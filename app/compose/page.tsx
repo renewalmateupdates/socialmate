@@ -18,9 +18,19 @@ const [scheduledAt, setScheduledAt] = useState(searchParams.get('date') || '')
   const router = useRouter()
 
   const handleSave = async (saveStatus: 'draft' | 'scheduled') => {
-    if (!content) return setMessage('Please write something first!')
-    if (saveStatus === 'scheduled' && !platform) return setMessage('Please select a platform!')
-    if (saveStatus === 'scheduled' && !scheduledAt) return setMessage('Please pick a date and time!')
+  if (!content) return setMessage('Please write something first!')
+  if (saveStatus === 'scheduled' && !platform) return setMessage('Please select a platform!')
+  if (saveStatus === 'scheduled' && !scheduledAt) return setMessage('Please pick a date and time!')
+
+  // 2 week scheduling limit for free tier
+  if (saveStatus === 'scheduled') {
+    const scheduledDate = new Date(scheduledAt)
+    const twoWeeksFromNow = new Date()
+    twoWeeksFromNow.setDate(twoWeeksFromNow.getDate() + 14)
+    if (scheduledDate > twoWeeksFromNow) {
+      return setMessage('⚡ Free plan allows scheduling up to 2 weeks out. Upgrade to Pro for 3 months, or Agency for unlimited!')
+    }
+  }
 
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
