@@ -7,70 +7,49 @@ import { Suspense } from 'react'
 
 const PLATFORMS = ['Instagram', 'X (Twitter)', 'LinkedIn', 'TikTok', 'YouTube', 'Pinterest', 'Threads']
 
+const CHAR_LIMITS: Record<string, number> = {
+  'Instagram': 2200,
+  'X (Twitter)': 280,
+  'LinkedIn': 3000,
+  'TikTok': 2200,
+  'YouTube': 5000,
+  'Pinterest': 500,
+  'Threads': 500,
+}
+
 function UpgradeModal({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl max-w-lg w-full p-8 relative shadow-2xl">
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors text-xl font-bold"
-        >
-          ✕
-        </button>
-
+        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors text-xl font-bold">✕</button>
         <div className="text-center mb-8">
           <div className="text-4xl mb-3">⚡</div>
           <h2 className="text-2xl font-extrabold tracking-tight mb-2">You've hit the free limit</h2>
           <p className="text-gray-500 text-sm">Free plan allows scheduling up to 2 weeks out. Upgrade to schedule further in advance.</p>
         </div>
-
         <div className="grid grid-cols-2 gap-4 mb-6">
           <div className="border border-gray-200 rounded-2xl p-5">
             <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Pro</div>
             <div className="text-3xl font-extrabold tracking-tight mb-1">$5<span className="text-sm font-normal text-gray-400">/mo</span></div>
             <ul className="space-y-2 mt-3 mb-5">
-              {[
-                "3-month scheduling window",
-                "10 connected accounts",
-                "500 AI credits / month",
-                "5 team members",
-                "Post recycling",
-              ].map((f) => (
-                <li key={f} className="flex items-start gap-2 text-xs text-gray-600">
-                  <span className="text-green-500 mt-0.5">✓</span>{f}
-                </li>
+              {["3-month scheduling window", "10 connected accounts", "500 AI credits / month", "5 team members", "Post recycling"].map((f) => (
+                <li key={f} className="flex items-start gap-2 text-xs text-gray-600"><span className="text-green-500 mt-0.5">✓</span>{f}</li>
               ))}
             </ul>
-            <button className="w-full bg-black text-white text-sm font-semibold py-2.5 rounded-xl hover:opacity-80 transition-all">
-              Upgrade to Pro →
-            </button>
+            <button className="w-full bg-black text-white text-sm font-semibold py-2.5 rounded-xl hover:opacity-80 transition-all">Upgrade to Pro →</button>
           </div>
-
           <div className="border-2 border-black rounded-2xl p-5 relative">
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-semibold px-3 py-1 rounded-full">
-              Best Value
-            </div>
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-semibold px-3 py-1 rounded-full">Best Value</div>
             <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Agency</div>
             <div className="text-3xl font-extrabold tracking-tight mb-1">$20<span className="text-sm font-normal text-gray-400">/mo</span></div>
             <ul className="space-y-2 mt-3 mb-5">
-              {[
-                "Unlimited scheduling",
-                "Unlimited accounts",
-                "Unlimited AI credits",
-                "Unlimited team members",
-                "White label reports",
-              ].map((f) => (
-                <li key={f} className="flex items-start gap-2 text-xs text-gray-600">
-                  <span className="text-green-500 mt-0.5">✓</span>{f}
-                </li>
+              {["Unlimited scheduling", "Unlimited accounts", "Unlimited AI credits", "Unlimited team members", "White label reports"].map((f) => (
+                <li key={f} className="flex items-start gap-2 text-xs text-gray-600"><span className="text-green-500 mt-0.5">✓</span>{f}</li>
               ))}
             </ul>
-            <button className="w-full bg-black text-white text-sm font-semibold py-2.5 rounded-xl hover:opacity-80 transition-all">
-              Upgrade to Agency →
-            </button>
+            <button className="w-full bg-black text-white text-sm font-semibold py-2.5 rounded-xl hover:opacity-80 transition-all">Upgrade to Agency →</button>
           </div>
         </div>
-
         <p className="text-center text-xs text-gray-400">
           No contracts. Cancel anytime. Questions? <a href="mailto:renewalmate.updates@gmail.com" className="underline hover:text-black">Contact us</a>
         </p>
@@ -89,8 +68,13 @@ function ComposeInner() {
   const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const router = useRouter()
 
+  const charLimit = platform ? CHAR_LIMITS[platform] : null
+  const isOverLimit = charLimit ? content.length > charLimit : false
+  const isNearLimit = charLimit ? content.length > charLimit * 0.9 : false
+
   const handleSave = async (saveStatus: 'draft' | 'scheduled') => {
     if (!content) return setMessage('Please write something first!')
+    if (isOverLimit) return setMessage(`You are over the ${platform} character limit of ${charLimit}!`)
     if (saveStatus === 'scheduled' && !platform) return setMessage('Please select a platform!')
     if (saveStatus === 'scheduled' && !scheduledAt) return setMessage('Please pick a date and time!')
 
@@ -197,6 +181,11 @@ function ComposeInner() {
                 </button>
               ))}
             </div>
+            {platform && (
+              <p className="text-xs text-gray-400 mt-2">
+                {platform} character limit: <strong>{CHAR_LIMITS[platform].toLocaleString()}</strong>
+              </p>
+            )}
           </div>
 
           <div>
@@ -206,9 +195,25 @@ function ComposeInner() {
               onChange={e => setContent(e.target.value)}
               placeholder="What do you want to share?"
               rows={5}
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-black transition-colors resize-none"
+              className={`w-full border rounded-xl px-4 py-3 text-sm focus:outline-none transition-colors resize-none ${isOverLimit ? 'border-red-400 focus:border-red-400' : isNearLimit ? 'border-amber-400 focus:border-amber-400' : 'border-gray-200 focus:border-black'}`}
             />
-            <div className="text-xs text-gray-400 text-right mt-1">{content.length} characters</div>
+            <div className="flex items-center justify-between mt-1">
+              <div className="text-xs">
+                {isOverLimit && (
+                  <span className="text-red-500 font-semibold">
+                    {content.length - charLimit!} characters over the limit
+                  </span>
+                )}
+                {isNearLimit && !isOverLimit && (
+                  <span className="text-amber-500 font-semibold">
+                    Almost at the limit
+                  </span>
+                )}
+              </div>
+              <div className={`text-xs font-medium ${isOverLimit ? 'text-red-500' : isNearLimit ? 'text-amber-500' : 'text-gray-400'}`}>
+                {charLimit ? `${content.length} / ${charLimit.toLocaleString()}` : `${content.length} characters`}
+              </div>
+            </div>
           </div>
 
           <div>
@@ -237,7 +242,7 @@ function ComposeInner() {
             </button>
             <button
               onClick={() => handleSave('scheduled')}
-              disabled={loading}
+              disabled={loading || isOverLimit}
               className="bg-black text-white text-sm font-semibold px-6 py-3 rounded-xl hover:opacity-80 transition-all disabled:opacity-50"
             >
               Schedule Post →
