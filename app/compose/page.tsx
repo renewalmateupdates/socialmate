@@ -7,14 +7,86 @@ import { Suspense } from 'react'
 
 const PLATFORMS = ['Instagram', 'X (Twitter)', 'LinkedIn', 'TikTok', 'YouTube', 'Pinterest', 'Threads']
 
+function UpgradeModal({ onClose }: { onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl max-w-lg w-full p-8 relative shadow-2xl">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-400 hover:text-black transition-colors text-xl font-bold"
+        >
+          ✕
+        </button>
+
+        <div className="text-center mb-8">
+          <div className="text-4xl mb-3">⚡</div>
+          <h2 className="text-2xl font-extrabold tracking-tight mb-2">You've hit the free limit</h2>
+          <p className="text-gray-500 text-sm">Free plan allows scheduling up to 2 weeks out. Upgrade to schedule further in advance.</p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="border border-gray-200 rounded-2xl p-5">
+            <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Pro</div>
+            <div className="text-3xl font-extrabold tracking-tight mb-1">$5<span className="text-sm font-normal text-gray-400">/mo</span></div>
+            <ul className="space-y-2 mt-3 mb-5">
+              {[
+                "3-month scheduling window",
+                "10 connected accounts",
+                "500 AI credits / month",
+                "5 team members",
+                "Post recycling",
+              ].map((f) => (
+                <li key={f} className="flex items-start gap-2 text-xs text-gray-600">
+                  <span className="text-green-500 mt-0.5">✓</span>{f}
+                </li>
+              ))}
+            </ul>
+            <button className="w-full bg-black text-white text-sm font-semibold py-2.5 rounded-xl hover:opacity-80 transition-all">
+              Upgrade to Pro →
+            </button>
+          </div>
+
+          <div className="border-2 border-black rounded-2xl p-5 relative">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-black text-white text-xs font-semibold px-3 py-1 rounded-full">
+              Best Value
+            </div>
+            <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Agency</div>
+            <div className="text-3xl font-extrabold tracking-tight mb-1">$20<span className="text-sm font-normal text-gray-400">/mo</span></div>
+            <ul className="space-y-2 mt-3 mb-5">
+              {[
+                "Unlimited scheduling",
+                "Unlimited accounts",
+                "Unlimited AI credits",
+                "Unlimited team members",
+                "White label reports",
+              ].map((f) => (
+                <li key={f} className="flex items-start gap-2 text-xs text-gray-600">
+                  <span className="text-green-500 mt-0.5">✓</span>{f}
+                </li>
+              ))}
+            </ul>
+            <button className="w-full bg-black text-white text-sm font-semibold py-2.5 rounded-xl hover:opacity-80 transition-all">
+              Upgrade to Agency →
+            </button>
+          </div>
+        </div>
+
+        <p className="text-center text-xs text-gray-400">
+          No contracts. Cancel anytime. Questions? <a href="mailto:renewalmate.updates@gmail.com" className="underline hover:text-black">Contact us</a>
+        </p>
+      </div>
+    </div>
+  )
+}
+
 function ComposeInner() {
   const searchParams = useSearchParams()
   const [content, setContent] = useState('')
   const [platform, setPlatform] = useState('')
   const [scheduledAt, setScheduledAt] = useState(searchParams.get('date') || '')
-  const [status, setStatus] = useState<'draft' | 'scheduled'>('draft')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
   const router = useRouter()
 
   const handleSave = async (saveStatus: 'draft' | 'scheduled') => {
@@ -27,7 +99,8 @@ function ComposeInner() {
       const twoWeeksFromNow = new Date()
       twoWeeksFromNow.setDate(twoWeeksFromNow.getDate() + 14)
       if (scheduledDate > twoWeeksFromNow) {
-        return setMessage('⚡ Free plan allows scheduling up to 2 weeks out. Upgrade to Pro for 3 months, or Agency for unlimited!')
+        setShowUpgradeModal(true)
+        return
       }
     }
 
@@ -56,6 +129,8 @@ function ComposeInner() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
+      {showUpgradeModal && <UpgradeModal onClose={() => setShowUpgradeModal(false)} />}
+
       <div className="w-56 bg-white border-r border-gray-100 flex flex-col fixed h-full">
         <div className="p-4 border-b border-gray-100">
           <div className="flex items-center gap-2">
@@ -147,7 +222,7 @@ function ComposeInner() {
           </div>
 
           {message && (
-            <div className={`text-sm px-4 py-3 rounded-xl ${message.includes('✅') ? 'bg-green-50 text-green-700' : message.includes('⚡') ? 'bg-amber-50 text-amber-700' : 'bg-red-50 text-red-600'}`}>
+            <div className={`text-sm px-4 py-3 rounded-xl ${message.includes('✅') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-600'}`}>
               {message}
             </div>
           )}
