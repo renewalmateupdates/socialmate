@@ -1,3 +1,5 @@
+'use client'
+import { useState } from 'react'
 import Link from "next/link"
 
 const PLATFORMS = [
@@ -33,61 +35,22 @@ const FEATURES = [
 
 const PRICING = [
   {
-    name: "Free",
-    price: "$0",
-    period: "forever",
+    name: "Free", price: "$0", period: "forever",
     description: "The most generous free tier in the market. No credit card ever.",
-    highlight: false,
-    cta: "Get Started Free",
-    ctaHref: "/signup",
-    features: [
-      "Unlimited scheduled posts",
-      "2-week scheduling window",
-      "3 connected accounts",
-      "15 AI credits / month",
-      "Visual content calendar",
-      "Basic analytics",
-      "Best time to post recommendations",
-      "No credit card required",
-    ],
+    highlight: false, cta: "Get Started Free", ctaHref: "/signup",
+    features: ["Unlimited scheduled posts", "2-week scheduling window", "3 connected accounts", "15 AI credits / month", "Visual content calendar", "Basic analytics", "Best time to post recommendations", "No credit card required"],
   },
   {
-    name: "Pro",
-    price: "$5",
-    period: "per month",
+    name: "Pro", price: "$5", period: "per month",
     description: "For serious creators and small teams who need more reach and power.",
-    highlight: true,
-    cta: "Start Pro →",
-    ctaHref: "/signup?plan=pro",
-    features: [
-      "Everything in Free",
-      "3-month scheduling window",
-      "10 connected accounts",
-      "500 AI credits / month",
-      "AI hashtag generator",
-      "5 team members",
-      "Post recycling",
-      "Priority support",
-    ],
+    highlight: true, cta: "Start Pro →", ctaHref: "/signup?plan=pro",
+    features: ["Everything in Free", "3-month scheduling window", "10 connected accounts", "500 AI credits / month", "AI hashtag generator", "5 team members", "Post recycling", "Priority support"],
   },
   {
-    name: "Agency",
-    price: "$20",
-    period: "per month",
+    name: "Agency", price: "$20", period: "per month",
     description: "For agencies and power users managing multiple brands.",
-    highlight: false,
-    cta: "Start Agency →",
-    ctaHref: "/signup?plan=agency",
-    features: [
-      "Everything in Pro",
-      "Unlimited scheduling window",
-      "Unlimited connected accounts",
-      "Unlimited AI credits",
-      "Unlimited team members",
-      "White label reports",
-      "Competitor benchmarking",
-      "Dedicated support",
-    ],
+    highlight: false, cta: "Start Agency →", ctaHref: "/signup?plan=agency",
+    features: ["Everything in Pro", "Unlimited scheduling window", "Unlimited connected accounts", "Unlimited AI credits", "Unlimited team members", "White label reports", "Competitor benchmarking", "Dedicated support"],
   },
 ]
 
@@ -98,27 +61,55 @@ const TESTIMONIALS = [
 ]
 
 export default function Home() {
+  const [menuOpen, setMenuOpen] = useState(false)
+
   return (
     <div className="min-h-screen bg-white text-black font-sans">
 
+      {/* NAV */}
       <nav className="sticky top-0 bg-white/90 backdrop-blur border-b border-[#e4e4e0] z-50">
         <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
             <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
             <span className="font-bold text-base tracking-tight">SocialMate</span>
           </Link>
+
           <div className="hidden md:flex items-center gap-6">
             <a href="#features" className="text-sm text-gray-500 hover:text-black transition-colors">Features</a>
             <a href="#platforms" className="text-sm text-gray-500 hover:text-black transition-colors">Platforms</a>
             <a href="#pricing" className="text-sm text-gray-500 hover:text-black transition-colors">Pricing</a>
           </div>
-          <div className="flex items-center gap-3">
+
+          <div className="hidden md:flex items-center gap-3">
             <Link href="/login" className="text-sm font-medium text-gray-600 hover:text-black transition-colors">Log in</Link>
             <Link href="/signup" className="bg-black text-white text-sm font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all">Get Started Free →</Link>
           </div>
+
+          <button
+            className="md:hidden flex flex-col gap-1.5 p-2"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            <span className={`block w-5 h-0.5 bg-black transition-all ${menuOpen ? 'rotate-45 translate-y-2' : ''}`} />
+            <span className={`block w-5 h-0.5 bg-black transition-all ${menuOpen ? 'opacity-0' : ''}`} />
+            <span className={`block w-5 h-0.5 bg-black transition-all ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+          </button>
         </div>
+
+        {/* MOBILE MENU */}
+        {menuOpen && (
+          <div className="md:hidden border-t border-[#e4e4e0] bg-white px-6 py-4 space-y-3">
+            <a href="#features" onClick={() => setMenuOpen(false)} className="block text-sm font-medium text-gray-600 hover:text-black transition-colors py-1">Features</a>
+            <a href="#platforms" onClick={() => setMenuOpen(false)} className="block text-sm font-medium text-gray-600 hover:text-black transition-colors py-1">Platforms</a>
+            <a href="#pricing" onClick={() => setMenuOpen(false)} className="block text-sm font-medium text-gray-600 hover:text-black transition-colors py-1">Pricing</a>
+            <div className="pt-2 flex flex-col gap-2">
+              <Link href="/login" onClick={() => setMenuOpen(false)} className="text-center border border-gray-200 text-gray-700 text-sm font-semibold px-4 py-2.5 rounded-xl hover:border-gray-400 transition-all">Log in</Link>
+              <Link href="/signup" onClick={() => setMenuOpen(false)} className="text-center bg-black text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all">Get Started Free →</Link>
+            </div>
+          </div>
+        )}
       </nav>
 
+      {/* HERO */}
       <section className="max-w-6xl mx-auto px-6 pt-24 pb-20 text-center">
         <div className="inline-flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 text-xs font-semibold px-3 py-1.5 rounded-full mb-8">
           <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
@@ -137,6 +128,7 @@ export default function Home() {
         <p className="text-xs text-gray-400 mt-4">Already used by 18,000+ creators, brands, and businesses.</p>
       </section>
 
+      {/* STATS */}
       <section className="border-y border-[#e4e4e0] bg-gray-50/50 py-10">
         <div className="max-w-4xl mx-auto px-6 grid grid-cols-3 gap-6 text-center">
           <div>
@@ -154,6 +146,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* PLATFORMS */}
       <section id="platforms" className="border-b border-[#e4e4e0] py-12 bg-white">
         <div className="max-w-6xl mx-auto px-6">
           <p className="text-center text-xs font-semibold text-gray-400 uppercase tracking-widest mb-6">Works with all major platforms</p>
@@ -168,6 +161,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* FEATURES */}
       <section id="features" className="max-w-6xl mx-auto px-6 py-24">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-extrabold tracking-tight mb-4">Everything you need. Nothing you don&apos;t.</h2>
@@ -184,6 +178,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* VS COMPETITORS */}
       <section className="bg-black text-white py-20">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-4xl font-extrabold tracking-tight mb-4">Why pay $99/month for the same thing?</h2>
@@ -206,6 +201,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* TESTIMONIALS */}
       <section className="max-w-6xl mx-auto px-6 py-24">
         <div className="text-center mb-14">
           <h2 className="text-4xl font-extrabold tracking-tight mb-4">Loved by 18,000+ users</h2>
@@ -222,6 +218,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* PRICING */}
       <section id="pricing" className="bg-gray-50/50 border-y border-[#e4e4e0] py-24">
         <div className="max-w-6xl mx-auto px-6">
           <div className="text-center mb-14">
@@ -264,6 +261,7 @@ export default function Home() {
         </div>
       </section>
 
+      {/* FINAL CTA */}
       <section className="max-w-4xl mx-auto px-6 py-24 text-center">
         <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">Stop paying for social scheduling.</h2>
         <p className="text-gray-500 text-lg mb-10 max-w-xl mx-auto">Join 18,000+ creators and brands who made the switch. Set up in 2 minutes, no credit card needed.</p>
@@ -271,6 +269,7 @@ export default function Home() {
         <p className="text-xs text-gray-400 mt-4">Free plan is genuinely free. No trial. No gotcha.</p>
       </section>
 
+      {/* FOOTER */}
       <footer className="border-t border-[#e4e4e0]">
         <div className="max-w-6xl mx-auto px-6 py-12">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
@@ -285,7 +284,7 @@ export default function Home() {
               <a href="/privacy" className="text-sm text-gray-400 hover:text-black transition-colors">Privacy</a>
               <a href="/terms" className="text-sm text-gray-400 hover:text-black transition-colors">Terms</a>
             </div>
-            <div className="text-sm text-gray-400">© 2026 SocialMate. All rights reserved.</div>
+            <div className="text-sm text-gray-400">2026 SocialMate. All rights reserved.</div>
           </div>
         </div>
       </footer>
