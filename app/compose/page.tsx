@@ -228,6 +228,7 @@ function ComposeInner() {
             { icon: "📅", label: "Calendar", href: "/calendar" },
             { icon: "✏️", label: "Compose", href: "/compose", active: true },
             { icon: "📂", label: "Drafts", href: "/drafts" },
+{ icon: "⏳", label: "Queue", href: "/queue" },
 { icon: "#️⃣", label: "Hashtags", href: "/hashtags" },
 { icon: "🖼️", label: "Media Library", href: "/media" },
           ].map(item => (

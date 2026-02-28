@@ -112,6 +112,7 @@ export default function Analytics() {
             { icon: "📅", label: "Calendar", href: "/calendar" },
             { icon: "✏️", label: "Compose", href: "/compose" },
             { icon: "📂", label: "Drafts", href: "/drafts" },
+{ icon: "⏳", label: "Queue", href: "/queue" },
 { icon: "#️⃣", label: "Hashtags", href: "/hashtags" },
 { icon: "🖼️", label: "Media Library", href: "/media" },
           ].map(item => (
