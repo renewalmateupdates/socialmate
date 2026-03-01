@@ -1,105 +1,173 @@
-import Link from "next/link"
+import Link from 'next/link'
 
 export default function Terms() {
   return (
-    <div className="min-h-screen bg-white text-black font-sans">
-      <nav className="sticky top-0 bg-white/90 backdrop-blur border-b border-[#e4e4e0] z-50">
-        <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
-            <span className="font-bold text-base tracking-tight">SocialMate</span>
-          </Link>
+    <div className="min-h-screen bg-white">
+
+      {/* NAV */}
+      <nav className="border-b border-gray-100 px-8 py-4 flex items-center justify-between sticky top-0 bg-white/95 backdrop-blur z-40">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
+          <span className="font-bold text-base tracking-tight">SocialMate</span>
+        </Link>
+        <div className="flex items-center gap-3">
+          <Link href="/login" className="text-sm font-semibold text-gray-500 hover:text-black transition-colors">Sign in</Link>
           <Link href="/signup" className="bg-black text-white text-sm font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
-            Get Started Free →
+            Get started free →
           </Link>
         </div>
       </nav>
 
       <div className="max-w-3xl mx-auto px-6 py-16">
-        <h1 className="text-4xl font-extrabold tracking-tight mb-2">Terms of Service</h1>
-        <p className="text-sm text-gray-400 mb-10">Last updated: February 2026</p>
 
-        <div className="space-y-8 text-gray-600 text-sm leading-relaxed">
-          <div>
-            <h2 className="text-lg font-bold text-black mb-2">1. Acceptance of Terms</h2>
-            <p>By creating an account or using SocialMate, you agree to these Terms of Service. If you do not agree, please do not use the service.</p>
+        <div className="mb-10">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Legal</p>
+          <h1 className="text-4xl font-extrabold tracking-tight mb-3">Terms of Service</h1>
+          <p className="text-gray-400 text-sm">Last updated: February 28, 2026</p>
+        </div>
+
+        <div className="space-y-8">
+
+          <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5">
+            <p className="text-sm font-bold text-blue-800 mb-1">The short version</p>
+            <p className="text-sm text-blue-700">Use SocialMate for lawful purposes, respect other users, and don't abuse the platform. We can suspend accounts that violate these terms. You own your content.</p>
           </div>
 
-          <div>
-            <h2 className="text-lg font-bold text-black mb-2">2. What SocialMate Is</h2>
-            <p>SocialMate is a social media scheduling and management platform. We provide tools to help you plan, schedule, and analyze your social media content across multiple platforms.</p>
-          </div>
+          {[
+            {
+              title: '1. Acceptance of Terms',
+              content: [
+                'By creating a SocialMate account or using our services, you agree to be bound by these Terms of Service.',
+                'If you are using SocialMate on behalf of a business or organization, you represent that you have authority to bind that entity to these terms.',
+                'You must be at least 13 years old to use SocialMate. If you are under 18, you must have parental or guardian consent.',
+              ]
+            },
+            {
+              title: '2. Your Account',
+              content: [
+                'You are responsible for maintaining the security of your account and password. SocialMate cannot and will not be liable for any loss from your failure to secure your account.',
+                'You must provide accurate and complete information when creating your account.',
+                'You may not share your account credentials with others or create accounts for the purpose of abusing SocialMate\'s free tier.',
+                'You are responsible for all activity that occurs under your account.',
+              ]
+            },
+            {
+              title: '3. Acceptable Use',
+              content: [
+                'You may not use SocialMate to post, schedule, or distribute content that is illegal, harmful, threatening, abusive, harassing, defamatory, or otherwise objectionable.',
+                'You may not use SocialMate to send spam, conduct phishing attacks, or distribute malware.',
+                'You may not attempt to reverse engineer, scrape, or extract data from SocialMate beyond normal use.',
+                'You may not use SocialMate to violate the terms of service of connected social media platforms.',
+                'You may not create multiple accounts to circumvent account limits or bans.',
+              ]
+            },
+            {
+              title: '4. Your Content',
+              content: [
+                'You retain full ownership of all content you create and post through SocialMate.',
+                'By using SocialMate, you grant us a limited license to store, process, and transmit your content solely for the purpose of providing the service.',
+                'We do not claim any intellectual property rights over your content.',
+                'We do not use your content to train AI models or for any purpose other than operating the service.',
+                'You are solely responsible for ensuring your content complies with applicable laws and the terms of the social platforms you post to.',
+              ]
+            },
+            {
+              title: '5. Free Plan & Pro Subscription',
+              content: [
+                'The free plan is provided as-is with no guarantee of continued availability of any specific features.',
+                'Pro subscriptions are billed in advance on a monthly or annual basis and are non-refundable except within the 7-day refund window.',
+                'We reserve the right to modify free plan features at any time with reasonable notice.',
+                'Refunds for Pro subscriptions are available within 7 days of purchase, no questions asked. After 7 days, no refunds are provided.',
+                'Cancelling a Pro subscription will downgrade your account to the free plan at the end of the current billing period.',
+              ]
+            },
+            {
+              title: '6. Service Availability',
+              content: [
+                'We strive for 99.9% uptime but do not guarantee uninterrupted availability of SocialMate.',
+                'We may temporarily suspend service for maintenance, updates, or security purposes.',
+                'We are not liable for any damages resulting from service interruptions.',
+                'Scheduled maintenance will be communicated in advance whenever possible.',
+              ]
+            },
+            {
+              title: '7. Termination',
+              content: [
+                'You may delete your account at any time from Settings → Danger Zone. Deletion is immediate and permanent.',
+                'We may suspend or terminate accounts that violate these terms, with or without notice depending on severity.',
+                'Upon termination, your data will be deleted according to our Privacy Policy.',
+                'Provisions that by their nature should survive termination (content ownership, limitation of liability) will survive.',
+              ]
+            },
+            {
+              title: '8. Limitation of Liability',
+              content: [
+                'SocialMate is provided "as is" without warranties of any kind, express or implied.',
+                'We are not liable for any indirect, incidental, special, consequential, or punitive damages.',
+                'Our total liability for any claims is limited to the amount you paid us in the 12 months preceding the claim.',
+                'We are not responsible for the actions of connected social media platforms or any content published through them.',
+              ]
+            },
+            {
+              title: '9. Changes to Terms',
+              content: [
+                'We may update these terms from time to time. We will notify you of material changes via email at least 14 days before they take effect.',
+                'Continued use of SocialMate after changes take effect constitutes acceptance of the updated terms.',
+                'If you disagree with updated terms, you may delete your account before the changes take effect.',
+              ]
+            },
+            {
+              title: '10. Governing Law',
+              content: [
+                'These terms are governed by the laws of the State of Delaware, United States, without regard to conflict of law principles.',
+                'Any disputes arising from these terms will be resolved through binding arbitration rather than court proceedings, except for small claims.',
+                'You waive any right to participate in class action lawsuits against SocialMate.',
+              ]
+            },
+            {
+              title: '11. Contact',
+              content: [
+                'For questions about these terms, contact us at: legal@socialmate.app',
+                'We aim to respond to all legal inquiries within 5 business days.',
+              ]
+            },
+          ].map(section => (
+            <div key={section.title} className="border-b border-gray-100 pb-8">
+              <h2 className="text-lg font-extrabold tracking-tight mb-4">{section.title}</h2>
+              <ul className="space-y-3">
+                {section.content.map((item, i) => (
+                  <li key={i} className="flex items-start gap-3 text-sm text-gray-600 leading-relaxed">
+                    <span className="text-gray-300 flex-shrink-0 mt-0.5">—</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
 
-          <div>
-            <h2 className="text-lg font-bold text-black mb-2">3. Your Account</h2>
-            <p>You are responsible for maintaining the security of your account. You must provide accurate information when creating your account. You may not share your account with others or use someone else&apos;s account without permission.</p>
-          </div>
-
-          <div>
-            <h2 className="text-lg font-bold text-black mb-2">4. Acceptable Use</h2>
-            <p>You agree not to use SocialMate to:</p>
-            <ul className="list-disc pl-5 mt-2 space-y-1">
-              <li>Post spam, misleading content, or content that violates any platform&apos;s terms of service</li>
-              <li>Harass, threaten, or harm others</li>
-              <li>Violate any applicable laws or regulations</li>
-              <li>Attempt to reverse engineer, hack, or disrupt the service</li>
-              <li>Create multiple free accounts to bypass plan limits</li>
-            </ul>
-          </div>
-
-          <div>
-            <h2 className="text-lg font-bold text-black mb-2">5. Free Plan</h2>
-            <p>The free plan is genuinely free with no hidden charges. Free plan users can schedule posts up to 2 weeks in advance, connect up to 3 accounts, and use 15 AI credits per month. We reserve the right to adjust free plan limits with 30 days notice.</p>
-          </div>
-
-          <div>
-            <h2 className="text-lg font-bold text-black mb-2">6. Paid Plans</h2>
-            <p>Pro ($5/month) and Agency ($20/month) plans are billed monthly. You can cancel at any time and will retain access until the end of your billing period. We do not offer refunds for partial months. Payments are processed securely by Stripe.</p>
-          </div>
-
-          <div>
-            <h2 className="text-lg font-bold text-black mb-2">7. Referral Program</h2>
-            <p>Our referral program awards 25 AI credits for each free user you refer, and 3 months of Pro free for each paying Pro referral, and 6 months of Pro free for each Agency referral. Rewards are only granted when a real payment clears. Abuse of the referral program may result in account termination.</p>
-          </div>
-
-          <div>
-            <h2 className="text-lg font-bold text-black mb-2">8. Your Content</h2>
-            <p>You own all content you create in SocialMate. We do not claim ownership of your posts, captions, or media. By using the service, you grant us permission to store and process your content solely for the purpose of delivering the service to you.</p>
-          </div>
-
-          <div>
-            <h2 className="text-lg font-bold text-black mb-2">9. Service Availability</h2>
-            <p>We aim for 99% uptime but cannot guarantee uninterrupted service. We are not liable for any losses caused by downtime, bugs, or service interruptions. We will always communicate planned maintenance in advance where possible.</p>
-          </div>
-
-          <div>
-            <h2 className="text-lg font-bold text-black mb-2">10. Termination</h2>
-            <p>You can delete your account at any time by contacting us at renewalmate.updates@gmail.com. We reserve the right to suspend or terminate accounts that violate these terms, with or without notice depending on severity.</p>
-          </div>
-
-          <div>
-            <h2 className="text-lg font-bold text-black mb-2">11. Changes to These Terms</h2>
-            <p>We may update these terms from time to time. We will notify you of significant changes by email at least 14 days before they take effect. Continued use of SocialMate after changes constitutes acceptance.</p>
-          </div>
-
-          <div>
-            <h2 className="text-lg font-bold text-black mb-2">12. Contact</h2>
-            <p>Questions about these terms? Email us at <a href="mailto:renewalmate.updates@gmail.com" className="underline hover:text-black">renewalmate.updates@gmail.com</a></p>
-          </div>
+        <div className="mt-10 bg-gray-50 border border-gray-100 rounded-2xl p-6 text-center">
+          <p className="text-sm text-gray-500 mb-3">Questions about our terms?</p>
+          <a href="mailto:legal@socialmate.app" className="text-sm font-bold text-black hover:underline">
+            legal@socialmate.app →
+          </a>
         </div>
       </div>
 
-      <footer className="border-t border-[#e4e4e0] mt-16">
-        <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
-            <span className="font-bold text-base tracking-tight">SocialMate</span>
-          </Link>
-          <div className="flex items-center gap-6">
-            <a href="/privacy" className="text-sm text-gray-400 hover:text-black transition-colors">Privacy</a>
-            <a href="/terms" className="text-sm text-gray-400 hover:text-black transition-colors">Terms</a>
+      {/* FOOTER */}
+      <footer className="border-t border-gray-100 px-8 py-8">
+        <div className="max-w-5xl mx-auto flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">S</div>
+            <span className="font-bold text-sm tracking-tight">SocialMate</span>
+            <span className="text-xs text-gray-400 ml-2">© 2026</span>
           </div>
-          <div className="text-sm text-gray-400">© 2026 SocialMate. All rights reserved.</div>
+          <div className="flex items-center gap-6 text-xs text-gray-400">
+            <Link href="/pricing" className="hover:text-black transition-colors">Pricing</Link>
+            <Link href="/blog" className="hover:text-black transition-colors">Blog</Link>
+            <Link href="/privacy" className="hover:text-black transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-black transition-colors font-semibold text-black">Terms</Link>
+          </div>
         </div>
       </footer>
     </div>
