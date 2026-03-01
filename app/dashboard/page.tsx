@@ -69,6 +69,7 @@ export default function Dashboard() {
 { icon: "⏳", label: "Queue", href: "/queue" },
 { icon: "#️⃣", label: "Hashtags", href: "/hashtags" },
 { icon: "🖼️", label: "Media Library", href: "/media" },
+{ icon: "📝", label: "Templates", href: "/templates" },
           ].map(item => (
             <Link key={item.label} href={item.href} className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${item.active ? 'bg-gray-100 text-black' : 'text-gray-500 hover:bg-gray-50 hover:text-black'}`}>
               <span>{item.icon}</span>{item.label}

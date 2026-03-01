@@ -86,6 +86,7 @@ export default function Settings() {
 { icon: "⏳", label: "Queue", href: "/queue" },
 { icon: "#️⃣", label: "Hashtags", href: "/hashtags" },
 { icon: "🖼️", label: "Media Library", href: "/media" },
+{ icon: "📝", label: "Templates", href: "/templates" },
           ].map(item => (
             <Link key={item.label} href={item.href} className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-black transition-all">
               <span>{item.icon}</span>{item.label}
