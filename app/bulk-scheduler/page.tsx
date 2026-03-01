@@ -209,6 +209,7 @@ export default function BulkScheduler() {
             { icon: "🖼️", label: "Media Library", href: "/media" },
             { icon: "📝", label: "Templates", href: "/templates" },
             { icon: "🔗", label: "Link in Bio", href: "/link-in-bio" },
+            { icon: "📆", label: "Bulk Scheduler", href: "/bulk-scheduler" },
             { icon: "📆", label: "Bulk Scheduler", href: "/bulk-scheduler", active: true },
           ].map(item => (
             <Link key={item.label} href={item.href} className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${'active' in item && item.active ? 'bg-gray-100 text-black' : 'text-gray-500 hover:bg-gray-50 hover:text-black'}`}>
