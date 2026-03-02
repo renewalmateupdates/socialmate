@@ -2,22 +2,20 @@
 import { useEffect, useState, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-import Link from 'next/link'
+import Sidebar from '@/components/Sidebar'
 
 function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 rounded-xl animate-pulse ${className}`} />
 }
 
-type MediaItem = {
+type MediaFile = {
   id: string
   name: string
   url: string
-  type: 'image' | 'video'
   size: number
+  type: string
   created_at: string
 }
-
-type FilterType = 'all' | 'image' | 'video'
 
 function formatBytes(bytes: number) {
   if (bytes < 1024) return bytes + ' B'
@@ -25,118 +23,99 @@ function formatBytes(bytes: number) {
   return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
 }
 
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+function timeAgo(dateStr: string) {
+  const diff = Date.now() - new Date(dateStr).getTime()
+  const days = Math.floor(diff / 86400000)
+  if (days < 1) return 'today'
+  if (days === 1) return 'yesterday'
+  if (days < 7) return `${days}d ago`
+  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-export default function MediaLibrary() {
+export default function Media() {
   const [user, setUser] = useState<any>(null)
+  const [files, setFiles] = useState<MediaFile[]>([])
   const [loading, setLoading] = useState(true)
-  const [media, setMedia] = useState<MediaItem[]>([])
-  const [filter, setFilter] = useState<FilterType>('all')
-  const [search, setSearch] = useState('')
   const [uploading, setUploading] = useState(false)
-  const [dragOver, setDragOver] = useState(false)
+  const [view, setView] = useState<'grid' | 'list'>('grid')
+  const [search, setSearch] = useState('')
+  const [filter, setFilter] = useState<'all' | 'image' | 'video'>('all')
   const [selected, setSelected] = useState<Set<string>>(new Set())
-  const [previewItem, setPreviewItem] = useState<MediaItem | null>(null)
-  const [uploadProgress, setUploadProgress] = useState(0)
+  const [preview, setPreview] = useState<MediaFile | null>(null)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+  const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
-
-  const AI_CREDITS_LEFT = 15
-  const AI_CREDITS_TOTAL = 15
-  const ACCOUNTS_USED = 0
-  const ACCOUNTS_TOTAL = 3
 
   useEffect(() => {
     const getData = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
       setUser(user)
-
-      const { data: files, error } = await supabase.storage
-        .from('media')
-        .list(`${user.id}/`, { sortBy: { column: 'created_at', order: 'desc' } })
-
-      if (!error && files) {
-        const items: MediaItem[] = files
-          .filter(f => f.name !== '.emptyFolderPlaceholder')
-          .map(f => {
-            const ext = f.name.split('.').pop()?.toLowerCase() || ''
-            const isVideo = ['mp4', 'mov', 'webm', 'avi'].includes(ext)
-            const { data } = supabase.storage.from('media').getPublicUrl(`${user.id}/${f.name}`)
-            return {
-              id: f.id || f.name,
-              name: f.name,
-              url: data.publicUrl,
-              type: isVideo ? 'video' : 'image',
-              size: f.metadata?.size || 0,
-              created_at: f.created_at || new Date().toISOString(),
-            }
-          })
-        setMedia(items)
-      }
+      await loadFiles(user.id)
       setLoading(false)
     }
     getData()
   }, [])
+
+  const loadFiles = async (userId: string) => {
+    const { data, error } = await supabase.storage.from('media').list(userId, {
+      limit: 100,
+      sortBy: { column: 'created_at', order: 'desc' }
+    })
+    if (error || !data) return
+    const mapped = data.filter(f => f.name !== '.emptyFolderPlaceholder').map(f => ({
+      id: f.id || f.name,
+      name: f.name,
+      url: supabase.storage.from('media').getPublicUrl(`${userId}/${f.name}`).data.publicUrl,
+      size: f.metadata?.size || 0,
+      type: f.metadata?.mimetype || 'image/jpeg',
+      created_at: f.created_at || new Date().toISOString(),
+    }))
+    setFiles(mapped)
+  }
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type })
     setTimeout(() => setToast(null), 3000)
   }
 
-  const handleFiles = async (files: FileList | null) => {
-    if (!files || !user) return
-    const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/quicktime', 'video/webm']
-    const maxSize = 50 * 1024 * 1024
-
-    const validFiles = Array.from(files).filter(f => {
-      if (!allowed.includes(f.type)) { showToast(`${f.name}: unsupported file type`, 'error'); return false }
-      if (f.size > maxSize) { showToast(`${f.name}: file too large (max 50MB)`, 'error'); return false }
-      return true
-    })
-
-    if (validFiles.length === 0) return
+  const handleUpload = async (uploadFiles: FileList | File[]) => {
+    const arr = Array.from(uploadFiles)
+    const allowed = arr.filter(f => f.type.startsWith('image/') || f.type.startsWith('video/'))
+    if (allowed.length === 0) { showToast('Only images and videos are allowed', 'error'); return }
     setUploading(true)
-    setUploadProgress(0)
-
-    const newItems: MediaItem[] = []
-    for (let i = 0; i < validFiles.length; i++) {
-      const file = validFiles[i]
+    let uploaded = 0
+    for (const file of allowed) {
       const ext = file.name.split('.').pop()
-      const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-      const path = `${user.id}/${filename}`
-
-      const { error } = await supabase.storage.from('media').upload(path, file)
-      if (error) { showToast(`Failed to upload ${file.name}`, 'error'); continue }
-
-      const { data } = supabase.storage.from('media').getPublicUrl(path)
-      newItems.push({
-        id: filename,
-        name: filename,
-        url: data.publicUrl,
-        type: file.type.startsWith('video/') ? 'video' : 'image',
-        size: file.size,
-        created_at: new Date().toISOString(),
-      })
-      setUploadProgress(Math.round(((i + 1) / validFiles.length) * 100))
+      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+      const { error } = await supabase.storage.from('media').upload(`${user.id}/${fileName}`, file)
+      if (!error) uploaded++
     }
-
-    setMedia(prev => [...newItems, ...prev])
+    await loadFiles(user.id)
     setUploading(false)
-    setUploadProgress(0)
-    showToast(`${newItems.length} file${newItems.length !== 1 ? 's' : ''} uploaded!`, 'success')
+    showToast(`${uploaded} file${uploaded !== 1 ? 's' : ''} uploaded!`, 'success')
   }
 
-  const handleDelete = async () => {
-    if (!user || selected.size === 0) return
-    const toDelete = media.filter(m => selected.has(m.id))
-    await supabase.storage.from('media').remove(toDelete.map(m => `${user.id}/${m.name}`))
-    setMedia(prev => prev.filter(m => !selected.has(m.id)))
+  const handleDelete = async (file: MediaFile) => {
+    await supabase.storage.from('media').remove([`${user.id}/${file.name}`])
+    setFiles(prev => prev.filter(f => f.id !== file.id))
+    setPreview(null)
+    showToast('File deleted', 'success')
+  }
+
+  const handleBulkDelete = async () => {
+    const toDelete = files.filter(f => selected.has(f.id))
+    const paths = toDelete.map(f => `${user.id}/${f.name}`)
+    await supabase.storage.from('media').remove(paths)
+    setFiles(prev => prev.filter(f => !selected.has(f.id)))
     setSelected(new Set())
     showToast(`${toDelete.length} file${toDelete.length !== 1 ? 's' : ''} deleted`, 'success')
+  }
+
+  const handleCopyUrl = (url: string) => {
+    navigator.clipboard.writeText(url)
+    showToast('URL copied to clipboard!', 'success')
   }
 
   const toggleSelect = (id: string) => {
@@ -147,252 +126,179 @@ export default function MediaLibrary() {
     })
   }
 
-  const filtered = media.filter(m => {
-    const matchType = filter === 'all' || m.type === filter
-    const matchSearch = m.name.toLowerCase().includes(search.toLowerCase())
-    return matchType && matchSearch
+  const handleDragOver = (e: React.DragEvent) => { e.preventDefault(); setDragOver(true) }
+  const handleDragLeave = () => setDragOver(false)
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault(); setDragOver(false)
+    handleUpload(e.dataTransfer.files)
+  }
+
+  const filtered = files.filter(f => {
+    const matchSearch = f.name.toLowerCase().includes(search.toLowerCase())
+    const matchFilter = filter === 'all' || (filter === 'image' && f.type.startsWith('image/')) || (filter === 'video' && f.type.startsWith('video/'))
+    return matchSearch && matchFilter
   })
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push('/')
-  }
+  const totalSize = files.reduce((sum, f) => sum + f.size, 0)
+  const imageCount = files.filter(f => f.type.startsWith('image/')).length
+  const videoCount = files.filter(f => f.type.startsWith('video/')).length
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
+      <Sidebar />
 
-      {/* SIDEBAR */}
-      <div className="w-56 bg-white border-r border-gray-100 flex flex-col fixed h-full">
-        <div className="p-4 border-b border-gray-100">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
-            <span className="font-bold text-base tracking-tight">SocialMate</span>
-          </div>
-        </div>
-        <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest px-3 py-2">Content</div>
-          {[
-            { icon: "🏠", label: "Dashboard", href: "/dashboard" },
-            { icon: "📅", label: "Calendar", href: "/calendar" },
-            { icon: "✏️", label: "Compose", href: "/compose" },
-            { icon: "📂", label: "Drafts", href: "/drafts" },
-{ icon: "⏳", label: "Queue", href: "/queue" },
-{ icon: "#️⃣", label: "Hashtags", href: "/hashtags" },
-{ icon: "🖼️", label: "Media Library", href: "/media" },
-{ icon: "📝", label: "Templates", href: "/templates" },
-            { icon: "🖼️", label: "Media Library", href: "/media", active: true },
-          ].map(item => (
-            <Link key={item.label} href={item.href} className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${'active' in item && item.active ? 'bg-gray-100 text-black' : 'text-gray-500 hover:bg-gray-50 hover:text-black'}`}>
-              <span>{item.icon}</span>{item.label}
-            </Link>
-          ))}
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest px-3 py-2 mt-3">Insights</div>
-          {[
-            { icon: "📊", label: "Analytics", href: "/analytics" },
-            { icon: "🔍", label: "Best Times", href: "/best-times" },
-          ].map(item => (
-            <Link key={item.label} href={item.href} className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-black transition-all">
-              <span>{item.icon}</span>{item.label}
-            </Link>
-          ))}
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest px-3 py-2 mt-3">Settings</div>
-          {[
-            { icon: "🔗", label: "Accounts", href: "/accounts" },
-            { icon: "👥", label: "Team", href: "/team" },
-            { icon: "⚙️", label: "Settings", href: "/settings" },
-            { icon: "🎁", label: "Referrals", href: "/referral" },
-            { icon: "🔔", label: "Notifications", href: "/notifications" },
-{ icon: "🔎", label: "Search", href: "/search" },
-          ].map(item => (
-            <Link key={item.label} href={item.href} className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-black transition-all">
-              <span>{item.icon}</span>{item.label}
-            </Link>
-          ))}
-        </nav>
-        <div className="p-3 border-t border-gray-100 space-y-3">
-          <div className="bg-gray-50 rounded-xl p-3">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs font-semibold text-gray-500">AI Credits</span>
-              <span className="text-xs font-bold text-gray-700">{AI_CREDITS_LEFT}/{AI_CREDITS_TOTAL}</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-1.5">
-              <div className="bg-black h-1.5 rounded-full transition-all" style={{ width: `${(AI_CREDITS_LEFT / AI_CREDITS_TOTAL) * 100}%` }} />
-            </div>
-            <p className="text-xs text-gray-400 mt-1.5">{AI_CREDITS_LEFT} credits remaining</p>
-          </div>
-          <div className="bg-gray-50 rounded-xl p-3">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs font-semibold text-gray-500">Accounts</span>
-              <span className="text-xs font-bold text-gray-700">{ACCOUNTS_USED}/{ACCOUNTS_TOTAL}</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-1.5">
-              <div className="bg-black h-1.5 rounded-full transition-all" style={{ width: `${(ACCOUNTS_USED / ACCOUNTS_TOTAL) * 100}%` }} />
-            </div>
-            <p className="text-xs text-gray-400 mt-1.5">{ACCOUNTS_TOTAL - ACCOUNTS_USED} slots remaining</p>
-          </div>
-          <Link href="/pricing" className="w-full block text-center bg-black text-white text-xs font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
-            ⚡ Upgrade to Pro
-          </Link>
-          <div className="px-1">
-            <div className="text-xs text-gray-400 truncate mb-1">{user?.email}</div>
-            <button onClick={handleSignOut} className="w-full text-left px-0 py-1 text-xs text-gray-400 hover:text-black transition-all">Sign out</button>
-          </div>
-        </div>
-      </div>
-
-      {/* MAIN */}
       <div className="ml-56 flex-1 p-8">
-
-        {/* HEADER */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-extrabold tracking-tight">Media Library</h1>
-            <p className="text-sm text-gray-400 mt-0.5">Upload and manage your images and videos</p>
+            <p className="text-sm text-gray-400 mt-0.5">
+              {loading ? 'Loading...' : `${files.length} file${files.length !== 1 ? 's' : ''} · ${formatBytes(totalSize)}`}
+            </p>
           </div>
-          <button onClick={() => fileInputRef.current?.click()} className="bg-black text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all">
-            + Upload Files
-          </button>
-          <input ref={fileInputRef} type="file" multiple accept="image/*,video/*" className="hidden" onChange={e => handleFiles(e.target.files)} />
+          <div className="flex items-center gap-2">
+            <input ref={fileInputRef} type="file" multiple accept="image/*,video/*"
+              className="hidden" onChange={e => e.target.files && handleUpload(e.target.files)} />
+            <button onClick={() => fileInputRef.current?.click()} disabled={uploading}
+              className="bg-black text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
+              {uploading ? '⏳ Uploading...' : '⬆️ Upload'}
+            </button>
+          </div>
         </div>
 
-        {/* STATS */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          {loading ? (
-            [1,2,3,4].map(i => (
-              <div key={i} className="bg-white border border-gray-100 rounded-2xl p-5">
-                <SkeletonBox className="h-3 w-16 mb-4" />
-                <SkeletonBox className="h-8 w-10 mb-2" />
-                <SkeletonBox className="h-3 w-20" />
-              </div>
-            ))
-          ) : (
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          {loading ? [1,2,3].map(i => <SkeletonBox key={i} className="h-20 rounded-2xl" />) : (
             [
-              { label: "Total Files", value: media.length.toString(), sub: "in your library", icon: "🗂️" },
-              { label: "Images", value: media.filter(m => m.type === 'image').length.toString(), sub: "photos & graphics", icon: "🖼️" },
-              { label: "Videos", value: media.filter(m => m.type === 'video').length.toString(), sub: "clips & reels", icon: "🎬" },
-              { label: "Storage Used", value: formatBytes(media.reduce((acc, m) => acc + m.size, 0)), sub: "of unlimited free", icon: "💾" },
+              { label: 'Total Files', value: files.length, icon: '🗂️' },
+              { label: 'Images', value: imageCount, icon: '🖼️' },
+              { label: 'Videos', value: videoCount, icon: '🎬' },
             ].map(stat => (
-              <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-5">
-                <div className="flex justify-between items-center mb-3">
+              <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-4">
+                <div className="flex justify-between items-center mb-2">
                   <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{stat.label}</span>
-                  <span className="text-base">{stat.icon}</span>
+                  <span>{stat.icon}</span>
                 </div>
-                <div className="text-3xl font-extrabold tracking-tight mb-1">{stat.value}</div>
-                <div className="text-xs text-gray-400">{stat.sub}</div>
+                <div className="text-2xl font-extrabold tracking-tight">{stat.value}</div>
               </div>
             ))
           )}
         </div>
 
-        {/* DRAG & DROP ZONE */}
         <div
-          onDragOver={e => { e.preventDefault(); setDragOver(true) }}
-          onDragLeave={() => setDragOver(false)}
-          onDrop={e => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files) }}
-          onClick={() => fileInputRef.current?.click()}
-          className={`border-2 border-dashed rounded-2xl p-8 mb-6 text-center cursor-pointer transition-all ${dragOver ? 'border-black bg-gray-50' : 'border-gray-200 hover:border-gray-400 hover:bg-gray-50'}`}
-        >
-          {uploading ? (
-            <div className="space-y-3">
-              <div className="text-2xl">⏳</div>
-              <p className="text-sm font-semibold text-gray-700">Uploading... {uploadProgress}%</p>
-              <div className="w-48 mx-auto bg-gray-200 rounded-full h-2">
-                <div className="bg-black h-2 rounded-full transition-all" style={{ width: `${uploadProgress}%` }} />
-              </div>
-            </div>
-          ) : (
-            <>
-              <div className="text-3xl mb-3">{dragOver ? '📥' : '☁️'}</div>
-              <p className="text-sm font-semibold text-gray-700 mb-1">{dragOver ? 'Drop to upload' : 'Drag & drop files here'}</p>
-              <p className="text-xs text-gray-400">or click to browse · Images & videos up to 50MB</p>
-            </>
-          )}
+          onDragOver={handleDragOver} onDragLeave={handleDragLeave} onDrop={handleDrop}
+          className={`border-2 border-dashed rounded-2xl p-6 mb-6 text-center transition-all ${dragOver ? 'border-black bg-black/5' : 'border-gray-200 hover:border-gray-400'}`}>
+          <div className="text-2xl mb-1">📁</div>
+          <p className="text-sm font-semibold text-gray-500">Drag & drop files here</p>
+          <p className="text-xs text-gray-400 mt-0.5">Images and videos supported</p>
         </div>
 
-        {/* FILTER + SEARCH */}
-        <div className="flex items-center justify-between mb-4 gap-4">
+        <div className="flex items-center gap-3 mb-6 flex-wrap">
+          <div className="relative flex-1 max-w-xs">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
+            <input type="text" placeholder="Search files..." value={search} onChange={e => setSearch(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 bg-white" />
+          </div>
           <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-xl p-1">
-            {(['all', 'image', 'video'] as FilterType[]).map(f => (
-              <button
-                key={f}
-                onClick={() => setFilter(f)}
-                className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${filter === f ? 'bg-black text-white' : 'text-gray-500 hover:text-black'}`}
-              >
+            {(['all', 'image', 'video'] as const).map(f => (
+              <button key={f} onClick={() => setFilter(f)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all capitalize ${filter === f ? 'bg-black text-white' : 'text-gray-500 hover:text-black'}`}>
                 {f === 'all' ? 'All' : f === 'image' ? '🖼️ Images' : '🎬 Videos'}
               </button>
             ))}
           </div>
-          <div className="flex items-center gap-3">
-            {selected.size > 0 && (
-              <button onClick={handleDelete} className="text-sm font-semibold text-red-500 hover:text-red-700 px-3 py-2 rounded-xl border border-red-200 hover:border-red-400 transition-all">
-                🗑️ Delete {selected.size} selected
-              </button>
-            )}
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
-              <input
-                type="text"
-                placeholder="Search files..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                className="pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 bg-white w-52"
-              />
-            </div>
+          <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-xl p-1 ml-auto">
+            <button onClick={() => setView('grid')} className={`px-3 py-1.5 rounded-lg text-sm transition-all ${view === 'grid' ? 'bg-black text-white' : 'text-gray-400 hover:text-black'}`}>⊞</button>
+            <button onClick={() => setView('list')} className={`px-3 py-1.5 rounded-lg text-sm transition-all ${view === 'list' ? 'bg-black text-white' : 'text-gray-400 hover:text-black'}`}>☰</button>
           </div>
         </div>
 
-        {/* GRID */}
+        {selected.size > 0 && (
+          <div className="bg-black text-white rounded-2xl px-5 py-3 mb-4 flex items-center gap-4">
+            <span className="text-sm font-semibold">{selected.size} selected</span>
+            <button onClick={handleBulkDelete}
+              className="text-xs font-semibold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all">
+              🗑️ Delete Selected
+            </button>
+            <button onClick={() => setSelected(new Set())} className="text-white/60 hover:text-white text-lg leading-none ml-auto">×</button>
+          </div>
+        )}
+
         {loading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {[1,2,3,4,5,6,7,8,9,10].map(i => <SkeletonBox key={i} className="aspect-square rounded-2xl" />)}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+            {[1,2,3,4,5,6,7,8].map(i => <SkeletonBox key={i} className="aspect-square rounded-2xl" />)}
           </div>
         ) : filtered.length === 0 ? (
           <div className="bg-white border border-gray-100 rounded-2xl p-16 text-center">
             <div className="text-5xl mb-4">{search ? '🔍' : '🖼️'}</div>
             <h2 className="text-lg font-bold tracking-tight mb-2">
-              {search ? 'No files match your search' : 'Your media library is empty'}
+              {search ? 'No files match your search' : 'No media yet'}
             </h2>
             <p className="text-gray-400 text-sm mb-6 max-w-sm mx-auto">
-              {search ? 'Try a different search term or clear your filter.' : 'Upload images and videos to reuse them across your posts.'}
+              {search ? 'Try a different search term.' : 'Upload images and videos to use in your posts.'}
             </p>
             {!search && (
-              <button onClick={() => fileInputRef.current?.click()} className="bg-black text-white text-sm font-semibold px-6 py-3 rounded-xl hover:opacity-80 transition-all">
+              <button onClick={() => fileInputRef.current?.click()}
+                className="bg-black text-white text-sm font-semibold px-6 py-3 rounded-xl hover:opacity-80 transition-all">
                 Upload Your First File →
               </button>
             )}
           </div>
+        ) : view === 'grid' ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+            {filtered.map(file => (
+              <div key={file.id}
+                className={`group relative aspect-square rounded-2xl overflow-hidden border-2 transition-all cursor-pointer ${selected.has(file.id) ? 'border-black' : 'border-transparent hover:border-gray-300'}`}
+                onClick={() => setPreview(file)}>
+                {file.type.startsWith('image/') ? (
+                  <img src={file.url} alt={file.name} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                    <span className="text-4xl">🎬</span>
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-start justify-between p-2">
+                  <input type="checkbox" checked={selected.has(file.id)}
+                    onChange={() => toggleSelect(file.id)}
+                    onClick={e => e.stopPropagation()}
+                    className="w-4 h-4 rounded accent-black opacity-0 group-hover:opacity-100 transition-all cursor-pointer" />
+                  <div className="opacity-0 group-hover:opacity-100 transition-all flex gap-1">
+                    <button onClick={e => { e.stopPropagation(); handleCopyUrl(file.url) }}
+                      className="w-7 h-7 bg-white rounded-lg flex items-center justify-center text-xs hover:bg-gray-100 transition-all">📋</button>
+                  </div>
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2 opacity-0 group-hover:opacity-100 transition-all">
+                  <p className="text-white text-xs font-semibold truncate">{file.name}</p>
+                  <p className="text-white/70 text-xs">{formatBytes(file.size)}</p>
+                </div>
+              </div>
+            ))}
+          </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {filtered.map(item => (
-              <div
-                key={item.id}
-                className={`group relative rounded-2xl overflow-hidden bg-white border-2 transition-all cursor-pointer ${selected.has(item.id) ? 'border-black' : 'border-gray-100 hover:border-gray-300'}`}
-              >
-                <button
-                  onClick={e => { e.stopPropagation(); toggleSelect(item.id) }}
-                  className={`absolute top-2 left-2 z-10 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${selected.has(item.id) ? 'bg-black border-black' : 'bg-white border-gray-300 opacity-0 group-hover:opacity-100'}`}
-                >
-                  {selected.has(item.id) && <span className="text-white text-xs">✓</span>}
-                </button>
-                <button
-                  onClick={() => setPreviewItem(item)}
-                  className="absolute top-2 right-2 z-10 w-6 h-6 bg-white rounded-lg shadow flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-all hover:bg-gray-100"
-                >
-                  ⛶
-                </button>
-                <div className="aspect-square bg-gray-50 flex items-center justify-center overflow-hidden" onClick={() => setPreviewItem(item)}>
-                  {item.type === 'image' ? (
-                    <img src={item.url} alt={item.name} className="w-full h-full object-cover" />
+          <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
+            {filtered.map((file, i) => (
+              <div key={file.id}
+                className={`flex items-center gap-4 px-5 py-3 hover:bg-gray-50 transition-all group cursor-pointer ${i !== filtered.length - 1 ? 'border-b border-gray-50' : ''}`}
+                onClick={() => setPreview(file)}>
+                <input type="checkbox" checked={selected.has(file.id)}
+                  onChange={() => toggleSelect(file.id)}
+                  onClick={e => e.stopPropagation()}
+                  className="w-4 h-4 rounded accent-black cursor-pointer flex-shrink-0" />
+                <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100">
+                  {file.type.startsWith('image/') ? (
+                    <img src={file.url} alt={file.name} className="w-full h-full object-cover" />
                   ) : (
-                    <div className="flex flex-col items-center gap-1 text-gray-400">
-                      <span className="text-3xl">🎬</span>
-                      <span className="text-xs">Video</span>
-                    </div>
+                    <div className="w-full h-full flex items-center justify-center text-lg">🎬</div>
                   )}
                 </div>
-                <div className="p-2 border-t border-gray-50">
-                  <p className="text-xs font-medium text-gray-700 truncate">{item.name}</p>
-                  <p className="text-xs text-gray-400">{formatBytes(item.size)}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold truncate">{file.name}</p>
+                  <p className="text-xs text-gray-400">{formatBytes(file.size)} · {timeAgo(file.created_at)}</p>
+                </div>
+                <span className="text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{file.type.split('/')[0]}</span>
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                  <button onClick={e => { e.stopPropagation(); handleCopyUrl(file.url) }}
+                    className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-black transition-all text-sm">📋</button>
+                  <button onClick={e => { e.stopPropagation(); handleDelete(file) }}
+                    className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-50 text-gray-300 hover:text-red-400 transition-all">×</button>
                 </div>
               </div>
             ))}
@@ -400,45 +306,41 @@ export default function MediaLibrary() {
         )}
       </div>
 
-      {/* PREVIEW MODAL */}
-      {previewItem && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-6" onClick={() => setPreviewItem(null)}>
-          <div className="bg-white rounded-2xl overflow-hidden max-w-2xl w-full shadow-2xl" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+      {preview && (
+        <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-6" onClick={() => setPreview(null)}>
+          <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
               <div>
-                <p className="font-bold text-sm tracking-tight truncate max-w-xs">{previewItem.name}</p>
-                <p className="text-xs text-gray-400">{formatBytes(previewItem.size)} · {formatDate(previewItem.created_at)}</p>
+                <p className="text-sm font-bold truncate max-w-xs">{preview.name}</p>
+                <p className="text-xs text-gray-400">{formatBytes(preview.size)} · {preview.type} · {timeAgo(preview.created_at)}</p>
               </div>
-              <div className="flex items-center gap-2">
-                <a href={previewItem.url} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold px-3 py-1.5 border border-gray-200 rounded-lg hover:border-gray-400 transition-all">
-                  Open ↗
-                </a>
-                <button onClick={() => setPreviewItem(null)} className="text-gray-400 hover:text-black text-xl leading-none px-1 transition-colors">×</button>
-              </div>
+              <button onClick={() => setPreview(null)} className="text-gray-400 hover:text-black text-xl leading-none">×</button>
             </div>
-            <div className="bg-gray-50 flex items-center justify-center p-4 min-h-64">
-              {previewItem.type === 'image' ? (
-                <img src={previewItem.url} alt={previewItem.name} className="max-h-96 max-w-full object-contain rounded-xl" />
+            <div className="p-6">
+              {preview.type.startsWith('image/') ? (
+                <img src={preview.url} alt={preview.name} className="w-full rounded-xl max-h-72 object-contain bg-gray-50" />
               ) : (
-                <video src={previewItem.url} controls className="max-h-96 max-w-full rounded-xl" />
+                <video src={preview.url} controls className="w-full rounded-xl max-h-72 bg-black" />
               )}
             </div>
-            <div className="px-5 py-4 border-t border-gray-100 flex gap-2">
-              <button
-                onClick={() => { navigator.clipboard.writeText(previewItem.url); showToast('URL copied!', 'success') }}
-                className="flex-1 text-sm font-semibold py-2 border border-gray-200 rounded-xl hover:border-gray-400 transition-all"
-              >
+            <div className="px-6 py-4 border-t border-gray-100 flex gap-2">
+              <button onClick={() => handleCopyUrl(preview.url)}
+                className="flex-1 py-2.5 text-sm font-semibold border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
                 📋 Copy URL
               </button>
-              <Link href={`/compose?media=${encodeURIComponent(previewItem.url)}`} className="flex-1 text-sm font-semibold py-2 bg-black text-white rounded-xl hover:opacity-80 transition-all text-center">
-                ✏️ Use in Post
-              </Link>
+              <a href={preview.url} download={preview.name} target="_blank" rel="noreferrer"
+                className="flex-1 py-2.5 text-sm font-semibold text-center border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                ⬇️ Download
+              </a>
+              <button onClick={() => handleDelete(preview)}
+                className="py-2.5 px-4 text-sm font-semibold text-red-400 border border-red-100 rounded-xl hover:border-red-300 transition-all">
+                🗑️
+              </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* TOAST */}
       {toast && (
         <div className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${toast.type === 'success' ? 'bg-black text-white' : 'bg-red-500 text-white'}`}>
           {toast.type === 'success' ? '✅' : '❌'} {toast.message}
