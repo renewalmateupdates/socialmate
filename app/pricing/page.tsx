@@ -1,290 +1,260 @@
-'use client'
-import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
+import type { Metadata } from 'next'
 import Link from 'next/link'
 
+export const metadata: Metadata = {
+  title: 'Pricing — Free Forever',
+  description: 'SocialMate is free forever. All 16 platforms, unlimited posts, team collaboration — at zero cost. Pro plan available for AI power users.',
+  openGraph: {
+    title: 'SocialMate Pricing — Free Forever',
+    description: 'All 16 platforms free. No per-channel fees. No post limits. Pro plan for AI power users.',
+    url: 'https://socialmate-six.vercel.app/pricing',
+  },
+}
+
+const FREE_FEATURES = [
+  '16 social platforms',
+  'Unlimited scheduled posts',
+  'Bulk Scheduler',
+  'Content Calendar',
+  'Drafts & Queue',
+  'Media Library',
+  'Hashtag Collections',
+  'Post Templates',
+  'Link in Bio builder',
+  'Analytics dashboard',
+  'Best Times to Post',
+  'Team collaboration (unlimited seats)',
+  'Referral program',
+  'Global search',
+  '15 AI credits / month',
+]
+
+const PRO_FEATURES = [
+  'Everything in Free',
+  '500 AI credits / month',
+  'AI caption generator',
+  'AI hashtag suggestions',
+  'AI post optimizer',
+  'Advanced analytics',
+  'Custom Link in Bio domain',
+  'Priority support',
+  'Early access to new features',
+  'Remove SocialMate branding',
+  'API access',
+  'Zapier & Make integrations',
+]
+
+const COMPARISON = [
+  { feature: 'Social platforms', free: '16', pro: '16', buffer: '3 (then $6/each)', hootsuite: '10', later: '6' },
+  { feature: 'Scheduled posts', free: 'Unlimited', pro: 'Unlimited', buffer: '10/channel', hootsuite: 'Unlimited', later: '30/profile' },
+  { feature: 'Team members', free: 'Unlimited', pro: 'Unlimited', buffer: '$12/user/mo', hootsuite: '$249/mo for 3', later: '$25/user/mo' },
+  { feature: 'AI captions', free: '15 credits', pro: '500 credits', buffer: '❌', hootsuite: 'Paid add-on', later: 'Paid add-on' },
+  { feature: 'Link in Bio', free: '✓ Free', pro: '✓ Custom domain', buffer: '❌', hootsuite: '❌', later: '✓ Paid' },
+  { feature: 'Bulk Scheduler', free: '✓ Free', pro: '✓ Free', buffer: 'Paid plan', hootsuite: 'Paid plan', later: 'Paid plan' },
+  { feature: 'Analytics', free: '✓ Free', pro: '✓ Advanced', buffer: 'Limited free', hootsuite: 'Paid add-on', later: 'Limited free' },
+  { feature: 'Monthly cost', free: '$0', pro: '$19/mo', buffer: '$18+/mo', hootsuite: '$99+/mo', later: '$25+/mo' },
+]
+
+const FAQS = [
+  {
+    q: 'Is the free plan actually free forever?',
+    a: 'Yes. No trial period, no credit card required, no bait-and-switch. The free plan is genuinely free forever. We make money when power users upgrade to Pro for more AI credits and advanced features.',
+  },
+  {
+    q: 'Why is SocialMate free when Buffer charges $6 per channel?',
+    a: "We built SocialMate because we believed social media scheduling was overpriced. Buffer's per-channel model means managing 10 platforms costs $60/month. That's unreasonable. Our free plan is sustainable because a meaningful percentage of users upgrade to Pro for AI features.",
+  },
+  {
+    q: 'What happens if I go over my AI credit limit?',
+    a: "You'll see a prompt to upgrade to Pro for 500 credits/month, or you can wait until your credits reset on the first of next month. Your scheduled posts and all other features continue working normally — only AI generation is paused.",
+  },
+  {
+    q: 'Can I really add unlimited team members for free?',
+    a: "Yes. Buffer charges $12 per user per month for team features. We don't. Invite your entire team, assign roles (Owner, Admin, Editor, Viewer), and collaborate on content — all included in the free plan.",
+  },
+  {
+    q: 'What payment methods do you accept for Pro?',
+    a: 'We accept all major credit and debit cards (Visa, Mastercard, Amex), as well as PayPal. Annual plans are billed once per year and save you 37% compared to monthly.',
+  },
+  {
+    q: 'Can I cancel my Pro subscription anytime?',
+    a: "Yes, cancel anytime with no questions asked. You'll keep Pro features until the end of your billing period, then automatically move to the free plan. No cancellation fees.",
+  },
+]
+
 export default function Pricing() {
-  const [user, setUser] = useState<any>(null)
-  const [billing, setBilling] = useState<'monthly' | 'yearly'>('yearly')
-  const router = useRouter()
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => setUser(user))
-  }, [])
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push('/')
-  }
-
-  const PRO_MONTHLY = 19
-  const PRO_YEARLY = 12
-
-  const FEATURES_FREE = [
-    '16 social platforms',
-    'Unlimited scheduled posts',
-    'Bulk Scheduler',
-    'Content Calendar',
-    'Drafts workspace',
-    'Post Queue',
-    'Media Library',
-    'Hashtag Collections',
-    'Post Templates',
-    'Link in Bio builder',
-    'Global Search',
-    'Basic Analytics',
-    'Best Times to Post',
-    'Team collaboration',
-    'Referral program',
-    '15 AI credits / month',
-  ]
-
-  const FEATURES_PRO = [
-    'Everything in Free',
-    '500 AI credits / month',
-    'AI Caption Generator',
-    'AI Hashtag Suggestions',
-    'AI Best Time Optimizer',
-    'Advanced Analytics',
-    'Custom branded Link in Bio',
-    'Priority support',
-    'Early access to new features',
-    'Remove SocialMate branding',
-    'API access',
-    'Zapier & Make integration',
-  ]
-
-  const COMPETITORS = [
-    { name: 'Buffer', price: '$18+/mo', platforms: '3 channels', posts: '10/channel', team: 'Paid add-on', ai: '❌', linkinbio: '$9/mo extra', analytics: 'Basic only' },
-    { name: 'Hootsuite', price: '$99+/mo', platforms: '10 accounts', posts: 'Unlimited', team: '1 user', ai: 'Limited', linkinbio: '❌', analytics: 'Paid add-on' },
-    { name: 'Later', price: '$25+/mo', platforms: '6 profiles', posts: '30/profile', team: 'Paid add-on', ai: 'Limited', linkinbio: '$9/mo extra', analytics: 'Basic only' },
-    { name: 'SocialMate', price: '$0 FREE', platforms: '16 platforms', posts: 'Unlimited', team: '✅ Free', ai: '✅ Included', linkinbio: '✅ Included', analytics: '✅ Included', highlight: true },
-  ]
-
-  const FAQS = [
-    { q: 'Is SocialMate really free forever?', a: 'Yes. The free plan is not a trial — it never expires. You get 16 platforms, unlimited scheduling, and all core features at zero cost, forever.' },
-    { q: 'What happens when I use all my AI credits?', a: 'AI credits reset every month. On the free plan you get 15 credits. On Pro you get 500. You can still use all other features without AI credits.' },
-    { q: 'How does SocialMate compare to Buffer?', a: "Buffer charges $6 per channel per month. Connecting 5 platforms costs $30/month. SocialMate gives you all 16 platforms for free — that's over $1,000/year in savings." },
-    { q: 'Can I upgrade or downgrade anytime?', a: 'Yes. You can upgrade to Pro at any time, and downgrade back to free whenever you want. No lock-in, no cancellation fees.' },
-    { q: 'Is my data safe?', a: 'All data is stored securely with Supabase, encrypted at rest and in transit. We never sell your data or show you ads.' },
-    { q: 'Do you offer refunds?', a: 'Yes. If you upgrade to Pro and are not satisfied within 7 days, we will give you a full refund, no questions asked.' },
-  ]
-
   return (
     <div className="min-h-screen bg-white">
 
       {/* NAV */}
-      <div className="border-b border-gray-100 px-8 py-4 flex items-center justify-between sticky top-0 bg-white z-40">
+      <nav className="border-b border-gray-100 px-8 py-4 flex items-center justify-between sticky top-0 bg-white/95 backdrop-blur z-40">
         <Link href="/" className="flex items-center gap-2">
           <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
           <span className="font-bold text-base tracking-tight">SocialMate</span>
         </Link>
-        <div className="flex items-center gap-3">
-          {user ? (
-            <>
-              <Link href="/dashboard" className="text-sm font-semibold text-gray-500 hover:text-black transition-colors">Dashboard</Link>
-              <button onClick={handleSignOut} className="text-sm text-gray-400 hover:text-black transition-colors">Sign out</button>
-            </>
-          ) : (
-            <>
-              <Link href="/login" className="text-sm font-semibold text-gray-500 hover:text-black transition-colors">Sign in</Link>
-              <Link href="/signup" className="bg-black text-white text-sm font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all">Get started free</Link>
-            </>
-          )}
+        <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-500">
+          <Link href="/" className="hover:text-black transition-colors">Home</Link>
+          <Link href="/pricing" className="text-black font-bold">Pricing</Link>
+          <Link href="/blog" className="hover:text-black transition-colors">Blog</Link>
         </div>
-      </div>
+        <div className="flex items-center gap-3">
+          <Link href="/login" className="text-sm font-semibold text-gray-500 hover:text-black transition-colors hidden sm:block">Sign in</Link>
+          <Link href="/signup" className="bg-black text-white text-sm font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
+            Get started free →
+          </Link>
+        </div>
+      </nav>
 
-      <div className="max-w-5xl mx-auto px-6 py-20">
+      <div className="max-w-5xl mx-auto px-6 py-16">
 
         {/* HEADER */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-14">
           <div className="inline-flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 text-xs font-bold px-4 py-2 rounded-full mb-6">
-            🎉 No credit card required · Free forever
+            🎉 Free forever · No credit card required
           </div>
-          <h1 className="text-5xl font-extrabold tracking-tight mb-4">
-            Simple, honest pricing
-          </h1>
+          <h1 className="text-5xl font-extrabold tracking-tight mb-4">Simple, honest pricing</h1>
           <p className="text-xl text-gray-400 max-w-xl mx-auto">
-            Most features are free. Upgrade only if you want more AI power.
+            Everything you need is free. Pro is for AI power users who want more.
           </p>
         </div>
 
-        {/* BILLING TOGGLE */}
-        <div className="flex items-center justify-center gap-3 mb-12">
-          <button
-            onClick={() => setBilling('monthly')}
-            className={`text-sm font-semibold px-4 py-2 rounded-xl transition-all ${billing === 'monthly' ? 'bg-gray-100 text-black' : 'text-gray-400'}`}
-          >
-            Monthly
-          </button>
-          <button
-            onClick={() => setBilling('yearly')}
-            className={`text-sm font-semibold px-4 py-2 rounded-xl transition-all ${billing === 'yearly' ? 'bg-gray-100 text-black' : 'text-gray-400'}`}
-          >
-            Yearly
-            <span className="ml-1.5 text-xs font-bold text-green-600 bg-green-100 px-1.5 py-0.5 rounded-full">Save 37%</span>
-          </button>
-        </div>
-
         {/* PLANS */}
-        <div className="grid grid-cols-2 gap-6 mb-20">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16 max-w-3xl mx-auto">
 
           {/* FREE */}
-          <div className="bg-white border-2 border-gray-100 rounded-3xl p-8 flex flex-col">
+          <div className="border border-gray-200 rounded-3xl p-8">
             <div className="mb-6">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Free</p>
+              <h2 className="text-lg font-extrabold tracking-tight mb-1">Free</h2>
               <div className="flex items-end gap-1 mb-2">
                 <span className="text-5xl font-extrabold tracking-tight">$0</span>
-                <span className="text-gray-400 mb-1.5 text-sm font-medium">/ forever</span>
+                <span className="text-gray-400 text-sm mb-2">/ forever</span>
               </div>
-              <p className="text-sm text-gray-400">Everything you need to manage social media like a pro</p>
+              <p className="text-sm text-gray-400">Everything you need to manage social media professionally.</p>
             </div>
-
-            <Link
-              href={user ? '/dashboard' : '/signup'}
-              className="w-full py-3 border-2 border-gray-200 text-sm font-bold rounded-2xl hover:border-gray-400 transition-all text-center mb-8"
-            >
-              {user ? 'Go to Dashboard →' : 'Get started free →'}
+            <Link href="/signup" className="block w-full py-3 border-2 border-black text-black text-sm font-bold rounded-xl hover:bg-black hover:text-white transition-all text-center mb-6">
+              Get started free →
             </Link>
-
-            <div className="space-y-3 flex-1">
-              {FEATURES_FREE.map(f => (
-                <div key={f} className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-xs">✓</span>
-                  </div>
-                  <span className="text-sm text-gray-600">{f}</span>
+            <div className="space-y-2.5">
+              {FREE_FEATURES.map(f => (
+                <div key={f} className="flex items-center gap-2.5 text-sm">
+                  <span className="text-green-500 font-bold flex-shrink-0">✓</span>
+                  <span className="text-gray-600">{f}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* PRO */}
-          <div className="bg-black rounded-3xl p-8 flex flex-col relative overflow-hidden">
-            <div className="absolute top-4 right-4 bg-white/10 text-white text-xs font-bold px-3 py-1 rounded-full">
-              Most Popular
+          <div className="bg-black text-white rounded-3xl p-8 relative">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+              <span className="bg-white text-black text-xs font-extrabold px-4 py-1.5 rounded-full shadow">
+                ⚡ Most Popular
+              </span>
             </div>
             <div className="mb-6">
-              <p className="text-xs font-bold text-white/50 uppercase tracking-widest mb-2">Pro</p>
+              <h2 className="text-lg font-extrabold tracking-tight mb-1">Pro</h2>
               <div className="flex items-end gap-1 mb-2">
-                <span className="text-5xl font-extrabold tracking-tight text-white">
-                  ${billing === 'yearly' ? PRO_YEARLY : PRO_MONTHLY}
-                </span>
-                <span className="text-white/50 mb-1.5 text-sm font-medium">/ month</span>
+                <span className="text-5xl font-extrabold tracking-tight">$19</span>
+                <span className="text-white/50 text-sm mb-2">/ month</span>
               </div>
-              {billing === 'yearly' && (
-                <p className="text-xs text-white/50">Billed ${PRO_YEARLY * 12}/year · Save ${(PRO_MONTHLY - PRO_YEARLY) * 12}/year</p>
-              )}
-              <p className="text-sm text-white/60 mt-2">For power users who want AI-driven content creation</p>
+              <p className="text-sm text-white/60">For creators and teams who want AI superpowers.</p>
             </div>
-
-            <button className="w-full py-3 bg-white text-black text-sm font-bold rounded-2xl hover:opacity-90 transition-all mb-8">
-              Upgrade to Pro →
-            </button>
-
-            <div className="space-y-3 flex-1">
-              {FEATURES_PRO.map(f => (
-                <div key={f} className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
-                    <span className="text-xs text-white">✓</span>
-                  </div>
-                  <span className="text-sm text-white/80">{f}</span>
+            <Link href="/signup" className="block w-full py-3 bg-white text-black text-sm font-bold rounded-xl hover:opacity-90 transition-all text-center mb-6">
+              Start Pro free trial →
+            </Link>
+            <div className="space-y-2.5">
+              {PRO_FEATURES.map(f => (
+                <div key={f} className="flex items-center gap-2.5 text-sm">
+                  <span className="text-green-400 font-bold flex-shrink-0">✓</span>
+                  <span className="text-white/80">{f}</span>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        {/* COMPETITOR COMPARISON */}
-        <div className="mb-20">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-extrabold tracking-tight mb-3">How we compare</h2>
-            <p className="text-gray-400">SocialMate's free plan beats competitors' paid plans</p>
-          </div>
-          <div className="overflow-x-auto rounded-2xl border border-gray-100">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-gray-100">
-                  <th className="text-left px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-wide">Feature</th>
-                  {COMPETITORS.map(c => (
-                    <th key={c.name} className={`px-6 py-4 text-center ${c.highlight ? 'bg-black text-white' : 'bg-white text-gray-700'}`}>
-                      <span className={`text-sm font-extrabold ${c.highlight ? 'text-white' : 'text-gray-800'}`}>{c.name}</span>
-                      <br />
-                      <span className={`text-xs font-semibold ${c.highlight ? 'text-white/60' : 'text-gray-400'}`}>{c.price}</span>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  { label: 'Platforms / Channels', key: 'platforms' },
-                  { label: 'Scheduled Posts', key: 'posts' },
-                  { label: 'Team Members', key: 'team' },
-                  { label: 'AI Tools', key: 'ai' },
-                  { label: 'Link in Bio', key: 'linkinbio' },
-                  { label: 'Analytics', key: 'analytics' },
-                ].map((row, i) => (
-                  <tr key={row.key} className={i % 2 === 0 ? 'bg-gray-50/50' : 'bg-white'}>
-                    <td className="px-6 py-4 text-xs font-semibold text-gray-500">{row.label}</td>
-                    {COMPETITORS.map(c => (
-                      <td key={c.name} className={`px-6 py-4 text-center text-xs font-semibold ${c.highlight ? 'bg-black text-white' : 'text-gray-600'}`}>
-                        {(c as any)[row.key]}
-                      </td>
-                    ))}
+        {/* COMPARISON TABLE */}
+        <div className="mb-16">
+          <h2 className="text-3xl font-extrabold tracking-tight text-center mb-8">How we compare</h2>
+          <div className="border border-gray-200 rounded-2xl overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left px-5 py-4 text-xs font-bold text-gray-400 uppercase tracking-wide">Feature</th>
+                    <th className="px-5 py-4 text-xs font-bold text-gray-400 uppercase tracking-wide text-center">Buffer</th>
+                    <th className="px-5 py-4 text-xs font-bold text-gray-400 uppercase tracking-wide text-center">Hootsuite</th>
+                    <th className="px-5 py-4 text-xs font-bold text-gray-400 uppercase tracking-wide text-center">Later</th>
+                    <th className="px-5 py-4 text-xs font-bold uppercase tracking-wide text-center bg-black text-white rounded-t-none">SocialMate</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {COMPARISON.map((row, i) => (
+                    <tr key={row.feature} className={i < COMPARISON.length - 1 ? 'border-b border-gray-100' : ''}>
+                      <td className="px-5 py-4 text-sm font-semibold text-gray-700">{row.feature}</td>
+                      <td className="px-5 py-4 text-xs text-center text-gray-500">{row.buffer}</td>
+                      <td className="px-5 py-4 text-xs text-center text-gray-500">{row.hootsuite}</td>
+                      <td className="px-5 py-4 text-xs text-center text-gray-500">{row.later}</td>
+                      <td className="px-5 py-4 text-xs text-center font-bold bg-gray-50">
+                        {row.free}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-
-        {/* SAVINGS CALLOUT */}
-        <div className="bg-gray-50 border border-gray-100 rounded-3xl p-10 text-center mb-20">
-          <div className="text-5xl mb-4">💰</div>
-          <h2 className="text-3xl font-extrabold tracking-tight mb-3">Save over $1,200/year</h2>
-          <p className="text-gray-400 max-w-lg mx-auto mb-6">
-            Buffer charges $6 per social channel per month. Managing 5 platforms costs $360/year. With SocialMate, all 16 platforms are free — saving you over $1,200 compared to Buffer alone.
-          </p>
-          <Link
-            href={user ? '/dashboard' : '/signup'}
-            className="inline-block bg-black text-white text-sm font-bold px-8 py-4 rounded-2xl hover:opacity-80 transition-all"
-          >
-            Start saving today →
-          </Link>
+          <div className="mt-4 text-center">
+            <p className="text-sm text-gray-400">
+              Switching from Buffer?{' '}
+              <span className="font-bold text-black">Save $1,200+/year</span>
+              {' '}by moving to SocialMate.
+            </p>
+          </div>
         </div>
 
         {/* FAQ */}
-        <div className="mb-20">
-          <h2 className="text-3xl font-extrabold tracking-tight text-center mb-10">Frequently asked questions</h2>
-          <div className="grid grid-cols-2 gap-4">
+        <div className="mb-16 max-w-2xl mx-auto">
+          <h2 className="text-3xl font-extrabold tracking-tight text-center mb-8">Frequently asked questions</h2>
+          <div className="space-y-4">
             {FAQS.map(faq => (
-              <div key={faq.q} className="bg-white border border-gray-100 rounded-2xl p-6 hover:border-gray-300 transition-all">
+              <div key={faq.q} className="border border-gray-100 rounded-2xl p-6">
                 <h3 className="text-sm font-bold mb-2">{faq.q}</h3>
-                <p className="text-sm text-gray-400 leading-relaxed">{faq.a}</p>
+                <p className="text-sm text-gray-500 leading-relaxed">{faq.a}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* FINAL CTA */}
-        <div className="bg-black rounded-3xl p-12 text-center text-white">
-          <h2 className="text-4xl font-extrabold tracking-tight mb-3">Ready to get started?</h2>
-          <p className="text-white/60 mb-8 max-w-md mx-auto">Join thousands of creators and brands scheduling smarter. Free forever, no credit card needed.</p>
-          <div className="flex items-center justify-center gap-3">
-            <Link
-              href={user ? '/dashboard' : '/signup'}
-              className="bg-white text-black text-sm font-bold px-8 py-4 rounded-2xl hover:opacity-90 transition-all"
-            >
-              {user ? 'Go to Dashboard →' : 'Create free account →'}
-            </Link>
-            <Link href="/login" className="text-white/60 text-sm font-semibold hover:text-white transition-colors px-4 py-4">
-              Sign in →
-            </Link>
-          </div>
-          <p className="text-white/30 text-xs mt-6">No credit card · No trial · Free forever</p>
+        <div className="bg-black rounded-3xl p-12 text-white text-center">
+          <h2 className="text-4xl font-extrabold tracking-tight mb-4">Start free today</h2>
+          <p className="text-white/60 text-lg mb-8 max-w-md mx-auto">
+            No credit card. No trial period. Just a free social media scheduler that actually works.
+          </p>
+          <Link href="/signup" className="inline-block bg-white text-black text-sm font-bold px-10 py-5 rounded-2xl hover:opacity-90 transition-all shadow-2xl">
+            Create free account →
+          </Link>
+          <p className="text-white/30 text-xs mt-4">16 platforms · Unlimited posts · Free forever</p>
         </div>
       </div>
+
+      {/* FOOTER */}
+      <footer className="border-t border-gray-100 px-8 py-8">
+        <div className="max-w-5xl mx-auto flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">S</div>
+            <span className="font-bold text-sm tracking-tight">SocialMate</span>
+            <span className="text-xs text-gray-400 ml-2">© 2026</span>
+          </div>
+          <div className="flex items-center gap-6 text-xs text-gray-400">
+            <Link href="/" className="hover:text-black transition-colors">Home</Link>
+            <Link href="/blog" className="hover:text-black transition-colors">Blog</Link>
+            <Link href="/privacy" className="hover:text-black transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-black transition-colors">Terms</Link>
+          </div>
+        </div>
+      </footer>
     </div>
   )
 }

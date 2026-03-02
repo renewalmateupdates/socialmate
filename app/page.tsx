@@ -1,4 +1,15 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
+
+export const metadata: Metadata = {
+  title: 'SocialMate — Free Social Media Scheduler for 16 Platforms',
+  description: 'Schedule posts to 16 social platforms completely free. No per-channel fees. No post limits. Better than Buffer and Hootsuite at zero cost.',
+  openGraph: {
+    title: 'SocialMate — Free Social Media Scheduler for 16 Platforms',
+    description: 'Schedule posts to 16 social platforms completely free. No per-channel fees. No post limits.',
+    url: 'https://socialmate-six.vercel.app',
+  },
+}
 
 const FEATURES = [
   { icon: '📅', title: 'Content Calendar', desc: 'Drag and drop to reschedule posts. See your entire month at a glance.' },
@@ -233,6 +244,9 @@ export default function Landing() {
           </div>
           <div className="flex items-center gap-6 text-xs text-gray-400">
             <Link href="/pricing" className="hover:text-black transition-colors">Pricing</Link>
+            <Link href="/blog" className="hover:text-black transition-colors">Blog</Link>
+            <Link href="/privacy" className="hover:text-black transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-black transition-colors">Terms</Link>
             <Link href="/login" className="hover:text-black transition-colors">Sign in</Link>
             <Link href="/signup" className="hover:text-black transition-colors">Sign up</Link>
             <Link href="/dashboard" className="hover:text-black transition-colors">Dashboard</Link>
