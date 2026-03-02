@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Sidebar from '@/components/Sidebar'
 
 function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 rounded-xl animate-pulse ${className}`} />
@@ -52,21 +53,14 @@ export default function Drafts() {
   const [platformFilter, setPlatformFilter] = useState('all')
   const router = useRouter()
 
-  const AI_CREDITS_LEFT = 15
-  const AI_CREDITS_TOTAL = 15
-  const ACCOUNTS_USED = 0
-  const ACCOUNTS_TOTAL = 16
-
   useEffect(() => {
     const getData = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
       setUser(user)
       const { data } = await supabase
-        .from('posts')
-        .select('*')
-        .eq('user_id', user.id)
-        .eq('status', 'draft')
+        .from('posts').select('*')
+        .eq('user_id', user.id).eq('status', 'draft')
         .order('created_at', { ascending: false })
       setDrafts(data || [])
       setLoading(false)
@@ -96,15 +90,11 @@ export default function Drafts() {
 
   const handleSchedule = async (id: string, time: string) => {
     if (!time) { showToast('Pick a time first', 'error'); return }
-    const { error } = await supabase
-      .from('posts')
-      .update({ status: 'scheduled', scheduled_at: new Date(time).toISOString() })
-      .eq('id', id)
+    const { error } = await supabase.from('posts')
+      .update({ status: 'scheduled', scheduled_at: new Date(time).toISOString() }).eq('id', id)
     if (error) { showToast('Failed to schedule', 'error'); return }
     setDrafts(prev => prev.filter(d => d.id !== id))
-    setScheduleId(null)
-    setScheduleTime('')
-    setPreview(null)
+    setScheduleId(null); setScheduleTime(''); setPreview(null)
     showToast('Post scheduled!', 'success')
   }
 
@@ -117,8 +107,7 @@ export default function Drafts() {
       await supabase.from('posts').update({ status: 'scheduled', scheduled_at: t.toISOString() }).eq('id', ids[i])
     }
     setDrafts(prev => prev.filter(d => !selected.has(d.id)))
-    setSelected(new Set())
-    setScheduleTime('')
+    setSelected(new Set()); setScheduleTime('')
     showToast(`${ids.length} post${ids.length !== 1 ? 's' : ''} scheduled!`, 'success')
   }
 
@@ -128,14 +117,6 @@ export default function Drafts() {
       next.has(id) ? next.delete(id) : next.add(id)
       return next
     })
-  }
-
-  const toggleSelectAll = () => {
-    if (selected.size === filtered.length) {
-      setSelected(new Set())
-    } else {
-      setSelected(new Set(filtered.map(d => d.id)))
-    }
   }
 
   const allPlatforms = Array.from(new Set(drafts.flatMap(d => d.platforms || [])))
@@ -154,97 +135,16 @@ export default function Drafts() {
     return matchSearch && matchPlatform
   })
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push('/')
+  const toggleSelectAll = () => {
+    if (selected.size === filtered.length) setSelected(new Set())
+    else setSelected(new Set(filtered.map(d => d.id)))
   }
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* SIDEBAR */}
-      <div className="w-56 bg-white border-r border-gray-100 flex flex-col fixed h-full">
-        <div className="p-4 border-b border-gray-100">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
-            <span className="font-bold text-base tracking-tight">SocialMate</span>
-          </div>
-        </div>
-        <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest px-3 py-2">Content</div>
-          {[
-            { icon: "🏠", label: "Dashboard", href: "/dashboard" },
-            { icon: "📅", label: "Calendar", href: "/calendar" },
-            { icon: "✏️", label: "Compose", href: "/compose" },
-            { icon: "📂", label: "Drafts", href: "/drafts", active: true },
-            { icon: "⏳", label: "Queue", href: "/queue" },
-            { icon: "#️⃣", label: "Hashtags", href: "/hashtags" },
-            { icon: "🖼️", label: "Media Library", href: "/media" },
-            { icon: "📝", label: "Templates", href: "/templates" },
-            { icon: "🔗", label: "Link in Bio", href: "/link-in-bio" },
-            { icon: "📆", label: "Bulk Scheduler", href: "/bulk-scheduler" },
-          ].map(item => (
-            <Link key={item.label} href={item.href} className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${'active' in item && item.active ? 'bg-gray-100 text-black' : 'text-gray-500 hover:bg-gray-50 hover:text-black'}`}>
-              <span>{item.icon}</span>{item.label}
-            </Link>
-          ))}
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest px-3 py-2 mt-3">Insights</div>
-          {[
-            { icon: "📊", label: "Analytics", href: "/analytics" },
-            { icon: "🔍", label: "Best Times", href: "/best-times" },
-          ].map(item => (
-            <Link key={item.label} href={item.href} className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-black transition-all">
-              <span>{item.icon}</span>{item.label}
-            </Link>
-          ))}
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest px-3 py-2 mt-3">Settings</div>
-          {[
-            { icon: "🔗", label: "Accounts", href: "/accounts" },
-            { icon: "👥", label: "Team", href: "/team" },
-            { icon: "⚙️", label: "Settings", href: "/settings" },
-            { icon: "🎁", label: "Referrals", href: "/referral" },
-            { icon: "🔔", label: "Notifications", href: "/notifications" },
-            { icon: "🔎", label: "Search", href: "/search" },
-          ].map(item => (
-            <Link key={item.label} href={item.href} className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-black transition-all">
-              <span>{item.icon}</span>{item.label}
-            </Link>
-          ))}
-        </nav>
-        <div className="p-3 border-t border-gray-100 space-y-3">
-          <div className="bg-gray-50 rounded-xl p-3">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs font-semibold text-gray-500">AI Credits</span>
-              <span className="text-xs font-bold text-gray-700">{AI_CREDITS_LEFT}/{AI_CREDITS_TOTAL}</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-1.5">
-              <div className="bg-black h-1.5 rounded-full" style={{ width: `${(AI_CREDITS_LEFT / AI_CREDITS_TOTAL) * 100}%` }} />
-            </div>
-            <p className="text-xs text-gray-400 mt-1.5">{AI_CREDITS_LEFT} credits remaining</p>
-          </div>
-          <div className="bg-gray-50 rounded-xl p-3">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs font-semibold text-gray-500">Accounts</span>
-              <span className="text-xs font-bold text-gray-700">{ACCOUNTS_USED}/{ACCOUNTS_TOTAL}</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-1.5">
-              <div className="bg-black h-1.5 rounded-full" style={{ width: `${(ACCOUNTS_USED / ACCOUNTS_TOTAL) * 100}%` }} />
-            </div>
-            <p className="text-xs text-gray-400 mt-1.5">{ACCOUNTS_TOTAL - ACCOUNTS_USED} slots remaining</p>
-          </div>
-          <Link href="/pricing" className="w-full block text-center bg-black text-white text-xs font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
-            ⚡ Upgrade to Pro
-          </Link>
-          <div className="px-1">
-            <div className="text-xs text-gray-400 truncate mb-1">{user?.email}</div>
-            <button onClick={handleSignOut} className="w-full text-left px-0 py-1 text-xs text-gray-400 hover:text-black transition-all">Sign out</button>
-          </div>
-        </div>
-      </div>
+      <Sidebar />
 
-      {/* MAIN */}
       <div className="ml-56 flex-1 p-8">
-
-        {/* HEADER */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-extrabold tracking-tight">Drafts</h1>
@@ -257,11 +157,8 @@ export default function Drafts() {
           </Link>
         </div>
 
-        {/* STATS */}
         <div className="grid grid-cols-3 gap-4 mb-6">
-          {loading ? (
-            [1,2,3].map(i => <SkeletonBox key={i} className="h-20 rounded-2xl" />)
-          ) : (
+          {loading ? [1,2,3].map(i => <SkeletonBox key={i} className="h-20 rounded-2xl" />) : (
             [
               { label: 'Total Drafts', value: drafts.length, icon: '📂' },
               { label: 'This Week', value: drafts.filter(d => Date.now() - new Date(d.created_at).getTime() < 7 * 86400000).length, icon: '📅' },
@@ -278,34 +175,22 @@ export default function Drafts() {
           )}
         </div>
 
-        {/* CONTROLS */}
         <div className="flex items-center gap-3 mb-6 flex-wrap">
           <div className="relative flex-1 max-w-xs">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
-            <input
-              type="text"
-              placeholder="Search drafts..."
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 bg-white"
-            />
+            <input type="text" placeholder="Search drafts..." value={search} onChange={e => setSearch(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 bg-white" />
           </div>
-          <select
-            value={sort}
-            onChange={e => setSort(e.target.value as any)}
-            className="text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:border-gray-400 bg-white"
-          >
+          <select value={sort} onChange={e => setSort(e.target.value as any)}
+            className="text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:border-gray-400 bg-white">
             <option value="newest">Newest First</option>
             <option value="oldest">Oldest First</option>
             <option value="longest">Longest First</option>
             <option value="shortest">Shortest First</option>
           </select>
           {allPlatforms.length > 0 && (
-            <select
-              value={platformFilter}
-              onChange={e => setPlatformFilter(e.target.value)}
-              className="text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:border-gray-400 bg-white"
-            >
+            <select value={platformFilter} onChange={e => setPlatformFilter(e.target.value)}
+              className="text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:border-gray-400 bg-white">
               <option value="all">All Platforms</option>
               {allPlatforms.map(p => <option key={p} value={p}>{p}</option>)}
             </select>
@@ -316,36 +201,21 @@ export default function Drafts() {
           </div>
         </div>
 
-        {/* BULK ACTION BAR */}
         {selected.size > 0 && (
           <div className="bg-black text-white rounded-2xl px-5 py-3 mb-4 flex items-center gap-4">
             <span className="text-sm font-semibold">{selected.size} selected</span>
             <div className="flex items-center gap-2 flex-1">
-              <input
-                type="datetime-local"
-                value={scheduleTime}
-                onChange={e => setScheduleTime(e.target.value)}
-                className="text-xs px-3 py-1.5 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:border-white/50"
-              />
-              <button
-                onClick={handleBulkSchedule}
-                disabled={!scheduleTime}
-                className="text-xs font-semibold px-3 py-1.5 bg-white text-black rounded-xl hover:opacity-80 transition-all disabled:opacity-40"
-              >
-                📅 Schedule All
-              </button>
-              <button
-                onClick={handleBulkDelete}
-                className="text-xs font-semibold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all"
-              >
-                🗑️ Delete All
-              </button>
+              <input type="datetime-local" value={scheduleTime} onChange={e => setScheduleTime(e.target.value)}
+                className="text-xs px-3 py-1.5 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:border-white/50" />
+              <button onClick={handleBulkSchedule} disabled={!scheduleTime}
+                className="text-xs font-semibold px-3 py-1.5 bg-white text-black rounded-xl hover:opacity-80 transition-all disabled:opacity-40">📅 Schedule All</button>
+              <button onClick={handleBulkDelete}
+                className="text-xs font-semibold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all">🗑️ Delete All</button>
             </div>
             <button onClick={() => setSelected(new Set())} className="text-white/60 hover:text-white text-lg leading-none">×</button>
           </div>
         )}
 
-        {/* CONTENT */}
         {loading ? (
           <div className={view === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-3'}>
             {[1,2,3,4,5,6].map(i => <SkeletonBox key={i} className="h-40 rounded-2xl" />)}
@@ -353,9 +223,7 @@ export default function Drafts() {
         ) : filtered.length === 0 ? (
           <div className="bg-white border border-gray-100 rounded-2xl p-16 text-center">
             <div className="text-5xl mb-4">{search ? '🔍' : '📂'}</div>
-            <h2 className="text-lg font-bold tracking-tight mb-2">
-              {search ? 'No drafts match your search' : 'No drafts yet'}
-            </h2>
+            <h2 className="text-lg font-bold tracking-tight mb-2">{search ? 'No drafts match your search' : 'No drafts yet'}</h2>
             <p className="text-gray-400 text-sm mb-6 max-w-sm mx-auto">
               {search ? 'Try a different search term.' : 'Start writing and save posts as drafts to work on them later.'}
             </p>
@@ -368,25 +236,17 @@ export default function Drafts() {
         ) : view === 'grid' ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filtered.map(draft => (
-              <div
-                key={draft.id}
+              <div key={draft.id}
                 className={`bg-white border rounded-2xl p-5 flex flex-col gap-3 transition-all group cursor-pointer ${selected.has(draft.id) ? 'border-black ring-2 ring-black ring-offset-1' : 'border-gray-100 hover:border-gray-300'}`}
-                onClick={() => setPreview(draft)}
-              >
+                onClick={() => setPreview(draft)}>
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-1 flex-wrap flex-1">
-                    {draft.platforms?.slice(0, 4).map(pl => (
-                      <span key={pl} className="text-sm">{PLATFORM_ICONS[pl] || '📱'}</span>
-                    ))}
+                    {draft.platforms?.slice(0, 4).map(pl => <span key={pl} className="text-sm">{PLATFORM_ICONS[pl] || '📱'}</span>)}
                     {draft.platforms?.length > 4 && <span className="text-xs text-gray-400">+{draft.platforms.length - 4}</span>}
                   </div>
-                  <input
-                    type="checkbox"
-                    checked={selected.has(draft.id)}
-                    onChange={() => toggleSelect(draft.id)}
+                  <input type="checkbox" checked={selected.has(draft.id)} onChange={() => toggleSelect(draft.id)}
                     onClick={e => e.stopPropagation()}
-                    className="w-4 h-4 rounded accent-black cursor-pointer opacity-0 group-hover:opacity-100 transition-all"
-                  />
+                    className="w-4 h-4 rounded accent-black cursor-pointer opacity-0 group-hover:opacity-100 transition-all" />
                 </div>
                 <p className="text-sm text-gray-700 line-clamp-4 flex-1 whitespace-pre-line">{draft.content}</p>
                 <div className="flex items-center justify-between pt-2 border-t border-gray-50">
@@ -399,12 +259,8 @@ export default function Drafts() {
         ) : (
           <div className="space-y-2">
             <div className="flex items-center gap-3 px-4 py-2">
-              <input
-                type="checkbox"
-                checked={selected.size === filtered.length && filtered.length > 0}
-                onChange={toggleSelectAll}
-                className="w-4 h-4 rounded accent-black cursor-pointer"
-              />
+              <input type="checkbox" checked={selected.size === filtered.length && filtered.length > 0}
+                onChange={toggleSelectAll} className="w-4 h-4 rounded accent-black cursor-pointer" />
               <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide flex-1">Content</span>
               <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide w-24">Platforms</span>
               <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide w-20">Length</span>
@@ -412,30 +268,23 @@ export default function Drafts() {
               <span className="w-16"></span>
             </div>
             {filtered.map(draft => (
-              <div
-                key={draft.id}
+              <div key={draft.id}
                 className={`flex items-center gap-3 px-4 py-3 bg-white rounded-2xl border transition-all group cursor-pointer ${selected.has(draft.id) ? 'border-black ring-1 ring-black' : 'border-gray-100 hover:border-gray-300'}`}
-                onClick={() => setPreview(draft)}
-              >
-                <input
-                  type="checkbox"
-                  checked={selected.has(draft.id)}
-                  onChange={() => toggleSelect(draft.id)}
-                  onClick={e => e.stopPropagation()}
-                  className="w-4 h-4 rounded accent-black cursor-pointer flex-shrink-0"
-                />
+                onClick={() => setPreview(draft)}>
+                <input type="checkbox" checked={selected.has(draft.id)} onChange={() => toggleSelect(draft.id)}
+                  onClick={e => e.stopPropagation()} className="w-4 h-4 rounded accent-black cursor-pointer flex-shrink-0" />
                 <p className="text-sm text-gray-700 flex-1 truncate">{draft.content}</p>
                 <div className="flex items-center gap-0.5 w-24 flex-shrink-0">
-                  {draft.platforms?.slice(0, 4).map(pl => (
-                    <span key={pl} className="text-xs">{PLATFORM_ICONS[pl] || '📱'}</span>
-                  ))}
+                  {draft.platforms?.slice(0, 4).map(pl => <span key={pl} className="text-xs">{PLATFORM_ICONS[pl] || '📱'}</span>)}
                   {draft.platforms?.length > 4 && <span className="text-xs text-gray-400">+{draft.platforms.length - 4}</span>}
                 </div>
                 <span className="text-xs text-gray-400 w-20 flex-shrink-0">{draft.content?.length} chars</span>
                 <span className="text-xs text-gray-400 w-20 flex-shrink-0">{timeAgo(draft.created_at)}</span>
                 <div className="flex items-center gap-1 w-16 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-all">
-                  <Link href={`/compose?edit=${draft.id}`} onClick={e => e.stopPropagation()} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-black transition-all text-sm">✏️</Link>
-                  <button onClick={e => { e.stopPropagation(); handleDelete(draft.id) }} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-50 text-gray-300 hover:text-red-400 transition-all">×</button>
+                  <Link href={`/compose?edit=${draft.id}`} onClick={e => e.stopPropagation()}
+                    className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-black transition-all text-sm">✏️</Link>
+                  <button onClick={e => { e.stopPropagation(); handleDelete(draft.id) }}
+                    className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-50 text-gray-300 hover:text-red-400 transition-all">×</button>
                 </div>
               </div>
             ))}
@@ -443,16 +292,13 @@ export default function Drafts() {
         )}
       </div>
 
-      {/* PREVIEW MODAL */}
       {preview && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-6" onClick={() => setPreview(null)}>
           <div className="bg-white rounded-2xl w-full max-w-lg shadow-2xl" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
               <div>
                 <div className="flex items-center gap-1 flex-wrap mb-1">
-                  {preview.platforms?.map(pl => (
-                    <span key={pl} className="text-base">{PLATFORM_ICONS[pl] || '📱'}</span>
-                  ))}
+                  {preview.platforms?.map(pl => <span key={pl} className="text-base">{PLATFORM_ICONS[pl] || '📱'}</span>)}
                 </div>
                 <p className="text-xs text-gray-400">{preview.content?.length} chars · {timeAgo(preview.created_at)}</p>
               </div>
@@ -462,42 +308,24 @@ export default function Drafts() {
               <div className="bg-gray-50 rounded-xl p-4 mb-4 max-h-60 overflow-y-auto">
                 <p className="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">{preview.content}</p>
               </div>
-              {scheduleId === preview.id ? (
+              {scheduleId === preview.id && (
                 <div className="flex gap-2">
-                  <input
-                    type="datetime-local"
-                    value={scheduleTime}
-                    onChange={e => setScheduleTime(e.target.value)}
-                    className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400"
-                  />
-                  <button
-                    onClick={() => handleSchedule(preview.id, scheduleTime)}
-                    className="px-4 py-2 bg-black text-white text-sm font-semibold rounded-xl hover:opacity-80 transition-all"
-                  >
-                    Confirm
-                  </button>
-                  <button onClick={() => { setScheduleId(null); setScheduleTime('') }} className="px-3 py-2 border border-gray-200 rounded-xl text-sm hover:border-gray-400 transition-all">
-                    Cancel
-                  </button>
+                  <input type="datetime-local" value={scheduleTime} onChange={e => setScheduleTime(e.target.value)}
+                    className="flex-1 px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400" />
+                  <button onClick={() => handleSchedule(preview.id, scheduleTime)}
+                    className="px-4 py-2 bg-black text-white text-sm font-semibold rounded-xl hover:opacity-80 transition-all">Confirm</button>
+                  <button onClick={() => { setScheduleId(null); setScheduleTime('') }}
+                    className="px-3 py-2 border border-gray-200 rounded-xl text-sm hover:border-gray-400 transition-all">Cancel</button>
                 </div>
-              ) : null}
+              )}
             </div>
             <div className="px-6 py-4 border-t border-gray-100 flex gap-2">
-              <Link href={`/compose?edit=${preview.id}`} className="flex-1 py-2.5 text-sm font-semibold border border-gray-200 rounded-xl hover:border-gray-400 transition-all text-center">
-                ✏️ Edit
-              </Link>
-              <button
-                onClick={() => { setScheduleId(preview.id); setScheduleTime('') }}
-                className="flex-1 py-2.5 text-sm font-semibold bg-black text-white rounded-xl hover:opacity-80 transition-all"
-              >
-                📅 Schedule
-              </button>
-              <button
-                onClick={() => handleDelete(preview.id)}
-                className="py-2.5 px-4 text-sm font-semibold text-red-400 border border-red-100 rounded-xl hover:border-red-300 transition-all"
-              >
-                🗑️
-              </button>
+              <Link href={`/compose?edit=${preview.id}`}
+                className="flex-1 py-2.5 text-sm font-semibold border border-gray-200 rounded-xl hover:border-gray-400 transition-all text-center">✏️ Edit</Link>
+              <button onClick={() => { setScheduleId(preview.id); setScheduleTime('') }}
+                className="flex-1 py-2.5 text-sm font-semibold bg-black text-white rounded-xl hover:opacity-80 transition-all">📅 Schedule</button>
+              <button onClick={() => handleDelete(preview.id)}
+                className="py-2.5 px-4 text-sm font-semibold text-red-400 border border-red-100 rounded-xl hover:border-red-300 transition-all">🗑️</button>
             </div>
           </div>
         </div>

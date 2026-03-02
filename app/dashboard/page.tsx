@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Sidebar from '@/components/Sidebar'
 
 function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 rounded-xl animate-pulse ${className}`} />
@@ -55,11 +56,6 @@ export default function Dashboard() {
   const [greeting, setGreeting] = useState('')
   const router = useRouter()
 
-  const AI_CREDITS_LEFT = 15
-  const AI_CREDITS_TOTAL = 15
-  const ACCOUNTS_USED = 0
-  const ACCOUNTS_TOTAL = 16
-
   useEffect(() => {
     const hour = new Date().getHours()
     if (hour < 12) setGreeting('Good morning')
@@ -72,24 +68,17 @@ export default function Dashboard() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
       setUser(user)
-
       const { data } = await supabase
         .from('posts')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(100)
-
       setPosts(data || [])
       setLoading(false)
     }
     getData()
   }, [])
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push('/')
-  }
 
   const now = new Date()
   const todayStr = now.toDateString()
@@ -118,103 +107,19 @@ export default function Dashboard() {
   })
 
   const maxWeekCount = Math.max(...weekDays.map(d => d.count), 1)
-
   const userName = user?.email?.split('@')[0] || 'there'
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* SIDEBAR */}
-      <div className="w-56 bg-white border-r border-gray-100 flex flex-col fixed h-full">
-        <div className="p-4 border-b border-gray-100">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
-            <span className="font-bold text-base tracking-tight">SocialMate</span>
-          </div>
-        </div>
-        <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest px-3 py-2">Content</div>
-          {[
-            { icon: "🏠", label: "Dashboard", href: "/dashboard", active: true },
-            { icon: "📅", label: "Calendar", href: "/calendar" },
-            { icon: "✏️", label: "Compose", href: "/compose" },
-            { icon: "📂", label: "Drafts", href: "/drafts" },
-            { icon: "⏳", label: "Queue", href: "/queue" },
-            { icon: "#️⃣", label: "Hashtags", href: "/hashtags" },
-            { icon: "🖼️", label: "Media Library", href: "/media" },
-            { icon: "📝", label: "Templates", href: "/templates" },
-            { icon: "🔗", label: "Link in Bio", href: "/link-in-bio" },
-            { icon: "📆", label: "Bulk Scheduler", href: "/bulk-scheduler" },
-          ].map(item => (
-            <Link key={item.label} href={item.href} className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${'active' in item && item.active ? 'bg-gray-100 text-black' : 'text-gray-500 hover:bg-gray-50 hover:text-black'}`}>
-              <span>{item.icon}</span>{item.label}
-            </Link>
-          ))}
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest px-3 py-2 mt-3">Insights</div>
-          {[
-            { icon: "📊", label: "Analytics", href: "/analytics" },
-            { icon: "🔍", label: "Best Times", href: "/best-times" },
-          ].map(item => (
-            <Link key={item.label} href={item.href} className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-black transition-all">
-              <span>{item.icon}</span>{item.label}
-            </Link>
-          ))}
-          <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest px-3 py-2 mt-3">Settings</div>
-          {[
-            { icon: "🔗", label: "Accounts", href: "/accounts" },
-            { icon: "👥", label: "Team", href: "/team" },
-            { icon: "⚙️", label: "Settings", href: "/settings" },
-            { icon: "🎁", label: "Referrals", href: "/referral" },
-            { icon: "🔔", label: "Notifications", href: "/notifications" },
-            { icon: "🔎", label: "Search", href: "/search" },
-          ].map(item => (
-            <Link key={item.label} href={item.href} className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-gray-500 hover:bg-gray-50 hover:text-black transition-all">
-              <span>{item.icon}</span>{item.label}
-            </Link>
-          ))}
-        </nav>
-        <div className="p-3 border-t border-gray-100 space-y-3">
-          <div className="bg-gray-50 rounded-xl p-3">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs font-semibold text-gray-500">AI Credits</span>
-              <span className="text-xs font-bold text-gray-700">{AI_CREDITS_LEFT}/{AI_CREDITS_TOTAL}</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-1.5">
-              <div className="bg-black h-1.5 rounded-full" style={{ width: `${(AI_CREDITS_LEFT / AI_CREDITS_TOTAL) * 100}%` }} />
-            </div>
-            <p className="text-xs text-gray-400 mt-1.5">{AI_CREDITS_LEFT} credits remaining</p>
-          </div>
-          <div className="bg-gray-50 rounded-xl p-3">
-            <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs font-semibold text-gray-500">Accounts</span>
-              <span className="text-xs font-bold text-gray-700">{ACCOUNTS_USED}/{ACCOUNTS_TOTAL}</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-1.5">
-              <div className="bg-black h-1.5 rounded-full" style={{ width: `${(ACCOUNTS_USED / ACCOUNTS_TOTAL) * 100}%` }} />
-            </div>
-            <p className="text-xs text-gray-400 mt-1.5">{ACCOUNTS_TOTAL - ACCOUNTS_USED} slots remaining</p>
-          </div>
-          <Link href="/pricing" className="w-full block text-center bg-black text-white text-xs font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
-            ⚡ Upgrade to Pro
-          </Link>
-          <div className="px-1">
-            <div className="text-xs text-gray-400 truncate mb-1">{user?.email}</div>
-            <button onClick={handleSignOut} className="w-full text-left px-0 py-1 text-xs text-gray-400 hover:text-black transition-all">Sign out</button>
-          </div>
-        </div>
-      </div>
+      <Sidebar />
 
-      {/* MAIN */}
       <div className="ml-56 flex-1 p-8">
-
-        {/* HEADER */}
         <div className="flex items-center justify-between mb-8">
           <div>
             {loading ? (
               <SkeletonBox className="h-8 w-48 mb-2" />
             ) : (
-              <h1 className="text-2xl font-extrabold tracking-tight">
-                {greeting}, {userName} 👋
-              </h1>
+              <h1 className="text-2xl font-extrabold tracking-tight">{greeting}, {userName} 👋</h1>
             )}
             <p className="text-sm text-gray-400 mt-0.5">
               {loading ? '' : `${todayPosts.length} post${todayPosts.length !== 1 ? 's' : ''} scheduled today · ${upcoming.length} coming up`}
@@ -230,7 +135,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* OVERDUE BANNER */}
         {!loading && overdue.length > 0 && (
           <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -246,7 +150,6 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* STATS ROW */}
         <div className="grid grid-cols-4 gap-4 mb-6">
           {loading ? (
             [1,2,3,4].map(i => (
@@ -276,19 +179,13 @@ export default function Dashboard() {
         </div>
 
         <div className="grid grid-cols-3 gap-6">
-
-          {/* LEFT COL */}
           <div className="col-span-2 space-y-6">
-
-            {/* THIS WEEK CHART */}
             <div className="bg-white border border-gray-100 rounded-2xl p-5">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-sm font-bold tracking-tight">This Week</h2>
                 <Link href="/calendar" className="text-xs font-semibold text-gray-400 hover:text-black transition-colors">View Calendar →</Link>
               </div>
-              {loading ? (
-                <SkeletonBox className="h-20" />
-              ) : (
+              {loading ? <SkeletonBox className="h-20" /> : (
                 <div className="flex items-end gap-2 h-20">
                   {weekDays.map(day => (
                     <div key={day.day} className="flex-1 flex flex-col items-center gap-1">
@@ -306,7 +203,6 @@ export default function Dashboard() {
               )}
             </div>
 
-            {/* UPCOMING POSTS */}
             <div className="bg-white border border-gray-100 rounded-2xl p-5">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-sm font-bold tracking-tight">Upcoming Posts</h2>
@@ -326,7 +222,7 @@ export default function Dashboard() {
                 </div>
               ) : upcoming.length === 0 ? (
                 <div className="text-center py-8">
-                  <div className="text-3xl mb-2">📭</div>
+                  <div className="text-3xl mb-2">🚭</div>
                   <p className="text-sm text-gray-400 mb-3">No upcoming posts scheduled</p>
                   <Link href="/compose" className="text-xs font-semibold bg-black text-white px-4 py-2 rounded-xl hover:opacity-80 transition-all">
                     Create Your First Post →
@@ -346,9 +242,7 @@ export default function Dashboard() {
                           <p className="text-sm font-medium truncate text-gray-800">{post.content?.slice(0, 60)}{post.content?.length > 60 ? '...' : ''}</p>
                           <div className="flex items-center gap-2 mt-0.5">
                             <div className="flex gap-0.5">
-                              {post.platforms?.slice(0, 3).map(pl => (
-                                <span key={pl} className="text-xs">{PLATFORM_ICONS[pl]}</span>
-                              ))}
+                              {post.platforms?.slice(0, 3).map(pl => <span key={pl} className="text-xs">{PLATFORM_ICONS[pl]}</span>)}
                               {post.platforms?.length > 3 && <span className="text-xs text-gray-400">+{post.platforms.length - 3}</span>}
                             </div>
                             <span className="text-xs text-gray-400">·</span>
@@ -370,7 +264,6 @@ export default function Dashboard() {
               )}
             </div>
 
-            {/* RECENT ACTIVITY */}
             <div className="bg-white border border-gray-100 rounded-2xl p-5">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-sm font-bold tracking-tight">Recent Activity</h2>
@@ -406,10 +299,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* RIGHT COL */}
           <div className="space-y-6">
-
-            {/* QUICK ACTIONS */}
             <div className="bg-white border border-gray-100 rounded-2xl p-5">
               <h2 className="text-sm font-bold tracking-tight mb-4">Quick Actions</h2>
               <div className="space-y-2">
@@ -421,11 +311,8 @@ export default function Dashboard() {
                   { icon: '🖼️', label: 'Upload media', sub: 'Add to your library', href: '/media' },
                   { icon: '🔗', label: 'Edit link in bio', sub: 'Update your bio page', href: '/link-in-bio' },
                 ].map(action => (
-                  <Link
-                    key={action.label}
-                    href={action.href}
-                    className={`flex items-center gap-3 p-3 rounded-xl transition-all ${action.primary ? 'bg-black text-white hover:opacity-80' : 'hover:bg-gray-50 border border-gray-100 hover:border-gray-300'}`}
-                  >
+                  <Link key={action.label} href={action.href}
+                    className={`flex items-center gap-3 p-3 rounded-xl transition-all ${action.primary ? 'bg-black text-white hover:opacity-80' : 'hover:bg-gray-50 border border-gray-100 hover:border-gray-300'}`}>
                     <span className="text-base">{action.icon}</span>
                     <div className="flex-1 min-w-0">
                       <p className={`text-xs font-bold ${action.primary ? 'text-white' : 'text-gray-700'}`}>{action.label}</p>
@@ -437,17 +324,12 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* TOP PLATFORMS */}
             <div className="bg-white border border-gray-100 rounded-2xl p-5">
               <h2 className="text-sm font-bold tracking-tight mb-4">Top Platforms</h2>
               {loading ? (
-                <div className="space-y-3">
-                  {[1,2,3].map(i => <SkeletonBox key={i} className="h-6" />)}
-                </div>
+                <div className="space-y-3">{[1,2,3].map(i => <SkeletonBox key={i} className="h-6" />)}</div>
               ) : topPlatforms.length === 0 ? (
-                <div className="text-center py-4">
-                  <p className="text-xs text-gray-400">No scheduled posts yet</p>
-                </div>
+                <div className="text-center py-4"><p className="text-xs text-gray-400">No scheduled posts yet</p></div>
               ) : (
                 <div className="space-y-3">
                   {topPlatforms.map(([platform, count]) => (
@@ -468,15 +350,12 @@ export default function Dashboard() {
               )}
             </div>
 
-            {/* TODAY'S POSTS */}
             <div className="bg-white border border-gray-100 rounded-2xl p-5">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-sm font-bold tracking-tight">Today</h2>
                 <span className="text-xs font-semibold text-gray-400">{now.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
               </div>
-              {loading ? (
-                <SkeletonBox className="h-20" />
-              ) : todayPosts.length === 0 ? (
+              {loading ? <SkeletonBox className="h-20" /> : todayPosts.length === 0 ? (
                 <div className="text-center py-4">
                   <p className="text-xs text-gray-400 mb-2">Nothing scheduled today</p>
                   <Link href="/compose" className="text-xs font-semibold text-black underline">Schedule something →</Link>
