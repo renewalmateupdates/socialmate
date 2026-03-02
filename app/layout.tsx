@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
+import CookieBanner from '@/components/CookieBanner'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
     url: 'https://socialmate-six.vercel.app',
     siteName: 'SocialMate',
     title: 'SocialMate — Free Social Media Scheduler for 16 Platforms',
-    description: 'Schedule posts to 16 social platforms for free. No per-channel fees, no post limits. Better than Buffer at zero cost.',
+    description: 'Schedule posts to 16 social platforms for free. No per-channel fees. No post limits. Better than Buffer at zero cost.',
     images: [
       {
         url: '/og-image.png',
@@ -42,7 +43,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'SocialMate — Free Social Media Scheduler for 16 Platforms',
-    description: 'Schedule posts to 16 social platforms for free. No per-channel fees, no post limits. Better than Buffer at zero cost.',
+    description: 'Schedule posts to 16 social platforms for free. No per-channel fees. No post limits. Better than Buffer at zero cost.',
     images: ['/og-image.png'],
     creator: '@socialmate',
   },
@@ -70,7 +71,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        {children}
+        <CookieBanner />
+      </body>
     </html>
   )
 }
