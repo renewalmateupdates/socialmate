@@ -51,7 +51,7 @@ export default function Sidebar() {
   const router = useRouter()
 
   useEffect(() => {
-  supabase.auth.getUser().then(({ data }) => setUser(data.user))
+    supabase.auth.getUser().then(({ data }) => setUser(data.user))
   }, [])
 
   const handleSignOut = async () => {
@@ -60,7 +60,7 @@ export default function Sidebar() {
   }
 
   return (
-    <div className="w-56 bg-white border-r border-gray-100 flex flex-col fixed h-full z-40">
+    <div className="w-56 bg-white border-r border-gray-100 flex flex-col flex-shrink-0 h-screen sticky top-0">
       <div className="p-4 border-b border-gray-100">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
