@@ -75,6 +75,11 @@ export default function Onboarding() {
   const handleFinish = async () => {
     setSaving(true)
 
+    await supabase.from('profiles').update({
+      full_name: displayName,
+      onboarding_completed: true,
+    }).eq('id', user.id)
+
     await supabase.from('user_settings').upsert({
       user_id: user.id,
       settings: {
@@ -100,6 +105,12 @@ export default function Onboarding() {
 
   const handleSkipPost = async () => {
     setSaving(true)
+
+    await supabase.from('profiles').update({
+      full_name: displayName,
+      onboarding_completed: true,
+    }).eq('id', user.id)
+
     await supabase.from('user_settings').upsert({
       user_id: user.id,
       settings: {
@@ -109,6 +120,7 @@ export default function Onboarding() {
         onboarding_complete: true,
       }
     }, { onConflict: 'user_id' })
+
     setSaving(false)
     router.push('/dashboard')
   }
@@ -125,7 +137,14 @@ export default function Onboarding() {
           <span className="font-bold text-base tracking-tight">SocialMate</span>
         </div>
         <button
-          onClick={() => router.push('/dashboard')}
+          onClick={async () => {
+            if (user) {
+              await supabase.from('profiles').update({
+                onboarding_completed: true,
+              }).eq('id', user.id)
+            }
+            router.push('/dashboard')
+          }}
           className="text-xs text-gray-400 hover:text-black transition-colors font-semibold"
         >
           Skip setup →
@@ -339,7 +358,6 @@ export default function Onboarding() {
                 </div>
               </div>
 
-              {/* STARTER IDEAS */}
               <div className="bg-gray-50 rounded-xl p-4 mb-6">
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Need inspiration?</p>
                 <div className="space-y-1.5">
