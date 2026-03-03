@@ -29,7 +29,7 @@ export default function Login() {
       return
     }
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password,
     })
@@ -40,7 +40,20 @@ export default function Login() {
       return
     }
 
-    router.push('/dashboard')
+    // Check onboarding status and redirect accordingly
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('onboarding_completed')
+      .eq('id', data.user.id)
+      .single()
+
+    router.refresh()
+
+    if (profile?.onboarding_completed) {
+      router.push('/dashboard')
+    } else {
+      router.push('/onboarding')
+    }
   }
 
   if (magicSent) {
