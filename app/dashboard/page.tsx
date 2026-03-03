@@ -2,14 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createBrowserClient } from '@supabase/ssr'
+import { supabase } from '@/lib/supabase'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
-
-const supabase = createBrowserClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -105,7 +100,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="grid grid-cols-3 gap-6">
-            {/* This Week */}
+            {/* Left/Main Column */}
             <div className="col-span-2 space-y-6">
               <div className="bg-white rounded-xl border border-gray-200 p-5">
                 <div className="flex items-center justify-between mb-4">
