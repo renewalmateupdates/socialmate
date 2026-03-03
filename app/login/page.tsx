@@ -29,30 +29,25 @@ export default function Login() {
       return
     }
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    })
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      })
 
-    if (error) {
-      setError(error.message === 'Invalid login credentials' ? 'Wrong email or password' : error.message)
+      if (error) {
+        setError(error.message === 'Invalid login credentials' ? 'Wrong email or password' : error.message)
+        setLoading(false)
+        return
+      }
+
+      if (data?.user) {
+        // Use window.location for a hard redirect to avoid router state issues
+        window.location.href = '/dashboard'
+      }
+    } catch (err) {
+      setError('Something went wrong. Please try again.')
       setLoading(false)
-      return
-    }
-
-    // Check onboarding status and redirect accordingly
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('onboarding_completed')
-      .eq('id', data.user.id)
-      .single()
-
-    router.refresh()
-
-    if (profile?.onboarding_completed) {
-      router.push('/dashboard')
-    } else {
-      router.push('/onboarding')
     }
   }
 
@@ -106,7 +101,6 @@ export default function Login() {
 
           <div className="bg-white border border-gray-100 rounded-3xl p-8">
 
-            {/* MODE TOGGLE */}
             <div className="flex items-center gap-1 bg-gray-50 rounded-xl p-1 mb-6">
               <button
                 onClick={() => { setMode('password'); setError('') }}
