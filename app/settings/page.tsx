@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
+import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
+import Link from 'next/link'
 
 function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 rounded-xl animate-pulse ${className}`} />
@@ -35,18 +37,74 @@ const TIMEZONES = [
 ]
 
 const TABS = [
-  { id: 'profile', label: 'Profile', icon: '👤' },
-  { id: 'preferences', label: 'Preferences', icon: '⚙️' },
-  { id: 'notifications', label: 'Notifications', icon: '🔔' },
-  { id: 'danger', label: 'Danger Zone', icon: '⚠️' },
+  { id: 'profile',       label: 'Profile',       icon: '👤' },
+  { id: 'plan',          label: 'Plan',           icon: '⚡' },
+  { id: 'preferences',  label: 'Preferences',    icon: '⚙️' },
+  { id: 'notifications', label: 'Notifications',  icon: '🔔' },
+  { id: 'danger',        label: 'Danger Zone',    icon: '⚠️' },
 ]
+
+const PLAN_DETAILS = {
+  free: {
+    label: 'Free',
+    color: 'bg-gray-100 text-gray-600',
+    ring: 'border-gray-200',
+    price: '$0 / month',
+    features: [
+      '1 account per platform',
+      '2 team seats',
+      '100 AI credits / month',
+      '2-week scheduling horizon',
+      '16 platforms',
+      'Link in Bio',
+      'Bulk Scheduler',
+      'Analytics (30-day history)',
+    ],
+  },
+  pro: {
+    label: 'Pro',
+    color: 'bg-blue-100 text-blue-600',
+    ring: 'border-blue-300',
+    price: '$5 / month',
+    features: [
+      '5 accounts per platform',
+      '5 team seats',
+      '500 AI credits / month',
+      '1-month scheduling horizon',
+      '16 platforms',
+      'Link in Bio',
+      'Bulk Scheduler',
+      'Analytics (90-day history)',
+      'Priority support',
+    ],
+  },
+  agency: {
+    label: 'Agency',
+    color: 'bg-purple-100 text-purple-600',
+    ring: 'border-purple-300',
+    price: '$20 / month',
+    features: [
+      '10 accounts per platform',
+      'Unlimited team seats',
+      'Unlimited AI credits',
+      '3-month scheduling horizon',
+      '16 platforms',
+      'Client workspaces',
+      'Link in Bio',
+      'Bulk Scheduler',
+      'Analytics (1-year history)',
+      'White-label add-on available',
+      'Priority support',
+    ],
+  },
+}
 
 export default function Settings() {
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
-  const [activeTab, setActiveTab] = useState<'profile' | 'preferences' | 'notifications' | 'danger'>('profile')
+  const [activeTab, setActiveTab] = useState<'profile' | 'plan' | 'preferences' | 'notifications' | 'danger'>('profile')
 
   const [displayName, setDisplayName] = useState('')
   const [bio, setBio] = useState('')
@@ -65,6 +123,7 @@ export default function Settings() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const router = useRouter()
+  const { plan, creditsUsed, creditsTotal, seatsUsed, seatsTotal, platformsConnected } = useWorkspace()
 
   useEffect(() => {
     const getData = async () => {
@@ -133,6 +192,11 @@ export default function Settings() {
     )
   }
 
+  const currentPlan = PLAN_DETAILS[plan]
+  const creditsRemaining = creditsTotal - creditsUsed
+  const creditsBar = plan === 'agency' ? 100 : Math.max(0, (creditsRemaining / creditsTotal) * 100)
+  const seatsBar = plan === 'agency' ? 100 : Math.min(100, (seatsUsed / seatsTotal) * 100)
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar />
@@ -143,10 +207,11 @@ export default function Settings() {
             <p className="text-sm text-gray-400 mt-0.5">Manage your account and preferences</p>
           </div>
 
-          <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-2xl p-1 mb-6">
+          {/* TABS */}
+          <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-2xl p-1 mb-6 overflow-x-auto">
             {TABS.map(tab => (
               <button key={tab.id} onClick={() => setActiveTab(tab.id as any)}
-                className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${activeTab === tab.id ? 'bg-black text-white' : 'text-gray-500 hover:text-black'}`}>
+                className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-black text-white' : 'text-gray-500 hover:text-black'}`}>
                 <span>{tab.icon}</span>{tab.label}
               </button>
             ))}
@@ -154,7 +219,7 @@ export default function Settings() {
 
           {loading ? (
             <div className="space-y-4">
-              {[1,2,3].map(i => <SkeletonBox key={i} className="h-16 rounded-2xl" />)}
+              {[1, 2, 3].map(i => <SkeletonBox key={i} className="h-16 rounded-2xl" />)}
             </div>
           ) : (
             <>
@@ -191,6 +256,149 @@ export default function Settings() {
                       className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 bg-white">
                       {TIMEZONES.map(tz => <option key={tz} value={tz}>{tz}</option>)}
                     </select>
+                  </div>
+                </div>
+              )}
+
+              {/* PLAN */}
+              {activeTab === 'plan' && (
+                <div className="space-y-4">
+
+                  {/* CURRENT PLAN CARD */}
+                  <div className={`bg-white border-2 ${currentPlan.ring} rounded-2xl p-6`}>
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${currentPlan.color}`}>
+                            {currentPlan.label}
+                          </span>
+                          <span className="text-xs text-gray-400 font-semibold">Current plan</span>
+                        </div>
+                        <p className="text-2xl font-extrabold tracking-tight">{currentPlan.price}</p>
+                      </div>
+                      {plan !== 'agency' && (
+                        <Link href="/pricing"
+                          className="bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all">
+                          {plan === 'free' ? '⚡ Upgrade to Pro' : '🏢 Upgrade to Agency'}
+                        </Link>
+                      )}
+                      {plan === 'agency' && (
+                        <span className="text-xs font-bold text-purple-600 bg-purple-50 px-3 py-2 rounded-xl">
+                          ✓ Max tier
+                        </span>
+                      )}
+                    </div>
+
+                    {/* USAGE METERS */}
+                    <div className="space-y-3 pt-4 border-t border-gray-100">
+                      {/* AI Credits */}
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs font-semibold text-gray-500">AI Credits</span>
+                          <span className="text-xs font-bold text-gray-700">
+                            {plan === 'agency' ? '∞ Unlimited' : `${creditsRemaining} / ${creditsTotal} remaining`}
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-100 rounded-full h-2">
+                          <div
+                            className={`h-2 rounded-full transition-all ${plan === 'agency' ? 'bg-purple-400' : creditsBar < 20 ? 'bg-red-400' : 'bg-black'}`}
+                            style={{ width: `${creditsBar}%` }}
+                          />
+                        </div>
+                        <p className="text-xs text-gray-400 mt-1">Resets monthly</p>
+                      </div>
+
+                      {/* Team Seats */}
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs font-semibold text-gray-500">Team Seats</span>
+                          <span className="text-xs font-bold text-gray-700">
+                            {plan === 'agency' ? `${seatsUsed} connected · Unlimited` : `${seatsUsed} / ${seatsTotal} used`}
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-100 rounded-full h-2">
+                          <div
+                            className={`h-2 rounded-full transition-all ${plan === 'agency' ? 'bg-purple-400 w-full' : 'bg-black'}`}
+                            style={plan === 'agency' ? {} : { width: `${seatsBar}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Platforms */}
+                      <div>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs font-semibold text-gray-500">Platforms Connected</span>
+                          <span className="text-xs font-bold text-gray-700">{platformsConnected} / 16</span>
+                        </div>
+                        <div className="w-full bg-gray-100 rounded-full h-2">
+                          <div
+                            className="bg-black h-2 rounded-full transition-all"
+                            style={{ width: `${Math.min(100, (platformsConnected / 16) * 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* INCLUDED FEATURES */}
+                    <div className="pt-4 border-t border-gray-100 mt-4">
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">What's included</p>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        {currentPlan.features.map((f, i) => (
+                          <div key={i} className="flex items-center gap-2 text-xs text-gray-600">
+                            <span className="text-green-500 font-bold flex-shrink-0">✓</span>{f}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* UPGRADE OPTIONS — only show if not agency */}
+                  {plan !== 'agency' && (
+                    <div className="bg-white border border-gray-100 rounded-2xl p-6">
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-4">
+                        {plan === 'free' ? 'Available Upgrades' : 'Next Tier'}
+                      </p>
+                      <div className="space-y-3">
+                        {plan === 'free' && (
+                          <div className="border border-blue-100 bg-blue-50 rounded-xl p-4 flex items-center justify-between">
+                            <div>
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">Pro</span>
+                                <span className="text-xs font-bold text-gray-700">$5 / month</span>
+                              </div>
+                              <p className="text-xs text-gray-500">5 accounts per platform · 500 AI credits · 5 team seats</p>
+                            </div>
+                            <Link href="/pricing"
+                              className="bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all flex-shrink-0 ml-4">
+                              Upgrade →
+                            </Link>
+                          </div>
+                        )}
+                        <div className="border border-purple-100 bg-purple-50 rounded-xl p-4 flex items-center justify-between">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-xs font-bold text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full">Agency</span>
+                              <span className="text-xs font-bold text-gray-700">$20 / month</span>
+                            </div>
+                            <p className="text-xs text-gray-500">Unlimited seats · Unlimited AI · Client workspaces · White-label</p>
+                          </div>
+                          <Link href="/pricing"
+                            className="bg-purple-600 text-white text-xs font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all flex-shrink-0 ml-4">
+                            Upgrade →
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* BILLING NOTE */}
+                  <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 text-center">
+                    <p className="text-xs text-gray-400">
+                      {plan === 'free'
+                        ? 'You\'re on the Free plan — no credit card required, ever.'
+                        : 'Billing is managed via Stripe. To cancel or change your plan, contact support.'
+                      }
+                    </p>
                   </div>
                 </div>
               )}
@@ -329,7 +537,7 @@ export default function Settings() {
                 </div>
               )}
 
-              {activeTab !== 'danger' && (
+              {activeTab !== 'danger' && activeTab !== 'plan' && (
                 <div className="mt-4 flex justify-end">
                   <button onClick={handleSave} disabled={saving}
                     className="bg-black text-white text-sm font-semibold px-6 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
