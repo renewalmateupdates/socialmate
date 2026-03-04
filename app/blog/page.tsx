@@ -11,24 +11,33 @@ export const metadata: Metadata = {
   },
 }
 
-const COMING_SOON_POSTS = [
+const POSTS = [
   {
-    topic: 'How to batch a full month of social content in one afternoon',
-    category: 'Strategy',
-    desc: 'The exact workflow top creators use to plan 30 days of posts in a single 2-hour session — without burning out or losing quality.',
-    eta: 'Coming soon',
-  },
-  {
-    topic: 'The best times to post on every platform in 2026',
-    category: 'Strategy',
-    desc: 'A platform-by-platform breakdown of peak engagement windows — backed by data, not guesswork. Plus how to find your own best times using real analytics.',
-    eta: 'Coming soon',
-  },
-  {
-    topic: 'Why social media scheduling tools are overpriced — and what to do about it',
+    slug: 'social-media-scheduling-tools-are-overpriced',
+    title: 'Why Social Media Scheduling Tools Are Overpriced — And What To Do About It',
     category: 'Industry',
-    desc: 'An honest look at how the social media tool market got this expensive, and why it doesn\'t have to cost this much to manage your presence professionally.',
-    eta: 'Coming soon',
+    excerpt: 'The average social media manager pays $50–$250/month just to schedule posts. Here\'s how that pricing model developed, why it doesn\'t have to be this way, and what a fairer alternative actually looks like.',
+    date: 'Mar 4, 2026',
+    readTime: '6 min read',
+    featured: true,
+  },
+  {
+    slug: 'batch-a-month-of-social-content',
+    title: 'How To Batch A Full Month of Social Content In One Afternoon',
+    category: 'Strategy',
+    excerpt: 'Most creators post reactively and burn out within months. The ones who stay consistent batch everything in one session. Here\'s the exact workflow — from blank page to 30 days scheduled.',
+    date: 'Mar 4, 2026',
+    readTime: '7 min read',
+    featured: false,
+  },
+  {
+    slug: 'best-times-to-post-2026',
+    title: 'The Best Times To Post On Every Platform In 2026',
+    category: 'Strategy',
+    excerpt: 'Timing affects reach more than most creators realize. A platform-by-platform breakdown of peak engagement windows — plus how to find your own best times from real data.',
+    date: 'Mar 4, 2026',
+    readTime: '8 min read',
+    featured: false,
   },
 ]
 
@@ -39,6 +48,9 @@ const CATEGORY_COLORS: Record<string, string> = {
 }
 
 export default function Blog() {
+  const featured = POSTS.find(p => p.featured)
+  const rest = POSTS.filter(p => !p.featured)
+
   return (
     <div className="min-h-screen bg-white">
 
@@ -74,53 +86,55 @@ export default function Blog() {
           </p>
         </div>
 
-        {/* COMING SOON POSTS */}
-        <div className="mb-14">
-          <div className="flex items-center gap-3 mb-6">
-            <h2 className="text-lg font-extrabold tracking-tight">Up next</h2>
-            <span className="text-xs font-bold text-gray-400 bg-gray-100 px-2.5 py-1 rounded-full">3 posts launching soon</span>
-          </div>
-          <div className="space-y-4">
-            {COMING_SOON_POSTS.map((post, i) => (
-              <div
-                key={i}
-                className="bg-white border border-gray-100 rounded-2xl p-6 flex items-start gap-5">
-                <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-base font-extrabold text-gray-400 flex-shrink-0">
-                  {i + 1}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${CATEGORY_COLORS[post.category] || 'bg-gray-100 text-gray-600'}`}>
-                      {post.category}
-                    </span>
-                    <span className="text-xs text-gray-400 font-semibold">{post.eta}</span>
-                  </div>
-                  <h3 className="text-sm font-extrabold tracking-tight mb-1.5 leading-snug">{post.topic}</h3>
-                  <p className="text-xs text-gray-400 leading-relaxed">{post.desc}</p>
-                </div>
+        {/* FEATURED POST */}
+        {featured && (
+          <Link href={`/blog/${featured.slug}`} className="block mb-10 group">
+            <div className="bg-black text-white rounded-3xl p-8 hover:opacity-95 transition-all">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-white/20 text-white">{featured.category}</span>
+                <span className="text-xs text-white/50">{featured.date}</span>
+                <span className="text-xs text-white/50">{featured.readTime}</span>
               </div>
-            ))}
-          </div>
+              <h2 className="text-2xl font-extrabold tracking-tight mb-3 leading-tight group-hover:opacity-80 transition-opacity">
+                {featured.title}
+              </h2>
+              <p className="text-white/60 leading-relaxed mb-6 max-w-2xl text-sm">{featured.excerpt}</p>
+              <span className="inline-flex items-center gap-2 bg-white text-black text-xs font-bold px-5 py-2.5 rounded-xl hover:opacity-90 transition-all">
+                Read article →
+              </span>
+            </div>
+          </Link>
+        )}
+
+        {/* REST OF POSTS */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-16">
+          {rest.map(post => (
+            <Link key={post.slug} href={`/blog/${post.slug}`}
+              className="bg-white border border-gray-100 rounded-2xl p-6 flex flex-col hover:border-gray-300 transition-all group">
+              <div className="flex items-center gap-2 mb-3">
+                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${CATEGORY_COLORS[post.category] || 'bg-gray-100 text-gray-600'}`}>
+                  {post.category}
+                </span>
+              </div>
+              <h2 className="text-sm font-extrabold tracking-tight mb-2 leading-snug group-hover:text-gray-600 transition-colors flex-1">
+                {post.title}
+              </h2>
+              <p className="text-xs text-gray-400 leading-relaxed mb-4 line-clamp-3">{post.excerpt}</p>
+              <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-50">
+                <span className="text-xs text-gray-400">{post.date}</span>
+                <span className="text-xs text-gray-400">{post.readTime}</span>
+              </div>
+            </Link>
+          ))}
         </div>
 
-        {/* HONEST STATEMENT */}
-        <div className="bg-gray-50 border border-gray-100 rounded-3xl p-10 mb-14 text-center">
-          <div className="text-3xl mb-4">📝</div>
-          <h2 className="text-2xl font-extrabold tracking-tight mb-3">We publish real content or nothing at all</h2>
-          <p className="text-gray-400 leading-relaxed max-w-xl mx-auto">
-            Every post on this blog will be genuinely useful — written by people who use SocialMate, based on real data, with no keyword stuffing or filler. We'd rather publish three great articles than thirty mediocre ones. The first posts are coming soon.
-          </p>
-        </div>
-
-        {/* NOTIFY / CTA */}
+        {/* CTA */}
         <div className="bg-black rounded-3xl p-10 text-white text-center">
-          <h2 className="text-3xl font-extrabold tracking-tight mb-3">Don't wait for the blog — start now</h2>
+          <h2 className="text-3xl font-extrabold tracking-tight mb-3">Ready to schedule smarter?</h2>
           <p className="text-white/60 mb-8 max-w-md mx-auto leading-relaxed">
-            The best way to learn social media scheduling is to actually do it. SocialMate is free, takes 60 seconds to set up, and supports all 16 platforms.
+            SocialMate is free, takes 60 seconds to set up, and supports all 16 platforms. No credit card, no trial period.
           </p>
-          <Link
-            href="/signup"
-            className="inline-block bg-white text-black text-sm font-bold px-8 py-4 rounded-2xl hover:opacity-90 transition-all">
+          <Link href="/signup" className="inline-block bg-white text-black text-sm font-bold px-8 py-4 rounded-2xl hover:opacity-90 transition-all">
             Create free account →
           </Link>
           <p className="text-white/30 text-xs mt-4">No credit card · Free forever · 16 platforms</p>
