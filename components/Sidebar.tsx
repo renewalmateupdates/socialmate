@@ -3,13 +3,9 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
+import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 
-const AI_CREDITS_LEFT = 100
-const AI_CREDITS_TOTAL = 100
-const ACCOUNTS_USED = 0
-const ACCOUNTS_TOTAL = 16
-
-const NAV = [
+const NAV_BASE = [
   {
     section: 'Content',
     items: [
@@ -45,10 +41,30 @@ const NAV = [
   },
 ]
 
+const AGENCY_NAV_ITEM = { icon: '🏢', label: 'Workspaces', href: '/workspaces' }
+
+const PLAN_BADGE: Record<string, { label: string; color: string }> = {
+  free:   { label: 'Free',   color: 'bg-gray-100 text-gray-500' },
+  pro:    { label: 'Pro',    color: 'bg-blue-100 text-blue-600' },
+  agency: { label: 'Agency', color: 'bg-purple-100 text-purple-600' },
+}
+
 export default function Sidebar() {
   const [user, setUser] = useState<any>(null)
+  const [wsOpen, setWsOpen] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
+  const {
+    workspaces,
+    activeWorkspace,
+    setActiveWorkspace,
+    plan,
+    creditsUsed,
+    creditsTotal,
+    accountsUsed,
+    accountsTotal,
+    loading,
+  } = useWorkspace()
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUser(data.user))
@@ -59,19 +75,116 @@ export default function Sidebar() {
     router.push('/')
   }
 
+  // Inject Workspaces nav item for agency users
+  const NAV = NAV_BASE.map(group => {
+    if (group.section === 'Settings' && plan === 'agency') {
+      const hasWs = group.items.find(i => i.href === '/workspaces')
+      if (!hasWs) {
+        return {
+          ...group,
+          items: [AGENCY_NAV_ITEM, ...group.items],
+        }
+      }
+    }
+    return group
+  })
+
+  const badge = PLAN_BADGE[plan] || PLAN_BADGE.free
+  const creditsDisplay = plan === 'agency' ? 'Unlimited' : `${creditsTotal - creditsUsed}`
+  const creditsBar = plan === 'agency' ? 100 : Math.max(0, ((creditsTotal - creditsUsed) / creditsTotal) * 100)
+  const accountsBar = Math.min(100, (accountsUsed / accountsTotal) * 100)
+
+  const clientWorkspaces = workspaces.filter(w => !w.is_personal)
+  const personalWorkspace = workspaces.find(w => w.is_personal)
+
   return (
     <div className="w-56 bg-white border-r border-gray-100 flex flex-col flex-shrink-0 h-screen sticky top-0">
+
+      {/* HEADER + WORKSPACE SWITCHER */}
       <div className="p-4 border-b border-gray-100">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
-          <span className="font-bold text-base tracking-tight">SocialMate</span>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
+            <span className="font-bold text-base tracking-tight">SocialMate</span>
+          </div>
+          <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
+        </div>
+
+        {/* WORKSPACE SWITCHER */}
+        <div className="relative">
+          <button
+            onClick={() => setWsOpen(p => !p)}
+            className="w-full flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl text-xs font-semibold text-gray-700 hover:border-gray-300 transition-all">
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-base">{activeWorkspace?.is_personal ? '🏠' : '🏢'}</span>
+              <span className="truncate">{activeWorkspace?.name || 'My Workspace'}</span>
+            </div>
+            <span className="text-gray-400 flex-shrink-0 ml-1">{wsOpen ? '▲' : '▼'}</span>
+          </button>
+
+          {wsOpen && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-100 rounded-xl shadow-lg z-50 overflow-hidden">
+              {/* Personal workspace */}
+              {personalWorkspace && (
+                <button
+                  onClick={() => { setActiveWorkspace(personalWorkspace); setWsOpen(false) }}
+                  className={`w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-left hover:bg-gray-50 transition-all ${activeWorkspace?.id === personalWorkspace.id ? 'bg-gray-50 text-black' : 'text-gray-600'}`}>
+                  <span>🏠</span>
+                  <span className="truncate">My Workspace</span>
+                  {activeWorkspace?.id === personalWorkspace.id && <span className="ml-auto text-black">✓</span>}
+                </button>
+              )}
+
+              {/* Client workspaces (agency only) */}
+              {plan === 'agency' && clientWorkspaces.length > 0 && (
+                <>
+                  <div className="px-3 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-widest border-t border-gray-50">
+                    Clients
+                  </div>
+                  {clientWorkspaces.map(ws => (
+                    <button
+                      key={ws.id}
+                      onClick={() => { setActiveWorkspace(ws); setWsOpen(false) }}
+                      className={`w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-left hover:bg-gray-50 transition-all ${activeWorkspace?.id === ws.id ? 'bg-gray-50 text-black' : 'text-gray-600'}`}>
+                      <span>🏢</span>
+                      <span className="truncate">{ws.client_name || ws.name}</span>
+                      {activeWorkspace?.id === ws.id && <span className="ml-auto text-black">✓</span>}
+                    </button>
+                  ))}
+                </>
+              )}
+
+              {/* Add client workspace — agency only */}
+              {plan === 'agency' && (
+                <Link
+                  href="/workspaces/new"
+                  onClick={() => setWsOpen(false)}
+                  className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-gray-400 hover:text-black hover:bg-gray-50 transition-all border-t border-gray-50">
+                  <span>+</span> Add client workspace
+                </Link>
+              )}
+
+              {/* Non-agency: upgrade prompt */}
+              {plan !== 'agency' && (
+                <Link
+                  href="/pricing"
+                  onClick={() => setWsOpen(false)}
+                  className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-purple-500 hover:bg-purple-50 transition-all border-t border-gray-50">
+                  <span>🏢</span> Client workspaces — Agency
+                </Link>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
+      {/* NAV */}
       <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
         {NAV.map(group => (
           <div key={group.section}>
-            <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest px-3 py-2 mt-1">{group.section}</div>
+            <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest px-3 py-2 mt-1">
+              {group.section}
+            </div>
             {group.items.map(item => {
               const active = pathname === item.href
               return (
@@ -85,36 +198,69 @@ export default function Sidebar() {
         ))}
       </nav>
 
+      {/* BOTTOM — CREDITS, ACCOUNTS, PLAN */}
       <div className="p-3 border-t border-gray-100 space-y-3">
+
+        {/* AI CREDITS */}
         <div className="bg-gray-50 rounded-xl p-3">
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs font-semibold text-gray-500">AI Credits</span>
-            <span className="text-xs font-bold text-gray-700">{AI_CREDITS_LEFT}/{AI_CREDITS_TOTAL}</span>
+            <span className="text-xs font-bold text-gray-700">
+              {loading ? '...' : plan === 'agency' ? '∞' : `${creditsTotal - creditsUsed}/${creditsTotal}`}
+            </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-1.5">
-            <div className="bg-black h-1.5 rounded-full" style={{ width: `${(AI_CREDITS_LEFT / AI_CREDITS_TOTAL) * 100}%` }} />
+            <div
+              className={`h-1.5 rounded-full transition-all ${plan === 'agency' ? 'bg-purple-500' : 'bg-black'}`}
+              style={{ width: `${creditsBar}%` }}
+            />
           </div>
-          <p className="text-xs text-gray-400 mt-1.5">{AI_CREDITS_LEFT} credits remaining</p>
+          <p className="text-xs text-gray-400 mt-1.5">
+            {loading ? 'Loading...' : plan === 'agency' ? 'Unlimited credits' : `${creditsDisplay} credits remaining`}
+          </p>
         </div>
 
+        {/* ACCOUNTS */}
         <div className="bg-gray-50 rounded-xl p-3">
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs font-semibold text-gray-500">Accounts</span>
-            <span className="text-xs font-bold text-gray-700">{ACCOUNTS_USED}/{ACCOUNTS_TOTAL}</span>
+            <span className="text-xs font-bold text-gray-700">
+              {loading ? '...' : `${accountsUsed}/${accountsTotal}`}
+            </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-1.5">
-            <div className="bg-black h-1.5 rounded-full" style={{ width: `${(ACCOUNTS_USED / ACCOUNTS_TOTAL) * 100}%` }} />
+            <div
+              className="bg-black h-1.5 rounded-full transition-all"
+              style={{ width: `${accountsBar}%` }}
+            />
           </div>
-          <p className="text-xs text-gray-400 mt-1.5">{ACCOUNTS_TOTAL - ACCOUNTS_USED} slots remaining</p>
+          <p className="text-xs text-gray-400 mt-1.5">
+            {loading ? 'Loading...' : `${accountsTotal - accountsUsed} slots remaining`}
+          </p>
         </div>
 
-        <Link href="/pricing" className="w-full block text-center bg-black text-white text-xs font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
-          ⚡ Upgrade to Pro
-        </Link>
+        {/* UPGRADE CTA — only show if not agency */}
+        {plan === 'free' && (
+          <Link href="/pricing"
+            className="w-full block text-center bg-black text-white text-xs font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
+            ⚡ Upgrade to Pro
+          </Link>
+        )}
+        {plan === 'pro' && (
+          <Link href="/pricing"
+            className="w-full block text-center bg-purple-600 text-white text-xs font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
+            🏢 Upgrade to Agency
+          </Link>
+        )}
 
+        {/* USER */}
         <div className="px-1">
           <div className="text-xs text-gray-400 truncate mb-1">{user?.email}</div>
-          <button onClick={handleSignOut} className="w-full text-left px-0 py-1 text-xs text-gray-400 hover:text-black transition-all">Sign out</button>
+          <button
+            onClick={handleSignOut}
+            className="w-full text-left px-0 py-1 text-xs text-gray-400 hover:text-black transition-all">
+            Sign out
+          </button>
         </div>
       </div>
     </div>
