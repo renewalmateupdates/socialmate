@@ -1,7 +1,7 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
 const PERKS = [
@@ -13,7 +13,7 @@ const PERKS = [
   'Analytics & Best Times',
 ]
 
-export default function Signup() {
+function SignupForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -21,7 +21,14 @@ export default function Signup() {
   const [error, setError] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [done, setDone] = useState(false)
+  const [refCode, setRefCode] = useState('')
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    const ref = searchParams.get('ref')
+    if (ref) setRefCode(ref)
+  }, [searchParams])
 
   const passwordStrength = (pw: string) => {
     if (!pw) return { score: 0, label: '', color: '' }
@@ -41,29 +48,25 @@ export default function Signup() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-
     if (!email.trim()) { setError('Enter your email'); return }
     if (!email.includes('@')) { setError('Enter a valid email'); return }
     if (!password) { setError('Choose a password'); return }
     if (password.length < 6) { setError('Password must be at least 6 characters'); return }
     if (password !== confirmPassword) { setError('Passwords do not match'); return }
-
     setLoading(true)
-
     const { error } = await supabase.auth.signUp({
       email: email.trim(),
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/onboarding`,
+        data: { referral_code: refCode || null },
       },
     })
-
     if (error) {
       setError(error.message.includes('already registered') ? 'This email is already registered. Try signing in.' : error.message)
       setLoading(false)
       return
     }
-
     setDone(true)
     setLoading(false)
   }
@@ -86,6 +89,14 @@ export default function Signup() {
             <p className="text-xs text-gray-400 mb-8 leading-relaxed">
               Click the link in that email to confirm your account and get started. Check your spam folder if you don't see it.
             </p>
+            {refCode && (
+              <div className="bg-green-50 border border-green-200 rounded-2xl p-4 mb-6 text-left">
+                <p className="text-xs font-bold text-green-700 mb-1">🎁 Referral applied</p>
+                <p className="text-xs text-green-600 leading-relaxed">
+                  Once you confirm your email and publish your first post, you'll both receive 25 bonus AI credits automatically.
+                </p>
+              </div>
+            )}
             <div className="bg-gray-50 rounded-2xl p-4 mb-6 text-left">
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">What's waiting for you</p>
               {PERKS.map(p => (
@@ -94,10 +105,7 @@ export default function Signup() {
                 </div>
               ))}
             </div>
-            <Link
-              href="/login"
-              className="block w-full py-3 bg-black text-white text-sm font-bold rounded-xl hover:opacity-80 transition-all"
-            >
+            <Link href="/login" className="block w-full py-3 bg-black text-white text-sm font-bold rounded-xl hover:opacity-80 transition-all">
               Go to Sign In →
             </Link>
           </div>
@@ -121,18 +129,18 @@ export default function Signup() {
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
 
-          {/* LEFT — PERKS */}
+          {/* LEFT */}
           <div className="hidden md:block">
             <div className="inline-flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 text-xs font-bold px-3 py-1.5 rounded-full mb-6">
               🎉 Free forever · No credit card
             </div>
             <h1 className="text-4xl font-extrabold tracking-tight leading-tight mb-4">
-              The social scheduler that's actually free
+              Professional tools shouldn't require a professional budget
             </h1>
             <p className="text-gray-400 mb-8 leading-relaxed">
-              Schedule to 16 platforms, manage your team, and grow your audience — without paying Buffer's $100+/month.
+              Schedule to 16 platforms, manage your team, and grow your audience — completely free. No per-channel fees, no seat limits, no catch.
             </p>
-            <div className="space-y-3">
+            <div className="space-y-3 mb-8">
               {PERKS.map(perk => (
                 <div key={perk} className="flex items-center gap-3">
                   <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
@@ -142,10 +150,11 @@ export default function Signup() {
                 </div>
               ))}
             </div>
-            <div className="mt-8 bg-black rounded-2xl p-5 text-white">
-              <p className="text-sm font-bold mb-1">"I was paying $99/month for Hootsuite."</p>
-              <p className="text-xs text-white/60">"SocialMate does everything I need for free. Genuinely shocked."</p>
-              <p className="text-xs text-white/40 mt-2">— Sarah K., Content Creator</p>
+            <div className="bg-gray-50 border border-gray-100 rounded-2xl p-5">
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Part of the Mate Series</p>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                SocialMate is built on a simple belief: software should work for you, not extract from you. Free means free — not a 14-day trial, not a stripped-down version.
+              </p>
             </div>
           </div>
 
@@ -158,6 +167,13 @@ export default function Signup() {
 
             <div className="bg-white border border-gray-100 rounded-3xl p-8">
               <h2 className="text-lg font-extrabold tracking-tight mb-6 hidden md:block">Create your free account</h2>
+
+              {refCode && (
+                <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 mb-4">
+                  <p className="text-xs font-bold text-green-700">🎁 Referral code applied: <span className="uppercase">{refCode}</span></p>
+                  <p className="text-xs text-green-600 mt-0.5">You'll both earn 25 bonus AI credits after your first post.</p>
+                </div>
+              )}
 
               <form onSubmit={handleSignup} className="space-y-4">
                 <div>
@@ -185,18 +201,15 @@ export default function Signup() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(p => !p)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition-colors text-xs font-semibold"
-                    >
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition-colors text-xs font-semibold">
                       {showPassword ? 'Hide' : 'Show'}
                     </button>
                   </div>
                   {password && (
                     <div className="mt-2 flex items-center gap-2">
                       <div className="flex-1 bg-gray-100 rounded-full h-1.5">
-                        <div
-                          className={`h-1.5 rounded-full transition-all ${strength.color}`}
-                          style={{ width: `${(strength.score / 4) * 100}%` }}
-                        />
+                        <div className={`h-1.5 rounded-full transition-all ${strength.color}`}
+                          style={{ width: `${(strength.score / 4) * 100}%` }} />
                       </div>
                       <span className={`text-xs font-semibold ${
                         strength.score <= 1 ? 'text-red-400' :
@@ -236,25 +249,20 @@ export default function Signup() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3.5 bg-black text-white text-sm font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                >
+                  className="w-full py-3.5 bg-black text-white text-sm font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
                   {loading ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                       Creating account...
                     </>
-                  ) : (
-                    'Create Free Account →'
-                  )}
+                  ) : 'Create Free Account →'}
                 </button>
               </form>
             </div>
 
             <p className="text-center text-xs text-gray-400 mt-4">
               Already have an account?{' '}
-              <Link href="/login" className="font-bold text-black hover:underline">
-                Sign in →
-              </Link>
+              <Link href="/login" className="font-bold text-black hover:underline">Sign in →</Link>
             </p>
             <p className="text-center text-xs text-gray-300 mt-2">
               By signing up you agree to our{' '}
@@ -266,5 +274,13 @@ export default function Signup() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function Signup() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center"><div className="w-6 h-6 border-2 border-gray-200 border-t-black rounded-full animate-spin" /></div>}>
+      <SignupForm />
+    </Suspense>
   )
 }

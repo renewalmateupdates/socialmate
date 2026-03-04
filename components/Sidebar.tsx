@@ -4,8 +4,8 @@ import { supabase } from '@/lib/supabase'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 
-const AI_CREDITS_LEFT = 15
-const AI_CREDITS_TOTAL = 15
+const AI_CREDITS_LEFT = 100
+const AI_CREDITS_TOTAL = 100
 const ACCOUNTS_USED = 0
 const ACCOUNTS_TOTAL = 16
 
