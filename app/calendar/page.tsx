@@ -29,13 +29,8 @@ const STATUS_COLORS: Record<string, string> = {
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
 
-function getDaysInMonth(year: number, month: number) {
-  return new Date(year, month + 1, 0).getDate()
-}
-
-function getFirstDayOfMonth(year: number, month: number) {
-  return new Date(year, month, 1).getDay()
-}
+function getDaysInMonth(year: number, month: number) { return new Date(year, month + 1, 0).getDate() }
+function getFirstDayOfMonth(year: number, month: number) { return new Date(year, month, 1).getDay() }
 
 export default function Calendar() {
   const [user, setUser] = useState<any>(null)
@@ -58,13 +53,8 @@ export default function Calendar() {
       setUser(user)
       const start = new Date(viewYear, viewMonth, 1).toISOString()
       const end = new Date(viewYear, viewMonth + 1, 0, 23, 59, 59).toISOString()
-      const { data } = await supabase
-        .from('posts')
-        .select('*')
-        .eq('user_id', user.id)
-        .gte('scheduled_at', start)
-        .lte('scheduled_at', end)
-        .order('scheduled_at', { ascending: true })
+      const { data } = await supabase.from('posts').select('*').eq('user_id', user.id)
+        .gte('scheduled_at', start).lte('scheduled_at', end).order('scheduled_at', { ascending: true })
       setPosts(data || [])
       setLoading(false)
     }
@@ -82,16 +72,8 @@ export default function Calendar() {
     return d.getFullYear() === viewYear && d.getMonth() === viewMonth && d.getDate() === day
   })
 
-  const handleDragStart = (e: React.DragEvent, postId: string) => {
-    setDraggingId(postId)
-    e.dataTransfer.effectAllowed = 'move'
-  }
-
-  const handleDragOver = (e: React.DragEvent, day: number) => {
-    e.preventDefault()
-    e.dataTransfer.dropEffect = 'move'
-    setDragOverDay(day)
-  }
+  const handleDragStart = (e: React.DragEvent, postId: string) => { setDraggingId(postId); e.dataTransfer.effectAllowed = 'move' }
+  const handleDragOver = (e: React.DragEvent, day: number) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setDragOverDay(day) }
 
   const handleDrop = async (e: React.DragEvent, day: number) => {
     e.preventDefault()
@@ -107,29 +89,20 @@ export default function Calendar() {
     } else {
       showToast('Failed to reschedule post', 'error')
     }
-    setDraggingId(null)
-    setDragOverDay(null)
+    setDraggingId(null); setDragOverDay(null)
   }
 
   const handleDragEnd = () => { setDraggingId(null); setDragOverDay(null) }
 
   const prevMonth = () => {
-    if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1) }
-    else setViewMonth(m => m - 1)
+    if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1) } else setViewMonth(m => m - 1)
     setSelectedDay(null)
   }
-
   const nextMonth = () => {
-    if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1) }
-    else setViewMonth(m => m + 1)
+    if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1) } else setViewMonth(m => m + 1)
     setSelectedDay(null)
   }
-
-  const goToToday = () => {
-    setViewYear(today.getFullYear())
-    setViewMonth(today.getMonth())
-    setSelectedDay(today.getDate())
-  }
+  const goToToday = () => { setViewYear(today.getFullYear()); setViewMonth(today.getMonth()); setSelectedDay(today.getDate()) }
 
   const daysInMonth = getDaysInMonth(viewYear, viewMonth)
   const firstDay = getFirstDayOfMonth(viewYear, viewMonth)
@@ -148,133 +121,137 @@ export default function Calendar() {
       <Sidebar />
 
       <div className="ml-56 flex-1 p-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-extrabold tracking-tight">Calendar</h1>
-            <p className="text-sm text-gray-400 mt-0.5">Drag and drop to reschedule posts</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <button onClick={goToToday} className="text-sm font-semibold px-4 py-2 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">Today</button>
-            <Link href="/compose" className="bg-black text-white text-sm font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all">+ New Post</Link>
-          </div>
-        </div>
+        <div className="max-w-7xl mx-auto">
 
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <button onClick={prevMonth} className="w-8 h-8 flex items-center justify-center rounded-xl border border-gray-200 hover:border-gray-400 transition-all text-sm">←</button>
-            <h2 className="text-lg font-extrabold tracking-tight min-w-[160px] text-center">{MONTHS[viewMonth]} {viewYear}</h2>
-            <button onClick={nextMonth} className="w-8 h-8 flex items-center justify-center rounded-xl border border-gray-200 hover:border-gray-400 transition-all text-sm">→</button>
-          </div>
-          <div className="flex items-center gap-2 text-xs text-gray-400">
-            <span className="w-2 h-2 rounded-full bg-blue-400 inline-block"></span> Scheduled
-            <span className="w-2 h-2 rounded-full bg-gray-300 inline-block ml-2"></span> Draft
-            <span className="w-2 h-2 rounded-full bg-green-400 inline-block ml-2"></span> Published
-          </div>
-        </div>
-
-        <div className="flex gap-6">
-          <div className="flex-1">
-            <div className="grid grid-cols-7 mb-1">
-              {DAYS.map(d => <div key={d} className="text-xs font-semibold text-gray-400 text-center py-2">{d}</div>)}
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-2xl font-extrabold tracking-tight">Calendar</h1>
+              <p className="text-sm text-gray-400 mt-0.5">Drag and drop to reschedule posts</p>
             </div>
-            <div className="grid grid-cols-7 gap-1">
-              {Array.from({ length: totalCells }).map((_, i) => {
-                const dayNum = i - firstDay + 1
-                const isValid = dayNum >= 1 && dayNum <= daysInMonth
-                const isToday = isValid && dayNum === today.getDate() && viewMonth === today.getMonth() && viewYear === today.getFullYear()
-                const isSelected = isValid && dayNum === selectedDay
-                const isDragOver = isValid && dayNum === dragOverDay
-                const dayPosts = isValid ? getPostsForDay(dayNum) : []
-                return (
-                  <div key={i}
-                    onClick={() => isValid && setSelectedDay(dayNum === selectedDay ? null : dayNum)}
-                    onDragOver={e => isValid && handleDragOver(e, dayNum)}
-                    onDrop={e => isValid && handleDrop(e, dayNum)}
-                    className={`min-h-[90px] rounded-xl p-1.5 border transition-all cursor-pointer ${
-                      !isValid ? 'border-transparent' :
-                      isDragOver ? 'border-black bg-black/5 scale-[1.02]' :
-                      isSelected ? 'border-black bg-black/5' :
-                      isToday ? 'border-blue-200 bg-blue-50/50' :
-                      'border-gray-100 bg-white hover:border-gray-300'
-                    }`}>
-                    {isValid && (
-                      <>
-                        <div className={`text-xs font-bold mb-1 w-6 h-6 flex items-center justify-center rounded-full ${isToday ? 'bg-black text-white' : 'text-gray-600'}`}>
-                          {dayNum}
-                        </div>
-                        <div className="space-y-0.5">
-                          {dayPosts.slice(0, 3).map(post => (
-                            <div key={post.id} draggable
-                              onDragStart={e => handleDragStart(e, post.id)}
-                              onDragEnd={handleDragEnd}
-                              onClick={e => { e.stopPropagation(); setPreviewPost(post); setSelectedDay(dayNum) }}
-                              className={`text-xs px-1.5 py-0.5 rounded-md border truncate cursor-grab active:cursor-grabbing transition-all hover:opacity-80 ${STATUS_COLORS[post.status] || STATUS_COLORS.draft} ${draggingId === post.id ? 'opacity-30' : ''}`}>
-                              {post.platforms?.[0] ? PLATFORM_ICONS[post.platforms[0]] : '📝'} {post.content?.slice(0, 20)}...
-                            </div>
-                          ))}
-                          {dayPosts.length > 3 && <div className="text-xs text-gray-400 px-1">+{dayPosts.length - 3} more</div>}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )
-              })}
-            </div>
-
-            <div className="grid grid-cols-3 gap-3 mt-4">
-              {[
-                { label: 'Scheduled', value: posts.filter(p => p.status === 'scheduled').length, color: 'text-blue-600' },
-                { label: 'Drafts', value: posts.filter(p => p.status === 'draft').length, color: 'text-gray-500' },
-                { label: 'Published', value: posts.filter(p => p.status === 'published').length, color: 'text-green-600' },
-              ].map(stat => (
-                <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-4 text-center">
-                  <div className={`text-2xl font-extrabold tracking-tight ${stat.color}`}>{stat.value}</div>
-                  <div className="text-xs text-gray-400 mt-0.5">{stat.label} this month</div>
-                </div>
-              ))}
+            <div className="flex items-center gap-2">
+              <button onClick={goToToday} className="text-sm font-semibold px-4 py-2 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">Today</button>
+              <Link href="/compose" className="bg-black text-white text-sm font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all">+ New Post</Link>
             </div>
           </div>
 
-          {selectedDay && (
-            <div className="w-72 flex-shrink-0">
-              <div className="bg-white border border-gray-100 rounded-2xl p-5 sticky top-8">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-bold text-sm tracking-tight">{MONTHS[viewMonth]} {selectedDay}</h3>
-                  <div className="flex items-center gap-2">
-                    <Link href={`/compose?date=${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`}
-                      className="text-xs font-semibold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all">+ Post</Link>
-                    <button onClick={() => setSelectedDay(null)} className="text-gray-400 hover:text-black text-lg leading-none">×</button>
-                  </div>
-                </div>
-                {selectedDayPosts.length === 0 ? (
-                  <div className="text-center py-8">
-                    <div className="text-3xl mb-2">🚭</div>
-                    <p className="text-sm text-gray-400">No posts on this day</p>
-                    <Link href="/compose" className="text-xs font-semibold text-black underline mt-2 inline-block">Create one →</Link>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {selectedDayPosts.map(post => (
-                      <div key={post.id} onClick={() => setPreviewPost(post)}
-                        className="p-3 rounded-xl border border-gray-100 hover:border-gray-300 cursor-pointer transition-all group">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-1 flex-wrap">
-                            {post.platforms?.slice(0, 4).map(pl => <span key={pl} className="text-sm">{PLATFORM_ICONS[pl] || '📱'}</span>)}
-                            {post.platforms?.length > 4 && <span className="text-xs text-gray-400">+{post.platforms.length - 4}</span>}
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <button onClick={prevMonth} className="w-8 h-8 flex items-center justify-center rounded-xl border border-gray-200 hover:border-gray-400 transition-all text-sm">←</button>
+              <h2 className="text-lg font-extrabold tracking-tight min-w-[160px] text-center">{MONTHS[viewMonth]} {viewYear}</h2>
+              <button onClick={nextMonth} className="w-8 h-8 flex items-center justify-center rounded-xl border border-gray-200 hover:border-gray-400 transition-all text-sm">→</button>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-gray-400">
+              <span className="w-2 h-2 rounded-full bg-blue-400 inline-block"></span> Scheduled
+              <span className="w-2 h-2 rounded-full bg-gray-300 inline-block ml-2"></span> Draft
+              <span className="w-2 h-2 rounded-full bg-green-400 inline-block ml-2"></span> Published
+            </div>
+          </div>
+
+          <div className="flex gap-6">
+            <div className="flex-1">
+              <div className="grid grid-cols-7 mb-1">
+                {DAYS.map(d => <div key={d} className="text-xs font-semibold text-gray-400 text-center py-2">{d}</div>)}
+              </div>
+              <div className="grid grid-cols-7 gap-1">
+                {Array.from({ length: totalCells }).map((_, i) => {
+                  const dayNum = i - firstDay + 1
+                  const isValid = dayNum >= 1 && dayNum <= daysInMonth
+                  const isToday = isValid && dayNum === today.getDate() && viewMonth === today.getMonth() && viewYear === today.getFullYear()
+                  const isSelected = isValid && dayNum === selectedDay
+                  const isDragOver = isValid && dayNum === dragOverDay
+                  const dayPosts = isValid ? getPostsForDay(dayNum) : []
+                  return (
+                    <div key={i}
+                      onClick={() => isValid && setSelectedDay(dayNum === selectedDay ? null : dayNum)}
+                      onDragOver={e => isValid && handleDragOver(e, dayNum)}
+                      onDrop={e => isValid && handleDrop(e, dayNum)}
+                      className={`min-h-[90px] rounded-xl p-1.5 border transition-all cursor-pointer ${
+                        !isValid ? 'border-transparent' :
+                        isDragOver ? 'border-black bg-black/5 scale-[1.02]' :
+                        isSelected ? 'border-black bg-black/5' :
+                        isToday ? 'border-blue-200 bg-blue-50/50' :
+                        'border-gray-100 bg-white hover:border-gray-300'
+                      }`}>
+                      {isValid && (
+                        <>
+                          <div className={`text-xs font-bold mb-1 w-6 h-6 flex items-center justify-center rounded-full ${isToday ? 'bg-black text-white' : 'text-gray-600'}`}>
+                            {dayNum}
                           </div>
-                          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_COLORS[post.status] || STATUS_COLORS.draft}`}>{post.status}</span>
-                        </div>
-                        <p className="text-xs text-gray-600 line-clamp-2">{post.content}</p>
-                        {post.scheduled_at && (
-                          <p className="text-xs text-gray-400 mt-1.5">🕐 {new Date(post.scheduled_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
-                        )}
-                      </div>
-                    ))}
+                          <div className="space-y-0.5">
+                            {dayPosts.slice(0, 3).map(post => (
+                              <div key={post.id} draggable
+                                onDragStart={e => handleDragStart(e, post.id)}
+                                onDragEnd={handleDragEnd}
+                                onClick={e => { e.stopPropagation(); setPreviewPost(post); setSelectedDay(dayNum) }}
+                                className={`text-xs px-1.5 py-0.5 rounded-md border truncate cursor-grab active:cursor-grabbing transition-all hover:opacity-80 ${STATUS_COLORS[post.status] || STATUS_COLORS.draft} ${draggingId === post.id ? 'opacity-30' : ''}`}>
+                                {post.platforms?.[0] ? PLATFORM_ICONS[post.platforms[0]] : '📝'} {post.content?.slice(0, 20)}...
+                              </div>
+                            ))}
+                            {dayPosts.length > 3 && <div className="text-xs text-gray-400 px-1">+{dayPosts.length - 3} more</div>}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+
+              <div className="grid grid-cols-3 gap-3 mt-4">
+                {[
+                  { label: 'Scheduled', value: posts.filter(p => p.status === 'scheduled').length, color: 'text-blue-600' },
+                  { label: 'Drafts', value: posts.filter(p => p.status === 'draft').length, color: 'text-gray-500' },
+                  { label: 'Published', value: posts.filter(p => p.status === 'published').length, color: 'text-green-600' },
+                ].map(stat => (
+                  <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-4 text-center">
+                    <div className={`text-2xl font-extrabold tracking-tight ${stat.color}`}>{stat.value}</div>
+                    <div className="text-xs text-gray-400 mt-0.5">{stat.label} this month</div>
                   </div>
-                )}
+                ))}
               </div>
             </div>
-          )}
+
+            {selectedDay && (
+              <div className="w-72 flex-shrink-0">
+                <div className="bg-white border border-gray-100 rounded-2xl p-5 sticky top-8">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-bold text-sm tracking-tight">{MONTHS[viewMonth]} {selectedDay}</h3>
+                    <div className="flex items-center gap-2">
+                      <Link href={`/compose?date=${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(selectedDay).padStart(2, '0')}`}
+                        className="text-xs font-semibold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all">+ Post</Link>
+                      <button onClick={() => setSelectedDay(null)} className="text-gray-400 hover:text-black text-lg leading-none">×</button>
+                    </div>
+                  </div>
+                  {selectedDayPosts.length === 0 ? (
+                    <div className="text-center py-8">
+                      <div className="text-3xl mb-2">📭</div>
+                      <p className="text-sm text-gray-400">No posts on this day</p>
+                      <Link href="/compose" className="text-xs font-semibold text-black underline mt-2 inline-block">Create one →</Link>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {selectedDayPosts.map(post => (
+                        <div key={post.id} onClick={() => setPreviewPost(post)}
+                          className="p-3 rounded-xl border border-gray-100 hover:border-gray-300 cursor-pointer transition-all group">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-1 flex-wrap">
+                              {post.platforms?.slice(0, 4).map(pl => <span key={pl} className="text-sm">{PLATFORM_ICONS[pl] || '📱'}</span>)}
+                              {post.platforms?.length > 4 && <span className="text-xs text-gray-400">+{post.platforms.length - 4}</span>}
+                            </div>
+                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_COLORS[post.status] || STATUS_COLORS.draft}`}>{post.status}</span>
+                          </div>
+                          <p className="text-xs text-gray-600 line-clamp-2">{post.content}</p>
+                          {post.scheduled_at && (
+                            <p className="text-xs text-gray-400 mt-1.5">🕐 {new Date(post.scheduled_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+
         </div>
       </div>
 

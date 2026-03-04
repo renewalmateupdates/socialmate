@@ -145,151 +145,155 @@ export default function Drafts() {
       <Sidebar />
 
       <div className="ml-56 flex-1 p-8">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-extrabold tracking-tight">Drafts</h1>
-            <p className="text-sm text-gray-400 mt-0.5">
-              {loading ? 'Loading...' : `${drafts.length} draft${drafts.length !== 1 ? 's' : ''} saved`}
-            </p>
-          </div>
-          <Link href="/compose" className="bg-black text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all">
-            + New Draft
-          </Link>
-        </div>
+        <div className="max-w-7xl mx-auto">
 
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          {loading ? [1,2,3].map(i => <SkeletonBox key={i} className="h-20 rounded-2xl" />) : (
-            [
-              { label: 'Total Drafts', value: drafts.length, icon: '📂' },
-              { label: 'This Week', value: drafts.filter(d => Date.now() - new Date(d.created_at).getTime() < 7 * 86400000).length, icon: '📅' },
-              { label: 'Avg Length', value: drafts.length > 0 ? Math.round(drafts.reduce((s, d) => s + (d.content?.length || 0), 0) / drafts.length) + ' chars' : '—', icon: '✍️' },
-            ].map(stat => (
-              <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-4">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{stat.label}</span>
-                  <span>{stat.icon}</span>
-                </div>
-                <div className="text-2xl font-extrabold tracking-tight">{stat.value}</div>
-              </div>
-            ))
-          )}
-        </div>
-
-        <div className="flex items-center gap-3 mb-6 flex-wrap">
-          <div className="relative flex-1 max-w-xs">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
-            <input type="text" placeholder="Search drafts..." value={search} onChange={e => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 bg-white" />
-          </div>
-          <select value={sort} onChange={e => setSort(e.target.value as any)}
-            className="text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:border-gray-400 bg-white">
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-            <option value="longest">Longest First</option>
-            <option value="shortest">Shortest First</option>
-          </select>
-          {allPlatforms.length > 0 && (
-            <select value={platformFilter} onChange={e => setPlatformFilter(e.target.value)}
-              className="text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:border-gray-400 bg-white">
-              <option value="all">All Platforms</option>
-              {allPlatforms.map(p => <option key={p} value={p}>{p}</option>)}
-            </select>
-          )}
-          <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-xl p-1 ml-auto">
-            <button onClick={() => setView('grid')} className={`px-3 py-1.5 rounded-lg text-sm transition-all ${view === 'grid' ? 'bg-black text-white' : 'text-gray-400 hover:text-black'}`}>⊞</button>
-            <button onClick={() => setView('list')} className={`px-3 py-1.5 rounded-lg text-sm transition-all ${view === 'list' ? 'bg-black text-white' : 'text-gray-400 hover:text-black'}`}>☰</button>
-          </div>
-        </div>
-
-        {selected.size > 0 && (
-          <div className="bg-black text-white rounded-2xl px-5 py-3 mb-4 flex items-center gap-4">
-            <span className="text-sm font-semibold">{selected.size} selected</span>
-            <div className="flex items-center gap-2 flex-1">
-              <input type="datetime-local" value={scheduleTime} onChange={e => setScheduleTime(e.target.value)}
-                className="text-xs px-3 py-1.5 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:border-white/50" />
-              <button onClick={handleBulkSchedule} disabled={!scheduleTime}
-                className="text-xs font-semibold px-3 py-1.5 bg-white text-black rounded-xl hover:opacity-80 transition-all disabled:opacity-40">📅 Schedule All</button>
-              <button onClick={handleBulkDelete}
-                className="text-xs font-semibold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all">🗑️ Delete All</button>
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-2xl font-extrabold tracking-tight">Drafts</h1>
+              <p className="text-sm text-gray-400 mt-0.5">
+                {loading ? 'Loading...' : `${drafts.length} draft${drafts.length !== 1 ? 's' : ''} saved`}
+              </p>
             </div>
-            <button onClick={() => setSelected(new Set())} className="text-white/60 hover:text-white text-lg leading-none">×</button>
+            <Link href="/compose" className="bg-black text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all">
+              + New Draft
+            </Link>
           </div>
-        )}
 
-        {loading ? (
-          <div className={view === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-3'}>
-            {[1,2,3,4,5,6].map(i => <SkeletonBox key={i} className="h-40 rounded-2xl" />)}
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="bg-white border border-gray-100 rounded-2xl p-16 text-center">
-            <div className="text-5xl mb-4">{search ? '🔍' : '📂'}</div>
-            <h2 className="text-lg font-bold tracking-tight mb-2">{search ? 'No drafts match your search' : 'No drafts yet'}</h2>
-            <p className="text-gray-400 text-sm mb-6 max-w-sm mx-auto">
-              {search ? 'Try a different search term.' : 'Start writing and save posts as drafts to work on them later.'}
-            </p>
-            {!search && (
-              <Link href="/compose" className="bg-black text-white text-sm font-semibold px-6 py-3 rounded-xl hover:opacity-80 transition-all">
-                Create Your First Draft →
-              </Link>
+          <div className="grid grid-cols-3 gap-4 mb-6">
+            {loading ? [1,2,3].map(i => <SkeletonBox key={i} className="h-20 rounded-2xl" />) : (
+              [
+                { label: 'Total Drafts', value: drafts.length, icon: '📂' },
+                { label: 'This Week', value: drafts.filter(d => Date.now() - new Date(d.created_at).getTime() < 7 * 86400000).length, icon: '📅' },
+                { label: 'Avg Length', value: drafts.length > 0 ? Math.round(drafts.reduce((s, d) => s + (d.content?.length || 0), 0) / drafts.length) + ' chars' : '—', icon: '✍️' },
+              ].map(stat => (
+                <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{stat.label}</span>
+                    <span>{stat.icon}</span>
+                  </div>
+                  <div className="text-2xl font-extrabold tracking-tight">{stat.value}</div>
+                </div>
+              ))
             )}
           </div>
-        ) : view === 'grid' ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filtered.map(draft => (
-              <div key={draft.id}
-                className={`bg-white border rounded-2xl p-5 flex flex-col gap-3 transition-all group cursor-pointer ${selected.has(draft.id) ? 'border-black ring-2 ring-black ring-offset-1' : 'border-gray-100 hover:border-gray-300'}`}
-                onClick={() => setPreview(draft)}>
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-1 flex-wrap flex-1">
-                    {draft.platforms?.slice(0, 4).map(pl => <span key={pl} className="text-sm">{PLATFORM_ICONS[pl] || '📱'}</span>)}
+
+          <div className="flex items-center gap-3 mb-6 flex-wrap">
+            <div className="relative flex-1 max-w-xs">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
+              <input type="text" placeholder="Search drafts..." value={search} onChange={e => setSearch(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 bg-white" />
+            </div>
+            <select value={sort} onChange={e => setSort(e.target.value as any)}
+              className="text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:border-gray-400 bg-white">
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="longest">Longest First</option>
+              <option value="shortest">Shortest First</option>
+            </select>
+            {allPlatforms.length > 0 && (
+              <select value={platformFilter} onChange={e => setPlatformFilter(e.target.value)}
+                className="text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:border-gray-400 bg-white">
+                <option value="all">All Platforms</option>
+                {allPlatforms.map(p => <option key={p} value={p}>{p}</option>)}
+              </select>
+            )}
+            <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-xl p-1 ml-auto">
+              <button onClick={() => setView('grid')} className={`px-3 py-1.5 rounded-lg text-sm transition-all ${view === 'grid' ? 'bg-black text-white' : 'text-gray-400 hover:text-black'}`}>⊞</button>
+              <button onClick={() => setView('list')} className={`px-3 py-1.5 rounded-lg text-sm transition-all ${view === 'list' ? 'bg-black text-white' : 'text-gray-400 hover:text-black'}`}>☰</button>
+            </div>
+          </div>
+
+          {selected.size > 0 && (
+            <div className="bg-black text-white rounded-2xl px-5 py-3 mb-4 flex items-center gap-4">
+              <span className="text-sm font-semibold">{selected.size} selected</span>
+              <div className="flex items-center gap-2 flex-1">
+                <input type="datetime-local" value={scheduleTime} onChange={e => setScheduleTime(e.target.value)}
+                  className="text-xs px-3 py-1.5 rounded-xl bg-white/10 border border-white/20 text-white focus:outline-none focus:border-white/50" />
+                <button onClick={handleBulkSchedule} disabled={!scheduleTime}
+                  className="text-xs font-semibold px-3 py-1.5 bg-white text-black rounded-xl hover:opacity-80 transition-all disabled:opacity-40">📅 Schedule All</button>
+                <button onClick={handleBulkDelete}
+                  className="text-xs font-semibold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all">🗑️ Delete All</button>
+              </div>
+              <button onClick={() => setSelected(new Set())} className="text-white/60 hover:text-white text-lg leading-none">×</button>
+            </div>
+          )}
+
+          {loading ? (
+            <div className={view === 'grid' ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4' : 'space-y-3'}>
+              {[1,2,3,4,5,6].map(i => <SkeletonBox key={i} className="h-40 rounded-2xl" />)}
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="bg-white border border-gray-100 rounded-2xl p-16 text-center">
+              <div className="text-5xl mb-4">{search ? '🔍' : '📂'}</div>
+              <h2 className="text-lg font-bold tracking-tight mb-2">{search ? 'No drafts match your search' : 'No drafts yet'}</h2>
+              <p className="text-gray-400 text-sm mb-6 max-w-sm mx-auto">
+                {search ? 'Try a different search term.' : 'Start writing and save posts as drafts to work on them later.'}
+              </p>
+              {!search && (
+                <Link href="/compose" className="bg-black text-white text-sm font-semibold px-6 py-3 rounded-xl hover:opacity-80 transition-all">
+                  Create Your First Draft →
+                </Link>
+              )}
+            </div>
+          ) : view === 'grid' ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filtered.map(draft => (
+                <div key={draft.id}
+                  className={`bg-white border rounded-2xl p-5 flex flex-col gap-3 transition-all group cursor-pointer ${selected.has(draft.id) ? 'border-black ring-2 ring-black ring-offset-1' : 'border-gray-100 hover:border-gray-300'}`}
+                  onClick={() => setPreview(draft)}>
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-1 flex-wrap flex-1">
+                      {draft.platforms?.slice(0, 4).map(pl => <span key={pl} className="text-sm">{PLATFORM_ICONS[pl] || '📱'}</span>)}
+                      {draft.platforms?.length > 4 && <span className="text-xs text-gray-400">+{draft.platforms.length - 4}</span>}
+                    </div>
+                    <input type="checkbox" checked={selected.has(draft.id)} onChange={() => toggleSelect(draft.id)}
+                      onClick={e => e.stopPropagation()}
+                      className="w-4 h-4 rounded accent-black cursor-pointer opacity-0 group-hover:opacity-100 transition-all" />
+                  </div>
+                  <p className="text-sm text-gray-700 line-clamp-4 flex-1 whitespace-pre-line">{draft.content}</p>
+                  <div className="flex items-center justify-between pt-2 border-t border-gray-50">
+                    <span className="text-xs text-gray-400">{timeAgo(draft.created_at)}</span>
+                    <span className="text-xs text-gray-400">{draft.content?.length} chars</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex items-center gap-3 px-4 py-2">
+                <input type="checkbox" checked={selected.size === filtered.length && filtered.length > 0}
+                  onChange={toggleSelectAll} className="w-4 h-4 rounded accent-black cursor-pointer" />
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide flex-1">Content</span>
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide w-24">Platforms</span>
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide w-20">Length</span>
+                <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide w-20">Created</span>
+                <span className="w-16"></span>
+              </div>
+              {filtered.map(draft => (
+                <div key={draft.id}
+                  className={`flex items-center gap-3 px-4 py-3 bg-white rounded-2xl border transition-all group cursor-pointer ${selected.has(draft.id) ? 'border-black ring-1 ring-black' : 'border-gray-100 hover:border-gray-300'}`}
+                  onClick={() => setPreview(draft)}>
+                  <input type="checkbox" checked={selected.has(draft.id)} onChange={() => toggleSelect(draft.id)}
+                    onClick={e => e.stopPropagation()} className="w-4 h-4 rounded accent-black cursor-pointer flex-shrink-0" />
+                  <p className="text-sm text-gray-700 flex-1 truncate">{draft.content}</p>
+                  <div className="flex items-center gap-0.5 w-24 flex-shrink-0">
+                    {draft.platforms?.slice(0, 4).map(pl => <span key={pl} className="text-xs">{PLATFORM_ICONS[pl] || '📱'}</span>)}
                     {draft.platforms?.length > 4 && <span className="text-xs text-gray-400">+{draft.platforms.length - 4}</span>}
                   </div>
-                  <input type="checkbox" checked={selected.has(draft.id)} onChange={() => toggleSelect(draft.id)}
-                    onClick={e => e.stopPropagation()}
-                    className="w-4 h-4 rounded accent-black cursor-pointer opacity-0 group-hover:opacity-100 transition-all" />
+                  <span className="text-xs text-gray-400 w-20 flex-shrink-0">{draft.content?.length} chars</span>
+                  <span className="text-xs text-gray-400 w-20 flex-shrink-0">{timeAgo(draft.created_at)}</span>
+                  <div className="flex items-center gap-1 w-16 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-all">
+                    <Link href={`/compose?edit=${draft.id}`} onClick={e => e.stopPropagation()}
+                      className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-black transition-all text-sm">✏️</Link>
+                    <button onClick={e => { e.stopPropagation(); handleDelete(draft.id) }}
+                      className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-50 text-gray-300 hover:text-red-400 transition-all">×</button>
+                  </div>
                 </div>
-                <p className="text-sm text-gray-700 line-clamp-4 flex-1 whitespace-pre-line">{draft.content}</p>
-                <div className="flex items-center justify-between pt-2 border-t border-gray-50">
-                  <span className="text-xs text-gray-400">{timeAgo(draft.created_at)}</span>
-                  <span className="text-xs text-gray-400">{draft.content?.length} chars</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="space-y-2">
-            <div className="flex items-center gap-3 px-4 py-2">
-              <input type="checkbox" checked={selected.size === filtered.length && filtered.length > 0}
-                onChange={toggleSelectAll} className="w-4 h-4 rounded accent-black cursor-pointer" />
-              <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide flex-1">Content</span>
-              <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide w-24">Platforms</span>
-              <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide w-20">Length</span>
-              <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide w-20">Created</span>
-              <span className="w-16"></span>
+              ))}
             </div>
-            {filtered.map(draft => (
-              <div key={draft.id}
-                className={`flex items-center gap-3 px-4 py-3 bg-white rounded-2xl border transition-all group cursor-pointer ${selected.has(draft.id) ? 'border-black ring-1 ring-black' : 'border-gray-100 hover:border-gray-300'}`}
-                onClick={() => setPreview(draft)}>
-                <input type="checkbox" checked={selected.has(draft.id)} onChange={() => toggleSelect(draft.id)}
-                  onClick={e => e.stopPropagation()} className="w-4 h-4 rounded accent-black cursor-pointer flex-shrink-0" />
-                <p className="text-sm text-gray-700 flex-1 truncate">{draft.content}</p>
-                <div className="flex items-center gap-0.5 w-24 flex-shrink-0">
-                  {draft.platforms?.slice(0, 4).map(pl => <span key={pl} className="text-xs">{PLATFORM_ICONS[pl] || '📱'}</span>)}
-                  {draft.platforms?.length > 4 && <span className="text-xs text-gray-400">+{draft.platforms.length - 4}</span>}
-                </div>
-                <span className="text-xs text-gray-400 w-20 flex-shrink-0">{draft.content?.length} chars</span>
-                <span className="text-xs text-gray-400 w-20 flex-shrink-0">{timeAgo(draft.created_at)}</span>
-                <div className="flex items-center gap-1 w-16 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-all">
-                  <Link href={`/compose?edit=${draft.id}`} onClick={e => e.stopPropagation()}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-black transition-all text-sm">✏️</Link>
-                  <button onClick={e => { e.stopPropagation(); handleDelete(draft.id) }}
-                    className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-50 text-gray-300 hover:text-red-400 transition-all">×</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+          )}
+
+        </div>
       </div>
 
       {preview && (

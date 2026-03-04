@@ -159,7 +159,7 @@ function ComposeInner() {
       <Sidebar />
 
       <div className="ml-56 flex-1 p-8">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <div className="mb-6">
             <h1 className="text-2xl font-extrabold tracking-tight">{editId ? 'Edit Post' : 'Compose'}</h1>
             <p className="text-sm text-gray-400 mt-0.5">Write once, post everywhere</p>
