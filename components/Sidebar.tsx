@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
+import { useWorkspace, PLAN_CONFIG, PLATFORMS_TOTAL } from '@/contexts/WorkspaceContext'
 
 const NAV_BASE = [
   {
@@ -41,8 +41,6 @@ const NAV_BASE = [
   },
 ]
 
-const AGENCY_NAV_ITEM = { icon: '🏢', label: 'Workspaces', href: '/workspaces' }
-
 const PLAN_BADGE: Record<string, { label: string; color: string }> = {
   free:   { label: 'Free',   color: 'bg-gray-100 text-gray-500' },
   pro:    { label: 'Pro',    color: 'bg-blue-100 text-blue-600' },
@@ -52,8 +50,10 @@ const PLAN_BADGE: Record<string, { label: string; color: string }> = {
 export default function Sidebar() {
   const [user, setUser] = useState<any>(null)
   const [wsOpen, setWsOpen] = useState(false)
+  const [showUpgradeNudge, setShowUpgradeNudge] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
+
   const {
     workspaces,
     activeWorkspace,
@@ -61,8 +61,9 @@ export default function Sidebar() {
     plan,
     creditsUsed,
     creditsTotal,
-    accountsUsed,
-    accountsTotal,
+    seatsUsed,
+    seatsTotal,
+    platformsConnected,
     loading,
   } = useWorkspace()
 
@@ -82,7 +83,7 @@ export default function Sidebar() {
       if (!hasWs) {
         return {
           ...group,
-          items: [AGENCY_NAV_ITEM, ...group.items],
+          items: [{ icon: '🏢', label: 'Workspaces', href: '/workspaces' }, ...group.items],
         }
       }
     }
@@ -90,9 +91,10 @@ export default function Sidebar() {
   })
 
   const badge = PLAN_BADGE[plan] || PLAN_BADGE.free
-  const creditsDisplay = plan === 'agency' ? 'Unlimited' : `${creditsTotal - creditsUsed}`
-  const creditsBar = plan === 'agency' ? 100 : Math.max(0, ((creditsTotal - creditsUsed) / creditsTotal) * 100)
-  const accountsBar = Math.min(100, (accountsUsed / accountsTotal) * 100)
+  const creditsRemaining = creditsTotal - creditsUsed
+  const creditsBar = plan === 'agency' ? 100 : Math.max(0, (creditsRemaining / creditsTotal) * 100)
+  const seatsBar = plan === 'agency' ? 100 : Math.min(100, (seatsUsed / seatsTotal) * 100)
+  const platformsBar = Math.min(100, (platformsConnected / PLATFORMS_TOTAL) * 100)
 
   const clientWorkspaces = workspaces.filter(w => !w.is_personal)
   const personalWorkspace = workspaces.find(w => w.is_personal)
@@ -100,20 +102,22 @@ export default function Sidebar() {
   return (
     <div className="w-56 bg-white border-r border-gray-100 flex flex-col flex-shrink-0 h-screen sticky top-0">
 
-      {/* HEADER + WORKSPACE SWITCHER */}
+      {/* HEADER */}
       <div className="p-4 border-b border-gray-100">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
             <span className="font-bold text-base tracking-tight">SocialMate</span>
           </div>
-          <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
+          <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${badge.color}`}>
+            {badge.label}
+          </span>
         </div>
 
         {/* WORKSPACE SWITCHER */}
         <div className="relative">
           <button
-            onClick={() => setWsOpen(p => !p)}
+            onClick={() => { setWsOpen(p => !p); setShowUpgradeNudge(false) }}
             className="w-full flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl text-xs font-semibold text-gray-700 hover:border-gray-300 transition-all">
             <div className="flex items-center gap-2 min-w-0">
               <span className="text-base">{activeWorkspace?.is_personal ? '🏠' : '🏢'}</span>
@@ -124,18 +128,21 @@ export default function Sidebar() {
 
           {wsOpen && (
             <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-100 rounded-xl shadow-lg z-50 overflow-hidden">
-              {/* Personal workspace */}
+
+              {/* PERSONAL WORKSPACE */}
               {personalWorkspace && (
                 <button
                   onClick={() => { setActiveWorkspace(personalWorkspace); setWsOpen(false) }}
                   className={`w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-left hover:bg-gray-50 transition-all ${activeWorkspace?.id === personalWorkspace.id ? 'bg-gray-50 text-black' : 'text-gray-600'}`}>
                   <span>🏠</span>
                   <span className="truncate">My Workspace</span>
-                  {activeWorkspace?.id === personalWorkspace.id && <span className="ml-auto text-black">✓</span>}
+                  {activeWorkspace?.id === personalWorkspace.id && (
+                    <span className="ml-auto text-black">✓</span>
+                  )}
                 </button>
               )}
 
-              {/* Client workspaces (agency only) */}
+              {/* CLIENT WORKSPACES — agency only */}
               {plan === 'agency' && clientWorkspaces.length > 0 && (
                 <>
                   <div className="px-3 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-widest border-t border-gray-50">
@@ -148,13 +155,15 @@ export default function Sidebar() {
                       className={`w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-left hover:bg-gray-50 transition-all ${activeWorkspace?.id === ws.id ? 'bg-gray-50 text-black' : 'text-gray-600'}`}>
                       <span>🏢</span>
                       <span className="truncate">{ws.client_name || ws.name}</span>
-                      {activeWorkspace?.id === ws.id && <span className="ml-auto text-black">✓</span>}
+                      {activeWorkspace?.id === ws.id && (
+                        <span className="ml-auto text-black">✓</span>
+                      )}
                     </button>
                   ))}
                 </>
               )}
 
-              {/* Add client workspace — agency only */}
+              {/* ADD CLIENT — agency only */}
               {plan === 'agency' && (
                 <Link
                   href="/workspaces/new"
@@ -164,14 +173,31 @@ export default function Sidebar() {
                 </Link>
               )}
 
-              {/* Non-agency: upgrade prompt */}
+              {/* CLIENT WORKSPACES UPGRADE PROMPT — non-agency */}
               {plan !== 'agency' && (
-                <Link
-                  href="/pricing"
-                  onClick={() => setWsOpen(false)}
+                <button
+                  onClick={() => setShowUpgradeNudge(p => !p)}
                   className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-purple-500 hover:bg-purple-50 transition-all border-t border-gray-50">
-                  <span>🏢</span> Client workspaces — Agency
-                </Link>
+                  <span>🏢</span>
+                  <span>Client workspaces</span>
+                  <span className="ml-auto text-purple-300">Agency</span>
+                </button>
+              )}
+
+              {/* INLINE UPGRADE NUDGE */}
+              {showUpgradeNudge && plan !== 'agency' && (
+                <div className="px-3 py-3 bg-purple-50 border-t border-purple-100">
+                  <p className="text-xs text-purple-700 font-semibold mb-1">Manage client workspaces</p>
+                  <p className="text-xs text-purple-500 mb-2 leading-relaxed">
+                    Create separate workspaces for each client with their own accounts, posts, and analytics.
+                  </p>
+                  <Link
+                    href="/pricing"
+                    onClick={() => setWsOpen(false)}
+                    className="block text-center bg-purple-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-purple-700 transition-all">
+                    Upgrade to Agency →
+                  </Link>
+                </div>
               )}
             </div>
           )}
@@ -198,7 +224,7 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* BOTTOM — CREDITS, ACCOUNTS, PLAN */}
+      {/* BOTTOM STATS */}
       <div className="p-3 border-t border-gray-100 space-y-3">
 
         {/* AI CREDITS */}
@@ -206,40 +232,59 @@ export default function Sidebar() {
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs font-semibold text-gray-500">AI Credits</span>
             <span className="text-xs font-bold text-gray-700">
-              {loading ? '...' : plan === 'agency' ? '∞' : `${creditsTotal - creditsUsed}/${creditsTotal}`}
+              {loading ? '...' : plan === 'agency' ? '∞' : `${creditsRemaining}/${creditsTotal}`}
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-1.5">
             <div
-              className={`h-1.5 rounded-full transition-all ${plan === 'agency' ? 'bg-purple-500' : 'bg-black'}`}
+              className={`h-1.5 rounded-full transition-all ${plan === 'agency' ? 'bg-purple-400' : 'bg-black'}`}
               style={{ width: `${creditsBar}%` }}
             />
           </div>
           <p className="text-xs text-gray-400 mt-1.5">
-            {loading ? 'Loading...' : plan === 'agency' ? 'Unlimited credits' : `${creditsDisplay} credits remaining`}
+            {loading ? 'Loading...' : plan === 'agency' ? 'Unlimited credits' : `${creditsRemaining} credits remaining`}
           </p>
         </div>
 
-        {/* ACCOUNTS */}
+        {/* TEAM SEATS / ACCOUNTS */}
         <div className="bg-gray-50 rounded-xl p-3">
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs font-semibold text-gray-500">Accounts</span>
             <span className="text-xs font-bold text-gray-700">
-              {loading ? '...' : `${accountsUsed}/${accountsTotal}`}
+              {loading ? '...' : plan === 'agency' ? seatsUsed : `${seatsUsed}/${seatsTotal}`}
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-1.5">
             <div
-              className="bg-black h-1.5 rounded-full transition-all"
-              style={{ width: `${accountsBar}%` }}
+              className={`h-1.5 rounded-full transition-all ${plan === 'agency' ? 'bg-purple-400 w-full' : 'bg-black'}`}
+              style={plan === 'agency' ? {} : { width: `${seatsBar}%` }}
             />
           </div>
           <p className="text-xs text-gray-400 mt-1.5">
-            {loading ? 'Loading...' : `${accountsTotal - accountsUsed} slots remaining`}
+            {loading ? 'Loading...' : plan === 'agency'
+              ? `${seatsUsed} seat${seatsUsed !== 1 ? 's' : ''} connected`
+              : `${seatsTotal - seatsUsed} seat${seatsTotal - seatsUsed !== 1 ? 's' : ''} remaining`
+            }
           </p>
         </div>
 
-        {/* UPGRADE CTA — only show if not agency */}
+        {/* PLATFORMS CONNECTED */}
+        <div className="bg-gray-50 rounded-xl p-3">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-xs font-semibold text-gray-500">Platforms</span>
+            <span className="text-xs font-bold text-gray-700">
+              {loading ? '...' : `${platformsConnected}/${PLATFORMS_TOTAL}`}
+            </span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-1.5">
+            <div className="bg-black h-1.5 rounded-full transition-all" style={{ width: `${platformsBar}%` }} />
+          </div>
+          <p className="text-xs text-gray-400 mt-1.5">
+            {loading ? 'Loading...' : `${PLATFORMS_TOTAL - platformsConnected} platforms available`}
+          </p>
+        </div>
+
+        {/* UPGRADE CTA */}
         {plan === 'free' && (
           <Link href="/pricing"
             className="w-full block text-center bg-black text-white text-xs font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
@@ -262,6 +307,7 @@ export default function Sidebar() {
             Sign out
           </button>
         </div>
+
       </div>
     </div>
   )
