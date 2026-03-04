@@ -2,42 +2,43 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Blog — Social Media Strategy & Tips',
-  description: 'Social media strategy, platform guides, scheduler comparisons, and tips for growing your audience.',
+  title: 'Blog — Social Media Strategy & Tips | SocialMate',
+  description: 'Real guides on social media scheduling, growing your audience, posting smarter, and making the most of free tools. Written by the SocialMate team.',
   openGraph: {
     title: 'SocialMate Blog — Social Media Strategy & Tips',
-    description: 'Platform guides, scheduler comparisons, and growth tips for social media managers and creators.',
-    url: 'https://socialmate-six.vercel.app/blog',
+    description: 'Real guides on social media scheduling, growing your audience, and posting smarter.',
+    url: 'https://socialmate.app/blog',
   },
 }
 
-const POSTS = [
-  { slug: 'buffer-alternative-free', title: 'The Best Free Buffer Alternative in 2026', excerpt: "Buffer charges $6 per social channel per month. Here's how SocialMate gives you all 16 platforms completely free — and why thousands are switching.", category: 'Comparison', readTime: '5 min read', date: 'Feb 28, 2026', featured: true },
-  { slug: 'hootsuite-alternative', title: 'Why Hootsuite Users Are Switching to SocialMate', excerpt: 'Hootsuite starts at $99/month. SocialMate gives you more features — bulk scheduling, link in bio, team collaboration — for free.', category: 'Comparison', readTime: '4 min read', date: 'Feb 25, 2026', featured: false },
-  { slug: 'free-linktree-alternative', title: 'Stop Paying for Linktree — Build Your Bio Page Free', excerpt: 'Linktree charges $10–$24/month for a simple link page. SocialMate includes a full Link in Bio builder at zero cost.', category: 'Tips', readTime: '3 min read', date: 'Feb 22, 2026', featured: false },
-  { slug: 'bulk-scheduling-guide', title: 'How to Schedule 30 Days of Content in 2 Hours', excerpt: 'The bulk scheduling workflow top creators use to plan a full month of social content in a single session — without burning out.', category: 'Strategy', readTime: '6 min read', date: 'Feb 18, 2026', featured: false },
-  { slug: 'best-times-to-post', title: 'The Best Times to Post on Every Social Platform in 2026', excerpt: 'Platform-by-platform breakdown of peak engagement windows — backed by data, not guesswork. Plus how to find your own best times.', category: 'Strategy', readTime: '7 min read', date: 'Feb 14, 2026', featured: false },
-  { slug: 'social-media-team-collaboration', title: 'How to Manage Social Media as a Team Without Paying Per Seat', excerpt: "Buffer and Hootsuite charge $12–$15 per user per month for team features. Here's how teams are managing social content together for free.", category: 'Teams', readTime: '4 min read', date: 'Feb 10, 2026', featured: false },
-  { slug: 'instagram-scheduling-guide', title: 'The Complete Guide to Scheduling Instagram Posts in 2026', excerpt: 'Everything you need to know about scheduling Instagram posts, Reels, and Stories — including the tools that make it effortless.', category: 'Guides', readTime: '8 min read', date: 'Feb 6, 2026', featured: false },
-  { slug: 'hashtag-strategy', title: 'How to Build a Hashtag Strategy That Actually Grows Your Audience', excerpt: "Most people use hashtags wrong. Here's the data-backed approach to hashtag collections that drives real reach on Instagram, TikTok, and LinkedIn.", category: 'Strategy', readTime: '5 min read', date: 'Feb 2, 2026', featured: false },
-  { slug: 'social-media-analytics', title: 'The Only Social Media Metrics That Actually Matter', excerpt: "Vanity metrics won't grow your business. Here's which analytics to track, how to read them, and what to do with the data.", category: 'Analytics', readTime: '6 min read', date: 'Jan 28, 2026', featured: false },
+const COMING_SOON_POSTS = [
+  {
+    topic: 'How to batch a full month of social content in one afternoon',
+    category: 'Strategy',
+    desc: 'The exact workflow top creators use to plan 30 days of posts in a single 2-hour session — without burning out or losing quality.',
+    eta: 'Coming soon',
+  },
+  {
+    topic: 'The best times to post on every platform in 2026',
+    category: 'Strategy',
+    desc: 'A platform-by-platform breakdown of peak engagement windows — backed by data, not guesswork. Plus how to find your own best times using real analytics.',
+    eta: 'Coming soon',
+  },
+  {
+    topic: 'Why social media scheduling tools are overpriced — and what to do about it',
+    category: 'Industry',
+    desc: 'An honest look at how the social media tool market got this expensive, and why it doesn\'t have to cost this much to manage your presence professionally.',
+    eta: 'Coming soon',
+  },
 ]
 
-const CATEGORIES = ['All', 'Comparison', 'Strategy', 'Tips', 'Guides', 'Teams', 'Analytics']
-
 const CATEGORY_COLORS: Record<string, string> = {
-  Comparison: 'bg-blue-50 text-blue-600',
   Strategy: 'bg-purple-50 text-purple-600',
-  Tips: 'bg-green-50 text-green-600',
-  Guides: 'bg-orange-50 text-orange-600',
-  Teams: 'bg-pink-50 text-pink-600',
-  Analytics: 'bg-yellow-50 text-yellow-700',
+  Industry: 'bg-blue-50 text-blue-600',
+  Guide: 'bg-green-50 text-green-600',
 }
 
 export default function Blog() {
-  const featured = POSTS.find(p => p.featured)
-  const rest = POSTS.filter(p => !p.featured)
-
   return (
     <div className="min-h-screen bg-white">
 
@@ -60,63 +61,74 @@ export default function Blog() {
         </div>
       </nav>
 
-      <div className="max-w-5xl mx-auto px-6 py-16">
+      <div className="max-w-4xl mx-auto px-6 py-16">
 
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-extrabold tracking-tight mb-4">Blog</h1>
-          <p className="text-xl text-gray-400 max-w-xl mx-auto">Social media strategy, platform guides, and tips for scheduling smarter.</p>
-        </div>
-
-        {featured && (
-          <div className="bg-black text-white rounded-3xl p-8 mb-12 group hover:opacity-95 transition-all cursor-pointer">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-white/20 text-white">{featured.category}</span>
-              <span className="text-xs text-white/50">{featured.date}</span>
-              <span className="text-xs text-white/50">{featured.readTime}</span>
-            </div>
-            <h2 className="text-3xl font-extrabold tracking-tight mb-3 leading-tight">{featured.title}</h2>
-            <p className="text-white/60 leading-relaxed mb-6 max-w-2xl">{featured.excerpt}</p>
-            <Link href={`/blog/${featured.slug}`} className="inline-flex items-center gap-2 bg-white text-black text-sm font-bold px-5 py-2.5 rounded-xl hover:opacity-90 transition-all">
-              Read article →
-            </Link>
+        {/* HEADER */}
+        <div className="text-center mb-14">
+          <div className="inline-flex items-center gap-2 bg-gray-100 text-gray-600 text-xs font-bold px-4 py-2 rounded-full mb-6">
+            ✍️ Real content only — no filler
           </div>
-        )}
-
-        <div className="flex items-center gap-2 flex-wrap mb-8">
-          {CATEGORIES.map(cat => (
-            <Link key={cat} href={cat === 'All' ? '/blog' : `/blog?category=${cat.toLowerCase()}`}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${cat === 'All' ? 'bg-black text-white border-black' : 'border-gray-200 text-gray-500 hover:border-gray-400 hover:text-black'}`}>
-              {cat}
-            </Link>
-          ))}
+          <h1 className="text-5xl font-extrabold tracking-tight mb-4">Blog</h1>
+          <p className="text-xl text-gray-400 max-w-xl mx-auto leading-relaxed">
+            Practical guides on scheduling smarter, growing your audience, and getting more out of your social media — without overpaying for tools to do it.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-          {rest.map(post => (
-            <Link key={post.slug} href={`/blog/${post.slug}`} className="bg-white border border-gray-100 rounded-2xl p-6 flex flex-col hover:border-gray-300 transition-all group">
-              <div className="flex items-center gap-2 mb-3">
-                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${CATEGORY_COLORS[post.category] || 'bg-gray-100 text-gray-600'}`}>{post.category}</span>
+        {/* COMING SOON POSTS */}
+        <div className="mb-14">
+          <div className="flex items-center gap-3 mb-6">
+            <h2 className="text-lg font-extrabold tracking-tight">Up next</h2>
+            <span className="text-xs font-bold text-gray-400 bg-gray-100 px-2.5 py-1 rounded-full">3 posts launching soon</span>
+          </div>
+          <div className="space-y-4">
+            {COMING_SOON_POSTS.map((post, i) => (
+              <div
+                key={i}
+                className="bg-white border border-gray-100 rounded-2xl p-6 flex items-start gap-5">
+                <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-base font-extrabold text-gray-400 flex-shrink-0">
+                  {i + 1}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${CATEGORY_COLORS[post.category] || 'bg-gray-100 text-gray-600'}`}>
+                      {post.category}
+                    </span>
+                    <span className="text-xs text-gray-400 font-semibold">{post.eta}</span>
+                  </div>
+                  <h3 className="text-sm font-extrabold tracking-tight mb-1.5 leading-snug">{post.topic}</h3>
+                  <p className="text-xs text-gray-400 leading-relaxed">{post.desc}</p>
+                </div>
               </div>
-              <h2 className="text-sm font-extrabold tracking-tight mb-2 leading-snug group-hover:text-gray-600 transition-colors flex-1">{post.title}</h2>
-              <p className="text-xs text-gray-400 leading-relaxed mb-4 line-clamp-3">{post.excerpt}</p>
-              <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-50">
-                <span className="text-xs text-gray-400">{post.date}</span>
-                <span className="text-xs text-gray-400">{post.readTime}</span>
-              </div>
-            </Link>
-          ))}
+            ))}
+          </div>
         </div>
 
-        <div className="bg-gray-50 border border-gray-100 rounded-3xl p-10 text-center">
-          <h2 className="text-3xl font-extrabold tracking-tight mb-3">Ready to schedule smarter?</h2>
-          <p className="text-gray-400 mb-6 max-w-md mx-auto">Join thousands of creators using SocialMate to manage 16 platforms for free.</p>
-          <Link href="/signup" className="inline-block bg-black text-white text-sm font-bold px-8 py-4 rounded-2xl hover:opacity-80 transition-all">
+        {/* HONEST STATEMENT */}
+        <div className="bg-gray-50 border border-gray-100 rounded-3xl p-10 mb-14 text-center">
+          <div className="text-3xl mb-4">📝</div>
+          <h2 className="text-2xl font-extrabold tracking-tight mb-3">We publish real content or nothing at all</h2>
+          <p className="text-gray-400 leading-relaxed max-w-xl mx-auto">
+            Every post on this blog will be genuinely useful — written by people who use SocialMate, based on real data, with no keyword stuffing or filler. We'd rather publish three great articles than thirty mediocre ones. The first posts are coming soon.
+          </p>
+        </div>
+
+        {/* NOTIFY / CTA */}
+        <div className="bg-black rounded-3xl p-10 text-white text-center">
+          <h2 className="text-3xl font-extrabold tracking-tight mb-3">Don't wait for the blog — start now</h2>
+          <p className="text-white/60 mb-8 max-w-md mx-auto leading-relaxed">
+            The best way to learn social media scheduling is to actually do it. SocialMate is free, takes 60 seconds to set up, and supports all 16 platforms.
+          </p>
+          <Link
+            href="/signup"
+            className="inline-block bg-white text-black text-sm font-bold px-8 py-4 rounded-2xl hover:opacity-90 transition-all">
             Create free account →
           </Link>
-          <p className="text-xs text-gray-400 mt-3">No credit card · Free forever</p>
+          <p className="text-white/30 text-xs mt-4">No credit card · Free forever · 16 platforms</p>
         </div>
+
       </div>
 
+      {/* FOOTER */}
       <footer className="border-t border-gray-100 px-8 py-8">
         <div className="max-w-5xl mx-auto flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-2">

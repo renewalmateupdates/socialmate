@@ -67,18 +67,18 @@ export default function Referral() {
     const urls: Record<string, string> = {
       twitter: `https://twitter.com/intent/tweet?text=${encodeURIComponent(message)}`,
       linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(referralLink)}`,
-      email: `mailto:?subject=Try SocialMate&body=${encodeURIComponent(message)}`,
+      email: `mailto:?subject=Try SocialMate — It's Free&body=${encodeURIComponent(message)}`,
     }
     window.open(urls[platform], '_blank')
   }
 
   const signed_up = referrals.filter(r => r.status === 'signed_up' || r.status === 'converted').length
   const converted = referrals.filter(r => r.status === 'converted').length
-  const credits_earned = converted * 5
+  const credits_earned = referrals.filter(r => r.status === 'signed_up').length * 25
 
   const STATUS_META: Record<string, { label: string; color: string }> = {
     pending: { label: 'Invited', color: 'bg-yellow-50 text-yellow-600 border border-yellow-200' },
-    signed_up: { label: 'Signed Up', color: 'bg-blue-50 text-blue-600 border border-blue-200' },
+    signed_up: { label: 'Activated', color: 'bg-blue-50 text-blue-600 border border-blue-200' },
     converted: { label: 'Upgraded', color: 'bg-green-50 text-green-700 border border-green-200' },
   }
 
@@ -88,21 +88,26 @@ export default function Referral() {
 
       <div className="ml-56 flex-1 p-8">
         <div className="max-w-2xl mx-auto">
+
           <div className="mb-8">
             <h1 className="text-2xl font-extrabold tracking-tight">Referrals</h1>
-            <p className="text-sm text-gray-400 mt-0.5">Invite friends, earn AI credits</p>
+            <p className="text-sm text-gray-400 mt-0.5">Invite friends and earn rewards</p>
           </div>
 
+          {/* HERO CARD */}
           <div className="bg-black text-white rounded-2xl p-8 mb-6 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -translate-y-1/4 translate-x-1/4" />
             <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full translate-y-1/4 -translate-x-1/4" />
             <div className="relative z-10">
               <div className="text-3xl mb-3">🎁</div>
-              <h2 className="text-xl font-extrabold mb-2">Earn 5 AI credits per referral</h2>
-              <p className="text-white/70 text-sm mb-6">For every friend who upgrades to Pro, you both get 5 free AI caption credits</p>
+              <h2 className="text-xl font-extrabold mb-2">Share SocialMate, earn rewards</h2>
+              <p className="text-white/70 text-sm mb-5 leading-relaxed">
+                Every referral counts. When someone you refer activates their account and posts for the first time, you both get <span className="text-white font-bold">25 bonus AI credits</span>. If they upgrade to a paid plan, you get <span className="text-white font-bold">1 free month</span> of your current tier.
+              </p>
               <div className="flex items-center gap-2 bg-white/10 rounded-xl p-3 border border-white/20">
                 <p className="text-sm font-mono flex-1 truncate text-white/90">{referralLink}</p>
-                <button onClick={handleCopyLink}
+                <button
+                  onClick={handleCopyLink}
                   className="text-xs font-semibold px-3 py-1.5 bg-white text-black rounded-lg hover:opacity-80 transition-all flex-shrink-0">
                   {copied ? '✅ Copied!' : '📋 Copy'}
                 </button>
@@ -110,11 +115,35 @@ export default function Referral() {
             </div>
           </div>
 
+          {/* HOW IT WORKS */}
+          <div className="bg-white border border-gray-100 rounded-2xl p-5 mb-6">
+            <h2 className="text-sm font-bold tracking-tight mb-4">How it works</h2>
+            <div className="space-y-3">
+              {[
+                { step: '1', title: 'Share your link', desc: 'Copy your referral link and share it anywhere — social media, email, DMs.' },
+                { step: '2', title: 'They sign up', desc: 'Your friend creates a free SocialMate account using your link or code.' },
+                { step: '3', title: 'They activate', desc: 'Once they confirm their email and publish their first post, you both earn 25 AI credits.' },
+                { step: '4', title: 'They upgrade (bonus)', desc: "If they upgrade to Pro or Agency, you earn 1 free month of your current plan. Automatically." },
+              ].map(item => (
+                <div key={item.step} className="flex items-start gap-3">
+                  <div className="w-6 h-6 rounded-full bg-black text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+                    {item.step}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold">{item.title}</p>
+                    <p className="text-xs text-gray-400 leading-relaxed">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* STATS */}
           <div className="grid grid-cols-3 gap-4 mb-6">
-            {loading ? [1,2,3].map(i => <SkeletonBox key={i} className="h-20 rounded-2xl" />) : (
+            {loading ? [1, 2, 3].map(i => <SkeletonBox key={i} className="h-20 rounded-2xl" />) : (
               [
                 { label: 'Total Invited', value: referrals.length, icon: '📧', color: 'text-gray-800' },
-                { label: 'Signed Up', value: signed_up, icon: '👤', color: 'text-blue-600' },
+                { label: 'Activated', value: signed_up, icon: '✅', color: 'text-blue-600' },
                 { label: 'Credits Earned', value: credits_earned, icon: '✨', color: 'text-purple-600' },
               ].map(stat => (
                 <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-4">
@@ -128,12 +157,14 @@ export default function Referral() {
             )}
           </div>
 
+          {/* CODE + SHARE */}
           <div className="grid grid-cols-2 gap-6 mb-6">
             <div className="bg-white border border-gray-100 rounded-2xl p-5">
               <h2 className="text-sm font-bold tracking-tight mb-4">Your Referral Code</h2>
               <div className="flex items-center gap-2 bg-gray-50 rounded-xl p-4 mb-3">
                 <p className="text-xl font-mono font-bold flex-1 tracking-widest uppercase">{referralCode}</p>
-                <button onClick={handleCopyCode}
+                <button
+                  onClick={handleCopyCode}
                   className="text-xs font-semibold px-3 py-1.5 border border-gray-200 rounded-lg hover:border-gray-400 transition-all">
                   Copy
                 </button>
@@ -149,7 +180,9 @@ export default function Referral() {
                   { id: 'linkedin', icon: '💼', label: 'LinkedIn' },
                   { id: 'email', icon: '📧', label: 'Email' },
                 ].map(p => (
-                  <button key={p.id} onClick={() => handleShare(p.id)}
+                  <button
+                    key={p.id}
+                    onClick={() => handleShare(p.id)}
                     className="w-full flex items-center gap-3 px-4 py-2.5 border border-gray-100 rounded-xl hover:border-gray-300 transition-all text-left">
                     <span className="text-base">{p.icon}</span>
                     <span className="text-sm font-semibold">{p.label}</span>
@@ -160,6 +193,7 @@ export default function Referral() {
             </div>
           </div>
 
+          {/* REFERRAL HISTORY */}
           <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
               <h2 className="text-sm font-bold tracking-tight">Referral History</h2>
@@ -167,7 +201,7 @@ export default function Referral() {
             </div>
             {loading ? (
               <div className="p-5 space-y-3">
-                {[1,2,3].map(i => <SkeletonBox key={i} className="h-12 rounded-xl" />)}
+                {[1, 2, 3].map(i => <SkeletonBox key={i} className="h-12 rounded-xl" />)}
               </div>
             ) : referrals.length === 0 ? (
               <div className="p-12 text-center">
@@ -179,8 +213,14 @@ export default function Referral() {
               <div>
                 {referrals.map((referral, i) => {
                   const meta = STATUS_META[referral.status]
+                  const reward = referral.status === 'converted'
+                    ? '1 month free 🎉'
+                    : referral.status === 'signed_up'
+                    ? '+25 credits ✨'
+                    : null
                   return (
-                    <div key={referral.id}
+                    <div
+                      key={referral.id}
                       className={`flex items-center gap-4 px-5 py-4 ${i !== referrals.length - 1 ? 'border-b border-gray-50' : ''}`}>
                       <div className="w-9 h-9 rounded-xl bg-gray-100 flex items-center justify-center text-sm font-bold flex-shrink-0">
                         {referral.referred_email.slice(0, 2).toUpperCase()}
@@ -192,8 +232,8 @@ export default function Referral() {
                         </p>
                       </div>
                       <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${meta.color}`}>{meta.label}</span>
-                      {referral.status === 'converted' && (
-                        <span className="text-xs font-semibold text-purple-600">+5 ✨</span>
+                      {reward && (
+                        <span className="text-xs font-semibold text-purple-600 whitespace-nowrap">{reward}</span>
                       )}
                     </div>
                   )
@@ -201,6 +241,7 @@ export default function Referral() {
               </div>
             )}
           </div>
+
         </div>
       </div>
 
