@@ -29,7 +29,6 @@ const PLATFORM_ICONS: Record<string, string> = {
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
 
-// What each plan can access
 const PLAN_RANGES: Record<string, string[]> = {
   free:   ['7', '30'],
   pro:    ['7', '30', '90'],
@@ -50,8 +49,9 @@ export default function Analytics() {
   const [loading, setLoading] = useState(true)
   const [range, setRange] = useState<'7' | '30' | '90' | 'all'>('30')
   const [lockedRange, setLockedRange] = useState<string | null>(null)
+  const [radarDismissed, setRadarDismissed] = useState(false)
   const router = useRouter()
-  const { plan } = useWorkspace()
+  const { plan, credits } = useWorkspace()
 
   const allowedRanges = PLAN_RANGES[plan] || PLAN_RANGES.free
 
@@ -72,10 +72,7 @@ export default function Analytics() {
   }, [])
 
   const handleRangeClick = (r: '7' | '30' | '90' | 'all') => {
-    if (!allowedRanges.includes(r)) {
-      setLockedRange(r)
-      return
-    }
+    if (!allowedRanges.includes(r)) { setLockedRange(r); return }
     setLockedRange(null)
     setRange(r)
   }
@@ -121,7 +118,10 @@ export default function Analytics() {
   const peakHour = hourCounts.reduce((a, b) => a.count > b.count ? a : b)
 
   const monthCounts = Array.from({ length: 12 }, (_, i) => {
-    const count = posts.filter(p => new Date(p.created_at).getMonth() === i && new Date(p.created_at).getFullYear() === now.getFullYear()).length
+    const count = posts.filter(p =>
+      new Date(p.created_at).getMonth() === i &&
+      new Date(p.created_at).getFullYear() === now.getFullYear()
+    ).length
     return { month: MONTHS[i], count }
   })
   const maxMonthCount = Math.max(...monthCounts.map(m => m.count), 1)
@@ -131,14 +131,29 @@ export default function Analytics() {
   for (let i = 0; i < 365; i++) {
     const d = new Date(today); d.setDate(today.getDate() - i)
     const hasPost = posts.some(p => new Date(p.created_at).toDateString() === d.toDateString())
-    if (hasPost) { tempStreak++; if (i === 0 || i === currentStreak) currentStreak = tempStreak; longestStreak = Math.max(longestStreak, tempStreak) }
-    else { tempStreak = 0 }
+    if (hasPost) {
+      tempStreak++
+      if (i === 0 || i === currentStreak) currentStreak = tempStreak
+      longestStreak = Math.max(longestStreak, tempStreak)
+    } else { tempStreak = 0 }
   }
 
   const oldestPost = posts[0]
-  const weeksSinceFirst = oldestPost ? Math.max((now.getTime() - new Date(oldestPost.created_at).getTime()) / (7 * 24 * 3600000), 1) : 1
+  const weeksSinceFirst = oldestPost
+    ? Math.max((now.getTime() - new Date(oldestPost.created_at).getTime()) / (7 * 24 * 3600000), 1)
+    : 1
   const avgPerWeek = (posts.length / weeksSinceFirst).toFixed(1)
-  const avgLength = filteredPosts.length > 0 ? Math.round(filteredPosts.reduce((sum, p) => sum + (p.content?.length || 0), 0) / filteredPosts.length) : 0
+  const avgLength = filteredPosts.length > 0
+    ? Math.round(filteredPosts.reduce((sum, p) => sum + (p.content?.length || 0), 0) / filteredPosts.length)
+    : 0
+
+  // Content gap detection
+  const daysSinceLastPost = posts.length > 0
+    ? Math.floor((now.getTime() - new Date(posts[posts.length - 1].created_at).getTime()) / (24 * 3600000))
+    : null
+  const mostUsedPlatform = topPlatforms[0]?.[0] || null
+  const hasVideoGap = filteredPosts.length > 5 &&
+    !filteredPosts.some(p => p.platforms?.includes('youtube') || p.platforms?.includes('tiktok'))
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -146,6 +161,7 @@ export default function Analytics() {
       <div className="ml-56 flex-1 p-8">
         <div className="max-w-7xl mx-auto">
 
+          {/* HEADER */}
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Analytics</h1>
@@ -163,7 +179,7 @@ export default function Analytics() {
                       : 'text-gray-300 cursor-pointer'
                     }`}>
                     {RANGE_LABELS[r]}
-                    {!allowed && <span className="ml-1 text-gray-300">🔒</span>}
+                    {!allowed && <span className="ml-1">🔒</span>}
                   </button>
                 )
               })}
@@ -178,7 +194,9 @@ export default function Analytics() {
                   {RANGE_LABELS[lockedRange]} history requires {RANGE_REQUIRED_PLAN[lockedRange]}
                 </p>
                 <p className="text-xs text-amber-600 mt-0.5">
-                  {lockedRange === '90' ? 'Pro plan includes 90-day analytics history.' : 'Agency plan includes full all-time history.'}
+                  {lockedRange === '90'
+                    ? 'Pro plan includes 90-day analytics history. As SocialMate grows, these limits will too.'
+                    : 'Agency plan includes full all-time history and PDF export for any date range.'}
                 </p>
               </div>
               <Link href="/pricing"
@@ -188,16 +206,70 @@ export default function Analytics() {
             </div>
           )}
 
-          {/* PLAN HISTORY BANNER */}
+          {/* FREE PLAN BANNER */}
           {plan === 'free' && (
             <div className="mb-6 bg-gray-50 border border-gray-200 rounded-2xl px-5 py-3 flex items-center justify-between">
               <p className="text-xs text-gray-500 font-semibold">
-                📊 Free plan includes up to 30-day history · <span className="text-gray-400 font-normal">Upgrade for 90-day and all-time data</span>
+                📊 Free plan shows up to 30-day history
+                <span className="text-gray-400 font-normal"> · Advanced analytics unlock for 2 AI credits · </span>
+                <Link href="/pricing" className="text-black font-bold underline">Upgrade for 90-day & all-time</Link>
               </p>
-              <Link href="/pricing" className="text-xs font-bold text-black underline ml-4">Upgrade →</Link>
             </div>
           )}
 
+          {/* SM-RADAR BANNER */}
+          {!radarDismissed && (
+            <div className="mb-6 bg-black rounded-2xl px-5 py-4 flex items-center justify-between text-white">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">📡</span>
+                <div>
+                  <p className="text-xs font-extrabold">SM-Radar — Personal Growth Intelligence</p>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    Get AI-powered insights on your best posting times, top content formats, and growth patterns. Costs 3 credits.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 flex-shrink-0 ml-4">
+                <Link href="/features"
+                  className="text-xs font-bold px-4 py-2 bg-white text-black rounded-xl hover:opacity-80 transition-all">
+                  Try SM-Radar
+                </Link>
+                <button onClick={() => setRadarDismissed(true)}
+                  className="text-xs text-gray-500 hover:text-gray-300 transition-all">
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* CONTENT GAP DETECTOR */}
+          {!loading && (daysSinceLastPost !== null && daysSinceLastPost > 3 || hasVideoGap) && (
+            <div className="mb-6 bg-orange-50 border border-orange-100 rounded-2xl px-5 py-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-base">🕳️</span>
+                <p className="text-xs font-extrabold text-orange-800">Content Gap Detected</p>
+              </div>
+              <div className="space-y-1">
+                {daysSinceLastPost !== null && daysSinceLastPost > 3 && (
+                  <p className="text-xs text-orange-700">
+                    You haven't posted in <span className="font-bold">{daysSinceLastPost} days</span>.
+                    Consistent posting keeps your audience engaged.
+                  </p>
+                )}
+                {hasVideoGap && (
+                  <p className="text-xs text-orange-700">
+                    No video content in this period — video posts typically drive higher engagement than static content.
+                  </p>
+                )}
+              </div>
+              <Link href="/compose"
+                className="inline-block mt-3 text-xs font-bold px-3 py-1.5 bg-orange-500 text-white rounded-xl hover:opacity-80 transition-all">
+                Create a post now →
+              </Link>
+            </div>
+          )}
+
+          {/* STAT CARDS */}
           <div className="grid grid-cols-4 gap-4 mb-6">
             {loading ? [1,2,3,4].map(i => (
               <div key={i} className="bg-white border border-gray-100 rounded-2xl p-5">
@@ -207,10 +279,10 @@ export default function Analytics() {
               </div>
             )) : (
               [
-                { label: 'Total Posts', value: filteredPosts.length, icon: '📝', sub: 'in selected range' },
-                { label: 'Scheduled', value: scheduled.length, icon: '📅', sub: 'queued up' },
-                { label: 'Avg / Week', value: avgPerWeek, icon: '📈', sub: 'posting frequency' },
-                { label: 'Avg Length', value: avgLength, icon: '✍️', sub: 'characters per post' },
+                { label: 'Total Posts',  value: filteredPosts.length, icon: '📝', sub: 'in selected range'  },
+                { label: 'Scheduled',    value: scheduled.length,     icon: '📅', sub: 'queued up'          },
+                { label: 'Avg / Week',   value: avgPerWeek,           icon: '📈', sub: 'posting frequency'  },
+                { label: 'Avg Length',   value: avgLength,            icon: '✍️', sub: 'characters per post' },
               ].map(stat => (
                 <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-5">
                   <div className="flex justify-between items-center mb-3">
@@ -224,6 +296,7 @@ export default function Analytics() {
             )}
           </div>
 
+          {/* STREAK + PEAK + STATUS */}
           <div className="grid grid-cols-3 gap-4 mb-6">
             <div className="bg-white border border-gray-100 rounded-2xl p-5 flex items-center gap-4">
               <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0">🔥</div>
@@ -246,9 +319,9 @@ export default function Analytics() {
               {loading ? <SkeletonBox className="h-12" /> : (
                 <div className="space-y-2">
                   {[
-                    { label: 'Scheduled', count: scheduled.length, color: 'bg-blue-400' },
-                    { label: 'Draft', count: drafts.length, color: 'bg-gray-300' },
-                    { label: 'Published', count: published.length, color: 'bg-green-400' },
+                    { label: 'Scheduled', count: scheduled.length,  color: 'bg-blue-400'  },
+                    { label: 'Draft',     count: drafts.length,     color: 'bg-gray-300'  },
+                    { label: 'Published', count: published.length,  color: 'bg-green-400' },
                   ].map(s => (
                     <div key={s.label} className="flex items-center gap-2">
                       <div className={`w-2 h-2 rounded-full ${s.color}`} />
@@ -262,7 +335,11 @@ export default function Analytics() {
           </div>
 
           <div className="grid grid-cols-3 gap-6">
+
+            {/* LEFT / MAIN CHARTS */}
             <div className="col-span-2 space-y-6">
+
+              {/* DAILY ACTIVITY */}
               <div className="bg-white border border-gray-100 rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Daily Activity</h2>
                 {loading ? <SkeletonBox className="h-32" /> : (
@@ -273,8 +350,10 @@ export default function Analytics() {
                           {day.count} · {day.label}
                         </div>
                         <div className="w-full flex items-end justify-center" style={{ height: '112px' }}>
-                          <div className={`w-full rounded-t-md transition-all ${day.count > 0 ? 'bg-black hover:opacity-70' : 'bg-gray-100'}`}
-                            style={{ height: day.count > 0 ? `${Math.max((day.count / maxDailyCount) * 100, 8)}%` : '4px' }} />
+                          <div
+                            className={`w-full rounded-t-md transition-all ${day.count > 0 ? 'bg-black hover:opacity-70' : 'bg-gray-100'}`}
+                            style={{ height: day.count > 0 ? `${Math.max((day.count / maxDailyCount) * 100, 8)}%` : '4px' }}
+                          />
                         </div>
                       </div>
                     ))}
@@ -286,6 +365,7 @@ export default function Analytics() {
                 </div>
               </div>
 
+              {/* BEST DAYS */}
               <div className="bg-white border border-gray-100 rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Best Days to Post</h2>
                 {loading ? <SkeletonBox className="h-24" /> : (
@@ -296,8 +376,10 @@ export default function Analytics() {
                       return (
                         <div key={i} className="flex-1 flex flex-col items-center gap-1">
                           <div className="w-full flex items-end justify-center" style={{ height: '72px' }}>
-                            <div className={`w-full rounded-t-lg transition-all ${isTop ? 'bg-black' : day.count > 0 ? 'bg-gray-200' : 'bg-gray-100'}`}
-                              style={{ height: day.count > 0 ? `${Math.max(pct, 10)}%` : '4px' }} />
+                            <div
+                              className={`w-full rounded-t-lg transition-all ${isTop ? 'bg-black' : day.count > 0 ? 'bg-gray-200' : 'bg-gray-100'}`}
+                              style={{ height: day.count > 0 ? `${Math.max(pct, 10)}%` : '4px' }}
+                            />
                           </div>
                           <span className={`text-xs font-semibold ${isTop ? 'text-black' : 'text-gray-400'}`}>{day.day}</span>
                           <span className="text-xs text-gray-400">{day.count}</span>
@@ -308,6 +390,7 @@ export default function Analytics() {
                 )}
               </div>
 
+              {/* BEST TIMES HEATMAP */}
               <div className="bg-white border border-gray-100 rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Best Times to Post</h2>
                 {loading ? <SkeletonBox className="h-16" /> : (
@@ -315,7 +398,11 @@ export default function Analytics() {
                     <div className="flex gap-1 flex-wrap">
                       {hourCounts.map(h => {
                         const pct = maxHourCount > 0 ? h.count / maxHourCount : 0
-                        const bg = pct === 0 ? 'bg-gray-100' : pct < 0.25 ? 'bg-gray-300' : pct < 0.5 ? 'bg-gray-400' : pct < 0.75 ? 'bg-gray-600' : 'bg-black'
+                        const bg = pct === 0 ? 'bg-gray-100'
+                          : pct < 0.25 ? 'bg-gray-300'
+                          : pct < 0.5 ? 'bg-gray-400'
+                          : pct < 0.75 ? 'bg-gray-600'
+                          : 'bg-black'
                         return (
                           <div key={h.hour} className="group relative">
                             <div className={`w-8 h-8 rounded-lg ${bg} transition-all`} />
@@ -340,6 +427,7 @@ export default function Analytics() {
                 )}
               </div>
 
+              {/* MONTHLY */}
               <div className="bg-white border border-gray-100 rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Posts by Month — {now.getFullYear()}</h2>
                 {loading ? <SkeletonBox className="h-24" /> : (
@@ -349,8 +437,10 @@ export default function Analytics() {
                       return (
                         <div key={i} className="flex-1 flex flex-col items-center gap-1">
                           <div className="w-full flex items-end justify-center" style={{ height: '72px' }}>
-                            <div className={`w-full rounded-t-lg transition-all ${isCurrent ? 'bg-black' : m.count > 0 ? 'bg-gray-200' : 'bg-gray-100'}`}
-                              style={{ height: m.count > 0 ? `${Math.max((m.count / maxMonthCount) * 100, 8)}%` : '4px' }} />
+                            <div
+                              className={`w-full rounded-t-lg transition-all ${isCurrent ? 'bg-black' : m.count > 0 ? 'bg-gray-200' : 'bg-gray-100'}`}
+                              style={{ height: m.count > 0 ? `${Math.max((m.count / maxMonthCount) * 100, 8)}%` : '4px' }}
+                            />
                           </div>
                           <span className={`text-xs ${isCurrent ? 'font-bold text-black' : 'text-gray-400'}`}>{m.month}</span>
                         </div>
@@ -361,43 +451,77 @@ export default function Analytics() {
               </div>
             </div>
 
+            {/* RIGHT COLUMN */}
             <div className="space-y-6">
+
+              {/* PLATFORM BREAKDOWN */}
               <div className="bg-white border border-gray-100 rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Platform Breakdown</h2>
-                {loading ? <div className="space-y-3">{[1,2,3,4].map(i => <SkeletonBox key={i} className="h-6" />)}</div>
-                : topPlatforms.length === 0 ? <div className="text-center py-6"><p className="text-xs text-gray-400">No posts yet</p></div>
-                : (
-                  <div className="space-y-3">
-                    {topPlatforms.map(([platform, count]) => (
-                      <div key={platform}>
-                        <div className="flex items-center justify-between mb-1">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm">{PLATFORM_ICONS[platform] || '📱'}</span>
-                            <span className="text-xs font-semibold capitalize">{platform}</span>
+                {loading
+                  ? <div className="space-y-3">{[1,2,3,4].map(i => <SkeletonBox key={i} className="h-6" />)}</div>
+                  : topPlatforms.length === 0
+                  ? <div className="text-center py-6"><p className="text-xs text-gray-400">No posts yet</p></div>
+                  : (
+                    <div className="space-y-3">
+                      {topPlatforms.map(([platform, count]) => (
+                        <div key={platform}>
+                          <div className="flex items-center justify-between mb-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm">{PLATFORM_ICONS[platform] || '📱'}</span>
+                              <span className="text-xs font-semibold capitalize">{platform}</span>
+                            </div>
+                            <span className="text-xs font-bold">{count}</span>
                           </div>
-                          <span className="text-xs font-bold">{count}</span>
+                          <div className="w-full bg-gray-100 rounded-full h-2">
+                            <div className="bg-black h-2 rounded-full transition-all"
+                              style={{ width: `${(count / maxPlatformCount) * 100}%` }} />
+                          </div>
                         </div>
-                        <div className="w-full bg-gray-100 rounded-full h-2">
-                          <div className="bg-black h-2 rounded-full transition-all" style={{ width: `${(count / maxPlatformCount) * 100}%` }} />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  )
+                }
               </div>
 
+              {/* CONTENT INSIGHTS */}
               <div className="bg-white border border-gray-100 rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Content Insights</h2>
                 {loading ? <SkeletonBox className="h-32" /> : (
                   <div className="space-y-4">
                     {[
-                      { label: 'Avg Caption Length', value: avgLength + ' chars', sub: avgLength < 100 ? 'Short & punchy' : avgLength < 300 ? 'Medium length' : 'Long form', icon: '✍️' },
-                      { label: 'Most Used Platform', value: topPlatforms[0]?.[0] ? topPlatforms[0][0].charAt(0).toUpperCase() + topPlatforms[0][0].slice(1) : '—', sub: topPlatforms[0] ? `${topPlatforms[0][1]} posts` : 'No posts yet', icon: topPlatforms[0] ? PLATFORM_ICONS[topPlatforms[0][0]] : '📱' },
-                      { label: 'Draft Rate', value: filteredPosts.length > 0 ? `${Math.round((drafts.length / filteredPosts.length) * 100)}%` : '0%', sub: 'posts left as drafts', icon: '📂' },
-                      { label: 'Total Platforms Used', value: topPlatforms.length, sub: 'different platforms', icon: '📱' },
+                      {
+                        label: 'Avg Caption Length',
+                        value: avgLength + ' chars',
+                        sub: avgLength < 100 ? 'Short & punchy' : avgLength < 300 ? 'Medium length' : 'Long form',
+                        icon: '✍️',
+                      },
+                      {
+                        label: 'Most Used Platform',
+                        value: topPlatforms[0]?.[0]
+                          ? topPlatforms[0][0].charAt(0).toUpperCase() + topPlatforms[0][0].slice(1)
+                          : '—',
+                        sub: topPlatforms[0] ? `${topPlatforms[0][1]} posts` : 'No posts yet',
+                        icon: topPlatforms[0] ? PLATFORM_ICONS[topPlatforms[0][0]] : '📱',
+                      },
+                      {
+                        label: 'Draft Rate',
+                        value: filteredPosts.length > 0
+                          ? `${Math.round((drafts.length / filteredPosts.length) * 100)}%`
+                          : '0%',
+                        sub: 'posts left as drafts',
+                        icon: '📂',
+                      },
+                      {
+                        label: 'Total Platforms Used',
+                        value: topPlatforms.length,
+                        sub: 'different platforms',
+                        icon: '📱',
+                      },
                     ].map(insight => (
                       <div key={insight.label} className="flex items-center gap-3">
-                        <div className="w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center text-base flex-shrink-0">{insight.icon}</div>
+                        <div className="w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center text-base flex-shrink-0">
+                          {insight.icon}
+                        </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs text-gray-400">{insight.label}</p>
                           <p className="text-sm font-bold truncate">{insight.value}</p>
@@ -409,6 +533,7 @@ export default function Analytics() {
                 )}
               </div>
 
+              {/* CONSISTENCY SCORE */}
               <div className="bg-white border border-gray-100 rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-2">Consistency Score</h2>
                 {loading ? <SkeletonBox className="h-20" /> : (() => {
@@ -431,14 +556,32 @@ export default function Analytics() {
                 })()}
               </div>
 
-              {/* UPGRADE CARD for free/pro */}
+              {/* SM-PULSE TEASER */}
+              <div className="bg-gradient-to-br from-gray-900 to-gray-700 rounded-2xl p-5 text-white">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xl">🔥</span>
+                  <p className="text-xs font-extrabold">SM-Pulse</p>
+                  <span className="text-xs font-bold px-2 py-0.5 bg-white text-black rounded-full">5 credits</span>
+                </div>
+                <p className="text-xs text-gray-400 leading-relaxed mb-3">
+                  See what's trending in your niche right now — before you create your next post.
+                </p>
+                <Link href="/features"
+                  className="text-xs font-bold px-4 py-2 bg-white text-black rounded-xl hover:opacity-80 transition-all inline-block">
+                  Try SM-Pulse →
+                </Link>
+              </div>
+
+              {/* UPGRADE CARD */}
               {plan !== 'agency' && (
                 <div className={`rounded-2xl p-5 border ${plan === 'free' ? 'bg-blue-50 border-blue-100' : 'bg-purple-50 border-purple-100'}`}>
                   <p className={`text-xs font-bold mb-1 ${plan === 'free' ? 'text-blue-700' : 'text-purple-700'}`}>
                     {plan === 'free' ? '⚡ Unlock more history' : '🏢 Unlock all-time history'}
                   </p>
                   <p className={`text-xs mb-3 ${plan === 'free' ? 'text-blue-600' : 'text-purple-600'}`}>
-                    {plan === 'free' ? 'Pro plan includes 90-day analytics history.' : 'Agency plan includes full all-time data.'}
+                    {plan === 'free'
+                      ? 'Pro plan includes 90-day analytics. We increase limits as SocialMate grows.'
+                      : 'Agency plan includes full all-time data and PDF export for any date range.'}
                   </p>
                   <Link href="/pricing"
                     className={`block text-center text-white text-xs font-bold px-3 py-2 rounded-xl hover:opacity-80 transition-all ${plan === 'free' ? 'bg-blue-600' : 'bg-purple-600'}`}>
@@ -446,6 +589,7 @@ export default function Analytics() {
                   </Link>
                 </div>
               )}
+
             </div>
           </div>
         </div>
