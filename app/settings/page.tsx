@@ -12,21 +12,21 @@ function SkeletonBox({ className }: { className?: string }) {
 
 const ALL_PLATFORMS = [
   { id: 'instagram', icon: '📸', label: 'Instagram' },
-  { id: 'twitter', icon: '🐦', label: 'X / Twitter' },
-  { id: 'linkedin', icon: '💼', label: 'LinkedIn' },
-  { id: 'tiktok', icon: '🎵', label: 'TikTok' },
-  { id: 'facebook', icon: '📘', label: 'Facebook' },
-  { id: 'threads', icon: '🧵', label: 'Threads' },
+  { id: 'twitter',   icon: '🐦', label: 'X / Twitter' },
+  { id: 'linkedin',  icon: '💼', label: 'LinkedIn' },
+  { id: 'tiktok',    icon: '🎵', label: 'TikTok' },
+  { id: 'facebook',  icon: '📘', label: 'Facebook' },
+  { id: 'threads',   icon: '🧵', label: 'Threads' },
   { id: 'pinterest', icon: '📌', label: 'Pinterest' },
-  { id: 'youtube', icon: '▶️', label: 'YouTube' },
-  { id: 'snapchat', icon: '👻', label: 'Snapchat' },
-  { id: 'bluesky', icon: '🦋', label: 'Bluesky' },
-  { id: 'reddit', icon: '🤖', label: 'Reddit' },
-  { id: 'discord', icon: '💬', label: 'Discord' },
-  { id: 'telegram', icon: '✈️', label: 'Telegram' },
-  { id: 'mastodon', icon: '🐘', label: 'Mastodon' },
-  { id: 'lemon8', icon: '🍋', label: 'Lemon8' },
-  { id: 'bereal', icon: '📷', label: 'BeReal' },
+  { id: 'youtube',   icon: '▶️', label: 'YouTube' },
+  { id: 'snapchat',  icon: '👻', label: 'Snapchat' },
+  { id: 'bluesky',   icon: '🦋', label: 'Bluesky' },
+  { id: 'reddit',    icon: '🤖', label: 'Reddit' },
+  { id: 'discord',   icon: '💬', label: 'Discord' },
+  { id: 'telegram',  icon: '✈️', label: 'Telegram' },
+  { id: 'mastodon',  icon: '🐘', label: 'Mastodon' },
+  { id: 'lemon8',    icon: '🍋', label: 'Lemon8' },
+  { id: 'bereal',    icon: '📷', label: 'BeReal' },
 ]
 
 const TIMEZONES = [
@@ -37,11 +37,11 @@ const TIMEZONES = [
 ]
 
 const TABS = [
-  { id: 'profile',       label: 'Profile',       icon: '👤' },
-  { id: 'plan',          label: 'Plan',           icon: '⚡' },
-  { id: 'preferences',  label: 'Preferences',    icon: '⚙️' },
-  { id: 'notifications', label: 'Notifications',  icon: '🔔' },
-  { id: 'danger',        label: 'Danger Zone',    icon: '⚠️' },
+  { id: 'profile',       label: 'Profile',      icon: '👤' },
+  { id: 'plan',          label: 'Plan',         icon: '⚡' },
+  { id: 'preferences',  label: 'Preferences',  icon: '⚙️' },
+  { id: 'notifications', label: 'Notifications', icon: '🔔' },
+  { id: 'danger',        label: 'Danger Zone',  icon: '⚠️' },
 ]
 
 const PLAN_DETAILS = {
@@ -56,7 +56,7 @@ const PLAN_DETAILS = {
       '100 AI credits / month',
       '2-week scheduling horizon',
       '16 platforms',
-      'Link in Bio',
+      'Link in Bio (with branding)',
       'Bulk Scheduler',
       'Analytics (30-day history)',
     ],
@@ -68,13 +68,14 @@ const PLAN_DETAILS = {
     price: '$5 / month',
     features: [
       '5 accounts per platform',
-      '5 team seats',
-      '500 AI credits / month',
+      '4 team seats',
+      '300 AI credits / month',
       '1-month scheduling horizon',
       '16 platforms',
-      'Link in Bio',
+      'Link in Bio (custom domain)',
       'Bulk Scheduler',
       'Analytics (90-day history)',
+      'White Label add-on available',
       'Priority support',
     ],
   },
@@ -85,16 +86,16 @@ const PLAN_DETAILS = {
     price: '$20 / month',
     features: [
       '10 accounts per platform',
-      'Unlimited team seats',
-      'Unlimited AI credits',
+      '50 team seats',
+      '1,000 AI credits / month',
       '3-month scheduling horizon',
       '16 platforms',
       'Client workspaces',
-      'Link in Bio',
-      'Bulk Scheduler',
-      'Analytics (1-year history)',
-      'White-label add-on available',
-      'Priority support',
+      'Link in Bio (custom domain)',
+      'Analytics (all-time history)',
+      'PDF export (any date range)',
+      'White Label add-on available',
+      'Dedicated support',
     ],
   },
 }
@@ -119,22 +120,27 @@ export default function Settings() {
   const [defaultStatus, setDefaultStatus] = useState<'draft' | 'scheduled'>('draft')
   const [theme, setTheme] = useState<'light' | 'system'>('light')
 
+  const [whiteLabelEnabled, setWhiteLabelEnabled] = useState(false)
+  const [whiteLabelToggledOn, setWhiteLabelToggledOn] = useState(false)
+
   const [deleteConfirm, setDeleteConfirm] = useState('')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   const router = useRouter()
-  const { plan, creditsUsed, creditsTotal, seatsUsed, seatsTotal, platformsConnected } = useWorkspace()
+  const { plan, credits, creditsUsed, creditsTotal, seatsUsed, seatsTotal, platformsConnected } = useWorkspace()
 
   useEffect(() => {
     const getData = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
       setUser(user)
+
       const { data } = await supabase
         .from('user_settings')
         .select('*')
         .eq('user_id', user.id)
         .single()
+
       if (data) {
         setDisplayName(data.display_name || '')
         setBio(data.bio || '')
@@ -146,6 +152,8 @@ export default function Settings() {
         setDefaultPlatforms(data.default_platforms || ['instagram'])
         setDefaultStatus(data.default_status || 'draft')
         setTheme(data.theme || 'light')
+        setWhiteLabelEnabled(data.white_label_enabled ?? false)
+        setWhiteLabelToggledOn(data.white_label_enabled ?? false)
       }
       setLoading(false)
     }
@@ -173,6 +181,7 @@ export default function Settings() {
         default_platforms: defaultPlatforms,
         default_status: defaultStatus,
         theme,
+        white_label_enabled: whiteLabelEnabled,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'user_id' })
     if (error) { showToast('Failed to save settings', 'error'); setSaving(false); return }
@@ -192,16 +201,18 @@ export default function Settings() {
     )
   }
 
+  const canUseWhiteLabel = plan === 'pro' || plan === 'agency'
   const currentPlan = PLAN_DETAILS[plan]
-  const creditsRemaining = creditsTotal - creditsUsed
-  const creditsBar = plan === 'agency' ? 100 : Math.max(0, (creditsRemaining / creditsTotal) * 100)
-  const seatsBar = plan === 'agency' ? 100 : Math.min(100, (seatsUsed / seatsTotal) * 100)
+  const creditsRemaining = credits
+  const creditsBar = Math.max(0, (creditsRemaining / creditsTotal) * 100)
+  const seatsBar = Math.min(100, (seatsUsed / seatsTotal) * 100)
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar />
       <div className="ml-56 flex-1 p-8">
         <div className="max-w-2xl mx-auto">
+
           <div className="mb-8">
             <h1 className="text-2xl font-extrabold tracking-tight">Settings</h1>
             <p className="text-sm text-gray-400 mt-0.5">Manage your account and preferences</p>
@@ -211,7 +222,9 @@ export default function Settings() {
           <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-2xl p-1 mb-6 overflow-x-auto">
             {TABS.map(tab => (
               <button key={tab.id} onClick={() => setActiveTab(tab.id as any)}
-                className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${activeTab === tab.id ? 'bg-black text-white' : 'text-gray-500 hover:text-black'}`}>
+                className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
+                  activeTab === tab.id ? 'bg-black text-white' : 'text-gray-500 hover:text-black'
+                }`}>
                 <span>{tab.icon}</span>{tab.label}
               </button>
             ))}
@@ -219,7 +232,7 @@ export default function Settings() {
 
           {loading ? (
             <div className="space-y-4">
-              {[1, 2, 3].map(i => <SkeletonBox key={i} className="h-16 rounded-2xl" />)}
+              {[1,2,3].map(i => <SkeletonBox key={i} className="h-16 rounded-2xl" />)}
             </div>
           ) : (
             <>
@@ -291,50 +304,44 @@ export default function Settings() {
 
                     {/* USAGE METERS */}
                     <div className="space-y-3 pt-4 border-t border-gray-100">
-                      {/* AI Credits */}
                       <div>
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-xs font-semibold text-gray-500">AI Credits</span>
                           <span className="text-xs font-bold text-gray-700">
-                            {plan === 'agency' ? '∞ Unlimited' : `${creditsRemaining} / ${creditsTotal} remaining`}
+                            {`${creditsRemaining} / ${creditsTotal} remaining`}
                           </span>
                         </div>
                         <div className="w-full bg-gray-100 rounded-full h-2">
-                          <div
-                            className={`h-2 rounded-full transition-all ${plan === 'agency' ? 'bg-purple-400' : creditsBar < 20 ? 'bg-red-400' : 'bg-black'}`}
-                            style={{ width: `${creditsBar}%` }}
-                          />
+                          <div className={`h-2 rounded-full transition-all ${
+                            plan === 'agency' ? 'bg-purple-400' :
+                            creditsBar < 20 ? 'bg-red-400' :
+                            creditsBar < 50 ? 'bg-yellow-400' : 'bg-black'
+                          }`} style={{ width: `${creditsBar}%` }} />
                         </div>
-                        <p className="text-xs text-gray-400 mt-1">Resets monthly</p>
+                        <p className="text-xs text-gray-400 mt-1">Resets monthly · unused credits bank up</p>
                       </div>
-
-                      {/* Team Seats */}
                       <div>
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-xs font-semibold text-gray-500">Team Seats</span>
                           <span className="text-xs font-bold text-gray-700">
-                            {plan === 'agency' ? `${seatsUsed} connected · Unlimited` : `${seatsUsed} / ${seatsTotal} used`}
+                            {plan === 'agency'
+                              ? `${seatsUsed} used · 50 max`
+                              : `${seatsUsed} / ${seatsTotal} used`}
                           </span>
                         </div>
                         <div className="w-full bg-gray-100 rounded-full h-2">
-                          <div
-                            className={`h-2 rounded-full transition-all ${plan === 'agency' ? 'bg-purple-400 w-full' : 'bg-black'}`}
-                            style={plan === 'agency' ? {} : { width: `${seatsBar}%` }}
-                          />
+                          <div className={`h-2 rounded-full transition-all ${seatsUsed >= seatsTotal ? 'bg-red-400' : 'bg-black'}`}
+                            style={{ width: `${seatsBar}%` }} />
                         </div>
                       </div>
-
-                      {/* Platforms */}
                       <div>
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-xs font-semibold text-gray-500">Platforms Connected</span>
                           <span className="text-xs font-bold text-gray-700">{platformsConnected} / 16</span>
                         </div>
                         <div className="w-full bg-gray-100 rounded-full h-2">
-                          <div
-                            className="bg-black h-2 rounded-full transition-all"
-                            style={{ width: `${Math.min(100, (platformsConnected / 16) * 100)}%` }}
-                          />
+                          <div className="bg-black h-2 rounded-full transition-all"
+                            style={{ width: `${Math.min(100, (platformsConnected / 16) * 100)}%` }} />
                         </div>
                       </div>
                     </div>
@@ -352,7 +359,89 @@ export default function Settings() {
                     </div>
                   </div>
 
-                  {/* UPGRADE OPTIONS — only show if not agency */}
+                  {/* WHITE LABEL ADD-ON */}
+                  {canUseWhiteLabel ? (
+                    <div className={`rounded-2xl p-6 border-2 transition-all ${
+                      whiteLabelEnabled
+                        ? 'bg-black border-black text-white'
+                        : 'bg-white border-gray-200'
+                    }`}>
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-base">🏷️</span>
+                            <p className={`text-sm font-extrabold ${whiteLabelEnabled ? 'text-white' : 'text-gray-900'}`}>
+                              White Label Add-on
+                            </p>
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                              whiteLabelEnabled ? 'bg-white text-black' : 'bg-gray-100 text-gray-600'
+                            }`}>+$20/mo</span>
+                          </div>
+                          <p className={`text-xs leading-relaxed ${whiteLabelEnabled ? 'text-gray-400' : 'text-gray-500'}`}>
+                            Remove all SocialMate branding. Use your own logo, colors, and custom domain.
+                            Client-facing dashboards show your brand — not ours.
+                          </p>
+                          {whiteLabelEnabled && (
+                            <div className="mt-3 space-y-1">
+                              {[
+                                'SocialMate branding removed everywhere',
+                                'Custom logo + brand colors',
+                                'Custom domain support',
+                                'Client dashboards show your brand',
+                              ].map(f => (
+                                <div key={f} className="flex items-center gap-2 text-xs text-gray-300">
+                                  <span className="text-green-400 font-bold">✓</span>{f}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => setWhiteLabelEnabled(p => !p)}
+                          className={`w-12 h-6 rounded-full transition-all relative flex-shrink-0 mt-1 ${
+                            whiteLabelEnabled ? 'bg-white' : 'bg-gray-200'
+                          }`}>
+                          <div className={`w-4 h-4 rounded-full absolute top-1 transition-all ${
+                            whiteLabelEnabled ? 'left-7 bg-black' : 'left-1 bg-white'
+                          }`} />
+                        </button>
+                      </div>
+                      {whiteLabelEnabled !== whiteLabelToggledOn && (
+                        <div className={`mt-4 pt-4 border-t ${whiteLabelEnabled ? 'border-gray-700' : 'border-gray-100'}`}>
+                          <p className={`text-xs ${whiteLabelEnabled ? 'text-gray-400' : 'text-gray-500'}`}>
+                            {whiteLabelEnabled
+                              ? '💳 Saving this will add $20/mo to your subscription via Stripe.'
+                              : '⚠️ Disabling White Label will remove custom branding from your account on next billing cycle.'
+                            }
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-base">🏷️</span>
+                            <p className="text-sm font-extrabold text-gray-400">White Label Add-on</p>
+                            <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-500">Pro / Agency</span>
+                          </div>
+                          <p className="text-xs text-gray-400 leading-relaxed">
+                            Remove SocialMate branding and use your own. Available on Pro and Agency plans.
+                          </p>
+                        </div>
+                        <div className="w-12 h-6 rounded-full bg-gray-200 relative flex-shrink-0 mt-1 opacity-40">
+                          <div className="w-4 h-4 bg-white rounded-full absolute top-1 left-1" />
+                        </div>
+                      </div>
+                      <Link href="/pricing"
+                        className="inline-block mt-4 text-xs font-bold px-4 py-2 bg-black text-white rounded-xl hover:opacity-80 transition-all">
+                        Upgrade to unlock →
+                      </Link>
+                    </div>
+                  )}
+
+                  {/* UPGRADE OPTIONS */}
                   {plan !== 'agency' && (
                     <div className="bg-white border border-gray-100 rounded-2xl p-6">
                       <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-4">
@@ -366,7 +455,7 @@ export default function Settings() {
                                 <span className="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">Pro</span>
                                 <span className="text-xs font-bold text-gray-700">$5 / month</span>
                               </div>
-                              <p className="text-xs text-gray-500">5 accounts per platform · 500 AI credits · 5 team seats</p>
+                              <p className="text-xs text-gray-500">5 accounts · 300 AI credits · 4 team seats · 90-day analytics</p>
                             </div>
                             <Link href="/pricing"
                               className="bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all flex-shrink-0 ml-4">
@@ -380,7 +469,7 @@ export default function Settings() {
                               <span className="text-xs font-bold text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full">Agency</span>
                               <span className="text-xs font-bold text-gray-700">$20 / month</span>
                             </div>
-                            <p className="text-xs text-gray-500">Unlimited seats · Unlimited AI · Client workspaces · White-label</p>
+                            <p className="text-xs text-gray-500">10 accounts · 1,000 AI credits · 50 seats · client workspaces</p>
                           </div>
                           <Link href="/pricing"
                             className="bg-purple-600 text-white text-xs font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all flex-shrink-0 ml-4">
@@ -395,7 +484,7 @@ export default function Settings() {
                   <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 text-center">
                     <p className="text-xs text-gray-400">
                       {plan === 'free'
-                        ? 'You\'re on the Free plan — no credit card required, ever.'
+                        ? "You're on the Free plan — no credit card required, ever."
                         : 'Billing is managed via Stripe. To cancel or change your plan, contact support.'
                       }
                     </p>
@@ -412,7 +501,11 @@ export default function Settings() {
                     <div className="flex flex-wrap gap-2">
                       {ALL_PLATFORMS.map(p => (
                         <button key={p.id} onClick={() => togglePlatform(p.id)}
-                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${defaultPlatforms.includes(p.id) ? 'bg-black text-white border-black' : 'border-gray-200 text-gray-500 hover:border-gray-400'}`}>
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                            defaultPlatforms.includes(p.id)
+                              ? 'bg-black text-white border-black'
+                              : 'border-gray-200 text-gray-500 hover:border-gray-400'
+                          }`}>
                           <span>{p.icon}</span>{p.label}
                         </button>
                       ))}
@@ -423,7 +516,9 @@ export default function Settings() {
                     <div className="flex gap-3">
                       {(['draft', 'scheduled'] as const).map(s => (
                         <button key={s} onClick={() => setDefaultStatus(s)}
-                          className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all ${defaultStatus === s ? 'bg-black text-white border-black' : 'border-gray-200 text-gray-500 hover:border-gray-400'}`}>
+                          className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
+                            defaultStatus === s ? 'bg-black text-white border-black' : 'border-gray-200 text-gray-500 hover:border-gray-400'
+                          }`}>
                           {s === 'draft' ? '📂 Save as Draft' : '📅 Schedule'}
                         </button>
                       ))}
@@ -434,7 +529,9 @@ export default function Settings() {
                     <div className="flex gap-3">
                       {([['light', '☀️ Light'], ['system', '💻 System']] as const).map(([val, label]) => (
                         <button key={val} onClick={() => setTheme(val)}
-                          className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all ${theme === val ? 'bg-black text-white border-black' : 'border-gray-200 text-gray-500 hover:border-gray-400'}`}>
+                          className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
+                            theme === val ? 'bg-black text-white border-black' : 'border-gray-200 text-gray-500 hover:border-gray-400'
+                          }`}>
                           {label}
                         </button>
                       ))}
@@ -449,9 +546,9 @@ export default function Settings() {
                   <div className="bg-white border border-gray-100 rounded-2xl p-6 space-y-5">
                     <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Email Notifications</p>
                     {[
-                      { label: 'Email Digest', sub: 'Daily summary of your scheduled posts', value: emailDigest, setter: setEmailDigest },
-                      { label: 'Post Reminders', sub: 'Get reminded when a post is due to go out', value: postReminders, setter: setPostReminders },
-                      { label: 'Weekly Report', sub: 'Weekly analytics summary sent to your inbox', value: weeklyReport, setter: setWeeklyReport },
+                      { label: 'Email Digest',   sub: 'Daily summary of your scheduled posts',            value: emailDigest,    setter: setEmailDigest    },
+                      { label: 'Post Reminders', sub: 'Get reminded when a post is due to go out',        value: postReminders,  setter: setPostReminders  },
+                      { label: 'Weekly Report',  sub: 'Weekly analytics summary sent to your inbox',      value: weeklyReport,   setter: setWeeklyReport   },
                     ].map(item => (
                       <div key={item.label} className="flex items-center justify-between">
                         <div>
@@ -478,12 +575,12 @@ export default function Settings() {
                       <span className="text-xs font-bold bg-gray-100 text-gray-500 px-2.5 py-1 rounded-full">Coming soon</span>
                     </div>
                     {[
-                      { label: 'Post Published', sub: 'Alert when a scheduled post goes live' },
-                      { label: 'Post Failed', sub: 'Alert if a scheduled post fails to publish' },
-                      { label: 'Team Activity', sub: 'Notify when a team member makes changes' },
-                      { label: 'Credit Low', sub: 'Warn when AI credits are running low' },
+                      { label: 'Post Published',  sub: 'Alert when a scheduled post goes live'         },
+                      { label: 'Post Failed',      sub: 'Alert if a scheduled post fails to publish'   },
+                      { label: 'Team Activity',    sub: 'Notify when a team member makes changes'      },
+                      { label: 'Credit Low',       sub: 'Warn when AI credits are running low'         },
                     ].map(item => (
-                      <div key={item.label} className="flex items-center justify-between opacity-50">
+                      <div key={item.label} className="flex items-center justify-between opacity-40">
                         <div>
                           <p className="text-sm font-semibold">{item.label}</p>
                           <p className="text-xs text-gray-400">{item.sub}</p>
@@ -545,13 +642,24 @@ export default function Settings() {
                   </button>
                 </div>
               )}
+
+              {activeTab === 'plan' && whiteLabelEnabled !== whiteLabelToggledOn && (
+                <div className="mt-4 flex justify-end">
+                  <button onClick={handleSave} disabled={saving}
+                    className="bg-black text-white text-sm font-semibold px-6 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
+                    {saving ? 'Saving...' : 'Save Plan Changes'}
+                  </button>
+                </div>
+              )}
             </>
           )}
         </div>
       </div>
 
       {toast && (
-        <div className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${toast.type === 'success' ? 'bg-black text-white' : 'bg-red-500 text-white'}`}>
+        <div className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${
+          toast.type === 'success' ? 'bg-black text-white' : 'bg-red-500 text-white'
+        }`}>
           {toast.type === 'success' ? '✅' : '❌'} {toast.message}
         </div>
       )}
