@@ -3,375 +3,530 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
+import { useWorkspace } from '@/contexts/WorkspaceContext'
 
-function SkeletonBox({ className }: { className?: string }) {
-  return <div className={`bg-gray-100 rounded-xl animate-pulse ${className}`} />
-}
+const THEMES = [
+  { id: 'white',    label: 'Clean White',   bg: 'bg-white',         text: 'text-gray-900',  btn: 'bg-gray-900 text-white'           },
+  { id: 'black',    label: 'Midnight',      bg: 'bg-gray-950',      text: 'text-white',     btn: 'bg-white text-gray-900'           },
+  { id: 'gray',     label: 'Soft Gray',     bg: 'bg-gray-100',      text: 'text-gray-800',  btn: 'bg-gray-800 text-white'           },
+  { id: 'blue',     label: 'Ocean Blue',    bg: 'bg-blue-600',      text: 'text-white',     btn: 'bg-white text-blue-600'           },
+  { id: 'purple',   label: 'Deep Purple',   bg: 'bg-purple-700',    text: 'text-white',     btn: 'bg-white text-purple-700'         },
+  { id: 'green',    label: 'Forest',        bg: 'bg-emerald-700',   text: 'text-white',     btn: 'bg-white text-emerald-700'        },
+]
 
-type BioLink = {
+const BTN_STYLES = [
+  { id: 'rounded',   label: 'Rounded',     class: 'rounded-xl'   },
+  { id: 'pill',      label: 'Pill',        class: 'rounded-full' },
+  { id: 'square',    label: 'Square',      class: 'rounded-none' },
+]
+
+const SOCIAL_PLATFORMS = [
+  { id: 'instagram', label: 'Instagram',   icon: '📸', placeholder: 'https://instagram.com/yourhandle'   },
+  { id: 'twitter',   label: 'X / Twitter', icon: '🐦', placeholder: 'https://twitter.com/yourhandle'    },
+  { id: 'linkedin',  label: 'LinkedIn',    icon: '💼', placeholder: 'https://linkedin.com/in/yourname'   },
+  { id: 'tiktok',    label: 'TikTok',      icon: '🎵', placeholder: 'https://tiktok.com/@yourhandle'    },
+  { id: 'youtube',   label: 'YouTube',     icon: '▶️', placeholder: 'https://youtube.com/@yourchannel'  },
+  { id: 'pinterest', label: 'Pinterest',   icon: '📌', placeholder: 'https://pinterest.com/yourhandle'  },
+]
+
+interface BioLink {
   id: string
   title: string
   url: string
-  icon: string
   active: boolean
-  order: number
-  clicks: number
 }
 
-type BioPage = {
-  id: string
-  username: string
-  display_name: string
-  bio: string
-  avatar_url: string
-  theme: string
-  background_color: string
+function makeId() {
+  return Math.random().toString(36).slice(2, 9)
 }
-
-const THEMES = [
-  { id: 'minimal', label: 'Minimal', bg: 'bg-white', text: 'text-gray-900', button: 'bg-gray-900 text-white' },
-  { id: 'dark', label: 'Dark', bg: 'bg-gray-900', text: 'text-white', button: 'bg-white text-gray-900' },
-  { id: 'soft', label: 'Soft', bg: 'bg-rose-50', text: 'text-gray-800', button: 'bg-rose-400 text-white' },
-  { id: 'ocean', label: 'Ocean', bg: 'bg-sky-50', text: 'text-sky-900', button: 'bg-sky-500 text-white' },
-  { id: 'forest', label: 'Forest', bg: 'bg-emerald-50', text: 'text-emerald-900', button: 'bg-emerald-600 text-white' },
-]
-
-const LINK_ICONS = ['🔗', '🌐', '📸', '🐦', '💼', '🎵', '▶️', '📧', '📱', '🛒', '📝', '🎨', '💡', '🎤', '📚', '🎯']
 
 export default function LinkInBio() {
   const [user, setUser] = useState<any>(null)
-  const [bioPage, setBioPage] = useState<BioPage | null>(null)
-  const [links, setLinks] = useState<BioLink[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [activeTab, setActiveTab] = useState<'links' | 'appearance'>('links')
+  const [recordId, setRecordId] = useState<string | null>(null)
+
+  const [name, setName] = useState('')
+  const [bio, setBio] = useState('')
+  const [slug, setSlug] = useState('')
+  const [slugAvailable, setSlugAvailable] = useState<boolean | null>(null)
+  const [checkingSlug, setCheckingSlug] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState('')
+  const [theme, setTheme] = useState('white')
+  const [btnStyle, setBtnStyle] = useState('rounded')
+  const [links, setLinks] = useState<BioLink[]>([
+    { id: makeId(), title: '', url: '', active: true },
+  ])
+  const [socials, setSocials] = useState<Record<string, string>>({})
+  const [activeTab, setActiveTab] = useState<'links' | 'design' | 'socials'>('links')
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
-  const [showAddLink, setShowAddLink] = useState(false)
-  const [editingLink, setEditingLink] = useState<BioLink | null>(null)
-  const [dragId, setDragId] = useState<string | null>(null)
-  const [dragOverId, setDragOverId] = useState<string | null>(null)
-
-  const [formTitle, setFormTitle] = useState('')
-  const [formUrl, setFormUrl] = useState('')
-  const [formIcon, setFormIcon] = useState('🔗')
-
-  const [pageName, setPageName] = useState('')
-  const [pageUsername, setPageUsername] = useState('')
-  const [pageBio, setPageBio] = useState('')
-  const [pageTheme, setPageTheme] = useState('minimal')
+  const [copied, setCopied] = useState(false)
 
   const router = useRouter()
-
-  useEffect(() => {
-    const getData = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
-      setUser(user)
-      const { data: page } = await supabase.from('bio_pages').select('*').eq('user_id', user.id).single()
-      if (page) {
-        setBioPage(page)
-        setPageName(page.display_name || '')
-        setPageUsername(page.username || '')
-        setPageBio(page.bio || '')
-        setPageTheme(page.theme || 'minimal')
-      } else {
-        const defaultUsername = user.email?.split('@')[0] || 'user'
-        setPageUsername(defaultUsername)
-      }
-      const { data: linksData } = await supabase.from('bio_links').select('*').eq('user_id', user.id).order('order', { ascending: true })
-      setLinks(linksData || [])
-      setLoading(false)
-    }
-    getData()
-  }, [])
+  const { plan } = useWorkspace()
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type })
     setTimeout(() => setToast(null), 3000)
   }
 
-  const handleSavePage = async () => {
+  useEffect(() => {
+    const load = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.push('/login'); return }
+      setUser(user)
+      const { data } = await supabase
+        .from('bio_pages')
+        .select('*')
+        .eq('user_id', user.id)
+        .single()
+      if (data) {
+        setRecordId(data.id)
+        setName(data.name || '')
+        setBio(data.bio || '')
+        setSlug(data.slug || '')
+        setAvatarUrl(data.avatar_url || '')
+        setTheme(data.theme || 'white')
+        setBtnStyle(data.btn_style || 'rounded')
+        setLinks(data.links || [{ id: makeId(), title: '', url: '', active: true }])
+        setSocials(data.socials || {})
+      } else {
+        const defaultSlug = user.email?.split('@')[0]?.toLowerCase().replace(/[^a-z0-9]/g, '') || ''
+        setSlug(defaultSlug)
+      }
+      setLoading(false)
+    }
+    load()
+  }, [])
+
+  const checkSlug = async (val: string) => {
+    if (!val || val.length < 2) { setSlugAvailable(null); return }
+    setCheckingSlug(true)
+    const { data } = await supabase
+      .from('bio_pages')
+      .select('id')
+      .eq('slug', val)
+      .neq('user_id', user?.id || '')
+      .single()
+    setSlugAvailable(!data)
+    setCheckingSlug(false)
+  }
+
+  const addLink = () => {
+    setLinks(prev => [...prev, { id: makeId(), title: '', url: '', active: true }])
+  }
+
+  const removeLink = (id: string) => {
+    setLinks(prev => prev.filter(l => l.id !== id))
+  }
+
+  const updateLink = (id: string, field: keyof BioLink, value: any) => {
+    setLinks(prev => prev.map(l => l.id === id ? { ...l, [field]: value } : l))
+  }
+
+  const moveLink = (id: string, direction: 'up' | 'down') => {
+    const idx = links.findIndex(l => l.id === id)
+    if (direction === 'up' && idx === 0) return
+    if (direction === 'down' && idx === links.length - 1) return
+    const newLinks = [...links]
+    const swap = direction === 'up' ? idx - 1 : idx + 1
+    ;[newLinks[idx], newLinks[swap]] = [newLinks[swap], newLinks[idx]]
+    setLinks(newLinks)
+  }
+
+  const handleSave = async () => {
+    if (!name.trim()) { showToast('Display name is required', 'error'); return }
+    if (!slug.trim()) { showToast('URL slug is required', 'error'); return }
+    if (slugAvailable === false) { showToast('That URL is already taken', 'error'); return }
     setSaving(true)
     const payload = {
       user_id: user.id,
-      display_name: pageName,
-      username: pageUsername.toLowerCase().replace(/[^a-z0-9_]/g, ''),
-      bio: pageBio,
-      theme: pageTheme,
+      name: name.trim(),
+      bio: bio.trim(),
+      slug: slug.trim().toLowerCase(),
+      avatar_url: avatarUrl.trim(),
+      theme,
+      btn_style: btnStyle,
+      links: links.filter(l => l.title.trim() && l.url.trim()),
+      socials,
+      updated_at: new Date().toISOString(),
     }
-    const { error } = await supabase.from('bio_pages').upsert(payload, { onConflict: 'user_id' })
-    if (error) { showToast('Failed to save', 'error'); setSaving(false); return }
-    showToast('Page saved!', 'success')
+    if (recordId) {
+      const { error } = await supabase.from('bio_pages').update(payload).eq('id', recordId)
+      if (error) { showToast('Failed to save', 'error'); setSaving(false); return }
+    } else {
+      const { data, error } = await supabase.from('bio_pages').insert(payload).select().single()
+      if (error) { showToast('Failed to save', 'error'); setSaving(false); return }
+      setRecordId(data.id)
+    }
+    showToast('Bio page saved!', 'success')
     setSaving(false)
   }
 
-  const openAddLink = () => {
-    setEditingLink(null)
-    setFormTitle(''); setFormUrl(''); setFormIcon('🔗')
-    setShowAddLink(true)
+  const copyLink = () => {
+    navigator.clipboard.writeText(`https://socialmate.app/b/${slug}`)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
-  const openEditLink = (link: BioLink) => {
-    setEditingLink(link)
-    setFormTitle(link.title); setFormUrl(link.url); setFormIcon(link.icon)
-    setShowAddLink(true)
-  }
-
-  const handleSaveLink = async () => {
-    if (!formTitle.trim()) { showToast('Add a title', 'error'); return }
-    if (!formUrl.trim()) { showToast('Add a URL', 'error'); return }
-    const url = formUrl.startsWith('http') ? formUrl : `https://${formUrl}`
-    if (editingLink) {
-      const { error } = await supabase.from('bio_links').update({ title: formTitle.trim(), url, icon: formIcon }).eq('id', editingLink.id)
-      if (error) { showToast('Failed to update link', 'error'); return }
-      setLinks(prev => prev.map(l => l.id === editingLink.id ? { ...l, title: formTitle.trim(), url, icon: formIcon } : l))
-      showToast('Link updated!', 'success')
-    } else {
-      const newOrder = links.length
-      const { data, error } = await supabase.from('bio_links').insert({
-        user_id: user.id, title: formTitle.trim(), url, icon: formIcon, active: true, order: newOrder, clicks: 0,
-      }).select().single()
-      if (error) { showToast('Failed to add link', 'error'); return }
-      setLinks(prev => [...prev, data])
-      showToast('Link added!', 'success')
-    }
-    setShowAddLink(false)
-  }
-
-  const handleDeleteLink = async (id: string) => {
-    await supabase.from('bio_links').delete().eq('id', id)
-    setLinks(prev => prev.filter(l => l.id !== id))
-    showToast('Link removed', 'success')
-  }
-
-  const handleToggleActive = async (link: BioLink) => {
-    await supabase.from('bio_links').update({ active: !link.active }).eq('id', link.id)
-    setLinks(prev => prev.map(l => l.id === link.id ? { ...l, active: !l.active } : l))
-  }
-
-  const handleDragStart = (id: string) => setDragId(id)
-  const handleDragOver = (e: React.DragEvent, id: string) => { e.preventDefault(); setDragOverId(id) }
-  const handleDrop = async (targetId: string) => {
-    if (!dragId || dragId === targetId) { setDragId(null); setDragOverId(null); return }
-    const oldIndex = links.findIndex(l => l.id === dragId)
-    const newIndex = links.findIndex(l => l.id === targetId)
-    const reordered = [...links]
-    const [moved] = reordered.splice(oldIndex, 1)
-    reordered.splice(newIndex, 0, moved)
-    const updated = reordered.map((l, i) => ({ ...l, order: i }))
-    setLinks(updated)
-    for (const l of updated) { await supabase.from('bio_links').update({ order: l.order }).eq('id', l.id) }
-    setDragId(null); setDragOverId(null)
-  }
-
-  const currentTheme = THEMES.find(t => t.id === pageTheme) || THEMES[0]
-  const activeLinks = links.filter(l => l.active)
-  const bioUrl = `socialmate.app/${pageUsername || 'yourname'}`
+  const currentTheme = THEMES.find(t => t.id === theme) || THEMES[0]
+  const currentBtnStyle = BTN_STYLES.find(b => b.id === btnStyle) || BTN_STYLES[0]
+  const activeLinks = links.filter(l => l.title.trim() && l.url.trim() && l.active)
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar />
-
       <div className="ml-56 flex-1 p-8">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-5xl mx-auto">
 
-          <div className="flex items-center justify-between mb-8">
+          {/* HEADER */}
+          <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Link in Bio</h1>
-              <p className="text-sm text-gray-400 mt-0.5">{pageUsername ? `socialmate.app/${pageUsername}` : 'Set up your bio page'}</p>
+              <p className="text-sm text-gray-400 mt-0.5">
+                Your free bio page — no Linktree needed
+              </p>
             </div>
-            <div className="flex items-center gap-2">
-              {pageUsername && (
-                <a href={`https://${bioUrl}`} target="_blank" rel="noreferrer"
-                  className="text-sm font-semibold px-4 py-2.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
-                  🔗 Preview
-                </a>
+            <div className="flex items-center gap-3">
+              {slug && (
+                <button onClick={copyLink}
+                  className={`text-xs font-bold px-4 py-2.5 border rounded-xl transition-all ${
+                    copied
+                      ? 'bg-green-500 text-white border-green-500'
+                      : 'border-gray-200 hover:border-gray-400'
+                  }`}>
+                  {copied ? '✓ Copied!' : `🔗 socialmate.app/b/${slug}`}
+                </button>
               )}
-              <button onClick={handleSavePage} disabled={saving}
-                className="bg-black text-white text-sm font-semibold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
+              <button onClick={handleSave} disabled={saving}
+                className="bg-black text-white text-xs font-bold px-5 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
                 {saving ? 'Saving...' : 'Save Page'}
               </button>
             </div>
           </div>
 
-          <div className="flex gap-6">
-            <div className="flex-1">
-              <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-xl p-1 mb-6 w-fit">
-                {(['links', 'appearance'] as const).map(tab => (
-                  <button key={tab} onClick={() => setActiveTab(tab)}
-                    className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all capitalize ${activeTab === tab ? 'bg-black text-white' : 'text-gray-500 hover:text-black'}`}>
-                    {tab === 'links' ? '🔗 Links' : '🎨 Appearance'}
+          <div className="grid grid-cols-3 gap-6">
+
+            {/* EDITOR */}
+            <div className="col-span-2 space-y-4">
+
+              {/* PROFILE */}
+              <div className="bg-white border border-gray-100 rounded-2xl p-5 space-y-4">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Profile</p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 block mb-1.5">
+                      Display Name <span className="text-red-400">*</span>
+                    </label>
+                    <input type="text" value={name} onChange={e => setName(e.target.value)}
+                      placeholder="Your name or brand"
+                      className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 block mb-1.5">
+                      Page URL <span className="text-red-400">*</span>
+                    </label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-semibold">
+                        /b/
+                      </span>
+                      <input
+                        type="text"
+                        value={slug}
+                        onChange={e => {
+                          const val = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')
+                          setSlug(val)
+                          setSlugAvailable(null)
+                        }}
+                        onBlur={() => checkSlug(slug)}
+                        placeholder="yourname"
+                        className={`w-full pl-8 pr-3 py-2.5 text-sm border rounded-xl focus:outline-none transition-all ${
+                          slugAvailable === false
+                            ? 'border-red-300 focus:border-red-400'
+                            : slugAvailable === true
+                            ? 'border-green-300 focus:border-green-400'
+                            : 'border-gray-200 focus:border-gray-400'
+                        }`}
+                      />
+                      {checkingSlug && (
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
+                          ...
+                        </span>
+                      )}
+                      {slugAvailable === true && (
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-green-500 font-bold">✓</span>
+                      )}
+                      {slugAvailable === false && (
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-red-500 font-bold">✕</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-500 block mb-1.5">Bio</label>
+                  <textarea value={bio} onChange={e => setBio(e.target.value)}
+                    placeholder="A short description of you or your brand..."
+                    rows={2}
+                    className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 resize-none" />
+                  <p className="text-xs text-gray-400 mt-1">{bio.length}/150</p>
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-500 block mb-1.5">
+                    Avatar URL
+                    <span className="text-gray-400 font-normal ml-1">(paste any image URL)</span>
+                  </label>
+                  <input type="url" value={avatarUrl} onChange={e => setAvatarUrl(e.target.value)}
+                    placeholder="https://example.com/photo.jpg"
+                    className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400" />
+                </div>
+              </div>
+
+              {/* TABS */}
+              <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-2xl p-1">
+                {[
+                  { id: 'links',   label: '🔗 Links'  },
+                  { id: 'socials', label: '📱 Socials' },
+                  { id: 'design',  label: '🎨 Design'  },
+                ].map(tab => (
+                  <button key={tab.id} onClick={() => setActiveTab(tab.id as any)}
+                    className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${
+                      activeTab === tab.id ? 'bg-black text-white' : 'text-gray-500 hover:text-black'
+                    }`}>
+                    {tab.label}
                   </button>
                 ))}
               </div>
 
-              {loading ? (
-                <div className="space-y-3">{[1,2,3].map(i => <SkeletonBox key={i} className="h-16 rounded-2xl" />)}</div>
-              ) : activeTab === 'links' ? (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3 mb-2">
-                    <div className="bg-white border border-gray-100 rounded-2xl p-4">
-                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Total Links</p>
-                      <p className="text-2xl font-extrabold">{links.length}</p>
-                    </div>
-                    <div className="bg-white border border-gray-100 rounded-2xl p-4">
-                      <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Total Clicks</p>
-                      <p className="text-2xl font-extrabold">{links.reduce((s, l) => s + (l.clicks || 0), 0)}</p>
-                    </div>
+              {/* LINKS TAB */}
+              {activeTab === 'links' && (
+                <div className="bg-white border border-gray-100 rounded-2xl p-5 space-y-3">
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Links</p>
+                    <p className="text-xs text-gray-400">{activeLinks.length} active</p>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Your Links</p>
-                    <button onClick={openAddLink} className="text-xs font-semibold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all">+ Add Link</button>
-                  </div>
-                  {links.length === 0 ? (
-                    <div className="bg-white border border-gray-100 rounded-2xl p-10 text-center">
-                      <div className="text-4xl mb-3">🔗</div>
-                      <p className="text-sm font-bold mb-1">No links yet</p>
-                      <p className="text-xs text-gray-400 mb-4">Add links to your socials, website, or anything else</p>
-                      <button onClick={openAddLink} className="bg-black text-white text-xs font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all">Add Your First Link →</button>
+                  {links.map((link, i) => (
+                    <div key={link.id}
+                      className={`border rounded-2xl p-3 transition-all ${
+                        link.active ? 'border-gray-100' : 'border-gray-50 opacity-50'
+                      }`}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <button onClick={() => moveLink(link.id, 'up')}
+                          disabled={i === 0}
+                          className="text-xs text-gray-300 hover:text-gray-600 disabled:opacity-0 transition-all">
+                          ↑
+                        </button>
+                        <button onClick={() => moveLink(link.id, 'down')}
+                          disabled={i === links.length - 1}
+                          className="text-xs text-gray-300 hover:text-gray-600 disabled:opacity-0 transition-all">
+                          ↓
+                        </button>
+                        <span className="text-xs text-gray-300 font-bold flex-1">Link {i + 1}</span>
+                        <button onClick={() => updateLink(link.id, 'active', !link.active)}
+                          className={`w-8 h-4 rounded-full transition-all relative flex-shrink-0 ${
+                            link.active ? 'bg-black' : 'bg-gray-200'
+                          }`}>
+                          <div className={`w-3 h-3 bg-white rounded-full absolute top-0.5 transition-all ${
+                            link.active ? 'left-4' : 'left-0.5'
+                          }`} />
+                        </button>
+                        <button onClick={() => removeLink(link.id)}
+                          className="text-xs text-gray-300 hover:text-red-400 transition-all ml-1">
+                          ✕
+                        </button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <input type="text" value={link.title}
+                          onChange={e => updateLink(link.id, 'title', e.target.value)}
+                          placeholder="Button label"
+                          className="px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400" />
+                        <input type="url" value={link.url}
+                          onChange={e => updateLink(link.id, 'url', e.target.value)}
+                          placeholder="https://..."
+                          className="px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400" />
+                      </div>
                     </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {links.map(link => (
-                        <div key={link.id} draggable
-                          onDragStart={() => handleDragStart(link.id)}
-                          onDragOver={e => handleDragOver(e, link.id)}
-                          onDrop={() => handleDrop(link.id)}
-                          onDragEnd={() => { setDragId(null); setDragOverId(null) }}
-                          className={`flex items-center gap-3 p-4 bg-white border rounded-2xl transition-all group cursor-grab active:cursor-grabbing ${dragOverId === link.id ? 'border-black scale-[1.01]' : 'border-gray-100 hover:border-gray-300'} ${!link.active ? 'opacity-50' : ''} ${dragId === link.id ? 'opacity-30' : ''}`}>
-                          <span className="text-gray-300 text-sm cursor-grab">⠿</span>
-                          <span className="text-xl flex-shrink-0">{link.icon}</span>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold truncate">{link.title}</p>
-                            <p className="text-xs text-gray-400 truncate">{link.url}</p>
-                          </div>
-                          <div className="flex items-center gap-1.5 text-xs text-gray-400">
-                            <span>{link.clicks || 0} clicks</span>
-                          </div>
-                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
-                            <button onClick={() => handleToggleActive(link)}
-                              className={`w-9 h-5 rounded-full transition-all relative ${link.active ? 'bg-black' : 'bg-gray-200'}`}>
-                              <div className={`w-3 h-3 bg-white rounded-full absolute top-1 transition-all ${link.active ? 'left-5' : 'left-1'}`} />
-                            </button>
-                            <button onClick={() => openEditLink(link)} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 hover:text-black transition-all text-sm">✏️</button>
-                            <button onClick={() => handleDeleteLink(link.id)} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-50 text-gray-300 hover:text-red-400 transition-all">×</button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  ))}
+                  <button onClick={addLink}
+                    className="w-full py-2.5 border-2 border-dashed border-gray-200 rounded-2xl text-xs font-bold text-gray-400 hover:border-gray-400 hover:text-black transition-all">
+                    + Add Link
+                  </button>
                 </div>
-              ) : (
-                <div className="space-y-5 bg-white border border-gray-100 rounded-2xl p-6">
-                  <div>
-                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Display Name</label>
-                    <input type="text" value={pageName} onChange={e => setPageName(e.target.value)} placeholder="Your name or brand"
-                      className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400" />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Username</label>
-                    <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden focus-within:border-gray-400 transition-all">
-                      <span className="px-3 py-2.5 text-sm text-gray-400 bg-gray-50 border-r border-gray-200">socialmate.app/</span>
-                      <input type="text" value={pageUsername} onChange={e => setPageUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
-                        placeholder="yourname" className="flex-1 px-3 py-2.5 text-sm focus:outline-none" />
+              )}
+
+              {/* SOCIALS TAB */}
+              {activeTab === 'socials' && (
+                <div className="bg-white border border-gray-100 rounded-2xl p-5 space-y-3">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Social Profiles</p>
+                  {SOCIAL_PLATFORMS.map(p => (
+                    <div key={p.id} className="flex items-center gap-3">
+                      <span className="text-xl w-7 flex-shrink-0">{p.icon}</span>
+                      <input
+                        type="url"
+                        value={socials[p.id] || ''}
+                        onChange={e => setSocials(prev => ({ ...prev, [p.id]: e.target.value }))}
+                        placeholder={p.placeholder}
+                        className="flex-1 px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400"
+                      />
                     </div>
-                  </div>
+                  ))}
+                </div>
+              )}
+
+              {/* DESIGN TAB */}
+              {activeTab === 'design' && (
+                <div className="bg-white border border-gray-100 rounded-2xl p-5 space-y-5">
                   <div>
-                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Bio</label>
-                    <textarea value={pageBio} onChange={e => setPageBio(e.target.value)} placeholder="Tell people about yourself..." rows={3}
-                      className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 resize-none" />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-3">Theme</label>
-                    <div className="grid grid-cols-5 gap-2">
-                      {THEMES.map(theme => (
-                        <button key={theme.id} onClick={() => setPageTheme(theme.id)}
-                          className={`flex flex-col items-center gap-1.5 p-2 rounded-xl border-2 transition-all ${pageTheme === theme.id ? 'border-black' : 'border-gray-200 hover:border-gray-400'}`}>
-                          <div className={`w-full h-8 rounded-lg ${theme.bg} border border-gray-200 flex items-center justify-center`}>
-                            <div className={`w-6 h-2 rounded-full ${theme.button.split(' ')[0]}`} />
-                          </div>
-                          <span className="text-xs font-semibold text-gray-600">{theme.label}</span>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Theme</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {THEMES.map(t => (
+                        <button key={t.id} onClick={() => setTheme(t.id)}
+                          className={`flex items-center gap-2 p-3 rounded-xl border-2 transition-all ${
+                            theme === t.id ? 'border-black' : 'border-gray-100 hover:border-gray-300'
+                          }`}>
+                          <div className={`w-6 h-6 rounded-lg ${t.bg} border border-gray-200 flex-shrink-0`} />
+                          <span className="text-xs font-semibold">{t.label}</span>
+                          {theme === t.id && <span className="ml-auto text-xs font-bold">✓</span>}
                         </button>
                       ))}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Button Style</p>
+                    <div className="flex gap-3">
+                      {BTN_STYLES.map(b => (
+                        <button key={b.id} onClick={() => setBtnStyle(b.id)}
+                          className={`flex-1 py-2.5 text-xs font-bold border-2 transition-all ${b.class} ${
+                            btnStyle === b.id ? 'border-black bg-black text-white' : 'border-gray-200 hover:border-gray-400'
+                          }`}>
+                          {b.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* PRO BRANDING TOGGLE */}
+                  <div className={`rounded-2xl p-4 ${
+                    plan === 'free'
+                      ? 'bg-gray-50 border border-gray-100'
+                      : 'bg-white border border-gray-200'
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-bold">
+                          Remove "Made with SocialMate" branding
+                        </p>
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          {plan === 'free'
+                            ? 'Available on Pro and Agency plans'
+                            : 'Your bio page shows no SocialMate branding'}
+                        </p>
+                      </div>
+                      {plan === 'free' ? (
+                        <span className="text-xs font-bold bg-gray-200 text-gray-500 px-2.5 py-1 rounded-full">
+                          Pro
+                        </span>
+                      ) : (
+                        <div className="w-10 h-5 rounded-full bg-black relative">
+                          <div className="w-3.5 h-3.5 bg-white rounded-full absolute top-0.5 right-0.5" />
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
               )}
             </div>
 
-            <div className="w-64 flex-shrink-0">
-              <div className="sticky top-8">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3 text-center">Preview</p>
-                <div className={`rounded-3xl p-5 ${currentTheme.bg} border border-gray-200 shadow-xl min-h-96`}>
-                  <div className="text-center mb-5">
-                    <div className="w-14 h-14 rounded-full bg-gray-200 mx-auto mb-2 flex items-center justify-center text-xl font-bold">
-                      {(pageName || pageUsername || 'U').charAt(0).toUpperCase()}
+            {/* LIVE PREVIEW */}
+            <div className="space-y-4">
+              <div className="bg-white border border-gray-100 rounded-2xl p-4">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Live Preview</p>
+                <div className={`rounded-2xl overflow-hidden border border-gray-100`}
+                  style={{ minHeight: 400 }}>
+                  <div className={`${currentTheme.bg} p-6 min-h-[400px] flex flex-col items-center`}>
+
+                    {/* AVATAR */}
+                    <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-2xl mb-3 overflow-hidden border-2 border-white/20 flex-shrink-0">
+                      {avatarUrl
+                        ? <img src={avatarUrl} alt={name} className="w-full h-full object-cover" />
+                        : <span>{name?.[0]?.toUpperCase() || '👤'}</span>
+                      }
                     </div>
-                    <p className={`text-sm font-bold ${currentTheme.text}`}>{pageName || pageUsername || 'Your Name'}</p>
-                    {pageBio && <p className={`text-xs mt-1 opacity-70 ${currentTheme.text}`}>{pageBio}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    {activeLinks.slice(0, 5).map(link => (
-                      <div key={link.id} className={`w-full py-2.5 px-4 rounded-xl text-xs font-semibold text-center flex items-center justify-center gap-2 ${currentTheme.button}`}>
-                        <span>{link.icon}</span>{link.title}
+
+                    {/* NAME */}
+                    <h2 className={`text-sm font-extrabold text-center mb-1 ${currentTheme.text}`}>
+                      {name || 'Your Name'}
+                    </h2>
+
+                    {/* BIO */}
+                    {bio && (
+                      <p className={`text-xs text-center mb-4 leading-relaxed opacity-70 ${currentTheme.text}`}>
+                        {bio}
+                      </p>
+                    )}
+
+                    {/* SOCIAL ICONS */}
+                    {Object.entries(socials).filter(([, v]) => v).length > 0 && (
+                      <div className="flex items-center gap-2 mb-4 flex-wrap justify-center">
+                        {SOCIAL_PLATFORMS
+                          .filter(p => socials[p.id])
+                          .map(p => (
+                            <span key={p.id} className="text-lg">{p.icon}</span>
+                          ))}
                       </div>
-                    ))}
-                    {activeLinks.length === 0 && (
-                      <div className={`w-full py-2.5 px-4 rounded-xl text-xs font-semibold text-center opacity-30 ${currentTheme.button}`}>Your Link Here</div>
+                    )}
+
+                    {/* LINKS */}
+                    <div className="w-full space-y-2">
+                      {activeLinks.length === 0 ? (
+                        <div className={`text-xs text-center opacity-40 py-4 ${currentTheme.text}`}>
+                          Add links to see them here
+                        </div>
+                      ) : (
+                        activeLinks.map(link => (
+                          <div key={link.id}
+                            className={`w-full py-2.5 px-4 text-xs font-bold text-center transition-all ${
+                              currentTheme.btn
+                            } ${currentBtnStyle.class}`}>
+                            {link.title}
+                          </div>
+                        ))
+                      )}
+                    </div>
+
+                    {/* BRANDING */}
+                    {plan === 'free' && (
+                      <p className={`text-xs mt-4 opacity-40 ${currentTheme.text}`}>
+                        Made with SocialMate · Free
+                      </p>
                     )}
                   </div>
-                  {activeLinks.length > 5 && <p className={`text-xs text-center mt-2 opacity-50 ${currentTheme.text}`}>+{activeLinks.length - 5} more</p>}
                 </div>
-                <p className="text-xs text-center mt-2 text-gray-400">{bioUrl}</p>
               </div>
+
+              {/* PUBLIC URL */}
+              {slug && (
+                <div className="bg-black rounded-2xl p-4 text-center">
+                  <p className="text-xs font-bold text-gray-400 mb-1">Your public URL</p>
+                  <p className="text-xs text-white font-bold mb-3 break-all">
+                    socialmate.app/b/{slug}
+                  </p>
+                  <button onClick={copyLink}
+                    className={`w-full py-2 text-xs font-bold rounded-xl transition-all ${
+                      copied ? 'bg-green-400 text-black' : 'bg-white text-black hover:opacity-80'
+                    }`}>
+                    {copied ? '✓ Copied!' : 'Copy Link'}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
-
         </div>
       </div>
 
-      {showAddLink && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-6" onClick={() => setShowAddLink(false)}>
-          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
-              <h2 className="text-base font-extrabold tracking-tight">{editingLink ? 'Edit Link' : 'Add Link'}</h2>
-              <button onClick={() => setShowAddLink(false)} className="text-gray-400 hover:text-black text-xl leading-none">×</button>
-            </div>
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Icon</label>
-                <div className="flex flex-wrap gap-2">
-                  {LINK_ICONS.map(icon => (
-                    <button key={icon} onClick={() => setFormIcon(icon)}
-                      className={`w-9 h-9 rounded-xl text-lg flex items-center justify-center border-2 transition-all ${formIcon === icon ? 'border-black' : 'border-gray-200 hover:border-gray-400'}`}>
-                      {icon}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Title</label>
-                <input type="text" value={formTitle} onChange={e => setFormTitle(e.target.value)} placeholder="e.g. My Instagram, Shop Now, Portfolio"
-                  className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400" />
-              </div>
-              <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">URL</label>
-                <input type="url" value={formUrl} onChange={e => setFormUrl(e.target.value)} placeholder="https://..."
-                  className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400" />
-              </div>
-            </div>
-            <div className="px-6 py-4 border-t border-gray-100 flex gap-2">
-              <button onClick={() => setShowAddLink(false)} className="flex-1 py-2.5 text-sm font-semibold border border-gray-200 rounded-xl hover:border-gray-400 transition-all">Cancel</button>
-              <button onClick={handleSaveLink} className="flex-1 py-2.5 text-sm font-semibold bg-black text-white rounded-xl hover:opacity-80 transition-all">
-                {editingLink ? 'Save Changes' : 'Add Link'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {toast && (
-        <div className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${toast.type === 'success' ? 'bg-black text-white' : 'bg-red-500 text-white'}`}>
+        <div className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${
+          toast.type === 'success' ? 'bg-black text-white' : 'bg-red-500 text-white'
+        }`}>
           {toast.type === 'success' ? '✅' : '❌'} {toast.message}
         </div>
       )}
