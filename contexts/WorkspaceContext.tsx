@@ -104,7 +104,6 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { setLoading(false); return }
 
-      // Load workspace
       const { data: ws } = await supabase
         .from('workspaces')
         .select('*')
@@ -116,7 +115,6 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         setActiveWorkspace(personal)
         setWorkspaceName(personal.name || 'My Workspace')
       } else {
-        // fallback personal workspace object
         const fallback: Workspace = {
           id: user.id,
           name: 'My Workspace',
@@ -127,7 +125,6 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         setActiveWorkspace(fallback)
       }
 
-      // Load plan + credits
       const { data: profile } = await supabase
         .from('profiles')
         .select('plan, credits, credits_used')
@@ -141,15 +138,13 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         setCreditsUsed(profile.credits_used ?? 0)
       }
 
-      // Load team seat count
       const { data: teamData } = await supabase
         .from('team_members')
         .select('id')
         .eq('owner_id', user.id)
 
-      setSeatsUsed((teamData?.length || 0) + 1) // +1 for owner
+      setSeatsUsed((teamData?.length || 0) + 1)
 
-      // Load connected platforms count
       const { data: accountsData } = await supabase
         .from('connected_accounts')
         .select('platform')

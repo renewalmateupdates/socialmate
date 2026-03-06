@@ -6,27 +6,27 @@ import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 
 const THEMES = [
-  { id: 'white',    label: 'Clean White',   bg: 'bg-white',         text: 'text-gray-900',  btn: 'bg-gray-900 text-white'           },
-  { id: 'black',    label: 'Midnight',      bg: 'bg-gray-950',      text: 'text-white',     btn: 'bg-white text-gray-900'           },
-  { id: 'gray',     label: 'Soft Gray',     bg: 'bg-gray-100',      text: 'text-gray-800',  btn: 'bg-gray-800 text-white'           },
-  { id: 'blue',     label: 'Ocean Blue',    bg: 'bg-blue-600',      text: 'text-white',     btn: 'bg-white text-blue-600'           },
-  { id: 'purple',   label: 'Deep Purple',   bg: 'bg-purple-700',    text: 'text-white',     btn: 'bg-white text-purple-700'         },
-  { id: 'green',    label: 'Forest',        bg: 'bg-emerald-700',   text: 'text-white',     btn: 'bg-white text-emerald-700'        },
+  { id: 'white',  label: 'Clean White', bg: 'bg-white',       text: 'text-gray-900', btn: 'bg-gray-900 text-white'   },
+  { id: 'black',  label: 'Midnight',    bg: 'bg-gray-950',    text: 'text-white',    btn: 'bg-white text-gray-900'   },
+  { id: 'gray',   label: 'Soft Gray',   bg: 'bg-gray-100',    text: 'text-gray-800', btn: 'bg-gray-800 text-white'   },
+  { id: 'blue',   label: 'Ocean Blue',  bg: 'bg-blue-600',    text: 'text-white',    btn: 'bg-white text-blue-600'   },
+  { id: 'purple', label: 'Deep Purple', bg: 'bg-purple-700',  text: 'text-white',    btn: 'bg-white text-purple-700' },
+  { id: 'green',  label: 'Forest',      bg: 'bg-emerald-700', text: 'text-white',    btn: 'bg-white text-emerald-700'},
 ]
 
 const BTN_STYLES = [
-  { id: 'rounded',   label: 'Rounded',     class: 'rounded-xl'   },
-  { id: 'pill',      label: 'Pill',        class: 'rounded-full' },
-  { id: 'square',    label: 'Square',      class: 'rounded-none' },
+  { id: 'rounded', label: 'Rounded', class: 'rounded-xl'   },
+  { id: 'pill',    label: 'Pill',    class: 'rounded-full' },
+  { id: 'square',  label: 'Square',  class: 'rounded-none' },
 ]
 
 const SOCIAL_PLATFORMS = [
-  { id: 'instagram', label: 'Instagram',   icon: '📸', placeholder: 'https://instagram.com/yourhandle'   },
-  { id: 'twitter',   label: 'X / Twitter', icon: '🐦', placeholder: 'https://twitter.com/yourhandle'    },
-  { id: 'linkedin',  label: 'LinkedIn',    icon: '💼', placeholder: 'https://linkedin.com/in/yourname'   },
-  { id: 'tiktok',    label: 'TikTok',      icon: '🎵', placeholder: 'https://tiktok.com/@yourhandle'    },
-  { id: 'youtube',   label: 'YouTube',     icon: '▶️', placeholder: 'https://youtube.com/@yourchannel'  },
-  { id: 'pinterest', label: 'Pinterest',   icon: '📌', placeholder: 'https://pinterest.com/yourhandle'  },
+  { id: 'instagram', label: 'Instagram',   icon: '📸', placeholder: 'https://instagram.com/yourhandle'  },
+  { id: 'twitter',   label: 'X / Twitter', icon: '🐦', placeholder: 'https://twitter.com/yourhandle'   },
+  { id: 'linkedin',  label: 'LinkedIn',    icon: '💼', placeholder: 'https://linkedin.com/in/yourname'  },
+  { id: 'tiktok',    label: 'TikTok',      icon: '🎵', placeholder: 'https://tiktok.com/@yourhandle'   },
+  { id: 'youtube',   label: 'YouTube',     icon: '▶️', placeholder: 'https://youtube.com/@yourchannel' },
+  { id: 'pinterest', label: 'Pinterest',   icon: '📌', placeholder: 'https://pinterest.com/yourhandle' },
 ]
 
 interface BioLink {
@@ -72,14 +72,16 @@ export default function LinkInBio() {
 
   useEffect(() => {
     const load = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
-      setUser(user)
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      if (!authUser) { router.push('/login'); return }
+      setUser(authUser)
+
       const { data } = await supabase
         .from('bio_pages')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', authUser.id)
         .single()
+
       if (data) {
         setRecordId(data.id)
         setName(data.name || '')
@@ -88,16 +90,16 @@ export default function LinkInBio() {
         setAvatarUrl(data.avatar_url || '')
         setTheme(data.theme || 'white')
         setBtnStyle(data.btn_style || 'rounded')
-        setLinks(data.links || [{ id: makeId(), title: '', url: '', active: true }])
+        setLinks(data.links?.length ? data.links : [{ id: makeId(), title: '', url: '', active: true }])
         setSocials(data.socials || {})
       } else {
-        const defaultSlug = user.email?.split('@')[0]?.toLowerCase().replace(/[^a-z0-9]/g, '') || ''
+        const defaultSlug = authUser.email?.split('@')[0]?.toLowerCase().replace(/[^a-z0-9]/g, '') || ''
         setSlug(defaultSlug)
       }
       setLoading(false)
     }
     load()
-  }, [])
+  }, [router])
 
   const checkSlug = async (val: string) => {
     if (!val || val.length < 2) { setSlugAvailable(null); return }
@@ -107,7 +109,7 @@ export default function LinkInBio() {
       .select('id')
       .eq('slug', val)
       .neq('user_id', user?.id || '')
-      .single()
+      .maybeSingle()
     setSlugAvailable(!data)
     setCheckingSlug(false)
   }
@@ -139,6 +141,7 @@ export default function LinkInBio() {
     if (!slug.trim()) { showToast('URL slug is required', 'error'); return }
     if (slugAvailable === false) { showToast('That URL is already taken', 'error'); return }
     setSaving(true)
+
     const payload = {
       user_id: user.id,
       name: name.trim(),
@@ -151,14 +154,16 @@ export default function LinkInBio() {
       socials,
       updated_at: new Date().toISOString(),
     }
+
     if (recordId) {
       const { error } = await supabase.from('bio_pages').update(payload).eq('id', recordId)
-      if (error) { showToast('Failed to save', 'error'); setSaving(false); return }
+      if (error) { showToast('Failed to save: ' + error.message, 'error'); setSaving(false); return }
     } else {
       const { data, error } = await supabase.from('bio_pages').insert(payload).select().single()
-      if (error) { showToast('Failed to save', 'error'); setSaving(false); return }
+      if (error) { showToast('Failed to save: ' + error.message, 'error'); setSaving(false); return }
       setRecordId(data.id)
     }
+
     showToast('Bio page saved!', 'success')
     setSaving(false)
   }
@@ -173,6 +178,17 @@ export default function LinkInBio() {
   const currentBtnStyle = BTN_STYLES.find(b => b.id === btnStyle) || BTN_STYLES[0]
   const activeLinks = links.filter(l => l.title.trim() && l.url.trim() && l.active)
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex">
+        <Sidebar />
+        <div className="ml-56 flex-1 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar />
@@ -183,19 +199,15 @@ export default function LinkInBio() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Link in Bio</h1>
-              <p className="text-sm text-gray-400 mt-0.5">
-                Your free bio page — no Linktree needed
-              </p>
+              <p className="text-sm text-gray-400 mt-0.5">Your free bio page — no Linktree needed</p>
             </div>
             <div className="flex items-center gap-3">
               {slug && (
                 <button onClick={copyLink}
                   className={`text-xs font-bold px-4 py-2.5 border rounded-xl transition-all ${
-                    copied
-                      ? 'bg-green-500 text-white border-green-500'
-                      : 'border-gray-200 hover:border-gray-400'
+                    copied ? 'bg-green-500 text-white border-green-500' : 'border-gray-200 hover:border-gray-400'
                   }`}>
-                  {copied ? '✓ Copied!' : `🔗 socialmate.app/b/${slug}`}
+                  {copied ? '✓ Copied!' : `🔗 /b/${slug}`}
                 </button>
               )}
               <button onClick={handleSave} disabled={saving}
@@ -227,9 +239,7 @@ export default function LinkInBio() {
                       Page URL <span className="text-red-400">*</span>
                     </label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-semibold">
-                        /b/
-                      </span>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-semibold">/b/</span>
                       <input
                         type="text"
                         value={slug}
@@ -240,18 +250,14 @@ export default function LinkInBio() {
                         }}
                         onBlur={() => checkSlug(slug)}
                         placeholder="yourname"
-                        className={`w-full pl-8 pr-3 py-2.5 text-sm border rounded-xl focus:outline-none transition-all ${
-                          slugAvailable === false
-                            ? 'border-red-300 focus:border-red-400'
-                            : slugAvailable === true
-                            ? 'border-green-300 focus:border-green-400'
-                            : 'border-gray-200 focus:border-gray-400'
+                        className={`w-full pl-8 pr-8 py-2.5 text-sm border rounded-xl focus:outline-none transition-all ${
+                          slugAvailable === false ? 'border-red-300' :
+                          slugAvailable === true  ? 'border-green-300' :
+                          'border-gray-200 focus:border-gray-400'
                         }`}
                       />
                       {checkingSlug && (
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">
-                          ...
-                        </span>
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">...</span>
                       )}
                       {slugAvailable === true && (
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-green-500 font-bold">✓</span>
@@ -272,8 +278,7 @@ export default function LinkInBio() {
                 </div>
                 <div>
                   <label className="text-xs font-bold text-gray-500 block mb-1.5">
-                    Avatar URL
-                    <span className="text-gray-400 font-normal ml-1">(paste any image URL)</span>
+                    Avatar URL <span className="text-gray-400 font-normal">(paste any image URL)</span>
                   </label>
                   <input type="url" value={avatarUrl} onChange={e => setAvatarUrl(e.target.value)}
                     placeholder="https://example.com/photo.jpg"
@@ -306,33 +311,19 @@ export default function LinkInBio() {
                   </div>
                   {links.map((link, i) => (
                     <div key={link.id}
-                      className={`border rounded-2xl p-3 transition-all ${
-                        link.active ? 'border-gray-100' : 'border-gray-50 opacity-50'
-                      }`}>
+                      className={`border rounded-2xl p-3 transition-all ${link.active ? 'border-gray-100' : 'border-gray-50 opacity-50'}`}>
                       <div className="flex items-center gap-2 mb-2">
-                        <button onClick={() => moveLink(link.id, 'up')}
-                          disabled={i === 0}
-                          className="text-xs text-gray-300 hover:text-gray-600 disabled:opacity-0 transition-all">
-                          ↑
-                        </button>
-                        <button onClick={() => moveLink(link.id, 'down')}
-                          disabled={i === links.length - 1}
-                          className="text-xs text-gray-300 hover:text-gray-600 disabled:opacity-0 transition-all">
-                          ↓
-                        </button>
+                        <button onClick={() => moveLink(link.id, 'up')} disabled={i === 0}
+                          className="text-xs text-gray-300 hover:text-gray-600 disabled:opacity-0 transition-all">↑</button>
+                        <button onClick={() => moveLink(link.id, 'down')} disabled={i === links.length - 1}
+                          className="text-xs text-gray-300 hover:text-gray-600 disabled:opacity-0 transition-all">↓</button>
                         <span className="text-xs text-gray-300 font-bold flex-1">Link {i + 1}</span>
                         <button onClick={() => updateLink(link.id, 'active', !link.active)}
-                          className={`w-8 h-4 rounded-full transition-all relative flex-shrink-0 ${
-                            link.active ? 'bg-black' : 'bg-gray-200'
-                          }`}>
-                          <div className={`w-3 h-3 bg-white rounded-full absolute top-0.5 transition-all ${
-                            link.active ? 'left-4' : 'left-0.5'
-                          }`} />
+                          className={`w-8 h-4 rounded-full transition-all relative flex-shrink-0 ${link.active ? 'bg-black' : 'bg-gray-200'}`}>
+                          <div className={`w-3 h-3 bg-white rounded-full absolute top-0.5 transition-all ${link.active ? 'left-4' : 'left-0.5'}`} />
                         </button>
                         <button onClick={() => removeLink(link.id)}
-                          className="text-xs text-gray-300 hover:text-red-400 transition-all ml-1">
-                          ✕
-                        </button>
+                          className="text-xs text-gray-300 hover:text-red-400 transition-all ml-1">✕</button>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
                         <input type="text" value={link.title}
@@ -404,27 +395,17 @@ export default function LinkInBio() {
                     </div>
                   </div>
 
-                  {/* PRO BRANDING TOGGLE */}
-                  <div className={`rounded-2xl p-4 ${
-                    plan === 'free'
-                      ? 'bg-gray-50 border border-gray-100'
-                      : 'bg-white border border-gray-200'
-                  }`}>
+                  {/* BRANDING TOGGLE */}
+                  <div className={`rounded-2xl p-4 ${plan === 'free' ? 'bg-gray-50 border border-gray-100' : 'bg-white border border-gray-200'}`}>
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-xs font-bold">
-                          Remove "Made with SocialMate" branding
-                        </p>
+                        <p className="text-xs font-bold">Remove "Made with SocialMate" branding</p>
                         <p className="text-xs text-gray-400 mt-0.5">
-                          {plan === 'free'
-                            ? 'Available on Pro and Agency plans'
-                            : 'Your bio page shows no SocialMate branding'}
+                          {plan === 'free' ? 'Available on Pro and Agency plans' : 'Your bio page shows no SocialMate branding'}
                         </p>
                       </div>
                       {plan === 'free' ? (
-                        <span className="text-xs font-bold bg-gray-200 text-gray-500 px-2.5 py-1 rounded-full">
-                          Pro
-                        </span>
+                        <span className="text-xs font-bold bg-gray-200 text-gray-500 px-2.5 py-1 rounded-full">Pro</span>
                       ) : (
                         <div className="w-10 h-5 rounded-full bg-black relative">
                           <div className="w-3.5 h-3.5 bg-white rounded-full absolute top-0.5 right-0.5" />
@@ -440,14 +421,13 @@ export default function LinkInBio() {
             <div className="space-y-4">
               <div className="bg-white border border-gray-100 rounded-2xl p-4">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Live Preview</p>
-                <div className={`rounded-2xl overflow-hidden border border-gray-100`}
-                  style={{ minHeight: 400 }}>
-                  <div className={`${currentTheme.bg} p-6 min-h-[400px] flex flex-col items-center`}>
+                <div className="rounded-2xl overflow-hidden border border-gray-100">
+                  <div className={`${currentTheme.bg} p-6 min-h-96 flex flex-col items-center`}>
 
                     {/* AVATAR */}
                     <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-2xl mb-3 overflow-hidden border-2 border-white/20 flex-shrink-0">
                       {avatarUrl
-                        ? <img src={avatarUrl} alt={name} className="w-full h-full object-cover" />
+                        ? <img src={avatarUrl} alt={name} className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
                         : <span>{name?.[0]?.toUpperCase() || '👤'}</span>
                       }
                     </div>
@@ -467,11 +447,9 @@ export default function LinkInBio() {
                     {/* SOCIAL ICONS */}
                     {Object.entries(socials).filter(([, v]) => v).length > 0 && (
                       <div className="flex items-center gap-2 mb-4 flex-wrap justify-center">
-                        {SOCIAL_PLATFORMS
-                          .filter(p => socials[p.id])
-                          .map(p => (
-                            <span key={p.id} className="text-lg">{p.icon}</span>
-                          ))}
+                        {SOCIAL_PLATFORMS.filter(p => socials[p.id]).map(p => (
+                          <span key={p.id} className="text-lg">{p.icon}</span>
+                        ))}
                       </div>
                     )}
 
@@ -484,9 +462,7 @@ export default function LinkInBio() {
                       ) : (
                         activeLinks.map(link => (
                           <div key={link.id}
-                            className={`w-full py-2.5 px-4 text-xs font-bold text-center transition-all ${
-                              currentTheme.btn
-                            } ${currentBtnStyle.class}`}>
+                            className={`w-full py-2.5 px-4 text-xs font-bold text-center ${currentTheme.btn} ${currentBtnStyle.class}`}>
                             {link.title}
                           </div>
                         ))
@@ -507,9 +483,7 @@ export default function LinkInBio() {
               {slug && (
                 <div className="bg-black rounded-2xl p-4 text-center">
                   <p className="text-xs font-bold text-gray-400 mb-1">Your public URL</p>
-                  <p className="text-xs text-white font-bold mb-3 break-all">
-                    socialmate.app/b/{slug}
-                  </p>
+                  <p className="text-xs text-white font-bold mb-3 break-all">socialmate.app/b/{slug}</p>
                   <button onClick={copyLink}
                     className={`w-full py-2 text-xs font-bold rounded-xl transition-all ${
                       copied ? 'bg-green-400 text-black' : 'bg-white text-black hover:opacity-80'
