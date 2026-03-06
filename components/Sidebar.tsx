@@ -9,42 +9,50 @@ const NAV_BASE = [
   {
     section: 'Content',
     items: [
-      { icon: '🏠', label: 'Dashboard', href: '/dashboard' },
-      { icon: '📅', label: 'Calendar', href: '/calendar' },
-      { icon: '✏️', label: 'Compose', href: '/compose' },
-      { icon: '📂', label: 'Drafts', href: '/drafts' },
-      { icon: '⏳', label: 'Queue', href: '/queue' },
-      { icon: '#️⃣', label: 'Hashtags', href: '/hashtags' },
-      { icon: '🖼️', label: 'Media Library', href: '/media' },
-      { icon: '📝', label: 'Templates', href: '/templates' },
-      { icon: '🔗', label: 'Link in Bio', href: '/link-in-bio' },
-      { icon: '📆', label: 'Bulk Scheduler', href: '/bulk-scheduler' },
+      { icon: '🏠', label: 'Dashboard',     href: '/dashboard'      },
+      { icon: '📅', label: 'Calendar',      href: '/calendar'       },
+      { icon: '✏️', label: 'Compose',       href: '/compose'        },
+      { icon: '📂', label: 'Drafts',        href: '/drafts'         },
+      { icon: '⏳', label: 'Queue',         href: '/queue'          },
+      { icon: '#️⃣', label: 'Hashtags',      href: '/hashtags'       },
+      { icon: '🖼️', label: 'Media Library', href: '/media'          },
+      { icon: '📝', label: 'Templates',     href: '/templates'      },
+      { icon: '🔗', label: 'Link in Bio',   href: '/link-in-bio'    },
+      { icon: '📆', label: 'Bulk Scheduler',href: '/bulk-scheduler' },
     ],
   },
   {
     section: 'Insights',
     items: [
-      { icon: '📊', label: 'Analytics', href: '/analytics' },
+      { icon: '📊', label: 'Analytics',  href: '/analytics'  },
       { icon: '🔍', label: 'Best Times', href: '/best-times' },
+    ],
+  },
+  {
+    section: 'Grow',
+    items: [
+      { icon: '🤖', label: 'AI Features', href: '/features'  },
+      { icon: '🎁', label: 'Referrals',   href: '/referral'  },
+      { icon: '🤝', label: 'Affiliate',   href: '/affiliate' },
     ],
   },
   {
     section: 'Settings',
     items: [
-      { icon: '🔗', label: 'Accounts', href: '/accounts' },
-      { icon: '👥', label: 'Team', href: '/team' },
-      { icon: '⚙️', label: 'Settings', href: '/settings' },
-      { icon: '🎁', label: 'Referrals', href: '/referral' },
+      { icon: '🔗', label: 'Accounts',      href: '/accounts'      },
+      { icon: '👥', label: 'Team',          href: '/team'          },
+      { icon: '⚙️', label: 'Settings',      href: '/settings'      },
       { icon: '🔔', label: 'Notifications', href: '/notifications' },
-      { icon: '🔎', label: 'Search', href: '/search' },
+      { icon: '🔎', label: 'Search',        href: '/search'        },
+      { icon: '💛', label: 'Our Story',     href: '/story'         },
     ],
   },
 ]
 
 const PLAN_BADGE: Record<string, { label: string; color: string }> = {
-  free:   { label: 'Free',   color: 'bg-gray-100 text-gray-500' },
-  pro:    { label: 'Pro',    color: 'bg-blue-100 text-blue-600' },
-  agency: { label: 'Agency', color: 'bg-purple-100 text-purple-600' },
+  free:   { label: 'Free',   color: 'bg-gray-100 text-gray-500'       },
+  pro:    { label: 'Pro',    color: 'bg-blue-100 text-blue-600'       },
+  agency: { label: 'Agency', color: 'bg-purple-100 text-purple-600'  },
 }
 
 export default function Sidebar() {
@@ -59,6 +67,7 @@ export default function Sidebar() {
     activeWorkspace,
     setActiveWorkspace,
     plan,
+    credits,
     creditsUsed,
     creditsTotal,
     seatsUsed,
@@ -76,14 +85,16 @@ export default function Sidebar() {
     router.push('/')
   }
 
-  // Inject Workspaces nav item for agency users
   const NAV = NAV_BASE.map(group => {
     if (group.section === 'Settings' && plan === 'agency') {
       const hasWs = group.items.find(i => i.href === '/workspaces')
       if (!hasWs) {
         return {
           ...group,
-          items: [{ icon: '🏢', label: 'Workspaces', href: '/workspaces' }, ...group.items],
+          items: [
+            { icon: '🏢', label: 'Workspaces', href: '/workspaces' },
+            ...group.items,
+          ],
         }
       }
     }
@@ -91,16 +102,20 @@ export default function Sidebar() {
   })
 
   const badge = PLAN_BADGE[plan] || PLAN_BADGE.free
-  const creditsRemaining = creditsTotal - creditsUsed
-  const creditsBar = plan === 'agency' ? 100 : Math.max(0, (creditsRemaining / creditsTotal) * 100)
-  const seatsBar = plan === 'agency' ? 100 : Math.min(100, (seatsUsed / seatsTotal) * 100)
+  const creditsRemaining = credits - creditsUsed
+  const creditsBar = plan === 'agency'
+    ? Math.min(100, (credits / PLAN_CONFIG.agency.credits) * 100)
+    : Math.max(0, (creditsRemaining / creditsTotal) * 100)
+  const seatsBar = plan === 'agency'
+    ? Math.min(100, (seatsUsed / PLAN_CONFIG.agency.seats) * 100)
+    : Math.min(100, (seatsUsed / seatsTotal) * 100)
   const platformsBar = Math.min(100, (platformsConnected / PLATFORMS_TOTAL) * 100)
 
   const clientWorkspaces = workspaces.filter(w => !w.is_personal)
   const personalWorkspace = workspaces.find(w => w.is_personal)
 
   return (
-    <div className="w-56 bg-white border-r border-gray-100 flex flex-col flex-shrink-0 h-screen sticky top-0">
+    <div className="w-56 bg-white border-r border-gray-100 flex flex-col flex-shrink-0 h-screen sticky top-0 fixed left-0 z-40">
 
       {/* HEADER */}
       <div className="p-4 border-b border-gray-100">
@@ -129,7 +144,6 @@ export default function Sidebar() {
           {wsOpen && (
             <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-100 rounded-xl shadow-lg z-50 overflow-hidden">
 
-              {/* PERSONAL WORKSPACE */}
               {personalWorkspace && (
                 <button
                   onClick={() => { setActiveWorkspace(personalWorkspace); setWsOpen(false) }}
@@ -142,38 +156,31 @@ export default function Sidebar() {
                 </button>
               )}
 
-              {/* CLIENT WORKSPACES — agency only */}
               {plan === 'agency' && clientWorkspaces.length > 0 && (
                 <>
                   <div className="px-3 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-widest border-t border-gray-50">
                     Clients
                   </div>
-                  {clientWorkspaces.map(ws => (
+                  {clientWorkspaces.map((ws: any) => (
                     <button
                       key={ws.id}
                       onClick={() => { setActiveWorkspace(ws); setWsOpen(false) }}
                       className={`w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-left hover:bg-gray-50 transition-all ${activeWorkspace?.id === ws.id ? 'bg-gray-50 text-black' : 'text-gray-600'}`}>
                       <span>🏢</span>
                       <span className="truncate">{ws.client_name || ws.name}</span>
-                      {activeWorkspace?.id === ws.id && (
-                        <span className="ml-auto text-black">✓</span>
-                      )}
+                      {activeWorkspace?.id === ws.id && <span className="ml-auto text-black">✓</span>}
                     </button>
                   ))}
                 </>
               )}
 
-              {/* ADD CLIENT — agency only */}
               {plan === 'agency' && (
-                <Link
-                  href="/workspaces/new"
-                  onClick={() => setWsOpen(false)}
+                <Link href="/workspaces/new" onClick={() => setWsOpen(false)}
                   className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-gray-400 hover:text-black hover:bg-gray-50 transition-all border-t border-gray-50">
                   <span>+</span> Add client workspace
                 </Link>
               )}
 
-              {/* CLIENT WORKSPACES UPGRADE PROMPT — non-agency */}
               {plan !== 'agency' && (
                 <button
                   onClick={() => setShowUpgradeNudge(p => !p)}
@@ -184,16 +191,13 @@ export default function Sidebar() {
                 </button>
               )}
 
-              {/* INLINE UPGRADE NUDGE */}
               {showUpgradeNudge && plan !== 'agency' && (
                 <div className="px-3 py-3 bg-purple-50 border-t border-purple-100">
                   <p className="text-xs text-purple-700 font-semibold mb-1">Manage client workspaces</p>
                   <p className="text-xs text-purple-500 mb-2 leading-relaxed">
                     Create separate workspaces for each client with their own accounts, posts, and analytics.
                   </p>
-                  <Link
-                    href="/pricing"
-                    onClick={() => setWsOpen(false)}
+                  <Link href="/pricing" onClick={() => setWsOpen(false)}
                     className="block text-center bg-purple-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-purple-700 transition-all">
                     Upgrade to Agency →
                   </Link>
@@ -215,7 +219,9 @@ export default function Sidebar() {
               const active = pathname === item.href
               return (
                 <Link key={item.label} href={item.href}
-                  className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${active ? 'bg-gray-100 text-black' : 'text-gray-500 hover:bg-gray-50 hover:text-black'}`}>
+                  className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                    active ? 'bg-gray-100 text-black' : 'text-gray-500 hover:bg-gray-50 hover:text-black'
+                  }`}>
                   <span>{item.icon}</span>{item.label}
                 </Link>
               )
@@ -232,43 +238,44 @@ export default function Sidebar() {
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs font-semibold text-gray-500">AI Credits</span>
             <span className="text-xs font-bold text-gray-700">
-              {loading ? '...' : plan === 'agency' ? '∞' : `${creditsRemaining}/${creditsTotal}`}
+              {loading ? '...' : `${credits}/${creditsTotal}`}
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-1.5">
             <div
-              className={`h-1.5 rounded-full transition-all ${plan === 'agency' ? 'bg-purple-400' : 'bg-black'}`}
+              className={`h-1.5 rounded-full transition-all ${
+                plan === 'agency' ? 'bg-purple-400' :
+                creditsBar < 20 ? 'bg-red-400' :
+                creditsBar < 50 ? 'bg-yellow-400' : 'bg-black'
+              }`}
               style={{ width: `${creditsBar}%` }}
             />
           </div>
           <p className="text-xs text-gray-400 mt-1.5">
-            {loading ? 'Loading...' : plan === 'agency' ? 'Unlimited credits' : `${creditsRemaining} credits remaining`}
+            {loading ? 'Loading...' : `${credits} remaining`}
           </p>
         </div>
 
-        {/* TEAM SEATS / ACCOUNTS */}
+        {/* TEAM SEATS */}
         <div className="bg-gray-50 rounded-xl p-3">
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs font-semibold text-gray-500">Accounts</span>
+            <span className="text-xs font-semibold text-gray-500">Team Seats</span>
             <span className="text-xs font-bold text-gray-700">
-              {loading ? '...' : plan === 'agency' ? seatsUsed : `${seatsUsed}/${seatsTotal}`}
+              {loading ? '...' : `${seatsUsed}/${seatsTotal}`}
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-1.5">
             <div
-              className={`h-1.5 rounded-full transition-all ${plan === 'agency' ? 'bg-purple-400 w-full' : 'bg-black'}`}
-              style={plan === 'agency' ? {} : { width: `${seatsBar}%` }}
+              className={`h-1.5 rounded-full transition-all ${seatsUsed >= seatsTotal ? 'bg-red-400' : 'bg-black'}`}
+              style={{ width: `${seatsBar}%` }}
             />
           </div>
           <p className="text-xs text-gray-400 mt-1.5">
-            {loading ? 'Loading...' : plan === 'agency'
-              ? `${seatsUsed} seat${seatsUsed !== 1 ? 's' : ''} connected`
-              : `${seatsTotal - seatsUsed} seat${seatsTotal - seatsUsed !== 1 ? 's' : ''} remaining`
-            }
+            {loading ? 'Loading...' : `${seatsTotal - seatsUsed} seat${seatsTotal - seatsUsed !== 1 ? 's' : ''} remaining`}
           </p>
         </div>
 
-        {/* PLATFORMS CONNECTED */}
+        {/* PLATFORMS */}
         <div className="bg-gray-50 rounded-xl p-3">
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs font-semibold text-gray-500">Platforms</span>
@@ -280,7 +287,7 @@ export default function Sidebar() {
             <div className="bg-black h-1.5 rounded-full transition-all" style={{ width: `${platformsBar}%` }} />
           </div>
           <p className="text-xs text-gray-400 mt-1.5">
-            {loading ? 'Loading...' : `${PLATFORMS_TOTAL - platformsConnected} platforms available`}
+            {loading ? 'Loading...' : `${PLATFORMS_TOTAL - platformsConnected} available to connect`}
           </p>
         </div>
 
@@ -301,8 +308,7 @@ export default function Sidebar() {
         {/* USER */}
         <div className="px-1">
           <div className="text-xs text-gray-400 truncate mb-1">{user?.email}</div>
-          <button
-            onClick={handleSignOut}
+          <button onClick={handleSignOut}
             className="w-full text-left px-0 py-1 text-xs text-gray-400 hover:text-black transition-all">
             Sign out
           </button>

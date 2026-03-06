@@ -4,34 +4,52 @@ import { supabase } from '@/lib/supabase'
 
 export type Plan = 'free' | 'pro' | 'agency'
 
+export const PLATFORMS_TOTAL = 16
+
 export const PLAN_CONFIG: Record<Plan, {
   label: string
   credits: number
+  creditBank: number
   seats: number
   accounts: number
   maxPosts: number
+  scheduleWeeks: number
 }> = {
   free: {
     label: 'Free',
     credits: 100,
-    seats: 1,
+    creditBank: 300,
+    seats: 2,
     accounts: 1,
-    maxPosts: 10,
+    maxPosts: 100,
+    scheduleWeeks: 2,
   },
   pro: {
     label: 'Pro',
     credits: 300,
-    seats: 5,
+    creditBank: 1000,
+    seats: 4,
     accounts: 5,
-    maxPosts: 100,
+    maxPosts: 1000,
+    scheduleWeeks: 4,
   },
   agency: {
     label: 'Agency',
     credits: 1000,
-    seats: 20,
+    creditBank: 5000,
+    seats: 50,
     accounts: 10,
-    maxPosts: -1,
+    maxPosts: 5000,
+    scheduleWeeks: 12,
   },
+}
+
+export type Workspace = {
+  id: string
+  name: string
+  is_personal: boolean
+  client_name?: string
+  owner_id: string
 }
 
 type WorkspaceContextType = {
@@ -39,8 +57,17 @@ type WorkspaceContextType = {
   setPlan: (plan: Plan) => void
   credits: number
   setCredits: (credits: number) => void
+  creditsUsed: number
+  creditsTotal: number
   workspaceName: string
   setWorkspaceName: (name: string) => void
+  workspaces: Workspace[]
+  activeWorkspace: Workspace | null
+  setActiveWorkspace: (ws: Workspace) => void
+  seatsUsed: number
+  seatsTotal: number
+  platformsConnected: number
+  loading: boolean
 }
 
 const WorkspaceContext = createContext<WorkspaceContextType>({
@@ -48,40 +75,111 @@ const WorkspaceContext = createContext<WorkspaceContextType>({
   setPlan: () => {},
   credits: 100,
   setCredits: () => {},
+  creditsUsed: 0,
+  creditsTotal: 100,
   workspaceName: 'My Workspace',
   setWorkspaceName: () => {},
+  workspaces: [],
+  activeWorkspace: null,
+  setActiveWorkspace: () => {},
+  seatsUsed: 1,
+  seatsTotal: 2,
+  platformsConnected: 0,
+  loading: true,
 })
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [plan, setPlan] = useState<Plan>('free')
   const [credits, setCredits] = useState(100)
+  const [creditsUsed, setCreditsUsed] = useState(0)
   const [workspaceName, setWorkspaceName] = useState('My Workspace')
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([])
+  const [activeWorkspace, setActiveWorkspace] = useState<Workspace | null>(null)
+  const [seatsUsed, setSeatsUsed] = useState(1)
+  const [platformsConnected, setPlatformsConnected] = useState(0)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const loadWorkspace = async () => {
+    const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return
+      if (!user) { setLoading(false); return }
 
-      const { data } = await supabase
+      // Load workspace
+      const { data: ws } = await supabase
         .from('workspaces')
-        .select('plan, credits, name')
+        .select('*')
         .eq('owner_id', user.id)
+
+      if (ws && ws.length > 0) {
+        setWorkspaces(ws)
+        const personal = ws.find((w: Workspace) => w.is_personal) || ws[0]
+        setActiveWorkspace(personal)
+        setWorkspaceName(personal.name || 'My Workspace')
+      } else {
+        // fallback personal workspace object
+        const fallback: Workspace = {
+          id: user.id,
+          name: 'My Workspace',
+          is_personal: true,
+          owner_id: user.id,
+        }
+        setWorkspaces([fallback])
+        setActiveWorkspace(fallback)
+      }
+
+      // Load plan + credits
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('plan, credits, credits_used')
+        .eq('id', user.id)
         .single()
 
-      if (data) {
-        setPlan((data.plan as Plan) || 'free')
-        setCredits(data.credits ?? PLAN_CONFIG[data.plan as Plan]?.credits ?? 100)
-        setWorkspaceName(data.name || 'My Workspace')
+      if (profile) {
+        const p = (profile.plan as Plan) || 'free'
+        setPlan(p)
+        setCredits(profile.credits ?? PLAN_CONFIG[p].credits)
+        setCreditsUsed(profile.credits_used ?? 0)
       }
+
+      // Load team seat count
+      const { data: teamData } = await supabase
+        .from('team_members')
+        .select('id')
+        .eq('owner_id', user.id)
+
+      setSeatsUsed((teamData?.length || 0) + 1) // +1 for owner
+
+      // Load connected platforms count
+      const { data: accountsData } = await supabase
+        .from('connected_accounts')
+        .select('platform')
+        .eq('user_id', user.id)
+
+      const uniquePlatforms = new Set(accountsData?.map((a: any) => a.platform) || [])
+      setPlatformsConnected(uniquePlatforms.size)
+
+      setLoading(false)
     }
-    loadWorkspace()
+
+    load()
   }, [])
+
+  const planConfig = PLAN_CONFIG[plan]
 
   return (
     <WorkspaceContext.Provider value={{
       plan, setPlan,
       credits, setCredits,
-      workspaceName, setWorkspaceName
+      creditsUsed,
+      creditsTotal: planConfig.credits,
+      workspaceName, setWorkspaceName,
+      workspaces,
+      activeWorkspace,
+      setActiveWorkspace,
+      seatsUsed,
+      seatsTotal: planConfig.seats,
+      platformsConnected,
+      loading,
     }}>
       {children}
     </WorkspaceContext.Provider>
