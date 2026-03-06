@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
+import { useWorkspace } from '@/contexts/WorkspaceContext'
 
 function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 rounded-xl animate-pulse ${className}`} />
@@ -22,30 +23,62 @@ const PLATFORM_ICONS: Record<string, string> = {
   instagram: '📸', twitter: '🐦', linkedin: '💼', tiktok: '🎵',
   facebook: '📘', pinterest: '📌', youtube: '▶️', threads: '🧵',
   snapchat: '👻', bluesky: '🦋', reddit: '🤖', discord: '💬',
-  telegram: '✈️', mastodon: '🐘', lemon8: '🍋', bereal: '📷', whatsapp: '💚',
+  telegram: '✈️', mastodon: '🐘', lemon8: '🍋', bereal: '📷',
 }
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+
+// What each plan can access
+const PLAN_RANGES: Record<string, string[]> = {
+  free:   ['7', '30'],
+  pro:    ['7', '30', '90'],
+  agency: ['7', '30', '90', 'all'],
+}
+
+const RANGE_LABELS: Record<string, string> = {
+  '7': '7d', '30': '30d', '90': '90d', 'all': 'All Time'
+}
+
+const RANGE_REQUIRED_PLAN: Record<string, string> = {
+  '90': 'Pro', 'all': 'Agency'
+}
 
 export default function Analytics() {
   const [user, setUser] = useState<any>(null)
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
   const [range, setRange] = useState<'7' | '30' | '90' | 'all'>('30')
+  const [lockedRange, setLockedRange] = useState<string | null>(null)
   const router = useRouter()
+  const { plan } = useWorkspace()
+
+  const allowedRanges = PLAN_RANGES[plan] || PLAN_RANGES.free
 
   useEffect(() => {
     const getData = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
       setUser(user)
-      const { data } = await supabase.from('posts').select('*').eq('user_id', user.id).order('created_at', { ascending: true })
+      const { data } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: true })
       setPosts(data || [])
       setLoading(false)
     }
     getData()
   }, [])
+
+  const handleRangeClick = (r: '7' | '30' | '90' | 'all') => {
+    if (!allowedRanges.includes(r)) {
+      setLockedRange(r)
+      return
+    }
+    setLockedRange(null)
+    setRange(r)
+  }
 
   const now = new Date()
   const rangeDays = range === 'all' ? 9999 : parseInt(range)
@@ -110,7 +143,6 @@ export default function Analytics() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar />
-
       <div className="ml-56 flex-1 p-8">
         <div className="max-w-7xl mx-auto">
 
@@ -120,14 +152,51 @@ export default function Analytics() {
               <p className="text-sm text-gray-400 mt-0.5">Real data from your posting activity</p>
             </div>
             <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-xl p-1">
-              {(['7', '30', '90', 'all'] as const).map(r => (
-                <button key={r} onClick={() => setRange(r)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${range === r ? 'bg-black text-white' : 'text-gray-500 hover:text-black'}`}>
-                  {r === 'all' ? 'All Time' : `${r}d`}
-                </button>
-              ))}
+              {(['7', '30', '90', 'all'] as const).map(r => {
+                const allowed = allowedRanges.includes(r)
+                const isActive = range === r
+                return (
+                  <button key={r} onClick={() => handleRangeClick(r)}
+                    className={`relative px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                      isActive ? 'bg-black text-white'
+                      : allowed ? 'text-gray-500 hover:text-black'
+                      : 'text-gray-300 cursor-pointer'
+                    }`}>
+                    {RANGE_LABELS[r]}
+                    {!allowed && <span className="ml-1 text-gray-300">🔒</span>}
+                  </button>
+                )
+              })}
             </div>
           </div>
+
+          {/* LOCKED RANGE NUDGE */}
+          {lockedRange && !allowedRanges.includes(lockedRange) && (
+            <div className="mb-6 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-bold text-amber-800">
+                  {RANGE_LABELS[lockedRange]} history requires {RANGE_REQUIRED_PLAN[lockedRange]}
+                </p>
+                <p className="text-xs text-amber-600 mt-0.5">
+                  {lockedRange === '90' ? 'Pro plan includes 90-day analytics history.' : 'Agency plan includes full all-time history.'}
+                </p>
+              </div>
+              <Link href="/pricing"
+                className="bg-black text-white text-xs font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all flex-shrink-0 ml-4">
+                Upgrade →
+              </Link>
+            </div>
+          )}
+
+          {/* PLAN HISTORY BANNER */}
+          {plan === 'free' && (
+            <div className="mb-6 bg-gray-50 border border-gray-200 rounded-2xl px-5 py-3 flex items-center justify-between">
+              <p className="text-xs text-gray-500 font-semibold">
+                📊 Free plan includes up to 30-day history · <span className="text-gray-400 font-normal">Upgrade for 90-day and all-time data</span>
+              </p>
+              <Link href="/pricing" className="text-xs font-bold text-black underline ml-4">Upgrade →</Link>
+            </div>
+          )}
 
           <div className="grid grid-cols-4 gap-4 mb-6">
             {loading ? [1,2,3,4].map(i => (
@@ -361,9 +430,24 @@ export default function Analytics() {
                   )
                 })()}
               </div>
+
+              {/* UPGRADE CARD for free/pro */}
+              {plan !== 'agency' && (
+                <div className={`rounded-2xl p-5 border ${plan === 'free' ? 'bg-blue-50 border-blue-100' : 'bg-purple-50 border-purple-100'}`}>
+                  <p className={`text-xs font-bold mb-1 ${plan === 'free' ? 'text-blue-700' : 'text-purple-700'}`}>
+                    {plan === 'free' ? '⚡ Unlock more history' : '🏢 Unlock all-time history'}
+                  </p>
+                  <p className={`text-xs mb-3 ${plan === 'free' ? 'text-blue-600' : 'text-purple-600'}`}>
+                    {plan === 'free' ? 'Pro plan includes 90-day analytics history.' : 'Agency plan includes full all-time data.'}
+                  </p>
+                  <Link href="/pricing"
+                    className={`block text-center text-white text-xs font-bold px-3 py-2 rounded-xl hover:opacity-80 transition-all ${plan === 'free' ? 'bg-blue-600' : 'bg-purple-600'}`}>
+                    {plan === 'free' ? 'Upgrade to Pro →' : 'Upgrade to Agency →'}
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
-
         </div>
       </div>
     </div>
