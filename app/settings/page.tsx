@@ -1,668 +1,402 @@
 'use client'
-import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
+import { useState } from 'react'
 import Sidebar from '@/components/Sidebar'
-import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
-import Link from 'next/link'
+import { useWorkspace } from '@/contexts/WorkspaceContext'
 
-function SkeletonBox({ className }: { className?: string }) {
-  return <div className={`bg-gray-100 rounded-xl animate-pulse ${className}`} />
-}
+const TABS = ['Profile', 'Plan', 'Referrals', 'Notifications', 'Security', 'White Label']
 
-const ALL_PLATFORMS = [
-  { id: 'instagram', icon: '📸', label: 'Instagram' },
-  { id: 'twitter',   icon: '🐦', label: 'X / Twitter' },
-  { id: 'linkedin',  icon: '💼', label: 'LinkedIn' },
-  { id: 'tiktok',    icon: '🎵', label: 'TikTok' },
-  { id: 'facebook',  icon: '📘', label: 'Facebook' },
-  { id: 'threads',   icon: '🧵', label: 'Threads' },
-  { id: 'pinterest', icon: '📌', label: 'Pinterest' },
-  { id: 'youtube',   icon: '▶️', label: 'YouTube' },
-  { id: 'snapchat',  icon: '👻', label: 'Snapchat' },
-  { id: 'bluesky',   icon: '🦋', label: 'Bluesky' },
-  { id: 'reddit',    icon: '🤖', label: 'Reddit' },
-  { id: 'discord',   icon: '💬', label: 'Discord' },
-  { id: 'telegram',  icon: '✈️', label: 'Telegram' },
-  { id: 'mastodon',  icon: '🐘', label: 'Mastodon' },
-  { id: 'lemon8',    icon: '🍋', label: 'Lemon8' },
-  { id: 'bereal',    icon: '📷', label: 'BeReal' },
+const REFERRAL_TIERS = [
+  { paying: 5,   reward: '1 month Pro free',  icon: '🎁' },
+  { paying: 10,  reward: '3 months Pro free', icon: '⭐' },
+  { paying: 25,  reward: '6 months Pro free', icon: '🚀' },
+  { paying: 50,  reward: '1 year Pro free',   icon: '💎' },
+  { paying: 100, reward: 'Pro free for life', icon: '👑' },
 ]
 
-const TIMEZONES = [
-  'America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles',
-  'America/Anchorage', 'Pacific/Honolulu', 'Europe/London', 'Europe/Paris',
-  'Europe/Berlin', 'Asia/Tokyo', 'Asia/Shanghai', 'Asia/Kolkata',
-  'Australia/Sydney', 'Pacific/Auckland',
+const MOCK_HISTORY = [
+  { name: 'Alex M.',   date: 'Feb 28, 2025', status: 'Upgraded to Pro',  reward: '+50 credits' },
+  { name: 'Jordan K.', date: 'Feb 14, 2025', status: 'Signed up',        reward: '+5 credits'  },
+  { name: 'Sam R.',    date: 'Jan 30, 2025', status: 'Upgraded to Pro',  reward: '+50 credits' },
 ]
-
-const TABS = [
-  { id: 'profile',       label: 'Profile',      icon: '👤' },
-  { id: 'plan',          label: 'Plan',         icon: '⚡' },
-  { id: 'preferences',  label: 'Preferences',  icon: '⚙️' },
-  { id: 'notifications', label: 'Notifications', icon: '🔔' },
-  { id: 'danger',        label: 'Danger Zone',  icon: '⚠️' },
-]
-
-const PLAN_DETAILS = {
-  free: {
-    label: 'Free',
-    color: 'bg-gray-100 text-gray-600',
-    ring: 'border-gray-200',
-    price: '$0 / month',
-    features: [
-      '1 account per platform',
-      '2 team seats',
-      '100 AI credits / month',
-      '2-week scheduling horizon',
-      '16 platforms',
-      'Link in Bio (with branding)',
-      'Bulk Scheduler',
-      'Analytics (30-day history)',
-    ],
-  },
-  pro: {
-    label: 'Pro',
-    color: 'bg-blue-100 text-blue-600',
-    ring: 'border-blue-300',
-    price: '$5 / month',
-    features: [
-      '5 accounts per platform',
-      '4 team seats',
-      '300 AI credits / month',
-      '1-month scheduling horizon',
-      '16 platforms',
-      'Link in Bio (custom domain)',
-      'Bulk Scheduler',
-      'Analytics (90-day history)',
-      'White Label add-on available',
-      'Priority support',
-    ],
-  },
-  agency: {
-    label: 'Agency',
-    color: 'bg-purple-100 text-purple-600',
-    ring: 'border-purple-300',
-    price: '$20 / month',
-    features: [
-      '10 accounts per platform',
-      '50 team seats',
-      '1,000 AI credits / month',
-      '3-month scheduling horizon',
-      '16 platforms',
-      'Client workspaces',
-      'Link in Bio (custom domain)',
-      'Analytics (all-time history)',
-      'PDF export (any date range)',
-      'White Label add-on available',
-      'Dedicated support',
-    ],
-  },
-}
 
 export default function Settings() {
-  const [user, setUser] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
-  const [activeTab, setActiveTab] = useState<'profile' | 'plan' | 'preferences' | 'notifications' | 'danger'>('profile')
+  const { plan } = useWorkspace()
+  const [activeTab, setActiveTab] = useState('Profile')
+  const [saved, setSaved] = useState(false)
+  const [whiteLabel, setWhiteLabel] = useState(false)
+  const [notifications, setNotifications] = useState({
+    postPublished: true,
+    postFailed: true,
+    weeklyDigest: false,
+    creditLow: true,
+    teamActivity: false,
+    productUpdates: true,
+  })
+  const [copiedLink, setCopiedLink] = useState(false)
 
-  const [displayName, setDisplayName] = useState('')
-  const [bio, setBio] = useState('')
-  const [website, setWebsite] = useState('')
-  const [timezone, setTimezone] = useState('America/New_York')
+  const referralCode = 'SOCIAL-DEMO'
+  const referralLink = `https://socialmate.app/signup?ref=${referralCode}`
+  const payingReferrals = 2
+  const totalReferrals = 3
+  const creditsEarned = 105
 
-  const [emailDigest, setEmailDigest] = useState(true)
-  const [postReminders, setPostReminders] = useState(true)
-  const [weeklyReport, setWeeklyReport] = useState(false)
-
-  const [defaultPlatforms, setDefaultPlatforms] = useState<string[]>(['instagram'])
-  const [defaultStatus, setDefaultStatus] = useState<'draft' | 'scheduled'>('draft')
-  const [theme, setTheme] = useState<'light' | 'system'>('light')
-
-  const [whiteLabelEnabled, setWhiteLabelEnabled] = useState(false)
-  const [whiteLabelToggledOn, setWhiteLabelToggledOn] = useState(false)
-
-  const [deleteConfirm, setDeleteConfirm] = useState('')
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-
-  const router = useRouter()
-  const { plan, credits, creditsUsed, creditsTotal, seatsUsed, seatsTotal, platformsConnected } = useWorkspace()
-
-  useEffect(() => {
-    const getData = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
-      setUser(user)
-
-      const { data } = await supabase
-        .from('user_settings')
-        .select('*')
-        .eq('user_id', user.id)
-        .single()
-
-      if (data) {
-        setDisplayName(data.display_name || '')
-        setBio(data.bio || '')
-        setWebsite(data.website || '')
-        setTimezone(data.timezone || 'America/New_York')
-        setEmailDigest(data.email_digest ?? true)
-        setPostReminders(data.post_reminders ?? true)
-        setWeeklyReport(data.weekly_report ?? false)
-        setDefaultPlatforms(data.default_platforms || ['instagram'])
-        setDefaultStatus(data.default_status || 'draft')
-        setTheme(data.theme || 'light')
-        setWhiteLabelEnabled(data.white_label_enabled ?? false)
-        setWhiteLabelToggledOn(data.white_label_enabled ?? false)
-      }
-      setLoading(false)
-    }
-    getData()
-  }, [])
-
-  const showToast = (message: string, type: 'success' | 'error') => {
-    setToast({ message, type })
-    setTimeout(() => setToast(null), 3000)
+  const handleSave = () => {
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
   }
 
-  const handleSave = async () => {
-    setSaving(true)
-    const { error } = await supabase
-      .from('user_settings')
-      .upsert({
-        user_id: user.id,
-        display_name: displayName,
-        bio,
-        website,
-        timezone,
-        email_digest: emailDigest,
-        post_reminders: postReminders,
-        weekly_report: weeklyReport,
-        default_platforms: defaultPlatforms,
-        default_status: defaultStatus,
-        theme,
-        white_label_enabled: whiteLabelEnabled,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: 'user_id' })
-    if (error) { showToast('Failed to save settings', 'error'); setSaving(false); return }
-    showToast('Settings saved!', 'success')
-    setSaving(false)
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(referralLink)
+    setCopiedLink(true)
+    setTimeout(() => setCopiedLink(false), 2000)
   }
-
-  const handleDeleteAccount = async () => {
-    if (deleteConfirm !== user?.email) { showToast('Email does not match', 'error'); return }
-    await supabase.auth.signOut()
-    router.push('/')
-  }
-
-  const togglePlatform = (id: string) => {
-    setDefaultPlatforms(prev =>
-      prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
-    )
-  }
-
-  const canUseWhiteLabel = plan === 'pro' || plan === 'agency'
-  const currentPlan = PLAN_DETAILS[plan]
-  const creditsRemaining = credits
-  const creditsBar = Math.max(0, (creditsRemaining / creditsTotal) * 100)
-  const seatsBar = Math.min(100, (seatsUsed / seatsTotal) * 100)
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar />
       <div className="ml-56 flex-1 p-8">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-3xl mx-auto">
 
           <div className="mb-8">
             <h1 className="text-2xl font-extrabold tracking-tight">Settings</h1>
-            <p className="text-sm text-gray-400 mt-0.5">Manage your account and preferences</p>
+            <p className="text-sm text-gray-400 mt-0.5">Manage your account, plan, and preferences</p>
           </div>
 
           {/* TABS */}
-          <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-2xl p-1 mb-6 overflow-x-auto">
+          <div className="flex items-center gap-1 mb-6 bg-white border border-gray-100 rounded-2xl p-1.5 flex-wrap">
             {TABS.map(tab => (
-              <button key={tab.id} onClick={() => setActiveTab(tab.id as any)}
-                className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
-                  activeTab === tab.id ? 'bg-black text-white' : 'text-gray-500 hover:text-black'
+              <button key={tab} onClick={() => setActiveTab(tab)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                  activeTab === tab ? 'bg-black text-white' : 'text-gray-500 hover:text-black'
                 }`}>
-                <span>{tab.icon}</span>{tab.label}
+                {tab}
               </button>
             ))}
           </div>
 
-          {loading ? (
-            <div className="space-y-4">
-              {[1,2,3].map(i => <SkeletonBox key={i} className="h-16 rounded-2xl" />)}
+          {/* ── PROFILE ── */}
+          {activeTab === 'Profile' && (
+            <div className="bg-white border border-gray-100 rounded-2xl p-6 space-y-4">
+              <h2 className="text-base font-extrabold">Profile</h2>
+              <div>
+                <label className="text-xs font-bold text-gray-500 block mb-1">Display Name</label>
+                <input defaultValue="Joshua" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all" />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-500 block mb-1">Email</label>
+                <input defaultValue="renewalmate.updates@gmail.com" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all" />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-500 block mb-1">Username / Handle</label>
+                <input defaultValue="@joshua" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all" />
+              </div>
+              <div>
+                <label className="text-xs font-bold text-gray-500 block mb-1">Bio</label>
+                <textarea rows={3} placeholder="Tell your audience about yourself..." className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all resize-none" />
+              </div>
+              <button onClick={handleSave}
+                className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${saved ? 'bg-green-500 text-white' : 'bg-black text-white hover:opacity-80'}`}>
+                {saved ? '✓ Saved!' : 'Save Changes'}
+              </button>
             </div>
-          ) : (
-            <>
-              {/* PROFILE */}
-              {activeTab === 'profile' && (
-                <div className="bg-white border border-gray-100 rounded-2xl p-6 space-y-5">
+          )}
+
+          {/* ── PLAN ── */}
+          {activeTab === 'Plan' && (
+            <div className="space-y-4">
+              <div className="bg-white border border-gray-100 rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-4">
                   <div>
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Email</p>
-                    <p className="text-sm font-medium text-gray-700 px-3 py-2.5 bg-gray-50 rounded-xl">{user?.email}</p>
-                    <p className="text-xs text-gray-400 mt-1">Email cannot be changed here</p>
+                    <h2 className="text-base font-extrabold">Current Plan</h2>
+                    <p className="text-xs text-gray-400 mt-0.5">Your active subscription</p>
                   </div>
-                  <div>
-                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Display Name</label>
-                    <input type="text" value={displayName} onChange={e => setDisplayName(e.target.value)}
-                      placeholder="Your name or brand name"
-                      className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400" />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Bio</label>
-                    <textarea value={bio} onChange={e => setBio(e.target.value)}
-                      placeholder="A short description of you or your brand"
-                      rows={3}
-                      className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 resize-none" />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Website</label>
-                    <input type="url" value={website} onChange={e => setWebsite(e.target.value)}
-                      placeholder="https://yourwebsite.com"
-                      className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400" />
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Timezone</label>
-                    <select value={timezone} onChange={e => setTimezone(e.target.value)}
-                      className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 bg-white">
-                      {TIMEZONES.map(tz => <option key={tz} value={tz}>{tz}</option>)}
-                    </select>
-                  </div>
+                  <span className={`text-xs font-bold px-3 py-1.5 rounded-full capitalize ${
+                    plan === 'free' ? 'bg-gray-100 text-gray-600' :
+                    plan === 'pro' ? 'bg-black text-white' :
+                    'bg-purple-100 text-purple-700'
+                  }`}>{plan}</span>
                 </div>
-              )}
-
-              {/* PLAN */}
-              {activeTab === 'plan' && (
-                <div className="space-y-4">
-
-                  {/* CURRENT PLAN CARD */}
-                  <div className={`bg-white border-2 ${currentPlan.ring} rounded-2xl p-6`}>
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${currentPlan.color}`}>
-                            {currentPlan.label}
-                          </span>
-                          <span className="text-xs text-gray-400 font-semibold">Current plan</span>
-                        </div>
-                        <p className="text-2xl font-extrabold tracking-tight">{currentPlan.price}</p>
-                      </div>
-                      {plan !== 'agency' && (
-                        <Link href="/pricing"
-                          className="bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all">
-                          {plan === 'free' ? '⚡ Upgrade to Pro' : '🏢 Upgrade to Agency'}
-                        </Link>
-                      )}
-                      {plan === 'agency' && (
-                        <span className="text-xs font-bold text-purple-600 bg-purple-50 px-3 py-2 rounded-xl">
-                          ✓ Max tier
-                        </span>
-                      )}
+                {plan === 'free' && (
+                  <div className="space-y-3">
+                    <div className="bg-black text-white rounded-xl p-4">
+                      <p className="text-sm font-extrabold mb-1">Upgrade to Pro — $5/month</p>
+                      <p className="text-xs text-gray-400 mb-3">5 accounts, 300 AI credits, 10 GB storage, 90-day analytics</p>
+                      <button className="bg-white text-black text-xs font-bold px-4 py-2 rounded-lg hover:opacity-80 transition-all">
+                        Upgrade to Pro →
+                      </button>
                     </div>
-
-                    {/* USAGE METERS */}
-                    <div className="space-y-3 pt-4 border-t border-gray-100">
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs font-semibold text-gray-500">AI Credits</span>
-                          <span className="text-xs font-bold text-gray-700">
-                            {`${creditsRemaining} / ${creditsTotal} remaining`}
-                          </span>
-                        </div>
-                        <div className="w-full bg-gray-100 rounded-full h-2">
-                          <div className={`h-2 rounded-full transition-all ${
-                            plan === 'agency' ? 'bg-purple-400' :
-                            creditsBar < 20 ? 'bg-red-400' :
-                            creditsBar < 50 ? 'bg-yellow-400' : 'bg-black'
-                          }`} style={{ width: `${creditsBar}%` }} />
-                        </div>
-                        <p className="text-xs text-gray-400 mt-1">Resets monthly · unused credits bank up</p>
-                      </div>
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs font-semibold text-gray-500">Team Seats</span>
-                          <span className="text-xs font-bold text-gray-700">
-                            {plan === 'agency'
-                              ? `${seatsUsed} used · 50 max`
-                              : `${seatsUsed} / ${seatsTotal} used`}
-                          </span>
-                        </div>
-                        <div className="w-full bg-gray-100 rounded-full h-2">
-                          <div className={`h-2 rounded-full transition-all ${seatsUsed >= seatsTotal ? 'bg-red-400' : 'bg-black'}`}
-                            style={{ width: `${seatsBar}%` }} />
-                        </div>
-                      </div>
-                      <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="text-xs font-semibold text-gray-500">Platforms Connected</span>
-                          <span className="text-xs font-bold text-gray-700">{platformsConnected} / 16</span>
-                        </div>
-                        <div className="w-full bg-gray-100 rounded-full h-2">
-                          <div className="bg-black h-2 rounded-full transition-all"
-                            style={{ width: `${Math.min(100, (platformsConnected / 16) * 100)}%` }} />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* INCLUDED FEATURES */}
-                    <div className="pt-4 border-t border-gray-100 mt-4">
-                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">What's included</p>
-                      <div className="grid grid-cols-2 gap-1.5">
-                        {currentPlan.features.map((f, i) => (
-                          <div key={i} className="flex items-center gap-2 text-xs text-gray-600">
-                            <span className="text-green-500 font-bold flex-shrink-0">✓</span>{f}
-                          </div>
-                        ))}
-                      </div>
+                    <div className="border border-purple-200 rounded-xl p-4">
+                      <p className="text-sm font-extrabold mb-1">Agency — $20/month</p>
+                      <p className="text-xs text-gray-400 mb-3">Unlimited seats, client workspaces, 50 GB storage, all-time analytics</p>
+                      <button className="bg-purple-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:opacity-80 transition-all">
+                        Upgrade to Agency →
+                      </button>
                     </div>
                   </div>
-
-                  {/* WHITE LABEL ADD-ON */}
-                  {canUseWhiteLabel ? (
-                    <div className={`rounded-2xl p-6 border-2 transition-all ${
-                      whiteLabelEnabled
-                        ? 'bg-black border-black text-white'
-                        : 'bg-white border-gray-200'
-                    }`}>
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-base">🏷️</span>
-                            <p className={`text-sm font-extrabold ${whiteLabelEnabled ? 'text-white' : 'text-gray-900'}`}>
-                              White Label Add-on
-                            </p>
-                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
-                              whiteLabelEnabled ? 'bg-white text-black' : 'bg-gray-100 text-gray-600'
-                            }`}>+$20/mo</span>
-                          </div>
-                          <p className={`text-xs leading-relaxed ${whiteLabelEnabled ? 'text-gray-400' : 'text-gray-500'}`}>
-                            Remove all SocialMate branding. Use your own logo, colors, and custom domain.
-                            Client-facing dashboards show your brand — not ours.
-                          </p>
-                          {whiteLabelEnabled && (
-                            <div className="mt-3 space-y-1">
-                              {[
-                                'SocialMate branding removed everywhere',
-                                'Custom logo + brand colors',
-                                'Custom domain support',
-                                'Client dashboards show your brand',
-                              ].map(f => (
-                                <div key={f} className="flex items-center gap-2 text-xs text-gray-300">
-                                  <span className="text-green-400 font-bold">✓</span>{f}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                        <button
-                          onClick={() => setWhiteLabelEnabled(p => !p)}
-                          className={`w-12 h-6 rounded-full transition-all relative flex-shrink-0 mt-1 ${
-                            whiteLabelEnabled ? 'bg-white' : 'bg-gray-200'
-                          }`}>
-                          <div className={`w-4 h-4 rounded-full absolute top-1 transition-all ${
-                            whiteLabelEnabled ? 'left-7 bg-black' : 'left-1 bg-white'
-                          }`} />
-                        </button>
-                      </div>
-                      {whiteLabelEnabled !== whiteLabelToggledOn && (
-                        <div className={`mt-4 pt-4 border-t ${whiteLabelEnabled ? 'border-gray-700' : 'border-gray-100'}`}>
-                          <p className={`text-xs ${whiteLabelEnabled ? 'text-gray-400' : 'text-gray-500'}`}>
-                            {whiteLabelEnabled
-                              ? '💳 Saving this will add $20/mo to your subscription via Stripe.'
-                              : '⚠️ Disabling White Label will remove custom branding from your account on next billing cycle.'
-                            }
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="bg-gray-50 border border-gray-200 rounded-2xl p-6">
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-base">🏷️</span>
-                            <p className="text-sm font-extrabold text-gray-400">White Label Add-on</p>
-                            <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-gray-200 text-gray-500">Pro / Agency</span>
-                          </div>
-                          <p className="text-xs text-gray-400 leading-relaxed">
-                            Remove SocialMate branding and use your own. Available on Pro and Agency plans.
-                          </p>
-                        </div>
-                        <div className="w-12 h-6 rounded-full bg-gray-200 relative flex-shrink-0 mt-1 opacity-40">
-                          <div className="w-4 h-4 bg-white rounded-full absolute top-1 left-1" />
-                        </div>
-                      </div>
-                      <Link href="/pricing"
-                        className="inline-block mt-4 text-xs font-bold px-4 py-2 bg-black text-white rounded-xl hover:opacity-80 transition-all">
-                        Upgrade to unlock →
-                      </Link>
-                    </div>
-                  )}
-
-                  {/* UPGRADE OPTIONS */}
-                  {plan !== 'agency' && (
-                    <div className="bg-white border border-gray-100 rounded-2xl p-6">
-                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-4">
-                        {plan === 'free' ? 'Available Upgrades' : 'Next Tier'}
-                      </p>
-                      <div className="space-y-3">
-                        {plan === 'free' && (
-                          <div className="border border-blue-100 bg-blue-50 rounded-xl p-4 flex items-center justify-between">
-                            <div>
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-xs font-bold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">Pro</span>
-                                <span className="text-xs font-bold text-gray-700">$5 / month</span>
-                              </div>
-                              <p className="text-xs text-gray-500">5 accounts · 300 AI credits · 4 team seats · 90-day analytics</p>
-                            </div>
-                            <Link href="/pricing"
-                              className="bg-blue-600 text-white text-xs font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all flex-shrink-0 ml-4">
-                              Upgrade →
-                            </Link>
-                          </div>
-                        )}
-                        <div className="border border-purple-100 bg-purple-50 rounded-xl p-4 flex items-center justify-between">
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="text-xs font-bold text-purple-600 bg-purple-100 px-2 py-0.5 rounded-full">Agency</span>
-                              <span className="text-xs font-bold text-gray-700">$20 / month</span>
-                            </div>
-                            <p className="text-xs text-gray-500">10 accounts · 1,000 AI credits · 50 seats · client workspaces</p>
-                          </div>
-                          <Link href="/pricing"
-                            className="bg-purple-600 text-white text-xs font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all flex-shrink-0 ml-4">
-                            Upgrade →
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* BILLING NOTE */}
-                  <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 text-center">
-                    <p className="text-xs text-gray-400">
-                      {plan === 'free'
-                        ? "You're on the Free plan — no credit card required, ever."
-                        : 'Billing is managed via Stripe. To cancel or change your plan, contact support.'
-                      }
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* PREFERENCES */}
-              {activeTab === 'preferences' && (
-                <div className="bg-white border border-gray-100 rounded-2xl p-6 space-y-6">
+                )}
+                {plan !== 'free' && (
                   <div>
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Default Platforms</p>
-                    <p className="text-xs text-gray-400 mb-3">Pre-select these platforms when composing new posts</p>
-                    <div className="flex flex-wrap gap-2">
-                      {ALL_PLATFORMS.map(p => (
-                        <button key={p.id} onClick={() => togglePlatform(p.id)}
-                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
-                            defaultPlatforms.includes(p.id)
-                              ? 'bg-black text-white border-black'
-                              : 'border-gray-200 text-gray-500 hover:border-gray-400'
-                          }`}>
-                          <span>{p.icon}</span>{p.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Default Save Action</p>
-                    <div className="flex gap-3">
-                      {(['draft', 'scheduled'] as const).map(s => (
-                        <button key={s} onClick={() => setDefaultStatus(s)}
-                          className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
-                            defaultStatus === s ? 'bg-black text-white border-black' : 'border-gray-200 text-gray-500 hover:border-gray-400'
-                          }`}>
-                          {s === 'draft' ? '📂 Save as Draft' : '📅 Schedule'}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Theme</p>
-                    <div className="flex gap-3">
-                      {([['light', '☀️ Light'], ['system', '💻 System']] as const).map(([val, label]) => (
-                        <button key={val} onClick={() => setTheme(val)}
-                          className={`flex-1 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
-                            theme === val ? 'bg-black text-white border-black' : 'border-gray-200 text-gray-500 hover:border-gray-400'
-                          }`}>
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* NOTIFICATIONS */}
-              {activeTab === 'notifications' && (
-                <div className="space-y-4">
-                  <div className="bg-white border border-gray-100 rounded-2xl p-6 space-y-5">
-                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Email Notifications</p>
-                    {[
-                      { label: 'Email Digest',   sub: 'Daily summary of your scheduled posts',            value: emailDigest,    setter: setEmailDigest    },
-                      { label: 'Post Reminders', sub: 'Get reminded when a post is due to go out',        value: postReminders,  setter: setPostReminders  },
-                      { label: 'Weekly Report',  sub: 'Weekly analytics summary sent to your inbox',      value: weeklyReport,   setter: setWeeklyReport   },
-                    ].map(item => (
-                      <div key={item.label} className="flex items-center justify-between">
-                        <div>
-                          <p className="text-sm font-semibold">{item.label}</p>
-                          <p className="text-xs text-gray-400">{item.sub}</p>
-                        </div>
-                        <button onClick={() => item.setter(!item.value)}
-                          className={`w-11 h-6 rounded-full transition-all relative flex-shrink-0 ${item.value ? 'bg-black' : 'bg-gray-200'}`}>
-                          <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all ${item.value ? 'left-6' : 'left-1'}`} />
-                        </button>
-                      </div>
-                    ))}
-                    <div className="pt-2 border-t border-gray-100">
-                      <p className="text-xs text-gray-400">Emails sent to <span className="font-semibold text-gray-700">{user?.email}</span></p>
-                    </div>
-                  </div>
-
-                  <div className="bg-white border border-gray-100 rounded-2xl p-6 space-y-5">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Push Notifications</p>
-                        <p className="text-xs text-gray-400 mt-1">Browser and mobile push alerts</p>
-                      </div>
-                      <span className="text-xs font-bold bg-gray-100 text-gray-500 px-2.5 py-1 rounded-full">Coming soon</span>
-                    </div>
-                    {[
-                      { label: 'Post Published',  sub: 'Alert when a scheduled post goes live'         },
-                      { label: 'Post Failed',      sub: 'Alert if a scheduled post fails to publish'   },
-                      { label: 'Team Activity',    sub: 'Notify when a team member makes changes'      },
-                      { label: 'Credit Low',       sub: 'Warn when AI credits are running low'         },
-                    ].map(item => (
-                      <div key={item.label} className="flex items-center justify-between opacity-40">
-                        <div>
-                          <p className="text-sm font-semibold">{item.label}</p>
-                          <p className="text-xs text-gray-400">{item.sub}</p>
-                        </div>
-                        <div className="w-11 h-6 rounded-full bg-gray-200 relative flex-shrink-0">
-                          <div className="w-4 h-4 bg-white rounded-full absolute top-1 left-1" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* DANGER */}
-              {activeTab === 'danger' && (
-                <div className="space-y-4">
-                  <div className="bg-white border border-gray-100 rounded-2xl p-6">
-                    <h3 className="text-sm font-bold mb-1">Export Data</h3>
-                    <p className="text-xs text-gray-400 mb-4">Download a copy of all your posts and account data</p>
-                    <button className="text-sm font-semibold px-4 py-2.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
-                      📦 Export All Data
+                    <p className="text-xs text-gray-500 mb-3">Next billing date: April 1, 2025</p>
+                    <button className="text-xs font-bold text-red-500 hover:text-red-700 transition-all">
+                      Cancel subscription
                     </button>
                   </div>
-                  <div className="bg-red-50 border border-red-200 rounded-2xl p-6">
-                    <h3 className="text-sm font-bold text-red-700 mb-1">Delete Account</h3>
-                    <p className="text-xs text-red-500 mb-4">Permanently deletes your account and all data. This cannot be undone.</p>
-                    {!showDeleteConfirm ? (
-                      <button onClick={() => setShowDeleteConfirm(true)}
-                        className="text-sm font-semibold px-4 py-2.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all">
-                        Delete My Account
-                      </button>
-                    ) : (
-                      <div className="space-y-3">
-                        <p className="text-xs text-red-600 font-semibold">Type your email to confirm: <span className="font-bold">{user?.email}</span></p>
-                        <input type="email" value={deleteConfirm} onChange={e => setDeleteConfirm(e.target.value)}
-                          placeholder={user?.email}
-                          className="w-full px-3 py-2.5 text-sm border border-red-200 rounded-xl focus:outline-none focus:border-red-400 bg-white" />
-                        <div className="flex gap-2">
-                          <button onClick={handleDeleteAccount} disabled={deleteConfirm !== user?.email}
-                            className="text-sm font-semibold px-4 py-2.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
-                            Confirm Delete
-                          </button>
-                          <button onClick={() => { setShowDeleteConfirm(false); setDeleteConfirm('') }}
-                            className="text-sm font-semibold px-4 py-2.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
+                )}
+              </div>
 
-              {activeTab !== 'danger' && activeTab !== 'plan' && (
-                <div className="mt-4 flex justify-end">
-                  <button onClick={handleSave} disabled={saving}
-                    className="bg-black text-white text-sm font-semibold px-6 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
-                    {saving ? 'Saving...' : 'Save Changes'}
-                  </button>
+              <div className="bg-white border border-gray-100 rounded-2xl p-6">
+                <h2 className="text-base font-extrabold mb-4">AI Credits</h2>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs text-gray-500">Monthly credits</span>
+                  <span className="text-xs font-bold">100 / 100</span>
                 </div>
-              )}
-
-              {activeTab === 'plan' && whiteLabelEnabled !== whiteLabelToggledOn && (
-                <div className="mt-4 flex justify-end">
-                  <button onClick={handleSave} disabled={saving}
-                    className="bg-black text-white text-sm font-semibold px-6 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
-                    {saving ? 'Saving...' : 'Save Plan Changes'}
-                  </button>
+                <div className="w-full bg-gray-100 rounded-full h-2 mb-4">
+                  <div className="bg-black h-2 rounded-full" style={{ width: '100%' }} />
                 </div>
-              )}
-            </>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-500">Banked credits</span>
+                  <span className="text-xs font-bold">0 / 300</span>
+                </div>
+              </div>
+            </div>
           )}
+
+          {/* ── REFERRALS ── */}
+          {activeTab === 'Referrals' && (
+            <div className="space-y-4">
+
+              {/* STATS */}
+              <div className="grid grid-cols-3 gap-4">
+                {[
+                  { label: 'Total Referrals',   value: totalReferrals  },
+                  { label: 'Paying Referrals',  value: payingReferrals },
+                  { label: 'Credits Earned',    value: creditsEarned   },
+                ].map((stat, i) => (
+                  <div key={i} className="bg-white border border-gray-100 rounded-2xl p-5 text-center">
+                    <p className="text-3xl font-extrabold mb-1">{stat.value}</p>
+                    <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide">{stat.label}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* YOUR LINK */}
+              <div className="bg-black text-white rounded-2xl p-6">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Your Referral Link</p>
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="flex-1 bg-white/10 rounded-xl px-4 py-3 text-sm font-mono truncate">
+                    {referralLink}
+                  </div>
+                  <button onClick={handleCopyLink}
+                    className={`px-5 py-3 rounded-xl text-sm font-bold transition-all flex-shrink-0 ${
+                      copiedLink ? 'bg-green-500 text-white' : 'bg-white text-black hover:opacity-80'
+                    }`}>
+                    {copiedLink ? '✓ Copied!' : 'Copy'}
+                  </button>
+                </div>
+                <p className="text-xs text-gray-400">
+                  Signup → <span className="text-white font-bold">+5 credits</span> &nbsp;·&nbsp;
+                  Upgrades to Pro → <span className="text-white font-bold">+50 credits</span> &nbsp;·&nbsp;
+                  Upgrades to Agency → <span className="text-white font-bold">+100 credits</span>
+                </p>
+              </div>
+
+              {/* NEXT MILESTONE */}
+              <div className="bg-white border border-gray-100 rounded-2xl p-6">
+                <h2 className="text-base font-extrabold mb-1">Next Milestone</h2>
+                <p className="text-xs text-gray-400 mb-4">
+                  You have <span className="font-bold text-black">{payingReferrals}</span> paying referrals.
+                  Reach <span className="font-bold text-black">5</span> to unlock your first free month of Pro.
+                </p>
+                <div className="w-full bg-gray-100 rounded-full h-2.5 mb-2">
+                  <div className="bg-black h-2.5 rounded-full transition-all"
+                    style={{ width: `${Math.min((payingReferrals / 5) * 100, 100)}%` }} />
+                </div>
+                <p className="text-xs text-gray-400">{payingReferrals} / 5 paying referrals</p>
+              </div>
+
+              {/* ALL TIERS */}
+              <div className="bg-white border border-gray-100 rounded-2xl p-6">
+                <h2 className="text-base font-extrabold mb-5">Reward Tiers</h2>
+                <div className="space-y-3">
+                  {REFERRAL_TIERS.map((tier, i) => {
+                    const unlocked = payingReferrals >= tier.paying
+                    return (
+                      <div key={i} className={`flex items-center justify-between py-3 border-b border-gray-50 last:border-0 ${unlocked ? 'opacity-50' : ''}`}>
+                        <div className="flex items-center gap-3">
+                          <span className="text-xl">{unlocked ? '✅' : tier.icon}</span>
+                          <div>
+                            <p className="text-sm font-bold">
+                              {tier.paying} paying referral{tier.paying > 1 ? 's' : ''}
+                            </p>
+                            {unlocked && <p className="text-xs text-green-500 font-bold">Unlocked</p>}
+                          </div>
+                        </div>
+                        <span className="text-xs font-extrabold px-3 py-2 bg-black text-white rounded-xl flex-shrink-0">
+                          {tier.reward}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+                <p className="text-xs text-gray-400 mt-4 pt-4 border-t border-gray-50">
+                  Paying referrals only count after 30 days of active subscription. Abuse of the referral system results in permanent account termination.
+                </p>
+              </div>
+
+              {/* HISTORY */}
+              <div className="bg-white border border-gray-100 rounded-2xl p-6">
+                <h2 className="text-base font-extrabold mb-5">Referral History</h2>
+                <div className="space-y-2">
+                  {MOCK_HISTORY.map((entry, i) => (
+                    <div key={i} className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
+                      <div>
+                        <p className="text-sm font-bold">{entry.name}</p>
+                        <p className="text-xs text-gray-400">{entry.date} · {entry.status}</p>
+                      </div>
+                      <span className="text-xs font-bold text-green-600 bg-green-50 px-3 py-1.5 rounded-xl">
+                        {entry.reward}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          )}
+
+          {/* ── NOTIFICATIONS ── */}
+          {activeTab === 'Notifications' && (
+            <div className="bg-white border border-gray-100 rounded-2xl p-6">
+              <h2 className="text-base font-extrabold mb-5">Notification Preferences</h2>
+              <div className="space-y-4">
+                {[
+                  { key: 'postPublished', label: 'Post published',      desc: 'When a scheduled post goes live' },
+                  { key: 'postFailed',    label: 'Post failed',          desc: 'When a scheduled post fails to publish' },
+                  { key: 'weeklyDigest',  label: 'Weekly digest',        desc: 'Summary of your posting activity every Monday' },
+                  { key: 'creditLow',     label: 'Low AI credits',       desc: 'When your credits drop below 20' },
+                  { key: 'teamActivity',  label: 'Team activity',        desc: 'When team members schedule or edit posts' },
+                  { key: 'productUpdates',label: 'Product updates',      desc: 'New features and platform announcements' },
+                ].map(item => (
+                  <div key={item.key} className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
+                    <div>
+                      <p className="text-sm font-bold">{item.label}</p>
+                      <p className="text-xs text-gray-400">{item.desc}</p>
+                    </div>
+                    <button
+                      onClick={() => setNotifications(prev => ({ ...prev, [item.key]: !prev[item.key as keyof typeof prev] }))}
+                      className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 ${
+                        notifications[item.key as keyof typeof notifications] ? 'bg-black' : 'bg-gray-200'
+                      }`}>
+                      <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                        notifications[item.key as keyof typeof notifications] ? 'translate-x-5' : 'translate-x-0.5'
+                      }`} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              <button onClick={handleSave}
+                className={`mt-5 px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${saved ? 'bg-green-500 text-white' : 'bg-black text-white hover:opacity-80'}`}>
+                {saved ? '✓ Saved!' : 'Save Preferences'}
+              </button>
+            </div>
+          )}
+
+          {/* ── SECURITY ── */}
+          {activeTab === 'Security' && (
+            <div className="space-y-4">
+              <div className="bg-white border border-gray-100 rounded-2xl p-6">
+                <h2 className="text-base font-extrabold mb-5">Change Password</h2>
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 block mb-1">Current Password</label>
+                    <input type="password" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 block mb-1">New Password</label>
+                    <input type="password" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all" />
+                  </div>
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 block mb-1">Confirm New Password</label>
+                    <input type="password" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all" />
+                  </div>
+                  <button onClick={handleSave}
+                    className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${saved ? 'bg-green-500 text-white' : 'bg-black text-white hover:opacity-80'}`}>
+                    {saved ? '✓ Updated!' : 'Update Password'}
+                  </button>
+                </div>
+              </div>
+              <div className="bg-white border border-gray-100 rounded-2xl p-6">
+                <h2 className="text-base font-extrabold mb-1">Danger Zone</h2>
+                <p className="text-xs text-gray-400 mb-4">These actions are irreversible. Please be certain.</p>
+                <div className="space-y-3">
+                  <button className="w-full text-left text-xs font-bold text-red-500 border border-red-100 rounded-xl px-4 py-3 hover:bg-red-50 transition-all">
+                    Delete all scheduled posts
+                  </button>
+                  <button className="w-full text-left text-xs font-bold text-red-600 border border-red-200 rounded-xl px-4 py-3 hover:bg-red-50 transition-all">
+                    Delete account permanently
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ── WHITE LABEL ── */}
+          {activeTab === 'White Label' && (
+            <div className="space-y-4">
+              {plan === 'free' ? (
+                <div className="bg-white border border-gray-100 rounded-2xl p-8 text-center">
+                  <div className="text-3xl mb-3">🏷️</div>
+                  <h2 className="text-base font-extrabold mb-2">White Label is a Pro & Agency feature</h2>
+                  <p className="text-xs text-gray-400 mb-5 max-w-sm mx-auto leading-relaxed">
+                    Remove SocialMate branding and replace it with your own. Available as a $20/month add-on on Pro and Agency plans.
+                  </p>
+                  <button className="bg-black text-white text-xs font-bold px-5 py-2.5 rounded-xl hover:opacity-80 transition-all">
+                    Upgrade to unlock →
+                  </button>
+                </div>
+              ) : (
+                <div className="bg-white border border-gray-100 rounded-2xl p-6">
+                  <div className="flex items-center justify-between mb-5">
+                    <div>
+                      <h2 className="text-base font-extrabold">White Label</h2>
+                      <p className="text-xs text-gray-400 mt-0.5">$20/month add-on</p>
+                    </div>
+                    <button onClick={() => setWhiteLabel(!whiteLabel)}
+                      className={`relative w-10 h-5 rounded-full transition-colors ${whiteLabel ? 'bg-black' : 'bg-gray-200'}`}>
+                      <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${whiteLabel ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                    </button>
+                  </div>
+                  {whiteLabel && (
+                    <div className="space-y-3">
+                      <div>
+                        <label className="text-xs font-bold text-gray-500 block mb-1">Brand Name</label>
+                        <input placeholder="Your Brand" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all" />
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-gray-500 block mb-1">Logo URL</label>
+                        <input placeholder="https://yourbrand.com/logo.png" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all" />
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-gray-500 block mb-1">Custom Domain</label>
+                        <input placeholder="app.yourbrand.com" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all" />
+                      </div>
+                      <div>
+                        <label className="text-xs font-bold text-gray-500 block mb-1">Brand Color</label>
+                        <input type="color" defaultValue="#000000" className="h-10 w-20 border border-gray-200 rounded-xl cursor-pointer" />
+                      </div>
+                      <button onClick={handleSave}
+                        className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${saved ? 'bg-green-500 text-white' : 'bg-black text-white hover:opacity-80'}`}>
+                        {saved ? '✓ Saved!' : 'Save Branding'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
         </div>
       </div>
-
-      {toast && (
-        <div className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${
-          toast.type === 'success' ? 'bg-black text-white' : 'bg-red-500 text-white'
-        }`}>
-          {toast.type === 'success' ? '✅' : '❌'} {toast.message}
-        </div>
-      )}
     </div>
   )
 }
