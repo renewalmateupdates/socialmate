@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`
-
 const CREDIT_COSTS: Record<string, number> = {
   caption:  1,
   hashtags: 1,
@@ -12,13 +10,13 @@ const CREDIT_COSTS: Record<string, number> = {
 function buildPrompt(tool: string, content: string, platform: string): string {
   switch (tool) {
     case 'caption':
-      return `You are a social media expert. Write an engaging ${platform} caption for the following topic or idea. Match the platform's style and character limits. Return only the caption, nothing else.\n\nTopic: ${content}`
+      return `You are a social media expert. Write an engaging ${platform} caption for the following topic or idea. Match the platform's style. Return only the caption, nothing else.\n\nTopic: ${content}`
     case 'hashtags':
-      return `You are a social media expert. Generate 10-15 relevant, high-performing hashtags for the following ${platform} post. Mix popular and niche hashtags. Return only the hashtags separated by spaces, nothing else.\n\nPost: ${content}`
+      return `You are a social media expert. Generate 10-15 relevant hashtags for the following ${platform} post. Mix popular and niche hashtags. Return only the hashtags separated by spaces, nothing else.\n\nPost: ${content}`
     case 'rewrite':
-      return `You are a social media copywriter. Rewrite the following ${platform} post to be more engaging, punchy, and likely to drive interaction. Keep a similar length. Return only the rewritten post, nothing else.\n\nOriginal: ${content}`
+      return `You are a social media copywriter. Rewrite the following ${platform} post to be more engaging and punchy. Return only the rewritten post, nothing else.\n\nOriginal: ${content}`
     case 'hook':
-      return `You are a viral content expert. Generate 3 scroll-stopping opening lines (hooks) for a ${platform} post about the following topic. Number them 1, 2, 3. Return only the hooks, nothing else.\n\nTopic: ${content}`
+      return `You are a viral content expert. Generate 3 scroll-stopping opening lines for a ${platform} post about the following topic. Number them 1, 2, 3. Return only the hooks, nothing else.\n\nTopic: ${content}`
     default:
       return content
   }
@@ -32,9 +30,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing tool or content' }, { status: 400 })
     }
 
+    const apiKey = process.env.GEMINI_API_KEY
+    if (!apiKey) {
+      console.error('GEMINI_API_KEY is not set')
+      return NextResponse.json({ error: 'API key not configured' }, { status: 500 })
+    }
+
     const prompt = buildPrompt(tool, content, platform || 'general')
 
-    const response = await fetch(GEMINI_URL, {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`
+
+    const response = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -46,13 +52,13 @@ export async function POST(req: NextRequest) {
       }),
     })
 
+    const data = await response.json()
+
     if (!response.ok) {
-      const error = await response.json()
-      console.error('Gemini error:', error)
-      return NextResponse.json({ error: 'Gemini API error' }, { status: 500 })
+      console.error('Gemini error:', JSON.stringify(data))
+      return NextResponse.json({ error: 'Gemini API error', detail: data }, { status: 500 })
     }
 
-    const data = await response.json()
     const result = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
     const creditCost = CREDIT_COSTS[tool] || 1
 
