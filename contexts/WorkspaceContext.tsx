@@ -1,5 +1,5 @@
 'use client'
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
 import { supabase } from '@/lib/supabase'
 
 export type Plan = 'free' | 'pro' | 'agency'
@@ -90,8 +90,9 @@ const WorkspaceContext = createContext<WorkspaceContextType>({
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [plan, setPlan] = useState<Plan>('free')
-  const [credits, setCredits] = useState(100)
+  const [credits, setCreditsState] = useState(100)
   const [creditsUsed, setCreditsUsed] = useState(0)
+  const [userId, setUserId] = useState<string | null>(null)
   const [workspaceName, setWorkspaceName] = useState('My Workspace')
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [activeWorkspace, setActiveWorkspace] = useState<Workspace | null>(null)
@@ -103,6 +104,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { setLoading(false); return }
+
+      setUserId(user.id)
 
       const { data: ws } = await supabase
         .from('workspaces')
@@ -134,7 +137,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       if (profile) {
         const p = (profile.plan as Plan) || 'free'
         setPlan(p)
-        setCredits(profile.credits ?? PLAN_CONFIG[p].credits)
+        setCreditsState(profile.credits ?? PLAN_CONFIG[p].credits)
         setCreditsUsed(profile.credits_used ?? 0)
       }
 
@@ -158,6 +161,16 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
     load()
   }, [])
+
+  // Persists credit changes to Supabase immediately
+  const setCredits = useCallback(async (newCredits: number) => {
+    setCreditsState(newCredits)
+    if (!userId) return
+    await supabase
+      .from('profiles')
+      .update({ credits: newCredits })
+      .eq('id', userId)
+  }, [userId])
 
   const planConfig = PLAN_CONFIG[plan]
 
