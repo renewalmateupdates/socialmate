@@ -37,6 +37,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'API key not configured' }, { status: 500 })
     }
 
+    console.log('API key present, length:', apiKey.length)
+
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
     const prompt = buildPrompt(tool, content, platform || 'general')
