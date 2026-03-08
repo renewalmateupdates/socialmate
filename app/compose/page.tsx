@@ -4,21 +4,21 @@ import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 
 const PLATFORMS = [
-  { id: 'linkedin',  name: 'LinkedIn',  icon: '💼', limit: 3000 },
-  { id: 'youtube',   name: 'YouTube',   icon: '▶️', limit: 5000 },
-  { id: 'pinterest', name: 'Pinterest', icon: '📌', limit: 500  },
-  { id: 'bluesky',   name: 'Bluesky',   icon: '🦋', limit: 300  },
-  { id: 'reddit',    name: 'Reddit',    icon: '🤖', limit: 40000},
-  { id: 'discord',   name: 'Discord',   icon: '💬', limit: 2000 },
-  { id: 'telegram',  name: 'Telegram',  icon: '✈️', limit: 4096 },
-  { id: 'mastodon',  name: 'Mastodon',  icon: '🐘', limit: 500  },
+  { id: 'linkedin',  name: 'LinkedIn',  icon: '💼', limit: 3000  },
+  { id: 'youtube',   name: 'YouTube',   icon: '▶️', limit: 5000  },
+  { id: 'pinterest', name: 'Pinterest', icon: '📌', limit: 500   },
+  { id: 'bluesky',   name: 'Bluesky',   icon: '🦋', limit: 300   },
+  { id: 'reddit',    name: 'Reddit',    icon: '🤖', limit: 40000 },
+  { id: 'discord',   name: 'Discord',   icon: '💬', limit: 2000  },
+  { id: 'telegram',  name: 'Telegram',  icon: '✈️', limit: 4096  },
+  { id: 'mastodon',  name: 'Mastodon',  icon: '🐘', limit: 500   },
 ]
 
 const AI_TOOLS = [
-  { id: 'caption',  label: 'Caption',   emoji: '✍️',  credits: 1, desc: 'Generate a caption from your topic' },
-  { id: 'hashtags', label: 'Hashtags',  emoji: '#️⃣', credits: 1, desc: 'Generate relevant hashtags'         },
-  { id: 'rewrite',  label: 'Rewrite',   emoji: '🔁',  credits: 1, desc: 'Rewrite your post to be punchier'   },
-  { id: 'hook',     label: 'Hook',      emoji: '🎣',  credits: 2, desc: 'Generate 3 viral opening hooks'     },
+  { id: 'caption',  label: 'Caption',  emoji: '✍️',  credits: 1, desc: 'Generate a caption from your topic' },
+  { id: 'hashtags', label: 'Hashtags', emoji: '#️⃣', credits: 1, desc: 'Generate relevant hashtags'         },
+  { id: 'rewrite',  label: 'Rewrite',  emoji: '🔁',  credits: 1, desc: 'Rewrite your post to be punchier'   },
+  { id: 'hook',     label: 'Hook',     emoji: '🎣',  credits: 2, desc: 'Generate 3 viral opening hooks'     },
 ]
 
 export default function Compose() {
@@ -156,9 +156,9 @@ export default function Compose() {
                     {charCount} / {charLimit.toLocaleString()}
                     {charOver && ' — over limit'}
                   </span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-400">{selectedPlatforms.length} platform{selectedPlatforms.length !== 1 ? 's' : ''} selected</span>
-                  </div>
+                  <span className="text-xs text-gray-400">
+                    {selectedPlatforms.length} platform{selectedPlatforms.length !== 1 ? 's' : ''} selected
+                  </span>
                 </div>
               </div>
 
@@ -185,14 +185,12 @@ export default function Compose() {
                   ))}
                 </div>
 
-                {/* AI ERROR */}
                 {aiError && (
                   <div className="bg-red-50 border border-red-100 rounded-xl p-3 mb-3">
                     <p className="text-xs text-red-600">{aiError}</p>
                   </div>
                 )}
 
-                {/* AI LOADING */}
                 {aiLoading && (
                   <div className="bg-gray-50 rounded-xl p-4 text-center">
                     <div className="inline-flex items-center gap-2 text-xs text-gray-500">
@@ -202,7 +200,6 @@ export default function Compose() {
                   </div>
                 )}
 
-                {/* AI RESULT */}
                 {aiResult && !aiLoading && (
                   <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Result</p>
@@ -267,14 +264,22 @@ export default function Compose() {
                   )}
                 </div>
                 {content && (
-                  <div className="mt-3 pt-3 border-t border-gray-50">
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">{activePlatform.icon}</span>
-                      <span className="text-xs font-bold text-gray-500">{activePlatform.name}</span>
-                      <span className={`ml-auto text-xs font-bold ${charOver ? 'text-red-500' : 'text-gray-400'}`}>
-                        {charCount}/{charLimit.toLocaleString()}
-                      </span>
-                    </div>
+                  <div className="mt-3 pt-3 border-t border-gray-50 space-y-1.5">
+                    {selectedPlatforms.map(id => {
+                      const p = PLATFORMS.find(pl => pl.id === id)
+                      if (!p) return null
+                      const over = charCount > p.limit
+                      return (
+                        <div key={id} className="flex items-center gap-2">
+                          <span className="text-sm">{p.icon}</span>
+                          <span className="text-xs font-bold text-gray-500">{p.name}</span>
+                          <span className={`ml-auto text-xs font-bold ${over ? 'text-red-500' : 'text-gray-400'}`}>
+                            {charCount}/{p.limit.toLocaleString()}
+                            {over && ' ⚠️'}
+                          </span>
+                        </div>
+                      )
+                    })}
                   </div>
                 )}
               </div>
@@ -284,9 +289,8 @@ export default function Compose() {
         </div>
       </div>
 
-      {/* TOAST */}
       {toast && (
-        <div className="fixed bottom-6 right-6 bg-black text-white text-xs font-bold px-4 py-3 rounded-xl shadow-lg z-50 animate-fade-in">
+        <div className="fixed bottom-6 right-6 bg-black text-white text-xs font-bold px-4 py-3 rounded-xl shadow-lg z-50">
           {toast}
         </div>
       )}
