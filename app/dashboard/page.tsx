@@ -1,9 +1,9 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
-import Sidebar from '@/components/Sidebar'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Sidebar from '@/components/Sidebar'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 
 const NEW_PLATFORMS = [
@@ -15,7 +15,8 @@ const NEW_PLATFORMS = [
 
 function CreditMeter({ credits, plan }: { credits: number; plan: string }) {
   const config = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
-  const max = config?.credits || 100
+  const max = config?.credits ?? 100
+  const bankCap = max * 3
   const pct = Math.min((credits / max) * 100, 100)
   const color = pct > 50 ? 'bg-green-500' : pct > 20 ? 'bg-yellow-400' : 'bg-red-400'
 
@@ -26,13 +27,10 @@ function CreditMeter({ credits, plan }: { credits: number; plan: string }) {
         <span className="text-xs font-bold text-gray-600">{credits} / {max}</span>
       </div>
       <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden mb-2">
-        <div
-          className={`h-full rounded-full transition-all ${color}`}
-          style={{ width: `${pct}%` }}
-        />
+        <div className={`h-full rounded-full transition-all ${color}`} style={{ width: `${pct}%` }} />
       </div>
       <div className="flex items-center justify-between">
-        <p className="text-xs text-gray-400">Resets monthly · banks up to {PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]?.credits * 3 || 300}</p>
+        <p className="text-xs text-gray-400">Resets monthly · banks up to {bankCap}</p>
         {pct < 20 && (
           <Link href="/referral" className="text-xs font-bold text-blue-600 hover:underline">
             Earn more →
@@ -46,7 +44,6 @@ function CreditMeter({ credits, plan }: { credits: number; plan: string }) {
 function PlatformNotificationBanner() {
   const [dismissed, setDismissed] = useState(false)
   if (dismissed) return null
-
   return (
     <div className="mb-6 bg-blue-50 border border-blue-100 rounded-2xl px-5 py-4 flex items-center justify-between">
       <div className="flex items-center gap-3">
@@ -59,8 +56,7 @@ function PlatformNotificationBanner() {
           </p>
         </div>
       </div>
-      <button
-        onClick={() => setDismissed(true)}
+      <button onClick={() => setDismissed(true)}
         className="text-xs font-bold text-blue-400 hover:text-blue-700 transition-all flex-shrink-0 ml-4">
         Dismiss
       </button>
@@ -68,11 +64,23 @@ function PlatformNotificationBanner() {
   )
 }
 
+type DashStats = {
+  scheduled: number
+  drafts: number
+  thisWeek: number
+  published: number
+  todayCount: number
+  upcomingCount: number
+}
+
 export default function DashboardPage() {
   const router = useRouter()
   const [user, setUser] = useState<any>(null)
   const [profile, setProfile] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState<DashStats>({
+    scheduled: 0, drafts: 0, thisWeek: 0, published: 0, todayCount: 0, upcomingCount: 0
+  })
   const { plan, credits } = useWorkspace()
 
   useEffect(() => {
@@ -87,6 +95,33 @@ export default function DashboardPage() {
         .single()
 
       if (!profile?.onboarding_completed) { router.push('/onboarding'); return }
+
+      const { data: posts } = await supabase
+        .from('posts')
+        .select('id, status, scheduled_at, created_at')
+        .eq('user_id', user.id)
+
+      if (posts) {
+        const now = new Date()
+        const weekAgo = new Date(now); weekAgo.setDate(now.getDate() - 7)
+        const todayStart = new Date(now); todayStart.setHours(0, 0, 0, 0)
+        const todayEnd = new Date(now); todayEnd.setHours(23, 59, 59, 999)
+
+        setStats({
+          scheduled: posts.filter(p => p.status === 'scheduled' && new Date(p.scheduled_at) > now).length,
+          drafts: posts.filter(p => p.status === 'draft').length,
+          thisWeek: posts.filter(p => new Date(p.created_at) >= weekAgo).length,
+          published: posts.filter(p => p.status === 'published').length,
+          todayCount: posts.filter(p =>
+            p.status === 'scheduled' &&
+            new Date(p.scheduled_at) >= todayStart &&
+            new Date(p.scheduled_at) <= todayEnd
+          ).length,
+          upcomingCount: posts.filter(p =>
+            p.status === 'scheduled' && new Date(p.scheduled_at) > now
+          ).length,
+        })
+      }
 
       setUser(user)
       setProfile(profile)
@@ -106,7 +141,6 @@ export default function DashboardPage() {
   const displayName = profile?.full_name || user?.email?.split('@')[0] || 'there'
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
-
   const planConfig = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
 
   return (
@@ -115,7 +149,6 @@ export default function DashboardPage() {
       <main className="ml-56 flex-1 overflow-y-auto">
         <div className="p-8">
 
-          {/* PLATFORM NOTIFICATION */}
           <PlatformNotificationBanner />
 
           {/* HEADER */}
@@ -124,7 +157,9 @@ export default function DashboardPage() {
               <h1 className="text-2xl font-extrabold tracking-tight text-gray-900">
                 {greeting}, {displayName} 👋
               </h1>
-              <p className="text-sm text-gray-400 mt-1">0 posts scheduled today · 0 coming up</p>
+              <p className="text-sm text-gray-400 mt-1">
+                {stats.todayCount} post{stats.todayCount !== 1 ? 's' : ''} scheduled today · {stats.upcomingCount} coming up
+              </p>
             </div>
             <div className="flex items-center gap-3">
               <Link href="/bulk-scheduler"
@@ -140,7 +175,6 @@ export default function DashboardPage() {
 
           {/* PLAN + CREDIT BAR */}
           <div className="grid grid-cols-3 gap-4 mb-6">
-            {/* Plan badge */}
             <div className={`rounded-2xl px-5 py-3 border flex items-center justify-between ${
               plan === 'free' ? 'bg-gray-50 border-gray-200' :
               plan === 'pro' ? 'bg-blue-50 border-blue-100' :
@@ -155,7 +189,9 @@ export default function DashboardPage() {
                   {plan === 'pro' && '⚡ Pro Plan'}
                   {plan === 'agency' && '🏢 Agency Plan'}
                 </p>
-                <p className="text-xs text-gray-400 mt-0.5">{planConfig?.label} · {planConfig?.accounts} account{planConfig?.accounts !== 1 ? 's' : ''} per platform</p>
+                <p className="text-xs text-gray-400 mt-0.5">
+                  {planConfig?.label} · {planConfig?.accounts} account{planConfig?.accounts !== 1 ? 's' : ''} per platform
+                </p>
               </div>
               {plan === 'free' && (
                 <Link href="/pricing"
@@ -164,8 +200,6 @@ export default function DashboardPage() {
                 </Link>
               )}
             </div>
-
-            {/* Credit meter spans 2 cols */}
             <div className="col-span-2">
               <CreditMeter credits={credits} plan={plan} />
             </div>
@@ -174,10 +208,10 @@ export default function DashboardPage() {
           {/* STATS */}
           <div className="grid grid-cols-4 gap-4 mb-8">
             {[
-              { label: 'Scheduled',  value: 0, sub: 'posts queued',   icon: '📅', color: 'text-blue-600'   },
-              { label: 'Drafts',     value: 0, sub: 'in progress',    icon: '📁', color: 'text-yellow-600' },
-              { label: 'This Week',  value: 0, sub: 'posts created',  icon: '✏️', color: 'text-purple-600' },
-              { label: 'Published',  value: 0, sub: 'all time',       icon: '✅', color: 'text-green-600'  },
+              { label: 'Scheduled',  value: stats.scheduled,  sub: 'posts queued',   icon: '📅', color: 'text-blue-600'   },
+              { label: 'Drafts',     value: stats.drafts,     sub: 'in progress',    icon: '📁', color: 'text-yellow-600' },
+              { label: 'This Week',  value: stats.thisWeek,   sub: 'posts created',  icon: '✏️', color: 'text-purple-600' },
+              { label: 'Published',  value: stats.published,  sub: 'all time',       icon: '✅', color: 'text-green-600'  },
             ].map(stat => (
               <div key={stat.label} className="bg-white rounded-2xl border border-gray-100 p-5">
                 <div className="flex items-center justify-between mb-2">
@@ -192,7 +226,6 @@ export default function DashboardPage() {
 
           <div className="grid grid-cols-3 gap-6">
 
-            {/* LEFT / MAIN */}
             <div className="col-span-2 space-y-6">
 
               {/* WEEK VIEW */}
@@ -281,13 +314,13 @@ export default function DashboardPage() {
                 <h2 className="text-sm font-extrabold text-gray-900 mb-4">Quick Actions</h2>
                 <div className="space-y-2">
                   {[
-                    { label: 'Write a post',    sub: 'Compose & schedule',      href: '/compose',        icon: '✏️', featured: true },
-                    { label: 'Bulk schedule',   sub: 'Schedule many at once',   href: '/bulk-scheduler', icon: '📅' },
-                    { label: 'View calendar',   sub: 'See all scheduled posts', href: '/calendar',       icon: '🗓️' },
-                    { label: 'Use a template',  sub: 'Start from a saved format', href: '/templates',    icon: '📋' },
-                    { label: 'Upload media',    sub: 'Add to your library',     href: '/media',          icon: '🖼️' },
-                    { label: 'Edit link in bio',sub: 'Update your bio page',    href: '/link-in-bio',    icon: '🔗' },
-                    { label: 'Explore AI tools',sub: 'Credits, features & more', href: '/features',      icon: '🤖' },
+                    { label: 'Write a post',     sub: 'Compose & schedule',        href: '/compose',        icon: '✏️', featured: true },
+                    { label: 'Bulk schedule',    sub: 'Schedule many at once',     href: '/bulk-scheduler', icon: '📅' },
+                    { label: 'View calendar',    sub: 'See all scheduled posts',   href: '/calendar',       icon: '🗓️' },
+                    { label: 'Use a template',   sub: 'Start from a saved format', href: '/templates',      icon: '📋' },
+                    { label: 'Upload media',     sub: 'Add to your library',       href: '/media',          icon: '🖼️' },
+                    { label: 'Edit link in bio', sub: 'Update your bio page',      href: '/link-in-bio',    icon: '🔗' },
+                    { label: 'Explore AI tools', sub: 'Credits, features & more',  href: '/features',       icon: '🤖' },
                   ].map(action => (
                     <Link key={action.href} href={action.href}
                       className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
@@ -308,7 +341,7 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* TOP PLATFORMS */}
+              {/* CONNECTED PLATFORMS */}
               <div className="bg-white rounded-2xl border border-gray-100 p-5">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-sm font-extrabold text-gray-900">Connected Platforms</h2>

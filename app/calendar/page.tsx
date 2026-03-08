@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
+import { useWorkspace } from '@/contexts/WorkspaceContext'
 
 const PLATFORM_ICONS: Record<string, string> = {
   instagram: '📸', twitter: '🐦', linkedin: '💼', tiktok: '🎵',
@@ -17,6 +18,18 @@ const MONTHS = [
   'January','February','March','April','May','June',
   'July','August','September','October','November','December'
 ]
+
+const FORWARD_LIMITS: Record<string, number> = {
+  free:   14,
+  pro:    90,
+  agency: 180,
+}
+
+const FORWARD_LIMIT_LABELS: Record<string, string> = {
+  free:   '2 weeks',
+  pro:    '3 months',
+  agency: '6 months',
+}
 
 function getDaysInMonth(year: number, month: number) {
   return new Date(year, month + 1, 0).getDate()
@@ -39,6 +52,15 @@ export default function Calendar() {
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
   const [selectedPosts, setSelectedPosts] = useState<any[]>([])
   const router = useRouter()
+  const { plan } = useWorkspace()
+
+  const forwardLimitDays = FORWARD_LIMITS[plan] || FORWARD_LIMITS.free
+  const limitDate = new Date()
+  limitDate.setDate(limitDate.getDate() + forwardLimitDays)
+  limitDate.setHours(23, 59, 59, 999)
+
+  const firstOfNextMonth = new Date(viewYear, viewMonth + 1, 1)
+  const canGoForward = firstOfNextMonth <= limitDate
 
   useEffect(() => {
     const load = async () => {
@@ -54,7 +76,7 @@ export default function Calendar() {
       setLoading(false)
     }
     load()
-  }, [])
+  }, [router])
 
   const prevMonth = () => {
     if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1) }
@@ -62,11 +84,11 @@ export default function Calendar() {
   }
 
   const nextMonth = () => {
+    if (!canGoForward) return
     if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1) }
     else setViewMonth(m => m + 1)
   }
 
-  // Group posts by date key
   const postsByDate: Record<string, any[]> = {}
   posts.forEach(post => {
     if (!post.scheduled_at) return
@@ -81,17 +103,21 @@ export default function Calendar() {
   const totalCells = Math.ceil((firstDay + daysInMonth) / 7) * 7
 
   const handleDayClick = (dateKey: string) => {
+    const clickedDate = new Date(dateKey + 'T12:00:00')
+    if (clickedDate > limitDate) return
     setSelectedDay(dateKey)
     setSelectedPosts(postsByDate[dateKey] || [])
   }
 
   const todayKey = formatDateKey(today.getFullYear(), today.getMonth(), today.getDate())
 
-  // Stats
   const monthPosts = posts.filter(p => {
     const d = new Date(p.scheduled_at)
     return d.getFullYear() === viewYear && d.getMonth() === viewMonth
   })
+
+  const nextPlan = plan === 'free' ? 'Pro' : plan === 'pro' ? 'Agency' : null
+  const nextLimit = plan === 'free' ? FORWARD_LIMIT_LABELS.pro : plan === 'pro' ? FORWARD_LIMIT_LABELS.agency : null
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -119,9 +145,22 @@ export default function Calendar() {
             </div>
           </div>
 
+          {/* TIER LIMIT BANNER */}
+          {!canGoForward && nextPlan && (
+            <div className="mb-6 bg-amber-50 border border-amber-100 rounded-2xl px-5 py-3 flex items-center justify-between">
+              <p className="text-xs text-amber-700 font-semibold">
+                🔒 {plan.charAt(0).toUpperCase() + plan.slice(1)} plan limit reached ({FORWARD_LIMIT_LABELS[plan]} ahead).
+                <span className="font-normal"> Upgrade to {nextPlan} to schedule up to {nextLimit} in advance.</span>
+              </p>
+              <Link href="/pricing"
+                className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all flex-shrink-0 ml-4">
+                Upgrade →
+              </Link>
+            </div>
+          )}
+
           <div className="grid grid-cols-4 gap-6">
 
-            {/* CALENDAR */}
             <div className="col-span-3">
               <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
 
@@ -134,8 +173,15 @@ export default function Calendar() {
                   <h2 className="text-base font-extrabold tracking-tight">
                     {MONTHS[viewMonth]} {viewYear}
                   </h2>
-                  <button onClick={nextMonth}
-                    className="w-8 h-8 flex items-center justify-center rounded-xl border border-gray-200 hover:border-gray-400 transition-all text-sm">
+                  <button
+                    onClick={nextMonth}
+                    disabled={!canGoForward}
+                    title={!canGoForward ? `${FORWARD_LIMIT_LABELS[plan]} limit reached on ${plan} plan` : undefined}
+                    className={`w-8 h-8 flex items-center justify-center rounded-xl border transition-all text-sm ${
+                      canGoForward
+                        ? 'border-gray-200 hover:border-gray-400'
+                        : 'border-gray-100 text-gray-300 cursor-not-allowed'
+                    }`}>
                     →
                   </button>
                 </div>
@@ -159,34 +205,32 @@ export default function Calendar() {
                     {Array.from({ length: totalCells }).map((_, i) => {
                       const dayNum = i - firstDay + 1
                       const isCurrentMonth = dayNum >= 1 && dayNum <= daysInMonth
-                      const dateKey = isCurrentMonth
-                        ? formatDateKey(viewYear, viewMonth, dayNum)
-                        : null
+                      const dateKey = isCurrentMonth ? formatDateKey(viewYear, viewMonth, dayNum) : null
                       const dayPosts = dateKey ? (postsByDate[dateKey] || []) : []
                       const isToday = dateKey === todayKey
                       const isSelected = dateKey === selectedDay
                       const isWeekend = i % 7 === 0 || i % 7 === 6
+                      const isBeyondLimit = dateKey ? new Date(dateKey + 'T12:00:00') > limitDate : false
 
                       return (
                         <div
                           key={i}
-                          onClick={() => dateKey && handleDayClick(dateKey)}
-                          className={`min-h-[90px] p-2 border-b border-r border-gray-50 transition-all ${
-                            isCurrentMonth
+                          onClick={() => dateKey && !isBeyondLimit && handleDayClick(dateKey)}
+                          className={`group min-h-[90px] p-2 border-b border-r border-gray-50 transition-all ${
+                            isCurrentMonth && !isBeyondLimit
                               ? 'cursor-pointer hover:bg-gray-50'
                               : 'bg-gray-50/50'
                           } ${isSelected ? 'bg-blue-50 border-blue-100' : ''} ${
-                            isWeekend && isCurrentMonth ? 'bg-gray-50/30' : ''
-                          }`}
+                            isWeekend && isCurrentMonth && !isBeyondLimit ? 'bg-gray-50/30' : ''
+                          } ${isBeyondLimit ? 'opacity-40 cursor-not-allowed' : ''}`}
                         >
                           {isCurrentMonth && (
                             <>
                               <div className={`w-7 h-7 flex items-center justify-center rounded-full text-xs font-bold mb-1 ${
-                                isToday
-                                  ? 'bg-black text-white'
-                                  : isSelected
-                                  ? 'bg-blue-500 text-white'
-                                  : 'text-gray-600 hover:bg-gray-100'
+                                isToday ? 'bg-black text-white'
+                                : isSelected ? 'bg-blue-500 text-white'
+                                : isBeyondLimit ? 'text-gray-300'
+                                : 'text-gray-600 hover:bg-gray-100'
                               }`}>
                                 {dayNum}
                               </div>
@@ -194,23 +238,17 @@ export default function Calendar() {
                                 {dayPosts.slice(0, 2).map(post => (
                                   <div key={post.id}
                                     className={`text-xs px-1.5 py-0.5 rounded-lg truncate font-semibold ${
-                                      post.status === 'scheduled'
-                                        ? 'bg-black text-white'
-                                        : 'bg-gray-100 text-gray-600'
+                                      post.status === 'scheduled' ? 'bg-black text-white' : 'bg-gray-100 text-gray-600'
                                     }`}>
-                                    {(post.platforms || []).slice(0, 2).map((p: string) =>
-                                      PLATFORM_ICONS[p] || ''
-                                    ).join('')}{' '}
+                                    {(post.platforms || []).slice(0, 2).map((p: string) => PLATFORM_ICONS[p] || '').join('')}{' '}
                                     {post.content?.slice(0, 15) || 'Post'}
                                   </div>
                                 ))}
                                 {dayPosts.length > 2 && (
-                                  <div className="text-xs text-gray-400 px-1">
-                                    +{dayPosts.length - 2} more
-                                  </div>
+                                  <div className="text-xs text-gray-400 px-1">+{dayPosts.length - 2} more</div>
                                 )}
                               </div>
-                              {dayPosts.length === 0 && (
+                              {dayPosts.length === 0 && !isBeyondLimit && (
                                 <Link
                                   href={`/compose?date=${dateKey}`}
                                   onClick={e => e.stopPropagation()}
@@ -231,7 +269,6 @@ export default function Calendar() {
             {/* RIGHT PANEL */}
             <div className="space-y-4">
 
-              {/* SELECTED DAY DETAIL */}
               {selectedDay ? (
                 <div className="bg-white border border-gray-100 rounded-2xl p-5">
                   <div className="flex items-center justify-between mb-4">
@@ -268,14 +305,10 @@ export default function Calendar() {
                               <span key={p} className="text-sm">{PLATFORM_ICONS[p]}</span>
                             ))}
                             <span className="text-xs text-gray-400 ml-auto">
-                              {new Date(post.scheduled_at).toLocaleTimeString('en-US', {
-                                hour: '2-digit', minute: '2-digit'
-                              })}
+                              {new Date(post.scheduled_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                             </span>
                           </div>
-                          <p className="text-xs text-gray-600 line-clamp-2">
-                            {post.content || 'No content'}
-                          </p>
+                          <p className="text-xs text-gray-600 line-clamp-2">{post.content || 'No content'}</p>
                         </Link>
                       ))}
                     </div>
@@ -291,22 +324,12 @@ export default function Calendar() {
 
               {/* MONTH STATS */}
               <div className="bg-white border border-gray-100 rounded-2xl p-5">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-4">
-                  {MONTHS[viewMonth]} Stats
-                </p>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-4">{MONTHS[viewMonth]} Stats</p>
                 <div className="space-y-3">
                   {[
                     { label: 'Total scheduled', value: monthPosts.length },
-                    {
-                      label: 'Days with content',
-                      value: new Set(
-                        monthPosts.map(p => new Date(p.scheduled_at).toDateString())
-                      ).size
-                    },
-                    {
-                      label: 'Platforms covered',
-                      value: new Set(monthPosts.flatMap(p => p.platforms || [])).size
-                    },
+                    { label: 'Days with content', value: new Set(monthPosts.map(p => new Date(p.scheduled_at).toDateString())).size },
+                    { label: 'Platforms covered', value: new Set(monthPosts.flatMap(p => p.platforms || [])).size },
                   ].map(stat => (
                     <div key={stat.label} className="flex items-center justify-between">
                       <span className="text-xs text-gray-500">{stat.label}</span>
@@ -316,43 +339,53 @@ export default function Calendar() {
                 </div>
               </div>
 
+              {/* SCHEDULING WINDOW */}
+              <div className="bg-white border border-gray-100 rounded-2xl p-5">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Scheduling Window</p>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-base">{plan === 'agency' ? '🏢' : plan === 'pro' ? '⚡' : '🔓'}</span>
+                  <span className="text-xs font-bold capitalize">{plan} Plan</span>
+                </div>
+                <p className="text-xs text-gray-400 mb-1">
+                  Schedule up to <span className="font-bold text-black">{FORWARD_LIMIT_LABELS[plan]}</span> ahead.
+                </p>
+                <p className="text-xs text-gray-300">
+                  Until {limitDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                </p>
+                {plan !== 'agency' && (
+                  <Link href="/pricing" className="inline-block mt-3 text-xs font-bold text-blue-600 hover:underline">
+                    Upgrade for a longer window →
+                  </Link>
+                )}
+              </div>
+
               {/* UPCOMING */}
               <div className="bg-white border border-gray-100 rounded-2xl p-5">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">
-                  Upcoming
-                </p>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Upcoming</p>
                 {posts.filter(p => new Date(p.scheduled_at) >= today).slice(0, 4).length === 0 ? (
-                  <p className="text-xs text-gray-400 text-center py-2">
-                    No upcoming posts
-                  </p>
+                  <p className="text-xs text-gray-400 text-center py-2">No upcoming posts</p>
                 ) : (
                   <div className="space-y-2">
-                    {posts
-                      .filter(p => new Date(p.scheduled_at) >= today)
-                      .slice(0, 4)
-                      .map(post => (
-                        <Link key={post.id} href={`/compose?draft=${post.id}`}
-                          className="block p-2 hover:bg-gray-50 rounded-xl transition-all">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm">
-                              {PLATFORM_ICONS[(post.platforms || [])[0]] || '📱'}
-                            </span>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-semibold truncate">
-                                {post.content?.slice(0, 30) || 'No content'}
-                              </p>
-                              <p className="text-xs text-gray-400">
-                                {new Date(post.scheduled_at).toLocaleDateString('en-US', {
-                                  month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-                                })}
-                              </p>
-                            </div>
+                    {posts.filter(p => new Date(p.scheduled_at) >= today).slice(0, 4).map(post => (
+                      <Link key={post.id} href={`/compose?draft=${post.id}`}
+                        className="block p-2 hover:bg-gray-50 rounded-xl transition-all">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm">{PLATFORM_ICONS[(post.platforms || [])[0]] || '📱'}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold truncate">{post.content?.slice(0, 30) || 'No content'}</p>
+                            <p className="text-xs text-gray-400">
+                              {new Date(post.scheduled_at).toLocaleDateString('en-US', {
+                                month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                              })}
+                            </p>
                           </div>
-                        </Link>
-                      ))}
+                        </div>
+                      </Link>
+                    ))}
                   </div>
                 )}
               </div>
+
             </div>
           </div>
         </div>

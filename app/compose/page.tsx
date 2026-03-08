@@ -14,6 +14,17 @@ const PLATFORMS = [
   { id: 'mastodon',  name: 'Mastodon',  icon: '🐘', limit: 500   },
 ]
 
+const COMING_SOON_PLATFORMS = [
+  { id: 'instagram', name: 'Instagram', icon: '📸' },
+  { id: 'twitter',   name: 'Twitter/X', icon: '🐦' },
+  { id: 'tiktok',    name: 'TikTok',    icon: '🎵' },
+  { id: 'facebook',  name: 'Facebook',  icon: '📘' },
+  { id: 'threads',   name: 'Threads',   icon: '🧵' },
+  { id: 'snapchat',  name: 'Snapchat',  icon: '👻' },
+  { id: 'lemon8',    name: 'Lemon8',    icon: '🍋' },
+  { id: 'bereal',    name: 'BeReal',    icon: '📷' },
+]
+
 const AI_TOOLS = [
   { id: 'caption',  label: 'Caption',  emoji: '✍️',  credits: 1, desc: 'Generate a caption from your topic' },
   { id: 'hashtags', label: 'Hashtags', emoji: '#️⃣', credits: 1, desc: 'Generate relevant hashtags'         },
@@ -34,10 +45,13 @@ export default function Compose() {
   const [aiError, setAiError] = useState('')
   const [toast, setToast] = useState('')
 
-  const activePlatform = PLATFORMS.find(p => selectedPlatforms[0] === p.id) || PLATFORMS[0]
+  const activePlatform = selectedPlatforms.length > 0
+    ? (PLATFORMS.find(p => selectedPlatforms[0] === p.id) || PLATFORMS[0])
+    : null
+
   const charCount = content.length
-  const charLimit = activePlatform.limit
-  const charOver = charCount > charLimit
+  const charLimit = activePlatform?.limit ?? null
+  const charOver = charLimit !== null && charCount > charLimit
 
   const showToast = (msg: string) => {
     setToast(msg)
@@ -51,6 +65,8 @@ export default function Compose() {
   }
 
   const handleAiTool = async (tool: typeof AI_TOOLS[0]) => {
+    setAiError('')
+
     if (!content.trim()) {
       setAiError('Write something first — the AI needs your content or topic to work with.')
       return
@@ -62,7 +78,6 @@ export default function Compose() {
 
     setActiveAiTool(tool.id)
     setAiLoading(true)
-    setAiError('')
     setAiResult('')
 
     try {
@@ -72,7 +87,7 @@ export default function Compose() {
         body: JSON.stringify({
           tool: tool.id,
           content,
-          platform: activePlatform.name,
+          platform: activePlatform?.name || 'general',
         }),
       })
 
@@ -122,7 +137,6 @@ export default function Compose() {
 
           <div className="grid grid-cols-3 gap-6">
 
-            {/* LEFT — COMPOSER */}
             <div className="col-span-2 space-y-4">
 
               {/* PLATFORM SELECTOR */}
@@ -139,8 +153,26 @@ export default function Compose() {
                       <span>{p.icon}</span>{p.name}
                     </button>
                   ))}
+                  {COMING_SOON_PLATFORMS.map(p => (
+                    <div key={p.id}
+                      title={`${p.name} — coming soon`}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border border-dashed border-gray-200 text-gray-300 cursor-not-allowed select-none">
+                      <span>{p.icon}</span>
+                      <span>{p.name}</span>
+                      <span className="text-xs font-normal text-gray-300 ml-0.5">· Soon</span>
+                    </div>
+                  ))}
                 </div>
               </div>
+
+              {/* NO PLATFORM WARNING */}
+              {selectedPlatforms.length === 0 && (
+                <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
+                  <p className="text-xs font-semibold text-amber-700">
+                    Select at least one platform to compose a post.
+                  </p>
+                </div>
+              )}
 
               {/* TEXT AREA */}
               <div className="bg-white border border-gray-100 rounded-2xl p-4">
@@ -152,10 +184,14 @@ export default function Compose() {
                   className="w-full text-sm outline-none resize-none text-gray-800 placeholder-gray-300"
                 />
                 <div className="flex items-center justify-between pt-3 border-t border-gray-50 mt-2">
-                  <span className={`text-xs font-bold ${charOver ? 'text-red-500' : 'text-gray-400'}`}>
-                    {charCount} / {charLimit.toLocaleString()}
-                    {charOver && ' — over limit'}
-                  </span>
+                  {charLimit !== null ? (
+                    <span className={`text-xs font-bold ${charOver ? 'text-red-500' : 'text-gray-400'}`}>
+                      {charCount} / {charLimit.toLocaleString()}
+                      {charOver && ' — over limit'}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-gray-300">Select a platform to see character limit</span>
+                  )}
                   <span className="text-xs text-gray-400">
                     {selectedPlatforms.length} platform{selectedPlatforms.length !== 1 ? 's' : ''} selected
                   </span>
@@ -172,10 +208,12 @@ export default function Compose() {
                   {AI_TOOLS.map(tool => (
                     <button key={tool.id}
                       onClick={() => handleAiTool(tool)}
-                      disabled={aiLoading && activeAiTool === tool.id}
+                      disabled={aiLoading}
                       className={`p-3 rounded-xl border text-center transition-all ${
                         activeAiTool === tool.id
                           ? 'bg-black text-white border-black'
+                          : aiLoading
+                          ? 'bg-gray-50 border-gray-100 text-gray-300 cursor-not-allowed'
                           : 'bg-white border-gray-200 hover:border-gray-400 text-gray-700'
                       }`}>
                       <div className="text-lg mb-1">{tool.emoji}</div>
@@ -239,7 +277,7 @@ export default function Compose() {
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => showToast('Post scheduled! ✓')}
-                  disabled={!content.trim() || charOver}
+                  disabled={!content.trim() || charOver || selectedPlatforms.length === 0}
                   className="flex-1 bg-black text-white text-sm font-bold py-3 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
                   {scheduleDate ? 'Schedule Post' : 'Post Now'}
                 </button>
@@ -263,7 +301,7 @@ export default function Compose() {
                     <p className="text-xs text-gray-300 text-center mt-8">Your post preview appears here</p>
                   )}
                 </div>
-                {content && (
+                {content && selectedPlatforms.length > 0 && (
                   <div className="mt-3 pt-3 border-t border-gray-50 space-y-1.5">
                     {selectedPlatforms.map(id => {
                       const p = PLATFORMS.find(pl => pl.id === id)

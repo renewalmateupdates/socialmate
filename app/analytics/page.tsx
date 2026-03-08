@@ -29,37 +29,40 @@ const PLATFORM_ICONS: Record<string, string> = {
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
 
-const PLAN_RANGES: Record<string, string[]> = {
-  free:   ['7', '30'],
-  pro:    ['7', '30', '90'],
-  agency: ['7', '30', '90', 'all'],
+const PLAN_FREE_RANGES: Record<string, string[]> = {
+  free:   ['14', '30'],
+  pro:    ['14', '30', '90'],
+  agency: ['14', '30', '90', 'all'],
+}
+
+const PLAN_CREDIT_RANGES: Record<string, Record<string, number>> = {
+  free:   { '90': 2, 'all': 4 },
+  pro:    { 'all': 2 },
+  agency: {},
 }
 
 const RANGE_LABELS: Record<string, string> = {
-  '7': '7d', '30': '30d', '90': '90d', 'all': 'All Time'
-}
-
-const RANGE_REQUIRED_PLAN: Record<string, string> = {
-  '90': 'Pro', 'all': 'Agency'
+  '14': '14d', '30': '30d', '90': '90d', 'all': 'All Time'
 }
 
 export default function Analytics() {
-  const [user, setUser] = useState<any>(null)
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
-  const [range, setRange] = useState<'7' | '30' | '90' | 'all'>('30')
-  const [lockedRange, setLockedRange] = useState<string | null>(null)
+  const [range, setRange] = useState<'14' | '30' | '90' | 'all'>('30')
   const [radarDismissed, setRadarDismissed] = useState(false)
+  const [creditModal, setCreditModal] = useState<{ range: string; cost: number } | null>(null)
+  const [radarModal, setRadarModal] = useState(false)
+  const [pulseModal, setPulseModal] = useState(false)
   const router = useRouter()
-  const { plan, credits } = useWorkspace()
+  const { plan, credits, setCredits } = useWorkspace()
 
-  const allowedRanges = PLAN_RANGES[plan] || PLAN_RANGES.free
+  const freeRanges = PLAN_FREE_RANGES[plan] || PLAN_FREE_RANGES.free
+  const creditRanges = PLAN_CREDIT_RANGES[plan] || {}
 
   useEffect(() => {
     const getData = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
-      setUser(user)
       const { data } = await supabase
         .from('posts')
         .select('*')
@@ -69,12 +72,23 @@ export default function Analytics() {
       setLoading(false)
     }
     getData()
-  }, [])
+  }, [router])
 
-  const handleRangeClick = (r: '7' | '30' | '90' | 'all') => {
-    if (!allowedRanges.includes(r)) { setLockedRange(r); return }
-    setLockedRange(null)
-    setRange(r)
+  const handleRangeClick = (r: '14' | '30' | '90' | 'all') => {
+    if (freeRanges.includes(r)) {
+      setRange(r)
+      return
+    }
+    if (creditRanges[r]) {
+      setCreditModal({ range: r, cost: creditRanges[r] })
+    }
+  }
+
+  const handleCreditUnlock = () => {
+    if (!creditModal || credits < creditModal.cost) return
+    setCredits(credits - creditModal.cost)
+    setRange(creditModal.range as '14' | '30' | '90' | 'all')
+    setCreditModal(null)
   }
 
   const now = new Date()
@@ -127,15 +141,22 @@ export default function Analytics() {
   const maxMonthCount = Math.max(...monthCounts.map(m => m.count), 1)
 
   let currentStreak = 0, longestStreak = 0, tempStreak = 0
-  const today = new Date(); today.setHours(0,0,0,0)
+  let currentStreakDone = false
+  const todayMidnight = new Date(); todayMidnight.setHours(0, 0, 0, 0)
   for (let i = 0; i < 365; i++) {
-    const d = new Date(today); d.setDate(today.getDate() - i)
-    const hasPost = posts.some(p => new Date(p.created_at).toDateString() === d.toDateString())
+    const d = new Date(todayMidnight); d.setDate(todayMidnight.getDate() - i)
+    const hasPost = posts.some(p => {
+      const pd = new Date(p.created_at); pd.setHours(0, 0, 0, 0)
+      return pd.getTime() === d.getTime()
+    })
     if (hasPost) {
       tempStreak++
-      if (i === 0 || i === currentStreak) currentStreak = tempStreak
       longestStreak = Math.max(longestStreak, tempStreak)
-    } else { tempStreak = 0 }
+      if (!currentStreakDone) currentStreak = tempStreak
+    } else {
+      if (!currentStreakDone) currentStreakDone = true
+      tempStreak = 0
+    }
   }
 
   const oldestPost = posts[0]
@@ -147,11 +168,9 @@ export default function Analytics() {
     ? Math.round(filteredPosts.reduce((sum, p) => sum + (p.content?.length || 0), 0) / filteredPosts.length)
     : 0
 
-  // Content gap detection
   const daysSinceLastPost = posts.length > 0
     ? Math.floor((now.getTime() - new Date(posts[posts.length - 1].created_at).getTime()) / (24 * 3600000))
     : null
-  const mostUsedPlatform = topPlatforms[0]?.[0] || null
   const hasVideoGap = filteredPosts.length > 5 &&
     !filteredPosts.some(p => p.platforms?.includes('youtube') || p.platforms?.includes('tiktok'))
 
@@ -161,6 +180,97 @@ export default function Analytics() {
       <div className="ml-56 flex-1 p-8">
         <div className="max-w-7xl mx-auto">
 
+          {/* CREDIT UNLOCK MODAL */}
+          {creditModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+              <div className="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl">
+                <div className="text-2xl mb-3">🔓</div>
+                <h2 className="text-sm font-extrabold mb-1">Unlock {RANGE_LABELS[creditModal.range]} history</h2>
+                <p className="text-xs text-gray-400 mb-4">
+                  This will spend{' '}
+                  <span className="font-bold text-black">{creditModal.cost} AI credits</span> from your balance ({credits} remaining).
+                  The view stays unlocked for this session.
+                </p>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handleCreditUnlock}
+                    disabled={credits < creditModal.cost}
+                    className="flex-1 bg-black text-white text-xs font-bold py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
+                    {credits < creditModal.cost ? 'Not enough credits' : `Spend ${creditModal.cost} credits →`}
+                  </button>
+                  <button
+                    onClick={() => setCreditModal(null)}
+                    className="px-4 py-2.5 border border-gray-200 text-xs font-bold text-gray-600 rounded-xl hover:border-gray-400 transition-all">
+                    Cancel
+                  </button>
+                </div>
+                {credits < creditModal.cost && (
+                  <p className="text-xs text-center mt-3">
+                    <Link href="/referral" className="text-blue-600 font-bold hover:underline">Earn more credits →</Link>
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* SM-RADAR MODAL */}
+          {radarModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+              <div className="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl">
+                <div className="text-2xl mb-3">📡</div>
+                <h2 className="text-sm font-extrabold mb-1">Run SM-Radar</h2>
+                <p className="text-xs text-gray-400 mb-1">Costs <span className="font-bold text-black">3 AI credits</span> ({credits} remaining)</p>
+                <p className="text-xs text-gray-400 mb-4">
+                  AI-powered insights on your best posting times, top content formats, and growth patterns based on your actual data.
+                </p>
+                <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 mb-4">
+                  <p className="text-xs text-amber-700 font-semibold">⚠️ Gemini integration coming soon — full results unlock when API is connected.</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => { if (credits >= 3) { setCredits(credits - 3); setRadarModal(false) } }}
+                    disabled={credits < 3}
+                    className="flex-1 bg-black text-white text-xs font-bold py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
+                    {credits < 3 ? 'Not enough credits' : 'Run SM-Radar — 3 credits'}
+                  </button>
+                  <button onClick={() => setRadarModal(false)}
+                    className="px-4 py-2.5 border border-gray-200 text-xs font-bold text-gray-600 rounded-xl hover:border-gray-400 transition-all">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SM-PULSE MODAL */}
+          {pulseModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+              <div className="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl">
+                <div className="text-2xl mb-3">🔥</div>
+                <h2 className="text-sm font-extrabold mb-1">Run SM-Pulse</h2>
+                <p className="text-xs text-gray-400 mb-1">Costs <span className="font-bold text-black">5 AI credits</span> ({credits} remaining)</p>
+                <p className="text-xs text-gray-400 mb-4">
+                  See what's trending in your niche right now — SM-Pulse scans viral patterns across platforms before you create your next post.
+                </p>
+                <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 mb-4">
+                  <p className="text-xs text-amber-700 font-semibold">⚠️ Gemini integration coming soon — full results unlock when API is connected.</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => { if (credits >= 5) { setCredits(credits - 5); setPulseModal(false) } }}
+                    disabled={credits < 5}
+                    className="flex-1 bg-black text-white text-xs font-bold py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
+                    {credits < 5 ? 'Not enough credits' : 'Run SM-Pulse — 5 credits'}
+                  </button>
+                  <button onClick={() => setPulseModal(false)}
+                    className="px-4 py-2.5 border border-gray-200 text-xs font-bold text-gray-600 rounded-xl hover:border-gray-400 transition-all">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* HEADER */}
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -168,51 +278,36 @@ export default function Analytics() {
               <p className="text-sm text-gray-400 mt-0.5">Real data from your posting activity</p>
             </div>
             <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-xl p-1">
-              {(['7', '30', '90', 'all'] as const).map(r => {
-                const allowed = allowedRanges.includes(r)
+              {(['14', '30', '90', 'all'] as const).map(r => {
+                const isFree = freeRanges.includes(r)
+                const creditCost = creditRanges[r]
                 const isActive = range === r
+                const isHardLocked = !isFree && !creditCost
                 return (
                   <button key={r} onClick={() => handleRangeClick(r)}
                     className={`relative px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                       isActive ? 'bg-black text-white'
-                      : allowed ? 'text-gray-500 hover:text-black'
-                      : 'text-gray-300 cursor-pointer'
+                      : isHardLocked ? 'text-gray-300 cursor-not-allowed'
+                      : 'text-gray-500 hover:text-black'
                     }`}>
                     {RANGE_LABELS[r]}
-                    {!allowed && <span className="ml-1">🔒</span>}
+                    {creditCost && !isFree && (
+                      <span className="ml-1 text-amber-500 font-bold">{creditCost}cr</span>
+                    )}
+                    {isHardLocked && <span className="ml-1">🔒</span>}
                   </button>
                 )
               })}
             </div>
           </div>
 
-          {/* LOCKED RANGE NUDGE */}
-          {lockedRange && !allowedRanges.includes(lockedRange) && (
-            <div className="mb-6 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 flex items-center justify-between">
-              <div>
-                <p className="text-sm font-bold text-amber-800">
-                  {RANGE_LABELS[lockedRange]} history requires {RANGE_REQUIRED_PLAN[lockedRange]}
-                </p>
-                <p className="text-xs text-amber-600 mt-0.5">
-                  {lockedRange === '90'
-                    ? 'Pro plan includes 90-day analytics history. As SocialMate grows, these limits will too.'
-                    : 'Agency plan includes full all-time history and PDF export for any date range.'}
-                </p>
-              </div>
-              <Link href="/pricing"
-                className="bg-black text-white text-xs font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all flex-shrink-0 ml-4">
-                Upgrade →
-              </Link>
-            </div>
-          )}
-
           {/* FREE PLAN BANNER */}
           {plan === 'free' && (
             <div className="mb-6 bg-gray-50 border border-gray-200 rounded-2xl px-5 py-3 flex items-center justify-between">
               <p className="text-xs text-gray-500 font-semibold">
-                📊 Free plan shows up to 30-day history
-                <span className="text-gray-400 font-normal"> · Advanced analytics unlock for 2 AI credits · </span>
-                <Link href="/pricing" className="text-black font-bold underline">Upgrade for 90-day & all-time</Link>
+                📊 Free plan includes 14-day & 30-day history free
+                <span className="text-gray-400 font-normal"> · 90-day view costs 2 credits · </span>
+                <Link href="/pricing" className="text-black font-bold underline">Upgrade to unlock for free</Link>
               </p>
             </div>
           )}
@@ -230,10 +325,11 @@ export default function Analytics() {
                 </div>
               </div>
               <div className="flex items-center gap-3 flex-shrink-0 ml-4">
-                <Link href="/features"
+                <button
+                  onClick={() => setRadarModal(true)}
                   className="text-xs font-bold px-4 py-2 bg-white text-black rounded-xl hover:opacity-80 transition-all">
                   Try SM-Radar
-                </Link>
+                </button>
                 <button onClick={() => setRadarDismissed(true)}
                   className="text-xs text-gray-500 hover:text-gray-300 transition-all">
                   Dismiss
@@ -336,7 +432,6 @@ export default function Analytics() {
 
           <div className="grid grid-cols-3 gap-6">
 
-            {/* LEFT / MAIN CHARTS */}
             <div className="col-span-2 space-y-6">
 
               {/* DAILY ACTIVITY */}
@@ -566,22 +661,23 @@ export default function Analytics() {
                 <p className="text-xs text-gray-400 leading-relaxed mb-3">
                   See what's trending in your niche right now — before you create your next post.
                 </p>
-                <Link href="/features"
+                <button
+                  onClick={() => setPulseModal(true)}
                   className="text-xs font-bold px-4 py-2 bg-white text-black rounded-xl hover:opacity-80 transition-all inline-block">
                   Try SM-Pulse →
-                </Link>
+                </button>
               </div>
 
               {/* UPGRADE CARD */}
               {plan !== 'agency' && (
                 <div className={`rounded-2xl p-5 border ${plan === 'free' ? 'bg-blue-50 border-blue-100' : 'bg-purple-50 border-purple-100'}`}>
                   <p className={`text-xs font-bold mb-1 ${plan === 'free' ? 'text-blue-700' : 'text-purple-700'}`}>
-                    {plan === 'free' ? '⚡ Unlock more history' : '🏢 Unlock all-time history'}
+                    {plan === 'free' ? '⚡ Unlock more history free' : '🏢 Unlock all-time history free'}
                   </p>
                   <p className={`text-xs mb-3 ${plan === 'free' ? 'text-blue-600' : 'text-purple-600'}`}>
                     {plan === 'free'
-                      ? 'Pro plan includes 90-day analytics. We increase limits as SocialMate grows.'
-                      : 'Agency plan includes full all-time data and PDF export for any date range.'}
+                      ? 'Pro plan includes 90-day analytics — no credits needed.'
+                      : 'Agency plan includes full all-time data and PDF export.'}
                   </p>
                   <Link href="/pricing"
                     className={`block text-center text-white text-xs font-bold px-3 py-2 rounded-xl hover:opacity-80 transition-all ${plan === 'free' ? 'bg-blue-600' : 'bg-purple-600'}`}>
