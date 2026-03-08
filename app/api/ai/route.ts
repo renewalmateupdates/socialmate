@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { GoogleGenerativeAI } from '@google/generative-ai'
 
 const CREDIT_COSTS: Record<string, number> = {
   caption:  1,
@@ -36,35 +37,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'API key not configured' }, { status: 500 })
     }
 
+    const genAI = new GoogleGenerativeAI(apiKey)
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
     const prompt = buildPrompt(tool, content, platform || 'general')
-
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.9,
-          maxOutputTokens: 1024,
-        },
-      }),
-    })
-
-    const data = await response.json()
-
-    if (!response.ok) {
-      console.error('Gemini error:', JSON.stringify(data))
-      return NextResponse.json({ error: 'Gemini API error', detail: data }, { status: 500 })
-    }
-
-    const result = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
+    const result = await model.generateContent(prompt)
+    const text = result.response.text()
     const creditCost = CREDIT_COSTS[tool] || 1
 
-    return NextResponse.json({ result, creditCost })
+    return NextResponse.json({ result: text, creditCost })
   } catch (err) {
     console.error('AI route error:', err)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: 'Internal server error', detail: String(err) }, { status: 500 })
   }
 }
