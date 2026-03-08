@@ -19,9 +19,7 @@ const PLATFORM_ICONS: Record<string, string> = {
 function groupByDate(posts: any[]) {
   const groups: Record<string, any[]> = {}
   posts.forEach(post => {
-    const date = post.scheduled_at
-      ? new Date(post.scheduled_at).toDateString()
-      : 'Unscheduled'
+    const date = post.scheduled_at ? new Date(post.scheduled_at).toDateString() : 'Unscheduled'
     if (!groups[date]) groups[date] = []
     groups[date].push(post)
   })
@@ -66,7 +64,7 @@ export default function Queue() {
       setLoading(false)
     }
     load()
-  }, [])
+  }, [router]) // Q1: fixed
 
   const handleCancel = async (id: string) => {
     setCancelling(id)
@@ -114,9 +112,7 @@ export default function Queue() {
             <div className="bg-white border border-gray-100 rounded-2xl p-12 text-center">
               <div className="text-4xl mb-3">📅</div>
               <p className="text-sm font-bold mb-1">Your queue is empty</p>
-              <p className="text-xs text-gray-400 mb-5">
-                Schedule posts and they'll line up here, grouped by day.
-              </p>
+              <p className="text-xs text-gray-400 mb-5">Schedule posts and they'll line up here, grouped by day.</p>
               <Link href="/compose"
                 className="inline-block bg-black text-white text-xs font-bold px-5 py-2.5 rounded-xl hover:opacity-80 transition-all">
                 Schedule your first post →
@@ -144,9 +140,7 @@ export default function Queue() {
                             <div className="flex items-center gap-2 mb-2">
                               {post.scheduled_at && (
                                 <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
-                                  {new Date(post.scheduled_at).toLocaleTimeString('en-US', {
-                                    hour: '2-digit', minute: '2-digit'
-                                  })}
+                                  {new Date(post.scheduled_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                                 </span>
                               )}
                             </div>

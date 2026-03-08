@@ -28,36 +28,114 @@ const PLATFORM_META: Record<string, {
   status: PlatformStatus
   statusNote?: string
 }> = {
-  youtube:   { icon: '▶️', color: 'bg-red-50 border-red-200',       label: 'YouTube',   status: 'available' },
-  reddit:    { icon: '🤖', color: 'bg-orange-50 border-orange-200', label: 'Reddit',    status: 'available' },
-  discord:   { icon: '💬', color: 'bg-indigo-50 border-indigo-200', label: 'Discord',   status: 'available' },
-  linkedin:  { icon: '💼', color: 'bg-blue-50 border-blue-200',     label: 'LinkedIn',  status: 'available' },
-  pinterest: { icon: '📌', color: 'bg-red-50 border-red-200',       label: 'Pinterest', status: 'available' },
-  mastodon:  { icon: '🐘', color: 'bg-purple-50 border-purple-200', label: 'Mastodon',  status: 'available' },
-  bluesky:   { icon: '🦋', color: 'bg-sky-50 border-sky-200',       label: 'Bluesky',   status: 'available' },
-  telegram:  { icon: '✈️', color: 'bg-sky-50 border-sky-200',       label: 'Telegram',  status: 'available' },
-  instagram: { icon: '📸', color: 'bg-pink-50 border-pink-200',     label: 'Instagram', status: 'coming_soon', statusNote: 'Awaiting API approval' },
-  facebook:  { icon: '📘', color: 'bg-blue-50 border-blue-200',     label: 'Facebook',  status: 'coming_soon', statusNote: 'Awaiting API approval' },
-  tiktok:    { icon: '🎵', color: 'bg-gray-50 border-gray-200',     label: 'TikTok',    status: 'coming_soon', statusNote: 'Awaiting API approval' },
-  threads:   { icon: '🧵', color: 'bg-gray-50 border-gray-200',     label: 'Threads',   status: 'coming_soon', statusNote: 'Awaiting API approval' },
-  twitter:   { icon: '🐦', color: 'bg-sky-50 border-sky-200',       label: 'X / Twitter', status: 'planned', statusNote: 'Planned integration' },
-  snapchat:  { icon: '👻', color: 'bg-yellow-50 border-yellow-200', label: 'Snapchat',  status: 'planned', statusNote: 'Planned integration' },
-  lemon8:    { icon: '🍋', color: 'bg-yellow-50 border-yellow-200', label: 'Lemon8',    status: 'planned', statusNote: 'Planned integration' },
-  bereal:    { icon: '📷', color: 'bg-gray-50 border-gray-200',     label: 'BeReal',    status: 'planned', statusNote: 'Planned integration' },
+  youtube:   { icon: '▶️', color: 'bg-red-50 border-red-200',       label: 'YouTube',     status: 'available' },
+  reddit:    { icon: '🤖', color: 'bg-orange-50 border-orange-200', label: 'Reddit',      status: 'available' },
+  discord:   { icon: '💬', color: 'bg-indigo-50 border-indigo-200', label: 'Discord',     status: 'available' },
+  linkedin:  { icon: '💼', color: 'bg-blue-50 border-blue-200',     label: 'LinkedIn',    status: 'available' },
+  pinterest: { icon: '📌', color: 'bg-red-50 border-red-200',       label: 'Pinterest',   status: 'available' },
+  mastodon:  { icon: '🐘', color: 'bg-purple-50 border-purple-200', label: 'Mastodon',    status: 'available' },
+  bluesky:   { icon: '🦋', color: 'bg-sky-50 border-sky-200',       label: 'Bluesky',     status: 'available' },
+  telegram:  { icon: '✈️', color: 'bg-sky-50 border-sky-200',       label: 'Telegram',    status: 'available' },
+  instagram: { icon: '📸', color: 'bg-pink-50 border-pink-200',     label: 'Instagram',   status: 'coming_soon', statusNote: 'Awaiting API approval' },
+  facebook:  { icon: '📘', color: 'bg-blue-50 border-blue-200',     label: 'Facebook',    status: 'coming_soon', statusNote: 'Awaiting API approval' },
+  tiktok:    { icon: '🎵', color: 'bg-gray-50 border-gray-200',     label: 'TikTok',      status: 'coming_soon', statusNote: 'Awaiting API approval' },
+  threads:   { icon: '🧵', color: 'bg-gray-50 border-gray-200',     label: 'Threads',     status: 'coming_soon', statusNote: 'Awaiting API approval' },
+  twitter:   { icon: '🐦', color: 'bg-sky-50 border-sky-200',       label: 'X / Twitter', status: 'planned',     statusNote: 'Planned integration' },
+  snapchat:  { icon: '👻', color: 'bg-yellow-50 border-yellow-200', label: 'Snapchat',    status: 'planned',     statusNote: 'Planned integration' },
+  lemon8:    { icon: '🍋', color: 'bg-yellow-50 border-yellow-200', label: 'Lemon8',      status: 'planned',     statusNote: 'Planned integration' },
+  bereal:    { icon: '📷', color: 'bg-gray-50 border-gray-200',     label: 'BeReal',      status: 'planned',     statusNote: 'Planned integration' },
 }
 
 const ALL_PLATFORMS = Object.keys(PLATFORM_META)
 const AVAILABLE_PLATFORMS = ALL_PLATFORMS.filter(p => PLATFORM_META[p].status === 'available')
 const COMING_SOON_PLATFORMS = ALL_PLATFORMS.filter(p => PLATFORM_META[p].status === 'coming_soon')
 const PLANNED_PLATFORMS = ALL_PLATFORMS.filter(p => PLATFORM_META[p].status === 'planned')
-const TOTAL_PLATFORMS = ALL_PLATFORMS.length
+
+// Ac2: moved outside parent component to prevent remount on every render
+function PlatformCard({
+  platform,
+  connectable,
+  accountsPerPlatform,
+  accountsByPlatform,
+  connectingPlatform,
+  onConnect,
+}: {
+  platform: string
+  connectable: boolean
+  accountsPerPlatform: number
+  accountsByPlatform: Record<string, Account[]>
+  connectingPlatform: string | null
+  onConnect: (platform: string) => void
+}) {
+  const meta = PLATFORM_META[platform]
+  const isConnecting = connectingPlatform === platform
+  const platformCount = accountsByPlatform[platform]?.length || 0
+  const atLimit = platformCount >= accountsPerPlatform
+  const isConnected = platformCount > 0
+
+  if (!connectable) {
+    return (
+      <div className="flex items-center gap-3 p-4 bg-white border border-gray-100 rounded-2xl opacity-50">
+        <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-xl flex-shrink-0">
+          {meta.icon}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-gray-600">{meta.label}</p>
+          <p className="text-xs text-gray-400">{meta.statusNote}</p>
+        </div>
+        <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
+          meta.status === 'coming_soon' ? 'bg-blue-50 text-blue-500' : 'bg-gray-100 text-gray-400'
+        }`}>
+          {meta.status === 'coming_soon' ? 'Coming Soon' : 'Planned'}
+        </span>
+      </div>
+    )
+  }
+
+  return (
+    <div className={`flex items-center gap-3 p-4 bg-white border rounded-2xl transition-all group ${
+      atLimit ? 'border-gray-100 opacity-60' : 'border-gray-100 hover:border-gray-300'
+    }`}>
+      <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-xl flex-shrink-0">
+        {meta.icon}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-semibold">{meta.label}</p>
+          {isConnected && (
+            <span className="text-xs font-semibold px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
+              Connected
+            </span>
+          )}
+        </div>
+        <p className="text-xs text-gray-400">
+          {platformCount > 0 ? `${platformCount}/${accountsPerPlatform} connected` : 'Not connected'}
+        </p>
+      </div>
+      {atLimit ? (
+        <Link href="/pricing"
+          className="text-xs font-semibold px-3 py-1.5 bg-gray-100 text-gray-500 rounded-xl hover:bg-gray-200 transition-all opacity-0 group-hover:opacity-100">
+          Upgrade
+        </Link>
+      ) : (
+        <button
+          onClick={() => onConnect(platform)}
+          disabled={isConnecting}
+          className="text-xs font-semibold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all opacity-0 group-hover:opacity-100 disabled:opacity-50">
+          {isConnecting ? 'Connecting...' : platformCount > 0 ? 'Add account' : 'Connect'}
+        </button>
+      )}
+    </div>
+  )
+}
 
 export default function Accounts() {
-  const [user, setUser] = useState<any>(null)
   const [accounts, setAccounts] = useState<Account[]>([])
   const [loading, setLoading] = useState(true)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null)
+  // Ac3: inline confirm state
+  const [confirmDisconnect, setConfirmDisconnect] = useState<string | null>(null)
   const router = useRouter()
   const { plan } = useWorkspace()
 
@@ -68,7 +146,6 @@ export default function Accounts() {
     const getData = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
-      setUser(user)
       const { data } = await supabase
         .from('connected_accounts')
         .select('*')
@@ -78,7 +155,7 @@ export default function Accounts() {
       setLoading(false)
     }
     getData()
-  }, [])
+  }, [router]) // Ac1: fixed
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type })
@@ -88,6 +165,7 @@ export default function Accounts() {
   const handleDisconnect = async (id: string, platform: string) => {
     await supabase.from('connected_accounts').delete().eq('id', id)
     setAccounts(prev => prev.filter(a => a.id !== id))
+    setConfirmDisconnect(null)
     showToast(`${PLATFORM_META[platform]?.label || platform} disconnected`, 'success')
   }
 
@@ -109,78 +187,6 @@ export default function Accounts() {
   }, {} as Record<string, Account[]>)
 
   const connectedPlatforms = new Set(accounts.map(a => a.platform))
-
-  const atPlatformLimit = (platform: string) => {
-    const count = accountsByPlatform[platform]?.length || 0
-    return count >= accountsPerPlatform
-  }
-
-  const PlatformCard = ({ platform, connectable }: { platform: string; connectable: boolean }) => {
-    const meta = PLATFORM_META[platform]
-    const isConnecting = connectingPlatform === platform
-    const platformCount = accountsByPlatform[platform]?.length || 0
-    const atLimit = atPlatformLimit(platform)
-    const isConnected = connectedPlatforms.has(platform)
-
-    if (!connectable) {
-      return (
-        <div className="flex items-center gap-3 p-4 bg-white border border-gray-100 rounded-2xl opacity-50">
-          <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-xl flex-shrink-0">
-            {meta.icon}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-gray-600">{meta.label}</p>
-            <p className="text-xs text-gray-400">{meta.statusNote}</p>
-          </div>
-          <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
-            meta.status === 'coming_soon'
-              ? 'bg-blue-50 text-blue-500'
-              : 'bg-gray-100 text-gray-400'
-          }`}>
-            {meta.status === 'coming_soon' ? 'Coming Soon' : 'Planned'}
-          </span>
-        </div>
-      )
-    }
-
-    return (
-      <div className={`flex items-center gap-3 p-4 bg-white border rounded-2xl transition-all group ${
-        atLimit ? 'border-gray-100 opacity-60' : 'border-gray-100 hover:border-gray-300'
-      }`}>
-        <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-xl flex-shrink-0">
-          {meta.icon}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <p className="text-sm font-semibold">{meta.label}</p>
-            {isConnected && (
-              <span className="text-xs font-semibold px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
-                Connected
-              </span>
-            )}
-          </div>
-          <p className="text-xs text-gray-400">
-            {platformCount > 0
-              ? `${platformCount}/${accountsPerPlatform} connected`
-              : 'Not connected'}
-          </p>
-        </div>
-        {atLimit ? (
-          <Link href="/pricing"
-            className="text-xs font-semibold px-3 py-1.5 bg-gray-100 text-gray-500 rounded-xl hover:bg-gray-200 transition-all opacity-0 group-hover:opacity-100">
-            Upgrade
-          </Link>
-        ) : (
-          <button
-            onClick={() => handleConnect(platform)}
-            disabled={isConnecting}
-            className="text-xs font-semibold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all opacity-0 group-hover:opacity-100 disabled:opacity-50">
-            {isConnecting ? 'Connecting...' : platformCount > 0 ? 'Add account' : 'Connect'}
-          </button>
-        )}
-      </div>
-    )
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -232,9 +238,9 @@ export default function Accounts() {
           <div className="grid grid-cols-3 gap-4 mb-8">
             {loading ? [1,2,3].map(i => <SkeletonBox key={i} className="h-20 rounded-2xl" />) : (
               [
-                { label: 'Connected',             value: accounts.length,                              icon: '✅', color: 'text-green-600' },
-                { label: 'Platforms Used',         value: `${connectedPlatforms.size} / ${AVAILABLE_PLATFORMS.length} live`, icon: '📱', color: 'text-gray-700' },
-                { label: 'Accounts Per Platform',  value: `${accountsPerPlatform} max`,                icon: '🔓', color: 'text-blue-600' },
+                { label: 'Connected',            value: accounts.length,                                              icon: '✅', color: 'text-green-600' },
+                { label: 'Platforms Used',        value: `${connectedPlatforms.size} / ${AVAILABLE_PLATFORMS.length} live`, icon: '📱', color: 'text-gray-700' },
+                { label: 'Accounts Per Platform', value: `${accountsPerPlatform} max`,                                icon: '🔓', color: 'text-blue-600' },
               ].map(stat => (
                 <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-4">
                   <div className="flex justify-between items-center mb-2">
@@ -253,8 +259,9 @@ export default function Accounts() {
               <h2 className="text-sm font-bold tracking-tight mb-4">Connected Accounts</h2>
               <div className="grid grid-cols-1 gap-3">
                 {accounts.map(account => {
-                  const meta = PLATFORM_META[account.platform] || { icon: '📱', color: 'bg-gray-50 border-gray-200', label: account.platform, status: 'available' }
+                  const meta = PLATFORM_META[account.platform] || { icon: '📱', color: 'bg-gray-50 border-gray-200', label: account.platform }
                   const platformCount = accountsByPlatform[account.platform]?.length || 0
+                  const isConfirming = confirmDisconnect === account.id
                   return (
                     <div key={account.id} className={`flex items-center gap-4 p-4 bg-white border rounded-2xl ${meta.color} transition-all`}>
                       <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-xl flex-shrink-0 shadow-sm">
@@ -274,10 +281,25 @@ export default function Accounts() {
                         <p className="text-xs text-gray-400">
                           Connected {new Date(account.connected_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </p>
-                        <button onClick={() => handleDisconnect(account.id, account.platform)}
-                          className="text-xs font-semibold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 hover:text-red-600 transition-all">
-                          Disconnect
-                        </button>
+                        {/* Ac3: inline confirm before disconnect */}
+                        {isConfirming ? (
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-red-500 font-semibold">Disconnect?</span>
+                            <button onClick={() => handleDisconnect(account.id, account.platform)}
+                              className="text-xs font-bold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all">
+                              Yes
+                            </button>
+                            <button onClick={() => setConfirmDisconnect(null)}
+                              className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <button onClick={() => setConfirmDisconnect(account.id)}
+                            className="text-xs font-semibold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 hover:text-red-600 transition-all">
+                            Disconnect
+                          </button>
+                        )}
                       </div>
                     </div>
                   )
@@ -299,7 +321,15 @@ export default function Accounts() {
             ) : (
               <div className="grid grid-cols-2 gap-3">
                 {AVAILABLE_PLATFORMS.map(platform => (
-                  <PlatformCard key={platform} platform={platform} connectable={true} />
+                  <PlatformCard
+                    key={platform}
+                    platform={platform}
+                    connectable={true}
+                    accountsPerPlatform={accountsPerPlatform}
+                    accountsByPlatform={accountsByPlatform}
+                    connectingPlatform={connectingPlatform}
+                    onConnect={handleConnect}
+                  />
                 ))}
               </div>
             )}
@@ -313,7 +343,15 @@ export default function Accounts() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               {COMING_SOON_PLATFORMS.map(platform => (
-                <PlatformCard key={platform} platform={platform} connectable={false} />
+                <PlatformCard
+                  key={platform}
+                  platform={platform}
+                  connectable={false}
+                  accountsPerPlatform={accountsPerPlatform}
+                  accountsByPlatform={accountsByPlatform}
+                  connectingPlatform={connectingPlatform}
+                  onConnect={handleConnect}
+                />
               ))}
             </div>
           </div>
@@ -326,7 +364,15 @@ export default function Accounts() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               {PLANNED_PLATFORMS.map(platform => (
-                <PlatformCard key={platform} platform={platform} connectable={false} />
+                <PlatformCard
+                  key={platform}
+                  platform={platform}
+                  connectable={false}
+                  accountsPerPlatform={accountsPerPlatform}
+                  accountsByPlatform={accountsByPlatform}
+                  connectingPlatform={connectingPlatform}
+                  onConnect={handleConnect}
+                />
               ))}
             </div>
           </div>

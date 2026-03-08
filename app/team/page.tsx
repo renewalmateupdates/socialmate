@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -20,10 +20,10 @@ type TeamMember = {
 }
 
 const ROLE_META: Record<string, { label: string; color: string; description: string }> = {
-  owner:  { label: 'Owner',  color: 'bg-black text-white',                              description: 'Full access to everything' },
-  admin:  { label: 'Admin',  color: 'bg-gray-800 text-white',                           description: 'Can manage team and settings' },
-  editor: { label: 'Editor', color: 'bg-blue-50 text-blue-700 border border-blue-200', description: 'Can create and schedule posts' },
-  viewer: { label: 'Viewer', color: 'bg-gray-100 text-gray-600',                        description: 'Can view posts and analytics' },
+  owner:  { label: 'Owner',  color: 'bg-black text-white',                               description: 'Full access to everything'          },
+  admin:  { label: 'Admin',  color: 'bg-gray-800 text-white',                            description: 'Can manage team and settings'       },
+  editor: { label: 'Editor', color: 'bg-blue-50 text-blue-700 border border-blue-200',  description: 'Can create and schedule posts'      },
+  viewer: { label: 'Viewer', color: 'bg-gray-100 text-gray-600',                         description: 'Can view posts and analytics'       },
 }
 
 export default function Team() {
@@ -36,17 +36,18 @@ export default function Team() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingRole, setEditingRole] = useState<string>('')
+  // T3: inline confirm for remove
+  const [confirmRemove, setConfirmRemove] = useState<string | null>(null)
   const router = useRouter()
   const { plan } = useWorkspace()
 
   const planConfig = PLAN_CONFIG[plan]
-  const seatLimit = planConfig.seats
-  const isUnlimited = plan === 'agency'
+  const seatLimit = planConfig.seats // agency = 50, no more isUnlimited bypass
 
   useEffect(() => {
     const getData = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
+      if (!user) { router.push('/login'); return } // T1: fixed
       setUser(user)
       const { data } = await supabase
         .from('team_members')
@@ -57,27 +58,26 @@ export default function Team() {
       setLoading(false)
     }
     getData()
-  }, [])
+  }, [router]) // T1: fixed
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type })
     setTimeout(() => setToast(null), 3000)
   }
 
-  const ownerMember: TeamMember = {
+  // T2: memoized so it doesn't recalculate on every render
+  const ownerMember: TeamMember = useMemo(() => ({
     id: 'owner',
     email: user?.email || '',
     role: 'owner',
     status: 'active',
     joined_at: user?.created_at || new Date().toISOString(),
-  }
+  }), [user])
 
   const allMembers = user ? [ownerMember, ...members] : members
-
-  // +1 for owner
   const seatsUsed = allMembers.length
-  const seatsRemaining = isUnlimited ? Infinity : seatLimit - seatsUsed
-  const atLimit = !isUnlimited && seatsUsed >= seatLimit
+  const seatsRemaining = seatLimit - seatsUsed
+  const atLimit = seatsUsed >= seatLimit
 
   const handleInvite = async () => {
     if (!inviteEmail.trim()) { showToast('Enter an email address', 'error'); return }
@@ -99,6 +99,7 @@ export default function Team() {
   const handleRemove = async (id: string, email: string) => {
     await supabase.from('team_members').delete().eq('id', id)
     setMembers(prev => prev.filter(m => m.id !== id))
+    setConfirmRemove(null)
     showToast(`${email} removed from team`, 'success')
   }
 
@@ -121,14 +122,10 @@ export default function Team() {
               <h1 className="text-2xl font-extrabold tracking-tight">Team</h1>
               <p className="text-sm text-gray-400 mt-0.5">Manage who has access to your SocialMate workspace</p>
             </div>
-            <div className="flex items-center gap-3">
-              {/* SEAT USAGE BADGE */}
-              <div className={`flex items-center gap-2 text-xs font-semibold rounded-xl px-4 py-2.5 border ${atLimit ? 'bg-red-50 border-red-200 text-red-600' : 'bg-white border-gray-100 text-gray-500'}`}>
-                {isUnlimited
-                  ? `${seatsUsed} members · Unlimited seats`
-                  : `${seatsUsed} / ${seatLimit} seats used`
-                }
-              </div>
+            <div className={`flex items-center gap-2 text-xs font-semibold rounded-xl px-4 py-2.5 border ${
+              atLimit ? 'bg-red-50 border-red-200 text-red-600' : 'bg-white border-gray-100 text-gray-500'
+            }`}>
+              {seatsUsed} / {seatLimit} seats used
             </div>
           </div>
 
@@ -139,43 +136,45 @@ export default function Team() {
                 <p className="text-sm font-bold text-amber-800">Seat limit reached</p>
                 <p className="text-xs text-amber-600 mt-0.5">
                   {plan === 'free'
-                    ? 'Free plan includes 2 team seats. Upgrade to Pro for 5 seats, or Agency for unlimited.'
-                    : 'Pro plan includes 5 team seats. Upgrade to Agency for unlimited seats.'
-                  }
+                    ? 'Free plan includes 2 seats. Upgrade to Pro for up to 5, or Agency for up to 50.'
+                    : plan === 'pro'
+                    ? 'Pro plan includes 5 seats. Upgrade to Agency for up to 50 seats.'
+                    : 'Agency plan supports up to 50 team seats.'}
                 </p>
               </div>
-              <Link href="/pricing"
-                className="bg-black text-white text-xs font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all flex-shrink-0 ml-4">
-                Upgrade →
-              </Link>
+              {plan !== 'agency' && (
+                <Link href="/pricing"
+                  className="bg-black text-white text-xs font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all flex-shrink-0 ml-4">
+                  Upgrade →
+                </Link>
+              )}
             </div>
           )}
 
           <div className="grid grid-cols-3 gap-6">
             <div className="col-span-2 space-y-6">
 
-              {/* SEAT PROGRESS BAR */}
-              {!isUnlimited && (
-                <div className="bg-white border border-gray-100 rounded-2xl p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold text-gray-500">Team seats</span>
-                    <span className="text-xs font-bold text-gray-700">{seatsUsed} / {seatLimit}</span>
-                  </div>
-                  <div className="w-full bg-gray-100 rounded-full h-2 mb-2">
-                    <div
-                      className={`h-2 rounded-full transition-all ${atLimit ? 'bg-red-400' : 'bg-black'}`}
-                      style={{ width: `${Math.min(100, (seatsUsed / seatLimit) * 100)}%` }}
-                    />
-                  </div>
-                  <p className="text-xs text-gray-400">
-                    {atLimit
-                      ? 'No seats remaining — upgrade to add more members'
-                      : `${seatsRemaining} seat${seatsRemaining !== 1 ? 's' : ''} remaining on ${planConfig.label} plan`
-                    }
-                  </p>
+              {/* SEAT PROGRESS */}
+              <div className="bg-white border border-gray-100 rounded-2xl p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-semibold text-gray-500">Team seats</span>
+                  <span className="text-xs font-bold text-gray-700">{seatsUsed} / {seatLimit}</span>
                 </div>
-              )}
+                <div className="w-full bg-gray-100 rounded-full h-2 mb-2">
+                  <div
+                    className={`h-2 rounded-full transition-all ${atLimit ? 'bg-red-400' : 'bg-black'}`}
+                    style={{ width: `${Math.min(100, (seatsUsed / seatLimit) * 100)}%` }}
+                  />
+                </div>
+                <p className="text-xs text-gray-400">
+                  {atLimit
+                    ? 'No seats remaining — upgrade to add more members'
+                    : `${seatsRemaining} seat${seatsRemaining !== 1 ? 's' : ''} remaining on ${planConfig.label} plan`
+                  }
+                </p>
+              </div>
 
+              {/* MEMBER LIST */}
               <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
                 <div className="px-5 py-4 border-b border-gray-100">
                   <h2 className="text-sm font-bold tracking-tight">Team Members</h2>
@@ -199,8 +198,11 @@ export default function Team() {
                       const roleMeta = ROLE_META[member.role]
                       const initials = member.email.slice(0, 2).toUpperCase()
                       const isOwner = member.role === 'owner'
+                      const isConfirming = confirmRemove === member.id
                       return (
-                        <div key={member.id} className={`flex items-center gap-4 px-5 py-4 ${i !== allMembers.length - 1 ? 'border-b border-gray-50' : ''} hover:bg-gray-50 transition-all group`}>
+                        <div key={member.id} className={`flex items-center gap-4 px-5 py-4 ${
+                          i !== allMembers.length - 1 ? 'border-b border-gray-50' : ''
+                        } hover:bg-gray-50 transition-all group`}>
                           <div className="w-10 h-10 rounded-xl bg-gray-100 flex items-center justify-center text-sm font-bold flex-shrink-0">
                             {member.avatar_url
                               ? <img src={member.avatar_url} alt={member.email} className="w-full h-full object-cover rounded-xl" />
@@ -232,6 +234,19 @@ export default function Team() {
                                 <button onClick={() => setEditingId(null)}
                                   className="text-xs px-2 py-1 border border-gray-200 rounded-lg hover:border-gray-400 transition-all">Cancel</button>
                               </div>
+                            ) : isConfirming ? (
+                              // T3: inline confirm before remove
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-red-500 font-semibold">Remove member?</span>
+                                <button onClick={() => handleRemove(member.id, member.email)}
+                                  className="text-xs font-bold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all">
+                                  Yes
+                                </button>
+                                <button onClick={() => setConfirmRemove(null)}
+                                  className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                                  Cancel
+                                </button>
+                              </div>
                             ) : (
                               <>
                                 <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${roleMeta.color}`}>{roleMeta.label}</span>
@@ -241,7 +256,7 @@ export default function Team() {
                                       className="text-xs font-semibold px-2.5 py-1 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
                                       Change Role
                                     </button>
-                                    <button onClick={() => handleRemove(member.id, member.email)}
+                                    <button onClick={() => setConfirmRemove(member.id)}
                                       className="text-xs font-semibold px-2.5 py-1 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all">
                                       Remove
                                     </button>
@@ -258,16 +273,21 @@ export default function Team() {
               </div>
             </div>
 
+            {/* RIGHT COLUMN */}
             <div className="space-y-6">
               <div className="bg-white border border-gray-100 rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Invite Member</h2>
                 {atLimit ? (
                   <div className="text-center py-4">
-                    <p className="text-xs text-gray-500 mb-3">You've used all {seatLimit} seats on your {planConfig.label} plan.</p>
-                    <Link href="/pricing"
-                      className="block w-full text-center bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all">
-                      {plan === 'free' ? '⚡ Upgrade to Pro' : '🏢 Upgrade to Agency'}
-                    </Link>
+                    <p className="text-xs text-gray-500 mb-3">
+                      You've used all {seatLimit} seats on your {planConfig.label} plan.
+                    </p>
+                    {plan !== 'agency' && (
+                      <Link href="/pricing"
+                        className="block w-full text-center bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all">
+                        {plan === 'free' ? '⚡ Upgrade to Pro' : '🏢 Upgrade to Agency'}
+                      </Link>
+                    )}
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -292,15 +312,14 @@ export default function Team() {
                       className="w-full py-2.5 bg-black text-white text-sm font-semibold rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
                       {inviting ? 'Sending...' : '📧 Send Invite'}
                     </button>
-                    {!isUnlimited && (
-                      <p className="text-xs text-gray-400 text-center">
-                        {seatsRemaining} seat{seatsRemaining !== 1 ? 's' : ''} remaining
-                      </p>
-                    )}
+                    <p className="text-xs text-gray-400 text-center">
+                      {seatsRemaining} seat{seatsRemaining !== 1 ? 's' : ''} remaining
+                    </p>
                   </div>
                 )}
               </div>
 
+              {/* ROLE PERMISSIONS */}
               <div className="bg-white border border-gray-100 rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Role Permissions</h2>
                 <div className="space-y-3">
@@ -313,13 +332,16 @@ export default function Team() {
                 </div>
               </div>
 
+              {/* UPGRADE CARD */}
               {plan !== 'agency' && (
                 <div className={`rounded-2xl p-5 border ${plan === 'free' ? 'bg-blue-50 border-blue-100' : 'bg-purple-50 border-purple-100'}`}>
                   <p className={`text-xs font-bold mb-1 ${plan === 'free' ? 'text-blue-700' : 'text-purple-700'}`}>
-                    {plan === 'free' ? '⚡ Need more seats?' : '🏢 Need unlimited seats?'}
+                    {plan === 'free' ? '⚡ Need more seats?' : '🏢 Need more seats?'}
                   </p>
                   <p className={`text-xs mb-3 ${plan === 'free' ? 'text-blue-600' : 'text-purple-600'}`}>
-                    {plan === 'free' ? 'Pro includes 5 seats. Agency includes unlimited.' : 'Agency plan includes unlimited team seats.'}
+                    {plan === 'free'
+                      ? 'Pro includes up to 5 seats. Agency includes up to 50.'
+                      : 'Agency plan includes up to 50 team seats.'}
                   </p>
                   <Link href="/pricing"
                     className={`block text-center text-white text-xs font-bold px-3 py-2 rounded-xl hover:opacity-80 transition-all ${plan === 'free' ? 'bg-blue-600' : 'bg-purple-600'}`}>
@@ -333,7 +355,9 @@ export default function Team() {
       </div>
 
       {toast && (
-        <div className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${toast.type === 'success' ? 'bg-black text-white' : 'bg-red-500 text-white'}`}>
+        <div className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${
+          toast.type === 'success' ? 'bg-black text-white' : 'bg-red-500 text-white'
+        }`}>
           {toast.type === 'success' ? '✅' : '❌'} {toast.message}
         </div>
       )}
