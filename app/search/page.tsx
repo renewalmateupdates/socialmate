@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
@@ -9,6 +9,7 @@ const PLATFORM_ICONS: Record<string, string> = {
   instagram: '📸', twitter: '🐦', linkedin: '💼', tiktok: '🎵',
   facebook: '📘', pinterest: '📌', youtube: '▶️', threads: '🧵',
   bluesky: '🦋', reddit: '🤖', discord: '💬', telegram: '✈️',
+  mastodon: '🐘', snapchat: '👻', lemon8: '🍋', bereal: '📷',
 }
 
 type ResultType = 'post' | 'template' | 'hashtag'
@@ -21,6 +22,24 @@ interface Result {
   href: string
   meta?: string
 }
+
+const TYPE_LABELS: Record<ResultType, { label: string; icon: string }> = {
+  post:     { label: 'Post',     icon: '✏️'  },
+  template: { label: 'Template', icon: '📝'  },
+  hashtag:  { label: 'Hashtags', icon: '#️⃣' },
+}
+
+const QUICK_LINKS = [
+  { label: 'Compose new post',    href: '/compose',        icon: '✏️'  },
+  { label: 'View drafts',         href: '/drafts',         icon: '📂'  },
+  { label: 'Content calendar',    href: '/calendar',       icon: '📅'  },
+  { label: 'Bulk scheduler',      href: '/bulk-scheduler', icon: '📆'  },
+  { label: 'Analytics',           href: '/analytics',      icon: '📊'  },
+  { label: 'Hashtag collections', href: '/hashtags',       icon: '#️⃣' },
+  { label: 'Post templates',      href: '/templates',      icon: '📝'  },
+  { label: 'Team management',     href: '/team',           icon: '👥'  },
+  { label: 'Account settings',    href: '/settings',       icon: '⚙️'  },
+]
 
 export default function Search() {
   const [query, setQuery] = useState('')
@@ -35,25 +54,16 @@ export default function Search() {
   useEffect(() => {
     const init = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
+      if (!user) { router.push('/login'); return } // S1: fixed
       setUserId(user.id)
     }
     init()
     setTimeout(() => inputRef.current?.focus(), 100)
-  }, [])
+  }, [router]) // S1: fixed
 
-  useEffect(() => {
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    if (!query.trim() || !userId) {
-      setResults([])
-      setHasSearched(false)
-      return
-    }
-    debounceRef.current = setTimeout(() => runSearch(query.trim()), 300)
-    return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
-  }, [query, userId])
-
-  const runSearch = async (q: string) => {
+  // S2: useCallback so runSearch is stable and can be safely listed as a dependency
+  const runSearch = useCallback(async (q: string) => {
+    if (!userId) return
     setSearching(true)
     setHasSearched(true)
     const all: Result[] = []
@@ -61,18 +71,18 @@ export default function Search() {
     const [postsRes, templatesRes, hashtagsRes] = await Promise.all([
       supabase.from('posts')
         .select('id, content, status, platforms')
-        .eq('user_id', userId!)
+        .eq('user_id', userId)
         .ilike('content', `%${q}%`)
         .limit(10),
       supabase.from('post_templates')
         .select('id, title, content')
-        .eq('user_id', userId!)
+        .eq('user_id', userId)
         .or(`title.ilike.%${q}%,content.ilike.%${q}%`)
         .limit(5),
       supabase.from('hashtag_collections')
         .select('id, name, tags')
-        .eq('user_id', userId!)
-        .or(`name.ilike.%${q}%`)
+        .eq('user_id', userId)
+        .ilike('name', `%${q}%`)
         .limit(5),
     ])
 
@@ -109,25 +119,18 @@ export default function Search() {
 
     setResults(all)
     setSearching(false)
-  }
+  }, [userId]) // S2: userId in deps, stable reference
 
-  const TYPE_LABELS: Record<ResultType, { label: string; icon: string }> = {
-    post:     { label: 'Post',     icon: '✏️'  },
-    template: { label: 'Template', icon: '📝'  },
-    hashtag:  { label: 'Hashtags', icon: '#️⃣' },
-  }
-
-  const QUICK_LINKS = [
-    { label: 'Compose new post',       href: '/compose',        icon: '✏️'  },
-    { label: 'View drafts',            href: '/drafts',         icon: '📂'  },
-    { label: 'Content calendar',       href: '/calendar',       icon: '📅'  },
-    { label: 'Bulk scheduler',         href: '/bulk-scheduler', icon: '📆'  },
-    { label: 'Analytics',              href: '/analytics',      icon: '📊'  },
-    { label: 'Hashtag collections',    href: '/hashtags',       icon: '#️⃣'  },
-    { label: 'Post templates',         href: '/templates',      icon: '📝'  },
-    { label: 'Team management',        href: '/team',           icon: '👥'  },
-    { label: 'Account settings',       href: '/settings',       icon: '⚙️'  },
-  ]
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    if (!query.trim() || !userId) {
+      setResults([])
+      setHasSearched(false)
+      return
+    }
+    debounceRef.current = setTimeout(() => runSearch(query.trim()), 300)
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
+  }, [query, userId, runSearch]) // S2: runSearch now safe to include
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -137,9 +140,7 @@ export default function Search() {
 
           <div className="mb-8">
             <h1 className="text-2xl font-extrabold tracking-tight">Search</h1>
-            <p className="text-sm text-gray-400 mt-0.5">
-              Find posts, templates, and hashtag collections
-            </p>
+            <p className="text-sm text-gray-400 mt-0.5">Find posts, templates, and hashtag collections</p>
           </div>
 
           {/* SEARCH INPUT */}
@@ -208,7 +209,7 @@ export default function Search() {
             </div>
           )}
 
-          {/* QUICK LINKS — show when no search active */}
+          {/* QUICK LINKS */}
           {!query && (
             <div>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Quick Links</p>

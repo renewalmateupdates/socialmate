@@ -11,15 +11,14 @@ function SkeletonBox({ className }: { className?: string }) {
 type NotifType = 'post_published' | 'post_failed' | 'credit_low' | 'team' | 'referral' | 'system'
 
 const TYPE_CONFIG: Record<NotifType, { icon: string; color: string }> = {
-  post_published: { icon: '✅', color: 'bg-green-50 border-green-100'  },
-  post_failed:    { icon: '❌', color: 'bg-red-50 border-red-100'      },
+  post_published: { icon: '✅', color: 'bg-green-50 border-green-100'   },
+  post_failed:    { icon: '❌', color: 'bg-red-50 border-red-100'       },
   credit_low:     { icon: '⚡', color: 'bg-yellow-50 border-yellow-100' },
-  team:           { icon: '👥', color: 'bg-blue-50 border-blue-100'    },
+  team:           { icon: '👥', color: 'bg-blue-50 border-blue-100'     },
   referral:       { icon: '🎁', color: 'bg-purple-50 border-purple-100' },
-  system:         { icon: '📣', color: 'bg-gray-50 border-gray-100'    },
+  system:         { icon: '📣', color: 'bg-gray-50 border-gray-100'     },
 }
 
-// Seed some placeholder notifications for UI demo until real ones exist
 const PLACEHOLDER_NOTIFS = [
   {
     id: 'p1', type: 'system', read: false,
@@ -50,19 +49,18 @@ export default function Notifications() {
   useEffect(() => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
+      if (!user) { router.push('/login'); return } // N1: fixed
       const { data } = await supabase
         .from('notifications')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(50)
-      const combined = [...(data || []), ...PLACEHOLDER_NOTIFS]
-      setNotifications(combined)
+      setNotifications([...(data || []), ...PLACEHOLDER_NOTIFS])
       setLoading(false)
     }
     load()
-  }, [])
+  }, [router]) // N1: fixed
 
   const markRead = async (id: string) => {
     if (id.startsWith('p')) {
@@ -127,8 +125,8 @@ export default function Notifications() {
           {/* FILTER */}
           <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-2xl p-1 mb-6 w-fit">
             {[
-              { id: 'all',    label: `All (${notifications.length})`  },
-              { id: 'unread', label: `Unread (${unreadCount})`         },
+              { id: 'all',    label: `All (${notifications.length})` },
+              { id: 'unread', label: `Unread (${unreadCount})`       },
             ].map(tab => (
               <button key={tab.id} onClick={() => setFilter(tab.id as any)}
                 className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
@@ -151,7 +149,7 @@ export default function Notifications() {
               </p>
               <p className="text-xs text-gray-400">
                 {filter === 'unread'
-                  ? 'You\'re all caught up!'
+                  ? "You're all caught up!"
                   : 'Post updates, credit alerts, and team activity will appear here.'}
               </p>
             </div>
@@ -162,18 +160,16 @@ export default function Notifications() {
                 return (
                   <div key={n.id}
                     onClick={() => !n.read && markRead(n.id)}
-                    className={`border rounded-2xl p-4 transition-all group cursor-pointer ${
-                      config.color
-                    } ${!n.read ? 'opacity-100' : 'opacity-60'}`}>
+                    className={`border rounded-2xl p-4 transition-all group cursor-pointer ${config.color} ${
+                      !n.read ? 'opacity-100' : 'opacity-60'
+                    }`}>
                     <div className="flex items-start gap-3">
                       <span className="text-lg flex-shrink-0 mt-0.5">{config.icon}</span>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex items-center gap-2">
                             <p className="text-xs font-extrabold">{n.title}</p>
-                            {!n.read && (
-                              <div className="w-2 h-2 rounded-full bg-black flex-shrink-0" />
-                            )}
+                            {!n.read && <div className="w-2 h-2 rounded-full bg-black flex-shrink-0" />}
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0">
                             <span className="text-xs text-gray-400">{formatTime(n.created_at)}</span>

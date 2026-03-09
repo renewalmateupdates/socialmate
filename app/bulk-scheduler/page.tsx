@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 
-const PLATFORMS = [
-  { id: 'instagram', label: 'Instagram',   icon: '📸' },
+// BS2: split into live (selectable) and coming soon (disabled)
+const LIVE_PLATFORMS = [
   { id: 'linkedin',  label: 'LinkedIn',    icon: '💼' },
   { id: 'youtube',   label: 'YouTube',     icon: '▶️' },
   { id: 'pinterest', label: 'Pinterest',   icon: '📌' },
@@ -15,11 +15,17 @@ const PLATFORMS = [
   { id: 'discord',   label: 'Discord',     icon: '💬' },
   { id: 'telegram',  label: 'Telegram',    icon: '✈️' },
   { id: 'mastodon',  label: 'Mastodon',    icon: '🐘' },
-  { id: 'twitter',   label: 'X / Twitter', icon: '🐦' },
+]
+
+const COMING_SOON_PLATFORMS = [
+  { id: 'instagram', label: 'Instagram',   icon: '📸' },
   { id: 'tiktok',    label: 'TikTok',      icon: '🎵' },
   { id: 'facebook',  label: 'Facebook',    icon: '📘' },
   { id: 'threads',   label: 'Threads',     icon: '🧵' },
+  { id: 'twitter',   label: 'X / Twitter', icon: '🐦' },
 ]
+
+const ALL_PLATFORMS = [...LIVE_PLATFORMS, ...COMING_SOON_PLATFORMS]
 
 const TIMES = [
   '06:00','07:00','08:00','09:00','10:00','11:00','12:00',
@@ -47,17 +53,20 @@ function getNextDate(offset: number) {
   return d.toISOString().split('T')[0]
 }
 
+function getTodayDate() {
+  return new Date().toISOString().split('T')[0]
+}
+
 export default function BulkScheduler() {
   const [user, setUser] = useState<any>(null)
   const [posts, setPosts] = useState<BulkPost[]>([
-    { id: makeId(), content: '', platforms: ['instagram'], date: getNextDate(1), time: '09:00', status: 'ready' },
-    { id: makeId(), content: '', platforms: ['instagram'], date: getNextDate(2), time: '09:00', status: 'ready' },
-    { id: makeId(), content: '', platforms: ['instagram'], date: getNextDate(3), time: '09:00', status: 'ready' },
+    { id: makeId(), content: '', platforms: ['linkedin'], date: getNextDate(1), time: '09:00', status: 'ready' },
+    { id: makeId(), content: '', platforms: ['linkedin'], date: getNextDate(2), time: '09:00', status: 'ready' },
+    { id: makeId(), content: '', platforms: ['linkedin'], date: getNextDate(3), time: '09:00', status: 'ready' },
   ])
-  const [defaultPlatforms, setDefaultPlatforms] = useState<string[]>(['instagram'])
+  const [defaultPlatforms, setDefaultPlatforms] = useState<string[]>(['linkedin'])
   const [defaultTime, setDefaultTime] = useState('09:00')
   const [saving, setSaving] = useState(false)
-  const [savedCount, setSavedCount] = useState(0)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const router = useRouter()
 
@@ -73,7 +82,7 @@ export default function BulkScheduler() {
       setUser(user)
     }
     init()
-  }, [])
+  }, [router]) // BS1: fixed
 
   const addRow = () => {
     const lastPost = posts[posts.length - 1]
@@ -127,12 +136,32 @@ export default function BulkScheduler() {
     showToast('Dates auto-filled starting tomorrow', 'success')
   }
 
+  // BS4: validate no past dates
+  const validateDates = () => {
+    const today = getTodayDate()
+    return posts.filter(p => p.content.trim() && p.platforms.length > 0 && p.date).every(p => p.date >= today)
+  }
+
   const handleSaveAll = async () => {
+    // BS4: past date check
+    const today = getTodayDate()
+    const pastDate = posts.some(p => p.content.trim() && p.date && p.date < today)
+    if (pastDate) {
+      showToast('Some posts have past dates — please update them before scheduling', 'error')
+      setPosts(prev => prev.map(p => ({
+        ...p,
+        status: p.content.trim() && p.date < today ? 'error' : p.status,
+        error: p.content.trim() && p.date < today ? 'Date is in the past' : p.error,
+      })))
+      return
+    }
+
     const valid = posts.filter(p => p.content.trim() && p.platforms.length > 0 && p.date)
     if (valid.length === 0) {
       showToast('Add content to at least one post', 'error')
       return
     }
+
     setSaving(true)
     let saved = 0
     const updatedPosts = [...posts]
@@ -156,23 +185,31 @@ export default function BulkScheduler() {
     }
 
     setPosts(updatedPosts)
-    setSavedCount(saved)
     setSaving(false)
     if (saved > 0) {
       showToast(`${saved} post${saved !== 1 ? 's' : ''} scheduled successfully!`, 'success')
     }
   }
 
+  // BS3: fixed — single setPosts call, no stale closure
   const clearSaved = () => {
-    setPosts(prev => prev.filter(p => p.status !== 'saved'))
-    if (posts.every(p => p.status === 'saved')) {
-      setPosts([{
-        id: makeId(), content: '', platforms: [...defaultPlatforms],
-        date: getNextDate(1), time: defaultTime, status: 'ready'
-      }])
-    }
+    setPosts(prev => {
+      const remaining = prev.filter(p => p.status !== 'saved')
+      if (remaining.length === 0) {
+        return [{
+          id: makeId(),
+          content: '',
+          platforms: [...defaultPlatforms],
+          date: getNextDate(1),
+          time: defaultTime,
+          status: 'ready',
+        }]
+      }
+      return remaining
+    })
   }
 
+  const today = getTodayDate()
   const readyCount = posts.filter(p => p.content.trim() && p.status === 'ready').length
   const savedPosts = posts.filter(p => p.status === 'saved').length
   const errorPosts = posts.filter(p => p.status === 'error').length
@@ -187,9 +224,7 @@ export default function BulkScheduler() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Bulk Scheduler</h1>
-              <p className="text-sm text-gray-400 mt-0.5">
-                Write and schedule multiple posts at once
-              </p>
+              <p className="text-sm text-gray-400 mt-0.5">Write and schedule multiple posts at once</p>
             </div>
             <div className="flex items-center gap-2">
               {savedPosts > 0 && (
@@ -210,9 +245,9 @@ export default function BulkScheduler() {
             <div className="flex items-center gap-4 flex-wrap">
               <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Defaults:</p>
 
-              {/* DEFAULT PLATFORMS */}
+              {/* BS2: only live platforms in defaults */}
               <div className="flex items-center gap-1 flex-wrap">
-                {PLATFORMS.slice(0, 8).map(p => (
+                {LIVE_PLATFORMS.map(p => (
                   <button key={p.id} onClick={() => {
                     setDefaultPlatforms(prev =>
                       prev.includes(p.id) ? prev.filter(x => x !== p.id) : [...prev, p.id]
@@ -224,10 +259,17 @@ export default function BulkScheduler() {
                         : 'border-gray-200 text-gray-500 hover:border-gray-400'
                     }`}>
                     <span>{p.icon}</span>
-                    <span className="hidden sm:inline capitalize">
-                      {p.id === 'twitter' ? 'X' : p.label.split(' ')[0]}
-                    </span>
+                    <span className="hidden sm:inline">{p.label.split(' ')[0]}</span>
                   </button>
+                ))}
+                {/* BS2: coming soon shown as disabled */}
+                {COMING_SOON_PLATFORMS.map(p => (
+                  <div key={p.id}
+                    className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold border border-dashed border-gray-200 text-gray-300 cursor-not-allowed"
+                    title={`${p.label} — coming soon`}>
+                    <span>{p.icon}</span>
+                    <span className="hidden sm:inline">{p.label.split(' ')[0]}</span>
+                  </div>
                 ))}
               </div>
 
@@ -264,51 +306,53 @@ export default function BulkScheduler() {
             </div>
           )}
 
-          {/* POSTS TABLE */}
+          {/* POSTS */}
           <div className="space-y-3 mb-4">
             {posts.map((post, index) => (
               <div key={post.id}
                 className={`bg-white border-2 rounded-2xl p-4 transition-all ${
-                  post.status === 'saved'  ? 'border-green-200 opacity-70' :
-                  post.status === 'error'  ? 'border-red-200' :
+                  post.status === 'saved' ? 'border-green-200 opacity-70' :
+                  post.status === 'error' ? 'border-red-200' :
                   'border-gray-100 hover:border-gray-300'
                 }`}>
 
-                {/* ROW HEADER */}
                 <div className="flex items-center gap-3 mb-3">
                   <span className="text-xs font-bold text-gray-400 w-6 text-center">
-                    {post.status === 'saved'  ? '✅' :
-                     post.status === 'error'  ? '❌' :
-                     `${index + 1}`}
+                    {post.status === 'saved' ? '✅' : post.status === 'error' ? '❌' : `${index + 1}`}
                   </span>
 
-                  {/* DATE */}
-                  <input type="date" value={post.date}
+                  {/* BS4: min date = today */}
+                  <input type="date" value={post.date} min={today}
                     onChange={e => updatePost(post.id, 'date', e.target.value)}
-                    className="px-2.5 py-1.5 text-xs border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 font-semibold" />
+                    className={`px-2.5 py-1.5 text-xs border rounded-xl focus:outline-none font-semibold ${
+                      post.date < today ? 'border-red-300 text-red-500' : 'border-gray-200 focus:border-gray-400'
+                    }`} />
 
-                  {/* TIME */}
                   <select value={post.time}
                     onChange={e => updatePost(post.id, 'time', e.target.value)}
                     className="px-2.5 py-1.5 text-xs border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 bg-white font-semibold">
                     {TIMES.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
 
-                  {/* PLATFORMS */}
+                  {/* BS2: live platforms only as toggles, coming soon as dimmed */}
                   <div className="flex items-center gap-1 flex-wrap flex-1">
-                    {PLATFORMS.slice(0, 9).map(p => (
+                    {LIVE_PLATFORMS.map(p => (
                       <button key={p.id}
                         onClick={() => togglePostPlatform(post.id, p.id)}
                         className={`text-base transition-all ${
-                          post.platforms.includes(p.id) ? 'opacity-100' : 'opacity-20 hover:opacity-60'
+                          post.platforms.includes(p.id) ? 'opacity-100' : 'opacity-20 hover:opacity-50'
                         }`}
                         title={p.label}>
                         {p.icon}
                       </button>
                     ))}
+                    {COMING_SOON_PLATFORMS.map(p => (
+                      <span key={p.id} className="text-base opacity-10 cursor-not-allowed" title={`${p.label} — coming soon`}>
+                        {p.icon}
+                      </span>
+                    ))}
                   </div>
 
-                  {/* REMOVE */}
                   <button onClick={() => removeRow(post.id)}
                     disabled={posts.length <= 1}
                     className="text-xs text-gray-300 hover:text-red-400 transition-all disabled:opacity-20 flex-shrink-0">
@@ -316,7 +360,6 @@ export default function BulkScheduler() {
                   </button>
                 </div>
 
-                {/* CONTENT */}
                 <textarea
                   value={post.content}
                   onChange={e => updatePost(post.id, 'content', e.target.value)}
@@ -340,13 +383,12 @@ export default function BulkScheduler() {
             ))}
           </div>
 
-          {/* ADD ROW + SAVE */}
+          {/* ADD + SAVE */}
           <div className="flex items-center justify-between">
             <button onClick={addRow}
               className="flex items-center gap-2 text-xs font-bold px-5 py-3 border-2 border-dashed border-gray-300 rounded-2xl hover:border-gray-500 transition-all text-gray-500 hover:text-black">
               + Add another post
             </button>
-
             <div className="flex items-center gap-3">
               <p className="text-xs text-gray-400">
                 {readyCount} post{readyCount !== 1 ? 's' : ''} ready to schedule
@@ -366,7 +408,7 @@ export default function BulkScheduler() {
               {[
                 { icon: '🗓', tip: 'Click "Auto-fill Dates" to spread posts across the next N days automatically.' },
                 { icon: '⚡', tip: 'Set defaults at the top, then click "Apply to All" to update every row at once.' },
-                { icon: '[x]', tip: 'Use [brackets] in your content as fill-in-the-blank placeholders to fill in later.' },
+                { icon: '[x]', tip: 'Use [brackets] in your content as fill-in-the-blank placeholders.' },
                 { icon: '📅', tip: 'After scheduling, view all posts in the Content Calendar to see your full plan.' },
               ].map(item => (
                 <div key={item.tip} className="flex items-start gap-2">
