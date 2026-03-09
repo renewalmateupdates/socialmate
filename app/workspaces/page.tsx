@@ -12,6 +12,7 @@ function SkeletonBox({ className }: { className?: string }) {
 
 export default function Workspaces() {
   const [loading, setLoading] = useState(true)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null) // W2
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const router = useRouter()
@@ -24,19 +25,21 @@ export default function Workspaces() {
       setLoading(false)
     }
     check()
-  }, [])
+  }, [router]) // W1: fixed
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type })
     setTimeout(() => setToast(null), 3000)
   }
 
+  // W2: now called only after confirmation
   const handleDelete = async (id: string, name: string) => {
     setDeletingId(id)
     const { error } = await supabase.from('workspaces').delete().eq('id', id)
     if (error) { showToast('Failed to delete workspace', 'error'); setDeletingId(null); return }
     showToast(`${name} deleted`, 'success')
     setDeletingId(null)
+    setConfirmDeleteId(null)
   }
 
   const handleSwitch = (ws: any) => {
@@ -90,7 +93,7 @@ export default function Workspaces() {
             )}
           </div>
 
-          {/* SEAT USAGE */}
+          {/* USAGE */}
           <div className="bg-white border border-gray-100 rounded-2xl p-4 mb-6">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-semibold text-gray-500">Client Workspaces</span>
@@ -155,51 +158,80 @@ export default function Workspaces() {
               <div className="space-y-3">
                 {clientWs.map(ws => {
                   const isActive = activeWorkspace?.id === ws.id
+                  const isConfirming = confirmDeleteId === ws.id
+
                   return (
                     <div key={ws.id}
-                      className={`bg-white border-2 rounded-2xl p-5 flex items-center justify-between transition-all group ${
+                      className={`bg-white border-2 rounded-2xl p-5 transition-all group ${
                         isActive ? 'border-black' : 'border-gray-100 hover:border-gray-300'
                       }`}>
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-xl">🏢</div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <p className="text-sm font-extrabold">{ws.client_name || ws.name}</p>
-                            {isActive && (
-                              <span className="text-xs font-bold px-2 py-0.5 bg-black text-white rounded-full">Active</span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-3 mt-0.5">
-                            {(ws as any).industry && (
-                              <p className="text-xs text-gray-400">{(ws as any).industry}</p>
-                            )}
-                            {(ws as any).website && (
-                              <a href={(ws as any).website} target="_blank" rel="noopener noreferrer"
-                                className="text-xs text-blue-500 hover:underline truncate max-w-[200px]">
-                                {(ws as any).website.replace('https://', '').replace('http://', '')}
-                              </a>
-                            )}
+
+                      {/* W2: confirm inline UI replaces the row actions */}
+                      {isConfirming ? (
+                        <div className="flex items-center justify-between">
+                          <p className="text-xs font-bold text-red-600">
+                            Delete "{ws.client_name || ws.name}"? This cannot be undone.
+                          </p>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <button
+                              onClick={() => handleDelete(ws.id, ws.client_name || ws.name)}
+                              disabled={deletingId === ws.id}
+                              className="text-xs font-bold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
+                              {deletingId === ws.id ? 'Deleting...' : 'Yes, delete'}
+                            </button>
+                            <button
+                              onClick={() => setConfirmDeleteId(null)}
+                              className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                              Cancel
+                            </button>
                           </div>
                         </div>
-                      </div>
+                      ) : (
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-xl">🏢</div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <p className="text-sm font-extrabold">{ws.client_name || ws.name}</p>
+                                {isActive && (
+                                  <span className="text-xs font-bold px-2 py-0.5 bg-black text-white rounded-full">Active</span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-3 mt-0.5">
+                                {(ws as any).industry && (
+                                  <p className="text-xs text-gray-400">{(ws as any).industry}</p>
+                                )}
+                                {(ws as any).website && (
+                                  <a href={(ws as any).website} target="_blank" rel="noopener noreferrer"
+                                    className="text-xs text-blue-500 hover:underline truncate max-w-[200px]">
+                                    {(ws as any).website.replace('https://', '').replace('http://', '')}
+                                  </a>
+                                )}
+                              </div>
+                            </div>
+                          </div>
 
-                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                        {!isActive && (
-                          <button onClick={() => handleSwitch(ws)}
-                            className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all">
-                            Switch →
-                          </button>
-                        )}
-                        <button
-                          onClick={() => handleDelete(ws.id, ws.client_name || ws.name)}
-                          disabled={deletingId === ws.id}
-                          className="text-xs font-bold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all disabled:opacity-40">
-                          {deletingId === ws.id ? 'Deleting...' : 'Delete'}
-                        </button>
-                      </div>
+                          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                            {!isActive && (
+                              <button onClick={() => handleSwitch(ws)}
+                                className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all">
+                                Switch →
+                              </button>
+                            )}
+                            {/* W3: active workspace cannot be deleted */}
+                            {!isActive && (
+                              <button
+                                onClick={() => setConfirmDeleteId(ws.id)}
+                                className="text-xs font-bold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all">
+                                Delete
+                              </button>
+                            )}
+                          </div>
 
-                      {isActive && (
-                        <span className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl">Active</span>
+                          {isActive && (
+                            <span className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl">Active</span>
+                          )}
+                        </div>
                       )}
                     </div>
                   )

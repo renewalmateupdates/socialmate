@@ -6,12 +6,12 @@ import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 
 const THEMES = [
-  { id: 'white',  label: 'Clean White', bg: 'bg-white',       text: 'text-gray-900', btn: 'bg-gray-900 text-white'   },
-  { id: 'black',  label: 'Midnight',    bg: 'bg-gray-950',    text: 'text-white',    btn: 'bg-white text-gray-900'   },
-  { id: 'gray',   label: 'Soft Gray',   bg: 'bg-gray-100',    text: 'text-gray-800', btn: 'bg-gray-800 text-white'   },
-  { id: 'blue',   label: 'Ocean Blue',  bg: 'bg-blue-600',    text: 'text-white',    btn: 'bg-white text-blue-600'   },
-  { id: 'purple', label: 'Deep Purple', bg: 'bg-purple-700',  text: 'text-white',    btn: 'bg-white text-purple-700' },
-  { id: 'green',  label: 'Forest',      bg: 'bg-emerald-700', text: 'text-white',    btn: 'bg-white text-emerald-700'},
+  { id: 'white',  label: 'Clean White', bg: 'bg-white',       text: 'text-gray-900', btn: 'bg-gray-900 text-white'    },
+  { id: 'black',  label: 'Midnight',    bg: 'bg-gray-950',    text: 'text-white',    btn: 'bg-white text-gray-900'    },
+  { id: 'gray',   label: 'Soft Gray',   bg: 'bg-gray-100',    text: 'text-gray-800', btn: 'bg-gray-800 text-white'    },
+  { id: 'blue',   label: 'Ocean Blue',  bg: 'bg-blue-600',    text: 'text-white',    btn: 'bg-white text-blue-600'    },
+  { id: 'purple', label: 'Deep Purple', bg: 'bg-purple-700',  text: 'text-white',    btn: 'bg-white text-purple-700'  },
+  { id: 'green',  label: 'Forest',      bg: 'bg-emerald-700', text: 'text-white',    btn: 'bg-white text-emerald-700' },
 ]
 
 const BTN_STYLES = [
@@ -28,6 +28,9 @@ const SOCIAL_PLATFORMS = [
   { id: 'youtube',   label: 'YouTube',     icon: '▶️', placeholder: 'https://youtube.com/@yourchannel' },
   { id: 'pinterest', label: 'Pinterest',   icon: '📌', placeholder: 'https://pinterest.com/yourhandle' },
 ]
+
+// LB3: canonical public route is /l/[slug]
+const PUBLIC_BASE = 'socialmate.app/l'
 
 interface BioLink {
   id: string
@@ -101,14 +104,15 @@ export default function LinkInBio() {
     load()
   }, [router])
 
-  const checkSlug = async (val: string) => {
+  // LB1: pass userId explicitly so the neq always uses the real UUID
+  const checkSlug = async (val: string, userId: string) => {
     if (!val || val.length < 2) { setSlugAvailable(null); return }
     setCheckingSlug(true)
     const { data } = await supabase
       .from('bio_pages')
       .select('id')
       .eq('slug', val)
-      .neq('user_id', user?.id || '')
+      .neq('user_id', userId)
       .maybeSingle()
     setSlugAvailable(!data)
     setCheckingSlug(false)
@@ -169,7 +173,7 @@ export default function LinkInBio() {
   }
 
   const copyLink = () => {
-    navigator.clipboard.writeText(`https://socialmate.app/b/${slug}`)
+    navigator.clipboard.writeText(`https://${PUBLIC_BASE}/${slug}`)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -207,7 +211,7 @@ export default function LinkInBio() {
                   className={`text-xs font-bold px-4 py-2.5 border rounded-xl transition-all ${
                     copied ? 'bg-green-500 text-white border-green-500' : 'border-gray-200 hover:border-gray-400'
                   }`}>
-                  {copied ? '✓ Copied!' : `🔗 /b/${slug}`}
+                  {copied ? '✓ Copied!' : `🔗 /l/${slug}`}
                 </button>
               )}
               <button onClick={handleSave} disabled={saving}
@@ -239,7 +243,7 @@ export default function LinkInBio() {
                       Page URL <span className="text-red-400">*</span>
                     </label>
                     <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-semibold">/b/</span>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-semibold">/l/</span>
                       <input
                         type="text"
                         value={slug}
@@ -248,7 +252,7 @@ export default function LinkInBio() {
                           setSlug(val)
                           setSlugAvailable(null)
                         }}
-                        onBlur={() => checkSlug(slug)}
+                        onBlur={() => user && checkSlug(slug, user.id)} // LB1: pass real userId
                         placeholder="yourname"
                         className={`w-full pl-8 pr-8 py-2.5 text-sm border rounded-xl focus:outline-none transition-all ${
                           slugAvailable === false ? 'border-red-300' :
@@ -270,11 +274,16 @@ export default function LinkInBio() {
                 </div>
                 <div>
                   <label className="text-xs font-bold text-gray-500 block mb-1.5">Bio</label>
-                  <textarea value={bio} onChange={e => setBio(e.target.value)}
+                  {/* LB2: maxLength enforced */}
+                  <textarea value={bio}
+                    onChange={e => setBio(e.target.value.slice(0, 150))}
                     placeholder="A short description of you or your brand..."
                     rows={2}
+                    maxLength={150}
                     className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 resize-none" />
-                  <p className="text-xs text-gray-400 mt-1">{bio.length}/150</p>
+                  <p className={`text-xs mt-1 ${bio.length >= 140 ? 'text-orange-500 font-semibold' : 'text-gray-400'}`}>
+                    {bio.length}/150
+                  </p>
                 </div>
                 <div>
                   <label className="text-xs font-bold text-gray-500 block mb-1.5">
@@ -395,7 +404,6 @@ export default function LinkInBio() {
                     </div>
                   </div>
 
-                  {/* BRANDING TOGGLE */}
                   <div className={`rounded-2xl p-4 ${plan === 'free' ? 'bg-gray-50 border border-gray-100' : 'bg-white border border-gray-200'}`}>
                     <div className="flex items-center justify-between">
                       <div>
@@ -423,28 +431,20 @@ export default function LinkInBio() {
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Live Preview</p>
                 <div className="rounded-2xl overflow-hidden border border-gray-100">
                   <div className={`${currentTheme.bg} p-6 min-h-96 flex flex-col items-center`}>
-
-                    {/* AVATAR */}
                     <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-2xl mb-3 overflow-hidden border-2 border-white/20 flex-shrink-0">
                       {avatarUrl
                         ? <img src={avatarUrl} alt={name} className="w-full h-full object-cover" onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
                         : <span>{name?.[0]?.toUpperCase() || '👤'}</span>
                       }
                     </div>
-
-                    {/* NAME */}
                     <h2 className={`text-sm font-extrabold text-center mb-1 ${currentTheme.text}`}>
                       {name || 'Your Name'}
                     </h2>
-
-                    {/* BIO */}
                     {bio && (
                       <p className={`text-xs text-center mb-4 leading-relaxed opacity-70 ${currentTheme.text}`}>
                         {bio}
                       </p>
                     )}
-
-                    {/* SOCIAL ICONS */}
                     {Object.entries(socials).filter(([, v]) => v).length > 0 && (
                       <div className="flex items-center gap-2 mb-4 flex-wrap justify-center">
                         {SOCIAL_PLATFORMS.filter(p => socials[p.id]).map(p => (
@@ -452,8 +452,6 @@ export default function LinkInBio() {
                         ))}
                       </div>
                     )}
-
-                    {/* LINKS */}
                     <div className="w-full space-y-2">
                       {activeLinks.length === 0 ? (
                         <div className={`text-xs text-center opacity-40 py-4 ${currentTheme.text}`}>
@@ -468,8 +466,6 @@ export default function LinkInBio() {
                         ))
                       )}
                     </div>
-
-                    {/* BRANDING */}
                     {plan === 'free' && (
                       <p className={`text-xs mt-4 opacity-40 ${currentTheme.text}`}>
                         Made with SocialMate · Free
@@ -479,11 +475,11 @@ export default function LinkInBio() {
                 </div>
               </div>
 
-              {/* PUBLIC URL */}
+              {/* LB3: consistent /l/ route */}
               {slug && (
                 <div className="bg-black rounded-2xl p-4 text-center">
                   <p className="text-xs font-bold text-gray-400 mb-1">Your public URL</p>
-                  <p className="text-xs text-white font-bold mb-3 break-all">socialmate.app/b/{slug}</p>
+                  <p className="text-xs text-white font-bold mb-3 break-all">{PUBLIC_BASE}/{slug}</p>
                   <button onClick={copyLink}
                     className={`w-full py-2 text-xs font-bold rounded-xl transition-all ${
                       copied ? 'bg-green-400 text-black' : 'bg-white text-black hover:opacity-80'

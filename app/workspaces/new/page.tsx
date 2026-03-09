@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
@@ -20,6 +20,7 @@ const PLATFORM_ICONS: Record<string, string> = {
 }
 
 export default function NewWorkspace() {
+  const [authChecked, setAuthChecked] = useState(false) // WN1
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [clientName, setClientName] = useState('')
   const [industry, setIndustry] = useState('')
@@ -31,6 +32,16 @@ export default function NewWorkspace() {
 
   const router = useRouter()
   const { plan, workspaces, setActiveWorkspace } = useWorkspace()
+
+  // WN1: auth guard
+  useEffect(() => {
+    const check = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.push('/login'); return }
+      setAuthChecked(true)
+    }
+    check()
+  }, [router])
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type })
@@ -45,6 +56,14 @@ export default function NewWorkspace() {
 
   const handleCreate = async () => {
     if (!clientName.trim()) { showToast('Client name is required', 'error'); return }
+
+    // WN2: enforce 50 workspace cap before inserting
+    const clientCount = workspaces.filter(w => !w.is_personal).length
+    if (clientCount >= 50) {
+      showToast('You have reached the 50 workspace limit', 'error')
+      return
+    }
+
     setSaving(true)
 
     const { data: { user } } = await supabase.auth.getUser()
@@ -75,6 +94,18 @@ export default function NewWorkspace() {
     setActiveWorkspace(data)
     showToast(`Workspace created for ${clientName}`, 'success')
     setTimeout(() => router.push('/dashboard'), 1000)
+  }
+
+  // WN1: show spinner until auth is confirmed
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex">
+        <Sidebar />
+        <div className="ml-56 flex-1 flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin" />
+        </div>
+      </div>
+    )
   }
 
   if (plan !== 'agency') {
@@ -117,6 +148,28 @@ export default function NewWorkspace() {
 
   const clientCount = workspaces.filter(w => !w.is_personal).length
 
+  // WN2: hard block at cap
+  if (clientCount >= 50) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex">
+        <Sidebar />
+        <div className="ml-56 flex-1 p-8 flex items-center justify-center">
+          <div className="max-w-md text-center">
+            <div className="text-5xl mb-4">🚫</div>
+            <h1 className="text-xl font-extrabold tracking-tight mb-3">Workspace limit reached</h1>
+            <p className="text-sm text-gray-500 mb-6">
+              You've used all 50 client workspaces on your Agency plan. Delete unused workspaces to create new ones.
+            </p>
+            <Link href="/workspaces"
+              className="inline-block bg-black text-white text-sm font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all">
+              ← Manage Workspaces
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar />
@@ -139,9 +192,9 @@ export default function NewWorkspace() {
           {/* STEP INDICATOR */}
           <div className="flex items-center gap-2 mb-8">
             {[
-              { n: 1, label: 'Client Info'  },
-              { n: 2, label: 'Platforms'    },
-              { n: 3, label: 'Review'       },
+              { n: 1, label: 'Client Info' },
+              { n: 2, label: 'Platforms'   },
+              { n: 3, label: 'Review'      },
             ].map((s, i) => (
               <div key={s.n} className="flex items-center gap-2">
                 <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
@@ -157,7 +210,7 @@ export default function NewWorkspace() {
             ))}
           </div>
 
-          {/* STEP 1 — CLIENT INFO */}
+          {/* STEP 1 */}
           {step === 1 && (
             <div className="bg-white border border-gray-100 rounded-2xl p-6 space-y-5">
               <div>
@@ -213,7 +266,7 @@ export default function NewWorkspace() {
             </div>
           )}
 
-          {/* STEP 2 — PLATFORMS */}
+          {/* STEP 2 */}
           {step === 2 && (
             <div className="bg-white border border-gray-100 rounded-2xl p-6">
               <h2 className="text-sm font-extrabold mb-1">Which platforms does this client use?</h2>
@@ -222,7 +275,6 @@ export default function NewWorkspace() {
               <div className="grid grid-cols-3 gap-2 mb-6">
                 {Object.entries(PLATFORM_ICONS).map(([id, icon]) => {
                   const selected = selectedPlatforms.includes(id)
-                  const label = id.charAt(0).toUpperCase() + id.slice(1).replace('twitter', 'X / Twitter')
                   return (
                     <button key={id} onClick={() => togglePlatform(id)}
                       className={`flex items-center gap-2 p-3 rounded-xl border-2 text-left transition-all ${
@@ -230,7 +282,7 @@ export default function NewWorkspace() {
                       }`}>
                       <span className="text-lg">{icon}</span>
                       <span className="text-xs font-semibold capitalize truncate">
-                        {id === 'twitter' ? 'X / Twitter' : label}
+                        {id === 'twitter' ? 'X / Twitter' : id.charAt(0).toUpperCase() + id.slice(1)}
                       </span>
                       {selected && <span className="ml-auto text-black font-bold text-xs flex-shrink-0">✓</span>}
                     </button>
@@ -255,12 +307,11 @@ export default function NewWorkspace() {
             </div>
           )}
 
-          {/* STEP 3 — REVIEW */}
+          {/* STEP 3 */}
           {step === 3 && (
             <div className="space-y-4">
               <div className="bg-white border border-gray-100 rounded-2xl p-6">
                 <h2 className="text-sm font-extrabold mb-4">Review workspace</h2>
-
                 <div className="space-y-3">
                   <div className="flex items-center justify-between py-2 border-b border-gray-50">
                     <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Client</span>
@@ -319,6 +370,7 @@ export default function NewWorkspace() {
               </div>
             </div>
           )}
+
         </div>
       </div>
 
