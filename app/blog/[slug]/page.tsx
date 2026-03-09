@@ -9,7 +9,7 @@ const POSTS: Record<string, {
   excerpt: string
   content: string
 }> = {
-  'social-media-scheduling-tools-are-overpriced': {
+  'real-cost-of-social-media-management-tools-2025': {
     title: 'Why Social Media Scheduling Tools Are Overpriced — And What To Do About It',
     category: 'Industry',
     date: 'Mar 4, 2026',
@@ -84,7 +84,7 @@ You shouldn't pay $50–$250/month to schedule social media posts. The software 
 If you've been paying those rates, it's worth seeing what $0/month actually gets you now.
     `,
   },
-  'batch-a-month-of-social-content': {
+  'schedule-30-days-of-content-in-one-sitting': {
     title: 'How To Batch A Full Month of Social Content In One Afternoon',
     category: 'Strategy',
     date: 'Mar 4, 2026',
