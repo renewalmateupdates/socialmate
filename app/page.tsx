@@ -1,5 +1,3 @@
-'use client'
-import { useState } from 'react'
 import Link from 'next/link'
 
 const PLATFORMS = [
@@ -39,7 +37,7 @@ const FEATURES = [
   { icon: '🤖', title: 'AI Caption Tools',    desc: 'Generate captions, hashtags, viral hooks, and full thread scripts with one click.' },
   { icon: '📊', title: 'Real Analytics',      desc: 'Track what\'s working. Posting streaks, platform breakdown, best times, consistency scores.' },
   { icon: '🔗', title: 'Link in Bio Builder', desc: 'Free Linktree alternative built right in. Your public URL, your links, your style.' },
-  { icon: '👥', title: 'Team Collaboration',  desc: 'Invite team members, assign roles, manage access. Up to unlimited seats on Agency.' },
+  { icon: '👥', title: 'Team Collaboration',  desc: 'Invite team members, assign roles, manage access. Up to 50 seats on Agency.' },
   { icon: '🏢', title: 'Client Workspaces',   desc: 'Agency plan includes separate workspaces for each client. Full isolation, clean reporting.' },
 ]
 
@@ -355,7 +353,7 @@ export default function Home() {
               </Link>
             ))}
           </nav>
-          <p className="text-xs text-gray-400">© 2025 SocialMate</p>
+          <p className="text-xs text-gray-400">© 2026 SocialMate</p>
         </div>
       </footer>
 

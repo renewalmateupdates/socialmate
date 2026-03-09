@@ -3,11 +3,16 @@ import { useState } from 'react'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 
+// Commission math at 30%: Pro=$5/mo, Agency=$20/mo
+// Row 1: (8×5)+(2×20)=$80 MRR × 30% = $24/mo, $288/yr
+// Row 2: (35×5)+(15×20)=$475 MRR × 30% = $143/mo, $1,716/yr
+// Row 3: (65×5)+(35×20)=$1,025 MRR × 30% = $308/mo, $3,696/yr
+// Row 4: (170×5)+(80×20)=$2,450 MRR × 30% = $735/mo, $8,820/yr
 const EARNINGS_EXAMPLES = [
-  { referrals: 10,  proSubs: 8,   agencySubs: 2,  monthly: 32,   annual: 384   },
-  { referrals: 50,  proSubs: 35,  agencySubs: 15, monthly: 142,  annual: 1710  },
-  { referrals: 100, proSubs: 65,  agencySubs: 35, monthly: 378,  annual: 4536  },
-  { referrals: 250, proSubs: 170, agencySubs: 80, monthly: 990,  annual: 11880 },
+  { referrals: 10,  proSubs: 8,   agencySubs: 2,  monthly: 24,  annual: 288   },
+  { referrals: 50,  proSubs: 35,  agencySubs: 15, monthly: 143, annual: 1716  },
+  { referrals: 100, proSubs: 65,  agencySubs: 35, monthly: 308, annual: 3696  },
+  { referrals: 250, proSubs: 170, agencySubs: 80, monthly: 735, annual: 8820  },
 ]
 
 const HOW_IT_WORKS = [

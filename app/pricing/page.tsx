@@ -23,7 +23,7 @@ const PLANS = [
       { label: '1 GB media storage' },
       { label: 'Video up to 30 seconds' },
       { label: 'Bulk scheduling (manual)' },
-      { label: '7-day & 30-day analytics' },
+      { label: '14-day & 30-day analytics' },
       { label: 'Link-in-bio page' },
       { label: 'Hashtag collections' },
       { label: 'Post templates' },
@@ -78,7 +78,7 @@ const PLANS = [
     features: [
       { label: 'Everything in Pro' },
       { label: '10 accounts per platform' },
-      { label: 'Unlimited team seats' },
+      { label: '50 team seats' },
       { label: 'Schedule up to 3 months ahead' },
       { label: '5,000 scheduled posts / month' },
       { label: '1,000 AI credits / month', note: 'Max bank: 5,000' },
@@ -168,7 +168,6 @@ export default function Pricing() {
                   )}
                 </div>
 
-                {/* PRICE DISPLAY */}
                 {plan.price.monthly === 0 ? (
                   <div className={`flex items-end gap-1 mb-2 ${plan.headerText}`}>
                     <span className="text-3xl font-extrabold">$0</span>
