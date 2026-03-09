@@ -11,34 +11,34 @@ export const PLAN_CONFIG: Record<Plan, {
   credits: number
   creditBank: number
   seats: number
-  accounts: number
+  accountsPerPlatform: number
   maxPosts: number
   scheduleWeeks: number
 }> = {
   free: {
     label: 'Free',
-    credits: 100,
-    creditBank: 300,
+    credits: 50,
+    creditBank: 150,
     seats: 2,
-    accounts: 1,
+    accountsPerPlatform: 1,
     maxPosts: 100,
     scheduleWeeks: 2,
   },
   pro: {
     label: 'Pro',
-    credits: 300,
-    creditBank: 1000,
+    credits: 250,
+    creditBank: 750,
     seats: 4,
-    accounts: 5,
+    accountsPerPlatform: 5,
     maxPosts: 1000,
     scheduleWeeks: 4,
   },
   agency: {
     label: 'Agency',
-    credits: 1000,
-    creditBank: 5000,
+    credits: 750,
+    creditBank: 3000,
     seats: 50,
-    accounts: 10,
+    accountsPerPlatform: 10,
     maxPosts: 5000,
     scheduleWeeks: 12,
   },
@@ -73,10 +73,10 @@ type WorkspaceContextType = {
 const WorkspaceContext = createContext<WorkspaceContextType>({
   plan: 'free',
   setPlan: () => {},
-  credits: 100,
+  credits: 50,
   setCredits: () => {},
   creditsUsed: 0,
-  creditsTotal: 100,
+  creditsTotal: 50,
   workspaceName: 'My Workspace',
   setWorkspaceName: () => {},
   workspaces: [],
@@ -90,7 +90,7 @@ const WorkspaceContext = createContext<WorkspaceContextType>({
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [plan, setPlan] = useState<Plan>('free')
-  const [credits, setCreditsState] = useState(100)
+  const [credits, setCreditsState] = useState(50)
   const [creditsUsed, setCreditsUsed] = useState(0)
   const [userId, setUserId] = useState<string | null>(null)
   const [workspaceName, setWorkspaceName] = useState('My Workspace')
@@ -162,7 +162,6 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     load()
   }, [])
 
-  // Persists credit changes to Supabase immediately
   const setCredits = useCallback(async (newCredits: number) => {
     setCreditsState(newCredits)
     if (!userId) return

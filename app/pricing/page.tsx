@@ -19,7 +19,8 @@ const PLANS = [
       { label: '2 team seats' },
       { label: 'Schedule up to 2 weeks ahead' },
       { label: '100 scheduled posts / month' },
-      { label: '100 AI credits / month', note: 'Max bank: 300' },
+      { label: '50 AI credits / month', note: 'Max bank: 150' },
+      { label: 'AI image gen & content calendar', note: 'Pro+ only' },
       { label: '1 GB media storage' },
       { label: 'Video up to 30 seconds' },
       { label: 'Bulk scheduling (manual)' },
@@ -50,10 +51,11 @@ const PLANS = [
       { label: '4 team seats' },
       { label: 'Schedule up to 1 month ahead' },
       { label: '1,000 scheduled posts / month' },
-      { label: '300 AI credits / month', note: 'Max bank: 1,000' },
+      { label: '250 AI credits / month', note: 'Max bank: 750' },
+      { label: 'AI image generation', note: '25 credits' },
+      { label: 'AI bulk content calendar (30 days)', note: '20 credits' },
       { label: '10 GB media storage' },
       { label: 'Video up to 2 minutes' },
-      { label: 'AI bulk content calendar (30 days)' },
       { label: '7, 30 & 90-day analytics' },
       { label: 'Advanced analytics' },
       { label: 'PDF export reports' },
@@ -81,7 +83,7 @@ const PLANS = [
       { label: '50 team seats' },
       { label: 'Schedule up to 3 months ahead' },
       { label: '5,000 scheduled posts / month' },
-      { label: '1,000 AI credits / month', note: 'Max bank: 5,000' },
+      { label: '750 AI credits / month', note: 'Max bank: 3,000' },
       { label: '50 GB media storage' },
       { label: 'Video up to 10 minutes' },
       { label: 'Client workspaces' },
@@ -105,21 +107,21 @@ const WHITE_LABEL_FEATURES = [
 ]
 
 const AI_CREDITS = [
-  { feature: 'Caption generator',            cost: '1 credit'   },
-  { feature: 'Hashtag generator',            cost: '1 credit'   },
-  { feature: 'Post rewrite / improver',      cost: '1 credit'   },
-  { feature: 'Viral Hook Generator',         cost: '2 credits'  },
-  { feature: 'Post idea generator',          cost: '2 credits'  },
-  { feature: 'Smart Auto-Formatting',        cost: '2 credits'  },
-  { feature: 'Platform rewrite (1 → all)',   cost: '2 credits'  },
-  { feature: 'SM-Radar growth report',       cost: '3 credits'  },
-  { feature: 'Thread generator',             cost: '3 credits'  },
-  { feature: 'Content repurposer',           cost: '3 credits'  },
-  { feature: 'AI Media Kit generator',       cost: '3 credits'  },
-  { feature: 'SM-Pulse trend scan',          cost: '5 credits'  },
-  { feature: '2-week AI content calendar',   cost: '10 credits' },
-  { feature: '30-day AI content calendar',   cost: '20 credits' },
-  { feature: 'AI image generation',          cost: '25 credits' },
+  { feature: 'Caption generator',            cost: '1 credit',   proOnly: false },
+  { feature: 'Hashtag generator',            cost: '1 credit',   proOnly: false },
+  { feature: 'Post rewrite / improver',      cost: '1 credit',   proOnly: false },
+  { feature: 'Viral Hook Generator',         cost: '2 credits',  proOnly: false },
+  { feature: 'Post idea generator',          cost: '2 credits',  proOnly: false },
+  { feature: 'Smart Auto-Formatting',        cost: '2 credits',  proOnly: false },
+  { feature: 'Platform rewrite (1 → all)',   cost: '2 credits',  proOnly: false },
+  { feature: 'SM-Radar growth report',       cost: '3 credits',  proOnly: false },
+  { feature: 'Thread generator',             cost: '3 credits',  proOnly: false },
+  { feature: 'Content repurposer',           cost: '3 credits',  proOnly: false },
+  { feature: 'AI Media Kit generator',       cost: '3 credits',  proOnly: false },
+  { feature: 'SM-Pulse trend scan',          cost: '5 credits',  proOnly: false },
+  { feature: '2-week AI content calendar',   cost: '10 credits', proOnly: false },
+  { feature: '30-day AI content calendar',   cost: '20 credits', proOnly: true  },
+  { feature: 'AI image generation',          cost: '25 credits', proOnly: true  },
 ]
 
 export default function Pricing() {
@@ -140,9 +142,7 @@ export default function Pricing() {
 
           {/* BILLING TOGGLE */}
           <div className="flex items-center justify-center gap-3 mt-8">
-            <span className={`text-sm font-semibold ${!annual ? 'text-black' : 'text-gray-400'}`}>
-              Monthly
-            </span>
+            <span className={`text-sm font-semibold ${!annual ? 'text-black' : 'text-gray-400'}`}>Monthly</span>
             <button
               onClick={() => setAnnual(!annual)}
               className={`relative w-12 h-6 rounded-full transition-colors ${annual ? 'bg-black' : 'bg-gray-200'}`}>
@@ -162,12 +162,9 @@ export default function Pricing() {
                 <div className="flex items-center justify-between mb-2">
                   <h2 className={`text-lg font-extrabold ${plan.headerText}`}>{plan.name}</h2>
                   {plan.badge && (
-                    <span className="text-xs font-bold px-3 py-1 bg-white text-black rounded-full">
-                      {plan.badge}
-                    </span>
+                    <span className="text-xs font-bold px-3 py-1 bg-white text-black rounded-full">{plan.badge}</span>
                   )}
                 </div>
-
                 {plan.price.monthly === 0 ? (
                   <div className={`flex items-end gap-1 mb-2 ${plan.headerText}`}>
                     <span className="text-3xl font-extrabold">$0</span>
@@ -179,9 +176,7 @@ export default function Pricing() {
                       <span className="text-3xl font-extrabold">${plan.price.annual}</span>
                       <span className={`text-sm mb-1 ${plan.subText}`}>/year</span>
                     </div>
-                    <p className="text-xs font-bold text-green-400 mt-0.5">
-                      Save ${plan.annualSavings} — 2 months free
-                    </p>
+                    <p className="text-xs font-bold text-green-400 mt-0.5">Save ${plan.annualSavings} — 2 months free</p>
                   </div>
                 ) : (
                   <div className={`flex items-end gap-1 mb-2 ${plan.headerText}`}>
@@ -189,10 +184,8 @@ export default function Pricing() {
                     <span className={`text-sm mb-1 ${plan.subText}`}>/month</span>
                   </div>
                 )}
-
                 <p className={`text-xs ${plan.subText}`}>{plan.description}</p>
               </div>
-
               <div className="px-6 py-5 flex-1 flex flex-col">
                 <ul className="space-y-2.5 flex-1 mb-6">
                   {plan.features.map((f, i) => (
@@ -248,12 +241,17 @@ export default function Pricing() {
         <div className="bg-white border border-gray-100 rounded-2xl p-6 mb-8">
           <h3 className="text-base font-extrabold mb-1">AI Credit Costs</h3>
           <p className="text-xs text-gray-500 mb-5">
-            Credits refresh monthly. Unused credits bank up — Free banks up to 300, Pro up to 1,000, Agency up to 5,000. Banks reset every 6 months.
+            Credits refresh monthly. Unused credits bank up — Free banks up to 150, Pro up to 750, Agency up to 3,000. Banks reset every 6 months.
           </p>
           <div className="grid grid-cols-3 gap-2">
             {AI_CREDITS.map((item, i) => (
               <div key={i} className="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2">
-                <span className="text-xs text-gray-600">{item.feature}</span>
+                <span className="text-xs text-gray-600">
+                  {item.feature}
+                  {item.proOnly && (
+                    <span className="ml-1.5 text-xs font-bold text-purple-500 bg-purple-50 px-1.5 py-0.5 rounded-full">Pro+</span>
+                  )}
+                </span>
                 <span className="text-xs font-bold text-gray-800 ml-2 flex-shrink-0">{item.cost}</span>
               </div>
             ))}
@@ -282,7 +280,7 @@ export default function Pricing() {
               },
               {
                 q: 'Can I earn extra credits?',
-                a: 'Yes. Refer a friend and you both earn 25 credits when they publish their first post. If they upgrade to a paid plan, you both earn 50 more.',
+                a: 'Yes. Refer a friend — when they publish their first post you both earn +10 credits. If they upgrade to Pro you earn +25, Agency earns you +50.',
               },
             ].map((item, i) => (
               <div key={i}>

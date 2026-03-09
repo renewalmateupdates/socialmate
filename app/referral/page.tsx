@@ -3,17 +3,17 @@ import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 
 const SIGNUP_REWARDS = [
-  { trigger: 'Someone signs up with your link', reward: '+5 credits',        note: 'Credited immediately on signup'                },
-  { trigger: 'They upgrade to Pro',             reward: '+50 credits',       note: 'Credited when payment is confirmed'            },
-  { trigger: 'They upgrade to Agency',          reward: '+100 credits',      note: 'Credited when payment is confirmed'            },
+  { trigger: 'They publish their first post', reward: '+10 credits',  note: 'Both you and your referral receive +10 credits'  },
+  { trigger: 'They upgrade to Pro',           reward: '+25 credits',  note: 'Credited when payment is confirmed'               },
+  { trigger: 'They upgrade to Agency',        reward: '+50 credits',  note: 'Credited when payment is confirmed'               },
 ]
 
 const TIERS = [
-  { paying: 5,   reward: '1 month Pro free',    icon: '🎁', desc: 'Your next billing cycle is on us'                },
-  { paying: 10,  reward: '3 months Pro free',   icon: '⭐', desc: 'A full quarter covered'                          },
-  { paying: 25,  reward: '6 months Pro free',   icon: '🚀', desc: 'Half a year free — you\'ve earned it'           },
-  { paying: 50,  reward: '1 year Pro free',     icon: '💎', desc: 'An entire year at no cost'                      },
-  { paying: 100, reward: 'Pro free for life',   icon: '👑', desc: 'You grow with us — we take care of you forever' },
+  { paying: 5,   reward: '1 month Pro free',  icon: '🎁', desc: 'Your next billing cycle is on us'                },
+  { paying: 10,  reward: '3 months Pro free', icon: '⭐', desc: 'A full quarter covered'                          },
+  { paying: 25,  reward: '6 months Pro free', icon: '🚀', desc: 'Half a year free — you\'ve earned it'           },
+  { paying: 50,  reward: '1 year Pro free',   icon: '💎', desc: 'An entire year at no cost'                      },
+  { paying: 100, reward: 'Pro free for life', icon: '👑', desc: 'You grow with us — we take care of you forever' },
 ]
 
 const FAQ = [
@@ -23,7 +23,7 @@ const FAQ = [
   },
   {
     q: 'When do I receive my credits?',
-    a: 'Signup credits (5) are added within 24 hours. Upgrade credits (50 or 100) are added after a 7-day hold to protect against refunds and chargebacks.',
+    a: 'First-post credits (+10) are added within 24 hours of your referral publishing. Upgrade credits (25 or 50) are added after a 7-day hold to protect against refunds and chargebacks.',
   },
   {
     q: 'What counts as a "paying referral" for tier rewards?',
@@ -56,7 +56,7 @@ export default function Referral() {
           </h1>
           <p className="text-sm text-gray-500 max-w-xl mx-auto leading-relaxed">
             Every SocialMate user gets a personal referral link. Share it. When people you refer
-            become paying users, you earn credits — and eventually free Pro. The more you refer,
+            start posting and upgrade, you earn credits — and eventually free Pro. The more you refer,
             the more generous the rewards get.
           </p>
         </div>

@@ -26,10 +26,10 @@ const AI_TOOLS = [
   { name: 'Viral Hook Generator',       emoji: '🎣',  credits: '2 credits'   },
   { name: 'SM-Pulse Trend Scanner',     emoji: '🔥',  credits: '5 credits'   },
   { name: 'SM-Radar Growth Report',     emoji: '📊',  credits: '3 credits'   },
-  { name: '30-Day AI Content Calendar', emoji: '📅',  credits: '20 credits'  },
+  { name: '30-Day AI Content Calendar', emoji: '📅',  credits: '20 cr · Pro+' },
   { name: 'Content Repurposer',         emoji: '♻️',  credits: '3 credits'   },
   { name: 'Thread Generator',           emoji: '🧵',  credits: '3 credits'   },
-  { name: 'AI Image Generation',        emoji: '🎨',  credits: '25 credits'  },
+  { name: 'AI Image Generation',        emoji: '🎨',  credits: '25 cr · Pro+' },
 ]
 
 const FEATURES = [
@@ -188,7 +188,7 @@ export default function Home() {
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">AI-Powered</p>
             <h2 className="text-3xl font-extrabold tracking-tight mb-3">Tools that write for you</h2>
             <p className="text-sm text-gray-500 max-w-xl mx-auto">
-              Every AI tool runs on Google Gemini. Credits are included with every plan — free users get 100/month.
+              Every AI tool runs on Google Gemini. Credits are included with every plan — free users get 50/month.
             </p>
           </div>
           <div className="grid grid-cols-5 gap-3 mb-8">
