@@ -5,31 +5,31 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 const PLATFORMS = [
-  { id: 'instagram', label: 'Instagram',  icon: '📸', desc: 'Photos & Reels',   available: false },
-  { id: 'linkedin',  label: 'LinkedIn',   icon: '💼', desc: 'Professional',     available: true  },
-  { id: 'youtube',   label: 'YouTube',    icon: '▶️', desc: 'Video',            available: true  },
-  { id: 'pinterest', label: 'Pinterest',  icon: '📌', desc: 'Visual content',   available: true  },
-  { id: 'reddit',    label: 'Reddit',     icon: '🤖', desc: 'Communities',      available: true  },
-  { id: 'discord',   label: 'Discord',    icon: '💬', desc: 'Announcements',    available: true  },
-  { id: 'bluesky',   label: 'Bluesky',    icon: '🦋', desc: 'Decentralized',    available: true  },
-  { id: 'mastodon',  label: 'Mastodon',   icon: '🐘', desc: 'Federated',        available: true  },
-  { id: 'telegram',  label: 'Telegram',   icon: '✈️', desc: 'Channels',         available: true  },
-  { id: 'tiktok',    label: 'TikTok',     icon: '🎵', desc: 'Short video',      available: false },
-  { id: 'facebook',  label: 'Facebook',   icon: '📘', desc: 'Pages & Groups',   available: false },
-  { id: 'threads',   label: 'Threads',    icon: '🧵', desc: 'Text & photos',    available: false },
-  { id: 'twitter',   label: 'X / Twitter',icon: '🐦', desc: 'Short posts',      available: false },
-  { id: 'snapchat',  label: 'Snapchat',   icon: '👻', desc: 'Stories',          available: false },
-  { id: 'lemon8',    label: 'Lemon8',     icon: '🍋', desc: 'Lifestyle',        available: false },
-  { id: 'bereal',    label: 'BeReal',     icon: '📷', desc: 'Authentic',        available: false },
+  { id: 'instagram', label: 'Instagram',   icon: '📸', desc: 'Photos & Reels',   available: false },
+  { id: 'linkedin',  label: 'LinkedIn',    icon: '💼', desc: 'Professional',     available: true  },
+  { id: 'youtube',   label: 'YouTube',     icon: '▶️', desc: 'Video',            available: true  },
+  { id: 'pinterest', label: 'Pinterest',   icon: '📌', desc: 'Visual content',   available: true  },
+  { id: 'reddit',    label: 'Reddit',      icon: '🤖', desc: 'Communities',      available: true  },
+  { id: 'discord',   label: 'Discord',     icon: '💬', desc: 'Announcements',    available: true  },
+  { id: 'bluesky',   label: 'Bluesky',     icon: '🦋', desc: 'Decentralized',    available: true  },
+  { id: 'mastodon',  label: 'Mastodon',    icon: '🐘', desc: 'Federated',        available: true  },
+  { id: 'telegram',  label: 'Telegram',    icon: '✈️', desc: 'Channels',         available: true  },
+  { id: 'tiktok',    label: 'TikTok',      icon: '🎵', desc: 'Short video',      available: false },
+  { id: 'facebook',  label: 'Facebook',    icon: '📘', desc: 'Pages & Groups',   available: false },
+  { id: 'threads',   label: 'Threads',     icon: '🧵', desc: 'Text & photos',    available: false },
+  { id: 'twitter',   label: 'X / Twitter', icon: '🐦', desc: 'Short posts',      available: false },
+  { id: 'snapchat',  label: 'Snapchat',    icon: '👻', desc: 'Stories',          available: false },
+  { id: 'lemon8',    label: 'Lemon8',      icon: '🍋', desc: 'Lifestyle',        available: false },
+  { id: 'bereal',    label: 'BeReal',      icon: '📷', desc: 'Authentic',        available: false },
 ]
 
 const USE_CASES = [
-  { id: 'creator',   label: 'Content Creator',    icon: '🎨', desc: 'Growing my personal brand'      },
-  { id: 'business',  label: 'Business Owner',     icon: '🏢', desc: 'Marketing my business'          },
-  { id: 'agency',    label: 'Agency / Freelancer',icon: '💼', desc: 'Managing client accounts'       },
-  { id: 'marketing', label: 'Marketing Team',     icon: '📣', desc: 'Team social media management'   },
-  { id: 'nonprofit', label: 'Nonprofit',          icon: '❤️', desc: 'Spreading our mission'          },
-  { id: 'other',     label: 'Just Exploring',     icon: '🔍', desc: 'Checking it out'                },
+  { id: 'creator',   label: 'Content Creator',     icon: '🎨', desc: 'Growing my personal brand'    },
+  { id: 'business',  label: 'Business Owner',      icon: '🏢', desc: 'Marketing my business'        },
+  { id: 'agency',    label: 'Agency / Freelancer', icon: '💼', desc: 'Managing client accounts'     },
+  { id: 'marketing', label: 'Marketing Team',      icon: '📣', desc: 'Team social media management' },
+  { id: 'nonprofit', label: 'Nonprofit',           icon: '❤️', desc: 'Spreading our mission'        },
+  { id: 'other',     label: 'Just Exploring',      icon: '🔍', desc: 'Checking it out'              },
 ]
 
 const STEPS = [
@@ -48,21 +48,21 @@ export default function Onboarding() {
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([])
   const [firstPost, setFirstPost] = useState('')
   const [saving, setSaving] = useState(false)
-  const [toast, setToast] = useState<string | null>(null)
+  const [toast, setToast] = useState<{ message: string; soft?: boolean } | null>(null)
   const router = useRouter()
 
   useEffect(() => {
     const init = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
+      if (!user) { router.push('/login'); return } // On1: fixed
       setUser(user)
       setDisplayName(user.email?.split('@')[0] || '')
     }
     init()
-  }, [])
+  }, [router]) // On1: fixed
 
-  const showToast = (msg: string) => {
-    setToast(msg)
+  const showToast = (message: string, soft = false) => {
+    setToast({ message, soft })
     setTimeout(() => setToast(null), 3000)
   }
 
@@ -74,28 +74,43 @@ export default function Onboarding() {
     )
   }
 
+  // On2: error handling on profile/settings writes
   const handleFinish = async () => {
     setSaving(true)
 
-    await supabase.from('profiles').update({
+    const profileRes = await supabase.from('profiles').update({
       full_name: displayName,
       onboarding_completed: true,
     }).eq('id', user.id)
 
-    await supabase.from('user_settings').upsert({
+    if (profileRes.error) {
+      showToast('Failed to save profile — please try again')
+      setSaving(false)
+      return
+    }
+
+    const settingsRes = await supabase.from('user_settings').upsert({
       user_id: user.id,
       display_name: displayName,
       use_case: useCase,
       default_platforms: selectedPlatforms,
     }, { onConflict: 'user_id' })
 
+    if (settingsRes.error) {
+      // Non-fatal: settings failed but profile saved — continue to dashboard
+      console.error('user_settings upsert failed:', settingsRes.error.message)
+    }
+
     if (firstPost.trim()) {
-      await supabase.from('posts').insert({
+      const postRes = await supabase.from('posts').insert({
         user_id: user.id,
         content: firstPost.trim(),
         platforms: selectedPlatforms,
         status: 'draft',
       })
+      if (postRes.error) {
+        console.error('draft post insert failed:', postRes.error.message)
+      }
     }
 
     setSaving(false)
@@ -125,7 +140,7 @@ export default function Onboarding() {
         </button>
       </div>
 
-      {/* PROGRESS BAR */}
+      {/* PROGRESS */}
       <div className="w-full bg-gray-100 h-1">
         <div className="bg-black h-1 transition-all duration-500" style={{ width: `${progress}%` }} />
       </div>
@@ -136,7 +151,7 @@ export default function Onboarding() {
           <div key={s.id} className="flex items-center gap-2">
             <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
               step === s.id ? 'bg-black text-white' :
-              step > s.id ? 'bg-gray-100 text-gray-500' :
+              step > s.id  ? 'bg-gray-100 text-gray-500' :
               'text-gray-300'
             }`}>
               <span>{step > s.id ? '✓' : s.icon}</span>
@@ -173,21 +188,19 @@ export default function Onboarding() {
                 />
               </div>
 
-              {/* CREDIT ACTIVATION EXPLAINER */}
               <div className="bg-black rounded-2xl p-5 mb-6 text-left text-white">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-xl">⚡</span>
                   <p className="text-sm font-extrabold">100 free AI credits waiting for you</p>
                 </div>
                 <p className="text-xs text-gray-400 leading-relaxed mb-3">
-                  Credits activate once you complete setup — this keeps things fair and prevents abuse.
-                  Here's all it takes:
+                  Credits activate once you complete setup — this keeps things fair and prevents abuse. Here's all it takes:
                 </p>
                 <div className="space-y-2">
                   {[
-                    { step: '1', label: 'Verify your email',                     done: true  },
-                    { step: '2', label: 'Connect one social platform',            done: false },
-                    { step: '3', label: 'Publish or schedule your first post',    done: false },
+                    { step: '1', label: 'Verify your email',                  done: true  },
+                    { step: '2', label: 'Connect one social platform',         done: false },
+                    { step: '3', label: 'Publish or schedule your first post', done: false },
                   ].map(item => (
                     <div key={item.step} className="flex items-center gap-3">
                       <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
@@ -278,7 +291,6 @@ export default function Onboarding() {
                 <p className="text-gray-400 text-sm">Select available ones now — more coming soon</p>
               </div>
 
-              {/* CREDIT STEP REMINDER */}
               <div className="bg-blue-50 border border-blue-100 rounded-2xl px-4 py-3 mb-5 flex items-center gap-3">
                 <span className="text-lg">⚡</span>
                 <p className="text-xs text-blue-700 font-semibold">
@@ -301,9 +313,7 @@ export default function Onboarding() {
                       <span className="text-xl">{p.icon}</span>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-bold truncate">{p.label}</p>
-                        <p className="text-xs text-gray-400">
-                          {p.available ? p.desc : 'Coming soon'}
-                        </p>
+                        <p className="text-xs text-gray-400">{p.available ? p.desc : 'Coming soon'}</p>
                       </div>
                       {selected && p.available && (
                         <span className="text-black font-bold text-sm flex-shrink-0">✓</span>
@@ -323,12 +333,24 @@ export default function Onboarding() {
                   className="px-6 py-3 border border-gray-200 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
                   ← Back
                 </button>
-                <button
-                  onClick={() => selectedPlatforms.length > 0 ? setStep(4) : showToast('Select at least one platform to activate your credits')}
-                  className="flex-1 py-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all">
-                  Continue →
-                </button>
+                {/* On3: soft nudge if none selected, but allow skipping */}
+                {selectedPlatforms.length > 0 ? (
+                  <button onClick={() => setStep(4)}
+                    className="flex-1 py-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all">
+                    Continue →
+                  </button>
+                ) : (
+                  <button onClick={() => { showToast('Select a platform to activate credits — or skip to do it later', true); setStep(4) }}
+                    className="flex-1 py-3 border border-gray-200 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all text-gray-500">
+                    Skip for now →
+                  </button>
+                )}
               </div>
+              {selectedPlatforms.length === 0 && (
+                <p className="text-xs text-center text-gray-400 mt-2">
+                  Credits activate when you connect a platform and publish your first post
+                </p>
+              )}
             </div>
           )}
 
@@ -341,7 +363,6 @@ export default function Onboarding() {
                 <p className="text-gray-400 text-sm">One post unlocks your 100 AI credits — takes 30 seconds</p>
               </div>
 
-              {/* CREDIT STEP REMINDER */}
               <div className="bg-green-50 border border-green-100 rounded-2xl px-4 py-3 mb-5">
                 <div className="flex items-center gap-2">
                   <span>⚡</span>
@@ -351,9 +372,9 @@ export default function Onboarding() {
                 </div>
                 <div className="flex items-center gap-4 mt-2">
                   {[
-                    { label: 'Email verified', done: true  },
-                    { label: 'Platform connected', done: selectedPlatforms.length > 0 },
-                    { label: 'First post', done: false },
+                    { label: 'Email verified',      done: true                         },
+                    { label: 'Platform connected',  done: selectedPlatforms.length > 0 },
+                    { label: 'First post',          done: false                        },
                   ].map(item => (
                     <div key={item.label} className="flex items-center gap-1.5">
                       <span className={`text-xs font-bold ${item.done ? 'text-green-600' : 'text-gray-400'}`}>
@@ -426,7 +447,7 @@ export default function Onboarding() {
               </div>
               {!firstPost.trim() && (
                 <p className="text-xs text-center text-gray-400 mt-2">
-                  Skipping means credits activate when you publish your first post from the dashboard
+                  Credits activate when you publish your first post from the dashboard
                 </p>
               )}
             </div>
@@ -441,7 +462,6 @@ export default function Onboarding() {
               </h2>
               <p className="text-gray-400 mb-6 text-sm">Your account is ready. Here's what to do next.</p>
 
-              {/* CREDIT STATUS */}
               <div className={`rounded-2xl p-4 mb-6 text-left ${
                 firstPost.trim() && selectedPlatforms.length > 0
                   ? 'bg-green-50 border border-green-100'
@@ -475,10 +495,10 @@ export default function Onboarding() {
 
               <div className="space-y-3 mb-8 text-left">
                 {[
-                  { icon: '✏️', title: 'Compose a post',       desc: 'Write and schedule your first post',             href: '/compose',        cta: 'Start writing'   },
-                  { icon: '📆', title: 'Bulk schedule content', desc: 'Plan a whole week of posts in one session',      href: '/bulk-scheduler', cta: 'Open scheduler'  },
-                  { icon: '🔗', title: 'Set up Link in Bio',   desc: 'Your free bio page — no Linktree needed',        href: '/link-in-bio',    cta: 'Build bio page'  },
-                  { icon: '🤖', title: 'Explore AI tools',     desc: 'Captions, hooks, calendars, trend scanning',     href: '/features',       cta: 'See features'    },
+                  { icon: '✏️', title: 'Compose a post',        desc: 'Write and schedule your first post',        href: '/compose',        cta: 'Start writing'  },
+                  { icon: '📆', title: 'Bulk schedule content',  desc: 'Plan a whole week of posts in one session', href: '/bulk-scheduler', cta: 'Open scheduler' },
+                  { icon: '🔗', title: 'Set up Link in Bio',    desc: 'Your free bio page — no Linktree needed',   href: '/link-in-bio',    cta: 'Build bio page' },
+                  { icon: '🤖', title: 'Explore AI tools',      desc: 'Captions, hooks, calendars, trend scanning',href: '/features',       cta: 'See features'   },
                 ].map(action => (
                   <div key={action.title}
                     className="flex items-center gap-4 p-4 border border-gray-100 rounded-2xl hover:border-gray-300 transition-all group">
@@ -507,12 +527,16 @@ export default function Onboarding() {
               </p>
             </div>
           )}
+
         </div>
       </div>
 
+      {/* On3: soft toast uses gray, error toast uses red */}
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg bg-red-500 text-white">
-          ❌ {toast}
+        <div className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${
+          toast.soft ? 'bg-gray-800 text-white' : 'bg-red-500 text-white'
+        }`}>
+          {toast.soft ? '💡' : '❌'} {toast.message}
         </div>
       )}
     </div>

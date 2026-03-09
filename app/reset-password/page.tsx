@@ -11,7 +11,34 @@ export default function ResetPassword() {
   const [error, setError] = useState('')
   const [done, setDone] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  // R2: track whether a valid recovery session exists
+  const [sessionReady, setSessionReady] = useState(false)
+  const [sessionChecking, setSessionChecking] = useState(true)
   const router = useRouter()
+
+  // R2: verify there's an active recovery session on mount
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      // Supabase sets the session type to 'recovery' when user arrives via reset link
+      if (session) {
+        setSessionReady(true)
+      }
+      setSessionChecking(false)
+    }
+    checkSession()
+
+    // Also listen for the PASSWORD_RECOVERY event in case the token
+    // is still being exchanged when the component mounts
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        setSessionReady(true)
+        setSessionChecking(false)
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, []) // R1: removed stale useEffect import issue — now actually used
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,15 +61,48 @@ export default function ResetPassword() {
           <span className="font-bold text-base tracking-tight">SocialMate</span>
         </Link>
       </div>
+
       <div className="flex-1 flex items-center justify-center p-6">
         <div className="w-full max-w-md">
-          {done ? (
+
+          {/* R2: still checking session */}
+          {sessionChecking && (
+            <div className="bg-white border border-gray-100 rounded-3xl p-10 text-center">
+              <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+              <p className="text-sm text-gray-400">Verifying your reset link...</p>
+            </div>
+          )}
+
+          {/* R2: expired or missing session */}
+          {!sessionChecking && !sessionReady && !done && (
+            <div className="bg-white border border-gray-100 rounded-3xl p-10 text-center">
+              <div className="text-6xl mb-6">⚠️</div>
+              <h1 className="text-2xl font-extrabold tracking-tight mb-3">Link expired or invalid</h1>
+              <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+                This password reset link has expired or already been used. Reset links are valid for 1 hour.
+              </p>
+              <Link href="/forgot-password"
+                className="block w-full py-3 bg-black text-white text-sm font-bold rounded-xl hover:opacity-80 transition-all text-center mb-3">
+                Request a new reset link →
+              </Link>
+              <Link href="/login"
+                className="block text-xs text-gray-400 hover:text-black transition-colors">
+                Back to sign in
+              </Link>
+            </div>
+          )}
+
+          {/* SUCCESS */}
+          {done && (
             <div className="bg-white border border-gray-100 rounded-3xl p-10 text-center">
               <div className="text-6xl mb-6">✅</div>
               <h1 className="text-2xl font-extrabold tracking-tight mb-3">Password updated!</h1>
               <p className="text-gray-400 text-sm">Redirecting you to the dashboard...</p>
             </div>
-          ) : (
+          )}
+
+          {/* FORM — only shown when session is valid */}
+          {!sessionChecking && sessionReady && !done && (
             <>
               <div className="text-center mb-8">
                 <h1 className="text-3xl font-extrabold tracking-tight mb-2">Choose a new password</h1>
@@ -51,7 +111,9 @@ export default function ResetPassword() {
               <div className="bg-white border border-gray-100 rounded-3xl p-8">
                 <form onSubmit={handleReset} className="space-y-4">
                   <div>
-                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">New Password</label>
+                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">
+                      New Password
+                    </label>
                     <div className="relative">
                       <input
                         type={showPassword ? 'text' : 'password'}
@@ -61,13 +123,18 @@ export default function ResetPassword() {
                         autoFocus
                         className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 pr-12"
                       />
-                      <button type="button" onClick={() => setShowPassword(p => !p)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-black font-semibold">
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(p => !p)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-black font-semibold">
                         {showPassword ? 'Hide' : 'Show'}
                       </button>
                     </div>
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">Confirm Password</label>
+                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">
+                      Confirm Password
+                    </label>
                     <input
                       type={showPassword ? 'text' : 'password'}
                       value={confirmPassword}
@@ -91,8 +158,7 @@ export default function ResetPassword() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-3.5 bg-black text-white text-sm font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
+                    className="w-full py-3.5 bg-black text-white text-sm font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
                     {loading ? (
                       <>
                         <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -104,6 +170,7 @@ export default function ResetPassword() {
               </div>
             </>
           )}
+
         </div>
       </div>
     </div>
