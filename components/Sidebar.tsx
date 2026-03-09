@@ -31,9 +31,12 @@ const NAV_BASE = [
   {
     section: 'Grow',
     items: [
-      { icon: '🤖', label: 'AI Features', href: '/ai-features'         },
-      { icon: '🎁', label: 'Referrals',   href: '/settings?tab=Referrals' },
-      { icon: '🤝', label: 'Affiliate',   href: '/affiliate'            },
+      { icon: '🤖', label: 'AI Features',   href: '/ai-features'             },
+      { icon: '🔥', label: 'SM-Pulse',      href: '/sm-pulse'                },
+      { icon: '📊', label: 'SM-Radar',      href: '/sm-radar'                },
+      { icon: '🕵️', label: 'Content Gaps', href: '/content-gap'             },
+      { icon: '🎁', label: 'Referrals',     href: '/settings?tab=Referrals'  },
+      { icon: '🤝', label: 'Affiliate',     href: '/affiliate'               },
     ],
   },
   {
@@ -114,7 +117,6 @@ export default function Sidebar() {
   const clientWorkspaces = workspaces.filter(w => !w.is_personal)
   const personalWorkspace = workspaces.find(w => w.is_personal)
 
-  // Active check — treat /settings?tab=Referrals as active when on /settings
   const isActive = (href: string) => {
     const base = href.split('?')[0]
     return pathname === base || pathname === href
