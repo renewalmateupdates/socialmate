@@ -18,6 +18,7 @@ export default function Hashtags() {
   const [tags, setTags] = useState('')
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null) // H2
   const [copied, setCopied] = useState<string | null>(null)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const router = useRouter()
@@ -41,7 +42,7 @@ export default function Hashtags() {
       setLoading(false)
     }
     load()
-  }, [])
+  }, [router]) // H1: fixed
 
   const handleSave = async () => {
     if (!name.trim() || !tags.trim()) { showToast('Name and hashtags required', 'error'); return }
@@ -88,6 +89,7 @@ export default function Hashtags() {
     setDeleting(id)
     await supabase.from('hashtag_collections').delete().eq('id', id)
     setCollections(prev => prev.filter(c => c.id !== id))
+    setConfirmDelete(null)
     showToast('Deleted', 'success')
     setDeleting(null)
   }
@@ -190,50 +192,68 @@ export default function Hashtags() {
             </div>
           ) : (
             <div className="space-y-3">
-              {collections.map(col => (
-                <div key={col.id}
-                  className="bg-white border border-gray-100 rounded-2xl p-5 hover:border-gray-300 transition-all group">
-                  <div className="flex items-start justify-between gap-4 mb-3">
-                    <div>
-                      <p className="text-sm font-extrabold">{col.name}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">
-                        {(col.tags || []).length} hashtags
-                      </p>
+              {collections.map(col => {
+                const isConfirming = confirmDelete === col.id
+                return (
+                  <div key={col.id}
+                    className="bg-white border border-gray-100 rounded-2xl p-5 hover:border-gray-300 transition-all group">
+                    <div className="flex items-start justify-between gap-4 mb-3">
+                      <div>
+                        <p className="text-sm font-extrabold">{col.name}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">{(col.tags || []).length} hashtags</p>
+                      </div>
+                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                        {isConfirming ? (
+                          // H2: inline confirm
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-red-500 font-semibold">Delete?</span>
+                            <button onClick={() => handleDelete(col.id)} disabled={deleting === col.id}
+                              className="text-xs font-bold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
+                              {deleting === col.id ? '...' : 'Yes'}
+                            </button>
+                            <button onClick={() => setConfirmDelete(null)}
+                              className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <button onClick={() => handleCopy(col)}
+                              className={`text-xs font-bold px-3 py-1.5 rounded-xl transition-all border ${
+                                copied === col.id
+                                  ? 'bg-green-500 text-white border-green-500'
+                                  : 'border-gray-200 hover:border-gray-400'
+                              }`}>
+                              {copied === col.id ? '✓ Copied' : 'Copy all'}
+                            </button>
+                            <button onClick={() => handleEdit(col)}
+                              className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                              Edit
+                            </button>
+                            <button onClick={() => setConfirmDelete(col.id)}
+                              className="text-xs font-bold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all">
+                              Delete
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                      <button onClick={() => handleCopy(col)}
-                        className={`text-xs font-bold px-3 py-1.5 rounded-xl transition-all border ${
-                          copied === col.id
-                            ? 'bg-green-500 text-white border-green-500'
-                            : 'border-gray-200 hover:border-gray-400'
-                        }`}>
-                        {copied === col.id ? '✓ Copied' : 'Copy all'}
-                      </button>
-                      <button onClick={() => handleEdit(col)}
-                        className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
-                        Edit
-                      </button>
-                      <button onClick={() => handleDelete(col.id)} disabled={deleting === col.id}
-                        className="text-xs font-bold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all disabled:opacity-40">
-                        {deleting === col.id ? '...' : 'Delete'}
-                      </button>
+                    <div className="flex flex-wrap gap-1.5">
+                      {(col.tags || []).slice(0, 20).map((tag: string) => (
+                        <span key={tag}
+                          className="text-xs font-semibold bg-gray-50 border border-gray-100 text-gray-600 px-2 py-0.5 rounded-lg">
+                          {tag}
+                        </span>
+                      ))}
+                      {(col.tags || []).length > 20 && (
+                        <span className="text-xs text-gray-400 px-2 py-0.5">
+                          +{col.tags.length - 20} more
+                        </span>
+                      )}
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {(col.tags || []).slice(0, 20).map((tag: string) => (
-                      <span key={tag}
-                        className="text-xs font-semibold bg-gray-50 border border-gray-100 text-gray-600 px-2 py-0.5 rounded-lg">
-                        {tag}
-                      </span>
-                    ))}
-                    {(col.tags || []).length > 20 && (
-                      <span className="text-xs text-gray-400 px-2 py-0.5">
-                        +{col.tags.length - 20} more
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>

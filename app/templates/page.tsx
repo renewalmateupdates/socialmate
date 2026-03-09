@@ -11,11 +11,52 @@ function SkeletonBox({ className }: { className?: string }) {
 
 const CATEGORIES = ['All', 'Promotional', 'Educational', 'Engagement', 'Announcement', 'Personal', 'Other']
 
+// Tm3: all 16 platforms covered
 const PLATFORM_ICONS: Record<string, string> = {
   instagram: '📸', twitter: '🐦', linkedin: '💼', tiktok: '🎵',
   facebook: '📘', pinterest: '📌', youtube: '▶️', threads: '🧵',
-  bluesky: '🦋', reddit: '🤖',
+  bluesky: '🦋', reddit: '🤖', discord: '💬', telegram: '✈️',
+  mastodon: '🐘', snapchat: '👻', lemon8: '🍋', bereal: '📷',
 }
+
+// Built-in starter templates — no DB required
+const STARTER_TEMPLATES = [
+  {
+    id: 'starter-1',
+    title: 'Product / Service Launch',
+    category: 'Promotional',
+    platforms: ['instagram', 'linkedin', 'facebook', 'bluesky'],
+    content: `🚀 Introducing [product/service name]!\n\n[One sentence describing what it does and who it's for.]\n\nHere's what makes it different:\n✅ [Benefit 1]\n✅ [Benefit 2]\n✅ [Benefit 3]\n\n[Call to action — link in bio / comment below / DM us]`,
+  },
+  {
+    id: 'starter-2',
+    title: 'Quick Tip / How-To',
+    category: 'Educational',
+    platforms: ['linkedin', 'instagram', 'tiktok', 'bluesky'],
+    content: `💡 [Topic] tip that changed everything for me:\n\n[Tip in one clear sentence.]\n\nHere's how to do it:\n1️⃣ [Step 1]\n2️⃣ [Step 2]\n3️⃣ [Step 3]\n\nSave this for later and share with someone who needs it! 👇`,
+  },
+  {
+    id: 'starter-3',
+    title: 'Engagement Question',
+    category: 'Engagement',
+    platforms: ['instagram', 'facebook', 'bluesky', 'reddit'],
+    content: `[Relatable observation or bold statement about your niche.] 🤔\n\nI used to think [common misconception], but now I know [what you actually believe].\n\nWhat do you think — am I wrong?\n\nDrop your take below 👇`,
+  },
+  {
+    id: 'starter-4',
+    title: 'Behind the Scenes',
+    category: 'Personal',
+    platforms: ['instagram', 'tiktok', 'facebook', 'bereal'],
+    content: `A little behind the scenes of [what you're working on] 👀\n\n[Short honest description of what your day/process looks like.]\n\nThe part nobody tells you about [your field/work]:\n[Honest, unexpected insight]\n\nAnything you want to know more about? Ask me below 👇`,
+  },
+  {
+    id: 'starter-5',
+    title: 'Weekly Roundup / Newsletter Promo',
+    category: 'Announcement',
+    platforms: ['linkedin', 'twitter', 'bluesky', 'mastodon'],
+    content: `This week in [your niche] 📰\n\n→ [Thing 1 that happened or that you learned]\n→ [Thing 2]\n→ [Thing 3]\n\nMy take: [One sentence opinion or insight]\n\nFollowing along? [Subscribe / follow / turn on notifications] so you don't miss next week's. 🔔`,
+  },
+]
 
 export default function Templates() {
   const [templates, setTemplates] = useState<any[]>([])
@@ -30,7 +71,9 @@ export default function Templates() {
   const [activeCategory, setActiveCategory] = useState('All')
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null) // Tm2
   const [copied, setCopied] = useState<string | null>(null)
+  const [savingStarter, setSavingStarter] = useState<string | null>(null)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const router = useRouter()
 
@@ -53,7 +96,7 @@ export default function Templates() {
       setLoading(false)
     }
     load()
-  }, [])
+  }, [router]) // Tm1: fixed
 
   const handleSave = async () => {
     if (!title.trim() || !content.trim()) { showToast('Title and content required', 'error'); return }
@@ -104,6 +147,7 @@ export default function Templates() {
     setDeleting(id)
     await supabase.from('post_templates').delete().eq('id', id)
     setTemplates(prev => prev.filter(t => t.id !== id))
+    setConfirmDelete(null)
     showToast('Deleted', 'success')
     setDeleting(null)
   }
@@ -112,6 +156,28 @@ export default function Templates() {
     navigator.clipboard.writeText(t.content)
     setCopied(t.id)
     setTimeout(() => setCopied(null), 2000)
+  }
+
+  // Save a starter template into the user's own collection
+  const handleSaveStarter = async (starter: typeof STARTER_TEMPLATES[0]) => {
+    if (!userId) return
+    setSavingStarter(starter.id)
+    const { data, error } = await supabase
+      .from('post_templates')
+      .insert({
+        user_id: userId,
+        title: starter.title,
+        content: starter.content,
+        category: starter.category,
+        platforms: starter.platforms,
+        updated_at: new Date().toISOString(),
+      })
+      .select()
+      .single()
+    if (error) { showToast('Failed to save', 'error'); setSavingStarter(null); return }
+    setTemplates(prev => [data, ...prev])
+    showToast(`"${starter.title}" saved to your templates`, 'success')
+    setSavingStarter(null)
   }
 
   const togglePlatform = (id: string) => {
@@ -229,33 +295,99 @@ export default function Templates() {
             </div>
           )}
 
-          {/* TEMPLATES */}
+          {/* USER TEMPLATES */}
           {loading ? (
             <div className="space-y-3">
               {[1,2,3].map(i => <SkeletonBox key={i} className="h-28" />)}
             </div>
-          ) : filtered.length === 0 ? (
-            <div className="bg-white border border-gray-100 rounded-2xl p-12 text-center">
-              <div className="text-4xl mb-3">📝</div>
-              <p className="text-sm font-bold mb-1">No templates yet</p>
-              <p className="text-xs text-gray-400 mb-5">
-                Save caption formats to reuse across any platform in one click.
-              </p>
-              <button onClick={() => setShowForm(true)}
-                className="inline-block bg-black text-white text-xs font-bold px-5 py-2.5 rounded-xl hover:opacity-80 transition-all">
-                Create your first template →
-              </button>
+          ) : filtered.length > 0 && (
+            <div className="space-y-3 mb-10">
+              {filtered.map(t => {
+                const isConfirming = confirmDelete === t.id
+                return (
+                  <div key={t.id}
+                    className="bg-white border border-gray-100 rounded-2xl p-5 hover:border-gray-300 transition-all group">
+                    <div className="flex items-start justify-between gap-4 mb-2">
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-extrabold">{t.title}</p>
+                        <span className="text-xs font-semibold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+                          {t.category || 'Other'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0">
+                        {isConfirming ? (
+                          // Tm2: inline confirm
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-red-500 font-semibold">Delete?</span>
+                            <button onClick={() => handleDelete(t.id)} disabled={deleting === t.id}
+                              className="text-xs font-bold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
+                              {deleting === t.id ? '...' : 'Yes'}
+                            </button>
+                            <button onClick={() => setConfirmDelete(null)}
+                              className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <button onClick={() => handleCopy(t)}
+                              className={`text-xs font-bold px-3 py-1.5 rounded-xl transition-all border ${
+                                copied === t.id
+                                  ? 'bg-green-500 text-white border-green-500'
+                                  : 'border-gray-200 hover:border-gray-400'
+                              }`}>
+                              {copied === t.id ? '✓ Copied' : 'Copy'}
+                            </button>
+                            <Link href={`/compose?template=${t.id}`}
+                              className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all">
+                              Use →
+                            </Link>
+                            <button onClick={() => handleEdit(t)}
+                              className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                              Edit
+                            </button>
+                            <button onClick={() => setConfirmDelete(t.id)}
+                              className="text-xs font-bold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all">
+                              Delete
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500 leading-relaxed line-clamp-3 whitespace-pre-line mb-3">
+                      {t.content}
+                    </p>
+                    {t.platforms && t.platforms.length > 0 && (
+                      <div className="flex items-center gap-1">
+                        {t.platforms.map((p: string) => (
+                          <span key={p} className="text-sm">{PLATFORM_ICONS[p]}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
             </div>
-          ) : (
+          )}
+
+          {/* STARTER TEMPLATES */}
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <h2 className="text-sm font-bold tracking-tight">Starter Templates</h2>
+              <span className="text-xs font-semibold px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full">Free to use</span>
+            </div>
+            <p className="text-xs text-gray-400 mb-4">
+              Ready-made formats to get you going. Hit "Use →" to open in compose, or "Save" to add to your collection.
+            </p>
             <div className="space-y-3">
-              {filtered.map(t => (
+              {STARTER_TEMPLATES.map(t => (
                 <div key={t.id}
                   className="bg-white border border-gray-100 rounded-2xl p-5 hover:border-gray-300 transition-all group">
                   <div className="flex items-start justify-between gap-4 mb-2">
                     <div className="flex items-center gap-2">
                       <p className="text-sm font-extrabold">{t.title}</p>
                       <span className="text-xs font-semibold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
-                        {t.category || 'Other'}
+                        {t.category}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0">
@@ -267,34 +399,43 @@ export default function Templates() {
                         }`}>
                         {copied === t.id ? '✓ Copied' : 'Copy'}
                       </button>
-                      <Link href={`/compose?template=${t.id}`}
+                      <Link href={`/compose?starterTemplate=${t.id}`}
                         className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all">
                         Use →
                       </Link>
-                      <button onClick={() => handleEdit(t)}
-                        className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
-                        Edit
-                      </button>
-                      <button onClick={() => handleDelete(t.id)} disabled={deleting === t.id}
-                        className="text-xs font-bold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all disabled:opacity-40">
-                        {deleting === t.id ? '...' : 'Delete'}
+                      <button
+                        onClick={() => handleSaveStarter(t)}
+                        disabled={savingStarter === t.id}
+                        className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
+                        {savingStarter === t.id ? 'Saving...' : 'Save'}
                       </button>
                     </div>
                   </div>
                   <p className="text-xs text-gray-500 leading-relaxed line-clamp-3 whitespace-pre-line mb-3">
                     {t.content}
                   </p>
-                  {t.platforms && t.platforms.length > 0 && (
-                    <div className="flex items-center gap-1">
-                      {t.platforms.map((p: string) => (
-                        <span key={p} className="text-sm">{PLATFORM_ICONS[p]}</span>
-                      ))}
-                    </div>
-                  )}
+                  <div className="flex items-center gap-1">
+                    {t.platforms.map(p => (
+                      <span key={p} className="text-sm">{PLATFORM_ICONS[p]}</span>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* EMPTY STATE — only shown when user has no templates yet */}
+          {!loading && templates.length === 0 && !showForm && (
+            <div className="mt-8 bg-gray-50 border border-gray-100 rounded-2xl p-6 text-center">
+              <p className="text-xs text-gray-400">
+                You haven't saved any templates yet. Use a starter above or{' '}
+                <button onClick={() => setShowForm(true)} className="text-black font-bold underline">
+                  create your own
+                </button>.
+              </p>
+            </div>
           )}
+
         </div>
       </div>
 

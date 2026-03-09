@@ -11,15 +11,20 @@ const HOURS = Array.from({ length: 24 }, (_, i) => {
   return `${h}${ampm}`
 })
 
+// BT2: all 8 live platforms covered + Twitter/Instagram for industry context
 const PLATFORM_AVERAGES = [
-  { platform: 'Instagram', icon: '📸', best: 'Tue–Fri, 9am–11am & 2pm–5pm',   peak: 'Wednesday 11am' },
-  { platform: 'LinkedIn',  icon: '💼', best: 'Tue–Thu, 8am–10am & 12pm–1pm',  peak: 'Tuesday 9am'    },
-  { platform: 'TikTok',    icon: '🎵', best: 'Tue, Thu, Fri 7am–9am & 7pm–9pm', peak: 'Friday 7pm'   },
-  { platform: 'Twitter',   icon: '🐦', best: 'Mon–Fri, 8am–10am & 12pm–1pm',  peak: 'Wednesday 9am'  },
-  { platform: 'Facebook',  icon: '📘', best: 'Wed–Fri, 9am–1pm',              peak: 'Wednesday 11am' },
-  { platform: 'Pinterest', icon: '📌', best: 'Sat & Sun, 8pm–11pm',           peak: 'Saturday 9pm'   },
-  { platform: 'YouTube',   icon: '▶️', best: 'Thu–Sat, 12pm–4pm',             peak: 'Saturday 3pm'   },
-  { platform: 'Bluesky',   icon: '🦋', best: 'Mon–Fri, 8am–10am',             peak: 'Tuesday 9am'    },
+  { platform: 'LinkedIn',  icon: '💼', best: 'Tue–Thu, 8am–10am & 12pm–1pm',      peak: 'Tuesday 9am'     },
+  { platform: 'YouTube',   icon: '▶️', best: 'Thu–Sat, 12pm–4pm',                  peak: 'Saturday 3pm'    },
+  { platform: 'Pinterest', icon: '📌', best: 'Sat & Sun, 8pm–11pm',                peak: 'Saturday 9pm'    },
+  { platform: 'Bluesky',   icon: '🦋', best: 'Mon–Fri, 8am–10am',                  peak: 'Tuesday 9am'     },
+  { platform: 'Reddit',    icon: '🤖', best: 'Mon–Fri, 6am–8am & 12pm–1pm (EST)',  peak: 'Monday 8am'      },
+  { platform: 'Discord',   icon: '💬', best: 'Weekdays 4pm–9pm, weekends all day',  peak: 'Saturday 7pm'    },
+  { platform: 'Telegram',  icon: '✈️', best: 'Mon–Fri, 8am–10am & 6pm–8pm',        peak: 'Wednesday 8am'   },
+  { platform: 'Mastodon',  icon: '🐘', best: 'Mon–Fri, 9am–11am (local timezone)',  peak: 'Tuesday 10am'    },
+  { platform: 'Instagram', icon: '📸', best: 'Tue–Fri, 9am–11am & 2pm–5pm',        peak: 'Wednesday 11am'  },
+  { platform: 'TikTok',    icon: '🎵', best: 'Tue, Thu, Fri 7am–9am & 7pm–9pm',    peak: 'Friday 7pm'      },
+  { platform: 'X/Twitter', icon: '🐦', best: 'Mon–Fri, 8am–10am & 12pm–1pm',       peak: 'Wednesday 9am'   },
+  { platform: 'Facebook',  icon: '📘', best: 'Wed–Fri, 9am–1pm',                   peak: 'Wednesday 11am'  },
 ]
 
 export default function BestTimes() {
@@ -32,14 +37,19 @@ export default function BestTimes() {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
+
+      // BT3: fetch both scheduled and published posts, handle both fields properly
       const { data } = await supabase
         .from('posts')
         .select('scheduled_at, published_at')
         .eq('user_id', user.id)
-        .not('scheduled_at', 'is', null)
+        .or('scheduled_at.not.is.null,published_at.not.is.null')
+
       const map: Record<string, number> = {}
       ;(data || []).forEach(post => {
-        const d = new Date(post.scheduled_at || post.published_at)
+        const raw = post.scheduled_at ?? post.published_at
+        if (!raw) return
+        const d = new Date(raw)
         const key = `${d.getDay()}-${d.getHours()}`
         map[key] = (map[key] || 0) + 1
       })
@@ -48,7 +58,7 @@ export default function BestTimes() {
       setLoading(false)
     }
     load()
-  }, [])
+  }, [router]) // BT1: fixed
 
   const maxVal = Math.max(...Object.values(heatmap), 1)
 
@@ -82,7 +92,7 @@ export default function BestTimes() {
                 <h2 className="text-sm font-extrabold">Your Posting Heatmap</h2>
                 <p className="text-xs text-gray-400 mt-0.5">
                   {postCount > 0
-                    ? `Based on ${postCount} scheduled post${postCount !== 1 ? 's' : ''}`
+                    ? `Based on ${postCount} post${postCount !== 1 ? 's' : ''}`
                     : 'Schedule more posts to see your personal pattern'}
                 </p>
               </div>
@@ -108,17 +118,13 @@ export default function BestTimes() {
             ) : (
               <div className="overflow-x-auto">
                 <div className="min-w-[600px]">
-                  {/* HOUR LABELS */}
                   <div className="flex mb-1 ml-10">
                     {HOURS.map((h, i) => (
                       <div key={i} className="flex-1 text-center">
-                        {i % 3 === 0 && (
-                          <span className="text-xs text-gray-400">{h}</span>
-                        )}
+                        {i % 3 === 0 && <span className="text-xs text-gray-400">{h}</span>}
                       </div>
                     ))}
                   </div>
-                  {/* GRID */}
                   {DAYS.map((day, dayIdx) => (
                     <div key={day} className="flex items-center mb-1">
                       <span className="text-xs text-gray-400 w-10 flex-shrink-0">{day}</span>
@@ -167,7 +173,7 @@ export default function BestTimes() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
                 { icon: '🧪', tip: 'Test different times for 2–4 weeks before drawing conclusions.' },
-                { icon: '🌍', tip: 'Adjust for your audience\'s timezone — not yours.' },
+                { icon: '🌍', tip: "Adjust for your audience's timezone — not yours." },
                 { icon: '📊', tip: 'Check your Analytics page to see which posts actually performed best.' },
               ].map(item => (
                 <div key={item.tip} className="flex items-start gap-2">
