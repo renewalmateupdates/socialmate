@@ -28,13 +28,14 @@ const COMING_SOON_PLATFORMS = [
 ]
 
 const AI_TOOLS = [
-  { id: 'caption',  label: 'Caption',  emoji: '✍️',  credits: 1, desc: 'Generate a caption from your topic' },
-  { id: 'hashtags', label: 'Hashtags', emoji: '#️⃣', credits: 1, desc: 'Generate relevant hashtags'         },
-  { id: 'rewrite',  label: 'Rewrite',  emoji: '🔁',  credits: 1, desc: 'Rewrite your post to be punchier'   },
-  { id: 'hook',     label: 'Hook',     emoji: '🎣',  credits: 2, desc: 'Generate 3 viral opening hooks'     },
+  { id: 'caption',   label: 'Caption',   emoji: '✍️',  credits: 1, desc: 'Generate a caption from your topic'        },
+  { id: 'hashtags',  label: 'Hashtags',  emoji: '#️⃣', credits: 1, desc: 'Generate relevant hashtags'                },
+  { id: 'rewrite',   label: 'Rewrite',   emoji: '🔁',  credits: 1, desc: 'Rewrite your post to be punchier'          },
+  { id: 'hook',      label: 'Hook',      emoji: '🎣',  credits: 2, desc: 'Generate 3 viral opening hooks'            },
+  { id: 'thread',    label: 'Thread',    emoji: '🧵',  credits: 3, desc: 'Turn your idea into a full thread'         },
+  { id: 'repurpose', label: 'Repurpose', emoji: '♻️',  credits: 3, desc: 'Reshape long content for this platform'    },
 ]
 
-// Mirror of starter templates — kept in sync with app/templates/page.tsx
 const STARTER_TEMPLATES = [
   {
     id: 'starter-1',
@@ -78,7 +79,6 @@ function ComposeInner() {
   const [toast, setToast] = useState('')
   const [templateBanner, setTemplateBanner] = useState<string | null>(null)
 
-  // Load template content from URL params
   useEffect(() => {
     const templateId = searchParams.get('template')
     const starterTemplateId = searchParams.get('starterTemplate')
@@ -201,7 +201,6 @@ function ComposeInner() {
             <p className="text-sm text-gray-400 mt-0.5">Write, schedule, and publish your posts</p>
           </div>
 
-          {/* TEMPLATE LOADED BANNER */}
           {templateBanner && (
             <div className="mb-4 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 flex items-center justify-between">
               <p className="text-xs font-semibold text-blue-700">📋 {templateBanner}</p>
@@ -277,7 +276,7 @@ function ComposeInner() {
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">AI Tools</p>
                   <span className="text-xs font-bold text-gray-500">{credits} credits remaining</span>
                 </div>
-                <div className="grid grid-cols-4 gap-2 mb-4">
+                <div className="grid grid-cols-6 gap-2 mb-4">
                   {AI_TOOLS.map(tool => (
                     <button key={tool.id}
                       onClick={() => handleAiTool(tool)}

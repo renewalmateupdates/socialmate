@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
 const CREDIT_COSTS: Record<string, number> = {
-  caption:  1,
-  hashtags: 1,
-  rewrite:  1,
-  hook:     2,
+  caption:   1,
+  hashtags:  1,
+  rewrite:   1,
+  hook:      2,
+  thread:    3,
+  repurpose: 3,
 }
 
 function buildPrompt(tool: string, content: string, platform: string): string {
@@ -18,6 +20,10 @@ function buildPrompt(tool: string, content: string, platform: string): string {
       return `You are a social media copywriter. Rewrite the following ${platform} post to be more engaging and punchy. Return only the rewritten post, nothing else.\n\nOriginal: ${content}`
     case 'hook':
       return `You are a viral content expert. Generate 3 scroll-stopping opening lines for a ${platform} post about the following topic. Number them 1, 2, 3. Return only the hooks, nothing else.\n\nTopic: ${content}`
+    case 'thread':
+      return `You are a social media expert specializing in threads. Turn the following topic or idea into a structured ${platform} thread of 5-7 parts. Start with a strong hook, build with supporting points, end with a CTA. Format each part as a numbered tweet starting with the number and a period (e.g. "1."). Return only the thread parts, nothing else.\n\nTopic: ${content}`
+    case 'repurpose':
+      return `You are a social media content strategist. Take the following long-form content and repurpose it into 3 short-form posts optimized for ${platform}. Each post should stand alone and be ready to publish. Separate each post with "---". Return only the posts, nothing else.\n\nContent: ${content}`
     default:
       return content
   }
@@ -37,10 +43,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'API key not configured' }, { status: 500 })
     }
 
-    console.log('API key present, length:', apiKey.length)
-
     const genAI = new GoogleGenerativeAI(apiKey)
-   const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
     const prompt = buildPrompt(tool, content, platform || 'general')
     const result = await model.generateContent(prompt)
     const text = result.response.text()
