@@ -1,5 +1,7 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 
@@ -32,7 +34,37 @@ const AI_TOOLS = [
   { id: 'hook',     label: 'Hook',     emoji: '🎣',  credits: 2, desc: 'Generate 3 viral opening hooks'     },
 ]
 
-export default function Compose() {
+// Mirror of starter templates — kept in sync with app/templates/page.tsx
+const STARTER_TEMPLATES = [
+  {
+    id: 'starter-1',
+    platforms: ['instagram', 'linkedin', 'facebook', 'bluesky'],
+    content: `🚀 Introducing [product/service name]!\n\n[One sentence describing what it does and who it's for.]\n\nHere's what makes it different:\n✅ [Benefit 1]\n✅ [Benefit 2]\n✅ [Benefit 3]\n\n[Call to action — link in bio / comment below / DM us]`,
+  },
+  {
+    id: 'starter-2',
+    platforms: ['linkedin', 'instagram', 'tiktok', 'bluesky'],
+    content: `💡 [Topic] tip that changed everything for me:\n\n[Tip in one clear sentence.]\n\nHere's how to do it:\n1️⃣ [Step 1]\n2️⃣ [Step 2]\n3️⃣ [Step 3]\n\nSave this for later and share with someone who needs it! 👇`,
+  },
+  {
+    id: 'starter-3',
+    platforms: ['instagram', 'facebook', 'bluesky', 'reddit'],
+    content: `[Relatable observation or bold statement about your niche.] 🤔\n\nI used to think [common misconception], but now I know [what you actually believe].\n\nWhat do you think — am I wrong?\n\nDrop your take below 👇`,
+  },
+  {
+    id: 'starter-4',
+    platforms: ['instagram', 'tiktok', 'facebook'],
+    content: `A little behind the scenes of [what you're working on] 👀\n\n[Short honest description of what your day/process looks like.]\n\nThe part nobody tells you about [your field/work]:\n[Honest, unexpected insight]\n\nAnything you want to know more about? Ask me below 👇`,
+  },
+  {
+    id: 'starter-5',
+    platforms: ['linkedin', 'bluesky', 'mastodon'],
+    content: `This week in [your niche] 📰\n\n→ [Thing 1 that happened or that you learned]\n→ [Thing 2]\n→ [Thing 3]\n\nMy take: [One sentence opinion or insight]\n\nFollowing along? Subscribe so you don't miss next week's. 🔔`,
+  },
+]
+
+function ComposeInner() {
+  const searchParams = useSearchParams()
   const { credits, setCredits } = useWorkspace()
 
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['linkedin'])
@@ -44,6 +76,40 @@ export default function Compose() {
   const [aiLoading, setAiLoading] = useState(false)
   const [aiError, setAiError] = useState('')
   const [toast, setToast] = useState('')
+  const [templateBanner, setTemplateBanner] = useState<string | null>(null)
+
+  // Load template content from URL params
+  useEffect(() => {
+    const templateId = searchParams.get('template')
+    const starterTemplateId = searchParams.get('starterTemplate')
+
+    if (starterTemplateId) {
+      const starter = STARTER_TEMPLATES.find(t => t.id === starterTemplateId)
+      if (starter) {
+        setContent(starter.content)
+        const validPlatforms = starter.platforms.filter(p => PLATFORMS.some(pl => pl.id === p))
+        if (validPlatforms.length > 0) setSelectedPlatforms(validPlatforms)
+        setTemplateBanner('Starter template loaded — replace the [bracketed] sections with your content.')
+      }
+    } else if (templateId) {
+      const loadTemplate = async () => {
+        const { data } = await supabase
+          .from('post_templates')
+          .select('*')
+          .eq('id', templateId)
+          .single()
+        if (data) {
+          setContent(data.content)
+          if (data.platforms && data.platforms.length > 0) {
+            const validPlatforms = data.platforms.filter((p: string) => PLATFORMS.some(pl => pl.id === p))
+            if (validPlatforms.length > 0) setSelectedPlatforms(validPlatforms)
+          }
+          setTemplateBanner(`Template "${data.title}" loaded.`)
+        }
+      }
+      loadTemplate()
+    }
+  }, [searchParams])
 
   const activePlatform = selectedPlatforms.length > 0
     ? (PLATFORMS.find(p => selectedPlatforms[0] === p.id) || PLATFORMS[0])
@@ -135,6 +201,14 @@ export default function Compose() {
             <p className="text-sm text-gray-400 mt-0.5">Write, schedule, and publish your posts</p>
           </div>
 
+          {/* TEMPLATE LOADED BANNER */}
+          {templateBanner && (
+            <div className="mb-4 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 flex items-center justify-between">
+              <p className="text-xs font-semibold text-blue-700">📋 {templateBanner}</p>
+              <button onClick={() => setTemplateBanner(null)} className="text-xs text-blue-400 hover:text-blue-700 ml-4 font-bold">✕</button>
+            </div>
+          )}
+
           <div className="grid grid-cols-3 gap-6">
 
             <div className="col-span-2 space-y-4">
@@ -165,7 +239,6 @@ export default function Compose() {
                 </div>
               </div>
 
-              {/* NO PLATFORM WARNING */}
               {selectedPlatforms.length === 0 && (
                 <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
                   <p className="text-xs font-semibold text-amber-700">
@@ -333,5 +406,17 @@ export default function Compose() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function Compose() {
+  return (
+    <Suspense fallback={
+      <div className="flex h-screen items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
+      </div>
+    }>
+      <ComposeInner />
+    </Suspense>
   )
 }

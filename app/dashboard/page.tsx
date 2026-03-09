@@ -8,15 +8,15 @@ import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 
 const NEW_PLATFORMS = [
   { name: 'Instagram', icon: '📸' },
-  { name: 'TikTok', icon: '🎵' },
-  { name: 'Facebook', icon: '📘' },
-  { name: 'Threads', icon: '🧵' },
+  { name: 'TikTok',    icon: '🎵' },
+  { name: 'Facebook',  icon: '📘' },
+  { name: 'Threads',   icon: '🧵' },
 ]
 
 function CreditMeter({ credits, plan }: { credits: number; plan: string }) {
   const config = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
-  const max = config?.credits ?? 100
-  const bankCap = max * 3
+  const max = config?.credits ?? 50
+  const bankCap = config?.creditBank ?? 150
   const pct = Math.min((credits / max) * 100, 100)
   const color = pct > 50 ? 'bg-green-500' : pct > 20 ? 'bg-yellow-400' : 'bg-red-400'
 
@@ -32,7 +32,7 @@ function CreditMeter({ credits, plan }: { credits: number; plan: string }) {
       <div className="flex items-center justify-between">
         <p className="text-xs text-gray-400">Resets monthly · banks up to {bankCap}</p>
         {pct < 20 && (
-          <Link href="/referral" className="text-xs font-bold text-blue-600 hover:underline">
+          <Link href="/settings?tab=Referrals" className="text-xs font-bold text-blue-600 hover:underline">
             Earn more →
           </Link>
         )}
@@ -52,7 +52,7 @@ function PlatformNotificationBanner() {
           <p className="text-xs font-extrabold text-blue-800">New platforms coming soon</p>
           <p className="text-xs text-blue-600 mt-0.5">
             {NEW_PLATFORMS.map(p => `${p.icon} ${p.name}`).join(' · ')} — developer approvals in progress.
-            We'll notify you here the moment each one goes live.
+            We'll notify you the moment each one goes live.
           </p>
         </div>
       </div>
@@ -79,7 +79,7 @@ export default function DashboardPage() {
   const [profile, setProfile] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState<DashStats>({
-    scheduled: 0, drafts: 0, thisWeek: 0, published: 0, todayCount: 0, upcomingCount: 0
+    scheduled: 0, drafts: 0, thisWeek: 0, published: 0, todayCount: 0, upcomingCount: 0,
   })
   const { plan, credits } = useWorkspace()
 
@@ -108,11 +108,11 @@ export default function DashboardPage() {
         const todayEnd = new Date(now); todayEnd.setHours(23, 59, 59, 999)
 
         setStats({
-          scheduled: posts.filter(p => p.status === 'scheduled' && new Date(p.scheduled_at) > now).length,
-          drafts: posts.filter(p => p.status === 'draft').length,
-          thisWeek: posts.filter(p => new Date(p.created_at) >= weekAgo).length,
-          published: posts.filter(p => p.status === 'published').length,
-          todayCount: posts.filter(p =>
+          scheduled:    posts.filter(p => p.status === 'scheduled' && new Date(p.scheduled_at) > now).length,
+          drafts:       posts.filter(p => p.status === 'draft').length,
+          thisWeek:     posts.filter(p => new Date(p.created_at) >= weekAgo).length,
+          published:    posts.filter(p => p.status === 'published').length,
+          todayCount:   posts.filter(p =>
             p.status === 'scheduled' &&
             new Date(p.scheduled_at) >= todayStart &&
             new Date(p.scheduled_at) <= todayEnd
@@ -138,7 +138,8 @@ export default function DashboardPage() {
     )
   }
 
-  const displayName = profile?.full_name || user?.email?.split('@')[0] || 'there'
+  // Fixed: was profile?.full_name — column is display_name
+  const displayName = profile?.display_name || user?.email?.split('@')[0] || 'there'
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
   const planConfig = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
@@ -176,21 +177,21 @@ export default function DashboardPage() {
           {/* PLAN + CREDIT BAR */}
           <div className="grid grid-cols-3 gap-4 mb-6">
             <div className={`rounded-2xl px-5 py-3 border flex items-center justify-between ${
-              plan === 'free' ? 'bg-gray-50 border-gray-200' :
-              plan === 'pro' ? 'bg-blue-50 border-blue-100' :
+              plan === 'free'   ? 'bg-gray-50 border-gray-200' :
+              plan === 'pro'    ? 'bg-blue-50 border-blue-100' :
               'bg-purple-50 border-purple-100'
             }`}>
               <div>
                 <p className={`text-xs font-extrabold ${
                   plan === 'agency' ? 'text-purple-700' :
-                  plan === 'pro' ? 'text-blue-700' : 'text-gray-700'
+                  plan === 'pro'    ? 'text-blue-700'   : 'text-gray-700'
                 }`}>
-                  {plan === 'free' && '🔓 Free Plan'}
-                  {plan === 'pro' && '⚡ Pro Plan'}
+                  {plan === 'free'   && '🔓 Free Plan'}
+                  {plan === 'pro'    && '⚡ Pro Plan'}
                   {plan === 'agency' && '🏢 Agency Plan'}
                 </p>
                 <p className="text-xs text-gray-400 mt-0.5">
-                  {planConfig?.label} · {planConfig?.accounts} account{planConfig?.accounts !== 1 ? 's' : ''} per platform
+                  {planConfig?.label} · {planConfig?.accountsPerPlatform} account{planConfig?.accountsPerPlatform !== 1 ? 's' : ''} per platform
                 </p>
               </div>
               {plan === 'free' && (
@@ -208,10 +209,10 @@ export default function DashboardPage() {
           {/* STATS */}
           <div className="grid grid-cols-4 gap-4 mb-8">
             {[
-              { label: 'Scheduled',  value: stats.scheduled,  sub: 'posts queued',   icon: '📅', color: 'text-blue-600'   },
-              { label: 'Drafts',     value: stats.drafts,     sub: 'in progress',    icon: '📁', color: 'text-yellow-600' },
-              { label: 'This Week',  value: stats.thisWeek,   sub: 'posts created',  icon: '✏️', color: 'text-purple-600' },
-              { label: 'Published',  value: stats.published,  sub: 'all time',       icon: '✅', color: 'text-green-600'  },
+              { label: 'Scheduled', value: stats.scheduled, sub: 'posts queued',  icon: '📅', color: 'text-blue-600'   },
+              { label: 'Drafts',    value: stats.drafts,    sub: 'in progress',   icon: '📁', color: 'text-yellow-600' },
+              { label: 'This Week', value: stats.thisWeek,  sub: 'posts created', icon: '✏️', color: 'text-purple-600' },
+              { label: 'Published', value: stats.published, sub: 'all time',      icon: '✅', color: 'text-green-600'  },
             ].map(stat => (
               <div key={stat.label} className="bg-white rounded-2xl border border-gray-100 p-5">
                 <div className="flex items-center justify-between mb-2">
@@ -294,11 +295,11 @@ export default function DashboardPage() {
                   <span className="text-3xl flex-shrink-0">🔥</span>
                 </div>
                 <div className="flex items-center gap-3 mt-4">
-                  <Link href="/features"
+                  <Link href="/ai-features"
                     className="text-xs font-bold px-4 py-2 bg-white text-black rounded-xl hover:opacity-80 transition-all">
                     Try SM-Pulse — 5 credits
                   </Link>
-                  <Link href="/features"
+                  <Link href="/ai-features"
                     className="text-xs font-semibold text-gray-400 hover:text-white transition-all">
                     See all AI tools →
                   </Link>
@@ -320,7 +321,7 @@ export default function DashboardPage() {
                     { label: 'Use a template',   sub: 'Start from a saved format', href: '/templates',      icon: '📋' },
                     { label: 'Upload media',     sub: 'Add to your library',       href: '/media',          icon: '🖼️' },
                     { label: 'Edit link in bio', sub: 'Update your bio page',      href: '/link-in-bio',    icon: '🔗' },
-                    { label: 'Explore AI tools', sub: 'Credits, features & more',  href: '/features',       icon: '🤖' },
+                    { label: 'Explore AI tools', sub: 'Credits, features & more',  href: '/ai-features',    icon: '🤖' },
                   ].map(action => (
                     <Link key={action.href} href={action.href}
                       className={`flex items-center gap-3 p-3 rounded-xl transition-all ${
@@ -360,14 +361,14 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* REFERRAL NUDGE */}
+              {/* REFERRAL NUDGE — fixed: goes to settings referral tab */}
               <div className="bg-gradient-to-br from-gray-900 to-gray-700 rounded-2xl p-5 text-white">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Earn more credits</p>
                 <p className="text-sm font-extrabold mb-1">Invite a friend</p>
                 <p className="text-xs text-gray-400 leading-relaxed mb-4">
                   You and a friend both earn 25 AI credits when they connect a platform and publish their first post.
                 </p>
-                <Link href="/referral"
+                <Link href="/settings?tab=Referrals"
                   className="text-xs font-bold px-4 py-2 bg-white text-black rounded-xl hover:opacity-80 transition-all inline-block">
                   Get your referral link →
                 </Link>

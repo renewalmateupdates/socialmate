@@ -1,5 +1,6 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
@@ -15,25 +16,24 @@ const REFERRAL_TIERS = [
   { paying: 100, reward: 'Pro free for life', icon: '👑' },
 ]
 
-const MOCK_HISTORY = [
-  { name: 'Alex M.',   date: 'Feb 28, 2025', status: 'Upgraded to Pro', reward: '+50 credits' },
-  { name: 'Jordan K.', date: 'Feb 14, 2025', status: 'Signed up',       reward: '+5 credits'  },
-  { name: 'Sam R.',    date: 'Jan 30, 2025', status: 'Upgraded to Pro', reward: '+50 credits' },
-]
-
-export default function Settings() {
+function SettingsInner() {
   const { plan } = useWorkspace()
   const router = useRouter()
+  const searchParams = useSearchParams()
 
-  // St1: auth guard
   const [userEmail, setUserEmail] = useState('')
+  const [userId, setUserId] = useState<string | null>(null)
   const [displayName, setDisplayName] = useState('')
   const [username, setUsername] = useState('')
   const [bio, setBio] = useState('')
   const [authLoading, setAuthLoading] = useState(true)
 
-  const [activeTab, setActiveTab] = useState('Profile')
-  // St3: per-tab saved state instead of one shared boolean
+  // Read tab from URL param — e.g. /settings?tab=Referrals
+  const tabFromUrl = searchParams.get('tab')
+  const [activeTab, setActiveTab] = useState(
+    tabFromUrl && TABS.includes(tabFromUrl) ? tabFromUrl : 'Profile'
+  )
+
   const [savedTab, setSavedTab] = useState<string | null>(null)
   const [whiteLabel, setWhiteLabel] = useState(false)
   const [notifications, setNotifications] = useState({
@@ -46,23 +46,30 @@ export default function Settings() {
   })
   const [copiedLink, setCopiedLink] = useState(false)
 
-  // St4: danger zone confirm states
   const [confirmDeletePosts, setConfirmDeletePosts] = useState(false)
   const [confirmDeleteAccount, setConfirmDeleteAccount] = useState(false)
   const [dangerLoading, setDangerLoading] = useState(false)
 
-  const referralCode = 'SOCIAL-DEMO'
-  const referralLink = `https://socialmate.app/signup?ref=${referralCode}`
-  const payingReferrals = 2
-  const totalReferrals = 3
-  const creditsEarned = 105
+  // Real referral data
+  const [referralCode, setReferralCode] = useState('')
+  const [referralStats, setReferralStats] = useState({
+    totalReferrals: 0,
+    payingReferrals: 0,
+    creditsEarned: 0,
+  })
+  const [referralHistory, setReferralHistory] = useState<any[]>([])
+  const [referralLoading, setReferralLoading] = useState(false)
 
-  // St1 + St2: load auth + profile data
   useEffect(() => {
     const init = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
       setUserEmail(user.email || '')
+      setUserId(user.id)
+
+      // Generate referral code from user ID
+      const code = `SM-${user.id.slice(0, 8).toUpperCase()}`
+      setReferralCode(code)
 
       const { data: profile } = await supabase
         .from('profiles')
@@ -75,10 +82,39 @@ export default function Settings() {
         setUsername(profile.username || '')
         setBio(profile.bio || '')
       }
+
       setAuthLoading(false)
     }
     init()
   }, [router])
+
+  // Load referral data when Referrals tab is active
+  useEffect(() => {
+    if (activeTab !== 'Referrals' || !userId) return
+    const loadReferrals = async () => {
+      setReferralLoading(true)
+      const { data, error } = await supabase
+        .from('referrals')
+        .select('*')
+        .eq('referrer_id', userId)
+        .order('created_at', { ascending: false })
+
+      if (!error && data) {
+        const paying = data.filter((r: any) => r.status === 'paid' || r.status === 'completed')
+        const totalCredits = data.reduce((sum: number, r: any) => sum + (r.credits_awarded || 0), 0)
+        setReferralStats({
+          totalReferrals: data.length,
+          payingReferrals: paying.length,
+          creditsEarned: totalCredits,
+        })
+        setReferralHistory(data.slice(0, 10))
+      }
+      setReferralLoading(false)
+    }
+    loadReferrals()
+  }, [activeTab, userId])
+
+  const referralLink = `https://socialmate.app/signup?ref=${referralCode}`
 
   const handleSave = async (tab: string) => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -102,7 +138,6 @@ export default function Settings() {
     setTimeout(() => setCopiedLink(false), 2000)
   }
 
-  // St4: danger zone actions with confirm
   const handleDeleteAllPosts = async () => {
     setDangerLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
@@ -115,7 +150,6 @@ export default function Settings() {
 
   const handleDeleteAccount = async () => {
     setDangerLoading(true)
-    // Sign out — actual account deletion requires a Supabase edge function with admin rights
     await supabase.auth.signOut()
     router.push('/login')
   }
@@ -158,7 +192,6 @@ export default function Settings() {
           {activeTab === 'Profile' && (
             <div className="bg-white border border-gray-100 rounded-2xl p-6 space-y-4">
               <h2 className="text-base font-extrabold">Profile</h2>
-              {/* St2: live values from Supabase */}
               <div>
                 <label className="text-xs font-bold text-gray-500 block mb-1">Display Name</label>
                 <input
@@ -211,7 +244,7 @@ export default function Settings() {
                   </div>
                   <span className={`text-xs font-bold px-3 py-1.5 rounded-full capitalize ${
                     plan === 'free' ? 'bg-gray-100 text-gray-600' :
-                    plan === 'pro' ? 'bg-black text-white' :
+                    plan === 'pro'  ? 'bg-black text-white' :
                     'bg-purple-100 text-purple-700'
                   }`}>{plan}</span>
                 </div>
@@ -219,7 +252,7 @@ export default function Settings() {
                   <div className="space-y-3">
                     <div className="bg-black text-white rounded-xl p-4">
                       <p className="text-sm font-extrabold mb-1">Upgrade to Pro — $5/month</p>
-                      <p className="text-xs text-gray-400 mb-3">5 accounts, 300 AI credits, 10 GB storage, 90-day analytics</p>
+                      <p className="text-xs text-gray-400 mb-3">5 accounts, 250 AI credits, 10 GB storage, 90-day analytics</p>
                       <button className="bg-white text-black text-xs font-bold px-4 py-2 rounded-lg hover:opacity-80 transition-all">
                         Upgrade to Pro →
                       </button>
@@ -246,14 +279,18 @@ export default function Settings() {
                 <h2 className="text-base font-extrabold mb-4">AI Credits</h2>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs text-gray-500">Monthly credits</span>
-                  <span className="text-xs font-bold">100 / 100</span>
+                  <span className="text-xs font-bold">
+                    {plan === 'free' ? '50 / 50' : plan === 'pro' ? '250 / 250' : '750 / 750'}
+                  </span>
                 </div>
                 <div className="w-full bg-gray-100 rounded-full h-2 mb-4">
                   <div className="bg-black h-2 rounded-full" style={{ width: '100%' }} />
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500">Banked credits</span>
-                  <span className="text-xs font-bold">0 / 300</span>
+                  <span className="text-xs text-gray-500">Credit bank capacity</span>
+                  <span className="text-xs font-bold">
+                    {plan === 'free' ? '150' : plan === 'pro' ? '750' : '3,000'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -262,94 +299,114 @@ export default function Settings() {
           {/* ── REFERRALS ── */}
           {activeTab === 'Referrals' && (
             <div className="space-y-4">
-              <div className="grid grid-cols-3 gap-4">
-                {[
-                  { label: 'Total Referrals',  value: totalReferrals  },
-                  { label: 'Paying Referrals', value: payingReferrals },
-                  { label: 'Credits Earned',   value: creditsEarned   },
-                ].map((stat, i) => (
-                  <div key={i} className="bg-white border border-gray-100 rounded-2xl p-5 text-center">
-                    <p className="text-3xl font-extrabold mb-1">{stat.value}</p>
-                    <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide">{stat.label}</p>
-                  </div>
-                ))}
-              </div>
-
-              <div className="bg-black text-white rounded-2xl p-6">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Your Referral Link</p>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="flex-1 bg-white/10 rounded-xl px-4 py-3 text-sm font-mono truncate">
-                    {referralLink}
-                  </div>
-                  <button onClick={handleCopyLink}
-                    className={`px-5 py-3 rounded-xl text-sm font-bold transition-all flex-shrink-0 ${
-                      copiedLink ? 'bg-green-500 text-white' : 'bg-white text-black hover:opacity-80'
-                    }`}>
-                    {copiedLink ? '✓ Copied!' : 'Copy'}
-                  </button>
+              {referralLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin" />
                 </div>
-                <p className="text-xs text-gray-400">
-                  Signup → <span className="text-white font-bold">+5 credits</span> &nbsp;·&nbsp;
-                  Upgrades to Pro → <span className="text-white font-bold">+50 credits</span> &nbsp;·&nbsp;
-                  Upgrades to Agency → <span className="text-white font-bold">+100 credits</span>
-                </p>
-              </div>
-
-              <div className="bg-white border border-gray-100 rounded-2xl p-6">
-                <h2 className="text-base font-extrabold mb-1">Next Milestone</h2>
-                <p className="text-xs text-gray-400 mb-4">
-                  You have <span className="font-bold text-black">{payingReferrals}</span> paying referrals.
-                  Reach <span className="font-bold text-black">5</span> to unlock your first free month of Pro.
-                </p>
-                <div className="w-full bg-gray-100 rounded-full h-2.5 mb-2">
-                  <div className="bg-black h-2.5 rounded-full transition-all"
-                    style={{ width: `${Math.min((payingReferrals / 5) * 100, 100)}%` }} />
-                </div>
-                <p className="text-xs text-gray-400">{payingReferrals} / 5 paying referrals</p>
-              </div>
-
-              <div className="bg-white border border-gray-100 rounded-2xl p-6">
-                <h2 className="text-base font-extrabold mb-5">Reward Tiers</h2>
-                <div className="space-y-3">
-                  {REFERRAL_TIERS.map((tier, i) => {
-                    const unlocked = payingReferrals >= tier.paying
-                    return (
-                      <div key={i} className={`flex items-center justify-between py-3 border-b border-gray-50 last:border-0 ${unlocked ? 'opacity-50' : ''}`}>
-                        <div className="flex items-center gap-3">
-                          <span className="text-xl">{unlocked ? '✅' : tier.icon}</span>
-                          <div>
-                            <p className="text-sm font-bold">{tier.paying} paying referral{tier.paying > 1 ? 's' : ''}</p>
-                            {unlocked && <p className="text-xs text-green-500 font-bold">Unlocked</p>}
-                          </div>
-                        </div>
-                        <span className="text-xs font-extrabold px-3 py-2 bg-black text-white rounded-xl flex-shrink-0">
-                          {tier.reward}
-                        </span>
+              ) : (
+                <>
+                  <div className="grid grid-cols-3 gap-4">
+                    {[
+                      { label: 'Total Referrals',  value: referralStats.totalReferrals  },
+                      { label: 'Paying Referrals', value: referralStats.payingReferrals },
+                      { label: 'Credits Earned',   value: referralStats.creditsEarned   },
+                    ].map((stat, i) => (
+                      <div key={i} className="bg-white border border-gray-100 rounded-2xl p-5 text-center">
+                        <p className="text-3xl font-extrabold mb-1">{stat.value}</p>
+                        <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide">{stat.label}</p>
                       </div>
-                    )
-                  })}
-                </div>
-                <p className="text-xs text-gray-400 mt-4 pt-4 border-t border-gray-50">
-                  Paying referrals only count after 30 days of active subscription. Abuse of the referral system results in permanent account termination.
-                </p>
-              </div>
+                    ))}
+                  </div>
 
-              <div className="bg-white border border-gray-100 rounded-2xl p-6">
-                <h2 className="text-base font-extrabold mb-5">Referral History</h2>
-                <div className="space-y-2">
-                  {MOCK_HISTORY.map((entry, i) => (
-                    <div key={i} className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
-                      <div>
-                        <p className="text-sm font-bold">{entry.name}</p>
-                        <p className="text-xs text-gray-400">{entry.date} · {entry.status}</p>
+                  <div className="bg-black text-white rounded-2xl p-6">
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Your Referral Link</p>
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="flex-1 bg-white/10 rounded-xl px-4 py-3 text-sm font-mono truncate">
+                        {referralLink}
                       </div>
-                      <span className="text-xs font-bold text-green-600 bg-green-50 px-3 py-1.5 rounded-xl">
-                        {entry.reward}
-                      </span>
+                      <button onClick={handleCopyLink}
+                        className={`px-5 py-3 rounded-xl text-sm font-bold transition-all flex-shrink-0 ${
+                          copiedLink ? 'bg-green-500 text-white' : 'bg-white text-black hover:opacity-80'
+                        }`}>
+                        {copiedLink ? '✓ Copied!' : 'Copy'}
+                      </button>
                     </div>
-                  ))}
-                </div>
-              </div>
+                    <p className="text-xs text-gray-400">
+                      Signup → <span className="text-white font-bold">+5 credits</span> &nbsp;·&nbsp;
+                      Upgrades to Pro → <span className="text-white font-bold">+50 credits</span> &nbsp;·&nbsp;
+                      Upgrades to Agency → <span className="text-white font-bold">+100 credits</span>
+                    </p>
+                  </div>
+
+                  <div className="bg-white border border-gray-100 rounded-2xl p-6">
+                    <h2 className="text-base font-extrabold mb-1">Next Milestone</h2>
+                    <p className="text-xs text-gray-400 mb-4">
+                      You have <span className="font-bold text-black">{referralStats.payingReferrals}</span> paying referral{referralStats.payingReferrals !== 1 ? 's' : ''}.
+                      Reach <span className="font-bold text-black">5</span> to unlock your first free month of Pro.
+                    </p>
+                    <div className="w-full bg-gray-100 rounded-full h-2.5 mb-2">
+                      <div className="bg-black h-2.5 rounded-full transition-all"
+                        style={{ width: `${Math.min((referralStats.payingReferrals / 5) * 100, 100)}%` }} />
+                    </div>
+                    <p className="text-xs text-gray-400">{referralStats.payingReferrals} / 5 paying referrals</p>
+                  </div>
+
+                  <div className="bg-white border border-gray-100 rounded-2xl p-6">
+                    <h2 className="text-base font-extrabold mb-5">Reward Tiers</h2>
+                    <div className="space-y-3">
+                      {REFERRAL_TIERS.map((tier, i) => {
+                        const unlocked = referralStats.payingReferrals >= tier.paying
+                        return (
+                          <div key={i} className={`flex items-center justify-between py-3 border-b border-gray-50 last:border-0 ${unlocked ? 'opacity-50' : ''}`}>
+                            <div className="flex items-center gap-3">
+                              <span className="text-xl">{unlocked ? '✅' : tier.icon}</span>
+                              <div>
+                                <p className="text-sm font-bold">{tier.paying} paying referral{tier.paying > 1 ? 's' : ''}</p>
+                                {unlocked && <p className="text-xs text-green-500 font-bold">Unlocked</p>}
+                              </div>
+                            </div>
+                            <span className="text-xs font-extrabold px-3 py-2 bg-black text-white rounded-xl flex-shrink-0">
+                              {tier.reward}
+                            </span>
+                          </div>
+                        )
+                      })}
+                    </div>
+                    <p className="text-xs text-gray-400 mt-4 pt-4 border-t border-gray-50">
+                      Paying referrals only count after 30 days of active subscription. Abuse results in permanent account termination.
+                    </p>
+                  </div>
+
+                  <div className="bg-white border border-gray-100 rounded-2xl p-6">
+                    <h2 className="text-base font-extrabold mb-5">Referral History</h2>
+                    {referralHistory.length === 0 ? (
+                      <div className="text-center py-8">
+                        <p className="text-3xl mb-3">🎁</p>
+                        <p className="text-sm font-bold text-gray-700 mb-1">No referrals yet</p>
+                        <p className="text-xs text-gray-400">Share your link above to start earning credits.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {referralHistory.map((entry: any, i: number) => (
+                          <div key={i} className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
+                            <div>
+                              <p className="text-sm font-bold">{entry.referred_email || 'Referred user'}</p>
+                              <p className="text-xs text-gray-400">
+                                {new Date(entry.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} · {entry.status}
+                              </p>
+                            </div>
+                            {entry.credits_awarded > 0 && (
+                              <span className="text-xs font-bold text-green-600 bg-green-50 px-3 py-1.5 rounded-xl">
+                                +{entry.credits_awarded} credits
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
             </div>
           )}
 
@@ -359,12 +416,12 @@ export default function Settings() {
               <h2 className="text-base font-extrabold mb-5">Notification Preferences</h2>
               <div className="space-y-4">
                 {[
-                  { key: 'postPublished',  label: 'Post published',   desc: 'When a scheduled post goes live'                      },
-                  { key: 'postFailed',     label: 'Post failed',       desc: 'When a scheduled post fails to publish'               },
-                  { key: 'weeklyDigest',   label: 'Weekly digest',     desc: 'Summary of your posting activity every Monday'        },
-                  { key: 'creditLow',      label: 'Low AI credits',    desc: 'When your credits drop below 20'                      },
-                  { key: 'teamActivity',   label: 'Team activity',     desc: 'When team members schedule or edit posts'             },
-                  { key: 'productUpdates', label: 'Product updates',   desc: 'New features and platform announcements'              },
+                  { key: 'postPublished',  label: 'Post published',  desc: 'When a scheduled post goes live'             },
+                  { key: 'postFailed',     label: 'Post failed',      desc: 'When a scheduled post fails to publish'      },
+                  { key: 'weeklyDigest',   label: 'Weekly digest',    desc: 'Summary of your posting activity every Monday'},
+                  { key: 'creditLow',      label: 'Low AI credits',   desc: 'When your credits drop below 20'             },
+                  { key: 'teamActivity',   label: 'Team activity',    desc: 'When team members schedule or edit posts'     },
+                  { key: 'productUpdates', label: 'Product updates',  desc: 'New features and platform announcements'     },
                 ].map(item => (
                   <div key={item.key} className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
                     <div>
@@ -383,7 +440,6 @@ export default function Settings() {
                   </div>
                 ))}
               </div>
-              {/* St3: uses savedTab, not shared saved boolean */}
               <button onClick={() => handleSave('Notifications')}
                 className={`mt-5 px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${
                   savedTab === 'Notifications' ? 'bg-green-500 text-white' : 'bg-black text-white hover:opacity-80'
@@ -420,13 +476,10 @@ export default function Settings() {
                 </div>
               </div>
 
-              {/* St4: danger zone with confirms */}
               <div className="bg-white border border-gray-100 rounded-2xl p-6">
                 <h2 className="text-base font-extrabold mb-1">Danger Zone</h2>
                 <p className="text-xs text-gray-400 mb-4">These actions are irreversible. Please be certain.</p>
                 <div className="space-y-3">
-
-                  {/* Delete all posts */}
                   {confirmDeletePosts ? (
                     <div className="border border-red-200 rounded-xl px-4 py-3 bg-red-50">
                       <p className="text-xs font-bold text-red-600 mb-2">
@@ -450,7 +503,6 @@ export default function Settings() {
                     </button>
                   )}
 
-                  {/* Delete account */}
                   {confirmDeleteAccount ? (
                     <div className="border border-red-300 rounded-xl px-4 py-3 bg-red-50">
                       <p className="text-xs font-bold text-red-700 mb-2">
@@ -473,7 +525,6 @@ export default function Settings() {
                       Delete account permanently
                     </button>
                   )}
-
                 </div>
               </div>
             </div>
@@ -539,5 +590,17 @@ export default function Settings() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function Settings() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <SettingsInner />
+    </Suspense>
   )
 }

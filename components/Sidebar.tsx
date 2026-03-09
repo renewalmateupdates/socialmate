@@ -9,16 +9,16 @@ const NAV_BASE = [
   {
     section: 'Content',
     items: [
-      { icon: '🏠', label: 'Dashboard',     href: '/dashboard'      },
-      { icon: '📅', label: 'Calendar',      href: '/calendar'       },
-      { icon: '✏️', label: 'Compose',       href: '/compose'        },
-      { icon: '📂', label: 'Drafts',        href: '/drafts'         },
-      { icon: '⏳', label: 'Queue',         href: '/queue'          },
-      { icon: '#️⃣', label: 'Hashtags',      href: '/hashtags'       },
-      { icon: '🖼️', label: 'Media Library', href: '/media'          },
-      { icon: '📝', label: 'Templates',     href: '/templates'      },
-      { icon: '🔗', label: 'Link in Bio',   href: '/link-in-bio'    },
-      { icon: '📆', label: 'Bulk Scheduler',href: '/bulk-scheduler' },
+      { icon: '🏠', label: 'Dashboard',      href: '/dashboard'      },
+      { icon: '📅', label: 'Calendar',       href: '/calendar'       },
+      { icon: '✏️', label: 'Compose',        href: '/compose'        },
+      { icon: '📂', label: 'Drafts',         href: '/drafts'         },
+      { icon: '⏳', label: 'Queue',          href: '/queue'          },
+      { icon: '#️⃣', label: 'Hashtags',       href: '/hashtags'       },
+      { icon: '🖼️', label: 'Media Library',  href: '/media'          },
+      { icon: '📝', label: 'Templates',      href: '/templates'      },
+      { icon: '🔗', label: 'Link in Bio',    href: '/link-in-bio'    },
+      { icon: '📆', label: 'Bulk Scheduler', href: '/bulk-scheduler' },
     ],
   },
   {
@@ -31,9 +31,9 @@ const NAV_BASE = [
   {
     section: 'Grow',
     items: [
-      { icon: '🤖', label: 'AI Features', href: '/features'  },
-      { icon: '🎁', label: 'Referrals',   href: '/referral'  },
-      { icon: '🤝', label: 'Affiliate',   href: '/affiliate' },
+      { icon: '🤖', label: 'AI Features', href: '/ai-features'         },
+      { icon: '🎁', label: 'Referrals',   href: '/settings?tab=Referrals' },
+      { icon: '🤝', label: 'Affiliate',   href: '/affiliate'            },
     ],
   },
   {
@@ -50,9 +50,9 @@ const NAV_BASE = [
 ]
 
 const PLAN_BADGE: Record<string, { label: string; color: string }> = {
-  free:   { label: 'Free',   color: 'bg-gray-100 text-gray-500'       },
-  pro:    { label: 'Pro',    color: 'bg-blue-100 text-blue-600'       },
-  agency: { label: 'Agency', color: 'bg-purple-100 text-purple-600'  },
+  free:   { label: 'Free',   color: 'bg-gray-100 text-gray-500'      },
+  pro:    { label: 'Pro',    color: 'bg-blue-100 text-blue-600'      },
+  agency: { label: 'Agency', color: 'bg-purple-100 text-purple-600' },
 }
 
 export default function Sidebar() {
@@ -114,6 +114,12 @@ export default function Sidebar() {
   const clientWorkspaces = workspaces.filter(w => !w.is_personal)
   const personalWorkspace = workspaces.find(w => w.is_personal)
 
+  // Active check — treat /settings?tab=Referrals as active when on /settings
+  const isActive = (href: string) => {
+    const base = href.split('?')[0]
+    return pathname === base || pathname === href
+  }
+
   return (
     <div className="w-56 bg-white border-r border-gray-100 flex flex-col flex-shrink-0 h-screen sticky top-0 fixed left-0 z-40">
 
@@ -143,16 +149,13 @@ export default function Sidebar() {
 
           {wsOpen && (
             <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-100 rounded-xl shadow-lg z-50 overflow-hidden">
-
               {personalWorkspace && (
                 <button
                   onClick={() => { setActiveWorkspace(personalWorkspace); setWsOpen(false) }}
                   className={`w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-left hover:bg-gray-50 transition-all ${activeWorkspace?.id === personalWorkspace.id ? 'bg-gray-50 text-black' : 'text-gray-600'}`}>
                   <span>🏠</span>
                   <span className="truncate">My Workspace</span>
-                  {activeWorkspace?.id === personalWorkspace.id && (
-                    <span className="ml-auto text-black">✓</span>
-                  )}
+                  {activeWorkspace?.id === personalWorkspace.id && <span className="ml-auto text-black">✓</span>}
                 </button>
               )}
 
@@ -216,7 +219,7 @@ export default function Sidebar() {
               {group.section}
             </div>
             {group.items.map(item => {
-              const active = pathname === item.href
+              const active = isActive(item.href)
               return (
                 <Link key={item.label} href={item.href}
                   className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
@@ -233,7 +236,6 @@ export default function Sidebar() {
       {/* BOTTOM STATS */}
       <div className="p-3 border-t border-gray-100 space-y-3">
 
-        {/* AI CREDITS */}
         <div className="bg-gray-50 rounded-xl p-3">
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs font-semibold text-gray-500">AI Credits</span>
@@ -256,7 +258,6 @@ export default function Sidebar() {
           </p>
         </div>
 
-        {/* TEAM SEATS */}
         <div className="bg-gray-50 rounded-xl p-3">
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs font-semibold text-gray-500">Team Seats</span>
@@ -275,7 +276,6 @@ export default function Sidebar() {
           </p>
         </div>
 
-        {/* PLATFORMS */}
         <div className="bg-gray-50 rounded-xl p-3">
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs font-semibold text-gray-500">Platforms</span>
@@ -291,7 +291,6 @@ export default function Sidebar() {
           </p>
         </div>
 
-        {/* UPGRADE CTA */}
         {plan === 'free' && (
           <Link href="/pricing"
             className="w-full block text-center bg-black text-white text-xs font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
@@ -305,7 +304,6 @@ export default function Sidebar() {
           </Link>
         )}
 
-        {/* USER */}
         <div className="px-1">
           <div className="text-xs text-gray-400 truncate mb-1">{user?.email}</div>
           <button onClick={handleSignOut}
