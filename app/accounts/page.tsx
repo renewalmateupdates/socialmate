@@ -140,7 +140,7 @@ export default function Accounts() {
   const { plan } = useWorkspace()
 
   const planConfig = PLAN_CONFIG[plan]
-  const accountsPerPlatform = planConfig.accounts
+  const accountsPerPlatform = planConfig.accountsPerPlatform
 
   useEffect(() => {
     const getData = async () => {
