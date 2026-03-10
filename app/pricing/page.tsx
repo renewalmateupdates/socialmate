@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import PublicLayout from '@/components/PublicLayout'
 
 const PLANS = [
@@ -33,6 +34,7 @@ const PLANS = [
     ],
     cta: 'Get Started Free',
     ctaHref: '/signup',
+    priceId: null,
     ctaStyle: 'border border-gray-300 text-gray-700 hover:bg-gray-50',
   },
   {
@@ -64,7 +66,8 @@ const PLANS = [
       { label: 'White Label add-on available', note: '+$20/mo' },
     ],
     cta: 'Start Pro',
-    ctaHref: '/signup?plan=pro',
+    ctaHref: null,
+    priceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID,
     ctaStyle: 'bg-white text-black hover:opacity-80',
   },
   {
@@ -93,7 +96,8 @@ const PLANS = [
       { label: 'Dedicated support' },
     ],
     cta: 'Start Agency',
-    ctaHref: '/signup?plan=agency',
+    ctaHref: null,
+    priceId: process.env.NEXT_PUBLIC_STRIPE_AGENCY_PRICE_ID,
     ctaStyle: 'bg-purple-600 text-white hover:opacity-80',
   },
 ]
@@ -126,6 +130,29 @@ const AI_CREDITS = [
 
 export default function Pricing() {
   const [annual, setAnnual] = useState(false)
+  const [loading, setLoading] = useState<string | null>(null)
+  const router = useRouter()
+
+  const handleCheckout = async (priceId: string, planName: string) => {
+    setLoading(planName)
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId }),
+      })
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+      } else if (data.error === 'Unauthorized') {
+        router.push('/login?redirect=/pricing')
+      }
+    } catch {
+      console.error('Checkout failed')
+    } finally {
+      setLoading(null)
+    }
+  }
 
   return (
     <PublicLayout>
@@ -198,10 +225,19 @@ export default function Pricing() {
                     </li>
                   ))}
                 </ul>
-                <Link href={plan.ctaHref}
-                  className={`w-full text-center text-sm font-bold py-3 rounded-xl transition-all ${plan.ctaStyle}`}>
-                  {plan.cta}
-                </Link>
+                {plan.priceId ? (
+                  <button
+                    onClick={() => handleCheckout(plan.priceId!, plan.name)}
+                    disabled={loading === plan.name}
+                    className={`w-full text-center text-sm font-bold py-3 rounded-xl transition-all disabled:opacity-60 ${plan.ctaStyle}`}>
+                    {loading === plan.name ? 'Loading...' : plan.cta}
+                  </button>
+                ) : (
+                  <Link href={plan.ctaHref!}
+                    className={`w-full text-center text-sm font-bold py-3 rounded-xl transition-all ${plan.ctaStyle}`}>
+                    {plan.cta}
+                  </Link>
+                )}
               </div>
             </div>
           ))}
@@ -229,10 +265,12 @@ export default function Pricing() {
             <div className="text-right flex-shrink-0">
               <div className="text-2xl font-extrabold">$20</div>
               <div className="text-xs text-gray-400">/month add-on</div>
-              <Link href="/signup"
-                className="mt-3 inline-block text-xs font-bold px-4 py-2 bg-black text-white rounded-xl hover:opacity-80 transition-all">
-                Add to plan →
-              </Link>
+              <button
+                onClick={() => handleCheckout(process.env.NEXT_PUBLIC_STRIPE_WHITE_LABEL_PRICE_ID!, 'WhiteLabel')}
+                disabled={loading === 'WhiteLabel'}
+                className="mt-3 inline-block text-xs font-bold px-4 py-2 bg-black text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
+                {loading === 'WhiteLabel' ? 'Loading...' : 'Add to plan →'}
+              </button>
             </div>
           </div>
         </div>

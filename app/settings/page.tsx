@@ -28,7 +28,6 @@ function SettingsInner() {
   const [bio, setBio] = useState('')
   const [authLoading, setAuthLoading] = useState(true)
 
-  // Read tab from URL param — e.g. /settings?tab=Referrals
   const tabFromUrl = searchParams.get('tab')
   const [activeTab, setActiveTab] = useState(
     tabFromUrl && TABS.includes(tabFromUrl) ? tabFromUrl : 'Profile'
@@ -36,6 +35,7 @@ function SettingsInner() {
 
   const [savedTab, setSavedTab] = useState<string | null>(null)
   const [whiteLabel, setWhiteLabel] = useState(false)
+  const [checkoutLoading, setCheckoutLoading] = useState(false)
   const [notifications, setNotifications] = useState({
     postPublished: true,
     postFailed: true,
@@ -50,7 +50,6 @@ function SettingsInner() {
   const [confirmDeleteAccount, setConfirmDeleteAccount] = useState(false)
   const [dangerLoading, setDangerLoading] = useState(false)
 
-  // Real referral data
   const [referralCode, setReferralCode] = useState('')
   const [referralStats, setReferralStats] = useState({
     totalReferrals: 0,
@@ -67,7 +66,6 @@ function SettingsInner() {
       setUserEmail(user.email || '')
       setUserId(user.id)
 
-      // Generate referral code from user ID
       const code = `SM-${user.id.slice(0, 8).toUpperCase()}`
       setReferralCode(code)
 
@@ -88,7 +86,6 @@ function SettingsInner() {
     init()
   }, [router])
 
-  // Load referral data when Referrals tab is active
   useEffect(() => {
     if (activeTab !== 'Referrals' || !userId) return
     const loadReferrals = async () => {
@@ -136,6 +133,37 @@ function SettingsInner() {
     navigator.clipboard.writeText(referralLink)
     setCopiedLink(true)
     setTimeout(() => setCopiedLink(false), 2000)
+  }
+
+  const handleCheckout = async (priceId: string) => {
+    setCheckoutLoading(true)
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId }),
+      })
+      const data = await res.json()
+      if (data.url) window.location.href = data.url
+      if (data.error === 'Unauthorized') router.push('/login')
+    } catch {
+      console.error('Checkout failed')
+    } finally {
+      setCheckoutLoading(false)
+    }
+  }
+
+  const handlePortal = async () => {
+    setCheckoutLoading(true)
+    try {
+      const res = await fetch('/api/stripe/portal', { method: 'POST' })
+      const data = await res.json()
+      if (data.url) window.location.href = data.url
+    } catch {
+      console.error('Portal failed')
+    } finally {
+      setCheckoutLoading(false)
+    }
   }
 
   const handleDeleteAllPosts = async () => {
@@ -253,24 +281,33 @@ function SettingsInner() {
                     <div className="bg-black text-white rounded-xl p-4">
                       <p className="text-sm font-extrabold mb-1">Upgrade to Pro — $5/month</p>
                       <p className="text-xs text-gray-400 mb-3">5 accounts, 250 AI credits, 10 GB storage, 90-day analytics</p>
-                      <button className="bg-white text-black text-xs font-bold px-4 py-2 rounded-lg hover:opacity-80 transition-all">
-                        Upgrade to Pro →
+                      <button
+                        onClick={() => handleCheckout(process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID!)}
+                        disabled={checkoutLoading}
+                        className="bg-white text-black text-xs font-bold px-4 py-2 rounded-lg hover:opacity-80 transition-all disabled:opacity-60">
+                        {checkoutLoading ? 'Loading...' : 'Upgrade to Pro →'}
                       </button>
                     </div>
                     <div className="border border-purple-200 rounded-xl p-4">
                       <p className="text-sm font-extrabold mb-1">Agency — $20/month</p>
                       <p className="text-xs text-gray-400 mb-3">Up to 50 seats, client workspaces, 50 GB storage, all-time analytics</p>
-                      <button className="bg-purple-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:opacity-80 transition-all">
-                        Upgrade to Agency →
+                      <button
+                        onClick={() => handleCheckout(process.env.NEXT_PUBLIC_STRIPE_AGENCY_PRICE_ID!)}
+                        disabled={checkoutLoading}
+                        className="bg-purple-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:opacity-80 transition-all disabled:opacity-60">
+                        {checkoutLoading ? 'Loading...' : 'Upgrade to Agency →'}
                       </button>
                     </div>
                   </div>
                 )}
                 {plan !== 'free' && (
                   <div>
-                    <p className="text-xs text-gray-500 mb-3">Next billing date: April 1, 2025</p>
-                    <button className="text-xs font-bold text-red-500 hover:text-red-700 transition-all">
-                      Cancel subscription
+                    <p className="text-xs text-gray-500 mb-3">Manage billing, invoices, and cancellation below.</p>
+                    <button
+                      onClick={handlePortal}
+                      disabled={checkoutLoading}
+                      className="text-xs font-bold text-black border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 transition-all disabled:opacity-60">
+                      {checkoutLoading ? 'Loading...' : 'Manage Subscription →'}
                     </button>
                   </div>
                 )}
@@ -416,12 +453,12 @@ function SettingsInner() {
               <h2 className="text-base font-extrabold mb-5">Notification Preferences</h2>
               <div className="space-y-4">
                 {[
-                  { key: 'postPublished',  label: 'Post published',  desc: 'When a scheduled post goes live'             },
-                  { key: 'postFailed',     label: 'Post failed',      desc: 'When a scheduled post fails to publish'      },
-                  { key: 'weeklyDigest',   label: 'Weekly digest',    desc: 'Summary of your posting activity every Monday'},
-                  { key: 'creditLow',      label: 'Low AI credits',   desc: 'When your credits drop below 20'             },
-                  { key: 'teamActivity',   label: 'Team activity',    desc: 'When team members schedule or edit posts'     },
-                  { key: 'productUpdates', label: 'Product updates',  desc: 'New features and platform announcements'     },
+                  { key: 'postPublished',  label: 'Post published',  desc: 'When a scheduled post goes live'              },
+                  { key: 'postFailed',     label: 'Post failed',      desc: 'When a scheduled post fails to publish'       },
+                  { key: 'weeklyDigest',   label: 'Weekly digest',    desc: 'Summary of your posting activity every Monday' },
+                  { key: 'creditLow',      label: 'Low AI credits',   desc: 'When your credits drop below 20'              },
+                  { key: 'teamActivity',   label: 'Team activity',    desc: 'When team members schedule or edit posts'      },
+                  { key: 'productUpdates', label: 'Product updates',  desc: 'New features and platform announcements'      },
                 ].map(item => (
                   <div key={item.key} className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
                     <div>
@@ -540,8 +577,11 @@ function SettingsInner() {
                   <p className="text-xs text-gray-400 mb-5 max-w-sm mx-auto leading-relaxed">
                     Remove SocialMate branding and replace it with your own. Available as a $20/month add-on on Pro and Agency plans.
                   </p>
-                  <button className="bg-black text-white text-xs font-bold px-5 py-2.5 rounded-xl hover:opacity-80 transition-all">
-                    Upgrade to unlock →
+                  <button
+                    onClick={() => handleCheckout(process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID!)}
+                    disabled={checkoutLoading}
+                    className="bg-black text-white text-xs font-bold px-5 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
+                    {checkoutLoading ? 'Loading...' : 'Upgrade to unlock →'}
                   </button>
                 </div>
               ) : (
