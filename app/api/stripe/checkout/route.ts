@@ -16,14 +16,16 @@ export async function POST(req: NextRequest) {
 
   const { priceId } = await req.json()
 
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate-six.vercel.app'
+
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
     payment_method_types: ['card'],
     customer_email: user.email,
     line_items: [{ price: priceId, quantity: 1 }],
     metadata: { user_id: user.id },
-    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?upgraded=true`,
-    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
+    success_url: `${appUrl}/dashboard?upgraded=true`,
+    cancel_url: `${appUrl}/pricing`,
   })
 
   return NextResponse.json({ url: session.url })
