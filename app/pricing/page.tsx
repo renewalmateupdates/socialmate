@@ -68,7 +68,7 @@ const PLANS = [
     cta: 'Start Pro',
     ctaHref: null,
     priceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID,
-    ctaStyle: 'bg-white text-black hover:opacity-80',
+    ctaStyle: 'bg-white text-black hover:opacity-80 border-2 border-white',
   },
   {
     name: 'Agency',
@@ -98,7 +98,7 @@ const PLANS = [
     cta: 'Start Agency',
     ctaHref: null,
     priceId: process.env.NEXT_PUBLIC_STRIPE_AGENCY_PRICE_ID,
-    ctaStyle: 'bg-purple-600 text-white hover:opacity-80',
+    ctaStyle: 'bg-purple-600 text-white hover:opacity-80 border-2 border-purple-600',
   },
 ]
 
@@ -139,13 +139,14 @@ export default function Pricing() {
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ priceId }),
       })
       const data = await res.json()
       if (data.url) {
         window.location.href = data.url
       } else if (data.error === 'Unauthorized') {
-        router.push('/login?redirect=/pricing')
+        router.push(`/login?redirect=/pricing`)
       }
     } catch {
       console.error('Checkout failed')
@@ -166,8 +167,6 @@ export default function Pricing() {
           <p className="text-gray-500 text-sm max-w-xl mx-auto leading-relaxed">
             Tools that charge $99/month for basic scheduling exist. SocialMate doesn't believe creators should have to pay that. Everything you need — at a fraction of the cost.
           </p>
-
-          {/* BILLING TOGGLE */}
           <div className="flex items-center justify-center gap-3 mt-8">
             <span className={`text-sm font-semibold ${!annual ? 'text-black' : 'text-gray-400'}`}>Monthly</span>
             <button

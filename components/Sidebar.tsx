@@ -31,12 +31,12 @@ const NAV_BASE = [
   {
     section: 'Grow',
     items: [
-      { icon: '🤖', label: 'AI Features',   href: '/ai-features'             },
-      { icon: '🔥', label: 'SM-Pulse',      href: '/sm-pulse'                },
-      { icon: '📊', label: 'SM-Radar',      href: '/sm-radar'                },
-      { icon: '🕵️', label: 'Content Gaps', href: '/content-gap'             },
-      { icon: '🎁', label: 'Referrals',     href: '/settings?tab=Referrals'  },
-      { icon: '🤝', label: 'Affiliate',     href: '/affiliate'               },
+      { icon: '🤖', label: 'AI Features',   href: '/ai-features'            },
+      { icon: '🔥', label: 'SM-Pulse',      href: '/sm-pulse'               },
+      { icon: '📊', label: 'SM-Radar',      href: '/sm-radar'               },
+      { icon: '🕵️', label: 'Content Gaps', href: '/content-gap'            },
+      { icon: '🎁', label: 'Referrals',     href: '/settings?tab=Referrals' },
+      { icon: '🤝', label: 'Affiliate',     href: '/affiliate'              },
     ],
   },
   {
@@ -53,8 +53,8 @@ const NAV_BASE = [
 ]
 
 const PLAN_BADGE: Record<string, { label: string; color: string }> = {
-  free:   { label: 'Free',   color: 'bg-gray-100 text-gray-500'      },
-  pro:    { label: 'Pro',    color: 'bg-blue-100 text-blue-600'      },
+  free:   { label: 'Free',   color: 'bg-gray-100 text-gray-500'     },
+  pro:    { label: 'Pro',    color: 'bg-blue-100 text-blue-600'     },
   agency: { label: 'Agency', color: 'bg-purple-100 text-purple-600' },
 }
 
@@ -62,6 +62,7 @@ export default function Sidebar() {
   const [user, setUser] = useState<any>(null)
   const [wsOpen, setWsOpen] = useState(false)
   const [showUpgradeNudge, setShowUpgradeNudge] = useState(false)
+  const [checkoutLoading, setCheckoutLoading] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
 
@@ -86,6 +87,25 @@ export default function Sidebar() {
   const handleSignOut = async () => {
     await supabase.auth.signOut()
     router.push('/')
+  }
+
+  const handleCheckout = async (priceId: string) => {
+    setCheckoutLoading(true)
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ priceId }),
+      })
+      const data = await res.json()
+      if (data.url) window.location.href = data.url
+      if (data.error === 'Unauthorized') router.push('/login')
+    } catch {
+      console.error('Checkout failed')
+    } finally {
+      setCheckoutLoading(false)
+    }
   }
 
   const NAV = NAV_BASE.map(group => {
@@ -202,10 +222,12 @@ export default function Sidebar() {
                   <p className="text-xs text-purple-500 mb-2 leading-relaxed">
                     Create separate workspaces for each client with their own accounts, posts, and analytics.
                   </p>
-                  <Link href="/pricing" onClick={() => setWsOpen(false)}
-                    className="block text-center bg-purple-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-purple-700 transition-all">
-                    Upgrade to Agency →
-                  </Link>
+                  <button
+                    onClick={() => { setWsOpen(false); handleCheckout(process.env.NEXT_PUBLIC_STRIPE_AGENCY_PRICE_ID!) }}
+                    disabled={checkoutLoading}
+                    className="w-full text-center bg-purple-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-purple-700 transition-all disabled:opacity-60">
+                    {checkoutLoading ? 'Loading...' : 'Upgrade to Agency →'}
+                  </button>
                 </div>
               )}
             </div>
@@ -294,16 +316,20 @@ export default function Sidebar() {
         </div>
 
         {plan === 'free' && (
-          <Link href="/pricing"
-            className="w-full block text-center bg-black text-white text-xs font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
-            ⚡ Upgrade to Pro
-          </Link>
+          <button
+            onClick={() => handleCheckout(process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID!)}
+            disabled={checkoutLoading}
+            className="w-full block text-center bg-black text-white text-xs font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
+            {checkoutLoading ? 'Loading...' : '⚡ Upgrade to Pro'}
+          </button>
         )}
         {plan === 'pro' && (
-          <Link href="/pricing"
-            className="w-full block text-center bg-purple-600 text-white text-xs font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
-            🏢 Upgrade to Agency
-          </Link>
+          <button
+            onClick={() => handleCheckout(process.env.NEXT_PUBLIC_STRIPE_AGENCY_PRICE_ID!)}
+            disabled={checkoutLoading}
+            className="w-full block text-center bg-purple-600 text-white text-xs font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
+            {checkoutLoading ? 'Loading...' : '🏢 Upgrade to Agency'}
+          </button>
         )}
 
         <div className="px-1">
