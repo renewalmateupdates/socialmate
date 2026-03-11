@@ -13,6 +13,12 @@ const PRICE_TO_PLAN: Record<string, string> = {
   [process.env.STRIPE_AGENCY_PRICE_ID!]: 'agency',
 }
 
+const PLAN_CREDITS: Record<string, number> = {
+  free: 100,
+  pro: 500,
+  agency: 2000,
+}
+
 function resolveSubscription(subscription: Stripe.Subscription) {
   let plan = 'free'
   let whiteLabelEnabled = false
@@ -53,6 +59,7 @@ export async function POST(req: NextRequest) {
 
     const subscription = await stripe.subscriptions.retrieve(session.subscription as string)
     const { plan, whiteLabelEnabled } = resolveSubscription(subscription)
+    const credits = PLAN_CREDITS[plan] ?? 100
 
     await supabase.from('user_settings').upsert({
       user_id: userId,
@@ -61,18 +68,25 @@ export async function POST(req: NextRequest) {
       stripe_customer_id: customerId,
       stripe_subscription_id: subscription.id,
       plan_expires_at: new Date((subscription as any).current_period_end * 1000).toISOString(),
+      ai_credits_remaining: credits,
+      ai_credits_total: credits,
+      ai_credits_reset_at: new Date().toISOString(),
     }, { onConflict: 'user_id' })
   }
 
   if (event.type === 'customer.subscription.updated') {
     const subscription = event.data.object as Stripe.Subscription
     const { plan, whiteLabelEnabled } = resolveSubscription(subscription)
+    const credits = PLAN_CREDITS[plan] ?? 100
 
     await supabase.from('user_settings')
       .update({
         plan,
         white_label_enabled: whiteLabelEnabled,
         plan_expires_at: new Date((subscription as any).current_period_end * 1000).toISOString(),
+        ai_credits_remaining: credits,
+        ai_credits_total: credits,
+        ai_credits_reset_at: new Date().toISOString(),
       })
       .eq('stripe_subscription_id', subscription.id)
   }
@@ -85,6 +99,9 @@ export async function POST(req: NextRequest) {
         white_label_enabled: false,
         stripe_subscription_id: null,
         plan_expires_at: null,
+        ai_credits_remaining: 100,
+        ai_credits_total: 100,
+        ai_credits_reset_at: new Date().toISOString(),
       })
       .eq('stripe_subscription_id', subscription.id)
   }
