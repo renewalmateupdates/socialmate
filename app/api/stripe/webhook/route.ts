@@ -3,10 +3,31 @@ import { stripe } from '@/lib/stripe'
 import { createClient } from '@supabase/supabase-js'
 import Stripe from 'stripe'
 
+const PLAN_PRICES = new Set([
+  process.env.STRIPE_PRO_PRICE_ID!,
+  process.env.STRIPE_AGENCY_PRICE_ID!,
+])
+
 const PRICE_TO_PLAN: Record<string, string> = {
   [process.env.STRIPE_PRO_PRICE_ID!]: 'pro',
   [process.env.STRIPE_AGENCY_PRICE_ID!]: 'agency',
-  [process.env.STRIPE_WHITE_LABEL_PRICE_ID!]: 'agency',
+}
+
+function resolveSubscription(subscription: Stripe.Subscription) {
+  let plan = 'free'
+  let whiteLabelEnabled = false
+
+  for (const item of subscription.items.data) {
+    const priceId = item.price.id
+    if (PLAN_PRICES.has(priceId)) {
+      plan = PRICE_TO_PLAN[priceId]
+    }
+    if (priceId === process.env.STRIPE_WHITE_LABEL_PRICE_ID!) {
+      whiteLabelEnabled = true
+    }
+  }
+
+  return { plan, whiteLabelEnabled }
 }
 
 export async function POST(req: NextRequest) {
@@ -31,22 +52,40 @@ export async function POST(req: NextRequest) {
     const customerId = session.customer as string
 
     const subscription = await stripe.subscriptions.retrieve(session.subscription as string)
-    const priceId = subscription.items.data[0].price.id
-    const plan = PRICE_TO_PLAN[priceId] || 'pro'
+    const { plan, whiteLabelEnabled } = resolveSubscription(subscription)
 
     await supabase.from('user_settings').upsert({
       user_id: userId,
       plan,
+      white_label_enabled: whiteLabelEnabled,
       stripe_customer_id: customerId,
       stripe_subscription_id: subscription.id,
       plan_expires_at: new Date((subscription as any).current_period_end * 1000).toISOString(),
     }, { onConflict: 'user_id' })
   }
 
+  if (event.type === 'customer.subscription.updated') {
+    const subscription = event.data.object as Stripe.Subscription
+    const { plan, whiteLabelEnabled } = resolveSubscription(subscription)
+
+    await supabase.from('user_settings')
+      .update({
+        plan,
+        white_label_enabled: whiteLabelEnabled,
+        plan_expires_at: new Date((subscription as any).current_period_end * 1000).toISOString(),
+      })
+      .eq('stripe_subscription_id', subscription.id)
+  }
+
   if (event.type === 'customer.subscription.deleted') {
     const subscription = event.data.object as Stripe.Subscription
     await supabase.from('user_settings')
-      .update({ plan: 'free', stripe_subscription_id: null, plan_expires_at: null })
+      .update({
+        plan: 'free',
+        white_label_enabled: false,
+        stripe_subscription_id: null,
+        plan_expires_at: null,
+      })
       .eq('stripe_subscription_id', subscription.id)
   }
 
