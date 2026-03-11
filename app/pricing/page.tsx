@@ -20,7 +20,7 @@ const PLANS = [
       { label: '2 team seats' },
       { label: 'Schedule up to 2 weeks ahead' },
       { label: '100 scheduled posts / month' },
-      { label: '50 AI credits / month', note: 'Max bank: 150' },
+      { label: '100 AI credits / month' },
       { label: 'AI image gen & content calendar', note: 'Pro+ only' },
       { label: '1 GB media storage' },
       { label: 'Video up to 30 seconds' },
@@ -50,15 +50,15 @@ const PLANS = [
     features: [
       { label: 'Everything in Free' },
       { label: '5 accounts per platform' },
-      { label: '4 team seats' },
+      { label: '5 team seats' },
       { label: 'Schedule up to 1 month ahead' },
       { label: '1,000 scheduled posts / month' },
-      { label: '250 AI credits / month', note: 'Max bank: 750' },
+      { label: '500 AI credits / month' },
       { label: 'AI image generation', note: '25 credits' },
       { label: 'AI bulk content calendar (30 days)', note: '20 credits' },
       { label: '10 GB media storage' },
       { label: 'Video up to 2 minutes' },
-      { label: '7, 30 & 90-day analytics' },
+      { label: '14-day, 30-day & 90-day analytics' },
       { label: 'Advanced analytics' },
       { label: 'PDF export reports' },
       { label: 'Custom domain for link-in-bio' },
@@ -67,7 +67,7 @@ const PLANS = [
     ],
     cta: 'Start Pro',
     ctaHref: null,
-    priceId: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID,
+    priceId: 'price_1T9pay7OMwDowUuU7S3G3lNX',
     ctaStyle: 'bg-white text-black hover:opacity-80 border-2 border-white',
   },
   {
@@ -83,21 +83,21 @@ const PLANS = [
     features: [
       { label: 'Everything in Pro' },
       { label: '10 accounts per platform' },
-      { label: '50 team seats' },
+      { label: '15 team seats' },
       { label: 'Schedule up to 3 months ahead' },
       { label: '5,000 scheduled posts / month' },
-      { label: '750 AI credits / month', note: 'Max bank: 3,000' },
+      { label: '2,000 AI credits / month' },
       { label: '50 GB media storage' },
       { label: 'Video up to 10 minutes' },
       { label: 'Client workspaces' },
-      { label: 'All-time analytics' },
+      { label: '14-day, 30-day, 90-day & 6-month analytics' },
       { label: 'PDF export (any date range)' },
       { label: 'White Label add-on available', note: '+$20/mo' },
       { label: 'Dedicated support' },
     ],
     cta: 'Start Agency',
     ctaHref: null,
-    priceId: process.env.NEXT_PUBLIC_STRIPE_AGENCY_PRICE_ID,
+    priceId: 'price_1T9qAd7OMwDowUuUpzjxLlG2',
     ctaStyle: 'bg-purple-600 text-white hover:opacity-80 border-2 border-purple-600',
   },
 ]
@@ -232,7 +232,8 @@ export default function Pricing() {
                     {loading === plan.name ? 'Loading...' : plan.cta}
                   </button>
                 ) : (
-                  <Link href={plan.ctaHref!}
+                  <Link
+                    href={plan.ctaHref!}
                     className={`w-full text-center text-sm font-bold py-3 rounded-xl transition-all ${plan.ctaStyle}`}>
                     {plan.cta}
                   </Link>
@@ -265,7 +266,7 @@ export default function Pricing() {
               <div className="text-2xl font-extrabold">$20</div>
               <div className="text-xs text-gray-400">/month add-on</div>
               <button
-                onClick={() => handleCheckout(process.env.NEXT_PUBLIC_STRIPE_WHITE_LABEL_PRICE_ID!, 'WhiteLabel')}
+                onClick={() => handleCheckout('price_1T9qAu7OMwDowUuUsqM2jwoC', 'WhiteLabel')}
                 disabled={loading === 'WhiteLabel'}
                 className="mt-3 inline-block text-xs font-bold px-4 py-2 bg-black text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
                 {loading === 'WhiteLabel' ? 'Loading...' : 'Add to plan →'}

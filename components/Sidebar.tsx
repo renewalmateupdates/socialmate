@@ -5,6 +5,9 @@ import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useWorkspace, PLAN_CONFIG, PLATFORMS_TOTAL } from '@/contexts/WorkspaceContext'
 
+const STRIPE_PRO_PRICE_ID = 'price_1T9pay7OMwDowUuU7S3G3lNX'
+const STRIPE_AGENCY_PRICE_ID = 'price_1T9qAd7OMwDowUuUpzjxLlG2'
+
 const NAV_BASE = [
   {
     section: 'Content',
@@ -125,13 +128,9 @@ export default function Sidebar() {
   })
 
   const badge = PLAN_BADGE[plan] || PLAN_BADGE.free
-  const creditsRemaining = credits - creditsUsed
-  const creditsBar = plan === 'agency'
-    ? Math.min(100, (credits / PLAN_CONFIG.agency.credits) * 100)
-    : Math.max(0, (creditsRemaining / creditsTotal) * 100)
-  const seatsBar = plan === 'agency'
-    ? Math.min(100, (seatsUsed / PLAN_CONFIG.agency.seats) * 100)
-    : Math.min(100, (seatsUsed / seatsTotal) * 100)
+  const creditsRemaining = creditsTotal - creditsUsed
+  const creditsBar = Math.max(0, (creditsRemaining / creditsTotal) * 100)
+  const seatsBar = Math.min(100, (seatsUsed / seatsTotal) * 100)
   const platformsBar = Math.min(100, (platformsConnected / PLATFORMS_TOTAL) * 100)
 
   const clientWorkspaces = workspaces.filter(w => !w.is_personal)
@@ -223,7 +222,7 @@ export default function Sidebar() {
                     Create separate workspaces for each client with their own accounts, posts, and analytics.
                   </p>
                   <button
-                    onClick={() => { setWsOpen(false); handleCheckout(process.env.NEXT_PUBLIC_STRIPE_AGENCY_PRICE_ID!) }}
+                    onClick={() => { setWsOpen(false); handleCheckout(STRIPE_AGENCY_PRICE_ID) }}
                     disabled={checkoutLoading}
                     className="w-full text-center bg-purple-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-purple-700 transition-all disabled:opacity-60">
                     {checkoutLoading ? 'Loading...' : 'Upgrade to Agency →'}
@@ -264,13 +263,12 @@ export default function Sidebar() {
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs font-semibold text-gray-500">AI Credits</span>
             <span className="text-xs font-bold text-gray-700">
-              {loading ? '...' : `${credits}/${creditsTotal}`}
+              {loading ? '...' : `${creditsRemaining}/${creditsTotal}`}
             </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-1.5">
             <div
               className={`h-1.5 rounded-full transition-all ${
-                plan === 'agency' ? 'bg-purple-400' :
                 creditsBar < 20 ? 'bg-red-400' :
                 creditsBar < 50 ? 'bg-yellow-400' : 'bg-black'
               }`}
@@ -278,7 +276,7 @@ export default function Sidebar() {
             />
           </div>
           <p className="text-xs text-gray-400 mt-1.5">
-            {loading ? 'Loading...' : `${credits} remaining`}
+            {loading ? 'Loading...' : `${creditsRemaining} remaining`}
           </p>
         </div>
 
@@ -317,7 +315,7 @@ export default function Sidebar() {
 
         {plan === 'free' && (
           <button
-            onClick={() => handleCheckout(process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID!)}
+            onClick={() => handleCheckout(STRIPE_PRO_PRICE_ID)}
             disabled={checkoutLoading}
             className="w-full block text-center bg-black text-white text-xs font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
             {checkoutLoading ? 'Loading...' : '⚡ Upgrade to Pro'}
@@ -325,7 +323,7 @@ export default function Sidebar() {
         )}
         {plan === 'pro' && (
           <button
-            onClick={() => handleCheckout(process.env.NEXT_PUBLIC_STRIPE_AGENCY_PRICE_ID!)}
+            onClick={() => handleCheckout(STRIPE_AGENCY_PRICE_ID)}
             disabled={checkoutLoading}
             className="w-full block text-center bg-purple-600 text-white text-xs font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
             {checkoutLoading ? 'Loading...' : '🏢 Upgrade to Agency'}
