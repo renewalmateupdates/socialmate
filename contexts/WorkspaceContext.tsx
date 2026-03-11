@@ -17,7 +17,7 @@ export const PLAN_CONFIG: Record<Plan, {
 }> = {
   free: {
     label: 'Free',
-    credits: 50,
+    credits: 100,
     creditBank: 150,
     seats: 2,
     accountsPerPlatform: 1,
@@ -26,18 +26,18 @@ export const PLAN_CONFIG: Record<Plan, {
   },
   pro: {
     label: 'Pro',
-    credits: 250,
+    credits: 500,
     creditBank: 750,
-    seats: 4,
+    seats: 5,
     accountsPerPlatform: 5,
     maxPosts: 1000,
     scheduleWeeks: 4,
   },
   agency: {
     label: 'Agency',
-    credits: 750,
+    credits: 2000,
     creditBank: 3000,
-    seats: 50,
+    seats: 15,
     accountsPerPlatform: 10,
     maxPosts: 5000,
     scheduleWeeks: 12,
@@ -73,10 +73,10 @@ type WorkspaceContextType = {
 const WorkspaceContext = createContext<WorkspaceContextType>({
   plan: 'free',
   setPlan: () => {},
-  credits: 50,
+  credits: 100,
   setCredits: () => {},
   creditsUsed: 0,
-  creditsTotal: 50,
+  creditsTotal: 100,
   workspaceName: 'My Workspace',
   setWorkspaceName: () => {},
   workspaces: [],
@@ -90,7 +90,7 @@ const WorkspaceContext = createContext<WorkspaceContextType>({
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [plan, setPlan] = useState<Plan>('free')
-  const [credits, setCreditsState] = useState(50)
+  const [credits, setCreditsState] = useState(100)
   const [creditsUsed, setCreditsUsed] = useState(0)
   const [userId, setUserId] = useState<string | null>(null)
   const [workspaceName, setWorkspaceName] = useState('My Workspace')
@@ -107,6 +107,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
       setUserId(user.id)
 
+      // Load workspaces
       const { data: ws } = await supabase
         .from('workspaces')
         .select('*')
@@ -128,19 +129,22 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         setActiveWorkspace(fallback)
       }
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('plan, credits, credits_used')
-        .eq('id', user.id)
+      // Read plan from user_settings (source of truth — updated by Stripe webhook)
+      const { data: settings } = await supabase
+        .from('user_settings')
+        .select('plan, ai_credits_remaining, ai_credits_used, ai_credits_total')
+        .eq('user_id', user.id)
         .single()
 
-      if (profile) {
-        const p = (profile.plan as Plan) || 'free'
+      if (settings) {
+        const p = (settings.plan as Plan) || 'free'
         setPlan(p)
-        setCreditsState(profile.credits ?? PLAN_CONFIG[p].credits)
-        setCreditsUsed(profile.credits_used ?? 0)
+        // Use ai_credits_remaining if available, otherwise fall back to plan default
+        setCreditsState(settings.ai_credits_remaining ?? PLAN_CONFIG[p].credits)
+        setCreditsUsed(settings.ai_credits_used ?? 0)
       }
 
+      // Team seats
       const { data: teamData } = await supabase
         .from('team_members')
         .select('id')
@@ -148,6 +152,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
       setSeatsUsed((teamData?.length || 0) + 1)
 
+      // Connected platforms
       const { data: accountsData } = await supabase
         .from('connected_accounts')
         .select('platform')
@@ -166,9 +171,9 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     setCreditsState(newCredits)
     if (!userId) return
     await supabase
-      .from('profiles')
-      .update({ credits: newCredits })
-      .eq('id', userId)
+      .from('user_settings')
+      .update({ ai_credits_remaining: newCredits })
+      .eq('user_id', userId)
   }, [userId])
 
   const planConfig = PLAN_CONFIG[plan]
