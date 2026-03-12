@@ -36,6 +36,11 @@ const PLAN_CREDITS: Record<string, number> = {
   agency: 2000,
 }
 
+function safeDate(ts: number | null | undefined): string | null {
+  if (!ts) return null
+  try { return new Date(ts * 1000).toISOString() } catch { return null }
+}
+
 function resolveSubscription(subscription: Stripe.Subscription) {
   let plan = 'free'
   let whiteLabelEnabled = false
@@ -99,7 +104,7 @@ export async function POST(req: NextRequest) {
       white_label_enabled: whiteLabelEnabled,
       stripe_customer_id: customerId,
       stripe_subscription_id: subscription.id,
-      plan_expires_at: new Date((subscription as any).current_period_end * 1000).toISOString(),
+      plan_expires_at: safeDate((subscription as any).current_period_end),
       ai_credits_remaining: credits,
       ai_credits_total: credits,
       ai_credits_reset_at: new Date().toISOString(),
@@ -114,7 +119,7 @@ export async function POST(req: NextRequest) {
       .update({
         plan,
         white_label_enabled: whiteLabelEnabled,
-        plan_expires_at: new Date((subscription as any).current_period_end * 1000).toISOString(),
+        plan_expires_at: safeDate((subscription as any).current_period_end),
         ai_credits_remaining: credits,
         ai_credits_total: credits,
         ai_credits_reset_at: new Date().toISOString(),
