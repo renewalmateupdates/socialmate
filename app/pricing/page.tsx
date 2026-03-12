@@ -4,10 +4,24 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import PublicLayout from '@/components/PublicLayout'
 
+// Monthly price IDs (live)
+const STRIPE_PRO_PRICE_ID        = 'price_1T9pay7OMwDowUuU7S3G3lNX'
+const STRIPE_AGENCY_PRICE_ID     = 'price_1T9qAd7OMwDowUuUpzjxLlG2'
+const STRIPE_WHITE_LABEL_PRICE_ID = 'price_1T9qAu7OMwDowUuUsqM2jwoC'
+
+// Annual price IDs — create these in Stripe then paste here
+const STRIPE_PRO_ANNUAL_PRICE_ID    = '' // TODO: create in Stripe (~$55/yr)
+const STRIPE_AGENCY_ANNUAL_PRICE_ID = '' // TODO: create in Stripe (~$210/yr)
+
+type Interval = 'monthly' | 'annual'
+
 const PLANS = [
   {
     name: 'Free',
-    price: { monthly: 0, annual: 0 },
+    monthlyPrice: 0,
+    annualPrice: 0,
+    annualMonthly: 0,
+    annualSaving: 0,
     description: 'Everything you need to get started — no credit card required.',
     badge: null,
     color: 'border-gray-200',
@@ -34,13 +48,16 @@ const PLANS = [
     ],
     cta: 'Get Started Free',
     ctaHref: '/signup',
-    priceId: null,
+    monthlyPriceId: null,
+    annualPriceId: null,
     ctaStyle: 'border border-gray-300 text-gray-700 hover:bg-gray-50',
   },
   {
     name: 'Pro',
-    price: { monthly: 5, annual: 50 },
-    annualSavings: 10,
+    monthlyPrice: 5,
+    annualPrice: 55,      // 8% off $60
+    annualMonthly: 4.58,  // $55/12
+    annualSaving: 5,
     description: 'For creators and small businesses who want to move faster.',
     badge: 'Most Popular',
     color: 'border-black',
@@ -67,13 +84,16 @@ const PLANS = [
     ],
     cta: 'Start Pro',
     ctaHref: null,
-    priceId: 'price_1T9pay7OMwDowUuU7S3G3lNX',
+    monthlyPriceId: STRIPE_PRO_PRICE_ID,
+    annualPriceId: STRIPE_PRO_ANNUAL_PRICE_ID,
     ctaStyle: 'bg-white text-black hover:opacity-80 border-2 border-white',
   },
   {
     name: 'Agency',
-    price: { monthly: 20, annual: 200 },
-    annualSavings: 40,
+    monthlyPrice: 20,
+    annualPrice: 209,      // 13% off $240
+    annualMonthly: 17.42,  // $209/12
+    annualSaving: 31,
     description: 'For agencies and power users managing multiple brands.',
     badge: null,
     color: 'border-purple-200',
@@ -97,7 +117,8 @@ const PLANS = [
     ],
     cta: 'Start Agency',
     ctaHref: null,
-    priceId: 'price_1T9qAd7OMwDowUuUpzjxLlG2',
+    monthlyPriceId: STRIPE_AGENCY_PRICE_ID,
+    annualPriceId: STRIPE_AGENCY_ANNUAL_PRICE_ID,
     ctaStyle: 'bg-purple-600 text-white hover:opacity-80 border-2 border-purple-600',
   },
 ]
@@ -111,29 +132,36 @@ const WHITE_LABEL_FEATURES = [
 ]
 
 const AI_CREDITS = [
-  { feature: 'Caption generator',            cost: '1 credit',   proOnly: false },
-  { feature: 'Hashtag generator',            cost: '1 credit',   proOnly: false },
-  { feature: 'Post rewrite / improver',      cost: '1 credit',   proOnly: false },
-  { feature: 'Viral Hook Generator',         cost: '2 credits',  proOnly: false },
-  { feature: 'Post idea generator',          cost: '2 credits',  proOnly: false },
-  { feature: 'Smart Auto-Formatting',        cost: '2 credits',  proOnly: false },
-  { feature: 'Platform rewrite (1 → all)',   cost: '2 credits',  proOnly: false },
-  { feature: 'SM-Radar growth report',       cost: '3 credits',  proOnly: false },
-  { feature: 'Thread generator',             cost: '3 credits',  proOnly: false },
-  { feature: 'Content repurposer',           cost: '3 credits',  proOnly: false },
-  { feature: 'AI Media Kit generator',       cost: '3 credits',  proOnly: false },
-  { feature: 'SM-Pulse trend scan',          cost: '5 credits',  proOnly: false },
-  { feature: '2-week AI content calendar',   cost: '10 credits', proOnly: false },
-  { feature: '30-day AI content calendar',   cost: '20 credits', proOnly: true  },
-  { feature: 'AI image generation',          cost: '25 credits', proOnly: true  },
+  { feature: 'Caption generator',           cost: '1 credit',   proOnly: false },
+  { feature: 'Hashtag generator',           cost: '1 credit',   proOnly: false },
+  { feature: 'Post rewrite / improver',     cost: '1 credit',   proOnly: false },
+  { feature: 'Viral Hook Generator',        cost: '2 credits',  proOnly: false },
+  { feature: 'Post idea generator',         cost: '2 credits',  proOnly: false },
+  { feature: 'Smart Auto-Formatting',       cost: '2 credits',  proOnly: false },
+  { feature: 'Platform rewrite (1 → all)',  cost: '2 credits',  proOnly: false },
+  { feature: 'SM-Radar growth report',      cost: '3 credits',  proOnly: false },
+  { feature: 'Thread generator',            cost: '3 credits',  proOnly: false },
+  { feature: 'Content repurposer',          cost: '3 credits',  proOnly: false },
+  { feature: 'AI Media Kit generator',      cost: '3 credits',  proOnly: false },
+  { feature: 'SM-Pulse trend scan',         cost: '5 credits',  proOnly: false },
+  { feature: '2-week AI content calendar',  cost: '10 credits', proOnly: false },
+  { feature: '30-day AI content calendar',  cost: '20 credits', proOnly: true  },
+  { feature: 'AI image generation',         cost: '25 credits', proOnly: true  },
 ]
 
 export default function Pricing() {
-  const [annual, setAnnual] = useState(false)
+  const [interval, setInterval] = useState<Interval>('monthly')
   const [loading, setLoading] = useState<string | null>(null)
   const router = useRouter()
 
+  const annual = interval === 'annual'
+
   const handleCheckout = async (priceId: string, planName: string) => {
+    if (!priceId) {
+      // Annual price IDs not yet created — fall back to monthly
+      alert('Annual billing coming soon — signing you up monthly for now.')
+      return
+    }
     setLoading(planName)
     try {
       const res = await fetch('/api/stripe/checkout', {
@@ -146,7 +174,7 @@ export default function Pricing() {
       if (data.url) {
         window.location.href = data.url
       } else if (data.error === 'Unauthorized') {
-        router.push(`/login?redirect=/pricing`)
+        router.push('/login?redirect=/pricing')
       }
     } catch {
       console.error('Checkout failed')
@@ -167,80 +195,99 @@ export default function Pricing() {
           <p className="text-gray-500 text-sm max-w-xl mx-auto leading-relaxed">
             Tools that charge $99/month for basic scheduling exist. SocialMate doesn't believe creators should have to pay that. Everything you need — at a fraction of the cost.
           </p>
-          <div className="flex items-center justify-center gap-3 mt-8">
-            <span className={`text-sm font-semibold ${!annual ? 'text-black' : 'text-gray-400'}`}>Monthly</span>
-            <button
-              onClick={() => setAnnual(!annual)}
-              className={`relative w-12 h-6 rounded-full transition-colors ${annual ? 'bg-black' : 'bg-gray-200'}`}>
-              <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${annual ? 'translate-x-7' : 'translate-x-1'}`} />
-            </button>
-            <span className={`text-sm font-semibold ${annual ? 'text-black' : 'text-gray-400'}`}>
-              Annual <span className="text-green-600 font-bold">2 months free</span>
-            </span>
+
+          {/* INTERVAL TOGGLE */}
+          <div className="flex items-center justify-center gap-1 mt-8 bg-gray-100 rounded-2xl p-1 w-fit mx-auto">
+            {(['monthly', 'annual'] as Interval[]).map(i => (
+              <button
+                key={i}
+                onClick={() => setInterval(i)}
+                className={`px-5 py-2 rounded-xl text-sm font-bold transition-all ${
+                  interval === i ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'
+                }`}>
+                {i === 'monthly' ? 'Monthly' : (
+                  <span className="flex items-center gap-2">
+                    Annual
+                    <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                      Save up to 13%
+                    </span>
+                  </span>
+                )}
+              </button>
+            ))}
           </div>
         </div>
 
         {/* PLAN CARDS */}
         <div className="grid grid-cols-3 gap-6 mb-12">
-          {PLANS.map(plan => (
-            <div key={plan.name} className={`bg-white border-2 rounded-2xl overflow-hidden flex flex-col ${plan.color}`}>
-              <div className={`px-6 py-5 ${plan.headerBg}`}>
-                <div className="flex items-center justify-between mb-2">
-                  <h2 className={`text-lg font-extrabold ${plan.headerText}`}>{plan.name}</h2>
-                  {plan.badge && (
-                    <span className="text-xs font-bold px-3 py-1 bg-white text-black rounded-full">{plan.badge}</span>
-                  )}
-                </div>
-                {plan.price.monthly === 0 ? (
-                  <div className={`flex items-end gap-1 mb-2 ${plan.headerText}`}>
-                    <span className="text-3xl font-extrabold">$0</span>
-                    <span className={`text-sm mb-1 ${plan.subText}`}>/month, forever</span>
+          {PLANS.map(plan => {
+            const priceId = annual ? plan.annualPriceId : plan.monthlyPriceId
+            return (
+              <div key={plan.name} className={`bg-white border-2 rounded-2xl overflow-hidden flex flex-col ${plan.color}`}>
+                <div className={`px-6 py-5 ${plan.headerBg}`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <h2 className={`text-lg font-extrabold ${plan.headerText}`}>{plan.name}</h2>
+                    {plan.badge && (
+                      <span className="text-xs font-bold px-3 py-1 bg-white text-black rounded-full">{plan.badge}</span>
+                    )}
                   </div>
-                ) : annual ? (
-                  <div className="mb-2">
-                    <div className={`flex items-end gap-1 ${plan.headerText}`}>
-                      <span className="text-3xl font-extrabold">${plan.price.annual}</span>
-                      <span className={`text-sm mb-1 ${plan.subText}`}>/year</span>
+
+                  {plan.monthlyPrice === 0 ? (
+                    <div className={`flex items-end gap-1 mb-2 ${plan.headerText}`}>
+                      <span className="text-3xl font-extrabold">$0</span>
+                      <span className={`text-sm mb-1 ${plan.subText}`}>/month, forever</span>
                     </div>
-                    <p className="text-xs font-bold text-green-400 mt-0.5">Save ${plan.annualSavings} — 2 months free</p>
-                  </div>
-                ) : (
-                  <div className={`flex items-end gap-1 mb-2 ${plan.headerText}`}>
-                    <span className="text-3xl font-extrabold">${plan.price.monthly}</span>
-                    <span className={`text-sm mb-1 ${plan.subText}`}>/month</span>
-                  </div>
-                )}
-                <p className={`text-xs ${plan.subText}`}>{plan.description}</p>
+                  ) : annual ? (
+                    <div className="mb-2">
+                      <div className={`flex items-end gap-1 ${plan.headerText}`}>
+                        <span className="text-3xl font-extrabold">${plan.annualPrice}</span>
+                        <span className={`text-sm mb-1 ${plan.subText}`}>/year</span>
+                      </div>
+                      <p className={`text-xs mt-0.5 ${plan.subText}`}>
+                        ~${plan.annualMonthly}/mo ·{' '}
+                        <span className="text-green-400 font-bold">save ${plan.annualSaving}</span>
+                      </p>
+                    </div>
+                  ) : (
+                    <div className={`flex items-end gap-1 mb-2 ${plan.headerText}`}>
+                      <span className="text-3xl font-extrabold">${plan.monthlyPrice}</span>
+                      <span className={`text-sm mb-1 ${plan.subText}`}>/month</span>
+                    </div>
+                  )}
+                  <p className={`text-xs ${plan.subText}`}>{plan.description}</p>
+                </div>
+
+                <div className="px-6 py-5 flex-1 flex flex-col">
+                  <ul className="space-y-2.5 flex-1 mb-6">
+                    {plan.features.map((f, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <span className="text-green-500 mt-0.5 flex-shrink-0">✓</span>
+                        <span className="text-xs text-gray-600">
+                          {f.label}
+                          {f.note && <span className="text-gray-400"> — {f.note}</span>}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  {priceId !== null ? (
+                    <button
+                      onClick={() => handleCheckout(priceId!, plan.name)}
+                      disabled={loading === plan.name}
+                      className={`w-full text-center text-sm font-bold py-3 rounded-xl transition-all disabled:opacity-60 ${plan.ctaStyle}`}>
+                      {loading === plan.name ? 'Loading...' : plan.cta}
+                    </button>
+                  ) : plan.ctaHref ? (
+                    <Link
+                      href={plan.ctaHref}
+                      className={`w-full text-center text-sm font-bold py-3 rounded-xl transition-all ${plan.ctaStyle}`}>
+                      {plan.cta}
+                    </Link>
+                  ) : null}
+                </div>
               </div>
-              <div className="px-6 py-5 flex-1 flex flex-col">
-                <ul className="space-y-2.5 flex-1 mb-6">
-                  {plan.features.map((f, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <span className="text-green-500 mt-0.5 flex-shrink-0">✓</span>
-                      <span className="text-xs text-gray-600">
-                        {f.label}
-                        {f.note && <span className="text-gray-400"> — {f.note}</span>}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-                {plan.priceId ? (
-                  <button
-                    onClick={() => handleCheckout(plan.priceId!, plan.name)}
-                    disabled={loading === plan.name}
-                    className={`w-full text-center text-sm font-bold py-3 rounded-xl transition-all disabled:opacity-60 ${plan.ctaStyle}`}>
-                    {loading === plan.name ? 'Loading...' : plan.cta}
-                  </button>
-                ) : (
-                  <Link
-                    href={plan.ctaHref!}
-                    className={`w-full text-center text-sm font-bold py-3 rounded-xl transition-all ${plan.ctaStyle}`}>
-                    {plan.cta}
-                  </Link>
-                )}
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
 
         {/* WHITE LABEL ADDON */}
@@ -266,7 +313,7 @@ export default function Pricing() {
               <div className="text-2xl font-extrabold">$20</div>
               <div className="text-xs text-gray-400">/month add-on</div>
               <button
-                onClick={() => handleCheckout('price_1T9qAu7OMwDowUuUsqM2jwoC', 'WhiteLabel')}
+                onClick={() => handleCheckout(STRIPE_WHITE_LABEL_PRICE_ID, 'WhiteLabel')}
                 disabled={loading === 'WhiteLabel'}
                 className="mt-3 inline-block text-xs font-bold px-4 py-2 bg-black text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
                 {loading === 'WhiteLabel' ? 'Loading...' : 'Add to plan →'}
@@ -310,7 +357,7 @@ export default function Pricing() {
               },
               {
                 q: 'Will prices go up?',
-                a: 'Current pricing is locked for all active subscribers. If pricing ever changes, you\'ll know well in advance and grandfathered rates will be honored.',
+                a: "Current pricing is locked for all active subscribers. If pricing ever changes, you'll know well in advance and grandfathered rates will be honored.",
               },
               {
                 q: 'What happens when I run out of AI credits?',
