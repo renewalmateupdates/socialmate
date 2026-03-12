@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 
-const STRIPE_PRO_PRICE_ID = 'price_1T9pay7OMwDowUuU7S3G3lNX'
+const STRIPE_PRO_PRICE_ID    = 'price_1T9pay7OMwDowUuU7S3G3lNX'
 const STRIPE_AGENCY_PRICE_ID = 'price_1T9qAd7OMwDowUuUpzjxLlG2'
 
 const TABS = ['Profile', 'Plan', 'Referrals', 'Notifications', 'Security', 'White Label']
@@ -17,6 +17,13 @@ const REFERRAL_TIERS = [
   { paying: 25,  reward: '6 months Pro free', icon: '🚀' },
   { paying: 50,  reward: '1 year Pro free',   icon: '💎' },
   { paying: 100, reward: 'Pro free for life', icon: '👑' },
+]
+
+const CREDIT_PACKS = [
+  { label: 'Starter',  credits: 100,  price: '$1.99',  priceId: 'price_1TA0jd7OMwDowUuULUw5W7EQ', popular: false },
+  { label: 'Popular',  credits: 300,  price: '$4.99',  priceId: 'price_1TA0l37OMwDowUuUU5JpIcDK', popular: true  },
+  { label: 'Pro Pack', credits: 750,  price: '$9.99',  priceId: 'price_1TA0nA7OMwDowUuU5wHTbucn', popular: false },
+  { label: 'Max Pack', credits: 2000, price: '$19.99', priceId: 'price_1TA0nS7OMwDowUuUKURJ7ZM4', popular: false },
 ]
 
 function SettingsInner() {
@@ -39,6 +46,7 @@ function SettingsInner() {
   const [savedTab, setSavedTab] = useState<string | null>(null)
   const [whiteLabel, setWhiteLabel] = useState(false)
   const [checkoutLoading, setCheckoutLoading] = useState(false)
+  const [creditPackLoading, setCreditPackLoading] = useState<string | null>(null)
   const [notifications, setNotifications] = useState({
     postPublished: true,
     postFailed: true,
@@ -153,6 +161,24 @@ function SettingsInner() {
       console.error('Checkout failed')
     } finally {
       setCheckoutLoading(false)
+    }
+  }
+
+  const handleCreditPack = async (priceId: string) => {
+    setCreditPackLoading(priceId)
+    try {
+      const res = await fetch('/api/stripe/credits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId }),
+      })
+      const data = await res.json()
+      if (data.url) window.location.href = data.url
+      if (data.error === 'Unauthorized') router.push('/login')
+    } catch {
+      console.error('Credit pack checkout failed')
+    } finally {
+      setCreditPackLoading(null)
     }
   }
 
@@ -338,6 +364,8 @@ function SettingsInner() {
                   </div>
                 )}
               </div>
+
+              {/* AI CREDITS */}
               <div className="bg-white border border-gray-100 rounded-2xl p-6">
                 <h2 className="text-base font-extrabold mb-4">AI Credits</h2>
                 <div className="flex items-center justify-between mb-2">
@@ -349,11 +377,39 @@ function SettingsInner() {
                 <div className="w-full bg-gray-100 rounded-full h-2 mb-4">
                   <div className="bg-black h-2 rounded-full" style={{ width: '100%' }} />
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between mb-6">
                   <span className="text-xs text-gray-500">Credit bank capacity</span>
                   <span className="text-xs font-bold">
                     {plan === 'free' ? '150' : plan === 'pro' ? '750' : '3,000'}
                   </span>
+                </div>
+
+                {/* CREDIT PACKS */}
+                <div className="border-t border-gray-100 pt-5">
+                  <p className="text-xs font-extrabold mb-1">Buy Credit Packs</p>
+                  <p className="text-xs text-gray-400 mb-4">One-time purchase — credits added instantly to your balance.</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {CREDIT_PACKS.map(pack => (
+                      <div key={pack.priceId} className={`relative border rounded-xl p-4 ${pack.popular ? 'border-black' : 'border-gray-200'}`}>
+                        {pack.popular && (
+                          <span className="absolute -top-2 left-3 text-xs font-bold bg-black text-white px-2 py-0.5 rounded-full">
+                            Popular
+                          </span>
+                        )}
+                        <p className="text-sm font-extrabold mb-0.5">{pack.label}</p>
+                        <p className="text-xs text-gray-400 mb-3">{pack.credits.toLocaleString()} credits</p>
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-extrabold">{pack.price}</span>
+                          <button
+                            onClick={() => handleCreditPack(pack.priceId)}
+                            disabled={creditPackLoading === pack.priceId}
+                            className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-lg hover:opacity-80 transition-all disabled:opacity-60">
+                            {creditPackLoading === pack.priceId ? '...' : 'Buy'}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>

@@ -3,11 +3,19 @@ import { stripe } from '@/lib/stripe'
 import { createClient } from '@supabase/supabase-js'
 import Stripe from 'stripe'
 
-const STRIPE_PRO_PRICE_ID         = 'price_1T9pay7OMwDowUuU7S3G3lNX'
-const STRIPE_AGENCY_PRICE_ID      = 'price_1T9qAd7OMwDowUuUpzjxLlG2'
-const STRIPE_WHITE_LABEL_PRICE_ID = 'price_1T9qAu7OMwDowUuUsqM2jwoC'
+const STRIPE_PRO_PRICE_ID           = 'price_1T9pay7OMwDowUuU7S3G3lNX'
+const STRIPE_AGENCY_PRICE_ID        = 'price_1T9qAd7OMwDowUuUpzjxLlG2'
+const STRIPE_WHITE_LABEL_PRICE_ID   = 'price_1T9qAu7OMwDowUuUsqM2jwoC'
 const STRIPE_PRO_ANNUAL_PRICE_ID    = 'price_1TA0Iv7OMwDowUuUaAA77Ye1'
 const STRIPE_AGENCY_ANNUAL_PRICE_ID = 'price_1TA0JQ7OMwDowUuUp4NnHEfO'
+
+// Credit pack price IDs → credits awarded
+const CREDIT_PACK_PRICES: Record<string, number> = {
+  'price_1TA0jd7OMwDowUuULUw5W7EQ': 100,   // Starter
+  'price_1TA0l37OMwDowUuUU5JpIcDK': 300,   // Popular
+  'price_1TA0nA7OMwDowUuU5wHTbucn': 750,   // Pro Pack
+  'price_1TA0nS7OMwDowUuUKURJ7ZM4': 2000,  // Max Pack
+}
 
 const PLAN_PRICES = new Set([
   STRIPE_PRO_PRICE_ID,
@@ -17,8 +25,8 @@ const PLAN_PRICES = new Set([
 ])
 
 const PRICE_TO_PLAN: Record<string, string> = {
-  [STRIPE_PRO_PRICE_ID]:         'pro',
-  [STRIPE_AGENCY_PRICE_ID]:      'agency',
+  [STRIPE_PRO_PRICE_ID]:           'pro',
+  [STRIPE_AGENCY_PRICE_ID]:        'agency',
   [STRIPE_PRO_ANNUAL_PRICE_ID]:    'pro',
   [STRIPE_AGENCY_ANNUAL_PRICE_ID]: 'agency',
 }
@@ -27,6 +35,13 @@ const PLAN_CREDITS: Record<string, number> = {
   free:   100,
   pro:    500,
   agency: 2000,
+}
+
+// Credit bank caps per plan
+const PLAN_CREDIT_BANK: Record<string, number> = {
+  free:   150,
+  pro:    750,
+  agency: 3000,
 }
 
 function resolveSubscription(subscription: Stripe.Subscription) {
@@ -65,8 +80,34 @@ export async function POST(req: NextRequest) {
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object as Stripe.Checkout.Session
     const userId = session.metadata?.user_id
-    const customerId = session.customer as string
+    const type = session.metadata?.type
+    const priceId = session.metadata?.price_id
 
+    // CREDIT PACK purchase
+    if (type === 'credit_pack' && priceId && userId) {
+      const creditsToAdd = CREDIT_PACK_PRICES[priceId]
+      if (creditsToAdd) {
+        // Get current credits and plan
+        const { data: settings } = await supabase
+          .from('user_settings')
+          .select('ai_credits_remaining, plan')
+          .eq('user_id', userId)
+          .single()
+
+        const currentCredits = settings?.ai_credits_remaining ?? 0
+        const userPlan = settings?.plan ?? 'free'
+        const bankCap = PLAN_CREDIT_BANK[userPlan] ?? 150
+        const newCredits = Math.min(currentCredits + creditsToAdd, bankCap)
+
+        await supabase.from('user_settings')
+          .update({ ai_credits_remaining: newCredits })
+          .eq('user_id', userId)
+      }
+      return NextResponse.json({ received: true })
+    }
+
+    // SUBSCRIPTION purchase
+    const customerId = session.customer as string
     const subscription = await stripe.subscriptions.retrieve(session.subscription as string)
     const { plan, whiteLabelEnabled } = resolveSubscription(subscription)
     const credits = PLAN_CREDITS[plan] ?? 100
