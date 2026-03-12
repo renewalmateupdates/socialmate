@@ -49,7 +49,6 @@ export default function AffiliatePage() {
   const [submitSuccess, setSubmitSuccess] = useState(false)
   const [copied, setCopied] = useState(false)
 
-  // Form state
   const [fullName, setFullName] = useState('')
   const [websiteUrl, setWebsiteUrl] = useState('')
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([])
@@ -141,7 +140,6 @@ export default function AffiliatePage() {
             <div className="flex items-center justify-center h-48 text-gray-400 text-sm">Loading...</div>
 
           ) : affiliateStatus === 'active' ? (
-            /* ── ACTIVE DASHBOARD ── */
             <div className="space-y-6">
               <div className="grid grid-cols-3 gap-4">
                 <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
@@ -245,7 +243,6 @@ export default function AffiliatePage() {
             </div>
 
           ) : affiliateStatus === 'pending_review' ? (
-            /* ── PENDING STATE ── */
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-center">
               <div className="text-4xl mb-4">⏳</div>
               <h2 className="text-xl font-bold text-gray-900 mb-2">Application Under Review</h2>
@@ -256,7 +253,6 @@ export default function AffiliatePage() {
             </div>
 
           ) : affiliateStatus === 'rejected' ? (
-            /* ── REJECTED STATE ── */
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-center">
               <div className="text-4xl mb-4">❌</div>
               <h2 className="text-xl font-bold text-gray-900 mb-2">Application Not Approved</h2>
@@ -271,7 +267,6 @@ export default function AffiliatePage() {
             </div>
 
           ) : (
-            /* ── APPLICATION FORM ── */
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
               <div className="text-4xl mb-4 text-center">🤝</div>
               <h2 className="text-xl font-bold text-gray-900 mb-1 text-center">Apply to the Affiliate Program</h2>
@@ -280,7 +275,6 @@ export default function AffiliatePage() {
                 Applications are reviewed manually — we'll notify you by email.
               </p>
 
-              {/* Tier info */}
               <div className="grid grid-cols-2 gap-4 mb-8">
                 <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
                   <div className="text-2xl font-bold text-gray-900">30%</div>
@@ -297,7 +291,7 @@ export default function AffiliatePage() {
               {plan === 'free' ? (
                 <div className="bg-yellow-50 border border-yellow-100 rounded-xl px-4 py-3 text-sm text-yellow-700 font-medium text-center">
                   You must be on a paid plan to apply.
-                  <button onClick={() => router.push('/settings')} className="ml-2 underline hover:no-underline">
+                  <button onClick={() => router.push('/settings?tab=Plan')} className="ml-2 underline hover:no-underline">
                     Upgrade now →
                   </button>
                 </div>

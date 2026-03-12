@@ -1,43 +1,44 @@
 import Link from 'next/link'
+import ReferralBanner from '@/app/components/ReferralBanner'
 
 const PLATFORMS = [
-  { name: 'Instagram',  icon: '📸', status: 'soon'      },
-  { name: 'LinkedIn',   icon: '💼', status: 'available' },
-  { name: 'YouTube',    icon: '▶️', status: 'available' },
-  { name: 'Pinterest',  icon: '📌', status: 'available' },
-  { name: 'Bluesky',    icon: '🦋', status: 'available' },
-  { name: 'Reddit',     icon: '🤖', status: 'available' },
-  { name: 'Discord',    icon: '💬', status: 'available' },
-  { name: 'Telegram',   icon: '✈️', status: 'available' },
-  { name: 'Mastodon',   icon: '🐘', status: 'available' },
-  { name: 'TikTok',     icon: '🎵', status: 'soon'      },
-  { name: 'Facebook',   icon: '📘', status: 'soon'      },
-  { name: 'Threads',    icon: '🧵', status: 'soon'      },
-  { name: 'X / Twitter',icon: '🐦', status: 'planned'   },
-  { name: 'Snapchat',   icon: '👻', status: 'planned'   },
-  { name: 'Lemon8',     icon: '🍋', status: 'planned'   },
-  { name: 'BeReal',     icon: '📷', status: 'planned'   },
+  { name: 'Instagram',   icon: '📸', status: 'soon'      },
+  { name: 'LinkedIn',    icon: '💼', status: 'available' },
+  { name: 'YouTube',     icon: '▶️', status: 'available' },
+  { name: 'Pinterest',   icon: '📌', status: 'available' },
+  { name: 'Bluesky',     icon: '🦋', status: 'available' },
+  { name: 'Reddit',      icon: '🤖', status: 'available' },
+  { name: 'Discord',     icon: '💬', status: 'available' },
+  { name: 'Telegram',    icon: '✈️', status: 'available' },
+  { name: 'Mastodon',    icon: '🐘', status: 'available' },
+  { name: 'TikTok',      icon: '🎵', status: 'soon'      },
+  { name: 'Facebook',    icon: '📘', status: 'soon'      },
+  { name: 'Threads',     icon: '🧵', status: 'soon'      },
+  { name: 'X / Twitter', icon: '🐦', status: 'planned'   },
+  { name: 'Snapchat',    icon: '👻', status: 'planned'   },
+  { name: 'Lemon8',      icon: '🍋', status: 'planned'   },
+  { name: 'BeReal',      icon: '📷', status: 'planned'   },
 ]
 
 const AI_TOOLS = [
-  { name: 'Caption Generator',          emoji: '✍️',  credits: '1 credit'    },
-  { name: 'Hashtag Generator',          emoji: '#️⃣', credits: '1 credit'    },
-  { name: 'Post Rewriter',              emoji: '🔁',  credits: '1 credit'    },
-  { name: 'Viral Hook Generator',       emoji: '🎣',  credits: '2 credits'   },
-  { name: 'SM-Pulse Trend Scanner',     emoji: '🔥',  credits: '5 credits'   },
-  { name: 'SM-Radar Growth Report',     emoji: '📊',  credits: '3 credits'   },
+  { name: 'Caption Generator',          emoji: '✍️',  credits: '1 credit'     },
+  { name: 'Hashtag Generator',          emoji: '#️⃣', credits: '1 credit'     },
+  { name: 'Post Rewriter',              emoji: '🔁',  credits: '1 credit'     },
+  { name: 'Viral Hook Generator',       emoji: '🎣',  credits: '2 credits'    },
+  { name: 'SM-Pulse Trend Scanner',     emoji: '🔥',  credits: '5 credits'    },
+  { name: 'SM-Radar Growth Report',     emoji: '📊',  credits: '3 credits'    },
   { name: '30-Day AI Content Calendar', emoji: '📅',  credits: '20 cr · Pro+' },
-  { name: 'Content Repurposer',         emoji: '♻️',  credits: '3 credits'   },
-  { name: 'Thread Generator',           emoji: '🧵',  credits: '3 credits'   },
+  { name: 'Content Repurposer',         emoji: '♻️',  credits: '3 credits'    },
+  { name: 'Thread Generator',           emoji: '🧵',  credits: '3 credits'    },
   { name: 'AI Image Generation',        emoji: '🎨',  credits: '25 cr · Pro+' },
 ]
 
 const FEATURES = [
-  { icon: '📅', title: 'Smart Scheduling',   desc: 'Schedule to 16 platforms from one place. Bulk upload, queues, drag-and-drop calendar.' },
-  { icon: '🤖', title: 'AI Caption Tools',    desc: 'Generate captions, hashtags, viral hooks, and full thread scripts with one click.' },
-  { icon: '📊', title: 'Real Analytics',      desc: 'Track what\'s working. Posting streaks, platform breakdown, best times, consistency scores.' },
-  { icon: '🔗', title: 'Link in Bio Builder', desc: 'Free Linktree alternative built right in. Your public URL, your links, your style.' },
-  { icon: '👥', title: 'Team Collaboration',  desc: 'Invite team members, assign roles, manage access. Up to 50 seats on Agency.' },
+  { icon: '📅', title: 'Smart Scheduling',    desc: 'Schedule to 16 platforms from one place. Bulk upload, queues, drag-and-drop calendar.' },
+  { icon: '🤖', title: 'AI Caption Tools',    desc: 'Generate captions, hashtags, viral hooks, and full thread scripts with one click.'      },
+  { icon: '📊', title: 'Real Analytics',      desc: "Track what's working. Posting streaks, platform breakdown, best times, consistency scores." },
+  { icon: '🔗', title: 'Link in Bio Builder', desc: 'Free Linktree alternative built right in. Your public URL, your links, your style.'       },
+  { icon: '👥', title: 'Team Collaboration',  desc: 'Invite team members, assign roles, manage access. Up to 50 seats on Agency.'             },
   { icon: '🏢', title: 'Client Workspaces',   desc: 'Agency plan includes separate workspaces for each client. Full isolation, clean reporting.' },
 ]
 
@@ -52,13 +53,18 @@ const FOOTER_LINKS = [
   { label: 'Terms',     href: '/terms'     },
 ]
 
-export default function Home() {
+export default function Home({ searchParams }: { searchParams: { ref?: string } }) {
+  const refCode = searchParams?.ref || ''
+
   const available = PLATFORMS.filter(p => p.status === 'available')
   const soon      = PLATFORMS.filter(p => p.status === 'soon')
   const planned   = PLATFORMS.filter(p => p.status === 'planned')
 
   return (
     <div className="min-h-screen bg-white">
+
+      {/* REFERRAL BANNER */}
+      {refCode && <ReferralBanner refCode={refCode} />}
 
       {/* NAV */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
@@ -263,9 +269,9 @@ export default function Home() {
           </p>
           <div className="grid grid-cols-3 gap-6 mb-10">
             {[
-              { icon: '🛠',  title: 'Built with early users',  desc: 'Your feedback directly shapes features, priorities, and the roadmap.' },
-              { icon: '🔒', title: 'Locked-in limits',         desc: 'Join now and lock in current plan limits forever. Grandfathered if we ever change pricing.' },
-              { icon: '🗺️', title: 'Shape what\'s next',      desc: 'Early users directly influence which features get built first. Your feedback matters most.' },
+              { icon: '🛠',  title: 'Built with early users', desc: 'Your feedback directly shapes features, priorities, and the roadmap.'                   },
+              { icon: '🔒', title: 'Locked-in limits',        desc: 'Join now and lock in current plan limits forever. Grandfathered if we ever change pricing.' },
+              { icon: '🗺️', title: "Shape what's next",      desc: 'Early users directly influence which features get built first. Your feedback matters most.' },
             ].map((card, i) => (
               <div key={i} className="bg-white border border-gray-100 rounded-2xl p-6 text-left">
                 <div className="text-2xl mb-3">{card.icon}</div>
