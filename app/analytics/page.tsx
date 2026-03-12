@@ -29,26 +29,29 @@ const PLATFORM_ICONS: Record<string, string> = {
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
 
+// Free: 14d + 30d free
+// Pro: 14d + 30d + 90d free, 180d costs credits
+// Agency: all free
 const PLAN_FREE_RANGES: Record<string, string[]> = {
   free:   ['14', '30'],
   pro:    ['14', '30', '90'],
-  agency: ['14', '30', '90', 'all'],
+  agency: ['14', '30', '90', '180'],
 }
 
 const PLAN_CREDIT_RANGES: Record<string, Record<string, number>> = {
-  free:   { '90': 2, 'all': 4 },
-  pro:    { 'all': 2 },
+  free:   { '90': 2 },
+  pro:    { '180': 2 },
   agency: {},
 }
 
 const RANGE_LABELS: Record<string, string> = {
-  '14': '14d', '30': '30d', '90': '90d', 'all': 'All Time'
+  '14': '14d', '30': '30d', '90': '90d', '180': '6mo'
 }
 
 export default function Analytics() {
   const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
-  const [range, setRange] = useState<'14' | '30' | '90' | 'all'>('30')
+  const [range, setRange] = useState<'14' | '30' | '90' | '180'>('30')
   const [radarDismissed, setRadarDismissed] = useState(false)
   const [creditModal, setCreditModal] = useState<{ range: string; cost: number } | null>(null)
   const [radarModal, setRadarModal] = useState(false)
@@ -74,29 +77,31 @@ export default function Analytics() {
     getData()
   }, [router])
 
-  const handleRangeClick = (r: '14' | '30' | '90' | 'all') => {
+  const handleRangeClick = (r: '14' | '30' | '90' | '180') => {
     if (freeRanges.includes(r)) {
       setRange(r)
       return
     }
     if (creditRanges[r]) {
       setCreditModal({ range: r, cost: creditRanges[r] })
+      return
     }
+    // hard locked — do nothing
   }
 
   const handleCreditUnlock = () => {
     if (!creditModal || credits < creditModal.cost) return
     setCredits(credits - creditModal.cost)
-    setRange(creditModal.range as '14' | '30' | '90' | 'all')
+    setRange(creditModal.range as '14' | '30' | '90' | '180')
     setCreditModal(null)
   }
 
   const now = new Date()
-  const rangeDays = range === 'all' ? 9999 : parseInt(range)
+  const rangeDays = parseInt(range)
   const rangeStart = new Date(now)
   rangeStart.setDate(now.getDate() - rangeDays)
 
-  const filteredPosts = posts.filter(p => range === 'all' || new Date(p.created_at) >= rangeStart)
+  const filteredPosts = posts.filter(p => new Date(p.created_at) >= rangeStart)
   const scheduled = filteredPosts.filter(p => p.status === 'scheduled')
   const drafts = filteredPosts.filter(p => p.status === 'draft')
   const published = filteredPosts.filter(p => p.status === 'published')
@@ -108,7 +113,7 @@ export default function Analytics() {
   const topPlatforms = Object.entries(platformCounts).sort((a, b) => b[1] - a[1])
   const maxPlatformCount = topPlatforms[0]?.[1] || 1
 
-  const daysToShow = Math.min(rangeDays === 9999 ? 30 : rangeDays, 30)
+  const daysToShow = Math.min(rangeDays, 30)
   const dailyCounts = Array.from({ length: daysToShow }, (_, i) => {
     const d = new Date(now)
     d.setDate(now.getDate() - (daysToShow - 1 - i))
@@ -206,7 +211,7 @@ export default function Analytics() {
                 </div>
                 {credits < creditModal.cost && (
                   <p className="text-xs text-center mt-3">
-                    <Link href="/referral" className="text-blue-600 font-bold hover:underline">Earn more credits →</Link>
+                    <Link href="/settings?tab=Referrals" className="text-blue-600 font-bold hover:underline">Earn more credits →</Link>
                   </p>
                 )}
               </div>
@@ -278,17 +283,18 @@ export default function Analytics() {
               <p className="text-sm text-gray-400 mt-0.5">Real data from your posting activity</p>
             </div>
             <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-xl p-1">
-              {(['14', '30', '90', 'all'] as const).map(r => {
+              {(['14', '30', '90', '180'] as const).map(r => {
                 const isFree = freeRanges.includes(r)
                 const creditCost = creditRanges[r]
                 const isActive = range === r
                 const isHardLocked = !isFree && !creditCost
                 return (
                   <button key={r} onClick={() => handleRangeClick(r)}
+                    disabled={isHardLocked}
                     className={`relative px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                      isActive ? 'bg-black text-white'
-                      : isHardLocked ? 'text-gray-300 cursor-not-allowed'
-                      : 'text-gray-500 hover:text-black'
+                      isActive        ? 'bg-black text-white' :
+                      isHardLocked    ? 'text-gray-300 cursor-not-allowed' :
+                      'text-gray-500 hover:text-black'
                     }`}>
                     {RANGE_LABELS[r]}
                     {creditCost && !isFree && (
@@ -301,13 +307,22 @@ export default function Analytics() {
             </div>
           </div>
 
-          {/* FREE PLAN BANNER */}
+          {/* PLAN BANNER */}
           {plan === 'free' && (
             <div className="mb-6 bg-gray-50 border border-gray-200 rounded-2xl px-5 py-3 flex items-center justify-between">
               <p className="text-xs text-gray-500 font-semibold">
-                📊 Free plan includes 14-day & 30-day history free
-                <span className="text-gray-400 font-normal"> · 90-day view costs 2 credits · </span>
-                <Link href="/pricing" className="text-black font-bold underline">Upgrade to unlock for free</Link>
+                📊 Free plan includes 14-day & 30-day history
+                <span className="text-gray-400 font-normal"> · 90-day costs 2 credits · </span>
+                <Link href="/pricing" className="text-black font-bold underline">Upgrade to Pro to unlock 90-day free</Link>
+              </p>
+            </div>
+          )}
+          {plan === 'pro' && (
+            <div className="mb-6 bg-gray-50 border border-gray-200 rounded-2xl px-5 py-3 flex items-center justify-between">
+              <p className="text-xs text-gray-500 font-semibold">
+                📊 Pro plan includes up to 90-day history
+                <span className="text-gray-400 font-normal"> · 6-month costs 2 credits · </span>
+                <Link href="/pricing" className="text-black font-bold underline">Upgrade to Agency to unlock free</Link>
               </p>
             </div>
           )}
@@ -325,8 +340,7 @@ export default function Analytics() {
                 </div>
               </div>
               <div className="flex items-center gap-3 flex-shrink-0 ml-4">
-                <button
-                  onClick={() => setRadarModal(true)}
+                <button onClick={() => setRadarModal(true)}
                   className="text-xs font-bold px-4 py-2 bg-white text-black rounded-xl hover:opacity-80 transition-all">
                   Try SM-Radar
                 </button>
@@ -375,9 +389,9 @@ export default function Analytics() {
               </div>
             )) : (
               [
-                { label: 'Total Posts',  value: filteredPosts.length, icon: '📝', sub: 'in selected range'  },
-                { label: 'Scheduled',    value: scheduled.length,     icon: '📅', sub: 'queued up'          },
-                { label: 'Avg / Week',   value: avgPerWeek,           icon: '📈', sub: 'posting frequency'  },
+                { label: 'Total Posts',  value: filteredPosts.length, icon: '📝', sub: 'in selected range'   },
+                { label: 'Scheduled',    value: scheduled.length,     icon: '📅', sub: 'queued up'           },
+                { label: 'Avg / Week',   value: avgPerWeek,           icon: '📈', sub: 'posting frequency'   },
                 { label: 'Avg Length',   value: avgLength,            icon: '✍️', sub: 'characters per post' },
               ].map(stat => (
                 <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-5">
@@ -431,7 +445,6 @@ export default function Analytics() {
           </div>
 
           <div className="grid grid-cols-3 gap-6">
-
             <div className="col-span-2 space-y-6">
 
               {/* DAILY ACTIVITY */}
@@ -495,7 +508,7 @@ export default function Analytics() {
                         const pct = maxHourCount > 0 ? h.count / maxHourCount : 0
                         const bg = pct === 0 ? 'bg-gray-100'
                           : pct < 0.25 ? 'bg-gray-300'
-                          : pct < 0.5 ? 'bg-gray-400'
+                          : pct < 0.5  ? 'bg-gray-400'
                           : pct < 0.75 ? 'bg-gray-600'
                           : 'bg-black'
                         return (
@@ -661,8 +674,7 @@ export default function Analytics() {
                 <p className="text-xs text-gray-400 leading-relaxed mb-3">
                   See what's trending in your niche right now — before you create your next post.
                 </p>
-                <button
-                  onClick={() => setPulseModal(true)}
+                <button onClick={() => setPulseModal(true)}
                   className="text-xs font-bold px-4 py-2 bg-white text-black rounded-xl hover:opacity-80 transition-all inline-block">
                   Try SM-Pulse →
                 </button>
@@ -672,12 +684,12 @@ export default function Analytics() {
               {plan !== 'agency' && (
                 <div className={`rounded-2xl p-5 border ${plan === 'free' ? 'bg-blue-50 border-blue-100' : 'bg-purple-50 border-purple-100'}`}>
                   <p className={`text-xs font-bold mb-1 ${plan === 'free' ? 'text-blue-700' : 'text-purple-700'}`}>
-                    {plan === 'free' ? '⚡ Unlock more history free' : '🏢 Unlock all-time history free'}
+                    {plan === 'free' ? '⚡ Unlock 90-day history free' : '🏢 Unlock 6-month history free'}
                   </p>
                   <p className={`text-xs mb-3 ${plan === 'free' ? 'text-blue-600' : 'text-purple-600'}`}>
                     {plan === 'free'
                       ? 'Pro plan includes 90-day analytics — no credits needed.'
-                      : 'Agency plan includes full all-time data and PDF export.'}
+                      : 'Agency plan includes full 6-month history.'}
                   </p>
                   <Link href="/pricing"
                     className={`block text-center text-white text-xs font-bold px-3 py-2 rounded-xl hover:opacity-80 transition-all ${plan === 'free' ? 'bg-blue-600' : 'bg-purple-600'}`}>
