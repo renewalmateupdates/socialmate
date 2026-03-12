@@ -10,8 +10,8 @@ const STRIPE_AGENCY_PRICE_ID     = 'price_1T9qAd7OMwDowUuUpzjxLlG2'
 const STRIPE_WHITE_LABEL_PRICE_ID = 'price_1T9qAu7OMwDowUuUsqM2jwoC'
 
 // Annual price IDs — create these in Stripe then paste here
-const STRIPE_PRO_ANNUAL_PRICE_ID    = '' // TODO: create in Stripe (~$55/yr)
-const STRIPE_AGENCY_ANNUAL_PRICE_ID = '' // TODO: create in Stripe (~$210/yr)
+const STRIPE_PRO_ANNUAL_PRICE_ID    = 'price_1TA0Iv7OMwDowUuUaAA77Ye1'
+const STRIPE_AGENCY_ANNUAL_PRICE_ID = 'price_1TA0JQ7OMwDowUuUp4NnHEfO'
 
 type Interval = 'monthly' | 'annual'
 
