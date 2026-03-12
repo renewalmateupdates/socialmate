@@ -1,20 +1,20 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
+import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 
-// BS2: split into live (selectable) and coming soon (disabled)
 const LIVE_PLATFORMS = [
-  { id: 'linkedin',  label: 'LinkedIn',    icon: '💼' },
-  { id: 'youtube',   label: 'YouTube',     icon: '▶️' },
-  { id: 'pinterest', label: 'Pinterest',   icon: '📌' },
-  { id: 'bluesky',   label: 'Bluesky',     icon: '🦋' },
-  { id: 'reddit',    label: 'Reddit',      icon: '🤖' },
-  { id: 'discord',   label: 'Discord',     icon: '💬' },
-  { id: 'telegram',  label: 'Telegram',    icon: '✈️' },
-  { id: 'mastodon',  label: 'Mastodon',    icon: '🐘' },
+  { id: 'linkedin',  label: 'LinkedIn',  icon: '💼' },
+  { id: 'youtube',   label: 'YouTube',   icon: '▶️' },
+  { id: 'pinterest', label: 'Pinterest', icon: '📌' },
+  { id: 'bluesky',   label: 'Bluesky',   icon: '🦋' },
+  { id: 'reddit',    label: 'Reddit',    icon: '🤖' },
+  { id: 'discord',   label: 'Discord',   icon: '💬' },
+  { id: 'telegram',  label: 'Telegram',  icon: '✈️' },
+  { id: 'mastodon',  label: 'Mastodon',  icon: '🐘' },
 ]
 
 const COMING_SOON_PLATFORMS = [
@@ -25,13 +25,18 @@ const COMING_SOON_PLATFORMS = [
   { id: 'twitter',   label: 'X / Twitter', icon: '🐦' },
 ]
 
-const ALL_PLATFORMS = [...LIVE_PLATFORMS, ...COMING_SOON_PLATFORMS]
-
 const TIMES = [
   '06:00','07:00','08:00','09:00','10:00','11:00','12:00',
   '13:00','14:00','15:00','16:00','17:00','18:00','19:00',
   '20:00','21:00','22:00',
 ]
+
+// Max rows allowed per bulk session per plan
+const PLAN_MAX_ROWS: Record<string, number> = {
+  free:   10,
+  pro:    50,
+  agency: 100,
+}
 
 interface BulkPost {
   id: string
@@ -59,6 +64,21 @@ function getTodayDate() {
 
 export default function BulkScheduler() {
   const [user, setUser] = useState<any>(null)
+  const { plan } = useWorkspace()
+  const planConfig = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
+  const maxRows = PLAN_MAX_ROWS[plan] ?? 10
+
+  const maxScheduleDate = (() => {
+    const d = new Date()
+    d.setDate(d.getDate() + (planConfig.scheduleWeeks * 7))
+    return d.toISOString().split('T')[0]
+  })()
+
+  const scheduleHorizonLabel =
+    plan === 'free'   ? '2 weeks' :
+    plan === 'pro'    ? '1 month' :
+    '3 months'
+
   const [posts, setPosts] = useState<BulkPost[]>([
     { id: makeId(), content: '', platforms: ['linkedin'], date: getNextDate(1), time: '09:00', status: 'ready' },
     { id: makeId(), content: '', platforms: ['linkedin'], date: getNextDate(2), time: '09:00', status: 'ready' },
@@ -82,19 +102,25 @@ export default function BulkScheduler() {
       setUser(user)
     }
     init()
-  }, [router]) // BS1: fixed
+  }, [router])
 
   const addRow = () => {
+    if (posts.length >= maxRows) {
+      showToast(`Your ${plan} plan supports up to ${maxRows} posts per bulk session. Upgrade for more.`, 'error')
+      return
+    }
     const lastPost = posts[posts.length - 1]
     const lastDate = lastPost?.date || getNextDate(1)
     const d = new Date(lastDate)
     d.setDate(d.getDate() + 1)
     const nextDate = d.toISOString().split('T')[0]
+    // cap at max schedule date
+    const clampedDate = nextDate > maxScheduleDate ? maxScheduleDate : nextDate
     setPosts(prev => [...prev, {
       id: makeId(),
       content: '',
       platforms: [...defaultPlatforms],
-      date: nextDate,
+      date: clampedDate,
       time: defaultTime,
       status: 'ready',
     }])
@@ -107,6 +133,17 @@ export default function BulkScheduler() {
 
   const updatePost = (id: string, field: keyof BulkPost, value: any) => {
     setPosts(prev => prev.map(p => p.id === id ? { ...p, [field]: value, status: 'ready', error: undefined } : p))
+  }
+
+  const handleDateChange = (postId: string, val: string) => {
+    if (val > maxScheduleDate) {
+      setPosts(prev => prev.map(p => p.id === postId
+        ? { ...p, status: 'error', error: `${plan} plan can only schedule up to ${scheduleHorizonLabel} ahead` }
+        : p
+      ))
+      return
+    }
+    updatePost(postId, 'date', val)
   }
 
   const togglePostPlatform = (postId: string, platformId: string) => {
@@ -129,22 +166,18 @@ export default function BulkScheduler() {
   }
 
   const autoFillDates = () => {
-    setPosts(prev => prev.map((p, i) => ({
-      ...p,
-      date: getNextDate(i + 1),
-    })))
+    setPosts(prev => prev.map((p, i) => {
+      const date = getNextDate(i + 1)
+      const clampedDate = date > maxScheduleDate ? maxScheduleDate : date
+      return { ...p, date: clampedDate, status: 'ready', error: undefined }
+    }))
     showToast('Dates auto-filled starting tomorrow', 'success')
   }
 
-  // BS4: validate no past dates
-  const validateDates = () => {
-    const today = getTodayDate()
-    return posts.filter(p => p.content.trim() && p.platforms.length > 0 && p.date).every(p => p.date >= today)
-  }
-
   const handleSaveAll = async () => {
-    // BS4: past date check
     const today = getTodayDate()
+
+    // Check past dates
     const pastDate = posts.some(p => p.content.trim() && p.date && p.date < today)
     if (pastDate) {
       showToast('Some posts have past dates — please update them before scheduling', 'error')
@@ -152,6 +185,18 @@ export default function BulkScheduler() {
         ...p,
         status: p.content.trim() && p.date < today ? 'error' : p.status,
         error: p.content.trim() && p.date < today ? 'Date is in the past' : p.error,
+      })))
+      return
+    }
+
+    // Check horizon violations
+    const horizonViolation = posts.some(p => p.content.trim() && p.date > maxScheduleDate)
+    if (horizonViolation) {
+      showToast(`Some posts exceed your ${scheduleHorizonLabel} scheduling limit`, 'error')
+      setPosts(prev => prev.map(p => ({
+        ...p,
+        status: p.content.trim() && p.date > maxScheduleDate ? 'error' : p.status,
+        error: p.content.trim() && p.date > maxScheduleDate ? `Exceeds ${scheduleHorizonLabel} limit for ${plan} plan` : p.error,
       })))
       return
     }
@@ -191,7 +236,6 @@ export default function BulkScheduler() {
     }
   }
 
-  // BS3: fixed — single setPosts call, no stale closure
   const clearSaved = () => {
     setPosts(prev => {
       const remaining = prev.filter(p => p.status !== 'saved')
@@ -213,6 +257,7 @@ export default function BulkScheduler() {
   const readyCount = posts.filter(p => p.content.trim() && p.status === 'ready').length
   const savedPosts = posts.filter(p => p.status === 'saved').length
   const errorPosts = posts.filter(p => p.status === 'error').length
+  const atRowLimit = posts.length >= maxRows
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -240,12 +285,29 @@ export default function BulkScheduler() {
             </div>
           </div>
 
+          {/* PLAN LIMITS BAR */}
+          <div className={`mb-4 rounded-2xl px-5 py-3 flex items-center justify-between border ${
+            plan === 'free'   ? 'bg-gray-50 border-gray-200' :
+            plan === 'pro'    ? 'bg-blue-50 border-blue-100' :
+            'bg-purple-50 border-purple-100'
+          }`}>
+            <p className="text-xs font-semibold text-gray-500">
+              {plan === 'free'   && '🔓 Free plan · Up to 10 posts per session · 2-week scheduling horizon'}
+              {plan === 'pro'    && '⚡ Pro plan · Up to 50 posts per session · 1-month scheduling horizon'}
+              {plan === 'agency' && '🏢 Agency plan · Up to 100 posts per session · 3-month scheduling horizon'}
+              <span className="ml-2 font-bold text-gray-700">{posts.length} / {maxRows} rows</span>
+            </p>
+            {plan !== 'agency' && (
+              <Link href="/pricing" className="text-xs font-bold text-black underline hover:opacity-70">
+                Upgrade →
+              </Link>
+            )}
+          </div>
+
           {/* DEFAULTS BAR */}
           <div className="bg-white border border-gray-100 rounded-2xl p-4 mb-4">
             <div className="flex items-center gap-4 flex-wrap">
               <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Defaults:</p>
-
-              {/* BS2: only live platforms in defaults */}
               <div className="flex items-center gap-1 flex-wrap">
                 {LIVE_PLATFORMS.map(p => (
                   <button key={p.id} onClick={() => {
@@ -262,7 +324,6 @@ export default function BulkScheduler() {
                     <span className="hidden sm:inline">{p.label.split(' ')[0]}</span>
                   </button>
                 ))}
-                {/* BS2: coming soon shown as disabled */}
                 {COMING_SOON_PLATFORMS.map(p => (
                   <div key={p.id}
                     className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold border border-dashed border-gray-200 text-gray-300 cursor-not-allowed"
@@ -272,13 +333,10 @@ export default function BulkScheduler() {
                   </div>
                 ))}
               </div>
-
-              {/* DEFAULT TIME */}
               <select value={defaultTime} onChange={e => setDefaultTime(e.target.value)}
                 className="px-3 py-1.5 text-xs border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 bg-white font-semibold">
                 {TIMES.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
-
               <div className="flex items-center gap-2 ml-auto">
                 <button onClick={autoFillDates}
                   className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
@@ -315,26 +373,27 @@ export default function BulkScheduler() {
                   post.status === 'error' ? 'border-red-200' :
                   'border-gray-100 hover:border-gray-300'
                 }`}>
-
                 <div className="flex items-center gap-3 mb-3">
                   <span className="text-xs font-bold text-gray-400 w-6 text-center">
                     {post.status === 'saved' ? '✅' : post.status === 'error' ? '❌' : `${index + 1}`}
                   </span>
-
-                  {/* BS4: min date = today */}
-                  <input type="date" value={post.date} min={today}
-                    onChange={e => updatePost(post.id, 'date', e.target.value)}
+                  <input
+                    type="date"
+                    value={post.date}
+                    min={today}
+                    max={maxScheduleDate}
+                    onChange={e => handleDateChange(post.id, e.target.value)}
                     className={`px-2.5 py-1.5 text-xs border rounded-xl focus:outline-none font-semibold ${
-                      post.date < today ? 'border-red-300 text-red-500' : 'border-gray-200 focus:border-gray-400'
-                    }`} />
-
+                      post.date < today || post.date > maxScheduleDate
+                        ? 'border-red-300 text-red-500'
+                        : 'border-gray-200 focus:border-gray-400'
+                    }`}
+                  />
                   <select value={post.time}
                     onChange={e => updatePost(post.id, 'time', e.target.value)}
                     className="px-2.5 py-1.5 text-xs border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 bg-white font-semibold">
                     {TIMES.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
-
-                  {/* BS2: live platforms only as toggles, coming soon as dimmed */}
                   <div className="flex items-center gap-1 flex-wrap flex-1">
                     {LIVE_PLATFORMS.map(p => (
                       <button key={p.id}
@@ -352,14 +411,12 @@ export default function BulkScheduler() {
                       </span>
                     ))}
                   </div>
-
                   <button onClick={() => removeRow(post.id)}
                     disabled={posts.length <= 1}
                     className="text-xs text-gray-300 hover:text-red-400 transition-all disabled:opacity-20 flex-shrink-0">
                     ✕
                   </button>
                 </div>
-
                 <textarea
                   value={post.content}
                   onChange={e => updatePost(post.id, 'content', e.target.value)}
@@ -368,11 +425,9 @@ export default function BulkScheduler() {
                   disabled={post.status === 'saved'}
                   className="w-full px-3 py-2.5 text-sm border border-gray-100 rounded-xl focus:outline-none focus:border-gray-300 resize-none bg-gray-50 disabled:opacity-60"
                 />
-
                 {post.status === 'error' && post.error && (
                   <p className="text-xs text-red-500 mt-1.5 font-semibold">⚠️ {post.error}</p>
                 )}
-
                 <div className="flex items-center justify-between mt-1.5">
                   <p className="text-xs text-gray-400">
                     {post.platforms.length} platform{post.platforms.length !== 1 ? 's' : ''}
@@ -385,10 +440,21 @@ export default function BulkScheduler() {
 
           {/* ADD + SAVE */}
           <div className="flex items-center justify-between">
-            <button onClick={addRow}
-              className="flex items-center gap-2 text-xs font-bold px-5 py-3 border-2 border-dashed border-gray-300 rounded-2xl hover:border-gray-500 transition-all text-gray-500 hover:text-black">
-              + Add another post
-            </button>
+            <div className="flex items-center gap-3">
+              <button onClick={addRow}
+                disabled={atRowLimit}
+                className="flex items-center gap-2 text-xs font-bold px-5 py-3 border-2 border-dashed border-gray-300 rounded-2xl hover:border-gray-500 transition-all text-gray-500 hover:text-black disabled:opacity-40 disabled:cursor-not-allowed">
+                + Add another post
+              </button>
+              {atRowLimit && (
+                <p className="text-xs text-gray-400">
+                  {plan !== 'agency'
+                    ? <><span className="font-bold text-black">{maxRows} row limit reached</span> · <Link href="/pricing" className="underline font-bold">Upgrade for more →</Link></>
+                    : <span className="font-bold">100 row limit reached</span>
+                  }
+                </p>
+              )}
+            </div>
             <div className="flex items-center gap-3">
               <p className="text-xs text-gray-400">
                 {readyCount} post{readyCount !== 1 ? 's' : ''} ready to schedule
