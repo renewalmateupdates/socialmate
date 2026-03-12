@@ -6,6 +6,9 @@ import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 
+const STRIPE_PRO_PRICE_ID = 'price_1T9pay7OMwDowUuU7S3G3lNX'
+const STRIPE_AGENCY_PRICE_ID = 'price_1T9qAd7OMwDowUuUpzjxLlG2'
+
 const TABS = ['Profile', 'Plan', 'Referrals', 'Notifications', 'Security', 'White Label']
 
 const REFERRAL_TIERS = [
@@ -280,9 +283,9 @@ function SettingsInner() {
                   <div className="space-y-3">
                     <div className="bg-black text-white rounded-xl p-4">
                       <p className="text-sm font-extrabold mb-1">Upgrade to Pro — $5/month</p>
-                      <p className="text-xs text-gray-400 mb-3">5 accounts, 250 AI credits, 10 GB storage, 90-day analytics</p>
+                      <p className="text-xs text-gray-400 mb-3">5 accounts per platform, 500 AI credits, 10 GB storage, 90-day analytics</p>
                       <button
-                        onClick={() => handleCheckout(process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID!)}
+                        onClick={() => handleCheckout(STRIPE_PRO_PRICE_ID)}
                         disabled={checkoutLoading}
                         className="bg-white text-black text-xs font-bold px-4 py-2 rounded-lg hover:opacity-80 transition-all disabled:opacity-60">
                         {checkoutLoading ? 'Loading...' : 'Upgrade to Pro →'}
@@ -290,9 +293,9 @@ function SettingsInner() {
                     </div>
                     <div className="border border-purple-200 rounded-xl p-4">
                       <p className="text-sm font-extrabold mb-1">Agency — $20/month</p>
-                      <p className="text-xs text-gray-400 mb-3">Up to 50 seats, client workspaces, 50 GB storage, all-time analytics</p>
+                      <p className="text-xs text-gray-400 mb-3">15 team seats, client workspaces, 50 GB storage, 6-month analytics</p>
                       <button
-                        onClick={() => handleCheckout(process.env.NEXT_PUBLIC_STRIPE_AGENCY_PRICE_ID!)}
+                        onClick={() => handleCheckout(STRIPE_AGENCY_PRICE_ID)}
                         disabled={checkoutLoading}
                         className="bg-purple-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:opacity-80 transition-all disabled:opacity-60">
                         {checkoutLoading ? 'Loading...' : 'Upgrade to Agency →'}
@@ -300,7 +303,30 @@ function SettingsInner() {
                     </div>
                   </div>
                 )}
-                {plan !== 'free' && (
+                {plan === 'pro' && (
+                  <div className="space-y-3">
+                    <div className="border border-purple-200 rounded-xl p-4">
+                      <p className="text-sm font-extrabold mb-1">Upgrade to Agency — $20/month</p>
+                      <p className="text-xs text-gray-400 mb-3">15 team seats, client workspaces, 2,000 AI credits, 6-month analytics</p>
+                      <button
+                        onClick={() => handleCheckout(STRIPE_AGENCY_PRICE_ID)}
+                        disabled={checkoutLoading}
+                        className="bg-purple-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:opacity-80 transition-all disabled:opacity-60">
+                        {checkoutLoading ? 'Loading...' : 'Upgrade to Agency →'}
+                      </button>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500 mb-3">Manage billing, invoices, and cancellation below.</p>
+                      <button
+                        onClick={handlePortal}
+                        disabled={checkoutLoading}
+                        className="text-xs font-bold text-black border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 transition-all disabled:opacity-60">
+                        {checkoutLoading ? 'Loading...' : 'Manage Subscription →'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+                {plan === 'agency' && (
                   <div>
                     <p className="text-xs text-gray-500 mb-3">Manage billing, invoices, and cancellation below.</p>
                     <button
@@ -317,7 +343,7 @@ function SettingsInner() {
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs text-gray-500">Monthly credits</span>
                   <span className="text-xs font-bold">
-                    {plan === 'free' ? '50 / 50' : plan === 'pro' ? '250 / 250' : '750 / 750'}
+                    {plan === 'free' ? '100 / 100' : plan === 'pro' ? '500 / 500' : '2,000 / 2,000'}
                   </span>
                 </div>
                 <div className="w-full bg-gray-100 rounded-full h-2 mb-4">
@@ -453,12 +479,12 @@ function SettingsInner() {
               <h2 className="text-base font-extrabold mb-5">Notification Preferences</h2>
               <div className="space-y-4">
                 {[
-                  { key: 'postPublished',  label: 'Post published',  desc: 'When a scheduled post goes live'              },
-                  { key: 'postFailed',     label: 'Post failed',      desc: 'When a scheduled post fails to publish'       },
-                  { key: 'weeklyDigest',   label: 'Weekly digest',    desc: 'Summary of your posting activity every Monday' },
-                  { key: 'creditLow',      label: 'Low AI credits',   desc: 'When your credits drop below 20'              },
-                  { key: 'teamActivity',   label: 'Team activity',    desc: 'When team members schedule or edit posts'      },
-                  { key: 'productUpdates', label: 'Product updates',  desc: 'New features and platform announcements'      },
+                  { key: 'postPublished',  label: 'Post published',  desc: 'When a scheduled post goes live'               },
+                  { key: 'postFailed',     label: 'Post failed',     desc: 'When a scheduled post fails to publish'        },
+                  { key: 'weeklyDigest',   label: 'Weekly digest',   desc: 'Summary of your posting activity every Monday' },
+                  { key: 'creditLow',      label: 'Low AI credits',  desc: 'When your credits drop below 20'               },
+                  { key: 'teamActivity',   label: 'Team activity',   desc: 'When team members schedule or edit posts'      },
+                  { key: 'productUpdates', label: 'Product updates', desc: 'New features and platform announcements'       },
                 ].map(item => (
                   <div key={item.key} className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
                     <div>
@@ -578,7 +604,7 @@ function SettingsInner() {
                     Remove SocialMate branding and replace it with your own. Available as a $20/month add-on on Pro and Agency plans.
                   </p>
                   <button
-                    onClick={() => handleCheckout(process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID!)}
+                    onClick={() => handleCheckout(STRIPE_PRO_PRICE_ID)}
                     disabled={checkoutLoading}
                     className="bg-black text-white text-xs font-bold px-5 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
                     {checkoutLoading ? 'Loading...' : 'Upgrade to unlock →'}
