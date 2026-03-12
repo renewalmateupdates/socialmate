@@ -53,8 +53,9 @@ const FOOTER_LINKS = [
   { label: 'Terms',     href: '/terms'     },
 ]
 
-export default function Home({ searchParams }: { searchParams: { ref?: string } }) {
-  const refCode = searchParams?.ref || ''
+export default async function Home({ searchParams }: { searchParams: Promise<{ ref?: string }> }) {
+  const params = await searchParams
+  const refCode = params?.ref || ''
 
   const available = PLATFORMS.filter(p => p.status === 'available')
   const soon      = PLATFORMS.filter(p => p.status === 'soon')
