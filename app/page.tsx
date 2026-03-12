@@ -1,47 +1,43 @@
-'use client'
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
 
 const PLATFORMS = [
-  { name: 'Instagram',   icon: '📸', status: 'soon'      },
-  { name: 'LinkedIn',    icon: '💼', status: 'available' },
-  { name: 'YouTube',     icon: '▶️', status: 'available' },
-  { name: 'Pinterest',   icon: '📌', status: 'available' },
-  { name: 'Bluesky',     icon: '🦋', status: 'available' },
-  { name: 'Reddit',      icon: '🤖', status: 'available' },
-  { name: 'Discord',     icon: '💬', status: 'available' },
-  { name: 'Telegram',    icon: '✈️', status: 'available' },
-  { name: 'Mastodon',    icon: '🐘', status: 'available' },
-  { name: 'TikTok',      icon: '🎵', status: 'soon'      },
-  { name: 'Facebook',    icon: '📘', status: 'soon'      },
-  { name: 'Threads',     icon: '🧵', status: 'soon'      },
-  { name: 'X / Twitter', icon: '🐦', status: 'planned'   },
-  { name: 'Snapchat',    icon: '👻', status: 'planned'   },
-  { name: 'Lemon8',      icon: '🍋', status: 'planned'   },
-  { name: 'BeReal',      icon: '📷', status: 'planned'   },
+  { name: 'Instagram',  icon: '📸', status: 'soon'      },
+  { name: 'LinkedIn',   icon: '💼', status: 'available' },
+  { name: 'YouTube',    icon: '▶️', status: 'available' },
+  { name: 'Pinterest',  icon: '📌', status: 'available' },
+  { name: 'Bluesky',    icon: '🦋', status: 'available' },
+  { name: 'Reddit',     icon: '🤖', status: 'available' },
+  { name: 'Discord',    icon: '💬', status: 'available' },
+  { name: 'Telegram',   icon: '✈️', status: 'available' },
+  { name: 'Mastodon',   icon: '🐘', status: 'available' },
+  { name: 'TikTok',     icon: '🎵', status: 'soon'      },
+  { name: 'Facebook',   icon: '📘', status: 'soon'      },
+  { name: 'Threads',    icon: '🧵', status: 'soon'      },
+  { name: 'X / Twitter',icon: '🐦', status: 'planned'   },
+  { name: 'Snapchat',   icon: '👻', status: 'planned'   },
+  { name: 'Lemon8',     icon: '🍋', status: 'planned'   },
+  { name: 'BeReal',     icon: '📷', status: 'planned'   },
 ]
 
 const AI_TOOLS = [
-  { name: 'Caption Generator',          emoji: '✍️',  credits: '1 credit'     },
-  { name: 'Hashtag Generator',          emoji: '#️⃣', credits: '1 credit'     },
-  { name: 'Post Rewriter',              emoji: '🔁',  credits: '1 credit'     },
-  { name: 'Viral Hook Generator',       emoji: '🎣',  credits: '2 credits'    },
-  { name: 'SM-Pulse Trend Scanner',     emoji: '🔥',  credits: '5 credits'    },
-  { name: 'SM-Radar Growth Report',     emoji: '📊',  credits: '3 credits'    },
+  { name: 'Caption Generator',          emoji: '✍️',  credits: '1 credit'    },
+  { name: 'Hashtag Generator',          emoji: '#️⃣', credits: '1 credit'    },
+  { name: 'Post Rewriter',              emoji: '🔁',  credits: '1 credit'    },
+  { name: 'Viral Hook Generator',       emoji: '🎣',  credits: '2 credits'   },
+  { name: 'SM-Pulse Trend Scanner',     emoji: '🔥',  credits: '5 credits'   },
+  { name: 'SM-Radar Growth Report',     emoji: '📊',  credits: '3 credits'   },
   { name: '30-Day AI Content Calendar', emoji: '📅',  credits: '20 cr · Pro+' },
-  { name: 'Content Repurposer',         emoji: '♻️',  credits: '3 credits'    },
-  { name: 'Thread Generator',           emoji: '🧵',  credits: '3 credits'    },
+  { name: 'Content Repurposer',         emoji: '♻️',  credits: '3 credits'   },
+  { name: 'Thread Generator',           emoji: '🧵',  credits: '3 credits'   },
   { name: 'AI Image Generation',        emoji: '🎨',  credits: '25 cr · Pro+' },
 ]
 
 const FEATURES = [
-  { icon: '📅', title: 'Smart Scheduling',    desc: 'Schedule to 16 platforms from one place. Bulk upload, queues, drag-and-drop calendar.' },
+  { icon: '📅', title: 'Smart Scheduling',   desc: 'Schedule to 16 platforms from one place. Bulk upload, queues, drag-and-drop calendar.' },
   { icon: '🤖', title: 'AI Caption Tools',    desc: 'Generate captions, hashtags, viral hooks, and full thread scripts with one click.' },
   { icon: '📊', title: 'Real Analytics',      desc: 'Track what\'s working. Posting streaks, platform breakdown, best times, consistency scores.' },
   { icon: '🔗', title: 'Link in Bio Builder', desc: 'Free Linktree alternative built right in. Your public URL, your links, your style.' },
-  { icon: '👥', title: 'Team Collaboration',  desc: 'Invite team members, assign roles, manage access. Up to 15 seats on Agency.' },
+  { icon: '👥', title: 'Team Collaboration',  desc: 'Invite team members, assign roles, manage access. Up to 50 seats on Agency.' },
   { icon: '🏢', title: 'Client Workspaces',   desc: 'Agency plan includes separate workspaces for each client. Full isolation, clean reporting.' },
 ]
 
@@ -57,15 +53,6 @@ const FOOTER_LINKS = [
 ]
 
 export default function Home() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const router = useRouter()
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsLoggedIn(!!session)
-    })
-  }, [])
-
   const available = PLATFORMS.filter(p => p.status === 'available')
   const soon      = PLATFORMS.filter(p => p.status === 'soon')
   const planned   = PLATFORMS.filter(p => p.status === 'planned')
@@ -95,18 +82,10 @@ export default function Home() {
             ))}
           </nav>
           <div className="flex items-center gap-3">
-            {isLoggedIn ? (
-              <Link href="/dashboard" className="bg-black text-white text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
-                Go to Dashboard →
-              </Link>
-            ) : (
-              <>
-                <Link href="/login" className="text-sm font-semibold text-gray-500 hover:text-black transition-all">Sign in</Link>
-                <Link href="/signup" className="bg-black text-white text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
-                  Get started free →
-                </Link>
-              </>
-            )}
+            <Link href="/login" className="text-sm font-semibold text-gray-500 hover:text-black transition-all">Sign in</Link>
+            <Link href="/signup" className="bg-black text-white text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
+              Get started free →
+            </Link>
           </div>
         </div>
       </header>
@@ -125,22 +104,14 @@ export default function Home() {
           16 platforms. AI tools that actually save time. A free plan that puts paid tools to shame.
         </p>
         <div className="flex items-center justify-center gap-4">
-          {isLoggedIn ? (
-            <Link href="/dashboard" className="bg-black text-white font-bold px-8 py-4 rounded-2xl hover:opacity-80 transition-all text-base">
-              Go to Dashboard →
-            </Link>
-          ) : (
-            <>
-              <Link href="/signup" className="bg-black text-white font-bold px-8 py-4 rounded-2xl hover:opacity-80 transition-all text-base">
-                Create free account →
-              </Link>
-              <Link href="/features" className="text-gray-500 font-semibold hover:text-black transition-all text-base">
-                See all features →
-              </Link>
-            </>
-          )}
+          <Link href="/signup" className="bg-black text-white font-bold px-8 py-4 rounded-2xl hover:opacity-80 transition-all text-base">
+            Create free account →
+          </Link>
+          <Link href="/features" className="text-gray-500 font-semibold hover:text-black transition-all text-base">
+            See all features →
+          </Link>
         </div>
-        {!isLoggedIn && <p className="text-xs text-gray-400 mt-4">No card required · Free forever · Takes 60 seconds</p>}
+        <p className="text-xs text-gray-400 mt-4">No card required · Free forever · Takes 60 seconds</p>
       </section>
 
       {/* PLATFORMS */}
@@ -217,7 +188,7 @@ export default function Home() {
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">AI-Powered</p>
             <h2 className="text-3xl font-extrabold tracking-tight mb-3">Tools that write for you</h2>
             <p className="text-sm text-gray-500 max-w-xl mx-auto">
-              Every AI tool runs on Google Gemini. Credits are included with every plan — free users get 100/month.
+              Every AI tool runs on Google Gemini. Credits are included with every plan — free users get 50/month.
             </p>
           </div>
           <div className="grid grid-cols-5 gap-3 mb-8">
@@ -292,9 +263,9 @@ export default function Home() {
           </p>
           <div className="grid grid-cols-3 gap-6 mb-10">
             {[
-              { icon: '🛠',  title: 'Built with early users', desc: 'Your feedback directly shapes features, priorities, and the roadmap.' },
-              { icon: '🔒', title: 'Locked-in limits',        desc: 'Join now and lock in current plan limits forever. Grandfathered if we ever change pricing.' },
-              { icon: '🗺️', title: 'Shape what\'s next',     desc: 'Early users directly influence which features get built first. Your feedback matters most.' },
+              { icon: '🛠',  title: 'Built with early users',  desc: 'Your feedback directly shapes features, priorities, and the roadmap.' },
+              { icon: '🔒', title: 'Locked-in limits',         desc: 'Join now and lock in current plan limits forever. Grandfathered if we ever change pricing.' },
+              { icon: '🗺️', title: 'Shape what\'s next',      desc: 'Early users directly influence which features get built first. Your feedback matters most.' },
             ].map((card, i) => (
               <div key={i} className="bg-white border border-gray-100 rounded-2xl p-6 text-left">
                 <div className="text-2xl mb-3">{card.icon}</div>
