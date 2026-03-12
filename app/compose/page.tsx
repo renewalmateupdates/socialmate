@@ -3,7 +3,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Sidebar from '@/components/Sidebar'
-import { useWorkspace } from '@/contexts/WorkspaceContext'
+import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 
 const PLATFORMS = [
   { id: 'linkedin',  name: 'LinkedIn',  icon: '💼', limit: 3000  },
@@ -28,12 +28,12 @@ const COMING_SOON_PLATFORMS = [
 ]
 
 const AI_TOOLS = [
-  { id: 'caption',   label: 'Caption',   emoji: '✍️',  credits: 1, desc: 'Generate a caption from your topic'        },
-  { id: 'hashtags',  label: 'Hashtags',  emoji: '#️⃣', credits: 1, desc: 'Generate relevant hashtags'                },
-  { id: 'rewrite',   label: 'Rewrite',   emoji: '🔁',  credits: 1, desc: 'Rewrite your post to be punchier'          },
-  { id: 'hook',      label: 'Hook',      emoji: '🎣',  credits: 2, desc: 'Generate 3 viral opening hooks'            },
-  { id: 'thread',    label: 'Thread',    emoji: '🧵',  credits: 3, desc: 'Turn your idea into a full thread'         },
-  { id: 'repurpose', label: 'Repurpose', emoji: '♻️',  credits: 3, desc: 'Reshape long content for this platform'    },
+  { id: 'caption',   label: 'Caption',   emoji: '✍️',  credits: 1, desc: 'Generate a caption from your topic'     },
+  { id: 'hashtags',  label: 'Hashtags',  emoji: '#️⃣', credits: 1, desc: 'Generate relevant hashtags'             },
+  { id: 'rewrite',   label: 'Rewrite',   emoji: '🔁',  credits: 1, desc: 'Rewrite your post to be punchier'       },
+  { id: 'hook',      label: 'Hook',      emoji: '🎣',  credits: 2, desc: 'Generate 3 viral opening hooks'         },
+  { id: 'thread',    label: 'Thread',    emoji: '🧵',  credits: 3, desc: 'Turn your idea into a full thread'      },
+  { id: 'repurpose', label: 'Repurpose', emoji: '♻️',  credits: 3, desc: 'Reshape long content for this platform' },
 ]
 
 const STARTER_TEMPLATES = [
@@ -66,7 +66,7 @@ const STARTER_TEMPLATES = [
 
 function ComposeInner() {
   const searchParams = useSearchParams()
-  const { credits, setCredits } = useWorkspace()
+  const { credits, setCredits, plan } = useWorkspace()
 
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['linkedin'])
   const [content, setContent] = useState('')
@@ -78,6 +78,20 @@ function ComposeInner() {
   const [aiError, setAiError] = useState('')
   const [toast, setToast] = useState('')
   const [templateBanner, setTemplateBanner] = useState<string | null>(null)
+  const [scheduleError, setScheduleError] = useState('')
+
+  // Compute max schedulable date based on plan
+  const planConfig = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
+  const maxScheduleDate = (() => {
+    const d = new Date()
+    d.setDate(d.getDate() + (planConfig.scheduleWeeks * 7))
+    return d.toISOString().split('T')[0]
+  })()
+
+  const scheduleHorizonLabel =
+    plan === 'free'   ? '2 weeks' :
+    plan === 'pro'    ? '1 month' :
+    '3 months'
 
   useEffect(() => {
     const templateId = searchParams.get('template')
@@ -128,6 +142,17 @@ function ComposeInner() {
     setSelectedPlatforms(prev =>
       prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
     )
+  }
+
+  const handleDateChange = (val: string) => {
+    setScheduleError('')
+    if (val && val > maxScheduleDate) {
+      setScheduleError(
+        `Your ${plan} plan can only schedule up to ${scheduleHorizonLabel} in advance. Upgrade to schedule further out.`
+      )
+      return
+    }
+    setScheduleDate(val)
   }
 
   const handleAiTool = async (tool: typeof AI_TOOLS[0]) => {
@@ -334,22 +359,43 @@ function ComposeInner() {
 
               {/* SCHEDULE */}
               <div className="bg-white border border-gray-100 rounded-2xl p-4">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Schedule</p>
-                <div className="flex items-center gap-3">
-                  <input type="date" value={scheduleDate}
-                    onChange={e => setScheduleDate(e.target.value)}
-                    className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-black transition-all" />
-                  <input type="time" value={scheduleTime}
-                    onChange={e => setScheduleTime(e.target.value)}
-                    className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-black transition-all" />
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Schedule</p>
+                  <span className="text-xs text-gray-400">
+                    {plan === 'free' && '⏳ Free — up to 2 weeks ahead'}
+                    {plan === 'pro'  && '⏳ Pro — up to 1 month ahead'}
+                    {plan === 'agency' && '⏳ Agency — up to 3 months ahead'}
+                  </span>
                 </div>
+                <div className="flex items-center gap-3">
+                  <input
+                    type="date"
+                    value={scheduleDate}
+                    min={new Date().toISOString().split('T')[0]}
+                    max={maxScheduleDate}
+                    onChange={e => handleDateChange(e.target.value)}
+                    className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-black transition-all"
+                  />
+                  <input
+                    type="time"
+                    value={scheduleTime}
+                    onChange={e => setScheduleTime(e.target.value)}
+                    className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-black transition-all"
+                  />
+                </div>
+                {scheduleError && (
+                  <div className="mt-2 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 flex items-center justify-between gap-3">
+                    <p className="text-xs text-amber-700">{scheduleError}</p>
+                    <a href="/pricing" className="text-xs font-bold text-black whitespace-nowrap hover:underline">Upgrade →</a>
+                  </div>
+                )}
               </div>
 
               {/* ACTIONS */}
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => showToast('Post scheduled! ✓')}
-                  disabled={!content.trim() || charOver || selectedPlatforms.length === 0}
+                  disabled={!content.trim() || charOver || selectedPlatforms.length === 0 || !!scheduleError}
                   className="flex-1 bg-black text-white text-sm font-bold py-3 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
                   {scheduleDate ? 'Schedule Post' : 'Post Now'}
                 </button>
@@ -360,6 +406,7 @@ function ComposeInner() {
                   Save Draft
                 </button>
               </div>
+
             </div>
 
             {/* RIGHT — PREVIEW */}
