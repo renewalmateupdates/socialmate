@@ -1,5 +1,6 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -64,6 +65,28 @@ function PlatformNotificationBanner() {
   )
 }
 
+function CreditSuccessModal({ onDismiss }: { onDismiss: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+      <div className="bg-white rounded-3xl p-8 max-w-sm w-full mx-4 text-center shadow-2xl">
+        <div className="text-5xl mb-4">🎉</div>
+        <h2 className="text-xl font-extrabold mb-2">Credits Added!</h2>
+        <p className="text-sm text-gray-500 leading-relaxed mb-2">
+          Your AI credits have been added to your account and are ready to use right now.
+        </p>
+        <p className="text-xs text-gray-400 mb-6">
+          Thank you for supporting SocialMate — it means everything as an indie creator. Every purchase helps keep the lights on. 🙏
+        </p>
+        <button
+          onClick={onDismiss}
+          className="w-full py-3 bg-black text-white text-sm font-bold rounded-xl hover:opacity-80 transition-all">
+          Let's go! →
+        </button>
+      </div>
+    </div>
+  )
+}
+
 type DashStats = {
   scheduled: number
   drafts: number
@@ -73,15 +96,29 @@ type DashStats = {
   upcomingCount: number
 }
 
-export default function DashboardPage() {
+function DashboardInner() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [user, setUser] = useState<any>(null)
   const [profile, setProfile] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [showCreditModal, setShowCreditModal] = useState(false)
   const [stats, setStats] = useState<DashStats>({
     scheduled: 0, drafts: 0, thisWeek: 0, published: 0, todayCount: 0, upcomingCount: 0,
   })
   const { plan, credits } = useWorkspace()
+
+  useEffect(() => {
+    if (searchParams.get('credits') === 'added') {
+      setShowCreditModal(true)
+    }
+  }, [searchParams])
+
+  const handleCreditModalDismiss = () => {
+    setShowCreditModal(false)
+    // Force full reload to refresh sidebar credits
+    window.location.href = '/dashboard'
+  }
 
   useEffect(() => {
     const init = async () => {
@@ -138,7 +175,6 @@ export default function DashboardPage() {
     )
   }
 
-  // Fixed: was profile?.full_name — column is display_name
   const displayName = profile?.display_name || user?.email?.split('@')[0] || 'there'
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
@@ -146,6 +182,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex h-screen bg-gray-50">
+      {showCreditModal && <CreditSuccessModal onDismiss={handleCreditModalDismiss} />}
       <Sidebar />
       <main className="ml-56 flex-1 overflow-y-auto">
         <div className="p-8">
@@ -226,7 +263,6 @@ export default function DashboardPage() {
           </div>
 
           <div className="grid grid-cols-3 gap-6">
-
             <div className="col-span-2 space-y-6">
 
               {/* WEEK VIEW */}
@@ -361,7 +397,7 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* REFERRAL NUDGE — fixed: goes to settings referral tab */}
+              {/* REFERRAL NUDGE */}
               <div className="bg-gradient-to-br from-gray-900 to-gray-700 rounded-2xl p-5 text-white">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Earn more credits</p>
                 <p className="text-sm font-extrabold mb-1">Invite a friend</p>
@@ -379,5 +415,17 @@ export default function DashboardPage() {
         </div>
       </main>
     </div>
+  )
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex h-screen items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
+      </div>
+    }>
+      <DashboardInner />
+    </Suspense>
   )
 }

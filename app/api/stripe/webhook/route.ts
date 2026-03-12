@@ -9,12 +9,11 @@ const STRIPE_WHITE_LABEL_PRICE_ID   = 'price_1T9qAu7OMwDowUuUsqM2jwoC'
 const STRIPE_PRO_ANNUAL_PRICE_ID    = 'price_1TA0Iv7OMwDowUuUaAA77Ye1'
 const STRIPE_AGENCY_ANNUAL_PRICE_ID = 'price_1TA0JQ7OMwDowUuUp4NnHEfO'
 
-// Credit pack price IDs → credits awarded
 const CREDIT_PACK_PRICES: Record<string, number> = {
-  'price_1TA0jd7OMwDowUuULUw5W7EQ': 100,   // Starter
-  'price_1TA0l37OMwDowUuUU5JpIcDK': 300,   // Popular
-  'price_1TA0nA7OMwDowUuU5wHTbucn': 750,   // Pro Pack
-  'price_1TA0nS7OMwDowUuUKURJ7ZM4': 2000,  // Max Pack
+  'price_1TA0jd7OMwDowUuULUw5W7EQ': 100,
+  'price_1TA0l37OMwDowUuUU5JpIcDK': 300,
+  'price_1TA0nA7OMwDowUuU5wHTbucn': 750,
+  'price_1TA0nS7OMwDowUuUKURJ7ZM4': 2000,
 }
 
 const PLAN_PRICES = new Set([
@@ -37,27 +36,14 @@ const PLAN_CREDITS: Record<string, number> = {
   agency: 2000,
 }
 
-// Credit bank caps per plan
-const PLAN_CREDIT_BANK: Record<string, number> = {
-  free:   150,
-  pro:    750,
-  agency: 3000,
-}
-
 function resolveSubscription(subscription: Stripe.Subscription) {
   let plan = 'free'
   let whiteLabelEnabled = false
-
   for (const item of subscription.items.data) {
     const priceId = item.price.id
-    if (PLAN_PRICES.has(priceId)) {
-      plan = PRICE_TO_PLAN[priceId]
-    }
-    if (priceId === STRIPE_WHITE_LABEL_PRICE_ID) {
-      whiteLabelEnabled = true
-    }
+    if (PLAN_PRICES.has(priceId)) plan = PRICE_TO_PLAN[priceId]
+    if (priceId === STRIPE_WHITE_LABEL_PRICE_ID) whiteLabelEnabled = true
   }
-
   return { plan, whiteLabelEnabled }
 }
 
@@ -83,30 +69,25 @@ export async function POST(req: NextRequest) {
     const type = session.metadata?.type
     const priceId = session.metadata?.price_id
 
-    // CREDIT PACK purchase
+    // CREDIT PACK — no bank cap, paid credits are uncapped
     if (type === 'credit_pack' && priceId && userId) {
       const creditsToAdd = CREDIT_PACK_PRICES[priceId]
       if (creditsToAdd) {
-        // Get current credits and plan
         const { data: settings } = await supabase
           .from('user_settings')
-          .select('ai_credits_remaining, plan')
+          .select('ai_credits_remaining')
           .eq('user_id', userId)
           .single()
 
         const currentCredits = settings?.ai_credits_remaining ?? 0
-        const userPlan = settings?.plan ?? 'free'
-        const bankCap = PLAN_CREDIT_BANK[userPlan] ?? 150
-        const newCredits = Math.min(currentCredits + creditsToAdd, bankCap)
-
         await supabase.from('user_settings')
-          .update({ ai_credits_remaining: newCredits })
+          .update({ ai_credits_remaining: currentCredits + creditsToAdd })
           .eq('user_id', userId)
       }
       return NextResponse.json({ received: true })
     }
 
-    // SUBSCRIPTION purchase
+    // SUBSCRIPTION
     const customerId = session.customer as string
     const subscription = await stripe.subscriptions.retrieve(session.subscription as string)
     const { plan, whiteLabelEnabled } = resolveSubscription(subscription)
@@ -129,7 +110,6 @@ export async function POST(req: NextRequest) {
     const subscription = event.data.object as Stripe.Subscription
     const { plan, whiteLabelEnabled } = resolveSubscription(subscription)
     const credits = PLAN_CREDITS[plan] ?? 100
-
     await supabase.from('user_settings')
       .update({
         plan,
