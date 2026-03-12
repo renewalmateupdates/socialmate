@@ -51,6 +51,7 @@ const FOOTER_LINKS = [
   { label: 'Blog',      href: '/blog'      },
   { label: 'Privacy',   href: '/privacy'   },
   { label: 'Terms',     href: '/terms'     },
+  { label: 'Admin',     href: '/admin/affiliates' },
 ]
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ ref?: string }> }) {
@@ -355,7 +356,10 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
           </div>
           <nav className="flex items-center gap-5 flex-wrap">
             {FOOTER_LINKS.map(link => (
-              <Link key={link.label} href={link.href} className="text-xs text-gray-400 hover:text-black transition-all">
+              <Link key={link.label} href={link.href}
+                className={`text-xs hover:text-black transition-all ${
+                  link.label === 'Admin' ? 'text-white select-none' : 'text-gray-400'
+                }`}>
                 {link.label}
               </Link>
             ))}
