@@ -36,6 +36,11 @@ const PLAN_CREDITS: Record<string, number> = {
   agency: 2000,
 }
 
+const PLAN_MONTHLY_VALUE: Record<string, number> = {
+  pro:    5.00,
+  agency: 20.00,
+}
+
 function safeDate(ts: number | null | undefined): string | null {
   if (!ts) return null
   try { return new Date(ts * 1000).toISOString() } catch { return null }
@@ -52,11 +57,118 @@ function resolveSubscription(subscription: Stripe.Subscription) {
   return { plan, whiteLabelEnabled }
 }
 
-export async function POST(req: NextRequest) {
-  const supabase = createClient(
+function getSupabase() {
+  return createClient<any>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
+}
+
+async function processAffiliateCommission(
+  supabase: ReturnType<typeof getSupabase>,
+  referredUserId: string,
+  plan: string,
+  isNewSubscription: boolean
+) {
+  try {
+    const { data: conversion } = await supabase
+      .from('referral_conversions')
+      .select('*')
+      .eq('referred_user_id', referredUserId)
+      .single()
+
+    if (!conversion) return
+
+    const { data: affiliate } = await supabase
+      .from('affiliates')
+      .select('*')
+      .eq('user_id', conversion.affiliate_user_id)
+      .single()
+
+    if (!affiliate || affiliate.status !== 'active') return
+
+    const activeCount: number = affiliate.active_referral_count ?? 0
+    const rate: number = activeCount >= 100 ? 0.40 : 0.30
+    const monthlyValue: number = PLAN_MONTHLY_VALUE[plan] ?? 0
+    const commission: number = parseFloat((monthlyValue * rate).toFixed(2))
+
+    if (commission <= 0) return
+
+    const lockExpired = new Date(conversion.lock_expires_at) <= new Date()
+    const newStatus = lockExpired ? 'eligible' : 'locked'
+
+    await supabase
+      .from('referral_conversions')
+      .update({
+        status: newStatus,
+        monthly_commission: commission,
+        total_earned: (conversion.total_earned ?? 0) + commission,
+      })
+      .eq('id', conversion.id)
+
+    const newUnpaid = parseFloat(((affiliate.unpaid_earnings ?? 0) + commission).toFixed(2))
+    const newTotal = parseFloat(((affiliate.total_earnings ?? 0) + commission).toFixed(2))
+    const newActiveCount: number = isNewSubscription
+      ? (affiliate.active_referral_count ?? 0) + 1
+      : (affiliate.active_referral_count ?? 0)
+    const updatedRate: number = newActiveCount >= 100 ? 0.40 : 0.30
+
+    await supabase
+      .from('affiliates')
+      .update({
+        unpaid_earnings: newUnpaid,
+        total_earnings: newTotal,
+        active_referral_count: newActiveCount,
+        commission_rate: updatedRate,
+      })
+      .eq('user_id', conversion.affiliate_user_id)
+
+  } catch (err) {
+    console.error('Affiliate commission error:', err)
+  }
+}
+
+async function handleAffiliateChurn(
+  supabase: ReturnType<typeof getSupabase>,
+  referredUserId: string
+) {
+  try {
+    const { data: conversion } = await supabase
+      .from('referral_conversions')
+      .select('affiliate_user_id')
+      .eq('referred_user_id', referredUserId)
+      .single()
+
+    if (!conversion) return
+
+    const { data: affiliate } = await supabase
+      .from('affiliates')
+      .select('active_referral_count, commission_rate')
+      .eq('user_id', conversion.affiliate_user_id)
+      .single()
+
+    if (!affiliate) return
+
+    const newCount: number = Math.max(0, (affiliate.active_referral_count ?? 1) - 1)
+    const newRate: number = newCount >= 100 ? 0.40 : 0.30
+
+    await supabase
+      .from('affiliates')
+      .update({ active_referral_count: newCount, commission_rate: newRate })
+      .eq('user_id', conversion.affiliate_user_id)
+
+    await supabase
+      .from('referral_conversions')
+      .update({ status: 'pending' })
+      .eq('referred_user_id', referredUserId)
+
+  } catch (err) {
+    console.error('Affiliate churn handler error:', err)
+  }
+}
+
+export async function POST(req: NextRequest) {
+  const supabase = getSupabase()
 
   const body = await req.text()
   const sig = req.headers.get('stripe-signature')!
@@ -74,7 +186,6 @@ export async function POST(req: NextRequest) {
     const type = session.metadata?.type
     const priceId = session.metadata?.price_id
 
-    // CREDIT PACK — no bank cap, paid credits are uncapped
     if (type === 'credit_pack' && priceId && userId) {
       const creditsToAdd = CREDIT_PACK_PRICES[priceId]
       if (creditsToAdd) {
@@ -84,15 +195,15 @@ export async function POST(req: NextRequest) {
           .eq('user_id', userId)
           .single()
 
-        const currentCredits = settings?.ai_credits_remaining ?? 0
-        await supabase.from('user_settings')
+        const currentCredits: number = settings?.ai_credits_remaining ?? 0
+        await supabase
+          .from('user_settings')
           .update({ ai_credits_remaining: currentCredits + creditsToAdd })
           .eq('user_id', userId)
       }
       return NextResponse.json({ received: true })
     }
 
-    // SUBSCRIPTION
     const customerId = session.customer as string
     const subscription = await stripe.subscriptions.retrieve(session.subscription as string)
     const { plan, whiteLabelEnabled } = resolveSubscription(subscription)
@@ -109,13 +220,19 @@ export async function POST(req: NextRequest) {
       ai_credits_total: credits,
       ai_credits_reset_at: new Date().toISOString(),
     }, { onConflict: 'user_id' })
+
+    if (userId) {
+      await processAffiliateCommission(supabase, userId, plan, true)
+    }
   }
 
   if (event.type === 'customer.subscription.updated') {
     const subscription = event.data.object as Stripe.Subscription
     const { plan, whiteLabelEnabled } = resolveSubscription(subscription)
     const credits = PLAN_CREDITS[plan] ?? 100
-    await supabase.from('user_settings')
+
+    await supabase
+      .from('user_settings')
       .update({
         plan,
         white_label_enabled: whiteLabelEnabled,
@@ -125,11 +242,29 @@ export async function POST(req: NextRequest) {
         ai_credits_reset_at: new Date().toISOString(),
       })
       .eq('stripe_subscription_id', subscription.id)
+
+    const { data: userSettings } = await supabase
+      .from('user_settings')
+      .select('user_id')
+      .eq('stripe_subscription_id', subscription.id)
+      .single()
+
+    if (userSettings?.user_id) {
+      await processAffiliateCommission(supabase, userSettings.user_id, plan, false)
+    }
   }
 
   if (event.type === 'customer.subscription.deleted') {
     const subscription = event.data.object as Stripe.Subscription
-    await supabase.from('user_settings')
+
+    const { data: userSettings } = await supabase
+      .from('user_settings')
+      .select('user_id')
+      .eq('stripe_subscription_id', subscription.id)
+      .single()
+
+    await supabase
+      .from('user_settings')
       .update({
         plan: 'free',
         white_label_enabled: false,
@@ -140,6 +275,10 @@ export async function POST(req: NextRequest) {
         ai_credits_reset_at: new Date().toISOString(),
       })
       .eq('stripe_subscription_id', subscription.id)
+
+    if (userSettings?.user_id) {
+      await handleAffiliateChurn(supabase, userSettings.user_id)
+    }
   }
 
   return NextResponse.json({ received: true })

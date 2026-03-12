@@ -25,6 +25,19 @@ export async function proxy(request: NextRequest) {
 
   await supabase.auth.getUser()
 
+  // Capture referral code from ?ref=CODE and store in cookie for 30 days
+  const { searchParams } = new URL(request.url)
+  const refCode = searchParams.get('ref')
+  if (refCode) {
+    supabaseResponse.cookies.set('sm_ref', refCode, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+      path: '/',
+      sameSite: 'lax',
+    })
+  }
+
   return supabaseResponse
 }
 
