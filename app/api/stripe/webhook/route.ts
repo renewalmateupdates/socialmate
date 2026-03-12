@@ -3,19 +3,29 @@ import { stripe } from '@/lib/stripe'
 import { createClient } from '@supabase/supabase-js'
 import Stripe from 'stripe'
 
+const STRIPE_PRO_PRICE_ID         = 'price_1T9pay7OMwDowUuU7S3G3lNX'
+const STRIPE_AGENCY_PRICE_ID      = 'price_1T9qAd7OMwDowUuUpzjxLlG2'
+const STRIPE_WHITE_LABEL_PRICE_ID = 'price_1T9qAu7OMwDowUuUsqM2jwoC'
+const STRIPE_PRO_ANNUAL_PRICE_ID    = 'price_1TA0Iv7OMwDowUuUaAA77Ye1'
+const STRIPE_AGENCY_ANNUAL_PRICE_ID = 'price_1TA0JQ7OMwDowUuUp4NnHEfO'
+
 const PLAN_PRICES = new Set([
-  process.env.STRIPE_PRO_PRICE_ID!,
-  process.env.STRIPE_AGENCY_PRICE_ID!,
+  STRIPE_PRO_PRICE_ID,
+  STRIPE_AGENCY_PRICE_ID,
+  STRIPE_PRO_ANNUAL_PRICE_ID,
+  STRIPE_AGENCY_ANNUAL_PRICE_ID,
 ])
 
 const PRICE_TO_PLAN: Record<string, string> = {
-  [process.env.STRIPE_PRO_PRICE_ID!]: 'pro',
-  [process.env.STRIPE_AGENCY_PRICE_ID!]: 'agency',
+  [STRIPE_PRO_PRICE_ID]:         'pro',
+  [STRIPE_AGENCY_PRICE_ID]:      'agency',
+  [STRIPE_PRO_ANNUAL_PRICE_ID]:    'pro',
+  [STRIPE_AGENCY_ANNUAL_PRICE_ID]: 'agency',
 }
 
 const PLAN_CREDITS: Record<string, number> = {
-  free: 100,
-  pro: 500,
+  free:   100,
+  pro:    500,
   agency: 2000,
 }
 
@@ -28,7 +38,7 @@ function resolveSubscription(subscription: Stripe.Subscription) {
     if (PLAN_PRICES.has(priceId)) {
       plan = PRICE_TO_PLAN[priceId]
     }
-    if (priceId === process.env.STRIPE_WHITE_LABEL_PRICE_ID!) {
+    if (priceId === STRIPE_WHITE_LABEL_PRICE_ID) {
       whiteLabelEnabled = true
     }
   }
