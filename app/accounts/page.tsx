@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
+import BlueskyConnectModal from '@/components/BlueskyConnectModal' // ADDED
 
 function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 rounded-xl animate-pulse ${className}`} />
@@ -136,6 +137,7 @@ function AccountsInner() {
   const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null)
   const [confirmDisconnect, setConfirmDisconnect] = useState<string | null>(null)
   const [showDiscordModal, setShowDiscordModal] = useState(false)
+  const [showBlueskyModal, setShowBlueskyModal] = useState(false) // ADDED
   const router = useRouter()
   const searchParams = useSearchParams()
   const { plan } = useWorkspace()
@@ -192,9 +194,29 @@ function AccountsInner() {
       return
     }
 
+    // ADDED
+    if (platform === 'bluesky') {
+      setShowBlueskyModal(true)
+      return
+    }
+
     setConnectingPlatform(platform)
     showToast(`${PLATFORM_META[platform]?.label || platform} integration coming soon!`, 'success')
     setTimeout(() => setConnectingPlatform(null), 2000)
+  }
+
+  // ADDED
+  const handleBlueskySuccess = async (handle: string, displayName: string) => {
+    setShowBlueskyModal(false)
+    showToast('Bluesky connected successfully!', 'success')
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { data } = await supabase
+      .from('connected_accounts')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+    setAccounts(data || [])
   }
 
   const accountsByPlatform = accounts.reduce((acc, account) => {
@@ -434,6 +456,14 @@ function AccountsInner() {
         </div>
       )}
 
+      {/* BLUESKY MODAL — ADDED */}
+      {showBlueskyModal && (
+        <BlueskyConnectModal
+          onSuccess={handleBlueskySuccess}
+          onClose={() => setShowBlueskyModal(false)}
+        />
+      )}
+
       {toast && (
         <div className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${
           toast.type === 'success' ? 'bg-black text-white' : 'bg-red-500 text-white'
@@ -455,4 +485,4 @@ export default function Accounts() {
       <AccountsInner />
     </Suspense>
   )
-}   
+}
