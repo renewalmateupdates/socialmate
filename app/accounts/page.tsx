@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
@@ -129,7 +129,7 @@ function PlatformCard({
   )
 }
 
-export default function Accounts() {
+function AccountsInner() {
   const [accounts, setAccounts] = useState<Account[]>([])
   const [loading, setLoading] = useState(true)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
@@ -442,5 +442,17 @@ export default function Accounts() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function Accounts() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-sm text-gray-400">Loading...</div>
+      </div>
+    }>
+      <AccountsInner />
+    </Suspense>
   )
 }
