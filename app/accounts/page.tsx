@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
-import BlueskyConnectModal from '@/components/BlueskyConnectModal' // ADDED
+import BlueskyConnectModal from '@/components/BlueskyConnectModal'
+import TelegramConnectModal from '@/components/TelegramConnectModal'
 
 function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 rounded-xl animate-pulse ${className}`} />
@@ -54,12 +55,7 @@ const COMING_SOON_PLATFORMS = ALL_PLATFORMS.filter(p => PLATFORM_META[p].status 
 const PLANNED_PLATFORMS = ALL_PLATFORMS.filter(p => PLATFORM_META[p].status === 'planned')
 
 function PlatformCard({
-  platform,
-  connectable,
-  accountsPerPlatform,
-  accountsByPlatform,
-  connectingPlatform,
-  onConnect,
+  platform, connectable, accountsPerPlatform, accountsByPlatform, connectingPlatform, onConnect,
 }: {
   platform: string
   connectable: boolean
@@ -137,7 +133,8 @@ function AccountsInner() {
   const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null)
   const [confirmDisconnect, setConfirmDisconnect] = useState<string | null>(null)
   const [showDiscordModal, setShowDiscordModal] = useState(false)
-  const [showBlueskyModal, setShowBlueskyModal] = useState(false) // ADDED
+  const [showBlueskyModal, setShowBlueskyModal] = useState(false)
+  const [showTelegramModal, setShowTelegramModal] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
   const { plan } = useWorkspace()
@@ -148,6 +145,17 @@ function AccountsInner() {
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type })
     setTimeout(() => setToast(null), 3000)
+  }
+
+  const refreshAccounts = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const { data } = await supabase
+      .from('connected_accounts')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+    setAccounts(data || [])
   }
 
   useEffect(() => {
@@ -188,35 +196,25 @@ function AccountsInner() {
       showToast(`Your ${planConfig.label} plan allows ${accountsPerPlatform} account${accountsPerPlatform !== 1 ? 's' : ''} per platform`, 'error')
       return
     }
-
-    if (platform === 'discord') {
-      setShowDiscordModal(true)
-      return
-    }
-
-    // ADDED
-    if (platform === 'bluesky') {
-      setShowBlueskyModal(true)
-      return
-    }
+    if (platform === 'discord') { setShowDiscordModal(true); return }
+    if (platform === 'bluesky') { setShowBlueskyModal(true); return }
+    if (platform === 'telegram') { setShowTelegramModal(true); return }
 
     setConnectingPlatform(platform)
     showToast(`${PLATFORM_META[platform]?.label || platform} integration coming soon!`, 'success')
     setTimeout(() => setConnectingPlatform(null), 2000)
   }
 
-  // ADDED
-  const handleBlueskySuccess = async (handle: string, displayName: string) => {
+  const handleBlueskySuccess = async () => {
     setShowBlueskyModal(false)
     showToast('Bluesky connected successfully!', 'success')
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-    const { data } = await supabase
-      .from('connected_accounts')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-    setAccounts(data || [])
+    await refreshAccounts()
+  }
+
+  const handleTelegramSuccess = async () => {
+    setShowTelegramModal(false)
+    showToast('Telegram bot connected successfully!', 'success')
+    await refreshAccounts()
   }
 
   const accountsByPlatform = accounts.reduce((acc, account) => {
@@ -233,7 +231,6 @@ function AccountsInner() {
       <div className="ml-56 flex-1 p-8">
         <div className="max-w-7xl mx-auto">
 
-          {/* HEADER */}
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Accounts</h1>
@@ -244,7 +241,6 @@ function AccountsInner() {
             </div>
           </div>
 
-          {/* PLAN BANNER */}
           <div className={`mb-6 rounded-2xl px-5 py-3 border flex items-center justify-between ${
             plan === 'free' ? 'bg-gray-50 border-gray-200' :
             plan === 'pro' ? 'bg-blue-50 border-blue-100' :
@@ -273,13 +269,12 @@ function AccountsInner() {
             )}
           </div>
 
-          {/* STATS */}
           <div className="grid grid-cols-3 gap-4 mb-8">
             {loading ? [1,2,3].map(i => <SkeletonBox key={i} className="h-20 rounded-2xl" />) : (
               [
-                { label: 'Connected',            value: accounts.length,                                                   icon: '✅', color: 'text-green-600' },
+                { label: 'Connected',            value: accounts.length,                                                    icon: '✅', color: 'text-green-600' },
                 { label: 'Platforms Used',        value: `${connectedPlatforms.size} / ${AVAILABLE_PLATFORMS.length} live`, icon: '📱', color: 'text-gray-700' },
-                { label: 'Accounts Per Platform', value: `${accountsPerPlatform} max`,                                     icon: '🔓', color: 'text-blue-600' },
+                { label: 'Accounts Per Platform', value: `${accountsPerPlatform} max`,                                      icon: '🔓', color: 'text-blue-600' },
               ].map(stat => (
                 <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-4">
                   <div className="flex justify-between items-center mb-2">
@@ -292,7 +287,6 @@ function AccountsInner() {
             )}
           </div>
 
-          {/* CONNECTED ACCOUNTS */}
           {!loading && accounts.length > 0 && (
             <div className="mb-8">
               <h2 className="text-sm font-bold tracking-tight mb-4">Connected Accounts</h2>
@@ -346,7 +340,6 @@ function AccountsInner() {
             </div>
           )}
 
-          {/* AVAILABLE PLATFORMS */}
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
               <h2 className="text-sm font-bold tracking-tight">Live Integrations</h2>
@@ -373,7 +366,6 @@ function AccountsInner() {
             )}
           </div>
 
-          {/* COMING SOON */}
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
               <h2 className="text-sm font-bold tracking-tight">Coming Soon</h2>
@@ -394,7 +386,6 @@ function AccountsInner() {
             </div>
           </div>
 
-          {/* PLANNED */}
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
               <h2 className="text-sm font-bold tracking-tight">Planned</h2>
@@ -415,7 +406,6 @@ function AccountsInner() {
             </div>
           </div>
 
-          {/* INFO BANNER */}
           <div className="bg-gray-50 border border-gray-100 rounded-2xl p-5">
             <div className="flex items-start gap-4">
               <span className="text-2xl">🚀</span>
@@ -456,11 +446,19 @@ function AccountsInner() {
         </div>
       )}
 
-      {/* BLUESKY MODAL — ADDED */}
+      {/* BLUESKY MODAL */}
       {showBlueskyModal && (
         <BlueskyConnectModal
           onSuccess={handleBlueskySuccess}
           onClose={() => setShowBlueskyModal(false)}
+        />
+      )}
+
+      {/* TELEGRAM MODAL */}
+      {showTelegramModal && (
+        <TelegramConnectModal
+          onSuccess={handleTelegramSuccess}
+          onClose={() => setShowTelegramModal(false)}
         />
       )}
 
