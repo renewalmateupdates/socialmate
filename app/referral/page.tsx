@@ -3,17 +3,47 @@ import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 
 const SIGNUP_REWARDS = [
-  { trigger: 'They publish their first post', reward: '+10 credits',  note: 'Both you and your referral receive +10 credits'  },
-  { trigger: 'They upgrade to Pro',           reward: '+25 credits',  note: 'Credited when payment is confirmed'               },
-  { trigger: 'They upgrade to Agency',        reward: '+50 credits',  note: 'Credited when payment is confirmed'               },
+  { trigger: 'They publish their first post', reward: '+10 credits',  note: 'Both you and your referral receive +10 credits'          },
+  { trigger: 'They upgrade to Pro',           reward: '+50 credits',  note: 'Credited after 7-day hold to protect against refunds'    },
+  { trigger: 'They upgrade to Agency',        reward: '+100 credits', note: 'Credited after 7-day hold to protect against refunds'    },
 ]
 
 const TIERS = [
-  { paying: 5,   reward: '1 month Pro free',  icon: '🎁', desc: 'Your next billing cycle is on us'                },
-  { paying: 10,  reward: '3 months Pro free', icon: '⭐', desc: 'A full quarter covered'                          },
-  { paying: 25,  reward: '6 months Pro free', icon: '🚀', desc: 'Half a year free — you\'ve earned it'           },
-  { paying: 50,  reward: '1 year Pro free',   icon: '💎', desc: 'An entire year at no cost'                      },
-  { paying: 100, reward: 'Pro free for life', icon: '👑', desc: 'You grow with us — we take care of you forever' },
+  {
+    paying: 5,
+    reward: '1 month Pro free',
+    icon: '🎁',
+    desc: 'Your next billing cycle is on us',
+    conditional: false,
+  },
+  {
+    paying: 10,
+    reward: '3 months Pro free',
+    icon: '⭐',
+    desc: 'A full quarter covered',
+    conditional: false,
+  },
+  {
+    paying: 25,
+    reward: '6 months Pro free',
+    icon: '🚀',
+    desc: 'Half a year free — you\'ve earned it',
+    conditional: false,
+  },
+  {
+    paying: 50,
+    reward: 'Pro free while active',
+    icon: '💎',
+    desc: 'Pro is free as long as you maintain 50+ active referrals',
+    conditional: true,
+  },
+  {
+    paying: 100,
+    reward: 'Pro free while active',
+    icon: '👑',
+    desc: 'Pro is free as long as you maintain 100+ active referrals',
+    conditional: true,
+  },
 ]
 
 const FAQ = [
@@ -23,7 +53,7 @@ const FAQ = [
   },
   {
     q: 'When do I receive my credits?',
-    a: 'First-post credits (+10) are added within 24 hours of your referral publishing. Upgrade credits (25 or 50) are added after a 7-day hold to protect against refunds and chargebacks.',
+    a: 'First-post credits (+10) are added within 24 hours of your referral publishing. Upgrade credits are added after a 7-day hold to protect against refunds and chargebacks.',
   },
   {
     q: 'What counts as a "paying referral" for tier rewards?',
@@ -36,6 +66,14 @@ const FAQ = [
   {
     q: 'Do tier rewards stack?',
     a: 'Yes. If you hit 10 paying referrals after already claiming the 5-referral reward, you receive the additional 2 months on top. Each tier is incremental.',
+  },
+  {
+    q: 'What happens to conditional rewards if referrals drop?',
+    a: 'If your active referral count drops below the required threshold, the free Pro benefit pauses until you\'re back above it. Credits and previously earned free months are never taken away.',
+  },
+  {
+    q: 'What\'s the difference between referrals and the affiliate program?',
+    a: 'The referral program is for everyone — earn credits and free Pro by sharing your link. The affiliate program is an application-based program for creators and marketers who want to earn cash commissions instead.',
   },
   {
     q: 'What happens to my free Pro months if I\'m already on Pro?',
@@ -59,6 +97,12 @@ export default function Referral() {
             start posting and upgrade, you earn credits — and eventually free Pro. The more you refer,
             the more generous the rewards get.
           </p>
+          <div className="inline-flex items-center gap-2 bg-gray-50 border border-gray-200 text-gray-500 text-xs px-4 py-2 rounded-full mt-4">
+            💡 Want to earn <strong className="text-gray-700">cash commissions</strong> instead?
+            <Link href="/affiliate" className="text-black font-bold underline hover:no-underline ml-1">
+              Apply to the Affiliate Program →
+            </Link>
+          </div>
         </div>
 
         {/* GET YOUR LINK CTA */}
@@ -73,6 +117,28 @@ export default function Referral() {
             className="bg-white text-black text-sm font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all flex-shrink-0">
             Sign in to get link →
           </Link>
+        </div>
+
+        {/* REFERRAL VS AFFILIATE CALLOUT */}
+        <div className="grid grid-cols-2 gap-4 mb-8">
+          <div className="bg-white border-2 border-black rounded-2xl p-5">
+            <div className="text-lg mb-2">🎁</div>
+            <h3 className="text-sm font-extrabold mb-1">Referral Program</h3>
+            <p className="text-xs text-gray-500 leading-relaxed">
+              For everyone. Share your link, earn AI credits and free Pro months. No application needed — starts the moment you sign up.
+            </p>
+            <div className="mt-3 text-xs font-bold text-black">You are here ↓</div>
+          </div>
+          <div className="bg-gray-50 border border-gray-200 rounded-2xl p-5">
+            <div className="text-lg mb-2">💸</div>
+            <h3 className="text-sm font-extrabold mb-1">Affiliate Program</h3>
+            <p className="text-xs text-gray-500 leading-relaxed">
+              For creators and marketers. Earn 30–40% recurring cash commissions on every referral. Requires an application and approval.
+            </p>
+            <Link href="/affiliate" className="mt-3 inline-block text-xs font-bold text-black underline hover:no-underline">
+              Learn more & apply →
+            </Link>
+          </div>
         </div>
 
         {/* HOW CREDITS WORK */}
@@ -109,6 +175,11 @@ export default function Referral() {
                 <div className="flex-1">
                   <p className="text-sm font-bold">
                     {tier.paying} paying referral{tier.paying > 1 ? 's' : ''}
+                    {tier.conditional && (
+                      <span className="ml-2 text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                        while active
+                      </span>
+                    )}
                   </p>
                   <p className="text-xs text-gray-400 mt-0.5">{tier.desc}</p>
                 </div>
@@ -119,7 +190,7 @@ export default function Referral() {
             ))}
           </div>
           <p className="text-xs text-gray-400 mt-4 pt-4 border-t border-gray-50">
-            Tier rewards are cumulative. Reaching 10 paying referrals earns the 5-referral reward first, then the 10-referral reward.
+            Tiers 1–3 are permanent once earned. Tiers 4–5 remain active as long as you maintain the required number of active paying referrals.
           </p>
         </div>
 
