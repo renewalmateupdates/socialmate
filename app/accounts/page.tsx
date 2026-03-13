@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -51,7 +52,6 @@ const AVAILABLE_PLATFORMS = ALL_PLATFORMS.filter(p => PLATFORM_META[p].status ==
 const COMING_SOON_PLATFORMS = ALL_PLATFORMS.filter(p => PLATFORM_META[p].status === 'coming_soon')
 const PLANNED_PLATFORMS = ALL_PLATFORMS.filter(p => PLATFORM_META[p].status === 'planned')
 
-// Ac2: moved outside parent component to prevent remount on every render
 function PlatformCard({
   platform,
   connectable,
@@ -134,13 +134,28 @@ export default function Accounts() {
   const [loading, setLoading] = useState(true)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null)
-  // Ac3: inline confirm state
   const [confirmDisconnect, setConfirmDisconnect] = useState<string | null>(null)
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { plan } = useWorkspace()
 
   const planConfig = PLAN_CONFIG[plan]
   const accountsPerPlatform = planConfig.accountsPerPlatform
+
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type })
+    setTimeout(() => setToast(null), 3000)
+  }
+
+  useEffect(() => {
+    const success = searchParams.get('success')
+    const error = searchParams.get('error')
+    if (success === 'discord_connected') showToast('Discord connected successfully!', 'success')
+    if (error === 'discord_denied') showToast('Discord connection cancelled', 'error')
+    if (error === 'invalid_state') showToast('Security check failed, please try again', 'error')
+    if (error === 'token_failed') showToast('Failed to connect Discord, please try again', 'error')
+    if (error === 'db_error') showToast('Something went wrong saving your account', 'error')
+  }, [searchParams])
 
   useEffect(() => {
     const getData = async () => {
@@ -155,12 +170,7 @@ export default function Accounts() {
       setLoading(false)
     }
     getData()
-  }, [router]) // Ac1: fixed
-
-  const showToast = (message: string, type: 'success' | 'error') => {
-    setToast({ message, type })
-    setTimeout(() => setToast(null), 3000)
-  }
+  }, [router])
 
   const handleDisconnect = async (id: string, platform: string) => {
     await supabase.from('connected_accounts').delete().eq('id', id)
@@ -175,6 +185,12 @@ export default function Accounts() {
       showToast(`Your ${planConfig.label} plan allows ${accountsPerPlatform} account${accountsPerPlatform !== 1 ? 's' : ''} per platform`, 'error')
       return
     }
+
+    if (platform === 'discord') {
+      window.location.href = '/api/accounts/discord/connect'
+      return
+    }
+
     setConnectingPlatform(platform)
     showToast(`${PLATFORM_META[platform]?.label || platform} integration coming soon!`, 'success')
     setTimeout(() => setConnectingPlatform(null), 2000)
@@ -238,9 +254,9 @@ export default function Accounts() {
           <div className="grid grid-cols-3 gap-4 mb-8">
             {loading ? [1,2,3].map(i => <SkeletonBox key={i} className="h-20 rounded-2xl" />) : (
               [
-                { label: 'Connected',            value: accounts.length,                                              icon: '✅', color: 'text-green-600' },
+                { label: 'Connected',            value: accounts.length,                                                   icon: '✅', color: 'text-green-600' },
                 { label: 'Platforms Used',        value: `${connectedPlatforms.size} / ${AVAILABLE_PLATFORMS.length} live`, icon: '📱', color: 'text-gray-700' },
-                { label: 'Accounts Per Platform', value: `${accountsPerPlatform} max`,                                icon: '🔓', color: 'text-blue-600' },
+                { label: 'Accounts Per Platform', value: `${accountsPerPlatform} max`,                                     icon: '🔓', color: 'text-blue-600' },
               ].map(stat => (
                 <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-4">
                   <div className="flex justify-between items-center mb-2">
@@ -281,7 +297,6 @@ export default function Accounts() {
                         <p className="text-xs text-gray-400">
                           Connected {new Date(account.connected_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </p>
-                        {/* Ac3: inline confirm before disconnect */}
                         {isConfirming ? (
                           <div className="flex items-center gap-2">
                             <span className="text-xs text-red-500 font-semibold">Disconnect?</span>
