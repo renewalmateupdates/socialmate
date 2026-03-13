@@ -12,11 +12,11 @@ const STRIPE_AGENCY_PRICE_ID = 'price_1T9qAd7OMwDowUuUpzjxLlG2'
 const TABS = ['Profile', 'Plan', 'Referrals', 'Notifications', 'Security', 'White Label']
 
 const REFERRAL_TIERS = [
-  { paying: 5,   reward: '1 month Pro free',  icon: '🎁' },
-  { paying: 10,  reward: '3 months Pro free', icon: '⭐' },
-  { paying: 25,  reward: '6 months Pro free', icon: '🚀' },
-  { paying: 50,  reward: '1 year Pro free',   icon: '💎' },
-  { paying: 100, reward: 'Pro free for life', icon: '👑' },
+  { paying: 5,   reward: '1 month Pro free',  icon: '🎁', conditional: false },
+  { paying: 10,  reward: '3 months Pro free', icon: '⭐', conditional: false },
+  { paying: 25,  reward: '6 months Pro free', icon: '🚀', conditional: false },
+  { paying: 50,  reward: 'Pro free while active', icon: '💎', conditional: true },
+  { paying: 100, reward: 'Pro free while active', icon: '👑', conditional: true },
 ]
 
 const CREDIT_PACKS = [
@@ -25,6 +25,8 @@ const CREDIT_PACKS = [
   { label: 'Pro Pack', credits: 750,  price: '$9.99',  priceId: 'price_1TA0nA7OMwDowUuU5wHTbucn', popular: false },
   { label: 'Max Pack', credits: 2000, price: '$19.99', priceId: 'price_1TA0nS7OMwDowUuUKURJ7ZM4', popular: false },
 ]
+
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate-six.vercel.app'
 
 function SettingsInner() {
   const { plan } = useWorkspace()
@@ -56,7 +58,6 @@ function SettingsInner() {
     productUpdates: true,
   })
   const [copiedLink, setCopiedLink] = useState(false)
-
   const [confirmDeletePosts, setConfirmDeletePosts] = useState(false)
   const [confirmDeleteAccount, setConfirmDeleteAccount] = useState(false)
   const [dangerLoading, setDangerLoading] = useState(false)
@@ -77,8 +78,13 @@ function SettingsInner() {
       setUserEmail(user.email || '')
       setUserId(user.id)
 
-      const code = `SM-${user.id.slice(0, 8).toUpperCase()}`
-      setReferralCode(code)
+      const { data: settings } = await supabase
+        .from('user_settings')
+        .select('referral_code')
+        .eq('user_id', user.id)
+        .single()
+
+      if (settings?.referral_code) setReferralCode(settings.referral_code)
 
       const { data: profile } = await supabase
         .from('profiles')
@@ -102,14 +108,14 @@ function SettingsInner() {
     const loadReferrals = async () => {
       setReferralLoading(true)
       const { data, error } = await supabase
-        .from('referrals')
+        .from('referral_conversions')
         .select('*')
-        .eq('referrer_id', userId)
-        .order('created_at', { ascending: false })
+        .eq('affiliate_user_id', userId)
+        .order('converted_at', { ascending: false })
 
       if (!error && data) {
-        const paying = data.filter((r: any) => r.status === 'paid' || r.status === 'completed')
-        const totalCredits = data.reduce((sum: number, r: any) => sum + (r.credits_awarded || 0), 0)
+        const paying = data.filter((r: any) => r.status === 'eligible' || r.status === 'paid')
+        const totalCredits = data.reduce((sum: number, r: any) => sum + (r.total_earned ?? 0), 0)
         setReferralStats({
           totalReferrals: data.length,
           payingReferrals: paying.length,
@@ -122,12 +128,13 @@ function SettingsInner() {
     loadReferrals()
   }, [activeTab, userId])
 
-  const referralLink = `https://socialmate.app/signup?ref=${referralCode}`
+  const referralLink = referralCode ? `${appUrl}/?ref=${referralCode}` : ''
+
+  const nextTier = REFERRAL_TIERS.find(t => referralStats.payingReferrals < t.paying)
 
   const handleSave = async (tab: string) => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
-
     if (tab === 'Profile') {
       await supabase.from('profiles').update({
         display_name: displayName,
@@ -135,7 +142,6 @@ function SettingsInner() {
         bio,
       }).eq('id', user.id)
     }
-
     setSavedTab(tab)
     setTimeout(() => setSavedTab(null), 2000)
   }
@@ -233,7 +239,6 @@ function SettingsInner() {
             <p className="text-sm text-gray-400 mt-0.5">Manage your account, plan, and preferences</p>
           </div>
 
-          {/* TABS */}
           <div className="flex items-center gap-1 mb-6 bg-white border border-gray-100 rounded-2xl p-1.5 flex-wrap">
             {TABS.map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)}
@@ -251,33 +256,24 @@ function SettingsInner() {
               <h2 className="text-base font-extrabold">Profile</h2>
               <div>
                 <label className="text-xs font-bold text-gray-500 block mb-1">Display Name</label>
-                <input
-                  value={displayName}
-                  onChange={e => setDisplayName(e.target.value)}
+                <input value={displayName} onChange={e => setDisplayName(e.target.value)}
                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all" />
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-500 block mb-1">Email</label>
-                <input
-                  value={userEmail}
-                  disabled
+                <input value={userEmail} disabled
                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none bg-gray-50 text-gray-400 cursor-not-allowed" />
                 <p className="text-xs text-gray-400 mt-1">Email cannot be changed here.</p>
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-500 block mb-1">Username / Handle</label>
-                <input
-                  value={username}
-                  onChange={e => setUsername(e.target.value)}
+                <input value={username} onChange={e => setUsername(e.target.value)}
                   placeholder="@yourhandle"
                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all" />
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-500 block mb-1">Bio</label>
-                <textarea
-                  rows={3}
-                  value={bio}
-                  onChange={e => setBio(e.target.value)}
+                <textarea rows={3} value={bio} onChange={e => setBio(e.target.value)}
                   placeholder="Tell your audience about yourself..."
                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all resize-none" />
               </div>
@@ -310,9 +306,7 @@ function SettingsInner() {
                     <div className="bg-black text-white rounded-xl p-4">
                       <p className="text-sm font-extrabold mb-1">Upgrade to Pro — $5/month</p>
                       <p className="text-xs text-gray-400 mb-3">5 accounts per platform, 500 AI credits, 10 GB storage, 90-day analytics</p>
-                      <button
-                        onClick={() => handleCheckout(STRIPE_PRO_PRICE_ID)}
-                        disabled={checkoutLoading}
+                      <button onClick={() => handleCheckout(STRIPE_PRO_PRICE_ID)} disabled={checkoutLoading}
                         className="bg-white text-black text-xs font-bold px-4 py-2 rounded-lg hover:opacity-80 transition-all disabled:opacity-60">
                         {checkoutLoading ? 'Loading...' : 'Upgrade to Pro →'}
                       </button>
@@ -320,9 +314,7 @@ function SettingsInner() {
                     <div className="border border-purple-200 rounded-xl p-4">
                       <p className="text-sm font-extrabold mb-1">Agency — $20/month</p>
                       <p className="text-xs text-gray-400 mb-3">15 team seats, client workspaces, 50 GB storage, 6-month analytics</p>
-                      <button
-                        onClick={() => handleCheckout(STRIPE_AGENCY_PRICE_ID)}
-                        disabled={checkoutLoading}
+                      <button onClick={() => handleCheckout(STRIPE_AGENCY_PRICE_ID)} disabled={checkoutLoading}
                         className="bg-purple-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:opacity-80 transition-all disabled:opacity-60">
                         {checkoutLoading ? 'Loading...' : 'Upgrade to Agency →'}
                       </button>
@@ -334,18 +326,14 @@ function SettingsInner() {
                     <div className="border border-purple-200 rounded-xl p-4">
                       <p className="text-sm font-extrabold mb-1">Upgrade to Agency — $20/month</p>
                       <p className="text-xs text-gray-400 mb-3">15 team seats, client workspaces, 2,000 AI credits, 6-month analytics</p>
-                      <button
-                        onClick={() => handleCheckout(STRIPE_AGENCY_PRICE_ID)}
-                        disabled={checkoutLoading}
+                      <button onClick={() => handleCheckout(STRIPE_AGENCY_PRICE_ID)} disabled={checkoutLoading}
                         className="bg-purple-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:opacity-80 transition-all disabled:opacity-60">
                         {checkoutLoading ? 'Loading...' : 'Upgrade to Agency →'}
                       </button>
                     </div>
                     <div>
                       <p className="text-xs text-gray-500 mb-3">Manage billing, invoices, and cancellation below.</p>
-                      <button
-                        onClick={handlePortal}
-                        disabled={checkoutLoading}
+                      <button onClick={handlePortal} disabled={checkoutLoading}
                         className="text-xs font-bold text-black border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 transition-all disabled:opacity-60">
                         {checkoutLoading ? 'Loading...' : 'Manage Subscription →'}
                       </button>
@@ -355,9 +343,7 @@ function SettingsInner() {
                 {plan === 'agency' && (
                   <div>
                     <p className="text-xs text-gray-500 mb-3">Manage billing, invoices, and cancellation below.</p>
-                    <button
-                      onClick={handlePortal}
-                      disabled={checkoutLoading}
+                    <button onClick={handlePortal} disabled={checkoutLoading}
                       className="text-xs font-bold text-black border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 transition-all disabled:opacity-60">
                       {checkoutLoading ? 'Loading...' : 'Manage Subscription →'}
                     </button>
@@ -365,7 +351,6 @@ function SettingsInner() {
                 )}
               </div>
 
-              {/* AI CREDITS */}
               <div className="bg-white border border-gray-100 rounded-2xl p-6">
                 <h2 className="text-base font-extrabold mb-4">AI Credits</h2>
                 <div className="flex items-center justify-between mb-2">
@@ -383,8 +368,6 @@ function SettingsInner() {
                     {plan === 'free' ? '150' : plan === 'pro' ? '750' : '3,000'}
                   </span>
                 </div>
-
-                {/* CREDIT PACKS */}
                 <div className="border-t border-gray-100 pt-5">
                   <p className="text-xs font-extrabold mb-1">Buy Credit Packs</p>
                   <p className="text-xs text-gray-400 mb-4">One-time purchase — credits added instantly to your balance.</p>
@@ -392,17 +375,13 @@ function SettingsInner() {
                     {CREDIT_PACKS.map(pack => (
                       <div key={pack.priceId} className={`relative border rounded-xl p-4 ${pack.popular ? 'border-black' : 'border-gray-200'}`}>
                         {pack.popular && (
-                          <span className="absolute -top-2 left-3 text-xs font-bold bg-black text-white px-2 py-0.5 rounded-full">
-                            Popular
-                          </span>
+                          <span className="absolute -top-2 left-3 text-xs font-bold bg-black text-white px-2 py-0.5 rounded-full">Popular</span>
                         )}
                         <p className="text-sm font-extrabold mb-0.5">{pack.label}</p>
                         <p className="text-xs text-gray-400 mb-3">{pack.credits.toLocaleString()} credits</p>
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-extrabold">{pack.price}</span>
-                          <button
-                            onClick={() => handleCreditPack(pack.priceId)}
-                            disabled={creditPackLoading === pack.priceId}
+                          <button onClick={() => handleCreditPack(pack.priceId)} disabled={creditPackLoading === pack.priceId}
                             className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-lg hover:opacity-80 transition-all disabled:opacity-60">
                             {creditPackLoading === pack.priceId ? '...' : 'Buy'}
                           </button>
@@ -441,9 +420,9 @@ function SettingsInner() {
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Your Referral Link</p>
                     <div className="flex items-center gap-3 mb-3">
                       <div className="flex-1 bg-white/10 rounded-xl px-4 py-3 text-sm font-mono truncate">
-                        {referralLink}
+                        {referralLink || 'Loading...'}
                       </div>
-                      <button onClick={handleCopyLink}
+                      <button onClick={handleCopyLink} disabled={!referralLink}
                         className={`px-5 py-3 rounded-xl text-sm font-bold transition-all flex-shrink-0 ${
                           copiedLink ? 'bg-green-500 text-white' : 'bg-white text-black hover:opacity-80'
                         }`}>
@@ -451,24 +430,25 @@ function SettingsInner() {
                       </button>
                     </div>
                     <p className="text-xs text-gray-400">
-                      Signup → <span className="text-white font-bold">+5 credits</span> &nbsp;·&nbsp;
-                      Upgrades to Pro → <span className="text-white font-bold">+50 credits</span> &nbsp;·&nbsp;
-                      Upgrades to Agency → <span className="text-white font-bold">+100 credits</span>
+                      They upgrade to Pro → <span className="text-white font-bold">+50 credits</span> &nbsp;·&nbsp;
+                      They upgrade to Agency → <span className="text-white font-bold">+100 credits</span>
                     </p>
                   </div>
 
-                  <div className="bg-white border border-gray-100 rounded-2xl p-6">
-                    <h2 className="text-base font-extrabold mb-1">Next Milestone</h2>
-                    <p className="text-xs text-gray-400 mb-4">
-                      You have <span className="font-bold text-black">{referralStats.payingReferrals}</span> paying referral{referralStats.payingReferrals !== 1 ? 's' : ''}.
-                      Reach <span className="font-bold text-black">5</span> to unlock your first free month of Pro.
-                    </p>
-                    <div className="w-full bg-gray-100 rounded-full h-2.5 mb-2">
-                      <div className="bg-black h-2.5 rounded-full transition-all"
-                        style={{ width: `${Math.min((referralStats.payingReferrals / 5) * 100, 100)}%` }} />
+                  {nextTier && (
+                    <div className="bg-white border border-gray-100 rounded-2xl p-6">
+                      <h2 className="text-base font-extrabold mb-1">Next Milestone</h2>
+                      <p className="text-xs text-gray-400 mb-4">
+                        You have <span className="font-bold text-black">{referralStats.payingReferrals}</span> paying referral{referralStats.payingReferrals !== 1 ? 's' : ''}.
+                        Reach <span className="font-bold text-black">{nextTier.paying}</span> to unlock <span className="font-bold text-black">{nextTier.reward}</span>.
+                      </p>
+                      <div className="w-full bg-gray-100 rounded-full h-2.5 mb-2">
+                        <div className="bg-black h-2.5 rounded-full transition-all"
+                          style={{ width: `${Math.min((referralStats.payingReferrals / nextTier.paying) * 100, 100)}%` }} />
+                      </div>
+                      <p className="text-xs text-gray-400">{referralStats.payingReferrals} / {nextTier.paying} paying referrals</p>
                     </div>
-                    <p className="text-xs text-gray-400">{referralStats.payingReferrals} / 5 paying referrals</p>
-                  </div>
+                  )}
 
                   <div className="bg-white border border-gray-100 rounded-2xl p-6">
                     <h2 className="text-base font-extrabold mb-5">Reward Tiers</h2>
@@ -480,7 +460,12 @@ function SettingsInner() {
                             <div className="flex items-center gap-3">
                               <span className="text-xl">{unlocked ? '✅' : tier.icon}</span>
                               <div>
-                                <p className="text-sm font-bold">{tier.paying} paying referral{tier.paying > 1 ? 's' : ''}</p>
+                                <p className="text-sm font-bold">
+                                  {tier.paying} paying referral{tier.paying > 1 ? 's' : ''}
+                                  {tier.conditional && (
+                                    <span className="ml-2 text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">while active</span>
+                                  )}
+                                </p>
                                 {unlocked && <p className="text-xs text-green-500 font-bold">Unlocked</p>}
                               </div>
                             </div>
@@ -492,7 +477,7 @@ function SettingsInner() {
                       })}
                     </div>
                     <p className="text-xs text-gray-400 mt-4 pt-4 border-t border-gray-50">
-                      Paying referrals only count after 30 days of active subscription. Abuse results in permanent account termination.
+                      Tiers 1–3 are permanent once earned. Tiers 4–5 remain active as long as you maintain the required paying referrals. Abuse results in permanent account termination.
                     </p>
                   </div>
 
@@ -509,14 +494,14 @@ function SettingsInner() {
                         {referralHistory.map((entry: any, i: number) => (
                           <div key={i} className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
                             <div>
-                              <p className="text-sm font-bold">{entry.referred_email || 'Referred user'}</p>
+                              <p className="text-sm font-bold">Referred user</p>
                               <p className="text-xs text-gray-400">
-                                {new Date(entry.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} · {entry.status}
+                                {new Date(entry.converted_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} · {entry.status}
                               </p>
                             </div>
-                            {entry.credits_awarded > 0 && (
+                            {entry.total_earned > 0 && (
                               <span className="text-xs font-bold text-green-600 bg-green-50 px-3 py-1.5 rounded-xl">
-                                +{entry.credits_awarded} credits
+                                ${entry.total_earned.toFixed(2)} earned
                               </span>
                             )}
                           </div>
@@ -621,7 +606,6 @@ function SettingsInner() {
                       Delete all scheduled posts
                     </button>
                   )}
-
                   {confirmDeleteAccount ? (
                     <div className="border border-red-300 rounded-xl px-4 py-3 bg-red-50">
                       <p className="text-xs font-bold text-red-700 mb-2">
@@ -659,9 +643,7 @@ function SettingsInner() {
                   <p className="text-xs text-gray-400 mb-5 max-w-sm mx-auto leading-relaxed">
                     Remove SocialMate branding and replace it with your own. Available as a $20/month add-on on Pro and Agency plans.
                   </p>
-                  <button
-                    onClick={() => handleCheckout(STRIPE_PRO_PRICE_ID)}
-                    disabled={checkoutLoading}
+                  <button onClick={() => handleCheckout(STRIPE_PRO_PRICE_ID)} disabled={checkoutLoading}
                     className="bg-black text-white text-xs font-bold px-5 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
                     {checkoutLoading ? 'Loading...' : 'Upgrade to unlock →'}
                   </button>

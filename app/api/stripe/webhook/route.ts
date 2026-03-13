@@ -41,6 +41,12 @@ const PLAN_MONTHLY_VALUE: Record<string, number> = {
   agency: 20.00,
 }
 
+// Credits awarded to referrer when referred user upgrades
+const REFERRAL_UPGRADE_CREDITS: Record<string, number> = {
+  pro:    50,
+  agency: 100,
+}
+
 function safeDate(ts: number | null | undefined): string | null {
   if (!ts) return null
   try { return new Date(ts * 1000).toISOString() } catch { return null }
@@ -62,6 +68,45 @@ function getSupabase() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
+}
+
+async function processReferralCredits(
+  supabase: ReturnType<typeof getSupabase>,
+  referredUserId: string,
+  plan: string,
+  isNewSubscription: boolean
+) {
+  if (!isNewSubscription) return
+  const creditsToAward = REFERRAL_UPGRADE_CREDITS[plan]
+  if (!creditsToAward) return
+
+  try {
+    const { data: conversion } = await supabase
+      .from('referral_conversions')
+      .select('affiliate_user_id')
+      .eq('referred_user_id', referredUserId)
+      .single()
+
+    if (!conversion) return
+
+    const { data: referrerSettings } = await supabase
+      .from('user_settings')
+      .select('ai_credits_remaining')
+      .eq('user_id', conversion.affiliate_user_id)
+      .single()
+
+    if (!referrerSettings) return
+
+    await supabase
+      .from('user_settings')
+      .update({
+        ai_credits_remaining: (referrerSettings.ai_credits_remaining ?? 0) + creditsToAward,
+      })
+      .eq('user_id', conversion.affiliate_user_id)
+
+  } catch (err) {
+    console.error('Referral credit award error:', err)
+  }
 }
 
 async function processAffiliateCommission(
@@ -222,6 +267,7 @@ export async function POST(req: NextRequest) {
     }, { onConflict: 'user_id' })
 
     if (userId) {
+      await processReferralCredits(supabase, userId, plan, true)
       await processAffiliateCommission(supabase, userId, plan, true)
     }
   }
