@@ -135,6 +135,7 @@ export default function Accounts() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null)
   const [confirmDisconnect, setConfirmDisconnect] = useState<string | null>(null)
+  const [showDiscordModal, setShowDiscordModal] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
   const { plan } = useWorkspace()
@@ -187,7 +188,7 @@ export default function Accounts() {
     }
 
     if (platform === 'discord') {
-      window.location.href = '/api/accounts/discord/connect'
+      setShowDiscordModal(true)
       return
     }
 
@@ -407,6 +408,31 @@ export default function Accounts() {
 
         </div>
       </div>
+
+      {/* DISCORD MODAL */}
+      {showDiscordModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl">
+            <p className="text-lg font-bold mb-2">💬 Adding a Discord Account</p>
+            <p className="text-sm text-gray-500 mb-4">
+              Make sure you're logged into the Discord account you want to connect before continuing.
+              To add a different account, log into that Discord account in your browser first.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDiscordModal(false)}
+                className="flex-1 text-sm font-semibold px-4 py-2.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                Cancel
+              </button>
+              <button
+                onClick={() => { setShowDiscordModal(false); window.location.href = '/api/accounts/discord/connect' }}
+                className="flex-1 text-sm font-semibold px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:opacity-80 transition-all">
+                Continue to Discord
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {toast && (
         <div className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${
