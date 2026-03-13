@@ -14,10 +14,10 @@ function SkeletonBox({ className }: { className?: string }) {
 type Account = {
   id: string
   platform: string
-  username: string
-  avatar_url: string
-  connected_at: string
-  status: string
+  account_name: string
+  profile_image_url: string
+  created_at: string
+  is_active: boolean
 }
 
 type PlatformStatus = 'available' | 'coming_soon' | 'planned'
@@ -165,7 +165,7 @@ export default function Accounts() {
         .from('connected_accounts')
         .select('*')
         .eq('user_id', user.id)
-        .order('connected_at', { ascending: false })
+        .order('created_at', { ascending: false })
       setAccounts(data || [])
       setLoading(false)
     }
@@ -291,11 +291,11 @@ export default function Accounts() {
                             <span className="text-xs text-gray-400">{platformCount}/{accountsPerPlatform} accounts</span>
                           )}
                         </div>
-                        <p className="text-xs text-gray-500 mt-0.5">@{account.username}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">@{account.account_name}</p>
                       </div>
                       <div className="flex items-center gap-2">
                         <p className="text-xs text-gray-400">
-                          Connected {new Date(account.connected_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          Connected {new Date(account.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </p>
                         {isConfirming ? (
                           <div className="flex items-center gap-2">

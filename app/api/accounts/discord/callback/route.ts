@@ -46,12 +46,12 @@ export async function GET(request: NextRequest) {
   })
 
   if (!userRes.ok) {
-    return NextResponse.redirect(`${appUrl}/accounts?error=user_failed`)
+    return NextResponse.redirect(`${appUrl}/accounts?error=token_failed`)
   }
 
   const discordUser = await userRes.json()
-  const username = discordUser.global_name || discordUser.username
-  const avatar_url = discordUser.avatar
+  const account_name = discordUser.global_name || discordUser.username
+  const profile_image_url = discordUser.avatar
     ? `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png`
     : null
   const expires_at = new Date(Date.now() + expires_in * 1000).toISOString()
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.redirect(`${appUrl}/login`)
 
-  // Check if this Discord account already connected
+  // Check if this Discord account is already connected
   const { data: existing } = await supabase
     .from('connected_accounts')
     .select('id')
@@ -84,27 +84,23 @@ export async function GET(request: NextRequest) {
     .single()
 
   if (existing) {
-    // Update tokens
     await supabase
       .from('connected_accounts')
       .update({ access_token, refresh_token, expires_at, scope })
       .eq('id', existing.id)
   } else {
-    // Insert new
     const { error: dbError } = await supabase
       .from('connected_accounts')
       .insert({
         user_id: user.id,
         platform: 'discord',
         platform_user_id: discordUser.id,
-        username,
-        avatar_url,
+        account_name,
+        profile_image_url,
         access_token,
         refresh_token,
         expires_at,
         scope,
-        status: 'active',
-        connected_at: new Date().toISOString(),
       })
 
     if (dbError) {
