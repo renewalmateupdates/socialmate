@@ -3,6 +3,10 @@ import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+import { Resend } from 'resend'
+
+const resend = new Resend(process.env.RESEND_API_KEY)
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate-six.vercel.app'
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
@@ -15,9 +19,7 @@ export async function GET(request: NextRequest) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
-          getAll() {
-            return cookieStore.getAll()
-          },
+          getAll() { return cookieStore.getAll() },
           setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options)
@@ -30,24 +32,21 @@ export async function GET(request: NextRequest) {
     const { data: { session } } = await supabase.auth.exchangeCodeForSession(code)
 
     if (session?.user) {
-      // Check for referral cookie and process it
-      const refCode = cookieStore.get('sm_ref')?.value
+      const adminSupabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
 
+      // Referral tracking
+      const refCode = cookieStore.get('sm_ref')?.value
       if (refCode) {
         try {
-          const adminSupabase = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.SUPABASE_SERVICE_ROLE_KEY!
-          )
-
-          // Find the affiliate by their referral code in user_settings
           const { data: referrerSettings } = await adminSupabase
             .from('user_settings')
             .select('user_id')
             .eq('referral_code', refCode)
             .single()
 
-          // Only create conversion if referrer exists and it's not self-referral
           if (referrerSettings && referrerSettings.user_id !== session.user.id) {
             await adminSupabase
               .from('referral_conversions')
@@ -59,19 +58,56 @@ export async function GET(request: NextRequest) {
                 converted_at: new Date().toISOString(),
                 lock_expires_at: new Date(
                   Date.now() + 60 * 24 * 60 * 60 * 1000
-                ).toISOString(), // 60 days
+                ).toISOString(),
               }, {
-                onConflict: 'referred_user_id', // one referral per user
+                onConflict: 'referred_user_id',
                 ignoreDuplicates: true,
               })
           }
         } catch (err) {
-          // Non-blocking — referral tracking failure should never break auth
           console.error('Referral tracking error:', err)
         }
-
-        // Clear the referral cookie
         cookieStore.delete('sm_ref')
+      }
+
+      // Welcome email
+      try {
+        const email = session.user.email
+        if (email) {
+          await resend.emails.send({
+            from: 'SocialMate <onboarding@resend.dev>',
+            to: email,
+            subject: '👋 Welcome to SocialMate!',
+            html: `
+              <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 32px; color: #111;">
+                <div style="font-size: 24px; font-weight: 800; margin-bottom: 8px;">SocialMate</div>
+                <hr style="border: none; border-top: 1px solid #eee; margin: 16px 0;" />
+                <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 8px;">Welcome aboard! 🎉</h2>
+                <p style="color: #555; font-size: 15px; line-height: 1.6;">
+                  Your account is all set. You're on the <strong>Free plan</strong> with access to
+                  AI tools, scheduling, and all 16 platforms right out of the gate.
+                </p>
+                <div style="background: #f9f9f9; border-radius: 12px; padding: 20px; margin: 24px 0;">
+                  <div style="font-size: 13px; font-weight: 700; color: #111; margin-bottom: 12px;">Here's what you can do right now:</div>
+                  <div style="font-size: 13px; color: #555; line-height: 2;">
+                    📅 &nbsp;<a href="${appUrl}/calendar" style="color: #000;">Schedule your first post</a><br/>
+                    🤖 &nbsp;<a href="${appUrl}/ai-features" style="color: #000;">Try the AI caption tools</a><br/>
+                    📊 &nbsp;<a href="${appUrl}/analytics" style="color: #000;">Set up your analytics</a><br/>
+                    🔗 &nbsp;<a href="${appUrl}/link-in-bio" style="color: #000;">Build your link in bio page</a>
+                  </div>
+                </div>
+                <p style="color: #555; font-size: 14px; line-height: 1.6;">
+                  Need more AI credits or connected accounts?
+                  <a href="${appUrl}/settings" style="color: #000; font-weight: 600;">Upgrade to Pro for $5/month →</a>
+                </p>
+                <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
+                <p style="color: #aaa; font-size: 12px;">SocialMate · Built for creators, small businesses, and agencies</p>
+              </div>
+            `,
+          })
+        }
+      } catch (err) {
+        console.error('Welcome email error:', err)
       }
 
       const { data: profile } = await supabase
