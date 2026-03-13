@@ -8,6 +8,7 @@ import Sidebar from '@/components/Sidebar'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 import BlueskyConnectModal from '@/components/BlueskyConnectModal'
 import TelegramConnectModal from '@/components/TelegramConnectModal'
+import MastodonConnectModal from '@/components/MastodonConnectModal'
 
 function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 rounded-xl animate-pulse ${className}`} />
@@ -135,6 +136,7 @@ function AccountsInner() {
   const [showDiscordModal, setShowDiscordModal] = useState(false)
   const [showBlueskyModal, setShowBlueskyModal] = useState(false)
   const [showTelegramModal, setShowTelegramModal] = useState(false)
+  const [showMastodonModal, setShowMastodonModal] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
   const { plan } = useWorkspace()
@@ -162,9 +164,17 @@ function AccountsInner() {
     const success = searchParams.get('success')
     const error = searchParams.get('error')
     if (success === 'discord_connected') showToast('Discord connected successfully!', 'success')
+    if (success === 'mastodon_connected') showToast('Mastodon connected successfully!', 'success')
     if (error === 'discord_denied') showToast('Discord connection cancelled', 'error')
+    if (error === 'mastodon_denied') showToast('Mastodon connection cancelled', 'error')
+    if (error === 'mastodon_no_instance') showToast('No instance provided', 'error')
+    if (error === 'mastodon_instance_unreachable') showToast('Could not reach that Mastodon instance', 'error')
+    if (error === 'mastodon_register_failed') showToast('Failed to register with that instance', 'error')
+    if (error === 'mastodon_invalid_state') showToast('Security check failed, please try again', 'error')
+    if (error === 'mastodon_token_failed') showToast('Failed to connect Mastodon, please try again', 'error')
+    if (error === 'mastodon_db_error') showToast('Something went wrong saving your account', 'error')
     if (error === 'invalid_state') showToast('Security check failed, please try again', 'error')
-    if (error === 'token_failed') showToast('Failed to connect Discord, please try again', 'error')
+    if (error === 'token_failed') showToast('Failed to connect, please try again', 'error')
     if (error === 'db_error') showToast('Something went wrong saving your account', 'error')
   }, [searchParams])
 
@@ -196,9 +206,10 @@ function AccountsInner() {
       showToast(`Your ${planConfig.label} plan allows ${accountsPerPlatform} account${accountsPerPlatform !== 1 ? 's' : ''} per platform`, 'error')
       return
     }
-    if (platform === 'discord') { setShowDiscordModal(true); return }
-    if (platform === 'bluesky') { setShowBlueskyModal(true); return }
+    if (platform === 'discord')  { setShowDiscordModal(true);  return }
+    if (platform === 'bluesky')  { setShowBlueskyModal(true);  return }
     if (platform === 'telegram') { setShowTelegramModal(true); return }
+    if (platform === 'mastodon') { setShowMastodonModal(true); return }
 
     setConnectingPlatform(platform)
     showToast(`${PLATFORM_META[platform]?.label || platform} integration coming soon!`, 'success')
@@ -431,8 +442,7 @@ function AccountsInner() {
               To add a different account, log into that Discord account in your browser first.
             </p>
             <div className="flex gap-3">
-              <button
-                onClick={() => setShowDiscordModal(false)}
+              <button onClick={() => setShowDiscordModal(false)}
                 className="flex-1 text-sm font-semibold px-4 py-2.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
                 Cancel
               </button>
@@ -459,6 +469,13 @@ function AccountsInner() {
         <TelegramConnectModal
           onSuccess={handleTelegramSuccess}
           onClose={() => setShowTelegramModal(false)}
+        />
+      )}
+
+      {/* MASTODON MODAL */}
+      {showMastodonModal && (
+        <MastodonConnectModal
+          onClose={() => setShowMastodonModal(false)}
         />
       )}
 
