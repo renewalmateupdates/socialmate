@@ -1,16 +1,28 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
 export default function ReferralBanner({ refCode }: { refCode: string }) {
   const [dismissed, setDismissed] = useState(false)
+  const [isAffiliate, setIsAffiliate] = useState(false)
+
+  useEffect(() => {
+    fetch(`/api/affiliate/check-code?ref=${refCode}`)
+      .then(r => r.json())
+      .then(d => setIsAffiliate(d.isAffiliate))
+      .catch(() => {})
+  }, [refCode])
+
   if (dismissed) return null
 
   return (
     <div className="w-full bg-black text-white text-sm py-2.5 px-4 flex items-center justify-center gap-3 relative">
       <span>🎁</span>
       <span className="font-medium">
-        You've been invited to SocialMate — create your free account and get started instantly.
+        {isAffiliate
+          ? 'You\'ve been referred by a SocialMate affiliate — create your free account and get started instantly.'
+          : 'You\'ve been invited to SocialMate — create your free account and get started instantly.'
+        }
       </span>
       <Link href="/signup" className="font-bold underline hover:no-underline ml-1">
         Get started free →
