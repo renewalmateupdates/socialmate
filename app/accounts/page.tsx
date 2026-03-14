@@ -166,21 +166,26 @@ function AccountsInner() {
     if (success === 'discord_connected')   showToast('Discord connected successfully!', 'success')
     if (success === 'mastodon_connected')  showToast('Mastodon connected successfully!', 'success')
     if (success === 'pinterest_connected') showToast('Pinterest connected successfully!', 'success')
-    if (error === 'discord_denied')                 showToast('Discord connection cancelled', 'error')
-    if (error === 'mastodon_denied')                showToast('Mastodon connection cancelled', 'error')
-    if (error === 'mastodon_no_instance')           showToast('No instance provided', 'error')
-    if (error === 'mastodon_instance_unreachable')  showToast('Could not reach that Mastodon instance', 'error')
-    if (error === 'mastodon_register_failed')       showToast('Failed to register with that instance', 'error')
-    if (error === 'mastodon_invalid_state')         showToast('Security check failed, please try again', 'error')
-    if (error === 'mastodon_token_failed')          showToast('Failed to connect Mastodon, please try again', 'error')
-    if (error === 'mastodon_db_error')              showToast('Something went wrong saving your account', 'error')
-    if (error === 'pinterest_denied')               showToast('Pinterest connection cancelled', 'error')
-    if (error === 'pinterest_invalid_state')        showToast('Security check failed, please try again', 'error')
-    if (error === 'pinterest_token_failed')         showToast('Failed to connect Pinterest, please try again', 'error')
-    if (error === 'pinterest_db_error')             showToast('Something went wrong saving your account', 'error')
-    if (error === 'invalid_state')                  showToast('Security check failed, please try again', 'error')
-    if (error === 'token_failed')                   showToast('Failed to connect, please try again', 'error')
-    if (error === 'db_error')                       showToast('Something went wrong saving your account', 'error')
+    if (success === 'linkedin_connected')  showToast('LinkedIn connected successfully!', 'success')
+    if (error === 'discord_denied')                showToast('Discord connection cancelled', 'error')
+    if (error === 'mastodon_denied')               showToast('Mastodon connection cancelled', 'error')
+    if (error === 'mastodon_no_instance')          showToast('No instance provided', 'error')
+    if (error === 'mastodon_instance_unreachable') showToast('Could not reach that Mastodon instance', 'error')
+    if (error === 'mastodon_register_failed')      showToast('Failed to register with that instance', 'error')
+    if (error === 'mastodon_invalid_state')        showToast('Security check failed, please try again', 'error')
+    if (error === 'mastodon_token_failed')         showToast('Failed to connect Mastodon, please try again', 'error')
+    if (error === 'mastodon_db_error')             showToast('Something went wrong saving your account', 'error')
+    if (error === 'pinterest_denied')              showToast('Pinterest connection cancelled', 'error')
+    if (error === 'pinterest_invalid_state')       showToast('Security check failed, please try again', 'error')
+    if (error === 'pinterest_token_failed')        showToast('Failed to connect Pinterest, please try again', 'error')
+    if (error === 'pinterest_db_error')            showToast('Something went wrong saving your account', 'error')
+    if (error === 'linkedin_denied')               showToast('LinkedIn connection cancelled', 'error')
+    if (error === 'linkedin_invalid_state')        showToast('Security check failed, please try again', 'error')
+    if (error === 'linkedin_token_failed')         showToast('Failed to connect LinkedIn, please try again', 'error')
+    if (error === 'linkedin_db_error')             showToast('Something went wrong saving your account', 'error')
+    if (error === 'invalid_state')                 showToast('Security check failed, please try again', 'error')
+    if (error === 'token_failed')                  showToast('Failed to connect, please try again', 'error')
+    if (error === 'db_error')                      showToast('Something went wrong saving your account', 'error')
   }, [searchParams])
 
   useEffect(() => {
@@ -216,6 +221,7 @@ function AccountsInner() {
     if (platform === 'telegram')  { setShowTelegramModal(true); return }
     if (platform === 'mastodon')  { setShowMastodonModal(true); return }
     if (platform === 'pinterest') { window.location.href = '/api/accounts/pinterest/connect'; return }
+    if (platform === 'linkedin')  { window.location.href = '/api/accounts/linkedin/connect';  return }
 
     setConnectingPlatform(platform)
     showToast(`${PLATFORM_META[platform]?.label || platform} integration coming soon!`, 'success')
@@ -438,7 +444,6 @@ function AccountsInner() {
         </div>
       </div>
 
-      {/* DISCORD MODAL */}
       {showDiscordModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl">
@@ -462,7 +467,6 @@ function AccountsInner() {
         </div>
       )}
 
-      {/* BLUESKY MODAL */}
       {showBlueskyModal && (
         <BlueskyConnectModal
           onSuccess={handleBlueskySuccess}
@@ -470,7 +474,6 @@ function AccountsInner() {
         />
       )}
 
-      {/* TELEGRAM MODAL */}
       {showTelegramModal && (
         <TelegramConnectModal
           onSuccess={handleTelegramSuccess}
@@ -478,7 +481,6 @@ function AccountsInner() {
         />
       )}
 
-      {/* MASTODON MODAL */}
       {showMastodonModal && (
         <MastodonConnectModal
           onClose={() => setShowMastodonModal(false)}
