@@ -1,5 +1,9 @@
 import { publishToDiscord } from './discord'
 import { publishToBluesky } from './bluesky'
+import { publishToTelegram } from './telegram'
+import { publishToMastodon } from './mastodon'
+import { publishToYouTube } from './youtube'
+import { publishToLinkedIn } from './linkedin'
 
 export type PublishResult = {
   platform: string
@@ -25,6 +29,18 @@ export async function publishToAll(
           break
         case 'bluesky':
           postId = await publishToBluesky(userId, content)
+          break
+        case 'telegram':
+          postId = await publishToTelegram(userId, content)
+          break
+        case 'mastodon':
+          postId = await publishToMastodon(userId, content)
+          break
+        case 'youtube':
+          postId = await publishToYouTube(userId, content)
+          break
+        case 'linkedin':
+          postId = await publishToLinkedIn(userId, content)
           break
         default:
           results.push({ platform, success: false, error: 'Platform adapter not yet implemented' })
