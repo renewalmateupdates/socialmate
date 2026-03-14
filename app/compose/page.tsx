@@ -64,6 +64,13 @@ const STARTER_TEMPLATES = [
   },
 ]
 
+type PublishResult = {
+  platform: string
+  success: boolean
+  postId?: string
+  error?: string
+}
+
 function ComposeInner() {
   const searchParams = useSearchParams()
   const { credits, setCredits, plan } = useWorkspace()
@@ -76,11 +83,14 @@ function ComposeInner() {
   const [activeAiTool, setActiveAiTool] = useState<string | null>(null)
   const [aiLoading, setAiLoading] = useState(false)
   const [aiError, setAiError] = useState('')
-  const [toast, setToast] = useState('')
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null)
   const [templateBanner, setTemplateBanner] = useState<string | null>(null)
   const [scheduleError, setScheduleError] = useState('')
+  const [publishing, setPublishing] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [currentDraftId, setCurrentDraftId] = useState<string | null>(null)
+  const [publishResults, setPublishResults] = useState<PublishResult[] | null>(null)
 
-  // Compute max schedulable date based on plan
   const planConfig = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
   const maxScheduleDate = (() => {
     const d = new Date()
@@ -133,9 +143,9 @@ function ComposeInner() {
   const charLimit = activePlatform?.limit ?? null
   const charOver = charLimit !== null && charCount > charLimit
 
-  const showToast = (msg: string) => {
-    setToast(msg)
-    setTimeout(() => setToast(''), 3000)
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
+    setToast({ message, type })
+    setTimeout(() => setToast(null), 4000)
   }
 
   const togglePlatform = (id: string) => {
@@ -157,7 +167,6 @@ function ComposeInner() {
 
   const handleAiTool = async (tool: typeof AI_TOOLS[0]) => {
     setAiError('')
-
     if (!content.trim()) {
       setAiError('Write something first — the AI needs your content or topic to work with.')
       return
@@ -166,11 +175,9 @@ function ComposeInner() {
       setAiError(`Not enough credits. This tool costs ${tool.credits} credit${tool.credits > 1 ? 's' : ''} and you have ${credits} remaining.`)
       return
     }
-
     setActiveAiTool(tool.id)
     setAiLoading(true)
     setAiResult('')
-
     try {
       const res = await fetch('/api/ai', {
         method: 'POST',
@@ -181,17 +188,14 @@ function ComposeInner() {
           platform: activePlatform?.name || 'general',
         }),
       })
-
       const data = await res.json()
-
       if (!res.ok || data.error) {
         setAiError('Something went wrong. Please try again.')
         return
       }
-
       setAiResult(data.result)
       setCredits(credits - tool.credits)
-      showToast(`Used ${tool.credits} credit${tool.credits > 1 ? 's' : ''} · ${credits - tool.credits} remaining`)
+      showToast(`Used ${tool.credits} credit${tool.credits > 1 ? 's' : ''} · ${credits - tool.credits} remaining`, 'info')
     } catch {
       setAiError('Network error. Please try again.')
     } finally {
@@ -215,6 +219,92 @@ function ComposeInner() {
     showToast('Post replaced ✓')
   }
 
+  const handlePublish = async () => {
+    if (!content.trim() || charOver || selectedPlatforms.length === 0 || !!scheduleError) return
+
+    setPublishing(true)
+    setPublishResults(null)
+
+    try {
+      let scheduledAt: string | undefined
+
+      if (scheduleDate) {
+        const time = scheduleTime || '09:00'
+        scheduledAt = new Date(`${scheduleDate}T${time}`).toISOString()
+      }
+
+      const res = await fetch('/api/posts/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content,
+          platforms: selectedPlatforms,
+          scheduledAt,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        showToast(data.error || 'Something went wrong', 'error')
+        return
+      }
+
+      if (scheduledAt) {
+        showToast('Post scheduled successfully! ✓')
+        setContent('')
+        setScheduleDate('')
+        setScheduleTime('')
+        setCurrentDraftId(null)
+      } else {
+        setPublishResults(data.results || [])
+        const allFailed = data.results?.every((r: PublishResult) => !r.success)
+        const someFailed = data.results?.some((r: PublishResult) => !r.success)
+
+        if (allFailed) {
+          showToast('Failed to publish to all platforms', 'error')
+        } else if (someFailed) {
+          showToast('Published to some platforms — check results below', 'info')
+        } else {
+          showToast('Published successfully! ✓')
+          setContent('')
+          setCurrentDraftId(null)
+        }
+      }
+    } catch {
+      showToast('Network error. Please try again.', 'error')
+    } finally {
+      setPublishing(false)
+    }
+  }
+
+  const handleSaveDraft = async () => {
+    if (!content.trim()) return
+    setSaving(true)
+    try {
+      const res = await fetch('/api/posts/draft', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content,
+          platforms: selectedPlatforms,
+          postId: currentDraftId,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        showToast(data.error || 'Failed to save draft', 'error')
+        return
+      }
+      setCurrentDraftId(data.postId)
+      showToast('Saved to drafts ✓')
+    } catch {
+      showToast('Network error. Please try again.', 'error')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar />
@@ -234,7 +324,6 @@ function ComposeInner() {
           )}
 
           <div className="grid grid-cols-3 gap-6">
-
             <div className="col-span-2 space-y-4">
 
               {/* PLATFORM SELECTOR */}
@@ -362,8 +451,8 @@ function ComposeInner() {
                 <div className="flex items-center justify-between mb-3">
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Schedule</p>
                   <span className="text-xs text-gray-400">
-                    {plan === 'free' && '⏳ Free — up to 2 weeks ahead'}
-                    {plan === 'pro'  && '⏳ Pro — up to 1 month ahead'}
+                    {plan === 'free'   && '⏳ Free — up to 2 weeks ahead'}
+                    {plan === 'pro'    && '⏳ Pro — up to 1 month ahead'}
                     {plan === 'agency' && '⏳ Agency — up to 3 months ahead'}
                   </span>
                 </div>
@@ -391,19 +480,48 @@ function ComposeInner() {
                 )}
               </div>
 
+              {/* PUBLISH RESULTS */}
+              {publishResults && (
+                <div className="bg-white border border-gray-100 rounded-2xl p-4">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Publish Results</p>
+                  <div className="space-y-2">
+                    {publishResults.map(result => (
+                      <div key={result.platform} className={`flex items-center gap-3 p-3 rounded-xl border ${
+                        result.success ? 'bg-green-50 border-green-100' : 'bg-red-50 border-red-100'
+                      }`}>
+                        <span className="text-lg">
+                          {PLATFORMS.find(p => p.id === result.platform)?.icon || '📱'}
+                        </span>
+                        <div className="flex-1">
+                          <p className="text-xs font-bold">
+                            {PLATFORMS.find(p => p.id === result.platform)?.name || result.platform}
+                          </p>
+                          {result.error && <p className="text-xs text-red-500 mt-0.5">{result.error}</p>}
+                        </div>
+                        <span className={`text-xs font-bold ${result.success ? 'text-green-600' : 'text-red-500'}`}>
+                          {result.success ? '✓ Published' : '✗ Failed'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* ACTIONS */}
               <div className="flex items-center gap-3">
                 <button
-                  onClick={() => showToast('Post scheduled! ✓')}
-                  disabled={!content.trim() || charOver || selectedPlatforms.length === 0 || !!scheduleError}
+                  onClick={handlePublish}
+                  disabled={publishing || !content.trim() || charOver || selectedPlatforms.length === 0 || !!scheduleError}
                   className="flex-1 bg-black text-white text-sm font-bold py-3 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-                  {scheduleDate ? 'Schedule Post' : 'Post Now'}
+                  {publishing
+                    ? (scheduleDate ? 'Scheduling...' : 'Publishing...')
+                    : (scheduleDate ? 'Schedule Post' : 'Post Now')}
                 </button>
                 <button
-                  onClick={() => showToast('Saved to drafts ✓')}
-                  disabled={!content.trim()}
+                  onClick={handleSaveDraft}
+                  disabled={saving || !content.trim()}
                   className="px-5 py-3 border border-gray-200 text-sm font-bold text-gray-600 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
-                  Save Draft
+                  {saving ? 'Saving...' : currentDraftId ? 'Update Draft' : 'Save Draft'}
                 </button>
               </div>
 
@@ -447,8 +565,12 @@ function ComposeInner() {
       </div>
 
       {toast && (
-        <div className="fixed bottom-6 right-6 bg-black text-white text-xs font-bold px-4 py-3 rounded-xl shadow-lg z-50">
-          {toast}
+        <div className={`fixed bottom-6 right-6 text-white text-xs font-bold px-4 py-3 rounded-xl shadow-lg z-50 ${
+          toast.type === 'error' ? 'bg-red-500' :
+          toast.type === 'info' ? 'bg-blue-600' :
+          'bg-black'
+        }`}>
+          {toast.message}
         </div>
       )}
     </div>
