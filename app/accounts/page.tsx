@@ -167,6 +167,7 @@ function AccountsInner() {
     if (success === 'mastodon_connected')  showToast('Mastodon connected successfully!', 'success')
     if (success === 'pinterest_connected') showToast('Pinterest connected successfully!', 'success')
     if (success === 'linkedin_connected')  showToast('LinkedIn connected successfully!', 'success')
+    if (success === 'youtube_connected')   showToast('YouTube connected successfully!', 'success')
     if (error === 'discord_denied')                showToast('Discord connection cancelled', 'error')
     if (error === 'mastodon_denied')               showToast('Mastodon connection cancelled', 'error')
     if (error === 'mastodon_no_instance')          showToast('No instance provided', 'error')
@@ -183,6 +184,11 @@ function AccountsInner() {
     if (error === 'linkedin_invalid_state')        showToast('Security check failed, please try again', 'error')
     if (error === 'linkedin_token_failed')         showToast('Failed to connect LinkedIn, please try again', 'error')
     if (error === 'linkedin_db_error')             showToast('Something went wrong saving your account', 'error')
+    if (error === 'youtube_denied')                showToast('YouTube connection cancelled', 'error')
+    if (error === 'youtube_invalid_state')         showToast('Security check failed, please try again', 'error')
+    if (error === 'youtube_token_failed')          showToast('Failed to connect YouTube, please try again', 'error')
+    if (error === 'youtube_no_channel')            showToast('No YouTube channel found on this account', 'error')
+    if (error === 'youtube_db_error')              showToast('Something went wrong saving your account', 'error')
     if (error === 'invalid_state')                 showToast('Security check failed, please try again', 'error')
     if (error === 'token_failed')                  showToast('Failed to connect, please try again', 'error')
     if (error === 'db_error')                      showToast('Something went wrong saving your account', 'error')
@@ -222,6 +228,7 @@ function AccountsInner() {
     if (platform === 'mastodon')  { setShowMastodonModal(true); return }
     if (platform === 'pinterest') { window.location.href = '/api/accounts/pinterest/connect'; return }
     if (platform === 'linkedin')  { window.location.href = '/api/accounts/linkedin/connect';  return }
+    if (platform === 'youtube')   { window.location.href = '/api/accounts/youtube/connect';   return }
 
     setConnectingPlatform(platform)
     showToast(`${PLATFORM_META[platform]?.label || platform} integration coming soon!`, 'success')
