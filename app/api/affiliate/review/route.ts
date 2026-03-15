@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
       const referralLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate-six.vercel.app'}/?ref=${settings?.referral_code}`
 
       await resend.emails.send({
-        from: 'SocialMate <onboarding@resend.dev>',
+        from: 'SocialMate <hello@socialmate.studio>',
         to: email,
         subject: '🎉 You\'re approved — welcome to the SocialMate Affiliate Program!',
         html: `
@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
 
     if (email) {
       await resend.emails.send({
-        from: 'SocialMate <onboarding@resend.dev>',
+        from: 'SocialMate <hello@socialmate.studio>',
         to: email,
         subject: 'Your SocialMate Affiliate Application',
         html: `

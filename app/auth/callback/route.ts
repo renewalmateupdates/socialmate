@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
         const email = session.user.email
         if (email) {
           await resend.emails.send({
-            from: 'SocialMate <onboarding@resend.dev>',
+            from: 'SocialMate <hello@socialmate.studio>',
             to: email,
             subject: '👋 Welcome to SocialMate!',
             html: `

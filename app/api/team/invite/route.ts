@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
 
   // Send invite email via Resend
   const { error: emailError } = await resend.emails.send({
-    from: 'SocialMate <onboarding@resend.dev>',
+    from: 'SocialMate <hello@socialmate.studio>',
     to: email,
     subject: `${inviterName} invited you to join SocialMate`,
     html: `
