@@ -71,10 +71,9 @@ function SettingsInner() {
   const [referralHistory, setReferralHistory] = useState<any[]>([])
   const [referralLoading, setReferralLoading] = useState(false)
 
-  // 2FA state
   const [mfaEnabled, setMfaEnabled] = useState(false)
   const [mfaFactorId, setMfaFactorId] = useState<string | null>(null)
-  const [mfaStep, setMfaStep] = useState<'idle' | 'enroll' | 'verify' | 'disable_confirm'>('idle')
+  const [mfaStep, setMfaStep] = useState<'idle' | 'enroll' | 'disable_confirm'>('idle')
   const [mfaQR, setMfaQR] = useState('')
   const [mfaSecret, setMfaSecret] = useState('')
   const [mfaEnrollId, setMfaEnrollId] = useState('')
@@ -107,7 +106,6 @@ function SettingsInner() {
         setBio(profile.bio || '')
       }
 
-      // Check existing MFA factors
       const { data: factors } = await supabase.auth.mfa.listFactors()
       const totpFactor = factors?.totp?.find((f: any) => f.status === 'verified')
       if (totpFactor) {
@@ -151,11 +149,7 @@ function SettingsInner() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
     if (tab === 'Profile') {
-      await supabase.from('profiles').update({
-        display_name: displayName,
-        username,
-        bio,
-      }).eq('id', user.id)
+      await supabase.from('profiles').update({ display_name: displayName, username, bio }).eq('id', user.id)
     }
     setSavedTab(tab)
     setTimeout(() => setSavedTab(null), 2000)
@@ -170,11 +164,7 @@ function SettingsInner() {
   const handleCheckout = async (priceId: string) => {
     setCheckoutLoading(true)
     try {
-      const res = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId }),
-      })
+      const res = await fetch('/api/stripe/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ priceId }) })
       const data = await res.json()
       if (data.url) window.location.href = data.url
       if (data.error === 'Unauthorized') router.push('/login')
@@ -185,11 +175,7 @@ function SettingsInner() {
   const handleCreditPack = async (priceId: string) => {
     setCreditPackLoading(priceId)
     try {
-      const res = await fetch('/api/stripe/credits', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId }),
-      })
+      const res = await fetch('/api/stripe/credits', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ priceId }) })
       const data = await res.json()
       if (data.url) window.location.href = data.url
       if (data.error === 'Unauthorized') router.push('/login')
@@ -210,9 +196,7 @@ function SettingsInner() {
   const handleDeleteAllPosts = async () => {
     setDangerLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      await supabase.from('posts').delete().eq('user_id', user.id).in('status', ['scheduled', 'draft'])
-    }
+    if (user) await supabase.from('posts').delete().eq('user_id', user.id).in('status', ['scheduled', 'draft'])
     setConfirmDeletePosts(false)
     setDangerLoading(false)
   }
@@ -223,16 +207,11 @@ function SettingsInner() {
     router.push('/login')
   }
 
-  // 2FA handlers
   const handleEnroll2FA = async () => {
     setMfaLoading(true)
     setMfaError('')
     const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' })
-    if (error || !data) {
-      setMfaError(error?.message || 'Failed to start 2FA setup')
-      setMfaLoading(false)
-      return
-    }
+    if (error || !data) { setMfaError(error?.message || 'Failed to start 2FA setup'); setMfaLoading(false); return }
     setMfaEnrollId(data.id)
     setMfaQR(data.totp.qr_code)
     setMfaSecret(data.totp.secret)
@@ -245,21 +224,9 @@ function SettingsInner() {
     setMfaLoading(true)
     setMfaError('')
     const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({ factorId: mfaEnrollId })
-    if (challengeError || !challenge) {
-      setMfaError(challengeError?.message || 'Challenge failed')
-      setMfaLoading(false)
-      return
-    }
-    const { data, error } = await supabase.auth.mfa.verify({
-      factorId: mfaEnrollId,
-      challengeId: challenge.id,
-      code: mfaCode,
-    })
-    if (error) {
-      setMfaError('Incorrect code — try again')
-      setMfaLoading(false)
-      return
-    }
+    if (challengeError || !challenge) { setMfaError(challengeError?.message || 'Challenge failed'); setMfaLoading(false); return }
+    const { error } = await supabase.auth.mfa.verify({ factorId: mfaEnrollId, challengeId: challenge.id, code: mfaCode })
+    if (error) { setMfaError('Incorrect code — try again'); setMfaLoading(false); return }
     setMfaEnabled(true)
     setMfaFactorId(mfaEnrollId)
     setMfaStep('idle')
@@ -274,11 +241,7 @@ function SettingsInner() {
     setMfaLoading(true)
     setMfaError('')
     const { error } = await supabase.auth.mfa.unenroll({ factorId: mfaFactorId })
-    if (error) {
-      setMfaError(error.message)
-      setMfaLoading(false)
-      return
-    }
+    if (error) { setMfaError(error.message); setMfaLoading(false); return }
     setMfaEnabled(false)
     setMfaFactorId(null)
     setMfaStep('idle')
@@ -310,9 +273,7 @@ function SettingsInner() {
           <div className="flex items-center gap-1 mb-6 bg-white border border-gray-100 rounded-2xl p-1.5 flex-wrap">
             {TABS.map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                  activeTab === tab ? 'bg-black text-white' : 'text-gray-500 hover:text-black'
-                }`}>
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === tab ? 'bg-black text-white' : 'text-gray-500 hover:text-black'}`}>
                 {tab}
               </button>
             ))}
@@ -335,8 +296,7 @@ function SettingsInner() {
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-500 block mb-1">Username / Handle</label>
-                <input value={username} onChange={e => setUsername(e.target.value)}
-                  placeholder="@yourhandle"
+                <input value={username} onChange={e => setUsername(e.target.value)} placeholder="@yourhandle"
                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all" />
               </div>
               <div>
@@ -346,9 +306,7 @@ function SettingsInner() {
                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all resize-none" />
               </div>
               <button onClick={() => handleSave('Profile')}
-                className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                  savedTab === 'Profile' ? 'bg-green-500 text-white' : 'bg-black text-white hover:opacity-80'
-                }`}>
+                className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${savedTab === 'Profile' ? 'bg-green-500 text-white' : 'bg-black text-white hover:opacity-80'}`}>
                 {savedTab === 'Profile' ? '✓ Saved!' : 'Save Changes'}
               </button>
             </div>
@@ -364,9 +322,7 @@ function SettingsInner() {
                     <p className="text-xs text-gray-400 mt-0.5">Your active subscription</p>
                   </div>
                   <span className={`text-xs font-bold px-3 py-1.5 rounded-full capitalize ${
-                    plan === 'free' ? 'bg-gray-100 text-gray-600' :
-                    plan === 'pro'  ? 'bg-black text-white' :
-                    'bg-purple-100 text-purple-700'
+                    plan === 'free' ? 'bg-gray-100 text-gray-600' : plan === 'pro' ? 'bg-black text-white' : 'bg-purple-100 text-purple-700'
                   }`}>{plan}</span>
                 </div>
                 {plan === 'free' && (
@@ -483,7 +439,6 @@ function SettingsInner() {
                       </div>
                     ))}
                   </div>
-
                   <div className="bg-black text-white rounded-2xl p-6">
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Your Referral Link</p>
                     <div className="flex items-center gap-3 mb-3">
@@ -491,9 +446,7 @@ function SettingsInner() {
                         {referralLink || 'Loading...'}
                       </div>
                       <button onClick={handleCopyLink} disabled={!referralLink}
-                        className={`px-5 py-3 rounded-xl text-sm font-bold transition-all flex-shrink-0 ${
-                          copiedLink ? 'bg-green-500 text-white' : 'bg-white text-black hover:opacity-80'
-                        }`}>
+                        className={`px-5 py-3 rounded-xl text-sm font-bold transition-all flex-shrink-0 ${copiedLink ? 'bg-green-500 text-white' : 'bg-white text-black hover:opacity-80'}`}>
                         {copiedLink ? '✓ Copied!' : 'Copy'}
                       </button>
                     </div>
@@ -502,7 +455,6 @@ function SettingsInner() {
                       They upgrade to Agency → <span className="text-white font-bold">+100 credits</span>
                     </p>
                   </div>
-
                   {nextTier && (
                     <div className="bg-white border border-gray-100 rounded-2xl p-6">
                       <h2 className="text-base font-extrabold mb-1">Next Milestone</h2>
@@ -517,7 +469,6 @@ function SettingsInner() {
                       <p className="text-xs text-gray-400">{referralStats.payingReferrals} / {nextTier.paying} paying referrals</p>
                     </div>
                   )}
-
                   <div className="bg-white border border-gray-100 rounded-2xl p-6">
                     <h2 className="text-base font-extrabold mb-5">Reward Tiers</h2>
                     <div className="space-y-3">
@@ -537,9 +488,7 @@ function SettingsInner() {
                                 {unlocked && <p className="text-xs text-green-500 font-bold">Unlocked</p>}
                               </div>
                             </div>
-                            <span className="text-xs font-extrabold px-3 py-2 bg-black text-white rounded-xl flex-shrink-0">
-                              {tier.reward}
-                            </span>
+                            <span className="text-xs font-extrabold px-3 py-2 bg-black text-white rounded-xl flex-shrink-0">{tier.reward}</span>
                           </div>
                         )
                       })}
@@ -548,7 +497,6 @@ function SettingsInner() {
                       Tiers 1–3 are permanent once earned. Tiers 4–5 remain active as long as you maintain the required paying referrals.
                     </p>
                   </div>
-
                   <div className="bg-white border border-gray-100 rounded-2xl p-6">
                     <h2 className="text-base font-extrabold mb-5">Referral History</h2>
                     {referralHistory.length === 0 ? (
@@ -602,20 +550,14 @@ function SettingsInner() {
                     </div>
                     <button
                       onClick={() => setNotifications(prev => ({ ...prev, [item.key]: !prev[item.key as keyof typeof prev] }))}
-                      className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 ${
-                        notifications[item.key as keyof typeof notifications] ? 'bg-black' : 'bg-gray-200'
-                      }`}>
-                      <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
-                        notifications[item.key as keyof typeof notifications] ? 'translate-x-5' : 'translate-x-0.5'
-                      }`} />
+                      className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 ${notifications[item.key as keyof typeof notifications] ? 'bg-black' : 'bg-gray-200'}`}>
+                      <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${notifications[item.key as keyof typeof notifications] ? 'translate-x-5' : 'translate-x-0.5'}`} />
                     </button>
                   </div>
                 ))}
               </div>
               <button onClick={() => handleSave('Notifications')}
-                className={`mt-5 px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                  savedTab === 'Notifications' ? 'bg-green-500 text-white' : 'bg-black text-white hover:opacity-80'
-                }`}>
+                className={`mt-5 px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${savedTab === 'Notifications' ? 'bg-green-500 text-white' : 'bg-black text-white hover:opacity-80'}`}>
                 {savedTab === 'Notifications' ? '✓ Saved!' : 'Save Preferences'}
               </button>
             </div>
@@ -633,9 +575,7 @@ function SettingsInner() {
                     {mfaEnabled ? '✓ Enabled' : 'Disabled'}
                   </span>
                 </div>
-                <p className="text-xs text-gray-400 mb-5">
-                  Add an extra layer of security using Google Authenticator or any TOTP app.
-                </p>
+                <p className="text-xs text-gray-400 mb-5">Add an extra layer of security using Google Authenticator or any TOTP app.</p>
 
                 {mfaError && (
                   <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-4">
@@ -643,7 +583,6 @@ function SettingsInner() {
                   </div>
                 )}
 
-                {/* Idle — not enrolled */}
                 {mfaStep === 'idle' && !mfaEnabled && (
                   <button onClick={handleEnroll2FA} disabled={mfaLoading}
                     className="px-5 py-2.5 bg-black text-white text-xs font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center gap-2">
@@ -652,23 +591,18 @@ function SettingsInner() {
                   </button>
                 )}
 
-                {/* Enroll — show QR */}
                 {mfaStep === 'enroll' && (
                   <div className="space-y-5">
                     <div className="bg-gray-50 rounded-2xl p-5">
                       <p className="text-xs font-bold text-gray-500 mb-3 uppercase tracking-wide">Step 1 — Scan with your authenticator app</p>
                       <div className="flex justify-center mb-4">
-                        <div
-                          className="w-40 h-40 bg-white border border-gray-200 rounded-xl p-2 flex items-center justify-center"
-                          dangerouslySetInnerHTML={{ __html: mfaQR }}
-                        />
+                        <img src={mfaQR} alt="2FA QR Code" className="w-40 h-40 rounded-xl" />
                       </div>
                       <p className="text-xs text-gray-400 text-center mb-2">Can't scan? Enter this code manually:</p>
                       <div className="bg-white border border-gray-200 rounded-xl px-4 py-2 text-center">
                         <p className="text-xs font-mono font-bold tracking-widest text-gray-700 break-all">{mfaSecret}</p>
                       </div>
                     </div>
-
                     <div>
                       <p className="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">Step 2 — Enter the 6-digit code</p>
                       <input
@@ -681,7 +615,6 @@ function SettingsInner() {
                         className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-center font-mono tracking-widest outline-none focus:border-black transition-all"
                       />
                     </div>
-
                     <div className="flex gap-3">
                       <button onClick={() => { setMfaStep('idle'); setMfaCode(''); setMfaError('') }}
                         className="px-5 py-2.5 border border-gray-200 text-xs font-bold rounded-xl hover:border-gray-400 transition-all">
@@ -696,24 +629,14 @@ function SettingsInner() {
                   </div>
                 )}
 
-                {/* Enabled — disable option */}
                 {mfaStep === 'idle' && mfaEnabled && (
-                  <div>
-                    {mfaStep === 'idle' && (
-                      <>
-                        {!confirmDeleteAccount ? (
-                          <button
-                            onClick={() => setMfaStep('disable_confirm' as any)}
-                            className="text-xs font-bold text-red-500 border border-red-100 rounded-xl px-4 py-2.5 hover:bg-red-50 transition-all">
-                            Disable 2FA
-                          </button>
-                        ) : null}
-                      </>
-                    )}
-                  </div>
+                  <button onClick={() => setMfaStep('disable_confirm')}
+                    className="text-xs font-bold text-red-500 border border-red-100 rounded-xl px-4 py-2.5 hover:bg-red-50 transition-all">
+                    Disable 2FA
+                  </button>
                 )}
 
-                {(mfaStep as string) === 'disable_confirm' && (
+                {mfaStep === 'disable_confirm' && (
                   <div className="border border-red-200 rounded-xl px-4 py-4 bg-red-50">
                     <p className="text-xs font-bold text-red-700 mb-3">
                       Disabling 2FA will remove the extra security layer from your account. Are you sure?
@@ -750,9 +673,7 @@ function SettingsInner() {
                     <input type="password" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all" />
                   </div>
                   <button onClick={() => handleSave('Security')}
-                    className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                      savedTab === 'Security' ? 'bg-green-500 text-white' : 'bg-black text-white hover:opacity-80'
-                    }`}>
+                    className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${savedTab === 'Security' ? 'bg-green-500 text-white' : 'bg-black text-white hover:opacity-80'}`}>
                     {savedTab === 'Security' ? '✓ Updated!' : 'Update Password'}
                   </button>
                 </div>
@@ -765,9 +686,7 @@ function SettingsInner() {
                 <div className="space-y-3">
                   {confirmDeletePosts ? (
                     <div className="border border-red-200 rounded-xl px-4 py-3 bg-red-50">
-                      <p className="text-xs font-bold text-red-600 mb-2">
-                        This will permanently delete all your scheduled and draft posts. Are you sure?
-                      </p>
+                      <p className="text-xs font-bold text-red-600 mb-2">This will permanently delete all your scheduled and draft posts. Are you sure?</p>
                       <div className="flex gap-2">
                         <button onClick={handleDeleteAllPosts} disabled={dangerLoading}
                           className="text-xs font-bold px-4 py-2 bg-red-500 text-white rounded-lg hover:opacity-80 transition-all disabled:opacity-40">
@@ -787,9 +706,7 @@ function SettingsInner() {
                   )}
                   {confirmDeleteAccount ? (
                     <div className="border border-red-300 rounded-xl px-4 py-3 bg-red-50">
-                      <p className="text-xs font-bold text-red-700 mb-2">
-                        Your account and all data will be permanently deleted. This cannot be undone.
-                      </p>
+                      <p className="text-xs font-bold text-red-700 mb-2">Your account and all data will be permanently deleted. This cannot be undone.</p>
                       <div className="flex gap-2">
                         <button onClick={handleDeleteAccount} disabled={dangerLoading}
                           className="text-xs font-bold px-4 py-2 bg-red-600 text-white rounded-lg hover:opacity-80 transition-all disabled:opacity-40">
@@ -858,9 +775,7 @@ function SettingsInner() {
                         <input type="color" defaultValue="#000000" className="h-10 w-20 border border-gray-200 rounded-xl cursor-pointer" />
                       </div>
                       <button onClick={() => handleSave('WhiteLabel')}
-                        className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                          savedTab === 'WhiteLabel' ? 'bg-green-500 text-white' : 'bg-black text-white hover:opacity-80'
-                        }`}>
+                        className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${savedTab === 'WhiteLabel' ? 'bg-green-500 text-white' : 'bg-black text-white hover:opacity-80'}`}>
                         {savedTab === 'WhiteLabel' ? '✓ Saved!' : 'Save Branding'}
                       </button>
                     </div>
