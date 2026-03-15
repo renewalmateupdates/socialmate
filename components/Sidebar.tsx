@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useWorkspace, PLAN_CONFIG, PLATFORMS_TOTAL } from '@/contexts/WorkspaceContext'
+import FeedbackWidget from '@/components/FeedbackWidget'
 
 const STRIPE_PRO_PRICE_ID = 'price_1T9pay7OMwDowUuU7S3G3lNX'
 const STRIPE_AGENCY_PRICE_ID = 'price_1T9qAd7OMwDowUuUpzjxLlG2'
@@ -142,203 +143,207 @@ export default function Sidebar() {
   }
 
   return (
-    <div className="w-56 bg-white border-r border-gray-100 flex flex-col flex-shrink-0 h-screen sticky top-0 fixed left-0 z-40">
+    <>
+      <div className="w-56 bg-white border-r border-gray-100 flex flex-col flex-shrink-0 h-screen sticky top-0 fixed left-0 z-40">
 
-      {/* HEADER */}
-      <div className="p-4 border-b border-gray-100">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
-            <span className="font-bold text-base tracking-tight">SocialMate</span>
-          </div>
-          <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${badge.color}`}>
-            {badge.label}
-          </span>
-        </div>
-
-        {/* WORKSPACE SWITCHER */}
-        <div className="relative">
-          <button
-            onClick={() => { setWsOpen(p => !p); setShowUpgradeNudge(false) }}
-            className="w-full flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl text-xs font-semibold text-gray-700 hover:border-gray-300 transition-all">
-            <div className="flex items-center gap-2 min-w-0">
-              <span className="text-base">{activeWorkspace?.is_personal ? '🏠' : '🏢'}</span>
-              <span className="truncate">{activeWorkspace?.name || 'My Workspace'}</span>
+        {/* HEADER */}
+        <div className="p-4 border-b border-gray-100">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
+              <span className="font-bold text-base tracking-tight">SocialMate</span>
             </div>
-            <span className="text-gray-400 flex-shrink-0 ml-1">{wsOpen ? '▲' : '▼'}</span>
-          </button>
+            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${badge.color}`}>
+              {badge.label}
+            </span>
+          </div>
 
-          {wsOpen && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-100 rounded-xl shadow-lg z-50 overflow-hidden">
-              {personalWorkspace && (
-                <button
-                  onClick={() => { setActiveWorkspace(personalWorkspace); setWsOpen(false) }}
-                  className={`w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-left hover:bg-gray-50 transition-all ${activeWorkspace?.id === personalWorkspace.id ? 'bg-gray-50 text-black' : 'text-gray-600'}`}>
-                  <span>🏠</span>
-                  <span className="truncate">My Workspace</span>
-                  {activeWorkspace?.id === personalWorkspace.id && <span className="ml-auto text-black">✓</span>}
-                </button>
-              )}
+          {/* WORKSPACE SWITCHER */}
+          <div className="relative">
+            <button
+              onClick={() => { setWsOpen(p => !p); setShowUpgradeNudge(false) }}
+              className="w-full flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl text-xs font-semibold text-gray-700 hover:border-gray-300 transition-all">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-base">{activeWorkspace?.is_personal ? '🏠' : '🏢'}</span>
+                <span className="truncate">{activeWorkspace?.name || 'My Workspace'}</span>
+              </div>
+              <span className="text-gray-400 flex-shrink-0 ml-1">{wsOpen ? '▲' : '▼'}</span>
+            </button>
 
-              {plan === 'agency' && clientWorkspaces.length > 0 && (
-                <>
-                  <div className="px-3 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-widest border-t border-gray-50">
-                    Clients
-                  </div>
-                  {clientWorkspaces.map((ws: any) => (
-                    <button
-                      key={ws.id}
-                      onClick={() => { setActiveWorkspace(ws); setWsOpen(false) }}
-                      className={`w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-left hover:bg-gray-50 transition-all ${activeWorkspace?.id === ws.id ? 'bg-gray-50 text-black' : 'text-gray-600'}`}>
-                      <span>🏢</span>
-                      <span className="truncate">{ws.client_name || ws.name}</span>
-                      {activeWorkspace?.id === ws.id && <span className="ml-auto text-black">✓</span>}
-                    </button>
-                  ))}
-                </>
-              )}
-
-              {plan === 'agency' && (
-                <Link href="/workspaces/new" onClick={() => setWsOpen(false)}
-                  className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-gray-400 hover:text-black hover:bg-gray-50 transition-all border-t border-gray-50">
-                  <span>+</span> Add client workspace
-                </Link>
-              )}
-
-              {plan !== 'agency' && (
-                <button
-                  onClick={() => setShowUpgradeNudge(p => !p)}
-                  className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-purple-500 hover:bg-purple-50 transition-all border-t border-gray-50">
-                  <span>🏢</span>
-                  <span>Client workspaces</span>
-                  <span className="ml-auto text-purple-300">Agency</span>
-                </button>
-              )}
-
-              {showUpgradeNudge && plan !== 'agency' && (
-                <div className="px-3 py-3 bg-purple-50 border-t border-purple-100">
-                  <p className="text-xs text-purple-700 font-semibold mb-1">Manage client workspaces</p>
-                  <p className="text-xs text-purple-500 mb-2 leading-relaxed">
-                    Create separate workspaces for each client with their own accounts, posts, and analytics.
-                  </p>
+            {wsOpen && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-100 rounded-xl shadow-lg z-50 overflow-hidden">
+                {personalWorkspace && (
                   <button
-                    onClick={() => { setWsOpen(false); handleCheckout(STRIPE_AGENCY_PRICE_ID) }}
-                    disabled={checkoutLoading}
-                    className="w-full text-center bg-purple-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-purple-700 transition-all disabled:opacity-60">
-                    {checkoutLoading ? 'Loading...' : 'Upgrade to Agency →'}
+                    onClick={() => { setActiveWorkspace(personalWorkspace); setWsOpen(false) }}
+                    className={`w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-left hover:bg-gray-50 transition-all ${activeWorkspace?.id === personalWorkspace.id ? 'bg-gray-50 text-black' : 'text-gray-600'}`}>
+                    <span>🏠</span>
+                    <span className="truncate">My Workspace</span>
+                    {activeWorkspace?.id === personalWorkspace.id && <span className="ml-auto text-black">✓</span>}
                   </button>
-                </div>
-              )}
+                )}
+
+                {plan === 'agency' && clientWorkspaces.length > 0 && (
+                  <>
+                    <div className="px-3 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-widest border-t border-gray-50">
+                      Clients
+                    </div>
+                    {clientWorkspaces.map((ws: any) => (
+                      <button
+                        key={ws.id}
+                        onClick={() => { setActiveWorkspace(ws); setWsOpen(false) }}
+                        className={`w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-left hover:bg-gray-50 transition-all ${activeWorkspace?.id === ws.id ? 'bg-gray-50 text-black' : 'text-gray-600'}`}>
+                        <span>🏢</span>
+                        <span className="truncate">{ws.client_name || ws.name}</span>
+                        {activeWorkspace?.id === ws.id && <span className="ml-auto text-black">✓</span>}
+                      </button>
+                    ))}
+                  </>
+                )}
+
+                {plan === 'agency' && (
+                  <Link href="/workspaces/new" onClick={() => setWsOpen(false)}
+                    className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-gray-400 hover:text-black hover:bg-gray-50 transition-all border-t border-gray-50">
+                    <span>+</span> Add client workspace
+                  </Link>
+                )}
+
+                {plan !== 'agency' && (
+                  <button
+                    onClick={() => setShowUpgradeNudge(p => !p)}
+                    className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-purple-500 hover:bg-purple-50 transition-all border-t border-gray-50">
+                    <span>🏢</span>
+                    <span>Client workspaces</span>
+                    <span className="ml-auto text-purple-300">Agency</span>
+                  </button>
+                )}
+
+                {showUpgradeNudge && plan !== 'agency' && (
+                  <div className="px-3 py-3 bg-purple-50 border-t border-purple-100">
+                    <p className="text-xs text-purple-700 font-semibold mb-1">Manage client workspaces</p>
+                    <p className="text-xs text-purple-500 mb-2 leading-relaxed">
+                      Create separate workspaces for each client with their own accounts, posts, and analytics.
+                    </p>
+                    <button
+                      onClick={() => { setWsOpen(false); handleCheckout(STRIPE_AGENCY_PRICE_ID) }}
+                      disabled={checkoutLoading}
+                      className="w-full text-center bg-purple-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:bg-purple-700 transition-all disabled:opacity-60">
+                      {checkoutLoading ? 'Loading...' : 'Upgrade to Agency →'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* NAV */}
+        <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
+          {NAV.map(group => (
+            <div key={group.section}>
+              <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest px-3 py-2 mt-1">
+                {group.section}
+              </div>
+              {group.items.map(item => {
+                const active = isActive(item.href)
+                return (
+                  <Link key={item.label} href={item.href}
+                    className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                      active ? 'bg-gray-100 text-black' : 'text-gray-500 hover:bg-gray-50 hover:text-black'
+                    }`}>
+                    <span>{item.icon}</span>{item.label}
+                  </Link>
+                )
+              })}
             </div>
+          ))}
+        </nav>
+
+        {/* BOTTOM STATS */}
+        <div className="p-3 border-t border-gray-100 space-y-3">
+
+          <div className="bg-gray-50 rounded-xl p-3">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-semibold text-gray-500">AI Credits</span>
+              <span className="text-xs font-bold text-gray-700">
+                {loading ? '...' : `${creditsRemaining}/${creditsTotal}`}
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-1.5">
+              <div
+                className={`h-1.5 rounded-full transition-all ${
+                  creditsBar < 20 ? 'bg-red-400' :
+                  creditsBar < 50 ? 'bg-yellow-400' : 'bg-black'
+                }`}
+                style={{ width: `${creditsBar}%` }}
+              />
+            </div>
+            <p className="text-xs text-gray-400 mt-1.5">
+              {loading ? 'Loading...' : `${creditsRemaining} remaining`}
+            </p>
+          </div>
+
+          <div className="bg-gray-50 rounded-xl p-3">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-semibold text-gray-500">Team Seats</span>
+              <span className="text-xs font-bold text-gray-700">
+                {loading ? '...' : `${seatsUsed}/${seatsTotal}`}
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-1.5">
+              <div
+                className={`h-1.5 rounded-full transition-all ${seatsUsed >= seatsTotal ? 'bg-red-400' : 'bg-black'}`}
+                style={{ width: `${seatsBar}%` }}
+              />
+            </div>
+            <p className="text-xs text-gray-400 mt-1.5">
+              {loading ? 'Loading...' : `${seatsTotal - seatsUsed} seat${seatsTotal - seatsUsed !== 1 ? 's' : ''} remaining`}
+            </p>
+          </div>
+
+          <div className="bg-gray-50 rounded-xl p-3">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-semibold text-gray-500">Platforms</span>
+              <span className="text-xs font-bold text-gray-700">
+                {loading ? '...' : `${platformsConnected}/${PLATFORMS_TOTAL}`}
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-1.5">
+              <div className="bg-black h-1.5 rounded-full transition-all" style={{ width: `${platformsBar}%` }} />
+            </div>
+            <p className="text-xs text-gray-400 mt-1.5">
+              {loading ? 'Loading...' : `${PLATFORMS_TOTAL - platformsConnected} available to connect`}
+            </p>
+          </div>
+
+          {plan === 'free' && (
+            <button
+              onClick={() => handleCheckout(STRIPE_PRO_PRICE_ID)}
+              disabled={checkoutLoading}
+              className="w-full block text-center bg-black text-white text-xs font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
+              {checkoutLoading ? 'Loading...' : '⚡ Upgrade to Pro'}
+            </button>
           )}
+          {plan === 'pro' && (
+            <button
+              onClick={() => handleCheckout(STRIPE_AGENCY_PRICE_ID)}
+              disabled={checkoutLoading}
+              className="w-full block text-center bg-purple-600 text-white text-xs font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
+              {checkoutLoading ? 'Loading...' : '🏢 Upgrade to Agency'}
+            </button>
+          )}
+
+          <div className="px-1">
+            <div className="text-xs text-gray-400 truncate mb-1">{user?.email}</div>
+            <button onClick={handleSignOut}
+              className="w-full text-left px-0 py-1 text-xs text-gray-400 hover:text-black transition-all">
+              Sign out
+            </button>
+          </div>
+
         </div>
       </div>
 
-      {/* NAV */}
-      <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
-        {NAV.map(group => (
-          <div key={group.section}>
-            <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest px-3 py-2 mt-1">
-              {group.section}
-            </div>
-            {group.items.map(item => {
-              const active = isActive(item.href)
-              return (
-                <Link key={item.label} href={item.href}
-                  className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                    active ? 'bg-gray-100 text-black' : 'text-gray-500 hover:bg-gray-50 hover:text-black'
-                  }`}>
-                  <span>{item.icon}</span>{item.label}
-                </Link>
-              )
-            })}
-          </div>
-        ))}
-      </nav>
-
-      {/* BOTTOM STATS */}
-      <div className="p-3 border-t border-gray-100 space-y-3">
-
-        <div className="bg-gray-50 rounded-xl p-3">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs font-semibold text-gray-500">AI Credits</span>
-            <span className="text-xs font-bold text-gray-700">
-              {loading ? '...' : `${creditsRemaining}/${creditsTotal}`}
-            </span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-1.5">
-            <div
-              className={`h-1.5 rounded-full transition-all ${
-                creditsBar < 20 ? 'bg-red-400' :
-                creditsBar < 50 ? 'bg-yellow-400' : 'bg-black'
-              }`}
-              style={{ width: `${creditsBar}%` }}
-            />
-          </div>
-          <p className="text-xs text-gray-400 mt-1.5">
-            {loading ? 'Loading...' : `${creditsRemaining} remaining`}
-          </p>
-        </div>
-
-        <div className="bg-gray-50 rounded-xl p-3">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs font-semibold text-gray-500">Team Seats</span>
-            <span className="text-xs font-bold text-gray-700">
-              {loading ? '...' : `${seatsUsed}/${seatsTotal}`}
-            </span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-1.5">
-            <div
-              className={`h-1.5 rounded-full transition-all ${seatsUsed >= seatsTotal ? 'bg-red-400' : 'bg-black'}`}
-              style={{ width: `${seatsBar}%` }}
-            />
-          </div>
-          <p className="text-xs text-gray-400 mt-1.5">
-            {loading ? 'Loading...' : `${seatsTotal - seatsUsed} seat${seatsTotal - seatsUsed !== 1 ? 's' : ''} remaining`}
-          </p>
-        </div>
-
-        <div className="bg-gray-50 rounded-xl p-3">
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs font-semibold text-gray-500">Platforms</span>
-            <span className="text-xs font-bold text-gray-700">
-              {loading ? '...' : `${platformsConnected}/${PLATFORMS_TOTAL}`}
-            </span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-1.5">
-            <div className="bg-black h-1.5 rounded-full transition-all" style={{ width: `${platformsBar}%` }} />
-          </div>
-          <p className="text-xs text-gray-400 mt-1.5">
-            {loading ? 'Loading...' : `${PLATFORMS_TOTAL - platformsConnected} available to connect`}
-          </p>
-        </div>
-
-        {plan === 'free' && (
-          <button
-            onClick={() => handleCheckout(STRIPE_PRO_PRICE_ID)}
-            disabled={checkoutLoading}
-            className="w-full block text-center bg-black text-white text-xs font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
-            {checkoutLoading ? 'Loading...' : '⚡ Upgrade to Pro'}
-          </button>
-        )}
-        {plan === 'pro' && (
-          <button
-            onClick={() => handleCheckout(STRIPE_AGENCY_PRICE_ID)}
-            disabled={checkoutLoading}
-            className="w-full block text-center bg-purple-600 text-white text-xs font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
-            {checkoutLoading ? 'Loading...' : '🏢 Upgrade to Agency'}
-          </button>
-        )}
-
-        <div className="px-1">
-          <div className="text-xs text-gray-400 truncate mb-1">{user?.email}</div>
-          <button onClick={handleSignOut}
-            className="w-full text-left px-0 py-1 text-xs text-gray-400 hover:text-black transition-all">
-            Sign out
-          </button>
-        </div>
-
-      </div>
-    </div>
+      <FeedbackWidget />
+    </>
   )
 }
