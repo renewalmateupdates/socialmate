@@ -6,29 +6,41 @@ import { WorkspaceProvider } from '@/contexts/WorkspaceContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
+const APP_URL = 'https://socialmate-six.vercel.app'
+
 export const metadata: Metadata = {
-  metadataBase: new URL('https://socialmate-six.vercel.app'),
+  metadataBase: new URL(APP_URL),
   title: {
     default: 'SocialMate — Free Social Media Scheduler for 16 Platforms',
     template: '%s | SocialMate',
   },
-  description: 'Schedule posts to 16 social platforms for free. No per-channel fees, no post limits, no catch. Better than Buffer and Hootsuite — at zero cost.',
+  description: 'Schedule posts to 16 social platforms for free. No per-channel fees, no post limits, no catch. The free-first alternative to Buffer and Hootsuite.',
   keywords: [
     'social media scheduler',
     'free buffer alternative',
-    'hootsuite alternative',
-    'instagram scheduler',
+    'free hootsuite alternative',
     'social media management',
+    'instagram scheduler',
+    'discord scheduler',
+    'bluesky scheduler',
+    'mastodon scheduler',
     'bulk scheduler',
     'link in bio',
+    'ai social media',
     'free social media tool',
+    'social media automation',
+    'content scheduler',
+    'post scheduler',
   ],
-  authors: [{ name: 'SocialMate' }],
-  creator: 'SocialMate',
+  authors: [{ name: 'SocialMate', url: APP_URL }],
+  creator: 'Gilgamesh Enterprise LLC',
+  publisher: 'Gilgamesh Enterprise LLC',
+  category: 'productivity',
+  applicationName: 'SocialMate',
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://socialmate-six.vercel.app',
+    url: APP_URL,
     siteName: 'SocialMate',
     title: 'SocialMate — Free Social Media Scheduler for 16 Platforms',
     description: 'Schedule posts to 16 social platforms for free. No per-channel fees. No post limits. Better than Buffer at zero cost.',
@@ -62,7 +74,57 @@ export const metadata: Metadata = {
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
   },
+  manifest: '/manifest.json',
+  alternates: {
+    canonical: APP_URL,
+  },
+}
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'SocialMate',
+  applicationCategory: 'BusinessApplication',
+  operatingSystem: 'Web',
+  url: APP_URL,
+  description: 'Free social media scheduling platform supporting 16+ platforms with AI content tools, analytics, and team collaboration.',
+  offers: [
+    {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+      name: 'Free Plan',
+    },
+    {
+      '@type': 'Offer',
+      price: '5',
+      priceCurrency: 'USD',
+      name: 'Pro Plan',
+      billingIncrement: 'P1M',
+    },
+    {
+      '@type': 'Offer',
+      price: '20',
+      priceCurrency: 'USD',
+      name: 'Agency Plan',
+      billingIncrement: 'P1M',
+    },
+  ],
+  author: {
+    '@type': 'Organization',
+    name: 'Gilgamesh Enterprise LLC',
+    email: 'socialmate.updates@gmail.com',
+  },
+  featureList: [
+    'Schedule posts to 16+ social platforms',
+    'AI-powered caption and hashtag generation',
+    'Link in Bio page builder',
+    'Team collaboration',
+    'Bulk scheduler',
+    'Analytics dashboard',
+  ],
 }
 
 export default function RootLayout({
@@ -72,6 +134,16 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <meta name="theme-color" content="#000000" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="SocialMate" />
+      </head>
       <body className={inter.className}>
         <WorkspaceProvider>
           {children}
