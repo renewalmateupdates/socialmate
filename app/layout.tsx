@@ -6,7 +6,7 @@ import { WorkspaceProvider } from '@/contexts/WorkspaceContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
-const APP_URL = 'https://socialmate-six.vercel.app'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
