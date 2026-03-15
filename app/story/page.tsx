@@ -8,6 +8,28 @@ const DONATION_AMOUNTS = [5, 10, 25]
 export default function Story() {
   const [customAmount, setCustomAmount] = useState('')
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  const handleDonate = async () => {
+    const amount = customAmount ? parseFloat(customAmount) : selectedAmount
+    if (!amount || amount <= 0) return
+    setLoading(true)
+    try {
+      const res = await fetch('/api/donations/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount }),
+      })
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   return (
     <PublicLayout>
@@ -25,7 +47,7 @@ export default function Story() {
           {[
             {
               title: 'Where this started',
-              body: 'I work full time at a deli. I pick up hours at a construction company when I can. And in every spare moment I have, I build SocialMate. Not because it\'s easy — it\'s anything but — but because I genuinely believe creators and small businesses deserve better tools than what the market is charging for.',
+              body: 'I know what it means to come from nothing. To watch opportunity feel out of reach — not because of lack of drive, but because the tools, the resources, and the access were always priced for people who already had everything. I built SocialMate as a self-taught developer, solo across every role — product, design, engineering, marketing, support. No team. No investors. No safety net. Just a deep conviction that creators and small businesses deserve powerful tools without being priced out of using them.',
             },
             {
               title: 'The problem I couldn\'t ignore',
@@ -54,7 +76,7 @@ export default function Story() {
             <p className="text-sm text-gray-500 leading-relaxed italic">
               "I want to turn a dark world into a bright future — one creator at a time."
             </p>
-            <p className="text-xs text-gray-400 mt-2">— The solo founder, developer, marketer, and deli worker behind SocialMate</p>
+            <p className="text-xs text-gray-400 mt-2">— The solo founder behind SocialMate</p>
           </div>
         </div>
 
@@ -62,7 +84,7 @@ export default function Story() {
         <div className="bg-white border border-gray-100 rounded-2xl p-8 mb-6">
           <h2 className="text-base font-extrabold mb-1">Support the mission</h2>
           <p className="text-xs text-gray-500 mb-6 leading-relaxed">
-            SocialMate is bootstrapped — no investors, no funding rounds, no safety net. If this product has brought you value and you want to help keep it growing, any contribution goes directly toward server costs, API access, and building more features faster.
+            SocialMate is fully bootstrapped — no investors, no funding rounds, no safety net. If this product has brought you value and you want to help keep it growing, any contribution goes directly toward server costs, API access, and building more features faster.
           </p>
           <div className="flex items-center gap-3 mb-4 flex-wrap">
             {DONATION_AMOUNTS.map(amount => (
@@ -83,16 +105,18 @@ export default function Story() {
                 className="w-24 px-3 py-2.5 text-sm outline-none" />
             </div>
           </div>
-          <button disabled={!selectedAmount && !customAmount}
+          <button
+            onClick={handleDonate}
+            disabled={(!selectedAmount && !customAmount) || loading}
             className="bg-black text-white text-sm font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-            Support SocialMate ❤️
+            {loading ? 'Redirecting...' : 'Support SocialMate ❤️'}
           </button>
           <p className="text-xs text-gray-400 mt-3">
             Payments processed securely via Stripe. This is a voluntary contribution — not a subscription.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <Link href="/pricing"
             className="text-xs font-bold px-4 py-2 bg-black text-white rounded-xl hover:opacity-80 transition-all">
             View Pricing
