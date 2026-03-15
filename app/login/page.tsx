@@ -13,6 +13,13 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [magicSent, setMagicSent] = useState(false)
   const [mode, setMode] = useState<'password' | 'magic'>('password')
+
+  // 2FA state
+  const [mfaRequired, setMfaRequired] = useState(false)
+  const [mfaFactorId, setMfaFactorId] = useState('')
+  const [mfaCode, setMfaCode] = useState('')
+  const [mfaLoading, setMfaLoading] = useState(false)
+
   const router = useRouter()
 
   const handleGoogleLogin = async () => {
@@ -20,14 +27,9 @@ export default function Login() {
     setError('')
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
     })
-    if (error) {
-      setError(error.message)
-      setGoogleLoading(false)
-    }
+    if (error) { setError(error.message); setGoogleLoading(false) }
   }
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -58,14 +60,106 @@ export default function Login() {
       }
 
       if (data?.user) {
+        // Check if 2FA is required
+        const { data: factors } = await supabase.auth.mfa.listFactors()
+        const totpFactor = factors?.totp?.find((f: any) => f.status === 'verified')
+        if (totpFactor) {
+          setMfaFactorId(totpFactor.id)
+          setMfaRequired(true)
+          setLoading(false)
+          return
+        }
         window.location.href = '/dashboard'
       }
-    } catch (err) {
+    } catch {
       setError('Something went wrong. Please try again.')
       setLoading(false)
     }
   }
 
+  const handleMfaVerify = async () => {
+    if (mfaCode.length !== 6) { setError('Enter the 6-digit code'); return }
+    setMfaLoading(true)
+    setError('')
+
+    const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({ factorId: mfaFactorId })
+    if (challengeError || !challenge) {
+      setError(challengeError?.message || 'Challenge failed')
+      setMfaLoading(false)
+      return
+    }
+
+    const { error } = await supabase.auth.mfa.verify({
+      factorId: mfaFactorId,
+      challengeId: challenge.id,
+      code: mfaCode,
+    })
+
+    if (error) {
+      setError('Incorrect code — try again')
+      setMfaLoading(false)
+      return
+    }
+
+    window.location.href = '/dashboard'
+  }
+
+  // ── 2FA challenge screen ──
+  if (mfaRequired) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <div className="border-b border-gray-100 bg-white px-8 py-4">
+          <Link href="/" className="flex items-center gap-2 w-fit">
+            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
+            <span className="font-bold text-base tracking-tight">SocialMate</span>
+          </Link>
+        </div>
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="bg-white border border-gray-100 rounded-3xl p-10 w-full max-w-md text-center">
+            <div className="text-5xl mb-5">🔐</div>
+            <h1 className="text-2xl font-extrabold tracking-tight mb-2">Two-factor authentication</h1>
+            <p className="text-gray-400 text-sm mb-8">Open your authenticator app and enter the 6-digit code.</p>
+
+            <input
+              type="text"
+              inputMode="numeric"
+              maxLength={6}
+              value={mfaCode}
+              onChange={e => setMfaCode(e.target.value.replace(/\D/g, ''))}
+              placeholder="000000"
+              autoFocus
+              className="w-full px-4 py-4 text-2xl font-mono text-center tracking-widest border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 transition-colors mb-4"
+            />
+
+            {error && (
+              <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-4">
+                <p className="text-xs font-semibold text-red-500">❌ {error}</p>
+              </div>
+            )}
+
+            <button
+              onClick={handleMfaVerify}
+              disabled={mfaLoading || mfaCode.length !== 6}
+              className="w-full py-3.5 bg-black text-white text-sm font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center justify-center gap-2 mb-4"
+            >
+              {mfaLoading ? (
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : 'Verify →'}
+            </button>
+
+            <button
+              onClick={() => { setMfaRequired(false); setMfaCode(''); setError('') }}
+              className="text-xs text-gray-400 hover:text-black transition-colors font-semibold"
+            >
+              ← Back to login
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Magic link sent screen ──
   if (magicSent) {
     return (
       <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -94,6 +188,7 @@ export default function Login() {
     )
   }
 
+  // ── Main login screen ──
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <div className="border-b border-gray-100 bg-white px-8 py-4 flex items-center justify-between">

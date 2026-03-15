@@ -12,11 +12,11 @@ const STRIPE_AGENCY_PRICE_ID = 'price_1T9qAd7OMwDowUuUpzjxLlG2'
 const TABS = ['Profile', 'Plan', 'Referrals', 'Notifications', 'Security', 'White Label']
 
 const REFERRAL_TIERS = [
-  { paying: 5,   reward: '1 month Pro free',  icon: '🎁', conditional: false },
-  { paying: 10,  reward: '3 months Pro free', icon: '⭐', conditional: false },
-  { paying: 25,  reward: '6 months Pro free', icon: '🚀', conditional: false },
-  { paying: 50,  reward: 'Pro free while active', icon: '💎', conditional: true },
-  { paying: 100, reward: 'Pro free while active', icon: '👑', conditional: true },
+  { paying: 5,   reward: '1 month Pro free',       icon: '🎁', conditional: false },
+  { paying: 10,  reward: '3 months Pro free',      icon: '⭐', conditional: false },
+  { paying: 25,  reward: '6 months Pro free',      icon: '🚀', conditional: false },
+  { paying: 50,  reward: 'Pro free while active',  icon: '💎', conditional: true  },
+  { paying: 100, reward: 'Pro free while active',  icon: '👑', conditional: true  },
 ]
 
 const CREDIT_PACKS = [
@@ -26,7 +26,7 @@ const CREDIT_PACKS = [
   { label: 'Max Pack', credits: 2000, price: '$19.99', priceId: 'price_1TA0nS7OMwDowUuUKURJ7ZM4', popular: false },
 ]
 
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate-six.vercel.app'
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
 
 function SettingsInner() {
   const { plan } = useWorkspace()
@@ -71,6 +71,17 @@ function SettingsInner() {
   const [referralHistory, setReferralHistory] = useState<any[]>([])
   const [referralLoading, setReferralLoading] = useState(false)
 
+  // 2FA state
+  const [mfaEnabled, setMfaEnabled] = useState(false)
+  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null)
+  const [mfaStep, setMfaStep] = useState<'idle' | 'enroll' | 'verify' | 'disable_confirm'>('idle')
+  const [mfaQR, setMfaQR] = useState('')
+  const [mfaSecret, setMfaSecret] = useState('')
+  const [mfaEnrollId, setMfaEnrollId] = useState('')
+  const [mfaCode, setMfaCode] = useState('')
+  const [mfaLoading, setMfaLoading] = useState(false)
+  const [mfaError, setMfaError] = useState('')
+
   useEffect(() => {
     const init = async () => {
       const { data: { user } } = await supabase.auth.getUser()
@@ -83,7 +94,6 @@ function SettingsInner() {
         .select('referral_code')
         .eq('user_id', user.id)
         .single()
-
       if (settings?.referral_code) setReferralCode(settings.referral_code)
 
       const { data: profile } = await supabase
@@ -91,11 +101,18 @@ function SettingsInner() {
         .select('display_name, username, bio')
         .eq('id', user.id)
         .single()
-
       if (profile) {
         setDisplayName(profile.display_name || '')
         setUsername(profile.username || '')
         setBio(profile.bio || '')
+      }
+
+      // Check existing MFA factors
+      const { data: factors } = await supabase.auth.mfa.listFactors()
+      const totpFactor = factors?.totp?.find((f: any) => f.status === 'verified')
+      if (totpFactor) {
+        setMfaEnabled(true)
+        setMfaFactorId(totpFactor.id)
       }
 
       setAuthLoading(false)
@@ -112,7 +129,6 @@ function SettingsInner() {
         .select('*')
         .eq('affiliate_user_id', userId)
         .order('converted_at', { ascending: false })
-
       if (!error && data) {
         const paying = data.filter((r: any) => r.status === 'eligible' || r.status === 'paid')
         const totalCredits = data.reduce((sum: number, r: any) => sum + (r.total_earned ?? 0), 0)
@@ -129,7 +145,6 @@ function SettingsInner() {
   }, [activeTab, userId])
 
   const referralLink = referralCode ? `${appUrl}/?ref=${referralCode}` : ''
-
   const nextTier = REFERRAL_TIERS.find(t => referralStats.payingReferrals < t.paying)
 
   const handleSave = async (tab: string) => {
@@ -163,11 +178,8 @@ function SettingsInner() {
       const data = await res.json()
       if (data.url) window.location.href = data.url
       if (data.error === 'Unauthorized') router.push('/login')
-    } catch {
-      console.error('Checkout failed')
-    } finally {
-      setCheckoutLoading(false)
-    }
+    } catch { console.error('Checkout failed') }
+    finally { setCheckoutLoading(false) }
   }
 
   const handleCreditPack = async (priceId: string) => {
@@ -181,11 +193,8 @@ function SettingsInner() {
       const data = await res.json()
       if (data.url) window.location.href = data.url
       if (data.error === 'Unauthorized') router.push('/login')
-    } catch {
-      console.error('Credit pack checkout failed')
-    } finally {
-      setCreditPackLoading(null)
-    }
+    } catch { console.error('Credit pack checkout failed') }
+    finally { setCreditPackLoading(null) }
   }
 
   const handlePortal = async () => {
@@ -194,11 +203,8 @@ function SettingsInner() {
       const res = await fetch('/api/stripe/portal', { method: 'POST' })
       const data = await res.json()
       if (data.url) window.location.href = data.url
-    } catch {
-      console.error('Portal failed')
-    } finally {
-      setCheckoutLoading(false)
-    }
+    } catch { console.error('Portal failed') }
+    finally { setCheckoutLoading(false) }
   }
 
   const handleDeleteAllPosts = async () => {
@@ -215,6 +221,68 @@ function SettingsInner() {
     setDangerLoading(true)
     await supabase.auth.signOut()
     router.push('/login')
+  }
+
+  // 2FA handlers
+  const handleEnroll2FA = async () => {
+    setMfaLoading(true)
+    setMfaError('')
+    const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' })
+    if (error || !data) {
+      setMfaError(error?.message || 'Failed to start 2FA setup')
+      setMfaLoading(false)
+      return
+    }
+    setMfaEnrollId(data.id)
+    setMfaQR(data.totp.qr_code)
+    setMfaSecret(data.totp.secret)
+    setMfaStep('enroll')
+    setMfaLoading(false)
+  }
+
+  const handleVerify2FA = async () => {
+    if (mfaCode.length !== 6) { setMfaError('Enter the 6-digit code'); return }
+    setMfaLoading(true)
+    setMfaError('')
+    const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({ factorId: mfaEnrollId })
+    if (challengeError || !challenge) {
+      setMfaError(challengeError?.message || 'Challenge failed')
+      setMfaLoading(false)
+      return
+    }
+    const { data, error } = await supabase.auth.mfa.verify({
+      factorId: mfaEnrollId,
+      challengeId: challenge.id,
+      code: mfaCode,
+    })
+    if (error) {
+      setMfaError('Incorrect code — try again')
+      setMfaLoading(false)
+      return
+    }
+    setMfaEnabled(true)
+    setMfaFactorId(mfaEnrollId)
+    setMfaStep('idle')
+    setMfaCode('')
+    setMfaQR('')
+    setMfaSecret('')
+    setMfaLoading(false)
+  }
+
+  const handleDisable2FA = async () => {
+    if (!mfaFactorId) return
+    setMfaLoading(true)
+    setMfaError('')
+    const { error } = await supabase.auth.mfa.unenroll({ factorId: mfaFactorId })
+    if (error) {
+      setMfaError(error.message)
+      setMfaLoading(false)
+      return
+    }
+    setMfaEnabled(false)
+    setMfaFactorId(null)
+    setMfaStep('idle')
+    setMfaLoading(false)
   }
 
   if (authLoading) {
@@ -477,7 +545,7 @@ function SettingsInner() {
                       })}
                     </div>
                     <p className="text-xs text-gray-400 mt-4 pt-4 border-t border-gray-50">
-                      Tiers 1–3 are permanent once earned. Tiers 4–5 remain active as long as you maintain the required paying referrals. Abuse results in permanent account termination.
+                      Tiers 1–3 are permanent once earned. Tiers 4–5 remain active as long as you maintain the required paying referrals.
                     </p>
                   </div>
 
@@ -556,6 +624,116 @@ function SettingsInner() {
           {/* ── SECURITY ── */}
           {activeTab === 'Security' && (
             <div className="space-y-4">
+
+              {/* 2FA */}
+              <div className="bg-white border border-gray-100 rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-1">
+                  <h2 className="text-base font-extrabold">Two-Factor Authentication</h2>
+                  <span className={`text-xs font-bold px-3 py-1 rounded-full ${mfaEnabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
+                    {mfaEnabled ? '✓ Enabled' : 'Disabled'}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-400 mb-5">
+                  Add an extra layer of security using Google Authenticator or any TOTP app.
+                </p>
+
+                {mfaError && (
+                  <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-4">
+                    <p className="text-xs font-semibold text-red-500">❌ {mfaError}</p>
+                  </div>
+                )}
+
+                {/* Idle — not enrolled */}
+                {mfaStep === 'idle' && !mfaEnabled && (
+                  <button onClick={handleEnroll2FA} disabled={mfaLoading}
+                    className="px-5 py-2.5 bg-black text-white text-xs font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center gap-2">
+                    {mfaLoading && <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+                    Enable 2FA →
+                  </button>
+                )}
+
+                {/* Enroll — show QR */}
+                {mfaStep === 'enroll' && (
+                  <div className="space-y-5">
+                    <div className="bg-gray-50 rounded-2xl p-5">
+                      <p className="text-xs font-bold text-gray-500 mb-3 uppercase tracking-wide">Step 1 — Scan with your authenticator app</p>
+                      <div className="flex justify-center mb-4">
+                        <div
+                          className="w-40 h-40 bg-white border border-gray-200 rounded-xl p-2 flex items-center justify-center"
+                          dangerouslySetInnerHTML={{ __html: mfaQR }}
+                        />
+                      </div>
+                      <p className="text-xs text-gray-400 text-center mb-2">Can't scan? Enter this code manually:</p>
+                      <div className="bg-white border border-gray-200 rounded-xl px-4 py-2 text-center">
+                        <p className="text-xs font-mono font-bold tracking-widest text-gray-700 break-all">{mfaSecret}</p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">Step 2 — Enter the 6-digit code</p>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={6}
+                        value={mfaCode}
+                        onChange={e => setMfaCode(e.target.value.replace(/\D/g, ''))}
+                        placeholder="000000"
+                        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-center font-mono tracking-widest outline-none focus:border-black transition-all"
+                      />
+                    </div>
+
+                    <div className="flex gap-3">
+                      <button onClick={() => { setMfaStep('idle'); setMfaCode(''); setMfaError('') }}
+                        className="px-5 py-2.5 border border-gray-200 text-xs font-bold rounded-xl hover:border-gray-400 transition-all">
+                        Cancel
+                      </button>
+                      <button onClick={handleVerify2FA} disabled={mfaLoading || mfaCode.length !== 6}
+                        className="flex-1 py-2.5 bg-black text-white text-xs font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                        {mfaLoading && <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+                        Verify & Enable →
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Enabled — disable option */}
+                {mfaStep === 'idle' && mfaEnabled && (
+                  <div>
+                    {mfaStep === 'idle' && (
+                      <>
+                        {!confirmDeleteAccount ? (
+                          <button
+                            onClick={() => setMfaStep('disable_confirm' as any)}
+                            className="text-xs font-bold text-red-500 border border-red-100 rounded-xl px-4 py-2.5 hover:bg-red-50 transition-all">
+                            Disable 2FA
+                          </button>
+                        ) : null}
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {(mfaStep as string) === 'disable_confirm' && (
+                  <div className="border border-red-200 rounded-xl px-4 py-4 bg-red-50">
+                    <p className="text-xs font-bold text-red-700 mb-3">
+                      Disabling 2FA will remove the extra security layer from your account. Are you sure?
+                    </p>
+                    <div className="flex gap-2">
+                      <button onClick={handleDisable2FA} disabled={mfaLoading}
+                        className="text-xs font-bold px-4 py-2 bg-red-500 text-white rounded-lg hover:opacity-80 transition-all disabled:opacity-40 flex items-center gap-2">
+                        {mfaLoading && <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
+                        Yes, disable 2FA
+                      </button>
+                      <button onClick={() => setMfaStep('idle')}
+                        className="text-xs font-bold px-4 py-2 border border-gray-200 rounded-lg hover:border-gray-400 transition-all">
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Change Password */}
               <div className="bg-white border border-gray-100 rounded-2xl p-6">
                 <h2 className="text-base font-extrabold mb-5">Change Password</h2>
                 <div className="space-y-3">
@@ -580,6 +758,7 @@ function SettingsInner() {
                 </div>
               </div>
 
+              {/* Danger Zone */}
               <div className="bg-white border border-gray-100 rounded-2xl p-6">
                 <h2 className="text-base font-extrabold mb-1">Danger Zone</h2>
                 <p className="text-xs text-gray-400 mb-4">These actions are irreversible. Please be certain.</p>

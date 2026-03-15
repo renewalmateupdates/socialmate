@@ -23,6 +23,7 @@ function SignupForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [done, setDone] = useState(false)
   const [refCode, setRefCode] = useState('')
+  const [ageConfirmed, setAgeConfirmed] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -32,6 +33,7 @@ function SignupForm() {
   }, [searchParams])
 
   const handleGoogleSignup = async () => {
+    if (!ageConfirmed) { setError('Please confirm you are 13 or older to continue'); return }
     setGoogleLoading(true)
     setError('')
     const { error } = await supabase.auth.signInWithOAuth({
@@ -64,6 +66,7 @@ function SignupForm() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    if (!ageConfirmed) { setError('Please confirm you are 13 or older to continue'); return }
     if (!email.trim()) { setError('Enter your email'); return }
     if (!email.includes('@')) { setError('Enter a valid email'); return }
     if (!password) { setError('Choose a password'); return }
@@ -190,6 +193,24 @@ function SignupForm() {
                   <p className="text-xs text-green-600 mt-0.5">You'll both earn 25 bonus AI credits after your first post.</p>
                 </div>
               )}
+
+              {/* Age Gate */}
+              <button
+                type="button"
+                onClick={() => setAgeConfirmed(a => !a)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all mb-5 ${
+                  ageConfirmed ? 'border-green-400 bg-green-50' : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 border-2 transition-all ${
+                  ageConfirmed ? 'bg-green-500 border-green-500' : 'border-gray-300'
+                }`}>
+                  {ageConfirmed && <span className="text-white text-xs font-bold">✓</span>}
+                </div>
+                <span className="text-xs font-semibold text-gray-600">
+                  I confirm I am 13 years of age or older
+                </span>
+              </button>
 
               {/* Google Button */}
               <button
