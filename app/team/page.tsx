@@ -20,10 +20,10 @@ type TeamMember = {
 }
 
 const ROLE_META: Record<string, { label: string; color: string; description: string }> = {
-  owner:  { label: 'Owner',  color: 'bg-black text-white',                               description: 'Full access to everything'          },
-  admin:  { label: 'Admin',  color: 'bg-gray-800 text-white',                            description: 'Can manage team and settings'       },
-  editor: { label: 'Editor', color: 'bg-blue-50 text-blue-700 border border-blue-200',  description: 'Can create and schedule posts'      },
-  viewer: { label: 'Viewer', color: 'bg-gray-100 text-gray-600',                         description: 'Can view posts and analytics'       },
+  owner:  { label: 'Owner',  color: 'bg-black text-white',                              description: 'Full access to everything'     },
+  admin:  { label: 'Admin',  color: 'bg-gray-800 text-white',                           description: 'Can manage team and settings'  },
+  editor: { label: 'Editor', color: 'bg-blue-50 text-blue-700 border border-blue-200', description: 'Can create and schedule posts' },
+  viewer: { label: 'Viewer', color: 'bg-gray-100 text-gray-600',                        description: 'Can view posts and analytics'  },
 }
 
 export default function Team() {
@@ -36,18 +36,17 @@ export default function Team() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editingRole, setEditingRole] = useState<string>('')
-  // T3: inline confirm for remove
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null)
   const router = useRouter()
   const { plan } = useWorkspace()
 
   const planConfig = PLAN_CONFIG[plan]
-  const seatLimit = planConfig.seats // agency = 50, no more isUnlimited bypass
+  const seatLimit = planConfig.seats
 
   useEffect(() => {
     const getData = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return } // T1: fixed
+      if (!user) { router.push('/login'); return }
       setUser(user)
       const { data } = await supabase
         .from('team_members')
@@ -58,14 +57,13 @@ export default function Team() {
       setLoading(false)
     }
     getData()
-  }, [router]) // T1: fixed
+  }, [router])
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type })
     setTimeout(() => setToast(null), 3000)
   }
 
-  // T2: memoized so it doesn't recalculate on every render
   const ownerMember: TeamMember = useMemo(() => ({
     id: 'owner',
     email: user?.email || '',
@@ -85,14 +83,30 @@ export default function Team() {
     if (members.some(m => m.email === inviteEmail.trim())) { showToast('Already a team member', 'error'); return }
     if (atLimit) { showToast('Seat limit reached — upgrade to add more members', 'error'); return }
     setInviting(true)
+
     const { data, error } = await supabase
       .from('team_members')
       .insert({ owner_id: user.id, email: inviteEmail.trim(), role: inviteRole, status: 'pending', joined_at: new Date().toISOString() })
       .select().single()
+
     if (error) { showToast('Failed to send invite', 'error'); setInviting(false); return }
     setMembers(prev => [...prev, data])
+
+    const res = await fetch('/api/team/invite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: inviteEmail.trim(), role: inviteRole, teamMemberId: data.id }),
+    })
+
+    const result = await res.json()
+    const emailCopy = inviteEmail.trim()
     setInviteEmail('')
-    showToast(`Invite sent to ${inviteEmail.trim()}`, 'success')
+
+    if (result.emailSent) {
+      showToast(`Invite email sent to ${emailCopy}`, 'success')
+    } else {
+      showToast(`${emailCopy} added — email delivery may be delayed`, 'success')
+    }
     setInviting(false)
   }
 
@@ -129,17 +143,16 @@ export default function Team() {
             </div>
           </div>
 
-          {/* AT LIMIT BANNER */}
           {atLimit && (
             <div className="mb-6 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 flex items-center justify-between">
               <div>
                 <p className="text-sm font-bold text-amber-800">Seat limit reached</p>
                 <p className="text-xs text-amber-600 mt-0.5">
                   {plan === 'free'
-                    ? 'Free plan includes 2 seats. Upgrade to Pro for up to 5, or Agency for up to 50.'
+                    ? 'Free plan includes 2 seats. Upgrade to Pro for up to 5, or Agency for up to 15.'
                     : plan === 'pro'
-                    ? 'Pro plan includes 5 seats. Upgrade to Agency for up to 50 seats.'
-                    : 'Agency plan supports up to 50 team seats.'}
+                    ? 'Pro plan includes 5 seats. Upgrade to Agency for up to 15 seats.'
+                    : 'Agency plan supports up to 15 team seats.'}
                 </p>
               </div>
               {plan !== 'agency' && (
@@ -154,7 +167,6 @@ export default function Team() {
           <div className="grid grid-cols-3 gap-6">
             <div className="col-span-2 space-y-6">
 
-              {/* SEAT PROGRESS */}
               <div className="bg-white border border-gray-100 rounded-2xl p-4">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-semibold text-gray-500">Team seats</span>
@@ -174,7 +186,6 @@ export default function Team() {
                 </p>
               </div>
 
-              {/* MEMBER LIST */}
               <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
                 <div className="px-5 py-4 border-b border-gray-100">
                   <h2 className="text-sm font-bold tracking-tight">Team Members</h2>
@@ -235,7 +246,6 @@ export default function Team() {
                                   className="text-xs px-2 py-1 border border-gray-200 rounded-lg hover:border-gray-400 transition-all">Cancel</button>
                               </div>
                             ) : isConfirming ? (
-                              // T3: inline confirm before remove
                               <div className="flex items-center gap-2">
                                 <span className="text-xs text-red-500 font-semibold">Remove member?</span>
                                 <button onClick={() => handleRemove(member.id, member.email)}
@@ -273,7 +283,6 @@ export default function Team() {
               </div>
             </div>
 
-            {/* RIGHT COLUMN */}
             <div className="space-y-6">
               <div className="bg-white border border-gray-100 rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Invite Member</h2>
@@ -319,7 +328,6 @@ export default function Team() {
                 )}
               </div>
 
-              {/* ROLE PERMISSIONS */}
               <div className="bg-white border border-gray-100 rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Role Permissions</h2>
                 <div className="space-y-3">
@@ -332,7 +340,6 @@ export default function Team() {
                 </div>
               </div>
 
-              {/* UPGRADE CARD */}
               {plan !== 'agency' && (
                 <div className={`rounded-2xl p-5 border ${plan === 'free' ? 'bg-blue-50 border-blue-100' : 'bg-purple-50 border-purple-100'}`}>
                   <p className={`text-xs font-bold mb-1 ${plan === 'free' ? 'text-blue-700' : 'text-purple-700'}`}>
@@ -340,8 +347,8 @@ export default function Team() {
                   </p>
                   <p className={`text-xs mb-3 ${plan === 'free' ? 'text-blue-600' : 'text-purple-600'}`}>
                     {plan === 'free'
-                      ? 'Pro includes up to 5 seats. Agency includes up to 50.'
-                      : 'Agency plan includes up to 50 team seats.'}
+                      ? 'Pro includes up to 5 seats. Agency includes up to 15.'
+                      : 'Agency plan includes up to 15 team seats.'}
                   </p>
                   <Link href="/pricing"
                     className={`block text-center text-white text-xs font-bold px-3 py-2 rounded-xl hover:opacity-80 transition-all ${plan === 'free' ? 'bg-blue-600' : 'bg-purple-600'}`}>
