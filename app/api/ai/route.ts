@@ -8,9 +8,46 @@ const CREDIT_COSTS: Record<string, number> = {
   hook:      2,
   thread:    3,
   repurpose: 3,
+  pulse:     5,
+  radar:     3,
 }
 
-function buildPrompt(tool: string, content: string, platform: string): string {
+async function fetchTrendingData(niche: string) {
+  const results: string[] = []
+
+  try {
+    // Reddit trending — public API, no auth needed
+    const redditRes = await fetch(
+      `https://www.reddit.com/search.json?q=${encodeURIComponent(niche)}&sort=hot&limit=5&t=day`,
+      { headers: { 'User-Agent': 'SocialMate/1.0' } }
+    )
+    if (redditRes.ok) {
+      const redditData = await redditRes.json()
+      const posts = redditData.data?.children?.slice(0, 5) || []
+      posts.forEach((p: any) => {
+        results.push(`Reddit hot: "${p.data.title}" — ${p.data.score} upvotes, ${p.data.num_comments} comments`)
+      })
+    }
+  } catch { /* ignore */ }
+
+  try {
+    // YouTube trending search — public, no auth needed
+    const ytRes = await fetch(
+      `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(niche)}&order=viewCount&type=video&maxResults=5&key=${process.env.YOUTUBE_API_KEY || ''}`,
+    )
+    if (ytRes.ok) {
+      const ytData = await ytRes.json()
+      const videos = ytData.items || []
+      videos.forEach((v: any) => {
+        results.push(`YouTube trending: "${v.snippet.title}" by ${v.snippet.channelTitle}`)
+      })
+    }
+  } catch { /* ignore */ }
+
+  return results.join('\n')
+}
+
+function buildPrompt(tool: string, content: string, platform: string, trendingContext?: string): string {
   switch (tool) {
     case 'caption':
       return `You are a social media expert. Write an engaging ${platform} caption for the following topic or idea. Match the platform's style. Return only the caption, nothing else.\n\nTopic: ${content}`
@@ -21,9 +58,35 @@ function buildPrompt(tool: string, content: string, platform: string): string {
     case 'hook':
       return `You are a viral content expert. Generate 3 scroll-stopping opening lines for a ${platform} post about the following topic. Number them 1, 2, 3. Return only the hooks, nothing else.\n\nTopic: ${content}`
     case 'thread':
-      return `You are a social media expert specializing in threads. Turn the following topic or idea into a structured ${platform} thread of 5-7 parts. Start with a strong hook, build with supporting points, end with a CTA. Format each part as a numbered tweet starting with the number and a period (e.g. "1."). Return only the thread parts, nothing else.\n\nTopic: ${content}`
+      return `You are a social media expert specializing in threads. Turn the following topic or idea into a structured ${platform} thread of 5-7 parts. Start with a strong hook, build with supporting points, end with a CTA. Format each part as a numbered tweet starting with the number and a period. Return only the thread parts, nothing else.\n\nTopic: ${content}`
     case 'repurpose':
       return `You are a social media content strategist. Take the following long-form content and repurpose it into 3 short-form posts optimized for ${platform}. Each post should stand alone and be ready to publish. Separate each post with "---". Return only the posts, nothing else.\n\nContent: ${content}`
+    case 'pulse':
+      return `You are a viral content strategist. The user creates content in this niche: "${content}".
+
+Here is what is currently trending right now based on real data:
+${trendingContext || 'No trending data available — provide general niche insights.'}
+
+Based on this trending data, provide:
+1. TOP 3 TRENDING TOPICS in this niche right now (with brief explanation of why each is hot)
+2. CONTENT ANGLES that would perform well (3 specific post ideas)
+3. HASHTAGS to use right now (10 relevant hashtags)
+4. BEST PLATFORM for this niche right now and why
+
+Format clearly with headers. Be specific and actionable.`
+    case 'radar':
+      return `You are a social media growth analyst. The user creates content in this niche: "${content}".
+
+Here is real trending data from Reddit and YouTube right now:
+${trendingContext || 'No trending data available — provide general analysis.'}
+
+Analyze this data and provide:
+1. CONTENT GAP ANALYSIS — what topics are people asking about that aren't being covered well?
+2. ENGAGEMENT PATTERNS — what type of content (questions, lists, stories, tutorials) is getting the most engagement?
+3. COMPETITOR WEAKNESSES — based on trending posts, where are creators falling short?
+4. YOUR OPPORTUNITY — one specific content strategy this creator should execute this week
+
+Be data-driven, specific, and actionable. Reference actual trends from the data.`
     default:
       return content
   }
@@ -42,9 +105,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'API key not configured' }, { status: 500 })
     }
 
+    // Fetch real trending data for pulse and radar
+    let trendingContext: string | undefined
+    if (tool === 'pulse' || tool === 'radar') {
+      trendingContext = await fetchTrendingData(content)
+    }
+
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
-    const prompt = buildPrompt(tool, content, platform || 'general')
+    const prompt = buildPrompt(tool, content, platform || 'general', trendingContext)
     const result = await model.generateContent(prompt)
     const text = result.response.text()
     const creditCost = CREDIT_COSTS[tool] || 1

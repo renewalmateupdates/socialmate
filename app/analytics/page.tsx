@@ -17,6 +17,8 @@ type Post = {
   scheduled_at: string
   status: string
   created_at: string
+  analytics?: Record<string, any>
+  platform_post_ids?: Record<string, string>
 }
 
 const PLATFORM_ICONS: Record<string, string> = {
@@ -29,9 +31,6 @@ const PLATFORM_ICONS: Record<string, string> = {
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
 
-// Free: 14d + 30d free
-// Pro: 14d + 30d + 90d free, 180d costs credits
-// Agency: all free
 const PLAN_FREE_RANGES: Record<string, string[]> = {
   free:   ['14', '30'],
   pro:    ['14', '30', '90'],
@@ -56,6 +55,11 @@ export default function Analytics() {
   const [creditModal, setCreditModal] = useState<{ range: string; cost: number } | null>(null)
   const [radarModal, setRadarModal] = useState(false)
   const [pulseModal, setPulseModal] = useState(false)
+  const [radarLoading, setRadarLoading] = useState(false)
+  const [pulseLoading, setPulseLoading] = useState(false)
+  const [radarResult, setRadarResult] = useState<string | null>(null)
+  const [pulseResult, setPulseResult] = useState<string | null>(null)
+  const [nicheInput, setNicheInput] = useState('')
   const router = useRouter()
   const { plan, credits, setCredits } = useWorkspace()
 
@@ -73,20 +77,15 @@ export default function Analytics() {
         .order('created_at', { ascending: true })
       setPosts(data || [])
       setLoading(false)
+      // Background analytics sync
+      fetch('/api/analytics/sync', { method: 'POST' }).catch(() => {})
     }
     getData()
   }, [router])
 
   const handleRangeClick = (r: '14' | '30' | '90' | '180') => {
-    if (freeRanges.includes(r)) {
-      setRange(r)
-      return
-    }
-    if (creditRanges[r]) {
-      setCreditModal({ range: r, cost: creditRanges[r] })
-      return
-    }
-    // hard locked — do nothing
+    if (freeRanges.includes(r)) { setRange(r); return }
+    if (creditRanges[r]) { setCreditModal({ range: r, cost: creditRanges[r] }); return }
   }
 
   const handleCreditUnlock = () => {
@@ -94,6 +93,48 @@ export default function Analytics() {
     setCredits(credits - creditModal.cost)
     setRange(creditModal.range as '14' | '30' | '90' | '180')
     setCreditModal(null)
+  }
+
+  const handleRunRadar = async () => {
+    if (credits < 3) return
+    const niche = nicheInput.trim() || 'social media content creation'
+    setRadarLoading(true)
+    setCredits(credits - 3)
+    try {
+      const res = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tool: 'radar', content: niche, platform: 'general' }),
+      })
+      const data = await res.json()
+      setRadarResult(data.result)
+      setRadarModal(false)
+    } catch {
+      setRadarResult('Something went wrong. Please try again.')
+    } finally {
+      setRadarLoading(false)
+    }
+  }
+
+  const handleRunPulse = async () => {
+    if (credits < 5) return
+    const niche = nicheInput.trim() || 'social media content creation'
+    setPulseLoading(true)
+    setCredits(credits - 5)
+    try {
+      const res = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tool: 'pulse', content: niche, platform: 'general' }),
+      })
+      const data = await res.json()
+      setPulseResult(data.result)
+      setPulseModal(false)
+    } catch {
+      setPulseResult('Something went wrong. Please try again.')
+    } finally {
+      setPulseLoading(false)
+    }
   }
 
   const now = new Date()
@@ -179,6 +220,16 @@ export default function Analytics() {
   const hasVideoGap = filteredPosts.length > 5 &&
     !filteredPosts.some(p => p.platforms?.includes('youtube') || p.platforms?.includes('tiktok'))
 
+  // Aggregate engagement from analytics column
+  const totalEngagement = published.reduce((sum, p) => {
+    if (!p.analytics) return sum
+    return sum + Object.values(p.analytics).reduce((s: number, e: any) => {
+      return s + (e.likes || 0) + (e.reposts || 0) + (e.reactions || 0) + (e.replies || 0)
+    }, 0)
+  }, 0)
+
+  const postsWithEngagement = published.filter(p => p.analytics && Object.keys(p.analytics).length > 0)
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar />
@@ -192,28 +243,18 @@ export default function Analytics() {
                 <div className="text-2xl mb-3">🔓</div>
                 <h2 className="text-sm font-extrabold mb-1">Unlock {RANGE_LABELS[creditModal.range]} history</h2>
                 <p className="text-xs text-gray-400 mb-4">
-                  This will spend{' '}
-                  <span className="font-bold text-black">{creditModal.cost} AI credits</span> from your balance ({credits} remaining).
-                  The view stays unlocked for this session.
+                  This will spend <span className="font-bold text-black">{creditModal.cost} AI credits</span> from your balance ({credits} remaining).
                 </p>
                 <div className="flex items-center gap-3">
-                  <button
-                    onClick={handleCreditUnlock}
-                    disabled={credits < creditModal.cost}
+                  <button onClick={handleCreditUnlock} disabled={credits < creditModal.cost}
                     className="flex-1 bg-black text-white text-xs font-bold py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
                     {credits < creditModal.cost ? 'Not enough credits' : `Spend ${creditModal.cost} credits →`}
                   </button>
-                  <button
-                    onClick={() => setCreditModal(null)}
+                  <button onClick={() => setCreditModal(null)}
                     className="px-4 py-2.5 border border-gray-200 text-xs font-bold text-gray-600 rounded-xl hover:border-gray-400 transition-all">
                     Cancel
                   </button>
                 </div>
-                {credits < creditModal.cost && (
-                  <p className="text-xs text-center mt-3">
-                    <Link href="/settings?tab=Referrals" className="text-blue-600 font-bold hover:underline">Earn more credits →</Link>
-                  </p>
-                )}
               </div>
             </div>
           )}
@@ -226,17 +267,22 @@ export default function Analytics() {
                 <h2 className="text-sm font-extrabold mb-1">Run SM-Radar</h2>
                 <p className="text-xs text-gray-400 mb-1">Costs <span className="font-bold text-black">3 AI credits</span> ({credits} remaining)</p>
                 <p className="text-xs text-gray-400 mb-4">
-                  AI-powered insights on your best posting times, top content formats, and growth patterns based on your actual data.
+                  AI analysis of content gaps, engagement patterns, and competitor weaknesses based on real trending data from Reddit and YouTube.
                 </p>
-                <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 mb-4">
-                  <p className="text-xs text-amber-700 font-semibold">⚠️ Gemini integration coming soon — full results unlock when API is connected.</p>
+                <div className="mb-4">
+                  <label className="text-xs font-semibold text-gray-500 block mb-1">Your niche or topic</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. fitness, tech reviews, cooking..."
+                    value={nicheInput}
+                    onChange={e => setNicheInput(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400"
+                  />
                 </div>
                 <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => { if (credits >= 3) { setCredits(credits - 3); setRadarModal(false) } }}
-                    disabled={credits < 3}
+                  <button onClick={handleRunRadar} disabled={credits < 3 || radarLoading}
                     className="flex-1 bg-black text-white text-xs font-bold py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
-                    {credits < 3 ? 'Not enough credits' : 'Run SM-Radar — 3 credits'}
+                    {radarLoading ? 'Analyzing...' : credits < 3 ? 'Not enough credits' : 'Run SM-Radar — 3 credits'}
                   </button>
                   <button onClick={() => setRadarModal(false)}
                     className="px-4 py-2.5 border border-gray-200 text-xs font-bold text-gray-600 rounded-xl hover:border-gray-400 transition-all">
@@ -255,21 +301,80 @@ export default function Analytics() {
                 <h2 className="text-sm font-extrabold mb-1">Run SM-Pulse</h2>
                 <p className="text-xs text-gray-400 mb-1">Costs <span className="font-bold text-black">5 AI credits</span> ({credits} remaining)</p>
                 <p className="text-xs text-gray-400 mb-4">
-                  See what's trending in your niche right now — SM-Pulse scans viral patterns across platforms before you create your next post.
+                  See what's trending in your niche right now — SM-Pulse scans Reddit and YouTube for viral patterns before you create your next post.
                 </p>
-                <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 mb-4">
-                  <p className="text-xs text-amber-700 font-semibold">⚠️ Gemini integration coming soon — full results unlock when API is connected.</p>
+                <div className="mb-4">
+                  <label className="text-xs font-semibold text-gray-500 block mb-1">Your niche or topic</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. fitness, tech reviews, cooking..."
+                    value={nicheInput}
+                    onChange={e => setNicheInput(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400"
+                  />
                 </div>
                 <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => { if (credits >= 5) { setCredits(credits - 5); setPulseModal(false) } }}
-                    disabled={credits < 5}
+                  <button onClick={handleRunPulse} disabled={credits < 5 || pulseLoading}
                     className="flex-1 bg-black text-white text-xs font-bold py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
-                    {credits < 5 ? 'Not enough credits' : 'Run SM-Pulse — 5 credits'}
+                    {pulseLoading ? 'Scanning trends...' : credits < 5 ? 'Not enough credits' : 'Run SM-Pulse — 5 credits'}
                   </button>
                   <button onClick={() => setPulseModal(false)}
                     className="px-4 py-2.5 border border-gray-200 text-xs font-bold text-gray-600 rounded-xl hover:border-gray-400 transition-all">
                     Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SM-RADAR RESULTS MODAL */}
+          {radarResult && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+              <div className="bg-white rounded-2xl p-6 max-w-2xl w-full mx-4 shadow-xl max-h-[80vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">📡</span>
+                    <h2 className="text-sm font-extrabold">SM-Radar Results</h2>
+                  </div>
+                  <button onClick={() => setRadarResult(null)} className="text-gray-400 hover:text-black text-xl">✕</button>
+                </div>
+                <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{radarResult}</div>
+                <div className="flex gap-3 mt-6">
+                  <button
+                    onClick={() => { navigator.clipboard.writeText(radarResult); }}
+                    className="flex-1 py-2.5 border border-gray-200 text-xs font-bold text-gray-600 rounded-xl hover:border-gray-400 transition-all">
+                    Copy Results
+                  </button>
+                  <button onClick={() => setRadarResult(null)}
+                    className="flex-1 py-2.5 bg-black text-white text-xs font-bold rounded-xl hover:opacity-80 transition-all">
+                    Done
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* SM-PULSE RESULTS MODAL */}
+          {pulseResult && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+              <div className="bg-white rounded-2xl p-6 max-w-2xl w-full mx-4 shadow-xl max-h-[80vh] overflow-y-auto">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">🔥</span>
+                    <h2 className="text-sm font-extrabold">SM-Pulse Results</h2>
+                  </div>
+                  <button onClick={() => setPulseResult(null)} className="text-gray-400 hover:text-black text-xl">✕</button>
+                </div>
+                <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{pulseResult}</div>
+                <div className="flex gap-3 mt-6">
+                  <button
+                    onClick={() => { navigator.clipboard.writeText(pulseResult); }}
+                    className="flex-1 py-2.5 border border-gray-200 text-xs font-bold text-gray-600 rounded-xl hover:border-gray-400 transition-all">
+                    Copy Results
+                  </button>
+                  <button onClick={() => setPulseResult(null)}
+                    className="flex-1 py-2.5 bg-black text-white text-xs font-bold rounded-xl hover:opacity-80 transition-all">
+                    Done
                   </button>
                 </div>
               </div>
@@ -289,17 +394,14 @@ export default function Analytics() {
                 const isActive = range === r
                 const isHardLocked = !isFree && !creditCost
                 return (
-                  <button key={r} onClick={() => handleRangeClick(r)}
-                    disabled={isHardLocked}
+                  <button key={r} onClick={() => handleRangeClick(r)} disabled={isHardLocked}
                     className={`relative px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                      isActive        ? 'bg-black text-white' :
-                      isHardLocked    ? 'text-gray-300 cursor-not-allowed' :
+                      isActive ? 'bg-black text-white' :
+                      isHardLocked ? 'text-gray-300 cursor-not-allowed' :
                       'text-gray-500 hover:text-black'
                     }`}>
                     {RANGE_LABELS[r]}
-                    {creditCost && !isFree && (
-                      <span className="ml-1 text-amber-500 font-bold">{creditCost}cr</span>
-                    )}
+                    {creditCost && !isFree && <span className="ml-1 text-amber-500 font-bold">{creditCost}cr</span>}
                     {isHardLocked && <span className="ml-1">🔒</span>}
                   </button>
                 )
@@ -307,9 +409,8 @@ export default function Analytics() {
             </div>
           </div>
 
-          {/* PLAN BANNER */}
           {plan === 'free' && (
-            <div className="mb-6 bg-gray-50 border border-gray-200 rounded-2xl px-5 py-3 flex items-center justify-between">
+            <div className="mb-6 bg-gray-50 border border-gray-200 rounded-2xl px-5 py-3">
               <p className="text-xs text-gray-500 font-semibold">
                 📊 Free plan includes 14-day & 30-day history
                 <span className="text-gray-400 font-normal"> · 90-day costs 2 credits · </span>
@@ -318,7 +419,7 @@ export default function Analytics() {
             </div>
           )}
           {plan === 'pro' && (
-            <div className="mb-6 bg-gray-50 border border-gray-200 rounded-2xl px-5 py-3 flex items-center justify-between">
+            <div className="mb-6 bg-gray-50 border border-gray-200 rounded-2xl px-5 py-3">
               <p className="text-xs text-gray-500 font-semibold">
                 📊 Pro plan includes up to 90-day history
                 <span className="text-gray-400 font-normal"> · 6-month costs 2 credits · </span>
@@ -333,9 +434,9 @@ export default function Analytics() {
               <div className="flex items-center gap-3">
                 <span className="text-2xl">📡</span>
                 <div>
-                  <p className="text-xs font-extrabold">SM-Radar — Personal Growth Intelligence</p>
+                  <p className="text-xs font-extrabold">SM-Radar — Real Trend Intelligence</p>
                   <p className="text-xs text-gray-400 mt-0.5">
-                    Get AI-powered insights on your best posting times, top content formats, and growth patterns. Costs 3 credits.
+                    AI analysis of real Reddit and YouTube data — content gaps, competitor weaknesses, and what to post this week. 3 credits.
                   </p>
                 </div>
               </div>
@@ -362,8 +463,7 @@ export default function Analytics() {
               <div className="space-y-1">
                 {daysSinceLastPost !== null && daysSinceLastPost > 3 && (
                   <p className="text-xs text-orange-700">
-                    You haven't posted in <span className="font-bold">{daysSinceLastPost} days</span>.
-                    Consistent posting keeps your audience engaged.
+                    You haven't posted in <span className="font-bold">{daysSinceLastPost} days</span>. Consistent posting keeps your audience engaged.
                   </p>
                 )}
                 {hasVideoGap && (
@@ -389,10 +489,10 @@ export default function Analytics() {
               </div>
             )) : (
               [
-                { label: 'Total Posts',  value: filteredPosts.length, icon: '📝', sub: 'in selected range'   },
-                { label: 'Scheduled',    value: scheduled.length,     icon: '📅', sub: 'queued up'           },
-                { label: 'Avg / Week',   value: avgPerWeek,           icon: '📈', sub: 'posting frequency'   },
-                { label: 'Avg Length',   value: avgLength,            icon: '✍️', sub: 'characters per post' },
+                { label: 'Total Posts',    value: filteredPosts.length, icon: '📝', sub: 'in selected range'    },
+                { label: 'Scheduled',      value: scheduled.length,     icon: '📅', sub: 'queued up'            },
+                { label: 'Avg / Week',     value: avgPerWeek,           icon: '📈', sub: 'posting frequency'    },
+                { label: 'Total Engagement', value: totalEngagement,    icon: '❤️', sub: 'likes, reactions, reposts' },
               ].map(stat => (
                 <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-5">
                   <div className="flex justify-between items-center mb-3">
@@ -429,9 +529,9 @@ export default function Analytics() {
               {loading ? <SkeletonBox className="h-12" /> : (
                 <div className="space-y-2">
                   {[
-                    { label: 'Scheduled', count: scheduled.length,  color: 'bg-blue-400'  },
-                    { label: 'Draft',     count: drafts.length,     color: 'bg-gray-300'  },
-                    { label: 'Published', count: published.length,  color: 'bg-green-400' },
+                    { label: 'Scheduled', count: scheduled.length, color: 'bg-blue-400'  },
+                    { label: 'Draft',     count: drafts.length,    color: 'bg-gray-300'  },
+                    { label: 'Published', count: published.length, color: 'bg-green-400' },
                   ].map(s => (
                     <div key={s.label} className="flex items-center gap-2">
                       <div className={`w-2 h-2 rounded-full ${s.color}`} />
@@ -444,10 +544,47 @@ export default function Analytics() {
             </div>
           </div>
 
+          {/* ENGAGEMENT BREAKDOWN — shows when there's real data */}
+          {postsWithEngagement.length > 0 && (
+            <div className="bg-white border border-gray-100 rounded-2xl p-5 mb-6">
+              <h2 className="text-sm font-bold tracking-tight mb-4">Engagement by Post</h2>
+              <div className="space-y-3">
+                {postsWithEngagement.slice(0, 5).map(post => {
+                  const eng = post.analytics || {}
+                  const totalEng = Object.values(eng).reduce((s: number, e: any) =>
+                    s + (e.likes || 0) + (e.reposts || 0) + (e.reactions || 0) + (e.replies || 0), 0)
+                  return (
+                    <div key={post.id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-semibold truncate">{post.content?.slice(0, 60)}...</p>
+                        <div className="flex items-center gap-2 mt-1">
+                          {post.platforms?.map(p => (
+                            <span key={p} className="text-xs">{PLATFORM_ICONS[p] || '📱'}</span>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4 flex-shrink-0">
+                        {Object.entries(eng).map(([platform, data]: [string, any]) => (
+                          <div key={platform} className="text-center">
+                            <span className="text-xs">{PLATFORM_ICONS[platform] || '📱'}</span>
+                            <p className="text-xs font-bold">{(data.likes || 0) + (data.reposts || 0) + (data.reactions || 0)}</p>
+                          </div>
+                        ))}
+                        <div className="text-center">
+                          <p className="text-xs text-gray-400">Total</p>
+                          <p className="text-sm font-extrabold">{totalEng}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
           <div className="grid grid-cols-3 gap-6">
             <div className="col-span-2 space-y-6">
 
-              {/* DAILY ACTIVITY */}
               <div className="bg-white border border-gray-100 rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Daily Activity</h2>
                 {loading ? <SkeletonBox className="h-32" /> : (
@@ -473,7 +610,6 @@ export default function Analytics() {
                 </div>
               </div>
 
-              {/* BEST DAYS */}
               <div className="bg-white border border-gray-100 rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Best Days to Post</h2>
                 {loading ? <SkeletonBox className="h-24" /> : (
@@ -498,7 +634,6 @@ export default function Analytics() {
                 )}
               </div>
 
-              {/* BEST TIMES HEATMAP */}
               <div className="bg-white border border-gray-100 rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Best Times to Post</h2>
                 {loading ? <SkeletonBox className="h-16" /> : (
@@ -506,11 +641,7 @@ export default function Analytics() {
                     <div className="flex gap-1 flex-wrap">
                       {hourCounts.map(h => {
                         const pct = maxHourCount > 0 ? h.count / maxHourCount : 0
-                        const bg = pct === 0 ? 'bg-gray-100'
-                          : pct < 0.25 ? 'bg-gray-300'
-                          : pct < 0.5  ? 'bg-gray-400'
-                          : pct < 0.75 ? 'bg-gray-600'
-                          : 'bg-black'
+                        const bg = pct === 0 ? 'bg-gray-100' : pct < 0.25 ? 'bg-gray-300' : pct < 0.5 ? 'bg-gray-400' : pct < 0.75 ? 'bg-gray-600' : 'bg-black'
                         return (
                           <div key={h.hour} className="group relative">
                             <div className={`w-8 h-8 rounded-lg ${bg} transition-all`} />
@@ -535,7 +666,6 @@ export default function Analytics() {
                 )}
               </div>
 
-              {/* MONTHLY */}
               <div className="bg-white border border-gray-100 rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Posts by Month — {now.getFullYear()}</h2>
                 {loading ? <SkeletonBox className="h-24" /> : (
@@ -559,10 +689,8 @@ export default function Analytics() {
               </div>
             </div>
 
-            {/* RIGHT COLUMN */}
             <div className="space-y-6">
 
-              {/* PLATFORM BREAKDOWN */}
               <div className="bg-white border border-gray-100 rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Platform Breakdown</h2>
                 {loading
@@ -591,7 +719,6 @@ export default function Analytics() {
                 }
               </div>
 
-              {/* CONTENT INSIGHTS */}
               <div className="bg-white border border-gray-100 rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Content Insights</h2>
                 {loading ? <SkeletonBox className="h-32" /> : (
@@ -605,25 +732,21 @@ export default function Analytics() {
                       },
                       {
                         label: 'Most Used Platform',
-                        value: topPlatforms[0]?.[0]
-                          ? topPlatforms[0][0].charAt(0).toUpperCase() + topPlatforms[0][0].slice(1)
-                          : '—',
+                        value: topPlatforms[0]?.[0] ? topPlatforms[0][0].charAt(0).toUpperCase() + topPlatforms[0][0].slice(1) : '—',
                         sub: topPlatforms[0] ? `${topPlatforms[0][1]} posts` : 'No posts yet',
                         icon: topPlatforms[0] ? PLATFORM_ICONS[topPlatforms[0][0]] : '📱',
                       },
                       {
                         label: 'Draft Rate',
-                        value: filteredPosts.length > 0
-                          ? `${Math.round((drafts.length / filteredPosts.length) * 100)}%`
-                          : '0%',
+                        value: filteredPosts.length > 0 ? `${Math.round((drafts.length / filteredPosts.length) * 100)}%` : '0%',
                         sub: 'posts left as drafts',
                         icon: '📂',
                       },
                       {
-                        label: 'Total Platforms Used',
-                        value: topPlatforms.length,
-                        sub: 'different platforms',
-                        icon: '📱',
+                        label: 'Posts with Engagement',
+                        value: postsWithEngagement.length,
+                        sub: 'synced from platforms',
+                        icon: '❤️',
                       },
                     ].map(insight => (
                       <div key={insight.label} className="flex items-center gap-3">
@@ -641,7 +764,6 @@ export default function Analytics() {
                 )}
               </div>
 
-              {/* CONSISTENCY SCORE */}
               <div className="bg-white border border-gray-100 rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-2">Consistency Score</h2>
                 {loading ? <SkeletonBox className="h-20" /> : (() => {
@@ -664,32 +786,28 @@ export default function Analytics() {
                 })()}
               </div>
 
-              {/* SM-PULSE TEASER */}
-              <div className="bg-gradient-to-br from-gray-900 to-gray-700 rounded-2xl p-5 text-white">
+              <div className="bg-black rounded-2xl p-5 text-white">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-xl">🔥</span>
                   <p className="text-xs font-extrabold">SM-Pulse</p>
                   <span className="text-xs font-bold px-2 py-0.5 bg-white text-black rounded-full">5 credits</span>
                 </div>
                 <p className="text-xs text-gray-400 leading-relaxed mb-3">
-                  See what's trending in your niche right now — before you create your next post.
+                  See what's trending in your niche right now — powered by real Reddit and YouTube data.
                 </p>
                 <button onClick={() => setPulseModal(true)}
                   className="text-xs font-bold px-4 py-2 bg-white text-black rounded-xl hover:opacity-80 transition-all inline-block">
-                  Try SM-Pulse →
+                  {pulseLoading ? 'Scanning...' : 'Try SM-Pulse →'}
                 </button>
               </div>
 
-              {/* UPGRADE CARD */}
               {plan !== 'agency' && (
                 <div className={`rounded-2xl p-5 border ${plan === 'free' ? 'bg-blue-50 border-blue-100' : 'bg-purple-50 border-purple-100'}`}>
                   <p className={`text-xs font-bold mb-1 ${plan === 'free' ? 'text-blue-700' : 'text-purple-700'}`}>
                     {plan === 'free' ? '⚡ Unlock 90-day history free' : '🏢 Unlock 6-month history free'}
                   </p>
                   <p className={`text-xs mb-3 ${plan === 'free' ? 'text-blue-600' : 'text-purple-600'}`}>
-                    {plan === 'free'
-                      ? 'Pro plan includes 90-day analytics — no credits needed.'
-                      : 'Agency plan includes full 6-month history.'}
+                    {plan === 'free' ? 'Pro plan includes 90-day analytics — no credits needed.' : 'Agency plan includes full 6-month history.'}
                   </p>
                   <Link href="/pricing"
                     className={`block text-center text-white text-xs font-bold px-3 py-2 rounded-xl hover:opacity-80 transition-all ${plan === 'free' ? 'bg-blue-600' : 'bg-purple-600'}`}>
