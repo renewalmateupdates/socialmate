@@ -61,6 +61,53 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Failed to publish post' }, { status: 500 })
   }
 
+  // ── First-post credit trigger ──────────────────────────────────────────
+  try {
+    // Count how many published posts this user has (including this one)
+    const { count } = await supabase
+      .from('posts')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('status', 'published')
+
+    if (count === 1) {
+      // This is their first published post — award +10 credits to the user
+      const { data: userSettings } = await supabase
+        .from('user_settings')
+        .select('credits, referred_by')
+        .eq('user_id', user.id)
+        .single()
+
+      if (userSettings) {
+        // Award user +10 credits
+        await supabase
+          .from('user_settings')
+          .update({ credits: (userSettings.credits ?? 0) + 10 })
+          .eq('user_id', user.id)
+
+        // If they were referred, award referrer +10 credits too
+        if (userSettings.referred_by) {
+          const { data: referrerSettings } = await supabase
+            .from('user_settings')
+            .select('credits')
+            .eq('user_id', userSettings.referred_by)
+            .single()
+
+          if (referrerSettings) {
+            await supabase
+              .from('user_settings')
+              .update({ credits: (referrerSettings.credits ?? 0) + 10 })
+              .eq('user_id', userSettings.referred_by)
+          }
+        }
+      }
+    }
+  } catch (creditErr) {
+    // Non-blocking — don't fail the publish if credits fail
+    console.error('First-post credit error:', creditErr)
+  }
+  // ──────────────────────────────────────────────────────────────────────
+
   // TODO (Phase 2): Call platform-specific publishing adapter here
 
   return NextResponse.json({ success: true, publishedAt: new Date().toISOString() })
