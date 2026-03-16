@@ -77,7 +77,6 @@ export default function Analytics() {
         .order('created_at', { ascending: true })
       setPosts(data || [])
       setLoading(false)
-      // Background analytics sync
       fetch('/api/analytics/sync', { method: 'POST' }).catch(() => {})
     }
     getData()
@@ -96,10 +95,10 @@ export default function Analytics() {
   }
 
   const handleRunRadar = async () => {
-    if (credits < 3) return
+    if (credits < 10) return
     const niche = nicheInput.trim() || 'social media content creation'
     setRadarLoading(true)
-    setCredits(credits - 3)
+    setCredits(credits - 10)
     try {
       const res = await fetch('/api/ai', {
         method: 'POST',
@@ -117,10 +116,10 @@ export default function Analytics() {
   }
 
   const handleRunPulse = async () => {
-    if (credits < 5) return
+    if (credits < 10) return
     const niche = nicheInput.trim() || 'social media content creation'
     setPulseLoading(true)
-    setCredits(credits - 5)
+    setCredits(credits - 10)
     try {
       const res = await fetch('/api/ai', {
         method: 'POST',
@@ -220,7 +219,6 @@ export default function Analytics() {
   const hasVideoGap = filteredPosts.length > 5 &&
     !filteredPosts.some(p => p.platforms?.includes('youtube') || p.platforms?.includes('tiktok'))
 
-  // Aggregate engagement from analytics column
   const totalEngagement = published.reduce((sum, p) => {
     if (!p.analytics) return sum
     return sum + Object.values(p.analytics).reduce((s: number, e: any) => {
@@ -230,13 +228,70 @@ export default function Analytics() {
 
   const postsWithEngagement = published.filter(p => p.analytics && Object.keys(p.analytics).length > 0)
 
+  const handleExportPDF = () => {
+    const printWindow = window.open('', '_blank')
+    if (!printWindow) return
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>SocialMate Analytics Report</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 40px; color: #111; }
+            h1 { font-size: 24px; font-weight: 800; margin-bottom: 4px; }
+            p { font-size: 13px; color: #666; margin-bottom: 32px; }
+            .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+            .card { border: 1px solid #eee; border-radius: 12px; padding: 16px; }
+            .card-label { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+            .card-value { font-size: 28px; font-weight: 800; }
+            .card-sub { font-size: 11px; color: #999; margin-top: 4px; }
+            .section { margin-bottom: 32px; }
+            .section-title { font-size: 14px; font-weight: 700; margin-bottom: 16px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+            .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f5f5f5; font-size: 13px; }
+            .footer { margin-top: 48px; font-size: 11px; color: #aaa; border-top: 1px solid #eee; padding-top: 16px; }
+          </style>
+        </head>
+        <body>
+          <h1>SocialMate Analytics Report</h1>
+          <p>Generated ${now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} · ${RANGE_LABELS[range]} range · Agency Plan</p>
+          <div class="grid">
+            <div class="card"><div class="card-label">Total Posts</div><div class="card-value">${filteredPosts.length}</div><div class="card-sub">in selected range</div></div>
+            <div class="card"><div class="card-label">Scheduled</div><div class="card-value">${scheduled.length}</div><div class="card-sub">queued up</div></div>
+            <div class="card"><div class="card-label">Avg / Week</div><div class="card-value">${avgPerWeek}</div><div class="card-sub">posting frequency</div></div>
+            <div class="card"><div class="card-label">Total Engagement</div><div class="card-value">${totalEngagement}</div><div class="card-sub">likes, reactions, reposts</div></div>
+          </div>
+          <div class="grid" style="grid-template-columns: repeat(3, 1fr)">
+            <div class="card"><div class="card-label">Current Streak</div><div class="card-value">${currentStreak}</div><div class="card-sub">days · longest: ${longestStreak}</div></div>
+            <div class="card"><div class="card-label">Peak Hour</div><div class="card-value">${peakHour.label}</div><div class="card-sub">${peakHour.count} posts at this hour</div></div>
+            <div class="card"><div class="card-label">Avg Caption Length</div><div class="card-value">${avgLength}</div><div class="card-sub">characters</div></div>
+          </div>
+          <div class="section">
+            <div class="section-title">Platform Breakdown</div>
+            ${topPlatforms.map(([platform, count]) => `<div class="row"><span style="text-transform:capitalize">${platform}</span><strong>${count} posts</strong></div>`).join('')}
+          </div>
+          <div class="section">
+            <div class="section-title">Post Status</div>
+            <div class="row"><span>Published</span><strong>${published.length}</strong></div>
+            <div class="row"><span>Scheduled</span><strong>${scheduled.length}</strong></div>
+            <div class="row"><span>Drafts</span><strong>${drafts.length}</strong></div>
+          </div>
+          <div class="section">
+            <div class="section-title">Best Days to Post</div>
+            ${dayOfWeekCounts.map(d => `<div class="row"><span>${d.day}</span><strong>${d.count} posts</strong></div>`).join('')}
+          </div>
+          <div class="footer">SocialMate · Gilgamesh Enterprise LLC · socialmate.studio · Report generated ${new Date().toISOString()}</div>
+        </body>
+      </html>
+    `)
+    printWindow.document.close()
+    printWindow.print()
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar />
       <div className="ml-56 flex-1 p-8">
         <div className="max-w-7xl mx-auto">
 
-          {/* CREDIT UNLOCK MODAL */}
           {creditModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
               <div className="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl">
@@ -259,30 +314,23 @@ export default function Analytics() {
             </div>
           )}
 
-          {/* SM-RADAR MODAL */}
           {radarModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
               <div className="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl">
                 <div className="text-2xl mb-3">📡</div>
                 <h2 className="text-sm font-extrabold mb-1">Run SM-Radar</h2>
-                <p className="text-xs text-gray-400 mb-1">Costs <span className="font-bold text-black">3 AI credits</span> ({credits} remaining)</p>
-                <p className="text-xs text-gray-400 mb-4">
-                  AI analysis of content gaps, engagement patterns, and competitor weaknesses based on real trending data from Reddit and YouTube.
-                </p>
+                <p className="text-xs text-gray-400 mb-1">Costs <span className="font-bold text-black">10 AI credits</span> ({credits} remaining)</p>
+                <p className="text-xs text-gray-400 mb-4">AI analysis of real Reddit and YouTube data — content gaps, competitor weaknesses, and what to post this week.</p>
                 <div className="mb-4">
                   <label className="text-xs font-semibold text-gray-500 block mb-1">Your niche or topic</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. fitness, tech reviews, cooking..."
-                    value={nicheInput}
-                    onChange={e => setNicheInput(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400"
-                  />
+                  <input type="text" placeholder="e.g. fitness, tech reviews, cooking..."
+                    value={nicheInput} onChange={e => setNicheInput(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400" />
                 </div>
                 <div className="flex items-center gap-3">
-                  <button onClick={handleRunRadar} disabled={credits < 3 || radarLoading}
+                  <button onClick={handleRunRadar} disabled={credits < 10 || radarLoading}
                     className="flex-1 bg-black text-white text-xs font-bold py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
-                    {radarLoading ? 'Analyzing...' : credits < 3 ? 'Not enough credits' : 'Run SM-Radar — 3 credits'}
+                    {radarLoading ? 'Analyzing...' : credits < 10 ? 'Not enough credits' : 'Run SM-Radar — 10 credits'}
                   </button>
                   <button onClick={() => setRadarModal(false)}
                     className="px-4 py-2.5 border border-gray-200 text-xs font-bold text-gray-600 rounded-xl hover:border-gray-400 transition-all">
@@ -293,30 +341,23 @@ export default function Analytics() {
             </div>
           )}
 
-          {/* SM-PULSE MODAL */}
           {pulseModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
               <div className="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl">
                 <div className="text-2xl mb-3">🔥</div>
                 <h2 className="text-sm font-extrabold mb-1">Run SM-Pulse</h2>
-                <p className="text-xs text-gray-400 mb-1">Costs <span className="font-bold text-black">5 AI credits</span> ({credits} remaining)</p>
-                <p className="text-xs text-gray-400 mb-4">
-                  See what's trending in your niche right now — SM-Pulse scans Reddit and YouTube for viral patterns before you create your next post.
-                </p>
+                <p className="text-xs text-gray-400 mb-1">Costs <span className="font-bold text-black">10 AI credits</span> ({credits} remaining)</p>
+                <p className="text-xs text-gray-400 mb-4">See what's trending in your niche right now — powered by real Reddit and YouTube data.</p>
                 <div className="mb-4">
                   <label className="text-xs font-semibold text-gray-500 block mb-1">Your niche or topic</label>
-                  <input
-                    type="text"
-                    placeholder="e.g. fitness, tech reviews, cooking..."
-                    value={nicheInput}
-                    onChange={e => setNicheInput(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400"
-                  />
+                  <input type="text" placeholder="e.g. fitness, tech reviews, cooking..."
+                    value={nicheInput} onChange={e => setNicheInput(e.target.value)}
+                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400" />
                 </div>
                 <div className="flex items-center gap-3">
-                  <button onClick={handleRunPulse} disabled={credits < 5 || pulseLoading}
+                  <button onClick={handleRunPulse} disabled={credits < 10 || pulseLoading}
                     className="flex-1 bg-black text-white text-xs font-bold py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
-                    {pulseLoading ? 'Scanning trends...' : credits < 5 ? 'Not enough credits' : 'Run SM-Pulse — 5 credits'}
+                    {pulseLoading ? 'Scanning trends...' : credits < 10 ? 'Not enough credits' : 'Run SM-Pulse — 10 credits'}
                   </button>
                   <button onClick={() => setPulseModal(false)}
                     className="px-4 py-2.5 border border-gray-200 text-xs font-bold text-gray-600 rounded-xl hover:border-gray-400 transition-all">
@@ -327,7 +368,6 @@ export default function Analytics() {
             </div>
           )}
 
-          {/* SM-RADAR RESULTS MODAL */}
           {radarResult && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
               <div className="bg-white rounded-2xl p-6 max-w-2xl w-full mx-4 shadow-xl max-h-[80vh] overflow-y-auto">
@@ -340,8 +380,7 @@ export default function Analytics() {
                 </div>
                 <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{radarResult}</div>
                 <div className="flex gap-3 mt-6">
-                  <button
-                    onClick={() => { navigator.clipboard.writeText(radarResult); }}
+                  <button onClick={() => navigator.clipboard.writeText(radarResult)}
                     className="flex-1 py-2.5 border border-gray-200 text-xs font-bold text-gray-600 rounded-xl hover:border-gray-400 transition-all">
                     Copy Results
                   </button>
@@ -354,7 +393,6 @@ export default function Analytics() {
             </div>
           )}
 
-          {/* SM-PULSE RESULTS MODAL */}
           {pulseResult && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
               <div className="bg-white rounded-2xl p-6 max-w-2xl w-full mx-4 shadow-xl max-h-[80vh] overflow-y-auto">
@@ -367,8 +405,7 @@ export default function Analytics() {
                 </div>
                 <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{pulseResult}</div>
                 <div className="flex gap-3 mt-6">
-                  <button
-                    onClick={() => { navigator.clipboard.writeText(pulseResult); }}
+                  <button onClick={() => navigator.clipboard.writeText(pulseResult)}
                     className="flex-1 py-2.5 border border-gray-200 text-xs font-bold text-gray-600 rounded-xl hover:border-gray-400 transition-all">
                     Copy Results
                   </button>
@@ -381,31 +418,38 @@ export default function Analytics() {
             </div>
           )}
 
-          {/* HEADER */}
           <div className="flex items-center justify-between mb-8">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Analytics</h1>
               <p className="text-sm text-gray-400 mt-0.5">Real data from your posting activity</p>
             </div>
-            <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-xl p-1">
-              {(['14', '30', '90', '180'] as const).map(r => {
-                const isFree = freeRanges.includes(r)
-                const creditCost = creditRanges[r]
-                const isActive = range === r
-                const isHardLocked = !isFree && !creditCost
-                return (
-                  <button key={r} onClick={() => handleRangeClick(r)} disabled={isHardLocked}
-                    className={`relative px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                      isActive ? 'bg-black text-white' :
-                      isHardLocked ? 'text-gray-300 cursor-not-allowed' :
-                      'text-gray-500 hover:text-black'
-                    }`}>
-                    {RANGE_LABELS[r]}
-                    {creditCost && !isFree && <span className="ml-1 text-amber-500 font-bold">{creditCost}cr</span>}
-                    {isHardLocked && <span className="ml-1">🔒</span>}
-                  </button>
-                )
-              })}
+            <div className="flex items-center gap-3">
+              {plan === 'agency' && (
+                <button onClick={handleExportPDF}
+                  className="flex items-center gap-2 px-4 py-2 border border-gray-200 text-xs font-bold text-gray-600 rounded-xl hover:border-gray-400 transition-all">
+                  📄 Export PDF
+                </button>
+              )}
+              <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-xl p-1">
+                {(['14', '30', '90', '180'] as const).map(r => {
+                  const isFree = freeRanges.includes(r)
+                  const creditCost = creditRanges[r]
+                  const isActive = range === r
+                  const isHardLocked = !isFree && !creditCost
+                  return (
+                    <button key={r} onClick={() => handleRangeClick(r)} disabled={isHardLocked}
+                      className={`relative px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                        isActive ? 'bg-black text-white' :
+                        isHardLocked ? 'text-gray-300 cursor-not-allowed' :
+                        'text-gray-500 hover:text-black'
+                      }`}>
+                      {RANGE_LABELS[r]}
+                      {creditCost && !isFree && <span className="ml-1 text-amber-500 font-bold">{creditCost}cr</span>}
+                      {isHardLocked && <span className="ml-1">🔒</span>}
+                    </button>
+                  )
+                })}
+              </div>
             </div>
           </div>
 
@@ -428,16 +472,13 @@ export default function Analytics() {
             </div>
           )}
 
-          {/* SM-RADAR BANNER */}
           {!radarDismissed && (
             <div className="mb-6 bg-black rounded-2xl px-5 py-4 flex items-center justify-between text-white">
               <div className="flex items-center gap-3">
                 <span className="text-2xl">📡</span>
                 <div>
                   <p className="text-xs font-extrabold">SM-Radar — Real Trend Intelligence</p>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    AI analysis of real Reddit and YouTube data — content gaps, competitor weaknesses, and what to post this week. 3 credits.
-                  </p>
+                  <p className="text-xs text-gray-400 mt-0.5">AI analysis of real Reddit and YouTube data — content gaps, competitor weaknesses, and what to post this week. 10 credits.</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 flex-shrink-0 ml-4">
@@ -445,15 +486,13 @@ export default function Analytics() {
                   className="text-xs font-bold px-4 py-2 bg-white text-black rounded-xl hover:opacity-80 transition-all">
                   Try SM-Radar
                 </button>
-                <button onClick={() => setRadarDismissed(true)}
-                  className="text-xs text-gray-500 hover:text-gray-300 transition-all">
+                <button onClick={() => setRadarDismissed(true)} className="text-xs text-gray-500 hover:text-gray-300 transition-all">
                   Dismiss
                 </button>
               </div>
             </div>
           )}
 
-          {/* CONTENT GAP DETECTOR */}
           {!loading && (daysSinceLastPost !== null && daysSinceLastPost > 3 || hasVideoGap) && (
             <div className="mb-6 bg-orange-50 border border-orange-100 rounded-2xl px-5 py-4">
               <div className="flex items-center gap-2 mb-2">
@@ -467,9 +506,7 @@ export default function Analytics() {
                   </p>
                 )}
                 {hasVideoGap && (
-                  <p className="text-xs text-orange-700">
-                    No video content in this period — video posts typically drive higher engagement than static content.
-                  </p>
+                  <p className="text-xs text-orange-700">No video content in this period — video posts typically drive higher engagement.</p>
                 )}
               </div>
               <Link href="/compose"
@@ -479,7 +516,6 @@ export default function Analytics() {
             </div>
           )}
 
-          {/* STAT CARDS */}
           <div className="grid grid-cols-4 gap-4 mb-6">
             {loading ? [1,2,3,4].map(i => (
               <div key={i} className="bg-white border border-gray-100 rounded-2xl p-5">
@@ -489,10 +525,10 @@ export default function Analytics() {
               </div>
             )) : (
               [
-                { label: 'Total Posts',    value: filteredPosts.length, icon: '📝', sub: 'in selected range'    },
-                { label: 'Scheduled',      value: scheduled.length,     icon: '📅', sub: 'queued up'            },
-                { label: 'Avg / Week',     value: avgPerWeek,           icon: '📈', sub: 'posting frequency'    },
-                { label: 'Total Engagement', value: totalEngagement,    icon: '❤️', sub: 'likes, reactions, reposts' },
+                { label: 'Total Posts',      value: filteredPosts.length, icon: '📝', sub: 'in selected range'         },
+                { label: 'Scheduled',        value: scheduled.length,     icon: '📅', sub: 'queued up'                 },
+                { label: 'Avg / Week',       value: avgPerWeek,           icon: '📈', sub: 'posting frequency'         },
+                { label: 'Total Engagement', value: totalEngagement,      icon: '❤️', sub: 'likes, reactions, reposts' },
               ].map(stat => (
                 <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-5">
                   <div className="flex justify-between items-center mb-3">
@@ -506,7 +542,6 @@ export default function Analytics() {
             )}
           </div>
 
-          {/* STREAK + PEAK + STATUS */}
           <div className="grid grid-cols-3 gap-4 mb-6">
             <div className="bg-white border border-gray-100 rounded-2xl p-5 flex items-center gap-4">
               <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0">🔥</div>
@@ -544,7 +579,6 @@ export default function Analytics() {
             </div>
           </div>
 
-          {/* ENGAGEMENT BREAKDOWN — shows when there's real data */}
           {postsWithEngagement.length > 0 && (
             <div className="bg-white border border-gray-100 rounded-2xl p-5 mb-6">
               <h2 className="text-sm font-bold tracking-tight mb-4">Engagement by Post</h2>
@@ -790,7 +824,7 @@ export default function Analytics() {
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-xl">🔥</span>
                   <p className="text-xs font-extrabold">SM-Pulse</p>
-                  <span className="text-xs font-bold px-2 py-0.5 bg-white text-black rounded-full">5 credits</span>
+                  <span className="text-xs font-bold px-2 py-0.5 bg-white text-black rounded-full">10 credits</span>
                 </div>
                 <p className="text-xs text-gray-400 leading-relaxed mb-3">
                   See what's trending in your niche right now — powered by real Reddit and YouTube data.
