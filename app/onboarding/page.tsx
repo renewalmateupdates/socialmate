@@ -5,15 +5,15 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 const PLATFORMS = [
-  { id: 'instagram', label: 'Instagram',   icon: '📸', desc: 'Photos & Reels',   available: false },
-  { id: 'linkedin',  label: 'LinkedIn',    icon: '💼', desc: 'Professional',     available: true  },
-  { id: 'youtube',   label: 'YouTube',     icon: '▶️', desc: 'Video',            available: true  },
-  { id: 'pinterest', label: 'Pinterest',   icon: '📌', desc: 'Visual content',   available: true  },
-  { id: 'reddit',    label: 'Reddit',      icon: '🤖', desc: 'Communities',      available: true  },
   { id: 'discord',   label: 'Discord',     icon: '💬', desc: 'Announcements',    available: true  },
   { id: 'bluesky',   label: 'Bluesky',     icon: '🦋', desc: 'Decentralized',    available: true  },
   { id: 'mastodon',  label: 'Mastodon',    icon: '🐘', desc: 'Federated',        available: true  },
   { id: 'telegram',  label: 'Telegram',    icon: '✈️', desc: 'Channels',         available: true  },
+  { id: 'linkedin',  label: 'LinkedIn',    icon: '💼', desc: 'Professional',     available: false },
+  { id: 'youtube',   label: 'YouTube',     icon: '▶️', desc: 'Video',            available: false },
+  { id: 'pinterest', label: 'Pinterest',   icon: '📌', desc: 'Visual content',   available: false },
+  { id: 'reddit',    label: 'Reddit',      icon: '🤖', desc: 'Communities',      available: false },
+  { id: 'instagram', label: 'Instagram',   icon: '📸', desc: 'Photos & Reels',   available: false },
   { id: 'tiktok',    label: 'TikTok',      icon: '🎵', desc: 'Short video',      available: false },
   { id: 'facebook',  label: 'Facebook',    icon: '📘', desc: 'Pages & Groups',   available: false },
   { id: 'threads',   label: 'Threads',     icon: '🧵', desc: 'Text & photos',    available: false },
@@ -54,12 +54,12 @@ export default function Onboarding() {
   useEffect(() => {
     const init = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return } // On1: fixed
+      if (!user) { router.push('/login'); return }
       setUser(user)
       setDisplayName(user.email?.split('@')[0] || '')
     }
     init()
-  }, [router]) // On1: fixed
+  }, [router])
 
   const showToast = (message: string, soft = false) => {
     setToast({ message, soft })
@@ -74,7 +74,6 @@ export default function Onboarding() {
     )
   }
 
-  // On2: error handling on profile/settings writes
   const handleFinish = async () => {
     setSaving(true)
 
@@ -97,7 +96,6 @@ export default function Onboarding() {
     }, { onConflict: 'user_id' })
 
     if (settingsRes.error) {
-      // Non-fatal: settings failed but profile saved — continue to dashboard
       console.error('user_settings upsert failed:', settingsRes.error.message)
     }
 
@@ -225,7 +223,7 @@ export default function Onboarding() {
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">What you get — free forever</p>
                 <div className="grid grid-cols-2 gap-2">
                   {[
-                    '16 social platforms',
+                    '4 live platforms now',
                     'Unlimited scheduling',
                     'Bulk Scheduler',
                     'Link in Bio builder',
@@ -288,7 +286,7 @@ export default function Onboarding() {
               <div className="text-center mb-6">
                 <div className="text-5xl mb-4">📱</div>
                 <h2 className="text-2xl font-extrabold tracking-tight mb-2">Which platforms do you use?</h2>
-                <p className="text-gray-400 text-sm">Select available ones now — more coming soon</p>
+                <p className="text-gray-400 text-sm">4 live now · 12 more coming soon</p>
               </div>
 
               <div className="bg-blue-50 border border-blue-100 rounded-2xl px-4 py-3 mb-5 flex items-center gap-3">
@@ -325,7 +323,7 @@ export default function Onboarding() {
 
               <p className="text-xs text-center text-gray-400 mb-6">
                 {selectedPlatforms.length} platform{selectedPlatforms.length !== 1 ? 's' : ''} selected ·
-                {' '}Instagram, TikTok, Facebook & Threads coming soon
+                {' '}LinkedIn, YouTube, Pinterest, Reddit & more coming soon
               </p>
 
               <div className="flex gap-3">
@@ -333,7 +331,6 @@ export default function Onboarding() {
                   className="px-6 py-3 border border-gray-200 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
                   ← Back
                 </button>
-                {/* On3: soft nudge if none selected, but allow skipping */}
                 {selectedPlatforms.length > 0 ? (
                   <button onClick={() => setStep(4)}
                     className="flex-1 py-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all">
@@ -495,10 +492,10 @@ export default function Onboarding() {
 
               <div className="space-y-3 mb-8 text-left">
                 {[
-                  { icon: '✏️', title: 'Compose a post',        desc: 'Write and schedule your first post',        href: '/compose',        cta: 'Start writing'  },
-                  { icon: '📆', title: 'Bulk schedule content',  desc: 'Plan a whole week of posts in one session', href: '/bulk-scheduler', cta: 'Open scheduler' },
-                  { icon: '🔗', title: 'Set up Link in Bio',    desc: 'Your free bio page — no Linktree needed',   href: '/link-in-bio',    cta: 'Build bio page' },
-                  { icon: '🤖', title: 'Explore AI tools',      desc: 'Captions, hooks, calendars, trend scanning',href: '/features',       cta: 'See features'   },
+                  { icon: '✏️', title: 'Compose a post',       desc: 'Write and schedule your first post',        href: '/compose',        cta: 'Start writing'  },
+                  { icon: '📆', title: 'Bulk schedule content', desc: 'Plan a whole week of posts in one session', href: '/bulk-scheduler', cta: 'Open scheduler' },
+                  { icon: '🔗', title: 'Set up Link in Bio',   desc: 'Your free bio page — no Linktree needed',   href: '/link-in-bio',    cta: 'Build bio page' },
+                  { icon: '🤖', title: 'Explore AI tools',     desc: 'Captions, hooks, calendars, trend scanning', href: '/features',      cta: 'See features'   },
                 ].map(action => (
                   <div key={action.title}
                     className="flex items-center gap-4 p-4 border border-gray-100 rounded-2xl hover:border-gray-300 transition-all group">
@@ -531,7 +528,6 @@ export default function Onboarding() {
         </div>
       </div>
 
-      {/* On3: soft toast uses gray, error toast uses red */}
       {toast && (
         <div className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${
           toast.soft ? 'bg-gray-800 text-white' : 'bg-red-500 text-white'

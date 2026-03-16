@@ -2,21 +2,23 @@ import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 
 const CREDIT_COSTS: Record<string, number> = {
-  caption:   1,
-  hashtags:  1,
-  rewrite:   1,
-  hook:      2,
-  thread:    3,
-  repurpose: 3,
-  pulse:     5,
-  radar:     3,
+  caption:      3,
+  hashtags:     2,
+  rewrite:      3,
+  hook:         4,
+  thread:       8,
+  repurpose:    8,
+  pulse:        10,
+  radar:        10,
+  content_gap:  10,
+  calendar:     20,
+  image:        25,
 }
 
 async function fetchTrendingData(niche: string) {
   const results: string[] = []
 
   try {
-    // Reddit trending — public API, no auth needed
     const redditRes = await fetch(
       `https://www.reddit.com/search.json?q=${encodeURIComponent(niche)}&sort=hot&limit=5&t=day`,
       { headers: { 'User-Agent': 'SocialMate/1.0' } }
@@ -31,7 +33,6 @@ async function fetchTrendingData(niche: string) {
   } catch { /* ignore */ }
 
   try {
-    // YouTube trending search — public, no auth needed
     const ytRes = await fetch(
       `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(niche)}&order=viewCount&type=video&maxResults=5&key=${process.env.YOUTUBE_API_KEY || ''}`,
     )
@@ -87,6 +88,27 @@ Analyze this data and provide:
 4. YOUR OPPORTUNITY — one specific content strategy this creator should execute this week
 
 Be data-driven, specific, and actionable. Reference actual trends from the data.`
+    case 'content_gap':
+      return `You are a content strategy expert. The user creates content in this niche: "${content}".
+
+Analyze this niche and identify:
+1. CONTENT GAPS — topics that are underserved or missing entirely in this niche
+2. AUDIENCE QUESTIONS — what questions are people asking that aren't being answered well
+3. FORMAT GAPS — what content formats (video, carousel, thread, etc.) are underused in this niche
+4. OPPORTUNITY SCORE — rate each gap 1-10 for ease of execution and potential reach
+
+Be specific, actionable, and prioritized. Return only the analysis, nothing else.`
+    case 'calendar':
+      return `You are a social media strategist. Create a 30-day content calendar for a creator in this niche: "${content}" posting on ${platform}.
+
+For each day provide:
+- Day number
+- Post topic
+- Content type (educational, entertaining, promotional, personal)
+- Hook/opening line
+- Key message
+
+Format as a structured list. Make it varied, engaging, and realistic to execute. Return only the calendar, nothing else.`
     default:
       return content
   }
@@ -105,7 +127,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'API key not configured' }, { status: 500 })
     }
 
-    // Fetch real trending data for pulse and radar
     let trendingContext: string | undefined
     if (tool === 'pulse' || tool === 'radar') {
       trendingContext = await fetchTrendingData(content)
