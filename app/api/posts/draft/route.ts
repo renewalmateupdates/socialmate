@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 
+const PLAN_POST_LIMITS: Record<string, number> = {
+  free:   100,
+  pro:    1000,
+  agency: 5000,
+}
+
 export async function POST(request: NextRequest) {
   const cookieStore = await cookies()
 
@@ -28,7 +34,7 @@ export async function POST(request: NextRequest) {
 
   if (!content?.trim()) return NextResponse.json({ error: 'Content is required' }, { status: 400 })
 
-  // If postId exists, update existing draft
+  // If postId exists, update existing draft — no limit check needed
   if (postId) {
     const { error } = await supabase
       .from('posts')
@@ -41,7 +47,35 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, postId })
   }
 
-  // Create new draft
+  // New draft — enforce monthly limit
+  const { data: settings } = await supabase
+    .from('user_settings')
+    .select('plan')
+    .eq('user_id', user.id)
+    .single()
+
+  const plan = settings?.plan || 'free'
+  const limit = PLAN_POST_LIMITS[plan] ?? 100
+
+  const startOfMonth = new Date()
+  startOfMonth.setDate(1)
+  startOfMonth.setHours(0, 0, 0, 0)
+
+  const { count } = await supabase
+    .from('posts')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .gte('created_at', startOfMonth.toISOString())
+
+  if ((count ?? 0) >= limit) {
+    return NextResponse.json({
+      error: 'Monthly post limit reached',
+      limit,
+      plan,
+      upgrade: plan === 'free' ? 'Upgrade to Pro for 1,000 posts/month' : 'Upgrade to Agency for 5,000 posts/month',
+    }, { status: 403 })
+  }
+
   const { data: post, error } = await supabase
     .from('posts')
     .insert({

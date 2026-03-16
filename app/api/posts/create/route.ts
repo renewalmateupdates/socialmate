@@ -4,6 +4,12 @@ import { createServerClient } from '@supabase/ssr'
 import { publishToAll } from '@/lib/publish'
 import { inngest } from '@/lib/inngest'
 
+const PLAN_POST_LIMITS: Record<string, number> = {
+  free:   100,
+  pro:    1000,
+  agency: 5000,
+}
+
 export async function POST(request: NextRequest) {
   const cookieStore = await cookies()
 
@@ -31,10 +37,38 @@ export async function POST(request: NextRequest) {
   if (!content?.trim()) return NextResponse.json({ error: 'Content is required' }, { status: 400 })
   if (!platforms?.length) return NextResponse.json({ error: 'Select at least one platform' }, { status: 400 })
 
+  // Post limit enforcement
+  const { data: settings } = await supabase
+    .from('user_settings')
+    .select('plan')
+    .eq('user_id', user.id)
+    .single()
+
+  const plan = settings?.plan || 'free'
+  const limit = PLAN_POST_LIMITS[plan] ?? 100
+
+  const startOfMonth = new Date()
+  startOfMonth.setDate(1)
+  startOfMonth.setHours(0, 0, 0, 0)
+
+  const { count } = await supabase
+    .from('posts')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id)
+    .gte('created_at', startOfMonth.toISOString())
+
+  if ((count ?? 0) >= limit) {
+    return NextResponse.json({
+      error: 'Monthly post limit reached',
+      limit,
+      plan,
+      upgrade: plan === 'free' ? 'Upgrade to Pro for 1,000 posts/month' : 'Upgrade to Agency for 5,000 posts/month',
+    }, { status: 403 })
+  }
+
   const isScheduled = !!scheduledAt
   const status = isScheduled ? 'scheduled' : 'publishing'
 
-  // Save post to DB
   const { data: post, error: dbError } = await supabase
     .from('posts')
     .insert({
@@ -53,12 +87,10 @@ export async function POST(request: NextRequest) {
   }
 
   if (isScheduled) {
-    // Calculate delay in ms
     const scheduledTime = new Date(scheduledAt).getTime()
     const now = Date.now()
     const delay = Math.max(0, scheduledTime - now)
 
-    // Send to Inngest for delayed publishing
     await inngest.send({
       name: 'post/scheduled',
       data: { postId: post.id, delay: `${Math.floor(delay / 1000)}s` },
@@ -67,16 +99,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, postId: post.id, status: 'scheduled' })
   }
 
-  // Publish Now — fire adapters immediately
   const results = await publishToAll(user.id, platforms, content)
   const allFailed = results.every(r => !r.success)
   const someFailed = results.some(r => !r.success)
 
-  // Build platform_post_ids map
   const platformPostIds: Record<string, string> = {}
   results.forEach(r => { if (r.success && r.postId) platformPostIds[r.platform] = r.postId })
 
-  // Update post status
   await supabase
     .from('posts')
     .update({

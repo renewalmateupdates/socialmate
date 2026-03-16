@@ -12,15 +12,21 @@ const FILTERS = ['All', 'Images', 'Videos']
 const MAX_FILE_SIZE_MB = 50
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/quicktime', 'video/webm']
 
+const PLAN_STORAGE_LIMITS: Record<string, number> = {
+  free:   1 * 1024 * 1024 * 1024,   // 1GB
+  pro:    10 * 1024 * 1024 * 1024,  // 10GB
+  agency: 50 * 1024 * 1024 * 1024,  // 50GB
+}
+
 export default function MediaLibrary() {
   const [files, setFiles] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
   const [filter, setFilter] = useState('All')
   const [userId, setUserId] = useState<string | null>(null)
+  const [userPlan, setUserPlan] = useState<string>('free')
   const [copied, setCopied] = useState<string | null>(null)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
-  // M2: inline confirm for delete
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -36,6 +42,14 @@ export default function MediaLibrary() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
       setUserId(user.id)
+
+      const { data: settings } = await supabase
+        .from('user_settings')
+        .select('plan')
+        .eq('user_id', user.id)
+        .single()
+      setUserPlan(settings?.plan || 'free')
+
       const { data } = await supabase
         .from('media_files')
         .select('*')
@@ -45,13 +59,12 @@ export default function MediaLibrary() {
       setLoading(false)
     }
     load()
-  }, [router]) // M1: fixed
+  }, [router])
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const selected = Array.from(e.target.files || [])
     if (!selected.length || !userId) return
 
-    // M3: validate type and size before uploading anything
     const invalid = selected.filter(f => !ACCEPTED_TYPES.includes(f.type))
     const oversized = selected.filter(f => f.size > MAX_FILE_SIZE_MB * 1024 * 1024)
     if (invalid.length) {
@@ -61,6 +74,18 @@ export default function MediaLibrary() {
     }
     if (oversized.length) {
       showToast(`File too large (max ${MAX_FILE_SIZE_MB}MB): ${oversized.map(f => f.name).join(', ')}`, 'error')
+      if (inputRef.current) inputRef.current.value = ''
+      return
+    }
+
+    // Storage limit enforcement
+    const currentUsed = files.reduce((sum, f) => sum + (f.file_size || 0), 0)
+    const incomingSize = selected.reduce((sum, f) => sum + f.size, 0)
+    const storageLimit = PLAN_STORAGE_LIMITS[userPlan] ?? PLAN_STORAGE_LIMITS.free
+    if (currentUsed + incomingSize > storageLimit) {
+      const limitGB = storageLimit / (1024 * 1024 * 1024)
+      const usedGB = (currentUsed / (1024 * 1024 * 1024)).toFixed(2)
+      showToast(`Storage limit reached (${usedGB}GB / ${limitGB}GB). Upgrade your plan for more storage.`, 'error')
       if (inputRef.current) inputRef.current.value = ''
       return
     }
@@ -124,6 +149,9 @@ export default function MediaLibrary() {
   })
 
   const totalSize = files.reduce((sum, f) => sum + (f.file_size || 0), 0)
+  const storageLimit = PLAN_STORAGE_LIMITS[userPlan] ?? PLAN_STORAGE_LIMITS.free
+  const storagePercent = Math.min((totalSize / storageLimit) * 100, 100)
+  const storageLimitGB = storageLimit / (1024 * 1024 * 1024)
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -146,6 +174,27 @@ export default function MediaLibrary() {
                 {uploading ? '⏳ Uploading...' : '+ Upload Files'}
               </label>
             </div>
+          </div>
+
+          {/* Storage usage bar */}
+          <div className="bg-white border border-gray-100 rounded-2xl p-4 mb-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold text-gray-500">Storage</span>
+              <span className="text-xs font-bold text-gray-700">
+                {formatSize(totalSize)} / {storageLimitGB}GB
+              </span>
+            </div>
+            <div className="w-full bg-gray-100 rounded-full h-2">
+              <div
+                className={`h-2 rounded-full transition-all ${storagePercent > 90 ? 'bg-red-500' : storagePercent > 70 ? 'bg-yellow-400' : 'bg-black'}`}
+                style={{ width: `${storagePercent}%` }}
+              />
+            </div>
+            {storagePercent > 90 && (
+              <p className="text-xs text-red-500 font-semibold mt-1.5">
+                Storage almost full — consider upgrading your plan.
+              </p>
+            )}
           </div>
 
           {/* FILTER */}
@@ -193,10 +242,8 @@ export default function MediaLibrary() {
                           <span className="text-4xl">🎥</span>
                         </div>
                       )}
-                      {/* HOVER OVERLAY */}
                       <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2 flex-wrap p-2">
                         {isConfirming ? (
-                          // M2: inline confirm
                           <div className="flex flex-col items-center gap-2">
                             <span className="text-xs text-white font-semibold">Delete?</span>
                             <div className="flex gap-2">
