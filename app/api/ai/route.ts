@@ -13,6 +13,7 @@ const CREDIT_COSTS: Record<string, number> = {
   content_gap:  10,
   calendar:     20,
   image:        25,
+  score:        2,
 }
 
 async function fetchTrendingData(niche: string) {
@@ -109,6 +110,23 @@ For each day provide:
 - Key message
 
 Format as a structured list. Make it varied, engaging, and realistic to execute. Return only the calendar, nothing else.`
+    case 'score':
+      return `You are a social media performance expert. Score the following post out of 100 and provide structured feedback.
+
+Post: "${content}"
+Platform: ${platform}
+
+Respond in EXACTLY this format:
+SCORE: [number 0-100]
+STRENGTHS:
+- [strength 1]
+- [strength 2]
+- [strength 3]
+IMPROVEMENTS:
+- [improvement 1]
+- [improvement 2]
+- [improvement 3]
+VERDICT: [one sentence summary of the post's potential]`
     default:
       return content
   }
