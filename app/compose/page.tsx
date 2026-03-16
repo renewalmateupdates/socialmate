@@ -28,13 +28,15 @@ const COMING_SOON_PLATFORMS = [
 ]
 
 const AI_TOOLS = [
-  { id: 'caption',   label: 'Caption',   emoji: '✍️',  credits: 1, desc: 'Generate a caption from your topic'     },
-  { id: 'hashtags',  label: 'Hashtags',  emoji: '#️⃣', credits: 1, desc: 'Generate relevant hashtags'             },
-  { id: 'rewrite',   label: 'Rewrite',   emoji: '🔁',  credits: 1, desc: 'Rewrite your post to be punchier'       },
-  { id: 'hook',      label: 'Hook',      emoji: '🎣',  credits: 2, desc: 'Generate 3 viral opening hooks'         },
-  { id: 'thread',    label: 'Thread',    emoji: '🧵',  credits: 3, desc: 'Turn your idea into a full thread'      },
-  { id: 'repurpose', label: 'Repurpose', emoji: '♻️',  credits: 3, desc: 'Reshape long content for this platform' },
+  { id: 'caption',   label: 'Caption',   emoji: '✍️',  credits: 3, desc: 'Generate a caption from your topic'     },
+  { id: 'hashtags',  label: 'Hashtags',  emoji: '#️⃣', credits: 2, desc: 'Generate relevant hashtags'             },
+  { id: 'rewrite',   label: 'Rewrite',   emoji: '🔁',  credits: 3, desc: 'Rewrite your post to be punchier'       },
+  { id: 'hook',      label: 'Hook',      emoji: '🎣',  credits: 4, desc: 'Generate 3 viral opening hooks'         },
+  { id: 'thread',    label: 'Thread',    emoji: '🧵',  credits: 8, desc: 'Turn your idea into a full thread'      },
+  { id: 'repurpose', label: 'Repurpose', emoji: '♻️',  credits: 8, desc: 'Reshape long content for this platform' },
 ]
+
+const SCORE_CREDIT_COST = 2
 
 const STARTER_TEMPLATES = [
   {
@@ -71,6 +73,14 @@ type PublishResult = {
   error?: string
 }
 
+type ScoreResult = {
+  score: number
+  label: string
+  strengths: string[]
+  improvements: string[]
+  verdict: string
+}
+
 function ComposeInner() {
   const searchParams = useSearchParams()
   const { credits, setCredits, plan } = useWorkspace()
@@ -90,6 +100,9 @@ function ComposeInner() {
   const [saving, setSaving] = useState(false)
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(null)
   const [publishResults, setPublishResults] = useState<PublishResult[] | null>(null)
+  const [scoreResult, setScoreResult] = useState<ScoreResult | null>(null)
+  const [scoring, setScoring] = useState(false)
+  const [scoreError, setScoreError] = useState('')
 
   const planConfig = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
   const maxScheduleDate = (() => {
@@ -203,6 +216,55 @@ function ComposeInner() {
     }
   }
 
+  const handleScorePost = async () => {
+    if (!content.trim()) { setScoreError('Write some content first before scoring.'); return }
+    if (credits < SCORE_CREDIT_COST) { setScoreError(`You need ${SCORE_CREDIT_COST} credits to score a post.`); return }
+    setScoring(true)
+    setScoreError('')
+    setScoreResult(null)
+
+    try {
+      const res = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tool: 'score',
+          content,
+          platform: activePlatform?.name || 'general',
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok || data.error) { setScoreError('Scoring failed. Please try again.'); setScoring(false); return }
+
+      try {
+        const raw = data.result
+        const scoreMatch = raw.match(/SCORE:\s*(\d+)/i)
+        const strengthsMatch = raw.match(/STRENGTHS:([\s\S]*?)(?:IMPROVEMENTS:|$)/i)
+        const improvementsMatch = raw.match(/IMPROVEMENTS:([\s\S]*?)(?:VERDICT:|$)/i)
+        const verdictMatch = raw.match(/VERDICT:([\s\S]*?)$/i)
+
+        const score = scoreMatch ? parseInt(scoreMatch[1]) : 50
+        const label = score >= 80 ? 'Great' : score >= 60 ? 'Good' : score >= 40 ? 'Fair' : 'Needs Work'
+        const strengths = strengthsMatch
+          ? strengthsMatch[1].trim().split('\n').filter(Boolean).map((s: string) => s.replace(/^[-•*]\s*/, ''))
+          : []
+        const improvements = improvementsMatch
+          ? improvementsMatch[1].trim().split('\n').filter(Boolean).map((s: string) => s.replace(/^[-•*]\s*/, ''))
+          : []
+        const verdict = verdictMatch ? verdictMatch[1].trim() : raw
+
+        setScoreResult({ score, label, strengths, improvements, verdict })
+      } catch {
+        setScoreResult({ score: 0, label: 'Unknown', strengths: [], improvements: [], verdict: data.result })
+      }
+
+      setCredits(credits - SCORE_CREDIT_COST)
+    } catch {
+      setScoreError('Network error. Please try again.')
+    }
+    setScoring(false)
+  }
+
   const handleInsertResult = () => {
     if (!aiResult) return
     setContent(prev => prev ? `${prev}\n\n${aiResult}` : aiResult)
@@ -221,13 +283,11 @@ function ComposeInner() {
 
   const handlePublish = async () => {
     if (!content.trim() || charOver || selectedPlatforms.length === 0 || !!scheduleError) return
-
     setPublishing(true)
     setPublishResults(null)
 
     try {
       let scheduledAt: string | undefined
-
       if (scheduleDate) {
         const time = scheduleTime || '09:00'
         scheduledAt = new Date(`${scheduleDate}T${time}`).toISOString()
@@ -236,11 +296,7 @@ function ComposeInner() {
       const res = await fetch('/api/posts/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          content,
-          platforms: selectedPlatforms,
-          scheduledAt,
-        }),
+        body: JSON.stringify({ content, platforms: selectedPlatforms, scheduledAt }),
       })
 
       const data = await res.json()
@@ -256,19 +312,18 @@ function ComposeInner() {
         setScheduleDate('')
         setScheduleTime('')
         setCurrentDraftId(null)
+        setScoreResult(null)
       } else {
         setPublishResults(data.results || [])
         const allFailed = data.results?.every((r: PublishResult) => !r.success)
         const someFailed = data.results?.some((r: PublishResult) => !r.success)
-
-        if (allFailed) {
-          showToast('Failed to publish to all platforms', 'error')
-        } else if (someFailed) {
-          showToast('Published to some platforms — check results below', 'info')
-        } else {
+        if (allFailed) showToast('Failed to publish to all platforms', 'error')
+        else if (someFailed) showToast('Published to some platforms — check results below', 'info')
+        else {
           showToast('Published successfully! ✓')
           setContent('')
           setCurrentDraftId(null)
+          setScoreResult(null)
         }
       }
     } catch {
@@ -285,17 +340,10 @@ function ComposeInner() {
       const res = await fetch('/api/posts/draft', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          content,
-          platforms: selectedPlatforms,
-          postId: currentDraftId,
-        }),
+        body: JSON.stringify({ content, platforms: selectedPlatforms, postId: currentDraftId }),
       })
       const data = await res.json()
-      if (!res.ok) {
-        showToast(data.error || 'Failed to save draft', 'error')
-        return
-      }
+      if (!res.ok) { showToast(data.error || 'Failed to save draft', 'error'); return }
       setCurrentDraftId(data.postId)
       showToast('Saved to drafts ✓')
     } catch {
@@ -304,6 +352,14 @@ function ComposeInner() {
       setSaving(false)
     }
   }
+
+  const scoreColor = scoreResult
+    ? scoreResult.score >= 80 ? 'text-green-600' : scoreResult.score >= 60 ? 'text-blue-600' : scoreResult.score >= 40 ? 'text-yellow-600' : 'text-red-500'
+    : ''
+
+  const scoreBg = scoreResult
+    ? scoreResult.score >= 80 ? 'bg-green-50 border-green-100' : scoreResult.score >= 60 ? 'bg-blue-50 border-blue-100' : scoreResult.score >= 40 ? 'bg-yellow-50 border-yellow-100' : 'bg-red-50 border-red-100'
+    : ''
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -326,7 +382,6 @@ function ComposeInner() {
           <div className="grid grid-cols-3 gap-6">
             <div className="col-span-2 space-y-4">
 
-              {/* PLATFORM SELECTOR */}
               <div className="bg-white border border-gray-100 rounded-2xl p-4">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Platforms</p>
                 <div className="flex flex-wrap gap-2">
@@ -341,8 +396,7 @@ function ComposeInner() {
                     </button>
                   ))}
                   {COMING_SOON_PLATFORMS.map(p => (
-                    <div key={p.id}
-                      title={`${p.name} — coming soon`}
+                    <div key={p.id} title={`${p.name} — coming soon`}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border border-dashed border-gray-200 text-gray-300 cursor-not-allowed select-none">
                       <span>{p.icon}</span>
                       <span>{p.name}</span>
@@ -354,17 +408,14 @@ function ComposeInner() {
 
               {selectedPlatforms.length === 0 && (
                 <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
-                  <p className="text-xs font-semibold text-amber-700">
-                    Select at least one platform to compose a post.
-                  </p>
+                  <p className="text-xs font-semibold text-amber-700">Select at least one platform to compose a post.</p>
                 </div>
               )}
 
-              {/* TEXT AREA */}
               <div className="bg-white border border-gray-100 rounded-2xl p-4">
                 <textarea
                   value={content}
-                  onChange={e => setContent(e.target.value)}
+                  onChange={e => { setContent(e.target.value); setScoreResult(null) }}
                   placeholder="What do you want to post? Write your content here, or use an AI tool to generate it..."
                   rows={8}
                   className="w-full text-sm outline-none resize-none text-gray-800 placeholder-gray-300"
@@ -384,7 +435,6 @@ function ComposeInner() {
                 </div>
               </div>
 
-              {/* AI TOOLS */}
               <div className="bg-white border border-gray-100 rounded-2xl p-4">
                 <div className="flex items-center justify-between mb-3">
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">AI Tools</p>
@@ -446,7 +496,84 @@ function ComposeInner() {
                 )}
               </div>
 
-              {/* SCHEDULE */}
+              <div className="bg-white border border-gray-100 rounded-2xl p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Post Score</p>
+                    <p className="text-xs text-gray-400 mt-0.5">AI predicts how your post will perform before you publish</p>
+                  </div>
+                  <button
+                    onClick={handleScorePost}
+                    disabled={scoring || !content.trim() || credits < SCORE_CREDIT_COST}
+                    className="flex items-center gap-2 px-4 py-2 bg-black text-white text-xs font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                    {scoring ? (
+                      <>
+                        <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Scoring...
+                      </>
+                    ) : (
+                      `⚡ Score Post — ${SCORE_CREDIT_COST} cr`
+                    )}
+                  </button>
+                </div>
+
+                {scoreError && (
+                  <div className="bg-red-50 border border-red-100 rounded-xl p-3">
+                    <p className="text-xs text-red-600">{scoreError}</p>
+                  </div>
+                )}
+
+                {scoreResult && (
+                  <div className={`border rounded-xl p-4 ${scoreBg}`}>
+                    <div className="flex items-center gap-4 mb-4">
+                      <div className="text-center">
+                        <p className={`text-4xl font-extrabold ${scoreColor}`}>{scoreResult.score}</p>
+                        <p className={`text-xs font-bold ${scoreColor}`}>{scoreResult.label}</p>
+                      </div>
+                      <div className="flex-1">
+                        <div className="w-full bg-white/60 rounded-full h-2.5">
+                          <div
+                            className={`h-2.5 rounded-full transition-all ${
+                              scoreResult.score >= 80 ? 'bg-green-500' :
+                              scoreResult.score >= 60 ? 'bg-blue-500' :
+                              scoreResult.score >= 40 ? 'bg-yellow-400' : 'bg-red-400'
+                            }`}
+                            style={{ width: `${scoreResult.score}%` }}
+                          />
+                        </div>
+                        <p className="text-xs text-gray-500 mt-2 leading-relaxed">{scoreResult.verdict}</p>
+                      </div>
+                    </div>
+                    {scoreResult.strengths.length > 0 && (
+                      <div className="mb-3">
+                        <p className="text-xs font-bold text-gray-600 mb-1.5">✅ Strengths</p>
+                        <ul className="space-y-1">
+                          {scoreResult.strengths.slice(0, 3).map((s, i) => (
+                            <li key={i} className="text-xs text-gray-600">• {s}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {scoreResult.improvements.length > 0 && (
+                      <div>
+                        <p className="text-xs font-bold text-gray-600 mb-1.5">💡 Improvements</p>
+                        <ul className="space-y-1">
+                          {scoreResult.improvements.slice(0, 3).map((s, i) => (
+                            <li key={i} className="text-xs text-gray-600">• {s}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {!scoreResult && !scoreError && (
+                  <div className="bg-gray-50 rounded-xl p-4 text-center">
+                    <p className="text-xs text-gray-400">Write your post and hit Score Post to get an AI prediction of how it will perform.</p>
+                  </div>
+                )}
+              </div>
+
               <div className="bg-white border border-gray-100 rounded-2xl p-4">
                 <div className="flex items-center justify-between mb-3">
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Schedule</p>
@@ -457,20 +584,14 @@ function ComposeInner() {
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
-                  <input
-                    type="date"
-                    value={scheduleDate}
+                  <input type="date" value={scheduleDate}
                     min={new Date().toISOString().split('T')[0]}
                     max={maxScheduleDate}
                     onChange={e => handleDateChange(e.target.value)}
-                    className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-black transition-all"
-                  />
-                  <input
-                    type="time"
-                    value={scheduleTime}
+                    className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-black transition-all" />
+                  <input type="time" value={scheduleTime}
                     onChange={e => setScheduleTime(e.target.value)}
-                    className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-black transition-all"
-                  />
+                    className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-black transition-all" />
                 </div>
                 {scheduleError && (
                   <div className="mt-2 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 flex items-center justify-between gap-3">
@@ -480,7 +601,6 @@ function ComposeInner() {
                 )}
               </div>
 
-              {/* PUBLISH RESULTS */}
               {publishResults && (
                 <div className="bg-white border border-gray-100 rounded-2xl p-4">
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Publish Results</p>
@@ -489,13 +609,9 @@ function ComposeInner() {
                       <div key={result.platform} className={`flex items-center gap-3 p-3 rounded-xl border ${
                         result.success ? 'bg-green-50 border-green-100' : 'bg-red-50 border-red-100'
                       }`}>
-                        <span className="text-lg">
-                          {PLATFORMS.find(p => p.id === result.platform)?.icon || '📱'}
-                        </span>
+                        <span className="text-lg">{PLATFORMS.find(p => p.id === result.platform)?.icon || '📱'}</span>
                         <div className="flex-1">
-                          <p className="text-xs font-bold">
-                            {PLATFORMS.find(p => p.id === result.platform)?.name || result.platform}
-                          </p>
+                          <p className="text-xs font-bold">{PLATFORMS.find(p => p.id === result.platform)?.name || result.platform}</p>
                           {result.error && <p className="text-xs text-red-500 mt-0.5">{result.error}</p>}
                         </div>
                         <span className={`text-xs font-bold ${result.success ? 'text-green-600' : 'text-red-500'}`}>
@@ -507,7 +623,6 @@ function ComposeInner() {
                 </div>
               )}
 
-              {/* ACTIONS */}
               <div className="flex items-center gap-3">
                 <button
                   onClick={handlePublish}
@@ -527,7 +642,6 @@ function ComposeInner() {
 
             </div>
 
-            {/* RIGHT — PREVIEW */}
             <div className="space-y-4">
               <div className="bg-white border border-gray-100 rounded-2xl p-4 sticky top-8">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Preview</p>
@@ -567,7 +681,7 @@ function ComposeInner() {
       {toast && (
         <div className={`fixed bottom-6 right-6 text-white text-xs font-bold px-4 py-3 rounded-xl shadow-lg z-50 ${
           toast.type === 'error' ? 'bg-red-500' :
-          toast.type === 'info' ? 'bg-blue-600' :
+          toast.type === 'info'  ? 'bg-blue-600' :
           'bg-black'
         }`}>
           {toast.message}
