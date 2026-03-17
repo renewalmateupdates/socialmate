@@ -11,7 +11,6 @@ function SkeletonBox({ className }: { className?: string }) {
 
 const CATEGORIES = ['All', 'Promotional', 'Educational', 'Engagement', 'Announcement', 'Personal', 'Other']
 
-// Tm3: all 16 platforms covered
 const PLATFORM_ICONS: Record<string, string> = {
   instagram: '📸', twitter: '🐦', linkedin: '💼', tiktok: '🎵',
   facebook: '📘', pinterest: '📌', youtube: '▶️', threads: '🧵',
@@ -19,42 +18,45 @@ const PLATFORM_ICONS: Record<string, string> = {
   mastodon: '🐘', snapchat: '👻', lemon8: '🍋', bereal: '📷',
 }
 
-// Built-in starter templates — no DB required
+// Only show live platforms in the template platform picker
+const LIVE_PLATFORM_IDS = ['discord', 'bluesky', 'telegram', 'mastodon']
+const SOON_PLATFORM_IDS = ['linkedin', 'youtube', 'pinterest', 'reddit']
+
 const STARTER_TEMPLATES = [
   {
     id: 'starter-1',
     title: 'Product / Service Launch',
     category: 'Promotional',
-    platforms: ['instagram', 'linkedin', 'facebook', 'bluesky'],
+    platforms: ['bluesky', 'discord'],
     content: `🚀 Introducing [product/service name]!\n\n[One sentence describing what it does and who it's for.]\n\nHere's what makes it different:\n✅ [Benefit 1]\n✅ [Benefit 2]\n✅ [Benefit 3]\n\n[Call to action — link in bio / comment below / DM us]`,
   },
   {
     id: 'starter-2',
     title: 'Quick Tip / How-To',
     category: 'Educational',
-    platforms: ['linkedin', 'instagram', 'tiktok', 'bluesky'],
+    platforms: ['bluesky', 'mastodon'],
     content: `💡 [Topic] tip that changed everything for me:\n\n[Tip in one clear sentence.]\n\nHere's how to do it:\n1️⃣ [Step 1]\n2️⃣ [Step 2]\n3️⃣ [Step 3]\n\nSave this for later and share with someone who needs it! 👇`,
   },
   {
     id: 'starter-3',
     title: 'Engagement Question',
     category: 'Engagement',
-    platforms: ['instagram', 'facebook', 'bluesky', 'reddit'],
+    platforms: ['bluesky', 'discord', 'mastodon'],
     content: `[Relatable observation or bold statement about your niche.] 🤔\n\nI used to think [common misconception], but now I know [what you actually believe].\n\nWhat do you think — am I wrong?\n\nDrop your take below 👇`,
   },
   {
     id: 'starter-4',
     title: 'Behind the Scenes',
     category: 'Personal',
-    platforms: ['instagram', 'tiktok', 'facebook', 'bereal'],
+    platforms: ['discord', 'telegram'],
     content: `A little behind the scenes of [what you're working on] 👀\n\n[Short honest description of what your day/process looks like.]\n\nThe part nobody tells you about [your field/work]:\n[Honest, unexpected insight]\n\nAnything you want to know more about? Ask me below 👇`,
   },
   {
     id: 'starter-5',
-    title: 'Weekly Roundup / Newsletter Promo',
+    title: 'Weekly Roundup',
     category: 'Announcement',
-    platforms: ['linkedin', 'twitter', 'bluesky', 'mastodon'],
-    content: `This week in [your niche] 📰\n\n→ [Thing 1 that happened or that you learned]\n→ [Thing 2]\n→ [Thing 3]\n\nMy take: [One sentence opinion or insight]\n\nFollowing along? [Subscribe / follow / turn on notifications] so you don't miss next week's. 🔔`,
+    platforms: ['bluesky', 'mastodon'],
+    content: `This week in [your niche] 📰\n\n→ [Thing 1 that happened or that you learned]\n→ [Thing 2]\n→ [Thing 3]\n\nMy take: [One sentence opinion or insight]\n\nFollowing along? Subscribe so you don't miss next week's. 🔔`,
   },
 ]
 
@@ -71,7 +73,7 @@ export default function Templates() {
   const [activeCategory, setActiveCategory] = useState('All')
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
-  const [confirmDelete, setConfirmDelete] = useState<string | null>(null) // Tm2
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const [copied, setCopied] = useState<string | null>(null)
   const [savingStarter, setSavingStarter] = useState<string | null>(null)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
@@ -96,7 +98,7 @@ export default function Templates() {
       setLoading(false)
     }
     load()
-  }, [router]) // Tm1: fixed
+  }, [router])
 
   const handleSave = async () => {
     if (!title.trim() || !content.trim()) { showToast('Title and content required', 'error'); return }
@@ -141,6 +143,7 @@ export default function Templates() {
     setCategory(t.category || 'Other')
     setPlatforms(t.platforms || [])
     setShowForm(true)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const handleDelete = async (id: string) => {
@@ -158,7 +161,6 @@ export default function Templates() {
     setTimeout(() => setCopied(null), 2000)
   }
 
-  // Save a starter template into the user's own collection
   const handleSaveStarter = async (starter: typeof STARTER_TEMPLATES[0]) => {
     if (!userId) return
     setSavingStarter(starter.id)
@@ -191,19 +193,20 @@ export default function Templates() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar />
-      <div className="ml-56 flex-1 p-8">
+      <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
 
-          <div className="flex items-center justify-between mb-8">
+          {/* HEADER */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Post Templates</h1>
               <p className="text-sm text-gray-400 mt-0.5">
-                {templates.length} template{templates.length !== 1 ? 's' : ''} saved
+                {loading ? 'Loading...' : `${templates.length} template${templates.length !== 1 ? 's' : ''} saved`}
               </p>
             </div>
             {!showForm && (
               <button onClick={() => setShowForm(true)}
-                className="bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all">
+                className="bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all self-start sm:self-auto">
                 + New Template
               </button>
             )}
@@ -211,12 +214,12 @@ export default function Templates() {
 
           {/* FORM */}
           {showForm && (
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 mb-6">
+            <div className="bg-white border border-gray-200 rounded-2xl p-5 md:p-6 mb-6">
               <h2 className="text-sm font-extrabold mb-4">
                 {editingId ? 'Edit Template' : 'New Template'}
               </h2>
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">Title</label>
                     <input type="text" value={title} onChange={e => setTitle(e.target.value)}
@@ -234,12 +237,11 @@ export default function Templates() {
                     </select>
                   </div>
                 </div>
+
                 <div>
                   <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">
                     Content
-                    <span className="text-gray-400 font-normal ml-1">
-                      (use [brackets] for fill-in-the-blank sections)
-                    </span>
+                    <span className="text-gray-400 font-normal ml-1">(use [brackets] for fill-in sections)</span>
                   </label>
                   <textarea value={content} onChange={e => setContent(e.target.value)}
                     placeholder="Excited to announce [product/service]! 🎉&#10;&#10;[Describe key benefit]&#10;&#10;[Call to action] 👇"
@@ -247,25 +249,36 @@ export default function Templates() {
                     className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 resize-none" />
                   <p className="text-xs text-gray-400 mt-1">{content.length} chars</p>
                 </div>
+
                 <div>
                   <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-2">
                     Best for platforms <span className="text-gray-400 font-normal">(optional)</span>
                   </label>
                   <div className="flex flex-wrap gap-2">
-                    {Object.entries(PLATFORM_ICONS).map(([id, icon]) => (
+                    {LIVE_PLATFORM_IDS.map(id => (
                       <button key={id} onClick={() => togglePlatform(id)}
                         className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${
                           platforms.includes(id)
                             ? 'bg-black text-white border-black'
                             : 'border-gray-200 text-gray-500 hover:border-gray-400'
                         }`}>
-                        <span>{icon}</span>
-                        <span className="capitalize">{id === 'twitter' ? 'X' : id}</span>
+                        <span>{PLATFORM_ICONS[id]}</span>
+                        <span className="capitalize">{id}</span>
                       </button>
+                    ))}
+                    {SOON_PLATFORM_IDS.map(id => (
+                      <div key={id}
+                        className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border border-dashed border-gray-100 text-gray-300 cursor-not-allowed"
+                        title={`${id} — coming soon`}>
+                        <span>{PLATFORM_ICONS[id]}</span>
+                        <span className="capitalize">{id}</span>
+                        <span className="text-gray-200 ml-0.5 text-xs">Soon</span>
+                      </div>
                     ))}
                   </div>
                 </div>
-                <div className="flex gap-2">
+
+                <div className="flex gap-2 flex-wrap">
                   <button onClick={handleSave} disabled={saving}
                     className="bg-black text-white text-sm font-bold px-5 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
                     {saving ? 'Saving...' : editingId ? 'Save Changes' : 'Save Template'}
@@ -306,62 +319,72 @@ export default function Templates() {
                 const isConfirming = confirmDelete === t.id
                 return (
                   <div key={t.id}
-                    className="bg-white border border-gray-100 rounded-2xl p-5 hover:border-gray-300 transition-all group">
-                    <div className="flex items-start justify-between gap-4 mb-2">
-                      <div className="flex items-center gap-2">
-                        <p className="text-sm font-extrabold">{t.title}</p>
-                        <span className="text-xs font-semibold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+                    className="bg-white border border-gray-100 rounded-2xl p-4 md:p-5 hover:border-gray-300 transition-all">
+
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div className="flex items-center gap-2 flex-wrap min-w-0">
+                        <p className="text-sm font-extrabold truncate">{t.title}</p>
+                        <span className="text-xs font-semibold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full flex-shrink-0">
                           {t.category || 'Other'}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0">
-                        {isConfirming ? (
-                          // Tm2: inline confirm
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-red-500 font-semibold">Delete?</span>
-                            <button onClick={() => handleDelete(t.id)} disabled={deleting === t.id}
-                              className="text-xs font-bold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
-                              {deleting === t.id ? '...' : 'Yes'}
-                            </button>
-                            <button onClick={() => setConfirmDelete(null)}
-                              className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
-                              Cancel
-                            </button>
-                          </div>
-                        ) : (
-                          <>
-                            <button onClick={() => handleCopy(t)}
-                              className={`text-xs font-bold px-3 py-1.5 rounded-xl transition-all border ${
-                                copied === t.id
-                                  ? 'bg-green-500 text-white border-green-500'
-                                  : 'border-gray-200 hover:border-gray-400'
-                              }`}>
-                              {copied === t.id ? '✓ Copied' : 'Copy'}
-                            </button>
-                            <Link href={`/compose?template=${t.id}`}
-                              className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all">
-                              Use →
-                            </Link>
-                            <button onClick={() => handleEdit(t)}
-                              className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
-                              Edit
-                            </button>
-                            <button onClick={() => setConfirmDelete(t.id)}
-                              className="text-xs font-bold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all">
-                              Delete
-                            </button>
-                          </>
-                        )}
-                      </div>
+                      {/* Always visible actions */}
+                      {!isConfirming && (
+                        <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap">
+                          <button onClick={() => handleCopy(t)}
+                            className={`text-xs font-bold px-2.5 py-1.5 rounded-xl transition-all border ${
+                              copied === t.id
+                                ? 'bg-green-500 text-white border-green-500'
+                                : 'border-gray-200 hover:border-gray-400'
+                            }`}>
+                            {copied === t.id ? '✓' : 'Copy'}
+                          </button>
+                          <Link href={`/compose?template=${t.id}`}
+                            className="text-xs font-bold px-2.5 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all">
+                            Use →
+                          </Link>
+                          <button onClick={() => handleEdit(t)}
+                            className="text-xs font-bold px-2.5 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                            Edit
+                          </button>
+                          <button onClick={() => setConfirmDelete(t.id)}
+                            className="text-xs font-bold px-2.5 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all">
+                            Delete
+                          </button>
+                        </div>
+                      )}
                     </div>
+
                     <p className="text-xs text-gray-500 leading-relaxed line-clamp-3 whitespace-pre-line mb-3">
                       {t.content}
                     </p>
+
                     {t.platforms && t.platforms.length > 0 && (
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1 mb-2">
                         {t.platforms.map((p: string) => (
                           <span key={p} className="text-sm">{PLATFORM_ICONS[p]}</span>
                         ))}
+                      </div>
+                    )}
+
+                    {/* CONFIRM DELETE — below content, full width */}
+                    {isConfirming && (
+                      <div className="mt-3 pt-3 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center gap-2">
+                        <p className="text-xs text-red-600 font-semibold flex-1">
+                          Permanently delete "{t.title}"? This cannot be undone.
+                        </p>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <button onClick={() => handleDelete(t.id)} disabled={deleting === t.id}
+                            className="text-xs font-bold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center gap-1.5">
+                            {deleting === t.id
+                              ? <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Deleting...</>
+                              : 'Yes, delete'}
+                          </button>
+                          <button onClick={() => setConfirmDelete(null)}
+                            className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                            Cancel
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -372,41 +395,40 @@ export default function Templates() {
 
           {/* STARTER TEMPLATES */}
           <div>
-            <div className="flex items-center gap-2 mb-4">
+            <div className="flex items-center gap-2 mb-3">
               <h2 className="text-sm font-bold tracking-tight">Starter Templates</h2>
               <span className="text-xs font-semibold px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full">Free to use</span>
             </div>
             <p className="text-xs text-gray-400 mb-4">
-              Ready-made formats to get you going. Hit "Use →" to open in compose, or "Save" to add to your collection.
+              Ready-made formats for the 4 live platforms. Hit "Use →" to open in Compose, or "Save" to add to your collection.
             </p>
             <div className="space-y-3">
               {STARTER_TEMPLATES.map(t => (
                 <div key={t.id}
-                  className="bg-white border border-gray-100 rounded-2xl p-5 hover:border-gray-300 transition-all group">
-                  <div className="flex items-start justify-between gap-4 mb-2">
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm font-extrabold">{t.title}</p>
-                      <span className="text-xs font-semibold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
+                  className="bg-white border border-gray-100 rounded-2xl p-4 md:p-5 hover:border-gray-300 transition-all">
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <div className="flex items-center gap-2 flex-wrap min-w-0">
+                      <p className="text-sm font-extrabold truncate">{t.title}</p>
+                      <span className="text-xs font-semibold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full flex-shrink-0">
                         {t.category}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all flex-shrink-0">
+                    {/* Always visible */}
+                    <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap">
                       <button onClick={() => handleCopy(t)}
-                        className={`text-xs font-bold px-3 py-1.5 rounded-xl transition-all border ${
+                        className={`text-xs font-bold px-2.5 py-1.5 rounded-xl transition-all border ${
                           copied === t.id
                             ? 'bg-green-500 text-white border-green-500'
                             : 'border-gray-200 hover:border-gray-400'
                         }`}>
-                        {copied === t.id ? '✓ Copied' : 'Copy'}
+                        {copied === t.id ? '✓' : 'Copy'}
                       </button>
                       <Link href={`/compose?starterTemplate=${t.id}`}
-                        className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all">
+                        className="text-xs font-bold px-2.5 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all">
                         Use →
                       </Link>
-                      <button
-                        onClick={() => handleSaveStarter(t)}
-                        disabled={savingStarter === t.id}
-                        className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
+                      <button onClick={() => handleSaveStarter(t)} disabled={savingStarter === t.id}
+                        className="text-xs font-bold px-2.5 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
                         {savingStarter === t.id ? 'Saving...' : 'Save'}
                       </button>
                     </div>
@@ -424,7 +446,7 @@ export default function Templates() {
             </div>
           </div>
 
-          {/* EMPTY STATE — only shown when user has no templates yet */}
+          {/* EMPTY STATE */}
           {!loading && templates.length === 0 && !showForm && (
             <div className="mt-8 bg-gray-50 border border-gray-100 rounded-2xl p-6 text-center">
               <p className="text-xs text-gray-400">
