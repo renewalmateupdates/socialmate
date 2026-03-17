@@ -6,27 +6,16 @@ import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 
-const SAMPLE_INSIGHTS = [
-  { label: 'Best performing format',   value: 'How-to lists',        detail: '3.2× avg engagement vs other formats',     icon: '📋' },
-  { label: 'Best day to post',         value: 'Tuesday',             detail: 'Consistently highest reach day',           icon: '📅' },
-  { label: 'Best time window',         value: '9 AM – 11 AM',        detail: 'Peak audience activity in your timezone',  icon: '⏰' },
-  { label: 'Top performing length',    value: '150–280 chars',       detail: 'Sweet spot before engagement drops off',   icon: '📏' },
-  { label: 'Strongest hook style',     value: 'Question openers',    detail: '2.1× more comments than statements',       icon: '🎣' },
-  { label: 'Underperforming content',  value: 'Promotional posts',   detail: '67% below your average engagement rate',  icon: '⚠️' },
-]
-
-const SAMPLE_TOP_POSTS = [
-  { preview: 'How I went from 0 to 10k followers in 90 days (thread)...', engagement: '4.2k', platform: 'LinkedIn' },
-  { preview: 'Unpopular opinion: consistency beats quality every time...', engagement: '3.8k', platform: 'LinkedIn' },
-  { preview: '5 tools I use every single day as a solo creator....',       engagement: '2.1k', platform: 'LinkedIn' },
-]
+const CREDIT_COST = 10
 
 export default function SMRadarPage() {
   const router = useRouter()
-  const { plan, credits, setCredits } = useWorkspace()
+  const { credits, setCredits } = useWorkspace()
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
-  const [generated, setGenerated] = useState(false)
+  const [result, setResult] = useState<string | null>(null)
+  const [niche, setNiche] = useState('')
+  const [error, setError] = useState('')
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -36,11 +25,26 @@ export default function SMRadarPage() {
   }, [router])
 
   const handleGenerate = async () => {
-    if (credits < 3) return
+    if (credits < CREDIT_COST) return
     setGenerating(true)
-    await new Promise(r => setTimeout(r, 2000))
-    setCredits(credits - 3)
-    setGenerated(true)
+    setError('')
+    setResult(null)
+
+    const nicheVal = niche.trim() || 'social media content creation'
+
+    try {
+      const res = await fetch('/api/ai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tool: 'radar', content: nicheVal, platform: 'general' }),
+      })
+      const data = await res.json()
+      if (!res.ok || data.error) { setError('Report generation failed. Please try again.'); setGenerating(false); return }
+      setResult(data.result)
+      setCredits(credits - CREDIT_COST)
+    } catch {
+      setError('Network error. Please try again.')
+    }
     setGenerating(false)
   }
 
@@ -55,38 +59,38 @@ export default function SMRadarPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar />
-      <main className="ml-56 flex-1 p-8">
+      <main className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
 
           {/* HEADER */}
-          <div className="flex items-start justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-2xl">📊</span>
+                <span className="text-2xl">📡</span>
                 <h1 className="text-2xl font-extrabold tracking-tight">SM-Radar</h1>
               </div>
               <p className="text-sm text-gray-400">
-                Understand what's actually working in your own content — and why.
+                AI analysis of real Reddit and YouTube data — content gaps, competitor weaknesses, and what to post this week.
               </p>
             </div>
-            <div className="text-right">
+            <div className="flex-shrink-0">
               <div className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Cost per report</div>
-              <div className="text-xl font-extrabold">3 <span className="text-sm font-semibold text-gray-400">credits</span></div>
+              <div className="text-xl font-extrabold">{CREDIT_COST} <span className="text-sm font-semibold text-gray-400">credits</span></div>
               <div className="text-xs text-gray-400 mt-0.5">{credits} remaining</div>
             </div>
           </div>
 
           {/* WHAT IT ANALYZES */}
           <div className="bg-white border border-gray-100 rounded-2xl p-5 mb-6">
-            <h2 className="text-sm font-extrabold mb-3">What SM-Radar analyzes</h2>
-            <div className="grid grid-cols-2 gap-3">
+            <h2 className="text-sm font-extrabold mb-4">What SM-Radar analyzes</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
-                { icon: '📅', label: 'Posting timing',    desc: 'Best days and times based on your actual results'         },
-                { icon: '📏', label: 'Content length',    desc: 'Optimal character count for your audience'                },
-                { icon: '🎣', label: 'Hook styles',       desc: 'Which opening formats drive the most engagement'          },
-                { icon: '🏷️', label: 'Topic clusters',    desc: 'Which themes consistently outperform your average'        },
-                { icon: '📋', label: 'Post formats',      desc: 'Lists vs stories vs questions — what works for you'       },
-                { icon: '⚠️', label: 'Content gaps',      desc: 'What you\'ve stopped posting that used to perform well'   },
+                { icon: '🕳️', label: 'Content gaps',        desc: 'Topics being asked about but not answered well in your niche'    },
+                { icon: '🔭', label: 'Competitor weak spots', desc: 'What competitors are missing that you can own'                  },
+                { icon: '📋', label: 'Best post formats',    desc: 'Which content structures are working right now in your niche'   },
+                { icon: '🎣', label: 'Hook styles',          desc: 'Opening formats driving the most engagement this week'          },
+                { icon: '📅', label: 'Timing signals',       desc: 'When your niche audience is most active and engaged'            },
+                { icon: '⚡', label: 'This week\'s opportunity', desc: 'One concrete content angle you should post on right now'    },
               ].map(item => (
                 <div key={item.label} className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
                   <span className="text-lg flex-shrink-0">{item.icon}</span>
@@ -99,78 +103,81 @@ export default function SMRadarPage() {
             </div>
           </div>
 
-          {/* GENERATE BUTTON */}
-          <div className="bg-black rounded-2xl p-6 mb-6 text-white flex items-center justify-between">
-            <div>
-              <p className="text-sm font-extrabold mb-1">
-                {generated ? '✅ Report ready — insights below' : 'Generate your performance report'}
-              </p>
-              <p className="text-xs text-gray-400">
-                {generated
-                  ? 'Based on your connected account data'
-                  : 'Requires at least one connected social account with post history.'}
-              </p>
-            </div>
-            <button
-              onClick={handleGenerate}
-              disabled={generating || credits < 3}
-              className="flex-shrink-0 bg-white text-black text-xs font-extrabold px-5 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2">
-              {generating ? (
-                <>
-                  <div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                  Analyzing...
-                </>
-              ) : (
-                '📊 Generate Report — 3 credits'
-              )}
-            </button>
+          {/* NICHE INPUT */}
+          <div className="bg-white border border-gray-100 rounded-2xl p-5 mb-4">
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-2">
+              Your niche or topic
+            </label>
+            <input
+              type="text"
+              value={niche}
+              onChange={e => setNiche(e.target.value)}
+              placeholder="e.g. fitness, SaaS marketing, cooking, personal finance..."
+              className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400"
+            />
+            <p className="text-xs text-gray-400 mt-1.5">Leave blank to default to social media content creation.</p>
           </div>
 
+          {/* GENERATE BUTTON */}
+          <div className="bg-black rounded-2xl p-5 md:p-6 mb-6 text-white">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-extrabold mb-1">
+                  {result ? '✅ Report ready — insights below' : 'Generate your Radar report'}
+                </p>
+                <p className="text-xs text-gray-400">
+                  {result
+                    ? 'Based on live Reddit and YouTube data for your niche'
+                    : `Powered by real Reddit and YouTube data. Costs ${CREDIT_COST} credits.`}
+                </p>
+              </div>
+              <button
+                onClick={handleGenerate}
+                disabled={generating || credits < CREDIT_COST}
+                className="self-start sm:self-auto flex-shrink-0 bg-white text-black text-xs font-extrabold px-5 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2">
+                {generating ? (
+                  <>
+                    <div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                    Analyzing...
+                  </>
+                ) : (
+                  `📡 Generate Report — ${CREDIT_COST} credits`
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* ERROR */}
+          {error && (
+            <div className="mb-4 bg-red-50 border border-red-100 rounded-2xl px-5 py-3">
+              <p className="text-xs text-red-600 font-semibold">{error}</p>
+            </div>
+          )}
+
           {/* RESULTS */}
-          {generated && (
+          {result && (
             <>
               <div className="bg-white border border-gray-100 rounded-2xl p-5 mb-4">
-                <h2 className="text-sm font-extrabold mb-4">Your Performance Insights</h2>
-                <div className="space-y-3">
-                  {SAMPLE_INSIGHTS.map((insight, i) => (
-                    <div key={i} className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
-                      <div className="flex items-center gap-3">
-                        <span className="text-xl">{insight.icon}</span>
-                        <div>
-                          <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">{insight.label}</p>
-                          <p className="text-sm font-extrabold text-gray-900">{insight.value}</p>
-                        </div>
-                      </div>
-                      <p className="text-xs text-gray-400 text-right max-w-xs">{insight.detail}</p>
-                    </div>
-                  ))}
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-sm font-extrabold">Your Radar Report</h2>
+                  <button
+                    onClick={() => navigator.clipboard.writeText(result)}
+                    className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                    Copy
+                  </button>
                 </div>
+                <pre className="text-xs text-gray-700 leading-relaxed whitespace-pre-wrap font-sans bg-gray-50 rounded-xl p-4">
+                  {result}
+                </pre>
               </div>
 
-              <div className="bg-white border border-gray-100 rounded-2xl p-5 mb-4">
-                <h2 className="text-sm font-extrabold mb-4">Your Top Performing Posts</h2>
-                <div className="space-y-3">
-                  {SAMPLE_TOP_POSTS.map((post, i) => (
-                    <div key={i} className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
-                      <div className="flex-1 min-w-0 mr-4">
-                        <p className="text-xs font-semibold text-gray-700 truncate">{post.preview}</p>
-                        <p className="text-xs text-gray-400 mt-0.5">{post.platform}</p>
-                      </div>
-                      <span className="text-xs font-extrabold text-green-600 bg-green-50 px-2.5 py-1 rounded-xl flex-shrink-0">
-                        {post.engagement} engagements
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-black text-white rounded-2xl p-5 flex items-center justify-between">
+              <div className="bg-black text-white rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <p className="text-sm font-extrabold mb-1">Apply these insights now</p>
                   <p className="text-xs text-gray-400">Open Compose and write your next post using what's working.</p>
                 </div>
                 <Link href="/compose"
-                  className="flex-shrink-0 bg-white text-black text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all">
+                  className="self-start sm:self-auto flex-shrink-0 bg-white text-black text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all">
                   Open Compose →
                 </Link>
               </div>
@@ -178,35 +185,34 @@ export default function SMRadarPage() {
           )}
 
           {/* PREVIEW STATE */}
-          {!generated && (
+          {!result && !generating && (
             <div className="bg-white border border-gray-100 rounded-2xl p-5">
-              <h2 className="text-sm font-extrabold mb-4">Sample insight preview</h2>
+              <h2 className="text-sm font-extrabold mb-4">What your report will include</h2>
               <div className="space-y-3 opacity-40 pointer-events-none select-none">
-                {SAMPLE_INSIGHTS.slice(0, 3).map((_, i) => (
-                  <div key={i} className="flex items-center justify-between py-3 border-b border-gray-50">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-gray-200 rounded-full" />
-                      <div>
-                        <div className="w-24 h-2.5 bg-gray-200 rounded mb-1.5" />
-                        <div className="w-32 h-3 bg-gray-300 rounded" />
-                      </div>
+                {[1,2,3,4].map(i => (
+                  <div key={i} className="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0">
+                    <div className="w-8 h-8 bg-gray-200 rounded-full flex-shrink-0" />
+                    <div className="flex-1">
+                      <div className="w-24 h-2.5 bg-gray-200 rounded mb-1.5" />
+                      <div className="w-48 h-3 bg-gray-300 rounded" />
                     </div>
-                    <div className="w-40 h-2.5 bg-gray-100 rounded" />
+                    <div className="w-32 h-2.5 bg-gray-100 rounded hidden sm:block" />
                   </div>
                 ))}
               </div>
-              <p className="text-xs text-center text-gray-400 mt-4">Generate a report to see your real data</p>
+              <p className="text-xs text-center text-gray-400 mt-4">Enter your niche above and generate a report to see real insights</p>
             </div>
           )}
 
-          {credits < 3 && (
-            <div className="mt-4 bg-red-50 border border-red-100 rounded-2xl p-4 flex items-center justify-between">
-              <p className="text-xs font-semibold text-red-600">
-                You need at least 3 credits to generate a report. You have {credits} remaining.
+          {/* LOW CREDITS */}
+          {credits < CREDIT_COST && (
+            <div className="mt-4 bg-red-50 border border-red-100 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+              <p className="text-xs font-semibold text-red-600 flex-1">
+                You need at least {CREDIT_COST} credits to generate a report. You have {credits} remaining.
               </p>
-              <Link href="/settings?tab=Referrals"
-                className="text-xs font-bold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all flex-shrink-0 ml-4">
-                Earn credits →
+              <Link href="/settings?tab=Plan"
+                className="self-start sm:self-auto text-xs font-bold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all flex-shrink-0">
+                Get more credits →
               </Link>
             </div>
           )}
