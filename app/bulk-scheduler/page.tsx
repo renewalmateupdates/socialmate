@@ -7,22 +7,22 @@ import Link from 'next/link'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 
 const LIVE_PLATFORMS = [
-  { id: 'linkedin',  label: 'LinkedIn',  icon: '💼' },
-  { id: 'youtube',   label: 'YouTube',   icon: '▶️' },
-  { id: 'pinterest', label: 'Pinterest', icon: '📌' },
-  { id: 'bluesky',   label: 'Bluesky',   icon: '🦋' },
-  { id: 'reddit',    label: 'Reddit',    icon: '🤖' },
   { id: 'discord',   label: 'Discord',   icon: '💬' },
+  { id: 'bluesky',   label: 'Bluesky',   icon: '🦋' },
   { id: 'telegram',  label: 'Telegram',  icon: '✈️' },
   { id: 'mastodon',  label: 'Mastodon',  icon: '🐘' },
 ]
 
 const COMING_SOON_PLATFORMS = [
-  { id: 'instagram', label: 'Instagram',   icon: '📸' },
-  { id: 'tiktok',    label: 'TikTok',      icon: '🎵' },
-  { id: 'facebook',  label: 'Facebook',    icon: '📘' },
-  { id: 'threads',   label: 'Threads',     icon: '🧵' },
-  { id: 'twitter',   label: 'X / Twitter', icon: '🐦' },
+  { id: 'linkedin',  label: 'LinkedIn',   icon: '💼' },
+  { id: 'youtube',   label: 'YouTube',    icon: '▶️' },
+  { id: 'pinterest', label: 'Pinterest',  icon: '📌' },
+  { id: 'reddit',    label: 'Reddit',     icon: '🤖' },
+  { id: 'instagram', label: 'Instagram',  icon: '📸' },
+  { id: 'tiktok',    label: 'TikTok',     icon: '🎵' },
+  { id: 'facebook',  label: 'Facebook',   icon: '📘' },
+  { id: 'threads',   label: 'Threads',    icon: '🧵' },
+  { id: 'twitter',   label: 'X/Twitter',  icon: '🐦' },
 ]
 
 const TIMES = [
@@ -31,7 +31,6 @@ const TIMES = [
   '20:00','21:00','22:00',
 ]
 
-// Max rows allowed per bulk session per plan
 const PLAN_MAX_ROWS: Record<string, number> = {
   free:   10,
   pro:    50,
@@ -80,11 +79,11 @@ export default function BulkScheduler() {
     '3 months'
 
   const [posts, setPosts] = useState<BulkPost[]>([
-    { id: makeId(), content: '', platforms: ['linkedin'], date: getNextDate(1), time: '09:00', status: 'ready' },
-    { id: makeId(), content: '', platforms: ['linkedin'], date: getNextDate(2), time: '09:00', status: 'ready' },
-    { id: makeId(), content: '', platforms: ['linkedin'], date: getNextDate(3), time: '09:00', status: 'ready' },
+    { id: makeId(), content: '', platforms: ['discord'], date: getNextDate(1), time: '09:00', status: 'ready' },
+    { id: makeId(), content: '', platforms: ['discord'], date: getNextDate(2), time: '09:00', status: 'ready' },
+    { id: makeId(), content: '', platforms: ['discord'], date: getNextDate(3), time: '09:00', status: 'ready' },
   ])
-  const [defaultPlatforms, setDefaultPlatforms] = useState<string[]>(['linkedin'])
+  const [defaultPlatforms, setDefaultPlatforms] = useState<string[]>(['discord'])
   const [defaultTime, setDefaultTime] = useState('09:00')
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
@@ -106,7 +105,7 @@ export default function BulkScheduler() {
 
   const addRow = () => {
     if (posts.length >= maxRows) {
-      showToast(`Your ${plan} plan supports up to ${maxRows} posts per bulk session. Upgrade for more.`, 'error')
+      showToast(`Your ${plan} plan supports up to ${maxRows} posts per session. Upgrade for more.`, 'error')
       return
     }
     const lastPost = posts[posts.length - 1]
@@ -114,7 +113,6 @@ export default function BulkScheduler() {
     const d = new Date(lastDate)
     d.setDate(d.getDate() + 1)
     const nextDate = d.toISOString().split('T')[0]
-    // cap at max schedule date
     const clampedDate = nextDate > maxScheduleDate ? maxScheduleDate : nextDate
     setPosts(prev => [...prev, {
       id: makeId(),
@@ -157,11 +155,7 @@ export default function BulkScheduler() {
   }
 
   const applyDefaultsToAll = () => {
-    setPosts(prev => prev.map(p => ({
-      ...p,
-      platforms: [...defaultPlatforms],
-      time: defaultTime,
-    })))
+    setPosts(prev => prev.map(p => ({ ...p, platforms: [...defaultPlatforms], time: defaultTime })))
     showToast('Defaults applied to all rows', 'success')
   }
 
@@ -177,35 +171,30 @@ export default function BulkScheduler() {
   const handleSaveAll = async () => {
     const today = getTodayDate()
 
-    // Check past dates
     const pastDate = posts.some(p => p.content.trim() && p.date && p.date < today)
     if (pastDate) {
       showToast('Some posts have past dates — please update them before scheduling', 'error')
       setPosts(prev => prev.map(p => ({
         ...p,
         status: p.content.trim() && p.date < today ? 'error' : p.status,
-        error: p.content.trim() && p.date < today ? 'Date is in the past' : p.error,
+        error:  p.content.trim() && p.date < today ? 'Date is in the past' : p.error,
       })))
       return
     }
 
-    // Check horizon violations
     const horizonViolation = posts.some(p => p.content.trim() && p.date > maxScheduleDate)
     if (horizonViolation) {
       showToast(`Some posts exceed your ${scheduleHorizonLabel} scheduling limit`, 'error')
       setPosts(prev => prev.map(p => ({
         ...p,
         status: p.content.trim() && p.date > maxScheduleDate ? 'error' : p.status,
-        error: p.content.trim() && p.date > maxScheduleDate ? `Exceeds ${scheduleHorizonLabel} limit for ${plan} plan` : p.error,
+        error:  p.content.trim() && p.date > maxScheduleDate ? `Exceeds ${scheduleHorizonLabel} limit` : p.error,
       })))
       return
     }
 
     const valid = posts.filter(p => p.content.trim() && p.platforms.length > 0 && p.date)
-    if (valid.length === 0) {
-      showToast('Add content to at least one post', 'error')
-      return
-    }
+    if (valid.length === 0) { showToast('Add content to at least one post', 'error'); return }
 
     setSaving(true)
     let saved = 0
@@ -231,47 +220,37 @@ export default function BulkScheduler() {
 
     setPosts(updatedPosts)
     setSaving(false)
-    if (saved > 0) {
-      showToast(`${saved} post${saved !== 1 ? 's' : ''} scheduled successfully!`, 'success')
-    }
+    if (saved > 0) showToast(`${saved} post${saved !== 1 ? 's' : ''} scheduled!`, 'success')
   }
 
   const clearSaved = () => {
     setPosts(prev => {
       const remaining = prev.filter(p => p.status !== 'saved')
-      if (remaining.length === 0) {
-        return [{
-          id: makeId(),
-          content: '',
-          platforms: [...defaultPlatforms],
-          date: getNextDate(1),
-          time: defaultTime,
-          status: 'ready',
-        }]
-      }
-      return remaining
+      return remaining.length === 0
+        ? [{ id: makeId(), content: '', platforms: [...defaultPlatforms], date: getNextDate(1), time: defaultTime, status: 'ready' }]
+        : remaining
     })
   }
 
-  const today = getTodayDate()
-  const readyCount = posts.filter(p => p.content.trim() && p.status === 'ready').length
-  const savedPosts = posts.filter(p => p.status === 'saved').length
-  const errorPosts = posts.filter(p => p.status === 'error').length
-  const atRowLimit = posts.length >= maxRows
+  const today         = getTodayDate()
+  const readyCount    = posts.filter(p => p.content.trim() && p.status === 'ready').length
+  const savedPosts    = posts.filter(p => p.status === 'saved').length
+  const errorPosts    = posts.filter(p => p.status === 'error').length
+  const atRowLimit    = posts.length >= maxRows
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar />
-      <div className="ml-56 flex-1 p-8">
+      <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-5xl mx-auto">
 
           {/* HEADER */}
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Bulk Scheduler</h1>
               <p className="text-sm text-gray-400 mt-0.5">Write and schedule multiple posts at once</p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               {savedPosts > 0 && (
                 <button onClick={clearSaved}
                   className="text-xs font-bold px-4 py-2.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
@@ -280,25 +259,25 @@ export default function BulkScheduler() {
               )}
               <Link href="/calendar"
                 className="text-xs font-bold px-4 py-2.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
-                📅 View Calendar
+                📅 Calendar
               </Link>
             </div>
           </div>
 
-          {/* PLAN LIMITS BAR */}
-          <div className={`mb-4 rounded-2xl px-5 py-3 flex items-center justify-between border ${
+          {/* PLAN LIMITS */}
+          <div className={`mb-4 rounded-2xl px-5 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border ${
             plan === 'free'   ? 'bg-gray-50 border-gray-200' :
             plan === 'pro'    ? 'bg-blue-50 border-blue-100' :
             'bg-purple-50 border-purple-100'
           }`}>
             <p className="text-xs font-semibold text-gray-500">
-              {plan === 'free'   && '🔓 Free plan · Up to 10 posts per session · 2-week scheduling horizon'}
-              {plan === 'pro'    && '⚡ Pro plan · Up to 50 posts per session · 1-month scheduling horizon'}
-              {plan === 'agency' && '🏢 Agency plan · Up to 100 posts per session · 3-month scheduling horizon'}
-              <span className="ml-2 font-bold text-gray-700">{posts.length} / {maxRows} rows</span>
+              {plan === 'free'   && '🔓 Free · Up to 10 posts per session · 2-week horizon'}
+              {plan === 'pro'    && '⚡ Pro · Up to 50 posts per session · 1-month horizon'}
+              {plan === 'agency' && '🏢 Agency · Up to 100 posts per session · 3-month horizon'}
+              <span className="ml-2 font-bold text-gray-700">{posts.length}/{maxRows} rows</span>
             </p>
             {plan !== 'agency' && (
-              <Link href="/pricing" className="text-xs font-bold text-black underline hover:opacity-70">
+              <Link href="/settings?tab=Plan" className="text-xs font-bold text-black underline hover:opacity-70 self-start sm:self-auto">
                 Upgrade →
               </Link>
             )}
@@ -306,44 +285,44 @@ export default function BulkScheduler() {
 
           {/* DEFAULTS BAR */}
           <div className="bg-white border border-gray-100 rounded-2xl p-4 mb-4">
-            <div className="flex items-center gap-4 flex-wrap">
-              <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">Defaults:</p>
-              <div className="flex items-center gap-1 flex-wrap">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Default Settings</p>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className="flex items-center gap-1.5 flex-wrap flex-1">
                 {LIVE_PLATFORMS.map(p => (
-                  <button key={p.id} onClick={() => {
-                    setDefaultPlatforms(prev =>
+                  <button key={p.id}
+                    onClick={() => setDefaultPlatforms(prev =>
                       prev.includes(p.id) ? prev.filter(x => x !== p.id) : [...prev, p.id]
-                    )
-                  }}
-                    className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold border transition-all ${
+                    )}
+                    className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold border transition-all ${
                       defaultPlatforms.includes(p.id)
                         ? 'bg-black text-white border-black'
                         : 'border-gray-200 text-gray-500 hover:border-gray-400'
                     }`}>
                     <span>{p.icon}</span>
-                    <span className="hidden sm:inline">{p.label.split(' ')[0]}</span>
+                    <span>{p.label}</span>
                   </button>
                 ))}
-                {COMING_SOON_PLATFORMS.map(p => (
+                {COMING_SOON_PLATFORMS.slice(0, 4).map(p => (
                   <div key={p.id}
-                    className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold border border-dashed border-gray-200 text-gray-300 cursor-not-allowed"
+                    className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-bold border border-dashed border-gray-100 text-gray-300 cursor-not-allowed"
                     title={`${p.label} — coming soon`}>
                     <span>{p.icon}</span>
-                    <span className="hidden sm:inline">{p.label.split(' ')[0]}</span>
+                    <span className="hidden sm:inline">{p.label}</span>
+                    <span className="text-xs text-gray-200 ml-0.5">Soon</span>
                   </div>
                 ))}
               </div>
-              <select value={defaultTime} onChange={e => setDefaultTime(e.target.value)}
-                className="px-3 py-1.5 text-xs border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 bg-white font-semibold">
-                {TIMES.map(t => <option key={t} value={t}>{t}</option>)}
-              </select>
-              <div className="flex items-center gap-2 ml-auto">
+              <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
+                <select value={defaultTime} onChange={e => setDefaultTime(e.target.value)}
+                  className="px-3 py-1.5 text-xs border border-gray-200 rounded-xl focus:outline-none bg-white font-semibold">
+                  {TIMES.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
                 <button onClick={autoFillDates}
-                  className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                  className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all whitespace-nowrap">
                   🗓 Auto-fill Dates
                 </button>
                 <button onClick={applyDefaultsToAll}
-                  className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all">
+                  className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all whitespace-nowrap">
                   Apply to All
                 </button>
               </div>
@@ -352,75 +331,80 @@ export default function BulkScheduler() {
 
           {/* STATUS BAR */}
           {(savedPosts > 0 || errorPosts > 0) && (
-            <div className={`rounded-2xl px-5 py-3 mb-4 flex items-center gap-4 text-xs font-semibold ${
+            <div className={`rounded-2xl px-5 py-3 mb-4 flex flex-wrap items-center gap-4 text-xs font-semibold ${
               errorPosts > 0 ? 'bg-red-50 border border-red-100' : 'bg-green-50 border border-green-100'
             }`}>
-              {savedPosts > 0 && (
-                <span className="text-green-700">✅ {savedPosts} post{savedPosts !== 1 ? 's' : ''} scheduled</span>
-              )}
-              {errorPosts > 0 && (
-                <span className="text-red-600">❌ {errorPosts} failed — check content and try again</span>
-              )}
+              {savedPosts > 0 && <span className="text-green-700">✅ {savedPosts} post{savedPosts !== 1 ? 's' : ''} scheduled</span>}
+              {errorPosts > 0 && <span className="text-red-600">❌ {errorPosts} failed — check content and try again</span>}
             </div>
           )}
 
-          {/* POSTS */}
+          {/* POST ROWS */}
           <div className="space-y-3 mb-4">
             {posts.map((post, index) => (
               <div key={post.id}
                 className={`bg-white border-2 rounded-2xl p-4 transition-all ${
-                  post.status === 'saved' ? 'border-green-200 opacity-70' :
-                  post.status === 'error' ? 'border-red-200' :
+                  post.status === 'saved'  ? 'border-green-200 opacity-70' :
+                  post.status === 'error'  ? 'border-red-200' :
                   'border-gray-100 hover:border-gray-300'
                 }`}>
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="text-xs font-bold text-gray-400 w-6 text-center">
-                    {post.status === 'saved' ? '✅' : post.status === 'error' ? '❌' : `${index + 1}`}
-                  </span>
-                  <input
-                    type="date"
-                    value={post.date}
-                    min={today}
-                    max={maxScheduleDate}
-                    onChange={e => handleDateChange(post.id, e.target.value)}
-                    className={`px-2.5 py-1.5 text-xs border rounded-xl focus:outline-none font-semibold ${
-                      post.date < today || post.date > maxScheduleDate
-                        ? 'border-red-300 text-red-500'
-                        : 'border-gray-200 focus:border-gray-400'
-                    }`}
-                  />
-                  <select value={post.time}
-                    onChange={e => updatePost(post.id, 'time', e.target.value)}
-                    className="px-2.5 py-1.5 text-xs border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 bg-white font-semibold">
-                    {TIMES.map(t => <option key={t} value={t}>{t}</option>)}
-                  </select>
-                  <div className="flex items-center gap-1 flex-wrap flex-1">
+
+                {/* ROW CONTROLS */}
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-gray-400 w-5 text-center flex-shrink-0">
+                      {post.status === 'saved' ? '✅' : post.status === 'error' ? '❌' : index + 1}
+                    </span>
+                    <input type="date" value={post.date}
+                      min={today} max={maxScheduleDate}
+                      onChange={e => handleDateChange(post.id, e.target.value)}
+                      className={`px-2.5 py-1.5 text-xs border rounded-xl focus:outline-none font-semibold ${
+                        post.date < today || post.date > maxScheduleDate
+                          ? 'border-red-300 text-red-500'
+                          : 'border-gray-200 focus:border-gray-400'
+                      }`} />
+                    <select value={post.time}
+                      onChange={e => updatePost(post.id, 'time', e.target.value)}
+                      className="px-2.5 py-1.5 text-xs border border-gray-200 rounded-xl focus:outline-none bg-white font-semibold">
+                      {TIMES.map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                    <button onClick={() => removeRow(post.id)}
+                      disabled={posts.length <= 1}
+                      className="text-xs text-gray-300 hover:text-red-400 transition-all disabled:opacity-20 flex-shrink-0 ml-auto sm:ml-0">
+                      ✕
+                    </button>
+                  </div>
+
+                  {/* PLATFORM TOGGLES */}
+                  <div className="flex items-center gap-1.5 flex-wrap">
                     {LIVE_PLATFORMS.map(p => (
                       <button key={p.id}
                         onClick={() => togglePostPlatform(post.id, p.id)}
-                        className={`text-base transition-all ${
-                          post.platforms.includes(p.id) ? 'opacity-100' : 'opacity-20 hover:opacity-50'
+                        className={`flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold border transition-all ${
+                          post.platforms.includes(p.id)
+                            ? 'bg-black text-white border-black'
+                            : 'border-gray-200 text-gray-400 hover:border-gray-400'
                         }`}
                         title={p.label}>
-                        {p.icon}
+                        <span>{p.icon}</span>
+                        <span className="hidden md:inline">{p.label}</span>
                       </button>
                     ))}
-                    {COMING_SOON_PLATFORMS.map(p => (
-                      <span key={p.id} className="text-base opacity-10 cursor-not-allowed" title={`${p.label} — coming soon`}>
+                    {COMING_SOON_PLATFORMS.slice(0, 4).map(p => (
+                      <span key={p.id}
+                        className="text-base opacity-20 cursor-not-allowed"
+                        title={`${p.label} — coming soon`}>
                         {p.icon}
                       </span>
                     ))}
                   </div>
-                  <button onClick={() => removeRow(post.id)}
-                    disabled={posts.length <= 1}
-                    className="text-xs text-gray-300 hover:text-red-400 transition-all disabled:opacity-20 flex-shrink-0">
-                    ✕
-                  </button>
                 </div>
+
+                {/* CONTENT */}
                 <textarea
                   value={post.content}
                   onChange={e => updatePost(post.id, 'content', e.target.value)}
-                  placeholder={`Post ${index + 1} content... Tip: use [brackets] for fill-in sections`}
+                  placeholder={`Post ${index + 1} content... Use [brackets] for fill-in sections`}
                   rows={3}
                   disabled={post.status === 'saved'}
                   className="w-full px-3 py-2.5 text-sm border border-gray-100 rounded-xl focus:outline-none focus:border-gray-300 resize-none bg-gray-50 disabled:opacity-60"
@@ -439,26 +423,20 @@ export default function BulkScheduler() {
           </div>
 
           {/* ADD + SAVE */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button onClick={addRow}
-                disabled={atRowLimit}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3 flex-wrap">
+              <button onClick={addRow} disabled={atRowLimit}
                 className="flex items-center gap-2 text-xs font-bold px-5 py-3 border-2 border-dashed border-gray-300 rounded-2xl hover:border-gray-500 transition-all text-gray-500 hover:text-black disabled:opacity-40 disabled:cursor-not-allowed">
                 + Add another post
               </button>
-              {atRowLimit && (
-                <p className="text-xs text-gray-400">
-                  {plan !== 'agency'
-                    ? <><span className="font-bold text-black">{maxRows} row limit reached</span> · <Link href="/pricing" className="underline font-bold">Upgrade for more →</Link></>
-                    : <span className="font-bold">100 row limit reached</span>
-                  }
-                </p>
+              {atRowLimit && plan !== 'agency' && (
+                <Link href="/settings?tab=Plan" className="text-xs font-bold underline text-gray-400">
+                  Upgrade for more rows →
+                </Link>
               )}
             </div>
-            <div className="flex items-center gap-3">
-              <p className="text-xs text-gray-400">
-                {readyCount} post{readyCount !== 1 ? 's' : ''} ready to schedule
-              </p>
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <p className="text-xs text-gray-400">{readyCount} post{readyCount !== 1 ? 's' : ''} ready</p>
               <button onClick={handleSaveAll}
                 disabled={saving || readyCount === 0}
                 className="bg-black text-white text-sm font-bold px-8 py-3 rounded-2xl hover:opacity-80 transition-all disabled:opacity-40">
@@ -469,13 +447,13 @@ export default function BulkScheduler() {
 
           {/* TIPS */}
           <div className="mt-8 bg-white border border-gray-100 rounded-2xl p-5">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">💡 Bulk Scheduler Tips</p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">💡 Tips</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
               {[
                 { icon: '🗓', tip: 'Click "Auto-fill Dates" to spread posts across the next N days automatically.' },
-                { icon: '⚡', tip: 'Set defaults at the top, then click "Apply to All" to update every row at once.' },
-                { icon: '[x]', tip: 'Use [brackets] in your content as fill-in-the-blank placeholders.' },
-                { icon: '📅', tip: 'After scheduling, view all posts in the Content Calendar to see your full plan.' },
+                { icon: '⚡', tip: 'Set defaults at the top then click "Apply to All" to update every row at once.' },
+                { icon: '[ ]', tip: 'Use [brackets] in content as fill-in-the-blank placeholders for easy editing.' },
+                { icon: '📅', tip: 'After scheduling, view your full plan in the Content Calendar.' },
               ].map(item => (
                 <div key={item.tip} className="flex items-start gap-2">
                   <span className="text-sm flex-shrink-0 font-bold text-gray-500">{item.icon}</span>
