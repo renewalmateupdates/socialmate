@@ -34,33 +34,34 @@ const NAV_BASE = [
   {
     section: 'Grow',
     items: [
-      { icon: '🤖', label: 'AI Features',    href: '/ai-features'            },
-      { icon: '🔥', label: 'SM-Pulse',       href: '/sm-pulse'               },
-      { icon: '📡', label: 'SM-Radar',       href: '/sm-radar'               },
-      { icon: '🕳️', label: 'Content Gaps',  href: '/content-gap'            },
-      { icon: '🔭', label: 'Competitors',    href: '/competitor-tracking'    },
-      { icon: '📬', label: 'Social Inbox',   href: '/social-inbox'           },
-      { icon: '🎁', label: 'Referrals',      href: '/settings?tab=Referrals' },
-      { icon: '🤝', label: 'Affiliate',      href: '/affiliate'              },
+      { icon: '🤖', label: 'AI Features',  href: '/ai-features'            },
+      { icon: '🔥', label: 'SM-Pulse',     href: '/sm-pulse'               },
+      { icon: '📡', label: 'SM-Radar',     href: '/sm-radar'               },
+      { icon: '🕳️', label: 'Content Gaps', href: '/content-gap'           },
+      { icon: '🔭', label: 'Competitors',  href: '/competitor-tracking'    },
+      { icon: '📬', label: 'Social Inbox', href: '/social-inbox'           },
+      { icon: '🎁', label: 'Referrals',    href: '/settings?tab=Referrals' },
+      { icon: '🤝', label: 'Affiliate',    href: '/affiliate'              },
     ],
   },
   {
     section: 'Manage',
     items: [
-      { icon: '🔗', label: 'Accounts',      href: '/accounts'      },
-      { icon: '👥', label: 'Team',          href: '/team'          },
-      { icon: '♻️', label: 'Evergreen',     href: '/evergreen'     },
-      { icon: '📡', label: 'RSS Import',    href: '/rss-import'    },
-      { icon: '✅', label: 'Approvals',     href: '/approvals'     },
+      { icon: '🔗', label: 'Accounts',     href: '/accounts'              },
+      { icon: '📍', label: 'Destinations', href: '/accounts/destinations' },
+      { icon: '👥', label: 'Team',         href: '/team'                  },
+      { icon: '♻️', label: 'Evergreen',    href: '/evergreen'             },
+      { icon: '📡', label: 'RSS Import',   href: '/rss-import'            },
+      { icon: '✅', label: 'Approvals',    href: '/approvals'             },
     ],
   },
   {
     section: 'Account',
     items: [
-      { icon: '⚙️', label: 'Settings',      href: '/settings'      },
-      { icon: '🔔', label: 'Notifications', href: '/notifications'  },
-      { icon: '🔎', label: 'Search',        href: '/search'         },
-      { icon: '💛', label: 'Our Story',     href: '/story'          },
+      { icon: '⚙️', label: 'Settings',      href: '/settings'     },
+      { icon: '🔔', label: 'Notifications', href: '/notifications' },
+      { icon: '🔎', label: 'Search',        href: '/search'        },
+      { icon: '💛', label: 'Our Story',     href: '/story'         },
     ],
   },
 ]
@@ -88,7 +89,6 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
     creditsTotal,
     seatsUsed,
     seatsTotal,
-    platformsConnected,
     loading,
   } = useWorkspace()
 
@@ -136,9 +136,9 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
     return group
   })
 
-  const badge       = PLAN_BADGE[plan] || PLAN_BADGE.free
-  const creditsBar  = creditsTotal > 0 ? Math.max(0, Math.min((credits / creditsTotal) * 100, 100)) : 0
-  const seatsBar    = seatsTotal   > 0 ? Math.min(100, (seatsUsed / seatsTotal) * 100) : 0
+  const badge      = PLAN_BADGE[plan] || PLAN_BADGE.free
+  const creditsBar = creditsTotal > 0 ? Math.max(0, Math.min((credits / creditsTotal) * 100, 100)) : 0
+  const seatsBar   = seatsTotal   > 0 ? Math.min(100, (seatsUsed / seatsTotal) * 100) : 0
 
   const clientWorkspaces  = workspaces.filter((w: any) => !w.is_personal)
   const personalWorkspace = workspaces.find((w: any) => w.is_personal)
@@ -180,14 +180,16 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
               {personalWorkspace && (
                 <button
                   onClick={() => { setActiveWorkspace(personalWorkspace); setWsOpen(false) }}
-                  className={`w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-left hover:bg-gray-50 transition-all ${activeWorkspace?.id === personalWorkspace.id ? 'bg-gray-50 text-black' : 'text-gray-600'}`}>
+                  className={`w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-left hover:bg-gray-50 transition-all ${
+                    activeWorkspace?.id === personalWorkspace.id ? 'bg-gray-50 text-black' : 'text-gray-600'
+                  }`}>
                   <span>🏠</span>
                   <span className="truncate">My Workspace</span>
                   {activeWorkspace?.id === personalWorkspace.id && <span className="ml-auto text-black">✓</span>}
                 </button>
               )}
 
-              {plan === 'agency' && clientWorkspaces.length > 0 && (
+              {(plan === 'pro' || plan === 'agency') && clientWorkspaces.length > 0 && (
                 <>
                   <div className="px-3 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-widest border-t border-gray-50">
                     Clients
@@ -195,7 +197,9 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
                   {clientWorkspaces.map((ws: any) => (
                     <button key={ws.id}
                       onClick={() => { setActiveWorkspace(ws); setWsOpen(false) }}
-                      className={`w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-left hover:bg-gray-50 transition-all ${activeWorkspace?.id === ws.id ? 'bg-gray-50 text-black' : 'text-gray-600'}`}>
+                      className={`w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-left hover:bg-gray-50 transition-all ${
+                        activeWorkspace?.id === ws.id ? 'bg-gray-50 text-black' : 'text-gray-600'
+                      }`}>
                       <span>🏢</span>
                       <span className="truncate">{ws.client_name || ws.name}</span>
                       {activeWorkspace?.id === ws.id && <span className="ml-auto text-black">✓</span>}
@@ -211,26 +215,33 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
                 </Link>
               )}
 
-              {plan !== 'agency' && (
+              {plan === 'pro' && (
+                <Link href="/workspaces/new" onClick={() => setWsOpen(false)}
+                  className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-gray-400 hover:text-black hover:bg-gray-50 transition-all border-t border-gray-50">
+                  <span>+</span> Add client workspace
+                </Link>
+              )}
+
+              {plan === 'free' && (
                 <>
                   <button
                     onClick={() => setShowUpgradeNudge(p => !p)}
                     className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-purple-500 hover:bg-purple-50 transition-all border-t border-gray-50">
                     <span>🏢</span>
                     <span>Client workspaces</span>
-                    <span className="ml-auto text-purple-300 text-xs">Agency</span>
+                    <span className="ml-auto text-purple-300 text-xs">Pro+</span>
                   </button>
                   {showUpgradeNudge && (
                     <div className="px-3 py-3 bg-purple-50 border-t border-purple-100">
-                      <p className="text-xs text-purple-700 font-semibold mb-1">Manage client workspaces</p>
+                      <p className="text-xs text-purple-700 font-semibold mb-1">Client workspaces</p>
                       <p className="text-xs text-purple-500 mb-2 leading-relaxed">
-                        Separate workspaces per client — their own accounts, posts, and analytics.
+                        1 client workspace on Pro. Up to 10 on Agency.
                       </p>
                       <button
-                        onClick={() => { setWsOpen(false); handleCheckout(STRIPE_AGENCY_PRICE_ID) }}
+                        onClick={() => { setWsOpen(false); handleCheckout(STRIPE_PRO_PRICE_ID) }}
                         disabled={checkoutLoading}
-                        className="w-full text-center bg-purple-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:opacity-80 transition-all disabled:opacity-60">
-                        {checkoutLoading ? 'Loading...' : 'Upgrade to Agency →'}
+                        className="w-full text-center bg-black text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:opacity-80 transition-all disabled:opacity-60">
+                        {checkoutLoading ? 'Loading...' : 'Upgrade to Pro →'}
                       </button>
                     </div>
                   )}
@@ -270,20 +281,26 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
         <div className="bg-gray-50 rounded-xl p-3">
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs font-semibold text-gray-500">AI Credits</span>
-            <span className="text-xs font-bold text-gray-700">{loading ? '...' : `${credits}/${creditsTotal}`}</span>
+            <span className="text-xs font-bold text-gray-700">
+              {loading ? '...' : `${credits}/${creditsTotal}`}
+            </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-1.5">
             <div className={`h-1.5 rounded-full transition-all ${
               creditsBar < 20 ? 'bg-red-400' : creditsBar < 50 ? 'bg-yellow-400' : 'bg-black'
             }`} style={{ width: `${creditsBar}%` }} />
           </div>
-          <p className="text-xs text-gray-400 mt-1">{loading ? 'Loading...' : `${credits} remaining`}</p>
+          <p className="text-xs text-gray-400 mt-1">
+            {loading ? 'Loading...' : `${credits} remaining`}
+          </p>
         </div>
 
         <div className="bg-gray-50 rounded-xl p-3">
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs font-semibold text-gray-500">Team Seats</span>
-            <span className="text-xs font-bold text-gray-700">{loading ? '...' : `${seatsUsed}/${seatsTotal}`}</span>
+            <span className="text-xs font-bold text-gray-700">
+              {loading ? '...' : `${seatsUsed}/${seatsTotal}`}
+            </span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-1.5">
             <div className={`h-1.5 rounded-full transition-all ${seatsUsed >= seatsTotal ? 'bg-red-400' : 'bg-black'}`}
@@ -331,7 +348,7 @@ export default function Sidebar() {
         <span className="text-lg">☰</span>
       </button>
 
-      {/* MOBILE DRAWER OVERLAY */}
+      {/* MOBILE OVERLAY */}
       {mobileOpen && (
         <div
           className="md:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
