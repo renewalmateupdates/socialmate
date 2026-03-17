@@ -16,6 +16,13 @@ const PLATFORM_ICONS: Record<string, string> = {
   mastodon: '🐘', snapchat: '👻', lemon8: '🍋', bereal: '📷',
 }
 
+const PLATFORM_NAMES: Record<string, string> = {
+  discord: 'Discord', bluesky: 'Bluesky', telegram: 'Telegram', mastodon: 'Mastodon',
+  linkedin: 'LinkedIn', youtube: 'YouTube', pinterest: 'Pinterest', reddit: 'Reddit',
+  instagram: 'Instagram', twitter: 'Twitter/X', tiktok: 'TikTok', facebook: 'Facebook',
+  threads: 'Threads', snapchat: 'Snapchat', lemon8: 'Lemon8', bereal: 'BeReal',
+}
+
 function groupByDate(posts: any[]) {
   const groups: Record<string, any[]> = {}
   posts.forEach(post => {
@@ -41,6 +48,7 @@ export default function Queue() {
   const [posts, setPosts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [cancelling, setCancelling] = useState<string | null>(null)
+  const [confirmCancel, setConfirmCancel] = useState<string | null>(null)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const router = useRouter()
 
@@ -64,7 +72,7 @@ export default function Queue() {
       setLoading(false)
     }
     load()
-  }, [router]) // Q1: fixed
+  }, [router])
 
   const handleCancel = async (id: string) => {
     setCancelling(id)
@@ -72,8 +80,9 @@ export default function Queue() {
       .from('posts')
       .update({ status: 'draft', scheduled_at: null })
       .eq('id', id)
-    if (error) { showToast('Failed to cancel', 'error'); setCancelling(null); return }
+    if (error) { showToast('Failed to unschedule', 'error'); setCancelling(null); return }
     setPosts(prev => prev.filter(p => p.id !== id))
+    setConfirmCancel(null)
     showToast('Moved back to drafts', 'success')
     setCancelling(null)
   }
@@ -85,24 +94,43 @@ export default function Queue() {
     return new Date(a).getTime() - new Date(b).getTime()
   })
 
+  const daysWithPosts = dateKeys.filter(k => k !== 'Unscheduled').length
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar />
-      <div className="ml-56 flex-1 p-8">
+      <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
 
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Upcoming Queue</h1>
               <p className="text-sm text-gray-400 mt-0.5">
-                {posts.length} post{posts.length !== 1 ? 's' : ''} scheduled
+                {loading ? 'Loading...' : `${posts.length} post${posts.length !== 1 ? 's' : ''} scheduled${daysWithPosts > 0 ? ` across ${daysWithPosts} day${daysWithPosts !== 1 ? 's' : ''}` : ''}`}
               </p>
             </div>
             <Link href="/compose"
-              className="bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all">
+              className="bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all self-start sm:self-auto">
               + Schedule Post
             </Link>
           </div>
+
+          {/* SUMMARY STATS */}
+          {!loading && posts.length > 0 && (
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              {[
+                { label: 'Scheduled',   value: posts.length,      icon: '📅' },
+                { label: 'Days Ahead',  value: daysWithPosts,     icon: '🗓️' },
+                { label: 'Platforms',   value: new Set(posts.flatMap(p => p.platforms || [])).size, icon: '📱' },
+              ].map(stat => (
+                <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-4 text-center">
+                  <div className="text-xl mb-1">{stat.icon}</div>
+                  <p className="text-xl font-extrabold">{stat.value}</p>
+                  <p className="text-xs text-gray-400 font-semibold mt-0.5">{stat.label}</p>
+                </div>
+              ))}
+            </div>
+          )}
 
           {loading ? (
             <div className="space-y-3">
@@ -132,45 +160,94 @@ export default function Queue() {
                     </span>
                   </div>
                   <div className="space-y-3">
-                    {grouped[dateKey].map(post => (
-                      <div key={post.id}
-                        className="bg-white border border-gray-100 rounded-2xl p-5 hover:border-gray-300 transition-all group">
-                        <div className="flex items-start justify-between gap-4">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-2">
+                    {grouped[dateKey].map(post => {
+                      const isConfirming = confirmCancel === post.id
+                      const isCancelling = cancelling === post.id
+                      return (
+                        <div key={post.id}
+                          className="bg-white border border-gray-100 rounded-2xl p-4 md:p-5 hover:border-gray-300 transition-all">
+                          <div className="flex items-start gap-4">
+                            <div className="flex-1 min-w-0">
                               {post.scheduled_at && (
-                                <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
-                                  {new Date(post.scheduled_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-                                </span>
+                                <div className="mb-2">
+                                  <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                                    {new Date(post.scheduled_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                                  </span>
+                                </div>
                               )}
+                              <p className="text-sm text-gray-700 leading-relaxed line-clamp-2 mb-3">
+                                {post.content || <span className="text-gray-300 italic">No content</span>}
+                              </p>
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                {(post.platforms || []).map((p: string) => (
+                                  <span key={p} className="flex items-center gap-1 text-xs text-gray-500 bg-gray-50 px-2 py-0.5 rounded-full">
+                                    <span>{PLATFORM_ICONS[p] || '📱'}</span>
+                                    <span className="hidden sm:inline">{PLATFORM_NAMES[p] || p}</span>
+                                  </span>
+                                ))}
+                              </div>
                             </div>
-                            <p className="text-sm text-gray-700 leading-relaxed line-clamp-2 mb-3">
-                              {post.content || <span className="text-gray-300 italic">No content</span>}
-                            </p>
-                            <div className="flex items-center gap-1">
-                              {(post.platforms || []).map((p: string) => (
-                                <span key={p} className="text-sm">{PLATFORM_ICONS[p] || '📱'}</span>
-                              ))}
+
+                            {/* ACTIONS — always visible, not hover-only */}
+                            {!isConfirming && (
+                              <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 flex-shrink-0">
+                                <Link href="/compose"
+                                  className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                                  Edit
+                                </Link>
+                                <button onClick={() => setConfirmCancel(post.id)}
+                                  className="text-xs font-bold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all">
+                                  Unschedule
+                                </button>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* CONFIRM UNSCHEDULE */}
+                          {isConfirming && (
+                            <div className="mt-3 pt-3 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center gap-2">
+                              <p className="text-xs text-red-600 font-semibold flex-1">
+                                Move this post back to drafts?
+                              </p>
+                              <div className="flex items-center gap-2 flex-shrink-0">
+                                <button
+                                  onClick={() => handleCancel(post.id)}
+                                  disabled={isCancelling}
+                                  className="text-xs font-bold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center gap-1.5">
+                                  {isCancelling ? (
+                                    <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Moving...</>
+                                  ) : 'Yes, unschedule'}
+                                </button>
+                                <button onClick={() => setConfirmCancel(null)}
+                                  className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                                  Cancel
+                                </button>
+                              </div>
                             </div>
-                          </div>
-                          <div className="flex items-center gap-2 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-all">
-                            <Link href={`/compose?draft=${post.id}`}
-                              className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
-                              Edit
-                            </Link>
-                            <button onClick={() => handleCancel(post.id)} disabled={cancelling === post.id}
-                              className="text-xs font-bold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all disabled:opacity-40">
-                              {cancelling === post.id ? '...' : 'Unschedule'}
-                            </button>
-                          </div>
+                          )}
                         </div>
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 </div>
               ))}
             </div>
           )}
+
+          {/* BULK SCHEDULE CTA */}
+          {!loading && posts.length > 0 && (
+            <div className="mt-8 bg-black rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-white">
+              <div>
+                <p className="text-sm font-extrabold mb-0.5">Schedule more content at once</p>
+                <p className="text-xs text-gray-400">Use the Bulk Scheduler to plan a full week in one session.</p>
+              </div>
+              <Link href="/bulk-scheduler"
+                className="flex-shrink-0 bg-white text-black text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all self-start sm:self-auto">
+                Open Bulk Scheduler →
+              </Link>
+            </div>
+          )}
+
         </div>
       </div>
 
