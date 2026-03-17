@@ -29,8 +29,8 @@ const SOCIAL_PLATFORMS = [
   { id: 'pinterest', label: 'Pinterest',   icon: '📌', placeholder: 'https://pinterest.com/yourhandle' },
 ]
 
-// LB3: canonical public route is /l/[slug]
 const PUBLIC_BASE = 'socialmate.app/l'
+const CUSTOM_DOMAIN_REFERRAL_THRESHOLD = 3
 
 interface BioLink {
   id: string
@@ -57,16 +57,22 @@ export default function LinkInBio() {
   const [avatarUrl, setAvatarUrl] = useState('')
   const [theme, setTheme] = useState('white')
   const [btnStyle, setBtnStyle] = useState('rounded')
-  const [links, setLinks] = useState<BioLink[]>([
-    { id: makeId(), title: '', url: '', active: true },
-  ])
+  const [links, setLinks] = useState<BioLink[]>([{ id: makeId(), title: '', url: '', active: true }])
   const [socials, setSocials] = useState<Record<string, string>>({})
-  const [activeTab, setActiveTab] = useState<'links' | 'design' | 'socials'>('links')
+  const [activeTab, setActiveTab] = useState<'links' | 'design' | 'socials' | 'domain'>('links')
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const [copied, setCopied] = useState(false)
 
+  // Custom domain state
+  const [customDomainUnlocked, setCustomDomainUnlocked] = useState(false)
+  const [customDomain, setCustomDomain] = useState('')
+  const [savingDomain, setSavingDomain] = useState(false)
+  const [payingReferrals, setPayingReferrals] = useState(0)
+
   const router = useRouter()
   const { plan } = useWorkspace()
+
+  const canUseCustomDomain = plan === 'pro' || plan === 'agency' || customDomainUnlocked
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type })
@@ -79,32 +85,51 @@ export default function LinkInBio() {
       if (!authUser) { router.push('/login'); return }
       setUser(authUser)
 
-      const { data } = await supabase
+      const { data: bioData } = await supabase
         .from('bio_pages')
         .select('*')
         .eq('user_id', authUser.id)
         .single()
 
-      if (data) {
-        setRecordId(data.id)
-        setName(data.name || '')
-        setBio(data.bio || '')
-        setSlug(data.slug || '')
-        setAvatarUrl(data.avatar_url || '')
-        setTheme(data.theme || 'white')
-        setBtnStyle(data.btn_style || 'rounded')
-        setLinks(data.links?.length ? data.links : [{ id: makeId(), title: '', url: '', active: true }])
-        setSocials(data.socials || {})
+      if (bioData) {
+        setRecordId(bioData.id)
+        setName(bioData.name || '')
+        setBio(bioData.bio || '')
+        setSlug(bioData.slug || '')
+        setAvatarUrl(bioData.avatar_url || '')
+        setTheme(bioData.theme || 'white')
+        setBtnStyle(bioData.btn_style || 'rounded')
+        setLinks(bioData.links?.length ? bioData.links : [{ id: makeId(), title: '', url: '', active: true }])
+        setSocials(bioData.socials || {})
+        setCustomDomain(bioData.custom_domain || '')
       } else {
         const defaultSlug = authUser.email?.split('@')[0]?.toLowerCase().replace(/[^a-z0-9]/g, '') || ''
         setSlug(defaultSlug)
       }
+
+      const { data: settings } = await supabase
+        .from('user_settings')
+        .select('custom_domain_unlocked')
+        .eq('user_id', authUser.id)
+        .single()
+
+      if (settings) setCustomDomainUnlocked(settings.custom_domain_unlocked || false)
+
+      // Load paying referral count for progress bar
+      const { data: referrals } = await supabase
+        .from('referral_conversions')
+        .select('status')
+        .eq('affiliate_user_id', authUser.id)
+      if (referrals) {
+        const paying = referrals.filter(r => r.status === 'eligible' || r.status === 'paid')
+        setPayingReferrals(paying.length)
+      }
+
       setLoading(false)
     }
     load()
   }, [router])
 
-  // LB1: pass userId explicitly so the neq always uses the real UUID
   const checkSlug = async (val: string, userId: string) => {
     if (!val || val.length < 2) { setSlugAvailable(null); return }
     setCheckingSlug(true)
@@ -118,18 +143,10 @@ export default function LinkInBio() {
     setCheckingSlug(false)
   }
 
-  const addLink = () => {
-    setLinks(prev => [...prev, { id: makeId(), title: '', url: '', active: true }])
-  }
-
-  const removeLink = (id: string) => {
-    setLinks(prev => prev.filter(l => l.id !== id))
-  }
-
-  const updateLink = (id: string, field: keyof BioLink, value: any) => {
+  const addLink = () => setLinks(prev => [...prev, { id: makeId(), title: '', url: '', active: true }])
+  const removeLink = (id: string) => setLinks(prev => prev.filter(l => l.id !== id))
+  const updateLink = (id: string, field: keyof BioLink, value: any) =>
     setLinks(prev => prev.map(l => l.id === id ? { ...l, [field]: value } : l))
-  }
-
   const moveLink = (id: string, direction: 'up' | 'down') => {
     const idx = links.findIndex(l => l.id === id)
     if (direction === 'up' && idx === 0) return
@@ -156,6 +173,7 @@ export default function LinkInBio() {
       btn_style: btnStyle,
       links: links.filter(l => l.title.trim() && l.url.trim()),
       socials,
+      custom_domain: canUseCustomDomain ? customDomain.trim() : null,
       updated_at: new Date().toISOString(),
     }
 
@@ -172,8 +190,22 @@ export default function LinkInBio() {
     setSaving(false)
   }
 
+  const handleSaveDomain = async () => {
+    if (!canUseCustomDomain) return
+    setSavingDomain(true)
+    await supabase
+      .from('bio_pages')
+      .update({ custom_domain: customDomain.trim() })
+      .eq('user_id', user.id)
+    showToast('Custom domain saved!', 'success')
+    setSavingDomain(false)
+  }
+
   const copyLink = () => {
-    navigator.clipboard.writeText(`https://${PUBLIC_BASE}/${slug}`)
+    const url = customDomain && canUseCustomDomain
+      ? `https://${customDomain}`
+      : `https://${PUBLIC_BASE}/${slug}`
+    navigator.clipboard.writeText(url)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -199,7 +231,6 @@ export default function LinkInBio() {
       <div className="ml-56 flex-1 p-8">
         <div className="max-w-5xl mx-auto">
 
-          {/* HEADER */}
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Link in Bio</h1>
@@ -222,85 +253,56 @@ export default function LinkInBio() {
           </div>
 
           <div className="grid grid-cols-3 gap-6">
-
-            {/* EDITOR */}
             <div className="col-span-2 space-y-4">
 
-              {/* PROFILE */}
               <div className="bg-white border border-gray-100 rounded-2xl p-5 space-y-4">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Profile</p>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-bold text-gray-500 block mb-1.5">
-                      Display Name <span className="text-red-400">*</span>
-                    </label>
+                    <label className="text-xs font-bold text-gray-500 block mb-1.5">Display Name <span className="text-red-400">*</span></label>
                     <input type="text" value={name} onChange={e => setName(e.target.value)}
                       placeholder="Your name or brand"
                       className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400" />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-gray-500 block mb-1.5">
-                      Page URL <span className="text-red-400">*</span>
-                    </label>
+                    <label className="text-xs font-bold text-gray-500 block mb-1.5">Page URL <span className="text-red-400">*</span></label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-semibold">/l/</span>
-                      <input
-                        type="text"
-                        value={slug}
-                        onChange={e => {
-                          const val = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')
-                          setSlug(val)
-                          setSlugAvailable(null)
-                        }}
-                        onBlur={() => user && checkSlug(slug, user.id)} // LB1: pass real userId
+                      <input type="text" value={slug}
+                        onChange={e => { const val = e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''); setSlug(val); setSlugAvailable(null) }}
+                        onBlur={() => user && checkSlug(slug, user.id)}
                         placeholder="yourname"
                         className={`w-full pl-8 pr-8 py-2.5 text-sm border rounded-xl focus:outline-none transition-all ${
-                          slugAvailable === false ? 'border-red-300' :
-                          slugAvailable === true  ? 'border-green-300' :
-                          'border-gray-200 focus:border-gray-400'
-                        }`}
-                      />
-                      {checkingSlug && (
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">...</span>
-                      )}
-                      {slugAvailable === true && (
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-green-500 font-bold">✓</span>
-                      )}
-                      {slugAvailable === false && (
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-red-500 font-bold">✕</span>
-                      )}
+                          slugAvailable === false ? 'border-red-300' : slugAvailable === true ? 'border-green-300' : 'border-gray-200 focus:border-gray-400'
+                        }`} />
+                      {checkingSlug && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">...</span>}
+                      {slugAvailable === true && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-green-500 font-bold">✓</span>}
+                      {slugAvailable === false && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-red-500 font-bold">✕</span>}
                     </div>
                   </div>
                 </div>
                 <div>
                   <label className="text-xs font-bold text-gray-500 block mb-1.5">Bio</label>
-                  {/* LB2: maxLength enforced */}
-                  <textarea value={bio}
-                    onChange={e => setBio(e.target.value.slice(0, 150))}
+                  <textarea value={bio} onChange={e => setBio(e.target.value.slice(0, 150))}
                     placeholder="A short description of you or your brand..."
-                    rows={2}
-                    maxLength={150}
+                    rows={2} maxLength={150}
                     className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 resize-none" />
-                  <p className={`text-xs mt-1 ${bio.length >= 140 ? 'text-orange-500 font-semibold' : 'text-gray-400'}`}>
-                    {bio.length}/150
-                  </p>
+                  <p className={`text-xs mt-1 ${bio.length >= 140 ? 'text-orange-500 font-semibold' : 'text-gray-400'}`}>{bio.length}/150</p>
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-gray-500 block mb-1.5">
-                    Avatar URL <span className="text-gray-400 font-normal">(paste any image URL)</span>
-                  </label>
+                  <label className="text-xs font-bold text-gray-500 block mb-1.5">Avatar URL <span className="text-gray-400 font-normal">(paste any image URL)</span></label>
                   <input type="url" value={avatarUrl} onChange={e => setAvatarUrl(e.target.value)}
                     placeholder="https://example.com/photo.jpg"
                     className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400" />
                 </div>
               </div>
 
-              {/* TABS */}
               <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-2xl p-1">
                 {[
-                  { id: 'links',   label: '🔗 Links'  },
-                  { id: 'socials', label: '📱 Socials' },
-                  { id: 'design',  label: '🎨 Design'  },
+                  { id: 'links',   label: '🔗 Links'         },
+                  { id: 'socials', label: '📱 Socials'        },
+                  { id: 'design',  label: '🎨 Design'         },
+                  { id: 'domain',  label: canUseCustomDomain ? '🌐 Custom Domain' : '🔒 Custom Domain' },
                 ].map(tab => (
                   <button key={tab.id} onClick={() => setActiveTab(tab.id as any)}
                     className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all ${
@@ -311,7 +313,6 @@ export default function LinkInBio() {
                 ))}
               </div>
 
-              {/* LINKS TAB */}
               {activeTab === 'links' && (
                 <div className="bg-white border border-gray-100 rounded-2xl p-5 space-y-3">
                   <div className="flex items-center justify-between mb-1">
@@ -319,8 +320,7 @@ export default function LinkInBio() {
                     <p className="text-xs text-gray-400">{activeLinks.length} active</p>
                   </div>
                   {links.map((link, i) => (
-                    <div key={link.id}
-                      className={`border rounded-2xl p-3 transition-all ${link.active ? 'border-gray-100' : 'border-gray-50 opacity-50'}`}>
+                    <div key={link.id} className={`border rounded-2xl p-3 transition-all ${link.active ? 'border-gray-100' : 'border-gray-50 opacity-50'}`}>
                       <div className="flex items-center gap-2 mb-2">
                         <button onClick={() => moveLink(link.id, 'up')} disabled={i === 0}
                           className="text-xs text-gray-300 hover:text-gray-600 disabled:opacity-0 transition-all">↑</button>
@@ -335,12 +335,10 @@ export default function LinkInBio() {
                           className="text-xs text-gray-300 hover:text-red-400 transition-all ml-1">✕</button>
                       </div>
                       <div className="grid grid-cols-2 gap-2">
-                        <input type="text" value={link.title}
-                          onChange={e => updateLink(link.id, 'title', e.target.value)}
+                        <input type="text" value={link.title} onChange={e => updateLink(link.id, 'title', e.target.value)}
                           placeholder="Button label"
                           className="px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400" />
-                        <input type="url" value={link.url}
-                          onChange={e => updateLink(link.id, 'url', e.target.value)}
+                        <input type="url" value={link.url} onChange={e => updateLink(link.id, 'url', e.target.value)}
                           placeholder="https://..."
                           className="px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400" />
                       </div>
@@ -353,26 +351,21 @@ export default function LinkInBio() {
                 </div>
               )}
 
-              {/* SOCIALS TAB */}
               {activeTab === 'socials' && (
                 <div className="bg-white border border-gray-100 rounded-2xl p-5 space-y-3">
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Social Profiles</p>
                   {SOCIAL_PLATFORMS.map(p => (
                     <div key={p.id} className="flex items-center gap-3">
                       <span className="text-xl w-7 flex-shrink-0">{p.icon}</span>
-                      <input
-                        type="url"
-                        value={socials[p.id] || ''}
+                      <input type="url" value={socials[p.id] || ''}
                         onChange={e => setSocials(prev => ({ ...prev, [p.id]: e.target.value }))}
                         placeholder={p.placeholder}
-                        className="flex-1 px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400"
-                      />
+                        className="flex-1 px-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400" />
                     </div>
                   ))}
                 </div>
               )}
 
-              {/* DESIGN TAB */}
               {activeTab === 'design' && (
                 <div className="bg-white border border-gray-100 rounded-2xl p-5 space-y-5">
                   <div>
@@ -380,9 +373,7 @@ export default function LinkInBio() {
                     <div className="grid grid-cols-3 gap-2">
                       {THEMES.map(t => (
                         <button key={t.id} onClick={() => setTheme(t.id)}
-                          className={`flex items-center gap-2 p-3 rounded-xl border-2 transition-all ${
-                            theme === t.id ? 'border-black' : 'border-gray-100 hover:border-gray-300'
-                          }`}>
+                          className={`flex items-center gap-2 p-3 rounded-xl border-2 transition-all ${theme === t.id ? 'border-black' : 'border-gray-100 hover:border-gray-300'}`}>
                           <div className={`w-6 h-6 rounded-lg ${t.bg} border border-gray-200 flex-shrink-0`} />
                           <span className="text-xs font-semibold">{t.label}</span>
                           {theme === t.id && <span className="ml-auto text-xs font-bold">✓</span>}
@@ -403,7 +394,6 @@ export default function LinkInBio() {
                       ))}
                     </div>
                   </div>
-
                   <div className={`rounded-2xl p-4 ${plan === 'free' ? 'bg-gray-50 border border-gray-100' : 'bg-white border border-gray-200'}`}>
                     <div className="flex items-center justify-between">
                       <div>
@@ -423,6 +413,119 @@ export default function LinkInBio() {
                   </div>
                 </div>
               )}
+
+              {activeTab === 'domain' && (
+                <div className="space-y-4">
+
+                  {/* Unlocked — Pro/Agency or earned via referrals */}
+                  {canUseCustomDomain && (
+                    <div className="bg-white border border-gray-100 rounded-2xl p-6 space-y-4">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-lg">🌐</span>
+                        <h2 className="text-base font-extrabold">Custom Domain</h2>
+                        {customDomainUnlocked && plan === 'free' && (
+                          <span className="text-xs font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Earned via referrals</span>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-400 leading-relaxed">
+                        Point your domain at SocialMate and your bio page will load at your own URL instead of socialmate.app/l/{slug || 'yourname'}.
+                      </p>
+                      <div>
+                        <label className="text-xs font-bold text-gray-500 block mb-1.5">Your Domain</label>
+                        <input
+                          type="text"
+                          value={customDomain}
+                          onChange={e => setCustomDomain(e.target.value.toLowerCase().replace(/\s/g, ''))}
+                          placeholder="links.yourbrand.com"
+                          className="w-full px-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-black transition-all"
+                        />
+                        <p className="text-xs text-gray-400 mt-1">e.g. links.yourbrand.com or bio.yourname.com</p>
+                      </div>
+                      <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 space-y-2">
+                        <p className="text-xs font-bold text-gray-700">DNS Setup Instructions</p>
+                        <p className="text-xs text-gray-500">Add this CNAME record in your domain's DNS settings:</p>
+                        <div className="bg-white border border-gray-200 rounded-lg p-3 font-mono text-xs text-gray-700 space-y-1">
+                          <div className="grid grid-cols-3 gap-2">
+                            <span className="font-bold text-gray-400">Type</span>
+                            <span className="font-bold text-gray-400">Name</span>
+                            <span className="font-bold text-gray-400">Value</span>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2">
+                            <span>CNAME</span>
+                            <span>{customDomain ? customDomain.split('.')[0] : 'links'}</span>
+                            <span>socialmate.studio</span>
+                          </div>
+                        </div>
+                        <p className="text-xs text-gray-400">DNS changes can take up to 48 hours to propagate.</p>
+                      </div>
+                      <button onClick={handleSaveDomain} disabled={savingDomain || !customDomain.trim()}
+                        className="px-5 py-2.5 bg-black text-white text-xs font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
+                        {savingDomain ? 'Saving...' : 'Save Domain'}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Free user — not yet unlocked */}
+                  {!canUseCustomDomain && (
+                    <div className="space-y-4">
+                      <div className="bg-black text-white rounded-2xl p-6">
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="text-2xl">🌐</span>
+                          <h2 className="text-base font-extrabold">Custom Domain</h2>
+                        </div>
+                        <p className="text-xs text-gray-400 mb-4 leading-relaxed">
+                          Use your own domain for your Link in Bio page — available on Pro and Agency plans, or unlock it for free by referring paying users.
+                        </p>
+                        <div className="bg-white/10 rounded-xl p-4 mb-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <p className="text-xs font-bold">Referral unlock progress</p>
+                            <p className="text-xs font-bold">{payingReferrals} / {CUSTOM_DOMAIN_REFERRAL_THRESHOLD} paying referrals</p>
+                          </div>
+                          <div className="w-full bg-white/20 rounded-full h-2.5">
+                            <div
+                              className="h-2.5 rounded-full bg-white transition-all"
+                              style={{ width: `${Math.min((payingReferrals / CUSTOM_DOMAIN_REFERRAL_THRESHOLD) * 100, 100)}%` }}
+                            />
+                          </div>
+                          <p className="text-xs text-gray-400 mt-2">
+                            {payingReferrals >= CUSTOM_DOMAIN_REFERRAL_THRESHOLD
+                              ? '✅ Unlocked! Refresh the page to access your custom domain settings.'
+                              : `${CUSTOM_DOMAIN_REFERRAL_THRESHOLD - payingReferrals} more paying referral${CUSTOM_DOMAIN_REFERRAL_THRESHOLD - payingReferrals !== 1 ? 's' : ''} to unlock`}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-3">
+                          <a href="/settings?tab=Referrals"
+                            className="flex-1 text-center py-2.5 bg-white text-black text-xs font-bold rounded-xl hover:opacity-80 transition-all">
+                            Get my referral link →
+                          </a>
+                          <a href="/settings?tab=Plan"
+                            className="flex-1 text-center py-2.5 border border-white/30 text-white text-xs font-bold rounded-xl hover:bg-white/10 transition-all">
+                            Upgrade to Pro →
+                          </a>
+                        </div>
+                      </div>
+
+                      <div className="bg-white border border-gray-100 rounded-2xl p-5">
+                        <h3 className="text-sm font-extrabold mb-3">How the referral unlock works</h3>
+                        <div className="space-y-3">
+                          {[
+                            { step: '1', text: 'Share your referral link from the Referrals tab in Settings' },
+                            { step: '2', text: 'When 3 of your referrals upgrade to a paid plan, custom domain unlocks permanently' },
+                            { step: '3', text: 'Come back here, set your domain, and follow the DNS instructions' },
+                          ].map(item => (
+                            <div key={item.step} className="flex items-start gap-3">
+                              <div className="w-6 h-6 bg-black text-white text-xs font-bold rounded-full flex items-center justify-center flex-shrink-0">
+                                {item.step}
+                              </div>
+                              <p className="text-xs text-gray-600 leading-relaxed pt-0.5">{item.text}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* LIVE PREVIEW */}
@@ -437,14 +540,8 @@ export default function LinkInBio() {
                         : <span>{name?.[0]?.toUpperCase() || '👤'}</span>
                       }
                     </div>
-                    <h2 className={`text-sm font-extrabold text-center mb-1 ${currentTheme.text}`}>
-                      {name || 'Your Name'}
-                    </h2>
-                    {bio && (
-                      <p className={`text-xs text-center mb-4 leading-relaxed opacity-70 ${currentTheme.text}`}>
-                        {bio}
-                      </p>
-                    )}
+                    <h2 className={`text-sm font-extrabold text-center mb-1 ${currentTheme.text}`}>{name || 'Your Name'}</h2>
+                    {bio && <p className={`text-xs text-center mb-4 leading-relaxed opacity-70 ${currentTheme.text}`}>{bio}</p>}
                     {Object.entries(socials).filter(([, v]) => v).length > 0 && (
                       <div className="flex items-center gap-2 mb-4 flex-wrap justify-center">
                         {SOCIAL_PLATFORMS.filter(p => socials[p.id]).map(p => (
@@ -454,36 +551,30 @@ export default function LinkInBio() {
                     )}
                     <div className="w-full space-y-2">
                       {activeLinks.length === 0 ? (
-                        <div className={`text-xs text-center opacity-40 py-4 ${currentTheme.text}`}>
-                          Add links to see them here
-                        </div>
+                        <div className={`text-xs text-center opacity-40 py-4 ${currentTheme.text}`}>Add links to see them here</div>
                       ) : (
                         activeLinks.map(link => (
-                          <div key={link.id}
-                            className={`w-full py-2.5 px-4 text-xs font-bold text-center ${currentTheme.btn} ${currentBtnStyle.class}`}>
+                          <div key={link.id} className={`w-full py-2.5 px-4 text-xs font-bold text-center ${currentTheme.btn} ${currentBtnStyle.class}`}>
                             {link.title}
                           </div>
                         ))
                       )}
                     </div>
                     {plan === 'free' && (
-                      <p className={`text-xs mt-4 opacity-40 ${currentTheme.text}`}>
-                        Made with SocialMate · Free
-                      </p>
+                      <p className={`text-xs mt-4 opacity-40 ${currentTheme.text}`}>Made with SocialMate · Free</p>
                     )}
                   </div>
                 </div>
               </div>
 
-              {/* LB3: consistent /l/ route */}
               {slug && (
                 <div className="bg-black rounded-2xl p-4 text-center">
                   <p className="text-xs font-bold text-gray-400 mb-1">Your public URL</p>
-                  <p className="text-xs text-white font-bold mb-3 break-all">{PUBLIC_BASE}/{slug}</p>
+                  <p className="text-xs text-white font-bold mb-3 break-all">
+                    {customDomain && canUseCustomDomain ? customDomain : `${PUBLIC_BASE}/${slug}`}
+                  </p>
                   <button onClick={copyLink}
-                    className={`w-full py-2 text-xs font-bold rounded-xl transition-all ${
-                      copied ? 'bg-green-400 text-black' : 'bg-white text-black hover:opacity-80'
-                    }`}>
+                    className={`w-full py-2 text-xs font-bold rounded-xl transition-all ${copied ? 'bg-green-400 text-black' : 'bg-white text-black hover:opacity-80'}`}>
                     {copied ? '✓ Copied!' : 'Copy Link'}
                   </button>
                 </div>

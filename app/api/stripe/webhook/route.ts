@@ -3,12 +3,14 @@ import { stripe } from '@/lib/stripe'
 import { createClient } from '@supabase/supabase-js'
 import Stripe from 'stripe'
 
-const STRIPE_PRO_PRICE_ID              = 'price_1T9pay7OMwDowUuU7S3G3lNX'
-const STRIPE_AGENCY_PRICE_ID           = 'price_1T9qAd7OMwDowUuUpzjxLlG2'
-const STRIPE_PRO_ANNUAL_PRICE_ID       = 'price_1TA0Iv7OMwDowUuUaAA77Ye1'
-const STRIPE_AGENCY_ANNUAL_PRICE_ID    = 'price_1TA0JQ7OMwDowUuUp4NnHEfO'
+const STRIPE_PRO_PRICE_ID               = 'price_1T9pay7OMwDowUuU7S3G3lNX'
+const STRIPE_AGENCY_PRICE_ID            = 'price_1T9qAd7OMwDowUuUpzjxLlG2'
+const STRIPE_PRO_ANNUAL_PRICE_ID        = 'price_1TA0Iv7OMwDowUuUaAA77Ye1'
+const STRIPE_AGENCY_ANNUAL_PRICE_ID     = 'price_1TA0JQ7OMwDowUuUp4NnHEfO'
 const STRIPE_WHITE_LABEL_BASIC_PRICE_ID = 'price_1T9qAu7OMwDowUuUsqM2jwoC'
 const STRIPE_WHITE_LABEL_PRO_PRICE_ID   = 'price_1TBnnS7OMwDowUuUsr09eHVg'
+
+const CUSTOM_DOMAIN_REFERRAL_THRESHOLD = 3
 
 const CREDIT_PACK_PRICES: Record<string, number> = {
   'price_1TA0jd7OMwDowUuULUw5W7EQ': 100,
@@ -89,6 +91,7 @@ async function processReferralCredits(
   if (!isNewSubscription) return
   const creditsToAward = REFERRAL_UPGRADE_CREDITS[plan]
   if (!creditsToAward) return
+
   try {
     const { data: conversion } = await supabase
       .from('referral_conversions')
@@ -96,16 +99,37 @@ async function processReferralCredits(
       .eq('referred_user_id', referredUserId)
       .single()
     if (!conversion) return
+
+    // Award referral credits
     const { data: referrerSettings } = await supabase
       .from('user_settings')
       .select('ai_credits_remaining')
       .eq('user_id', conversion.affiliate_user_id)
       .single()
     if (!referrerSettings) return
+
     await supabase
       .from('user_settings')
       .update({ ai_credits_remaining: (referrerSettings.ai_credits_remaining ?? 0) + creditsToAward })
       .eq('user_id', conversion.affiliate_user_id)
+
+    // Check if referrer has hit the custom domain unlock threshold
+    const { data: allConversions } = await supabase
+      .from('referral_conversions')
+      .select('status')
+      .eq('affiliate_user_id', conversion.affiliate_user_id)
+
+    const payingCount = (allConversions || []).filter(
+      (r: any) => r.status === 'eligible' || r.status === 'paid'
+    ).length
+
+    if (payingCount >= CUSTOM_DOMAIN_REFERRAL_THRESHOLD) {
+      await supabase
+        .from('user_settings')
+        .update({ custom_domain_unlocked: true })
+        .eq('user_id', conversion.affiliate_user_id)
+    }
+
   } catch (err) {
     console.error('Referral credit award error:', err)
   }
@@ -124,19 +148,23 @@ async function processAffiliateCommission(
       .eq('referred_user_id', referredUserId)
       .single()
     if (!conversion) return
+
     const { data: affiliate } = await supabase
       .from('affiliates')
       .select('*')
       .eq('user_id', conversion.affiliate_user_id)
       .single()
     if (!affiliate || affiliate.status !== 'active') return
+
     const activeCount: number = affiliate.active_referral_count ?? 0
     const rate: number = activeCount >= 100 ? 0.40 : 0.30
     const monthlyValue: number = PLAN_MONTHLY_VALUE[plan] ?? 0
     const commission: number = parseFloat((monthlyValue * rate).toFixed(2))
     if (commission <= 0) return
+
     const lockExpired = new Date(conversion.lock_expires_at) <= new Date()
     const newStatus = lockExpired ? 'eligible' : 'locked'
+
     await supabase
       .from('referral_conversions')
       .update({
@@ -145,12 +173,14 @@ async function processAffiliateCommission(
         total_earned: (conversion.total_earned ?? 0) + commission,
       })
       .eq('id', conversion.id)
+
     const newUnpaid = parseFloat(((affiliate.unpaid_earnings ?? 0) + commission).toFixed(2))
     const newTotal = parseFloat(((affiliate.total_earnings ?? 0) + commission).toFixed(2))
     const newActiveCount: number = isNewSubscription
       ? (affiliate.active_referral_count ?? 0) + 1
       : (affiliate.active_referral_count ?? 0)
     const updatedRate: number = newActiveCount >= 100 ? 0.40 : 0.30
+
     await supabase
       .from('affiliates')
       .update({
@@ -160,6 +190,7 @@ async function processAffiliateCommission(
         commission_rate: updatedRate,
       })
       .eq('user_id', conversion.affiliate_user_id)
+
   } catch (err) {
     console.error('Affiliate commission error:', err)
   }
@@ -176,22 +207,27 @@ async function handleAffiliateChurn(
       .eq('referred_user_id', referredUserId)
       .single()
     if (!conversion) return
+
     const { data: affiliate } = await supabase
       .from('affiliates')
       .select('active_referral_count, commission_rate')
       .eq('user_id', conversion.affiliate_user_id)
       .single()
     if (!affiliate) return
+
     const newCount: number = Math.max(0, (affiliate.active_referral_count ?? 1) - 1)
     const newRate: number = newCount >= 100 ? 0.40 : 0.30
+
     await supabase
       .from('affiliates')
       .update({ active_referral_count: newCount, commission_rate: newRate })
       .eq('user_id', conversion.affiliate_user_id)
+
     await supabase
       .from('referral_conversions')
       .update({ status: 'pending' })
       .eq('referred_user_id', referredUserId)
+
   } catch (err) {
     console.error('Affiliate churn handler error:', err)
   }
@@ -233,7 +269,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true })
     }
 
-    // White label add-on only (no base plan in session)
+    // White label add-on only
     if (type === 'white_label' && userId) {
       const whiteLabelTier = session.metadata?.white_label_tier || 'basic'
       await supabase
