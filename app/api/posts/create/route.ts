@@ -78,8 +78,8 @@ export async function POST(request: NextRequest) {
       content,
       platforms,
       status,
-      scheduled_at: scheduledAt   || null,
-      destinations: destinations  || {},
+      scheduled_at: scheduledAt  || null,
+      destinations: destinations || {},
     })
     .select()
     .single()
@@ -90,19 +90,15 @@ export async function POST(request: NextRequest) {
   }
 
   if (isScheduled) {
-    const scheduledTime = new Date(scheduledAt).getTime()
-    const now           = Date.now()
-    const delay         = Math.max(0, scheduledTime - now)
-
     await inngest.send({
       name: 'post/scheduled',
-      data: { postId: post.id, delay: `${Math.floor(delay / 1000)}s` },
+      data: { postId: post.id, scheduledAt },
     })
 
     return NextResponse.json({ success: true, postId: post.id, status: 'scheduled' })
   }
 
-  // Post Now — publish immediately, passing destinations map
+  // Post Now — publish immediately
   const results    = await publishToAll(user.id, platforms, content, destinations || {})
   const allFailed  = results.every(r => !r.success)
   const someFailed = results.some(r => !r.success)
@@ -113,8 +109,8 @@ export async function POST(request: NextRequest) {
   await supabase
     .from('posts')
     .update({
-      status:           allFailed ? 'failed' : someFailed ? 'partial' : 'published',
-      published_at:     allFailed ? null : new Date().toISOString(),
+      status:            allFailed ? 'failed' : someFailed ? 'partial' : 'published',
+      published_at:      allFailed ? null : new Date().toISOString(),
       platform_post_ids: platformPostIds,
     })
     .eq('id', post.id)
