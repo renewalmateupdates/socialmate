@@ -14,6 +14,7 @@ export const PLAN_CONFIG: Record<Plan, {
   accountsPerPlatform: number
   maxPosts: number
   scheduleWeeks: number
+  clientWorkspaces: number
 }> = {
   free: {
     label: 'Free',
@@ -23,6 +24,7 @@ export const PLAN_CONFIG: Record<Plan, {
     accountsPerPlatform: 1,
     maxPosts: 100,
     scheduleWeeks: 2,
+    clientWorkspaces: 0,
   },
   pro: {
     label: 'Pro',
@@ -32,6 +34,7 @@ export const PLAN_CONFIG: Record<Plan, {
     accountsPerPlatform: 5,
     maxPosts: 1000,
     scheduleWeeks: 4,
+    clientWorkspaces: 1,
   },
   agency: {
     label: 'Agency',
@@ -41,6 +44,7 @@ export const PLAN_CONFIG: Record<Plan, {
     accountsPerPlatform: 10,
     maxPosts: 5000,
     scheduleWeeks: 12,
+    clientWorkspaces: 10,
   },
 }
 
@@ -107,7 +111,6 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
       setUserId(user.id)
 
-      // Load workspaces
       const { data: ws } = await supabase
         .from('workspaces')
         .select('*')
@@ -129,7 +132,6 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         setActiveWorkspace(fallback)
       }
 
-      // Read plan from user_settings (source of truth — updated by Stripe webhook)
       const { data: settings } = await supabase
         .from('user_settings')
         .select('plan, ai_credits_remaining, ai_credits_used, ai_credits_total')
@@ -139,12 +141,10 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       if (settings) {
         const p = (settings.plan as Plan) || 'free'
         setPlan(p)
-        // Use ai_credits_remaining if available, otherwise fall back to plan default
         setCreditsState(settings.ai_credits_remaining ?? PLAN_CONFIG[p].credits)
         setCreditsUsed(settings.ai_credits_used ?? 0)
       }
 
-      // Team seats
       const { data: teamData } = await supabase
         .from('team_members')
         .select('id')
@@ -152,7 +152,6 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
       setSeatsUsed((teamData?.length || 0) + 1)
 
-      // Connected platforms
       const { data: accountsData } = await supabase
         .from('connected_accounts')
         .select('platform')
