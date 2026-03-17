@@ -12,7 +12,7 @@ function SkeletonBox({ className }: { className?: string }) {
 
 export default function Workspaces() {
   const [loading, setLoading] = useState(true)
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null) // W2
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const router = useRouter()
@@ -25,14 +25,13 @@ export default function Workspaces() {
       setLoading(false)
     }
     check()
-  }, [router]) // W1: fixed
+  }, [router])
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type })
     setTimeout(() => setToast(null), 3000)
   }
 
-  // W2: now called only after confirmation
   const handleDelete = async (id: string, name: string) => {
     setDeletingId(id)
     const { error } = await supabase.from('workspaces').delete().eq('id', id)
@@ -51,14 +50,14 @@ export default function Workspaces() {
     return (
       <div className="min-h-screen bg-gray-50 flex">
         <Sidebar />
-        <div className="ml-56 flex-1 p-8 flex items-center justify-center">
+        <div className="md:ml-56 flex-1 p-8 flex items-center justify-center">
           <div className="max-w-md text-center">
             <div className="text-5xl mb-4">🏢</div>
             <h1 className="text-2xl font-extrabold tracking-tight mb-3">Client Workspaces</h1>
             <p className="text-sm text-gray-500 leading-relaxed mb-6">
               Separate workspaces for each client — isolated accounts, posts, and analytics. Agency plan only.
             </p>
-            <Link href="/pricing"
+            <Link href="/settings?tab=Plan"
               className="block w-full text-center bg-black text-white text-sm font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all">
               Upgrade to Agency →
             </Link>
@@ -68,17 +67,17 @@ export default function Workspaces() {
     )
   }
 
-  const personalWs = workspaces.find(w => w.is_personal)
-  const clientWs = workspaces.filter(w => !w.is_personal)
+  const personalWs = workspaces.find((w: any) => w.is_personal)
+  const clientWs   = workspaces.filter((w: any) => !w.is_personal)
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar />
-      <div className="ml-56 flex-1 p-8">
+      <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
 
           {/* HEADER */}
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Workspaces</h1>
               <p className="text-sm text-gray-400 mt-0.5">
@@ -87,13 +86,13 @@ export default function Workspaces() {
             </div>
             {clientWs.length < 50 && (
               <Link href="/workspaces/new"
-                className="bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all">
+                className="self-start sm:self-auto bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all">
                 + New Client Workspace
               </Link>
             )}
           </div>
 
-          {/* USAGE */}
+          {/* USAGE BAR */}
           <div className="bg-white border border-gray-100 rounded-2xl p-4 mb-6">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-semibold text-gray-500">Client Workspaces</span>
@@ -110,26 +109,24 @@ export default function Workspaces() {
           {personalWs && (
             <div className="mb-6">
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Personal</p>
-              <div className={`bg-white border-2 rounded-2xl p-5 flex items-center justify-between transition-all ${
+              <div className={`bg-white border-2 rounded-2xl p-4 md:p-5 flex items-center justify-between transition-all ${
                 activeWorkspace?.id === personalWs.id ? 'border-black' : 'border-gray-100'
               }`}>
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-xl">🏠</div>
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-xl flex-shrink-0">🏠</div>
                   <div>
                     <p className="text-sm font-extrabold">My Workspace</p>
                     <p className="text-xs text-gray-400">Your personal account</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  {activeWorkspace?.id === personalWs.id ? (
-                    <span className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl">Active</span>
-                  ) : (
-                    <button onClick={() => handleSwitch(personalWs)}
-                      className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
-                      Switch →
-                    </button>
-                  )}
-                </div>
+                {activeWorkspace?.id === personalWs.id ? (
+                  <span className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl flex-shrink-0">Active</span>
+                ) : (
+                  <button onClick={() => handleSwitch(personalWs)}
+                    className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all flex-shrink-0">
+                    Switch →
+                  </button>
+                )}
               </div>
             </div>
           )}
@@ -156,81 +153,79 @@ export default function Workspaces() {
               </div>
             ) : (
               <div className="space-y-3">
-                {clientWs.map(ws => {
-                  const isActive = activeWorkspace?.id === ws.id
+                {clientWs.map((ws: any) => {
+                  const isActive     = activeWorkspace?.id === ws.id
                   const isConfirming = confirmDeleteId === ws.id
+                  const isDeleting   = deletingId === ws.id
 
                   return (
                     <div key={ws.id}
-                      className={`bg-white border-2 rounded-2xl p-5 transition-all group ${
+                      className={`bg-white border-2 rounded-2xl p-4 md:p-5 transition-all ${
                         isActive ? 'border-black' : 'border-gray-100 hover:border-gray-300'
                       }`}>
 
-                      {/* W2: confirm inline UI replaces the row actions */}
-                      {isConfirming ? (
-                        <div className="flex items-center justify-between">
-                          <p className="text-xs font-bold text-red-600">
-                            Delete "{ws.client_name || ws.name}"? This cannot be undone.
-                          </p>
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            <button
-                              onClick={() => handleDelete(ws.id, ws.client_name || ws.name)}
-                              disabled={deletingId === ws.id}
-                              className="text-xs font-bold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
-                              {deletingId === ws.id ? 'Deleting...' : 'Yes, delete'}
-                            </button>
-                            <button
-                              onClick={() => setConfirmDeleteId(null)}
-                              className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
-                              Cancel
-                            </button>
+                      {/* MAIN ROW */}
+                      <div className="flex items-center gap-3 md:gap-4">
+                        <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-xl flex-shrink-0">🏢</div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="text-sm font-extrabold truncate">{ws.client_name || ws.name}</p>
+                            {isActive && (
+                              <span className="text-xs font-bold px-2 py-0.5 bg-black text-white rounded-full flex-shrink-0">Active</span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-3 mt-0.5 flex-wrap">
+                            {ws.industry && <p className="text-xs text-gray-400">{ws.industry}</p>}
+                            {ws.website && (
+                              <a href={ws.website} target="_blank" rel="noopener noreferrer"
+                                onClick={e => e.stopPropagation()}
+                                className="text-xs text-blue-500 hover:underline truncate max-w-[200px]">
+                                {ws.website.replace('https://', '').replace('http://', '')}
+                              </a>
+                            )}
                           </div>
                         </div>
-                      ) : (
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-xl">🏢</div>
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <p className="text-sm font-extrabold">{ws.client_name || ws.name}</p>
-                                {isActive && (
-                                  <span className="text-xs font-bold px-2 py-0.5 bg-black text-white rounded-full">Active</span>
-                                )}
-                              </div>
-                              <div className="flex items-center gap-3 mt-0.5">
-                                {(ws as any).industry && (
-                                  <p className="text-xs text-gray-400">{(ws as any).industry}</p>
-                                )}
-                                {(ws as any).website && (
-                                  <a href={(ws as any).website} target="_blank" rel="noopener noreferrer"
-                                    className="text-xs text-blue-500 hover:underline truncate max-w-[200px]">
-                                    {(ws as any).website.replace('https://', '').replace('http://', '')}
-                                  </a>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                        {/* ACTIONS — always visible */}
+                        {!isConfirming && (
+                          <div className="flex items-center gap-2 flex-shrink-0">
                             {!isActive && (
                               <button onClick={() => handleSwitch(ws)}
                                 className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all">
                                 Switch →
                               </button>
                             )}
-                            {/* W3: active workspace cannot be deleted */}
+                            {isActive && (
+                              <span className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl">Active</span>
+                            )}
                             {!isActive && (
-                              <button
-                                onClick={() => setConfirmDeleteId(ws.id)}
+                              <button onClick={() => setConfirmDeleteId(ws.id)}
                                 className="text-xs font-bold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all">
                                 Delete
                               </button>
                             )}
                           </div>
+                        )}
+                      </div>
 
-                          {isActive && (
-                            <span className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl">Active</span>
-                          )}
+                      {/* CONFIRM DELETE — below main row */}
+                      {isConfirming && (
+                        <div className="mt-3 pt-3 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center gap-2">
+                          <p className="text-xs font-bold text-red-600 flex-1">
+                            Delete "{ws.client_name || ws.name}"? This cannot be undone.
+                          </p>
+                          <div className="flex items-center gap-2 flex-shrink-0">
+                            <button onClick={() => handleDelete(ws.id, ws.client_name || ws.name)}
+                              disabled={isDeleting}
+                              className="text-xs font-bold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center gap-1.5">
+                              {isDeleting
+                                ? <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Deleting...</>
+                                : 'Yes, delete'}
+                            </button>
+                            <button onClick={() => setConfirmDeleteId(null)}
+                              className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                              Cancel
+                            </button>
+                          </div>
                         </div>
                       )}
                     </div>

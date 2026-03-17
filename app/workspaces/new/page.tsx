@@ -13,14 +13,13 @@ const INDUSTRIES = [
 ]
 
 const PLATFORM_ICONS: Record<string, string> = {
-  instagram: '📸', twitter: '🐦', linkedin: '💼', tiktok: '🎵',
-  facebook: '📘', pinterest: '📌', youtube: '▶️', threads: '🧵',
-  bluesky: '🦋', reddit: '🤖', discord: '💬', telegram: '✈️',
-  mastodon: '🐘',
+  discord: '💬', bluesky: '🦋', telegram: '✈️', mastodon: '🐘',
+  linkedin: '💼', youtube: '▶️', pinterest: '📌', reddit: '🤖',
+  instagram: '📸', tiktok: '🎵', twitter: '🐦', facebook: '📘', threads: '🧵',
 }
 
 export default function NewWorkspace() {
-  const [authChecked, setAuthChecked] = useState(false) // WN1
+  const [authChecked, setAuthChecked] = useState(false)
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [clientName, setClientName] = useState('')
   const [industry, setIndustry] = useState('')
@@ -33,7 +32,6 @@ export default function NewWorkspace() {
   const router = useRouter()
   const { plan, workspaces, setActiveWorkspace } = useWorkspace()
 
-  // WN1: auth guard
   useEffect(() => {
     const check = async () => {
       const { data: { user } } = await supabase.auth.getUser()
@@ -56,52 +54,41 @@ export default function NewWorkspace() {
 
   const handleCreate = async () => {
     if (!clientName.trim()) { showToast('Client name is required', 'error'); return }
-
-    // WN2: enforce 50 workspace cap before inserting
-    const clientCount = workspaces.filter(w => !w.is_personal).length
-    if (clientCount >= 50) {
-      showToast('You have reached the 50 workspace limit', 'error')
-      return
-    }
+    const clientCount = workspaces.filter((w: any) => !w.is_personal).length
+    if (clientCount >= 50) { showToast('You have reached the 50 workspace limit', 'error'); return }
 
     setSaving(true)
-
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/login'); return }
 
     const { data, error } = await supabase
       .from('workspaces')
       .insert({
-        owner_id: user.id,
-        name: clientName.trim(),
-        client_name: clientName.trim(),
-        industry: industry || null,
-        website: website || null,
-        notes: notes || null,
+        owner_id:          user.id,
+        name:              clientName.trim(),
+        client_name:       clientName.trim(),
+        industry:          industry || null,
+        website:           website  || null,
+        notes:             notes    || null,
         default_platforms: selectedPlatforms,
-        is_personal: false,
-        created_at: new Date().toISOString(),
+        is_personal:       false,
+        created_at:        new Date().toISOString(),
       })
       .select()
       .single()
 
-    if (error) {
-      showToast('Failed to create workspace', 'error')
-      setSaving(false)
-      return
-    }
+    if (error) { showToast('Failed to create workspace', 'error'); setSaving(false); return }
 
     setActiveWorkspace(data)
     showToast(`Workspace created for ${clientName}`, 'success')
     setTimeout(() => router.push('/dashboard'), 1000)
   }
 
-  // WN1: show spinner until auth is confirmed
   if (!authChecked) {
     return (
       <div className="min-h-screen bg-gray-50 flex">
         <Sidebar />
-        <div className="ml-56 flex-1 flex items-center justify-center">
+        <div className="md:ml-56 flex-1 flex items-center justify-center">
           <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin" />
         </div>
       </div>
@@ -112,7 +99,7 @@ export default function NewWorkspace() {
     return (
       <div className="min-h-screen bg-gray-50 flex">
         <Sidebar />
-        <div className="ml-56 flex-1 p-8 flex items-center justify-center">
+        <div className="md:ml-56 flex-1 p-8 flex items-center justify-center">
           <div className="max-w-md text-center">
             <div className="text-5xl mb-4">🏢</div>
             <h1 className="text-2xl font-extrabold tracking-tight mb-3">Client Workspaces</h1>
@@ -132,12 +119,11 @@ export default function NewWorkspace() {
                 </div>
               ))}
             </div>
-            <Link href="/pricing"
+            <Link href="/settings?tab=Plan"
               className="block w-full text-center bg-black text-white text-sm font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all mb-3">
               Upgrade to Agency — $20/mo →
             </Link>
-            <Link href="/dashboard"
-              className="text-xs text-gray-400 hover:text-black transition-all">
+            <Link href="/dashboard" className="text-xs text-gray-400 hover:text-black transition-all">
               ← Back to dashboard
             </Link>
           </div>
@@ -146,14 +132,13 @@ export default function NewWorkspace() {
     )
   }
 
-  const clientCount = workspaces.filter(w => !w.is_personal).length
+  const clientCount = workspaces.filter((w: any) => !w.is_personal).length
 
-  // WN2: hard block at cap
   if (clientCount >= 50) {
     return (
       <div className="min-h-screen bg-gray-50 flex">
         <Sidebar />
-        <div className="ml-56 flex-1 p-8 flex items-center justify-center">
+        <div className="md:ml-56 flex-1 p-8 flex items-center justify-center">
           <div className="max-w-md text-center">
             <div className="text-5xl mb-4">🚫</div>
             <h1 className="text-xl font-extrabold tracking-tight mb-3">Workspace limit reached</h1>
@@ -173,11 +158,11 @@ export default function NewWorkspace() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar />
-      <div className="ml-56 flex-1 p-8">
+      <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-xl mx-auto">
 
           {/* HEADER */}
-          <div className="flex items-center gap-4 mb-8">
+          <div className="flex flex-wrap items-center gap-3 mb-8">
             <Link href="/workspaces"
               className="text-xs font-semibold text-gray-400 hover:text-black transition-all">
               ← Workspaces
@@ -190,42 +175,39 @@ export default function NewWorkspace() {
           </div>
 
           {/* STEP INDICATOR */}
-          <div className="flex items-center gap-2 mb-8">
+          <div className="flex items-center gap-1.5 mb-8 overflow-x-auto pb-1">
             {[
               { n: 1, label: 'Client Info' },
               { n: 2, label: 'Platforms'   },
               { n: 3, label: 'Review'      },
             ].map((s, i) => (
-              <div key={s.n} className="flex items-center gap-2">
-                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                  step === s.n ? 'bg-black text-white'
-                  : step > s.n ? 'bg-gray-100 text-gray-500'
-                  : 'text-gray-300'
+              <div key={s.n} className="flex items-center gap-1.5 flex-shrink-0">
+                <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  step === s.n ? 'bg-black text-white' :
+                  step >  s.n ? 'bg-gray-100 text-gray-500' :
+                  'text-gray-300'
                 }`}>
                   <span>{step > s.n ? '✓' : s.n}</span>
                   <span>{s.label}</span>
                 </div>
-                {i < 2 && <div className={`w-6 h-px ${step > s.n ? 'bg-gray-300' : 'bg-gray-100'}`} />}
+                {i < 2 && <div className={`w-4 h-px flex-shrink-0 ${step > s.n ? 'bg-gray-300' : 'bg-gray-100'}`} />}
               </div>
             ))}
           </div>
 
           {/* STEP 1 */}
           {step === 1 && (
-            <div className="bg-white border border-gray-100 rounded-2xl p-6 space-y-5">
+            <div className="bg-white border border-gray-100 rounded-2xl p-5 md:p-6 space-y-5">
               <div>
                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">
                   Client Name <span className="text-red-400">*</span>
                 </label>
-                <input
-                  type="text"
-                  value={clientName}
+                <input type="text" value={clientName}
                   onChange={e => setClientName(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && clientName.trim() && setStep(2)}
                   placeholder="Acme Co., Sarah's Boutique..."
                   autoFocus
-                  className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400"
-                />
+                  className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400" />
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">Industry</label>
@@ -237,29 +219,21 @@ export default function NewWorkspace() {
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">Client Website</label>
-                <input
-                  type="url"
-                  value={website}
-                  onChange={e => setWebsite(e.target.value)}
+                <input type="url" value={website} onChange={e => setWebsite(e.target.value)}
                   placeholder="https://clientwebsite.com"
-                  className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400"
-                />
+                  className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400" />
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">
                   Internal Notes
                   <span className="text-gray-400 font-normal ml-1">(not visible to client)</span>
                 </label>
-                <textarea
-                  value={notes}
-                  onChange={e => setNotes(e.target.value)}
+                <textarea value={notes} onChange={e => setNotes(e.target.value)}
                   placeholder="Goals, tone of voice, content guidelines..."
                   rows={3}
-                  className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 resize-none"
-                />
+                  className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 resize-none" />
               </div>
-              <button
-                onClick={() => clientName.trim() ? setStep(2) : showToast('Client name is required', 'error')}
+              <button onClick={() => clientName.trim() ? setStep(2) : showToast('Client name is required', 'error')}
                 className="w-full py-3 bg-black text-white text-sm font-bold rounded-xl hover:opacity-80 transition-all">
                 Continue →
               </button>
@@ -268,20 +242,20 @@ export default function NewWorkspace() {
 
           {/* STEP 2 */}
           {step === 2 && (
-            <div className="bg-white border border-gray-100 rounded-2xl p-6">
+            <div className="bg-white border border-gray-100 rounded-2xl p-5 md:p-6">
               <h2 className="text-sm font-extrabold mb-1">Which platforms does this client use?</h2>
-              <p className="text-xs text-gray-400 mb-5">You can add or change these later from the workspace settings.</p>
+              <p className="text-xs text-gray-400 mb-5">You can add or change these later from workspace settings.</p>
 
-              <div className="grid grid-cols-3 gap-2 mb-6">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-5">
                 {Object.entries(PLATFORM_ICONS).map(([id, icon]) => {
                   const selected = selectedPlatforms.includes(id)
                   return (
                     <button key={id} onClick={() => togglePlatform(id)}
-                      className={`flex items-center gap-2 p-3 rounded-xl border-2 text-left transition-all ${
+                      className={`flex items-center gap-2 p-2.5 rounded-xl border-2 text-left transition-all ${
                         selected ? 'border-black bg-black/5' : 'border-gray-100 hover:border-gray-300'
                       }`}>
-                      <span className="text-lg">{icon}</span>
-                      <span className="text-xs font-semibold capitalize truncate">
+                      <span className="text-base flex-shrink-0">{icon}</span>
+                      <span className="text-xs font-semibold truncate">
                         {id === 'twitter' ? 'X / Twitter' : id.charAt(0).toUpperCase() + id.slice(1)}
                       </span>
                       {selected && <span className="ml-auto text-black font-bold text-xs flex-shrink-0">✓</span>}
@@ -310,25 +284,19 @@ export default function NewWorkspace() {
           {/* STEP 3 */}
           {step === 3 && (
             <div className="space-y-4">
-              <div className="bg-white border border-gray-100 rounded-2xl p-6">
+              <div className="bg-white border border-gray-100 rounded-2xl p-5 md:p-6">
                 <h2 className="text-sm font-extrabold mb-4">Review workspace</h2>
                 <div className="space-y-3">
-                  <div className="flex items-center justify-between py-2 border-b border-gray-50">
-                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Client</span>
-                    <span className="text-sm font-bold">{clientName}</span>
-                  </div>
-                  {industry && (
-                    <div className="flex items-center justify-between py-2 border-b border-gray-50">
-                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Industry</span>
-                      <span className="text-sm font-semibold text-gray-700">{industry}</span>
+                  {[
+                    { label: 'Client',   value: clientName },
+                    industry && { label: 'Industry', value: industry },
+                    website  && { label: 'Website',  value: website.replace('https://', '').replace('http://', '') },
+                  ].filter(Boolean).map((row: any) => (
+                    <div key={row.label} className="flex items-center justify-between py-2 border-b border-gray-50">
+                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{row.label}</span>
+                      <span className="text-sm font-bold text-right max-w-[60%] truncate">{row.value}</span>
                     </div>
-                  )}
-                  {website && (
-                    <div className="flex items-center justify-between py-2 border-b border-gray-50">
-                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Website</span>
-                      <span className="text-sm font-semibold text-gray-700 truncate max-w-[60%]">{website}</span>
-                    </div>
-                  )}
+                  ))}
                   <div className="flex items-start justify-between py-2 border-b border-gray-50">
                     <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide mt-0.5">Platforms</span>
                     <div className="flex flex-wrap gap-1 justify-end max-w-[60%]">
@@ -352,7 +320,7 @@ export default function NewWorkspace() {
               <div className="bg-blue-50 border border-blue-100 rounded-2xl px-5 py-4">
                 <p className="text-xs font-bold text-blue-700 mb-1">What happens next</p>
                 <p className="text-xs text-blue-600 leading-relaxed">
-                  A new isolated workspace is created for {clientName}. You can connect their social accounts,
+                  A new isolated workspace is created for {clientName}. Connect their social accounts,
                   schedule posts, and view analytics all separately from your other workspaces.
                   Switch between workspaces using the dropdown in the sidebar.
                 </p>
