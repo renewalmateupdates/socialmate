@@ -1,19 +1,19 @@
 'use client'
 import { useState, useEffect, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 
 const PLATFORMS = [
-  { id: 'linkedin',  name: 'LinkedIn',  icon: '💼', limit: 3000  },
-  { id: 'youtube',   name: 'YouTube',   icon: '▶️', limit: 5000  },
-  { id: 'pinterest', name: 'Pinterest', icon: '📌', limit: 500   },
-  { id: 'bluesky',   name: 'Bluesky',   icon: '🦋', limit: 300   },
-  { id: 'reddit',    name: 'Reddit',    icon: '🤖', limit: 40000 },
-  { id: 'discord',   name: 'Discord',   icon: '💬', limit: 2000  },
-  { id: 'telegram',  name: 'Telegram',  icon: '✈️', limit: 4096  },
-  { id: 'mastodon',  name: 'Mastodon',  icon: '🐘', limit: 500   },
+  { id: 'discord',   name: 'Discord',   icon: '💬', limit: 2000,  live: true  },
+  { id: 'bluesky',   name: 'Bluesky',   icon: '🦋', limit: 300,   live: true  },
+  { id: 'telegram',  name: 'Telegram',  icon: '✈️', limit: 4096,  live: true  },
+  { id: 'mastodon',  name: 'Mastodon',  icon: '🐘', limit: 500,   live: true  },
+  { id: 'linkedin',  name: 'LinkedIn',  icon: '💼', limit: 3000,  live: false },
+  { id: 'youtube',   name: 'YouTube',   icon: '▶️', limit: 5000,  live: false },
+  { id: 'pinterest', name: 'Pinterest', icon: '📌', limit: 500,   live: false },
+  { id: 'reddit',    name: 'Reddit',    icon: '🤖', limit: 40000, live: false },
 ]
 
 const COMING_SOON_PLATFORMS = [
@@ -41,27 +41,27 @@ const SCORE_CREDIT_COST = 2
 const STARTER_TEMPLATES = [
   {
     id: 'starter-1',
-    platforms: ['instagram', 'linkedin', 'facebook', 'bluesky'],
+    platforms: ['bluesky', 'discord'],
     content: `🚀 Introducing [product/service name]!\n\n[One sentence describing what it does and who it's for.]\n\nHere's what makes it different:\n✅ [Benefit 1]\n✅ [Benefit 2]\n✅ [Benefit 3]\n\n[Call to action — link in bio / comment below / DM us]`,
   },
   {
     id: 'starter-2',
-    platforms: ['linkedin', 'instagram', 'tiktok', 'bluesky'],
+    platforms: ['bluesky', 'mastodon'],
     content: `💡 [Topic] tip that changed everything for me:\n\n[Tip in one clear sentence.]\n\nHere's how to do it:\n1️⃣ [Step 1]\n2️⃣ [Step 2]\n3️⃣ [Step 3]\n\nSave this for later and share with someone who needs it! 👇`,
   },
   {
     id: 'starter-3',
-    platforms: ['instagram', 'facebook', 'bluesky', 'reddit'],
+    platforms: ['bluesky', 'discord'],
     content: `[Relatable observation or bold statement about your niche.] 🤔\n\nI used to think [common misconception], but now I know [what you actually believe].\n\nWhat do you think — am I wrong?\n\nDrop your take below 👇`,
   },
   {
     id: 'starter-4',
-    platforms: ['instagram', 'tiktok', 'facebook'],
+    platforms: ['telegram', 'discord'],
     content: `A little behind the scenes of [what you're working on] 👀\n\n[Short honest description of what your day/process looks like.]\n\nThe part nobody tells you about [your field/work]:\n[Honest, unexpected insight]\n\nAnything you want to know more about? Ask me below 👇`,
   },
   {
     id: 'starter-5',
-    platforms: ['linkedin', 'bluesky', 'mastodon'],
+    platforms: ['bluesky', 'mastodon'],
     content: `This week in [your niche] 📰\n\n→ [Thing 1 that happened or that you learned]\n→ [Thing 2]\n→ [Thing 3]\n\nMy take: [One sentence opinion or insight]\n\nFollowing along? Subscribe so you don't miss next week's. 🔔`,
   },
 ]
@@ -83,9 +83,11 @@ type ScoreResult = {
 
 function ComposeInner() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const { credits, setCredits, plan } = useWorkspace()
 
-  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['linkedin'])
+  const [loading, setLoading] = useState(true)
+  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['discord'])
   const [content, setContent] = useState('')
   const [scheduleDate, setScheduleDate] = useState('')
   const [scheduleTime, setScheduleTime] = useState('')
@@ -103,6 +105,7 @@ function ComposeInner() {
   const [scoreResult, setScoreResult] = useState<ScoreResult | null>(null)
   const [scoring, setScoring] = useState(false)
   const [scoreError, setScoreError] = useState('')
+  const [showPreview, setShowPreview] = useState(false)
 
   const planConfig = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
   const maxScheduleDate = (() => {
@@ -116,6 +119,14 @@ function ComposeInner() {
     plan === 'pro'    ? '1 month' :
     '3 months'
 
+  // AUTH GUARD
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) { router.push('/login'); return }
+      setLoading(false)
+    })
+  }, [router])
+
   useEffect(() => {
     const templateId = searchParams.get('template')
     const starterTemplateId = searchParams.get('starterTemplate')
@@ -124,7 +135,9 @@ function ComposeInner() {
       const starter = STARTER_TEMPLATES.find(t => t.id === starterTemplateId)
       if (starter) {
         setContent(starter.content)
-        const validPlatforms = starter.platforms.filter(p => PLATFORMS.some(pl => pl.id === p))
+        const validPlatforms = starter.platforms.filter(p =>
+          PLATFORMS.some(pl => pl.id === p && pl.live)
+        )
         if (validPlatforms.length > 0) setSelectedPlatforms(validPlatforms)
         setTemplateBanner('Starter template loaded — replace the [bracketed] sections with your content.')
       }
@@ -138,7 +151,9 @@ function ComposeInner() {
         if (data) {
           setContent(data.content)
           if (data.platforms && data.platforms.length > 0) {
-            const validPlatforms = data.platforms.filter((p: string) => PLATFORMS.some(pl => pl.id === p))
+            const validPlatforms = data.platforms.filter((p: string) =>
+              PLATFORMS.some(pl => pl.id === p && pl.live)
+            )
             if (validPlatforms.length > 0) setSelectedPlatforms(validPlatforms)
           }
           setTemplateBanner(`Template "${data.title}" loaded.`)
@@ -147,6 +162,9 @@ function ComposeInner() {
       loadTemplate()
     }
   }, [searchParams])
+
+  const livePlatforms = PLATFORMS.filter(p => p.live)
+  const soonPlatforms = PLATFORMS.filter(p => !p.live)
 
   const activePlatform = selectedPlatforms.length > 0
     ? (PLATFORMS.find(p => selectedPlatforms[0] === p.id) || PLATFORMS[0])
@@ -361,15 +379,31 @@ function ComposeInner() {
     ? scoreResult.score >= 80 ? 'bg-green-50 border-green-100' : scoreResult.score >= 60 ? 'bg-blue-50 border-blue-100' : scoreResult.score >= 40 ? 'bg-yellow-50 border-yellow-100' : 'bg-red-50 border-red-100'
     : ''
 
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar />
-      <div className="ml-56 flex-1 p-8">
+      <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-5xl mx-auto">
 
-          <div className="mb-6">
-            <h1 className="text-2xl font-extrabold tracking-tight">Compose</h1>
-            <p className="text-sm text-gray-400 mt-0.5">Write, schedule, and publish your posts</p>
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-2xl font-extrabold tracking-tight">Compose</h1>
+              <p className="text-sm text-gray-400 mt-0.5">Write, schedule, and publish your posts</p>
+            </div>
+            {/* Mobile preview toggle */}
+            <button
+              onClick={() => setShowPreview(p => !p)}
+              className="lg:hidden text-xs font-bold px-3 py-2 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+              {showPreview ? 'Hide Preview' : 'Preview'}
+            </button>
           </div>
 
           {templateBanner && (
@@ -379,13 +413,46 @@ function ComposeInner() {
             </div>
           )}
 
-          <div className="grid grid-cols-3 gap-6">
-            <div className="col-span-2 space-y-4">
+          {/* MOBILE PREVIEW */}
+          {showPreview && (
+            <div className="lg:hidden mb-4 bg-white border border-gray-100 rounded-2xl p-4">
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Preview</p>
+              <div className="bg-gray-50 rounded-xl p-4 min-h-24">
+                {content ? (
+                  <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{content}</p>
+                ) : (
+                  <p className="text-xs text-gray-300 text-center mt-4">Your post preview appears here</p>
+                )}
+              </div>
+              {content && selectedPlatforms.length > 0 && (
+                <div className="mt-3 pt-3 border-t border-gray-50 space-y-1.5">
+                  {selectedPlatforms.map(id => {
+                    const p = PLATFORMS.find(pl => pl.id === id)
+                    if (!p) return null
+                    const over = charCount > p.limit
+                    return (
+                      <div key={id} className="flex items-center gap-2">
+                        <span className="text-sm">{p.icon}</span>
+                        <span className="text-xs font-bold text-gray-500">{p.name}</span>
+                        <span className={`ml-auto text-xs font-bold ${over ? 'text-red-500' : 'text-gray-400'}`}>
+                          {charCount}/{p.limit.toLocaleString()}{over && ' ⚠️'}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )}
 
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-4">
+
+              {/* PLATFORM SELECTOR */}
               <div className="bg-white border border-gray-100 rounded-2xl p-4">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Platforms</p>
                 <div className="flex flex-wrap gap-2">
-                  {PLATFORMS.map(p => (
+                  {livePlatforms.map(p => (
                     <button key={p.id} onClick={() => togglePlatform(p.id)}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
                         selectedPlatforms.includes(p.id)
@@ -394,6 +461,14 @@ function ComposeInner() {
                       }`}>
                       <span>{p.icon}</span>{p.name}
                     </button>
+                  ))}
+                  {soonPlatforms.map(p => (
+                    <div key={p.id} title={`${p.name} — coming soon`}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border border-dashed border-blue-100 text-blue-300 cursor-not-allowed select-none">
+                      <span>{p.icon}</span>
+                      <span>{p.name}</span>
+                      <span className="text-xs font-bold text-blue-300 ml-0.5">· Soon</span>
+                    </div>
                   ))}
                   {COMING_SOON_PLATFORMS.map(p => (
                     <div key={p.id} title={`${p.name} — coming soon`}
@@ -412,6 +487,7 @@ function ComposeInner() {
                 </div>
               )}
 
+              {/* TEXT AREA */}
               <div className="bg-white border border-gray-100 rounded-2xl p-4">
                 <textarea
                   value={content}
@@ -435,16 +511,18 @@ function ComposeInner() {
                 </div>
               </div>
 
+              {/* AI TOOLS */}
               <div className="bg-white border border-gray-100 rounded-2xl p-4">
                 <div className="flex items-center justify-between mb-3">
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">AI Tools</p>
                   <span className="text-xs font-bold text-gray-500">{credits} credits remaining</span>
                 </div>
-                <div className="grid grid-cols-6 gap-2 mb-4">
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-4">
                   {AI_TOOLS.map(tool => (
                     <button key={tool.id}
                       onClick={() => handleAiTool(tool)}
                       disabled={aiLoading}
+                      title={tool.desc}
                       className={`p-3 rounded-xl border text-center transition-all ${
                         activeAiTool === tool.id
                           ? 'bg-black text-white border-black'
@@ -478,7 +556,7 @@ function ComposeInner() {
                   <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Result</p>
                     <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap mb-3">{aiResult}</p>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <button onClick={handleInsertResult}
                         className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-lg hover:opacity-80 transition-all">
                         Insert below
@@ -496,8 +574,9 @@ function ComposeInner() {
                 )}
               </div>
 
+              {/* POST SCORE */}
               <div className="bg-white border border-gray-100 rounded-2xl p-4">
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
                   <div>
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Post Score</p>
                     <p className="text-xs text-gray-400 mt-0.5">AI predicts how your post will perform before you publish</p>
@@ -505,7 +584,7 @@ function ComposeInner() {
                   <button
                     onClick={handleScorePost}
                     disabled={scoring || !content.trim() || credits < SCORE_CREDIT_COST}
-                    className="flex items-center gap-2 px-4 py-2 bg-black text-white text-xs font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                    className="flex items-center gap-2 px-4 py-2 bg-black text-white text-xs font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed self-start sm:self-auto">
                     {scoring ? (
                       <>
                         <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -526,7 +605,7 @@ function ComposeInner() {
                 {scoreResult && (
                   <div className={`border rounded-xl p-4 ${scoreBg}`}>
                     <div className="flex items-center gap-4 mb-4">
-                      <div className="text-center">
+                      <div className="text-center flex-shrink-0">
                         <p className={`text-4xl font-extrabold ${scoreColor}`}>{scoreResult.score}</p>
                         <p className={`text-xs font-bold ${scoreColor}`}>{scoreResult.label}</p>
                       </div>
@@ -574,8 +653,9 @@ function ComposeInner() {
                 )}
               </div>
 
+              {/* SCHEDULE */}
               <div className="bg-white border border-gray-100 rounded-2xl p-4">
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3">
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Schedule</p>
                   <span className="text-xs text-gray-400">
                     {plan === 'free'   && '⏳ Free — up to 2 weeks ahead'}
@@ -583,7 +663,7 @@ function ComposeInner() {
                     {plan === 'agency' && '⏳ Agency — up to 3 months ahead'}
                   </span>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                   <input type="date" value={scheduleDate}
                     min={new Date().toISOString().split('T')[0]}
                     max={maxScheduleDate}
@@ -601,6 +681,7 @@ function ComposeInner() {
                 )}
               </div>
 
+              {/* PUBLISH RESULTS */}
               {publishResults && (
                 <div className="bg-white border border-gray-100 rounded-2xl p-4">
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Publish Results</p>
@@ -614,7 +695,7 @@ function ComposeInner() {
                           <p className="text-xs font-bold">{PLATFORMS.find(p => p.id === result.platform)?.name || result.platform}</p>
                           {result.error && <p className="text-xs text-red-500 mt-0.5">{result.error}</p>}
                         </div>
-                        <span className={`text-xs font-bold ${result.success ? 'text-green-600' : 'text-red-500'}`}>
+                        <span className={`text-xs font-bold flex-shrink-0 ${result.success ? 'text-green-600' : 'text-red-500'}`}>
                           {result.success ? '✓ Published' : '✗ Failed'}
                         </span>
                       </div>
@@ -623,6 +704,7 @@ function ComposeInner() {
                 </div>
               )}
 
+              {/* ACTIONS */}
               <div className="flex items-center gap-3">
                 <button
                   onClick={handlePublish}
@@ -642,7 +724,8 @@ function ComposeInner() {
 
             </div>
 
-            <div className="space-y-4">
+            {/* DESKTOP PREVIEW */}
+            <div className="hidden lg:block space-y-4">
               <div className="bg-white border border-gray-100 rounded-2xl p-4 sticky top-8">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Preview</p>
                 <div className="bg-gray-50 rounded-xl p-4 min-h-32">
