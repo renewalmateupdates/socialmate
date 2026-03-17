@@ -289,12 +289,13 @@ export default function Analytics() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar />
-      <div className="ml-56 flex-1 p-8">
+      <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-7xl mx-auto">
 
+          {/* MODALS */}
           {creditModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-              <div className="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl">
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+              <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
                 <div className="text-2xl mb-3">🔓</div>
                 <h2 className="text-sm font-extrabold mb-1">Unlock {RANGE_LABELS[creditModal.range]} history</h2>
                 <p className="text-xs text-gray-400 mb-4">
@@ -315,8 +316,8 @@ export default function Analytics() {
           )}
 
           {radarModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-              <div className="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl">
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+              <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
                 <div className="text-2xl mb-3">📡</div>
                 <h2 className="text-sm font-extrabold mb-1">Run SM-Radar</h2>
                 <p className="text-xs text-gray-400 mb-1">Costs <span className="font-bold text-black">10 AI credits</span> ({credits} remaining)</p>
@@ -342,8 +343,8 @@ export default function Analytics() {
           )}
 
           {pulseModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-              <div className="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl">
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+              <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
                 <div className="text-2xl mb-3">🔥</div>
                 <h2 className="text-sm font-extrabold mb-1">Run SM-Pulse</h2>
                 <p className="text-xs text-gray-400 mb-1">Costs <span className="font-bold text-black">10 AI credits</span> ({credits} remaining)</p>
@@ -370,7 +371,7 @@ export default function Analytics() {
 
           {radarResult && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-              <div className="bg-white rounded-2xl p-6 max-w-2xl w-full mx-4 shadow-xl max-h-[80vh] overflow-y-auto">
+              <div className="bg-white rounded-2xl p-6 max-w-2xl w-full shadow-xl max-h-[80vh] overflow-y-auto">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <span className="text-xl">📡</span>
@@ -395,7 +396,7 @@ export default function Analytics() {
 
           {pulseResult && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-              <div className="bg-white rounded-2xl p-6 max-w-2xl w-full mx-4 shadow-xl max-h-[80vh] overflow-y-auto">
+              <div className="bg-white rounded-2xl p-6 max-w-2xl w-full shadow-xl max-h-[80vh] overflow-y-auto">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <span className="text-xl">🔥</span>
@@ -418,19 +419,20 @@ export default function Analytics() {
             </div>
           )}
 
-          <div className="flex items-center justify-between mb-8">
+          {/* HEADER */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Analytics</h1>
               <p className="text-sm text-gray-400 mt-0.5">Real data from your posting activity</p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2">
               {plan === 'agency' && (
                 <button onClick={handleExportPDF}
                   className="flex items-center gap-2 px-4 py-2 border border-gray-200 text-xs font-bold text-gray-600 rounded-xl hover:border-gray-400 transition-all">
                   📄 Export PDF
                 </button>
               )}
-              <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-xl p-1">
+              <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-xl p-1 overflow-x-auto">
                 {(['14', '30', '90', '180'] as const).map(r => {
                   const isFree = freeRanges.includes(r)
                   const creditCost = creditRanges[r]
@@ -438,7 +440,7 @@ export default function Analytics() {
                   const isHardLocked = !isFree && !creditCost
                   return (
                     <button key={r} onClick={() => handleRangeClick(r)} disabled={isHardLocked}
-                      className={`relative px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                      className={`relative px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
                         isActive ? 'bg-black text-white' :
                         isHardLocked ? 'text-gray-300 cursor-not-allowed' :
                         'text-gray-500 hover:text-black'
@@ -473,15 +475,15 @@ export default function Analytics() {
           )}
 
           {!radarDismissed && (
-            <div className="mb-6 bg-black rounded-2xl px-5 py-4 flex items-center justify-between text-white">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">📡</span>
+            <div className="mb-6 bg-black rounded-2xl px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-4 text-white">
+              <div className="flex items-start gap-3 flex-1">
+                <span className="text-2xl flex-shrink-0">📡</span>
                 <div>
                   <p className="text-xs font-extrabold">SM-Radar — Real Trend Intelligence</p>
                   <p className="text-xs text-gray-400 mt-0.5">AI analysis of real Reddit and YouTube data — content gaps, competitor weaknesses, and what to post this week. 10 credits.</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 flex-shrink-0 ml-4">
+              <div className="flex items-center gap-3 flex-shrink-0">
                 <button onClick={() => setRadarModal(true)}
                   className="text-xs font-bold px-4 py-2 bg-white text-black rounded-xl hover:opacity-80 transition-all">
                   Try SM-Radar
@@ -516,7 +518,8 @@ export default function Analytics() {
             </div>
           )}
 
-          <div className="grid grid-cols-4 gap-4 mb-6">
+          {/* STAT CARDS */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
             {loading ? [1,2,3,4].map(i => (
               <div key={i} className="bg-white border border-gray-100 rounded-2xl p-5">
                 <SkeletonBox className="h-3 w-16 mb-4" />
@@ -530,19 +533,20 @@ export default function Analytics() {
                 { label: 'Avg / Week',       value: avgPerWeek,           icon: '📈', sub: 'posting frequency'         },
                 { label: 'Total Engagement', value: totalEngagement,      icon: '❤️', sub: 'likes, reactions, reposts' },
               ].map(stat => (
-                <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-5">
+                <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-4 md:p-5">
                   <div className="flex justify-between items-center mb-3">
-                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{stat.label}</span>
-                    <span className="text-base">{stat.icon}</span>
+                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide leading-tight">{stat.label}</span>
+                    <span className="text-base flex-shrink-0">{stat.icon}</span>
                   </div>
-                  <div className="text-3xl font-extrabold tracking-tight mb-1">{stat.value}</div>
+                  <div className="text-2xl md:text-3xl font-extrabold tracking-tight mb-1">{stat.value}</div>
                   <div className="text-xs text-gray-400">{stat.sub}</div>
                 </div>
               ))
             )}
           </div>
 
-          <div className="grid grid-cols-3 gap-4 mb-6">
+          {/* STREAK / PEAK / STATUS */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <div className="bg-white border border-gray-100 rounded-2xl p-5 flex items-center gap-4">
               <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0">🔥</div>
               <div>
@@ -597,7 +601,7 @@ export default function Analytics() {
                           ))}
                         </div>
                       </div>
-                      <div className="flex items-center gap-4 flex-shrink-0">
+                      <div className="flex items-center gap-3 flex-shrink-0">
                         {Object.entries(eng).map(([platform, data]: [string, any]) => (
                           <div key={platform} className="text-center">
                             <span className="text-xs">{PLATFORM_ICONS[platform] || '📱'}</span>
@@ -616,8 +620,9 @@ export default function Analytics() {
             </div>
           )}
 
-          <div className="grid grid-cols-3 gap-6">
-            <div className="col-span-2 space-y-6">
+          {/* MAIN CHARTS GRID */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
 
               <div className="bg-white border border-gray-100 rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Daily Activity</h2>
@@ -647,7 +652,7 @@ export default function Analytics() {
               <div className="bg-white border border-gray-100 rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Best Days to Post</h2>
                 {loading ? <SkeletonBox className="h-24" /> : (
-                  <div className="flex items-end gap-3 h-24">
+                  <div className="flex items-end gap-2 h-24">
                     {dayOfWeekCounts.map((day, i) => {
                       const pct = maxDayCount > 0 ? (day.count / maxDayCount) * 100 : 0
                       const isTop = day.count === maxDayCount && day.count > 0
@@ -678,7 +683,7 @@ export default function Analytics() {
                         const bg = pct === 0 ? 'bg-gray-100' : pct < 0.25 ? 'bg-gray-300' : pct < 0.5 ? 'bg-gray-400' : pct < 0.75 ? 'bg-gray-600' : 'bg-black'
                         return (
                           <div key={h.hour} className="group relative">
-                            <div className={`w-8 h-8 rounded-lg ${bg} transition-all`} />
+                            <div className={`w-7 h-7 md:w-8 md:h-8 rounded-lg ${bg} transition-all`} />
                             <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap z-10">
                               {h.label}: {h.count}
                             </div>
@@ -703,7 +708,7 @@ export default function Analytics() {
               <div className="bg-white border border-gray-100 rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Posts by Month — {now.getFullYear()}</h2>
                 {loading ? <SkeletonBox className="h-24" /> : (
-                  <div className="flex items-end gap-2 h-24">
+                  <div className="flex items-end gap-1 md:gap-2 h-24">
                     {monthCounts.map((m, i) => {
                       const isCurrent = i === now.getMonth()
                       return (
@@ -714,7 +719,7 @@ export default function Analytics() {
                               style={{ height: m.count > 0 ? `${Math.max((m.count / maxMonthCount) * 100, 8)}%` : '4px' }}
                             />
                           </div>
-                          <span className={`text-xs ${isCurrent ? 'font-bold text-black' : 'text-gray-400'}`}>{m.month}</span>
+                          <span className={`text-xs ${isCurrent ? 'font-bold text-black' : 'text-gray-400'} hidden sm:block`}>{m.month}</span>
                         </div>
                       )
                     })}
@@ -723,8 +728,8 @@ export default function Analytics() {
               </div>
             </div>
 
+            {/* RIGHT COLUMN */}
             <div className="space-y-6">
-
               <div className="bg-white border border-gray-100 rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Platform Breakdown</h2>
                 {loading
@@ -758,35 +763,13 @@ export default function Analytics() {
                 {loading ? <SkeletonBox className="h-32" /> : (
                   <div className="space-y-4">
                     {[
-                      {
-                        label: 'Avg Caption Length',
-                        value: avgLength + ' chars',
-                        sub: avgLength < 100 ? 'Short & punchy' : avgLength < 300 ? 'Medium length' : 'Long form',
-                        icon: '✍️',
-                      },
-                      {
-                        label: 'Most Used Platform',
-                        value: topPlatforms[0]?.[0] ? topPlatforms[0][0].charAt(0).toUpperCase() + topPlatforms[0][0].slice(1) : '—',
-                        sub: topPlatforms[0] ? `${topPlatforms[0][1]} posts` : 'No posts yet',
-                        icon: topPlatforms[0] ? PLATFORM_ICONS[topPlatforms[0][0]] : '📱',
-                      },
-                      {
-                        label: 'Draft Rate',
-                        value: filteredPosts.length > 0 ? `${Math.round((drafts.length / filteredPosts.length) * 100)}%` : '0%',
-                        sub: 'posts left as drafts',
-                        icon: '📂',
-                      },
-                      {
-                        label: 'Posts with Engagement',
-                        value: postsWithEngagement.length,
-                        sub: 'synced from platforms',
-                        icon: '❤️',
-                      },
+                      { label: 'Avg Caption Length', value: avgLength + ' chars', sub: avgLength < 100 ? 'Short & punchy' : avgLength < 300 ? 'Medium length' : 'Long form', icon: '✍️' },
+                      { label: 'Most Used Platform', value: topPlatforms[0]?.[0] ? topPlatforms[0][0].charAt(0).toUpperCase() + topPlatforms[0][0].slice(1) : '—', sub: topPlatforms[0] ? `${topPlatforms[0][1]} posts` : 'No posts yet', icon: topPlatforms[0] ? PLATFORM_ICONS[topPlatforms[0][0]] : '📱' },
+                      { label: 'Draft Rate', value: filteredPosts.length > 0 ? `${Math.round((drafts.length / filteredPosts.length) * 100)}%` : '0%', sub: 'posts left as drafts', icon: '📂' },
+                      { label: 'Posts with Engagement', value: postsWithEngagement.length, sub: 'synced from platforms', icon: '❤️' },
                     ].map(insight => (
                       <div key={insight.label} className="flex items-center gap-3">
-                        <div className="w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center text-base flex-shrink-0">
-                          {insight.icon}
-                        </div>
+                        <div className="w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center text-base flex-shrink-0">{insight.icon}</div>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs text-gray-400">{insight.label}</p>
                           <p className="text-sm font-bold truncate">{insight.value}</p>
@@ -849,7 +832,6 @@ export default function Analytics() {
                   </Link>
                 </div>
               )}
-
             </div>
           </div>
         </div>
