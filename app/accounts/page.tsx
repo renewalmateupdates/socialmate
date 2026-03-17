@@ -50,10 +50,10 @@ const PLATFORM_META: Record<string, {
   bereal:    { icon: '📷', color: 'bg-gray-50 border-gray-200',     label: 'BeReal',      status: 'planned',     statusNote: 'Planned integration'              },
 }
 
-const ALL_PLATFORMS       = Object.keys(PLATFORM_META)
-const LIVE_PLATFORMS      = ALL_PLATFORMS.filter(p => PLATFORM_META[p].status === 'live')
+const ALL_PLATFORMS         = Object.keys(PLATFORM_META)
+const LIVE_PLATFORMS        = ALL_PLATFORMS.filter(p => PLATFORM_META[p].status === 'live')
 const COMING_SOON_PLATFORMS = ALL_PLATFORMS.filter(p => PLATFORM_META[p].status === 'coming_soon')
-const PLANNED_PLATFORMS   = ALL_PLATFORMS.filter(p => PLATFORM_META[p].status === 'planned')
+const PLANNED_PLATFORMS     = ALL_PLATFORMS.filter(p => PLATFORM_META[p].status === 'planned')
 
 function PlatformCard({
   platform, connectable, accountsPerPlatform, accountsByPlatform, connectingPlatform, onConnect,
@@ -110,7 +110,6 @@ function PlatformCard({
           {platformCount > 0 ? `${platformCount}/${accountsPerPlatform} connected` : 'Not connected'}
         </p>
       </div>
-      {/* Always visible on mobile, hover-revealed on desktop */}
       {atLimit ? (
         <Link href="/pricing"
           className="text-xs font-semibold px-3 py-1.5 bg-gray-100 text-gray-500 rounded-xl hover:bg-gray-200 transition-all flex-shrink-0">
@@ -230,9 +229,9 @@ function AccountsInner() {
     if (platform === 'bluesky')   { setShowBlueskyModal(true);  return }
     if (platform === 'telegram')  { setShowTelegramModal(true); return }
     if (platform === 'mastodon')  { setShowMastodonModal(true); return }
-    if (platform === 'pinterest') { window.location.href = '/api/accounts/pinterest/connect'; return }
-    if (platform === 'linkedin')  { window.location.href = '/api/accounts/linkedin/connect';  return }
-    if (platform === 'youtube')   { window.location.href = '/api/accounts/youtube/connect';   return }
+    if (platform === 'pinterest') { window.open('/api/accounts/pinterest/connect', '_blank'); return }
+    if (platform === 'linkedin')  { window.open('/api/accounts/linkedin/connect', '_blank');  return }
+    if (platform === 'youtube')   { window.open('/api/accounts/youtube/connect', '_blank');   return }
     setConnectingPlatform(platform)
     showToast(`${PLATFORM_META[platform]?.label || platform} integration coming soon!`, 'success')
     setTimeout(() => setConnectingPlatform(null), 2000)
@@ -275,8 +274,8 @@ function AccountsInner() {
           </div>
 
           <div className={`mb-6 rounded-2xl px-5 py-4 border flex flex-col sm:flex-row sm:items-center gap-3 ${
-            plan === 'free'   ? 'bg-gray-50 border-gray-200'      :
-            plan === 'pro'    ? 'bg-blue-50 border-blue-100'       :
+            plan === 'free'   ? 'bg-gray-50 border-gray-200'   :
+            plan === 'pro'    ? 'bg-blue-50 border-blue-100'   :
             'bg-purple-50 border-purple-100'
           }`}>
             <div className="flex-1">
@@ -306,9 +305,9 @@ function AccountsInner() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
             {loading ? [1,2,3].map(i => <SkeletonBox key={i} className="h-20 rounded-2xl" />) : (
               [
-                { label: 'Connected',             value: accounts.length,                                              icon: '✅', color: 'text-green-600' },
-                { label: 'Platforms Used',         value: `${connectedPlatforms.size} / ${LIVE_PLATFORMS.length} live`, icon: '📱', color: 'text-gray-700' },
-                { label: 'Accounts Per Platform',  value: `${accountsPerPlatform} max`,                                icon: '🔓', color: 'text-blue-600' },
+                { label: 'Connected',            value: accounts.length,                                               icon: '✅', color: 'text-green-600' },
+                { label: 'Platforms Used',        value: `${connectedPlatforms.size} / ${LIVE_PLATFORMS.length} live`, icon: '📱', color: 'text-gray-700' },
+                { label: 'Accounts Per Platform', value: `${accountsPerPlatform} max`,                                 icon: '🔓', color: 'text-blue-600' },
               ].map(stat => (
                 <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-4">
                   <div className="flex justify-between items-center mb-2">
@@ -484,7 +483,7 @@ function AccountsInner() {
                 className="flex-1 text-sm font-semibold px-4 py-2.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
                 Cancel
               </button>
-              <button onClick={() => { setShowDiscordModal(false); window.location.href = '/api/accounts/discord/connect' }}
+              <button onClick={() => { setShowDiscordModal(false); window.open('/api/accounts/discord/connect', '_blank') }}
                 className="flex-1 text-sm font-semibold px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:opacity-80 transition-all">
                 Continue to Discord →
               </button>
