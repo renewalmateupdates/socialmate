@@ -4,14 +4,12 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import PublicLayout from '@/components/PublicLayout'
 
-// Monthly price IDs (live)
-const STRIPE_PRO_PRICE_ID        = 'price_1T9pay7OMwDowUuU7S3G3lNX'
-const STRIPE_AGENCY_PRICE_ID     = 'price_1T9qAd7OMwDowUuUpzjxLlG2'
-const STRIPE_WHITE_LABEL_PRICE_ID = 'price_1T9qAu7OMwDowUuUsqM2jwoC'
-
-// Annual price IDs — create these in Stripe then paste here
-const STRIPE_PRO_ANNUAL_PRICE_ID    = 'price_1TA0Iv7OMwDowUuUaAA77Ye1'
-const STRIPE_AGENCY_ANNUAL_PRICE_ID = 'price_1TA0JQ7OMwDowUuUp4NnHEfO'
+const STRIPE_PRO_PRICE_ID            = 'price_1T9pay7OMwDowUuU7S3G3lNX'
+const STRIPE_AGENCY_PRICE_ID         = 'price_1T9qAd7OMwDowUuUpzjxLlG2'
+const STRIPE_PRO_ANNUAL_PRICE_ID     = 'price_1TA0Iv7OMwDowUuUaAA77Ye1'
+const STRIPE_AGENCY_ANNUAL_PRICE_ID  = 'price_1TA0JQ7OMwDowUuUp4NnHEfO'
+const STRIPE_WHITE_LABEL_BASIC_PRICE_ID = 'price_1T9qAu7OMwDowUuUsqM2jwoC'
+const STRIPE_WHITE_LABEL_PRO_PRICE_ID   = 'price_1TBnnS7OMwDowUuUsr09eHVg'
 
 type Interval = 'monthly' | 'annual'
 
@@ -22,65 +20,62 @@ const PLANS = [
     annualPrice: 0,
     annualMonthly: 0,
     annualSaving: 0,
-    description: 'Everything you need to get started — no credit card required.',
+    description: 'Everything you need to get started — no credit card, no catch.',
     badge: null,
     color: 'border-gray-200',
     headerBg: 'bg-gray-50',
     headerText: 'text-gray-900',
     subText: 'text-gray-400',
     features: [
-      { label: '8 live platform integrations', note: 'More coming soon' },
-      { label: '1 account per platform' },
-      { label: '2 team seats' },
-      { label: 'Schedule up to 2 weeks ahead' },
-      { label: '100 scheduled posts / month' },
-      { label: '100 AI credits / month' },
-      { label: 'AI image gen & content calendar', note: 'Pro+ only' },
-      { label: '1 GB media storage' },
-      { label: 'Video up to 30 seconds' },
-      { label: 'Bulk scheduling (manual)' },
-      { label: '14-day & 30-day analytics' },
-      { label: 'Link-in-bio page' },
-      { label: 'Hashtag collections' },
-      { label: 'Post templates' },
-      { label: 'Content queue & drafts' },
-      { label: 'Referral program' },
+      { label: '4 live platforms now',              note: '12 more coming soon'  },
+      { label: '1 connected account per platform'                                },
+      { label: '2 team seats'                                                    },
+      { label: '100 posts / month'                                               },
+      { label: '100 AI credits / month',            note: 'banks up to 150'      },
+      { label: '1 GB media storage'                                              },
+      { label: '2-week scheduling window'                                        },
+      { label: '14-day & 30-day analytics'                                       },
+      { label: 'Link in Bio page'                                                },
+      { label: 'Bulk scheduler'                                                  },
+      { label: 'Post templates & hashtag library'                                },
+      { label: 'Content Gap Detector',              note: '10 credits'           },
+      { label: 'Competitor tracking',               note: 'up to 3 accounts'     },
+      { label: 'RSS / blog import'                                               },
+      { label: 'Evergreen content recycling'                                     },
+      { label: 'Referral program'                                                },
     ],
     cta: 'Get Started Free',
     ctaHref: '/signup',
     monthlyPriceId: null,
     annualPriceId: null,
-    ctaStyle: 'border border-gray-300 text-gray-700 hover:bg-gray-50',
+    ctaStyle: 'border-2 border-gray-300 text-gray-700 hover:bg-gray-50',
   },
   {
     name: 'Pro',
     monthlyPrice: 5,
-    annualPrice: 55,      // 8% off $60
-    annualMonthly: 4.58,  // $55/12
+    annualPrice: 55,
+    annualMonthly: 4.58,
     annualSaving: 5,
-    description: 'For creators and small businesses who want to move faster.',
+    description: 'For creators and small businesses who want to grow faster.',
     badge: 'Most Popular',
     color: 'border-black',
     headerBg: 'bg-black',
     headerText: 'text-white',
     subText: 'text-gray-300',
     features: [
-      { label: 'Everything in Free' },
-      { label: '5 accounts per platform' },
-      { label: '5 team seats' },
-      { label: 'Schedule up to 1 month ahead' },
-      { label: '1,000 scheduled posts / month' },
-      { label: '500 AI credits / month' },
-      { label: 'AI image generation', note: '25 credits' },
-      { label: 'AI bulk content calendar (30 days)', note: '20 credits' },
-      { label: '10 GB media storage' },
-      { label: 'Video up to 2 minutes' },
-      { label: '14-day, 30-day & 90-day analytics' },
-      { label: 'Advanced analytics' },
-      { label: 'PDF export reports' },
-      { label: 'Custom domain for link-in-bio' },
-      { label: 'Priority support & early access' },
-      { label: 'White Label add-on available', note: '+$20/mo' },
+      { label: 'Everything in Free'                                              },
+      { label: '5 connected accounts per platform'                              },
+      { label: '5 team seats'                                                   },
+      { label: '1,000 posts / month'                                            },
+      { label: '500 AI credits / month',            note: 'banks up to 750'     },
+      { label: '10 GB media storage'                                            },
+      { label: '1-month scheduling window'                                      },
+      { label: '90-day analytics history'                                       },
+      { label: 'AI Content Calendar',              note: '20 credits'           },
+      { label: 'AI Image Generation',              note: '25 credits'           },
+      { label: 'Custom domain for Link in Bio'                                  },
+      { label: 'White Label add-on available',     note: '+$20/mo or +$40/mo'   },
+      { label: 'Priority support & early features'                              },
     ],
     cta: 'Start Pro',
     ctaHref: null,
@@ -91,29 +86,29 @@ const PLANS = [
   {
     name: 'Agency',
     monthlyPrice: 20,
-    annualPrice: 209,      // 13% off $240
-    annualMonthly: 17.42,  // $209/12
+    annualPrice: 209,
+    annualMonthly: 17.42,
     annualSaving: 31,
     description: 'For agencies and power users managing multiple brands.',
     badge: null,
-    color: 'border-purple-200',
+    color: 'border-purple-300',
     headerBg: 'bg-purple-50',
     headerText: 'text-gray-900',
     subText: 'text-gray-500',
     features: [
-      { label: 'Everything in Pro' },
-      { label: '10 accounts per platform' },
-      { label: '15 team seats' },
-      { label: 'Schedule up to 3 months ahead' },
-      { label: '5,000 scheduled posts / month' },
-      { label: '2,000 AI credits / month' },
-      { label: '50 GB media storage' },
-      { label: 'Video up to 10 minutes' },
-      { label: 'Client workspaces' },
-      { label: '14-day, 30-day, 90-day & 6-month analytics' },
-      { label: 'PDF export (any date range)' },
-      { label: 'White Label add-on available', note: '+$20/mo' },
-      { label: 'Dedicated support' },
+      { label: 'Everything in Pro'                                              },
+      { label: '10 connected accounts per platform'                            },
+      { label: '15 team seats'                                                 },
+      { label: '5,000 posts / month'                                           },
+      { label: '2,000 AI credits / month',          note: 'banks up to 3,000'  },
+      { label: '50 GB media storage'                                           },
+      { label: '3-month scheduling window'                                     },
+      { label: '6-month analytics history'                                     },
+      { label: 'Client workspace management'                                   },
+      { label: 'PDF analytics reports'                                         },
+      { label: 'Content approval workflows'                                    },
+      { label: 'White Label add-on available',     note: '+$20/mo or +$40/mo'  },
+      { label: 'Dedicated support'                                             },
     ],
     cta: 'Start Agency',
     ctaHref: null,
@@ -123,30 +118,72 @@ const PLANS = [
   },
 ]
 
-const WHITE_LABEL_FEATURES = [
-  'Remove all SocialMate branding',
-  'Custom logo & color scheme',
-  'Custom domain for client dashboards',
-  'White-labeled link-in-bio pages',
-  'Client-facing reports without SocialMate branding',
+const AI_CREDITS = [
+  { feature: 'Caption Generator',       cost: '3 credits',  proOnly: false },
+  { feature: 'Hashtag Generator',       cost: '2 credits',  proOnly: false },
+  { feature: 'Post Rewrite / Improver', cost: '3 credits',  proOnly: false },
+  { feature: 'Viral Hook Generator',    cost: '4 credits',  proOnly: false },
+  { feature: 'Thread Generator',        cost: '8 credits',  proOnly: false },
+  { feature: 'Content Repurposer',      cost: '8 credits',  proOnly: false },
+  { feature: 'Post Score',              cost: '2 credits',  proOnly: false },
+  { feature: 'SM-Pulse',                cost: '10 credits', proOnly: false },
+  { feature: 'SM-Radar',                cost: '10 credits', proOnly: false },
+  { feature: 'Content Gap Detector',    cost: '10 credits', proOnly: false },
+  { feature: 'AI Content Calendar',     cost: '20 credits', proOnly: true  },
+  { feature: 'AI Image Generation',     cost: '25 credits', proOnly: true  },
 ]
 
-const AI_CREDITS = [
-  { feature: 'Caption generator',           cost: '1 credit',   proOnly: false },
-  { feature: 'Hashtag generator',           cost: '1 credit',   proOnly: false },
-  { feature: 'Post rewrite / improver',     cost: '1 credit',   proOnly: false },
-  { feature: 'Viral Hook Generator',        cost: '2 credits',  proOnly: false },
-  { feature: 'Post idea generator',         cost: '2 credits',  proOnly: false },
-  { feature: 'Smart Auto-Formatting',       cost: '2 credits',  proOnly: false },
-  { feature: 'Platform rewrite (1 → all)',  cost: '2 credits',  proOnly: false },
-  { feature: 'SM-Radar growth report',      cost: '3 credits',  proOnly: false },
-  { feature: 'Thread generator',            cost: '3 credits',  proOnly: false },
-  { feature: 'Content repurposer',          cost: '3 credits',  proOnly: false },
-  { feature: 'AI Media Kit generator',      cost: '3 credits',  proOnly: false },
-  { feature: 'SM-Pulse trend scan',         cost: '5 credits',  proOnly: false },
-  { feature: '2-week AI content calendar',  cost: '10 credits', proOnly: false },
-  { feature: '30-day AI content calendar',  cost: '20 credits', proOnly: true  },
-  { feature: 'AI image generation',         cost: '25 credits', proOnly: true  },
+const WHITE_LABEL_TIERS = [
+  {
+    name: 'White Label Basic',
+    price: '$20/mo',
+    priceId: STRIPE_WHITE_LABEL_BASIC_PRICE_ID,
+    features: [
+      'Remove SocialMate branding',
+      'Add your own logo',
+      'Custom brand colors',
+      'Your brand name throughout the app',
+    ],
+  },
+  {
+    name: 'White Label Pro',
+    price: '$40/mo',
+    priceId: STRIPE_WHITE_LABEL_PRO_PRICE_ID,
+    features: [
+      'Everything in Basic',
+      'Custom domain (app.yourbrand.com)',
+      'Full client rebrand — SocialMate never visible',
+      'Priority support',
+    ],
+    highlight: true,
+  },
+]
+
+const FAQ = [
+  {
+    q: 'How is the Free plan this generous?',
+    a: 'We built SocialMate lean from the start. By controlling AI costs through a credit system and keeping infrastructure efficient, we can offer genuinely powerful tools for free without burning out.',
+  },
+  {
+    q: 'Will prices go up?',
+    a: 'Current pricing is locked for all active subscribers. If pricing ever changes, you\'ll know well in advance and grandfathered rates will be honored — no surprises.',
+  },
+  {
+    q: 'What happens when I run out of AI credits?',
+    a: 'You can still schedule, draft, and manage posts — AI features pause until credits refresh next month. You can also earn bonus credits through referrals or buy credit packs.',
+  },
+  {
+    q: 'Can I earn extra credits?',
+    a: 'Yes. Refer a friend: when they publish their first post you both earn +10 credits. When they upgrade to Pro you earn +50 credits, Agency earns you +100 credits.',
+  },
+  {
+    q: 'What platforms are live right now?',
+    a: 'Discord, Bluesky, Telegram, and Mastodon are live. LinkedIn, YouTube, Pinterest, and Reddit are coming very soon — code complete, awaiting platform approval. 8 more are planned.',
+  },
+  {
+    q: 'Is White Label available on Free?',
+    a: 'No — White Label is an add-on for Pro and Agency subscribers only. It removes all SocialMate branding and replaces it with your own logo, colors, and optionally your own domain.',
+  },
 ]
 
 export default function Pricing() {
@@ -157,11 +194,6 @@ export default function Pricing() {
   const annual = interval === 'annual'
 
   const handleCheckout = async (priceId: string, planName: string) => {
-    if (!priceId) {
-      // Annual price IDs not yet created — fall back to monthly
-      alert('Annual billing coming soon — signing you up monthly for now.')
-      return
-    }
     setLoading(planName)
     try {
       const res = await fetch('/api/stripe/checkout', {
@@ -188,29 +220,25 @@ export default function Pricing() {
       <div className="max-w-6xl mx-auto px-6 py-16">
 
         {/* HEADER */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-14">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Pricing</p>
           <h1 className="text-4xl font-extrabold tracking-tight mb-4">
-            Simple, transparent pricing
+            Simple, honest pricing
           </h1>
           <p className="text-gray-500 text-sm max-w-xl mx-auto leading-relaxed">
-            Tools that charge $99/month for basic scheduling exist. SocialMate doesn't believe creators should have to pay that. Everything you need — at a fraction of the cost.
+            Buffer charges $18/mo for 5 platforms. Hootsuite charges $99/mo. SocialMate gives you all 16 platforms, 12 AI tools, and a Link in Bio page — starting at $0.
           </p>
 
-          {/* INTERVAL TOGGLE */}
           <div className="flex items-center justify-center gap-1 mt-8 bg-gray-100 rounded-2xl p-1 w-fit mx-auto">
             {(['monthly', 'annual'] as Interval[]).map(i => (
-              <button
-                key={i}
-                onClick={() => setInterval(i)}
+              <button key={i} onClick={() => setInterval(i)}
                 className={`px-5 py-2 rounded-xl text-sm font-bold transition-all ${
                   interval === i ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'
                 }`}>
                 {i === 'monthly' ? 'Monthly' : (
                   <span className="flex items-center gap-2">
                     Annual
-                    <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
-                      Save up to 13%
-                    </span>
+                    <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">Save up to 13%</span>
                   </span>
                 )}
               </button>
@@ -219,13 +247,13 @@ export default function Pricing() {
         </div>
 
         {/* PLAN CARDS */}
-        <div className="grid grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           {PLANS.map(plan => {
             const priceId = annual ? plan.annualPriceId : plan.monthlyPriceId
             return (
               <div key={plan.name} className={`bg-white border-2 rounded-2xl overflow-hidden flex flex-col ${plan.color}`}>
-                <div className={`px-6 py-5 ${plan.headerBg}`}>
-                  <div className="flex items-center justify-between mb-2">
+                <div className={`px-6 py-6 ${plan.headerBg}`}>
+                  <div className="flex items-center justify-between mb-3">
                     <h2 className={`text-lg font-extrabold ${plan.headerText}`}>{plan.name}</h2>
                     {plan.badge && (
                       <span className="text-xs font-bold px-3 py-1 bg-white text-black rounded-full">{plan.badge}</span>
@@ -234,34 +262,34 @@ export default function Pricing() {
 
                   {plan.monthlyPrice === 0 ? (
                     <div className={`flex items-end gap-1 mb-2 ${plan.headerText}`}>
-                      <span className="text-3xl font-extrabold">$0</span>
-                      <span className={`text-sm mb-1 ${plan.subText}`}>/month, forever</span>
+                      <span className="text-4xl font-extrabold">$0</span>
+                      <span className={`text-sm mb-1.5 ${plan.subText}`}>/month, forever</span>
                     </div>
                   ) : annual ? (
                     <div className="mb-2">
                       <div className={`flex items-end gap-1 ${plan.headerText}`}>
-                        <span className="text-3xl font-extrabold">${plan.annualPrice}</span>
-                        <span className={`text-sm mb-1 ${plan.subText}`}>/year</span>
+                        <span className="text-4xl font-extrabold">${plan.annualPrice}</span>
+                        <span className={`text-sm mb-1.5 ${plan.subText}`}>/year</span>
                       </div>
-                      <p className={`text-xs mt-0.5 ${plan.subText}`}>
+                      <p className={`text-xs mt-1 ${plan.subText}`}>
                         ~${plan.annualMonthly}/mo ·{' '}
                         <span className="text-green-400 font-bold">save ${plan.annualSaving}</span>
                       </p>
                     </div>
                   ) : (
                     <div className={`flex items-end gap-1 mb-2 ${plan.headerText}`}>
-                      <span className="text-3xl font-extrabold">${plan.monthlyPrice}</span>
-                      <span className={`text-sm mb-1 ${plan.subText}`}>/month</span>
+                      <span className="text-4xl font-extrabold">${plan.monthlyPrice}</span>
+                      <span className={`text-sm mb-1.5 ${plan.subText}`}>/month</span>
                     </div>
                   )}
-                  <p className={`text-xs ${plan.subText}`}>{plan.description}</p>
+                  <p className={`text-xs leading-relaxed ${plan.subText}`}>{plan.description}</p>
                 </div>
 
                 <div className="px-6 py-5 flex-1 flex flex-col">
                   <ul className="space-y-2.5 flex-1 mb-6">
                     {plan.features.map((f, i) => (
                       <li key={i} className="flex items-start gap-2">
-                        <span className="text-green-500 mt-0.5 flex-shrink-0">✓</span>
+                        <span className="text-green-500 mt-0.5 flex-shrink-0 font-bold">✓</span>
                         <span className="text-xs text-gray-600">
                           {f.label}
                           {f.note && <span className="text-gray-400"> — {f.note}</span>}
@@ -270,16 +298,14 @@ export default function Pricing() {
                     ))}
                   </ul>
 
-                  {priceId !== null ? (
-                    <button
-                      onClick={() => handleCheckout(priceId!, plan.name)}
+                  {priceId ? (
+                    <button onClick={() => handleCheckout(priceId, plan.name)}
                       disabled={loading === plan.name}
                       className={`w-full text-center text-sm font-bold py-3 rounded-xl transition-all disabled:opacity-60 ${plan.ctaStyle}`}>
                       {loading === plan.name ? 'Loading...' : plan.cta}
                     </button>
                   ) : plan.ctaHref ? (
-                    <Link
-                      href={plan.ctaHref}
+                    <Link href={plan.ctaHref}
                       className={`w-full text-center text-sm font-bold py-3 rounded-xl transition-all ${plan.ctaStyle}`}>
                       {plan.cta}
                     </Link>
@@ -290,89 +316,136 @@ export default function Pricing() {
           })}
         </div>
 
-        {/* WHITE LABEL ADDON */}
+        {/* WHITE LABEL ADD-ON */}
         <div className="bg-white border border-gray-100 rounded-2xl p-6 mb-8">
-          <div className="flex items-start justify-between gap-6">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className="text-base font-extrabold">White Label Add-on</h3>
-                <span className="text-xs font-bold px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">Pro & Agency</span>
+          <div className="mb-5">
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="text-base font-extrabold">White Label Add-on</h3>
+              <span className="text-xs font-bold px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">Pro & Agency only</span>
+            </div>
+            <p className="text-xs text-gray-500">Remove SocialMate branding entirely. Your logo, your colors, your domain. Two tiers based on how deep you want to go.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {WHITE_LABEL_TIERS.map(wl => (
+              <div key={wl.name} className={`border-2 rounded-2xl p-5 ${wl.highlight ? 'border-black' : 'border-gray-100'}`}>
+                {wl.highlight && (
+                  <span className="text-xs font-bold bg-black text-white px-2 py-0.5 rounded-full mb-3 inline-block">Best for agencies</span>
+                )}
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <p className="text-sm font-extrabold">{wl.name}</p>
+                    <p className="text-xl font-extrabold mt-0.5">{wl.price}</p>
+                  </div>
+                  <button onClick={() => handleCheckout(wl.priceId, wl.name)}
+                    disabled={loading === wl.name}
+                    className={`text-xs font-bold px-4 py-2 rounded-xl transition-all disabled:opacity-60 ${
+                      wl.highlight ? 'bg-black text-white hover:opacity-80' : 'border border-gray-200 text-gray-700 hover:border-black'
+                    }`}>
+                    {loading === wl.name ? 'Loading...' : 'Add to plan →'}
+                  </button>
+                </div>
+                <ul className="space-y-2">
+                  {wl.features.map((f, i) => (
+                    <li key={i} className="flex items-center gap-2 text-xs text-gray-600">
+                      <span className="text-green-500 font-bold flex-shrink-0">✓</span>{f}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <p className="text-xs text-gray-500 mb-4">
-                Remove SocialMate branding entirely and replace it with your own. Perfect for agencies delivering social media services under their own brand.
-              </p>
-              <ul className="grid grid-cols-2 gap-2">
-                {WHITE_LABEL_FEATURES.map((f, i) => (
-                  <li key={i} className="flex items-center gap-2 text-xs text-gray-600">
-                    <span className="text-green-500">✓</span> {f}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="text-right flex-shrink-0">
-              <div className="text-2xl font-extrabold">$20</div>
-              <div className="text-xs text-gray-400">/month add-on</div>
-              <button
-                onClick={() => handleCheckout(STRIPE_WHITE_LABEL_PRICE_ID, 'WhiteLabel')}
-                disabled={loading === 'WhiteLabel'}
-                className="mt-3 inline-block text-xs font-bold px-4 py-2 bg-black text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
-                {loading === 'WhiteLabel' ? 'Loading...' : 'Add to plan →'}
-              </button>
-            </div>
+            ))}
           </div>
         </div>
 
-        {/* AI CREDITS BREAKDOWN */}
+        {/* AI CREDIT COSTS */}
         <div className="bg-white border border-gray-100 rounded-2xl p-6 mb-8">
-          <h3 className="text-base font-extrabold mb-1">AI Credit Costs</h3>
-          <p className="text-xs text-gray-500 mb-5">
-            Credits refresh monthly. Unused credits bank up — Free banks up to 150, Pro up to 750, Agency up to 3,000. Banks reset every 6 months.
-          </p>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="flex items-start justify-between mb-5">
+            <div>
+              <h3 className="text-base font-extrabold mb-1">AI Credit Costs</h3>
+              <p className="text-xs text-gray-500 max-w-xl">
+                Credits refresh monthly. Unused credits roll over into your bank — Free banks up to 150, Pro up to 750, Agency up to 3,000. Banks reset every 6 months.
+              </p>
+            </div>
+            <Link href="/ai-features"
+              className="text-xs font-bold text-black hover:underline flex-shrink-0 ml-4">
+              See all tools →
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
             {AI_CREDITS.map((item, i) => (
-              <div key={i} className="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2">
-                <span className="text-xs text-gray-600">
+              <div key={i} className="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2.5">
+                <span className="text-xs text-gray-700 font-semibold">
                   {item.feature}
                   {item.proOnly && (
                     <span className="ml-1.5 text-xs font-bold text-purple-500 bg-purple-50 px-1.5 py-0.5 rounded-full">Pro+</span>
                   )}
                 </span>
-                <span className="text-xs font-bold text-gray-800 ml-2 flex-shrink-0">{item.cost}</span>
+                <span className="text-xs font-extrabold text-gray-900 ml-3 flex-shrink-0">{item.cost}</span>
               </div>
             ))}
           </div>
-          <p className="text-xs text-gray-400 mt-4">
-            Editing AI-generated content is always free. Credits are only charged at generation.
-          </p>
+          <div className="mt-4 flex items-center justify-between">
+            <p className="text-xs text-gray-400">Editing AI-generated content is always free — credits only charge on generation.</p>
+            <Link href="/settings?tab=Plan"
+              className="text-xs font-bold text-black hover:underline flex-shrink-0">
+              Buy credit packs →
+            </Link>
+          </div>
+        </div>
+
+        {/* CREDIT PACKS */}
+        <div className="bg-black text-white rounded-2xl p-6 mb-8">
+          <div className="flex items-start justify-between mb-5">
+            <div>
+              <h3 className="text-base font-extrabold mb-1">Need more credits?</h3>
+              <p className="text-xs text-gray-400">One-time credit packs — added to your balance instantly. No subscription.</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {[
+              { label: 'Starter',  credits: '100 cr',   price: '$1.99' },
+              { label: 'Popular',  credits: '300 cr',   price: '$4.99',  badge: true },
+              { label: 'Pro Pack', credits: '750 cr',   price: '$9.99' },
+              { label: 'Max Pack', credits: '2,000 cr', price: '$19.99' },
+            ].map(pack => (
+              <div key={pack.label} className={`bg-white/10 rounded-xl p-4 text-center relative ${pack.badge ? 'ring-2 ring-white' : ''}`}>
+                {pack.badge && (
+                  <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-xs font-bold bg-white text-black px-2 py-0.5 rounded-full">Popular</span>
+                )}
+                <p className="text-sm font-extrabold mb-0.5">{pack.label}</p>
+                <p className="text-xs text-gray-400 mb-2">{pack.credits}</p>
+                <p className="text-lg font-extrabold">{pack.price}</p>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-gray-500 mt-4 text-center">Purchase credit packs from Settings → Plan after signing up</p>
         </div>
 
         {/* FAQ */}
         <div className="bg-white border border-gray-100 rounded-2xl p-6">
-          <h3 className="text-base font-extrabold mb-4">Why is SocialMate so affordable?</h3>
-          <div className="grid grid-cols-2 gap-6">
-            {[
-              {
-                q: 'How is Free this generous?',
-                a: 'We built SocialMate lean from day one. By controlling AI costs with a credit system and keeping infrastructure efficient, we can offer genuinely powerful tools for free.',
-              },
-              {
-                q: 'Will prices go up?',
-                a: "Current pricing is locked for all active subscribers. If pricing ever changes, you'll know well in advance and grandfathered rates will be honored.",
-              },
-              {
-                q: 'What happens when I run out of AI credits?',
-                a: 'You can still schedule, draft, and manage posts manually — for free. AI features pause until your credits refresh next month, or you can earn more through referrals.',
-              },
-              {
-                q: 'Can I earn extra credits?',
-                a: 'Yes. Refer a friend — when they publish their first post you both earn +10 credits. If they upgrade to Pro you earn +25, Agency earns you +50.',
-              },
-            ].map((item, i) => (
+          <h3 className="text-base font-extrabold mb-6">Frequently asked questions</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {FAQ.map((item, i) => (
               <div key={i}>
-                <p className="text-xs font-bold mb-1">{item.q}</p>
+                <p className="text-xs font-extrabold mb-1.5">{item.q}</p>
                 <p className="text-xs text-gray-500 leading-relaxed">{item.a}</p>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* BOTTOM CTA */}
+        <div className="text-center mt-12">
+          <h2 className="text-2xl font-extrabold mb-2">Ready to get started?</h2>
+          <p className="text-sm text-gray-500 mb-6">No card required. Free forever. 100 AI credits on your first post.</p>
+          <div className="flex items-center justify-center gap-4">
+            <Link href="/signup"
+              className="bg-black text-white font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm">
+              Create free account →
+            </Link>
+            <Link href="/features"
+              className="text-gray-500 font-semibold hover:text-black transition-all text-sm">
+              See all features →
+            </Link>
           </div>
         </div>
 
