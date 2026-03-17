@@ -23,7 +23,7 @@ type Account = {
   is_active: boolean
 }
 
-type PlatformStatus = 'available' | 'coming_soon' | 'planned'
+type PlatformStatus = 'live' | 'coming_soon' | 'planned'
 
 const PLATFORM_META: Record<string, {
   icon: string
@@ -32,28 +32,28 @@ const PLATFORM_META: Record<string, {
   status: PlatformStatus
   statusNote?: string
 }> = {
-  youtube:   { icon: '▶️', color: 'bg-red-50 border-red-200',       label: 'YouTube',     status: 'available' },
-  reddit:    { icon: '🤖', color: 'bg-orange-50 border-orange-200', label: 'Reddit',      status: 'available' },
-  discord:   { icon: '💬', color: 'bg-indigo-50 border-indigo-200', label: 'Discord',     status: 'available' },
-  linkedin:  { icon: '💼', color: 'bg-blue-50 border-blue-200',     label: 'LinkedIn',    status: 'available' },
-  pinterest: { icon: '📌', color: 'bg-red-50 border-red-200',       label: 'Pinterest',   status: 'available' },
-  mastodon:  { icon: '🐘', color: 'bg-purple-50 border-purple-200', label: 'Mastodon',    status: 'available' },
-  bluesky:   { icon: '🦋', color: 'bg-sky-50 border-sky-200',       label: 'Bluesky',     status: 'available' },
-  telegram:  { icon: '✈️', color: 'bg-sky-50 border-sky-200',       label: 'Telegram',    status: 'available' },
-  instagram: { icon: '📸', color: 'bg-pink-50 border-pink-200',     label: 'Instagram',   status: 'coming_soon', statusNote: 'Awaiting API approval' },
-  facebook:  { icon: '📘', color: 'bg-blue-50 border-blue-200',     label: 'Facebook',    status: 'coming_soon', statusNote: 'Awaiting API approval' },
-  tiktok:    { icon: '🎵', color: 'bg-gray-50 border-gray-200',     label: 'TikTok',      status: 'coming_soon', statusNote: 'Awaiting API approval' },
-  threads:   { icon: '🧵', color: 'bg-gray-50 border-gray-200',     label: 'Threads',     status: 'coming_soon', statusNote: 'Awaiting API approval' },
-  twitter:   { icon: '🐦', color: 'bg-sky-50 border-sky-200',       label: 'X / Twitter', status: 'planned',     statusNote: 'Planned integration' },
-  snapchat:  { icon: '👻', color: 'bg-yellow-50 border-yellow-200', label: 'Snapchat',    status: 'planned',     statusNote: 'Planned integration' },
-  lemon8:    { icon: '🍋', color: 'bg-yellow-50 border-yellow-200', label: 'Lemon8',      status: 'planned',     statusNote: 'Planned integration' },
-  bereal:    { icon: '📷', color: 'bg-gray-50 border-gray-200',     label: 'BeReal',      status: 'planned',     statusNote: 'Planned integration' },
+  discord:   { icon: '💬', color: 'bg-indigo-50 border-indigo-200', label: 'Discord',     status: 'live'        },
+  bluesky:   { icon: '🦋', color: 'bg-sky-50 border-sky-200',       label: 'Bluesky',     status: 'live'        },
+  telegram:  { icon: '✈️', color: 'bg-sky-50 border-sky-200',       label: 'Telegram',    status: 'live'        },
+  mastodon:  { icon: '🐘', color: 'bg-purple-50 border-purple-200', label: 'Mastodon',    status: 'live'        },
+  linkedin:  { icon: '💼', color: 'bg-blue-50 border-blue-200',     label: 'LinkedIn',    status: 'coming_soon', statusNote: 'Code complete — awaiting approval' },
+  youtube:   { icon: '▶️', color: 'bg-red-50 border-red-200',       label: 'YouTube',     status: 'coming_soon', statusNote: 'Code complete — awaiting approval' },
+  pinterest: { icon: '📌', color: 'bg-red-50 border-red-200',       label: 'Pinterest',   status: 'coming_soon', statusNote: 'Code complete — awaiting approval' },
+  reddit:    { icon: '🤖', color: 'bg-orange-50 border-orange-200', label: 'Reddit',      status: 'coming_soon', statusNote: 'Code complete — awaiting approval' },
+  instagram: { icon: '📸', color: 'bg-pink-50 border-pink-200',     label: 'Instagram',   status: 'coming_soon', statusNote: 'Awaiting API approval'             },
+  facebook:  { icon: '📘', color: 'bg-blue-50 border-blue-200',     label: 'Facebook',    status: 'coming_soon', statusNote: 'Awaiting API approval'             },
+  tiktok:    { icon: '🎵', color: 'bg-gray-50 border-gray-200',     label: 'TikTok',      status: 'coming_soon', statusNote: 'Awaiting API approval'             },
+  threads:   { icon: '🧵', color: 'bg-gray-50 border-gray-200',     label: 'Threads',     status: 'coming_soon', statusNote: 'Awaiting API approval'             },
+  twitter:   { icon: '🐦', color: 'bg-sky-50 border-sky-200',       label: 'X / Twitter', status: 'planned',     statusNote: 'Planned integration'              },
+  snapchat:  { icon: '👻', color: 'bg-yellow-50 border-yellow-200', label: 'Snapchat',    status: 'planned',     statusNote: 'Planned integration'              },
+  lemon8:    { icon: '🍋', color: 'bg-yellow-50 border-yellow-200', label: 'Lemon8',      status: 'planned',     statusNote: 'Planned integration'              },
+  bereal:    { icon: '📷', color: 'bg-gray-50 border-gray-200',     label: 'BeReal',      status: 'planned',     statusNote: 'Planned integration'              },
 }
 
-const ALL_PLATFORMS = Object.keys(PLATFORM_META)
-const AVAILABLE_PLATFORMS = ALL_PLATFORMS.filter(p => PLATFORM_META[p].status === 'available')
+const ALL_PLATFORMS       = Object.keys(PLATFORM_META)
+const LIVE_PLATFORMS      = ALL_PLATFORMS.filter(p => PLATFORM_META[p].status === 'live')
 const COMING_SOON_PLATFORMS = ALL_PLATFORMS.filter(p => PLATFORM_META[p].status === 'coming_soon')
-const PLANNED_PLATFORMS = ALL_PLATFORMS.filter(p => PLATFORM_META[p].status === 'planned')
+const PLANNED_PLATFORMS   = ALL_PLATFORMS.filter(p => PLATFORM_META[p].status === 'planned')
 
 function PlatformCard({
   platform, connectable, accountsPerPlatform, accountsByPlatform, connectingPlatform, onConnect,
@@ -73,32 +73,32 @@ function PlatformCard({
 
   if (!connectable) {
     return (
-      <div className="flex items-center gap-3 p-4 bg-white border border-gray-100 rounded-2xl opacity-50">
+      <div className="flex items-center gap-3 p-4 bg-white border border-gray-100 rounded-2xl opacity-60">
         <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-xl flex-shrink-0">
           {meta.icon}
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-gray-600">{meta.label}</p>
-          <p className="text-xs text-gray-400">{meta.statusNote}</p>
+          <p className="text-xs text-gray-400 truncate">{meta.statusNote}</p>
         </div>
-        <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
+        <span className={`text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0 ${
           meta.status === 'coming_soon' ? 'bg-blue-50 text-blue-500' : 'bg-gray-100 text-gray-400'
         }`}>
-          {meta.status === 'coming_soon' ? 'Coming Soon' : 'Planned'}
+          {meta.status === 'coming_soon' ? 'Soon' : 'Planned'}
         </span>
       </div>
     )
   }
 
   return (
-    <div className={`flex items-center gap-3 p-4 bg-white border rounded-2xl transition-all group ${
+    <div className={`flex items-center gap-3 p-4 bg-white border rounded-2xl transition-all ${
       atLimit ? 'border-gray-100 opacity-60' : 'border-gray-100 hover:border-gray-300'
     }`}>
       <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-xl flex-shrink-0">
         {meta.icon}
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <p className="text-sm font-semibold">{meta.label}</p>
           {isConnected && (
             <span className="text-xs font-semibold px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
@@ -110,17 +110,18 @@ function PlatformCard({
           {platformCount > 0 ? `${platformCount}/${accountsPerPlatform} connected` : 'Not connected'}
         </p>
       </div>
+      {/* Always visible on mobile, hover-revealed on desktop */}
       {atLimit ? (
         <Link href="/pricing"
-          className="text-xs font-semibold px-3 py-1.5 bg-gray-100 text-gray-500 rounded-xl hover:bg-gray-200 transition-all opacity-0 group-hover:opacity-100">
+          className="text-xs font-semibold px-3 py-1.5 bg-gray-100 text-gray-500 rounded-xl hover:bg-gray-200 transition-all flex-shrink-0">
           Upgrade
         </Link>
       ) : (
         <button
           onClick={() => onConnect(platform)}
           disabled={isConnecting}
-          className="text-xs font-semibold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all opacity-0 group-hover:opacity-100 disabled:opacity-50">
-          {isConnecting ? 'Connecting...' : platformCount > 0 ? 'Add account' : 'Connect'}
+          className="text-xs font-semibold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex-shrink-0">
+          {isConnecting ? 'Connecting...' : isConnected ? '+ Add' : 'Connect'}
         </button>
       )}
     </div>
@@ -133,6 +134,7 @@ function AccountsInner() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null)
   const [confirmDisconnect, setConfirmDisconnect] = useState<string | null>(null)
+  const [disconnecting, setDisconnecting] = useState<string | null>(null)
   const [showDiscordModal, setShowDiscordModal] = useState(false)
   const [showBlueskyModal, setShowBlueskyModal] = useState(false)
   const [showTelegramModal, setShowTelegramModal] = useState(false)
@@ -141,7 +143,7 @@ function AccountsInner() {
   const searchParams = useSearchParams()
   const { plan } = useWorkspace()
 
-  const planConfig = PLAN_CONFIG[plan]
+  const planConfig = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
   const accountsPerPlatform = planConfig.accountsPerPlatform
 
   const showToast = (message: string, type: 'success' | 'error') => {
@@ -173,24 +175,24 @@ function AccountsInner() {
     if (error === 'mastodon_no_instance')          showToast('No instance provided', 'error')
     if (error === 'mastodon_instance_unreachable') showToast('Could not reach that Mastodon instance', 'error')
     if (error === 'mastodon_register_failed')      showToast('Failed to register with that instance', 'error')
-    if (error === 'mastodon_invalid_state')        showToast('Security check failed, please try again', 'error')
-    if (error === 'mastodon_token_failed')         showToast('Failed to connect Mastodon, please try again', 'error')
+    if (error === 'mastodon_invalid_state')        showToast('Security check failed — please try again', 'error')
+    if (error === 'mastodon_token_failed')         showToast('Failed to connect Mastodon — please try again', 'error')
     if (error === 'mastodon_db_error')             showToast('Something went wrong saving your account', 'error')
     if (error === 'pinterest_denied')              showToast('Pinterest connection cancelled', 'error')
-    if (error === 'pinterest_invalid_state')       showToast('Security check failed, please try again', 'error')
-    if (error === 'pinterest_token_failed')        showToast('Failed to connect Pinterest, please try again', 'error')
+    if (error === 'pinterest_invalid_state')       showToast('Security check failed — please try again', 'error')
+    if (error === 'pinterest_token_failed')        showToast('Failed to connect Pinterest — please try again', 'error')
     if (error === 'pinterest_db_error')            showToast('Something went wrong saving your account', 'error')
     if (error === 'linkedin_denied')               showToast('LinkedIn connection cancelled', 'error')
-    if (error === 'linkedin_invalid_state')        showToast('Security check failed, please try again', 'error')
-    if (error === 'linkedin_token_failed')         showToast('Failed to connect LinkedIn, please try again', 'error')
+    if (error === 'linkedin_invalid_state')        showToast('Security check failed — please try again', 'error')
+    if (error === 'linkedin_token_failed')         showToast('Failed to connect LinkedIn — please try again', 'error')
     if (error === 'linkedin_db_error')             showToast('Something went wrong saving your account', 'error')
     if (error === 'youtube_denied')                showToast('YouTube connection cancelled', 'error')
-    if (error === 'youtube_invalid_state')         showToast('Security check failed, please try again', 'error')
-    if (error === 'youtube_token_failed')          showToast('Failed to connect YouTube, please try again', 'error')
+    if (error === 'youtube_invalid_state')         showToast('Security check failed — please try again', 'error')
+    if (error === 'youtube_token_failed')          showToast('Failed to connect YouTube — please try again', 'error')
     if (error === 'youtube_no_channel')            showToast('No YouTube channel found on this account', 'error')
     if (error === 'youtube_db_error')              showToast('Something went wrong saving your account', 'error')
-    if (error === 'invalid_state')                 showToast('Security check failed, please try again', 'error')
-    if (error === 'token_failed')                  showToast('Failed to connect, please try again', 'error')
+    if (error === 'invalid_state')                 showToast('Security check failed — please try again', 'error')
+    if (error === 'token_failed')                  showToast('Failed to connect — please try again', 'error')
     if (error === 'db_error')                      showToast('Something went wrong saving your account', 'error')
   }, [searchParams])
 
@@ -210,9 +212,11 @@ function AccountsInner() {
   }, [router])
 
   const handleDisconnect = async (id: string, platform: string) => {
+    setDisconnecting(id)
     await supabase.from('connected_accounts').delete().eq('id', id)
     setAccounts(prev => prev.filter(a => a.id !== id))
     setConfirmDisconnect(null)
+    setDisconnecting(null)
     showToast(`${PLATFORM_META[platform]?.label || platform} disconnected`, 'success')
   }
 
@@ -229,7 +233,6 @@ function AccountsInner() {
     if (platform === 'pinterest') { window.location.href = '/api/accounts/pinterest/connect'; return }
     if (platform === 'linkedin')  { window.location.href = '/api/accounts/linkedin/connect';  return }
     if (platform === 'youtube')   { window.location.href = '/api/accounts/youtube/connect';   return }
-
     setConnectingPlatform(platform)
     showToast(`${PLATFORM_META[platform]?.label || platform} integration coming soon!`, 'success')
     setTimeout(() => setConnectingPlatform(null), 2000)
@@ -258,53 +261,54 @@ function AccountsInner() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar />
-      <div className="ml-56 flex-1 p-8">
-        <div className="max-w-7xl mx-auto">
+      <div className="md:ml-56 flex-1 p-4 md:p-8">
+        <div className="max-w-5xl mx-auto">
 
-          <div className="flex items-center justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Accounts</h1>
               <p className="text-sm text-gray-400 mt-0.5">Connect and manage your social media accounts</p>
             </div>
-            <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 bg-white border border-gray-100 rounded-xl px-4 py-2.5">
+            <div className="text-xs font-semibold text-gray-500 bg-white border border-gray-100 rounded-xl px-4 py-2.5 self-start sm:self-auto">
               {accounts.length} connected · {accountsPerPlatform} per platform on {planConfig.label}
             </div>
           </div>
 
-          <div className={`mb-6 rounded-2xl px-5 py-3 border flex items-center justify-between ${
-            plan === 'free' ? 'bg-gray-50 border-gray-200' :
-            plan === 'pro' ? 'bg-blue-50 border-blue-100' :
+          <div className={`mb-6 rounded-2xl px-5 py-4 border flex flex-col sm:flex-row sm:items-center gap-3 ${
+            plan === 'free'   ? 'bg-gray-50 border-gray-200'      :
+            plan === 'pro'    ? 'bg-blue-50 border-blue-100'       :
             'bg-purple-50 border-purple-100'
           }`}>
-            <div>
+            <div className="flex-1">
               <p className={`text-xs font-bold ${
                 plan === 'agency' ? 'text-purple-700' :
-                plan === 'pro' ? 'text-blue-700' : 'text-gray-700'
+                plan === 'pro'    ? 'text-blue-700'   : 'text-gray-700'
               }`}>
-                {plan === 'free' && '🔓 Free plan — 1 account per platform across 8 live integrations'}
-                {plan === 'pro' && '⚡ Pro plan — up to 5 accounts per platform across all integrations'}
+                {plan === 'free'   && '🔓 Free plan — 1 account per platform across 4 live integrations'}
+                {plan === 'pro'    && '⚡ Pro plan — up to 5 accounts per platform'}
                 {plan === 'agency' && '🏢 Agency plan — up to 10 accounts per platform, client workspaces included'}
               </p>
               <p className="text-xs text-gray-400 mt-0.5">
-                {plan === 'free' ? 'More platforms are in review. Upgrade to Pro to unlock priority access as they launch.' :
-                 plan === 'pro' ? 'Upgrade to Agency for 10 accounts per platform and client workspaces.' :
+                {plan === 'free'   ? 'LinkedIn, YouTube, Pinterest & Reddit are coming very soon. Upgrade to Pro for more accounts per platform.' :
+                 plan === 'pro'    ? 'Upgrade to Agency for 10 accounts per platform and client workspaces.' :
                  "You're on the highest tier — full access across all platforms as they go live."}
               </p>
             </div>
             {plan !== 'agency' && (
-              <Link href="/pricing"
-                className="bg-black text-white text-xs font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all flex-shrink-0 ml-4">
+              <Link href="/settings?tab=Plan"
+                className="bg-black text-white text-xs font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all self-start sm:self-auto flex-shrink-0">
                 Upgrade →
               </Link>
             )}
           </div>
 
-          <div className="grid grid-cols-3 gap-4 mb-8">
+          {/* STAT CARDS */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
             {loading ? [1,2,3].map(i => <SkeletonBox key={i} className="h-20 rounded-2xl" />) : (
               [
-                { label: 'Connected',            value: accounts.length,                                                    icon: '✅', color: 'text-green-600' },
-                { label: 'Platforms Used',        value: `${connectedPlatforms.size} / ${AVAILABLE_PLATFORMS.length} live`, icon: '📱', color: 'text-gray-700' },
-                { label: 'Accounts Per Platform', value: `${accountsPerPlatform} max`,                                      icon: '🔓', color: 'text-blue-600' },
+                { label: 'Connected',             value: accounts.length,                                              icon: '✅', color: 'text-green-600' },
+                { label: 'Platforms Used',         value: `${connectedPlatforms.size} / ${LIVE_PLATFORMS.length} live`, icon: '📱', color: 'text-gray-700' },
+                { label: 'Accounts Per Platform',  value: `${accountsPerPlatform} max`,                                icon: '🔓', color: 'text-blue-600' },
               ].map(stat => (
                 <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-4">
                   <div className="flex justify-between items-center mb-2">
@@ -317,52 +321,62 @@ function AccountsInner() {
             )}
           </div>
 
+          {/* CONNECTED ACCOUNTS */}
           {!loading && accounts.length > 0 && (
             <div className="mb-8">
               <h2 className="text-sm font-bold tracking-tight mb-4">Connected Accounts</h2>
-              <div className="grid grid-cols-1 gap-3">
+              <div className="space-y-3">
                 {accounts.map(account => {
                   const meta = PLATFORM_META[account.platform] || { icon: '📱', color: 'bg-gray-50 border-gray-200', label: account.platform }
                   const platformCount = accountsByPlatform[account.platform]?.length || 0
                   const isConfirming = confirmDisconnect === account.id
+                  const isDisconnecting = disconnecting === account.id
                   return (
-                    <div key={account.id} className={`flex items-center gap-4 p-4 bg-white border rounded-2xl ${meta.color} transition-all`}>
-                      <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-xl flex-shrink-0 shadow-sm">
-                        {meta.icon}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm font-bold">{meta.label}</p>
-                          <span className="text-xs font-semibold px-2 py-0.5 bg-green-100 text-green-700 rounded-full">Connected</span>
-                          {platformCount > 1 && (
-                            <span className="text-xs text-gray-400">{platformCount}/{accountsPerPlatform} accounts</span>
-                          )}
+                    <div key={account.id} className={`p-4 bg-white border rounded-2xl ${meta.color} transition-all`}>
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-xl flex-shrink-0 shadow-sm">
+                          {meta.icon}
                         </div>
-                        <p className="text-xs text-gray-500 mt-0.5">@{account.account_name}</p>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="text-sm font-bold">{meta.label}</p>
+                            <span className="text-xs font-semibold px-2 py-0.5 bg-green-100 text-green-700 rounded-full">Connected</span>
+                            {platformCount > 1 && (
+                              <span className="text-xs text-gray-400">{platformCount}/{accountsPerPlatform} accounts</span>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            @{account.account_name} · Connected {new Date(account.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                          </p>
+                        </div>
+                        {!isConfirming && (
+                          <button onClick={() => setConfirmDisconnect(account.id)}
+                            className="text-xs font-semibold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 hover:text-red-600 transition-all flex-shrink-0">
+                            Disconnect
+                          </button>
+                        )}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <p className="text-xs text-gray-400">
-                          Connected {new Date(account.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                        </p>
-                        {isConfirming ? (
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-red-500 font-semibold">Disconnect?</span>
+
+                      {isConfirming && (
+                        <div className="mt-3 pt-3 border-t border-white/60 flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                          <p className="text-xs text-red-600 font-semibold flex-1">
+                            Disconnect @{account.account_name} from {meta.label}? This cannot be undone.
+                          </p>
+                          <div className="flex items-center gap-2 flex-shrink-0">
                             <button onClick={() => handleDisconnect(account.id, account.platform)}
-                              className="text-xs font-bold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all">
-                              Yes
+                              disabled={isDisconnecting}
+                              className="text-xs font-bold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center gap-1.5">
+                              {isDisconnecting ? (
+                                <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Disconnecting...</>
+                              ) : 'Yes, disconnect'}
                             </button>
                             <button onClick={() => setConfirmDisconnect(null)}
                               className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
                               Cancel
                             </button>
                           </div>
-                        ) : (
-                          <button onClick={() => setConfirmDisconnect(account.id)}
-                            className="text-xs font-semibold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 hover:text-red-600 transition-all">
-                            Disconnect
-                          </button>
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
                   )
                 })}
@@ -370,18 +384,19 @@ function AccountsInner() {
             </div>
           )}
 
+          {/* LIVE INTEGRATIONS */}
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
               <h2 className="text-sm font-bold tracking-tight">Live Integrations</h2>
-              <span className="text-xs font-semibold px-2 py-0.5 bg-green-100 text-green-700 rounded-full">{AVAILABLE_PLATFORMS.length} available</span>
+              <span className="text-xs font-semibold px-2 py-0.5 bg-green-100 text-green-700 rounded-full">{LIVE_PLATFORMS.length} available now</span>
             </div>
             {loading ? (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[1,2,3,4].map(i => <SkeletonBox key={i} className="h-16 rounded-2xl" />)}
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-3">
-                {AVAILABLE_PLATFORMS.map(platform => (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {LIVE_PLATFORMS.map(platform => (
                   <PlatformCard
                     key={platform}
                     platform={platform}
@@ -396,12 +411,13 @@ function AccountsInner() {
             )}
           </div>
 
+          {/* COMING SOON */}
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
-              <h2 className="text-sm font-bold tracking-tight">Coming Soon</h2>
+              <h2 className="text-sm font-bold tracking-tight">Coming Very Soon</h2>
               <span className="text-xs font-semibold px-2 py-0.5 bg-blue-100 text-blue-600 rounded-full">Awaiting approval</span>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {COMING_SOON_PLATFORMS.map(platform => (
                 <PlatformCard
                   key={platform}
@@ -416,12 +432,13 @@ function AccountsInner() {
             </div>
           </div>
 
+          {/* PLANNED */}
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
               <h2 className="text-sm font-bold tracking-tight">Planned</h2>
               <span className="text-xs font-semibold px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full">On the roadmap</span>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {PLANNED_PLATFORMS.map(platform => (
                 <PlatformCard
                   key={platform}
@@ -438,11 +455,13 @@ function AccountsInner() {
 
           <div className="bg-gray-50 border border-gray-100 rounded-2xl p-5">
             <div className="flex items-start gap-4">
-              <span className="text-2xl">🚀</span>
+              <span className="text-2xl flex-shrink-0">🚀</span>
               <div>
                 <p className="text-sm font-bold mb-1">More platforms are on the way</p>
                 <p className="text-xs text-gray-500 leading-relaxed">
-                  SocialMate is actively expanding integrations. Instagram, TikTok, Facebook, and Threads are in developer review. We'll notify you on your dashboard the moment a new platform goes live.
+                  LinkedIn, YouTube, Pinterest, and Reddit are code-complete and awaiting platform approval — launching very soon.
+                  Instagram, TikTok, Facebook, and Threads are in developer review.
+                  We'll notify you on your dashboard the moment each one goes live.
                 </p>
               </div>
             </div>
@@ -451,23 +470,23 @@ function AccountsInner() {
         </div>
       </div>
 
+      {/* DISCORD MODAL */}
       {showDiscordModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-xl">
-            <p className="text-lg font-bold mb-2">💬 Adding a Discord Account</p>
-            <p className="text-sm text-gray-500 mb-4">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
+            <p className="text-lg font-bold mb-2">💬 Connect Discord</p>
+            <p className="text-sm text-gray-500 mb-4 leading-relaxed">
               Make sure you're logged into the Discord account you want to connect before continuing.
-              To add a different account, log into that Discord account in your browser first.
+              To add a different account, log into that account in your browser first.
             </p>
             <div className="flex gap-3">
               <button onClick={() => setShowDiscordModal(false)}
                 className="flex-1 text-sm font-semibold px-4 py-2.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
                 Cancel
               </button>
-              <button
-                onClick={() => { setShowDiscordModal(false); window.location.href = '/api/accounts/discord/connect' }}
+              <button onClick={() => { setShowDiscordModal(false); window.location.href = '/api/accounts/discord/connect' }}
                 className="flex-1 text-sm font-semibold px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:opacity-80 transition-all">
-                Continue to Discord
+                Continue to Discord →
               </button>
             </div>
           </div>
@@ -475,23 +494,13 @@ function AccountsInner() {
       )}
 
       {showBlueskyModal && (
-        <BlueskyConnectModal
-          onSuccess={handleBlueskySuccess}
-          onClose={() => setShowBlueskyModal(false)}
-        />
+        <BlueskyConnectModal onSuccess={handleBlueskySuccess} onClose={() => setShowBlueskyModal(false)} />
       )}
-
       {showTelegramModal && (
-        <TelegramConnectModal
-          onSuccess={handleTelegramSuccess}
-          onClose={() => setShowTelegramModal(false)}
-        />
+        <TelegramConnectModal onSuccess={handleTelegramSuccess} onClose={() => setShowTelegramModal(false)} />
       )}
-
       {showMastodonModal && (
-        <MastodonConnectModal
-          onClose={() => setShowMastodonModal(false)}
-        />
+        <MastodonConnectModal onClose={() => setShowMastodonModal(false)} />
       )}
 
       {toast && (
@@ -509,7 +518,7 @@ export default function Accounts() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-sm text-gray-400">Loading...</div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
       </div>
     }>
       <AccountsInner />
