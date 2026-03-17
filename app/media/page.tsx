@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
+import { useWorkspace } from '@/contexts/WorkspaceContext'
+import Link from 'next/link'
 
 function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 rounded-xl animate-pulse ${className}`} />
@@ -13,9 +15,9 @@ const MAX_FILE_SIZE_MB = 50
 const ACCEPTED_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/quicktime', 'video/webm']
 
 const PLAN_STORAGE_LIMITS: Record<string, number> = {
-  free:   1 * 1024 * 1024 * 1024,   // 1GB
-  pro:    10 * 1024 * 1024 * 1024,  // 10GB
-  agency: 50 * 1024 * 1024 * 1024,  // 50GB
+  free:   1  * 1024 * 1024 * 1024,
+  pro:    10 * 1024 * 1024 * 1024,
+  agency: 50 * 1024 * 1024 * 1024,
 }
 
 export default function MediaLibrary() {
@@ -24,13 +26,14 @@ export default function MediaLibrary() {
   const [uploading, setUploading] = useState(false)
   const [filter, setFilter] = useState('All')
   const [userId, setUserId] = useState<string | null>(null)
-  const [userPlan, setUserPlan] = useState<string>('free')
   const [copied, setCopied] = useState<string | null>(null)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
+  const [selectedFile, setSelectedFile] = useState<any | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
+  const { plan } = useWorkspace()
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type })
@@ -42,14 +45,6 @@ export default function MediaLibrary() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
       setUserId(user.id)
-
-      const { data: settings } = await supabase
-        .from('user_settings')
-        .select('plan')
-        .eq('user_id', user.id)
-        .single()
-      setUserPlan(settings?.plan || 'free')
-
       const { data } = await supabase
         .from('media_files')
         .select('*')
@@ -65,7 +60,7 @@ export default function MediaLibrary() {
     const selected = Array.from(e.target.files || [])
     if (!selected.length || !userId) return
 
-    const invalid = selected.filter(f => !ACCEPTED_TYPES.includes(f.type))
+    const invalid  = selected.filter(f => !ACCEPTED_TYPES.includes(f.type))
     const oversized = selected.filter(f => f.size > MAX_FILE_SIZE_MB * 1024 * 1024)
     if (invalid.length) {
       showToast(`Unsupported file type: ${invalid.map(f => f.name).join(', ')}`, 'error')
@@ -78,14 +73,13 @@ export default function MediaLibrary() {
       return
     }
 
-    // Storage limit enforcement
-    const currentUsed = files.reduce((sum, f) => sum + (f.file_size || 0), 0)
+    const currentUsed  = files.reduce((sum, f) => sum + (f.file_size || 0), 0)
     const incomingSize = selected.reduce((sum, f) => sum + f.size, 0)
-    const storageLimit = PLAN_STORAGE_LIMITS[userPlan] ?? PLAN_STORAGE_LIMITS.free
+    const storageLimit = PLAN_STORAGE_LIMITS[plan] ?? PLAN_STORAGE_LIMITS.free
     if (currentUsed + incomingSize > storageLimit) {
       const limitGB = storageLimit / (1024 * 1024 * 1024)
-      const usedGB = (currentUsed / (1024 * 1024 * 1024)).toFixed(2)
-      showToast(`Storage limit reached (${usedGB}GB / ${limitGB}GB). Upgrade your plan for more storage.`, 'error')
+      const usedGB  = (currentUsed / (1024 * 1024 * 1024)).toFixed(2)
+      showToast(`Storage limit reached (${usedGB}GB / ${limitGB}GB). Upgrade for more storage.`, 'error')
       if (inputRef.current) inputRef.current.value = ''
       return
     }
@@ -93,7 +87,7 @@ export default function MediaLibrary() {
     setUploading(true)
     let successCount = 0
     for (const file of selected) {
-      const ext = file.name.split('.').pop()
+      const ext  = file.name.split('.').pop()
       const path = `${userId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
       const { error: uploadError } = await supabase.storage
         .from('media')
@@ -103,10 +97,10 @@ export default function MediaLibrary() {
       const { data: record } = await supabase
         .from('media_files')
         .insert({
-          user_id: userId,
+          user_id:   userId,
           file_name: file.name,
           file_path: path,
-          file_url: urlData.publicUrl,
+          file_url:  urlData.publicUrl,
           file_type: file.type,
           file_size: file.size,
         })
@@ -124,8 +118,9 @@ export default function MediaLibrary() {
     await supabase.storage.from('media').remove([file.file_path])
     await supabase.from('media_files').delete().eq('id', file.id)
     setFiles(prev => prev.filter(f => f.id !== file.id))
+    if (selectedFile?.id === file.id) setSelectedFile(null)
     setConfirmDelete(null)
-    showToast('Deleted', 'success')
+    showToast('File deleted', 'success')
     setDeleting(null)
   }
 
@@ -142,98 +137,164 @@ export default function MediaLibrary() {
   }
 
   const filtered = files.filter(f => {
-    if (filter === 'All') return true
     if (filter === 'Images') return f.file_type?.startsWith('image/')
     if (filter === 'Videos') return f.file_type?.startsWith('video/')
     return true
   })
 
-  const totalSize = files.reduce((sum, f) => sum + (f.file_size || 0), 0)
-  const storageLimit = PLAN_STORAGE_LIMITS[userPlan] ?? PLAN_STORAGE_LIMITS.free
+  const totalSize     = files.reduce((sum, f) => sum + (f.file_size || 0), 0)
+  const storageLimit  = PLAN_STORAGE_LIMITS[plan] ?? PLAN_STORAGE_LIMITS.free
   const storagePercent = Math.min((totalSize / storageLimit) * 100, 100)
   const storageLimitGB = storageLimit / (1024 * 1024 * 1024)
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar />
-      <div className="ml-56 flex-1 p-8">
+      <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-5xl mx-auto">
 
-          <div className="flex items-center justify-between mb-8">
+          {/* HEADER */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Media Library</h1>
               <p className="text-sm text-gray-400 mt-0.5">
                 {files.length} file{files.length !== 1 ? 's' : ''} · {formatSize(totalSize)} used
               </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="self-start sm:self-auto">
               <input ref={inputRef} type="file" multiple accept="image/*,video/*"
                 onChange={handleUpload} className="hidden" id="media-upload" />
               <label htmlFor="media-upload"
-                className={`bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all cursor-pointer ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                className={`inline-block bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all cursor-pointer ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
                 {uploading ? '⏳ Uploading...' : '+ Upload Files'}
               </label>
             </div>
           </div>
 
-          {/* Storage usage bar */}
+          {/* STORAGE BAR */}
           <div className="bg-white border border-gray-100 rounded-2xl p-4 mb-6">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-gray-500">Storage</span>
+              <span className="text-xs font-bold text-gray-500">Storage Used</span>
               <span className="text-xs font-bold text-gray-700">
                 {formatSize(totalSize)} / {storageLimitGB}GB
               </span>
             </div>
             <div className="w-full bg-gray-100 rounded-full h-2">
-              <div
-                className={`h-2 rounded-full transition-all ${storagePercent > 90 ? 'bg-red-500' : storagePercent > 70 ? 'bg-yellow-400' : 'bg-black'}`}
-                style={{ width: `${storagePercent}%` }}
-              />
+              <div className={`h-2 rounded-full transition-all ${
+                storagePercent > 90 ? 'bg-red-500' :
+                storagePercent > 70 ? 'bg-yellow-400' : 'bg-black'
+              }`} style={{ width: `${storagePercent}%` }} />
             </div>
             {storagePercent > 90 && (
-              <p className="text-xs text-red-500 font-semibold mt-1.5">
-                Storage almost full — consider upgrading your plan.
-              </p>
+              <div className="flex items-center justify-between mt-2">
+                <p className="text-xs text-red-500 font-semibold">Storage almost full</p>
+                <Link href="/settings?tab=Plan" className="text-xs font-bold text-black underline">
+                  Upgrade →
+                </Link>
+              </div>
             )}
           </div>
 
-          {/* FILTER */}
-          <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-2xl p-1 mb-6 w-fit">
-            {FILTERS.map(f => (
-              <button key={f} onClick={() => setFilter(f)}
-                className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
-                  filter === f ? 'bg-black text-white' : 'text-gray-500 hover:text-black'
-                }`}>
-                {f}
-              </button>
-            ))}
+          {/* FILTER + UPLOAD ZONE */}
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-6">
+            <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-2xl p-1">
+              {FILTERS.map(f => (
+                <button key={f} onClick={() => setFilter(f)}
+                  className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+                    filter === f ? 'bg-black text-white' : 'text-gray-500 hover:text-black'
+                  }`}>
+                  {f}
+                </button>
+              ))}
+            </div>
           </div>
 
-          {/* UPLOAD ZONE */}
+          {/* DROP ZONE */}
           <label htmlFor="media-upload"
-            className="block border-2 border-dashed border-gray-200 rounded-2xl p-8 text-center mb-6 hover:border-gray-400 transition-all cursor-pointer group">
+            className="block border-2 border-dashed border-gray-200 rounded-2xl p-6 md:p-8 text-center mb-6 hover:border-gray-400 transition-all cursor-pointer group">
             <div className="text-3xl mb-2 group-hover:scale-110 transition-transform">🖼️</div>
             <p className="text-sm font-bold text-gray-500">Drop files here or click to upload</p>
             <p className="text-xs text-gray-400 mt-1">Images and videos · Max {MAX_FILE_SIZE_MB}MB per file</p>
           </label>
 
+          {/* FILE DETAIL PANEL */}
+          {selectedFile && (
+            <div className="bg-white border border-gray-200 rounded-2xl p-4 mb-6 flex flex-col sm:flex-row gap-4">
+              <div className="w-full sm:w-32 h-32 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0">
+                {selectedFile.file_type?.startsWith('image/') ? (
+                  <img src={selectedFile.file_url} alt={selectedFile.file_name} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-4xl">🎥</div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold truncate mb-1">{selectedFile.file_name}</p>
+                <p className="text-xs text-gray-400 mb-3">{formatSize(selectedFile.file_size || 0)}</p>
+                <div className="flex flex-wrap gap-2">
+                  <button onClick={() => handleCopy(selectedFile.file_url, selectedFile.id)}
+                    className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition-all ${
+                      copied === selectedFile.id
+                        ? 'bg-green-500 text-white border-green-500'
+                        : 'border-gray-200 hover:border-gray-400'
+                    }`}>
+                    {copied === selectedFile.id ? '✓ Copied' : 'Copy URL'}
+                  </button>
+                  {confirmDelete === selectedFile.id ? (
+                    <>
+                      <button onClick={() => handleDelete(selectedFile)}
+                        disabled={deleting === selectedFile.id}
+                        className="text-xs font-bold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center gap-1.5">
+                        {deleting === selectedFile.id
+                          ? <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Deleting...</>
+                          : 'Yes, delete'}
+                      </button>
+                      <button onClick={() => setConfirmDelete(null)}
+                        className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <button onClick={() => setConfirmDelete(selectedFile.id)}
+                      className="text-xs font-bold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all">
+                      Delete
+                    </button>
+                  )}
+                  <button onClick={() => { setSelectedFile(null); setConfirmDelete(null) }}
+                    className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all ml-auto">
+                    ✕ Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* GRID */}
           {loading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
               {[1,2,3,4,5,6,7,8].map(i => <SkeletonBox key={i} className="aspect-square" />)}
             </div>
           ) : filtered.length === 0 ? (
             <div className="bg-white border border-gray-100 rounded-2xl p-12 text-center">
               <div className="text-4xl mb-3">📁</div>
-              <p className="text-sm font-bold mb-1">No media files yet</p>
+              <p className="text-sm font-bold mb-1">
+                {filter === 'All' ? 'No media files yet' : `No ${filter.toLowerCase()} yet`}
+              </p>
               <p className="text-xs text-gray-400">Upload images and videos to use in your posts.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
               {filtered.map(file => {
-                const isConfirming = confirmDelete === file.id
+                const isSelected = selectedFile?.id === file.id
                 return (
-                  <div key={file.id}
-                    className="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:border-gray-300 transition-all group">
+                  <button
+                    key={file.id}
+                    onClick={() => {
+                      setSelectedFile(isSelected ? null : file)
+                      setConfirmDelete(null)
+                    }}
+                    className={`bg-white border-2 rounded-2xl overflow-hidden transition-all text-left w-full ${
+                      isSelected ? 'border-black' : 'border-gray-100 hover:border-gray-300'
+                    }`}>
                     <div className="aspect-square bg-gray-50 relative overflow-hidden">
                       {file.file_type?.startsWith('image/') ? (
                         <img src={file.file_url} alt={file.file_name} className="w-full h-full object-cover" />
@@ -242,42 +303,17 @@ export default function MediaLibrary() {
                           <span className="text-4xl">🎥</span>
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center gap-2 flex-wrap p-2">
-                        {isConfirming ? (
-                          <div className="flex flex-col items-center gap-2">
-                            <span className="text-xs text-white font-semibold">Delete?</span>
-                            <div className="flex gap-2">
-                              <button onClick={() => handleDelete(file)} disabled={deleting === file.id}
-                                className="text-xs font-bold px-2.5 py-1.5 bg-red-500 text-white rounded-lg hover:opacity-80 transition-all disabled:opacity-40">
-                                {deleting === file.id ? '...' : 'Yes'}
-                              </button>
-                              <button onClick={() => setConfirmDelete(null)}
-                                className="text-xs font-bold px-2.5 py-1.5 bg-white text-black rounded-lg hover:opacity-80 transition-all">
-                                Cancel
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <>
-                            <button onClick={() => handleCopy(file.file_url, file.id)}
-                              className={`text-xs font-bold px-2.5 py-1.5 rounded-lg transition-all ${
-                                copied === file.id ? 'bg-green-400 text-black' : 'bg-white text-black hover:opacity-80'
-                              }`}>
-                              {copied === file.id ? '✓' : 'Copy URL'}
-                            </button>
-                            <button onClick={() => setConfirmDelete(file.id)}
-                              className="text-xs font-bold px-2.5 py-1.5 bg-red-500 text-white rounded-lg hover:opacity-80 transition-all">
-                              Delete
-                            </button>
-                          </>
-                        )}
-                      </div>
+                      {isSelected && (
+                        <div className="absolute top-2 right-2 w-5 h-5 bg-black rounded-full flex items-center justify-center">
+                          <span className="text-white text-xs font-bold">✓</span>
+                        </div>
+                      )}
                     </div>
-                    <div className="p-3">
+                    <div className="p-2.5">
                       <p className="text-xs font-semibold text-gray-700 truncate">{file.file_name}</p>
                       <p className="text-xs text-gray-400 mt-0.5">{formatSize(file.file_size || 0)}</p>
                     </div>
-                  </div>
+                  </button>
                 )
               })}
             </div>
