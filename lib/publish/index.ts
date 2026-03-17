@@ -12,26 +12,30 @@ export type PublishResult = {
   error?: string
 }
 
+// destinations is a map of platform -> destination ID from post_destinations table
+// e.g. { discord: 'uuid-of-destination', telegram: 'uuid-of-destination' }
 export async function publishToAll(
   userId: string,
   platforms: string[],
-  content: string
+  content: string,
+  destinations: Record<string, string> = {}
 ): Promise<PublishResult[]> {
   const results: PublishResult[] = []
 
   for (const platform of platforms) {
     try {
       let postId: string | undefined
+      const destId = destinations[platform]
 
       switch (platform) {
         case 'discord':
-          postId = await publishToDiscord(userId, content)
+          postId = await publishToDiscord(userId, content, destId)
           break
         case 'bluesky':
           postId = await publishToBluesky(userId, content)
           break
         case 'telegram':
-          postId = await publishToTelegram(userId, content)
+          postId = await publishToTelegram(userId, content, destId)
           break
         case 'mastodon':
           postId = await publishToMastodon(userId, content)
@@ -43,7 +47,11 @@ export async function publishToAll(
           postId = await publishToLinkedIn(userId, content)
           break
         default:
-          results.push({ platform, success: false, error: 'Platform adapter not yet implemented' })
+          results.push({
+            platform,
+            success: false,
+            error: 'Platform not yet available',
+          })
           continue
       }
 

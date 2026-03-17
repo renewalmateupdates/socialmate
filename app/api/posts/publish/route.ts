@@ -1,114 +1,178 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
+import { createClient } from '@supabase/supabase-js'
+import { publishToAll } from '@/lib/publish'
+
+const supabaseAdmin = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
 export async function POST(request: NextRequest) {
-  const cookieStore = await cookies()
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll: () => cookieStore.getAll(),
-        setAll: (cookiesToSet) => {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
-          )
-        },
-      },
-    }
-  )
-
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
   const body = await request.json()
-  const { postId } = body
+  const { postId, fromInngest } = body
 
   if (!postId) {
     return NextResponse.json({ error: 'postId is required' }, { status: 400 })
   }
 
-  const { data: post, error: fetchError } = await supabase
-    .from('posts')
-    .select('id, status, published_at, user_id')
-    .eq('id', postId)
-    .eq('user_id', user.id)
-    .single()
+  // When called from Inngest, use service role (no session cookie)
+  // When called directly, verify user session
+  let userId: string
 
-  if (fetchError || !post) {
-    return NextResponse.json({ error: 'Post not found' }, { status: 404 })
-  }
+  if (fromInngest) {
+    // Inngest call — fetch post directly with service role
+    const { data: post, error } = await supabaseAdmin
+      .from('posts')
+      .select('id, user_id, content, platforms, destinations, status, published_at')
+      .eq('id', postId)
+      .single()
 
-  if (post.published_at) {
-    return NextResponse.json({ error: 'Post is already published' }, { status: 409 })
-  }
+    if (error || !post) {
+      return NextResponse.json({ error: 'Post not found' }, { status: 404 })
+    }
 
-  const { error: updateError } = await supabase
-    .from('posts')
-    .update({
-      status: 'published',
-      published_at: new Date().toISOString(),
+    if (post.published_at) {
+      return NextResponse.json({ error: 'Already published' }, { status: 409 })
+    }
+
+    userId = post.user_id
+
+    // Actually publish to platforms
+    const destinations = post.destinations || {}
+    const results = await publishToAll(userId, post.platforms, post.content, destinations)
+    const allFailed  = results.every(r => !r.success)
+    const someFailed = results.some(r => !r.success)
+
+    const platformPostIds: Record<string, string> = {}
+    results.forEach(r => {
+      if (r.success && r.postId) platformPostIds[r.platform] = r.postId
     })
-    .eq('id', postId)
-    .eq('user_id', user.id)
 
-  if (updateError) {
-    console.error('Publish error:', updateError)
-    return NextResponse.json({ error: 'Failed to publish post' }, { status: 500 })
+    await supabaseAdmin
+      .from('posts')
+      .update({
+        status: allFailed ? 'failed' : someFailed ? 'partial' : 'published',
+        published_at: allFailed ? null : new Date().toISOString(),
+        platform_post_ids: platformPostIds,
+      })
+      .eq('id', postId)
+
+    // First-post credit trigger
+    await handleFirstPostCredits(userId)
+
+    return NextResponse.json({
+      success: !allFailed,
+      results,
+      status: allFailed ? 'failed' : someFailed ? 'partial' : 'published',
+    })
+
+  } else {
+    // Direct call — verify session
+    const cookieStore = await cookies()
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll: () => cookieStore.getAll(),
+          setAll: (cookiesToSet) => {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          },
+        },
+      }
+    )
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    userId = user.id
+
+    const { data: post, error } = await supabase
+      .from('posts')
+      .select('id, user_id, content, platforms, destinations, status, published_at')
+      .eq('id', postId)
+      .eq('user_id', userId)
+      .single()
+
+    if (error || !post) {
+      return NextResponse.json({ error: 'Post not found' }, { status: 404 })
+    }
+
+    if (post.published_at) {
+      return NextResponse.json({ error: 'Already published' }, { status: 409 })
+    }
+
+    const destinations = post.destinations || {}
+    const results = await publishToAll(userId, post.platforms, post.content, destinations)
+    const allFailed  = results.every(r => !r.success)
+    const someFailed = results.some(r => !r.success)
+
+    const platformPostIds: Record<string, string> = {}
+    results.forEach(r => {
+      if (r.success && r.postId) platformPostIds[r.platform] = r.postId
+    })
+
+    await supabase
+      .from('posts')
+      .update({
+        status: allFailed ? 'failed' : someFailed ? 'partial' : 'published',
+        published_at: allFailed ? null : new Date().toISOString(),
+        platform_post_ids: platformPostIds,
+      })
+      .eq('id', postId)
+
+    await handleFirstPostCredits(userId)
+
+    return NextResponse.json({
+      success: !allFailed,
+      results,
+      status: allFailed ? 'failed' : someFailed ? 'partial' : 'published',
+    })
   }
+}
 
-  // ── First-post credit trigger ──────────────────────────────────────────
+async function handleFirstPostCredits(userId: string) {
   try {
-    // Count how many published posts this user has (including this one)
-    const { count } = await supabase
+    const { count } = await supabaseAdmin
       .from('posts')
       .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id)
+      .eq('user_id', userId)
       .eq('status', 'published')
 
     if (count === 1) {
-      // This is their first published post — award +10 credits to the user
-      const { data: userSettings } = await supabase
+      const { data: userSettings } = await supabaseAdmin
         .from('user_settings')
-        .select('credits, referred_by')
-        .eq('user_id', user.id)
+        .select('ai_credits_remaining, referred_by')
+        .eq('user_id', userId)
         .single()
 
       if (userSettings) {
-        // Award user +10 credits
-        await supabase
+        await supabaseAdmin
           .from('user_settings')
-          .update({ credits: (userSettings.credits ?? 0) + 10 })
-          .eq('user_id', user.id)
+          .update({ ai_credits_remaining: (userSettings.ai_credits_remaining ?? 0) + 10 })
+          .eq('user_id', userId)
 
-        // If they were referred, award referrer +10 credits too
         if (userSettings.referred_by) {
-          const { data: referrerSettings } = await supabase
+          const { data: referrerSettings } = await supabaseAdmin
             .from('user_settings')
-            .select('credits')
+            .select('ai_credits_remaining')
             .eq('user_id', userSettings.referred_by)
             .single()
 
           if (referrerSettings) {
-            await supabase
+            await supabaseAdmin
               .from('user_settings')
-              .update({ credits: (referrerSettings.credits ?? 0) + 10 })
+              .update({ ai_credits_remaining: (referrerSettings.ai_credits_remaining ?? 0) + 10 })
               .eq('user_id', userSettings.referred_by)
           }
         }
       }
     }
-  } catch (creditErr) {
-    // Non-blocking — don't fail the publish if credits fail
-    console.error('First-post credit error:', creditErr)
+  } catch (err) {
+    console.error('First-post credit error:', err)
   }
-  // ──────────────────────────────────────────────────────────────────────
-
-  // TODO (Phase 2): Call platform-specific publishing adapter here
-
-  return NextResponse.json({ success: true, publishedAt: new Date().toISOString() })
 }
