@@ -14,9 +14,13 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { priceId } = await req.json()
+  const { priceId, fromOnboarding } = await req.json()
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate-six.vercel.app'
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
+
+  const successUrl = fromOnboarding
+    ? `${appUrl}/onboarding?upgraded=true&step=3`
+    : `${appUrl}/dashboard?upgraded=true`
 
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
@@ -24,8 +28,8 @@ export async function POST(req: NextRequest) {
     customer_email: user.email,
     line_items: [{ price: priceId, quantity: 1 }],
     metadata: { user_id: user.id },
-    success_url: `${appUrl}/dashboard?upgraded=true`,
-    cancel_url: `${appUrl}/pricing`,
+    success_url: successUrl,
+    cancel_url: fromOnboarding ? `${appUrl}/onboarding?step=2` : `${appUrl}/pricing`,
   })
 
   return NextResponse.json({ url: session.url })

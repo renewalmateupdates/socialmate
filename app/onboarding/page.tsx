@@ -1,26 +1,22 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
 const PLATFORMS = [
-  { id: 'discord',   label: 'Discord',     icon: '💬', desc: 'Announcements',    available: true  },
-  { id: 'bluesky',   label: 'Bluesky',     icon: '🦋', desc: 'Decentralized',    available: true  },
-  { id: 'mastodon',  label: 'Mastodon',    icon: '🐘', desc: 'Federated',        available: true  },
-  { id: 'telegram',  label: 'Telegram',    icon: '✈️', desc: 'Channels',         available: true  },
-  { id: 'linkedin',  label: 'LinkedIn',    icon: '💼', desc: 'Professional',     available: false },
-  { id: 'youtube',   label: 'YouTube',     icon: '▶️', desc: 'Video',            available: false },
-  { id: 'pinterest', label: 'Pinterest',   icon: '📌', desc: 'Visual content',   available: false },
-  { id: 'reddit',    label: 'Reddit',      icon: '🤖', desc: 'Communities',      available: false },
-  { id: 'instagram', label: 'Instagram',   icon: '📸', desc: 'Photos & Reels',   available: false },
-  { id: 'tiktok',    label: 'TikTok',      icon: '🎵', desc: 'Short video',      available: false },
-  { id: 'facebook',  label: 'Facebook',    icon: '📘', desc: 'Pages & Groups',   available: false },
-  { id: 'threads',   label: 'Threads',     icon: '🧵', desc: 'Text & photos',    available: false },
-  { id: 'twitter',   label: 'X / Twitter', icon: '🐦', desc: 'Short posts',      available: false },
-  { id: 'snapchat',  label: 'Snapchat',    icon: '👻', desc: 'Stories',          available: false },
-  { id: 'lemon8',    label: 'Lemon8',      icon: '🍋', desc: 'Lifestyle',        available: false },
-  { id: 'bereal',    label: 'BeReal',      icon: '📷', desc: 'Authentic',        available: false },
+  { id: 'discord',   label: 'Discord',     icon: '💬', desc: 'Announcements',  available: true  },
+  { id: 'bluesky',   label: 'Bluesky',     icon: '🦋', desc: 'Decentralized',  available: true  },
+  { id: 'mastodon',  label: 'Mastodon',    icon: '🐘', desc: 'Federated',      available: true  },
+  { id: 'telegram',  label: 'Telegram',    icon: '✈️', desc: 'Channels',       available: true  },
+  { id: 'linkedin',  label: 'LinkedIn',    icon: '💼', desc: 'Coming soon',    available: false },
+  { id: 'youtube',   label: 'YouTube',     icon: '▶️', desc: 'Coming soon',    available: false },
+  { id: 'pinterest', label: 'Pinterest',   icon: '📌', desc: 'Coming soon',    available: false },
+  { id: 'reddit',    label: 'Reddit',      icon: '🤖', desc: 'Coming soon',    available: false },
+  { id: 'instagram', label: 'Instagram',   icon: '📸', desc: 'Coming soon',    available: false },
+  { id: 'tiktok',    label: 'TikTok',      icon: '🎵', desc: 'Coming soon',    available: false },
+  { id: 'twitter',   label: 'X / Twitter', icon: '🐦', desc: 'Coming soon',    available: false },
+  { id: 'threads',   label: 'Threads',     icon: '🧵', desc: 'Coming soon',    available: false },
 ]
 
 const USE_CASES = [
@@ -32,83 +28,282 @@ const USE_CASES = [
   { id: 'other',     label: 'Just Exploring',      icon: '🔍', desc: 'Checking it out'              },
 ]
 
+const STRIPE_PRO_PRICE_ID    = 'price_1T9pay7OMwDowUuU7S3G3lNX'
+const STRIPE_AGENCY_PRICE_ID = 'price_1T9qAd7OMwDowUuUpzjxLlG2'
+
+const PLAN_DETAILS = {
+  free: {
+    label: 'Free',
+    price: '$0/mo',
+    color: 'border-gray-200',
+    badge: 'bg-gray-100 text-gray-600',
+    icon: '🆓',
+    credits: 100,
+    creditBank: 150,
+    platforms: 1,
+    seats: 2,
+    posts: 100,
+    storage: '1 GB',
+    schedule: '2 weeks',
+    analytics: '30 days',
+    features: [
+      '4 live platforms now',
+      '100 AI credits / month',
+      '1 connected account per platform',
+      '2 team seats',
+      '100 posts / month',
+      '1 GB media storage',
+      '2-week scheduling window',
+      'Link in Bio builder',
+      'Bulk scheduler',
+      'Post templates & hashtag library',
+      'Analytics dashboard',
+    ],
+    aiTools: [
+      { name: 'Caption Generator', cost: 3 },
+      { name: 'Hashtag Generator', cost: 2 },
+      { name: 'Post Rewrite',      cost: 3 },
+      { name: 'Viral Hook',        cost: 4 },
+      { name: 'Thread Generator',  cost: 8 },
+      { name: 'Content Repurposer',cost: 8 },
+      { name: 'Post Score',        cost: 2 },
+      { name: 'SM-Pulse',          cost: 10 },
+      { name: 'SM-Radar',          cost: 10 },
+      { name: 'Content Gap',       cost: 10 },
+    ],
+  },
+  pro: {
+    label: 'Pro',
+    price: '$5/mo',
+    color: 'border-black',
+    badge: 'bg-black text-white',
+    icon: '⚡',
+    credits: 500,
+    creditBank: 750,
+    platforms: 5,
+    seats: 5,
+    posts: 1000,
+    storage: '10 GB',
+    schedule: '1 month',
+    analytics: '90 days',
+    features: [
+      'Everything in Free',
+      '500 AI credits / month',
+      '5 connected accounts per platform',
+      '5 team seats',
+      '1,000 posts / month',
+      '10 GB media storage',
+      '1-month scheduling window',
+      '90-day analytics history',
+      'AI Content Calendar (20 cr)',
+      'AI Image Generation (25 cr)',
+      'White Label add-on available',
+    ],
+    aiTools: [
+      { name: 'Caption Generator',   cost: 3  },
+      { name: 'Hashtag Generator',   cost: 2  },
+      { name: 'Post Rewrite',        cost: 3  },
+      { name: 'Viral Hook',          cost: 4  },
+      { name: 'Thread Generator',    cost: 8  },
+      { name: 'Content Repurposer',  cost: 8  },
+      { name: 'Post Score',          cost: 2  },
+      { name: 'SM-Pulse',            cost: 10 },
+      { name: 'SM-Radar',            cost: 10 },
+      { name: 'Content Gap',         cost: 10 },
+      { name: 'AI Content Calendar', cost: 20 },
+      { name: 'AI Image Generation', cost: 25 },
+    ],
+  },
+  agency: {
+    label: 'Agency',
+    price: '$20/mo',
+    color: 'border-purple-500',
+    badge: 'bg-purple-600 text-white',
+    icon: '🏢',
+    credits: 2000,
+    creditBank: 3000,
+    platforms: 10,
+    seats: 15,
+    posts: 5000,
+    storage: '50 GB',
+    schedule: '3 months',
+    analytics: '6 months',
+    features: [
+      'Everything in Pro',
+      '2,000 AI credits / month',
+      '10 connected accounts per platform',
+      '15 team seats',
+      '5,000 posts / month',
+      '50 GB media storage',
+      '3-month scheduling window',
+      '6-month analytics history',
+      'Client workspace management',
+      'PDF analytics reports',
+      'White Label add-on available',
+    ],
+    aiTools: [
+      { name: 'Caption Generator',   cost: 3  },
+      { name: 'Hashtag Generator',   cost: 2  },
+      { name: 'Post Rewrite',        cost: 3  },
+      { name: 'Viral Hook',          cost: 4  },
+      { name: 'Thread Generator',    cost: 8  },
+      { name: 'Content Repurposer',  cost: 8  },
+      { name: 'Post Score',          cost: 2  },
+      { name: 'SM-Pulse',            cost: 10 },
+      { name: 'SM-Radar',            cost: 10 },
+      { name: 'Content Gap',         cost: 10 },
+      { name: 'AI Content Calendar', cost: 20 },
+      { name: 'AI Image Generation', cost: 25 },
+    ],
+  },
+}
+
 const STEPS = [
-  { id: 1, label: 'Welcome',    icon: '👋' },
-  { id: 2, label: 'Use Case',   icon: '🎯' },
-  { id: 3, label: 'Platforms',  icon: '📱' },
-  { id: 4, label: 'First Post', icon: '✏️' },
-  { id: 5, label: "You're in!", icon: '🚀' },
+  { id: 1, label: 'Welcome'   },
+  { id: 2, label: 'Your Plan' },
+  { id: 3, label: 'About You' },
+  { id: 4, label: 'Platforms' },
+  { id: 5, label: 'Security'  },
+  { id: 6, label: 'First Post'},
+  { id: 7, label: "You're in!"},
 ]
 
-export default function Onboarding() {
+function OnboardingInner() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
   const [user, setUser] = useState<any>(null)
   const [step, setStep] = useState(1)
   const [displayName, setDisplayName] = useState('')
+  const [selectedPlan, setSelectedPlan] = useState<'free' | 'pro' | 'agency'>('free')
   const [useCase, setUseCase] = useState('')
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([])
   const [firstPost, setFirstPost] = useState('')
   const [saving, setSaving] = useState(false)
-  const [toast, setToast] = useState<{ message: string; soft?: boolean } | null>(null)
-  const router = useRouter()
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null)
+  const [toast, setToast] = useState<{ message: string; type: 'error' | 'info' } | null>(null)
+
+  // 2FA state
+  const [mfaStep, setMfaStep] = useState<'idle' | 'enroll'>('idle')
+  const [mfaQR, setMfaQR] = useState('')
+  const [mfaSecret, setMfaSecret] = useState('')
+  const [mfaEnrollId, setMfaEnrollId] = useState('')
+  const [mfaCode, setMfaCode] = useState('')
+  const [mfaLoading, setMfaLoading] = useState(false)
+  const [mfaError, setMfaError] = useState('')
+  const [mfaDone, setMfaDone] = useState(false)
+
+  const showToast = (message: string, type: 'error' | 'info' = 'error') => {
+    setToast({ message, type })
+    setTimeout(() => setToast(null), 4000)
+  }
 
   useEffect(() => {
     const init = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
-      setUser(user)
-      setDisplayName(user.email?.split('@')[0] || '')
+      const { data: { user: authUser } } = await supabase.auth.getUser()
+      if (!authUser) { router.push('/login'); return }
+      setUser(authUser)
+      setDisplayName(authUser.email?.split('@')[0] || '')
+
+      // Load existing plan from user_settings if returning from Stripe
+      const { data: settings } = await supabase
+        .from('user_settings')
+        .select('plan')
+        .eq('user_id', authUser.id)
+        .single()
+
+      if (settings?.plan && settings.plan !== 'free') {
+        setSelectedPlan(settings.plan as 'pro' | 'agency')
+      }
+
+      // Handle return from Stripe checkout
+      const upgraded = searchParams.get('upgraded')
+      const stepParam = searchParams.get('step')
+      if (upgraded === 'true' && stepParam) {
+        setStep(parseInt(stepParam))
+      }
     }
     init()
-  }, [router])
+  }, [router, searchParams])
 
-  const showToast = (message: string, soft = false) => {
-    setToast({ message, soft })
-    setTimeout(() => setToast(null), 3000)
-  }
+  const planConfig = PLAN_DETAILS[selectedPlan]
+  const maxPlatforms = planConfig.platforms
 
   const togglePlatform = (id: string) => {
     const platform = PLATFORMS.find(p => p.id === id)
     if (!platform?.available) return
-    setSelectedPlatforms(prev =>
-      prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id]
-    )
+    setSelectedPlatforms(prev => {
+      if (prev.includes(id)) return prev.filter(p => p !== id)
+      if (prev.length >= maxPlatforms) {
+        showToast(`Your ${selectedPlan} plan supports up to ${maxPlatforms} connected account${maxPlatforms > 1 ? 's' : ''}`, 'info')
+        return prev
+      }
+      return [...prev, id]
+    })
+  }
+
+  const handlePlanCheckout = async (plan: 'pro' | 'agency') => {
+    const priceId = plan === 'pro' ? STRIPE_PRO_PRICE_ID : STRIPE_AGENCY_PRICE_ID
+    setCheckoutLoading(plan)
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId, fromOnboarding: true }),
+      })
+      const data = await res.json()
+      if (data.url) window.location.href = data.url
+    } catch {
+      showToast('Checkout failed — please try again')
+    } finally {
+      setCheckoutLoading(null)
+    }
+  }
+
+  const handleEnroll2FA = async () => {
+    setMfaLoading(true); setMfaError('')
+    const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' })
+    if (error || !data) { setMfaError('Failed to start 2FA setup'); setMfaLoading(false); return }
+    setMfaEnrollId(data.id)
+    setMfaQR(data.totp.qr_code)
+    setMfaSecret(data.totp.secret)
+    setMfaStep('enroll')
+    setMfaLoading(false)
+  }
+
+  const handleVerify2FA = async () => {
+    if (mfaCode.length !== 6) { setMfaError('Enter the 6-digit code'); return }
+    setMfaLoading(true); setMfaError('')
+    const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({ factorId: mfaEnrollId })
+    if (challengeError || !challenge) { setMfaError('Challenge failed — try again'); setMfaLoading(false); return }
+    const { error } = await supabase.auth.mfa.verify({ factorId: mfaEnrollId, challengeId: challenge.id, code: mfaCode })
+    if (error) { setMfaError('Incorrect code — try again'); setMfaLoading(false); return }
+    setMfaDone(true)
+    setMfaStep('idle')
+    setMfaLoading(false)
   }
 
   const handleFinish = async () => {
     setSaving(true)
-
-    const profileRes = await supabase.from('profiles').update({
+    await supabase.from('profiles').update({
       full_name: displayName,
       onboarding_completed: true,
     }).eq('id', user.id)
 
-    if (profileRes.error) {
-      showToast('Failed to save profile — please try again')
-      setSaving(false)
-      return
-    }
-
-    const settingsRes = await supabase.from('user_settings').upsert({
+    await supabase.from('user_settings').upsert({
       user_id: user.id,
       display_name: displayName,
       use_case: useCase,
       default_platforms: selectedPlatforms,
     }, { onConflict: 'user_id' })
 
-    if (settingsRes.error) {
-      console.error('user_settings upsert failed:', settingsRes.error.message)
-    }
-
     if (firstPost.trim()) {
-      const postRes = await supabase.from('posts').insert({
+      await supabase.from('posts').insert({
         user_id: user.id,
         content: firstPost.trim(),
         platforms: selectedPlatforms,
         status: 'draft',
       })
-      if (postRes.error) {
-        console.error('draft post insert failed:', postRes.error.message)
-      }
     }
 
     setSaving(false)
@@ -117,143 +312,238 @@ export default function Onboarding() {
 
   const progress = ((step - 1) / (STEPS.length - 1)) * 100
 
+  const PlanBadge = () => (
+    <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${planConfig.badge}`}>
+      {planConfig.icon} {planConfig.label}
+    </span>
+  )
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
 
-      {/* TOP BAR */}
-      <div className="bg-white border-b border-gray-100 px-8 py-4 flex items-center justify-between">
+      <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
           <span className="font-bold text-base tracking-tight">SocialMate</span>
+          {step > 2 && <PlanBadge />}
         </div>
-        <button
-          onClick={async () => {
-            if (user) {
-              await supabase.from('profiles').update({ onboarding_completed: true }).eq('id', user.id)
-            }
-            router.push('/dashboard')
-          }}
-          className="text-xs text-gray-400 hover:text-black transition-colors font-semibold">
-          Skip setup →
-        </button>
+        <div className="flex items-center gap-4">
+          <span className="text-xs text-gray-400 font-semibold">Step {step} of {STEPS.length}</span>
+          <button
+            onClick={async () => {
+              if (user) await supabase.from('profiles').update({ onboarding_completed: true }).eq('id', user.id)
+              router.push('/dashboard')
+            }}
+            className="text-xs text-gray-400 hover:text-black transition-colors font-semibold">
+            Skip setup →
+          </button>
+        </div>
       </div>
 
-      {/* PROGRESS */}
       <div className="w-full bg-gray-100 h-1">
         <div className="bg-black h-1 transition-all duration-500" style={{ width: `${progress}%` }} />
       </div>
 
-      {/* STEP INDICATORS */}
-      <div className="flex items-center justify-center gap-2 py-6">
+      <div className="flex items-center justify-center gap-1 py-4 overflow-x-auto px-4">
         {STEPS.map((s, i) => (
-          <div key={s.id} className="flex items-center gap-2">
-            <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
+          <div key={s.id} className="flex items-center gap-1 flex-shrink-0">
+            <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
               step === s.id ? 'bg-black text-white' :
-              step > s.id  ? 'bg-gray-100 text-gray-500' :
+              step > s.id  ? 'bg-gray-200 text-gray-500' :
               'text-gray-300'
             }`}>
-              <span>{step > s.id ? '✓' : s.icon}</span>
-              <span className="hidden sm:inline">{s.label}</span>
+              <span>{step > s.id ? '✓' : s.id}</span>
+              <span className="hidden md:inline">{s.label}</span>
             </div>
-            {i < STEPS.length - 1 && (
-              <div className={`w-6 h-px ${step > s.id ? 'bg-gray-300' : 'bg-gray-100'}`} />
-            )}
+            {i < STEPS.length - 1 && <div className={`w-4 h-px ${step > s.id ? 'bg-gray-300' : 'bg-gray-100'}`} />}
           </div>
         ))}
       </div>
 
-      {/* STEP CONTENT */}
-      <div className="flex-1 flex items-start justify-center px-6 pb-12">
-        <div className="w-full max-w-lg">
+      <div className="flex-1 flex items-start justify-center px-4 pb-12 pt-2">
+        <div className="w-full max-w-2xl">
 
-          {/* STEP 1 — WELCOME */}
+          {/* ── STEP 1 — WELCOME ── */}
           {step === 1 && (
-            <div className="bg-white border border-gray-100 rounded-3xl p-10 text-center">
-              <div className="text-6xl mb-6">👋</div>
-              <h1 className="text-3xl font-extrabold tracking-tight mb-3">Welcome to SocialMate</h1>
-              <p className="text-gray-400 mb-8">Let's get you set up in under 2 minutes. First, what should we call you?</p>
+            <div className="bg-white border border-gray-100 rounded-3xl p-8 md:p-10">
+              <div className="text-center mb-8">
+                <div className="text-5xl mb-4">👋</div>
+                <h1 className="text-3xl font-extrabold tracking-tight mb-2">Welcome to SocialMate</h1>
+                <p className="text-gray-400 text-sm">Let's get you set up in under 3 minutes.</p>
+              </div>
 
-              <div className="text-left mb-6">
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">Your Name</label>
-                <input
-                  type="text"
-                  value={displayName}
-                  onChange={e => setDisplayName(e.target.value)}
+              <div className="mb-6">
+                <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-2">What should we call you?</label>
+                <input type="text" value={displayName} onChange={e => setDisplayName(e.target.value)}
                   placeholder="Your name or brand..."
                   onKeyDown={e => e.key === 'Enter' && displayName.trim() && setStep(2)}
-                  className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 text-center text-lg font-semibold"
-                  autoFocus
-                />
+                  className="w-full px-4 py-3 text-lg font-semibold text-center border border-gray-200 rounded-2xl focus:outline-none focus:border-black transition-all"
+                  autoFocus />
               </div>
 
-              <div className="bg-black rounded-2xl p-5 mb-6 text-left text-white">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-xl">⚡</span>
-                  <p className="text-sm font-extrabold">100 free AI credits waiting for you</p>
-                </div>
-                <p className="text-xs text-gray-400 leading-relaxed mb-3">
-                  Credits activate once you complete setup — this keeps things fair and prevents abuse. Here's all it takes:
-                </p>
-                <div className="space-y-2">
-                  {[
-                    { step: '1', label: 'Verify your email',                  done: true  },
-                    { step: '2', label: 'Connect one social platform',         done: false },
-                    { step: '3', label: 'Publish or schedule your first post', done: false },
-                  ].map(item => (
-                    <div key={item.step} className="flex items-center gap-3">
-                      <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                        item.done ? 'bg-green-400 text-black' : 'bg-gray-700 text-gray-400'
-                      }`}>
-                        {item.done ? '✓' : item.step}
-                      </div>
-                      <p className={`text-xs font-semibold ${item.done ? 'text-gray-300 line-through' : 'text-white'}`}>
-                        {item.label}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-3 pt-3 border-t border-gray-700">
-                  <p className="text-xs text-gray-500">
-                    Invite a friend after setup and you both earn another 25 credits on top.
-                  </p>
-                </div>
-              </div>
-
-              <div className="bg-gray-50 rounded-2xl p-5 mb-8 text-left">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">What you get — free forever</p>
-                <div className="grid grid-cols-2 gap-2">
+              <div className="bg-black rounded-2xl p-6 mb-6 text-white">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">What you get — free, forever</p>
+                <div className="grid grid-cols-2 gap-x-6 gap-y-2 mb-4">
                   {[
                     '4 live platforms now',
-                    'Unlimited scheduling',
-                    'Bulk Scheduler',
-                    'Link in Bio builder',
-                    '2 team seats',
                     '100 AI credits / month',
+                    'Bulk Scheduler',
+                    'Link in Bio page',
+                    '2 team seats',
                     'Analytics dashboard',
                     'Post templates',
+                    'Hashtag library',
+                    'Media library (1 GB)',
+                    '100 posts / month',
                   ].map(f => (
-                    <div key={f} className="flex items-center gap-2 text-xs text-gray-600">
-                      <span className="text-green-500 font-bold">✓</span>{f}
+                    <div key={f} className="flex items-center gap-2 text-xs text-gray-300">
+                      <span className="text-green-400 font-bold flex-shrink-0">✓</span>{f}
                     </div>
                   ))}
                 </div>
+                <div className="border-t border-gray-700 pt-4">
+                  <p className="text-xs text-gray-400">Need more? Choose Pro or Agency on the next step — or upgrade anytime later.</p>
+                </div>
               </div>
 
-              <button
-                onClick={() => displayName.trim() ? setStep(2) : showToast('Enter your name to continue')}
+              <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <span className="text-xl">⚡</span>
+                  <div>
+                    <p className="text-xs font-extrabold text-blue-800 mb-1">100 free AI credits activate after setup</p>
+                    <p className="text-xs text-blue-600 leading-relaxed">Connect a platform → publish your first post → credits unlock instantly. Refer a friend after and you both earn 25 more.</p>
+                  </div>
+                </div>
+              </div>
+
+              <button onClick={() => displayName.trim() ? setStep(2) : showToast('Enter your name to continue')}
                 className="w-full py-3.5 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all">
-                Get started →
+                Let's go →
               </button>
             </div>
           )}
 
-          {/* STEP 2 — USE CASE */}
+          {/* ── STEP 2 — PLAN SELECTION ── */}
           {step === 2 && (
-            <div className="bg-white border border-gray-100 rounded-3xl p-10">
+            <div className="space-y-4">
+              <div className="text-center mb-6">
+                <div className="text-5xl mb-3">📦</div>
+                <h2 className="text-2xl font-extrabold tracking-tight mb-1">Choose your plan</h2>
+                <p className="text-gray-400 text-sm">Start free or go straight to Pro or Agency — no pressure, upgrade anytime.</p>
+              </div>
+
+              {(['free', 'pro', 'agency'] as const).map(p => {
+                const cfg = PLAN_DETAILS[p]
+                const isSelected = selectedPlan === p
+                return (
+                  <div key={p} className={`bg-white border-2 rounded-2xl p-6 transition-all cursor-pointer ${
+                    isSelected ? cfg.color : 'border-gray-100 hover:border-gray-300'
+                  }`} onClick={() => { if (p === 'free') setSelectedPlan('free') }}>
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{cfg.icon}</span>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="text-base font-extrabold">{cfg.label}</p>
+                            {p === 'pro' && <span className="text-xs font-bold bg-black text-white px-2 py-0.5 rounded-full">Most popular</span>}
+                            {p === 'agency' && <span className="text-xs font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">Best for teams</span>}
+                          </div>
+                          <p className="text-xl font-extrabold">{cfg.price}</p>
+                        </div>
+                      </div>
+                      {isSelected && p === 'free' && (
+                        <span className="text-xs font-bold bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full">Selected</span>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-3 mb-4 text-center">
+                      {[
+                        { label: 'AI Credits',  value: cfg.credits.toLocaleString() + '/mo' },
+                        { label: 'Platforms',   value: cfg.platforms + ' accounts'           },
+                        { label: 'Team Seats',  value: cfg.seats + ' seats'                  },
+                      ].map(stat => (
+                        <div key={stat.label} className="bg-gray-50 rounded-xl p-2">
+                          <p className="text-xs font-extrabold">{stat.value}</p>
+                          <p className="text-xs text-gray-400">{stat.label}</p>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 mb-4">
+                      {cfg.features.slice(0, 6).map(f => (
+                        <div key={f} className="flex items-center gap-1.5 text-xs text-gray-600">
+                          <span className="text-green-500 font-bold flex-shrink-0">✓</span>{f}
+                        </div>
+                      ))}
+                    </div>
+
+                    {p === 'free' && (
+                      <button
+                        onClick={() => { setSelectedPlan('free'); setStep(3) }}
+                        className="w-full py-2.5 border-2 border-gray-200 text-sm font-bold rounded-xl hover:border-black hover:bg-black hover:text-white transition-all">
+                        Continue with Free →
+                      </button>
+                    )}
+                    {p === 'pro' && (
+                      <button
+                        onClick={() => handlePlanCheckout('pro')}
+                        disabled={checkoutLoading === 'pro'}
+                        className="w-full py-2.5 bg-black text-white text-sm font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                        {checkoutLoading === 'pro' ? (
+                          <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Processing...</>
+                        ) : 'Start Pro — $5/month →'}
+                      </button>
+                    )}
+                    {p === 'agency' && (
+                      <button
+                        onClick={() => handlePlanCheckout('agency')}
+                        disabled={checkoutLoading === 'agency'}
+                        className="w-full py-2.5 bg-purple-600 text-white text-sm font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                        {checkoutLoading === 'agency' ? (
+                          <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Processing...</>
+                        ) : 'Start Agency — $20/month →'}
+                      </button>
+                    )}
+                  </div>
+                )
+              })}
+
+              <div className="bg-white border border-gray-100 rounded-2xl p-5">
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">All AI tools included — every plan</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {PLAN_DETAILS.free.aiTools.map(tool => (
+                    <div key={tool.name} className="flex items-center justify-between text-xs py-1.5 border-b border-gray-50 last:border-0">
+                      <span className="text-gray-700 font-semibold">{tool.name}</span>
+                      <span className="text-gray-400 font-bold">{tool.cost} cr</span>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-400 mt-3">Pro & Agency also unlock AI Content Calendar (20 cr) and AI Image Generation (25 cr).</p>
+              </div>
+
+              <button onClick={() => setStep(1)}
+                className="w-full py-2.5 border border-gray-200 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all text-gray-500">
+                ← Back
+              </button>
+            </div>
+          )}
+
+          {/* ── STEP 3 — USE CASE ── */}
+          {step === 3 && (
+            <div className="bg-white border border-gray-100 rounded-3xl p-8 md:p-10">
+              {searchParams.get('upgraded') === 'true' && (
+                <div className="bg-green-50 border border-green-200 rounded-2xl px-4 py-3 mb-6 flex items-center gap-3">
+                  <span className="text-xl">🎉</span>
+                  <div>
+                    <p className="text-sm font-extrabold text-green-700">Payment confirmed — welcome to {planConfig.label}!</p>
+                    <p className="text-xs text-green-600 mt-0.5">Your {planConfig.credits.toLocaleString()} AI credits and all {planConfig.label} features are now active.</p>
+                  </div>
+                </div>
+              )}
               <div className="text-center mb-8">
                 <div className="text-5xl mb-4">🎯</div>
                 <h2 className="text-2xl font-extrabold tracking-tight mb-2">How will you use SocialMate?</h2>
-                <p className="text-gray-400 text-sm">This helps us personalize your experience</p>
+                <p className="text-gray-400 text-sm">Helps us personalize your dashboard and tips</p>
               </div>
               <div className="grid grid-cols-2 gap-3 mb-8">
                 {USE_CASES.map(uc => (
@@ -268,11 +558,11 @@ export default function Onboarding() {
                 ))}
               </div>
               <div className="flex gap-3">
-                <button onClick={() => setStep(1)}
+                <button onClick={() => setStep(2)}
                   className="px-6 py-3 border border-gray-200 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
                   ← Back
                 </button>
-                <button onClick={() => useCase ? setStep(3) : showToast('Pick an option to continue')}
+                <button onClick={() => useCase ? setStep(4) : showToast('Pick an option to continue')}
                   className="flex-1 py-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all">
                   Continue →
                 </button>
@@ -280,31 +570,33 @@ export default function Onboarding() {
             </div>
           )}
 
-          {/* STEP 3 — PLATFORMS */}
-          {step === 3 && (
-            <div className="bg-white border border-gray-100 rounded-3xl p-10">
+          {/* ── STEP 4 — PLATFORMS ── */}
+          {step === 4 && (
+            <div className="bg-white border border-gray-100 rounded-3xl p-8 md:p-10">
               <div className="text-center mb-6">
                 <div className="text-5xl mb-4">📱</div>
                 <h2 className="text-2xl font-extrabold tracking-tight mb-2">Which platforms do you use?</h2>
-                <p className="text-gray-400 text-sm">4 live now · 12 more coming soon</p>
+                <p className="text-gray-400 text-sm">
+                  Your <span className={`font-bold ${selectedPlan === 'agency' ? 'text-purple-600' : 'text-black'}`}>{planConfig.label}</span> plan supports {maxPlatforms} connected account{maxPlatforms > 1 ? 's' : ''} · 4 live now · 12 more coming soon
+                </p>
               </div>
 
               <div className="bg-blue-50 border border-blue-100 rounded-2xl px-4 py-3 mb-5 flex items-center gap-3">
-                <span className="text-lg">⚡</span>
-                <p className="text-xs text-blue-700 font-semibold">
-                  Connect at least one platform to activate your 100 free AI credits
-                </p>
+                <span>⚡</span>
+                <p className="text-xs text-blue-700 font-semibold">Connect at least one platform to activate your {planConfig.credits.toLocaleString()} AI credits</p>
               </div>
 
               <div className="grid grid-cols-2 gap-2 mb-4">
                 {PLATFORMS.map(p => {
-                  const selected = selectedPlatforms.includes(p.id)
+                  const isSelected = selectedPlatforms.includes(p.id)
+                  const isAtLimit = selectedPlatforms.length >= maxPlatforms && !isSelected
                   return (
-                    <button key={p.id} onClick={() => togglePlatform(p.id)}
+                    <button key={p.id}
+                      onClick={() => togglePlatform(p.id)}
                       className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${
-                        !p.available
-                          ? 'border-gray-50 bg-gray-50 opacity-50 cursor-not-allowed'
-                          : selected
+                        !p.available || isAtLimit
+                          ? 'border-gray-50 bg-gray-50 opacity-40 cursor-not-allowed'
+                          : isSelected
                           ? 'border-black bg-black/5'
                           : 'border-gray-100 hover:border-gray-300'
                       }`}>
@@ -313,96 +605,171 @@ export default function Onboarding() {
                         <p className="text-xs font-bold truncate">{p.label}</p>
                         <p className="text-xs text-gray-400">{p.available ? p.desc : 'Coming soon'}</p>
                       </div>
-                      {selected && p.available && (
-                        <span className="text-black font-bold text-sm flex-shrink-0">✓</span>
-                      )}
+                      {isSelected && p.available && <span className="text-black font-bold text-sm flex-shrink-0">✓</span>}
                     </button>
                   )
                 })}
               </div>
 
               <p className="text-xs text-center text-gray-400 mb-6">
-                {selectedPlatforms.length} platform{selectedPlatforms.length !== 1 ? 's' : ''} selected ·
-                {' '}LinkedIn, YouTube, Pinterest, Reddit & more coming soon
+                {selectedPlatforms.length} / {maxPlatforms} accounts selected
               </p>
 
               <div className="flex gap-3">
-                <button onClick={() => setStep(2)}
+                <button onClick={() => setStep(3)}
                   className="px-6 py-3 border border-gray-200 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
                   ← Back
                 </button>
                 {selectedPlatforms.length > 0 ? (
-                  <button onClick={() => setStep(4)}
+                  <button onClick={() => setStep(5)}
                     className="flex-1 py-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all">
                     Continue →
                   </button>
                 ) : (
-                  <button onClick={() => { showToast('Select a platform to activate credits — or skip to do it later', true); setStep(4) }}
+                  <button onClick={() => setStep(5)}
                     className="flex-1 py-3 border border-gray-200 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all text-gray-500">
                     Skip for now →
                   </button>
                 )}
               </div>
-              {selectedPlatforms.length === 0 && (
-                <p className="text-xs text-center text-gray-400 mt-2">
-                  Credits activate when you connect a platform and publish your first post
-                </p>
+            </div>
+          )}
+
+          {/* ── STEP 5 — SECURITY / 2FA ── */}
+          {step === 5 && (
+            <div className="bg-white border border-gray-100 rounded-3xl p-8 md:p-10">
+              <div className="text-center mb-6">
+                <div className="text-5xl mb-4">🔐</div>
+                <h2 className="text-2xl font-extrabold tracking-tight mb-2">Secure your account</h2>
+                <p className="text-gray-400 text-sm">Two-factor authentication adds a second layer of protection. Takes 60 seconds.</p>
+              </div>
+
+              {mfaDone ? (
+                <div className="bg-green-50 border border-green-200 rounded-2xl p-6 text-center mb-6">
+                  <div className="text-4xl mb-3">✅</div>
+                  <p className="text-sm font-extrabold text-green-700 mb-1">2FA enabled — your account is secured</p>
+                  <p className="text-xs text-green-600">You'll need your authenticator app each time you log in from a new device.</p>
+                </div>
+              ) : mfaStep === 'idle' ? (
+                <div className="space-y-4 mb-6">
+                  <div className="bg-gray-50 border border-gray-100 rounded-2xl p-5">
+                    <div className="flex items-start gap-4">
+                      <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white text-lg flex-shrink-0">🛡️</div>
+                      <div>
+                        <p className="text-sm font-extrabold mb-1">Why enable 2FA?</p>
+                        <div className="space-y-1">
+                          {[
+                            'Protects your connected social accounts',
+                            'Blocks unauthorized logins even if password is leaked',
+                            'Required for Agency plan team security compliance',
+                          ].map(r => (
+                            <div key={r} className="flex items-center gap-2 text-xs text-gray-600">
+                              <span className="text-green-500 font-bold flex-shrink-0">✓</span>{r}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <button onClick={handleEnroll2FA} disabled={mfaLoading}
+                    className="w-full py-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                    {mfaLoading ? (
+                      <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Setting up...</>
+                    ) : '🔐 Enable Two-Factor Authentication'}
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-5 mb-6">
+                  <div className="bg-gray-50 rounded-2xl p-5">
+                    <p className="text-xs font-bold text-gray-500 mb-3 uppercase tracking-wide">Step 1 — Scan with your authenticator app</p>
+                    <div className="flex justify-center mb-4">
+                      <img src={mfaQR} alt="2FA QR Code" className="w-40 h-40 rounded-xl" />
+                    </div>
+                    <p className="text-xs text-gray-400 text-center mb-2">Can't scan? Enter this code manually:</p>
+                    <div className="bg-white border border-gray-200 rounded-xl px-4 py-2 text-center">
+                      <p className="text-xs font-mono font-bold tracking-widest text-gray-700 break-all">{mfaSecret}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">Step 2 — Enter the 6-digit code</p>
+                    <input type="text" inputMode="numeric" maxLength={6} value={mfaCode}
+                      onChange={e => setMfaCode(e.target.value.replace(/\D/g, ''))}
+                      placeholder="000000"
+                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-center font-mono tracking-widest outline-none focus:border-black transition-all" />
+                    {mfaError && <p className="text-xs text-red-500 font-semibold mt-2">❌ {mfaError}</p>}
+                  </div>
+                  <button onClick={handleVerify2FA} disabled={mfaLoading || mfaCode.length !== 6}
+                    className="w-full py-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all disabled:opacity-40 flex items-center justify-center gap-2">
+                    {mfaLoading ? (
+                      <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Verifying...</>
+                    ) : 'Verify & Secure Account →'}
+                  </button>
+                </div>
+              )}
+
+              <div className="flex gap-3">
+                <button onClick={() => setStep(4)}
+                  className="px-6 py-3 border border-gray-200 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
+                  ← Back
+                </button>
+                <button onClick={() => setStep(6)}
+                  className={`flex-1 py-3 text-sm font-bold rounded-2xl transition-all ${
+                    mfaDone
+                      ? 'bg-black text-white hover:opacity-80'
+                      : 'border border-gray-200 text-gray-500 hover:border-gray-400'
+                  }`}>
+                  {mfaDone ? 'Continue →' : 'Skip for now →'}
+                </button>
+              </div>
+              {!mfaDone && (
+                <p className="text-xs text-center text-gray-400 mt-2">You can enable 2FA anytime in Settings → Security</p>
               )}
             </div>
           )}
 
-          {/* STEP 4 — FIRST POST */}
-          {step === 4 && (
-            <div className="bg-white border border-gray-100 rounded-3xl p-10">
+          {/* ── STEP 6 — FIRST POST ── */}
+          {step === 6 && (
+            <div className="bg-white border border-gray-100 rounded-3xl p-8 md:p-10">
               <div className="text-center mb-6">
                 <div className="text-5xl mb-4">✏️</div>
                 <h2 className="text-2xl font-extrabold tracking-tight mb-2">Write your first post</h2>
-                <p className="text-gray-400 text-sm">One post unlocks your 100 AI credits — takes 30 seconds</p>
+                <p className="text-gray-400 text-sm">Publish or schedule this to unlock your {planConfig.credits.toLocaleString()} AI credits</p>
               </div>
 
               <div className="bg-green-50 border border-green-100 rounded-2xl px-4 py-3 mb-5">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 mb-2">
                   <span>⚡</span>
-                  <p className="text-xs text-green-700 font-semibold">
-                    Almost there — publish or schedule this post to unlock your credits
-                  </p>
+                  <p className="text-xs text-green-700 font-semibold">Credit unlock checklist</p>
                 </div>
-                <div className="flex items-center gap-4 mt-2">
+                <div className="flex items-center gap-4 flex-wrap">
                   {[
-                    { label: 'Email verified',      done: true                         },
-                    { label: 'Platform connected',  done: selectedPlatforms.length > 0 },
-                    { label: 'First post',          done: false                        },
+                    { label: 'Email verified',     done: true                         },
+                    { label: 'Platform connected', done: selectedPlatforms.length > 0 },
+                    { label: 'First post',         done: firstPost.trim().length > 0  },
                   ].map(item => (
                     <div key={item.label} className="flex items-center gap-1.5">
-                      <span className={`text-xs font-bold ${item.done ? 'text-green-600' : 'text-gray-400'}`}>
-                        {item.done ? '✓' : '○'}
-                      </span>
-                      <span className={`text-xs ${item.done ? 'text-green-700 font-semibold' : 'text-gray-400'}`}>
-                        {item.label}
-                      </span>
+                      <span className={`text-xs font-bold ${item.done ? 'text-green-600' : 'text-gray-400'}`}>{item.done ? '✓' : '○'}</span>
+                      <span className={`text-xs ${item.done ? 'text-green-700 font-semibold' : 'text-gray-400'}`}>{item.label}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
               <div className="mb-4">
-                <div className="flex items-center gap-1 flex-wrap mb-3">
-                  {selectedPlatforms.slice(0, 6).map(p => {
-                    const pl = PLATFORMS.find(pl => pl.id === p)
-                    return pl ? <span key={p} className="text-lg">{pl.icon}</span> : null
-                  })}
-                  {selectedPlatforms.length > 6 && (
-                    <span className="text-xs text-gray-400">+{selectedPlatforms.length - 6} more</span>
-                  )}
-                </div>
-                <textarea
-                  value={firstPost}
-                  onChange={e => setFirstPost(e.target.value)}
+                {selectedPlatforms.length > 0 && (
+                  <div className="flex items-center gap-1 flex-wrap mb-3">
+                    {selectedPlatforms.slice(0, 6).map(p => {
+                      const pl = PLATFORMS.find(pl => pl.id === p)
+                      return pl ? <span key={p} className="text-lg">{pl.icon}</span> : null
+                    })}
+                    {selectedPlatforms.length > 6 && <span className="text-xs text-gray-400">+{selectedPlatforms.length - 6} more</span>}
+                  </div>
+                )}
+                <textarea value={firstPost} onChange={e => setFirstPost(e.target.value)}
                   placeholder={`Write something for your audience...\n\nTip: Use [brackets] for fill-in-the-blank sections`}
                   rows={5}
-                  className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 resize-none"
-                  autoFocus
-                />
+                  className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-black transition-all resize-none"
+                  autoFocus />
                 <div className="flex items-center justify-between mt-1.5">
                   <p className="text-xs text-gray-400">Saved as a draft — edit before publishing</p>
                   <p className="text-xs text-gray-400">{firstPost.length} chars</p>
@@ -416,86 +783,91 @@ export default function Onboarding() {
                     "Excited to share something new with you all 🎉 [describe what's coming]",
                     "Here's what I've been working on lately: [project or update]",
                     "Quick tip for [your audience]: [share a valuable insight]",
+                    "Something I wish I knew earlier about [your niche]: [insight]",
                   ].map(idea => (
                     <button key={idea} onClick={() => setFirstPost(idea)}
                       className="w-full text-left text-xs text-gray-500 hover:text-black p-2 rounded-lg hover:bg-white transition-all">
-                      → {idea.length > 65 ? idea.slice(0, 65) + '...' : idea}
+                      → {idea.length > 70 ? idea.slice(0, 70) + '...' : idea}
                     </button>
                   ))}
                 </div>
               </div>
 
               <div className="flex gap-3">
-                <button onClick={() => setStep(3)}
+                <button onClick={() => setStep(5)}
                   className="px-6 py-3 border border-gray-200 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
                   ← Back
                 </button>
                 {firstPost.trim() ? (
-                  <button onClick={() => setStep(5)}
+                  <button onClick={() => setStep(7)}
                     className="flex-1 py-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all">
-                    Save Draft & Unlock Credits →
+                    Save Draft & Continue →
                   </button>
                 ) : (
-                  <button onClick={() => setStep(5)}
+                  <button onClick={() => setStep(7)}
                     className="flex-1 py-3 border border-gray-200 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all text-gray-500">
                     Skip for now →
                   </button>
                 )}
               </div>
-              {!firstPost.trim() && (
-                <p className="text-xs text-center text-gray-400 mt-2">
-                  Credits activate when you publish your first post from the dashboard
-                </p>
-              )}
             </div>
           )}
 
-          {/* STEP 5 — DONE */}
-          {step === 5 && (
-            <div className="bg-white border border-gray-100 rounded-3xl p-10 text-center">
+          {/* ── STEP 7 — DONE ── */}
+          {step === 7 && (
+            <div className="bg-white border border-gray-100 rounded-3xl p-8 md:p-10 text-center">
               <div className="text-6xl mb-4">🚀</div>
               <h2 className="text-3xl font-extrabold tracking-tight mb-2">
                 You're all set, {displayName || 'friend'}!
               </h2>
-              <p className="text-gray-400 mb-6 text-sm">Your account is ready. Here's what to do next.</p>
+              <p className="text-gray-400 mb-2 text-sm">Your {planConfig.label} account is ready.</p>
+              <div className="flex justify-center mb-6"><PlanBadge /></div>
 
-              <div className={`rounded-2xl p-4 mb-6 text-left ${
+              <div className={`rounded-2xl p-5 mb-6 text-left ${
                 firstPost.trim() && selectedPlatforms.length > 0
-                  ? 'bg-green-50 border border-green-100'
+                  ? 'bg-green-50 border border-green-200'
                   : 'bg-amber-50 border border-amber-100'
               }`}>
                 {firstPost.trim() && selectedPlatforms.length > 0 ? (
                   <div className="flex items-center gap-3">
-                    <span className="text-2xl">⚡</span>
+                    <span className="text-3xl">⚡</span>
                     <div>
-                      <p className="text-sm font-extrabold text-green-700">100 AI credits unlocked!</p>
-                      <p className="text-xs text-green-600 mt-0.5">
-                        Invite a friend and you both earn another 25 credits on top.
-                      </p>
+                      <p className="text-sm font-extrabold text-green-700">{planConfig.credits.toLocaleString()} AI credits unlocked!</p>
+                      <p className="text-xs text-green-600 mt-0.5">Refer a friend and you both earn another 25 credits on top.</p>
                     </div>
                   </div>
                 ) : (
                   <div className="flex items-start gap-3">
-                    <span className="text-xl mt-0.5">⚡</span>
+                    <span className="text-2xl mt-0.5">⚡</span>
                     <div>
                       <p className="text-sm font-extrabold text-amber-700">Credits activate on your first post</p>
                       <p className="text-xs text-amber-600 mt-0.5">
                         {!selectedPlatforms.length
-                          ? 'Connect a platform and publish one post from the dashboard to unlock your 100 credits.'
-                          : 'Publish or schedule your first post from the dashboard to unlock your 100 credits.'
-                        }
+                          ? 'Connect a platform and publish one post from the dashboard to unlock your credits.'
+                          : 'Publish or schedule your first post from the dashboard to unlock your credits.'}
                       </p>
                     </div>
                   </div>
                 )}
               </div>
 
+              {mfaDone && (
+                <div className="bg-green-50 border border-green-100 rounded-2xl px-4 py-3 mb-4 flex items-center gap-2">
+                  <span>🔐</span>
+                  <p className="text-xs text-green-700 font-semibold">Two-factor authentication is enabled — your account is secured.</p>
+                </div>
+              )}
+
               <div className="space-y-3 mb-8 text-left">
                 {[
-                  { icon: '✏️', title: 'Compose a post',       desc: 'Write and schedule your first post',        href: '/compose',        cta: 'Start writing'  },
-                  { icon: '📆', title: 'Bulk schedule content', desc: 'Plan a whole week of posts in one session', href: '/bulk-scheduler', cta: 'Open scheduler' },
-                  { icon: '🔗', title: 'Set up Link in Bio',   desc: 'Your free bio page — no Linktree needed',   href: '/link-in-bio',    cta: 'Build bio page' },
-                  { icon: '🤖', title: 'Explore AI tools',     desc: 'Captions, hooks, calendars, trend scanning', href: '/features',      cta: 'See features'   },
+                  { icon: '✏️', title: 'Compose a post',        desc: 'Write, schedule, and use AI tools',           href: '/compose',          cta: 'Start writing'   },
+                  { icon: '🤖', title: 'Explore AI Features',   desc: `${planConfig.aiTools.length} tools — captions, hooks, scoring & more`, href: '/ai-features', cta: 'Explore tools'   },
+                  { icon: '📆', title: 'Bulk Scheduler',        desc: 'Plan a whole week of content at once',         href: '/bulk-scheduler',   cta: 'Open scheduler'  },
+                  { icon: '🔗', title: 'Set up Link in Bio',    desc: 'Your free bio page — no Linktree needed',      href: '/link-in-bio',      cta: 'Build page'      },
+                  { icon: '📊', title: 'Analytics',             desc: `Up to ${planConfig.analytics} of history`,    href: '/analytics',        cta: 'View analytics'  },
+                  ...(selectedPlatforms.length === 0 ? [
+                    { icon: '📱', title: 'Connect a Platform',  desc: 'Activate your AI credits',                    href: '/accounts',         cta: 'Connect now'     },
+                  ] : []),
                 ].map(action => (
                   <div key={action.title}
                     className="flex items-center gap-4 p-4 border border-gray-100 rounded-2xl hover:border-gray-300 transition-all group">
@@ -519,8 +891,7 @@ export default function Onboarding() {
                 {saving ? 'Setting up your account...' : 'Go to Dashboard →'}
               </button>
               <p className="text-xs text-gray-400 mt-4">
-                Settings can be changed anytime in{' '}
-                <Link href="/settings" className="underline">Settings</Link>
+                Everything can be changed anytime in <Link href="/settings" className="underline">Settings</Link>
               </p>
             </div>
           )}
@@ -530,11 +901,23 @@ export default function Onboarding() {
 
       {toast && (
         <div className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${
-          toast.soft ? 'bg-gray-800 text-white' : 'bg-red-500 text-white'
+          toast.type === 'info' ? 'bg-gray-800 text-white' : 'bg-red-500 text-white'
         }`}>
-          {toast.soft ? '💡' : '❌'} {toast.message}
+          {toast.type === 'info' ? '💡' : '❌'} {toast.message}
         </div>
       )}
     </div>
+  )
+}
+
+export default function Onboarding() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
+      </div>
+    }>
+      <OnboardingInner />
+    </Suspense>
   )
 }
