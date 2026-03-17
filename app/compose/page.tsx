@@ -3,6 +3,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Sidebar from '@/components/Sidebar'
+import Link from 'next/link'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 
 const PLATFORMS = [
@@ -26,6 +27,9 @@ const COMING_SOON_PLATFORMS = [
   { id: 'lemon8',    name: 'Lemon8',    icon: '🍋' },
   { id: 'bereal',    name: 'BeReal',    icon: '📷' },
 ]
+
+// Platforms that require a destination to be selected before posting
+const DESTINATION_PLATFORMS = ['discord', 'telegram']
 
 const AI_TOOLS = [
   { id: 'caption',   label: 'Caption',   emoji: '✍️',  credits: 3, desc: 'Generate a caption from your topic'     },
@@ -81,6 +85,12 @@ type ScoreResult = {
   verdict: string
 }
 
+type Destination = {
+  id: string
+  platform: string
+  label: string
+}
+
 function ComposeInner() {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -107,6 +117,11 @@ function ComposeInner() {
   const [scoreError, setScoreError] = useState('')
   const [showPreview, setShowPreview] = useState(false)
 
+  // Destinations — map of platform -> available destinations
+  const [destinations, setDestinations] = useState<Record<string, Destination[]>>({})
+  // Selected destination per platform — map of platform -> destination ID
+  const [selectedDestinations, setSelectedDestinations] = useState<Record<string, string>>({})
+
   const planConfig = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
   const maxScheduleDate = (() => {
     const d = new Date()
@@ -119,16 +134,40 @@ function ComposeInner() {
     plan === 'pro'    ? '1 month' :
     '3 months'
 
-  // AUTH GUARD
+  // AUTH GUARD + load destinations
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) { router.push('/login'); return }
+
+      // Load saved destinations for destination-based platforms
+      const { data: dests } = await supabase
+        .from('post_destinations')
+        .select('id, platform, label')
+        .eq('user_id', data.user.id)
+        .order('created_at', { ascending: true })
+
+      if (dests && dests.length > 0) {
+        const grouped = dests.reduce((acc: Record<string, Destination[]>, d: Destination) => {
+          if (!acc[d.platform]) acc[d.platform] = []
+          acc[d.platform].push(d)
+          return acc
+        }, {})
+        setDestinations(grouped)
+
+        // Auto-select first destination per platform
+        const autoSelected: Record<string, string> = {}
+        Object.entries(grouped).forEach(([platform, list]) => {
+          if (list.length > 0) autoSelected[platform] = list[0].id
+        })
+        setSelectedDestinations(autoSelected)
+      }
+
       setLoading(false)
     })
   }, [router])
 
   useEffect(() => {
-    const templateId = searchParams.get('template')
+    const templateId      = searchParams.get('template')
     const starterTemplateId = searchParams.get('starterTemplate')
 
     if (starterTemplateId) {
@@ -172,7 +211,12 @@ function ComposeInner() {
 
   const charCount = content.length
   const charLimit = activePlatform?.limit ?? null
-  const charOver = charLimit !== null && charCount > charLimit
+  const charOver  = charLimit !== null && charCount > charLimit
+
+  // Check if any selected destination-based platform is missing a destination
+  const missingDestinations = selectedPlatforms
+    .filter(p => DESTINATION_PLATFORMS.includes(p))
+    .filter(p => !selectedDestinations[p] && (!destinations[p] || destinations[p].length === 0))
 
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
     setToast({ message, type })
@@ -220,10 +264,7 @@ function ComposeInner() {
         }),
       })
       const data = await res.json()
-      if (!res.ok || data.error) {
-        setAiError('Something went wrong. Please try again.')
-        return
-      }
+      if (!res.ok || data.error) { setAiError('Something went wrong. Please try again.'); return }
       setAiResult(data.result)
       setCredits(credits - tool.credits)
       showToast(`Used ${tool.credits} credit${tool.credits > 1 ? 's' : ''} · ${credits - tool.credits} remaining`, 'info')
@@ -240,27 +281,20 @@ function ComposeInner() {
     setScoring(true)
     setScoreError('')
     setScoreResult(null)
-
     try {
       const res = await fetch('/api/ai', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tool: 'score',
-          content,
-          platform: activePlatform?.name || 'general',
-        }),
+        body: JSON.stringify({ tool: 'score', content, platform: activePlatform?.name || 'general' }),
       })
       const data = await res.json()
       if (!res.ok || data.error) { setScoreError('Scoring failed. Please try again.'); setScoring(false); return }
-
       try {
         const raw = data.result
-        const scoreMatch = raw.match(/SCORE:\s*(\d+)/i)
-        const strengthsMatch = raw.match(/STRENGTHS:([\s\S]*?)(?:IMPROVEMENTS:|$)/i)
+        const scoreMatch       = raw.match(/SCORE:\s*(\d+)/i)
+        const strengthsMatch   = raw.match(/STRENGTHS:([\s\S]*?)(?:IMPROVEMENTS:|$)/i)
         const improvementsMatch = raw.match(/IMPROVEMENTS:([\s\S]*?)(?:VERDICT:|$)/i)
-        const verdictMatch = raw.match(/VERDICT:([\s\S]*?)$/i)
-
+        const verdictMatch     = raw.match(/VERDICT:([\s\S]*?)$/i)
         const score = scoreMatch ? parseInt(scoreMatch[1]) : 50
         const label = score >= 80 ? 'Great' : score >= 60 ? 'Good' : score >= 40 ? 'Fair' : 'Needs Work'
         const strengths = strengthsMatch
@@ -270,12 +304,10 @@ function ComposeInner() {
           ? improvementsMatch[1].trim().split('\n').filter(Boolean).map((s: string) => s.replace(/^[-•*]\s*/, ''))
           : []
         const verdict = verdictMatch ? verdictMatch[1].trim() : raw
-
         setScoreResult({ score, label, strengths, improvements, verdict })
       } catch {
         setScoreResult({ score: 0, label: 'Unknown', strengths: [], improvements: [], verdict: data.result })
       }
-
       setCredits(credits - SCORE_CREDIT_COST)
     } catch {
       setScoreError('Network error. Please try again.')
@@ -303,7 +335,6 @@ function ComposeInner() {
     if (!content.trim() || charOver || selectedPlatforms.length === 0 || !!scheduleError) return
     setPublishing(true)
     setPublishResults(null)
-
     try {
       let scheduledAt: string | undefined
       if (scheduleDate) {
@@ -314,15 +345,16 @@ function ComposeInner() {
       const res = await fetch('/api/posts/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content, platforms: selectedPlatforms, scheduledAt }),
+        body: JSON.stringify({
+          content,
+          platforms: selectedPlatforms,
+          scheduledAt,
+          destinations: selectedDestinations,
+        }),
       })
 
       const data = await res.json()
-
-      if (!res.ok) {
-        showToast(data.error || 'Something went wrong', 'error')
-        return
-      }
+      if (!res.ok) { showToast(data.error || 'Something went wrong', 'error'); return }
 
       if (scheduledAt) {
         showToast('Post scheduled successfully! ✓')
@@ -333,7 +365,7 @@ function ComposeInner() {
         setScoreResult(null)
       } else {
         setPublishResults(data.results || [])
-        const allFailed = data.results?.every((r: PublishResult) => !r.success)
+        const allFailed  = data.results?.every((r: PublishResult) => !r.success)
         const someFailed = data.results?.some((r: PublishResult) => !r.success)
         if (allFailed) showToast('Failed to publish to all platforms', 'error')
         else if (someFailed) showToast('Published to some platforms — check results below', 'info')
@@ -372,12 +404,16 @@ function ComposeInner() {
   }
 
   const scoreColor = scoreResult
-    ? scoreResult.score >= 80 ? 'text-green-600' : scoreResult.score >= 60 ? 'text-blue-600' : scoreResult.score >= 40 ? 'text-yellow-600' : 'text-red-500'
-    : ''
+    ? scoreResult.score >= 80 ? 'text-green-600'
+    : scoreResult.score >= 60 ? 'text-blue-600'
+    : scoreResult.score >= 40 ? 'text-yellow-600'
+    : 'text-red-500' : ''
 
   const scoreBg = scoreResult
-    ? scoreResult.score >= 80 ? 'bg-green-50 border-green-100' : scoreResult.score >= 60 ? 'bg-blue-50 border-blue-100' : scoreResult.score >= 40 ? 'bg-yellow-50 border-yellow-100' : 'bg-red-50 border-red-100'
-    : ''
+    ? scoreResult.score >= 80 ? 'bg-green-50 border-green-100'
+    : scoreResult.score >= 60 ? 'bg-blue-50 border-blue-100'
+    : scoreResult.score >= 40 ? 'bg-yellow-50 border-yellow-100'
+    : 'bg-red-50 border-red-100' : ''
 
   if (loading) {
     return (
@@ -398,7 +434,6 @@ function ComposeInner() {
               <h1 className="text-2xl font-extrabold tracking-tight">Compose</h1>
               <p className="text-sm text-gray-400 mt-0.5">Write, schedule, and publish your posts</p>
             </div>
-            {/* Mobile preview toggle */}
             <button
               onClick={() => setShowPreview(p => !p)}
               className="lg:hidden text-xs font-bold px-3 py-2 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
@@ -418,11 +453,10 @@ function ComposeInner() {
             <div className="lg:hidden mb-4 bg-white border border-gray-100 rounded-2xl p-4">
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Preview</p>
               <div className="bg-gray-50 rounded-xl p-4 min-h-24">
-                {content ? (
-                  <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{content}</p>
-                ) : (
-                  <p className="text-xs text-gray-300 text-center mt-4">Your post preview appears here</p>
-                )}
+                {content
+                  ? <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{content}</p>
+                  : <p className="text-xs text-gray-300 text-center mt-4">Your post preview appears here</p>
+                }
               </div>
               {content && selectedPlatforms.length > 0 && (
                 <div className="mt-3 pt-3 border-t border-gray-50 space-y-1.5">
@@ -465,16 +499,14 @@ function ComposeInner() {
                   {soonPlatforms.map(p => (
                     <div key={p.id} title={`${p.name} — coming soon`}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border border-dashed border-blue-100 text-blue-300 cursor-not-allowed select-none">
-                      <span>{p.icon}</span>
-                      <span>{p.name}</span>
+                      <span>{p.icon}</span><span>{p.name}</span>
                       <span className="text-xs font-bold text-blue-300 ml-0.5">· Soon</span>
                     </div>
                   ))}
                   {COMING_SOON_PLATFORMS.map(p => (
                     <div key={p.id} title={`${p.name} — coming soon`}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border border-dashed border-gray-200 text-gray-300 cursor-not-allowed select-none">
-                      <span>{p.icon}</span>
-                      <span>{p.name}</span>
+                      <span>{p.icon}</span><span>{p.name}</span>
                       <span className="text-xs font-normal text-gray-300 ml-0.5">· Soon</span>
                     </div>
                   ))}
@@ -484,6 +516,68 @@ function ComposeInner() {
               {selectedPlatforms.length === 0 && (
                 <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
                   <p className="text-xs font-semibold text-amber-700">Select at least one platform to compose a post.</p>
+                </div>
+              )}
+
+              {/* DESTINATION SELECTOR — shown when Discord or Telegram is selected */}
+              {selectedPlatforms.some(p => DESTINATION_PLATFORMS.includes(p)) && (
+                <div className="bg-white border border-gray-100 rounded-2xl p-4">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">
+                    Post Destinations
+                  </p>
+                  <div className="space-y-3">
+                    {selectedPlatforms
+                      .filter(p => DESTINATION_PLATFORMS.includes(p))
+                      .map(platformId => {
+                        const platform = PLATFORMS.find(p => p.id === platformId)!
+                        const platformDests = destinations[platformId] || []
+                        return (
+                          <div key={platformId}>
+                            <div className="flex items-center gap-2 mb-1.5">
+                              <span className="text-sm">{platform.icon}</span>
+                              <span className="text-xs font-bold text-gray-700">{platform.name}</span>
+                            </div>
+                            {platformDests.length === 0 ? (
+                              <div className="flex items-center justify-between bg-amber-50 border border-amber-100 rounded-xl px-3 py-2">
+                                <p className="text-xs text-amber-700 font-semibold">
+                                  No {platform.name} destinations configured
+                                </p>
+                                <Link
+                                  href="/accounts/destinations"
+                                  className="text-xs font-bold text-black ml-3 underline hover:opacity-70 flex-shrink-0">
+                                  Add one →
+                                </Link>
+                              </div>
+                            ) : (
+                              <select
+                                value={selectedDestinations[platformId] || ''}
+                                onChange={e => setSelectedDestinations(prev => ({
+                                  ...prev,
+                                  [platformId]: e.target.value,
+                                }))}
+                                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 bg-white font-semibold">
+                                {platformDests.map(d => (
+                                  <option key={d.id} value={d.id}>{d.label}</option>
+                                ))}
+                              </select>
+                            )}
+                          </div>
+                        )
+                      })}
+                  </div>
+                </div>
+              )}
+
+              {/* MISSING DESTINATIONS WARNING */}
+              {missingDestinations.length > 0 && (
+                <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 flex items-center justify-between">
+                  <p className="text-xs font-semibold text-amber-700">
+                    {missingDestinations.map(p => PLATFORMS.find(pl => pl.id === p)?.name).join(' and ')} need{missingDestinations.length === 1 ? 's' : ''} a destination before you can post.
+                  </p>
+                  <Link href="/accounts/destinations"
+                    className="text-xs font-bold text-black ml-3 underline hover:opacity-70 flex-shrink-0">
+                    Set up →
+                  </Link>
                 </div>
               )}
 
@@ -519,16 +613,12 @@ function ComposeInner() {
                 </div>
                 <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-4">
                   {AI_TOOLS.map(tool => (
-                    <button key={tool.id}
-                      onClick={() => handleAiTool(tool)}
-                      disabled={aiLoading}
-                      title={tool.desc}
+                    <button key={tool.id} onClick={() => handleAiTool(tool)}
+                      disabled={aiLoading} title={tool.desc}
                       className={`p-3 rounded-xl border text-center transition-all ${
-                        activeAiTool === tool.id
-                          ? 'bg-black text-white border-black'
-                          : aiLoading
-                          ? 'bg-gray-50 border-gray-100 text-gray-300 cursor-not-allowed'
-                          : 'bg-white border-gray-200 hover:border-gray-400 text-gray-700'
+                        activeAiTool === tool.id ? 'bg-black text-white border-black'
+                        : aiLoading ? 'bg-gray-50 border-gray-100 text-gray-300 cursor-not-allowed'
+                        : 'bg-white border-gray-200 hover:border-gray-400 text-gray-700'
                       }`}>
                       <div className="text-lg mb-1">{tool.emoji}</div>
                       <p className="text-xs font-bold">{tool.label}</p>
@@ -581,18 +671,12 @@ function ComposeInner() {
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Post Score</p>
                     <p className="text-xs text-gray-400 mt-0.5">AI predicts how your post will perform before you publish</p>
                   </div>
-                  <button
-                    onClick={handleScorePost}
+                  <button onClick={handleScorePost}
                     disabled={scoring || !content.trim() || credits < SCORE_CREDIT_COST}
                     className="flex items-center gap-2 px-4 py-2 bg-black text-white text-xs font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed self-start sm:self-auto">
                     {scoring ? (
-                      <>
-                        <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Scoring...
-                      </>
-                    ) : (
-                      `⚡ Score Post — ${SCORE_CREDIT_COST} cr`
-                    )}
+                      <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Scoring...</>
+                    ) : `⚡ Score Post — ${SCORE_CREDIT_COST} cr`}
                   </button>
                 </div>
 
@@ -611,14 +695,11 @@ function ComposeInner() {
                       </div>
                       <div className="flex-1">
                         <div className="w-full bg-white/60 rounded-full h-2.5">
-                          <div
-                            className={`h-2.5 rounded-full transition-all ${
-                              scoreResult.score >= 80 ? 'bg-green-500' :
-                              scoreResult.score >= 60 ? 'bg-blue-500' :
-                              scoreResult.score >= 40 ? 'bg-yellow-400' : 'bg-red-400'
-                            }`}
-                            style={{ width: `${scoreResult.score}%` }}
-                          />
+                          <div className={`h-2.5 rounded-full transition-all ${
+                            scoreResult.score >= 80 ? 'bg-green-500' :
+                            scoreResult.score >= 60 ? 'bg-blue-500' :
+                            scoreResult.score >= 40 ? 'bg-yellow-400' : 'bg-red-400'
+                          }`} style={{ width: `${scoreResult.score}%` }} />
                         </div>
                         <p className="text-xs text-gray-500 mt-2 leading-relaxed">{scoreResult.verdict}</p>
                       </div>
@@ -676,7 +757,7 @@ function ComposeInner() {
                 {scheduleError && (
                   <div className="mt-2 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 flex items-center justify-between gap-3">
                     <p className="text-xs text-amber-700">{scheduleError}</p>
-                    <a href="/pricing" className="text-xs font-bold text-black whitespace-nowrap hover:underline">Upgrade →</a>
+                    <a href="/settings?tab=Plan" className="text-xs font-bold text-black whitespace-nowrap hover:underline">Upgrade →</a>
                   </div>
                 )}
               </div>
@@ -708,15 +789,20 @@ function ComposeInner() {
               <div className="flex items-center gap-3">
                 <button
                   onClick={handlePublish}
-                  disabled={publishing || !content.trim() || charOver || selectedPlatforms.length === 0 || !!scheduleError}
+                  disabled={
+                    publishing ||
+                    !content.trim() ||
+                    charOver ||
+                    selectedPlatforms.length === 0 ||
+                    !!scheduleError ||
+                    missingDestinations.length > 0
+                  }
                   className="flex-1 bg-black text-white text-sm font-bold py-3 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
                   {publishing
                     ? (scheduleDate ? 'Scheduling...' : 'Publishing...')
                     : (scheduleDate ? 'Schedule Post' : 'Post Now')}
                 </button>
-                <button
-                  onClick={handleSaveDraft}
-                  disabled={saving || !content.trim()}
+                <button onClick={handleSaveDraft} disabled={saving || !content.trim()}
                   className="px-5 py-3 border border-gray-200 text-sm font-bold text-gray-600 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
                   {saving ? 'Saving...' : currentDraftId ? 'Update Draft' : 'Save Draft'}
                 </button>
@@ -729,11 +815,10 @@ function ComposeInner() {
               <div className="bg-white border border-gray-100 rounded-2xl p-4 sticky top-8">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Preview</p>
                 <div className="bg-gray-50 rounded-xl p-4 min-h-32">
-                  {content ? (
-                    <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{content}</p>
-                  ) : (
-                    <p className="text-xs text-gray-300 text-center mt-8">Your post preview appears here</p>
-                  )}
+                  {content
+                    ? <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{content}</p>
+                    : <p className="text-xs text-gray-300 text-center mt-8">Your post preview appears here</p>
+                  }
                 </div>
                 {content && selectedPlatforms.length > 0 && (
                   <div className="mt-3 pt-3 border-t border-gray-50 space-y-1.5">
@@ -752,6 +837,25 @@ function ComposeInner() {
                         </div>
                       )
                     })}
+                  </div>
+                )}
+                {/* Show selected destinations in preview */}
+                {selectedPlatforms.some(p => DESTINATION_PLATFORMS.includes(p)) && (
+                  <div className="mt-3 pt-3 border-t border-gray-50 space-y-1">
+                    {selectedPlatforms
+                      .filter(p => DESTINATION_PLATFORMS.includes(p))
+                      .map(platformId => {
+                        const destId = selectedDestinations[platformId]
+                        const dest = destinations[platformId]?.find(d => d.id === destId)
+                        const platform = PLATFORMS.find(p => p.id === platformId)
+                        if (!dest) return null
+                        return (
+                          <div key={platformId} className="flex items-center gap-1.5">
+                            <span className="text-xs">{platform?.icon}</span>
+                            <span className="text-xs text-gray-400 truncate">→ {dest.label}</span>
+                          </div>
+                        )
+                      })}
                   </div>
                 )}
               </div>

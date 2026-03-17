@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await request.json()
-  const { content, platforms, scheduledAt } = body
+  const { content, platforms, scheduledAt, destinations } = body
 
   if (!content?.trim()) return NextResponse.json({ error: 'Content is required' }, { status: 400 })
   if (!platforms?.length) return NextResponse.json({ error: 'Select at least one platform' }, { status: 400 })
@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     .eq('user_id', user.id)
     .single()
 
-  const plan = settings?.plan || 'free'
+  const plan  = settings?.plan || 'free'
   const limit = PLAN_POST_LIMITS[plan] ?? 100
 
   const startOfMonth = new Date()
@@ -62,21 +62,24 @@ export async function POST(request: NextRequest) {
       error: 'Monthly post limit reached',
       limit,
       plan,
-      upgrade: plan === 'free' ? 'Upgrade to Pro for 1,000 posts/month' : 'Upgrade to Agency for 5,000 posts/month',
+      upgrade: plan === 'free'
+        ? 'Upgrade to Pro for 1,000 posts/month'
+        : 'Upgrade to Agency for 5,000 posts/month',
     }, { status: 403 })
   }
 
   const isScheduled = !!scheduledAt
-  const status = isScheduled ? 'scheduled' : 'publishing'
+  const status      = isScheduled ? 'scheduled' : 'publishing'
 
   const { data: post, error: dbError } = await supabase
     .from('posts')
     .insert({
-      user_id: user.id,
+      user_id:      user.id,
       content,
       platforms,
       status,
-      scheduled_at: scheduledAt || null,
+      scheduled_at: scheduledAt   || null,
+      destinations: destinations  || {},
     })
     .select()
     .single()
@@ -88,8 +91,8 @@ export async function POST(request: NextRequest) {
 
   if (isScheduled) {
     const scheduledTime = new Date(scheduledAt).getTime()
-    const now = Date.now()
-    const delay = Math.max(0, scheduledTime - now)
+    const now           = Date.now()
+    const delay         = Math.max(0, scheduledTime - now)
 
     await inngest.send({
       name: 'post/scheduled',
@@ -99,8 +102,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, postId: post.id, status: 'scheduled' })
   }
 
-  const results = await publishToAll(user.id, platforms, content)
-  const allFailed = results.every(r => !r.success)
+  // Post Now — publish immediately, passing destinations map
+  const results    = await publishToAll(user.id, platforms, content, destinations || {})
+  const allFailed  = results.every(r => !r.success)
   const someFailed = results.some(r => !r.success)
 
   const platformPostIds: Record<string, string> = {}
@@ -109,16 +113,16 @@ export async function POST(request: NextRequest) {
   await supabase
     .from('posts')
     .update({
-      status: allFailed ? 'failed' : someFailed ? 'partial' : 'published',
-      published_at: allFailed ? null : new Date().toISOString(),
+      status:           allFailed ? 'failed' : someFailed ? 'partial' : 'published',
+      published_at:     allFailed ? null : new Date().toISOString(),
       platform_post_ids: platformPostIds,
     })
     .eq('id', post.id)
 
   return NextResponse.json({
     success: !allFailed,
-    postId: post.id,
+    postId:  post.id,
     results,
-    status: allFailed ? 'failed' : someFailed ? 'partial' : 'published',
+    status:  allFailed ? 'failed' : someFailed ? 'partial' : 'published',
   })
 }
