@@ -49,18 +49,21 @@ export default function Notifications() {
   useEffect(() => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return } // N1: fixed
+      if (!user) { router.push('/login'); return }
       const { data } = await supabase
         .from('notifications')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(50)
-      setNotifications([...(data || []), ...PLACEHOLDER_NOTIFS])
+      const real = data || []
+      // Only show placeholders if user has no real notifications yet
+      const combined = real.length > 0 ? real : [...real, ...PLACEHOLDER_NOTIFS]
+      setNotifications(combined)
       setLoading(false)
     }
     load()
-  }, [router]) // N1: fixed
+  }, [router])
 
   const markRead = async (id: string) => {
     if (id.startsWith('p')) {
@@ -88,26 +91,27 @@ export default function Notifications() {
   }
 
   const formatTime = (ts: string) => {
-    const diff = Date.now() - new Date(ts).getTime()
-    const mins = Math.floor(diff / 60000)
+    const diff  = Date.now() - new Date(ts).getTime()
+    const mins  = Math.floor(diff / 60000)
     const hours = Math.floor(mins / 60)
-    const days = Math.floor(hours / 24)
-    if (mins < 1) return 'Just now'
-    if (mins < 60) return `${mins}m ago`
+    const days  = Math.floor(hours / 24)
+    if (mins < 1)   return 'Just now'
+    if (mins < 60)  return `${mins}m ago`
     if (hours < 24) return `${hours}h ago`
     return `${days}d ago`
   }
 
-  const filtered = filter === 'unread' ? notifications.filter(n => !n.read) : notifications
+  const filtered    = filter === 'unread' ? notifications.filter(n => !n.read) : notifications
   const unreadCount = notifications.filter(n => !n.read).length
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar />
-      <div className="ml-56 flex-1 p-8">
+      <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-2xl mx-auto">
 
-          <div className="flex items-center justify-between mb-8">
+          {/* HEADER */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Notifications</h1>
               <p className="text-sm text-gray-400 mt-0.5">
@@ -116,7 +120,7 @@ export default function Notifications() {
             </div>
             {unreadCount > 0 && (
               <button onClick={markAllRead}
-                className="text-xs font-bold px-4 py-2.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                className="self-start sm:self-auto text-xs font-bold px-4 py-2.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
                 Mark all read
               </button>
             )}
@@ -160,27 +164,30 @@ export default function Notifications() {
                 return (
                   <div key={n.id}
                     onClick={() => !n.read && markRead(n.id)}
-                    className={`border rounded-2xl p-4 transition-all group cursor-pointer ${config.color} ${
+                    className={`border rounded-2xl p-4 transition-all cursor-pointer ${config.color} ${
                       !n.read ? 'opacity-100' : 'opacity-60'
                     }`}>
                     <div className="flex items-start gap-3">
                       <span className="text-lg flex-shrink-0 mt-0.5">{config.icon}</span>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            <p className="text-xs font-extrabold">{n.title}</p>
-                            {!n.read && <div className="w-2 h-2 rounded-full bg-black flex-shrink-0" />}
+                        <div className="flex items-start justify-between gap-2 mb-0.5">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <p className="text-xs font-extrabold truncate">{n.title}</p>
+                            {!n.read && (
+                              <div className="w-2 h-2 rounded-full bg-black flex-shrink-0" />
+                            )}
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0">
-                            <span className="text-xs text-gray-400">{formatTime(n.created_at)}</span>
+                            <span className="text-xs text-gray-400 whitespace-nowrap">{formatTime(n.created_at)}</span>
+                            {/* Always visible delete — not hover-only */}
                             <button
                               onClick={e => { e.stopPropagation(); deleteNotif(n.id) }}
-                              className="text-xs text-gray-300 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-all">
+                              className="text-xs text-gray-300 hover:text-red-400 transition-all flex-shrink-0 px-1">
                               ✕
                             </button>
                           </div>
                         </div>
-                        <p className="text-xs text-gray-600 mt-0.5 leading-relaxed">{n.body}</p>
+                        <p className="text-xs text-gray-600 leading-relaxed">{n.body}</p>
                       </div>
                     </div>
                   </div>
