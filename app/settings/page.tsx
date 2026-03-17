@@ -46,7 +46,6 @@ function SettingsInner() {
   )
 
   const [savedTab, setSavedTab] = useState<string | null>(null)
-  const [whiteLabel, setWhiteLabel] = useState(false)
   const [checkoutLoading, setCheckoutLoading] = useState(false)
   const [creditPackLoading, setCreditPackLoading] = useState<string | null>(null)
   const [notifications, setNotifications] = useState({
@@ -63,11 +62,7 @@ function SettingsInner() {
   const [dangerLoading, setDangerLoading] = useState(false)
 
   const [referralCode, setReferralCode] = useState('')
-  const [referralStats, setReferralStats] = useState({
-    totalReferrals: 0,
-    payingReferrals: 0,
-    creditsEarned: 0,
-  })
+  const [referralStats, setReferralStats] = useState({ totalReferrals: 0, payingReferrals: 0, creditsEarned: 0 })
   const [referralHistory, setReferralHistory] = useState<any[]>([])
   const [referralLoading, setReferralLoading] = useState(false)
 
@@ -81,6 +76,16 @@ function SettingsInner() {
   const [mfaLoading, setMfaLoading] = useState(false)
   const [mfaError, setMfaError] = useState('')
 
+  // White label state
+  const [whiteLabelActive, setWhiteLabelActive] = useState(false)
+  const [whiteLabelTier, setWhiteLabelTier] = useState<string | null>(null)
+  const [wlBrandName, setWlBrandName] = useState('')
+  const [wlLogoUrl, setWlLogoUrl] = useState('')
+  const [wlDomain, setWlDomain] = useState('')
+  const [wlColor, setWlColor] = useState('#000000')
+  const [wlCheckoutLoading, setWlCheckoutLoading] = useState(false)
+  const [wlActivated, setWlActivated] = useState(false)
+
   useEffect(() => {
     const init = async () => {
       const { data: { user } } = await supabase.auth.getUser()
@@ -90,10 +95,19 @@ function SettingsInner() {
 
       const { data: settings } = await supabase
         .from('user_settings')
-        .select('referral_code')
+        .select('referral_code, white_label_active, white_label_tier, white_label_brand_name, white_label_logo_url, white_label_custom_domain, white_label_brand_color')
         .eq('user_id', user.id)
         .single()
-      if (settings?.referral_code) setReferralCode(settings.referral_code)
+
+      if (settings) {
+        if (settings.referral_code) setReferralCode(settings.referral_code)
+        setWhiteLabelActive(settings.white_label_active || false)
+        setWhiteLabelTier(settings.white_label_tier || null)
+        setWlBrandName(settings.white_label_brand_name || '')
+        setWlLogoUrl(settings.white_label_logo_url || '')
+        setWlDomain(settings.white_label_custom_domain || '')
+        setWlColor(settings.white_label_brand_color || '#000000')
+      }
 
       const { data: profile } = await supabase
         .from('profiles')
@@ -108,15 +122,15 @@ function SettingsInner() {
 
       const { data: factors } = await supabase.auth.mfa.listFactors()
       const totpFactor = factors?.totp?.find((f: any) => f.status === 'verified')
-      if (totpFactor) {
-        setMfaEnabled(true)
-        setMfaFactorId(totpFactor.id)
-      }
+      if (totpFactor) { setMfaEnabled(true); setMfaFactorId(totpFactor.id) }
+
+      // Check if just activated white label
+      if (searchParams.get('white_label') === 'activated') setWlActivated(true)
 
       setAuthLoading(false)
     }
     init()
-  }, [router])
+  }, [router, searchParams])
 
   useEffect(() => {
     if (activeTab !== 'Referrals' || !userId) return
@@ -130,11 +144,7 @@ function SettingsInner() {
       if (!error && data) {
         const paying = data.filter((r: any) => r.status === 'eligible' || r.status === 'paid')
         const totalCredits = data.reduce((sum: number, r: any) => sum + (r.total_earned ?? 0), 0)
-        setReferralStats({
-          totalReferrals: data.length,
-          payingReferrals: paying.length,
-          creditsEarned: totalCredits,
-        })
+        setReferralStats({ totalReferrals: data.length, payingReferrals: paying.length, creditsEarned: totalCredits })
         setReferralHistory(data.slice(0, 10))
       }
       setReferralLoading(false)
@@ -150,6 +160,14 @@ function SettingsInner() {
     if (!user) return
     if (tab === 'Profile') {
       await supabase.from('profiles').update({ display_name: displayName, username, bio }).eq('id', user.id)
+    }
+    if (tab === 'WhiteLabel') {
+      await supabase.from('user_settings').update({
+        white_label_brand_name: wlBrandName,
+        white_label_logo_url: wlLogoUrl,
+        white_label_custom_domain: wlDomain,
+        white_label_brand_color: wlColor,
+      }).eq('user_id', user.id)
     }
     setSavedTab(tab)
     setTimeout(() => setSavedTab(null), 2000)
@@ -170,6 +188,17 @@ function SettingsInner() {
       if (data.error === 'Unauthorized') router.push('/login')
     } catch { console.error('Checkout failed') }
     finally { setCheckoutLoading(false) }
+  }
+
+  const handleWhiteLabelCheckout = async (tier: 'basic' | 'pro') => {
+    setWlCheckoutLoading(true)
+    try {
+      const res = await fetch('/api/stripe/whitelabel', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tier }) })
+      const data = await res.json()
+      if (data.url) window.location.href = data.url
+      if (data.error) alert(data.error)
+    } catch { console.error('White label checkout failed') }
+    finally { setWlCheckoutLoading(false) }
   }
 
   const handleCreditPack = async (priceId: string) => {
@@ -208,44 +237,28 @@ function SettingsInner() {
   }
 
   const handleEnroll2FA = async () => {
-    setMfaLoading(true)
-    setMfaError('')
+    setMfaLoading(true); setMfaError('')
     const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' })
     if (error || !data) { setMfaError(error?.message || 'Failed to start 2FA setup'); setMfaLoading(false); return }
-    setMfaEnrollId(data.id)
-    setMfaQR(data.totp.qr_code)
-    setMfaSecret(data.totp.secret)
-    setMfaStep('enroll')
-    setMfaLoading(false)
+    setMfaEnrollId(data.id); setMfaQR(data.totp.qr_code); setMfaSecret(data.totp.secret); setMfaStep('enroll'); setMfaLoading(false)
   }
 
   const handleVerify2FA = async () => {
     if (mfaCode.length !== 6) { setMfaError('Enter the 6-digit code'); return }
-    setMfaLoading(true)
-    setMfaError('')
+    setMfaLoading(true); setMfaError('')
     const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({ factorId: mfaEnrollId })
     if (challengeError || !challenge) { setMfaError(challengeError?.message || 'Challenge failed'); setMfaLoading(false); return }
     const { error } = await supabase.auth.mfa.verify({ factorId: mfaEnrollId, challengeId: challenge.id, code: mfaCode })
     if (error) { setMfaError('Incorrect code — try again'); setMfaLoading(false); return }
-    setMfaEnabled(true)
-    setMfaFactorId(mfaEnrollId)
-    setMfaStep('idle')
-    setMfaCode('')
-    setMfaQR('')
-    setMfaSecret('')
-    setMfaLoading(false)
+    setMfaEnabled(true); setMfaFactorId(mfaEnrollId); setMfaStep('idle'); setMfaCode(''); setMfaQR(''); setMfaSecret(''); setMfaLoading(false)
   }
 
   const handleDisable2FA = async () => {
     if (!mfaFactorId) return
-    setMfaLoading(true)
-    setMfaError('')
+    setMfaLoading(true); setMfaError('')
     const { error } = await supabase.auth.mfa.unenroll({ factorId: mfaFactorId })
     if (error) { setMfaError(error.message); setMfaLoading(false); return }
-    setMfaEnabled(false)
-    setMfaFactorId(null)
-    setMfaStep('idle')
-    setMfaLoading(false)
+    setMfaEnabled(false); setMfaFactorId(null); setMfaStep('idle'); setMfaLoading(false)
   }
 
   if (authLoading) {
@@ -379,18 +392,14 @@ function SettingsInner() {
                 <h2 className="text-base font-extrabold mb-4">AI Credits</h2>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs text-gray-500">Monthly credits</span>
-                  <span className="text-xs font-bold">
-                    {plan === 'free' ? '100 / 100' : plan === 'pro' ? '500 / 500' : '2,000 / 2,000'}
-                  </span>
+                  <span className="text-xs font-bold">{plan === 'free' ? '100 / 100' : plan === 'pro' ? '500 / 500' : '2,000 / 2,000'}</span>
                 </div>
                 <div className="w-full bg-gray-100 rounded-full h-2 mb-4">
                   <div className="bg-black h-2 rounded-full" style={{ width: '100%' }} />
                 </div>
                 <div className="flex items-center justify-between mb-6">
                   <span className="text-xs text-gray-500">Credit bank capacity</span>
-                  <span className="text-xs font-bold">
-                    {plan === 'free' ? '150' : plan === 'pro' ? '750' : '3,000'}
-                  </span>
+                  <span className="text-xs font-bold">{plan === 'free' ? '150' : plan === 'pro' ? '750' : '3,000'}</span>
                 </div>
                 <div className="border-t border-gray-100 pt-5">
                   <p className="text-xs font-extrabold mb-1">Buy Credit Packs</p>
@@ -442,9 +451,7 @@ function SettingsInner() {
                   <div className="bg-black text-white rounded-2xl p-6">
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Your Referral Link</p>
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="flex-1 bg-white/10 rounded-xl px-4 py-3 text-sm font-mono truncate">
-                        {referralLink || 'Loading...'}
-                      </div>
+                      <div className="flex-1 bg-white/10 rounded-xl px-4 py-3 text-sm font-mono truncate">{referralLink || 'Loading...'}</div>
                       <button onClick={handleCopyLink} disabled={!referralLink}
                         className={`px-5 py-3 rounded-xl text-sm font-bold transition-all flex-shrink-0 ${copiedLink ? 'bg-green-500 text-white' : 'bg-white text-black hover:opacity-80'}`}>
                         {copiedLink ? '✓ Copied!' : 'Copy'}
@@ -481,9 +488,7 @@ function SettingsInner() {
                               <div>
                                 <p className="text-sm font-bold">
                                   {tier.paying} paying referral{tier.paying > 1 ? 's' : ''}
-                                  {tier.conditional && (
-                                    <span className="ml-2 text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">while active</span>
-                                  )}
+                                  {tier.conditional && <span className="ml-2 text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">while active</span>}
                                 </p>
                                 {unlocked && <p className="text-xs text-green-500 font-bold">Unlocked</p>}
                               </div>
@@ -516,9 +521,7 @@ function SettingsInner() {
                               </p>
                             </div>
                             {entry.total_earned > 0 && (
-                              <span className="text-xs font-bold text-green-600 bg-green-50 px-3 py-1.5 rounded-xl">
-                                ${entry.total_earned.toFixed(2)} earned
-                              </span>
+                              <span className="text-xs font-bold text-green-600 bg-green-50 px-3 py-1.5 rounded-xl">${entry.total_earned.toFixed(2)} earned</span>
                             )}
                           </div>
                         ))}
@@ -566,8 +569,6 @@ function SettingsInner() {
           {/* ── SECURITY ── */}
           {activeTab === 'Security' && (
             <div className="space-y-4">
-
-              {/* 2FA */}
               <div className="bg-white border border-gray-100 rounded-2xl p-6">
                 <div className="flex items-center justify-between mb-1">
                   <h2 className="text-base font-extrabold">Two-Factor Authentication</h2>
@@ -576,13 +577,11 @@ function SettingsInner() {
                   </span>
                 </div>
                 <p className="text-xs text-gray-400 mb-5">Add an extra layer of security using Google Authenticator or any TOTP app.</p>
-
                 {mfaError && (
                   <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-4">
                     <p className="text-xs font-semibold text-red-500">❌ {mfaError}</p>
                   </div>
                 )}
-
                 {mfaStep === 'idle' && !mfaEnabled && (
                   <button onClick={handleEnroll2FA} disabled={mfaLoading}
                     className="px-5 py-2.5 bg-black text-white text-xs font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center gap-2">
@@ -590,7 +589,6 @@ function SettingsInner() {
                     Enable 2FA →
                   </button>
                 )}
-
                 {mfaStep === 'enroll' && (
                   <div className="space-y-5">
                     <div className="bg-gray-50 rounded-2xl p-5">
@@ -605,15 +603,9 @@ function SettingsInner() {
                     </div>
                     <div>
                       <p className="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">Step 2 — Enter the 6-digit code</p>
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        maxLength={6}
-                        value={mfaCode}
-                        onChange={e => setMfaCode(e.target.value.replace(/\D/g, ''))}
-                        placeholder="000000"
-                        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-center font-mono tracking-widest outline-none focus:border-black transition-all"
-                      />
+                      <input type="text" inputMode="numeric" maxLength={6} value={mfaCode}
+                        onChange={e => setMfaCode(e.target.value.replace(/\D/g, ''))} placeholder="000000"
+                        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-center font-mono tracking-widest outline-none focus:border-black transition-all" />
                     </div>
                     <div className="flex gap-3">
                       <button onClick={() => { setMfaStep('idle'); setMfaCode(''); setMfaError('') }}
@@ -628,19 +620,15 @@ function SettingsInner() {
                     </div>
                   </div>
                 )}
-
                 {mfaStep === 'idle' && mfaEnabled && (
                   <button onClick={() => setMfaStep('disable_confirm')}
                     className="text-xs font-bold text-red-500 border border-red-100 rounded-xl px-4 py-2.5 hover:bg-red-50 transition-all">
                     Disable 2FA
                   </button>
                 )}
-
                 {mfaStep === 'disable_confirm' && (
                   <div className="border border-red-200 rounded-xl px-4 py-4 bg-red-50">
-                    <p className="text-xs font-bold text-red-700 mb-3">
-                      Disabling 2FA will remove the extra security layer from your account. Are you sure?
-                    </p>
+                    <p className="text-xs font-bold text-red-700 mb-3">Disabling 2FA will remove the extra security layer from your account. Are you sure?</p>
                     <div className="flex gap-2">
                       <button onClick={handleDisable2FA} disabled={mfaLoading}
                         className="text-xs font-bold px-4 py-2 bg-red-500 text-white rounded-lg hover:opacity-80 transition-all disabled:opacity-40 flex items-center gap-2">
@@ -656,7 +644,6 @@ function SettingsInner() {
                 )}
               </div>
 
-              {/* Change Password */}
               <div className="bg-white border border-gray-100 rounded-2xl p-6">
                 <h2 className="text-base font-extrabold mb-5">Change Password</h2>
                 <div className="space-y-3">
@@ -679,7 +666,6 @@ function SettingsInner() {
                 </div>
               </div>
 
-              {/* Danger Zone */}
               <div className="bg-white border border-gray-100 rounded-2xl p-6">
                 <h2 className="text-base font-extrabold mb-1">Danger Zone</h2>
                 <p className="text-xs text-gray-400 mb-4">These actions are irreversible. Please be certain.</p>
@@ -732,52 +718,132 @@ function SettingsInner() {
           {/* ── WHITE LABEL ── */}
           {activeTab === 'White Label' && (
             <div className="space-y-4">
-              {plan === 'free' ? (
+
+              {/* Free plan — locked */}
+              {plan === 'free' && (
                 <div className="bg-white border border-gray-100 rounded-2xl p-8 text-center">
                   <div className="text-3xl mb-3">🏷️</div>
                   <h2 className="text-base font-extrabold mb-2">White Label is a Pro & Agency feature</h2>
                   <p className="text-xs text-gray-400 mb-5 max-w-sm mx-auto leading-relaxed">
-                    Remove SocialMate branding and replace it with your own. Available as a $20/month add-on on Pro and Agency plans.
+                    Remove SocialMate branding and replace it with your own logo, colors, and domain. Available as a monthly add-on on Pro and Agency plans.
                   </p>
                   <button onClick={() => handleCheckout(STRIPE_PRO_PRICE_ID)} disabled={checkoutLoading}
                     className="bg-black text-white text-xs font-bold px-5 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
-                    {checkoutLoading ? 'Loading...' : 'Upgrade to unlock →'}
+                    {checkoutLoading ? 'Loading...' : 'Upgrade to Pro to unlock →'}
                   </button>
                 </div>
-              ) : (
-                <div className="bg-white border border-gray-100 rounded-2xl p-6">
-                  <div className="flex items-center justify-between mb-5">
-                    <div>
-                      <h2 className="text-base font-extrabold">White Label</h2>
-                      <p className="text-xs text-gray-400 mt-0.5">$20/month add-on</p>
+              )}
+
+              {/* Pro or Agency — not yet purchased */}
+              {plan !== 'free' && !whiteLabelActive && (
+                <div className="space-y-4">
+                  {wlActivated && (
+                    <div className="bg-green-50 border border-green-200 rounded-2xl px-5 py-4">
+                      <p className="text-sm font-extrabold text-green-700">✅ White Label activated! Configure your branding below.</p>
                     </div>
-                    <button onClick={() => setWhiteLabel(!whiteLabel)}
-                      className={`relative w-10 h-5 rounded-full transition-colors ${whiteLabel ? 'bg-black' : 'bg-gray-200'}`}>
-                      <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${whiteLabel ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                  )}
+                  <div className="bg-white border border-gray-100 rounded-2xl p-6">
+                    <h2 className="text-base font-extrabold mb-1">White Label Add-on</h2>
+                    <p className="text-xs text-gray-400 mb-6 leading-relaxed">
+                      Purchase the White Label add-on to remove SocialMate branding and replace it with your own. Billed monthly — cancel anytime from your billing portal.
+                    </p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="border border-gray-200 rounded-2xl p-5">
+                        <p className="text-sm font-extrabold mb-1">White Label Basic</p>
+                        <p className="text-2xl font-extrabold mb-1">$20<span className="text-sm font-semibold text-gray-400">/mo</span></p>
+                        <ul className="space-y-1.5 mb-5">
+                          {['Remove SocialMate branding', 'Add your logo', 'Custom brand colors', 'Your brand name throughout'].map(f => (
+                            <li key={f} className="flex items-center gap-2 text-xs text-gray-600">
+                              <span className="text-green-500 font-bold">✓</span>{f}
+                            </li>
+                          ))}
+                        </ul>
+                        <button onClick={() => handleWhiteLabelCheckout('basic')} disabled={wlCheckoutLoading}
+                          className="w-full py-2.5 bg-black text-white text-xs font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-50">
+                          {wlCheckoutLoading ? 'Loading...' : 'Add White Label Basic →'}
+                        </button>
+                      </div>
+                      <div className="border-2 border-black rounded-2xl p-5 relative">
+                        <span className="absolute -top-2.5 left-4 text-xs font-bold bg-black text-white px-2 py-0.5 rounded-full">Best for agencies</span>
+                        <p className="text-sm font-extrabold mb-1">White Label Pro</p>
+                        <p className="text-2xl font-extrabold mb-1">$40<span className="text-sm font-semibold text-gray-400">/mo</span></p>
+                        <ul className="space-y-1.5 mb-5">
+                          {['Everything in Basic', 'Custom domain (app.yourbrand.com)', 'Full rebrand — clients never see SocialMate', 'Priority support'].map(f => (
+                            <li key={f} className="flex items-center gap-2 text-xs text-gray-600">
+                              <span className="text-green-500 font-bold">✓</span>{f}
+                            </li>
+                          ))}
+                        </ul>
+                        <button onClick={() => handleWhiteLabelCheckout('pro')} disabled={wlCheckoutLoading}
+                          className="w-full py-2.5 bg-black text-white text-xs font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-50">
+                          {wlCheckoutLoading ? 'Loading...' : 'Add White Label Pro →'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Active white label — config UI */}
+              {plan !== 'free' && whiteLabelActive && (
+                <div className="space-y-4">
+                  <div className="bg-green-50 border border-green-200 rounded-2xl px-5 py-3 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-green-600 font-bold">✓</span>
+                      <p className="text-xs font-bold text-green-700">
+                        White Label {whiteLabelTier === 'pro' ? 'Pro' : 'Basic'} — Active
+                      </p>
+                    </div>
+                    <button onClick={handlePortal} className="text-xs font-bold text-green-700 hover:underline">
+                      Manage billing →
                     </button>
                   </div>
-                  {whiteLabel && (
-                    <div className="space-y-3">
-                      <div>
-                        <label className="text-xs font-bold text-gray-500 block mb-1">Brand Name</label>
-                        <input placeholder="Your Brand" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all" />
-                      </div>
-                      <div>
-                        <label className="text-xs font-bold text-gray-500 block mb-1">Logo URL</label>
-                        <input placeholder="https://yourbrand.com/logo.png" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all" />
-                      </div>
+
+                  <div className="bg-white border border-gray-100 rounded-2xl p-6 space-y-4">
+                    <h2 className="text-base font-extrabold">Brand Configuration</h2>
+                    <div>
+                      <label className="text-xs font-bold text-gray-500 block mb-1">Brand Name</label>
+                      <input value={wlBrandName} onChange={e => setWlBrandName(e.target.value)}
+                        placeholder="Your Brand"
+                        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all" />
+                      <p className="text-xs text-gray-400 mt-1">Replaces "SocialMate" throughout the app.</p>
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-gray-500 block mb-1">Logo URL</label>
+                      <input value={wlLogoUrl} onChange={e => setWlLogoUrl(e.target.value)}
+                        placeholder="https://yourbrand.com/logo.png"
+                        className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all" />
+                      <p className="text-xs text-gray-400 mt-1">PNG or SVG recommended. Will replace the SocialMate logo.</p>
+                    </div>
+                    {whiteLabelTier === 'pro' && (
                       <div>
                         <label className="text-xs font-bold text-gray-500 block mb-1">Custom Domain</label>
-                        <input placeholder="app.yourbrand.com" className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all" />
+                        <input value={wlDomain} onChange={e => setWlDomain(e.target.value)}
+                          placeholder="app.yourbrand.com"
+                          className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all" />
+                        <p className="text-xs text-gray-400 mt-1">Point your DNS CNAME to socialmate.studio then enter your domain here.</p>
                       </div>
-                      <div>
-                        <label className="text-xs font-bold text-gray-500 block mb-1">Brand Color</label>
-                        <input type="color" defaultValue="#000000" className="h-10 w-20 border border-gray-200 rounded-xl cursor-pointer" />
+                    )}
+                    <div>
+                      <label className="text-xs font-bold text-gray-500 block mb-1">Brand Color</label>
+                      <div className="flex items-center gap-3">
+                        <input type="color" value={wlColor} onChange={e => setWlColor(e.target.value)}
+                          className="h-10 w-16 border border-gray-200 rounded-xl cursor-pointer" />
+                        <input value={wlColor} onChange={e => setWlColor(e.target.value)}
+                          placeholder="#000000"
+                          className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all font-mono" />
                       </div>
-                      <button onClick={() => handleSave('WhiteLabel')}
-                        className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${savedTab === 'WhiteLabel' ? 'bg-green-500 text-white' : 'bg-black text-white hover:opacity-80'}`}>
-                        {savedTab === 'WhiteLabel' ? '✓ Saved!' : 'Save Branding'}
-                      </button>
+                    </div>
+                    <button onClick={() => handleSave('WhiteLabel')}
+                      className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${savedTab === 'WhiteLabel' ? 'bg-green-500 text-white' : 'bg-black text-white hover:opacity-80'}`}>
+                      {savedTab === 'WhiteLabel' ? '✓ Saved!' : 'Save Branding'}
+                    </button>
+                  </div>
+
+                  {wlLogoUrl && (
+                    <div className="bg-white border border-gray-100 rounded-2xl p-5">
+                      <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Logo Preview</p>
+                      <img src={wlLogoUrl} alt="Brand logo" className="h-10 object-contain" onError={e => (e.currentTarget.style.display = 'none')} />
                     </div>
                   )}
                 </div>
