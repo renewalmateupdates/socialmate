@@ -26,12 +26,12 @@ const PLATFORM_NAMES: Record<string, string> = {
 function timeAgo(dateStr: string) {
   const diff = Date.now() - new Date(dateStr).getTime()
   const mins = Math.floor(diff / 60000)
-  if (mins < 1)   return 'just now'
-  if (mins < 60)  return `${mins}m ago`
+  if (mins < 1)  return 'just now'
+  if (mins < 60) return `${mins}m ago`
   const hrs = Math.floor(mins / 60)
-  if (hrs < 24)   return `${hrs}h ago`
+  if (hrs < 24)  return `${hrs}h ago`
   const days = Math.floor(hrs / 24)
-  if (days < 7)   return `${days}d ago`
+  if (days < 7)  return `${days}d ago`
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
@@ -71,11 +71,11 @@ export default function Drafts() {
     if (error) { showToast('Failed to delete', 'error'); setDeleting(null); return }
     setDrafts(prev => prev.filter(d => d.id !== id))
     setConfirmDelete(null)
-    showToast('Draft deleted', 'success')
+    showToast('Deleted successfully', 'success')
     setDeleting(null)
   }
 
-  const filtered = filter === 'all' ? drafts : drafts.filter(d => d.status === filter)
+  const filtered       = filter === 'all' ? drafts : drafts.filter(d => d.status === filter)
   const draftCount     = drafts.filter(d => d.status === 'draft').length
   const scheduledCount = drafts.filter(d => d.status === 'scheduled').length
 
@@ -102,9 +102,9 @@ export default function Drafts() {
           {!loading && drafts.length > 0 && (
             <div className="grid grid-cols-3 gap-3 mb-6">
               {[
-                { label: 'Total',     value: drafts.length,    icon: '📝' },
-                { label: 'Drafts',    value: draftCount,       icon: '📂' },
-                { label: 'Scheduled', value: scheduledCount,   icon: '📅' },
+                { label: 'Total',     value: drafts.length,  icon: '📝' },
+                { label: 'Drafts',    value: draftCount,     icon: '📂' },
+                { label: 'Scheduled', value: scheduledCount, icon: '📅' },
               ].map(stat => (
                 <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-4 text-center">
                   <div className="text-xl mb-1">{stat.icon}</div>
@@ -209,10 +209,10 @@ export default function Drafts() {
                         </div>
                       </div>
 
-                      {/* ACTIONS — always visible */}
+                      {/* ACTIONS */}
                       {!isConfirming && (
                         <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                          <Link href="/compose"
+                          <Link href={`/compose?draft=${draft.id}`}
                             className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all">
                             Edit →
                           </Link>

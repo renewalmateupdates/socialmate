@@ -69,7 +69,6 @@ export async function POST(request: NextRequest) {
   }
 
   const isScheduled = !!scheduledAt
-  const status      = isScheduled ? 'scheduled' : 'publishing'
 
   const { data: post, error: dbError } = await supabase
     .from('posts')
@@ -77,7 +76,7 @@ export async function POST(request: NextRequest) {
       user_id:      user.id,
       content,
       platforms,
-      status,
+      status:       isScheduled ? 'scheduled' : 'draft',
       scheduled_at: scheduledAt  || null,
       destinations: destinations || {},
     })

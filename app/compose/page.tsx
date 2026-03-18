@@ -28,7 +28,6 @@ const COMING_SOON_PLATFORMS = [
   { id: 'bereal',    name: 'BeReal',    icon: '📷' },
 ]
 
-// Platforms that require a destination to be selected before posting
 const DESTINATION_PLATFORMS = ['discord', 'telegram']
 
 const AI_TOOLS = [
@@ -91,6 +90,12 @@ type Destination = {
   label: string
 }
 
+// Get today's date in local timezone as YYYY-MM-DD
+function getLocalDateString() {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 function ComposeInner() {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -117,29 +122,29 @@ function ComposeInner() {
   const [scoreError, setScoreError] = useState('')
   const [showPreview, setShowPreview] = useState(false)
 
-  // Destinations — map of platform -> available destinations
   const [destinations, setDestinations] = useState<Record<string, Destination[]>>({})
-  // Selected destination per platform — map of platform -> destination ID
   const [selectedDestinations, setSelectedDestinations] = useState<Record<string, string>>({})
 
   const planConfig = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
   const maxScheduleDate = (() => {
     const d = new Date()
     d.setDate(d.getDate() + (planConfig.scheduleWeeks * 7))
-    return d.toISOString().split('T')[0]
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
   })()
+
+  const todayLocal = getLocalDateString()
 
   const scheduleHorizonLabel =
     plan === 'free'   ? '2 weeks' :
     plan === 'pro'    ? '1 month' :
     '3 months'
 
-  // AUTH GUARD + load destinations
+  // AUTH GUARD + load destinations + load draft if editing
   useEffect(() => {
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) { router.push('/login'); return }
 
-      // Load saved destinations for destination-based platforms
+      // Load destinations
       const { data: dests } = await supabase
         .from('post_destinations')
         .select('id, platform, label')
@@ -154,7 +159,6 @@ function ComposeInner() {
         }, {})
         setDestinations(grouped)
 
-        // Auto-select first destination per platform
         const autoSelected: Record<string, string> = {}
         Object.entries(grouped).forEach(([platform, list]) => {
           if (list.length > 0) autoSelected[platform] = list[0].id
@@ -162,13 +166,34 @@ function ComposeInner() {
         setSelectedDestinations(autoSelected)
       }
 
+      // Load draft if editing
+      const draftId = searchParams.get('draft')
+      if (draftId) {
+        const { data: draft } = await supabase
+          .from('posts')
+          .select('*')
+          .eq('id', draftId)
+          .eq('user_id', data.user.id)
+          .single()
+        if (draft) {
+          setContent(draft.content || '')
+          if (draft.platforms?.length > 0) setSelectedPlatforms(draft.platforms)
+          setCurrentDraftId(draftId)
+          setTemplateBanner('Editing draft — make your changes and save or publish.')
+        }
+      }
+
       setLoading(false)
     })
-  }, [router])
+  }, [router, searchParams])
 
   useEffect(() => {
-    const templateId      = searchParams.get('template')
+    const templateId        = searchParams.get('template')
     const starterTemplateId = searchParams.get('starterTemplate')
+    const draftId           = searchParams.get('draft')
+
+    // Don't apply templates if loading a draft
+    if (draftId) return
 
     if (starterTemplateId) {
       const starter = STARTER_TEMPLATES.find(t => t.id === starterTemplateId)
@@ -213,7 +238,6 @@ function ComposeInner() {
   const charLimit = activePlatform?.limit ?? null
   const charOver  = charLimit !== null && charCount > charLimit
 
-  // Check if any selected destination-based platform is missing a destination
   const missingDestinations = selectedPlatforms
     .filter(p => DESTINATION_PLATFORMS.includes(p))
     .filter(p => !selectedDestinations[p] && (!destinations[p] || destinations[p].length === 0))
@@ -291,10 +315,10 @@ function ComposeInner() {
       if (!res.ok || data.error) { setScoreError('Scoring failed. Please try again.'); setScoring(false); return }
       try {
         const raw = data.result
-        const scoreMatch       = raw.match(/SCORE:\s*(\d+)/i)
-        const strengthsMatch   = raw.match(/STRENGTHS:([\s\S]*?)(?:IMPROVEMENTS:|$)/i)
+        const scoreMatch        = raw.match(/SCORE:\s*(\d+)/i)
+        const strengthsMatch    = raw.match(/STRENGTHS:([\s\S]*?)(?:IMPROVEMENTS:|$)/i)
         const improvementsMatch = raw.match(/IMPROVEMENTS:([\s\S]*?)(?:VERDICT:|$)/i)
-        const verdictMatch     = raw.match(/VERDICT:([\s\S]*?)$/i)
+        const verdictMatch      = raw.match(/VERDICT:([\s\S]*?)$/i)
         const score = scoreMatch ? parseInt(scoreMatch[1]) : 50
         const label = score >= 80 ? 'Great' : score >= 60 ? 'Good' : score >= 40 ? 'Fair' : 'Needs Work'
         const strengths = strengthsMatch
@@ -519,12 +543,10 @@ function ComposeInner() {
                 </div>
               )}
 
-              {/* DESTINATION SELECTOR — shown when Discord or Telegram is selected */}
+              {/* DESTINATION SELECTOR */}
               {selectedPlatforms.some(p => DESTINATION_PLATFORMS.includes(p)) && (
                 <div className="bg-white border border-gray-100 rounded-2xl p-4">
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">
-                    Post Destinations
-                  </p>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Post Destinations</p>
                   <div className="space-y-3">
                     {selectedPlatforms
                       .filter(p => DESTINATION_PLATFORMS.includes(p))
@@ -542,8 +564,7 @@ function ComposeInner() {
                                 <p className="text-xs text-amber-700 font-semibold">
                                   No {platform.name} destinations configured
                                 </p>
-                                <Link
-                                  href="/accounts/destinations"
+                                <Link href="/accounts/destinations"
                                   className="text-xs font-bold text-black ml-3 underline hover:opacity-70 flex-shrink-0">
                                   Add one →
                                 </Link>
@@ -746,7 +767,7 @@ function ComposeInner() {
                 </div>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                   <input type="date" value={scheduleDate}
-                    min={new Date().toISOString().split('T')[0]}
+                    min={todayLocal}
                     max={maxScheduleDate}
                     onChange={e => handleDateChange(e.target.value)}
                     className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-black transition-all" />
@@ -839,7 +860,6 @@ function ComposeInner() {
                     })}
                   </div>
                 )}
-                {/* Show selected destinations in preview */}
                 {selectedPlatforms.some(p => DESTINATION_PLATFORMS.includes(p)) && (
                   <div className="mt-3 pt-3 border-t border-gray-50 space-y-1">
                     {selectedPlatforms
