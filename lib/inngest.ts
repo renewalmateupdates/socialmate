@@ -16,7 +16,20 @@ export const publishScheduledPost = inngest.createFunction(
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ postId, fromInngest: true }),
       })
-      if (!res.ok) throw new Error('Publish failed')
+
+      const data = await res.json().catch(() => ({}))
+
+      if (!res.ok) {
+        // Mark post as failed in DB so it doesn't stay stuck as 'scheduled'
+        await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/posts/fail`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ postId }),
+        })
+        throw new Error(`Publish failed: ${data.error || res.status}`)
+      }
+
+      return data
     })
   }
 )

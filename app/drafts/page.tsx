@@ -51,21 +51,25 @@ export default function Drafts() {
     setTimeout(() => setToast(null), 3000)
   }
 
-  useEffect(() => {
-    const load = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login'); return }
-      const { data } = await supabase
-        .from('posts')
-        .select('*')
-        .eq('user_id', user.id)
-        .in('status', ['draft', 'scheduled', 'published', 'partial', 'failed'])
-        .order('created_at', { ascending: false })
-      setPosts(data || [])
-      setLoading(false)
-    }
-    load()
-  }, [router])
+  const loadPosts = async () => {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { router.push('/login'); return }
+    const { data } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('user_id', user.id)
+      .in('status', ['draft', 'scheduled', 'published', 'partial', 'failed'])
+      .order('created_at', { ascending: false })
+    setPosts(data || [])
+    setLoading(false)
+  }
+
+  useEffect(() => { loadPosts() }, [router])
+
+  const handleRefresh = () => {
+    setLoading(true)
+    loadPosts()
+  }
 
   const handleDelete = async (id: string) => {
     setDeleting(id)
@@ -87,11 +91,11 @@ export default function Drafts() {
                    posts.filter(d => d.status === filter)
 
   const statusConfig: Record<string, { label: string; bg: string; text: string; icon: string }> = {
-    draft:     { label: 'Draft',     bg: 'bg-gray-100',   text: 'text-gray-500',  icon: '📂' },
-    scheduled: { label: 'Scheduled', bg: 'bg-blue-100',   text: 'text-blue-600',  icon: '📅' },
-    published: { label: 'Published', bg: 'bg-green-100',  text: 'text-green-700', icon: '✅' },
-    partial:   { label: 'Partial',   bg: 'bg-yellow-100', text: 'text-yellow-700',icon: '⚠️' },
-    failed:    { label: 'Failed',    bg: 'bg-red-100',    text: 'text-red-600',   icon: '❌' },
+    draft:     { label: 'Draft',     bg: 'bg-gray-100',   text: 'text-gray-500',   icon: '📂' },
+    scheduled: { label: 'Scheduled', bg: 'bg-blue-100',   text: 'text-blue-600',   icon: '📅' },
+    published: { label: 'Published', bg: 'bg-green-100',  text: 'text-green-700',  icon: '✅' },
+    partial:   { label: 'Partial',   bg: 'bg-yellow-100', text: 'text-yellow-700', icon: '⚠️' },
+    failed:    { label: 'Failed',    bg: 'bg-red-100',    text: 'text-red-600',    icon: '❌' },
   }
 
   return (
@@ -107,20 +111,28 @@ export default function Drafts() {
                 {loading ? 'Loading...' : `${draftCount} draft${draftCount !== 1 ? 's' : ''} · ${scheduledCount} scheduled · ${publishedCount} published`}
               </p>
             </div>
-            <Link href="/compose"
-              className="bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all self-start sm:self-auto">
-              + New Post
-            </Link>
+            <div className="flex items-center gap-2 self-start sm:self-auto">
+              <button
+                onClick={handleRefresh}
+                disabled={loading}
+                className="text-xs font-bold px-4 py-2.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
+                ↻ Refresh
+              </button>
+              <Link href="/compose"
+                className="bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all">
+                + New Post
+              </Link>
+            </div>
           </div>
 
           {/* STATS */}
           {!loading && posts.length > 0 && (
             <div className="grid grid-cols-4 gap-3 mb-6">
               {[
-                { label: 'Drafts',     value: draftCount,     icon: '📂', color: 'text-gray-700'   },
-                { label: 'Scheduled',  value: scheduledCount, icon: '📅', color: 'text-blue-600'   },
-                { label: 'Published',  value: publishedCount, icon: '✅', color: 'text-green-600'  },
-                { label: 'Failed',     value: failedCount,    icon: '❌', color: 'text-red-500'    },
+                { label: 'Drafts',    value: draftCount,     icon: '📂', color: 'text-gray-700'  },
+                { label: 'Scheduled', value: scheduledCount, icon: '📅', color: 'text-blue-600'  },
+                { label: 'Published', value: publishedCount, icon: '✅', color: 'text-green-600' },
+                { label: 'Failed',    value: failedCount,    icon: '❌', color: 'text-red-500'   },
               ].map(stat => (
                 <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-4 text-center">
                   <div className="text-xl mb-1">{stat.icon}</div>
@@ -134,10 +146,10 @@ export default function Drafts() {
           {/* FILTER TABS */}
           <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-2xl p-1 mb-6 w-fit flex-wrap">
             {[
-              { id: 'all',       label: `All (${posts.length})`          },
-              { id: 'draft',     label: `Drafts (${draftCount})`         },
-              { id: 'scheduled', label: `Scheduled (${scheduledCount})`  },
-              { id: 'published', label: `Published (${publishedCount})`  },
+              { id: 'all',       label: `All (${posts.length})`         },
+              { id: 'draft',     label: `Drafts (${draftCount})`        },
+              { id: 'scheduled', label: `Scheduled (${scheduledCount})` },
+              { id: 'published', label: `Published (${publishedCount})` },
             ].map(tab => (
               <button key={tab.id} onClick={() => setFilter(tab.id as FilterType)}
                 className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
@@ -181,40 +193,31 @@ export default function Drafts() {
 
                     <div className="flex items-start gap-4">
                       <div className="flex-1 min-w-0">
-                        {/* STATUS + TIME */}
                         <div className="flex items-center gap-2 flex-wrap mb-2">
                           <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${status.bg} ${status.text}`}>
                             {status.icon} {status.label}
                           </span>
                           {post.scheduled_at && post.status === 'scheduled' && (
                             <span className="text-xs text-gray-400">
-                              {new Date(post.scheduled_at).toLocaleDateString('en-US', {
-                                month: 'short', day: 'numeric',
-                              })} at {new Date(post.scheduled_at).toLocaleTimeString('en-US', {
-                                hour: '2-digit', minute: '2-digit',
-                              })}
+                              {new Date(post.scheduled_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                              {' '}at{' '}
+                              {new Date(post.scheduled_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                             </span>
                           )}
                           {post.published_at && isPublished && (
                             <span className="text-xs text-gray-400">
-                              {new Date(post.published_at).toLocaleDateString('en-US', {
-                                month: 'short', day: 'numeric',
-                              })} at {new Date(post.published_at).toLocaleTimeString('en-US', {
-                                hour: '2-digit', minute: '2-digit',
-                              })}
+                              {new Date(post.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                              {' '}at{' '}
+                              {new Date(post.published_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                             </span>
                           )}
-                          <span className="text-xs text-gray-300 ml-auto">
-                            {timeAgo(post.created_at)}
-                          </span>
+                          <span className="text-xs text-gray-300 ml-auto">{timeAgo(post.created_at)}</span>
                         </div>
 
-                        {/* CONTENT */}
                         <p className="text-sm text-gray-700 leading-relaxed line-clamp-2 mb-3">
                           {post.content || <span className="text-gray-300 italic">No content</span>}
                         </p>
 
-                        {/* PLATFORMS */}
                         <div className="flex items-center gap-1.5 flex-wrap">
                           {(post.platforms || []).slice(0, 6).map((p: string) => (
                             <span key={p} className="flex items-center gap-1 text-xs text-gray-500 bg-gray-50 px-2 py-0.5 rounded-full">
@@ -231,7 +234,6 @@ export default function Drafts() {
                         </div>
                       </div>
 
-                      {/* ACTIONS */}
                       {!isConfirming && (
                         <div className="flex flex-col items-end gap-2 flex-shrink-0">
                           {isEditable && (
@@ -248,20 +250,17 @@ export default function Drafts() {
                       )}
                     </div>
 
-                    {/* CONFIRM DELETE */}
                     {isConfirming && (
                       <div className="mt-3 pt-3 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center gap-2">
                         <p className="text-xs text-red-600 font-semibold flex-1">
                           Permanently delete this {post.status === 'scheduled' ? 'scheduled post' : post.status === 'published' ? 'published post record' : 'draft'}? This cannot be undone.
                         </p>
                         <div className="flex items-center gap-2 flex-shrink-0">
-                          <button
-                            onClick={() => handleDelete(post.id)}
-                            disabled={isDeleting}
+                          <button onClick={() => handleDelete(post.id)} disabled={isDeleting}
                             className="text-xs font-bold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center gap-1.5">
-                            {isDeleting ? (
-                              <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Deleting...</>
-                            ) : 'Yes, delete'}
+                            {isDeleting
+                              ? <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Deleting...</>
+                              : 'Yes, delete'}
                           </button>
                           <button onClick={() => setConfirmDelete(null)}
                             className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
