@@ -32,10 +32,22 @@ export async function POST(request: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await request.json()
-  const { content, platforms, scheduledAt, destinations, draftId } = body
+  const { content, platforms, scheduledAt, destinations, draftId, workspaceId } = body
 
   if (!content?.trim()) return NextResponse.json({ error: 'Content is required' }, { status: 400 })
   if (!platforms?.length) return NextResponse.json({ error: 'Select at least one platform' }, { status: 400 })
+
+  // Resolve workspace — use provided workspaceId or fall back to user's personal workspace
+  let resolvedWorkspaceId = workspaceId
+  if (!resolvedWorkspaceId) {
+    const { data: personalWs } = await supabase
+      .from('workspaces')
+      .select('id')
+      .eq('owner_id', user.id)
+      .eq('is_personal', true)
+      .single()
+    resolvedWorkspaceId = personalWs?.id || null
+  }
 
   // Post limit enforcement
   const { data: settings } = await supabase
@@ -74,6 +86,7 @@ export async function POST(request: NextRequest) {
     .from('posts')
     .insert({
       user_id:      user.id,
+      workspace_id: resolvedWorkspaceId,
       content,
       platforms,
       status:       isScheduled ? 'scheduled' : 'draft',
@@ -89,7 +102,6 @@ export async function POST(request: NextRequest) {
   }
 
   if (isScheduled) {
-    // If publishing from an existing draft, delete the old draft
     if (draftId) {
       await supabase.from('posts').delete().eq('id', draftId).eq('user_id', user.id)
     }
@@ -121,7 +133,6 @@ export async function POST(request: NextRequest) {
     })
     .eq('id', post.id)
 
-  // If publishing from an existing draft, delete the old draft
   if (draftId && !allFailed) {
     await supabase.from('posts').delete().eq('id', draftId).eq('user_id', user.id)
   }

@@ -30,11 +30,11 @@ export async function POST(request: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await request.json()
-  const { content, platforms, postId } = body
+  const { content, platforms, postId, workspaceId } = body
 
   if (!content?.trim()) return NextResponse.json({ error: 'Content is required' }, { status: 400 })
 
-  // If postId exists, update existing draft — no limit check needed
+  // Updating an existing draft — no limit check, no workspace change needed
   if (postId) {
     const { error } = await supabase
       .from('posts')
@@ -47,14 +47,26 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, postId })
   }
 
-  // New draft — enforce monthly limit
+  // New draft — resolve workspace
+  let resolvedWorkspaceId = workspaceId
+  if (!resolvedWorkspaceId) {
+    const { data: personalWs } = await supabase
+      .from('workspaces')
+      .select('id')
+      .eq('owner_id', user.id)
+      .eq('is_personal', true)
+      .single()
+    resolvedWorkspaceId = personalWs?.id || null
+  }
+
+  // Enforce monthly limit
   const { data: settings } = await supabase
     .from('user_settings')
     .select('plan')
     .eq('user_id', user.id)
     .single()
 
-  const plan = settings?.plan || 'free'
+  const plan  = settings?.plan || 'free'
   const limit = PLAN_POST_LIMITS[plan] ?? 100
 
   const startOfMonth = new Date()
@@ -79,10 +91,11 @@ export async function POST(request: NextRequest) {
   const { data: post, error } = await supabase
     .from('posts')
     .insert({
-      user_id: user.id,
+      user_id:      user.id,
+      workspace_id: resolvedWorkspaceId,
       content,
-      platforms: platforms || [],
-      status: 'draft',
+      platforms:    platforms || [],
+      status:       'draft',
     })
     .select()
     .single()
