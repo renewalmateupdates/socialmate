@@ -43,7 +43,6 @@ export default function Calendar() {
   const router = useRouter()
   const { plan } = useWorkspace()
 
-  // Use same schedule window as compose/PLAN_CONFIG to stay consistent
   const planConfig = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
   const forwardLimitDays = (planConfig?.scheduleWeeks || 2) * 7
   const forwardLimitLabel =
@@ -94,9 +93,9 @@ export default function Calendar() {
     postsByDate[key].push(post)
   })
 
-  const daysInMonth  = getDaysInMonth(viewYear, viewMonth)
-  const firstDay     = getFirstDayOfMonth(viewYear, viewMonth)
-  const totalCells   = Math.ceil((firstDay + daysInMonth) / 7) * 7
+  const daysInMonth = getDaysInMonth(viewYear, viewMonth)
+  const firstDay    = getFirstDayOfMonth(viewYear, viewMonth)
+  const totalCells  = Math.ceil((firstDay + daysInMonth) / 7) * 7
 
   const handleDayClick = (dateKey: string) => {
     const clicked = new Date(dateKey + 'T12:00:00')
@@ -118,7 +117,6 @@ export default function Calendar() {
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
 
-          {/* HEADER */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Content Calendar</h1>
@@ -138,12 +136,10 @@ export default function Calendar() {
             </div>
           </div>
 
-          {/* LIMIT BANNER */}
           {!canGoForward && plan !== 'agency' && (
             <div className="mb-6 bg-amber-50 border border-amber-100 rounded-2xl px-5 py-3 flex flex-col sm:flex-row sm:items-center gap-3">
               <p className="text-xs text-amber-700 font-semibold flex-1">
-                🔒 {plan.charAt(0).toUpperCase() + plan.slice(1)} plan limit reached ({forwardLimitLabel} ahead).
-                {' '}Upgrade to schedule further out.
+                🔒 {plan.charAt(0).toUpperCase() + plan.slice(1)} plan limit reached ({forwardLimitLabel} ahead). Upgrade to schedule further out.
               </p>
               <Link href="/settings?tab=Plan"
                 className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all self-start sm:self-auto flex-shrink-0">
@@ -157,8 +153,6 @@ export default function Calendar() {
             {/* CALENDAR */}
             <div className="xl:col-span-3">
               <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
-
-                {/* MONTH NAV */}
                 <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-gray-100">
                   <button onClick={prevMonth}
                     className="w-8 h-8 flex items-center justify-center rounded-xl border border-gray-200 hover:border-gray-400 transition-all text-sm">
@@ -168,7 +162,6 @@ export default function Calendar() {
                     {MONTHS[viewMonth]} {viewYear}
                   </h2>
                   <button onClick={nextMonth} disabled={!canGoForward}
-                    title={!canGoForward ? `${forwardLimitLabel} limit reached on ${plan} plan` : undefined}
                     className={`w-8 h-8 flex items-center justify-center rounded-xl border transition-all text-sm ${
                       canGoForward ? 'border-gray-200 hover:border-gray-400' : 'border-gray-100 text-gray-300 cursor-not-allowed'
                     }`}>
@@ -176,7 +169,6 @@ export default function Calendar() {
                   </button>
                 </div>
 
-                {/* DAY HEADERS */}
                 <div className="grid grid-cols-7 border-b border-gray-100">
                   {DAYS_OF_WEEK.map((d, i) => (
                     <div key={d} className="py-2 text-center text-xs font-bold text-gray-400 uppercase tracking-wide">
@@ -186,7 +178,6 @@ export default function Calendar() {
                   ))}
                 </div>
 
-                {/* GRID */}
                 {loading ? (
                   <div className="p-8 text-center">
                     <div className="text-gray-300 text-sm animate-pulse">Loading calendar...</div>
@@ -249,7 +240,6 @@ export default function Calendar() {
 
             {/* RIGHT PANEL */}
             <div className="space-y-4">
-
               {selectedDay ? (
                 <div className="bg-white border border-gray-100 rounded-2xl p-5">
                   <div className="flex items-center justify-between mb-4">
@@ -279,7 +269,7 @@ export default function Calendar() {
                   ) : (
                     <div className="space-y-2">
                       {selectedPosts.map(post => (
-                        <Link key={post.id} href="/compose"
+                        <Link key={post.id} href={`/queue?date=${selectedDay}`}
                           className="block p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all">
                           <div className="flex items-center gap-1 mb-1">
                             {(post.platforms || []).slice(0, 4).map((p: string) => (
@@ -290,6 +280,7 @@ export default function Calendar() {
                             </span>
                           </div>
                           <p className="text-xs text-gray-600 line-clamp-2">{post.content || 'No content'}</p>
+                          <p className="text-xs text-blue-500 font-semibold mt-1.5">View full day schedule →</p>
                         </Link>
                       ))}
                     </div>
@@ -308,9 +299,9 @@ export default function Calendar() {
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-4">{MONTHS[viewMonth]} Stats</p>
                 <div className="space-y-3">
                   {[
-                    { label: 'Total scheduled',    value: monthPosts.length },
-                    { label: 'Days with content',  value: new Set(monthPosts.map(p => new Date(p.scheduled_at).toDateString())).size },
-                    { label: 'Platforms covered',  value: new Set(monthPosts.flatMap(p => p.platforms || [])).size },
+                    { label: 'Total scheduled',   value: monthPosts.length },
+                    { label: 'Days with content', value: new Set(monthPosts.map(p => new Date(p.scheduled_at).toDateString())).size },
+                    { label: 'Platforms covered', value: new Set(monthPosts.flatMap(p => p.platforms || [])).size },
                   ].map(stat => (
                     <div key={stat.label} className="flex items-center justify-between">
                       <span className="text-xs text-gray-500">{stat.label}</span>
@@ -348,22 +339,24 @@ export default function Calendar() {
                   <p className="text-xs text-gray-400 text-center py-2">No upcoming posts</p>
                 ) : (
                   <div className="space-y-2">
-                    {posts.filter(p => new Date(p.scheduled_at) >= today).slice(0, 4).map(post => (
-                      <Link key={post.id} href="/compose"
-                        className="block p-2 hover:bg-gray-50 rounded-xl transition-all">
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm flex-shrink-0">{PLATFORM_ICONS[(post.platforms || [])[0]] || '📱'}</span>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-semibold truncate">{post.content?.slice(0, 30) || 'No content'}</p>
-                            <p className="text-xs text-gray-400">
-                              {new Date(post.scheduled_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                              {' '}at{' '}
-                              {new Date(post.scheduled_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-                            </p>
+                    {posts.filter(p => new Date(p.scheduled_at) >= today).slice(0, 4).map(post => {
+                      const d = new Date(post.scheduled_at)
+                      const dateKey = formatDateKey(d.getFullYear(), d.getMonth(), d.getDate())
+                      return (
+                        <Link key={post.id} href={`/queue?date=${dateKey}`}
+                          className="block p-2 hover:bg-gray-50 rounded-xl transition-all">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm flex-shrink-0">{PLATFORM_ICONS[(post.platforms || [])[0]] || '📱'}</span>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-semibold truncate">{post.content?.slice(0, 30) || 'No content'}</p>
+                              <p className="text-xs text-gray-400">
+                                {d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at {d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      </Link>
-                    ))}
+                        </Link>
+                      )
+                    })}
                   </div>
                 )}
               </div>

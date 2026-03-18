@@ -1,7 +1,7 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 
@@ -44,13 +44,24 @@ function formatDateLabel(dateStr: string) {
   return date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
 }
 
-export default function Queue() {
+// Convert YYYY-MM-DD to a toDateString() key for matching
+function dateParamToDateString(param: string): string | null {
+  if (!param) return null
+  const d = new Date(param + 'T12:00:00')
+  if (isNaN(d.getTime())) return null
+  return d.toDateString()
+}
+
+function QueueInner() {
   const [posts, setPosts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [cancelling, setCancelling] = useState<string | null>(null)
   const [confirmCancel, setConfirmCancel] = useState<string | null>(null)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const targetDate = searchParams.get('date')
+  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type })
@@ -74,6 +85,18 @@ export default function Queue() {
     load()
   }, [router])
 
+  // Auto-scroll to target date after posts load
+  useEffect(() => {
+    if (loading || !targetDate) return
+    const targetDateString = dateParamToDateString(targetDate)
+    if (!targetDateString) return
+    const timeout = setTimeout(() => {
+      const el = sectionRefs.current[targetDateString]
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 100)
+    return () => clearTimeout(timeout)
+  }, [loading, targetDate])
+
   const handleCancel = async (id: string) => {
     setCancelling(id)
     const { error } = await supabase
@@ -95,6 +118,7 @@ export default function Queue() {
   })
 
   const daysWithPosts = dateKeys.filter(k => k !== 'Unscheduled').length
+  const targetDateString = targetDate ? dateParamToDateString(targetDate) : null
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -109,19 +133,42 @@ export default function Queue() {
                 {loading ? 'Loading...' : `${posts.length} post${posts.length !== 1 ? 's' : ''} scheduled${daysWithPosts > 0 ? ` across ${daysWithPosts} day${daysWithPosts !== 1 ? 's' : ''}` : ''}`}
               </p>
             </div>
-            <Link href="/compose"
-              className="bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all self-start sm:self-auto">
-              + Schedule Post
-            </Link>
+            <div className="flex items-center gap-2 self-start sm:self-auto">
+              {targetDate && (
+                <Link href="/queue"
+                  className="text-xs font-bold px-3 py-2.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                  ← All days
+                </Link>
+              )}
+              <Link href="/compose"
+                className="bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all">
+                + Schedule Post
+              </Link>
+            </div>
           </div>
+
+          {/* HIGHLIGHTED DATE BANNER */}
+          {targetDate && targetDateString && (
+            <div className="mb-6 bg-blue-50 border border-blue-100 rounded-2xl px-5 py-3 flex items-center gap-3">
+              <span className="text-blue-500">📅</span>
+              <p className="text-xs font-semibold text-blue-700">
+                Showing schedule for{' '}
+                <span className="font-extrabold">
+                  {new Date(targetDate + 'T12:00:00').toLocaleDateString('en-US', {
+                    weekday: 'long', month: 'long', day: 'numeric',
+                  })}
+                </span>
+              </p>
+            </div>
+          )}
 
           {/* SUMMARY STATS */}
           {!loading && posts.length > 0 && (
             <div className="grid grid-cols-3 gap-3 mb-6">
               {[
-                { label: 'Scheduled',   value: posts.length,      icon: '📅' },
-                { label: 'Days Ahead',  value: daysWithPosts,     icon: '🗓️' },
-                { label: 'Platforms',   value: new Set(posts.flatMap(p => p.platforms || [])).size, icon: '📱' },
+                { label: 'Scheduled',  value: posts.length,  icon: '📅' },
+                { label: 'Days Ahead', value: daysWithPosts, icon: '🗓️' },
+                { label: 'Platforms',  value: new Set(posts.flatMap(p => p.platforms || [])).size, icon: '📱' },
               ].map(stat => (
                 <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-4 text-center">
                   <div className="text-xl mb-1">{stat.icon}</div>
@@ -148,93 +195,99 @@ export default function Queue() {
             </div>
           ) : (
             <div className="space-y-8">
-              {dateKeys.map(dateKey => (
-                <div key={dateKey}>
-                  <div className="flex items-center gap-3 mb-3">
-                    <p className="text-xs font-extrabold text-gray-900 uppercase tracking-widest">
-                      {formatDateLabel(dateKey)}
-                    </p>
-                    <div className="flex-1 h-px bg-gray-100" />
-                    <span className="text-xs text-gray-400">
-                      {grouped[dateKey].length} post{grouped[dateKey].length !== 1 ? 's' : ''}
-                    </span>
-                  </div>
-                  <div className="space-y-3">
-                    {grouped[dateKey].map(post => {
-                      const isConfirming = confirmCancel === post.id
-                      const isCancelling = cancelling === post.id
-                      return (
-                        <div key={post.id}
-                          className="bg-white border border-gray-100 rounded-2xl p-4 md:p-5 hover:border-gray-300 transition-all">
-                          <div className="flex items-start gap-4">
-                            <div className="flex-1 min-w-0">
-                              {post.scheduled_at && (
-                                <div className="mb-2">
-                                  <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
-                                    {new Date(post.scheduled_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-                                  </span>
+              {dateKeys.map(dateKey => {
+                const isHighlighted = targetDateString === dateKey
+                return (
+                  <div
+                    key={dateKey}
+                    ref={el => { sectionRefs.current[dateKey] = el }}
+                    className={`scroll-mt-8 rounded-2xl transition-all ${isHighlighted ? 'ring-2 ring-blue-300 ring-offset-2' : ''}`}>
+                    <div className="flex items-center gap-3 mb-3 px-1">
+                      <p className={`text-xs font-extrabold uppercase tracking-widest ${isHighlighted ? 'text-blue-600' : 'text-gray-900'}`}>
+                        {formatDateLabel(dateKey)}
+                        {isHighlighted && <span className="ml-2 text-blue-400 normal-case tracking-normal font-semibold">← from calendar</span>}
+                      </p>
+                      <div className="flex-1 h-px bg-gray-100" />
+                      <span className="text-xs text-gray-400">
+                        {grouped[dateKey].length} post{grouped[dateKey].length !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+                    <div className="space-y-3">
+                      {grouped[dateKey].map(post => {
+                        const isConfirming = confirmCancel === post.id
+                        const isCancelling = cancelling === post.id
+                        return (
+                          <div key={post.id}
+                            className={`bg-white border rounded-2xl p-4 md:p-5 transition-all ${
+                              isHighlighted ? 'border-blue-100 hover:border-blue-300' : 'border-gray-100 hover:border-gray-300'
+                            }`}>
+                            <div className="flex items-start gap-4">
+                              <div className="flex-1 min-w-0">
+                                {post.scheduled_at && (
+                                  <div className="mb-2">
+                                    <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                                      {new Date(post.scheduled_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                                    </span>
+                                  </div>
+                                )}
+                                <p className="text-sm text-gray-700 leading-relaxed line-clamp-2 mb-3">
+                                  {post.content || <span className="text-gray-300 italic">No content</span>}
+                                </p>
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  {(post.platforms || []).map((p: string) => (
+                                    <span key={p} className="flex items-center gap-1 text-xs text-gray-500 bg-gray-50 px-2 py-0.5 rounded-full">
+                                      <span>{PLATFORM_ICONS[p] || '📱'}</span>
+                                      <span className="hidden sm:inline">{PLATFORM_NAMES[p] || p}</span>
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {!isConfirming && (
+                                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 flex-shrink-0">
+                                  <Link href={`/compose?draft=${post.id}`}
+                                    className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                                    Edit
+                                  </Link>
+                                  <button onClick={() => setConfirmCancel(post.id)}
+                                    className="text-xs font-bold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all">
+                                    Unschedule
+                                  </button>
                                 </div>
                               )}
-                              <p className="text-sm text-gray-700 leading-relaxed line-clamp-2 mb-3">
-                                {post.content || <span className="text-gray-300 italic">No content</span>}
-                              </p>
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                {(post.platforms || []).map((p: string) => (
-                                  <span key={p} className="flex items-center gap-1 text-xs text-gray-500 bg-gray-50 px-2 py-0.5 rounded-full">
-                                    <span>{PLATFORM_ICONS[p] || '📱'}</span>
-                                    <span className="hidden sm:inline">{PLATFORM_NAMES[p] || p}</span>
-                                  </span>
-                                ))}
-                              </div>
                             </div>
 
-                            {/* ACTIONS — always visible, not hover-only */}
-                            {!isConfirming && (
-                              <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 flex-shrink-0">
-                                <Link href="/compose"
-                                  className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
-                                  Edit
-                                </Link>
-                                <button onClick={() => setConfirmCancel(post.id)}
-                                  className="text-xs font-bold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all">
-                                  Unschedule
-                                </button>
+                            {isConfirming && (
+                              <div className="mt-3 pt-3 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center gap-2">
+                                <p className="text-xs text-red-600 font-semibold flex-1">
+                                  Move this post back to drafts?
+                                </p>
+                                <div className="flex items-center gap-2 flex-shrink-0">
+                                  <button
+                                    onClick={() => handleCancel(post.id)}
+                                    disabled={isCancelling}
+                                    className="text-xs font-bold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center gap-1.5">
+                                    {isCancelling ? (
+                                      <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Moving...</>
+                                    ) : 'Yes, unschedule'}
+                                  </button>
+                                  <button onClick={() => setConfirmCancel(null)}
+                                    className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                                    Cancel
+                                  </button>
+                                </div>
                               </div>
                             )}
                           </div>
-
-                          {/* CONFIRM UNSCHEDULE */}
-                          {isConfirming && (
-                            <div className="mt-3 pt-3 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center gap-2">
-                              <p className="text-xs text-red-600 font-semibold flex-1">
-                                Move this post back to drafts?
-                              </p>
-                              <div className="flex items-center gap-2 flex-shrink-0">
-                                <button
-                                  onClick={() => handleCancel(post.id)}
-                                  disabled={isCancelling}
-                                  className="text-xs font-bold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center gap-1.5">
-                                  {isCancelling ? (
-                                    <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Moving...</>
-                                  ) : 'Yes, unschedule'}
-                                </button>
-                                <button onClick={() => setConfirmCancel(null)}
-                                  className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
-                                  Cancel
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )
-                    })}
+                        )
+                      })}
+                    </div>
                   </div>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
 
-          {/* BULK SCHEDULE CTA */}
           {!loading && posts.length > 0 && (
             <div className="mt-8 bg-black rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-white">
               <div>
@@ -259,5 +312,17 @@ export default function Queue() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function Queue() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
+      </div>
+    }>
+      <QueueInner />
+    </Suspense>
   )
 }
