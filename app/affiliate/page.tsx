@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
+import Link from 'next/link'
 
 interface Conversion {
   id: string
@@ -29,7 +30,7 @@ interface AffiliateData {
   next_tier: { rate: string; remaining: number } | null
 }
 
-const PLATFORMS = ['Twitter/X', 'YouTube', 'Instagram', 'TikTok', 'LinkedIn', 'Blog/Newsletter', 'Other']
+const PLATFORMS    = ['Twitter/X', 'YouTube', 'Instagram', 'TikTok', 'LinkedIn', 'Blog/Newsletter', 'Other']
 const AUDIENCE_SIZES = ['Under 1K', '1K–10K', '10K–50K', '50K+']
 
 const STATUS_BADGE: Record<string, { label: string; color: string }> = {
@@ -40,30 +41,30 @@ const STATUS_BADGE: Record<string, { label: string; color: string }> = {
 }
 
 export default function AffiliatePage() {
-  const { plan } = useWorkspace()
-  const router = useRouter()
-  const [data, setData] = useState<AffiliateData | null>(null)
-  const [loading, setLoading] = useState(true)
+  const { plan, loading: planLoading } = useWorkspace()
+  const router  = useRouter()
+  const [data, setData]           = useState<AffiliateData | null>(null)
+  const [loading, setLoading]     = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [submitSuccess, setSubmitSuccess] = useState(false)
-  const [copied, setCopied] = useState(false)
+  const [copied, setCopied]       = useState(false)
 
-  const [fullName, setFullName] = useState('')
-  const [websiteUrl, setWebsiteUrl] = useState('')
+  const [fullName, setFullName]           = useState('')
+  const [websiteUrl, setWebsiteUrl]       = useState('')
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([])
-  const [audienceSize, setAudienceSize] = useState('')
+  const [audienceSize, setAudienceSize]   = useState('')
   const [promotionPlan, setPromotionPlan] = useState('')
-  const [whyGoodFit, setWhyGoodFit] = useState('')
+  const [whyGoodFit, setWhyGoodFit]       = useState('')
 
   const appUrl = 'https://socialmate.studio'
 
-  useEffect(() => { fetchStats() }, [])
+  useEffect(() => { if (!planLoading && plan !== 'free') fetchStats() }, [planLoading, plan])
 
   async function fetchStats() {
     setLoading(true)
     try {
-      const res = await fetch('/api/affiliate/stats')
+      const res  = await fetch('/api/affiliate/stats')
       const json = await res.json()
       setData(json)
     } catch {
@@ -87,16 +88,16 @@ export default function AffiliatePage() {
     }
     setSubmitting(true)
     try {
-      const res = await fetch('/api/affiliate/join', {
+      const res  = await fetch('/api/affiliate/join', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          full_name: fullName,
-          website_url: websiteUrl,
-          platforms: selectedPlatforms,
-          audience_size: audienceSize,
+          full_name:      fullName,
+          website_url:    websiteUrl,
+          platforms:      selectedPlatforms,
+          audience_size:  audienceSize,
           promotion_plan: promotionPlan,
-          why_good_fit: whyGoodFit,
+          why_good_fit:   whyGoodFit,
         }),
       })
       const json = await res.json()
@@ -120,8 +121,56 @@ export default function AffiliatePage() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const referralLink     = data?.referral_code ? `${appUrl}/?ref=${data.referral_code}` : ''
-  const affiliateStatus  = data?.affiliate?.status
+  const referralLink    = data?.referral_code ? `${appUrl}/?ref=${data.referral_code}` : ''
+  const affiliateStatus = data?.affiliate?.status
+
+  // Wait for plan to load before rendering gate
+  if (planLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex">
+        <Sidebar />
+        <div className="md:ml-56 flex-1 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
+        </div>
+      </div>
+    )
+  }
+
+  // FREE TIER GATE — top level, no form shown at all
+  if (plan === 'free') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex">
+        <Sidebar />
+        <div className="md:ml-56 flex-1 p-8 flex items-center justify-center">
+          <div className="max-w-md text-center">
+            <div className="text-5xl mb-4">🤝</div>
+            <h1 className="text-2xl font-extrabold tracking-tight mb-3">Affiliate Program</h1>
+            <p className="text-sm text-gray-500 leading-relaxed mb-6">
+              Earn recurring commissions by referring new users to SocialMate.
+              The affiliate program is available to Pro and Agency subscribers.
+            </p>
+            <div className="grid grid-cols-2 gap-3 mb-6 text-left">
+              <div className="bg-white border border-gray-100 rounded-2xl p-4">
+                <div className="text-2xl font-extrabold mb-1">30%</div>
+                <div className="text-xs text-gray-500">Recurring commission</div>
+                <div className="text-xs text-gray-400 mt-1">Starting rate</div>
+              </div>
+              <div className="bg-purple-50 border border-purple-100 rounded-2xl p-4">
+                <div className="text-2xl font-extrabold text-purple-700 mb-1">40%</div>
+                <div className="text-xs text-purple-600">Recurring commission</div>
+                <div className="text-xs text-purple-400 mt-1">At 100 active referrals</div>
+              </div>
+            </div>
+            <Link href="/settings?tab=Plan"
+              className="block w-full text-center bg-black text-white text-sm font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all mb-3">
+              Upgrade to unlock Affiliate →
+            </Link>
+            <p className="text-xs text-gray-400">Pro · $5/mo · Agency · $20/mo</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -137,19 +186,18 @@ export default function AffiliatePage() {
           </div>
 
           {loading ? (
-            <div className="flex items-center justify-center h-48 text-gray-400 text-sm">
+            <div className="flex items-center justify-center h-48">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
             </div>
 
           ) : affiliateStatus === 'active' ? (
             <div className="space-y-6">
-
               {/* STAT CARDS */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {[
-                  { label: 'Unpaid Earnings',  value: `$${(data!.affiliate!.unpaid_earnings ?? 0).toFixed(2)}`,  sub: 'Pending payout'       },
-                  { label: 'Total Earned',     value: `$${(data!.affiliate!.total_earnings ?? 0).toFixed(2)}`,   sub: 'All time'             },
-                  { label: 'Active Referrals', value: `${data!.affiliate!.active_referral_count ?? 0}`,          sub: 'Paying subscribers'   },
+                  { label: 'Unpaid Earnings',  value: `$${(data!.affiliate!.unpaid_earnings ?? 0).toFixed(2)}`,  sub: 'Pending payout'     },
+                  { label: 'Total Earned',     value: `$${(data!.affiliate!.total_earnings ?? 0).toFixed(2)}`,   sub: 'All time'           },
+                  { label: 'Active Referrals', value: `${data!.affiliate!.active_referral_count ?? 0}`,          sub: 'Paying subscribers' },
                 ].map(stat => (
                   <div key={stat.label} className="bg-white rounded-2xl border border-gray-100 p-5">
                     <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">{stat.label}</div>
@@ -212,9 +260,7 @@ export default function AffiliatePage() {
                     No referrals yet. Share your link to get started.
                   </div>
                 ) : (
-                  /* Mobile: card list. Desktop: table */
                   <>
-                    {/* MOBILE CARDS */}
                     <div className="sm:hidden divide-y divide-gray-50">
                       {data!.conversions.map(c => {
                         const badge = STATUS_BADGE[c.status] || STATUS_BADGE.pending
@@ -236,7 +282,6 @@ export default function AffiliatePage() {
                         )
                       })}
                     </div>
-                    {/* DESKTOP TABLE */}
                     <table className="hidden sm:table w-full text-sm">
                       <thead>
                         <tr className="text-xs font-semibold text-gray-400 uppercase tracking-widest border-b border-gray-50">
@@ -274,8 +319,7 @@ export default function AffiliatePage() {
               <div className="text-4xl mb-4">⏳</div>
               <h2 className="text-xl font-extrabold mb-2">Application Under Review</h2>
               <p className="text-gray-500 text-sm max-w-md mx-auto leading-relaxed">
-                Your application has been submitted and is being reviewed.
-                You'll be notified by email once a decision has been made.
+                Your application is being reviewed. You'll be notified by email once a decision has been made.
               </p>
             </div>
 
@@ -294,7 +338,7 @@ export default function AffiliatePage() {
             </div>
 
           ) : (
-            /* APPLICATION FORM */
+            /* APPLICATION FORM — Pro/Agency only reaches here */
             <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
               <div className="text-4xl mb-4 text-center">🤝</div>
               <h2 className="text-xl font-extrabold mb-1 text-center">Apply to the Affiliate Program</h2>
@@ -316,14 +360,7 @@ export default function AffiliatePage() {
                 </div>
               </div>
 
-              {plan === 'free' ? (
-                <div className="bg-yellow-50 border border-yellow-100 rounded-xl px-4 py-3 text-sm text-yellow-700 font-medium text-center">
-                  You must be on a paid plan to apply.
-                  <button onClick={() => router.push('/settings?tab=Plan')} className="ml-2 underline hover:no-underline">
-                    Upgrade now →
-                  </button>
-                </div>
-              ) : submitSuccess ? (
+              {submitSuccess ? (
                 <div className="bg-green-50 border border-green-100 rounded-xl px-4 py-4 text-center">
                   <div className="text-2xl mb-2">✅</div>
                   <div className="text-sm font-semibold text-green-700">Application submitted! We'll review it and email you.</div>
@@ -336,18 +373,16 @@ export default function AffiliatePage() {
                     </label>
                     <input type="text" value={fullName} onChange={e => setFullName(e.target.value)}
                       placeholder="Your full name"
-                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-gray-400" />
+                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gray-400" />
                   </div>
-
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
                       Website or Main Social Profile
                     </label>
                     <input type="url" value={websiteUrl} onChange={e => setWebsiteUrl(e.target.value)}
                       placeholder="https://"
-                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-gray-400" />
+                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gray-400" />
                   </div>
-
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
                       Active Platforms
@@ -365,7 +400,6 @@ export default function AffiliatePage() {
                       ))}
                     </div>
                   </div>
-
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
                       Estimated Monthly Audience
@@ -383,7 +417,6 @@ export default function AffiliatePage() {
                       ))}
                     </div>
                   </div>
-
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
                       How do you plan to promote SocialMate? <span className="text-red-400">*</span>
@@ -391,9 +424,8 @@ export default function AffiliatePage() {
                     <textarea value={promotionPlan} onChange={e => setPromotionPlan(e.target.value)}
                       rows={3}
                       placeholder="Describe your content style, audience, and how you'd introduce SocialMate..."
-                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-gray-400 resize-none" />
+                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gray-400 resize-none" />
                   </div>
-
                   <div>
                     <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
                       Why would you be a great affiliate? <span className="text-red-400">*</span>
@@ -401,19 +433,16 @@ export default function AffiliatePage() {
                     <textarea value={whyGoodFit} onChange={e => setWhyGoodFit(e.target.value)}
                       rows={3}
                       placeholder="What makes you a good fit for the SocialMate affiliate program?"
-                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-gray-400 resize-none" />
+                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gray-400 resize-none" />
                   </div>
-
                   {submitError && (
                     <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3 text-sm text-red-600">
                       {submitError}
                     </div>
                   )}
-
                   <p className="text-xs text-gray-400 pt-1">
                     60-day lock period · 30% recurring commission · Reviewed within 3–5 business days
                   </p>
-
                   <button onClick={handleSubmit} disabled={submitting}
                     className="w-full bg-black text-white font-bold text-sm px-8 py-3 rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
                     {submitting ? 'Submitting...' : 'Submit Application →'}
