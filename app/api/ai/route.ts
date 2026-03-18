@@ -1,19 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import { cookies } from 'next/headers'
+import { createServerClient } from '@supabase/ssr'
 
 const CREDIT_COSTS: Record<string, number> = {
-  caption:      3,
-  hashtags:     2,
-  rewrite:      3,
-  hook:         4,
-  thread:       8,
-  repurpose:    8,
-  pulse:        10,
-  radar:        10,
-  content_gap:  10,
-  calendar:     20,
-  image:        25,
-  score:        2,
+  caption:     3,
+  hashtags:    2,
+  rewrite:     3,
+  hook:        4,
+  thread:      8,
+  repurpose:   8,
+  pulse:       10,
+  radar:       10,
+  content_gap: 10,
+  calendar:    20,
+  image:       25,
+  score:       2,
 }
 
 async function fetchTrendingData(niche: string) {
@@ -134,15 +136,78 @@ VERDICT: [one sentence summary of the post's potential]`
 
 export async function POST(req: NextRequest) {
   try {
+    // Auth check
+    const cookieStore = await cookies()
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll: () => cookieStore.getAll(),
+          setAll: (cookiesToSet) => {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          },
+        },
+      }
+    )
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
     const { tool, content, platform } = await req.json()
 
     if (!tool || !content) {
       return NextResponse.json({ error: 'Missing tool or content' }, { status: 400 })
     }
 
+    const creditCost = CREDIT_COSTS[tool]
+    if (creditCost === undefined) {
+      return NextResponse.json({ error: 'Unknown tool' }, { status: 400 })
+    }
+
+    // Server-side credit check and atomic deduction
+    const { data: settings, error: settingsError } = await supabase
+      .from('user_settings')
+      .select('ai_credits_remaining')
+      .eq('user_id', user.id)
+      .single()
+
+    if (settingsError || !settings) {
+      return NextResponse.json({ error: 'Could not load account settings' }, { status: 500 })
+    }
+
+    const currentCredits = settings.ai_credits_remaining ?? 0
+    if (currentCredits < creditCost) {
+      return NextResponse.json({
+        error: `Not enough credits. This tool costs ${creditCost} and you have ${currentCredits} remaining.`,
+        creditsRequired: creditCost,
+        creditsRemaining: currentCredits,
+      }, { status: 402 })
+    }
+
+    // Deduct credits before running — prevents retrying on error to farm credits
+    const newCredits = currentCredits - creditCost
+    const { error: deductError } = await supabase
+      .from('user_settings')
+      .update({ ai_credits_remaining: newCredits })
+      .eq('user_id', user.id)
+      // Only deduct if credits haven't changed since we read them (race condition guard)
+      .eq('ai_credits_remaining', currentCredits)
+
+    if (deductError) {
+      return NextResponse.json({ error: 'Failed to deduct credits — please try again' }, { status: 500 })
+    }
+
     const apiKey = process.env.GEMINI_API_KEY
     if (!apiKey) {
-      return NextResponse.json({ error: 'API key not configured' }, { status: 500 })
+      // Refund credits if AI isn't configured
+      await supabase
+        .from('user_settings')
+        .update({ ai_credits_remaining: currentCredits })
+        .eq('user_id', user.id)
+      return NextResponse.json({ error: 'AI not configured' }, { status: 500 })
     }
 
     let trendingContext: string | undefined
@@ -150,14 +215,26 @@ export async function POST(req: NextRequest) {
       trendingContext = await fetchTrendingData(content)
     }
 
-    const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+    const genAI  = new GoogleGenerativeAI(apiKey)
+    const model  = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
     const prompt = buildPrompt(tool, content, platform || 'general', trendingContext)
-    const result = await model.generateContent(prompt)
-    const text = result.response.text()
-    const creditCost = CREDIT_COSTS[tool] || 1
 
-    return NextResponse.json({ result: text, creditCost })
+    let text: string
+    try {
+      const result = await model.generateContent(prompt)
+      text = result.response.text()
+    } catch (aiErr) {
+      // Refund credits if Gemini fails
+      await supabase
+        .from('user_settings')
+        .update({ ai_credits_remaining: currentCredits })
+        .eq('user_id', user.id)
+      console.error('Gemini error:', aiErr)
+      return NextResponse.json({ error: 'AI generation failed — credits refunded' }, { status: 500 })
+    }
+
+    return NextResponse.json({ result: text, creditCost, creditsRemaining: newCredits })
+
   } catch (err) {
     console.error('AI route error:', err)
     return NextResponse.json({ error: 'Internal server error', detail: String(err) }, { status: 500 })
