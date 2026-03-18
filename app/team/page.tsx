@@ -20,29 +20,29 @@ type TeamMember = {
 }
 
 const ROLE_META: Record<string, { label: string; color: string; description: string }> = {
-  owner:  { label: 'Owner',  color: 'bg-black text-white',                               description: 'Full access to everything'     },
-  admin:  { label: 'Admin',  color: 'bg-gray-800 text-white',                            description: 'Can manage team and settings'  },
-  editor: { label: 'Editor', color: 'bg-blue-50 text-blue-700 border border-blue-200',  description: 'Can create and schedule posts' },
-  viewer: { label: 'Viewer', color: 'bg-gray-100 text-gray-600',                         description: 'Can view posts and analytics'  },
+  owner:  { label: 'Owner',  color: 'bg-black text-white',                              description: 'Full access to everything'     },
+  admin:  { label: 'Admin',  color: 'bg-gray-800 text-white',                           description: 'Can manage team and settings'  },
+  editor: { label: 'Editor', color: 'bg-blue-50 text-blue-700 border border-blue-200', description: 'Can create and schedule posts' },
+  viewer: { label: 'Viewer', color: 'bg-gray-100 text-gray-600',                        description: 'Can view posts and analytics'  },
 }
 
 export default function Team() {
-  const [user, setUser] = useState<any>(null)
-  const [members, setMembers] = useState<TeamMember[]>([])
-  const [loading, setLoading] = useState(true)
+  const [user, setUser]             = useState<any>(null)
+  const [members, setMembers]       = useState<TeamMember[]>([])
+  const [loading, setLoading]       = useState(true)
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteRole, setInviteRole] = useState<'admin' | 'editor' | 'viewer'>('editor')
-  const [inviting, setInviting] = useState(false)
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
-  const [editingId, setEditingId] = useState<string | null>(null)
+  const [inviting, setInviting]     = useState(false)
+  const [toast, setToast]           = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+  const [editingId, setEditingId]   = useState<string | null>(null)
   const [editingRole, setEditingRole] = useState<string>('')
   const [confirmRemove, setConfirmRemove] = useState<string | null>(null)
-  const [removing, setRemoving] = useState<string | null>(null)
+  const [removing, setRemoving]     = useState<string | null>(null)
   const router = useRouter()
   const { plan } = useWorkspace()
 
-  const planConfig = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
-  const seatLimit = planConfig.seats
+  const planConfig     = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
+  const seatLimit      = planConfig.seats
 
   useEffect(() => {
     const getData = async () => {
@@ -66,10 +66,10 @@ export default function Team() {
   }
 
   const ownerMember: TeamMember = useMemo(() => ({
-    id: 'owner',
-    email: user?.email || '',
-    role: 'owner',
-    status: 'active',
+    id:        'owner',
+    email:     user?.email || '',
+    role:      'owner',
+    status:    'active',
     joined_at: user?.created_at || new Date().toISOString(),
   }), [user])
 
@@ -79,30 +79,45 @@ export default function Team() {
   const atLimit        = seatsUsed >= seatLimit
 
   const handleInvite = async () => {
-    if (!inviteEmail.trim())              { showToast('Enter an email address', 'error'); return }
-    if (!inviteEmail.includes('@'))       { showToast('Enter a valid email', 'error'); return }
-    if (members.some(m => m.email === inviteEmail.trim())) { showToast('Already a team member', 'error'); return }
-    if (atLimit) { showToast('Seat limit reached — upgrade to add more members', 'error'); return }
+    if (!inviteEmail.trim())        { showToast('Enter an email address', 'error'); return }
+    if (!inviteEmail.includes('@')) { showToast('Enter a valid email', 'error'); return }
+    if (members.some(m => m.email === inviteEmail.trim())) {
+      showToast('Already a team member', 'error'); return
+    }
+    if (atLimit) {
+      showToast('Seat limit reached — upgrade to add more members', 'error'); return
+    }
+
     setInviting(true)
+    const emailCopy = inviteEmail.trim()
 
-    const { data, error } = await supabase
-      .from('team_members')
-      .insert({ owner_id: user.id, email: inviteEmail.trim(), role: inviteRole, status: 'pending', joined_at: new Date().toISOString() })
-      .select().single()
-
-    if (error) { showToast('Failed to send invite', 'error'); setInviting(false); return }
-    setMembers(prev => [...prev, data])
-
+    // API handles insert + seat check + email — no client-side insert
     const res = await fetch('/api/team/invite', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: inviteEmail.trim(), role: inviteRole, teamMemberId: data.id }),
+      body: JSON.stringify({ email: emailCopy, role: inviteRole }),
     })
 
     const result = await res.json()
-    const emailCopy = inviteEmail.trim()
+
+    if (!res.ok) {
+      showToast(result.error || 'Failed to send invite', 'error')
+      setInviting(false)
+      return
+    }
+
+    // Add the new member to local state from the API response
+    if (result.member) {
+      setMembers(prev => [...prev, result.member])
+    }
+
     setInviteEmail('')
-    showToast(result.emailSent ? `Invite email sent to ${emailCopy}` : `${emailCopy} added — email delivery may be delayed`, 'success')
+    showToast(
+      result.emailSent
+        ? `Invite sent to ${emailCopy}`
+        : `${emailCopy} added — email delivery may be delayed`,
+      'success'
+    )
     setInviting(false)
   }
 
@@ -203,18 +218,17 @@ export default function Team() {
                 ) : (
                   <div>
                     {allMembers.map((member, i) => {
-                      const roleMeta    = ROLE_META[member.role]
-                      const initials    = member.email.slice(0, 2).toUpperCase()
-                      const isOwner     = member.role === 'owner'
-                      const isEditing   = editingId === member.id
+                      const roleMeta     = ROLE_META[member.role]
+                      const initials     = member.email.slice(0, 2).toUpperCase()
+                      const isOwner      = member.role === 'owner'
+                      const isEditing    = editingId === member.id
                       const isConfirming = confirmRemove === member.id
-                      const isRemoving  = removing === member.id
+                      const isRemoving   = removing === member.id
 
                       return (
                         <div key={member.id}
                           className={`px-4 md:px-5 py-4 ${i !== allMembers.length - 1 ? 'border-b border-gray-50' : ''} hover:bg-gray-50 transition-all`}>
 
-                          {/* MAIN ROW */}
                           <div className="flex items-center gap-3">
                             <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-gray-100 flex items-center justify-center text-sm font-bold flex-shrink-0 overflow-hidden">
                               {member.avatar_url
@@ -231,16 +245,16 @@ export default function Team() {
                                 )}
                               </div>
                               <p className="text-xs text-gray-400 mt-0.5">
-                                {isOwner ? 'Workspace owner' : `Joined ${new Date(member.joined_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`}
+                                {isOwner
+                                  ? 'Workspace owner'
+                                  : `Joined ${new Date(member.joined_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`}
                               </p>
                             </div>
-                            {/* Role badge — always visible */}
                             {!isEditing && !isConfirming && (
                               <span className={`text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0 ${roleMeta.color}`}>
                                 {roleMeta.label}
                               </span>
                             )}
-                            {/* Non-owner actions — always visible */}
                             {!isOwner && !isEditing && !isConfirming && (
                               <div className="flex items-center gap-1.5 flex-shrink-0">
                                 <button onClick={() => { setEditingId(member.id); setEditingRole(member.role) }}
@@ -255,7 +269,6 @@ export default function Team() {
                             )}
                           </div>
 
-                          {/* ROLE EDIT — below main row */}
                           {isEditing && (
                             <div className="mt-3 pt-3 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center gap-2">
                               <p className="text-xs font-semibold text-gray-500 flex-shrink-0">Change role for {member.email}:</p>
@@ -278,7 +291,6 @@ export default function Team() {
                             </div>
                           )}
 
-                          {/* CONFIRM REMOVE — below main row */}
                           {isConfirming && (
                             <div className="mt-3 pt-3 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center gap-2">
                               <p className="text-xs text-red-600 font-semibold flex-1">

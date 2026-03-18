@@ -6,6 +6,12 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+const PLAN_SEAT_LIMITS: Record<string, number> = {
+  free:   2,
+  pro:    5,
+  agency: 15,
+}
+
 export async function POST(request: NextRequest) {
   const { token, userId, email } = await request.json()
 
@@ -36,7 +42,30 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'This invite was sent to a different email address' }, { status: 400 })
   }
 
-  // Update team_members record to active
+  // Re-check seat limit at time of acceptance (owner may have downgraded)
+  const { data: ownerSettings } = await supabaseAdmin
+    .from('user_settings')
+    .select('plan')
+    .eq('user_id', invite.owner_id)
+    .single()
+
+  const plan      = ownerSettings?.plan || 'free'
+  const seatLimit = PLAN_SEAT_LIMITS[plan] ?? 2
+
+  const { count: memberCount } = await supabaseAdmin
+    .from('team_members')
+    .select('id', { count: 'exact', head: true })
+    .eq('owner_id', invite.owner_id)
+    .eq('status', 'active')
+
+  const seatsUsed = (memberCount ?? 0) + 1 // +1 for owner
+  if (seatsUsed >= seatLimit) {
+    return NextResponse.json({
+      error: 'This workspace has reached its seat limit. The workspace owner will need to upgrade their plan.',
+    }, { status: 403 })
+  }
+
+  // Activate the team member record
   const { error: updateError } = await supabaseAdmin
     .from('team_members')
     .update({ status: 'active', joined_at: new Date().toISOString() })
@@ -44,14 +73,14 @@ export async function POST(request: NextRequest) {
     .eq('email', invite.email)
 
   if (updateError) {
-    // If no existing record, insert one
+    // No existing record — insert fresh
     await supabaseAdmin
       .from('team_members')
       .insert({
-        owner_id: invite.owner_id,
-        email: invite.email,
-        role: invite.role,
-        status: 'active',
+        owner_id:  invite.owner_id,
+        email:     invite.email,
+        role:      invite.role,
+        status:    'active',
         joined_at: new Date().toISOString(),
       })
   }

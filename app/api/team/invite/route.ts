@@ -12,6 +12,12 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+const PLAN_SEAT_LIMITS: Record<string, number> = {
+  free:   2,
+  pro:    5,
+  agency: 15,
+}
+
 export async function POST(request: NextRequest) {
   const cookieStore = await cookies()
 
@@ -33,36 +39,89 @@ export async function POST(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { email, role, teamMemberId } = await request.json()
+  const { email, role } = await request.json()
 
   if (!email || !role) {
     return NextResponse.json({ error: 'Email and role are required' }, { status: 400 })
   }
 
-  // Generate secure token
-  const token = crypto.randomBytes(32).toString('hex')
+  // Server-side seat limit check
+  const { data: settings } = await supabaseAdmin
+    .from('user_settings')
+    .select('plan')
+    .eq('user_id', user.id)
+    .single()
+
+  const plan      = settings?.plan || 'free'
+  const seatLimit = PLAN_SEAT_LIMITS[plan] ?? 2
+
+  // Count existing members (not counting owner — owner is +1 implicit)
+  const { count: memberCount } = await supabaseAdmin
+    .from('team_members')
+    .select('id', { count: 'exact', head: true })
+    .eq('owner_id', user.id)
+
+  // seatsUsed = members + 1 (owner)
+  const seatsUsed = (memberCount ?? 0) + 1
+  if (seatsUsed >= seatLimit) {
+    return NextResponse.json({
+      error: `Seat limit reached. Your ${plan} plan allows ${seatLimit} seats total.`,
+    }, { status: 403 })
+  }
+
+  // Check not already a member
+  const { data: existing } = await supabaseAdmin
+    .from('team_members')
+    .select('id')
+    .eq('owner_id', user.id)
+    .eq('email', email.trim())
+    .maybeSingle()
+
+  if (existing) {
+    return NextResponse.json({ error: 'This person is already a team member' }, { status: 409 })
+  }
+
+  // Insert the team member record
+  const { data: member, error: insertError } = await supabaseAdmin
+    .from('team_members')
+    .insert({
+      owner_id:  user.id,
+      email:     email.trim(),
+      role,
+      status:    'pending',
+      joined_at: new Date().toISOString(),
+    })
+    .select()
+    .single()
+
+  if (insertError || !member) {
+    console.error('Team member insert error:', insertError)
+    return NextResponse.json({ error: 'Failed to add team member' }, { status: 500 })
+  }
+
+  // Generate secure invite token
+  const token     = crypto.randomBytes(32).toString('hex')
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
 
-  // Save token to DB
   const { error: tokenError } = await supabaseAdmin
     .from('invite_tokens')
     .insert({
       token,
-      owner_id: user.id,
-      email,
+      owner_id:   user.id,
+      email:      email.trim(),
       role,
       expires_at: expiresAt,
     })
 
   if (tokenError) {
     console.error('Token insert error:', tokenError)
-    return NextResponse.json({ error: 'Failed to create invite token' }, { status: 500 })
+    // Member was added, just couldn't send email — not fatal
+    return NextResponse.json({ success: true, emailSent: false, member })
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL!
+  const appUrl    = process.env.NEXT_PUBLIC_APP_URL!
   const inviteUrl = `${appUrl}/invite?token=${token}`
 
-  // Get inviter's display name
   const { data: inviterSettings } = await supabaseAdmin
     .from('user_settings')
     .select('display_name')
@@ -71,10 +130,9 @@ export async function POST(request: NextRequest) {
 
   const inviterName = inviterSettings?.display_name || user.email
 
-  // Send invite email via Resend
   const { error: emailError } = await resend.emails.send({
-    from: 'SocialMate <hello@socialmate.studio>',
-    to: email,
+    from:    'SocialMate <hello@socialmate.studio>',
+    to:      email.trim(),
     subject: `${inviterName} invited you to join SocialMate`,
     html: `
       <!DOCTYPE html>
@@ -100,9 +158,8 @@ export async function POST(request: NextRequest) {
 
   if (emailError) {
     console.error('Email send error:', emailError)
-    // Don't fail the whole invite if email fails — token is saved
-    return NextResponse.json({ success: true, emailSent: false })
+    return NextResponse.json({ success: true, emailSent: false, member })
   }
 
-  return NextResponse.json({ success: true, emailSent: true })
+  return NextResponse.json({ success: true, emailSent: true, member })
 }
