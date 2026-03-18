@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await request.json()
-  const { content, platforms, scheduledAt, destinations } = body
+  const { content, platforms, scheduledAt, destinations, draftId } = body
 
   if (!content?.trim()) return NextResponse.json({ error: 'Content is required' }, { status: 400 })
   if (!platforms?.length) return NextResponse.json({ error: 'Select at least one platform' }, { status: 400 })
@@ -89,6 +89,11 @@ export async function POST(request: NextRequest) {
   }
 
   if (isScheduled) {
+    // If publishing from an existing draft, delete the old draft
+    if (draftId) {
+      await supabase.from('posts').delete().eq('id', draftId).eq('user_id', user.id)
+    }
+
     await inngest.send({
       name: 'post/scheduled',
       data: { postId: post.id, scheduledAt },
@@ -105,19 +110,26 @@ export async function POST(request: NextRequest) {
   const platformPostIds: Record<string, string> = {}
   results.forEach(r => { if (r.success && r.postId) platformPostIds[r.platform] = r.postId })
 
+  const finalStatus = allFailed ? 'failed' : someFailed ? 'partial' : 'published'
+
   await supabase
     .from('posts')
     .update({
-      status:            allFailed ? 'failed' : someFailed ? 'partial' : 'published',
+      status:            finalStatus,
       published_at:      allFailed ? null : new Date().toISOString(),
       platform_post_ids: platformPostIds,
     })
     .eq('id', post.id)
 
+  // If publishing from an existing draft, delete the old draft
+  if (draftId && !allFailed) {
+    await supabase.from('posts').delete().eq('id', draftId).eq('user_id', user.id)
+  }
+
   return NextResponse.json({
     success: !allFailed,
     postId:  post.id,
     results,
-    status:  allFailed ? 'failed' : someFailed ? 'partial' : 'published',
+    status:  finalStatus,
   })
 }

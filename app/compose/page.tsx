@@ -374,6 +374,7 @@ function ComposeInner() {
           platforms: selectedPlatforms,
           scheduledAt,
           destinations: selectedDestinations,
+          draftId: currentDraftId || undefined,
         }),
       })
 
