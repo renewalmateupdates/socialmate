@@ -9,14 +9,15 @@ import { useWorkspace } from '@/contexts/WorkspaceContext'
 const STRIPE_PRO_PRICE_ID    = 'price_1T9pay7OMwDowUuU7S3G3lNX'
 const STRIPE_AGENCY_PRICE_ID = 'price_1T9qAd7OMwDowUuUpzjxLlG2'
 
-const TABS = ['Profile', 'Plan', 'Referrals', 'Notifications', 'Security', 'White Label']
+const ALL_TABS    = ['Profile', 'Plan', 'Referrals', 'Notifications', 'Security', 'White Label']
+const FREE_TABS   = ['Profile', 'Plan', 'Notifications', 'Security']
 
 const REFERRAL_TIERS = [
-  { paying: 5,   reward: '1 month Pro free',       icon: '🎁', conditional: false },
-  { paying: 10,  reward: '3 months Pro free',      icon: '⭐', conditional: false },
-  { paying: 25,  reward: '6 months Pro free',      icon: '🚀', conditional: false },
-  { paying: 50,  reward: 'Pro free while active',  icon: '💎', conditional: true  },
-  { paying: 100, reward: 'Pro free while active',  icon: '👑', conditional: true  },
+  { paying: 5,   reward: '1 month Pro free',      icon: '🎁', conditional: false },
+  { paying: 10,  reward: '3 months Pro free',     icon: '⭐', conditional: false },
+  { paying: 25,  reward: '6 months Pro free',     icon: '🚀', conditional: false },
+  { paying: 50,  reward: 'Pro free while active', icon: '💎', conditional: true  },
+  { paying: 100, reward: 'Pro free while active', icon: '👑', conditional: true  },
 ]
 
 const CREDIT_PACKS = [
@@ -33,58 +34,69 @@ function SettingsInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const [userEmail, setUserEmail] = useState('')
-  const [userId, setUserId] = useState<string | null>(null)
-  const [displayName, setDisplayName] = useState('')
-  const [username, setUsername] = useState('')
-  const [bio, setBio] = useState('')
-  const [authLoading, setAuthLoading] = useState(true)
+  // Tabs depend on plan — computed inside component
+  const TABS = plan === 'free' ? FREE_TABS : ALL_TABS
 
-  const tabFromUrl = searchParams.get('tab')
+  const [userEmail, setUserEmail]       = useState('')
+  const [userId, setUserId]             = useState<string | null>(null)
+  const [displayName, setDisplayName]   = useState('')
+  const [username, setUsername]         = useState('')
+  const [bio, setBio]                   = useState('')
+  const [authLoading, setAuthLoading]   = useState(true)
+
+  const tabFromUrl  = searchParams.get('tab')
   const [activeTab, setActiveTab] = useState(
-    tabFromUrl && TABS.includes(tabFromUrl) ? tabFromUrl : 'Profile'
+    tabFromUrl && ALL_TABS.includes(tabFromUrl) ? tabFromUrl : 'Profile'
   )
 
-  const [savedTab, setSavedTab] = useState<string | null>(null)
-  const [checkoutLoading, setCheckoutLoading] = useState(false)
+  const [savedTab, setSavedTab]                   = useState<string | null>(null)
+  const [checkoutLoading, setCheckoutLoading]     = useState(false)
   const [creditPackLoading, setCreditPackLoading] = useState<string | null>(null)
   const [notifications, setNotifications] = useState({
     postPublished: true,
-    postFailed: true,
-    weeklyDigest: false,
-    creditLow: true,
-    teamActivity: false,
+    postFailed:    true,
+    weeklyDigest:  false,
+    creditLow:     true,
+    teamActivity:  false,
     productUpdates: true,
   })
-  const [copiedLink, setCopiedLink] = useState(false)
-  const [confirmDeletePosts, setConfirmDeletePosts] = useState(false)
+  const [copiedLink, setCopiedLink]                   = useState(false)
+  const [confirmDeletePosts, setConfirmDeletePosts]   = useState(false)
   const [confirmDeleteAccount, setConfirmDeleteAccount] = useState(false)
-  const [dangerLoading, setDangerLoading] = useState(false)
+  const [dangerLoading, setDangerLoading]             = useState(false)
 
-  const [referralCode, setReferralCode] = useState('')
-  const [referralStats, setReferralStats] = useState({ totalReferrals: 0, payingReferrals: 0, creditsEarned: 0 })
+  const [referralCode, setReferralCode]       = useState('')
+  const [referralStats, setReferralStats]     = useState({ totalReferrals: 0, payingReferrals: 0, creditsEarned: 0 })
   const [referralHistory, setReferralHistory] = useState<any[]>([])
   const [referralLoading, setReferralLoading] = useState(false)
 
-  const [mfaEnabled, setMfaEnabled] = useState(false)
-  const [mfaFactorId, setMfaFactorId] = useState<string | null>(null)
-  const [mfaStep, setMfaStep] = useState<'idle' | 'enroll' | 'disable_confirm'>('idle')
-  const [mfaQR, setMfaQR] = useState('')
-  const [mfaSecret, setMfaSecret] = useState('')
-  const [mfaEnrollId, setMfaEnrollId] = useState('')
-  const [mfaCode, setMfaCode] = useState('')
-  const [mfaLoading, setMfaLoading] = useState(false)
-  const [mfaError, setMfaError] = useState('')
+  const [mfaEnabled, setMfaEnabled]     = useState(false)
+  const [mfaFactorId, setMfaFactorId]   = useState<string | null>(null)
+  const [mfaStep, setMfaStep]           = useState<'idle' | 'enroll' | 'disable_confirm'>('idle')
+  const [mfaQR, setMfaQR]               = useState('')
+  const [mfaSecret, setMfaSecret]       = useState('')
+  const [mfaEnrollId, setMfaEnrollId]   = useState('')
+  const [mfaCode, setMfaCode]           = useState('')
+  const [mfaLoading, setMfaLoading]     = useState(false)
+  const [mfaError, setMfaError]         = useState('')
 
   // White label state
   const [whiteLabelActive, setWhiteLabelActive] = useState(false)
-  const [whiteLabelTier, setWhiteLabelTier] = useState<string | null>(null)
-  const [wlBrandName, setWlBrandName] = useState('')
-  const [wlLogoUrl, setWlLogoUrl] = useState('')
-  const [wlDomain, setWlDomain] = useState('')
-  const [wlColor, setWlColor] = useState('#000000')
+  const [whiteLabelTier, setWhiteLabelTier]     = useState<string | null>(null)
+  const [wlBrandName, setWlBrandName]           = useState('')
+  const [wlLogoUrl, setWlLogoUrl]               = useState('')
+  const [wlDomain, setWlDomain]                 = useState('')
+  const [wlColor, setWlColor]                   = useState('#000000')
   const [wlCheckoutLoading, setWlCheckoutLoading] = useState(false)
-  const [wlActivated, setWlActivated] = useState(false)
+  const [wlActivated, setWlActivated]           = useState(false)
+
+  // Credit purchase success toast
+  useEffect(() => {
+    if (searchParams.get('credits') === 'purchased') {
+      setSavedTab('credits_purchased')
+      setTimeout(() => setSavedTab(null), 4000)
+    }
+  }, [searchParams])
 
   useEffect(() => {
     const init = async () => {
@@ -124,7 +136,6 @@ function SettingsInner() {
       const totpFactor = factors?.totp?.find((f: any) => f.status === 'verified')
       if (totpFactor) { setMfaEnabled(true); setMfaFactorId(totpFactor.id) }
 
-      // Check if just activated white label
       if (searchParams.get('white_label') === 'activated') setWlActivated(true)
 
       setAuthLoading(false)
@@ -142,7 +153,7 @@ function SettingsInner() {
         .eq('affiliate_user_id', userId)
         .order('converted_at', { ascending: false })
       if (!error && data) {
-        const paying = data.filter((r: any) => r.status === 'eligible' || r.status === 'paid')
+        const paying      = data.filter((r: any) => r.status === 'eligible' || r.status === 'paid')
         const totalCredits = data.reduce((sum: number, r: any) => sum + (r.total_earned ?? 0), 0)
         setReferralStats({ totalReferrals: data.length, payingReferrals: paying.length, creditsEarned: totalCredits })
         setReferralHistory(data.slice(0, 10))
@@ -153,7 +164,7 @@ function SettingsInner() {
   }, [activeTab, userId])
 
   const referralLink = referralCode ? `${appUrl}/?ref=${referralCode}` : ''
-  const nextTier = REFERRAL_TIERS.find(t => referralStats.payingReferrals < t.paying)
+  const nextTier     = REFERRAL_TIERS.find(t => referralStats.payingReferrals < t.paying)
 
   const handleSave = async (tab: string) => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -163,10 +174,10 @@ function SettingsInner() {
     }
     if (tab === 'WhiteLabel') {
       await supabase.from('user_settings').update({
-        white_label_brand_name: wlBrandName,
-        white_label_logo_url: wlLogoUrl,
+        white_label_brand_name:    wlBrandName,
+        white_label_logo_url:      wlLogoUrl,
         white_label_custom_domain: wlDomain,
-        white_label_brand_color: wlColor,
+        white_label_brand_color:   wlColor,
       }).eq('user_id', user.id)
     }
     setSavedTab(tab)
@@ -182,7 +193,7 @@ function SettingsInner() {
   const handleCheckout = async (priceId: string) => {
     setCheckoutLoading(true)
     try {
-      const res = await fetch('/api/stripe/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ priceId }) })
+      const res  = await fetch('/api/stripe/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ priceId }) })
       const data = await res.json()
       if (data.url) window.location.href = data.url
       if (data.error === 'Unauthorized') router.push('/login')
@@ -193,7 +204,7 @@ function SettingsInner() {
   const handleWhiteLabelCheckout = async (tier: 'basic' | 'pro') => {
     setWlCheckoutLoading(true)
     try {
-      const res = await fetch('/api/stripe/whitelabel', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tier }) })
+      const res  = await fetch('/api/stripe/whitelabel', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tier }) })
       const data = await res.json()
       if (data.url) window.location.href = data.url
       if (data.error) alert(data.error)
@@ -204,7 +215,7 @@ function SettingsInner() {
   const handleCreditPack = async (priceId: string) => {
     setCreditPackLoading(priceId)
     try {
-      const res = await fetch('/api/stripe/credits', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ priceId }) })
+      const res  = await fetch('/api/stripe/credits', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ priceId }) })
       const data = await res.json()
       if (data.url) window.location.href = data.url
       if (data.error === 'Unauthorized') router.push('/login')
@@ -215,7 +226,7 @@ function SettingsInner() {
   const handlePortal = async () => {
     setCheckoutLoading(true)
     try {
-      const res = await fetch('/api/stripe/portal', { method: 'POST' })
+      const res  = await fetch('/api/stripe/portal', { method: 'POST' })
       const data = await res.json()
       if (data.url) window.location.href = data.url
     } catch { console.error('Portal failed') }
@@ -265,7 +276,7 @@ function SettingsInner() {
     return (
       <div className="min-h-screen bg-gray-50 flex">
         <Sidebar />
-        <div className="ml-56 flex-1 flex items-center justify-center">
+        <div className="md:ml-56 flex-1 flex items-center justify-center">
           <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin" />
         </div>
       </div>
@@ -275,7 +286,7 @@ function SettingsInner() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar />
-      <div className="ml-56 flex-1 p-8">
+      <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
 
           <div className="mb-8">
@@ -335,14 +346,17 @@ function SettingsInner() {
                     <p className="text-xs text-gray-400 mt-0.5">Your active subscription</p>
                   </div>
                   <span className={`text-xs font-bold px-3 py-1.5 rounded-full capitalize ${
-                    plan === 'free' ? 'bg-gray-100 text-gray-600' : plan === 'pro' ? 'bg-black text-white' : 'bg-purple-100 text-purple-700'
+                    plan === 'free' ? 'bg-gray-100 text-gray-600' :
+                    plan === 'pro'  ? 'bg-black text-white' :
+                    'bg-purple-100 text-purple-700'
                   }`}>{plan}</span>
                 </div>
+
                 {plan === 'free' && (
                   <div className="space-y-3">
                     <div className="bg-black text-white rounded-xl p-4">
                       <p className="text-sm font-extrabold mb-1">Upgrade to Pro — $5/month</p>
-                      <p className="text-xs text-gray-400 mb-3">5 accounts per platform, 500 AI credits, 10 GB storage, 90-day analytics</p>
+                      <p className="text-xs text-gray-400 mb-3">5 accounts per platform · 500 AI credits · 1 client workspace · 90-day analytics</p>
                       <button onClick={() => handleCheckout(STRIPE_PRO_PRICE_ID)} disabled={checkoutLoading}
                         className="bg-white text-black text-xs font-bold px-4 py-2 rounded-lg hover:opacity-80 transition-all disabled:opacity-60">
                         {checkoutLoading ? 'Loading...' : 'Upgrade to Pro →'}
@@ -350,7 +364,7 @@ function SettingsInner() {
                     </div>
                     <div className="border border-purple-200 rounded-xl p-4">
                       <p className="text-sm font-extrabold mb-1">Agency — $20/month</p>
-                      <p className="text-xs text-gray-400 mb-3">15 team seats, client workspaces, 50 GB storage, 6-month analytics</p>
+                      <p className="text-xs text-gray-400 mb-3">15 team seats · 5 client workspaces · 2,000 AI credits · 6-month analytics</p>
                       <button onClick={() => handleCheckout(STRIPE_AGENCY_PRICE_ID)} disabled={checkoutLoading}
                         className="bg-purple-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:opacity-80 transition-all disabled:opacity-60">
                         {checkoutLoading ? 'Loading...' : 'Upgrade to Agency →'}
@@ -358,11 +372,12 @@ function SettingsInner() {
                     </div>
                   </div>
                 )}
+
                 {plan === 'pro' && (
                   <div className="space-y-3">
                     <div className="border border-purple-200 rounded-xl p-4">
                       <p className="text-sm font-extrabold mb-1">Upgrade to Agency — $20/month</p>
-                      <p className="text-xs text-gray-400 mb-3">15 team seats, client workspaces, 2,000 AI credits, 6-month analytics</p>
+                      <p className="text-xs text-gray-400 mb-3">15 team seats · 5 client workspaces · 2,000 AI credits · 6-month analytics</p>
                       <button onClick={() => handleCheckout(STRIPE_AGENCY_PRICE_ID)} disabled={checkoutLoading}
                         className="bg-purple-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:opacity-80 transition-all disabled:opacity-60">
                         {checkoutLoading ? 'Loading...' : 'Upgrade to Agency →'}
@@ -377,6 +392,7 @@ function SettingsInner() {
                     </div>
                   </div>
                 )}
+
                 {plan === 'agency' && (
                   <div>
                     <p className="text-xs text-gray-500 mb-3">Manage billing, invoices, and cancellation below.</p>
@@ -388,18 +404,23 @@ function SettingsInner() {
                 )}
               </div>
 
+              {/* AI CREDITS */}
               <div className="bg-white border border-gray-100 rounded-2xl p-6">
                 <h2 className="text-base font-extrabold mb-4">AI Credits</h2>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs text-gray-500">Monthly credits</span>
-                  <span className="text-xs font-bold">{plan === 'free' ? '100 / 100' : plan === 'pro' ? '500 / 500' : '2,000 / 2,000'}</span>
+                  <span className="text-xs font-bold">
+                    {plan === 'free' ? '100 / 100' : plan === 'pro' ? '500 / 500' : '2,000 / 2,000'}
+                  </span>
                 </div>
                 <div className="w-full bg-gray-100 rounded-full h-2 mb-4">
                   <div className="bg-black h-2 rounded-full" style={{ width: '100%' }} />
                 </div>
                 <div className="flex items-center justify-between mb-6">
                   <span className="text-xs text-gray-500">Credit bank capacity</span>
-                  <span className="text-xs font-bold">{plan === 'free' ? '150' : plan === 'pro' ? '750' : '3,000'}</span>
+                  <span className="text-xs font-bold">
+                    {plan === 'free' ? '150' : plan === 'pro' ? '750' : '3,000'}
+                  </span>
                 </div>
                 <div className="border-t border-gray-100 pt-5">
                   <p className="text-xs font-extrabold mb-1">Buy Credit Packs</p>
@@ -448,10 +469,13 @@ function SettingsInner() {
                       </div>
                     ))}
                   </div>
+
                   <div className="bg-black text-white rounded-2xl p-6">
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Your Referral Link</p>
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="flex-1 bg-white/10 rounded-xl px-4 py-3 text-sm font-mono truncate">{referralLink || 'Loading...'}</div>
+                      <div className="flex-1 bg-white/10 rounded-xl px-4 py-3 text-sm font-mono truncate">
+                        {referralLink || 'Loading...'}
+                      </div>
                       <button onClick={handleCopyLink} disabled={!referralLink}
                         className={`px-5 py-3 rounded-xl text-sm font-bold transition-all flex-shrink-0 ${copiedLink ? 'bg-green-500 text-white' : 'bg-white text-black hover:opacity-80'}`}>
                         {copiedLink ? '✓ Copied!' : 'Copy'}
@@ -462,6 +486,7 @@ function SettingsInner() {
                       They upgrade to Agency → <span className="text-white font-bold">+100 credits</span>
                     </p>
                   </div>
+
                   {nextTier && (
                     <div className="bg-white border border-gray-100 rounded-2xl p-6">
                       <h2 className="text-base font-extrabold mb-1">Next Milestone</h2>
@@ -476,6 +501,7 @@ function SettingsInner() {
                       <p className="text-xs text-gray-400">{referralStats.payingReferrals} / {nextTier.paying} paying referrals</p>
                     </div>
                   )}
+
                   <div className="bg-white border border-gray-100 rounded-2xl p-6">
                     <h2 className="text-base font-extrabold mb-5">Reward Tiers</h2>
                     <div className="space-y-3">
@@ -488,7 +514,9 @@ function SettingsInner() {
                               <div>
                                 <p className="text-sm font-bold">
                                   {tier.paying} paying referral{tier.paying > 1 ? 's' : ''}
-                                  {tier.conditional && <span className="ml-2 text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">while active</span>}
+                                  {tier.conditional && (
+                                    <span className="ml-2 text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">while active</span>
+                                  )}
                                 </p>
                                 {unlocked && <p className="text-xs text-green-500 font-bold">Unlocked</p>}
                               </div>
@@ -502,6 +530,7 @@ function SettingsInner() {
                       Tiers 1–3 are permanent once earned. Tiers 4–5 remain active as long as you maintain the required paying referrals.
                     </p>
                   </div>
+
                   <div className="bg-white border border-gray-100 rounded-2xl p-6">
                     <h2 className="text-base font-extrabold mb-5">Referral History</h2>
                     {referralHistory.length === 0 ? (
@@ -521,7 +550,9 @@ function SettingsInner() {
                               </p>
                             </div>
                             {entry.total_earned > 0 && (
-                              <span className="text-xs font-bold text-green-600 bg-green-50 px-3 py-1.5 rounded-xl">${entry.total_earned.toFixed(2)} earned</span>
+                              <span className="text-xs font-bold text-green-600 bg-green-50 px-3 py-1.5 rounded-xl">
+                                ${entry.total_earned.toFixed(2)} earned
+                              </span>
                             )}
                           </div>
                         ))}
@@ -719,13 +750,13 @@ function SettingsInner() {
           {activeTab === 'White Label' && (
             <div className="space-y-4">
 
-              {/* Free plan — locked */}
+              {/* Free plan — fully locked */}
               {plan === 'free' && (
                 <div className="bg-white border border-gray-100 rounded-2xl p-8 text-center">
                   <div className="text-3xl mb-3">🏷️</div>
-                  <h2 className="text-base font-extrabold mb-2">White Label is a Pro & Agency feature</h2>
+                  <h2 className="text-base font-extrabold mb-2">White Label is a Pro & Agency add-on</h2>
                   <p className="text-xs text-gray-400 mb-5 max-w-sm mx-auto leading-relaxed">
-                    Remove SocialMate branding and replace it with your own logo, colors, and domain. Available as a monthly add-on on Pro and Agency plans.
+                    Remove SocialMate branding and replace it with your own. Available in two tiers as a monthly add-on on Pro and Agency plans.
                   </p>
                   <button onClick={() => handleCheckout(STRIPE_PRO_PRICE_ID)} disabled={checkoutLoading}
                     className="bg-black text-white text-xs font-bold px-5 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
@@ -745,14 +776,21 @@ function SettingsInner() {
                   <div className="bg-white border border-gray-100 rounded-2xl p-6">
                     <h2 className="text-base font-extrabold mb-1">White Label Add-on</h2>
                     <p className="text-xs text-gray-400 mb-6 leading-relaxed">
-                      Purchase the White Label add-on to remove SocialMate branding and replace it with your own. Billed monthly — cancel anytime from your billing portal.
+                      Remove SocialMate branding and replace it with your own. Billed monthly — cancel anytime from your billing portal.
                     </p>
                     <div className="grid grid-cols-2 gap-4">
+
+                      {/* Basic */}
                       <div className="border border-gray-200 rounded-2xl p-5">
                         <p className="text-sm font-extrabold mb-1">White Label Basic</p>
                         <p className="text-2xl font-extrabold mb-1">$20<span className="text-sm font-semibold text-gray-400">/mo</span></p>
                         <ul className="space-y-1.5 mb-5">
-                          {['Remove SocialMate branding', 'Add your logo', 'Custom brand colors', 'Your brand name throughout'].map(f => (
+                          {[
+                            'Remove SocialMate branding',
+                            'Add your custom logo',
+                            'Set your brand colors',
+                            'Your brand name throughout the app',
+                          ].map(f => (
                             <li key={f} className="flex items-center gap-2 text-xs text-gray-600">
                               <span className="text-green-500 font-bold">✓</span>{f}
                             </li>
@@ -763,12 +801,19 @@ function SettingsInner() {
                           {wlCheckoutLoading ? 'Loading...' : 'Add White Label Basic →'}
                         </button>
                       </div>
+
+                      {/* Pro */}
                       <div className="border-2 border-black rounded-2xl p-5 relative">
                         <span className="absolute -top-2.5 left-4 text-xs font-bold bg-black text-white px-2 py-0.5 rounded-full">Best for agencies</span>
                         <p className="text-sm font-extrabold mb-1">White Label Pro</p>
                         <p className="text-2xl font-extrabold mb-1">$40<span className="text-sm font-semibold text-gray-400">/mo</span></p>
                         <ul className="space-y-1.5 mb-5">
-                          {['Everything in Basic', 'Custom domain (app.yourbrand.com)', 'Full rebrand — clients never see SocialMate', 'Priority support'].map(f => (
+                          {[
+                            'Everything in Basic',
+                            'Custom domain (app.yourbrand.com)',
+                            'Full rebrand — clients never see SocialMate',
+                            'Priority support',
+                          ].map(f => (
                             <li key={f} className="flex items-center gap-2 text-xs text-gray-600">
                               <span className="text-green-500 font-bold">✓</span>{f}
                             </li>
@@ -791,7 +836,7 @@ function SettingsInner() {
                     <div className="flex items-center gap-2">
                       <span className="text-green-600 font-bold">✓</span>
                       <p className="text-xs font-bold text-green-700">
-                        White Label {whiteLabelTier === 'pro' ? 'Pro' : 'Basic'} — Active
+                        White Label {whiteLabelTier === 'pro' ? 'Pro — $40/mo' : 'Basic — $20/mo'} Active
                       </p>
                     </div>
                     <button onClick={handlePortal} className="text-xs font-bold text-green-700 hover:underline">
@@ -834,6 +879,19 @@ function SettingsInner() {
                           className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all font-mono" />
                       </div>
                     </div>
+
+                    {/* Upgrade from Basic to Pro */}
+                    {whiteLabelTier === 'basic' && (
+                      <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                        <p className="text-xs font-bold mb-1">Want a custom domain?</p>
+                        <p className="text-xs text-gray-400 mb-3">Upgrade to White Label Pro for custom domain support and full rebrand at $40/mo.</p>
+                        <button onClick={() => handleWhiteLabelCheckout('pro')} disabled={wlCheckoutLoading}
+                          className="text-xs font-bold px-4 py-2 bg-black text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-50">
+                          {wlCheckoutLoading ? 'Loading...' : 'Upgrade to White Label Pro →'}
+                        </button>
+                      </div>
+                    )}
+
                     <button onClick={() => handleSave('WhiteLabel')}
                       className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${savedTab === 'WhiteLabel' ? 'bg-green-500 text-white' : 'bg-black text-white hover:opacity-80'}`}>
                       {savedTab === 'WhiteLabel' ? '✓ Saved!' : 'Save Branding'}
@@ -843,7 +901,8 @@ function SettingsInner() {
                   {wlLogoUrl && (
                     <div className="bg-white border border-gray-100 rounded-2xl p-5">
                       <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">Logo Preview</p>
-                      <img src={wlLogoUrl} alt="Brand logo" className="h-10 object-contain" onError={e => (e.currentTarget.style.display = 'none')} />
+                      <img src={wlLogoUrl} alt="Brand logo" className="h-10 object-contain"
+                        onError={e => (e.currentTarget.style.display = 'none')} />
                     </div>
                   )}
                 </div>
@@ -853,6 +912,13 @@ function SettingsInner() {
 
         </div>
       </div>
+
+      {/* TOASTS */}
+      {savedTab === 'credits_purchased' && (
+        <div className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg bg-black text-white">
+          ✅ Credits added to your account!
+        </div>
+      )}
     </div>
   )
 }
