@@ -184,7 +184,9 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       plan, setPlan,
       credits, setCredits,
       creditsUsed,
-      creditsTotal: planConfig.credits,
+      // Bank capacity is 1.5x the plan's monthly credits
+// This is the correct denominator — shows how full your bank is
+creditsTotal: planConfig.creditBank,
       workspaceName, setWorkspaceName,
       workspaces,
       activeWorkspace,

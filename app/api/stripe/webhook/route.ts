@@ -363,11 +363,19 @@ export async function POST(req: NextRequest) {
     }
 
     if (planChanged) {
-      // Plan actually changed (upgrade/downgrade) — reset credits to new plan amount
-      updatePayload.ai_credits_remaining = newCredits
-      updatePayload.ai_credits_total     = newCredits
-      updatePayload.ai_credits_reset_at  = new Date().toISOString()
-    }
+  // On upgrade: preserve purchased/banked credits if higher than new plan amount
+  // On downgrade: cap to new plan amount so users can't keep agency credits on free
+  const currentCredits = current?.ai_credits_remaining ?? 0
+  const isUpgrade = (
+    (current?.plan === 'free' && (plan === 'pro' || plan === 'agency')) ||
+    (current?.plan === 'pro'  && plan === 'agency')
+  )
+  updatePayload.ai_credits_remaining = isUpgrade
+    ? Math.max(currentCredits, newCredits)
+    : newCredits
+  updatePayload.ai_credits_total    = newCredits
+  updatePayload.ai_credits_reset_at = new Date().toISOString()
+}
     // If plan didn't change (just a renewal), we do NOT touch credits — preserves bank
 
     await supabase
