@@ -90,7 +90,6 @@ type Destination = {
   label: string
 }
 
-// Get today's date in local timezone as YYYY-MM-DD
 function getLocalDateString() {
   const d = new Date()
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -99,7 +98,7 @@ function getLocalDateString() {
 function ComposeInner() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { credits, setCredits, plan } = useWorkspace()
+  const { credits, setCredits, plan, activeWorkspace } = useWorkspace()
 
   const [loading, setLoading] = useState(true)
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['discord'])
@@ -133,35 +132,48 @@ function ComposeInner() {
   })()
 
   const todayLocal = getLocalDateString()
-
   const scheduleHorizonLabel =
     plan === 'free'   ? '2 weeks' :
     plan === 'pro'    ? '1 month' :
     '3 months'
 
-  // AUTH GUARD + load destinations + load draft if editing
+  // Reload data whenever active workspace changes
   useEffect(() => {
+    if (!activeWorkspace) return
+    const wsId = activeWorkspace.id
+
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) { router.push('/login'); return }
 
-      // Load destinations
+      // Load destinations scoped to this workspace
       const { data: dests } = await supabase
         .from('post_destinations')
         .select('id, platform, label')
         .eq('user_id', data.user.id)
+        .eq('workspace_id', wsId)
         .order('created_at', { ascending: true })
 
-      if (dests && dests.length > 0) {
-        const grouped = dests.reduce((acc: Record<string, Destination[]>, d: Destination) => {
+      // Fallback: load all destinations for this user if none found scoped
+      const { data: allDests } = !dests?.length
+        ? await supabase
+            .from('post_destinations')
+            .select('id, platform, label')
+            .eq('user_id', data.user.id)
+            .order('created_at', { ascending: true })
+        : { data: null }
+
+      const destData = dests?.length ? dests : (allDests || [])
+
+      if (destData.length > 0) {
+        const grouped = destData.reduce((acc: Record<string, Destination[]>, d: Destination) => {
           if (!acc[d.platform]) acc[d.platform] = []
           acc[d.platform].push(d)
           return acc
         }, {})
         setDestinations(grouped)
-
         const autoSelected: Record<string, string> = {}
         Object.entries(grouped).forEach(([platform, list]) => {
-          if (list.length > 0) autoSelected[platform] = list[0].id
+          if ((list as Destination[]).length > 0) autoSelected[platform] = (list as Destination[])[0].id
         })
         setSelectedDestinations(autoSelected)
       }
@@ -185,14 +197,13 @@ function ComposeInner() {
 
       setLoading(false)
     })
-  }, [router, searchParams])
+  }, [router, searchParams, activeWorkspace?.id])
 
   useEffect(() => {
     const templateId        = searchParams.get('template')
     const starterTemplateId = searchParams.get('starterTemplate')
     const draftId           = searchParams.get('draft')
 
-    // Don't apply templates if loading a draft
     if (draftId) return
 
     if (starterTemplateId) {
@@ -375,6 +386,7 @@ function ComposeInner() {
           scheduledAt,
           destinations: selectedDestinations,
           draftId: currentDraftId || undefined,
+          workspaceId: activeWorkspace?.id,
         }),
       })
 
@@ -415,7 +427,12 @@ function ComposeInner() {
       const res = await fetch('/api/posts/draft', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content, platforms: selectedPlatforms, postId: currentDraftId }),
+        body: JSON.stringify({
+          content,
+          platforms: selectedPlatforms,
+          postId: currentDraftId,
+          workspaceId: activeWorkspace?.id,
+        }),
       })
       const data = await res.json()
       if (!res.ok) { showToast(data.error || 'Failed to save draft', 'error'); return }
@@ -457,7 +474,11 @@ function ComposeInner() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Compose</h1>
-              <p className="text-sm text-gray-400 mt-0.5">Write, schedule, and publish your posts</p>
+              <p className="text-sm text-gray-400 mt-0.5">
+                {activeWorkspace && !activeWorkspace.is_personal
+                  ? `Posting as ${activeWorkspace.client_name || activeWorkspace.name}`
+                  : 'Write, schedule, and publish your posts'}
+              </p>
             </div>
             <button
               onClick={() => setShowPreview(p => !p)}
@@ -466,6 +487,17 @@ function ComposeInner() {
             </button>
           </div>
 
+          {/* WORKSPACE BANNER */}
+          {activeWorkspace && !activeWorkspace.is_personal && (
+            <div className="mb-4 bg-purple-50 border border-purple-100 rounded-xl px-4 py-3 flex items-center gap-3">
+              <span className="text-base">🏢</span>
+              <p className="text-xs font-semibold text-purple-700">
+                Active workspace: <span className="font-extrabold">{activeWorkspace.client_name || activeWorkspace.name}</span>
+                {' '}— posts will be scoped to this client.
+              </p>
+            </div>
+          )}
+
           {templateBanner && (
             <div className="mb-4 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 flex items-center justify-between">
               <p className="text-xs font-semibold text-blue-700">📋 {templateBanner}</p>
@@ -473,7 +505,6 @@ function ComposeInner() {
             </div>
           )}
 
-          {/* MOBILE PREVIEW */}
           {showPreview && (
             <div className="lg:hidden mb-4 bg-white border border-gray-100 rounded-2xl p-4">
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Preview</p>
@@ -590,7 +621,6 @@ function ComposeInner() {
                 </div>
               )}
 
-              {/* MISSING DESTINATIONS WARNING */}
               {missingDestinations.length > 0 && (
                 <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 flex items-center justify-between">
                   <p className="text-xs font-semibold text-amber-700">

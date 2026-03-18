@@ -67,6 +67,7 @@ type WorkspaceContextType = {
   setWorkspaceName: (name: string) => void
   workspaces: Workspace[]
   activeWorkspace: Workspace | null
+  activeWorkspaceId: string | null
   setActiveWorkspace: (ws: Workspace) => void
   seatsUsed: number
   seatsTotal: number
@@ -85,6 +86,7 @@ const WorkspaceContext = createContext<WorkspaceContextType>({
   setWorkspaceName: () => {},
   workspaces: [],
   activeWorkspace: null,
+  activeWorkspaceId: null,
   setActiveWorkspace: () => {},
   seatsUsed: 1,
   seatsTotal: 2,
@@ -186,6 +188,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       workspaceName, setWorkspaceName,
       workspaces,
       activeWorkspace,
+      activeWorkspaceId: activeWorkspace?.id ?? null,
       setActiveWorkspace,
       seatsUsed,
       seatsTotal: planConfig.seats,

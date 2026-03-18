@@ -29,7 +29,7 @@ const PLATFORM_ICONS: Record<string, string> = {
 }
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+const DAYS   = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
 
 const PLAN_FREE_RANGES: Record<string, string[]> = {
   free:   ['14', '30'],
@@ -48,39 +48,46 @@ const RANGE_LABELS: Record<string, string> = {
 }
 
 export default function Analytics() {
-  const [posts, setPosts] = useState<Post[]>([])
-  const [loading, setLoading] = useState(true)
-  const [range, setRange] = useState<'14' | '30' | '90' | '180'>('30')
+  const [posts, setPosts]           = useState<Post[]>([])
+  const [loading, setLoading]       = useState(true)
+  const [range, setRange]           = useState<'14' | '30' | '90' | '180'>('30')
   const [radarDismissed, setRadarDismissed] = useState(false)
-  const [creditModal, setCreditModal] = useState<{ range: string; cost: number } | null>(null)
-  const [radarModal, setRadarModal] = useState(false)
-  const [pulseModal, setPulseModal] = useState(false)
-  const [radarLoading, setRadarLoading] = useState(false)
-  const [pulseLoading, setPulseLoading] = useState(false)
-  const [radarResult, setRadarResult] = useState<string | null>(null)
-  const [pulseResult, setPulseResult] = useState<string | null>(null)
-  const [nicheInput, setNicheInput] = useState('')
+  const [creditModal, setCreditModal]       = useState<{ range: string; cost: number } | null>(null)
+  const [radarModal, setRadarModal]         = useState(false)
+  const [pulseModal, setPulseModal]         = useState(false)
+  const [radarLoading, setRadarLoading]     = useState(false)
+  const [pulseLoading, setPulseLoading]     = useState(false)
+  const [radarResult, setRadarResult]       = useState<string | null>(null)
+  const [pulseResult, setPulseResult]       = useState<string | null>(null)
+  const [nicheInput, setNicheInput]         = useState('')
   const router = useRouter()
-  const { plan, credits, setCredits } = useWorkspace()
+  const { plan, credits, setCredits, activeWorkspace } = useWorkspace()
 
-  const freeRanges = PLAN_FREE_RANGES[plan] || PLAN_FREE_RANGES.free
+  const freeRanges   = PLAN_FREE_RANGES[plan]   || PLAN_FREE_RANGES.free
   const creditRanges = PLAN_CREDIT_RANGES[plan] || {}
 
+  // Reload posts when active workspace changes
   useEffect(() => {
+    if (!activeWorkspace) return
+    setLoading(true)
+
     const getData = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
+
       const { data } = await supabase
         .from('posts')
         .select('*')
         .eq('user_id', user.id)
+        .eq('workspace_id', activeWorkspace.id)
         .order('created_at', { ascending: true })
+
       setPosts(data || [])
       setLoading(false)
       fetch('/api/analytics/sync', { method: 'POST' }).catch(() => {})
     }
     getData()
-  }, [router])
+  }, [router, activeWorkspace?.id])
 
   const handleRangeClick = (r: '14' | '30' | '90' | '180') => {
     if (freeRanges.includes(r)) { setRange(r); return }
@@ -136,29 +143,29 @@ export default function Analytics() {
     }
   }
 
-  const now = new Date()
-  const rangeDays = parseInt(range)
+  const now        = new Date()
+  const rangeDays  = parseInt(range)
   const rangeStart = new Date(now)
   rangeStart.setDate(now.getDate() - rangeDays)
 
   const filteredPosts = posts.filter(p => new Date(p.created_at) >= rangeStart)
-  const scheduled = filteredPosts.filter(p => p.status === 'scheduled')
-  const drafts = filteredPosts.filter(p => p.status === 'draft')
-  const published = filteredPosts.filter(p => p.status === 'published')
+  const scheduled     = filteredPosts.filter(p => p.status === 'scheduled')
+  const drafts        = filteredPosts.filter(p => p.status === 'draft')
+  const published     = filteredPosts.filter(p => p.status === 'published')
 
   const platformCounts = filteredPosts.reduce((acc, post) => {
     post.platforms?.forEach(pl => { acc[pl] = (acc[pl] || 0) + 1 })
     return acc
   }, {} as Record<string, number>)
-  const topPlatforms = Object.entries(platformCounts).sort((a, b) => b[1] - a[1])
+  const topPlatforms     = Object.entries(platformCounts).sort((a, b) => b[1] - a[1])
   const maxPlatformCount = topPlatforms[0]?.[1] || 1
 
-  const daysToShow = Math.min(rangeDays, 30)
+  const daysToShow  = Math.min(rangeDays, 30)
   const dailyCounts = Array.from({ length: daysToShow }, (_, i) => {
     const d = new Date(now)
     d.setDate(now.getDate() - (daysToShow - 1 - i))
     const dateStr = d.toDateString()
-    const count = filteredPosts.filter(p => new Date(p.created_at).toDateString() === dateStr).length
+    const count   = filteredPosts.filter(p => new Date(p.created_at).toDateString() === dateStr).length
     return { date: d, count, label: `${MONTHS[d.getMonth()]} ${d.getDate()}` }
   })
   const maxDailyCount = Math.max(...dailyCounts.map(d => d.count), 1)
@@ -174,7 +181,7 @@ export default function Analytics() {
     return { hour: i, count, label: i === 0 ? '12am' : i === 12 ? '12pm' : i < 12 ? `${i}am` : `${i - 12}pm` }
   })
   const maxHourCount = Math.max(...hourCounts.map(h => h.count), 1)
-  const peakHour = hourCounts.reduce((a, b) => a.count > b.count ? a : b)
+  const peakHour     = hourCounts.reduce((a, b) => a.count > b.count ? a : b)
 
   const monthCounts = Array.from({ length: 12 }, (_, i) => {
     const count = posts.filter(p =>
@@ -204,12 +211,12 @@ export default function Analytics() {
     }
   }
 
-  const oldestPost = posts[0]
+  const oldestPost     = posts[0]
   const weeksSinceFirst = oldestPost
     ? Math.max((now.getTime() - new Date(oldestPost.created_at).getTime()) / (7 * 24 * 3600000), 1)
     : 1
   const avgPerWeek = (posts.length / weeksSinceFirst).toFixed(1)
-  const avgLength = filteredPosts.length > 0
+  const avgLength  = filteredPosts.length > 0
     ? Math.round(filteredPosts.reduce((sum, p) => sum + (p.content?.length || 0), 0) / filteredPosts.length)
     : 0
 
@@ -252,7 +259,7 @@ export default function Analytics() {
         </head>
         <body>
           <h1>SocialMate Analytics Report</h1>
-          <p>Generated ${now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} · ${RANGE_LABELS[range]} range · Agency Plan</p>
+          <p>Generated ${now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })} · ${RANGE_LABELS[range]} range · ${activeWorkspace?.client_name || activeWorkspace?.name || 'My Workspace'}</p>
           <div class="grid">
             <div class="card"><div class="card-label">Total Posts</div><div class="card-value">${filteredPosts.length}</div><div class="card-sub">in selected range</div></div>
             <div class="card"><div class="card-label">Scheduled</div><div class="card-value">${scheduled.length}</div><div class="card-sub">queued up</div></div>
@@ -423,7 +430,12 @@ export default function Analytics() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Analytics</h1>
-              <p className="text-sm text-gray-400 mt-0.5">Real data from your posting activity</p>
+              <p className="text-sm text-gray-400 mt-0.5">
+                Real data from your posting activity
+                {activeWorkspace && !activeWorkspace.is_personal && (
+                  <span className="ml-2 text-purple-500 font-semibold">· {activeWorkspace.client_name || activeWorkspace.name}</span>
+                )}
+              </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               {plan === 'agency' && (
@@ -434,15 +446,15 @@ export default function Analytics() {
               )}
               <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-xl p-1 overflow-x-auto">
                 {(['14', '30', '90', '180'] as const).map(r => {
-                  const isFree = freeRanges.includes(r)
-                  const creditCost = creditRanges[r]
-                  const isActive = range === r
+                  const isFree      = freeRanges.includes(r)
+                  const creditCost  = creditRanges[r]
+                  const isActive    = range === r
                   const isHardLocked = !isFree && !creditCost
                   return (
                     <button key={r} onClick={() => handleRangeClick(r)} disabled={isHardLocked}
                       className={`relative px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
-                        isActive ? 'bg-black text-white' :
-                        isHardLocked ? 'text-gray-300 cursor-not-allowed' :
+                        isActive      ? 'bg-black text-white' :
+                        isHardLocked  ? 'text-gray-300 cursor-not-allowed' :
                         'text-gray-500 hover:text-black'
                       }`}>
                       {RANGE_LABELS[r]}
@@ -588,7 +600,7 @@ export default function Analytics() {
               <h2 className="text-sm font-bold tracking-tight mb-4">Engagement by Post</h2>
               <div className="space-y-3">
                 {postsWithEngagement.slice(0, 5).map(post => {
-                  const eng = post.analytics || {}
+                  const eng      = post.analytics || {}
                   const totalEng = Object.values(eng).reduce((s: number, e: any) =>
                     s + (e.likes || 0) + (e.reposts || 0) + (e.reactions || 0) + (e.replies || 0), 0)
                   return (
@@ -654,7 +666,7 @@ export default function Analytics() {
                 {loading ? <SkeletonBox className="h-24" /> : (
                   <div className="flex items-end gap-2 h-24">
                     {dayOfWeekCounts.map((day, i) => {
-                      const pct = maxDayCount > 0 ? (day.count / maxDayCount) * 100 : 0
+                      const pct   = maxDayCount > 0 ? (day.count / maxDayCount) * 100 : 0
                       const isTop = day.count === maxDayCount && day.count > 0
                       return (
                         <div key={i} className="flex-1 flex flex-col items-center gap-1">
@@ -680,7 +692,7 @@ export default function Analytics() {
                     <div className="flex gap-1 flex-wrap">
                       {hourCounts.map(h => {
                         const pct = maxHourCount > 0 ? h.count / maxHourCount : 0
-                        const bg = pct === 0 ? 'bg-gray-100' : pct < 0.25 ? 'bg-gray-300' : pct < 0.5 ? 'bg-gray-400' : pct < 0.75 ? 'bg-gray-600' : 'bg-black'
+                        const bg  = pct === 0 ? 'bg-gray-100' : pct < 0.25 ? 'bg-gray-300' : pct < 0.5 ? 'bg-gray-400' : pct < 0.75 ? 'bg-gray-600' : 'bg-black'
                         return (
                           <div key={h.hour} className="group relative">
                             <div className={`w-7 h-7 md:w-8 md:h-8 rounded-lg ${bg} transition-all`} />

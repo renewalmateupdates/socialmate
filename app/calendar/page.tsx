@@ -33,17 +33,17 @@ function formatDateKey(year: number, month: number, day: number) {
 }
 
 export default function Calendar() {
-  const [posts, setPosts] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [today] = useState(new Date())
-  const [viewYear, setViewYear] = useState(new Date().getFullYear())
-  const [viewMonth, setViewMonth] = useState(new Date().getMonth())
+  const [posts, setPosts]             = useState<any[]>([])
+  const [loading, setLoading]         = useState(true)
+  const [today]                       = useState(new Date())
+  const [viewYear, setViewYear]       = useState(new Date().getFullYear())
+  const [viewMonth, setViewMonth]     = useState(new Date().getMonth())
   const [selectedDay, setSelectedDay] = useState<string | null>(null)
   const [selectedPosts, setSelectedPosts] = useState<any[]>([])
   const router = useRouter()
-  const { plan } = useWorkspace()
+  const { plan, activeWorkspace } = useWorkspace()
 
-  const planConfig = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
+  const planConfig       = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
   const forwardLimitDays = (planConfig?.scheduleWeeks || 2) * 7
   const forwardLimitLabel =
     plan === 'free'   ? '2 weeks' :
@@ -57,21 +57,28 @@ export default function Calendar() {
   const firstOfNextMonth = new Date(viewYear, viewMonth + 1, 1)
   const canGoForward = firstOfNextMonth <= limitDate
 
+  // Reload posts when active workspace changes
   useEffect(() => {
+    if (!activeWorkspace) return
+    setLoading(true)
+
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
+
       const { data } = await supabase
         .from('posts')
         .select('*')
         .eq('user_id', user.id)
+        .eq('workspace_id', activeWorkspace.id)
         .not('scheduled_at', 'is', null)
         .order('scheduled_at', { ascending: true })
+
       setPosts(data || [])
       setLoading(false)
     }
     load()
-  }, [router])
+  }, [router, activeWorkspace?.id])
 
   const prevMonth = () => {
     if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1) }
@@ -104,8 +111,7 @@ export default function Calendar() {
     setSelectedPosts(postsByDate[dateKey] || [])
   }
 
-  const todayKey = formatDateKey(today.getFullYear(), today.getMonth(), today.getDate())
-
+  const todayKey  = formatDateKey(today.getFullYear(), today.getMonth(), today.getDate())
   const monthPosts = posts.filter(p => {
     const d = new Date(p.scheduled_at)
     return d.getFullYear() === viewYear && d.getMonth() === viewMonth
@@ -122,6 +128,9 @@ export default function Calendar() {
               <h1 className="text-2xl font-extrabold tracking-tight">Content Calendar</h1>
               <p className="text-sm text-gray-400 mt-0.5">
                 {monthPosts.length} post{monthPosts.length !== 1 ? 's' : ''} in {MONTHS[viewMonth]}
+                {activeWorkspace && !activeWorkspace.is_personal && (
+                  <span className="ml-2 text-purple-500 font-semibold">· {activeWorkspace.client_name || activeWorkspace.name}</span>
+                )}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -189,8 +198,8 @@ export default function Calendar() {
                       const isCurrentMonth = dayNum >= 1 && dayNum <= daysInMonth
                       const dateKey = isCurrentMonth ? formatDateKey(viewYear, viewMonth, dayNum) : null
                       const dayPosts = dateKey ? (postsByDate[dateKey] || []) : []
-                      const isToday    = dateKey === todayKey
-                      const isSelected = dateKey === selectedDay
+                      const isToday       = dateKey === todayKey
+                      const isSelected    = dateKey === selectedDay
                       const isBeyondLimit = dateKey ? new Date(dateKey + 'T12:00:00') > limitDate : false
 
                       return (

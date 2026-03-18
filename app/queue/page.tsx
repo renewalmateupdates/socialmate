@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
+import { useWorkspace } from '@/contexts/WorkspaceContext'
 
 function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 rounded-xl animate-pulse ${className}`} />
@@ -35,16 +36,15 @@ function groupByDate(posts: any[]) {
 
 function formatDateLabel(dateStr: string) {
   if (dateStr === 'Unscheduled') return 'Unscheduled'
-  const date = new Date(dateStr)
-  const today = new Date()
+  const date     = new Date(dateStr)
+  const today    = new Date()
   const tomorrow = new Date(today)
   tomorrow.setDate(today.getDate() + 1)
-  if (date.toDateString() === today.toDateString()) return 'Today'
+  if (date.toDateString() === today.toDateString())    return 'Today'
   if (date.toDateString() === tomorrow.toDateString()) return 'Tomorrow'
   return date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
 }
 
-// Convert YYYY-MM-DD to a toDateString() key for matching
 function dateParamToDateString(param: string): string | null {
   if (!param) return null
   const d = new Date(param + 'T12:00:00')
@@ -53,37 +53,45 @@ function dateParamToDateString(param: string): string | null {
 }
 
 function QueueInner() {
-  const [posts, setPosts] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
-  const [cancelling, setCancelling] = useState<string | null>(null)
+  const [posts, setPosts]               = useState<any[]>([])
+  const [loading, setLoading]           = useState(true)
+  const [cancelling, setCancelling]     = useState<string | null>(null)
   const [confirmCancel, setConfirmCancel] = useState<string | null>(null)
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
-  const router = useRouter()
+  const [toast, setToast]               = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+  const router      = useRouter()
   const searchParams = useSearchParams()
-  const targetDate = searchParams.get('date')
+  const targetDate  = searchParams.get('date')
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const { activeWorkspace } = useWorkspace()
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type })
     setTimeout(() => setToast(null), 3000)
   }
 
+  // Reload posts when active workspace changes
   useEffect(() => {
+    if (!activeWorkspace) return
+    setLoading(true)
+
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
+
       const { data } = await supabase
         .from('posts')
         .select('*')
         .eq('user_id', user.id)
+        .eq('workspace_id', activeWorkspace.id)
         .eq('status', 'scheduled')
         .gte('scheduled_at', new Date().toISOString())
         .order('scheduled_at', { ascending: true })
+
       setPosts(data || [])
       setLoading(false)
     }
     load()
-  }, [router])
+  }, [router, activeWorkspace?.id])
 
   // Auto-scroll to target date after posts load
   useEffect(() => {
@@ -110,15 +118,15 @@ function QueueInner() {
     setCancelling(null)
   }
 
-  const grouped = groupByDate(posts)
+  const grouped  = groupByDate(posts)
   const dateKeys = Object.keys(grouped).sort((a, b) => {
     if (a === 'Unscheduled') return 1
     if (b === 'Unscheduled') return -1
     return new Date(a).getTime() - new Date(b).getTime()
   })
 
-  const daysWithPosts = dateKeys.filter(k => k !== 'Unscheduled').length
-  const targetDateString = targetDate ? dateParamToDateString(targetDate) : null
+  const daysWithPosts     = dateKeys.filter(k => k !== 'Unscheduled').length
+  const targetDateString  = targetDate ? dateParamToDateString(targetDate) : null
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -131,6 +139,9 @@ function QueueInner() {
               <h1 className="text-2xl font-extrabold tracking-tight">Upcoming Queue</h1>
               <p className="text-sm text-gray-400 mt-0.5">
                 {loading ? 'Loading...' : `${posts.length} post${posts.length !== 1 ? 's' : ''} scheduled${daysWithPosts > 0 ? ` across ${daysWithPosts} day${daysWithPosts !== 1 ? 's' : ''}` : ''}`}
+                {activeWorkspace && !activeWorkspace.is_personal && (
+                  <span className="ml-2 text-purple-500 font-semibold">· {activeWorkspace.client_name || activeWorkspace.name}</span>
+                )}
               </p>
             </div>
             <div className="flex items-center gap-2 self-start sm:self-auto">
@@ -147,7 +158,6 @@ function QueueInner() {
             </div>
           </div>
 
-          {/* HIGHLIGHTED DATE BANNER */}
           {targetDate && targetDateString && (
             <div className="mb-6 bg-blue-50 border border-blue-100 rounded-2xl px-5 py-3 flex items-center gap-3">
               <span className="text-blue-500">📅</span>
@@ -162,7 +172,6 @@ function QueueInner() {
             </div>
           )}
 
-          {/* SUMMARY STATS */}
           {!loading && posts.length > 0 && (
             <div className="grid grid-cols-3 gap-3 mb-6">
               {[
@@ -215,7 +224,7 @@ function QueueInner() {
                     <div className="space-y-3">
                       {grouped[dateKey].map(post => {
                         const isConfirming = confirmCancel === post.id
-                        const isCancelling = cancelling === post.id
+                        const isCancelling = cancelling   === post.id
                         return (
                           <div key={post.id}
                             className={`bg-white border rounded-2xl p-4 md:p-5 transition-all ${
