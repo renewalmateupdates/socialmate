@@ -10,6 +10,12 @@ const PLAN_POST_LIMITS: Record<string, number> = {
   agency: 5000,
 }
 
+const PLAN_SCHEDULE_WEEKS: Record<string, number> = {
+  free:   2,
+  pro:    4,
+  agency: 12,
+}
+
 export async function POST(request: NextRequest) {
   const cookieStore = await cookies()
 
@@ -37,7 +43,7 @@ export async function POST(request: NextRequest) {
   if (!content?.trim()) return NextResponse.json({ error: 'Content is required' }, { status: 400 })
   if (!platforms?.length) return NextResponse.json({ error: 'Select at least one platform' }, { status: 400 })
 
-  // Resolve workspace — use provided workspaceId or fall back to user's personal workspace
+  // Resolve workspace
   let resolvedWorkspaceId = workspaceId
   if (!resolvedWorkspaceId) {
     const { data: personalWs } = await supabase
@@ -49,7 +55,7 @@ export async function POST(request: NextRequest) {
     resolvedWorkspaceId = personalWs?.id || null
   }
 
-  // Post limit enforcement
+  // Get plan
   const { data: settings } = await supabase
     .from('user_settings')
     .select('plan')
@@ -57,6 +63,28 @@ export async function POST(request: NextRequest) {
     .single()
 
   const plan  = settings?.plan || 'free'
+
+  // Server-side scheduling window enforcement
+  if (scheduledAt) {
+    const scheduleDate  = new Date(scheduledAt)
+    const now           = new Date()
+    const scheduleWeeks = PLAN_SCHEDULE_WEEKS[plan] ?? 2
+    const maxDate       = new Date(now.getTime() + scheduleWeeks * 7 * 24 * 60 * 60 * 1000)
+
+    if (scheduleDate <= now) {
+      return NextResponse.json({ error: 'Scheduled time must be in the future' }, { status: 400 })
+    }
+
+    if (scheduleDate > maxDate) {
+      const label = plan === 'free' ? '2 weeks' : plan === 'pro' ? '1 month' : '3 months'
+      return NextResponse.json({
+        error: `Your ${plan} plan can only schedule up to ${label} in advance`,
+        upgrade: plan !== 'agency',
+      }, { status: 403 })
+    }
+  }
+
+  // Monthly post limit enforcement
   const limit = PLAN_POST_LIMITS[plan] ?? 100
 
   const startOfMonth = new Date()
