@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
-import { useWorkspace } from '@/contexts/WorkspaceContext'
 import Link from 'next/link'
+import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 
 function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 rounded-xl animate-pulse ${className}`} />
@@ -46,7 +46,8 @@ export default function Workspaces() {
     router.push('/dashboard')
   }
 
-  if (plan !== 'agency') {
+  // Free users: upgrade wall
+  if (plan === 'free') {
     return (
       <div className="min-h-screen bg-gray-50 flex">
         <Sidebar />
@@ -55,11 +56,23 @@ export default function Workspaces() {
             <div className="text-5xl mb-4">🏢</div>
             <h1 className="text-2xl font-extrabold tracking-tight mb-3">Client Workspaces</h1>
             <p className="text-sm text-gray-500 leading-relaxed mb-6">
-              Separate workspaces for each client — isolated accounts, posts, and analytics. Agency plan only.
+              Manage clients in fully isolated workspaces — their own accounts, posts, and analytics.
             </p>
+            <div className="grid grid-cols-2 gap-3 mb-6 text-left">
+              <div className="bg-white border border-blue-100 rounded-2xl p-4">
+                <div className="text-xs font-bold text-blue-600 mb-2">Pro · $5/mo</div>
+                <div className="text-2xl font-extrabold mb-1">1</div>
+                <div className="text-xs text-gray-500">client workspace</div>
+              </div>
+              <div className="bg-white border border-purple-100 rounded-2xl p-4">
+                <div className="text-xs font-bold text-purple-600 mb-2">Agency · $20/mo</div>
+                <div className="text-2xl font-extrabold mb-1">5</div>
+                <div className="text-xs text-gray-500">client workspaces</div>
+              </div>
+            </div>
             <Link href="/settings?tab=Plan"
               className="block w-full text-center bg-black text-white text-sm font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all">
-              Upgrade to Agency →
+              View Plans →
             </Link>
           </div>
         </div>
@@ -67,6 +80,8 @@ export default function Workspaces() {
     )
   }
 
+  const limit    = PLAN_CONFIG[plan].clientWorkspaces
+  const atLimit  = workspaces.filter((w: any) => !w.is_personal).length >= limit
   const personalWs = workspaces.find((w: any) => w.is_personal)
   const clientWs   = workspaces.filter((w: any) => !w.is_personal)
 
@@ -81,10 +96,10 @@ export default function Workspaces() {
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Workspaces</h1>
               <p className="text-sm text-gray-400 mt-0.5">
-                {clientWs.length} client workspace{clientWs.length !== 1 ? 's' : ''} · 50 max on Agency
+                {clientWs.length} client workspace{clientWs.length !== 1 ? 's' : ''} · {limit} max on {PLAN_CONFIG[plan].label}
               </p>
             </div>
-            {clientWs.length < 50 && (
+            {!atLimit && (
               <Link href="/workspaces/new"
                 className="self-start sm:self-auto bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all">
                 + New Client Workspace
@@ -96,13 +111,15 @@ export default function Workspaces() {
           <div className="bg-white border border-gray-100 rounded-2xl p-4 mb-6">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-semibold text-gray-500">Client Workspaces</span>
-              <span className="text-xs font-bold text-gray-700">{clientWs.length} / 50</span>
+              <span className="text-xs font-bold text-gray-700">{clientWs.length} / {limit}</span>
             </div>
             <div className="w-full bg-gray-100 rounded-full h-2">
-              <div className="bg-black h-2 rounded-full transition-all"
-                style={{ width: `${Math.min(100, (clientWs.length / 50) * 100)}%` }} />
+              <div className={`h-2 rounded-full transition-all ${atLimit ? 'bg-red-400' : 'bg-black'}`}
+                style={{ width: `${Math.min(100, (clientWs.length / limit) * 100)}%` }} />
             </div>
-            <p className="text-xs text-gray-400 mt-1.5">{50 - clientWs.length} slots remaining</p>
+            <p className="text-xs text-gray-400 mt-1.5">
+              {atLimit ? 'Workspace limit reached' : `${limit - clientWs.length} slot${limit - clientWs.length !== 1 ? 's' : ''} remaining`}
+            </p>
           </div>
 
           {/* PERSONAL WORKSPACE */}
@@ -164,7 +181,6 @@ export default function Workspaces() {
                         isActive ? 'border-black' : 'border-gray-100 hover:border-gray-300'
                       }`}>
 
-                      {/* MAIN ROW */}
                       <div className="flex items-center gap-3 md:gap-4">
                         <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-xl flex-shrink-0">🏢</div>
                         <div className="flex-1 min-w-0">
@@ -185,9 +201,12 @@ export default function Workspaces() {
                             )}
                           </div>
                         </div>
-                        {/* ACTIONS — always visible */}
                         {!isConfirming && (
                           <div className="flex items-center gap-2 flex-shrink-0">
+                            <Link href={`/workspaces/${ws.id}`}
+                              className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                              Edit
+                            </Link>
                             {!isActive && (
                               <button onClick={() => handleSwitch(ws)}
                                 className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all">
@@ -207,7 +226,6 @@ export default function Workspaces() {
                         )}
                       </div>
 
-                      {/* CONFIRM DELETE — below main row */}
                       {isConfirming && (
                         <div className="mt-3 pt-3 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center gap-2">
                           <p className="text-xs font-bold text-red-600 flex-1">
@@ -235,10 +253,31 @@ export default function Workspaces() {
             )}
           </div>
 
-          {clientWs.length >= 50 && (
-            <div className="mt-6 bg-red-50 border border-red-100 rounded-2xl px-5 py-4 text-center">
-              <p className="text-xs font-bold text-red-600">You've reached the 50 workspace limit on Agency.</p>
-              <p className="text-xs text-red-400 mt-1">Delete unused workspaces to create new ones.</p>
+          {/* AT LIMIT BANNER */}
+          {atLimit && (
+            <div className="mt-6 rounded-2xl px-5 py-4 text-center border border-gray-100 bg-gray-50">
+              {plan === 'agency' ? (
+                <>
+                  <p className="text-xs font-bold text-gray-700">You've reached your {limit} workspace limit on Agency.</p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Need more?{' '}
+                    <a href="mailto:support@socialmate.studio" className="text-black underline hover:no-underline">
+                      Contact us
+                    </a>{' '}
+                    to discuss additional workspaces.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-xs font-bold text-gray-700">You've used your 1 workspace on Pro.</p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    <Link href="/settings?tab=Plan" className="text-black underline hover:no-underline">
+                      Upgrade to Agency
+                    </Link>{' '}
+                    for up to 5 client workspaces.
+                  </p>
+                </>
+              )}
             </div>
           )}
 

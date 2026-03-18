@@ -120,8 +120,14 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
     }
   }
 
+  const clientWorkspaces  = workspaces.filter((w: any) => !w.is_personal)
+  const personalWorkspace = workspaces.find((w: any) => w.is_personal)
+  const wsLimit           = PLAN_CONFIG[plan]?.clientWorkspaces ?? 0
+  const atWsLimit         = clientWorkspaces.length >= wsLimit
+
+  // Inject Workspaces nav item for Pro and Agency
   const NAV = NAV_BASE.map(group => {
-    if (group.section === 'Manage' && plan === 'agency') {
+    if (group.section === 'Manage' && (plan === 'agency' || plan === 'pro')) {
       const hasWs = group.items.find(i => i.href === '/workspaces')
       if (!hasWs) {
         return {
@@ -139,9 +145,6 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   const badge      = PLAN_BADGE[plan] || PLAN_BADGE.free
   const creditsBar = creditsTotal > 0 ? Math.max(0, Math.min((credits / creditsTotal) * 100, 100)) : 0
   const seatsBar   = seatsTotal   > 0 ? Math.min(100, (seatsUsed / seatsTotal) * 100) : 0
-
-  const clientWorkspaces  = workspaces.filter((w: any) => !w.is_personal)
-  const personalWorkspace = workspaces.find((w: any) => w.is_personal)
 
   const isActive = (href: string) => {
     const base = href.split('?')[0]
@@ -208,18 +211,32 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
                 </>
               )}
 
-              {plan === 'agency' && (
+              {/* Pro: show Add only if under limit (1) */}
+              {plan === 'pro' && !atWsLimit && (
                 <Link href="/workspaces/new" onClick={() => setWsOpen(false)}
                   className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-gray-400 hover:text-black hover:bg-gray-50 transition-all border-t border-gray-50">
                   <span>+</span> Add client workspace
                 </Link>
               )}
+              {plan === 'pro' && atWsLimit && (
+                <Link href="/settings?tab=Plan" onClick={() => setWsOpen(false)}
+                  className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-blue-500 hover:bg-blue-50 transition-all border-t border-gray-50">
+                  <span>⚡</span> Upgrade for more workspaces
+                </Link>
+              )}
 
-              {plan === 'pro' && (
+              {/* Agency: show Add only if under limit (5) */}
+              {plan === 'agency' && !atWsLimit && (
                 <Link href="/workspaces/new" onClick={() => setWsOpen(false)}
                   className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-gray-400 hover:text-black hover:bg-gray-50 transition-all border-t border-gray-50">
                   <span>+</span> Add client workspace
                 </Link>
+              )}
+              {plan === 'agency' && atWsLimit && (
+                <a href="mailto:support@socialmate.studio" onClick={() => setWsOpen(false)}
+                  className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-purple-500 hover:bg-purple-50 transition-all border-t border-gray-50">
+                  <span>✉️</span> Contact us for more
+                </a>
               )}
 
               {plan === 'free' && (
@@ -235,7 +252,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
                     <div className="px-3 py-3 bg-purple-50 border-t border-purple-100">
                       <p className="text-xs text-purple-700 font-semibold mb-1">Client workspaces</p>
                       <p className="text-xs text-purple-500 mb-2 leading-relaxed">
-                        1 client workspace on Pro. Up to 10 on Agency.
+                        1 client workspace on Pro. Up to 5 on Agency.
                       </p>
                       <button
                         onClick={() => { setWsOpen(false); handleCheckout(STRIPE_PRO_PRICE_ID) }}
@@ -341,14 +358,12 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* MOBILE HAMBURGER */}
       <button
         onClick={() => setMobileOpen(true)}
         className="md:hidden fixed top-4 left-4 z-50 w-9 h-9 bg-white border border-gray-200 rounded-xl flex items-center justify-center shadow-sm hover:border-gray-400 transition-all">
         <span className="text-lg">☰</span>
       </button>
 
-      {/* MOBILE OVERLAY */}
       {mobileOpen && (
         <div
           className="md:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
@@ -356,7 +371,6 @@ export default function Sidebar() {
         />
       )}
 
-      {/* MOBILE DRAWER */}
       <div className={`md:hidden fixed top-0 left-0 z-50 h-full overflow-y-auto transition-transform duration-300 ${
         mobileOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
@@ -370,7 +384,6 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* DESKTOP SIDEBAR */}
       <div className="hidden md:block fixed left-0 top-0 h-screen z-40 overflow-y-auto">
         <SidebarContent />
       </div>

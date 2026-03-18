@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
-import { useWorkspace } from '@/contexts/WorkspaceContext'
+import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 import Link from 'next/link'
 
 const INDUSTRIES = [
@@ -55,7 +55,11 @@ export default function NewWorkspace() {
   const handleCreate = async () => {
     if (!clientName.trim()) { showToast('Client name is required', 'error'); return }
     const clientCount = workspaces.filter((w: any) => !w.is_personal).length
-    if (clientCount >= 50) { showToast('You have reached the 50 workspace limit', 'error'); return }
+    const limit = PLAN_CONFIG[plan]?.clientWorkspaces ?? 0
+    if (clientCount >= limit) {
+      showToast(`You've reached the ${limit} workspace limit on ${PLAN_CONFIG[plan].label}`, 'error')
+      return
+    }
 
     setSaving(true)
     const { data: { user } } = await supabase.auth.getUser()
@@ -95,7 +99,8 @@ export default function NewWorkspace() {
     )
   }
 
-  if (plan !== 'agency') {
+  // Free: upgrade wall
+  if (plan === 'free') {
     return (
       <div className="min-h-screen bg-gray-50 flex">
         <Sidebar />
@@ -104,24 +109,23 @@ export default function NewWorkspace() {
             <div className="text-5xl mb-4">🏢</div>
             <h1 className="text-2xl font-extrabold tracking-tight mb-3">Client Workspaces</h1>
             <p className="text-sm text-gray-500 leading-relaxed mb-6">
-              Create separate workspaces for each client — their own accounts, posts, analytics, and team access. Available on the Agency plan.
+              Create separate workspaces for each client — their own accounts, posts, analytics, and team access.
             </p>
-            <div className="bg-white border border-gray-100 rounded-2xl p-6 mb-6 text-left space-y-2">
-              {[
-                'Separate accounts and posts per client',
-                'Client-specific analytics',
-                'Invite client team members',
-                'White label branding per workspace',
-                'Up to 50 client workspaces',
-              ].map(f => (
-                <div key={f} className="flex items-center gap-2 text-xs text-gray-600">
-                  <span className="text-green-500 font-bold">✓</span>{f}
-                </div>
-              ))}
+            <div className="grid grid-cols-2 gap-3 mb-6 text-left">
+              <div className="bg-white border border-blue-100 rounded-2xl p-4">
+                <div className="text-xs font-bold text-blue-600 mb-2">Pro · $5/mo</div>
+                <div className="text-2xl font-extrabold mb-1">1</div>
+                <div className="text-xs text-gray-500">client workspace</div>
+              </div>
+              <div className="bg-white border border-purple-100 rounded-2xl p-4">
+                <div className="text-xs font-bold text-purple-600 mb-2">Agency · $20/mo</div>
+                <div className="text-2xl font-extrabold mb-1">5</div>
+                <div className="text-xs text-gray-500">client workspaces</div>
+              </div>
             </div>
             <Link href="/settings?tab=Plan"
               className="block w-full text-center bg-black text-white text-sm font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all mb-3">
-              Upgrade to Agency — $20/mo →
+              View Plans →
             </Link>
             <Link href="/dashboard" className="text-xs text-gray-400 hover:text-black transition-all">
               ← Back to dashboard
@@ -132,9 +136,11 @@ export default function NewWorkspace() {
     )
   }
 
+  const limit       = PLAN_CONFIG[plan].clientWorkspaces
   const clientCount = workspaces.filter((w: any) => !w.is_personal).length
 
-  if (clientCount >= 50) {
+  // At limit
+  if (clientCount >= limit) {
     return (
       <div className="min-h-screen bg-gray-50 flex">
         <Sidebar />
@@ -142,13 +148,38 @@ export default function NewWorkspace() {
           <div className="max-w-md text-center">
             <div className="text-5xl mb-4">🚫</div>
             <h1 className="text-xl font-extrabold tracking-tight mb-3">Workspace limit reached</h1>
-            <p className="text-sm text-gray-500 mb-6">
-              You've used all 50 client workspaces on your Agency plan. Delete unused workspaces to create new ones.
-            </p>
-            <Link href="/workspaces"
-              className="inline-block bg-black text-white text-sm font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all">
-              ← Manage Workspaces
-            </Link>
+            {plan === 'agency' ? (
+              <>
+                <p className="text-sm text-gray-500 mb-6">
+                  You've used all {limit} client workspaces on Agency. Delete an unused workspace to create a new one, or contact us to discuss additional workspaces.
+                </p>
+                <Link href="/workspaces"
+                  className="inline-block bg-black text-white text-sm font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all mb-3">
+                  ← Manage Workspaces
+                </Link>
+                <div>
+                  <a href="mailto:support@socialmate.studio"
+                    className="text-xs text-gray-400 hover:text-black transition-all">
+                    Contact us for more workspaces →
+                  </a>
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-gray-500 mb-6">
+                  You've used your 1 client workspace on Pro. Upgrade to Agency for up to 5 workspaces.
+                </p>
+                <Link href="/settings?tab=Plan"
+                  className="inline-block bg-black text-white text-sm font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all mb-3">
+                  Upgrade to Agency →
+                </Link>
+                <div>
+                  <Link href="/workspaces" className="text-xs text-gray-400 hover:text-black transition-all">
+                    ← Back to Workspaces
+                  </Link>
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -170,7 +201,9 @@ export default function NewWorkspace() {
             <div className="h-4 w-px bg-gray-200" />
             <div>
               <h1 className="text-xl font-extrabold tracking-tight">New Client Workspace</h1>
-              <p className="text-xs text-gray-400 mt-0.5">{clientCount} of 50 client workspaces used</p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                {clientCount} of {limit} client workspace{limit !== 1 ? 's' : ''} used on {PLAN_CONFIG[plan].label}
+              </p>
             </div>
           </div>
 

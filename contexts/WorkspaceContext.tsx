@@ -44,7 +44,7 @@ export const PLAN_CONFIG: Record<Plan, {
     accountsPerPlatform: 10,
     maxPosts: 5000,
     scheduleWeeks: 12,
-    clientWorkspaces: 10,
+    clientWorkspaces: 5,
   },
 }
 
