@@ -4,10 +4,10 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import PublicLayout from '@/components/PublicLayout'
 
-const STRIPE_PRO_PRICE_ID            = 'price_1T9pay7OMwDowUuU7S3G3lNX'
-const STRIPE_AGENCY_PRICE_ID         = 'price_1T9qAd7OMwDowUuUpzjxLlG2'
-const STRIPE_PRO_ANNUAL_PRICE_ID     = 'price_1TA0Iv7OMwDowUuUaAA77Ye1'
-const STRIPE_AGENCY_ANNUAL_PRICE_ID  = 'price_1TA0JQ7OMwDowUuUp4NnHEfO'
+const STRIPE_PRO_PRICE_ID               = 'price_1T9pay7OMwDowUuU7S3G3lNX'
+const STRIPE_AGENCY_PRICE_ID            = 'price_1T9qAd7OMwDowUuUpzjxLlG2'
+const STRIPE_PRO_ANNUAL_PRICE_ID        = 'price_1TA0Iv7OMwDowUuUaAA77Ye1'
+const STRIPE_AGENCY_ANNUAL_PRICE_ID     = 'price_1TA0JQ7OMwDowUuUp4NnHEfO'
 const STRIPE_WHITE_LABEL_BASIC_PRICE_ID = 'price_1T9qAu7OMwDowUuUsqM2jwoC'
 const STRIPE_WHITE_LABEL_PRO_PRICE_ID   = 'price_1TBnnS7OMwDowUuUsr09eHVg'
 
@@ -27,22 +27,21 @@ const PLANS = [
     headerText: 'text-gray-900',
     subText: 'text-gray-400',
     features: [
-      { label: '4 live platforms now',              note: '12 more coming soon'  },
-      { label: '1 connected account per platform'                                },
-      { label: '2 team seats'                                                    },
-      { label: '100 posts / month'                                               },
-      { label: '100 AI credits / month',            note: 'banks up to 150'      },
-      { label: '1 GB media storage'                                              },
-      { label: '2-week scheduling window'                                        },
-      { label: '14-day & 30-day analytics'                                       },
-      { label: 'Link in Bio page'                                                },
-      { label: 'Bulk scheduler'                                                  },
-      { label: 'Post templates & hashtag library'                                },
-      { label: 'Content Gap Detector',              note: '10 credits'           },
-      { label: 'Competitor tracking',               note: 'up to 3 accounts'     },
-      { label: 'RSS / blog import'                                               },
-      { label: 'Evergreen content recycling'                                     },
-      { label: 'Referral program'                                                },
+      { label: '4 live platforms now',             note: '12 more coming soon' },
+      { label: '1 connected account per platform'                              },
+      { label: '2 team seats'                                                  },
+      { label: '100 posts / month'                                             },
+      { label: '100 AI credits / month',           note: 'banks up to 150'    },
+      { label: '1 GB media storage'                                            },
+      { label: '2-week scheduling window'                                      },
+      { label: '14-day & 30-day analytics'                                     },
+      { label: 'Link in Bio page'                                              },
+      { label: 'Bulk scheduler'                                                },
+      { label: 'Post templates & hashtag library'                              },
+      { label: 'Content Gap Detector',             note: '10 credits'         },
+      { label: 'Competitor tracking',              note: 'up to 3 accounts'   },
+      { label: 'RSS / blog import'                                             },
+      { label: 'Evergreen content recycling'                                   },
     ],
     cta: 'Get Started Free',
     ctaHref: '/signup',
@@ -63,19 +62,21 @@ const PLANS = [
     headerText: 'text-white',
     subText: 'text-gray-300',
     features: [
-      { label: 'Everything in Free'                                              },
-      { label: '5 connected accounts per platform'                              },
-      { label: '5 team seats'                                                   },
-      { label: '1,000 posts / month'                                            },
-      { label: '500 AI credits / month',            note: 'banks up to 750'     },
-      { label: '10 GB media storage'                                            },
-      { label: '1-month scheduling window'                                      },
-      { label: '90-day analytics history'                                       },
-      { label: 'AI Content Calendar',              note: '20 credits'           },
-      { label: 'AI Image Generation',              note: '25 credits'           },
-      { label: 'Custom domain for Link in Bio'                                  },
-      { label: 'White Label add-on available',     note: '+$20/mo or +$40/mo'   },
-      { label: 'Priority support & early features'                              },
+      { label: 'Everything in Free'                                             },
+      { label: '5 connected accounts per platform'                             },
+      { label: '5 team seats'                                                  },
+      { label: '1 client workspace'                                            },
+      { label: '1,000 posts / month'                                           },
+      { label: '500 AI credits / month',           note: 'banks up to 750'    },
+      { label: '10 GB media storage'                                           },
+      { label: '1-month scheduling window'                                     },
+      { label: '90-day analytics history'                                      },
+      { label: 'AI Content Calendar',              note: '20 credits'         },
+      { label: 'AI Image Generation',              note: '25 credits'         },
+      { label: 'Custom domain for Link in Bio'                                 },
+      { label: 'Referral & affiliate program'                                  },
+      { label: 'White Label add-on available',     note: '+$20/mo or +$40/mo' },
+      { label: 'Priority support & early features'                             },
     ],
     cta: 'Start Pro',
     ctaHref: null,
@@ -99,15 +100,15 @@ const PLANS = [
       { label: 'Everything in Pro'                                              },
       { label: '10 connected accounts per platform'                            },
       { label: '15 team seats'                                                 },
+      { label: '5 client workspaces',              note: 'more available on request' },
       { label: '5,000 posts / month'                                           },
-      { label: '2,000 AI credits / month',          note: 'banks up to 3,000'  },
+      { label: '2,000 AI credits / month',         note: 'banks up to 3,000'  },
       { label: '50 GB media storage'                                           },
       { label: '3-month scheduling window'                                     },
       { label: '6-month analytics history'                                     },
-      { label: 'Client workspace management'                                   },
       { label: 'PDF analytics reports'                                         },
       { label: 'Content approval workflows'                                    },
-      { label: 'White Label add-on available',     note: '+$20/mo or +$40/mo'  },
+      { label: 'White Label add-on available',     note: '+$20/mo or +$40/mo' },
       { label: 'Dedicated support'                                             },
     ],
     cta: 'Start Agency',
@@ -138,17 +139,20 @@ const WHITE_LABEL_TIERS = [
     name: 'White Label Basic',
     price: '$20/mo',
     priceId: STRIPE_WHITE_LABEL_BASIC_PRICE_ID,
+    tier: 'basic' as const,
     features: [
       'Remove SocialMate branding',
       'Add your own logo',
       'Custom brand colors',
       'Your brand name throughout the app',
     ],
+    highlight: false,
   },
   {
     name: 'White Label Pro',
     price: '$40/mo',
     priceId: STRIPE_WHITE_LABEL_PRO_PRICE_ID,
+    tier: 'pro' as const,
     features: [
       'Everything in Basic',
       'Custom domain (app.yourbrand.com)',
@@ -162,11 +166,11 @@ const WHITE_LABEL_TIERS = [
 const FAQ = [
   {
     q: 'How is the Free plan this generous?',
-    a: 'We built SocialMate lean from the start. By controlling AI costs through a credit system and keeping infrastructure efficient, we can offer genuinely powerful tools for free without burning out.',
+    a: "We built SocialMate lean from the start. By controlling AI costs through a credit system and keeping infrastructure efficient, we can offer genuinely powerful tools for free without burning out.",
   },
   {
     q: 'Will prices go up?',
-    a: 'Current pricing is locked for all active subscribers. If pricing ever changes, you\'ll know well in advance and grandfathered rates will be honored — no surprises.',
+    a: "Current pricing is locked for all active subscribers. If pricing ever changes, you'll know well in advance and grandfathered rates will be honored — no surprises.",
   },
   {
     q: 'What happens when I run out of AI credits?',
@@ -174,7 +178,7 @@ const FAQ = [
   },
   {
     q: 'Can I earn extra credits?',
-    a: 'Yes. Refer a friend: when they publish their first post you both earn +10 credits. When they upgrade to Pro you earn +50 credits, Agency earns you +100 credits.',
+    a: 'Yes — Pro and Agency subscribers get access to our referral program. When someone you refer upgrades to Pro you earn +50 credits, Agency earns you +100 credits.',
   },
   {
     q: 'What platforms are live right now?',
@@ -182,13 +186,13 @@ const FAQ = [
   },
   {
     q: 'Is White Label available on Free?',
-    a: 'No — White Label is an add-on for Pro and Agency subscribers only. It removes all SocialMate branding and replaces it with your own logo, colors, and optionally your own domain.',
+    a: 'No — White Label is an add-on for Pro and Agency subscribers only. Basic ($20/mo) removes branding and adds your logo and colors. Pro ($40/mo) adds a custom domain for full client rebranding.',
   },
 ]
 
 export default function Pricing() {
   const [interval, setInterval] = useState<Interval>('monthly')
-  const [loading, setLoading] = useState<string | null>(null)
+  const [loading, setLoading]   = useState<string | null>(null)
   const router = useRouter()
 
   const annual = interval === 'annual'
@@ -210,6 +214,30 @@ export default function Pricing() {
       }
     } catch {
       console.error('Checkout failed')
+    } finally {
+      setLoading(null)
+    }
+  }
+
+  const handleWhiteLabelCheckout = async (tier: 'basic' | 'pro', planName: string) => {
+    setLoading(planName)
+    try {
+      const res = await fetch('/api/stripe/whitelabel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ tier }),
+      })
+      const data = await res.json()
+      if (data.url) {
+        window.location.href = data.url
+      } else if (data.error === 'Unauthorized') {
+        router.push('/login?redirect=/pricing')
+      } else if (data.error) {
+        alert(data.error)
+      }
+    } catch {
+      console.error('White label checkout failed')
     } finally {
       setLoading(null)
     }
@@ -336,10 +364,13 @@ export default function Pricing() {
                     <p className="text-sm font-extrabold">{wl.name}</p>
                     <p className="text-xl font-extrabold mt-0.5">{wl.price}</p>
                   </div>
-                  <button onClick={() => handleWhiteLabelCheckout(wl.priceId, wl.name)}
+                  <button
+                    onClick={() => handleWhiteLabelCheckout(wl.tier, wl.name)}
                     disabled={loading === wl.name}
                     className={`text-xs font-bold px-4 py-2 rounded-xl transition-all disabled:opacity-60 ${
-                      wl.highlight ? 'bg-black text-white hover:opacity-80' : 'border border-gray-200 text-gray-700 hover:border-black'
+                      wl.highlight
+                        ? 'bg-black text-white hover:opacity-80'
+                        : 'border border-gray-200 text-gray-700 hover:border-black'
                     }`}>
                     {loading === wl.name ? 'Loading...' : 'Add to plan →'}
                   </button>
@@ -402,9 +433,9 @@ export default function Pricing() {
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { label: 'Starter',  credits: '100 cr',   price: '$1.99' },
+              { label: 'Starter',  credits: '100 cr',   price: '$1.99'  },
               { label: 'Popular',  credits: '300 cr',   price: '$4.99',  badge: true },
-              { label: 'Pro Pack', credits: '750 cr',   price: '$9.99' },
+              { label: 'Pro Pack', credits: '750 cr',   price: '$9.99'  },
               { label: 'Max Pack', credits: '2,000 cr', price: '$19.99' },
             ].map(pack => (
               <div key={pack.label} className={`bg-white/10 rounded-xl p-4 text-center relative ${pack.badge ? 'ring-2 ring-white' : ''}`}>
@@ -436,7 +467,7 @@ export default function Pricing() {
         {/* BOTTOM CTA */}
         <div className="text-center mt-12">
           <h2 className="text-2xl font-extrabold mb-2">Ready to get started?</h2>
-          <p className="text-sm text-gray-500 mb-6">No card required. Free forever. 100 AI credits on your first post.</p>
+          <p className="text-sm text-gray-500 mb-6">No card required. Free forever. 100 AI credits on signup.</p>
           <div className="flex items-center justify-center gap-4">
             <Link href="/signup"
               className="bg-black text-white font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm">
