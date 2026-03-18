@@ -336,7 +336,7 @@ export default function Pricing() {
                     <p className="text-sm font-extrabold">{wl.name}</p>
                     <p className="text-xl font-extrabold mt-0.5">{wl.price}</p>
                   </div>
-                  <button onClick={() => handleCheckout(wl.priceId, wl.name)}
+                  <button onClick={() => handleWhiteLabelCheckout(wl.priceId, wl.name)}
                     disabled={loading === wl.name}
                     className={`text-xs font-bold px-4 py-2 rounded-xl transition-all disabled:opacity-60 ${
                       wl.highlight ? 'bg-black text-white hover:opacity-80' : 'border border-gray-200 text-gray-700 hover:border-black'
