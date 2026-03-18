@@ -323,9 +323,14 @@ export async function POST(req: NextRequest) {
       .eq('user_id', userId)
       .maybeSingle()
 
-    const creditsToSet = existingSettings
-      ? resolveCreditsOnPlanChange(existingSettings.plan, plan, existingSettings.ai_credits_remaining ?? 0)
-      : PLAN_CREDITS[plan] ?? 100
+    // If already on this plan, subscription.updated already handled credits — don't overwrite
+// Only set credits if this is a genuinely new subscription (no prior plan or different plan)
+const alreadyOnPlan = existingSettings?.plan === plan
+const creditsToSet = alreadyOnPlan
+  ? (existingSettings?.ai_credits_remaining ?? PLAN_CREDITS[plan] ?? 100)
+  : existingSettings
+    ? resolveCreditsOnPlanChange(existingSettings.plan, plan, existingSettings.ai_credits_remaining ?? 0)
+    : PLAN_CREDITS[plan] ?? 100
 
     await supabase.from('user_settings').upsert({
       user_id:                userId,
