@@ -1,26 +1,43 @@
 @import "tailwindcss";
 
+/* ── THEME VARIABLES ─────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg:         #f9fafb;
+  --surface:    #ffffff;
+  --border:     #f3f4f6;
+  --border-mid: #e5e7eb;
+  --text:       #111827;
+  --text-muted: #6b7280;
+  --text-faint: #9ca3af;
+  --accent:     #000000;
+  --accent-fg:  #ffffff;
+  --sidebar-bg: #ffffff;
+  --background: #f9fafb;
+  --foreground: #111827;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+[data-theme="dark"] {
+  --bg:         #0f1117;
+  --surface:    #1a1d27;
+  --border:     #2a2d3a;
+  --border-mid: #3a3d4a;
+  --text:       #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-faint: #64748b;
+  --sidebar-bg: #13151f;
+  --background: #0f1117;
+  --foreground: #f1f5f9;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+[data-accent="midnight"] { --accent: #3b5bdb; --accent-fg: #ffffff; }
+[data-accent="forest"]   { --accent: #2f9e44; --accent-fg: #ffffff; }
+[data-accent="rose"]     { --accent: #e64980; --accent-fg: #ffffff; }
+[data-accent="slate"]    { --accent: #495057; --accent-fg: #ffffff; }
+[data-accent="amber"]    { --accent: #f08c00; --accent-fg: #ffffff; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background-color: var(--bg);
+  color: var(--text);
   font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }

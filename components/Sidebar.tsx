@@ -3,7 +3,8 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
-import { useWorkspace, PLAN_CONFIG, PLATFORMS_TOTAL } from '@/contexts/WorkspaceContext'
+import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
+import ThemeToggle from '@/components/ThemeToggle'
 
 const STRIPE_PRO_PRICE_ID    = 'price_1T9pay7OMwDowUuU7S3G3lNX'
 const STRIPE_AGENCY_PRICE_ID = 'price_1T9qAd7OMwDowUuUpzjxLlG2'
@@ -37,7 +38,7 @@ const NAV_BASE = [
       { icon: '🤖', label: 'AI Features',  href: '/ai-features'            },
       { icon: '🔥', label: 'SM-Pulse',     href: '/sm-pulse'               },
       { icon: '📡', label: 'SM-Radar',     href: '/sm-radar'               },
-      { icon: '🕳️', label: 'Content Gaps', href: '/content-gap'           },
+      { icon: '🕳️', label: 'Content Gaps', href: '/content-gap'            },
       { icon: '🔭', label: 'Competitors',  href: '/competitor-tracking'    },
       { icon: '📬', label: 'Social Inbox', href: '/social-inbox'           },
       { icon: '🎁', label: 'Referrals',    href: '/settings?tab=Referrals' },
@@ -73,23 +74,16 @@ const PLAN_BADGE: Record<string, { label: string; color: string }> = {
 }
 
 function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
-  const [user, setUser] = useState<any>(null)
-  const [wsOpen, setWsOpen] = useState(false)
+  const [user, setUser]                     = useState<any>(null)
+  const [wsOpen, setWsOpen]                 = useState(false)
   const [showUpgradeNudge, setShowUpgradeNudge] = useState(false)
-  const [checkoutLoading, setCheckoutLoading] = useState(false)
+  const [checkoutLoading, setCheckoutLoading]   = useState(false)
   const pathname = usePathname()
-  const router = useRouter()
+  const router   = useRouter()
 
   const {
-    workspaces,
-    activeWorkspace,
-    setActiveWorkspace,
-    plan,
-    credits,
-    creditsTotal,
-    seatsUsed,
-    seatsTotal,
-    loading,
+    workspaces, activeWorkspace, setActiveWorkspace,
+    plan, credits, creditsTotal, seatsUsed, seatsTotal, loading,
   } = useWorkspace()
 
   useEffect(() => {
@@ -104,7 +98,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   const handleCheckout = async (priceId: string) => {
     setCheckoutLoading(true)
     try {
-      const res = await fetch('/api/stripe/checkout', {
+      const res  = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -125,7 +119,6 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   const wsLimit           = PLAN_CONFIG[plan]?.clientWorkspaces ?? 0
   const atWsLimit         = clientWorkspaces.length >= wsLimit
 
-  // Inject Workspaces nav item for Pro and Agency
   const NAV = NAV_BASE.map(group => {
     if (group.section === 'Manage' && (plan === 'agency' || plan === 'pro')) {
       const hasWs = group.items.find(i => i.href === '/workspaces')
@@ -211,7 +204,6 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
                 </>
               )}
 
-              {/* Pro: show Add only if under limit (1) */}
               {plan === 'pro' && !atWsLimit && (
                 <Link href="/workspaces/new" onClick={() => setWsOpen(false)}
                   className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-gray-400 hover:text-black hover:bg-gray-50 transition-all border-t border-gray-50">
@@ -224,8 +216,6 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
                   <span>⚡</span> Upgrade for more workspaces
                 </Link>
               )}
-
-              {/* Agency: show Add only if under limit (5) */}
               {plan === 'agency' && !atWsLimit && (
                 <Link href="/workspaces/new" onClick={() => setWsOpen(false)}
                   className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-gray-400 hover:text-black hover:bg-gray-50 transition-all border-t border-gray-50">
@@ -238,7 +228,6 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
                   <span>✉️</span> Contact us for more
                 </a>
               )}
-
               {plan === 'free' && (
                 <>
                   <button
@@ -271,11 +260,11 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
 
       {/* NAV */}
       <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
-        {NAV.map(group => (
+        {NAV.map((group, gi) => (
           <div key={group.section}>
-            <div className="text-xs font-extrabold text-gray-600 uppercase tracking-widest px-3 py-2 mt-1 border-t border-gray-100 first:border-0">
-  {group.section}
-</div>
+            <div className={`text-xs font-extrabold text-gray-600 uppercase tracking-widest px-3 py-2 mt-1 ${gi > 0 ? 'border-t border-gray-100' : ''}`}>
+              {group.section}
+            </div>
             {group.items.map(item => {
               const active = isActive(item.href)
               return (
@@ -294,7 +283,6 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
 
       {/* BOTTOM STATS */}
       <div className="p-3 border-t border-gray-100 space-y-2.5 flex-shrink-0">
-
         <div className="bg-gray-50 rounded-xl p-3">
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs font-semibold text-gray-500">AI Credits</span>
@@ -341,6 +329,9 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
           </button>
         )}
 
+        {/* THEME TOGGLE */}
+        <ThemeToggle />
+
         <div className="px-1 pt-1">
           <div className="text-xs text-gray-400 truncate mb-1">{user?.email}</div>
           <button onClick={handleSignOut}
@@ -365,18 +356,15 @@ export default function Sidebar() {
       </button>
 
       {mobileOpen && (
-        <div
-          className="md:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
-          onClick={() => setMobileOpen(false)}
-        />
+        <div className="md:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+          onClick={() => setMobileOpen(false)} />
       )}
 
       <div className={`md:hidden fixed top-0 left-0 z-50 h-full overflow-y-auto transition-transform duration-300 ${
         mobileOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="relative">
-          <button
-            onClick={() => setMobileOpen(false)}
+          <button onClick={() => setMobileOpen(false)}
             className="absolute top-3 right-3 z-10 w-7 h-7 bg-gray-100 rounded-lg flex items-center justify-center text-xs font-bold text-gray-500 hover:bg-gray-200 transition-all">
             ✕
           </button>

@@ -18,8 +18,8 @@ export const PLAN_CONFIG: Record<Plan, {
 }> = {
   free: {
     label: 'Free',
-    credits: 100,
-    creditBank: 150,
+    credits: 50,
+    creditBank: 75,
     seats: 2,
     accountsPerPlatform: 1,
     maxPosts: 100,
@@ -78,10 +78,10 @@ type WorkspaceContextType = {
 const WorkspaceContext = createContext<WorkspaceContextType>({
   plan: 'free',
   setPlan: () => {},
-  credits: 100,
+  credits: 50,
   setCredits: () => {},
   creditsUsed: 0,
-  creditsTotal: 100,
+  creditsTotal: 75,
   workspaceName: 'My Workspace',
   setWorkspaceName: () => {},
   workspaces: [],
@@ -95,16 +95,16 @@ const WorkspaceContext = createContext<WorkspaceContextType>({
 })
 
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
-  const [plan, setPlan] = useState<Plan>('free')
-  const [credits, setCreditsState] = useState(100)
-  const [creditsUsed, setCreditsUsed] = useState(0)
-  const [userId, setUserId] = useState<string | null>(null)
-  const [workspaceName, setWorkspaceName] = useState('My Workspace')
-  const [workspaces, setWorkspaces] = useState<Workspace[]>([])
+  const [plan, setPlan]                     = useState<Plan>('free')
+  const [credits, setCreditsState]          = useState(50)
+  const [creditsUsed, setCreditsUsed]       = useState(0)
+  const [userId, setUserId]                 = useState<string | null>(null)
+  const [workspaceName, setWorkspaceName]   = useState('My Workspace')
+  const [workspaces, setWorkspaces]         = useState<Workspace[]>([])
   const [activeWorkspace, setActiveWorkspace] = useState<Workspace | null>(null)
-  const [seatsUsed, setSeatsUsed] = useState(1)
+  const [seatsUsed, setSeatsUsed]           = useState(1)
   const [platformsConnected, setPlatformsConnected] = useState(0)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading]               = useState(true)
 
   useEffect(() => {
     const load = async () => {
@@ -184,9 +184,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       plan, setPlan,
       credits, setCredits,
       creditsUsed,
-      // Bank capacity is 1.5x the plan's monthly credits
-// This is the correct denominator — shows how full your bank is
-creditsTotal: planConfig.creditBank,
+      creditsTotal: planConfig.creditBank,
       workspaceName, setWorkspaceName,
       workspaces,
       activeWorkspace,

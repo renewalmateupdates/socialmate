@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import CookieBanner from '@/components/CookieBanner'
 import { WorkspaceProvider } from '@/contexts/WorkspaceContext'
+import { ThemeProvider } from '@/contexts/ThemeContext'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -44,14 +45,7 @@ export const metadata: Metadata = {
     siteName: 'SocialMate',
     title: 'SocialMate — Free Social Media Scheduler for 16 Platforms',
     description: 'Schedule posts to 16 social platforms for free. No per-channel fees. No post limits. Better than Buffer at zero cost.',
-    images: [
-      {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'SocialMate — Free Social Media Scheduler',
-      },
-    ],
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'SocialMate — Free Social Media Scheduler' }],
   },
   twitter: {
     card: 'summary_large_image',
@@ -77,9 +71,7 @@ export const metadata: Metadata = {
     apple: '/apple-touch-icon.png',
   },
   manifest: '/manifest.json',
-  alternates: {
-    canonical: APP_URL,
-  },
+  alternates: { canonical: APP_URL },
 }
 
 const jsonLd = {
@@ -91,26 +83,9 @@ const jsonLd = {
   url: APP_URL,
   description: 'Free social media scheduling platform supporting 16+ platforms with AI content tools, analytics, and team collaboration.',
   offers: [
-    {
-      '@type': 'Offer',
-      price: '0',
-      priceCurrency: 'USD',
-      name: 'Free Plan',
-    },
-    {
-      '@type': 'Offer',
-      price: '5',
-      priceCurrency: 'USD',
-      name: 'Pro Plan',
-      billingIncrement: 'P1M',
-    },
-    {
-      '@type': 'Offer',
-      price: '20',
-      priceCurrency: 'USD',
-      name: 'Agency Plan',
-      billingIncrement: 'P1M',
-    },
+    { '@type': 'Offer', price: '0',  priceCurrency: 'USD', name: 'Free Plan' },
+    { '@type': 'Offer', price: '5',  priceCurrency: 'USD', name: 'Pro Plan',    billingIncrement: 'P1M' },
+    { '@type': 'Offer', price: '20', priceCurrency: 'USD', name: 'Agency Plan', billingIncrement: 'P1M' },
   ],
   author: {
     '@type': 'Organization',
@@ -127,27 +102,22 @@ const jsonLd = {
   ],
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
         <meta name="theme-color" content="#000000" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="SocialMate" />
       </head>
       <body className={inter.className}>
-        <WorkspaceProvider>
-          {children}
-        </WorkspaceProvider>
+        <ThemeProvider>
+          <WorkspaceProvider>
+            {children}
+          </WorkspaceProvider>
+        </ThemeProvider>
         <CookieBanner />
       </body>
     </html>
