@@ -4,14 +4,14 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { Resend } from 'resend'
-
+ 
 const resend = new Resend(process.env.RESEND_API_KEY)
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate-six.vercel.app'
-
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
+ 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
-
+ 
   if (code) {
     const cookieStore = await cookies()
     const supabase = createServerClient(
@@ -28,15 +28,37 @@ export async function GET(request: NextRequest) {
         },
       }
     )
-
+ 
     const { data: { session } } = await supabase.auth.exchangeCodeForSession(code)
-
+ 
     if (session?.user) {
       const adminSupabase = createClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!
       )
-
+ 
+      // Auto-create personal workspace if it doesn't exist yet
+      try {
+        const { data: existingWs } = await adminSupabase
+          .from('workspaces')
+          .select('id')
+          .eq('owner_id', session.user.id)
+          .eq('is_personal', true)
+          .single()
+ 
+        if (!existingWs) {
+          await adminSupabase
+            .from('workspaces')
+            .insert({
+              owner_id:    session.user.id,
+              name:        'Personal',
+              is_personal: true,
+            })
+        }
+      } catch (err) {
+        console.error('Personal workspace creation error:', err)
+      }
+ 
       // Referral tracking
       const refCode = cookieStore.get('sm_ref')?.value
       if (refCode) {
@@ -46,21 +68,21 @@ export async function GET(request: NextRequest) {
             .select('user_id')
             .eq('referral_code', refCode)
             .single()
-
+ 
           if (referrerSettings && referrerSettings.user_id !== session.user.id) {
             await adminSupabase
               .from('referral_conversions')
               .upsert({
                 affiliate_user_id: referrerSettings.user_id,
-                referred_user_id: session.user.id,
-                referral_code: refCode,
-                status: 'pending',
-                converted_at: new Date().toISOString(),
-                lock_expires_at: new Date(
+                referred_user_id:  session.user.id,
+                referral_code:     refCode,
+                status:            'pending',
+                converted_at:      new Date().toISOString(),
+                lock_expires_at:   new Date(
                   Date.now() + 60 * 24 * 60 * 60 * 1000
                 ).toISOString(),
               }, {
-                onConflict: 'referred_user_id',
+                onConflict:       'referred_user_id',
                 ignoreDuplicates: true,
               })
           }
@@ -69,7 +91,7 @@ export async function GET(request: NextRequest) {
         }
         cookieStore.delete('sm_ref')
       }
-
+ 
       // Welcome email
       try {
         const email = session.user.email
@@ -98,7 +120,7 @@ export async function GET(request: NextRequest) {
                 </div>
                 <p style="color: #555; font-size: 14px; line-height: 1.6;">
                   Need more AI credits or connected accounts?
-                  <a href="${appUrl}/settings" style="color: #000; font-weight: 600;">Upgrade to Pro for $5/month →</a>
+                  <a href="${appUrl}/pricing" style="color: #000; font-weight: 600;">Upgrade to Pro for $5/month →</a>
                 </p>
                 <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
                 <p style="color: #aaa; font-size: 12px;">SocialMate · Built for creators, small businesses, and agencies</p>
@@ -109,17 +131,18 @@ export async function GET(request: NextRequest) {
       } catch (err) {
         console.error('Welcome email error:', err)
       }
-
+ 
       const { data: profile } = await supabase
         .from('profiles')
         .select('onboarding_completed')
         .eq('id', session.user.id)
         .single()
-
+ 
       const redirectTo = profile?.onboarding_completed ? '/dashboard' : '/onboarding'
       return NextResponse.redirect(new URL(redirectTo, requestUrl.origin))
     }
   }
-
+ 
   return NextResponse.redirect(new URL('/login', requestUrl.origin))
 }
+ 
