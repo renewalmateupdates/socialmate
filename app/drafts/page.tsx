@@ -64,7 +64,25 @@ export default function Drafts() {
     setLoading(false)
   }
 
-  useEffect(() => { loadPosts() }, [router])
+  useEffect(() => {
+  loadPosts()
+
+  // Realtime subscription — auto-update when post status changes
+  const channel = supabase
+    .channel('posts-status')
+    .on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'posts' },
+      (payload) => {
+        setPosts(prev =>
+          prev.map(p => p.id === payload.new.id ? { ...p, ...payload.new } : p)
+        )
+      }
+    )
+    .subscribe()
+
+  return () => { supabase.removeChannel(channel) }
+}, [router])
 
   const handleRefresh = () => {
     setLoading(true)
