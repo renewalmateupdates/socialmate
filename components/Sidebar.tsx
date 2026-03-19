@@ -273,9 +273,9 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
       <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
         {NAV.map(group => (
           <div key={group.section}>
-            <div className="text-xs font-bold text-gray-400 uppercase tracking-widest px-3 py-2 mt-1">
-              {group.section}
-            </div>
+            <div className="text-xs font-extrabold text-gray-600 uppercase tracking-widest px-3 py-2 mt-1 border-t border-gray-100 first:border-0">
+  {group.section}
+</div>
             {group.items.map(item => {
               const active = isActive(item.href)
               return (
