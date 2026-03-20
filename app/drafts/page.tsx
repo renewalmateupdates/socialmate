@@ -65,24 +65,39 @@ export default function Drafts() {
   }
 
   useEffect(() => {
-  loadPosts()
+    loadPosts()
 
-  // Realtime subscription — auto-update when post status changes
-  const channel = supabase
-    .channel('posts-status')
-    .on(
-      'postgres_changes',
-      { event: 'UPDATE', schema: 'public', table: 'posts' },
-      (payload) => {
-        setPosts(prev =>
-          prev.map(p => p.id === payload.new.id ? { ...p, ...payload.new } : p)
+    // Realtime subscription — auto-update when post status changes
+    const channel = supabase
+      .channel('posts-status')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'posts' },
+        (payload) => {
+          setPosts(prev =>
+            prev.map(p => p.id === payload.new.id ? { ...p, ...payload.new } : p)
+          )
+        }
+      )
+      .subscribe()
+
+    // Auto-refresh every 30s when there are past-due scheduled posts
+    const interval = setInterval(async () => {
+      const now = new Date().toISOString()
+      setPosts(prev => {
+        const hasPastDueScheduled = prev.some(
+          p => p.status === 'scheduled' && p.scheduled_at && p.scheduled_at <= now
         )
-      }
-    )
-    .subscribe()
+        if (hasPastDueScheduled) loadPosts()
+        return prev
+      })
+    }, 30_000)
 
-  return () => { supabase.removeChannel(channel) }
-}, [router])
+    return () => {
+      supabase.removeChannel(channel)
+      clearInterval(interval)
+    }
+  }, [router])
 
   const handleRefresh = () => {
     setLoading(true)

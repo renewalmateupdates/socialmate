@@ -12,12 +12,13 @@ const STRIPE_AGENCY_PRICE_ID = 'price_1T9qAd7OMwDowUuUpzjxLlG2'
 const ALL_TABS    = ['Profile', 'Plan', 'Referrals', 'Notifications', 'Security', 'White Label']
 const FREE_TABS   = ['Profile', 'Plan', 'Notifications', 'Security']
 
+// Every 5 paying referrals = +100 bonus credits (stacking, no cap)
 const REFERRAL_TIERS = [
-  { paying: 5,   reward: '1 month Pro free',      icon: '🎁', conditional: false },
-  { paying: 10,  reward: '3 months Pro free',     icon: '⭐', conditional: false },
-  { paying: 25,  reward: '6 months Pro free',     icon: '🚀', conditional: false },
-  { paying: 50,  reward: 'Pro free while active', icon: '💎', conditional: true  },
-  { paying: 100, reward: 'Pro free while active', icon: '👑', conditional: true  },
+  { paying: 5,   reward: '+100 bonus credits',  icon: '🎁' },
+  { paying: 10,  reward: '+200 bonus credits',  icon: '⭐' },
+  { paying: 15,  reward: '+300 bonus credits',  icon: '🚀' },
+  { paying: 20,  reward: '+400 bonus credits',  icon: '💎' },
+  { paying: 25,  reward: '+500 bonus credits',  icon: '👑' },
 ]
 
 const CREDIT_PACKS = [
@@ -514,11 +515,8 @@ function SettingsInner() {
                               <div>
                                 <p className="text-sm font-bold">
                                   {tier.paying} paying referral{tier.paying > 1 ? 's' : ''}
-                                  {tier.conditional && (
-                                    <span className="ml-2 text-xs font-semibold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">while active</span>
-                                  )}
                                 </p>
-                                {unlocked && <p className="text-xs text-green-500 font-bold">Unlocked</p>}
+                                {unlocked && <p className="text-xs text-green-500 font-bold">Reached ✓</p>}
                               </div>
                             </div>
                             <span className="text-xs font-extrabold px-3 py-2 bg-black text-white rounded-xl flex-shrink-0">{tier.reward}</span>
@@ -527,7 +525,7 @@ function SettingsInner() {
                       })}
                     </div>
                     <p className="text-xs text-gray-400 mt-4 pt-4 border-t border-gray-50">
-                      Tiers 1–3 are permanent once earned. Tiers 4–5 remain active as long as you maintain the required paying referrals.
+                      Every 5 paying referrals earns +100 bonus credits, stacking with no cap. Credits are added automatically when your referrals convert.
                     </p>
                   </div>
 

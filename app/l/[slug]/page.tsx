@@ -9,13 +9,21 @@ function getSupabase() {
   )
 }
 
-const THEMES: Record<string, { bg: string; text: string; btn: string; subtext: string }> = {
-  white:  { bg: '#ffffff', text: '#111827', btn: '#111827', subtext: '#6b7280' },
-  black:  { bg: '#030712', text: '#ffffff', btn: '#ffffff', subtext: '#9ca3af' },
-  gray:   { bg: '#f3f4f6', text: '#1f2937', btn: '#1f2937', subtext: '#6b7280' },
-  blue:   { bg: '#2563eb', text: '#ffffff', btn: '#ffffff', subtext: '#bfdbfe' },
-  purple: { bg: '#7e22ce', text: '#ffffff', btn: '#ffffff', subtext: '#e9d5ff' },
-  green:  { bg: '#065f46', text: '#ffffff', btn: '#ffffff', subtext: '#a7f3d0' },
+const THEMES: Record<string, { bg: string; text: string; btn: string; subtext: string; btnText: string }> = {
+  white:    { bg: '#ffffff', text: '#111827', btn: '#111827', subtext: '#6b7280', btnText: '#ffffff' },
+  black:    { bg: '#030712', text: '#ffffff', btn: '#ffffff', subtext: '#9ca3af', btnText: '#111827' },
+  gray:     { bg: '#f3f4f6', text: '#1f2937', btn: '#1f2937', subtext: '#6b7280', btnText: '#ffffff' },
+  blue:     { bg: '#2563eb', text: '#ffffff', btn: '#ffffff', subtext: '#bfdbfe', btnText: '#2563eb' },
+  purple:   { bg: '#7e22ce', text: '#ffffff', btn: '#ffffff', subtext: '#e9d5ff', btnText: '#7e22ce' },
+  green:    { bg: '#065f46', text: '#ffffff', btn: '#ffffff', subtext: '#a7f3d0', btnText: '#065f46' },
+  sunset:   { bg: '#f97316', text: '#ffffff', btn: '#ffffff', subtext: '#fed7aa', btnText: '#f97316' },
+  rose:     { bg: '#ffe4e6', text: '#881337', btn: '#9f1239', subtext: '#be123c', btnText: '#ffffff' },
+  slate:    { bg: '#334155', text: '#f1f5f9', btn: '#f1f5f9', subtext: '#94a3b8', btnText: '#0f172a' },
+  amber:    { bg: '#fbbf24', text: '#451a03', btn: '#451a03', subtext: '#78350f', btnText: '#fef3c7' },
+  neon:     { bg: '#000000', text: '#4ade80', btn: '#4ade80', subtext: '#16a34a', btnText: '#000000' },
+  lavender: { bg: '#ede9fe', text: '#4c1d95', btn: '#7c3aed', subtext: '#6d28d9', btnText: '#ffffff' },
+  sand:     { bg: '#fefce8', text: '#713f12', btn: '#92400e', subtext: '#a16207', btnText: '#fefce8' },
+  crimson:  { bg: '#b91c1c', text: '#ffffff', btn: '#ffffff', subtext: '#fca5a5', btnText: '#b91c1c' },
 }
 
 const BTN_RADIUS: Record<string, string> = {
@@ -76,6 +84,7 @@ export default async function BioPage({ params }: { params: { slug: string } }) 
 
   const p = page as PageData
   const theme = THEMES[p.theme] || THEMES.white
+  const btnTextColor = theme.btnText ?? theme.bg
   const btnRadius = BTN_RADIUS[p.btn_style] || BTN_RADIUS.rounded
   const activeLinks = (p.links || []).filter((l) => l.active && l.title && l.url)
   const activeSocials = Object.entries(p.socials || {}).filter(([, v]) => v)
@@ -151,7 +160,7 @@ export default async function BioPage({ params }: { params: { slug: string } }) 
                 width: '100%',
                 padding: '14px 24px',
                 backgroundColor: theme.btn,
-                color: theme.bg,
+                color: btnTextColor,
                 textAlign: 'center' as const,
                 textDecoration: 'none',
                 fontWeight: '700',

@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 import ThemeToggle from '@/components/ThemeToggle'
+import ComposeShortcut from '@/components/ComposeShortcut'
 
 const STRIPE_PRO_PRICE_ID    = 'price_1T9pay7OMwDowUuU7S3G3lNX'
 const STRIPE_AGENCY_PRICE_ID = 'price_1T9qAd7OMwDowUuUpzjxLlG2'
@@ -43,6 +44,7 @@ const NAV_BASE = [
       { icon: '📬', label: 'Social Inbox', href: '/social-inbox'           },
       { icon: '🎁', label: 'Referrals',    href: '/settings?tab=Referrals' },
       { icon: '🤝', label: 'Affiliate',    href: '/affiliate'              },
+      { icon: '🗺️', label: 'Roadmap',      href: '/roadmap'                },
     ],
   },
   {
@@ -135,9 +137,13 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
     return group
   })
 
-  const badge      = PLAN_BADGE[plan] || PLAN_BADGE.free
-  const creditsBar = creditsTotal > 0 ? Math.max(0, Math.min((credits / creditsTotal) * 100, 100)) : 0
-  const seatsBar   = seatsTotal   > 0 ? Math.min(100, (seatsUsed / seatsTotal) * 100) : 0
+  const badge          = PLAN_BADGE[plan] || PLAN_BADGE.free
+  const monthlyCredits = PLAN_CONFIG[plan]?.credits ?? 50
+  const monthlyRemaining = Math.min(credits, monthlyCredits)
+  const bankedCredits  = Math.max(0, credits - monthlyCredits)
+  const creditsBar     = monthlyCredits > 0 ? Math.max(0, Math.min((monthlyRemaining / monthlyCredits) * 100, 100)) : 0
+  const creditBarColor = monthlyRemaining < 10 ? 'bg-red-400' : monthlyRemaining < 20 ? 'bg-yellow-400' : 'bg-emerald-400'
+  const seatsBar       = seatsTotal > 0 ? Math.min(100, (seatsUsed / seatsTotal) * 100) : 0
 
   const isActive = (href: string) => {
     const base = href.split('?')[0]
@@ -288,7 +294,15 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
                     color:      active ? 'var(--text)' : 'var(--text-muted)',
                     fontWeight: active ? '700' : '500',
                   }}>
-                  <span>{item.icon}</span>{item.label}
+                  <span>{item.icon}</span>
+                  <span className="flex-1">{item.label}</span>
+                  {item.href === '/ai-features' && !loading && (
+                    <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${
+                      monthlyRemaining < 10 ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400' :
+                      monthlyRemaining < 20 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400' :
+                      'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
+                    }`}>{monthlyRemaining}</span>
+                  )}
                 </Link>
               )
             })}
@@ -302,17 +316,20 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>AI Credits</span>
             <span className="text-xs font-bold" style={{ color: 'var(--text)' }}>
-              {loading ? '...' : `${credits}/${creditsTotal}`}
+              {loading ? '...' : `${monthlyRemaining} left`}
             </span>
           </div>
           <div className="w-full rounded-full h-1.5" style={{ background: 'var(--border-mid)' }}>
-            <div className={`h-1.5 rounded-full transition-all ${
-              creditsBar < 20 ? 'bg-red-400' : creditsBar < 50 ? 'bg-yellow-400' : 'bg-black dark:bg-white'
-            }`} style={{ width: `${creditsBar}%` }} />
+            <div className={`h-1.5 rounded-full transition-all ${creditBarColor}`} style={{ width: `${creditsBar}%` }} />
           </div>
           <p className="text-xs mt-1" style={{ color: 'var(--text-faint)' }}>
-            {loading ? 'Loading...' : `${credits} remaining`}
+            {loading ? 'Loading...' : `of ${monthlyCredits} this month`}
           </p>
+          {!loading && bankedCredits > 0 && (
+            <p className="text-xs mt-0.5 font-semibold" style={{ color: 'var(--text-faint)' }}>
+              Bank: {bankedCredits} saved
+            </p>
+          )}
         </div>
 
         <div className="rounded-xl p-3" style={{ background: 'var(--bg)' }}>
@@ -365,6 +382,7 @@ export default function Sidebar() {
 
   return (
     <>
+      <ComposeShortcut />
       {/* Mobile hamburger button */}
       <button
         onClick={() => setMobileOpen(true)}

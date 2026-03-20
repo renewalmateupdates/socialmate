@@ -65,6 +65,7 @@ function DashboardInner() {
   const [upcomingPosts, setUpcomingPosts] = useState<Post[]>([])
   const [recentPosts, setRecentPosts] = useState<Post[]>([])
   const [weekCounts, setWeekCounts] = useState<number[]>([0,0,0,0,0,0,0])
+  const [streak, setStreak] = useState(0)
   const { plan, credits } = useWorkspace()
 
   useEffect(() => {
@@ -125,6 +126,14 @@ function DashboardInner() {
         })
         setWeekCounts(counts)
       }
+
+      // Load posting streak
+      const { data: settingsData } = await supabase
+        .from('user_settings')
+        .select('current_streak')
+        .eq('user_id', user.id)
+        .single()
+      if (settingsData?.current_streak) setStreak(settingsData.current_streak)
 
       setUser(user)
       setProfile(profile)
@@ -246,6 +255,22 @@ function DashboardInner() {
                 <span className={`text-2xl font-extrabold ${s.color}`}>{s.value}</span>
               </div>
             ))}
+
+            {/* Streak card */}
+            <div className="col-span-2 bg-white border border-gray-100 rounded-2xl p-3 flex items-center gap-3">
+              <div className="text-2xl">🔥</div>
+              <div>
+                <div className="text-xs text-gray-400 mb-0.5">Posting Streak</div>
+                <div className="text-xl font-extrabold text-orange-500">
+                  {streak} day{streak !== 1 ? 's' : ''}
+                </div>
+              </div>
+              {streak >= 7 && (
+                <div className="ml-auto text-xs font-bold bg-orange-50 text-orange-600 px-2 py-1 rounded-full">
+                  🏆 On fire!
+                </div>
+              )}
+            </div>
           </div>
 
           {/* MAIN GRID */}

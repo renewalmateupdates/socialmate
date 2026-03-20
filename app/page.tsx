@@ -107,13 +107,15 @@ const COMPARISON = [
 ]
 
 const FOOTER_LINKS = [
-  { label: 'Features',  href: '/features'  },
-  { label: 'Pricing',   href: '/pricing'   },
-  { label: 'Affiliate', href: '/affiliate' },
-  { label: 'Our Story', href: '/story'     },
-  { label: 'Blog',      href: '/blog'      },
-  { label: 'Privacy',   href: '/privacy'   },
-  { label: 'Terms',     href: '/terms'     },
+  { label: 'Features',        href: '/features'  },
+  { label: 'Pricing',         href: '/pricing'   },
+  { label: 'Roadmap',         href: '/roadmap'   },
+  { label: 'Affiliate',       href: '/affiliate' },
+  { label: 'Our Story',       href: '/story'     },
+  { label: 'Blog',            href: '/blog'      },
+  { label: 'Share Feedback',  href: '#feedback'  },
+  { label: 'Privacy',         href: '/privacy'   },
+  { label: 'Terms',           href: '/terms'     },
 ]
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ ref?: string }> }) {
@@ -121,7 +123,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
   const refCode = params?.ref || ''
 
   // Check if the current user is the admin (server-side, so nothing leaks to the DOM)
-  let isAdmin = false
+  let isAdmin    = false
+  let isLoggedIn = false
   try {
     const cookieStore = await cookies()
     const supabase = createServerClient(
@@ -135,11 +138,12 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
       }
     )
     const { data: { user } } = await supabase.auth.getUser()
-    if (user && user.id === process.env.ADMIN_USER_ID) {
-      isAdmin = true
+    if (user) {
+      isLoggedIn = true
+      if (user.id === process.env.ADMIN_USER_ID) isAdmin = true
     }
   } catch {
-    // If auth check fails, isAdmin stays false — safe default
+    // If auth check fails, both stay false — safe default
   }
 
   const live    = PLATFORMS.filter(p => p.status === 'live')
@@ -162,6 +166,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
             {[
               { label: 'Features',  href: '/features'  },
               { label: 'Pricing',   href: '/pricing'   },
+              { label: 'Roadmap',   href: '/roadmap'   },
               { label: 'Platforms', href: '#platforms' },
               { label: 'Our Story', href: '/story'     },
             ].map(link => (
@@ -172,13 +177,22 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
             ))}
           </nav>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm font-semibold text-gray-500 hover:text-black transition-all hidden sm:block">
-              Sign in
-            </Link>
-            <Link href="/signup"
-              className="bg-black text-white text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
-              Get started free →
-            </Link>
+            {isLoggedIn ? (
+              <Link href="/dashboard"
+                className="bg-black text-white text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
+                Dashboard →
+              </Link>
+            ) : (
+              <>
+                <Link href="/login" className="text-sm font-semibold text-gray-500 hover:text-black transition-all hidden sm:block">
+                  Sign in
+                </Link>
+                <Link href="/signup"
+                  className="bg-black text-white text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
+                  Get started free →
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -239,7 +253,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             {[
-              { icon: '🤖', value: '100',     label: 'AI credits / month'           },
+              { icon: '🤖', value: '50',      label: 'AI credits / month'           },
               { icon: '📅', value: '2 weeks', label: 'Scheduling window'            },
               { icon: '👥', value: '2',        label: 'Team seats included'         },
               { icon: '💾', value: '1 GB',     label: 'Media storage'               },
@@ -321,8 +335,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">AI-Powered</p>
             <h2 className="text-3xl font-extrabold tracking-tight mb-3">12 AI tools built in</h2>
             <p className="text-sm text-gray-500 max-w-xl mx-auto">
-              Every tool runs on Google Gemini. 100 credits included free every month —
-              no separate AI subscription, no hidden costs.
+              Every tool runs on Google Gemini. 50 credits included free every month —
+              no separate AI subscription, no hidden costs. Credits exist to keep the service sustainable for everyone.
             </p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
@@ -572,7 +586,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         <div className="max-w-3xl mx-auto px-6 text-center">
           <h2 className="text-4xl font-extrabold tracking-tight mb-4">Ready to get started?</h2>
           <p className="text-gray-400 mb-8 text-sm max-w-lg mx-auto">
-            Free forever. No card required. 100 AI credits on your first post. Set up in 60 seconds.
+            Free forever. No card required. 50 AI credits per month, included free. Set up in 60 seconds.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/signup"

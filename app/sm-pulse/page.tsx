@@ -186,23 +186,41 @@ export default function SMPulsePage() {
             </div>
           )}
 
-          {/* PREVIEW STATE */}
+          {/* PREVIEW STATE — blurred sample results */}
           {!result && !scanning && (
-            <div className="bg-white border border-gray-100 rounded-2xl p-5">
-              <h2 className="text-sm font-extrabold mb-4">What you'll see after scanning</h2>
-              <div className="space-y-3 opacity-40 pointer-events-none select-none">
-                {[1,2,3,4].map(i => (
-                  <div key={i} className="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0">
-                    <div className="w-7 h-7 bg-gray-200 rounded-full flex-shrink-0" />
-                    <div className="flex-1">
-                      <div className="w-36 h-3 bg-gray-200 rounded mb-1.5" />
-                      <div className="w-24 h-2.5 bg-gray-100 rounded" />
-                    </div>
-                    <div className="w-16 h-6 bg-gray-200 rounded-xl" />
-                  </div>
-                ))}
+            <div className="relative bg-white border border-gray-100 rounded-2xl overflow-hidden">
+              <div className="p-5 filter blur-sm pointer-events-none select-none" aria-hidden="true">
+                <h2 className="text-sm font-extrabold mb-4">🔥 Trending Now in Your Niche</h2>
+                <div className="bg-gray-50 rounded-xl p-4 text-xs text-gray-700 leading-relaxed whitespace-pre-wrap font-sans">
+{`## TOP TRENDING TOPICS THIS WEEK
+
+🚀 #1 — AI productivity workflows (+340% engagement spike)
+   Why it's trending: New ChatGPT feature dropped Tuesday, Reddit r/productivity exploded
+   Best format: "I tried X for 7 days" story format
+   Peak window: Next 18–24 hours
+
+📈 #2 — Founder burnout & mental health
+   Why it's trending: Viral Twitter thread, 3.2M impressions
+   Best format: Raw, vulnerable short-form video
+   Peak window: 2–3 days remaining
+
+🎯 #3 — "Silent quitting" → "Loud thriving"
+   Why it's trending: Counter-narrative gaining traction
+   Best format: Before/after carousel
+   Peak window: 4–5 days
+
+💡 RECOMMENDED ACTION:
+   Post on topic #1 within 24h using the story format.
+   Engage with the burnout thread before creating your post.`}
+                </div>
               </div>
-              <p className="text-xs text-center text-gray-400 mt-4">Enter your niche above and run a scan to see your trend report</p>
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/70 backdrop-blur-[2px]">
+                <div className="text-center px-6">
+                  <div className="text-3xl mb-3">🔥</div>
+                  <p className="text-sm font-extrabold mb-1">Your trend report appears here</p>
+                  <p className="text-xs text-gray-500 max-w-xs">Enter your niche above and run a scan to unlock real-time trend intelligence for your content.</p>
+                </div>
+              </div>
             </div>
           )}
 

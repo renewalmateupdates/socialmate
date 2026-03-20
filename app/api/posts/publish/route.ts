@@ -56,8 +56,9 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', postId)
 
-    // First-post credit trigger
+    // First-post credit trigger + streak update
     await handleFirstPostCredits(userId)
+    if (!allFailed) await updateStreak(userId)
 
     return NextResponse.json({
       success: !allFailed,
@@ -123,12 +124,46 @@ export async function POST(request: NextRequest) {
       .eq('id', postId)
 
     await handleFirstPostCredits(userId)
+    if (!allFailed) await updateStreak(userId)
 
     return NextResponse.json({
       success: !allFailed,
       results,
       status: allFailed ? 'failed' : someFailed ? 'partial' : 'published',
     })
+  }
+}
+
+async function updateStreak(userId: string) {
+  try {
+    const { data: settings } = await getSupabaseAdmin()
+      .from('user_settings')
+      .select('current_streak, longest_streak, last_post_date')
+      .eq('user_id', userId)
+      .single()
+
+    const today     = new Date().toISOString().split('T')[0]
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
+
+    const lastDate       = settings?.last_post_date
+    const currentStreak  = settings?.current_streak ?? 0
+    const longestStreak  = settings?.longest_streak ?? 0
+
+    if (lastDate === today) return // Already posted today — no change
+
+    const newStreak = lastDate === yesterday ? currentStreak + 1 : 1
+    const newLongest = Math.max(newStreak, longestStreak)
+
+    await getSupabaseAdmin()
+      .from('user_settings')
+      .update({
+        current_streak: newStreak,
+        longest_streak: newLongest,
+        last_post_date: today,
+      })
+      .eq('user_id', userId)
+  } catch (err) {
+    console.error('Streak update error:', err)
   }
 }
 
