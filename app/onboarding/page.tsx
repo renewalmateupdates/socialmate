@@ -576,8 +576,8 @@ function OnboardingInner() {
               <div className="text-center mb-6">
                 <div className="text-5xl mb-4">📱</div>
                 <h2 className="text-2xl font-extrabold tracking-tight mb-2">Which platforms do you use?</h2>
-                <p className="text-gray-400 text-sm">
-                  Your <span className={`font-bold ${selectedPlan === 'agency' ? 'text-purple-600' : 'text-black'}`}>{planConfig.label}</span> plan supports {maxPlatforms} connected account{maxPlatforms > 1 ? 's' : ''} · 4 live now · 12 more coming soon
+                <p className="text-gray-400 dark:text-gray-500 text-sm">
+                  Your <span className={`font-bold ${selectedPlan === 'agency' ? 'text-purple-600' : 'text-black dark:text-white'}`}>{planConfig.label}</span> plan supports {maxPlatforms} connected account{maxPlatforms > 1 ? 's' : ''} · 4 live now · 12 more coming soon
                 </p>
               </div>
 
@@ -595,15 +595,15 @@ function OnboardingInner() {
                       onClick={() => togglePlatform(p.id)}
                       className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${
                         !p.available || isAtLimit
-                          ? 'border-gray-50 bg-gray-50 opacity-40 cursor-not-allowed'
+                          ? 'border-gray-50 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 opacity-40 cursor-not-allowed'
                           : isSelected
-                          ? 'border-black bg-black/5'
-                          : 'border-gray-100 hover:border-gray-300'
+                          ? 'border-black bg-black/5 dark:bg-white/5'
+                          : 'border-gray-100 dark:border-gray-700 hover:border-gray-300'
                       }`}>
                       <span className="text-xl">{p.icon}</span>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-bold truncate">{p.label}</p>
-                        <p className="text-xs text-gray-400">{p.available ? p.desc : 'Coming soon'}</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500">{p.available ? p.desc : 'Coming soon'}</p>
                       </div>
                       {isSelected && p.available && <span className="text-black font-bold text-sm flex-shrink-0">✓</span>}
                     </button>
@@ -611,13 +611,13 @@ function OnboardingInner() {
                 })}
               </div>
 
-              <p className="text-xs text-center text-gray-400 mb-6">
+              <p className="text-xs text-center text-gray-400 dark:text-gray-500 mb-6">
                 {selectedPlatforms.length} / {maxPlatforms} accounts selected
               </p>
 
               <div className="flex gap-3">
                 <button onClick={() => setStep(3)}
-                  className="px-6 py-3 border border-gray-200 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
+                  className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
                   ← Back
                 </button>
                 {selectedPlatforms.length > 0 ? (
@@ -627,7 +627,7 @@ function OnboardingInner() {
                   </button>
                 ) : (
                   <button onClick={() => setStep(5)}
-                    className="flex-1 py-3 border border-gray-200 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all text-gray-500">
+                    className="flex-1 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all text-gray-500 dark:text-gray-400">
                     Skip for now →
                   </button>
                 )}
@@ -641,7 +641,7 @@ function OnboardingInner() {
               <div className="text-center mb-6">
                 <div className="text-5xl mb-4">🔐</div>
                 <h2 className="text-2xl font-extrabold tracking-tight mb-2">Secure your account</h2>
-                <p className="text-gray-400 text-sm">Two-factor authentication adds a second layer of protection. Takes 60 seconds.</p>
+                <p className="text-gray-400 dark:text-gray-500 text-sm">Two-factor authentication adds a second layer of protection. Takes 60 seconds.</p>
               </div>
 
               {mfaDone ? (
@@ -652,7 +652,7 @@ function OnboardingInner() {
                 </div>
               ) : mfaStep === 'idle' ? (
                 <div className="space-y-4 mb-6">
-                  <div className="bg-gray-50 border border-gray-100 rounded-2xl p-5">
+                  <div className="bg-gray-50 dark:bg-gray-800 border border-theme rounded-2xl p-5">
                     <div className="flex items-start gap-4">
                       <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white text-lg flex-shrink-0">🛡️</div>
                       <div>
@@ -663,7 +663,7 @@ function OnboardingInner() {
                             'Blocks unauthorized logins even if password is leaked',
                             'Required for Agency plan team security compliance',
                           ].map(r => (
-                            <div key={r} className="flex items-center gap-2 text-xs text-gray-600">
+                            <div key={r} className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
                               <span className="text-green-500 font-bold flex-shrink-0">✓</span>{r}
                             </div>
                           ))}
@@ -680,22 +680,22 @@ function OnboardingInner() {
                 </div>
               ) : (
                 <div className="space-y-5 mb-6">
-                  <div className="bg-gray-50 rounded-2xl p-5">
-                    <p className="text-xs font-bold text-gray-500 mb-3 uppercase tracking-wide">Step 1 — Scan with your authenticator app</p>
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-5">
+                    <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wide">Step 1 — Scan with your authenticator app</p>
                     <div className="flex justify-center mb-4">
                       <img src={mfaQR} alt="2FA QR Code" className="w-40 h-40 rounded-xl" />
                     </div>
-                    <p className="text-xs text-gray-400 text-center mb-2">Can't scan? Enter this code manually:</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 text-center mb-2">Can't scan? Enter this code manually:</p>
                     <div className="bg-surface border border-theme-md rounded-xl px-4 py-2 text-center">
-                      <p className="text-xs font-mono font-bold tracking-widest text-gray-700 break-all">{mfaSecret}</p>
+                      <p className="text-xs font-mono font-bold tracking-widest text-gray-700 dark:text-gray-300 break-all">{mfaSecret}</p>
                     </div>
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">Step 2 — Enter the 6-digit code</p>
+                    <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">Step 2 — Enter the 6-digit code</p>
                     <input type="text" inputMode="numeric" maxLength={6} value={mfaCode}
                       onChange={e => setMfaCode(e.target.value.replace(/\D/g, ''))}
                       placeholder="000000"
-                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-center font-mono tracking-widest outline-none focus:border-black transition-all" />
+                      className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl px-4 py-3 text-sm text-center font-mono tracking-widest outline-none focus:border-black transition-all" />
                     {mfaError && <p className="text-xs text-red-500 font-semibold mt-2">❌ {mfaError}</p>}
                   </div>
                   <button onClick={handleVerify2FA} disabled={mfaLoading || mfaCode.length !== 6}
@@ -709,20 +709,20 @@ function OnboardingInner() {
 
               <div className="flex gap-3">
                 <button onClick={() => setStep(4)}
-                  className="px-6 py-3 border border-gray-200 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
+                  className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
                   ← Back
                 </button>
                 <button onClick={() => setStep(6)}
                   className={`flex-1 py-3 text-sm font-bold rounded-2xl transition-all ${
                     mfaDone
                       ? 'bg-black text-white hover:opacity-80'
-                      : 'border border-gray-200 text-gray-500 hover:border-gray-400'
+                      : 'border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-400'
                   }`}>
                   {mfaDone ? 'Continue →' : 'Skip for now →'}
                 </button>
               </div>
               {!mfaDone && (
-                <p className="text-xs text-center text-gray-400 mt-2">You can enable 2FA anytime in Settings → Security</p>
+                <p className="text-xs text-center text-gray-400 dark:text-gray-500 mt-2">You can enable 2FA anytime in Settings → Security</p>
               )}
             </div>
           )}
@@ -733,7 +733,7 @@ function OnboardingInner() {
               <div className="text-center mb-6">
                 <div className="text-5xl mb-4">✏️</div>
                 <h2 className="text-2xl font-extrabold tracking-tight mb-2">Write your first post</h2>
-                <p className="text-gray-400 text-sm">Publish or schedule this to unlock your {planConfig.credits.toLocaleString()} AI credits</p>
+                <p className="text-gray-400 dark:text-gray-500 text-sm">Publish or schedule this to unlock your {planConfig.credits.toLocaleString()} AI credits</p>
               </div>
 
               <div className="bg-green-50 border border-green-100 rounded-2xl px-4 py-3 mb-5">
@@ -748,8 +748,8 @@ function OnboardingInner() {
                     { label: 'First post',         done: firstPost.trim().length > 0  },
                   ].map(item => (
                     <div key={item.label} className="flex items-center gap-1.5">
-                      <span className={`text-xs font-bold ${item.done ? 'text-green-600' : 'text-gray-400'}`}>{item.done ? '✓' : '○'}</span>
-                      <span className={`text-xs ${item.done ? 'text-green-700 font-semibold' : 'text-gray-400'}`}>{item.label}</span>
+                      <span className={`text-xs font-bold ${item.done ? 'text-green-600' : 'text-gray-400 dark:text-gray-500'}`}>{item.done ? '✓' : '○'}</span>
+                      <span className={`text-xs ${item.done ? 'text-green-700 font-semibold' : 'text-gray-400 dark:text-gray-500'}`}>{item.label}</span>
                     </div>
                   ))}
                 </div>
@@ -762,22 +762,22 @@ function OnboardingInner() {
                       const pl = PLATFORMS.find(pl => pl.id === p)
                       return pl ? <span key={p} className="text-lg">{pl.icon}</span> : null
                     })}
-                    {selectedPlatforms.length > 6 && <span className="text-xs text-gray-400">+{selectedPlatforms.length - 6} more</span>}
+                    {selectedPlatforms.length > 6 && <span className="text-xs text-gray-400 dark:text-gray-500">+{selectedPlatforms.length - 6} more</span>}
                   </div>
                 )}
                 <textarea value={firstPost} onChange={e => setFirstPost(e.target.value)}
                   placeholder={`Write something for your audience...\n\nTip: Use [brackets] for fill-in-the-blank sections`}
                   rows={5}
-                  className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-black transition-all resize-none"
+                  className="w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-black transition-all resize-none"
                   autoFocus />
                 <div className="flex items-center justify-between mt-1.5">
-                  <p className="text-xs text-gray-400">Saved as a draft — edit before publishing</p>
-                  <p className="text-xs text-gray-400">{firstPost.length} chars</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">Saved as a draft — edit before publishing</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">{firstPost.length} chars</p>
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-xl p-4 mb-6">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Need inspiration?</p>
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-6">
+                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-2">Need inspiration?</p>
                 <div className="space-y-1.5">
                   {[
                     "Excited to share something new with you all 🎉 [describe what's coming]",
@@ -786,7 +786,7 @@ function OnboardingInner() {
                     "Something I wish I knew earlier about [your niche]: [insight]",
                   ].map(idea => (
                     <button key={idea} onClick={() => setFirstPost(idea)}
-                      className="w-full text-left text-xs text-gray-500 hover:text-black p-2 rounded-lg hover:bg-white transition-all">
+                      className="w-full text-left text-xs text-gray-500 dark:text-gray-400 hover:text-black p-2 rounded-lg hover:bg-white dark:hover:bg-gray-700 transition-all">
                       → {idea.length > 70 ? idea.slice(0, 70) + '...' : idea}
                     </button>
                   ))}
@@ -795,7 +795,7 @@ function OnboardingInner() {
 
               <div className="flex gap-3">
                 <button onClick={() => setStep(5)}
-                  className="px-6 py-3 border border-gray-200 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
+                  className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
                   ← Back
                 </button>
                 {firstPost.trim() ? (
@@ -805,7 +805,7 @@ function OnboardingInner() {
                   </button>
                 ) : (
                   <button onClick={() => setStep(7)}
-                    className="flex-1 py-3 border border-gray-200 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all text-gray-500">
+                    className="flex-1 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all text-gray-500 dark:text-gray-400">
                     Skip for now →
                   </button>
                 )}
@@ -820,7 +820,7 @@ function OnboardingInner() {
               <h2 className="text-3xl font-extrabold tracking-tight mb-2">
                 You're all set, {displayName || 'friend'}!
               </h2>
-              <p className="text-gray-400 mb-2 text-sm">Your {planConfig.label} account is ready.</p>
+              <p className="text-gray-400 dark:text-gray-500 mb-2 text-sm">Your {planConfig.label} account is ready.</p>
               <div className="flex justify-center mb-6"><PlanBadge /></div>
 
               <div className={`rounded-2xl p-5 mb-6 text-left ${
@@ -870,16 +870,16 @@ function OnboardingInner() {
                   ] : []),
                 ].map(action => (
                   <div key={action.title}
-                    className="flex items-center gap-4 p-4 border border-gray-100 rounded-2xl hover:border-gray-300 transition-all group">
-                    <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
+                    className="flex items-center gap-4 p-4 border border-theme rounded-2xl hover:border-gray-300 dark:hover:border-gray-600 transition-all group">
+                    <div className="w-10 h-10 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
                       {action.icon}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold">{action.title}</p>
-                      <p className="text-xs text-gray-400">{action.desc}</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500">{action.desc}</p>
                     </div>
                     <Link href={action.href}
-                      className="text-xs font-bold text-gray-400 group-hover:text-black transition-colors flex-shrink-0">
+                      className="text-xs font-bold text-gray-400 dark:text-gray-500 group-hover:text-black transition-colors flex-shrink-0">
                       {action.cta} →
                     </Link>
                   </div>
@@ -890,7 +890,7 @@ function OnboardingInner() {
                 className="w-full py-4 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all disabled:opacity-50">
                 {saving ? 'Setting up your account...' : 'Go to Dashboard →'}
               </button>
-              <p className="text-xs text-gray-400 mt-4">
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-4">
                 Everything can be changed anytime in <Link href="/settings" className="underline">Settings</Link>
               </p>
             </div>
