@@ -6,12 +6,20 @@ import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 
 const THEMES = [
-  { id: 'white',  label: 'Clean White', bg: 'bg-white',       text: 'text-gray-900', btn: 'bg-gray-900 text-white'    },
-  { id: 'black',  label: 'Midnight',    bg: 'bg-gray-950',    text: 'text-white',    btn: 'bg-white text-gray-900'    },
-  { id: 'gray',   label: 'Soft Gray',   bg: 'bg-gray-100',    text: 'text-gray-800', btn: 'bg-gray-800 text-white'    },
-  { id: 'blue',   label: 'Ocean Blue',  bg: 'bg-blue-600',    text: 'text-white',    btn: 'bg-white text-blue-600'    },
-  { id: 'purple', label: 'Deep Purple', bg: 'bg-purple-700',  text: 'text-white',    btn: 'bg-white text-purple-700'  },
-  { id: 'green',  label: 'Forest',      bg: 'bg-emerald-700', text: 'text-white',    btn: 'bg-white text-emerald-700' },
+  { id: 'white',    label: 'Clean White', bg: 'bg-white',         text: 'text-gray-900',    btn: 'bg-gray-900 text-white'       },
+  { id: 'black',    label: 'Midnight',    bg: 'bg-gray-950',      text: 'text-white',       btn: 'bg-white text-gray-900'       },
+  { id: 'gray',     label: 'Soft Gray',   bg: 'bg-gray-100',      text: 'text-gray-800',    btn: 'bg-gray-800 text-white'       },
+  { id: 'blue',     label: 'Ocean Blue',  bg: 'bg-blue-600',      text: 'text-white',       btn: 'bg-white text-blue-600'       },
+  { id: 'purple',   label: 'Deep Purple', bg: 'bg-purple-700',    text: 'text-white',       btn: 'bg-white text-purple-700'     },
+  { id: 'green',    label: 'Forest',      bg: 'bg-emerald-700',   text: 'text-white',       btn: 'bg-white text-emerald-700'    },
+  { id: 'sunset',   label: 'Sunset',      bg: 'bg-orange-500',    text: 'text-white',       btn: 'bg-white text-orange-500'     },
+  { id: 'rose',     label: 'Rose Gold',   bg: 'bg-rose-100',      text: 'text-rose-900',    btn: 'bg-rose-700 text-white'       },
+  { id: 'slate',    label: 'Slate',       bg: 'bg-slate-700',     text: 'text-slate-100',   btn: 'bg-slate-100 text-slate-900'  },
+  { id: 'amber',    label: 'Amber',       bg: 'bg-amber-400',     text: 'text-amber-950',   btn: 'bg-amber-950 text-amber-100'  },
+  { id: 'neon',     label: 'Neon',        bg: 'bg-black',         text: 'text-green-400',   btn: 'bg-green-400 text-black'      },
+  { id: 'lavender', label: 'Lavender',    bg: 'bg-violet-100',    text: 'text-violet-900',  btn: 'bg-violet-600 text-white'     },
+  { id: 'sand',     label: 'Sand',        bg: 'bg-yellow-50',     text: 'text-yellow-900',  btn: 'bg-yellow-800 text-yellow-50' },
+  { id: 'crimson',  label: 'Crimson',     bg: 'bg-red-700',       text: 'text-white',       btn: 'bg-white text-red-700'        },
 ]
 
 const BTN_STYLES = [

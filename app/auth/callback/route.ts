@@ -93,10 +93,26 @@ export async function GET(request: NextRequest) {
         cookieStore.delete('sm_ref')
       }
  
-      // Welcome email
+      // Welcome email — only on first signup (account created within 60s + no flag set)
       try {
         const email = session.user.email
-        if (email) {
+        const createdAt = new Date(session.user.created_at).getTime()
+        const isNewAccount = Date.now() - createdAt < 60_000
+
+        const { data: emailFlagRow } = await adminSupabase
+          .from('user_settings')
+          .select('welcome_email_sent')
+          .eq('user_id', session.user.id)
+          .single()
+
+        const alreadySent = emailFlagRow?.welcome_email_sent === true
+
+        if (email && isNewAccount && !alreadySent) {
+          await adminSupabase
+            .from('user_settings')
+            .update({ welcome_email_sent: true })
+            .eq('user_id', session.user.id)
+
           await getResend().emails.send({
             from: 'SocialMate <hello@socialmate.studio>',
             to: email,
@@ -114,7 +130,7 @@ export async function GET(request: NextRequest) {
                   <div style="font-size: 13px; font-weight: 700; color: #111; margin-bottom: 12px;">Here's what you can do right now:</div>
                   <div style="font-size: 13px; color: #555; line-height: 2;">
                     📅 &nbsp;<a href="${appUrl}/calendar" style="color: #000;">Schedule your first post</a><br/>
-                    🤖 &nbsp;<a href="${appUrl}/ai-features" style="color: #000;">Try the AI caption tools</a><br/>
+                    🤖 &nbsp;<a href="${appUrl}/ai-features" style="color: #000;">Try the AI caption tools (50 credits free/month)</a><br/>
                     📊 &nbsp;<a href="${appUrl}/analytics" style="color: #000;">Set up your analytics</a><br/>
                     🔗 &nbsp;<a href="${appUrl}/link-in-bio" style="color: #000;">Build your link in bio page</a>
                   </div>

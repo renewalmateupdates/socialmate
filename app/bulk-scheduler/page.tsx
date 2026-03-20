@@ -25,11 +25,12 @@ const COMING_SOON_PLATFORMS = [
   { id: 'twitter',   label: 'X/Twitter',  icon: '🐦' },
 ]
 
-const TIMES = [
-  '06:00','07:00','08:00','09:00','10:00','11:00','12:00',
-  '13:00','14:00','15:00','16:00','17:00','18:00','19:00',
-  '20:00','21:00','22:00',
+const HOURS = [
+  '06','07','08','09','10','11','12',
+  '13','14','15','16','17','18','19',
+  '20','21','22',
 ]
+const MINUTES = ['00','15','30','45']
 
 const PLAN_MAX_ROWS: Record<string, number> = {
   free:   10,
@@ -83,8 +84,13 @@ export default function BulkScheduler() {
     { id: makeId(), content: '', platforms: ['discord'], date: getNextDate(2), time: '09:00', status: 'ready' },
     { id: makeId(), content: '', platforms: ['discord'], date: getNextDate(3), time: '09:00', status: 'ready' },
   ])
+  // Track per-row minute selection separately since BulkPost.time is HH:MM string
+  const getHour   = (t: string) => t.split(':')[0] ?? '09'
+  const getMinute = (t: string) => t.split(':')[1] ?? '00'
   const [defaultPlatforms, setDefaultPlatforms] = useState<string[]>(['discord'])
-  const [defaultTime, setDefaultTime] = useState('09:00')
+  const [defaultHour, setDefaultHour]     = useState('09')
+  const [defaultMinute, setDefaultMinute] = useState('00')
+  const defaultTime = `${defaultHour}:${defaultMinute}`
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const router = useRouter()
@@ -313,10 +319,17 @@ export default function BulkScheduler() {
                 ))}
               </div>
               <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
-                <select value={defaultTime} onChange={e => setDefaultTime(e.target.value)}
-                  className="px-3 py-1.5 text-xs border border-gray-200 rounded-xl focus:outline-none bg-white font-semibold">
-                  {TIMES.map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
+                <div className="flex items-center gap-1">
+                  <select value={defaultHour} onChange={e => setDefaultHour(e.target.value)}
+                    className="px-2 py-1.5 text-xs border border-gray-200 rounded-xl focus:outline-none bg-white font-semibold">
+                    {HOURS.map(h => <option key={h} value={h}>{h}</option>)}
+                  </select>
+                  <span className="text-xs font-bold text-gray-400">:</span>
+                  <select value={defaultMinute} onChange={e => setDefaultMinute(e.target.value)}
+                    className="px-2 py-1.5 text-xs border border-gray-200 rounded-xl focus:outline-none bg-white font-semibold">
+                    {MINUTES.map(m => <option key={m} value={m}>{m}</option>)}
+                  </select>
+                </div>
                 <button onClick={autoFillDates}
                   className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all whitespace-nowrap">
                   🗓 Auto-fill Dates
@@ -363,11 +376,19 @@ export default function BulkScheduler() {
                           ? 'border-red-300 text-red-500'
                           : 'border-gray-200 focus:border-gray-400'
                       }`} />
-                    <select value={post.time}
-                      onChange={e => updatePost(post.id, 'time', e.target.value)}
-                      className="px-2.5 py-1.5 text-xs border border-gray-200 rounded-xl focus:outline-none bg-white font-semibold">
-                      {TIMES.map(t => <option key={t} value={t}>{t}</option>)}
-                    </select>
+                    <div className="flex items-center gap-0.5">
+                      <select value={getHour(post.time)}
+                        onChange={e => updatePost(post.id, 'time', `${e.target.value}:${getMinute(post.time)}`)}
+                        className="px-2 py-1.5 text-xs border border-gray-200 rounded-xl focus:outline-none bg-white font-semibold">
+                        {HOURS.map(h => <option key={h} value={h}>{h}</option>)}
+                      </select>
+                      <span className="text-xs font-bold text-gray-400">:</span>
+                      <select value={getMinute(post.time)}
+                        onChange={e => updatePost(post.id, 'time', `${getHour(post.time)}:${e.target.value}`)}
+                        className="px-2 py-1.5 text-xs border border-gray-200 rounded-xl focus:outline-none bg-white font-semibold">
+                        {MINUTES.map(m => <option key={m} value={m}>{m}</option>)}
+                      </select>
+                    </div>
                     <button onClick={() => removeRow(post.id)}
                       disabled={posts.length <= 1}
                       className="text-xs text-gray-300 hover:text-red-400 transition-all disabled:opacity-20 flex-shrink-0 ml-auto sm:ml-0">

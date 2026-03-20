@@ -1,5 +1,6 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { supabase } from '@/lib/supabase'
 
 type FeedbackType = 'bug' | 'feature' | 'general'
 
@@ -13,8 +14,19 @@ export default function FeedbackWidget() {
   const [open, setOpen]       = useState(false)
   const [type, setType]       = useState<FeedbackType>('general')
   const [message, setMessage] = useState('')
+  const [email, setEmail]     = useState('')
   const [loading, setLoading] = useState(false)
   const [done, setDone]       = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user?.email) {
+        setEmail(data.user.email)
+        setIsLoggedIn(true)
+      }
+    })
+  }, [])
 
   const handleSubmit = async () => {
     if (!message.trim()) return
@@ -23,7 +35,7 @@ export default function FeedbackWidget() {
       await fetch('/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, message }),
+        body: JSON.stringify({ type, message, email: email.trim() }),
       })
       setDone(true)
       setMessage('')
@@ -39,9 +51,9 @@ export default function FeedbackWidget() {
   }
 
   return (
-    <div className="fixed bottom-6 left-6 z-50">
+    <div className="fixed bottom-6 right-6 z-50">
       {open && (
-        <div className="mb-3 w-72 bg-white border border-gray-200 rounded-2xl shadow-xl p-5">
+        <div className="mb-3 w-80 bg-white border border-gray-200 rounded-2xl shadow-2xl p-5">
           {done ? (
             <div className="text-center py-4">
               <div className="text-3xl mb-2">🙏</div>
@@ -51,9 +63,9 @@ export default function FeedbackWidget() {
           ) : (
             <>
               <div className="flex items-center justify-between mb-4">
-                <p className="text-sm font-extrabold">Send Feedback</p>
+                <p className="text-sm font-extrabold">Share Feedback</p>
                 <button onClick={() => setOpen(false)}
-                  className="text-gray-300 hover:text-gray-500 transition-all text-lg leading-none">
+                  className="text-gray-300 hover:text-gray-500 transition-all text-xl leading-none">
                   ×
                 </button>
               </div>
@@ -64,8 +76,8 @@ export default function FeedbackWidget() {
                   <button key={t.id} onClick={() => setType(t.id)}
                     className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all border ${
                       type === t.id
-                        ? 'bg-black text-white border-black'
-                        : 'border-gray-200 text-gray-500 hover:border-gray-400'
+                        ? 'bg-pink-500 text-white border-pink-500'
+                        : 'border-gray-200 text-gray-500 hover:border-pink-300'
                     }`}>
                     {t.emoji} {t.label}
                   </button>
@@ -81,13 +93,27 @@ export default function FeedbackWidget() {
                   "Share anything on your mind..."
                 }
                 rows={4}
-                className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 outline-none resize-none focus:border-gray-400 transition-all placeholder:text-gray-300"
+                className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 outline-none resize-none focus:border-pink-400 transition-all placeholder:text-gray-300 mb-3"
               />
+
+              {!isLoggedIn && (
+                <input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="Your email (optional)"
+                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 outline-none focus:border-pink-400 transition-all mb-3"
+                />
+              )}
+
+              {isLoggedIn && email && (
+                <p className="text-xs text-gray-400 mb-3">Sending as {email}</p>
+              )}
 
               <button
                 onClick={handleSubmit}
                 disabled={!message.trim() || loading}
-                className="mt-3 w-full bg-black text-white text-xs font-bold py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                className="w-full bg-pink-500 text-white text-xs font-bold py-2.5 rounded-xl hover:bg-pink-600 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
                 {loading ? 'Sending...' : 'Send Feedback →'}
               </button>
 
@@ -101,7 +127,8 @@ export default function FeedbackWidget() {
 
       <button
         onClick={() => setOpen(o => !o)}
-        className="w-10 h-10 bg-black text-white rounded-full shadow-lg hover:opacity-80 transition-all flex items-center justify-center text-base">
+        title="Share feedback"
+        className="w-12 h-12 bg-pink-500 hover:bg-pink-600 text-white rounded-full shadow-lg transition-all flex items-center justify-center text-lg font-bold">
         {open ? '×' : '💬'}
       </button>
     </div>

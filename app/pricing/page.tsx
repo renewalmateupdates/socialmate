@@ -31,7 +31,7 @@ const PLANS = [
       { label: '1 connected account per platform'                              },
       { label: '2 team seats'                                                  },
       { label: '100 posts / month'                                             },
-      { label: '100 AI credits / month',           note: 'banks up to 150'    },
+      { label: '50 AI credits / month',            note: 'banks up to 75'     },
       { label: '1 GB media storage'                                            },
       { label: '2-week scheduling window'                                      },
       { label: '14-day & 30-day analytics'                                     },
@@ -178,7 +178,7 @@ const FAQ = [
   },
   {
     q: 'Can I earn extra credits?',
-    a: 'Yes — Pro and Agency subscribers get access to our referral program. When someone you refer upgrades to Pro you earn +50 credits, Agency earns you +100 credits.',
+    a: 'Yes — all users get access to the referral program. Every 5 paying referrals earns you +100 bonus credits, stacking with no cap.',
   },
   {
     q: 'What platforms are live right now?',
@@ -467,7 +467,7 @@ export default function Pricing() {
         {/* BOTTOM CTA */}
         <div className="text-center mt-12">
           <h2 className="text-2xl font-extrabold mb-2">Ready to get started?</h2>
-          <p className="text-sm text-gray-500 mb-6">No card required. Free forever. 100 AI credits on signup.</p>
+          <p className="text-sm text-gray-500 mb-6">No card required. Free forever. 50 AI credits per month, included free.</p>
           <div className="flex items-center justify-center gap-4">
             <Link href="/signup"
               className="bg-black text-white font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm">

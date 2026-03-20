@@ -6,7 +6,7 @@ import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 
 function SkeletonBox({ className }: { className?: string }) {
-  return <div className={`bg-gray-100 rounded-xl animate-pulse ${className}`} />
+  return <div className={`bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse ${className}`} />
 }
 
 const PLATFORM_ICONS: Record<string, string> = {
@@ -65,24 +65,39 @@ export default function Drafts() {
   }
 
   useEffect(() => {
-  loadPosts()
+    loadPosts()
 
-  // Realtime subscription — auto-update when post status changes
-  const channel = supabase
-    .channel('posts-status')
-    .on(
-      'postgres_changes',
-      { event: 'UPDATE', schema: 'public', table: 'posts' },
-      (payload) => {
-        setPosts(prev =>
-          prev.map(p => p.id === payload.new.id ? { ...p, ...payload.new } : p)
+    // Realtime subscription — auto-update when post status changes
+    const channel = supabase
+      .channel('posts-status')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'posts' },
+        (payload) => {
+          setPosts(prev =>
+            prev.map(p => p.id === payload.new.id ? { ...p, ...payload.new } : p)
+          )
+        }
+      )
+      .subscribe()
+
+    // Auto-refresh every 30s when there are past-due scheduled posts
+    const interval = setInterval(async () => {
+      const now = new Date().toISOString()
+      setPosts(prev => {
+        const hasPastDueScheduled = prev.some(
+          p => p.status === 'scheduled' && p.scheduled_at && p.scheduled_at <= now
         )
-      }
-    )
-    .subscribe()
+        if (hasPastDueScheduled) loadPosts()
+        return prev
+      })
+    }, 30_000)
 
-  return () => { supabase.removeChannel(channel) }
-}, [router])
+    return () => {
+      supabase.removeChannel(channel)
+      clearInterval(interval)
+    }
+  }, [router])
 
   const handleRefresh = () => {
     setLoading(true)
@@ -109,7 +124,7 @@ export default function Drafts() {
                    posts.filter(d => d.status === filter)
 
   const statusConfig: Record<string, { label: string; bg: string; text: string; icon: string }> = {
-    draft:     { label: 'Draft',     bg: 'bg-gray-100',   text: 'text-gray-500',   icon: '📂' },
+    draft:     { label: 'Draft',     bg: 'bg-gray-100 dark:bg-gray-800',   text: 'text-gray-500 dark:text-gray-400',   icon: '📂' },
     scheduled: { label: 'Scheduled', bg: 'bg-blue-100',   text: 'text-blue-600',   icon: '📅' },
     published: { label: 'Published', bg: 'bg-green-100',  text: 'text-green-700',  icon: '✅' },
     partial:   { label: 'Partial',   bg: 'bg-yellow-100', text: 'text-yellow-700', icon: '⚠️' },
@@ -117,7 +132,7 @@ export default function Drafts() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
@@ -125,7 +140,7 @@ export default function Drafts() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Posts</h1>
-              <p className="text-sm text-gray-400 mt-0.5">
+              <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">
                 {loading ? 'Loading...' : `${draftCount} draft${draftCount !== 1 ? 's' : ''} · ${scheduledCount} scheduled · ${publishedCount} published`}
               </p>
             </div>
@@ -133,7 +148,7 @@ export default function Drafts() {
               <button
                 onClick={handleRefresh}
                 disabled={loading}
-                className="text-xs font-bold px-4 py-2.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
+                className="text-xs font-bold px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
                 ↻ Refresh
               </button>
               <Link href="/compose"
@@ -152,17 +167,17 @@ export default function Drafts() {
                 { label: 'Published', value: publishedCount, icon: '✅', color: 'text-green-600' },
                 { label: 'Failed',    value: failedCount,    icon: '❌', color: 'text-red-500'   },
               ].map(stat => (
-                <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-4 text-center">
+                <div key={stat.label} className="bg-surface border border-theme rounded-2xl p-4 text-center">
                   <div className="text-xl mb-1">{stat.icon}</div>
                   <p className={`text-xl font-extrabold ${stat.color}`}>{stat.value}</p>
-                  <p className="text-xs text-gray-400 font-semibold mt-0.5">{stat.label}</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 font-semibold mt-0.5">{stat.label}</p>
                 </div>
               ))}
             </div>
           )}
 
           {/* FILTER TABS */}
-          <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-2xl p-1 mb-6 w-fit flex-wrap">
+          <div className="flex items-center gap-1 bg-surface border border-theme rounded-2xl p-1 mb-6 w-fit flex-wrap">
             {[
               { id: 'all',       label: `All (${posts.length})`         },
               { id: 'draft',     label: `Drafts (${draftCount})`        },
@@ -171,7 +186,7 @@ export default function Drafts() {
             ].map(tab => (
               <button key={tab.id} onClick={() => setFilter(tab.id as FilterType)}
                 className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
-                  filter === tab.id ? 'bg-black text-white' : 'text-gray-500 hover:text-black'
+                  filter === tab.id ? 'bg-black text-white' : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
                 }`}>
                 {tab.label}
               </button>
@@ -183,10 +198,10 @@ export default function Drafts() {
               {[1,2,3].map(i => <SkeletonBox key={i} className="h-24" />)}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="bg-white border border-gray-100 rounded-2xl p-12 text-center">
+            <div className="bg-surface border border-theme rounded-2xl p-12 text-center">
               <div className="text-4xl mb-3">📝</div>
               <p className="text-sm font-bold mb-1">No {filter === 'all' ? '' : filter + ' '}posts yet</p>
-              <p className="text-xs text-gray-400 mb-5">
+              <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">
                 {filter === 'scheduled' ? 'Schedule a post and it will appear here.' :
                  filter === 'published' ? 'Posts you publish will appear here.' :
                  'Start writing and save as a draft to come back to it later.'}
@@ -207,7 +222,7 @@ export default function Drafts() {
 
                 return (
                   <div key={post.id}
-                    className="bg-white border border-gray-100 rounded-2xl p-4 md:p-5 hover:border-gray-300 transition-all">
+                    className="bg-surface border border-theme rounded-2xl p-4 md:p-5 hover:border-gray-300 dark:hover:border-gray-600 transition-all">
 
                     <div className="flex items-start gap-4">
                       <div className="flex-1 min-w-0">
@@ -216,38 +231,38 @@ export default function Drafts() {
                             {status.icon} {status.label}
                           </span>
                           {post.scheduled_at && post.status === 'scheduled' && (
-                            <span className="text-xs text-gray-400">
+                            <span className="text-xs text-gray-400 dark:text-gray-500">
                               {new Date(post.scheduled_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                               {' '}at{' '}
                               {new Date(post.scheduled_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                             </span>
                           )}
                           {post.published_at && isPublished && (
-                            <span className="text-xs text-gray-400">
+                            <span className="text-xs text-gray-400 dark:text-gray-500">
                               {new Date(post.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                               {' '}at{' '}
                               {new Date(post.published_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                             </span>
                           )}
-                          <span className="text-xs text-gray-300 ml-auto">{timeAgo(post.created_at)}</span>
+                          <span className="text-xs text-gray-300 dark:text-gray-600 ml-auto">{timeAgo(post.created_at)}</span>
                         </div>
 
-                        <p className="text-sm text-gray-700 leading-relaxed line-clamp-2 mb-3">
-                          {post.content || <span className="text-gray-300 italic">No content</span>}
+                        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-2 mb-3">
+                          {post.content || <span className="text-gray-300 dark:text-gray-600 italic">No content</span>}
                         </p>
 
                         <div className="flex items-center gap-1.5 flex-wrap">
                           {(post.platforms || []).slice(0, 6).map((p: string) => (
-                            <span key={p} className="flex items-center gap-1 text-xs text-gray-500 bg-gray-50 px-2 py-0.5 rounded-full">
+                            <span key={p} className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 px-2 py-0.5 rounded-full">
                               <span>{PLATFORM_ICONS[p] || '📱'}</span>
                               <span className="hidden sm:inline">{PLATFORM_NAMES[p] || p}</span>
                             </span>
                           ))}
                           {(post.platforms || []).length > 6 && (
-                            <span className="text-xs text-gray-400">+{post.platforms.length - 6} more</span>
+                            <span className="text-xs text-gray-400 dark:text-gray-500">+{post.platforms.length - 6} more</span>
                           )}
                           {(!post.platforms || post.platforms.length === 0) && (
-                            <span className="text-xs text-gray-300">No platforms selected</span>
+                            <span className="text-xs text-gray-300 dark:text-gray-600">No platforms selected</span>
                           )}
                         </div>
                       </div>
@@ -269,7 +284,7 @@ export default function Drafts() {
                     </div>
 
                     {isConfirming && (
-                      <div className="mt-3 pt-3 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center gap-2">
+                      <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center gap-2">
                         <p className="text-xs text-red-600 font-semibold flex-1">
                           Permanently delete this {post.status === 'scheduled' ? 'scheduled post' : post.status === 'published' ? 'published post record' : 'draft'}? This cannot be undone.
                         </p>
@@ -281,7 +296,7 @@ export default function Drafts() {
                               : 'Yes, delete'}
                           </button>
                           <button onClick={() => setConfirmDelete(null)}
-                            className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                            className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
                             Cancel
                           </button>
                         </div>

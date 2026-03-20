@@ -184,23 +184,41 @@ export default function SMRadarPage() {
             </>
           )}
 
-          {/* PREVIEW STATE */}
+          {/* PREVIEW STATE — blurred sample report */}
           {!result && !generating && (
-            <div className="bg-white border border-gray-100 rounded-2xl p-5">
-              <h2 className="text-sm font-extrabold mb-4">What your report will include</h2>
-              <div className="space-y-3 opacity-40 pointer-events-none select-none">
-                {[1,2,3,4].map(i => (
-                  <div key={i} className="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0">
-                    <div className="w-8 h-8 bg-gray-200 rounded-full flex-shrink-0" />
-                    <div className="flex-1">
-                      <div className="w-24 h-2.5 bg-gray-200 rounded mb-1.5" />
-                      <div className="w-48 h-3 bg-gray-300 rounded" />
-                    </div>
-                    <div className="w-32 h-2.5 bg-gray-100 rounded hidden sm:block" />
-                  </div>
-                ))}
+            <div className="relative bg-white border border-gray-100 rounded-2xl overflow-hidden">
+              <div className="p-5 filter blur-sm pointer-events-none select-none" aria-hidden="true">
+                <h2 className="text-sm font-extrabold mb-4">📡 Your Growth Intelligence Report</h2>
+                <div className="bg-gray-50 rounded-xl p-4 text-xs text-gray-700 leading-relaxed whitespace-pre-wrap font-sans">
+{`## SM-RADAR: PERSONAL GROWTH INTELLIGENCE
+
+📊 CONTENT GAP ANALYSIS
+   Your biggest missed opportunity: Long-form educational content
+   Competitors post 4x more "how-to" content than you
+   Gap score: 8.4/10 — HIGH priority
+
+🎯 YOUR #1 CONTENT STRATEGY THIS WEEK
+   Format: 5-step educational carousel
+   Topic: "How I [outcome] in [timeframe] without [common obstacle]"
+   Post on: Tuesday or Wednesday, 9–11am
+   Expected reach boost: +40–60% vs. your current average
+
+🔍 COMPETITOR WEAKNESSES YOU CAN EXPLOIT
+   • @competitor1 has 0 video content — video beats text 3:1 in your niche
+   • No one in your niche posts on Sundays — wide-open posting window
+   • "Personal story" posts get 2x engagement — underutilized by all competitors
+
+💡 THIS WEEK'S SINGLE BEST MOVE:
+   Record a 60-second "what I wish I knew" video and post Sunday at 10am.`}
+                </div>
               </div>
-              <p className="text-xs text-center text-gray-400 mt-4">Enter your niche above and generate a report to see real insights</p>
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/70 backdrop-blur-[2px]">
+                <div className="text-center px-6">
+                  <div className="text-3xl mb-3">📡</div>
+                  <p className="text-sm font-extrabold mb-1">Your growth report appears here</p>
+                  <p className="text-xs text-gray-500 max-w-xs">Enter your niche above and generate a report to unlock personalized content strategy intelligence.</p>
+                </div>
+              </div>
             </div>
           )}
 

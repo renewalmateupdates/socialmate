@@ -459,14 +459,14 @@ function ComposeInner() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-50">
+      <div className="flex h-screen items-center justify-center bg-theme">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-5xl mx-auto">
@@ -474,7 +474,7 @@ function ComposeInner() {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Compose</h1>
-              <p className="text-sm text-gray-400 mt-0.5">
+              <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">
                 {activeWorkspace && !activeWorkspace.is_personal
                   ? `Posting as ${activeWorkspace.client_name || activeWorkspace.name}`
                   : 'Write, schedule, and publish your posts'}
@@ -482,7 +482,7 @@ function ComposeInner() {
             </div>
             <button
               onClick={() => setShowPreview(p => !p)}
-              className="lg:hidden text-xs font-bold px-3 py-2 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+              className="lg:hidden text-xs font-bold px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-gray-400 transition-all">
               {showPreview ? 'Hide Preview' : 'Preview'}
             </button>
           </div>
@@ -506,12 +506,12 @@ function ComposeInner() {
           )}
 
           {showPreview && (
-            <div className="lg:hidden mb-4 bg-white border border-gray-100 rounded-2xl p-4">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Preview</p>
-              <div className="bg-gray-50 rounded-xl p-4 min-h-24">
+            <div className="lg:hidden mb-4 bg-surface border border-theme rounded-2xl p-4">
+              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">Preview</p>
+              <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 min-h-24">
                 {content
                   ? <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{content}</p>
-                  : <p className="text-xs text-gray-300 text-center mt-4">Your post preview appears here</p>
+                  : <p className="text-xs text-gray-300 dark:text-gray-600 text-center mt-4">Your post preview appears here</p>
                 }
               </div>
               {content && selectedPlatforms.length > 0 && (
@@ -523,8 +523,8 @@ function ComposeInner() {
                     return (
                       <div key={id} className="flex items-center gap-2">
                         <span className="text-sm">{p.icon}</span>
-                        <span className="text-xs font-bold text-gray-500">{p.name}</span>
-                        <span className={`ml-auto text-xs font-bold ${over ? 'text-red-500' : 'text-gray-400'}`}>
+                        <span className="text-xs font-bold text-gray-500 dark:text-gray-400">{p.name}</span>
+                        <span className={`ml-auto text-xs font-bold ${over ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
                           {charCount}/{p.limit.toLocaleString()}{over && ' ⚠️'}
                         </span>
                       </div>
@@ -539,15 +539,15 @@ function ComposeInner() {
             <div className="lg:col-span-2 space-y-4">
 
               {/* PLATFORM SELECTOR */}
-              <div className="bg-white border border-gray-100 rounded-2xl p-4">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Platforms</p>
+              <div className="bg-surface border border-theme rounded-2xl p-4">
+                <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">Platforms</p>
                 <div className="flex flex-wrap gap-2">
                   {livePlatforms.map(p => (
                     <button key={p.id} onClick={() => togglePlatform(p.id)}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
                         selectedPlatforms.includes(p.id)
                           ? 'bg-black text-white border-black'
-                          : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'
+                          : 'bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-400'
                       }`}>
                       <span>{p.icon}</span>{p.name}
                     </button>
@@ -561,9 +561,9 @@ function ComposeInner() {
                   ))}
                   {COMING_SOON_PLATFORMS.map(p => (
                     <div key={p.id} title={`${p.name} — coming soon`}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border border-dashed border-gray-200 text-gray-300 cursor-not-allowed select-none">
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border border-dashed border-gray-200 dark:border-gray-700 text-gray-300 dark:text-gray-600 cursor-not-allowed select-none">
                       <span>{p.icon}</span><span>{p.name}</span>
-                      <span className="text-xs font-normal text-gray-300 ml-0.5">· Soon</span>
+                      <span className="text-xs font-normal text-gray-300 dark:text-gray-600 ml-0.5">· Soon</span>
                     </div>
                   ))}
                 </div>
@@ -577,8 +577,8 @@ function ComposeInner() {
 
               {/* DESTINATION SELECTOR */}
               {selectedPlatforms.some(p => DESTINATION_PLATFORMS.includes(p)) && (
-                <div className="bg-white border border-gray-100 rounded-2xl p-4">
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Post Destinations</p>
+                <div className="bg-surface border border-theme rounded-2xl p-4">
+                  <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">Post Destinations</p>
                   <div className="space-y-3">
                     {selectedPlatforms
                       .filter(p => DESTINATION_PLATFORMS.includes(p))
@@ -608,7 +608,7 @@ function ComposeInner() {
                                   ...prev,
                                   [platformId]: e.target.value,
                                 }))}
-                                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 bg-white font-semibold">
+                                className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-gray-400 bg-white dark:bg-gray-900 font-semibold">
                                 {platformDests.map(d => (
                                   <option key={d.id} value={d.id}>{d.label}</option>
                                 ))}
@@ -634,34 +634,34 @@ function ComposeInner() {
               )}
 
               {/* TEXT AREA */}
-              <div className="bg-white border border-gray-100 rounded-2xl p-4">
+              <div className="bg-surface border border-theme rounded-2xl p-4">
                 <textarea
                   value={content}
                   onChange={e => { setContent(e.target.value); setScoreResult(null) }}
                   placeholder="What do you want to post? Write your content here, or use an AI tool to generate it..."
                   rows={8}
-                  className="w-full text-sm outline-none resize-none text-gray-800 placeholder-gray-300"
+                  className="w-full text-sm outline-none resize-none text-gray-800 dark:text-gray-200 placeholder-gray-300 dark:placeholder-gray-600"
                 />
                 <div className="flex items-center justify-between pt-3 border-t border-gray-50 mt-2">
                   {charLimit !== null ? (
-                    <span className={`text-xs font-bold ${charOver ? 'text-red-500' : 'text-gray-400'}`}>
+                    <span className={`text-xs font-bold ${charOver ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
                       {charCount} / {charLimit.toLocaleString()}
                       {charOver && ' — over limit'}
                     </span>
                   ) : (
-                    <span className="text-xs text-gray-300">Select a platform to see character limit</span>
+                    <span className="text-xs text-gray-300 dark:text-gray-600">Select a platform to see character limit</span>
                   )}
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-gray-400 dark:text-gray-500">
                     {selectedPlatforms.length} platform{selectedPlatforms.length !== 1 ? 's' : ''} selected
                   </span>
                 </div>
               </div>
 
               {/* AI TOOLS */}
-              <div className="bg-white border border-gray-100 rounded-2xl p-4">
+              <div className="bg-surface border border-theme rounded-2xl p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">AI Tools</p>
-                  <span className="text-xs font-bold text-gray-500">{credits} credits remaining</span>
+                  <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">AI Tools</p>
+                  <span className="text-xs font-bold text-gray-500 dark:text-gray-400">{credits} credits remaining</span>
                 </div>
                 <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-4">
                   {AI_TOOLS.map(tool => (
@@ -669,12 +669,12 @@ function ComposeInner() {
                       disabled={aiLoading} title={tool.desc}
                       className={`p-3 rounded-xl border text-center transition-all ${
                         activeAiTool === tool.id ? 'bg-black text-white border-black'
-                        : aiLoading ? 'bg-gray-50 border-gray-100 text-gray-300 cursor-not-allowed'
-                        : 'bg-white border-gray-200 hover:border-gray-400 text-gray-700'
+                        : aiLoading ? 'bg-gray-50 dark:bg-gray-900 border-gray-100 text-gray-300 dark:text-gray-600 cursor-not-allowed'
+                        : 'bg-white dark:bg-gray-900 border-gray-200 hover:border-gray-400 text-gray-700'
                       }`}>
                       <div className="text-lg mb-1">{tool.emoji}</div>
                       <p className="text-xs font-bold">{tool.label}</p>
-                      <p className="text-xs text-gray-400 mt-0.5">{tool.credits} cr</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{tool.credits} cr</p>
                     </button>
                   ))}
                 </div>
@@ -686,8 +686,8 @@ function ComposeInner() {
                 )}
 
                 {aiLoading && (
-                  <div className="bg-gray-50 rounded-xl p-4 text-center">
-                    <div className="inline-flex items-center gap-2 text-xs text-gray-500">
+                  <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 text-center">
+                    <div className="inline-flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                       <div className="w-3 h-3 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
                       Generating with Gemini...
                     </div>
@@ -695,8 +695,8 @@ function ComposeInner() {
                 )}
 
                 {aiResult && !aiLoading && (
-                  <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Result</p>
+                  <div className="bg-theme border border-theme-md rounded-xl p-4">
+                    <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-2">Result</p>
                     <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap mb-3">{aiResult}</p>
                     <div className="flex flex-wrap items-center gap-2">
                       <button onClick={handleInsertResult}
@@ -704,11 +704,11 @@ function ComposeInner() {
                         Insert below
                       </button>
                       <button onClick={handleReplaceWithResult}
-                        className="text-xs font-bold px-3 py-1.5 border border-gray-300 text-gray-600 rounded-lg hover:border-gray-500 transition-all">
+                        className="text-xs font-bold px-3 py-1.5 border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg hover:border-gray-500 transition-all">
                         Replace post
                       </button>
                       <button onClick={() => { setAiResult(''); setActiveAiTool(null) }}
-                        className="text-xs text-gray-400 hover:text-gray-600 transition-all ml-auto">
+                        className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-all ml-auto">
                         Dismiss
                       </button>
                     </div>
@@ -717,11 +717,11 @@ function ComposeInner() {
               </div>
 
               {/* POST SCORE */}
-              <div className="bg-white border border-gray-100 rounded-2xl p-4">
+              <div className="bg-surface border border-theme rounded-2xl p-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
                   <div>
-                    <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Post Score</p>
-                    <p className="text-xs text-gray-400 mt-0.5">AI predicts how your post will perform before you publish</p>
+                    <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Post Score</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">AI predicts how your post will perform before you publish</p>
                   </div>
                   <button onClick={handleScorePost}
                     disabled={scoring || !content.trim() || credits < SCORE_CREDIT_COST}
@@ -753,25 +753,25 @@ function ComposeInner() {
                             scoreResult.score >= 40 ? 'bg-yellow-400' : 'bg-red-400'
                           }`} style={{ width: `${scoreResult.score}%` }} />
                         </div>
-                        <p className="text-xs text-gray-500 mt-2 leading-relaxed">{scoreResult.verdict}</p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 leading-relaxed">{scoreResult.verdict}</p>
                       </div>
                     </div>
                     {scoreResult.strengths.length > 0 && (
                       <div className="mb-3">
-                        <p className="text-xs font-bold text-gray-600 mb-1.5">✅ Strengths</p>
+                        <p className="text-xs font-bold text-gray-600 dark:text-gray-300 mb-1.5">✅ Strengths</p>
                         <ul className="space-y-1">
                           {scoreResult.strengths.slice(0, 3).map((s, i) => (
-                            <li key={i} className="text-xs text-gray-600">• {s}</li>
+                            <li key={i} className="text-xs text-gray-600 dark:text-gray-300">• {s}</li>
                           ))}
                         </ul>
                       </div>
                     )}
                     {scoreResult.improvements.length > 0 && (
                       <div>
-                        <p className="text-xs font-bold text-gray-600 mb-1.5">💡 Improvements</p>
+                        <p className="text-xs font-bold text-gray-600 dark:text-gray-300 mb-1.5">💡 Improvements</p>
                         <ul className="space-y-1">
                           {scoreResult.improvements.slice(0, 3).map((s, i) => (
-                            <li key={i} className="text-xs text-gray-600">• {s}</li>
+                            <li key={i} className="text-xs text-gray-600 dark:text-gray-300">• {s}</li>
                           ))}
                         </ul>
                       </div>
@@ -780,17 +780,17 @@ function ComposeInner() {
                 )}
 
                 {!scoreResult && !scoreError && (
-                  <div className="bg-gray-50 rounded-xl p-4 text-center">
-                    <p className="text-xs text-gray-400">Write your post and hit Score Post to get an AI prediction of how it will perform.</p>
+                  <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 text-center">
+                    <p className="text-xs text-gray-400 dark:text-gray-500">Write your post and hit Score Post to get an AI prediction of how it will perform.</p>
                   </div>
                 )}
               </div>
 
               {/* SCHEDULE */}
-              <div className="bg-white border border-gray-100 rounded-2xl p-4">
+              <div className="bg-surface border border-theme rounded-2xl p-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3">
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Schedule</p>
-                  <span className="text-xs text-gray-400">
+                  <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Schedule</p>
+                  <span className="text-xs text-gray-400 dark:text-gray-500">
                     {plan === 'free'   && '⏳ Free — up to 2 weeks ahead'}
                     {plan === 'pro'    && '⏳ Pro — up to 1 month ahead'}
                     {plan === 'agency' && '⏳ Agency — up to 3 months ahead'}
@@ -801,10 +801,10 @@ function ComposeInner() {
                     min={todayLocal}
                     max={maxScheduleDate}
                     onChange={e => handleDateChange(e.target.value)}
-                    className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-black transition-all" />
+                    className="flex-1 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none focus:border-black dark:bg-gray-900 transition-all" />
                   <input type="time" value={scheduleTime}
                     onChange={e => setScheduleTime(e.target.value)}
-                    className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm outline-none focus:border-black transition-all" />
+                    className="flex-1 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none focus:border-black dark:bg-gray-900 transition-all" />
                 </div>
                 {scheduleError && (
                   <div className="mt-2 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 flex items-center justify-between gap-3">
@@ -816,8 +816,8 @@ function ComposeInner() {
 
               {/* PUBLISH RESULTS */}
               {publishResults && (
-                <div className="bg-white border border-gray-100 rounded-2xl p-4">
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Publish Results</p>
+                <div className="bg-surface border border-theme rounded-2xl p-4">
+                  <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">Publish Results</p>
                   <div className="space-y-2">
                     {publishResults.map(result => (
                       <div key={result.platform} className={`flex items-center gap-3 p-3 rounded-xl border ${
@@ -855,7 +855,7 @@ function ComposeInner() {
                     : (scheduleDate ? 'Schedule Post' : 'Post Now')}
                 </button>
                 <button onClick={handleSaveDraft} disabled={saving || !content.trim()}
-                  className="px-5 py-3 border border-gray-200 text-sm font-bold text-gray-600 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
+                  className="px-5 py-3 border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
                   {saving ? 'Saving...' : currentDraftId ? 'Update Draft' : 'Save Draft'}
                 </button>
               </div>
@@ -864,12 +864,12 @@ function ComposeInner() {
 
             {/* DESKTOP PREVIEW */}
             <div className="hidden lg:block space-y-4">
-              <div className="bg-white border border-gray-100 rounded-2xl p-4 sticky top-8">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Preview</p>
-                <div className="bg-gray-50 rounded-xl p-4 min-h-32">
+              <div className="bg-surface border border-theme rounded-2xl p-4 sticky top-8">
+                <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">Preview</p>
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 min-h-32">
                   {content
                     ? <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{content}</p>
-                    : <p className="text-xs text-gray-300 text-center mt-8">Your post preview appears here</p>
+                    : <p className="text-xs text-gray-300 dark:text-gray-600 text-center mt-8">Your post preview appears here</p>
                   }
                 </div>
                 {content && selectedPlatforms.length > 0 && (
@@ -881,8 +881,8 @@ function ComposeInner() {
                       return (
                         <div key={id} className="flex items-center gap-2">
                           <span className="text-sm">{p.icon}</span>
-                          <span className="text-xs font-bold text-gray-500">{p.name}</span>
-                          <span className={`ml-auto text-xs font-bold ${over ? 'text-red-500' : 'text-gray-400'}`}>
+                          <span className="text-xs font-bold text-gray-500 dark:text-gray-400">{p.name}</span>
+                          <span className={`ml-auto text-xs font-bold ${over ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
                             {charCount}/{p.limit.toLocaleString()}
                             {over && ' ⚠️'}
                           </span>
@@ -903,7 +903,7 @@ function ComposeInner() {
                         return (
                           <div key={platformId} className="flex items-center gap-1.5">
                             <span className="text-xs">{platform?.icon}</span>
-                            <span className="text-xs text-gray-400 truncate">→ {dest.label}</span>
+                            <span className="text-xs text-gray-400 dark:text-gray-500 truncate">→ {dest.label}</span>
                           </div>
                         )
                       })}
@@ -932,7 +932,7 @@ function ComposeInner() {
 export default function Compose() {
   return (
     <Suspense fallback={
-      <div className="flex h-screen items-center justify-center bg-gray-50">
+      <div className="flex h-screen items-center justify-center bg-theme">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
       </div>
     }>

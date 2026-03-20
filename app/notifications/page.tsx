@@ -23,13 +23,13 @@ const PLACEHOLDER_NOTIFS = [
   {
     id: 'p1', type: 'system', read: false,
     title: 'Welcome to SocialMate!',
-    body: 'Your account is set up and ready to go. Connect a platform to activate your 100 AI credits.',
+    body: 'Your account is set up and ready to go. Connect a platform to activate your 50 AI credits.',
     created_at: new Date().toISOString(),
   },
   {
     id: 'p2', type: 'credit_low', read: false,
     title: 'Activate your AI credits',
-    body: 'Connect one platform and publish your first post to unlock 100 monthly AI credits.',
+    body: 'Connect one platform and publish your first post to unlock 50 monthly AI credits.',
     created_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
   },
 ]
