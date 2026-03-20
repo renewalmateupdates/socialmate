@@ -480,7 +480,7 @@ function OnboardingInner() {
                     {p === 'free' && (
                       <button
                         onClick={() => { setSelectedPlan('free'); setStep(3) }}
-                        className="w-full py-2.5 border-2 border-gray-200 text-sm font-bold rounded-xl hover:border-black hover:bg-black hover:text-white transition-all">
+                        className="w-full py-2.5 border-2 border-gray-200 dark:border-gray-700 text-sm font-bold rounded-xl hover:border-black hover:bg-black hover:text-white transition-all">
                         Continue with Free →
                       </button>
                     )}
@@ -509,20 +509,20 @@ function OnboardingInner() {
               })}
 
               <div className="bg-surface border border-theme rounded-2xl p-5">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">All AI tools included — every plan</p>
+                <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">All AI tools included — every plan</p>
                 <div className="grid grid-cols-2 gap-2">
                   {PLAN_DETAILS.free.aiTools.map(tool => (
-                    <div key={tool.name} className="flex items-center justify-between text-xs py-1.5 border-b border-gray-50 last:border-0">
-                      <span className="text-gray-700 font-semibold">{tool.name}</span>
-                      <span className="text-gray-400 font-bold">{tool.cost} cr</span>
+                    <div key={tool.name} className="flex items-center justify-between text-xs py-1.5 border-b border-gray-50 dark:border-gray-800 last:border-0">
+                      <span className="text-gray-700 dark:text-gray-300 font-semibold">{tool.name}</span>
+                      <span className="text-gray-400 dark:text-gray-500 font-bold">{tool.cost} cr</span>
                     </div>
                   ))}
                 </div>
-                <p className="text-xs text-gray-400 mt-3">Pro & Agency also unlock AI Content Calendar (20 cr) and AI Image Generation (25 cr).</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">Pro & Agency also unlock AI Content Calendar (20 cr) and AI Image Generation (25 cr).</p>
               </div>
 
               <button onClick={() => setStep(1)}
-                className="w-full py-2.5 border border-gray-200 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all text-gray-500">
+                className="w-full py-2.5 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all text-gray-500 dark:text-gray-400">
                 ← Back
               </button>
             </div>
@@ -543,23 +543,23 @@ function OnboardingInner() {
               <div className="text-center mb-8">
                 <div className="text-5xl mb-4">🎯</div>
                 <h2 className="text-2xl font-extrabold tracking-tight mb-2">How will you use SocialMate?</h2>
-                <p className="text-gray-400 text-sm">Helps us personalize your dashboard and tips</p>
+                <p className="text-gray-400 dark:text-gray-500 text-sm">Helps us personalize your dashboard and tips</p>
               </div>
               <div className="grid grid-cols-2 gap-3 mb-8">
                 {USE_CASES.map(uc => (
                   <button key={uc.id} onClick={() => setUseCase(uc.id)}
                     className={`p-4 rounded-2xl border-2 text-left transition-all ${
-                      useCase === uc.id ? 'border-black bg-black/5' : 'border-gray-100 hover:border-gray-300'
+                      useCase === uc.id ? 'border-black bg-black/5 dark:bg-white/5' : 'border-gray-100 dark:border-gray-700 hover:border-gray-300'
                     }`}>
                     <div className="text-2xl mb-2">{uc.icon}</div>
                     <p className="text-sm font-bold">{uc.label}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">{uc.desc}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{uc.desc}</p>
                   </button>
                 ))}
               </div>
               <div className="flex gap-3">
                 <button onClick={() => setStep(2)}
-                  className="px-6 py-3 border border-gray-200 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
+                  className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
                   ← Back
                 </button>
                 <button onClick={() => useCase ? setStep(4) : showToast('Pick an option to continue')}

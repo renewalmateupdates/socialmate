@@ -319,7 +319,7 @@ export default function Templates() {
                 const isConfirming = confirmDelete === t.id
                 return (
                   <div key={t.id}
-                    className="bg-surface border border-theme rounded-2xl p-4 md:p-5 hover:border-gray-300 transition-all">
+                    className="bg-surface border border-theme rounded-2xl p-4 md:p-5 hover:border-gray-300 dark:hover:border-gray-600 transition-all">
 
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <div className="flex items-center gap-2 flex-wrap min-w-0">
@@ -405,7 +405,7 @@ export default function Templates() {
             <div className="space-y-3">
               {STARTER_TEMPLATES.map(t => (
                 <div key={t.id}
-                  className="bg-surface border border-theme rounded-2xl p-4 md:p-5 hover:border-gray-300 transition-all">
+                  className="bg-surface border border-theme rounded-2xl p-4 md:p-5 hover:border-gray-300 dark:hover:border-gray-600 transition-all">
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <div className="flex items-center gap-2 flex-wrap min-w-0">
                       <p className="text-sm font-extrabold truncate">{t.title}</p>
@@ -448,8 +448,8 @@ export default function Templates() {
 
           {/* EMPTY STATE */}
           {!loading && templates.length === 0 && !showForm && (
-            <div className="mt-8 bg-gray-50 border border-gray-100 rounded-2xl p-6 text-center">
-              <p className="text-xs text-gray-400">
+            <div className="mt-8 bg-gray-50 dark:bg-gray-800 border border-theme rounded-2xl p-6 text-center">
+              <p className="text-xs text-gray-400 dark:text-gray-500">
                 You haven't saved any templates yet. Use a starter above or{' '}
                 <button onClick={() => setShowForm(true)} className="text-black font-bold underline">
                   create your own
