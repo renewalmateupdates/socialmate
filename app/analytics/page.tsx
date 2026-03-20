@@ -7,7 +7,7 @@ import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 
 function SkeletonBox({ className }: { className?: string }) {
-  return <div className={`bg-gray-100 rounded-xl animate-pulse ${className}`} />
+  return <div className={`bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse ${className}`} />
 }
 
 type Post = {
@@ -294,7 +294,7 @@ export default function Analytics() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-7xl mx-auto">
@@ -302,10 +302,10 @@ export default function Analytics() {
           {/* MODALS */}
           {creditModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-              <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
+              <div className="bg-surface rounded-2xl p-6 max-w-sm w-full shadow-xl">
                 <div className="text-2xl mb-3">🔓</div>
                 <h2 className="text-sm font-extrabold mb-1">Unlock {RANGE_LABELS[creditModal.range]} history</h2>
-                <p className="text-xs text-gray-400 mb-4">
+                <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
                   This will spend <span className="font-bold text-black">{creditModal.cost} AI credits</span> from your balance ({credits} remaining).
                 </p>
                 <div className="flex items-center gap-3">
@@ -444,7 +444,7 @@ export default function Analytics() {
                   📄 Export PDF
                 </button>
               )}
-              <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-xl p-1 overflow-x-auto">
+              <div className="flex items-center gap-1 bg-surface border border-theme rounded-xl p-1 overflow-x-auto">
                 {(['14', '30', '90', '180'] as const).map(r => {
                   const isFree      = freeRanges.includes(r)
                   const creditCost  = creditRanges[r]
@@ -533,7 +533,7 @@ export default function Analytics() {
           {/* STAT CARDS */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
             {loading ? [1,2,3,4].map(i => (
-              <div key={i} className="bg-white border border-gray-100 rounded-2xl p-5">
+              <div key={i} className="bg-surface border border-theme rounded-2xl p-5">
                 <SkeletonBox className="h-3 w-16 mb-4" />
                 <SkeletonBox className="h-8 w-12 mb-2" />
                 <SkeletonBox className="h-3 w-20" />
@@ -545,7 +545,7 @@ export default function Analytics() {
                 { label: 'Avg / Week',       value: avgPerWeek,           icon: '📈', sub: 'posting frequency'         },
                 { label: 'Total Engagement', value: totalEngagement,      icon: '❤️', sub: 'likes, reactions, reposts' },
               ].map(stat => (
-                <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-4 md:p-5">
+                <div key={stat.label} className="bg-surface border border-theme rounded-2xl p-4 md:p-5">
                   <div className="flex justify-between items-center mb-3">
                     <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide leading-tight">{stat.label}</span>
                     <span className="text-base flex-shrink-0">{stat.icon}</span>
@@ -559,7 +559,7 @@ export default function Analytics() {
 
           {/* STREAK / PEAK / STATUS */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 flex items-center gap-4">
+            <div className="bg-surface border border-theme rounded-2xl p-5 flex items-center gap-4">
               <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0">🔥</div>
               <div>
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Current Streak</p>
@@ -567,7 +567,7 @@ export default function Analytics() {
                 <p className="text-xs text-gray-400">Longest: {longestStreak} days</p>
               </div>
             </div>
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 flex items-center gap-4">
+            <div className="bg-surface border border-theme rounded-2xl p-5 flex items-center gap-4">
               <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0">⏰</div>
               <div>
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Peak Hour</p>
@@ -575,7 +575,7 @@ export default function Analytics() {
                 <p className="text-xs text-gray-400">{peakHour.count} posts at this hour</p>
               </div>
             </div>
-            <div className="bg-white border border-gray-100 rounded-2xl p-5">
+            <div className="bg-surface border border-theme rounded-2xl p-5">
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Post Status</p>
               {loading ? <SkeletonBox className="h-12" /> : (
                 <div className="space-y-2">
@@ -596,7 +596,7 @@ export default function Analytics() {
           </div>
 
           {postsWithEngagement.length > 0 && (
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 mb-6">
+            <div className="bg-surface border border-theme rounded-2xl p-5 mb-6">
               <h2 className="text-sm font-bold tracking-tight mb-4">Engagement by Post</h2>
               <div className="space-y-3">
                 {postsWithEngagement.slice(0, 5).map(post => {
@@ -636,7 +636,7 @@ export default function Analytics() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
 
-              <div className="bg-white border border-gray-100 rounded-2xl p-5">
+              <div className="bg-surface border border-theme rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Daily Activity</h2>
                 {loading ? <SkeletonBox className="h-32" /> : (
                   <div className="flex items-end gap-1 h-32">
@@ -661,7 +661,7 @@ export default function Analytics() {
                 </div>
               </div>
 
-              <div className="bg-white border border-gray-100 rounded-2xl p-5">
+              <div className="bg-surface border border-theme rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Best Days to Post</h2>
                 {loading ? <SkeletonBox className="h-24" /> : (
                   <div className="flex items-end gap-2 h-24">
@@ -685,7 +685,7 @@ export default function Analytics() {
                 )}
               </div>
 
-              <div className="bg-white border border-gray-100 rounded-2xl p-5">
+              <div className="bg-surface border border-theme rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Best Times to Post</h2>
                 {loading ? <SkeletonBox className="h-16" /> : (
                   <div>
@@ -717,7 +717,7 @@ export default function Analytics() {
                 )}
               </div>
 
-              <div className="bg-white border border-gray-100 rounded-2xl p-5">
+              <div className="bg-surface border border-theme rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Posts by Month — {now.getFullYear()}</h2>
                 {loading ? <SkeletonBox className="h-24" /> : (
                   <div className="flex items-end gap-1 md:gap-2 h-24">
@@ -742,7 +742,7 @@ export default function Analytics() {
 
             {/* RIGHT COLUMN */}
             <div className="space-y-6">
-              <div className="bg-white border border-gray-100 rounded-2xl p-5">
+              <div className="bg-surface border border-theme rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Platform Breakdown</h2>
                 {loading
                   ? <div className="space-y-3">{[1,2,3,4].map(i => <SkeletonBox key={i} className="h-6" />)}</div>
@@ -770,7 +770,7 @@ export default function Analytics() {
                 }
               </div>
 
-              <div className="bg-white border border-gray-100 rounded-2xl p-5">
+              <div className="bg-surface border border-theme rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Content Insights</h2>
                 {loading ? <SkeletonBox className="h-32" /> : (
                   <div className="space-y-4">
@@ -793,7 +793,7 @@ export default function Analytics() {
                 )}
               </div>
 
-              <div className="bg-white border border-gray-100 rounded-2xl p-5">
+              <div className="bg-surface border border-theme rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-2">Consistency Score</h2>
                 {loading ? <SkeletonBox className="h-20" /> : (() => {
                   const score = Math.min(Math.round((parseFloat(avgPerWeek) / 7) * 100), 100)

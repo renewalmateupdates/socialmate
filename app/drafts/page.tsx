@@ -265,6 +265,24 @@ export default function Drafts() {
                             <span className="text-xs text-gray-300 dark:text-gray-600">No platforms selected</span>
                           )}
                         </div>
+
+                        {/* Engagement metrics for published posts */}
+                        {isPublished && post.analytics && (() => {
+                          const allPlatforms = ['bluesky', 'mastodon'].filter(p => post.analytics[p])
+                          if (allPlatforms.length === 0) return null
+                          const totals = allPlatforms.reduce((acc: { likes: number; replies: number; reposts: number }, p: string) => ({
+                            likes:   acc.likes   + (post.analytics[p]?.likes   ?? 0),
+                            replies: acc.replies + (post.analytics[p]?.replies ?? 0),
+                            reposts: acc.reposts + (post.analytics[p]?.reposts ?? 0),
+                          }), { likes: 0, replies: 0, reposts: 0 })
+                          return (
+                            <div className="flex items-center gap-3 mt-2 pt-2 border-t border-gray-50 dark:border-gray-800">
+                              <span className="text-xs text-gray-400 dark:text-gray-500 font-semibold">❤️ {totals.likes}</span>
+                              <span className="text-xs text-gray-400 dark:text-gray-500 font-semibold">💬 {totals.replies}</span>
+                              <span className="text-xs text-gray-400 dark:text-gray-500 font-semibold">🔄 {totals.reposts}</span>
+                            </div>
+                          )
+                        })()}
                       </div>
 
                       {!isConfirming && (

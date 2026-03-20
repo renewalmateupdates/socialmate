@@ -86,7 +86,7 @@ export default function ApprovalsPage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-50">
+      <div className="flex h-screen items-center justify-center bg-theme">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
       </div>
     )
@@ -94,11 +94,11 @@ export default function ApprovalsPage() {
 
   if (plan === 'free') {
     return (
-      <div className="min-h-screen bg-gray-50 flex">
+      <div className="min-h-screen bg-theme flex">
         <Sidebar />
         <main className="md:ml-56 flex-1 p-4 md:p-8">
           <div className="max-w-3xl mx-auto">
-            <div className="bg-white border border-gray-100 rounded-2xl p-10 text-center">
+            <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
               <div className="text-4xl mb-4">✅</div>
               <h1 className="text-xl font-extrabold mb-2">Content Approval Workflows</h1>
               <p className="text-sm text-gray-400 mb-6 max-w-sm mx-auto leading-relaxed">
@@ -116,7 +116,7 @@ export default function ApprovalsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <main className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
@@ -142,7 +142,7 @@ export default function ApprovalsPage() {
             ))}
           </div>
 
-          <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-2xl p-1 mb-6 w-fit">
+          <div className="flex items-center gap-1 bg-surface border border-theme rounded-2xl p-1 mb-6 w-fit">
             {(['pending', 'approved', 'rejected'] as const).map(t => (
               <button key={t} onClick={() => setTab(t)}
                 className={`px-4 py-2 rounded-xl text-xs font-bold capitalize transition-all ${
@@ -154,7 +154,7 @@ export default function ApprovalsPage() {
           </div>
 
           {filteredPosts.length === 0 ? (
-            <div className="bg-white border border-gray-100 rounded-2xl p-10 text-center">
+            <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
               <div className="text-4xl mb-3">
                 {tab === 'pending' ? '📭' : tab === 'approved' ? '✅' : '❌'}
               </div>
@@ -168,7 +168,7 @@ export default function ApprovalsPage() {
           ) : (
             <div className="space-y-4">
               {filteredPosts.map(post => (
-                <div key={post.id} className="bg-white border border-gray-100 rounded-2xl p-5">
+                <div key={post.id} className="bg-surface border border-theme rounded-2xl p-5">
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap line-clamp-4">{post.content}</p>

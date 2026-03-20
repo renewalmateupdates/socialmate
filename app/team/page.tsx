@@ -139,7 +139,7 @@ export default function Team() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-5xl mx-auto">
@@ -181,7 +181,7 @@ export default function Team() {
             <div className="lg:col-span-2 space-y-6">
 
               {/* SEAT BAR */}
-              <div className="bg-white border border-gray-100 rounded-2xl p-4">
+              <div className="bg-surface border border-theme rounded-2xl p-4">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs font-semibold text-gray-500">Team seats</span>
                   <span className="text-xs font-bold text-gray-700">{seatsUsed} / {seatLimit}</span>
@@ -198,7 +198,7 @@ export default function Team() {
               </div>
 
               {/* MEMBER LIST */}
-              <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
+              <div className="bg-surface border border-theme rounded-2xl overflow-hidden">
                 <div className="px-5 py-4 border-b border-gray-100">
                   <h2 className="text-sm font-bold tracking-tight">Team Members</h2>
                 </div>
@@ -322,7 +322,7 @@ export default function Team() {
             <div className="space-y-6">
 
               {/* INVITE FORM */}
-              <div className="bg-white border border-gray-100 rounded-2xl p-5">
+              <div className="bg-surface border border-theme rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Invite Member</h2>
                 {atLimit ? (
                   <div className="text-center py-4">
@@ -367,7 +367,7 @@ export default function Team() {
               </div>
 
               {/* ROLE PERMISSIONS */}
-              <div className="bg-white border border-gray-100 rounded-2xl p-5">
+              <div className="bg-surface border border-theme rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Role Permissions</h2>
                 <div className="space-y-3">
                   {Object.entries(ROLE_META).map(([role, meta]) => (

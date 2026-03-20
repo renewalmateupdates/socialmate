@@ -49,7 +49,7 @@ export default function Workspaces() {
   // Free users: upgrade wall
   if (plan === 'free') {
     return (
-      <div className="min-h-screen bg-gray-50 flex">
+      <div className="min-h-screen bg-theme flex">
         <Sidebar />
         <div className="md:ml-56 flex-1 p-8 flex items-center justify-center">
           <div className="max-w-md text-center">
@@ -86,7 +86,7 @@ export default function Workspaces() {
   const clientWs   = workspaces.filter((w: any) => !w.is_personal)
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
@@ -108,7 +108,7 @@ export default function Workspaces() {
           </div>
 
           {/* USAGE BAR */}
-          <div className="bg-white border border-gray-100 rounded-2xl p-4 mb-6">
+          <div className="bg-surface border border-theme rounded-2xl p-4 mb-6">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-semibold text-gray-500">Client Workspaces</span>
               <span className="text-xs font-bold text-gray-700">{clientWs.length} / {limit}</span>
@@ -157,7 +157,7 @@ export default function Workspaces() {
                 {[1,2,3].map(i => <SkeletonBox key={i} className="h-20" />)}
               </div>
             ) : clientWs.length === 0 ? (
-              <div className="bg-white border border-gray-100 rounded-2xl p-10 text-center">
+              <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
                 <div className="text-4xl mb-3">🏢</div>
                 <p className="text-sm font-bold mb-1">No client workspaces yet</p>
                 <p className="text-xs text-gray-400 mb-5">

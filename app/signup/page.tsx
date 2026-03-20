@@ -92,20 +92,20 @@ function SignupForm() {
 
   if (done) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col">
-        <div className="border-b border-gray-100 bg-white px-8 py-4">
+      <div className="min-h-screen bg-theme flex flex-col">
+        <div className="border-b border-theme bg-surface px-8 py-4">
           <Link href="/" className="flex items-center gap-2 w-fit">
             <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
             <span className="font-bold text-base tracking-tight">SocialMate</span>
           </Link>
         </div>
         <div className="flex-1 flex items-center justify-center p-6">
-          <div className="bg-white border border-gray-100 rounded-3xl p-10 w-full max-w-md text-center">
+          <div className="bg-surface border border-theme rounded-3xl p-10 w-full max-w-md text-center">
             <div className="text-6xl mb-6">🎉</div>
             <h1 className="text-2xl font-extrabold tracking-tight mb-3">You're almost in!</h1>
-            <p className="text-gray-400 text-sm mb-2">We sent a confirmation email to</p>
+            <p className="text-gray-400 dark:text-gray-500 text-sm mb-2">We sent a confirmation email to</p>
             <p className="font-bold text-sm mb-6">{email}</p>
-            <p className="text-xs text-gray-400 mb-8 leading-relaxed">
+            <p className="text-xs text-gray-400 dark:text-gray-500 mb-8 leading-relaxed">
               Click the link in that email to confirm your account and get started. Check your spam folder if you don't see it.
             </p>
             {refCode && (
@@ -116,10 +116,10 @@ function SignupForm() {
                 </p>
               </div>
             )}
-            <div className="bg-gray-50 rounded-2xl p-4 mb-6 text-left">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">What's waiting for you</p>
+            <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-4 mb-6 text-left">
+              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-2">What's waiting for you</p>
               {PERKS.map(p => (
-                <div key={p} className="flex items-center gap-2 text-xs text-gray-600 py-0.5">
+                <div key={p} className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 py-0.5">
                   <span className="text-green-500 font-bold">✓</span> {p}
                 </div>
               ))}
@@ -134,13 +134,13 @@ function SignupForm() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <div className="border-b border-gray-100 bg-white px-8 py-4 flex items-center justify-between">
+    <div className="min-h-screen bg-theme flex flex-col">
+      <div className="border-b border-theme bg-surface px-8 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
           <span className="font-bold text-base tracking-tight">SocialMate</span>
         </Link>
-        <Link href="/login" className="text-sm font-semibold text-gray-500 hover:text-black transition-colors">
+        <Link href="/login" className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-black transition-colors">
           Already have an account? Sign in →
         </Link>
       </div>
@@ -156,7 +156,7 @@ function SignupForm() {
             <h1 className="text-4xl font-extrabold tracking-tight leading-tight mb-4">
               Professional tools shouldn't require a professional budget
             </h1>
-            <p className="text-gray-400 mb-8 leading-relaxed">
+            <p className="text-gray-400 dark:text-gray-500 mb-8 leading-relaxed">
               Schedule to 16 platforms, manage your team, and grow your audience — completely free. No per-channel fees, no seat limits, no catch.
             </p>
             <div className="space-y-3 mb-8">
@@ -165,13 +165,13 @@ function SignupForm() {
                   <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
                     <span className="text-xs text-green-600 font-bold">✓</span>
                   </div>
-                  <span className="text-sm font-medium text-gray-700">{perk}</span>
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{perk}</span>
                 </div>
               ))}
             </div>
-            <div className="bg-gray-50 border border-gray-100 rounded-2xl p-5">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Part of the Mate Series</p>
-              <p className="text-sm text-gray-600 leading-relaxed">
+            <div className="bg-gray-50 dark:bg-gray-800 border border-theme rounded-2xl p-5">
+              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">Part of the Mate Series</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
                 SocialMate is built on a simple belief: software should work for you, not extract from you. Free means free — not a 14-day trial, not a stripped-down version.
               </p>
             </div>
@@ -181,10 +181,10 @@ function SignupForm() {
           <div>
             <div className="text-center mb-6 md:hidden">
               <h1 className="text-2xl font-extrabold tracking-tight mb-1">Create free account</h1>
-              <p className="text-gray-400 text-sm">No credit card required</p>
+              <p className="text-gray-400 dark:text-gray-500 text-sm">No credit card required</p>
             </div>
 
-            <div className="bg-white border border-gray-100 rounded-3xl p-8">
+            <div className="bg-surface border border-theme rounded-3xl p-8">
               <h2 className="text-lg font-extrabold tracking-tight mb-6 hidden md:block">Create your free account</h2>
 
               {refCode && (
@@ -199,15 +199,15 @@ function SignupForm() {
                 type="button"
                 onClick={() => setAgeConfirmed(a => !a)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all mb-5 ${
-                  ageConfirmed ? 'border-green-400 bg-green-50' : 'border-gray-200 hover:border-gray-300'
+                  ageConfirmed ? 'border-green-400 bg-green-50' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
                 }`}
               >
                 <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 border-2 transition-all ${
-                  ageConfirmed ? 'bg-green-500 border-green-500' : 'border-gray-300'
+                  ageConfirmed ? 'bg-green-500 border-green-500' : 'border-gray-300 dark:border-gray-600'
                 }`}>
                   {ageConfirmed && <span className="text-white text-xs font-bold">✓</span>}
                 </div>
-                <span className="text-xs font-semibold text-gray-600">
+                <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">
                   I confirm I am 13 years of age or older
                 </span>
               </button>
@@ -216,7 +216,7 @@ function SignupForm() {
               <button
                 onClick={handleGoogleSignup}
                 disabled={googleLoading}
-                className="w-full flex items-center justify-center gap-3 py-3 border border-gray-200 rounded-xl text-sm font-semibold hover:bg-gray-50 transition-all disabled:opacity-50 mb-5"
+                className="w-full flex items-center justify-center gap-3 py-3 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-all disabled:opacity-50 mb-5"
               >
                 {googleLoading ? (
                   <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
@@ -233,44 +233,44 @@ function SignupForm() {
 
               {/* Divider */}
               <div className="flex items-center gap-3 mb-5">
-                <div className="flex-1 h-px bg-gray-100" />
-                <span className="text-xs text-gray-400 font-medium">or sign up with email</span>
-                <div className="flex-1 h-px bg-gray-100" />
+                <div className="flex-1 h-px bg-gray-100 dark:bg-gray-700" />
+                <span className="text-xs text-gray-400 dark:text-gray-500 font-medium">or sign up with email</span>
+                <div className="flex-1 h-px bg-gray-100 dark:bg-gray-700" />
               </div>
 
               <form onSubmit={handleSignup} className="space-y-4">
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">Email</label>
+                  <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">Email</label>
                   <input
                     type="email"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     placeholder="you@example.com"
                     autoFocus
-                    className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 transition-colors"
+                    className="w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-gray-400 transition-colors"
                   />
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">Password</label>
+                  <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">Password</label>
                   <div className="relative">
                     <input
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={e => setPassword(e.target.value)}
                       placeholder="At least 6 characters"
-                      className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 transition-colors pr-12"
+                      className="w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-gray-400 transition-colors pr-12"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(p => !p)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition-colors text-xs font-semibold">
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-black transition-colors text-xs font-semibold">
                       {showPassword ? 'Hide' : 'Show'}
                     </button>
                   </div>
                   {password && (
                     <div className="mt-2 flex items-center gap-2">
-                      <div className="flex-1 bg-gray-100 rounded-full h-1.5">
+                      <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-1.5">
                         <div className={`h-1.5 rounded-full transition-all ${strength.color}`}
                           style={{ width: `${(strength.score / 4) * 100}%` }} />
                       </div>
@@ -284,7 +284,7 @@ function SignupForm() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">Confirm Password</label>
+                  <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">Confirm Password</label>
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={confirmPassword}
@@ -295,7 +295,7 @@ function SignupForm() {
                         ? 'border-red-300 focus:border-red-400'
                         : confirmPassword && confirmPassword === password
                         ? 'border-green-300 focus:border-green-400'
-                        : 'border-gray-200 focus:border-gray-400'
+                        : 'border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 focus:border-gray-400'
                     }`}
                   />
                   {confirmPassword && confirmPassword === password && (
@@ -323,11 +323,11 @@ function SignupForm() {
               </form>
             </div>
 
-            <p className="text-center text-xs text-gray-400 mt-4">
+            <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-4">
               Already have an account?{' '}
               <Link href="/login" className="font-bold text-black hover:underline">Sign in →</Link>
             </p>
-            <p className="text-center text-xs text-gray-300 mt-2">
+            <p className="text-center text-xs text-gray-300 dark:text-gray-600 mt-2">
               By signing up you agree to our{' '}
               <Link href="/terms" className="hover:text-gray-500 transition-colors">Terms</Link>
               {' '}and{' '}
@@ -342,7 +342,7 @@ function SignupForm() {
 
 export default function Signup() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center"><div className="w-6 h-6 border-2 border-gray-200 border-t-black rounded-full animate-spin" /></div>}>
+    <Suspense fallback={<div className="min-h-screen bg-theme flex items-center justify-center"><div className="w-6 h-6 border-2 border-gray-200 dark:border-gray-700 border-t-black rounded-full animate-spin" /></div>}>
       <SignupForm />
     </Suspense>
   )

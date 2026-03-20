@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 
 function SkeletonBox({ className }: { className?: string }) {
-  return <div className={`bg-gray-100 rounded-xl animate-pulse ${className}`} />
+  return <div className={`bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse ${className}`} />
 }
 
 export default function Hashtags() {
@@ -109,7 +109,7 @@ export default function Hashtags() {
   const tagCount = tags.split(/[\s,]+/).filter(t => t.trim().length > 0).length
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
@@ -118,7 +118,7 @@ export default function Hashtags() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Hashtag Collections</h1>
-              <p className="text-sm text-gray-400 mt-0.5">
+              <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">
                 {loading ? 'Loading...' : `${collections.length} collection${collections.length !== 1 ? 's' : ''} · ${totalTags} hashtags total`}
               </p>
             </div>
@@ -132,22 +132,22 @@ export default function Hashtags() {
 
           {/* FORM */}
           {showForm && (
-            <div className="bg-white border border-gray-200 rounded-2xl p-5 md:p-6 mb-6">
+            <div className="bg-surface border border-theme-md rounded-2xl p-5 md:p-6 mb-6">
               <h2 className="text-sm font-extrabold mb-4">
                 {editingId ? 'Edit Collection' : 'New Hashtag Collection'}
               </h2>
               <div className="space-y-4">
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">
                     Collection Name
                   </label>
                   <input type="text" value={name} onChange={e => setName(e.target.value)}
                     placeholder="e.g. Food & Lifestyle, Tech Content..."
-                    className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400"
+                    className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-gray-400"
                     autoFocus />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">
                     Hashtags
                     <span className="text-gray-400 font-normal ml-1">
                       (separate with spaces or commas, # optional)
@@ -156,8 +156,8 @@ export default function Hashtags() {
                   <textarea value={tags} onChange={e => setTags(e.target.value)}
                     placeholder="foodie cooking recipe homecook instafood..."
                     rows={4}
-                    className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 resize-none font-mono" />
-                  <p className="text-xs text-gray-400 mt-1">{tagCount} hashtag{tagCount !== 1 ? 's' : ''}</p>
+                    className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-gray-400 resize-none font-mono dark:bg-gray-800 dark:text-gray-100" />
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{tagCount} hashtag{tagCount !== 1 ? 's' : ''}</p>
                 </div>
                 <div className="flex gap-2 flex-wrap">
                   <button onClick={handleSave} disabled={saving}
@@ -165,7 +165,7 @@ export default function Hashtags() {
                     {saving ? 'Saving...' : editingId ? 'Save Changes' : 'Save Collection'}
                   </button>
                   <button onClick={handleCancel}
-                    className="px-5 py-2.5 border border-gray-200 text-sm font-semibold rounded-xl hover:border-gray-400 transition-all">
+                    className="px-5 py-2.5 border border-gray-200 dark:border-gray-600 text-sm font-semibold rounded-xl hover:border-gray-400 transition-all">
                     Cancel
                   </button>
                 </div>
@@ -179,10 +179,10 @@ export default function Hashtags() {
               {[1,2,3].map(i => <SkeletonBox key={i} className="h-28" />)}
             </div>
           ) : collections.length === 0 && !showForm ? (
-            <div className="bg-white border border-gray-100 rounded-2xl p-12 text-center">
+            <div className="bg-surface border border-theme rounded-2xl p-12 text-center">
               <div className="text-4xl mb-3">#️⃣</div>
               <p className="text-sm font-bold mb-1">No hashtag collections yet</p>
-              <p className="text-xs text-gray-400 mb-5">
+              <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">
                 Save groups of hashtags to insert into posts with one click.
               </p>
               <button onClick={() => setShowForm(true)}
@@ -197,13 +197,13 @@ export default function Hashtags() {
                 const isDeleting   = deleting === col.id
                 return (
                   <div key={col.id}
-                    className="bg-white border border-gray-100 rounded-2xl p-4 md:p-5 hover:border-gray-300 transition-all">
+                    className="bg-surface border border-theme rounded-2xl p-4 md:p-5 hover:border-gray-300 dark:hover:border-gray-600 transition-all">
 
                     {/* TOP ROW */}
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div className="min-w-0">
                         <p className="text-sm font-extrabold truncate">{col.name}</p>
-                        <p className="text-xs text-gray-400 mt-0.5">{(col.tags || []).length} hashtags</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{(col.tags || []).length} hashtags</p>
                       </div>
 
                       {/* ACTIONS — always visible */}
@@ -213,12 +213,12 @@ export default function Hashtags() {
                             className={`text-xs font-bold px-2.5 py-1.5 rounded-xl transition-all border ${
                               copied === col.id
                                 ? 'bg-green-500 text-white border-green-500'
-                                : 'border-gray-200 hover:border-gray-400'
+                                : 'border-gray-200 dark:border-gray-600 hover:border-gray-400'
                             }`}>
                             {copied === col.id ? '✓ Copied' : 'Copy all'}
                           </button>
                           <button onClick={() => handleEdit(col)}
-                            className="text-xs font-bold px-2.5 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                            className="text-xs font-bold px-2.5 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
                             Edit
                           </button>
                           <button onClick={() => setConfirmDelete(col.id)}
@@ -233,12 +233,12 @@ export default function Hashtags() {
                     <div className="flex flex-wrap gap-1.5">
                       {(col.tags || []).slice(0, 20).map((tag: string) => (
                         <span key={tag}
-                          className="text-xs font-semibold bg-gray-50 border border-gray-100 text-gray-600 px-2 py-0.5 rounded-lg">
+                          className="text-xs font-semibold bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded-lg">
                           {tag}
                         </span>
                       ))}
                       {(col.tags || []).length > 20 && (
-                        <span className="text-xs text-gray-400 px-2 py-0.5">
+                        <span className="text-xs text-gray-400 dark:text-gray-500 px-2 py-0.5">
                           +{col.tags.length - 20} more
                         </span>
                       )}
@@ -246,7 +246,7 @@ export default function Hashtags() {
 
                     {/* CONFIRM DELETE — below tags, full width */}
                     {isConfirming && (
-                      <div className="mt-3 pt-3 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center gap-2">
+                      <div className="mt-3 pt-3 border-t border-theme flex flex-col sm:flex-row sm:items-center gap-2">
                         <p className="text-xs text-red-600 font-semibold flex-1">
                           Delete "{col.name}"? This cannot be undone.
                         </p>
@@ -258,7 +258,7 @@ export default function Hashtags() {
                               : 'Yes, delete'}
                           </button>
                           <button onClick={() => setConfirmDelete(null)}
-                            className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                            className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
                             Cancel
                           </button>
                         </div>

@@ -101,7 +101,7 @@ export default function BestTimes() {
   )
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-5xl mx-auto">
@@ -115,7 +115,7 @@ export default function BestTimes() {
           </div>
 
           {/* PERSONAL HEATMAP */}
-          <div className="bg-white border border-gray-100 rounded-2xl p-5 md:p-6 mb-6">
+          <div className="bg-surface border border-theme rounded-2xl p-5 md:p-6 mb-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
               <div>
                 <h2 className="text-sm font-extrabold">Your Posting Heatmap</h2>
@@ -177,7 +177,7 @@ export default function BestTimes() {
           </div>
 
           {/* INDUSTRY AVERAGES */}
-          <div className="bg-white border border-gray-100 rounded-2xl p-5 md:p-6">
+          <div className="bg-surface border border-theme rounded-2xl p-5 md:p-6">
             <div className="mb-5">
               <h2 className="text-sm font-extrabold">Industry Averages</h2>
               <p className="text-xs text-gray-400 mt-0.5">

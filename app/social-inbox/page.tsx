@@ -99,7 +99,7 @@ export default function SocialInbox() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-50">
+      <div className="flex h-screen items-center justify-center bg-theme">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
       </div>
     )
@@ -108,7 +108,7 @@ export default function SocialInbox() {
   const hasNoAccounts = connectedPlatforms.length === 0
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <main className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
@@ -123,10 +123,10 @@ export default function SocialInbox() {
                   <span className="text-xs font-bold bg-black text-white px-2 py-0.5 rounded-full">{unreadCount}</span>
                 )}
               </div>
-              <p className="text-sm text-gray-400">Mentions and replies from your connected platforms.</p>
+              <p className="text-sm text-gray-400 dark:text-gray-500">Mentions and replies from your connected platforms.</p>
             </div>
             {unreadCount > 0 && (
-              <button onClick={markAllRead} className="text-xs font-bold text-gray-500 hover:text-black transition-colors">
+              <button onClick={markAllRead} className="text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">
                 Mark all read
               </button>
             )}
@@ -134,10 +134,10 @@ export default function SocialInbox() {
 
           {/* NO ACCOUNTS CONNECTED */}
           {hasNoAccounts ? (
-            <div className="bg-white border border-gray-100 rounded-2xl p-12 text-center">
+            <div className="bg-surface border border-theme rounded-2xl p-12 text-center">
               <div className="text-4xl mb-3">📭</div>
-              <p className="text-sm font-bold text-gray-700 mb-1">No platforms connected yet</p>
-              <p className="text-xs text-gray-400 mb-5 max-w-sm mx-auto leading-relaxed">
+              <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">No platforms connected yet</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mb-5 max-w-sm mx-auto leading-relaxed">
                 Connect your social accounts to start seeing mentions, replies, and comments here in one place.
               </p>
               <Link href="/accounts"
@@ -155,27 +155,27 @@ export default function SocialInbox() {
                   { label: 'Mentions', value: messages.filter(m => m.type === 'mention').length },
                   { label: 'Replies',  value: messages.filter(m => m.type === 'reply').length },
                 ].map(s => (
-                  <div key={s.label} className="bg-white border border-gray-100 rounded-2xl p-4 text-center">
+                  <div key={s.label} className="bg-surface border border-theme rounded-2xl p-4 text-center">
                     <p className="text-2xl font-extrabold">{s.value}</p>
-                    <p className="text-xs text-gray-400 font-semibold mt-0.5">{s.label}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 font-semibold mt-0.5">{s.label}</p>
                   </div>
                 ))}
               </div>
 
               {/* FILTERS */}
               <div className="flex items-center gap-3 mb-6 flex-wrap">
-                <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-2xl p-1">
+                <div className="flex items-center gap-1 bg-surface border border-theme rounded-2xl p-1">
                   {(['all', 'unread', 'mention', 'reply'] as const).map(f => (
                     <button key={f} onClick={() => setFilter(f)}
                       className={`px-3 py-1.5 rounded-xl text-xs font-bold capitalize transition-all ${
-                        filter === f ? 'bg-black text-white' : 'text-gray-500 hover:text-black'
+                        filter === f ? 'bg-black text-white' : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
                       }`}>
                       {f}
                     </button>
                   ))}
                 </div>
                 {activePlatforms.length > 0 && (
-                  <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-2xl p-1">
+                  <div className="flex items-center gap-1 bg-surface border border-theme rounded-2xl p-1">
                     <button onClick={() => setPlatformFilter('all')}
                       className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                         platformFilter === 'all' ? 'bg-black text-white' : 'text-gray-500 hover:text-black'
@@ -200,7 +200,7 @@ export default function SocialInbox() {
                   <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-black" />
                 </div>
               ) : filtered.length === 0 ? (
-                <div className="bg-white border border-gray-100 rounded-2xl p-10 text-center">
+                <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
                   <div className="text-3xl mb-2">📭</div>
                   <p className="text-sm font-bold text-gray-700 mb-1">
                     {messages.length === 0 ? 'No activity yet' : 'Nothing matches this filter'}

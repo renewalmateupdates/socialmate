@@ -118,7 +118,7 @@ export default function Destinations() {
   const meta = PLATFORM_META[platform]
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
@@ -161,7 +161,7 @@ export default function Destinations() {
 
           {/* ADD FORM */}
           {showForm && (
-            <div className="bg-white border border-gray-200 rounded-2xl p-5 mb-6">
+            <div className="bg-surface border border-theme-md rounded-2xl p-5 mb-6">
               <h2 className="text-sm font-extrabold mb-4">Add Destination</h2>
               <div className="space-y-4">
 
@@ -231,7 +231,7 @@ export default function Destinations() {
               {[1,2,3].map(i => <SkeletonBox key={i} className="h-16" />)}
             </div>
           ) : destinations.length === 0 && !showForm ? (
-            <div className="bg-white border border-gray-100 rounded-2xl p-12 text-center">
+            <div className="bg-surface border border-theme rounded-2xl p-12 text-center">
               <div className="text-4xl mb-3">📍</div>
               <p className="text-sm font-bold mb-1">No destinations yet</p>
               <p className="text-xs text-gray-400 mb-5">
@@ -260,7 +260,7 @@ export default function Destinations() {
                         const isConfirming = confirmDelete === d.id
                         const isDeleting   = deleting === d.id
                         return (
-                          <div key={d.id} className="bg-white border border-gray-100 rounded-2xl p-4 hover:border-gray-300 transition-all">
+                          <div key={d.id} className="bg-surface border border-theme rounded-2xl p-4 hover:border-gray-300 transition-all">
                             <div className="flex items-center justify-between gap-3">
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-bold truncate">{d.label}</p>

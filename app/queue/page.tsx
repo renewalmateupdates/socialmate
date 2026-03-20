@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 
 function SkeletonBox({ className }: { className?: string }) {
-  return <div className={`bg-gray-100 rounded-xl animate-pulse ${className}`} />
+  return <div className={`bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse ${className}`} />
 }
 
 const PLATFORM_ICONS: Record<string, string> = {
@@ -129,7 +129,7 @@ function QueueInner() {
   const targetDateString  = targetDate ? dateParamToDateString(targetDate) : null
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
@@ -147,7 +147,7 @@ function QueueInner() {
             <div className="flex items-center gap-2 self-start sm:self-auto">
               {targetDate && (
                 <Link href="/queue"
-                  className="text-xs font-bold px-3 py-2.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                  className="text-xs font-bold px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
                   ← All days
                 </Link>
               )}
@@ -179,7 +179,7 @@ function QueueInner() {
                 { label: 'Days Ahead', value: daysWithPosts, icon: '🗓️' },
                 { label: 'Platforms',  value: new Set(posts.flatMap(p => p.platforms || [])).size, icon: '📱' },
               ].map(stat => (
-                <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-4 text-center">
+                <div key={stat.label} className="bg-surface border border-theme rounded-2xl p-4 text-center">
                   <div className="text-xl mb-1">{stat.icon}</div>
                   <p className="text-xl font-extrabold">{stat.value}</p>
                   <p className="text-xs text-gray-400 font-semibold mt-0.5">{stat.label}</p>
@@ -193,7 +193,7 @@ function QueueInner() {
               {[1,2,3].map(i => <SkeletonBox key={i} className="h-24" />)}
             </div>
           ) : posts.length === 0 ? (
-            <div className="bg-white border border-gray-100 rounded-2xl p-12 text-center">
+            <div className="bg-surface border border-theme rounded-2xl p-12 text-center">
               <div className="text-4xl mb-3">📅</div>
               <p className="text-sm font-bold mb-1">Your queue is empty</p>
               <p className="text-xs text-gray-400 mb-5">Schedule posts and they'll line up here, grouped by day.</p>
@@ -212,12 +212,12 @@ function QueueInner() {
                     ref={el => { sectionRefs.current[dateKey] = el }}
                     className={`scroll-mt-8 rounded-2xl transition-all ${isHighlighted ? 'ring-2 ring-blue-300 ring-offset-2' : ''}`}>
                     <div className="flex items-center gap-3 mb-3 px-1">
-                      <p className={`text-xs font-extrabold uppercase tracking-widest ${isHighlighted ? 'text-blue-600' : 'text-gray-900'}`}>
+                      <p className={`text-xs font-extrabold uppercase tracking-widest ${isHighlighted ? 'text-blue-600' : 'text-gray-900 dark:text-gray-100'}`}>
                         {formatDateLabel(dateKey)}
                         {isHighlighted && <span className="ml-2 text-blue-400 normal-case tracking-normal font-semibold">← from calendar</span>}
                       </p>
-                      <div className="flex-1 h-px bg-gray-100" />
-                      <span className="text-xs text-gray-400">
+                      <div className="flex-1 h-px bg-gray-100 dark:bg-gray-800" />
+                      <span className="text-xs text-gray-400 dark:text-gray-500">
                         {grouped[dateKey].length} post{grouped[dateKey].length !== 1 ? 's' : ''}
                       </span>
                     </div>
@@ -227,8 +227,8 @@ function QueueInner() {
                         const isCancelling = cancelling   === post.id
                         return (
                           <div key={post.id}
-                            className={`bg-white border rounded-2xl p-4 md:p-5 transition-all ${
-                              isHighlighted ? 'border-blue-100 hover:border-blue-300' : 'border-gray-100 hover:border-gray-300'
+                            className={`bg-surface border rounded-2xl p-4 md:p-5 transition-all ${
+                              isHighlighted ? 'border-blue-100 hover:border-blue-300' : 'border-theme hover:border-gray-300'
                             }`}>
                             <div className="flex items-start gap-4">
                               <div className="flex-1 min-w-0">
@@ -239,12 +239,12 @@ function QueueInner() {
                                     </span>
                                   </div>
                                 )}
-                                <p className="text-sm text-gray-700 leading-relaxed line-clamp-2 mb-3">
-                                  {post.content || <span className="text-gray-300 italic">No content</span>}
+                                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-2 mb-3">
+                                  {post.content || <span className="text-gray-300 dark:text-gray-600 italic">No content</span>}
                                 </p>
                                 <div className="flex items-center gap-1.5 flex-wrap">
                                   {(post.platforms || []).map((p: string) => (
-                                    <span key={p} className="flex items-center gap-1 text-xs text-gray-500 bg-gray-50 px-2 py-0.5 rounded-full">
+                                    <span key={p} className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 px-2 py-0.5 rounded-full">
                                       <span>{PLATFORM_ICONS[p] || '📱'}</span>
                                       <span className="hidden sm:inline">{PLATFORM_NAMES[p] || p}</span>
                                     </span>
@@ -255,7 +255,7 @@ function QueueInner() {
                               {!isConfirming && (
                                 <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 flex-shrink-0">
                                   <Link href={`/compose?draft=${post.id}`}
-                                    className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                                    className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
                                     Edit
                                   </Link>
                                   <button onClick={() => setConfirmCancel(post.id)}
@@ -267,7 +267,7 @@ function QueueInner() {
                             </div>
 
                             {isConfirming && (
-                              <div className="mt-3 pt-3 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center gap-2">
+                              <div className="mt-3 pt-3 border-t border-theme flex flex-col sm:flex-row sm:items-center gap-2">
                                 <p className="text-xs text-red-600 font-semibold flex-1">
                                   Move this post back to drafts?
                                 </p>
@@ -281,7 +281,7 @@ function QueueInner() {
                                     ) : 'Yes, unschedule'}
                                   </button>
                                   <button onClick={() => setConfirmCancel(null)}
-                                    className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                                    className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
                                     Cancel
                                   </button>
                                 </div>
@@ -327,7 +327,7 @@ function QueueInner() {
 export default function Queue() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-theme flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
       </div>
     }>

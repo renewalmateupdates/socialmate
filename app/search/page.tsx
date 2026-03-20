@@ -132,7 +132,7 @@ export default function Search() {
   }, [query, userId, runSearch])
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-2xl mx-auto">
@@ -151,7 +151,7 @@ export default function Search() {
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder="Search posts, templates, hashtags..."
-              className="w-full pl-10 pr-10 py-3.5 text-sm bg-white border border-gray-200 rounded-2xl focus:outline-none focus:border-gray-400 shadow-sm"
+              className="w-full pl-10 pr-10 py-3.5 text-sm bg-surface border border-theme-md rounded-2xl focus:outline-none focus:border-gray-400 shadow-sm"
             />
             {query && (
               <button onClick={() => setQuery('')}
@@ -172,7 +172,7 @@ export default function Search() {
 
           {/* EMPTY STATE */}
           {!searching && hasSearched && results.length === 0 && (
-            <div className="bg-white border border-gray-100 rounded-2xl p-10 text-center">
+            <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
               <div className="text-4xl mb-3">🔍</div>
               <p className="text-sm font-bold mb-1">No results for "{query}"</p>
               <p className="text-xs text-gray-400">Try different keywords or check your spelling.</p>
@@ -189,7 +189,7 @@ export default function Search() {
                 const typeInfo = TYPE_LABELS[r.type]
                 return (
                   <Link key={r.id} href={r.href}
-                    className="flex items-center gap-3 bg-white border border-gray-100 rounded-2xl p-4 hover:border-gray-300 transition-all group">
+                    className="flex items-center gap-3 bg-surface border border-theme rounded-2xl p-4 hover:border-gray-300 transition-all group">
                     <div className="w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center text-base flex-shrink-0">
                       {typeInfo.icon}
                     </div>
@@ -217,7 +217,7 @@ export default function Search() {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                 {QUICK_LINKS.map(link => (
                   <Link key={link.href} href={link.href}
-                    className="flex items-center gap-2 bg-white border border-gray-100 rounded-xl px-3 py-2.5 hover:border-gray-300 transition-all group">
+                    className="flex items-center gap-2 bg-surface border border-theme rounded-xl px-3 py-2.5 hover:border-gray-300 transition-all group">
                     <span className="text-sm flex-shrink-0">{link.icon}</span>
                     <span className="text-xs font-semibold text-gray-600 group-hover:text-black transition-all truncate">
                       {link.label}

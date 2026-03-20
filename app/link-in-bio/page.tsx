@@ -201,7 +201,7 @@ export default function LinkInBio() {
 
   const PreviewPanel = () => (
     <div className="space-y-4">
-      <div className="bg-white border border-gray-100 rounded-2xl p-4">
+      <div className="bg-surface border border-theme rounded-2xl p-4">
         <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Live Preview</p>
         <div className="rounded-2xl overflow-hidden border border-gray-100">
           <div className={`${currentTheme.bg} p-5 min-h-80 flex flex-col items-center`}>
@@ -254,7 +254,7 @@ export default function LinkInBio() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex">
+      <div className="min-h-screen bg-theme flex">
         <Sidebar />
         <div className="md:ml-56 flex-1 flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
@@ -264,7 +264,7 @@ export default function LinkInBio() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-5xl mx-auto">
@@ -307,7 +307,7 @@ export default function LinkInBio() {
             <div className="lg:col-span-2 space-y-4">
 
               {/* PROFILE */}
-              <div className="bg-white border border-gray-100 rounded-2xl p-5 space-y-4">
+              <div className="bg-surface border border-theme rounded-2xl p-5 space-y-4">
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Profile</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
@@ -358,7 +358,7 @@ export default function LinkInBio() {
               </div>
 
               {/* TABS */}
-              <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-2xl p-1 overflow-x-auto">
+              <div className="flex items-center gap-1 bg-surface border border-theme rounded-2xl p-1 overflow-x-auto">
                 {[
                   { id: 'links',   label: '🔗 Links'   },
                   { id: 'socials', label: '📱 Socials'  },
@@ -376,7 +376,7 @@ export default function LinkInBio() {
 
               {/* LINKS TAB */}
               {activeTab === 'links' && (
-                <div className="bg-white border border-gray-100 rounded-2xl p-5 space-y-3">
+                <div className="bg-surface border border-theme rounded-2xl p-5 space-y-3">
                   <div className="flex items-center justify-between mb-1">
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">Links</p>
                     <p className="text-xs text-gray-400">{activeLinks.length} active</p>
@@ -415,7 +415,7 @@ export default function LinkInBio() {
 
               {/* SOCIALS TAB */}
               {activeTab === 'socials' && (
-                <div className="bg-white border border-gray-100 rounded-2xl p-5 space-y-3">
+                <div className="bg-surface border border-theme rounded-2xl p-5 space-y-3">
                   <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Social Profiles</p>
                   {SOCIAL_PLATFORMS.map(p => (
                     <div key={p.id} className="flex items-center gap-3">
@@ -431,7 +431,7 @@ export default function LinkInBio() {
 
               {/* DESIGN TAB */}
               {activeTab === 'design' && (
-                <div className="bg-white border border-gray-100 rounded-2xl p-5 space-y-5">
+                <div className="bg-surface border border-theme rounded-2xl p-5 space-y-5">
                   <div>
                     <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Theme</p>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -482,7 +482,7 @@ export default function LinkInBio() {
               {activeTab === 'domain' && (
                 <div className="space-y-4">
                   {canUseCustomDomain ? (
-                    <div className="bg-white border border-gray-100 rounded-2xl p-5 space-y-4">
+                    <div className="bg-surface border border-theme rounded-2xl p-5 space-y-4">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-lg">🌐</span>
                         <h2 className="text-base font-extrabold">Custom Domain</h2>
@@ -504,7 +504,7 @@ export default function LinkInBio() {
                       <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 space-y-2">
                         <p className="text-xs font-bold text-gray-700">DNS Setup Instructions</p>
                         <p className="text-xs text-gray-500">Add this CNAME record in your domain's DNS settings:</p>
-                        <div className="bg-white border border-gray-200 rounded-lg p-3 font-mono text-xs text-gray-700 overflow-x-auto">
+                        <div className="bg-surface border border-theme-md rounded-lg p-3 font-mono text-xs text-gray-700 overflow-x-auto">
                           <div className="grid grid-cols-3 gap-2 mb-1">
                             <span className="font-bold text-gray-400">Type</span>
                             <span className="font-bold text-gray-400">Name</span>
@@ -560,7 +560,7 @@ export default function LinkInBio() {
                         </div>
                       </div>
 
-                      <div className="bg-white border border-gray-100 rounded-2xl p-5">
+                      <div className="bg-surface border border-theme rounded-2xl p-5">
                         <h3 className="text-sm font-extrabold mb-3">How the referral unlock works</h3>
                         <div className="space-y-3">
                           {[

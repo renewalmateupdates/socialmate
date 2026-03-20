@@ -11,7 +11,7 @@ import TelegramConnectModal from '@/components/TelegramConnectModal'
 import MastodonConnectModal from '@/components/MastodonConnectModal'
 
 function SkeletonBox({ className }: { className?: string }) {
-  return <div className={`bg-gray-100 rounded-xl animate-pulse ${className}`} />
+  return <div className={`bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse ${className}`} />
 }
 
 type Account = {
@@ -73,16 +73,16 @@ function PlatformCard({
 
   if (!connectable) {
     return (
-      <div className="flex items-center gap-3 p-4 bg-white border border-gray-100 rounded-2xl opacity-60">
+      <div className="flex items-center gap-3 p-4 bg-surface border border-theme rounded-2xl opacity-60">
         <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-xl flex-shrink-0">
           {meta.icon}
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-gray-600">{meta.label}</p>
+          <p className="text-sm font-semibold text-gray-600 dark:text-gray-300">{meta.label}</p>
           <p className="text-xs text-gray-400 truncate">{meta.statusNote}</p>
         </div>
         <span className={`text-xs font-semibold px-2.5 py-1 rounded-full flex-shrink-0 ${
-          meta.status === 'coming_soon' ? 'bg-blue-50 text-blue-500' : 'bg-gray-100 text-gray-400'
+          meta.status === 'coming_soon' ? 'bg-blue-50 text-blue-500' : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'
         }`}>
           {meta.status === 'coming_soon' ? 'Soon' : 'Planned'}
         </span>
@@ -91,8 +91,8 @@ function PlatformCard({
   }
 
   return (
-    <div className={`flex items-center gap-3 p-4 bg-white border rounded-2xl transition-all ${
-      atLimit ? 'border-gray-100 opacity-60' : 'border-gray-100 hover:border-gray-300'
+    <div className={`flex items-center gap-3 p-4 bg-surface border rounded-2xl transition-all ${
+      atLimit ? 'border-theme opacity-60' : 'border-theme hover:border-gray-300'
     }`}>
       <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-xl flex-shrink-0">
         {meta.icon}
@@ -112,7 +112,7 @@ function PlatformCard({
       </div>
       {atLimit ? (
         <Link href="/pricing"
-          className="text-xs font-semibold px-3 py-1.5 bg-gray-100 text-gray-500 rounded-xl hover:bg-gray-200 transition-all flex-shrink-0">
+          className="text-xs font-semibold px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-xl hover:bg-gray-200 transition-all flex-shrink-0">
           Upgrade
         </Link>
       ) : (
@@ -258,7 +258,7 @@ function AccountsInner() {
   const connectedPlatforms = new Set(accounts.map(a => a.platform))
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-5xl mx-auto">
@@ -268,20 +268,20 @@ function AccountsInner() {
               <h1 className="text-2xl font-extrabold tracking-tight">Accounts</h1>
               <p className="text-sm text-gray-400 mt-0.5">Connect and manage your social media accounts</p>
             </div>
-            <div className="text-xs font-semibold text-gray-500 bg-white border border-gray-100 rounded-xl px-4 py-2.5 self-start sm:self-auto">
+            <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 bg-surface border border-theme rounded-xl px-4 py-2.5 self-start sm:self-auto">
               {accounts.length} connected · {accountsPerPlatform} per platform on {planConfig.label}
             </div>
           </div>
 
           <div className={`mb-6 rounded-2xl px-5 py-4 border flex flex-col sm:flex-row sm:items-center gap-3 ${
-            plan === 'free'   ? 'bg-gray-50 border-gray-200'   :
+            plan === 'free'   ? 'bg-theme border-theme-md'   :
             plan === 'pro'    ? 'bg-blue-50 border-blue-100'   :
             'bg-purple-50 border-purple-100'
           }`}>
             <div className="flex-1">
               <p className={`text-xs font-bold ${
                 plan === 'agency' ? 'text-purple-700' :
-                plan === 'pro'    ? 'text-blue-700'   : 'text-gray-700'
+                plan === 'pro'    ? 'text-blue-700'   : 'text-gray-700 dark:text-gray-300'
               }`}>
                 {plan === 'free'   && '🔓 Free plan — 1 account per platform across 4 live integrations'}
                 {plan === 'pro'    && '⚡ Pro plan — up to 5 accounts per platform'}
@@ -309,12 +309,12 @@ function AccountsInner() {
                 { label: 'Platforms Used',        value: `${connectedPlatforms.size} / ${LIVE_PLATFORMS.length} live`, icon: '📱', color: 'text-gray-700' },
                 { label: 'Accounts Per Platform', value: `${accountsPerPlatform} max`,                                 icon: '🔓', color: 'text-blue-600' },
               ].map(stat => (
-                <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-4">
+                <div key={stat.label} className="bg-surface border border-theme rounded-2xl p-4">
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{stat.label}</span>
+                    <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">{stat.label}</span>
                     <span>{stat.icon}</span>
                   </div>
-                  <div className={`text-2xl font-extrabold tracking-tight ${stat.color}`}>{stat.value}</div>
+                  <div className={`text-2xl font-extrabold tracking-tight dark:text-gray-100 ${stat.color}`}>{stat.value}</div>
                 </div>
               ))
             )}
@@ -331,7 +331,7 @@ function AccountsInner() {
                   const isConfirming = confirmDisconnect === account.id
                   const isDisconnecting = disconnecting === account.id
                   return (
-                    <div key={account.id} className={`p-4 bg-white border rounded-2xl ${meta.color} transition-all`}>
+                    <div key={account.id} className={`p-4 bg-surface border rounded-2xl ${meta.color} transition-all`}>
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-xl flex-shrink-0 shadow-sm">
                           {meta.icon}
@@ -341,10 +341,10 @@ function AccountsInner() {
                             <p className="text-sm font-bold">{meta.label}</p>
                             <span className="text-xs font-semibold px-2 py-0.5 bg-green-100 text-green-700 rounded-full">Connected</span>
                             {platformCount > 1 && (
-                              <span className="text-xs text-gray-400">{platformCount}/{accountsPerPlatform} accounts</span>
+                              <span className="text-xs text-gray-400 dark:text-gray-500">{platformCount}/{accountsPerPlatform} accounts</span>
                             )}
                           </div>
-                          <p className="text-xs text-gray-500 mt-0.5">
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                             @{account.account_name} · Connected {new Date(account.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                           </p>
                         </div>
@@ -370,7 +370,7 @@ function AccountsInner() {
                               ) : 'Yes, disconnect'}
                             </button>
                             <button onClick={() => setConfirmDisconnect(null)}
-                              className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                              className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
                               Cancel
                             </button>
                           </div>
@@ -435,7 +435,7 @@ function AccountsInner() {
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
               <h2 className="text-sm font-bold tracking-tight">Planned</h2>
-              <span className="text-xs font-semibold px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full">On the roadmap</span>
+              <span className="text-xs font-semibold px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-full">On the roadmap</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {PLANNED_PLATFORMS.map(platform => (
@@ -452,12 +452,12 @@ function AccountsInner() {
             </div>
           </div>
 
-          <div className="bg-gray-50 border border-gray-100 rounded-2xl p-5">
+          <div className="bg-theme border border-theme rounded-2xl p-5">
             <div className="flex items-start gap-4">
               <span className="text-2xl flex-shrink-0">🚀</span>
               <div>
                 <p className="text-sm font-bold mb-1">More platforms are on the way</p>
-                <p className="text-xs text-gray-500 leading-relaxed">
+                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
                   LinkedIn, YouTube, Pinterest, and Reddit are code-complete and awaiting platform approval — launching very soon.
                   Instagram, TikTok, Facebook, and Threads are in developer review.
                   We'll notify you on your dashboard the moment each one goes live.
@@ -472,15 +472,15 @@ function AccountsInner() {
       {/* DISCORD MODAL */}
       {showDiscordModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
+          <div className="bg-surface rounded-2xl p-6 max-w-sm w-full shadow-xl">
             <p className="text-lg font-bold mb-2">💬 Connect Discord</p>
-            <p className="text-sm text-gray-500 mb-4 leading-relaxed">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 leading-relaxed">
               Make sure you're logged into the Discord account you want to connect before continuing.
               To add a different account, log into that account in your browser first.
             </p>
             <div className="flex gap-3">
               <button onClick={() => setShowDiscordModal(false)}
-                className="flex-1 text-sm font-semibold px-4 py-2.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                className="flex-1 text-sm font-semibold px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
                 Cancel
               </button>
               <button onClick={() => { setShowDiscordModal(false); window.open('/api/accounts/discord/connect', '_blank') }}
@@ -516,7 +516,7 @@ function AccountsInner() {
 export default function Accounts() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-theme flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
       </div>
     }>

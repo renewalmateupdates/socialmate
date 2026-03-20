@@ -90,7 +90,7 @@ export default function NewWorkspace() {
 
   if (!authChecked) {
     return (
-      <div className="min-h-screen bg-gray-50 flex">
+      <div className="min-h-screen bg-theme flex">
         <Sidebar />
         <div className="md:ml-56 flex-1 flex items-center justify-center">
           <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin" />
@@ -102,7 +102,7 @@ export default function NewWorkspace() {
   // Free: upgrade wall
   if (plan === 'free') {
     return (
-      <div className="min-h-screen bg-gray-50 flex">
+      <div className="min-h-screen bg-theme flex">
         <Sidebar />
         <div className="md:ml-56 flex-1 p-8 flex items-center justify-center">
           <div className="max-w-md text-center">
@@ -142,7 +142,7 @@ export default function NewWorkspace() {
   // At limit
   if (clientCount >= limit) {
     return (
-      <div className="min-h-screen bg-gray-50 flex">
+      <div className="min-h-screen bg-theme flex">
         <Sidebar />
         <div className="md:ml-56 flex-1 p-8 flex items-center justify-center">
           <div className="max-w-md text-center">
@@ -187,7 +187,7 @@ export default function NewWorkspace() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-xl mx-auto">
@@ -230,7 +230,7 @@ export default function NewWorkspace() {
 
           {/* STEP 1 */}
           {step === 1 && (
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 md:p-6 space-y-5">
+            <div className="bg-surface border border-theme rounded-2xl p-5 md:p-6 space-y-5">
               <div>
                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">
                   Client Name <span className="text-red-400">*</span>
@@ -275,7 +275,7 @@ export default function NewWorkspace() {
 
           {/* STEP 2 */}
           {step === 2 && (
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 md:p-6">
+            <div className="bg-surface border border-theme rounded-2xl p-5 md:p-6">
               <h2 className="text-sm font-extrabold mb-1">Which platforms does this client use?</h2>
               <p className="text-xs text-gray-400 mb-5">You can add or change these later from workspace settings.</p>
 
@@ -317,7 +317,7 @@ export default function NewWorkspace() {
           {/* STEP 3 */}
           {step === 3 && (
             <div className="space-y-4">
-              <div className="bg-white border border-gray-100 rounded-2xl p-5 md:p-6">
+              <div className="bg-surface border border-theme rounded-2xl p-5 md:p-6">
                 <h2 className="text-sm font-extrabold mb-4">Review workspace</h2>
                 <div className="space-y-3">
                   {[

@@ -95,14 +95,14 @@ export default function CompetitorTracking() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-50">
+      <div className="flex h-screen items-center justify-center bg-theme">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <main className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
@@ -113,7 +113,7 @@ export default function CompetitorTracking() {
                 <span className="text-2xl">🔭</span>
                 <h1 className="text-2xl font-extrabold tracking-tight">Competitor Tracking</h1>
               </div>
-              <p className="text-sm text-gray-400">Track up to 3 competitor accounts across platforms — all tiers.</p>
+              <p className="text-sm text-gray-400 dark:text-gray-500">Track up to 3 competitor accounts across platforms — all tiers.</p>
             </div>
             {competitors.length < MAX_COMPETITORS && (
               <button onClick={() => setShowForm(!showForm)}
@@ -124,33 +124,33 @@ export default function CompetitorTracking() {
           </div>
 
           <div className="grid grid-cols-3 gap-4 mb-8">
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 text-center">
+            <div className="bg-surface border border-theme rounded-2xl p-5 text-center">
               <p className="text-2xl font-extrabold">{competitors.length} / {MAX_COMPETITORS}</p>
-              <p className="text-xs text-gray-400 font-semibold mt-0.5">Tracked</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 font-semibold mt-0.5">Tracked</p>
             </div>
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 text-center">
+            <div className="bg-surface border border-theme rounded-2xl p-5 text-center">
               <p className="text-2xl font-extrabold">{uniquePlatforms.length}</p>
-              <p className="text-xs text-gray-400 font-semibold mt-0.5">Platforms</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 font-semibold mt-0.5">Platforms</p>
             </div>
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 text-center">
+            <div className="bg-surface border border-theme rounded-2xl p-5 text-center">
               <p className="text-2xl font-extrabold">{slotsLeft}</p>
-              <p className="text-xs text-gray-400 font-semibold mt-0.5">Slots left</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 font-semibold mt-0.5">Slots left</p>
             </div>
           </div>
 
           {showForm && (
-            <div className="bg-white border border-gray-100 rounded-2xl p-6 mb-6">
+            <div className="bg-surface border border-theme rounded-2xl p-6 mb-6">
               <h2 className="text-sm font-extrabold mb-4">Add Competitor</h2>
               <div className="space-y-3">
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1">Competitor Name</label>
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1">Competitor Name</label>
                   <input value={name} onChange={e => setName(e.target.value)}
                     placeholder="e.g. Buffer, Hootsuite, a creator..."
                     className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all" />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1">Platform</label>
+                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1">Platform</label>
                     <select value={platform} onChange={e => setPlatform(e.target.value)}
                       className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all">
                       {PLATFORMS.map(p => (
@@ -159,14 +159,14 @@ export default function CompetitorTracking() {
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1">Handle / URL</label>
+                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1">Handle / URL</label>
                     <input value={handle} onChange={e => setHandle(e.target.value)}
                       placeholder="@handle or profile URL"
                       className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black transition-all" />
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1">Notes (optional)</label>
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1">Notes (optional)</label>
                   <textarea value={notes} onChange={e => setNotes(e.target.value)}
                     placeholder="What are you watching for?"
                     rows={2}
@@ -188,10 +188,10 @@ export default function CompetitorTracking() {
           )}
 
           {competitors.length === 0 ? (
-            <div className="bg-white border border-gray-100 rounded-2xl p-10 text-center">
+            <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
               <div className="text-4xl mb-3">🔭</div>
-              <p className="text-sm font-bold text-gray-700 mb-1">No competitors tracked yet</p>
-              <p className="text-xs text-gray-400 mb-4">Add up to 3 competitor accounts to keep tabs on what they're doing.</p>
+              <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">No competitors tracked yet</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">Add up to 3 competitor accounts to keep tabs on what they're doing.</p>
               <button onClick={() => setShowForm(true)}
                 className="text-xs font-bold px-4 py-2 bg-black text-white rounded-xl hover:opacity-80 transition-all">
                 + Add your first competitor
@@ -202,15 +202,15 @@ export default function CompetitorTracking() {
               {competitors.map(c => {
                 const p = PLATFORMS.find(pl => pl.id === c.platform)
                 return (
-                  <div key={c.id} className="bg-white border border-gray-100 rounded-2xl p-5">
+                  <div key={c.id} className="bg-surface border border-theme rounded-2xl p-5">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
+                        <div className="w-10 h-10 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
                           {p?.icon || '📱'}
                         </div>
                         <div>
                           <p className="text-sm font-extrabold">{c.name}</p>
-                          <p className="text-xs text-gray-400">{p?.name} · {c.handle}</p>
+                          <p className="text-xs text-gray-400 dark:text-gray-500">{p?.name} · {c.handle}</p>
                         </div>
                       </div>
                       <button onClick={() => handleDelete(c.id)} disabled={deleting === c.id}

@@ -191,7 +191,7 @@ export default function Templates() {
     : templates.filter(t => t.category === activeCategory)
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
@@ -214,7 +214,7 @@ export default function Templates() {
 
           {/* FORM */}
           {showForm && (
-            <div className="bg-white border border-gray-200 rounded-2xl p-5 md:p-6 mb-6">
+            <div className="bg-surface border border-theme-md rounded-2xl p-5 md:p-6 mb-6">
               <h2 className="text-sm font-extrabold mb-4">
                 {editingId ? 'Edit Template' : 'New Template'}
               </h2>
@@ -319,7 +319,7 @@ export default function Templates() {
                 const isConfirming = confirmDelete === t.id
                 return (
                   <div key={t.id}
-                    className="bg-white border border-gray-100 rounded-2xl p-4 md:p-5 hover:border-gray-300 transition-all">
+                    className="bg-surface border border-theme rounded-2xl p-4 md:p-5 hover:border-gray-300 transition-all">
 
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <div className="flex items-center gap-2 flex-wrap min-w-0">
@@ -405,7 +405,7 @@ export default function Templates() {
             <div className="space-y-3">
               {STARTER_TEMPLATES.map(t => (
                 <div key={t.id}
-                  className="bg-white border border-gray-100 rounded-2xl p-4 md:p-5 hover:border-gray-300 transition-all">
+                  className="bg-surface border border-theme rounded-2xl p-4 md:p-5 hover:border-gray-300 transition-all">
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <div className="flex items-center gap-2 flex-wrap min-w-0">
                       <p className="text-sm font-extrabold truncate">{t.title}</p>

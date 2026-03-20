@@ -319,7 +319,7 @@ function OnboardingInner() {
   )
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-theme flex flex-col">
 
       <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -365,7 +365,7 @@ function OnboardingInner() {
 
           {/* ── STEP 1 — WELCOME ── */}
           {step === 1 && (
-            <div className="bg-white border border-gray-100 rounded-3xl p-8 md:p-10">
+            <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
               <div className="text-center mb-8">
                 <div className="text-5xl mb-4">👋</div>
                 <h1 className="text-3xl font-extrabold tracking-tight mb-2">Welcome to SocialMate</h1>
@@ -508,7 +508,7 @@ function OnboardingInner() {
                 )
               })}
 
-              <div className="bg-white border border-gray-100 rounded-2xl p-5">
+              <div className="bg-surface border border-theme rounded-2xl p-5">
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">All AI tools included — every plan</p>
                 <div className="grid grid-cols-2 gap-2">
                   {PLAN_DETAILS.free.aiTools.map(tool => (
@@ -530,7 +530,7 @@ function OnboardingInner() {
 
           {/* ── STEP 3 — USE CASE ── */}
           {step === 3 && (
-            <div className="bg-white border border-gray-100 rounded-3xl p-8 md:p-10">
+            <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
               {searchParams.get('upgraded') === 'true' && (
                 <div className="bg-green-50 border border-green-200 rounded-2xl px-4 py-3 mb-6 flex items-center gap-3">
                   <span className="text-xl">🎉</span>
@@ -572,7 +572,7 @@ function OnboardingInner() {
 
           {/* ── STEP 4 — PLATFORMS ── */}
           {step === 4 && (
-            <div className="bg-white border border-gray-100 rounded-3xl p-8 md:p-10">
+            <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
               <div className="text-center mb-6">
                 <div className="text-5xl mb-4">📱</div>
                 <h2 className="text-2xl font-extrabold tracking-tight mb-2">Which platforms do you use?</h2>
@@ -637,7 +637,7 @@ function OnboardingInner() {
 
           {/* ── STEP 5 — SECURITY / 2FA ── */}
           {step === 5 && (
-            <div className="bg-white border border-gray-100 rounded-3xl p-8 md:p-10">
+            <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
               <div className="text-center mb-6">
                 <div className="text-5xl mb-4">🔐</div>
                 <h2 className="text-2xl font-extrabold tracking-tight mb-2">Secure your account</h2>
@@ -686,7 +686,7 @@ function OnboardingInner() {
                       <img src={mfaQR} alt="2FA QR Code" className="w-40 h-40 rounded-xl" />
                     </div>
                     <p className="text-xs text-gray-400 text-center mb-2">Can't scan? Enter this code manually:</p>
-                    <div className="bg-white border border-gray-200 rounded-xl px-4 py-2 text-center">
+                    <div className="bg-surface border border-theme-md rounded-xl px-4 py-2 text-center">
                       <p className="text-xs font-mono font-bold tracking-widest text-gray-700 break-all">{mfaSecret}</p>
                     </div>
                   </div>
@@ -729,7 +729,7 @@ function OnboardingInner() {
 
           {/* ── STEP 6 — FIRST POST ── */}
           {step === 6 && (
-            <div className="bg-white border border-gray-100 rounded-3xl p-8 md:p-10">
+            <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
               <div className="text-center mb-6">
                 <div className="text-5xl mb-4">✏️</div>
                 <h2 className="text-2xl font-extrabold tracking-tight mb-2">Write your first post</h2>
@@ -815,7 +815,7 @@ function OnboardingInner() {
 
           {/* ── STEP 7 — DONE ── */}
           {step === 7 && (
-            <div className="bg-white border border-gray-100 rounded-3xl p-8 md:p-10 text-center">
+            <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10 text-center">
               <div className="text-6xl mb-4">🚀</div>
               <h2 className="text-3xl font-extrabold tracking-tight mb-2">
                 You're all set, {displayName || 'friend'}!
@@ -913,7 +913,7 @@ function OnboardingInner() {
 export default function Onboarding() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-theme flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
       </div>
     }>

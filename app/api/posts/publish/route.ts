@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { publishToAll } from '@/lib/publish'
+import { inngest } from '@/lib/inngest'
 
 
 export async function POST(request: NextRequest) {
@@ -59,6 +60,14 @@ export async function POST(request: NextRequest) {
     // First-post credit trigger + streak update
     await handleFirstPostCredits(userId)
     if (!allFailed) await updateStreak(userId)
+
+    // Emit analytics fetch event for Bluesky/Mastodon posts
+    if (!allFailed) {
+      const analyticsPlatforms = results.filter(r => r.success && (r.platform === 'bluesky' || r.platform === 'mastodon'))
+      if (analyticsPlatforms.length > 0) {
+        await inngest.send({ name: 'post/published', data: { postId, userId, platformPostIds } }).catch(() => {})
+      }
+    }
 
     return NextResponse.json({
       success: !allFailed,
@@ -125,6 +134,14 @@ export async function POST(request: NextRequest) {
 
     await handleFirstPostCredits(userId)
     if (!allFailed) await updateStreak(userId)
+
+    // Emit analytics fetch event for Bluesky/Mastodon posts
+    if (!allFailed) {
+      const analyticsPlatforms = results.filter(r => r.success && (r.platform === 'bluesky' || r.platform === 'mastodon'))
+      if (analyticsPlatforms.length > 0) {
+        await inngest.send({ name: 'post/published', data: { postId, userId, platformPostIds } }).catch(() => {})
+      }
+    }
 
     return NextResponse.json({
       success: !allFailed,
