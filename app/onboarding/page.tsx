@@ -321,26 +321,26 @@ function OnboardingInner() {
   return (
     <div className="min-h-screen bg-theme flex flex-col">
 
-      <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
+      <div className="bg-surface border-b border-theme px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
           <span className="font-bold text-base tracking-tight">SocialMate</span>
           {step > 2 && <PlanBadge />}
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-xs text-gray-400 font-semibold">Step {step} of {STEPS.length}</span>
+          <span className="text-xs text-gray-400 dark:text-gray-500 font-semibold">Step {step} of {STEPS.length}</span>
           <button
             onClick={async () => {
               if (user) await supabase.from('profiles').update({ onboarding_completed: true }).eq('id', user.id)
               router.push('/dashboard')
             }}
-            className="text-xs text-gray-400 hover:text-black transition-colors font-semibold">
+            className="text-xs text-gray-400 dark:text-gray-500 hover:text-black transition-colors font-semibold">
             Skip setup →
           </button>
         </div>
       </div>
 
-      <div className="w-full bg-gray-100 h-1">
+      <div className="w-full bg-gray-100 dark:bg-gray-800 h-1">
         <div className="bg-black h-1 transition-all duration-500" style={{ width: `${progress}%` }} />
       </div>
 
@@ -349,13 +349,13 @@ function OnboardingInner() {
           <div key={s.id} className="flex items-center gap-1 flex-shrink-0">
             <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
               step === s.id ? 'bg-black text-white' :
-              step > s.id  ? 'bg-gray-200 text-gray-500' :
-              'text-gray-300'
+              step > s.id  ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400' :
+              'text-gray-300 dark:text-gray-600'
             }`}>
               <span>{step > s.id ? '✓' : s.id}</span>
               <span className="hidden md:inline">{s.label}</span>
             </div>
-            {i < STEPS.length - 1 && <div className={`w-4 h-px ${step > s.id ? 'bg-gray-300' : 'bg-gray-100'}`} />}
+            {i < STEPS.length - 1 && <div className={`w-4 h-px ${step > s.id ? 'bg-gray-300 dark:bg-gray-600' : 'bg-gray-100 dark:bg-gray-700'}`} />}
           </div>
         ))}
       </div>
@@ -369,7 +369,7 @@ function OnboardingInner() {
               <div className="text-center mb-8">
                 <div className="text-5xl mb-4">👋</div>
                 <h1 className="text-3xl font-extrabold tracking-tight mb-2">Welcome to SocialMate</h1>
-                <p className="text-gray-400 text-sm">Let's get you set up in under 3 minutes.</p>
+                <p className="text-gray-400 dark:text-gray-500 text-sm">Let's get you set up in under 3 minutes.</p>
               </div>
 
               <div className="mb-6">

@@ -42,12 +42,12 @@ const PLATFORM_META: Record<string, {
   reddit:    { icon: '🤖', color: 'bg-orange-50 border-orange-200', label: 'Reddit',      status: 'coming_soon', statusNote: 'Code complete — awaiting approval' },
   instagram: { icon: '📸', color: 'bg-pink-50 border-pink-200',     label: 'Instagram',   status: 'coming_soon', statusNote: 'Awaiting API approval'             },
   facebook:  { icon: '📘', color: 'bg-blue-50 border-blue-200',     label: 'Facebook',    status: 'coming_soon', statusNote: 'Awaiting API approval'             },
-  tiktok:    { icon: '🎵', color: 'bg-gray-50 border-gray-200',     label: 'TikTok',      status: 'coming_soon', statusNote: 'Awaiting API approval'             },
-  threads:   { icon: '🧵', color: 'bg-gray-50 border-gray-200',     label: 'Threads',     status: 'coming_soon', statusNote: 'Awaiting API approval'             },
+  tiktok:    { icon: '🎵', color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700',     label: 'TikTok',      status: 'coming_soon', statusNote: 'Awaiting API approval'             },
+  threads:   { icon: '🧵', color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700',     label: 'Threads',     status: 'coming_soon', statusNote: 'Awaiting API approval'             },
   twitter:   { icon: '🐦', color: 'bg-sky-50 border-sky-200',       label: 'X / Twitter', status: 'planned',     statusNote: 'Planned integration'              },
   snapchat:  { icon: '👻', color: 'bg-yellow-50 border-yellow-200', label: 'Snapchat',    status: 'planned',     statusNote: 'Planned integration'              },
   lemon8:    { icon: '🍋', color: 'bg-yellow-50 border-yellow-200', label: 'Lemon8',      status: 'planned',     statusNote: 'Planned integration'              },
-  bereal:    { icon: '📷', color: 'bg-gray-50 border-gray-200',     label: 'BeReal',      status: 'planned',     statusNote: 'Planned integration'              },
+  bereal:    { icon: '📷', color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700',     label: 'BeReal',      status: 'planned',     statusNote: 'Planned integration'              },
 }
 
 const ALL_PLATFORMS         = Object.keys(PLATFORM_META)
@@ -74,7 +74,7 @@ function PlatformCard({
   if (!connectable) {
     return (
       <div className="flex items-center gap-3 p-4 bg-surface border border-theme rounded-2xl opacity-60">
-        <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-xl flex-shrink-0">
+        <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-xl flex-shrink-0">
           {meta.icon}
         </div>
         <div className="flex-1 min-w-0">
@@ -94,7 +94,7 @@ function PlatformCard({
     <div className={`flex items-center gap-3 p-4 bg-surface border rounded-2xl transition-all ${
       atLimit ? 'border-theme opacity-60' : 'border-theme hover:border-gray-300'
     }`}>
-      <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-xl flex-shrink-0">
+      <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-xl flex-shrink-0">
         {meta.icon}
       </div>
       <div className="flex-1 min-w-0">
@@ -326,14 +326,14 @@ function AccountsInner() {
               <h2 className="text-sm font-bold tracking-tight mb-4">Connected Accounts</h2>
               <div className="space-y-3">
                 {accounts.map(account => {
-                  const meta = PLATFORM_META[account.platform] || { icon: '📱', color: 'bg-gray-50 border-gray-200', label: account.platform }
+                  const meta = PLATFORM_META[account.platform] || { icon: '📱', color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700', label: account.platform }
                   const platformCount = accountsByPlatform[account.platform]?.length || 0
                   const isConfirming = confirmDisconnect === account.id
                   const isDisconnecting = disconnecting === account.id
                   return (
                     <div key={account.id} className={`p-4 bg-surface border rounded-2xl ${meta.color} transition-all`}>
                       <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-xl flex-shrink-0 shadow-sm">
+                        <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-700 flex items-center justify-center text-xl flex-shrink-0 shadow-sm">
                           {meta.icon}
                         </div>
                         <div className="flex-1 min-w-0">

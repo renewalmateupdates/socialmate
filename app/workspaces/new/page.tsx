@@ -108,7 +108,7 @@ export default function NewWorkspace() {
           <div className="max-w-md text-center">
             <div className="text-5xl mb-4">🏢</div>
             <h1 className="text-2xl font-extrabold tracking-tight mb-3">Client Workspaces</h1>
-            <p className="text-sm text-gray-500 leading-relaxed mb-6">
+            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-6">
               Create separate workspaces for each client — their own accounts, posts, analytics, and team access.
             </p>
             <div className="grid grid-cols-2 gap-3 mb-6 text-left">
@@ -127,7 +127,7 @@ export default function NewWorkspace() {
               className="block w-full text-center bg-black text-white text-sm font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all mb-3">
               View Plans →
             </Link>
-            <Link href="/dashboard" className="text-xs text-gray-400 hover:text-black transition-all">
+            <Link href="/dashboard" className="text-xs text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white transition-all">
               ← Back to dashboard
             </Link>
           </div>
@@ -150,7 +150,7 @@ export default function NewWorkspace() {
             <h1 className="text-xl font-extrabold tracking-tight mb-3">Workspace limit reached</h1>
             {plan === 'agency' ? (
               <>
-                <p className="text-sm text-gray-500 mb-6">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
                   You've used all {limit} client workspaces on Agency. Delete an unused workspace to create a new one, or contact us to discuss additional workspaces.
                 </p>
                 <Link href="/workspaces"
@@ -159,14 +159,14 @@ export default function NewWorkspace() {
                 </Link>
                 <div>
                   <a href="mailto:support@socialmate.studio"
-                    className="text-xs text-gray-400 hover:text-black transition-all">
+                    className="text-xs text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white transition-all">
                     Contact us for more workspaces →
                   </a>
                 </div>
               </>
             ) : (
               <>
-                <p className="text-sm text-gray-500 mb-6">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
                   You've used your 1 client workspace on Pro. Upgrade to Agency for up to 5 workspaces.
                 </p>
                 <Link href="/settings?tab=Plan"
@@ -195,13 +195,13 @@ export default function NewWorkspace() {
           {/* HEADER */}
           <div className="flex flex-wrap items-center gap-3 mb-8">
             <Link href="/workspaces"
-              className="text-xs font-semibold text-gray-400 hover:text-black transition-all">
+              className="text-xs font-semibold text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white transition-all">
               ← Workspaces
             </Link>
             <div className="h-4 w-px bg-gray-200" />
             <div>
               <h1 className="text-xl font-extrabold tracking-tight">New Client Workspace</h1>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                 {clientCount} of {limit} client workspace{limit !== 1 ? 's' : ''} used on {PLAN_CONFIG[plan].label}
               </p>
             </div>
@@ -217,8 +217,8 @@ export default function NewWorkspace() {
               <div key={s.n} className="flex items-center gap-1.5 flex-shrink-0">
                 <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
                   step === s.n ? 'bg-black text-white' :
-                  step >  s.n ? 'bg-gray-100 text-gray-500' :
-                  'text-gray-300'
+                  step >  s.n ? 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400' :
+                  'text-gray-300 dark:text-gray-600'
                 }`}>
                   <span>{step > s.n ? '✓' : s.n}</span>
                   <span>{s.label}</span>
@@ -232,7 +232,7 @@ export default function NewWorkspace() {
           {step === 1 && (
             <div className="bg-surface border border-theme rounded-2xl p-5 md:p-6 space-y-5">
               <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">
                   Client Name <span className="text-red-400">*</span>
                 </label>
                 <input type="text" value={clientName}
@@ -243,7 +243,7 @@ export default function NewWorkspace() {
                   className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400" />
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">Industry</label>
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">Industry</label>
                 <select value={industry} onChange={e => setIndustry(e.target.value)}
                   className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 bg-white">
                   <option value="">Select an industry...</option>
@@ -251,15 +251,15 @@ export default function NewWorkspace() {
                 </select>
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">Client Website</label>
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">Client Website</label>
                 <input type="url" value={website} onChange={e => setWebsite(e.target.value)}
                   placeholder="https://clientwebsite.com"
                   className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400" />
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">
                   Internal Notes
-                  <span className="text-gray-400 font-normal ml-1">(not visible to client)</span>
+                  <span className="text-gray-400 dark:text-gray-500 font-normal ml-1">(not visible to client)</span>
                 </label>
                 <textarea value={notes} onChange={e => setNotes(e.target.value)}
                   placeholder="Goals, tone of voice, content guidelines..."
@@ -277,7 +277,7 @@ export default function NewWorkspace() {
           {step === 2 && (
             <div className="bg-surface border border-theme rounded-2xl p-5 md:p-6">
               <h2 className="text-sm font-extrabold mb-1">Which platforms does this client use?</h2>
-              <p className="text-xs text-gray-400 mb-5">You can add or change these later from workspace settings.</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">You can add or change these later from workspace settings.</p>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-5">
                 {Object.entries(PLATFORM_ICONS).map(([id, icon]) => {
@@ -285,7 +285,7 @@ export default function NewWorkspace() {
                   return (
                     <button key={id} onClick={() => togglePlatform(id)}
                       className={`flex items-center gap-2 p-2.5 rounded-xl border-2 text-left transition-all ${
-                        selected ? 'border-black bg-black/5' : 'border-gray-100 hover:border-gray-300'
+                        selected ? 'border-black bg-black/5' : 'border-theme hover:border-gray-300'
                       }`}>
                       <span className="text-base flex-shrink-0">{icon}</span>
                       <span className="text-xs font-semibold truncate">
@@ -297,7 +297,7 @@ export default function NewWorkspace() {
                 })}
               </div>
 
-              <p className="text-xs text-gray-400 text-center mb-5">
+              <p className="text-xs text-gray-400 dark:text-gray-500 text-center mb-5">
                 {selectedPlatforms.length} platform{selectedPlatforms.length !== 1 ? 's' : ''} selected
               </p>
 

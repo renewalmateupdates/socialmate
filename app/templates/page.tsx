@@ -200,7 +200,7 @@ export default function Templates() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Post Templates</h1>
-              <p className="text-sm text-gray-400 mt-0.5">
+              <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">
                 {loading ? 'Loading...' : `${templates.length} template${templates.length !== 1 ? 's' : ''} saved`}
               </p>
             </div>
@@ -221,16 +221,16 @@ export default function Templates() {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">Title</label>
+                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">Title</label>
                     <input type="text" value={title} onChange={e => setTitle(e.target.value)}
                       placeholder="e.g. Product Launch Announcement"
-                      className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400"
+                      className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-gray-400 dark:focus:border-gray-400"
                       autoFocus />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">Category</label>
+                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">Category</label>
                     <select value={category} onChange={e => setCategory(e.target.value)}
-                      className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 bg-white">
+                      className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-gray-400 bg-white dark:bg-gray-900 dark:text-gray-100">
                       {CATEGORIES.filter(c => c !== 'All').map(c => (
                         <option key={c} value={c}>{c}</option>
                       ))}
@@ -239,20 +239,20 @@ export default function Templates() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">
                     Content
-                    <span className="text-gray-400 font-normal ml-1">(use [brackets] for fill-in sections)</span>
+                    <span className="text-gray-400 dark:text-gray-500 font-normal ml-1">(use [brackets] for fill-in sections)</span>
                   </label>
                   <textarea value={content} onChange={e => setContent(e.target.value)}
                     placeholder="Excited to announce [product/service]! 🎉&#10;&#10;[Describe key benefit]&#10;&#10;[Call to action] 👇"
                     rows={6}
-                    className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 resize-none" />
-                  <p className="text-xs text-gray-400 mt-1">{content.length} chars</p>
+                    className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-gray-400 resize-none" />
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{content.length} chars</p>
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-2">
-                    Best for platforms <span className="text-gray-400 font-normal">(optional)</span>
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-2">
+                    Best for platforms <span className="text-gray-400 dark:text-gray-500 font-normal">(optional)</span>
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {LIVE_PLATFORM_IDS.map(id => (
@@ -260,7 +260,7 @@ export default function Templates() {
                         className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${
                           platforms.includes(id)
                             ? 'bg-black text-white border-black'
-                            : 'border-gray-200 text-gray-500 hover:border-gray-400'
+                            : 'border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-gray-400'
                         }`}>
                         <span>{PLATFORM_ICONS[id]}</span>
                         <span className="capitalize">{id}</span>
@@ -268,11 +268,11 @@ export default function Templates() {
                     ))}
                     {SOON_PLATFORM_IDS.map(id => (
                       <div key={id}
-                        className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border border-dashed border-gray-100 text-gray-300 cursor-not-allowed"
+                        className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border border-dashed border-gray-100 dark:border-gray-700 text-gray-300 dark:text-gray-600 cursor-not-allowed"
                         title={`${id} — coming soon`}>
                         <span>{PLATFORM_ICONS[id]}</span>
                         <span className="capitalize">{id}</span>
-                        <span className="text-gray-200 ml-0.5 text-xs">Soon</span>
+                        <span className="text-gray-200 dark:text-gray-600 ml-0.5 text-xs">Soon</span>
                       </div>
                     ))}
                   </div>

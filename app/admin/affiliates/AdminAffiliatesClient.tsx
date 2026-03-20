@@ -206,12 +206,12 @@ export default function AdminAffiliatesClient() {
 
                   <div>
                     <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Promotion Plan</div>
-                    <div className="text-gray-700 leading-relaxed bg-gray-50 rounded-xl p-3">{selected.promotion_plan}</div>
+                    <div className="text-gray-700 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-gray-800 rounded-xl p-3">{selected.promotion_plan}</div>
                   </div>
 
                   <div>
                     <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Why They're a Good Fit</div>
-                    <div className="text-gray-700 leading-relaxed bg-gray-50 rounded-xl p-3">{selected.why_good_fit}</div>
+                    <div className="text-gray-700 dark:text-gray-300 leading-relaxed bg-gray-50 dark:bg-gray-800 rounded-xl p-3">{selected.why_good_fit}</div>
                   </div>
 
                   {selected.status === 'rejected' && selected.rejection_reason && (
@@ -223,13 +223,13 @@ export default function AdminAffiliatesClient() {
                 </div>
 
                 {selected.status === 'pending_review' && (
-                  <div className="mt-6 space-y-3 border-t border-gray-100 pt-5">
+                  <div className="mt-6 space-y-3 border-t border-theme pt-5">
                     <textarea
                       placeholder="Rejection reason (optional — only needed if rejecting)"
                       value={rejectionReason}
                       onChange={e => setRejectionReason(e.target.value)}
                       rows={2}
-                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-gray-400 resize-none"
+                      className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl px-3 py-2 text-sm text-gray-700 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-gray-400 resize-none"
                     />
                     <div className="flex gap-3">
                       <button
