@@ -106,7 +106,7 @@ SocialMate's free plan includes:
 - 100 posts per month
 - 2-week scheduling window
 - 2 team seats
-- 100 AI credits per month (caption generation, hashtag sets, post scoring, and more)
+- 50 AI credits per month (caption generation, hashtag sets, post scoring, and more)
 - Analytics covering the last 30 days
 - A link in bio page (no separate Linktree subscription needed)
 - Competitor tracking for up to 3 accounts

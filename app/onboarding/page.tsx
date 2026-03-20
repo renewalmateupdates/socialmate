@@ -48,7 +48,7 @@ const PLAN_DETAILS = {
     analytics: '30 days',
     features: [
       '4 live platforms now',
-      '100 AI credits / month',
+      '50 AI credits / month',
       '1 connected account per platform',
       '2 team seats',
       '100 posts / month',
@@ -386,7 +386,7 @@ function OnboardingInner() {
                 <div className="grid grid-cols-2 gap-x-6 gap-y-2 mb-4">
                   {[
                     '4 live platforms now',
-                    '100 AI credits / month',
+                    '50 AI credits / month',
                     'Bulk Scheduler',
                     'Link in Bio page',
                     '2 team seats',

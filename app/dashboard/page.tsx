@@ -144,7 +144,7 @@ function DashboardInner() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-50">
+      <div className="flex h-screen items-center justify-center bg-theme">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
       </div>
     )
@@ -164,7 +164,7 @@ function DashboardInner() {
   const creditColor  = creditPct > 50 ? 'bg-green-500' : creditPct > 20 ? 'bg-yellow-400' : 'bg-red-400'
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-theme">
       {showCreditModal && <CreditSuccessModal onDismiss={handleCreditModalDismiss} />}
       <Sidebar />
       <main className="md:ml-56 flex-1 p-4 md:p-8">
@@ -174,7 +174,7 @@ function DashboardInner() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">{greeting}, {displayName} 👋</h1>
-              <p className="text-sm text-gray-400 mt-0.5">
+              <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">
                 {stats.todayCount > 0
                   ? `${stats.todayCount} post${stats.todayCount !== 1 ? 's' : ''} scheduled today · ${stats.upcomingCount} coming up`
                   : 'Nothing scheduled today — want to change that?'}
@@ -182,7 +182,7 @@ function DashboardInner() {
             </div>
             <div className="flex items-center gap-2 self-start sm:self-auto">
               <Link href="/bulk-scheduler"
-                className="px-3 py-2 border border-gray-200 bg-white rounded-xl text-xs font-semibold hover:border-gray-400 transition-all">
+                className="px-3 py-2 border border-gray-200 bg-white dark:bg-gray-800 dark:text-white rounded-xl text-xs font-semibold hover:border-gray-400 transition-all">
                 📅 Bulk Schedule
               </Link>
               <Link href="/compose"
@@ -209,7 +209,7 @@ function DashboardInner() {
                   {plan === 'pro'  && '⚡ Pro Plan'}
                   {plan === 'agency' && '🏢 Agency Plan'}
                 </p>
-                <p className="text-xs text-gray-400 mt-0.5">
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                   {planConfig?.accountsPerPlatform} acct/platform · {planConfig?.seats} seats
                 </p>
               </div>
@@ -222,16 +222,16 @@ function DashboardInner() {
             </div>
 
             {/* Credits card */}
-            <div className="col-span-2 bg-white border border-gray-100 rounded-2xl px-4 py-3">
+            <div className="col-span-2 bg-surface border border-theme rounded-2xl px-4 py-3">
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-xs font-semibold text-gray-400">AI Credits</span>
-                <span className="text-xs font-bold text-gray-700">{credits.toLocaleString()} remaining</span>
+                <span className="text-xs font-semibold text-gray-400 dark:text-gray-500">AI Credits</span>
+                <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{credits.toLocaleString()} remaining</span>
               </div>
-              <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden mb-1.5">
+              <div className="w-full h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden mb-1.5">
                 <div className={`h-full rounded-full transition-all ${creditColor}`} style={{ width: `${creditPct}%` }} />
               </div>
               <div className="flex items-center justify-between">
-                <p className="text-xs text-gray-400">banks up to {bankCap.toLocaleString()}</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500">banks up to {bankCap.toLocaleString()}</p>
                 {creditPct < 20 && (
                   <Link href="/settings?tab=Plan" className="text-xs font-bold text-blue-600 hover:underline">
                     Get more →
@@ -247,9 +247,9 @@ function DashboardInner() {
               { label: 'Published', value: stats.published,  icon: '✅', color: 'text-green-600'  },
               { label: 'This Week', value: stats.thisWeek,   icon: '✏️', color: 'text-purple-600' },
             ].map(s => (
-              <div key={s.label} className="bg-white border border-gray-100 rounded-2xl p-3 flex flex-col justify-between">
+              <div key={s.label} className="bg-surface border border-theme rounded-2xl p-3 flex flex-col justify-between">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs text-gray-400">{s.label}</span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500">{s.label}</span>
                   <span className="text-sm">{s.icon}</span>
                 </div>
                 <span className={`text-2xl font-extrabold ${s.color}`}>{s.value}</span>
@@ -257,10 +257,10 @@ function DashboardInner() {
             ))}
 
             {/* Streak card */}
-            <div className="col-span-2 bg-white border border-gray-100 rounded-2xl p-3 flex items-center gap-3">
+            <div className="col-span-2 bg-surface border border-theme rounded-2xl p-3 flex items-center gap-3">
               <div className="text-2xl">🔥</div>
               <div>
-                <div className="text-xs text-gray-400 mb-0.5">Posting Streak</div>
+                <div className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">Posting Streak</div>
                 <div className="text-xl font-extrabold text-orange-500">
                   {streak} day{streak !== 1 ? 's' : ''}
                 </div>
@@ -280,10 +280,10 @@ function DashboardInner() {
             <div className="lg:col-span-2 space-y-5">
 
               {/* WEEK ACTIVITY */}
-              <div className="bg-white rounded-2xl border border-gray-100 p-5">
+              <div className="bg-surface rounded-2xl border border-theme p-5">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-sm font-extrabold">This Week's Activity</h2>
-                  <Link href="/analytics" className="text-xs text-gray-400 hover:text-black transition-all">Full analytics →</Link>
+                  <Link href="/analytics" className="text-xs text-gray-400 dark:text-gray-500 hover:text-black transition-all">Full analytics →</Link>
                 </div>
                 <div className="grid grid-cols-7 gap-1">
                   {DAYS.map((day, i) => {
@@ -294,11 +294,11 @@ function DashboardInner() {
                       <div key={day} className="flex flex-col items-center gap-1">
                         <div className="w-full flex items-end justify-center" style={{ height: '48px' }}>
                           {count > 0
-                            ? <div className={`w-full rounded-t-lg ${isToday ? 'bg-black' : 'bg-gray-200'}`} style={{ height: `${pct}%` }} />
-                            : <div className="w-full h-1 bg-gray-100 rounded" />}
+                            ? <div className={`w-full rounded-t-lg ${isToday ? 'bg-black dark:bg-white' : 'bg-gray-200 dark:bg-gray-700'}`} style={{ height: `${pct}%` }} />
+                            : <div className="w-full h-1 bg-gray-100 dark:bg-gray-800 rounded" />}
                         </div>
-                        <span className={`text-xs font-semibold ${isToday ? 'text-black' : 'text-gray-400'}`}>{day}</span>
-                        <span className="text-xs text-gray-400">{count > 0 ? count : ''}</span>
+                        <span className={`text-xs font-semibold ${isToday ? 'text-black dark:text-white' : 'text-gray-400 dark:text-gray-500'}`}>{day}</span>
+                        <span className="text-xs text-gray-400 dark:text-gray-500">{count > 0 ? count : ''}</span>
                       </div>
                     )
                   })}
@@ -306,16 +306,16 @@ function DashboardInner() {
               </div>
 
               {/* UPCOMING POSTS */}
-              <div className="bg-white rounded-2xl border border-gray-100 p-5">
+              <div className="bg-surface rounded-2xl border border-theme p-5">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-sm font-extrabold">Upcoming Posts</h2>
-                  <Link href="/queue" className="text-xs text-gray-400 hover:text-black transition-all">View all →</Link>
+                  <Link href="/queue" className="text-xs text-gray-400 dark:text-gray-500 hover:text-black transition-all">View all →</Link>
                 </div>
                 {upcomingPosts.length === 0 ? (
                   <div className="text-center py-8">
                     <div className="text-3xl mb-2">📭</div>
-                    <p className="text-sm font-bold text-gray-700 mb-1">Queue is empty</p>
-                    <p className="text-xs text-gray-400 mb-4">Schedule posts to build your content pipeline.</p>
+                    <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Queue is empty</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">Schedule posts to build your content pipeline.</p>
                     <Link href="/compose" className="px-4 py-2 bg-black text-white text-xs font-bold rounded-xl hover:opacity-80 transition-all">
                       Write a post →
                     </Link>
@@ -323,16 +323,16 @@ function DashboardInner() {
                 ) : (
                   <div className="space-y-2">
                     {upcomingPosts.map(post => (
-                      <div key={post.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
+                      <div key={post.id} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-semibold text-gray-800 line-clamp-1">
+                          <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 line-clamp-1">
                             {post.content?.slice(0, 100)}{post.content?.length > 100 ? '…' : ''}
                           </p>
                           <div className="flex items-center gap-1.5 mt-1 flex-wrap">
                             {post.platforms?.slice(0, 4).map(p => (
                               <span key={p} className="text-xs">{PLATFORM_ICONS[p] || '📱'}</span>
                             ))}
-                            <span className="text-xs text-gray-400 ml-1">
+                            <span className="text-xs text-gray-400 dark:text-gray-500 ml-1">
                               {new Date(post.scheduled_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at {new Date(post.scheduled_at).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
                             </span>
                           </div>
@@ -345,32 +345,32 @@ function DashboardInner() {
               </div>
 
               {/* RECENT ACTIVITY */}
-              <div className="bg-white rounded-2xl border border-gray-100 p-5">
+              <div className="bg-surface rounded-2xl border border-theme p-5">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-sm font-extrabold">Recent Activity</h2>
-                  <Link href="/drafts" className="text-xs text-gray-400 hover:text-black transition-all">View drafts →</Link>
+                  <Link href="/drafts" className="text-xs text-gray-400 dark:text-gray-500 hover:text-black transition-all">View drafts →</Link>
                 </div>
                 {recentPosts.length === 0 ? (
-                  <p className="text-xs text-gray-400 text-center py-6">Your drafts and published posts appear here.</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-6">Your drafts and published posts appear here.</p>
                 ) : (
                   <div className="space-y-2">
                     {recentPosts.map(post => (
-                      <div key={post.id} className="flex items-start gap-3 p-3 border border-gray-50 rounded-xl hover:border-gray-200 transition-all">
+                      <div key={post.id} className="flex items-start gap-3 p-3 border border-gray-50 dark:border-gray-700 rounded-xl hover:border-gray-200 dark:hover:border-gray-600 transition-all">
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-semibold text-gray-800 line-clamp-1">
+                          <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 line-clamp-1">
                             {post.content?.slice(0, 80)}{post.content?.length > 80 ? '…' : ''}
                           </p>
                           <div className="flex items-center gap-1.5 mt-1">
                             {post.platforms?.slice(0, 3).map(p => (
                               <span key={p} className="text-xs">{PLATFORM_ICONS[p] || '📱'}</span>
                             ))}
-                            <span className="text-xs text-gray-400 ml-1">
+                            <span className="text-xs text-gray-400 dark:text-gray-500 ml-1">
                               {new Date(post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                             </span>
                           </div>
                         </div>
                         <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
-                          post.status === 'published' ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-gray-500'
+                          post.status === 'published' ? 'bg-green-50 text-green-600' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
                         }`}>
                           {post.status === 'published' ? 'Published' : 'Draft'}
                         </span>
@@ -386,7 +386,7 @@ function DashboardInner() {
             <div className="space-y-5">
 
               {/* QUICK ACTIONS */}
-              <div className="bg-white rounded-2xl border border-gray-100 p-5">
+              <div className="bg-surface rounded-2xl border border-theme p-5">
                 <h2 className="text-sm font-extrabold mb-3">Quick Actions</h2>
                 <div className="space-y-1">
                   {[
@@ -399,14 +399,14 @@ function DashboardInner() {
                   ].map(a => (
                     <Link key={a.href} href={a.href}
                       className={`flex items-center gap-3 p-2.5 rounded-xl transition-all ${
-                        a.featured ? 'bg-black text-white hover:opacity-80' : 'hover:bg-gray-50'
+                        a.featured ? 'bg-black text-white hover:opacity-80 dark:bg-gray-800 dark:text-white' : 'hover:bg-gray-50 dark:hover:bg-gray-800'
                       }`}>
                       <span className="text-base">{a.icon}</span>
                       <div className="flex-1 min-w-0">
-                        <p className={`text-xs font-bold ${a.featured ? 'text-white' : 'text-gray-900'}`}>{a.label}</p>
-                        <p className={`text-xs truncate ${a.featured ? 'text-gray-300' : 'text-gray-400'}`}>{a.sub}</p>
+                        <p className={`text-xs font-bold ${a.featured ? 'text-white' : 'text-gray-900 dark:text-gray-100'}`}>{a.label}</p>
+                        <p className={`text-xs truncate ${a.featured ? 'text-gray-300' : 'text-gray-400 dark:text-gray-500'}`}>{a.sub}</p>
                       </div>
-                      <span className={`text-xs ${a.featured ? 'text-gray-400' : 'text-gray-300'}`}>→</span>
+                      <span className={`text-xs ${a.featured ? 'text-gray-400' : 'text-gray-300 dark:text-gray-600'}`}>→</span>
                     </Link>
                   ))}
                 </div>
@@ -425,7 +425,7 @@ function DashboardInner() {
                   <span className="text-2xl">🔥</span>
                 </div>
                 <Link href="/sm-pulse"
-                  className="text-xs font-bold px-4 py-2 bg-white text-black rounded-xl hover:opacity-80 transition-all inline-block">
+                  className="text-xs font-bold px-4 py-2 bg-white dark:bg-gray-800 text-black dark:text-white rounded-xl hover:opacity-80 transition-all inline-block">
                   Try SM-Pulse — 10 cr
                 </Link>
               </div>
@@ -448,7 +448,7 @@ function DashboardInner() {
                     ))}
                   </div>
                   <Link href="/settings?tab=Referrals"
-                    className="text-xs font-bold px-4 py-2 bg-white text-black rounded-xl hover:opacity-80 transition-all inline-block w-full text-center">
+                    className="text-xs font-bold px-4 py-2 bg-white dark:bg-gray-800 text-black dark:text-white rounded-xl hover:opacity-80 transition-all inline-block w-full text-center">
                     Get your referral link →
                   </Link>
                 </div>
@@ -483,7 +483,7 @@ function DashboardInner() {
 export default function DashboardPage() {
   return (
     <Suspense fallback={
-      <div className="flex h-screen items-center justify-center bg-gray-50">
+      <div className="flex h-screen items-center justify-center bg-theme">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
       </div>
     }>

@@ -312,7 +312,7 @@ export default function AIFeaturesPage() {
             </div>
           </div>
 
-          <div className="bg-black text-white rounded-2xl p-5 mb-8 flex items-center justify-between">
+          <div className="bg-black text-white rounded-2xl p-5 mb-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">All tools live</p>
               <p className="text-sm font-extrabold">9 AI tools ready — including SM-Pulse, SM-Radar & Content Gap</p>
@@ -322,6 +322,15 @@ export default function AIFeaturesPage() {
               className="flex-shrink-0 bg-white text-black text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all">
               Open Compose →
             </Link>
+          </div>
+
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-3 mb-8 flex items-start gap-3">
+            <span className="text-lg flex-shrink-0">💡</span>
+            <p className="text-xs text-amber-800 leading-relaxed">
+              <strong>Why do AI tools cost credits?</strong> Every AI generation calls Google Gemini, which has real compute costs.
+              Credits keep SocialMate sustainable so we can stay free. Free plan includes 50 credits/month — enough to generate
+              ~15 captions, ~25 hashtag sets, or run ~5 SM-Pulse scans. Unused credits roll into your bank (up to 75 max).
+            </p>
           </div>
 
           <Section title="🤖 AI Tools" tools={AI_TOOLS} plan={plan} />
