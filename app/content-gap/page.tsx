@@ -58,7 +58,7 @@ export default function ContentGapPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar />
-      <main className="ml-56 flex-1 p-8">
+      <main className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
 
           <div className="flex items-start justify-between mb-8">

@@ -1,12 +1,9 @@
+export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
 export async function GET(req: NextRequest) {
   const cookieStore = await cookies()
@@ -19,7 +16,7 @@ export async function GET(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { data: account } = await supabaseAdmin
+  const { data: account } = await getSupabaseAdmin()
     .from('connected_accounts')
     .select('access_token, refresh_token, platform_user_id')
     .eq('user_id', user.id)
@@ -37,7 +34,7 @@ export async function GET(req: NextRequest) {
     if (refreshRes.ok) {
       const session = await refreshRes.json()
       accessJwt = session.accessJwt
-      await supabaseAdmin
+      await getSupabaseAdmin()
         .from('connected_accounts')
         .update({ access_token: session.accessJwt, refresh_token: session.refreshJwt })
         .eq('user_id', user.id)

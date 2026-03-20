@@ -1,42 +1,63 @@
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+
+const MAX_MASTODON_LENGTH = 500
 
 export async function publishToMastodon(userId: string, content: string): Promise<string> {
-  const { data: account } = await supabaseAdmin
+  // Enforce 500 character limit (Mastodon default; some instances allow more)
+  if (content.length > MAX_MASTODON_LENGTH) {
+    throw new Error(`Post exceeds Mastodon's ${MAX_MASTODON_LENGTH} character limit (${content.length} chars). Please shorten your post.`)
+  }
+
+  const { data: account, error: accountError } = await getSupabaseAdmin()
     .from('connected_accounts')
     .select('access_token, platform_user_id')
     .eq('user_id', userId)
     .eq('platform', 'mastodon')
     .single()
 
-  if (!account) throw new Error('No Mastodon account connected')
+  if (accountError || !account) {
+    throw new Error('No Mastodon account connected. Go to Accounts to connect your Mastodon account.')
+  }
 
   // platform_user_id is stored as "userId@instance"
-  const instance = account.platform_user_id.split('@').slice(1).join('@')
+  const parts    = account.platform_user_id.split('@')
+  const instance = parts.slice(1).join('@')
 
-  if (!instance) throw new Error('Could not determine Mastodon instance')
+  if (!instance) {
+    throw new Error('Could not determine Mastodon instance. Please reconnect your account.')
+  }
 
   const res = await fetch(`https://${instance}/api/v1/statuses`, {
-    method: 'POST',
+    method:  'POST',
     headers: {
-      Authorization: `Bearer ${account.access_token}`,
+      Authorization:  `Bearer ${account.access_token}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      status: content,
+      status:     content,
       visibility: 'public',
     }),
   })
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
-    throw new Error(err.error || 'Failed to post to Mastodon')
+    const detail = err.error || `HTTP ${res.status}`
+    console.error(`[Mastodon] Post failed on instance ${instance}:`, err)
+
+    if (res.status === 401) {
+      throw new Error('Mastodon: Token expired or revoked. Please reconnect your Mastodon account.')
+    }
+    if (res.status === 422 && err.error?.includes('characters')) {
+      throw new Error(`Mastodon: Your instance has a shorter character limit than ${MAX_MASTODON_LENGTH}. Please shorten your post.`)
+    }
+    if (res.status === 429) {
+      throw new Error('Mastodon: Rate limit hit. Please wait a few minutes and try again.')
+    }
+    throw new Error(`Mastodon post failed on ${instance}: ${detail}`)
   }
 
   const data = await res.json()
+  console.log(`[Mastodon] Published post ${data.id} on ${instance}`)
   return data.id
 }

@@ -1,16 +1,13 @@
+export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
 export async function POST(request: NextRequest) {
   const { postId } = await request.json()
   if (!postId) return NextResponse.json({ error: 'postId required' }, { status: 400 })
 
-  await supabaseAdmin
+  await getSupabaseAdmin()
     .from('posts')
     .update({ status: 'failed' })
     .eq('id', postId)

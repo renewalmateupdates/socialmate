@@ -1,5 +1,6 @@
 'use client'
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { supabase } from '@/lib/supabase'
 
 export type ThemeMode   = 'light' | 'dark'
 export type ThemeAccent = 'default' | 'midnight' | 'forest' | 'rose' | 'slate' | 'amber'
@@ -27,32 +28,117 @@ const ThemeContext = createContext<ThemeContextType>({
   setAccent: () => {},
 })
 
+function applyTheme(mode: ThemeMode, accent: ThemeAccent) {
+  const html = document.documentElement
+  // Apply .dark class so Tailwind dark: variants work
+  if (mode === 'dark') {
+    html.classList.add('dark')
+    html.setAttribute('data-theme', 'dark')
+  } else {
+    html.classList.remove('dark')
+    html.setAttribute('data-theme', 'light')
+  }
+  // Accent
+  if (accent === 'default') {
+    html.removeAttribute('data-accent')
+  } else {
+    html.setAttribute('data-accent', accent)
+  }
+}
+
+async function saveThemeToSupabase(mode: ThemeMode, accent: ThemeAccent) {
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    await supabase
+      .from('user_settings')
+      .update({ theme_mode: mode, theme_accent: accent })
+      .eq('user_id', user.id)
+  } catch {
+    // Silently fail — localStorage is the source of truth if Supabase is unavailable
+  }
+}
+
+async function loadThemeFromSupabase(): Promise<{ mode: ThemeMode; accent: ThemeAccent } | null> {
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return null
+    const { data } = await supabase
+      .from('user_settings')
+      .select('theme_mode, theme_accent')
+      .eq('user_id', user.id)
+      .single()
+    if (data?.theme_mode) {
+      return {
+        mode:   (data.theme_mode  as ThemeMode)   || 'light',
+        accent: (data.theme_accent as ThemeAccent) || 'default',
+      }
+    }
+    return null
+  } catch {
+    return null
+  }
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mode,   setModeState]   = useState<ThemeMode>('light')
   const [accent, setAccentState] = useState<ThemeAccent>('default')
+  const [loaded, setLoaded]      = useState(false)
 
+  // On mount: Supabase → localStorage → system preference
   useEffect(() => {
-    const savedMode   = localStorage.getItem('sm-theme-mode')   as ThemeMode   | null
-    const savedAccent = localStorage.getItem('sm-theme-accent') as ThemeAccent | null
-    if (savedMode)   setModeState(savedMode)
-    if (savedAccent) setAccentState(savedAccent)
+    async function init() {
+      // 1. Try Supabase (authoritative for logged-in users, cross-device)
+      const supabaseTheme = await loadThemeFromSupabase()
+      if (supabaseTheme) {
+        setModeState(supabaseTheme.mode)
+        setAccentState(supabaseTheme.accent)
+        localStorage.setItem('sm-theme-mode',   supabaseTheme.mode)
+        localStorage.setItem('sm-theme-accent', supabaseTheme.accent)
+        applyTheme(supabaseTheme.mode, supabaseTheme.accent)
+        setLoaded(true)
+        return
+      }
+
+      // 2. Try localStorage
+      const savedMode   = localStorage.getItem('sm-theme-mode')   as ThemeMode   | null
+      const savedAccent = localStorage.getItem('sm-theme-accent') as ThemeAccent | null
+      if (savedMode) {
+        const m = savedMode
+        const a = savedAccent || 'default'
+        setModeState(m)
+        setAccentState(a)
+        applyTheme(m, a)
+        setLoaded(true)
+        return
+      }
+
+      // 3. System preference
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+      const systemMode: ThemeMode = prefersDark ? 'dark' : 'light'
+      setModeState(systemMode)
+      setAccentState('default')
+      applyTheme(systemMode, 'default')
+      localStorage.setItem('sm-theme-mode',   systemMode)
+      localStorage.setItem('sm-theme-accent', 'default')
+      setLoaded(true)
+    }
+    init()
   }, [])
 
-  useEffect(() => {
-    const html = document.documentElement
-    html.setAttribute('data-theme', mode)
-    html.setAttribute('data-accent', accent)
-    localStorage.setItem('sm-theme-mode', mode)
-  }, [mode])
+  const setMode = (m: ThemeMode) => {
+    setModeState(m)
+    localStorage.setItem('sm-theme-mode', m)
+    applyTheme(m, accent)
+    saveThemeToSupabase(m, accent)
+  }
 
-  useEffect(() => {
-    const html = document.documentElement
-    html.setAttribute('data-accent', accent)
-    localStorage.setItem('sm-theme-accent', accent)
-  }, [accent])
-
-  const setMode = (m: ThemeMode) => setModeState(m)
-  const setAccent = (a: ThemeAccent) => setAccentState(a)
+  const setAccent = (a: ThemeAccent) => {
+    setAccentState(a)
+    localStorage.setItem('sm-theme-accent', a)
+    applyTheme(mode, a)
+    saveThemeToSupabase(mode, a)
+  }
 
   return (
     <ThemeContext.Provider value={{ mode, accent, setMode, setAccent }}>

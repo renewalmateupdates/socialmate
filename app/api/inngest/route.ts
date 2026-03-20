@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import { serve } from 'inngest/next'
 import { inngest, publishScheduledPost } from '@/lib/inngest'
 

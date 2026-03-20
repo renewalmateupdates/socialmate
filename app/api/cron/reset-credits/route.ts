@@ -1,10 +1,7 @@
+export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
 const PLAN_CREDITS: Record<string, number> = {
   free:   50,
@@ -28,7 +25,7 @@ export async function GET(req: NextRequest) {
   const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
 
   // Find all users whose credits are due for reset
-  const { data: users, error } = await supabaseAdmin
+  const { data: users, error } = await getSupabaseAdmin()
     .from('user_settings')
     .select('user_id, plan, ai_credits_remaining, ai_credits_reset_at')
     .or(`ai_credits_reset_at.is.null,ai_credits_reset_at.lt.${thirtyDaysAgo}`)
@@ -49,7 +46,7 @@ export async function GET(req: NextRequest) {
     // Add monthly credits but cap at bank capacity
     const newCredits  = Math.min(current + monthly, bankCap)
 
-    await supabaseAdmin
+    await getSupabaseAdmin()
       .from('user_settings')
       .update({
         ai_credits_remaining: newCredits,

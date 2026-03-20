@@ -1,12 +1,8 @@
+export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 async function fetchBlueskyEngagement(postUri: string, accessToken: string) {
   try {
@@ -101,7 +97,7 @@ export async function POST(request: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   // Get all published posts with platform_post_ids
-  const { data: posts } = await supabaseAdmin
+  const { data: posts } = await getSupabaseAdmin()
     .from('posts')
     .select('id, platforms, platform_post_ids, analytics')
     .eq('user_id', user.id)
@@ -113,7 +109,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Get connected accounts for this user
-  const { data: accounts } = await supabaseAdmin
+  const { data: accounts } = await getSupabaseAdmin()
     .from('connected_accounts')
     .select('platform, access_token, platform_user_id')
     .eq('user_id', user.id)
@@ -159,7 +155,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (updated) {
-      await supabaseAdmin
+      await getSupabaseAdmin()
         .from('posts')
         .update({ analytics: newAnalytics })
         .eq('id', post.id)

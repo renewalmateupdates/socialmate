@@ -2,10 +2,12 @@ import { createClient } from '@supabase/supabase-js'
 import { notFound } from 'next/navigation'
 import React from 'react'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+function getSupabase() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
 
 const THEMES: Record<string, { bg: string; text: string; btn: string; subtext: string }> = {
   white:  { bg: '#ffffff', text: '#111827', btn: '#111827', subtext: '#6b7280' },
@@ -32,7 +34,7 @@ const SOCIAL_ICONS: Record<string, string> = {
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
-  const { data } = await supabase
+  const { data } = await getSupabase()
     .from('bio_pages')
     .select('name, bio')
     .eq('slug', params.slug)
@@ -64,7 +66,7 @@ interface PageData {
 }
 
 export default async function BioPage({ params }: { params: { slug: string } }) {
-  const { data: page } = await supabase
+  const { data: page } = await getSupabase()
     .from('bio_pages')
     .select('*')
     .eq('slug', params.slug)
@@ -78,7 +80,7 @@ export default async function BioPage({ params }: { params: { slug: string } }) 
   const activeLinks = (p.links || []).filter((l) => l.active && l.title && l.url)
   const activeSocials = Object.entries(p.socials || {}).filter(([, v]) => v)
 
-  const { data: settings } = await supabase
+  const { data: settings } = await getSupabase()
     .from('user_settings')
     .select('plan')
     .eq('user_id', p.user_id)

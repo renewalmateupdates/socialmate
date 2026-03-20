@@ -96,7 +96,7 @@ export default function ApprovalsPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex">
         <Sidebar />
-        <main className="ml-56 flex-1 p-8">
+        <main className="md:ml-56 flex-1 p-4 md:p-8">
           <div className="max-w-3xl mx-auto">
             <div className="bg-white border border-gray-100 rounded-2xl p-10 text-center">
               <div className="text-4xl mb-4">✅</div>
@@ -118,7 +118,7 @@ export default function ApprovalsPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex">
       <Sidebar />
-      <main className="ml-56 flex-1 p-8">
+      <main className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
 
           <div className="mb-8">
