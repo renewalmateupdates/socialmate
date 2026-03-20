@@ -112,15 +112,15 @@ export default function NewWorkspace() {
               Create separate workspaces for each client — their own accounts, posts, analytics, and team access.
             </p>
             <div className="grid grid-cols-2 gap-3 mb-6 text-left">
-              <div className="bg-white border border-blue-100 rounded-2xl p-4">
+              <div className="bg-surface border border-blue-100 rounded-2xl p-4">
                 <div className="text-xs font-bold text-blue-600 mb-2">Pro · $5/mo</div>
                 <div className="text-2xl font-extrabold mb-1">1</div>
-                <div className="text-xs text-gray-500">client workspace</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">client workspace</div>
               </div>
-              <div className="bg-white border border-purple-100 rounded-2xl p-4">
+              <div className="bg-surface border border-purple-100 rounded-2xl p-4">
                 <div className="text-xs font-bold text-purple-600 mb-2">Agency · $20/mo</div>
                 <div className="text-2xl font-extrabold mb-1">5</div>
-                <div className="text-xs text-gray-500">client workspaces</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">client workspaces</div>
               </div>
             </div>
             <Link href="/settings?tab=Plan"

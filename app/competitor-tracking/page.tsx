@@ -219,12 +219,12 @@ export default function CompetitorTracking() {
                       </button>
                     </div>
                     {c.notes && (
-                      <div className="mt-3 pt-3 border-t border-gray-50">
-                        <p className="text-xs text-gray-500 leading-relaxed">{c.notes}</p>
+                      <div className="mt-3 pt-3 border-t border-gray-100">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{c.notes}</p>
                       </div>
                     )}
-                    <div className="mt-3 pt-3 border-t border-gray-50 flex items-center justify-between">
-                      <span className="text-xs text-gray-400">
+                    <div className="mt-3 pt-3 border-t border-gray-100 flex items-center justify-between">
+                      <span className="text-xs text-gray-400 dark:text-gray-500">
                         Added {new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </span>
                       <Link href="/sm-pulse" className="text-xs font-bold text-black hover:underline">
@@ -235,8 +235,8 @@ export default function CompetitorTracking() {
                 )
               })}
               {competitors.length >= MAX_COMPETITORS && (
-                <div className="bg-gray-50 border border-gray-100 rounded-2xl p-4 text-center">
-                  <p className="text-xs text-gray-500 font-semibold">
+                <div className="bg-theme border border-theme rounded-2xl p-4 text-center">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold">
                     You've reached the {MAX_COMPETITORS}-competitor limit. Remove one to add another.
                   </p>
                 </div>

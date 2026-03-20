@@ -139,7 +139,7 @@ export default function Search() {
 
           <div className="mb-8">
             <h1 className="text-2xl font-extrabold tracking-tight">Search</h1>
-            <p className="text-sm text-gray-400 mt-0.5">Find posts, templates, and hashtag collections</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">Find posts, templates, and hashtag collections</p>
           </div>
 
           {/* SEARCH INPUT */}
@@ -165,7 +165,7 @@ export default function Search() {
           {searching && (
             <div className="space-y-2">
               {[1,2,3].map(i => (
-                <div key={i} className="bg-gray-100 rounded-2xl h-16 animate-pulse" />
+                <div key={i} className="bg-gray-100 dark:bg-gray-800 rounded-2xl h-16 animate-pulse" />
               ))}
             </div>
           )}
@@ -175,14 +175,14 @@ export default function Search() {
             <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
               <div className="text-4xl mb-3">🔍</div>
               <p className="text-sm font-bold mb-1">No results for "{query}"</p>
-              <p className="text-xs text-gray-400">Try different keywords or check your spelling.</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500">Try different keywords or check your spelling.</p>
             </div>
           )}
 
           {/* RESULTS */}
           {!searching && results.length > 0 && (
             <div className="space-y-2 mb-8">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">
+              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">
                 {results.length} result{results.length !== 1 ? 's' : ''}
               </p>
               {results.map(r => {
@@ -190,20 +190,20 @@ export default function Search() {
                 return (
                   <Link key={r.id} href={r.href}
                     className="flex items-center gap-3 bg-surface border border-theme rounded-2xl p-4 hover:border-gray-300 transition-all group">
-                    <div className="w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center text-base flex-shrink-0">
+                    <div className="w-9 h-9 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-base flex-shrink-0">
                       {typeInfo.icon}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-0.5 flex-wrap">
                         <p className="text-xs font-extrabold truncate">{r.title}</p>
-                        <span className="text-xs font-semibold bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full flex-shrink-0">
+                        <span className="text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-1.5 py-0.5 rounded-full flex-shrink-0">
                           {typeInfo.label}
                         </span>
                       </div>
-                      <p className="text-xs text-gray-400 truncate">{r.subtitle}</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 truncate">{r.subtitle}</p>
                     </div>
                     {r.meta && <span className="text-sm flex-shrink-0">{r.meta}</span>}
-                    <span className="text-gray-300 group-hover:text-gray-600 transition-all text-xs flex-shrink-0">→</span>
+                    <span className="text-gray-300 dark:text-gray-600 group-hover:text-gray-600 dark:group-hover:text-gray-400 transition-all text-xs flex-shrink-0">→</span>
                   </Link>
                 )
               })}
@@ -213,13 +213,13 @@ export default function Search() {
           {/* QUICK LINKS */}
           {!query && (
             <div>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Quick Links</p>
+              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Quick Links</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                 {QUICK_LINKS.map(link => (
                   <Link key={link.href} href={link.href}
                     className="flex items-center gap-2 bg-surface border border-theme rounded-xl px-3 py-2.5 hover:border-gray-300 transition-all group">
                     <span className="text-sm flex-shrink-0">{link.icon}</span>
-                    <span className="text-xs font-semibold text-gray-600 group-hover:text-black transition-all truncate">
+                    <span className="text-xs font-semibold text-gray-600 dark:text-gray-400 group-hover:text-black dark:group-hover:text-white transition-all truncate">
                       {link.label}
                     </span>
                   </Link>

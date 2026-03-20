@@ -6,7 +6,7 @@ import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 
 function SkeletonBox({ className }: { className?: string }) {
-  return <div className={`bg-gray-100 rounded-xl animate-pulse ${className}`} />
+  return <div className={`bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse ${className}`} />
 }
 
 const CATEGORIES = ['All', 'Promotional', 'Educational', 'Engagement', 'Announcement', 'Personal', 'Other']

@@ -178,14 +178,14 @@ export default function SocialInbox() {
                   <div className="flex items-center gap-1 bg-surface border border-theme rounded-2xl p-1">
                     <button onClick={() => setPlatformFilter('all')}
                       className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                        platformFilter === 'all' ? 'bg-black text-white' : 'text-gray-500 hover:text-black'
+                        platformFilter === 'all' ? 'bg-black text-white' : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
                       }`}>
                       All
                     </button>
                     {activePlatforms.map(p => (
                       <button key={p} onClick={() => setPlatformFilter(p)}
                         className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                          platformFilter === p ? 'bg-black text-white' : 'text-gray-500 hover:text-black'
+                          platformFilter === p ? 'bg-black text-white' : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
                         }`}>
                         {PLATFORM_ICONS[p]} {p}
                       </button>
@@ -202,10 +202,10 @@ export default function SocialInbox() {
               ) : filtered.length === 0 ? (
                 <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
                   <div className="text-3xl mb-2">📭</div>
-                  <p className="text-sm font-bold text-gray-700 mb-1">
+                  <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
                     {messages.length === 0 ? 'No activity yet' : 'Nothing matches this filter'}
                   </p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-gray-400 dark:text-gray-500">
                     {messages.length === 0
                       ? 'When people mention or reply to you, it will show up here.'
                       : 'Try changing the filter above.'}
@@ -215,11 +215,11 @@ export default function SocialInbox() {
                 <div className="space-y-3">
                   {filtered.map(msg => (
                     <div key={msg.id} onClick={() => markRead(msg.id)}
-                      className={`bg-white border rounded-2xl p-4 cursor-pointer transition-all hover:border-gray-300 ${
-                        !msg.read ? 'border-black' : 'border-gray-100'
+                      className={`bg-surface border rounded-2xl p-4 cursor-pointer transition-all hover:border-gray-300 ${
+                        !msg.read ? 'border-black' : 'border-theme'
                       }`}>
                       <div className="flex items-start gap-3">
-                        <div className="w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center text-lg flex-shrink-0">
+                        <div className="w-9 h-9 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-lg flex-shrink-0">
                           {PLATFORM_ICONS[msg.platform] || '📱'}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -230,12 +230,12 @@ export default function SocialInbox() {
                             }`}>
                               {msg.type}
                             </span>
-                            <span className="text-xs text-gray-400 ml-auto">{formatTime(msg.received_at)}</span>
+                            <span className="text-xs text-gray-400 dark:text-gray-500 ml-auto">{formatTime(msg.received_at)}</span>
                             {!msg.read && <div className="w-2 h-2 bg-black rounded-full" />}
                           </div>
-                          <p className="text-sm text-gray-600 leading-relaxed">{msg.content}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{msg.content}</p>
                           <div className="flex items-center gap-2 mt-1.5">
-                            <span className="text-xs text-gray-400 capitalize">{msg.platform}</span>
+                            <span className="text-xs text-gray-400 dark:text-gray-500 capitalize">{msg.platform}</span>
                             {msg.post_url && (
                               <a href={msg.post_url} target="_blank" rel="noopener noreferrer"
                                 onClick={e => e.stopPropagation()}
@@ -252,8 +252,8 @@ export default function SocialInbox() {
               )}
 
               {/* COMING SOON BANNER */}
-              <div className="mt-6 bg-gray-50 border border-gray-100 rounded-2xl p-4 text-center">
-                <p className="text-xs text-gray-400 font-semibold">
+              <div className="mt-6 bg-theme border border-theme rounded-2xl p-4 text-center">
+                <p className="text-xs text-gray-400 dark:text-gray-500 font-semibold">
                   More platforms coming soon — connect your accounts to expand your inbox.
                 </p>
               </div>

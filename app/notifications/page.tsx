@@ -134,7 +134,7 @@ export default function Notifications() {
             ].map(tab => (
               <button key={tab.id} onClick={() => setFilter(tab.id as any)}
                 className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
-                  filter === tab.id ? 'bg-black text-white' : 'text-gray-500 hover:text-black'
+                  filter === tab.id ? 'bg-black text-white' : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
                 }`}>
                 {tab.label}
               </button>
@@ -151,7 +151,7 @@ export default function Notifications() {
               <p className="text-sm font-bold mb-1">
                 {filter === 'unread' ? 'No unread notifications' : 'No notifications yet'}
               </p>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-gray-400 dark:text-gray-500">
                 {filter === 'unread'
                   ? "You're all caught up!"
                   : 'Post updates, credit alerts, and team activity will appear here.'}
@@ -178,16 +178,16 @@ export default function Notifications() {
                             )}
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0">
-                            <span className="text-xs text-gray-400 whitespace-nowrap">{formatTime(n.created_at)}</span>
+                            <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">{formatTime(n.created_at)}</span>
                             {/* Always visible delete — not hover-only */}
                             <button
                               onClick={e => { e.stopPropagation(); deleteNotif(n.id) }}
-                              className="text-xs text-gray-300 hover:text-red-400 transition-all flex-shrink-0 px-1">
+                              className="text-xs text-gray-300 dark:text-gray-600 hover:text-red-400 transition-all flex-shrink-0 px-1">
                               ✕
                             </button>
                           </div>
                         </div>
-                        <p className="text-xs text-gray-600 leading-relaxed">{n.body}</p>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{n.body}</p>
                       </div>
                     </div>
                   </div>
