@@ -284,7 +284,7 @@ export default function Templates() {
                     {saving ? 'Saving...' : editingId ? 'Save Changes' : 'Save Template'}
                   </button>
                   <button onClick={resetForm}
-                    className="px-5 py-2.5 border border-gray-200 text-sm font-semibold rounded-xl hover:border-gray-400 transition-all">
+                    className="px-5 py-2.5 border border-gray-200 dark:border-gray-600 text-sm font-semibold rounded-xl hover:border-gray-400 transition-all">
                     Cancel
                   </button>
                 </div>
@@ -300,7 +300,7 @@ export default function Templates() {
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
                     activeCategory === cat
                       ? 'bg-black text-white border-black'
-                      : 'bg-white border-gray-200 text-gray-500 hover:border-gray-400'
+                      : 'bg-surface border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-gray-400'
                   }`}>
                   {cat}
                 </button>
@@ -324,7 +324,7 @@ export default function Templates() {
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <div className="flex items-center gap-2 flex-wrap min-w-0">
                         <p className="text-sm font-extrabold truncate">{t.title}</p>
-                        <span className="text-xs font-semibold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full flex-shrink-0">
+                        <span className="text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full flex-shrink-0">
                           {t.category || 'Other'}
                         </span>
                       </div>
@@ -335,7 +335,7 @@ export default function Templates() {
                             className={`text-xs font-bold px-2.5 py-1.5 rounded-xl transition-all border ${
                               copied === t.id
                                 ? 'bg-green-500 text-white border-green-500'
-                                : 'border-gray-200 hover:border-gray-400'
+                                : 'border-gray-200 dark:border-gray-600 hover:border-gray-400'
                             }`}>
                             {copied === t.id ? '✓' : 'Copy'}
                           </button>
@@ -344,7 +344,7 @@ export default function Templates() {
                             Use →
                           </Link>
                           <button onClick={() => handleEdit(t)}
-                            className="text-xs font-bold px-2.5 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                            className="text-xs font-bold px-2.5 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
                             Edit
                           </button>
                           <button onClick={() => setConfirmDelete(t.id)}
@@ -355,7 +355,7 @@ export default function Templates() {
                       )}
                     </div>
 
-                    <p className="text-xs text-gray-500 leading-relaxed line-clamp-3 whitespace-pre-line mb-3">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-3 whitespace-pre-line mb-3">
                       {t.content}
                     </p>
 
@@ -369,7 +369,7 @@ export default function Templates() {
 
                     {/* CONFIRM DELETE — below content, full width */}
                     {isConfirming && (
-                      <div className="mt-3 pt-3 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center gap-2">
+                      <div className="mt-3 pt-3 border-t border-theme flex flex-col sm:flex-row sm:items-center gap-2">
                         <p className="text-xs text-red-600 font-semibold flex-1">
                           Permanently delete "{t.title}"? This cannot be undone.
                         </p>
@@ -381,7 +381,7 @@ export default function Templates() {
                               : 'Yes, delete'}
                           </button>
                           <button onClick={() => setConfirmDelete(null)}
-                            className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                            className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
                             Cancel
                           </button>
                         </div>
@@ -399,7 +399,7 @@ export default function Templates() {
               <h2 className="text-sm font-bold tracking-tight">Starter Templates</h2>
               <span className="text-xs font-semibold px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full">Free to use</span>
             </div>
-            <p className="text-xs text-gray-400 mb-4">
+            <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
               Ready-made formats for the 4 live platforms. Hit "Use →" to open in Compose, or "Save" to add to your collection.
             </p>
             <div className="space-y-3">
@@ -409,7 +409,7 @@ export default function Templates() {
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <div className="flex items-center gap-2 flex-wrap min-w-0">
                       <p className="text-sm font-extrabold truncate">{t.title}</p>
-                      <span className="text-xs font-semibold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full flex-shrink-0">
+                      <span className="text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full flex-shrink-0">
                         {t.category}
                       </span>
                     </div>
@@ -419,7 +419,7 @@ export default function Templates() {
                         className={`text-xs font-bold px-2.5 py-1.5 rounded-xl transition-all border ${
                           copied === t.id
                             ? 'bg-green-500 text-white border-green-500'
-                            : 'border-gray-200 hover:border-gray-400'
+                            : 'border-gray-200 dark:border-gray-600 hover:border-gray-400'
                         }`}>
                         {copied === t.id ? '✓' : 'Copy'}
                       </button>
@@ -428,12 +428,12 @@ export default function Templates() {
                         Use →
                       </Link>
                       <button onClick={() => handleSaveStarter(t)} disabled={savingStarter === t.id}
-                        className="text-xs font-bold px-2.5 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
+                        className="text-xs font-bold px-2.5 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
                         {savingStarter === t.id ? 'Saving...' : 'Save'}
                       </button>
                     </div>
                   </div>
-                  <p className="text-xs text-gray-500 leading-relaxed line-clamp-3 whitespace-pre-line mb-3">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-3 whitespace-pre-line mb-3">
                     {t.content}
                   </p>
                   <div className="flex items-center gap-1">

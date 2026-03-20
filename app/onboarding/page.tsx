@@ -373,11 +373,11 @@ function OnboardingInner() {
               </div>
 
               <div className="mb-6">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-2">What should we call you?</label>
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-2">What should we call you?</label>
                 <input type="text" value={displayName} onChange={e => setDisplayName(e.target.value)}
                   placeholder="Your name or brand..."
                   onKeyDown={e => e.key === 'Enter' && displayName.trim() && setStep(2)}
-                  className="w-full px-4 py-3 text-lg font-semibold text-center border border-gray-200 rounded-2xl focus:outline-none focus:border-black transition-all"
+                  className="w-full px-4 py-3 text-lg font-semibold text-center border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-2xl focus:outline-none focus:border-black transition-all"
                   autoFocus />
               </div>
 
@@ -396,13 +396,13 @@ function OnboardingInner() {
                     'Media library (1 GB)',
                     '100 posts / month',
                   ].map(f => (
-                    <div key={f} className="flex items-center gap-2 text-xs text-gray-300">
+                    <div key={f} className="flex items-center gap-2 text-xs text-gray-300 dark:text-gray-400">
                       <span className="text-green-400 font-bold flex-shrink-0">✓</span>{f}
                     </div>
                   ))}
                 </div>
                 <div className="border-t border-gray-700 pt-4">
-                  <p className="text-xs text-gray-400">Need more? Choose Pro or Agency on the next step — or upgrade anytime later.</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">Need more? Choose Pro or Agency on the next step — or upgrade anytime later.</p>
                 </div>
               </div>
 
@@ -429,15 +429,15 @@ function OnboardingInner() {
               <div className="text-center mb-6">
                 <div className="text-5xl mb-3">📦</div>
                 <h2 className="text-2xl font-extrabold tracking-tight mb-1">Choose your plan</h2>
-                <p className="text-gray-400 text-sm">Start free or go straight to Pro or Agency — no pressure, upgrade anytime.</p>
+                <p className="text-gray-400 dark:text-gray-500 text-sm">Start free or go straight to Pro or Agency — no pressure, upgrade anytime.</p>
               </div>
 
               {(['free', 'pro', 'agency'] as const).map(p => {
                 const cfg = PLAN_DETAILS[p]
                 const isSelected = selectedPlan === p
                 return (
-                  <div key={p} className={`bg-white border-2 rounded-2xl p-6 transition-all cursor-pointer ${
-                    isSelected ? cfg.color : 'border-gray-100 hover:border-gray-300'
+                  <div key={p} className={`bg-surface border-2 rounded-2xl p-6 transition-all cursor-pointer ${
+                    isSelected ? cfg.color : 'border-gray-100 dark:border-gray-700 hover:border-gray-300'
                   }`} onClick={() => { if (p === 'free') setSelectedPlan('free') }}>
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
@@ -452,7 +452,7 @@ function OnboardingInner() {
                         </div>
                       </div>
                       {isSelected && p === 'free' && (
-                        <span className="text-xs font-bold bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full">Selected</span>
+                        <span className="text-xs font-bold bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-3 py-1.5 rounded-full">Selected</span>
                       )}
                     </div>
 
@@ -462,16 +462,16 @@ function OnboardingInner() {
                         { label: 'Platforms',   value: cfg.platforms + ' accounts'           },
                         { label: 'Team Seats',  value: cfg.seats + ' seats'                  },
                       ].map(stat => (
-                        <div key={stat.label} className="bg-gray-50 rounded-xl p-2">
+                        <div key={stat.label} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-2">
                           <p className="text-xs font-extrabold">{stat.value}</p>
-                          <p className="text-xs text-gray-400">{stat.label}</p>
+                          <p className="text-xs text-gray-400 dark:text-gray-500">{stat.label}</p>
                         </div>
                       ))}
                     </div>
 
                     <div className="grid grid-cols-2 gap-x-4 gap-y-1 mb-4">
                       {cfg.features.slice(0, 6).map(f => (
-                        <div key={f} className="flex items-center gap-1.5 text-xs text-gray-600">
+                        <div key={f} className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
                           <span className="text-green-500 font-bold flex-shrink-0">✓</span>{f}
                         </div>
                       ))}

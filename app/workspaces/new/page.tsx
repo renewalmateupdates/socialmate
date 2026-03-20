@@ -325,26 +325,26 @@ export default function NewWorkspace() {
                     industry && { label: 'Industry', value: industry },
                     website  && { label: 'Website',  value: website.replace('https://', '').replace('http://', '') },
                   ].filter(Boolean).map((row: any) => (
-                    <div key={row.label} className="flex items-center justify-between py-2 border-b border-gray-50">
-                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{row.label}</span>
+                    <div key={row.label} className="flex items-center justify-between py-2 border-b border-theme">
+                      <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">{row.label}</span>
                       <span className="text-sm font-bold text-right max-w-[60%] truncate">{row.value}</span>
                     </div>
                   ))}
-                  <div className="flex items-start justify-between py-2 border-b border-gray-50">
-                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide mt-0.5">Platforms</span>
+                  <div className="flex items-start justify-between py-2 border-b border-theme">
+                    <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mt-0.5">Platforms</span>
                     <div className="flex flex-wrap gap-1 justify-end max-w-[60%]">
                       {selectedPlatforms.length > 0
                         ? selectedPlatforms.map(p => (
                           <span key={p} className="text-lg">{PLATFORM_ICONS[p]}</span>
                         ))
-                        : <span className="text-xs text-gray-400">None selected</span>
+                        : <span className="text-xs text-gray-400 dark:text-gray-500">None selected</span>
                       }
                     </div>
                   </div>
                   {notes && (
                     <div className="py-2">
-                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide block mb-1">Notes</span>
-                      <p className="text-xs text-gray-500 leading-relaxed">{notes}</p>
+                      <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide block mb-1">Notes</span>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{notes}</p>
                     </div>
                   )}
                 </div>
