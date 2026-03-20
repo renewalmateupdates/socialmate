@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
@@ -5,7 +6,7 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { Resend } from 'resend'
  
-const resend = new Resend(process.env.RESEND_API_KEY)
+function getResend() { return new Resend(process.env.RESEND_API_KEY) }
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
  
 export async function GET(request: NextRequest) {
@@ -96,7 +97,7 @@ export async function GET(request: NextRequest) {
       try {
         const email = session.user.email
         if (email) {
-          await resend.emails.send({
+          await getResend().emails.send({
             from: 'SocialMate <hello@socialmate.studio>',
             to: email,
             subject: '👋 Welcome to SocialMate!',

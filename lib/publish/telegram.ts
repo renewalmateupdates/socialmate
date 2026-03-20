@@ -1,25 +1,28 @@
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+
+const MAX_TELEGRAM_LENGTH = 4096
 
 export async function publishToTelegram(
   userId: string,
   content: string,
   destinationId?: string
 ): Promise<string> {
+  // Enforce 4096 character limit
+  if (content.length > MAX_TELEGRAM_LENGTH) {
+    throw new Error(`Post exceeds Telegram's ${MAX_TELEGRAM_LENGTH} character limit (${content.length} chars). Please shorten your post.`)
+  }
+
   // Get the bot token from connected_accounts
-  const { data: account } = await supabaseAdmin
+  const { data: account, error: accountError } = await getSupabaseAdmin()
     .from('connected_accounts')
     .select('access_token')
     .eq('user_id', userId)
     .eq('platform', 'telegram')
     .single()
 
-  if (!account?.access_token) {
-    throw new Error('No Telegram account connected')
+  if (accountError || !account?.access_token) {
+    throw new Error('No Telegram account connected. Go to Accounts to connect your Telegram bot.')
   }
 
   const botToken = account.access_token
@@ -28,7 +31,7 @@ export async function publishToTelegram(
   let chatId: string | null = null
 
   if (destinationId) {
-    const { data: dest } = await supabaseAdmin
+    const { data: dest } = await getSupabaseAdmin()
       .from('post_destinations')
       .select('destination_id')
       .eq('id', destinationId)
@@ -39,7 +42,7 @@ export async function publishToTelegram(
 
   // Fall back to first saved Telegram destination
   if (!chatId) {
-    const { data: dest } = await supabaseAdmin
+    const { data: dest } = await getSupabaseAdmin()
       .from('post_destinations')
       .select('destination_id')
       .eq('user_id', userId)
@@ -52,18 +55,18 @@ export async function publishToTelegram(
 
   if (!chatId) {
     throw new Error(
-      'No Telegram destination configured. Go to Accounts → Destinations to add a Telegram channel or group.'
+      'No Telegram destination configured. Go to Accounts → Destinations to add your Telegram channel or group chat ID.'
     )
   }
 
   const res = await fetch(
     `https://api.telegram.org/bot${botToken}/sendMessage`,
     {
-      method: 'POST',
+      method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        chat_id: chatId,
-        text: content,
+        chat_id:    chatId,
+        text:       content,
         parse_mode: 'HTML',
       }),
     }
@@ -71,9 +74,23 @@ export async function publishToTelegram(
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
-    throw new Error(err.description || 'Failed to send Telegram message')
+    const detail = err.description || `HTTP ${res.status}`
+    console.error('[Telegram] Send failed:', err)
+
+    if (res.status === 400 && err.description?.includes('chat not found')) {
+      throw new Error(`Telegram: Chat not found. Verify the chat ID "${chatId}" is correct and the bot has been added to the chat.`)
+    }
+    if (res.status === 403) {
+      throw new Error('Telegram: Bot was kicked from the chat or lacks permission to post. Re-add the bot and grant it admin rights.')
+    }
+    if (res.status === 401) {
+      throw new Error('Telegram: Invalid bot token. Please reconnect your Telegram account.')
+    }
+    throw new Error(`Telegram post failed: ${detail}`)
   }
 
   const data = await res.json()
-  return String(data.result.message_id)
+  const messageId = String(data.result.message_id)
+  console.log(`[Telegram] Published message ${messageId} to chat ${chatId}`)
+  return messageId
 }

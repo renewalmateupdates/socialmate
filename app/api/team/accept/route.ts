@@ -1,10 +1,7 @@
+export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
 const PLAN_SEAT_LIMITS: Record<string, number> = {
   free:   2,
@@ -20,7 +17,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Look up token
-  const { data: invite, error: tokenError } = await supabaseAdmin
+  const { data: invite, error: tokenError } = await getSupabaseAdmin()
     .from('invite_tokens')
     .select('*')
     .eq('token', token)
@@ -43,7 +40,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Re-check seat limit at time of acceptance (owner may have downgraded)
-  const { data: ownerSettings } = await supabaseAdmin
+  const { data: ownerSettings } = await getSupabaseAdmin()
     .from('user_settings')
     .select('plan')
     .eq('user_id', invite.owner_id)
@@ -52,7 +49,7 @@ export async function POST(request: NextRequest) {
   const plan      = ownerSettings?.plan || 'free'
   const seatLimit = PLAN_SEAT_LIMITS[plan] ?? 2
 
-  const { count: memberCount } = await supabaseAdmin
+  const { count: memberCount } = await getSupabaseAdmin()
     .from('team_members')
     .select('id', { count: 'exact', head: true })
     .eq('owner_id', invite.owner_id)
@@ -66,7 +63,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Activate the team member record
-  const { error: updateError } = await supabaseAdmin
+  const { error: updateError } = await getSupabaseAdmin()
     .from('team_members')
     .update({ status: 'active', joined_at: new Date().toISOString() })
     .eq('owner_id', invite.owner_id)
@@ -74,7 +71,7 @@ export async function POST(request: NextRequest) {
 
   if (updateError) {
     // No existing record — insert fresh
-    await supabaseAdmin
+    await getSupabaseAdmin()
       .from('team_members')
       .insert({
         owner_id:  invite.owner_id,
@@ -86,7 +83,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Mark token as used
-  await supabaseAdmin
+  await getSupabaseAdmin()
     .from('invite_tokens')
     .update({ used_at: new Date().toISOString() })
     .eq('token', token)

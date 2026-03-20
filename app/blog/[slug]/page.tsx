@@ -9,6 +9,233 @@ const POSTS: Record<string, {
   excerpt: string
   content: string
 }> = {
+  'why-we-built-socialmate': {
+    title:    'Why We Built SocialMate: The Full Story',
+    category: 'Our Story',
+    date:     'Mar 1, 2026',
+    readTime: '4 min read',
+    excerpt:  'Built by a deli worker in spare moments. Here\'s why SocialMate exists and what we\'re building toward.',
+    content: `
+## The Problem We Kept Running Into
+
+I was managing social media for a local business in between shifts. The tools that could actually do the job — schedule across multiple platforms, give you analytics, help with content — all cost $50 to $250 per month.
+
+That's a lot when the business you're posting for barely makes enough to justify the marketing budget in the first place.
+
+I looked for a free alternative. What I found were free tiers that gave you two channels, a handful of scheduled posts, and constant prompts to upgrade. Not useful.
+
+So I started building SocialMate in my spare time. That was in late 2024.
+
+## What We Decided Early On
+
+The first decision we made was that the free plan had to be genuinely useful. Not a trial. Not a crippled version. An actual working tool that covers the needs of a small creator or small business without requiring them to pay.
+
+That meant: real platform support, not a token list of one or two. Real scheduling with a reasonable window. Real AI tools, not one tool locked to a credit that expires. Real analytics that show you something meaningful.
+
+It also meant accepting that growth would be slower. A useful free tier means fewer people feel pressure to upgrade. We made peace with that.
+
+## Who We Built This For
+
+SocialMate is for people who are doing real work without enterprise resources.
+
+The freelance social media manager handling four clients who can't justify $99/month for a tool that mostly just schedules posts. The small business owner who posts their own content between running everything else. The creator who is serious about their audience but not yet at the revenue level where $50/month for a scheduling tool makes sense.
+
+These are real people with real needs. The existing tools weren't built for them — they were built for teams at companies that can put "scheduling software" on an expense report without anyone blinking.
+
+## What Makes SocialMate Different
+
+We support 16 platforms and we're adding more. The free plan includes all of them. Connecting Discord and Bluesky and Mastodon and Telegram doesn't cost more than connecting just one.
+
+We built 12 AI tools into the platform. Not one AI tool on a restricted tier — twelve, available from day one. Caption generation, hashtag sets, viral hook writing, post rewriting, thread generation, content repurposing, post scoring, SM-Pulse trend analysis, SM-Radar competitive intelligence, content gap detection, AI content calendar, and more.
+
+We built in features that other tools charge for separately: bulk scheduling, a link in bio page, evergreen content recycling, competitor tracking, RSS import, team collaboration with content approval workflows.
+
+All of it is included. Most of it is free.
+
+## How We're Sustaining It
+
+SocialMate is fully bootstrapped. There are no investors, no venture funding, no board to answer to.
+
+The Pro plan ($5/month) and Agency plan ($20/month) pay for infrastructure and development. Users who find enough value to upgrade are the ones who make the free tier possible for everyone else. That's the model.
+
+It works as long as we build something people find genuinely useful at the free tier and genuinely worth paying for at the paid tiers. We think we can do that.
+
+## What's Next
+
+SocialMate is early. There are features we haven't built yet. Platforms we haven't connected. Polish we haven't applied. We're working through the list.
+
+If you're here now, you're part of the first wave. Your feedback shapes what gets built next. We ship fast and we pay attention to what users actually need.
+
+We're glad you're here.
+    `,
+  },
+  'best-free-social-media-scheduler-2025': {
+    title:    'The Best Free Social Media Scheduler in 2026 (No Credit Card)',
+    category: 'Guides',
+    date:     'Feb 20, 2026',
+    readTime: '5 min read',
+    excerpt:  'Most "free" schedulers are just trials. SocialMate is genuinely free — here\'s exactly what you get.',
+    content: `
+## "Free" Usually Means Something Else
+
+The social media scheduling market has a language problem.
+
+"Free" usually means: free for 7 days, then $29/month. Or: free for one user, one platform, three scheduled posts per month. Or: free to sign up, but every feature you'd actually use is behind a paywall.
+
+Hootsuite removed their free plan entirely. Buffer's free plan gives you 3 channels and 10 posts per channel — not enough for any real social presence. Sprout Social starts at $249/month.
+
+This guide covers what a genuinely free scheduler actually looks like in 2026, and how to find one without getting burned.
+
+## What "Genuinely Free" Requires
+
+A social media scheduler is only free in a meaningful sense if it lets you do these things at no cost:
+
+1. Connect more than one or two platforms
+2. Schedule more than a token number of posts
+3. Access analytics beyond basic counts
+4. Use the tool with at least one team member
+5. Actually publish posts without hitting a wall
+
+Anything less than that is a trial with a free label on it.
+
+## What SocialMate Offers for Free
+
+SocialMate's free plan includes:
+
+- All 16 supported platforms (Discord, Bluesky, Telegram, Mastodon, LinkedIn, YouTube, Pinterest, and 9 more on the roadmap)
+- 100 posts per month
+- 2-week scheduling window
+- 2 team seats
+- 100 AI credits per month (caption generation, hashtag sets, post scoring, and more)
+- Analytics covering the last 30 days
+- A link in bio page (no separate Linktree subscription needed)
+- Competitor tracking for up to 3 accounts
+- RSS import, bulk scheduler, hashtag manager
+
+There is no credit card required. There is no trial period. The features above are just what the free plan is.
+
+## What You Give Up at the Free Tier
+
+Being honest about limitations matters. Here's what free users don't get:
+
+- Scheduling more than 2 weeks in advance (Pro gets 4 weeks, Agency gets 12)
+- Client workspaces (Pro gets 1, Agency gets up to 10)
+- More than 2 team seats
+- White label options
+- Posts beyond 100/month
+
+If you need those things, the Pro plan is $5/month and covers most of them. But for individual users, small businesses, and early-stage creators, the free tier covers a lot of ground.
+
+## How to Get Started
+
+Creating an account takes about 60 seconds. Connect your first platform — Bluesky, Discord, Mastodon, or Telegram are all live now. Compose your first post. Schedule it or publish immediately.
+
+If you've been putting off social media scheduling because you couldn't justify paying for another tool, this is the time to stop waiting. The free plan is genuinely free.
+    `,
+  },
+  'how-to-use-ai-for-social-media-captions': {
+    title:    'How to Use AI to Write Better Social Media Captions',
+    category: 'Tips',
+    date:     'Feb 10, 2026',
+    readTime: '3 min read',
+    excerpt:  'AI caption tools can save hours every week. Here\'s how to use them without sounding like a robot.',
+    content: `
+## The Problem With AI Captions
+
+Most people who try AI for social media captions give up after a few attempts. The outputs are too generic, too formal, too clearly AI-generated. "Exciting news!" and "We're thrilled to announce" have become punchlines because AI tools trained on corporate content produce corporate-sounding outputs by default.
+
+The problem isn't AI. The problem is how people are using it.
+
+## Give It Context, Not Just a Topic
+
+The most common mistake is prompting with just a topic. "Write a caption about our new product launch." The AI has nothing to work with except the bare minimum, so it produces the bare minimum.
+
+Better inputs:
+- **Your tone**: Are you casual and direct? Warm and encouraging? Dry and witty?
+- **Your audience**: Who's reading this? What do they care about?
+- **The platform**: A LinkedIn caption reads differently than a Bluesky post.
+- **The goal**: Awareness? Engagement? Click-through?
+- **A specific angle**: Don't say "our new product." Say "we built this because customers kept asking for X."
+
+The more specific you are, the more the AI can match your voice and purpose.
+
+## Use AI as a Starting Point
+
+The best use of AI for captions is not final output — it's first drafts.
+
+Use SocialMate's Caption Generator to produce 3-5 options for a post. Read them. One usually has the right idea with wrong execution. Take that one and rewrite it in your actual voice. What you end up with is usually better than if you'd started from scratch, because the AI gave you a structure and an angle to react to.
+
+This workflow is faster than writing from scratch and produces more authentic output than using AI copy directly.
+
+## Viral Hook Generator
+
+The opening line of a post matters more than anything else. If the first sentence doesn't stop the scroll, nothing else matters.
+
+SocialMate's Viral Hook Generator is specifically trained on high-performing post openings. Give it your topic and tone, and it produces opening lines designed for engagement. Run it alongside your Caption Generator and mix and match — often the best caption is the AI hook combined with your own body text.
+
+## Post Rewriter
+
+This one gets underused. If you wrote a caption that's technically accurate but just isn't landing — or if you want to repurpose the same core idea for a different platform — the Post Rewriter takes your draft and restructures it.
+
+Paste your existing caption, tell it what's not working or what platform you're adapting it for, and it rewrites while keeping your core message intact. This is particularly useful for adapting LinkedIn posts to Bluesky where the character limit is tighter and the tone is more conversational.
+
+## What AI Won't Do
+
+AI can help with structure, phrasing, hooks, and volume. It can't replace your actual perspective or experience. The captions that perform best on social media are almost always specific — specific anecdotes, specific results, specific opinions. AI doesn't have those. You do.
+
+Use AI to accelerate the writing process. But make sure every caption you publish has something specific and human at its core.
+    `,
+  },
+  'why-your-hashtag-strategy-isnt-working': {
+    title:    'Why Your Hashtag Strategy Isn\'t Working (And How to Fix It)',
+    category: 'Tips',
+    date:     'Jan 28, 2026',
+    readTime: '4 min read',
+    excerpt:  'Spamming 30 hashtags stopped working years ago. Here\'s what actually drives reach in 2026.',
+    content: `
+## The Hashtag Myth
+
+At some point in the early 2010s, stacking 30 hashtags on an Instagram post helped with reach. That time has passed. The platforms changed, the algorithms changed, and the behavior that used to work now either does nothing or actively hurts your content.
+
+If you're still using a block of 25-30 hashtags on every post, you're spending time on something that isn't moving the needle.
+
+## What Changed
+
+Several things happened simultaneously across platforms:
+
+**Instagram deprioritized hashtag-driven discovery** for most content types. Their own official guidance now recommends 3-5 targeted hashtags over large hashtag dumps. The algorithm prioritizes accounts and content, not tags.
+
+**Most platforms outside Instagram never relied on hashtags** the way Instagram users expected. Hashtags on LinkedIn work differently. Hashtags on Bluesky work differently. Treating them all the same way produces poor results across the board.
+
+**Generic hashtags became noise**. #marketing #business #entrepreneur are flooded with content. Your post isn't being seen by anyone browsing those tags — there's too much competition and too little intent behind the behavior.
+
+## What Actually Works Now
+
+**Fewer, more targeted hashtags** outperform large volumes on every platform. On Instagram, 3-5 specific tags relevant to your actual content. On LinkedIn, 3 hashtags that match the topic you're writing about. On Bluesky, 1-2 that your specific community actually follows.
+
+**Niche over broad**. #contentmarketing reaches your actual audience. #marketing does not.
+
+**Platform-specific strategy**. Hashtags on Bluesky are a navigation tool for small communities — use the ones your niche actively monitors. Hashtags on LinkedIn signal your expertise area. Don't use the same set everywhere.
+
+**Consistency over volume**. Using the same 5-10 hashtags consistently over time builds topical authority in ways that random hashtag selection can't.
+
+## How to Build Your Hashtag Sets
+
+Start by searching hashtags you're considering and looking at what actually appears there. Is your content competitive in that space? Are people engaging with that tag, or is it a graveyard of posts with no engagement?
+
+SocialMate's Hashtag Manager lets you build named hashtag sets — for example, "SaaS Marketing" or "Content Creation Tips" — and insert them into posts with a single click. Build 3-4 sets that match your content pillars. Rotate them based on what you're posting about rather than using the same block every time.
+
+The goal is intentional, relevant hashtag use. Not volume.
+
+## The Quick Fix
+
+If your current hashtag strategy is a paste of 20-30 generic tags: cut it to 5, make sure each one is specific to the actual content of the post, and test that approach for 30 days.
+
+You probably won't see a massive traffic spike from hashtags regardless. That's the honest answer — organic hashtag reach is limited in 2026. Your time is better spent on content quality, posting consistency, and community engagement than on hashtag optimization.
+
+But cutting the bloated tag block removes something that isn't helping and occasionally hurts. That's a net win.
+    `,
+  },
   'real-cost-of-social-media-management-tools-2025': {
     title: 'Why Social Media Scheduling Tools Are Overpriced — And What To Do About It',
     category: 'Industry',
@@ -297,18 +524,20 @@ const CATEGORY_COLORS: Record<string, string> = {
 }
 
 export async function generateMetadata(
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ): Promise<Metadata> {
-  const post = POSTS[params.slug]
+  const { slug } = await params
+  const post = POSTS[slug]
   if (!post) return { title: 'Post not found — SocialMate Blog' }
   return {
     title: `${post.title} — SocialMate Blog`,
     description: post.excerpt,
     openGraph: {
-      title: post.title,
+      title:       post.title,
       description: post.excerpt,
-      url: `https://socialmate.app/blog/${params.slug}`,
+      url:         `https://socialmate.studio/blog/${slug}`,
     },
+    alternates: { canonical: `https://socialmate.studio/blog/${slug}` },
   }
 }
 
@@ -350,8 +579,9 @@ function renderContent(content: string) {
   return elements
 }
 
-export default function BlogPost({ params }: { params: { slug: string } }) {
-  const post = POSTS[params.slug]
+export default async function BlogPost({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
+  const post = POSTS[slug]
 
   if (!post) {
     return (
@@ -388,7 +618,7 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
   }
 
   const otherPosts = Object.entries(POSTS)
-    .filter(([slug]) => slug !== params.slug)
+    .filter(([s]) => s !== slug)
     .slice(0, 3)
 
   return (

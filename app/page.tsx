@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import { cookies } from 'next/headers'
+import { createServerClient } from '@supabase/ssr'
 import ReferralBanner from '@/app/components/ReferralBanner'
 
 const PLATFORMS = [
@@ -105,19 +107,40 @@ const COMPARISON = [
 ]
 
 const FOOTER_LINKS = [
-  { label: 'Features',  href: '/features'        },
-  { label: 'Pricing',   href: '/pricing'          },
-  { label: 'Affiliate', href: '/affiliate'        },
-  { label: 'Our Story', href: '/story'            },
-  { label: 'Blog',      href: '/blog'             },
-  { label: 'Privacy',   href: '/privacy'          },
-  { label: 'Terms',     href: '/terms'            },
-  { label: 'Admin',     href: '/admin/affiliates' },
+  { label: 'Features',  href: '/features'  },
+  { label: 'Pricing',   href: '/pricing'   },
+  { label: 'Affiliate', href: '/affiliate' },
+  { label: 'Our Story', href: '/story'     },
+  { label: 'Blog',      href: '/blog'      },
+  { label: 'Privacy',   href: '/privacy'   },
+  { label: 'Terms',     href: '/terms'     },
 ]
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ ref?: string }> }) {
   const params = await searchParams
   const refCode = params?.ref || ''
+
+  // Check if the current user is the admin (server-side, so nothing leaks to the DOM)
+  let isAdmin = false
+  try {
+    const cookieStore = await cookies()
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll: () => cookieStore.getAll(),
+          setAll: () => {},
+        },
+      }
+    )
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user && user.id === process.env.ADMIN_USER_ID) {
+      isAdmin = true
+    }
+  } catch {
+    // If auth check fails, isAdmin stays false — safe default
+  }
 
   const live    = PLATFORMS.filter(p => p.status === 'live')
   const soon    = PLATFORMS.filter(p => p.status === 'soon')
@@ -575,12 +598,17 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
           <nav className="flex items-center gap-5 flex-wrap">
             {FOOTER_LINKS.map(link => (
               <Link key={link.label} href={link.href}
-                className={`text-xs hover:text-white transition-all ${
-                  link.label === 'Admin' ? 'text-black select-none' : 'text-gray-500'
-                }`}>
+                className="text-xs text-gray-500 hover:text-white transition-all">
                 {link.label}
               </Link>
             ))}
+            {/* Admin link — only rendered in DOM for admin user */}
+            {isAdmin && (
+              <Link href="/admin/affiliates"
+                className="text-xs text-gray-500 hover:text-white transition-all">
+                Admin
+              </Link>
+            )}
           </nav>
           <p className="text-xs text-gray-600">© 2026 SocialMate</p>
         </div>

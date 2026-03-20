@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -E \"\\\\.\\(json|ts|js|env|sql|yml|yaml\\)$\")",
+      "Bash(grep -rn '\"\"ml-56 flex-1 p-8\"\"' app/ --include=\"*.tsx\")",
+      "Bash(npx next:*)",
+      "Bash(for f:*)",
+      "Bash(do)",
+      "Bash(if ! grep -q \"export const dynamic\" \"$f\")",
+      "Bash(then)",
+      "Bash(sed -i \"1s/^/export const dynamic = ''force-dynamic''\\\\n/\" \"$f\")",
+      "Bash(xargs grep:*)",
+      "Bash(echo \"Fixed: $f\")",
+      "Bash(fi)",
+      "Bash(done)",
+      "Bash(if grep:*)",
+      "Bash(sed -i \"/^const supabaseAdmin = createClient\\(/,/^\\)/d\" \"$f\")",
+      "Bash(sed -i \"s|import { createClient } from ''@supabase/supabase-js''|import { getSupabaseAdmin } from ''@/lib/supabase-admin''|g\" \"$f\")",
+      "Bash(sed -i \"s|import { createClient, SupabaseClient } from ''@supabase/supabase-js''|import { getSupabaseAdmin } from ''@/lib/supabase-admin''|g\" \"$f\")",
+      "Bash(sed -i \"s/supabaseAdmin\\\\./getSupabaseAdmin\\(\\)./g\" \"$f\")",
+      "Bash(while read:*)",
+      "Bash(do sed:*)",
+      "Bash(grep -n \"supabase\\\\.\" app/l/[slug]/page.tsx)",
+      "Bash(grep -n \"supabase\" app/l/[slug]/page.tsx)"
+    ]
+  }
+}
