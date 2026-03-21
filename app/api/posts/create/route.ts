@@ -196,7 +196,15 @@ export async function POST(request: NextRequest) {
   if (draftId && !allFailed) {
     await supabase.from('posts').delete().eq('id', draftId).eq('user_id', user.id)
   }
- 
+
+  // Fire analytics fetch event for successfully published posts
+  if (!allFailed && Object.keys(platformPostIds).length > 0) {
+    await inngest.send({
+      name: 'post/published',
+      data: { postId: post.id, userId: user.id, platformPostIds },
+    }).catch(err => console.error('[Create] Failed to send post/published event:', err))
+  }
+
   return NextResponse.json({
     success: !allFailed,
     postId:  post.id,

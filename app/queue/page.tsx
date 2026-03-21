@@ -250,6 +250,27 @@ function QueueInner() {
                                     </span>
                                   ))}
                                 </div>
+
+                                {/* Engagement metrics for published posts */}
+                                {post.analytics && (() => {
+                                  const allPlatforms = ['bluesky', 'mastodon'].filter(p => post.analytics[p])
+                                  if (allPlatforms.length === 0) return null
+                                  const totals = allPlatforms.reduce((acc: { likes: number; replies: number; reposts: number }, p: string) => ({
+                                    likes:   acc.likes   + (post.analytics[p]?.likes   ?? 0),
+                                    replies: acc.replies + (post.analytics[p]?.replies ?? 0),
+                                    reposts: acc.reposts + (post.analytics[p]?.reposts ?? 0),
+                                  }), { likes: 0, replies: 0, reposts: 0 })
+                                  if (totals.likes === 0 && totals.replies === 0 && totals.reposts === 0) return null
+                                  return (
+                                    <div
+                                      title="Stats fetched 1h and 24h after publish"
+                                      className="text-xs text-gray-400 dark:text-gray-500 flex gap-3 mt-2">
+                                      <span>❤️ {totals.likes}</span>
+                                      <span>💬 {totals.replies}</span>
+                                      <span>🔄 {totals.reposts}</span>
+                                    </div>
+                                  )
+                                })()}
                               </div>
 
                               {!isConfirming && (
