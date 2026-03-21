@@ -100,9 +100,10 @@ export const weeklyDigest = inngest.createFunction(
         .select('user_id, notification_prefs')
         .in('user_id', userIds)
 
-      const { data: { users } } = await getSupabaseAdmin().auth.admin.listUsers()
+      const usersRes = await getSupabaseAdmin().auth.admin.listUsers()
+      const users = usersRes.data?.users ?? []
       const emailMap: Record<string, string> = {}
-      for (const u of (users || [])) { if (u.email) emailMap[u.id] = u.email }
+      for (const u of users) { if (u.email) emailMap[u.id] = u.email }
 
       for (const userId of userIds) {
         const email = emailMap[userId]
@@ -223,12 +224,26 @@ export const fetchPostAnalytics = inngest.createFunction(
     // Fetch at 1 hour
     await step.sleepUntil('wait-1hr', new Date(Date.now() + 60 * 60 * 1000))
     const analytics1h = await step.run('fetch-1hr', fetchEngagement)
-    await getSupabaseAdmin().from('posts').update({ analytics: { ...analytics1h, fetched_at_1h: new Date().toISOString() } }).eq('id', postId)
+    await getSupabaseAdmin()
+      .from('posts')
+      .update({ analytics: { ...analytics1h, fetched_at_1h: new Date().toISOString() } })
+      .eq('id', postId)
 
-    // Fetch at 24 hours
+    // Fetch at 24 hours — merge with 1h data
     await step.sleepUntil('wait-24hr', new Date(Date.now() + 23 * 60 * 60 * 1000))
     const analytics24h = await step.run('fetch-24hr', fetchEngagement)
-    await getSupabaseAdmin().from('posts').update({ analytics: { ...analytics24h, fetched_at_24h: new Date().toISOString() } }).eq('id', postId)
+    // Merge 24h into the 1h snapshot so both snapshots are preserved
+    await getSupabaseAdmin()
+      .from('posts')
+      .update({
+        analytics: {
+          ...analytics1h,
+          fetched_at_1h: new Date().toISOString(),
+          ...analytics24h,
+          fetched_at_24h: new Date().toISOString(),
+        },
+      })
+      .eq('id', postId)
 
     return { postId, analytics24h }
   }

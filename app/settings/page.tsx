@@ -65,7 +65,20 @@ function SettingsInner() {
   const [copiedLink, setCopiedLink]                   = useState(false)
   const [confirmDeletePosts, setConfirmDeletePosts]   = useState(false)
   const [confirmDeleteAccount, setConfirmDeleteAccount] = useState(false)
+  const [deleteConfirmText, setDeleteConfirmText]     = useState('')
   const [dangerLoading, setDangerLoading]             = useState(false)
+
+  // Change password state
+  const [currentPassword, setCurrentPassword]     = useState('')
+  const [newPassword, setNewPassword]             = useState('')
+  const [confirmPassword, setConfirmPassword]     = useState('')
+  const [passwordError, setPasswordError]         = useState('')
+  const [passwordLoading, setPasswordLoading]     = useState(false)
+  const [passwordSuccess, setPasswordSuccess]     = useState(false)
+
+  // Active sessions state
+  const [sessionsLoading, setSessionsLoading]     = useState(false)
+  const [sessionSignedOut, setSessionSignedOut]   = useState(false)
 
   const [referralCode, setReferralCode]       = useState('')
   const [referralStats, setReferralStats]     = useState({ totalReferrals: 0, payingReferrals: 0, creditsEarned: 0 })
@@ -269,10 +282,55 @@ function SettingsInner() {
     setDangerLoading(false)
   }
 
+  const handleChangePassword = async () => {
+    setPasswordError('')
+    setPasswordSuccess(false)
+    if (!newPassword || newPassword.length < 8) {
+      setPasswordError('New password must be at least 8 characters.')
+      return
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordError('Passwords do not match.')
+      return
+    }
+    setPasswordLoading(true)
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    setPasswordLoading(false)
+    if (error) {
+      setPasswordError(error.message)
+    } else {
+      setPasswordSuccess(true)
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+      setTimeout(() => setPasswordSuccess(false), 4000)
+    }
+  }
+
+  const handleSignOutOtherSessions = async () => {
+    setSessionsLoading(true)
+    await supabase.auth.signOut({ scope: 'others' })
+    setSessionsLoading(false)
+    setSessionSignedOut(true)
+    setTimeout(() => setSessionSignedOut(false), 3000)
+  }
+
   const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== 'DELETE') return
     setDangerLoading(true)
-    await supabase.auth.signOut()
-    router.push('/login')
+    try {
+      const res = await fetch('/api/user/delete', { method: 'POST' })
+      if (res.ok) {
+        await supabase.auth.signOut()
+        router.push('/')
+      } else {
+        const json = await res.json().catch(() => ({}))
+        console.error('Delete account failed:', json.error)
+        setDangerLoading(false)
+      }
+    } catch {
+      setDangerLoading(false)
+    }
   }
 
   const handleEnroll2FA = async () => {
@@ -706,24 +764,66 @@ function SettingsInner() {
               </div>
 
               <div className="bg-surface border border-theme rounded-2xl p-6">
-                <h2 className="text-base font-extrabold mb-5">Change Password</h2>
+                <h2 className="text-base font-extrabold mb-1">Change Password</h2>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">Must be at least 8 characters.</p>
                 <div className="space-y-3">
                   <div>
                     <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">Current Password</label>
-                    <input type="password" className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black dark:focus:border-gray-400 transition-all" />
+                    <input
+                      type="password"
+                      value={currentPassword}
+                      onChange={e => setCurrentPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black dark:focus:border-gray-400 transition-all" />
                   </div>
                   <div>
                     <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">New Password</label>
-                    <input type="password" className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black dark:focus:border-gray-400 transition-all" />
+                    <input
+                      type="password"
+                      value={newPassword}
+                      onChange={e => setNewPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black dark:focus:border-gray-400 transition-all" />
                   </div>
                   <div>
                     <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">Confirm New Password</label>
-                    <input type="password" className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black dark:focus:border-gray-400 transition-all" />
+                    <input
+                      type="password"
+                      value={confirmPassword}
+                      onChange={e => setConfirmPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black dark:focus:border-gray-400 transition-all" />
                   </div>
-                  <button onClick={() => handleSave('Security')}
-                    className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${savedTab === 'Security' ? 'bg-green-500 text-white' : 'bg-black text-white hover:opacity-80'}`}>
-                    {savedTab === 'Security' ? '✓ Updated!' : 'Update Password'}
+                  {passwordError && (
+                    <p className="text-xs text-red-500 font-semibold">{passwordError}</p>
+                  )}
+                  {passwordSuccess && (
+                    <p className="text-xs text-green-500 font-semibold">Password updated successfully ✓</p>
+                  )}
+                  <button
+                    onClick={handleChangePassword}
+                    disabled={passwordLoading || !newPassword}
+                    className="px-5 py-2.5 rounded-xl text-xs font-bold transition-all bg-black dark:bg-white text-white dark:text-black hover:opacity-80 disabled:opacity-40 flex items-center gap-2">
+                    {passwordLoading && <div className="w-3 h-3 border-2 border-white/30 dark:border-black/30 border-t-white dark:border-t-black rounded-full animate-spin" />}
+                    {passwordLoading ? 'Updating...' : 'Update Password'}
                   </button>
+                </div>
+              </div>
+
+              <div className="bg-surface border border-theme rounded-2xl p-6">
+                <h2 className="text-base font-extrabold mb-1">Active Sessions</h2>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
+                  You are currently signed in. Sign out all other browsers and devices.
+                </p>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs font-semibold text-green-600 bg-green-50 px-3 py-1.5 rounded-full">Current session</span>
+                  <button
+                    onClick={handleSignOutOtherSessions}
+                    disabled={sessionsLoading}
+                    className="text-xs font-bold px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 dark:hover:border-gray-400 transition-all disabled:opacity-40">
+                    {sessionsLoading ? 'Signing out...' : 'Sign out all other sessions'}
+                  </button>
+                  {sessionSignedOut && <span className="text-xs text-green-500 font-semibold">Done ✓</span>}
                 </div>
               </div>
 
@@ -752,14 +852,23 @@ function SettingsInner() {
                     </button>
                   )}
                   {confirmDeleteAccount ? (
-                    <div className="border border-red-300 rounded-xl px-4 py-3 bg-red-50">
-                      <p className="text-xs font-bold text-red-700 mb-2">Your account and all data will be permanently deleted. This cannot be undone.</p>
+                    <div className="border border-red-300 rounded-xl px-4 py-4 bg-red-50">
+                      <p className="text-xs font-bold text-red-700 mb-1">⚠️ This will permanently delete your account and all data.</p>
+                      <p className="text-xs text-red-600 mb-3">This action cannot be undone. Type <strong>DELETE</strong> to confirm.</p>
+                      <input
+                        type="text"
+                        value={deleteConfirmText}
+                        onChange={e => setDeleteConfirmText(e.target.value)}
+                        placeholder="Type DELETE to confirm"
+                        className="w-full border border-red-200 rounded-xl px-3 py-2 text-sm mb-3 outline-none focus:border-red-400 transition-all" />
                       <div className="flex gap-2">
-                        <button onClick={handleDeleteAccount} disabled={dangerLoading}
+                        <button
+                          onClick={handleDeleteAccount}
+                          disabled={dangerLoading || deleteConfirmText !== 'DELETE'}
                           className="text-xs font-bold px-4 py-2 bg-red-600 text-white rounded-lg hover:opacity-80 transition-all disabled:opacity-40">
-                          {dangerLoading ? 'Processing...' : 'Yes, delete my account'}
+                          {dangerLoading ? 'Processing...' : 'Delete my account'}
                         </button>
-                        <button onClick={() => setConfirmDeleteAccount(false)}
+                        <button onClick={() => { setConfirmDeleteAccount(false); setDeleteConfirmText('') }}
                           className="text-xs font-bold px-4 py-2 border border-gray-200 rounded-lg hover:border-gray-400 transition-all">
                           Cancel
                         </button>
@@ -768,7 +877,7 @@ function SettingsInner() {
                   ) : (
                     <button onClick={() => setConfirmDeleteAccount(true)}
                       className="w-full text-left text-xs font-bold text-red-600 border border-red-200 rounded-xl px-4 py-3 hover:bg-red-50 transition-all">
-                      Delete account permanently
+                      Delete my account
                     </button>
                   )}
                 </div>
