@@ -49,14 +49,14 @@ export default function ContentGapPage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-50">
+      <div className="flex h-screen items-center justify-center bg-theme">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <main className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
@@ -67,18 +67,18 @@ export default function ContentGapPage() {
                 <span className="text-2xl">🕳️</span>
                 <h1 className="text-2xl font-extrabold tracking-tight">Content Gap Detector</h1>
               </div>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-gray-400 dark:text-gray-500">
                 Spot underserved topics and missing content in your niche before your audience notices.
               </p>
             </div>
             <div className="text-right">
-              <div className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Cost per scan</div>
-              <div className="text-xl font-extrabold">{CREDIT_COST} <span className="text-sm font-semibold text-gray-400">credits</span></div>
-              <div className="text-xs text-gray-400 mt-0.5">{credits} remaining</div>
+              <div className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">Cost per scan</div>
+              <div className="text-xl font-extrabold">{CREDIT_COST} <span className="text-sm font-semibold text-gray-400 dark:text-gray-500">credits</span></div>
+              <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{credits} remaining</div>
             </div>
           </div>
 
-          <div className="bg-white border border-gray-100 rounded-2xl p-5 mb-6">
+          <div className="bg-surface border border-theme rounded-2xl p-5 mb-6">
             <h2 className="text-sm font-extrabold mb-3">What the detector catches</h2>
             <div className="grid grid-cols-3 gap-3">
               {[
@@ -86,17 +86,17 @@ export default function ContentGapPage() {
                 { icon: '❓', label: 'Audience questions', desc: 'What your audience is asking that nobody answers well' },
                 { icon: '📐', label: 'Format gaps',    desc: 'Content formats your niche is underusing' },
               ].map(item => (
-                <div key={item.label} className="text-center p-4 bg-gray-50 rounded-xl">
+                <div key={item.label} className="text-center p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
                   <span className="text-2xl block mb-2">{item.icon}</span>
-                  <p className="text-xs font-bold text-gray-900 mb-1">{item.label}</p>
-                  <p className="text-xs text-gray-400 leading-relaxed">{item.desc}</p>
+                  <p className="text-xs font-bold text-gray-900 dark:text-gray-100 mb-1">{item.label}</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 leading-relaxed">{item.desc}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="bg-white border border-gray-100 rounded-2xl p-5 mb-6">
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-2">Your niche</label>
+          <div className="bg-surface border border-theme rounded-2xl p-5 mb-6">
+            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-2">Your niche</label>
             <input
               type="text"
               value={niche}
@@ -139,11 +139,11 @@ export default function ContentGapPage() {
           )}
 
           {result && (
-            <div className="bg-white border border-gray-100 rounded-2xl p-6 mb-6">
+            <div className="bg-surface border border-theme rounded-2xl p-6 mb-6">
               <h2 className="text-sm font-extrabold mb-4">Gap Analysis — {niche}</h2>
-              <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{result}</div>
-              <div className="mt-5 pt-4 border-t border-gray-100 flex items-center justify-between">
-                <p className="text-xs text-gray-400">Use these insights to fill gaps in your content strategy.</p>
+              <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{result}</div>
+              <div className="mt-5 pt-4 border-t border-theme flex items-center justify-between">
+                <p className="text-xs text-gray-400 dark:text-gray-500">Use these insights to fill gaps in your content strategy.</p>
                 <Link href="/compose"
                   className="text-xs font-bold px-4 py-2 bg-black text-white rounded-xl hover:opacity-80 transition-all">
                   Create content →

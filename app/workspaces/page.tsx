@@ -49,25 +49,25 @@ export default function Workspaces() {
   // Free users: upgrade wall
   if (plan === 'free') {
     return (
-      <div className="min-h-screen bg-gray-50 flex">
+      <div className="min-h-screen bg-theme flex">
         <Sidebar />
         <div className="md:ml-56 flex-1 p-8 flex items-center justify-center">
           <div className="max-w-md text-center">
             <div className="text-5xl mb-4">🏢</div>
             <h1 className="text-2xl font-extrabold tracking-tight mb-3">Client Workspaces</h1>
-            <p className="text-sm text-gray-500 leading-relaxed mb-6">
+            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-6">
               Manage clients in fully isolated workspaces — their own accounts, posts, and analytics.
             </p>
             <div className="grid grid-cols-2 gap-3 mb-6 text-left">
-              <div className="bg-white border border-blue-100 rounded-2xl p-4">
+              <div className="bg-surface border border-blue-100 rounded-2xl p-4">
                 <div className="text-xs font-bold text-blue-600 mb-2">Pro · $5/mo</div>
                 <div className="text-2xl font-extrabold mb-1">1</div>
-                <div className="text-xs text-gray-500">client workspace</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">client workspace</div>
               </div>
-              <div className="bg-white border border-purple-100 rounded-2xl p-4">
+              <div className="bg-surface border border-purple-100 rounded-2xl p-4">
                 <div className="text-xs font-bold text-purple-600 mb-2">Agency · $20/mo</div>
                 <div className="text-2xl font-extrabold mb-1">5</div>
-                <div className="text-xs text-gray-500">client workspaces</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">client workspaces</div>
               </div>
             </div>
             <Link href="/settings?tab=Plan"
@@ -86,7 +86,7 @@ export default function Workspaces() {
   const clientWs   = workspaces.filter((w: any) => !w.is_personal)
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-4xl mx-auto">
@@ -95,7 +95,7 @@ export default function Workspaces() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Workspaces</h1>
-              <p className="text-sm text-gray-400 mt-0.5">
+              <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">
                 {clientWs.length} client workspace{clientWs.length !== 1 ? 's' : ''} · {limit} max on {PLAN_CONFIG[plan].label}
               </p>
             </div>
@@ -108,16 +108,16 @@ export default function Workspaces() {
           </div>
 
           {/* USAGE BAR */}
-          <div className="bg-white border border-gray-100 rounded-2xl p-4 mb-6">
+          <div className="bg-surface border border-theme rounded-2xl p-4 mb-6">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-gray-500">Client Workspaces</span>
-              <span className="text-xs font-bold text-gray-700">{clientWs.length} / {limit}</span>
+              <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Client Workspaces</span>
+              <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{clientWs.length} / {limit}</span>
             </div>
-            <div className="w-full bg-gray-100 rounded-full h-2">
+            <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2">
               <div className={`h-2 rounded-full transition-all ${atLimit ? 'bg-red-400' : 'bg-black'}`}
                 style={{ width: `${Math.min(100, (clientWs.length / limit) * 100)}%` }} />
             </div>
-            <p className="text-xs text-gray-400 mt-1.5">
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">
               {atLimit ? 'Workspace limit reached' : `${limit - clientWs.length} slot${limit - clientWs.length !== 1 ? 's' : ''} remaining`}
             </p>
           </div>
@@ -125,15 +125,15 @@ export default function Workspaces() {
           {/* PERSONAL WORKSPACE */}
           {personalWs && (
             <div className="mb-6">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Personal</p>
-              <div className={`bg-white border-2 rounded-2xl p-4 md:p-5 flex items-center justify-between transition-all ${
-                activeWorkspace?.id === personalWs.id ? 'border-black' : 'border-gray-100'
+              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Personal</p>
+              <div className={`bg-surface border-2 rounded-2xl p-4 md:p-5 flex items-center justify-between transition-all ${
+                activeWorkspace?.id === personalWs.id ? 'border-black' : 'border-theme'
               }`}>
                 <div className="flex items-center gap-3 md:gap-4">
-                  <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-xl flex-shrink-0">🏠</div>
+                  <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center text-xl flex-shrink-0">🏠</div>
                   <div>
                     <p className="text-sm font-extrabold">My Workspace</p>
-                    <p className="text-xs text-gray-400">Your personal account</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500">Your personal account</p>
                   </div>
                 </div>
                 {activeWorkspace?.id === personalWs.id ? (
@@ -150,17 +150,17 @@ export default function Workspaces() {
 
           {/* CLIENT WORKSPACES */}
           <div>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Client Workspaces</p>
+            <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Client Workspaces</p>
 
             {loading ? (
               <div className="space-y-3">
                 {[1,2,3].map(i => <SkeletonBox key={i} className="h-20" />)}
               </div>
             ) : clientWs.length === 0 ? (
-              <div className="bg-white border border-gray-100 rounded-2xl p-10 text-center">
+              <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
                 <div className="text-4xl mb-3">🏢</div>
                 <p className="text-sm font-bold mb-1">No client workspaces yet</p>
-                <p className="text-xs text-gray-400 mb-5">
+                <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">
                   Create a separate workspace for each client — isolated accounts, posts, and analytics.
                 </p>
                 <Link href="/workspaces/new"
@@ -177,12 +177,12 @@ export default function Workspaces() {
 
                   return (
                     <div key={ws.id}
-                      className={`bg-white border-2 rounded-2xl p-4 md:p-5 transition-all ${
-                        isActive ? 'border-black' : 'border-gray-100 hover:border-gray-300'
+                      className={`bg-surface border-2 rounded-2xl p-4 md:p-5 transition-all ${
+                        isActive ? 'border-black' : 'border-theme hover:border-gray-300'
                       }`}>
 
                       <div className="flex items-center gap-3 md:gap-4">
-                        <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-xl flex-shrink-0">🏢</div>
+                        <div className="w-10 h-10 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center text-xl flex-shrink-0">🏢</div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <p className="text-sm font-extrabold truncate">{ws.client_name || ws.name}</p>
@@ -191,7 +191,7 @@ export default function Workspaces() {
                             )}
                           </div>
                           <div className="flex items-center gap-3 mt-0.5 flex-wrap">
-                            {ws.industry && <p className="text-xs text-gray-400">{ws.industry}</p>}
+                            {ws.industry && <p className="text-xs text-gray-400 dark:text-gray-500">{ws.industry}</p>}
                             {ws.website && (
                               <a href={ws.website} target="_blank" rel="noopener noreferrer"
                                 onClick={e => e.stopPropagation()}
@@ -255,11 +255,11 @@ export default function Workspaces() {
 
           {/* AT LIMIT BANNER */}
           {atLimit && (
-            <div className="mt-6 rounded-2xl px-5 py-4 text-center border border-gray-100 bg-gray-50">
+            <div className="mt-6 rounded-2xl px-5 py-4 text-center border border-theme bg-theme">
               {plan === 'agency' ? (
                 <>
-                  <p className="text-xs font-bold text-gray-700">You've reached your {limit} workspace limit on Agency.</p>
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="text-xs font-bold text-gray-700 dark:text-gray-300">You've reached your {limit} workspace limit on Agency.</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                     Need more?{' '}
                     <a href="mailto:support@socialmate.studio" className="text-black underline hover:no-underline">
                       Contact us
@@ -269,8 +269,8 @@ export default function Workspaces() {
                 </>
               ) : (
                 <>
-                  <p className="text-xs font-bold text-gray-700">You've used your 1 workspace on Pro.</p>
-                  <p className="text-xs text-gray-400 mt-1">
+                  <p className="text-xs font-bold text-gray-700 dark:text-gray-300">You've used your 1 workspace on Pro.</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                     <Link href="/settings?tab=Plan" className="text-black underline hover:no-underline">
                       Upgrade to Agency
                     </Link>{' '}

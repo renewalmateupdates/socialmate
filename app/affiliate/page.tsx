@@ -127,7 +127,7 @@ export default function AffiliatePage() {
   // Wait for plan to load before rendering gate
   if (planLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex">
+      <div className="min-h-screen bg-theme flex">
         <Sidebar />
         <div className="md:ml-56 flex-1 flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
@@ -139,21 +139,21 @@ export default function AffiliatePage() {
   // FREE TIER GATE — top level, no form shown at all
   if (plan === 'free') {
     return (
-      <div className="min-h-screen bg-gray-50 flex">
+      <div className="min-h-screen bg-theme flex">
         <Sidebar />
         <div className="md:ml-56 flex-1 p-8 flex items-center justify-center">
           <div className="max-w-md text-center">
             <div className="text-5xl mb-4">🤝</div>
             <h1 className="text-2xl font-extrabold tracking-tight mb-3">Affiliate Program</h1>
-            <p className="text-sm text-gray-500 leading-relaxed mb-6">
+            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-6">
               Earn recurring commissions by referring new users to SocialMate.
               The affiliate program is available to Pro and Agency subscribers.
             </p>
             <div className="grid grid-cols-2 gap-3 mb-6 text-left">
-              <div className="bg-white border border-gray-100 rounded-2xl p-4">
+              <div className="bg-surface border border-theme rounded-2xl p-4">
                 <div className="text-2xl font-extrabold mb-1">30%</div>
-                <div className="text-xs text-gray-500">Recurring commission</div>
-                <div className="text-xs text-gray-400 mt-1">Starting rate</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">Recurring commission</div>
+                <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">Starting rate</div>
               </div>
               <div className="bg-purple-50 border border-purple-100 rounded-2xl p-4">
                 <div className="text-2xl font-extrabold text-purple-700 mb-1">40%</div>
@@ -165,7 +165,7 @@ export default function AffiliatePage() {
               className="block w-full text-center bg-black text-white text-sm font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all mb-3">
               Upgrade to unlock Affiliate →
             </Link>
-            <p className="text-xs text-gray-400">Pro · $5/mo · Agency · $20/mo</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500">Pro · $5/mo · Agency · $20/mo</p>
           </div>
         </div>
       </div>
@@ -173,14 +173,14 @@ export default function AffiliatePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <main className="md:ml-56 flex-1 overflow-y-auto p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
 
           <div className="mb-8">
             <h1 className="text-2xl font-extrabold tracking-tight">Affiliate Program</h1>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               Earn recurring commissions by referring new users to SocialMate.
             </p>
           </div>
@@ -199,24 +199,24 @@ export default function AffiliatePage() {
                   { label: 'Total Earned',     value: `$${(data!.affiliate!.total_earnings ?? 0).toFixed(2)}`,   sub: 'All time'           },
                   { label: 'Active Referrals', value: `${data!.affiliate!.active_referral_count ?? 0}`,          sub: 'Paying subscribers' },
                 ].map(stat => (
-                  <div key={stat.label} className="bg-white rounded-2xl border border-gray-100 p-5">
-                    <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">{stat.label}</div>
-                    <div className="text-2xl font-extrabold text-gray-900">{stat.value}</div>
-                    <div className="text-xs text-gray-400 mt-1">{stat.sub}</div>
+                  <div key={stat.label} className="bg-surface rounded-2xl border border-theme p-5">
+                    <div className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">{stat.label}</div>
+                    <div className="text-2xl font-extrabold text-gray-900 dark:text-gray-100">{stat.value}</div>
+                    <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">{stat.sub}</div>
                   </div>
                 ))}
               </div>
 
               {/* COMMISSION RATE */}
-              <div className="bg-white rounded-2xl border border-gray-100 p-5">
+              <div className="bg-surface rounded-2xl border border-theme p-5">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
                   <div>
-                    <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-0.5">Commission Rate</div>
-                    <div className="text-xl font-extrabold text-gray-900">{data!.commission_label}</div>
+                    <div className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-0.5">Commission Rate</div>
+                    <div className="text-xl font-extrabold text-gray-900 dark:text-gray-100">{data!.commission_label}</div>
                   </div>
                   {data!.next_tier ? (
                     <div className="sm:text-right">
-                      <div className="text-xs text-gray-400">Next tier: {data!.next_tier.rate}</div>
+                      <div className="text-xs text-gray-400 dark:text-gray-500">Next tier: {data!.next_tier.rate}</div>
                       <div className="text-xs text-purple-600 font-semibold mt-0.5">
                         {data!.next_tier.remaining} more referral{data!.next_tier.remaining !== 1 ? 's' : ''} to unlock
                       </div>
@@ -226,7 +226,7 @@ export default function AffiliatePage() {
                   )}
                 </div>
                 {data!.next_tier && (
-                  <div className="w-full bg-gray-100 rounded-full h-2">
+                  <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2">
                     <div className="bg-purple-500 h-2 rounded-full transition-all"
                       style={{ width: `${Math.min(100, ((data!.affiliate!.active_referral_count ?? 0) / 100) * 100)}%` }} />
                   </div>
@@ -234,10 +234,10 @@ export default function AffiliatePage() {
               </div>
 
               {/* REFERRAL LINK */}
-              <div className="bg-white rounded-2xl border border-gray-100 p-5">
-                <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">Your Referral Link</div>
+              <div className="bg-surface rounded-2xl border border-theme p-5">
+                <div className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Your Referral Link</div>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                  <div className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-600 font-mono truncate">
+                  <div className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 text-sm text-gray-600 dark:text-gray-400 font-mono truncate">
                     {referralLink}
                   </div>
                   <button onClick={copyLink}
@@ -245,37 +245,37 @@ export default function AffiliatePage() {
                     {copied ? '✓ Copied' : 'Copy Link'}
                   </button>
                 </div>
-                <p className="text-xs text-gray-400 mt-2">
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
                   Share this link. When someone signs up and subscribes, you earn commission automatically.
                 </p>
               </div>
 
               {/* REFERRAL HISTORY */}
-              <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-                <div className="px-5 py-4 border-b border-gray-50">
-                  <h3 className="text-sm font-bold text-gray-900">Referral History</h3>
+              <div className="bg-surface rounded-2xl border border-theme overflow-hidden">
+                <div className="px-5 py-4 border-b border-gray-50 dark:border-gray-800">
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-gray-100">Referral History</h3>
                 </div>
                 {(data!.conversions ?? []).length === 0 ? (
-                  <div className="px-5 py-10 text-center text-sm text-gray-400">
+                  <div className="px-5 py-10 text-center text-sm text-gray-400 dark:text-gray-500">
                     No referrals yet. Share your link to get started.
                   </div>
                 ) : (
                   <>
-                    <div className="sm:hidden divide-y divide-gray-50">
+                    <div className="sm:hidden divide-y divide-gray-50 dark:divide-gray-800">
                       {data!.conversions.map(c => {
                         const badge = STATUS_BADGE[c.status] || STATUS_BADGE.pending
                         return (
                           <div key={c.id} className="px-5 py-4 space-y-2">
                             <div className="flex items-center justify-between">
-                              <span className="text-xs text-gray-500">{new Date(c.converted_at).toLocaleDateString()}</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400">{new Date(c.converted_at).toLocaleDateString()}</span>
                               <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="text-xs text-gray-400">Monthly</span>
+                              <span className="text-xs text-gray-400 dark:text-gray-500">Monthly</span>
                               <span className="text-xs font-medium">${(c.monthly_commission ?? 0).toFixed(2)}</span>
                             </div>
                             <div className="flex items-center justify-between">
-                              <span className="text-xs text-gray-400">Total earned</span>
+                              <span className="text-xs text-gray-400 dark:text-gray-500">Total earned</span>
                               <span className="text-xs font-bold">${(c.total_earned ?? 0).toFixed(2)}</span>
                             </div>
                           </div>
@@ -284,7 +284,7 @@ export default function AffiliatePage() {
                     </div>
                     <table className="hidden sm:table w-full text-sm">
                       <thead>
-                        <tr className="text-xs font-semibold text-gray-400 uppercase tracking-widest border-b border-gray-50">
+                        <tr className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest border-b border-gray-50 dark:border-gray-800">
                           <th className="px-5 py-3 text-left">Date</th>
                           <th className="px-5 py-3 text-left">Status</th>
                           <th className="px-5 py-3 text-left">Lock Expires</th>
@@ -296,14 +296,14 @@ export default function AffiliatePage() {
                         {data!.conversions.map(c => {
                           const badge = STATUS_BADGE[c.status] || STATUS_BADGE.pending
                           return (
-                            <tr key={c.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50 transition-all">
-                              <td className="px-5 py-3 text-gray-600">{new Date(c.converted_at).toLocaleDateString()}</td>
+                            <tr key={c.id} className="border-b border-gray-50 dark:border-gray-800 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+                              <td className="px-5 py-3 text-gray-600 dark:text-gray-400">{new Date(c.converted_at).toLocaleDateString()}</td>
                               <td className="px-5 py-3">
                                 <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${badge.color}`}>{badge.label}</span>
                               </td>
-                              <td className="px-5 py-3 text-gray-500 text-xs">{new Date(c.lock_expires_at).toLocaleDateString()}</td>
-                              <td className="px-5 py-3 text-right text-gray-700 font-medium">${(c.monthly_commission ?? 0).toFixed(2)}</td>
-                              <td className="px-5 py-3 text-right font-bold text-gray-900">${(c.total_earned ?? 0).toFixed(2)}</td>
+                              <td className="px-5 py-3 text-gray-500 dark:text-gray-400 text-xs">{new Date(c.lock_expires_at).toLocaleDateString()}</td>
+                              <td className="px-5 py-3 text-right text-gray-700 dark:text-gray-300 font-medium">${(c.monthly_commission ?? 0).toFixed(2)}</td>
+                              <td className="px-5 py-3 text-right font-bold text-gray-900 dark:text-gray-100">${(c.total_earned ?? 0).toFixed(2)}</td>
                             </tr>
                           )
                         })}
@@ -315,16 +315,16 @@ export default function AffiliatePage() {
             </div>
 
           ) : affiliateStatus === 'pending_review' ? (
-            <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
+            <div className="bg-surface rounded-2xl border border-theme p-8 text-center">
               <div className="text-4xl mb-4">⏳</div>
               <h2 className="text-xl font-extrabold mb-2">Application Under Review</h2>
-              <p className="text-gray-500 text-sm max-w-md mx-auto leading-relaxed">
+              <p className="text-gray-500 dark:text-gray-400 text-sm max-w-md mx-auto leading-relaxed">
                 Your application is being reviewed. You'll be notified by email once a decision has been made.
               </p>
             </div>
 
           ) : affiliateStatus === 'rejected' ? (
-            <div className="bg-white rounded-2xl border border-gray-100 p-8 text-center">
+            <div className="bg-surface rounded-2xl border border-theme p-8 text-center">
               <div className="text-4xl mb-4">❌</div>
               <h2 className="text-xl font-extrabold mb-2">Application Not Approved</h2>
               {data?.affiliate?.rejection_reason && (
@@ -332,26 +332,26 @@ export default function AffiliatePage() {
                   <strong>Reason:</strong> {data.affiliate.rejection_reason}
                 </div>
               )}
-              <p className="text-gray-500 text-sm max-w-md mx-auto">
+              <p className="text-gray-500 dark:text-gray-400 text-sm max-w-md mx-auto">
                 If you have questions, please reach out to support.
               </p>
             </div>
 
           ) : (
             /* APPLICATION FORM — Pro/Agency only reaches here */
-            <div className="bg-white rounded-2xl border border-gray-100 p-6 md:p-8">
+            <div className="bg-surface rounded-2xl border border-theme p-6 md:p-8">
               <div className="text-4xl mb-4 text-center">🤝</div>
               <h2 className="text-xl font-extrabold mb-1 text-center">Apply to the Affiliate Program</h2>
-              <p className="text-gray-500 text-sm mb-8 text-center max-w-md mx-auto leading-relaxed">
+              <p className="text-gray-500 dark:text-gray-400 text-sm mb-8 text-center max-w-md mx-auto leading-relaxed">
                 Earn <strong>30% recurring commission</strong> on every referral, up to <strong>40%</strong> at 100 active referrals.
                 Applications are reviewed manually — we'll notify you by email.
               </p>
 
               <div className="grid grid-cols-2 gap-4 mb-8">
-                <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                  <div className="text-2xl font-extrabold text-gray-900">30%</div>
-                  <div className="text-xs text-gray-500 mt-0.5">Recurring commission</div>
-                  <div className="text-xs text-gray-400 mt-1">Starting rate</div>
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-theme">
+                  <div className="text-2xl font-extrabold text-gray-900 dark:text-gray-100">30%</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Recurring commission</div>
+                  <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">Starting rate</div>
                 </div>
                 <div className="bg-purple-50 rounded-xl p-4 border border-purple-100">
                   <div className="text-2xl font-extrabold text-purple-700">40%</div>
@@ -368,23 +368,23 @@ export default function AffiliatePage() {
               ) : (
                 <div className="space-y-5">
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+                    <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">
                       Full Name <span className="text-red-400">*</span>
                     </label>
                     <input type="text" value={fullName} onChange={e => setFullName(e.target.value)}
                       placeholder="Your full name"
-                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gray-400" />
+                      className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gray-400" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+                    <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">
                       Website or Main Social Profile
                     </label>
                     <input type="url" value={websiteUrl} onChange={e => setWebsiteUrl(e.target.value)}
                       placeholder="https://"
-                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gray-400" />
+                      className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gray-400" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+                    <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
                       Active Platforms
                     </label>
                     <div className="flex flex-wrap gap-2">
@@ -393,7 +393,7 @@ export default function AffiliatePage() {
                           className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
                             selectedPlatforms.includes(p)
                               ? 'bg-black text-white border-black'
-                              : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'
+                              : 'bg-surface text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-400'
                           }`}>
                           {p}
                         </button>
@@ -401,7 +401,7 @@ export default function AffiliatePage() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">
+                    <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">
                       Estimated Monthly Audience
                     </label>
                     <div className="flex gap-2 flex-wrap">
@@ -410,7 +410,7 @@ export default function AffiliatePage() {
                           className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
                             audienceSize === s
                               ? 'bg-black text-white border-black'
-                              : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'
+                              : 'bg-surface text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-400'
                           }`}>
                           {s}
                         </button>
@@ -418,29 +418,29 @@ export default function AffiliatePage() {
                     </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+                    <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">
                       How do you plan to promote SocialMate? <span className="text-red-400">*</span>
                     </label>
                     <textarea value={promotionPlan} onChange={e => setPromotionPlan(e.target.value)}
                       rows={3}
                       placeholder="Describe your content style, audience, and how you'd introduce SocialMate..."
-                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gray-400 resize-none" />
+                      className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gray-400 resize-none" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">
+                    <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">
                       Why would you be a great affiliate? <span className="text-red-400">*</span>
                     </label>
                     <textarea value={whyGoodFit} onChange={e => setWhyGoodFit(e.target.value)}
                       rows={3}
                       placeholder="What makes you a good fit for the SocialMate affiliate program?"
-                      className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gray-400 resize-none" />
+                      className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-gray-400 resize-none" />
                   </div>
                   {submitError && (
                     <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3 text-sm text-red-600">
                       {submitError}
                     </div>
                   )}
-                  <p className="text-xs text-gray-400 pt-1">
+                  <p className="text-xs text-gray-400 dark:text-gray-500 pt-1">
                     60-day lock period · 30% recurring commission · Reviewed within 3–5 business days
                   </p>
                   <button onClick={handleSubmit} disabled={submitting}

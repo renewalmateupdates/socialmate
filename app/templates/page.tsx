@@ -6,7 +6,7 @@ import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 
 function SkeletonBox({ className }: { className?: string }) {
-  return <div className={`bg-gray-100 rounded-xl animate-pulse ${className}`} />
+  return <div className={`bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse ${className}`} />
 }
 
 const CATEGORIES = ['All', 'Promotional', 'Educational', 'Engagement', 'Announcement', 'Personal', 'Other']
@@ -191,7 +191,7 @@ export default function Templates() {
     : templates.filter(t => t.category === activeCategory)
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
@@ -200,7 +200,7 @@ export default function Templates() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Post Templates</h1>
-              <p className="text-sm text-gray-400 mt-0.5">
+              <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">
                 {loading ? 'Loading...' : `${templates.length} template${templates.length !== 1 ? 's' : ''} saved`}
               </p>
             </div>
@@ -214,23 +214,23 @@ export default function Templates() {
 
           {/* FORM */}
           {showForm && (
-            <div className="bg-white border border-gray-200 rounded-2xl p-5 md:p-6 mb-6">
+            <div className="bg-surface border border-theme-md rounded-2xl p-5 md:p-6 mb-6">
               <h2 className="text-sm font-extrabold mb-4">
                 {editingId ? 'Edit Template' : 'New Template'}
               </h2>
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">Title</label>
+                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">Title</label>
                     <input type="text" value={title} onChange={e => setTitle(e.target.value)}
                       placeholder="e.g. Product Launch Announcement"
-                      className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400"
+                      className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-gray-400 dark:focus:border-gray-400"
                       autoFocus />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">Category</label>
+                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">Category</label>
                     <select value={category} onChange={e => setCategory(e.target.value)}
-                      className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 bg-white">
+                      className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-gray-400 bg-white dark:bg-gray-900 dark:text-gray-100">
                       {CATEGORIES.filter(c => c !== 'All').map(c => (
                         <option key={c} value={c}>{c}</option>
                       ))}
@@ -239,20 +239,20 @@ export default function Templates() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">
                     Content
-                    <span className="text-gray-400 font-normal ml-1">(use [brackets] for fill-in sections)</span>
+                    <span className="text-gray-400 dark:text-gray-500 font-normal ml-1">(use [brackets] for fill-in sections)</span>
                   </label>
                   <textarea value={content} onChange={e => setContent(e.target.value)}
                     placeholder="Excited to announce [product/service]! 🎉&#10;&#10;[Describe key benefit]&#10;&#10;[Call to action] 👇"
                     rows={6}
-                    className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 resize-none" />
-                  <p className="text-xs text-gray-400 mt-1">{content.length} chars</p>
+                    className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-gray-400 resize-none" />
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{content.length} chars</p>
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-2">
-                    Best for platforms <span className="text-gray-400 font-normal">(optional)</span>
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-2">
+                    Best for platforms <span className="text-gray-400 dark:text-gray-500 font-normal">(optional)</span>
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {LIVE_PLATFORM_IDS.map(id => (
@@ -260,7 +260,7 @@ export default function Templates() {
                         className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all ${
                           platforms.includes(id)
                             ? 'bg-black text-white border-black'
-                            : 'border-gray-200 text-gray-500 hover:border-gray-400'
+                            : 'border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-gray-400'
                         }`}>
                         <span>{PLATFORM_ICONS[id]}</span>
                         <span className="capitalize">{id}</span>
@@ -268,11 +268,11 @@ export default function Templates() {
                     ))}
                     {SOON_PLATFORM_IDS.map(id => (
                       <div key={id}
-                        className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border border-dashed border-gray-100 text-gray-300 cursor-not-allowed"
+                        className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold border border-dashed border-gray-100 dark:border-gray-700 text-gray-300 dark:text-gray-600 cursor-not-allowed"
                         title={`${id} — coming soon`}>
                         <span>{PLATFORM_ICONS[id]}</span>
                         <span className="capitalize">{id}</span>
-                        <span className="text-gray-200 ml-0.5 text-xs">Soon</span>
+                        <span className="text-gray-200 dark:text-gray-600 ml-0.5 text-xs">Soon</span>
                       </div>
                     ))}
                   </div>
@@ -284,7 +284,7 @@ export default function Templates() {
                     {saving ? 'Saving...' : editingId ? 'Save Changes' : 'Save Template'}
                   </button>
                   <button onClick={resetForm}
-                    className="px-5 py-2.5 border border-gray-200 text-sm font-semibold rounded-xl hover:border-gray-400 transition-all">
+                    className="px-5 py-2.5 border border-gray-200 dark:border-gray-600 text-sm font-semibold rounded-xl hover:border-gray-400 transition-all">
                     Cancel
                   </button>
                 </div>
@@ -300,7 +300,7 @@ export default function Templates() {
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
                     activeCategory === cat
                       ? 'bg-black text-white border-black'
-                      : 'bg-white border-gray-200 text-gray-500 hover:border-gray-400'
+                      : 'bg-surface border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-gray-400'
                   }`}>
                   {cat}
                 </button>
@@ -319,12 +319,12 @@ export default function Templates() {
                 const isConfirming = confirmDelete === t.id
                 return (
                   <div key={t.id}
-                    className="bg-white border border-gray-100 rounded-2xl p-4 md:p-5 hover:border-gray-300 transition-all">
+                    className="bg-surface border border-theme rounded-2xl p-4 md:p-5 hover:border-gray-300 dark:hover:border-gray-600 transition-all">
 
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <div className="flex items-center gap-2 flex-wrap min-w-0">
                         <p className="text-sm font-extrabold truncate">{t.title}</p>
-                        <span className="text-xs font-semibold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full flex-shrink-0">
+                        <span className="text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full flex-shrink-0">
                           {t.category || 'Other'}
                         </span>
                       </div>
@@ -335,7 +335,7 @@ export default function Templates() {
                             className={`text-xs font-bold px-2.5 py-1.5 rounded-xl transition-all border ${
                               copied === t.id
                                 ? 'bg-green-500 text-white border-green-500'
-                                : 'border-gray-200 hover:border-gray-400'
+                                : 'border-gray-200 dark:border-gray-600 hover:border-gray-400'
                             }`}>
                             {copied === t.id ? '✓' : 'Copy'}
                           </button>
@@ -344,7 +344,7 @@ export default function Templates() {
                             Use →
                           </Link>
                           <button onClick={() => handleEdit(t)}
-                            className="text-xs font-bold px-2.5 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                            className="text-xs font-bold px-2.5 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
                             Edit
                           </button>
                           <button onClick={() => setConfirmDelete(t.id)}
@@ -355,7 +355,7 @@ export default function Templates() {
                       )}
                     </div>
 
-                    <p className="text-xs text-gray-500 leading-relaxed line-clamp-3 whitespace-pre-line mb-3">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-3 whitespace-pre-line mb-3">
                       {t.content}
                     </p>
 
@@ -369,7 +369,7 @@ export default function Templates() {
 
                     {/* CONFIRM DELETE — below content, full width */}
                     {isConfirming && (
-                      <div className="mt-3 pt-3 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center gap-2">
+                      <div className="mt-3 pt-3 border-t border-theme flex flex-col sm:flex-row sm:items-center gap-2">
                         <p className="text-xs text-red-600 font-semibold flex-1">
                           Permanently delete "{t.title}"? This cannot be undone.
                         </p>
@@ -381,7 +381,7 @@ export default function Templates() {
                               : 'Yes, delete'}
                           </button>
                           <button onClick={() => setConfirmDelete(null)}
-                            className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                            className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
                             Cancel
                           </button>
                         </div>
@@ -399,17 +399,17 @@ export default function Templates() {
               <h2 className="text-sm font-bold tracking-tight">Starter Templates</h2>
               <span className="text-xs font-semibold px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full">Free to use</span>
             </div>
-            <p className="text-xs text-gray-400 mb-4">
+            <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
               Ready-made formats for the 4 live platforms. Hit "Use →" to open in Compose, or "Save" to add to your collection.
             </p>
             <div className="space-y-3">
               {STARTER_TEMPLATES.map(t => (
                 <div key={t.id}
-                  className="bg-white border border-gray-100 rounded-2xl p-4 md:p-5 hover:border-gray-300 transition-all">
+                  className="bg-surface border border-theme rounded-2xl p-4 md:p-5 hover:border-gray-300 dark:hover:border-gray-600 transition-all">
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <div className="flex items-center gap-2 flex-wrap min-w-0">
                       <p className="text-sm font-extrabold truncate">{t.title}</p>
-                      <span className="text-xs font-semibold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full flex-shrink-0">
+                      <span className="text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full flex-shrink-0">
                         {t.category}
                       </span>
                     </div>
@@ -419,7 +419,7 @@ export default function Templates() {
                         className={`text-xs font-bold px-2.5 py-1.5 rounded-xl transition-all border ${
                           copied === t.id
                             ? 'bg-green-500 text-white border-green-500'
-                            : 'border-gray-200 hover:border-gray-400'
+                            : 'border-gray-200 dark:border-gray-600 hover:border-gray-400'
                         }`}>
                         {copied === t.id ? '✓' : 'Copy'}
                       </button>
@@ -428,12 +428,12 @@ export default function Templates() {
                         Use →
                       </Link>
                       <button onClick={() => handleSaveStarter(t)} disabled={savingStarter === t.id}
-                        className="text-xs font-bold px-2.5 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
+                        className="text-xs font-bold px-2.5 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
                         {savingStarter === t.id ? 'Saving...' : 'Save'}
                       </button>
                     </div>
                   </div>
-                  <p className="text-xs text-gray-500 leading-relaxed line-clamp-3 whitespace-pre-line mb-3">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-3 whitespace-pre-line mb-3">
                     {t.content}
                   </p>
                   <div className="flex items-center gap-1">
@@ -448,8 +448,8 @@ export default function Templates() {
 
           {/* EMPTY STATE */}
           {!loading && templates.length === 0 && !showForm && (
-            <div className="mt-8 bg-gray-50 border border-gray-100 rounded-2xl p-6 text-center">
-              <p className="text-xs text-gray-400">
+            <div className="mt-8 bg-gray-50 dark:bg-gray-800 border border-theme rounded-2xl p-6 text-center">
+              <p className="text-xs text-gray-400 dark:text-gray-500">
                 You haven't saved any templates yet. Use a starter above or{' '}
                 <button onClick={() => setShowForm(true)} className="text-black font-bold underline">
                   create your own

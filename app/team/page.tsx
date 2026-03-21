@@ -139,7 +139,7 @@ export default function Team() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-5xl mx-auto">
@@ -148,10 +148,10 @@ export default function Team() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Team</h1>
-              <p className="text-sm text-gray-400 mt-0.5">Manage who has access to your workspace</p>
+              <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">Manage who has access to your workspace</p>
             </div>
             <div className={`self-start sm:self-auto flex items-center gap-2 text-xs font-semibold rounded-xl px-4 py-2.5 border ${
-              atLimit ? 'bg-red-50 border-red-200 text-red-600' : 'bg-white border-gray-100 text-gray-500'
+              atLimit ? 'bg-red-50 border-red-200 text-red-600' : 'bg-surface border-theme text-gray-500 dark:text-gray-400'
             }`}>
               {seatsUsed} / {seatLimit} seats used
             </div>
@@ -181,16 +181,16 @@ export default function Team() {
             <div className="lg:col-span-2 space-y-6">
 
               {/* SEAT BAR */}
-              <div className="bg-white border border-gray-100 rounded-2xl p-4">
+              <div className="bg-surface border border-theme rounded-2xl p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-semibold text-gray-500">Team seats</span>
-                  <span className="text-xs font-bold text-gray-700">{seatsUsed} / {seatLimit}</span>
+                  <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">Team seats</span>
+                  <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{seatsUsed} / {seatLimit}</span>
                 </div>
-                <div className="w-full bg-gray-100 rounded-full h-2 mb-2">
+                <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2 mb-2">
                   <div className={`h-2 rounded-full transition-all ${atLimit ? 'bg-red-400' : 'bg-black'}`}
                     style={{ width: `${Math.min(100, (seatsUsed / seatLimit) * 100)}%` }} />
                 </div>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-gray-400 dark:text-gray-500">
                   {atLimit
                     ? 'No seats remaining — upgrade to add more members'
                     : `${seatsRemaining} seat${seatsRemaining !== 1 ? 's' : ''} remaining on ${planConfig.label} plan`}
@@ -198,7 +198,7 @@ export default function Team() {
               </div>
 
               {/* MEMBER LIST */}
-              <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
+              <div className="bg-surface border border-theme rounded-2xl overflow-hidden">
                 <div className="px-5 py-4 border-b border-gray-100">
                   <h2 className="text-sm font-bold tracking-tight">Team Members</h2>
                 </div>
@@ -227,10 +227,10 @@ export default function Team() {
 
                       return (
                         <div key={member.id}
-                          className={`px-4 md:px-5 py-4 ${i !== allMembers.length - 1 ? 'border-b border-gray-50' : ''} hover:bg-gray-50 transition-all`}>
+                          className={`px-4 md:px-5 py-4 ${i !== allMembers.length - 1 ? 'border-b border-gray-100' : ''} hover:bg-gray-50 dark:hover:bg-gray-800 transition-all`}>
 
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-gray-100 flex items-center justify-center text-sm font-bold flex-shrink-0 overflow-hidden">
+                            <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-sm font-bold flex-shrink-0 overflow-hidden">
                               {member.avatar_url
                                 ? <img src={member.avatar_url} alt={member.email} className="w-full h-full object-cover" />
                                 : initials}
@@ -244,7 +244,7 @@ export default function Team() {
                                   </span>
                                 )}
                               </div>
-                              <p className="text-xs text-gray-400 mt-0.5">
+                              <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                                 {isOwner
                                   ? 'Workspace owner'
                                   : `Joined ${new Date(member.joined_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`}
@@ -271,7 +271,7 @@ export default function Team() {
 
                           {isEditing && (
                             <div className="mt-3 pt-3 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center gap-2">
-                              <p className="text-xs font-semibold text-gray-500 flex-shrink-0">Change role for {member.email}:</p>
+                              <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 flex-shrink-0">Change role for {member.email}:</p>
                               <div className="flex items-center gap-2 flex-wrap">
                                 <select value={editingRole} onChange={e => setEditingRole(e.target.value)}
                                   className="text-xs border border-gray-200 rounded-xl px-3 py-1.5 focus:outline-none focus:border-gray-400 bg-white font-semibold">
@@ -322,11 +322,11 @@ export default function Team() {
             <div className="space-y-6">
 
               {/* INVITE FORM */}
-              <div className="bg-white border border-gray-100 rounded-2xl p-5">
+              <div className="bg-surface border border-theme rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Invite Member</h2>
                 {atLimit ? (
                   <div className="text-center py-4">
-                    <p className="text-xs text-gray-500 mb-3">
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
                       You've used all {seatLimit} seats on your {planConfig.label} plan.
                     </p>
                     {plan !== 'agency' && (
@@ -339,27 +339,27 @@ export default function Team() {
                 ) : (
                   <div className="space-y-3">
                     <div>
-                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Email</label>
+                      <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1">Email</label>
                       <input type="email" placeholder="colleague@company.com"
                         value={inviteEmail} onChange={e => setInviteEmail(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && handleInvite()}
                         className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400" />
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1">Role</label>
+                      <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1">Role</label>
                       <select value={inviteRole} onChange={e => setInviteRole(e.target.value as any)}
                         className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 bg-white">
                         <option value="admin">Admin</option>
                         <option value="editor">Editor</option>
                         <option value="viewer">Viewer</option>
                       </select>
-                      <p className="text-xs text-gray-400 mt-1">{ROLE_META[inviteRole]?.description}</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{ROLE_META[inviteRole]?.description}</p>
                     </div>
                     <button onClick={handleInvite} disabled={inviting || !inviteEmail.trim()}
                       className="w-full py-2.5 bg-black text-white text-sm font-semibold rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
                       {inviting ? 'Sending...' : '📧 Send Invite'}
                     </button>
-                    <p className="text-xs text-gray-400 text-center">
+                    <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
                       {seatsRemaining} seat{seatsRemaining !== 1 ? 's' : ''} remaining
                     </p>
                   </div>
@@ -367,7 +367,7 @@ export default function Team() {
               </div>
 
               {/* ROLE PERMISSIONS */}
-              <div className="bg-white border border-gray-100 rounded-2xl p-5">
+              <div className="bg-surface border border-theme rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Role Permissions</h2>
                 <div className="space-y-3">
                   {Object.entries(ROLE_META).map(([role, meta]) => (
@@ -375,7 +375,7 @@ export default function Team() {
                       <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 mt-0.5 ${meta.color}`}>
                         {meta.label}
                       </span>
-                      <p className="text-xs text-gray-400">{meta.description}</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500">{meta.description}</p>
                     </div>
                   ))}
                 </div>

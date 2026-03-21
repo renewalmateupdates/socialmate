@@ -118,7 +118,7 @@ export default function Calendar() {
   })
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
@@ -135,7 +135,7 @@ export default function Calendar() {
             </div>
             <div className="flex items-center gap-2">
               <Link href="/bulk-scheduler"
-                className="text-xs font-bold px-3 py-2 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                className="text-xs font-bold px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
                 📆 Bulk
               </Link>
               <Link href="/compose"
@@ -161,10 +161,10 @@ export default function Calendar() {
 
             {/* CALENDAR */}
             <div className="xl:col-span-3">
-              <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
-                <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-gray-100">
+              <div className="bg-surface border border-theme rounded-2xl overflow-hidden">
+                <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-theme">
                   <button onClick={prevMonth}
-                    className="w-8 h-8 flex items-center justify-center rounded-xl border border-gray-200 hover:border-gray-400 transition-all text-sm">
+                    className="w-8 h-8 flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-600 hover:border-gray-400 transition-all text-sm">
                     ←
                   </button>
                   <h2 className="text-base font-extrabold tracking-tight">
@@ -172,15 +172,15 @@ export default function Calendar() {
                   </h2>
                   <button onClick={nextMonth} disabled={!canGoForward}
                     className={`w-8 h-8 flex items-center justify-center rounded-xl border transition-all text-sm ${
-                      canGoForward ? 'border-gray-200 hover:border-gray-400' : 'border-gray-100 text-gray-300 cursor-not-allowed'
+                      canGoForward ? 'border-gray-200 dark:border-gray-600 hover:border-gray-400' : 'border-gray-100 text-gray-300 dark:text-gray-600 cursor-not-allowed'
                     }`}>
                     →
                   </button>
                 </div>
 
-                <div className="grid grid-cols-7 border-b border-gray-100">
+                <div className="grid grid-cols-7 border-b border-theme">
                   {DAYS_OF_WEEK.map((d, i) => (
-                    <div key={d} className="py-2 text-center text-xs font-bold text-gray-400 uppercase tracking-wide">
+                    <div key={d} className="py-2 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">
                       <span className="hidden sm:inline">{d}</span>
                       <span className="sm:hidden">{DAYS_OF_WEEK_XS[i]}</span>
                     </div>
@@ -189,7 +189,7 @@ export default function Calendar() {
 
                 {loading ? (
                   <div className="p-8 text-center">
-                    <div className="text-gray-300 text-sm animate-pulse">Loading calendar...</div>
+                    <div className="text-gray-300 dark:text-gray-600 text-sm animate-pulse">Loading calendar...</div>
                   </div>
                 ) : (
                   <div className="grid grid-cols-7">
@@ -205,16 +205,16 @@ export default function Calendar() {
                       return (
                         <div key={i}
                           onClick={() => dateKey && !isBeyondLimit && handleDayClick(dateKey)}
-                          className={`group min-h-[70px] md:min-h-[90px] p-1.5 md:p-2 border-b border-r border-gray-50 transition-all ${
-                            isCurrentMonth && !isBeyondLimit ? 'cursor-pointer hover:bg-gray-50' : 'bg-gray-50/50'
+                          className={`group min-h-[70px] md:min-h-[90px] p-1.5 md:p-2 border-b border-r border-gray-50 dark:border-gray-800 transition-all ${
+                            isCurrentMonth && !isBeyondLimit ? 'cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800' : 'bg-gray-50/50 dark:bg-gray-800/50'
                           } ${isSelected ? 'bg-blue-50' : ''} ${isBeyondLimit ? 'opacity-30 cursor-not-allowed' : ''}`}>
                           {isCurrentMonth && (
                             <>
                               <div className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-bold mb-1 ${
                                 isToday    ? 'bg-black text-white' :
                                 isSelected ? 'bg-blue-500 text-white' :
-                                isBeyondLimit ? 'text-gray-300' :
-                                'text-gray-600'
+                                isBeyondLimit ? 'text-gray-300 dark:text-gray-600' :
+                                'text-gray-600 dark:text-gray-300'
                               }`}>
                                 {dayNum}
                               </div>
@@ -222,7 +222,7 @@ export default function Calendar() {
                                 {dayPosts.slice(0, 2).map(post => (
                                   <div key={post.id}
                                     className={`text-xs px-1 py-0.5 rounded truncate font-semibold leading-tight ${
-                                      post.status === 'scheduled' ? 'bg-black text-white' : 'bg-gray-100 text-gray-600'
+                                      post.status === 'scheduled' ? 'bg-black text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'
                                     }`}>
                                     <span className="hidden sm:inline">
                                       {(post.platforms || []).slice(0, 2).map((p: string) => PLATFORM_ICONS[p] || '').join('')}
@@ -234,7 +234,7 @@ export default function Calendar() {
                                   </div>
                                 ))}
                                 {dayPosts.length > 2 && (
-                                  <div className="text-xs text-gray-400 px-1">+{dayPosts.length - 2}</div>
+                                  <div className="text-xs text-gray-400 dark:text-gray-500 px-1">+{dayPosts.length - 2}</div>
                                 )}
                               </div>
                             </>
@@ -250,10 +250,10 @@ export default function Calendar() {
             {/* RIGHT PANEL */}
             <div className="space-y-4">
               {selectedDay ? (
-                <div className="bg-white border border-gray-100 rounded-2xl p-5">
+                <div className="bg-surface border border-theme rounded-2xl p-5">
                   <div className="flex items-center justify-between mb-4">
                     <div>
-                      <p className="text-xs font-bold text-gray-900">
+                      <p className="text-xs font-bold text-gray-900 dark:text-gray-100">
                         {new Date(selectedDay + 'T12:00:00').toLocaleDateString('en-US', {
                           weekday: 'long', month: 'short', day: 'numeric'
                         })}
@@ -279,16 +279,16 @@ export default function Calendar() {
                     <div className="space-y-2">
                       {selectedPosts.map(post => (
                         <Link key={post.id} href={`/queue?date=${selectedDay}`}
-                          className="block p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all">
+                          className="block p-3 bg-gray-50 dark:bg-gray-800 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
                           <div className="flex items-center gap-1 mb-1">
                             {(post.platforms || []).slice(0, 4).map((p: string) => (
                               <span key={p} className="text-sm">{PLATFORM_ICONS[p] || '📱'}</span>
                             ))}
-                            <span className="text-xs text-gray-400 ml-auto">
+                            <span className="text-xs text-gray-400 dark:text-gray-500 ml-auto">
                               {new Date(post.scheduled_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                             </span>
                           </div>
-                          <p className="text-xs text-gray-600 line-clamp-2">{post.content || 'No content'}</p>
+                          <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-2">{post.content || 'No content'}</p>
                           <p className="text-xs text-blue-500 font-semibold mt-1.5">View full day schedule →</p>
                         </Link>
                       ))}
@@ -296,16 +296,16 @@ export default function Calendar() {
                   )}
                 </div>
               ) : (
-                <div className="bg-white border border-gray-100 rounded-2xl p-5 text-center">
+                <div className="bg-surface border border-theme rounded-2xl p-5 text-center">
                   <div className="text-3xl mb-2">📅</div>
-                  <p className="text-xs font-bold text-gray-500 mb-1">Click any day</p>
+                  <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">Click any day</p>
                   <p className="text-xs text-gray-400">to see or add posts for that date</p>
                 </div>
               )}
 
               {/* MONTH STATS */}
-              <div className="bg-white border border-gray-100 rounded-2xl p-5">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-4">{MONTHS[viewMonth]} Stats</p>
+              <div className="bg-surface border border-theme rounded-2xl p-5">
+                <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-4">{MONTHS[viewMonth]} Stats</p>
                 <div className="space-y-3">
                   {[
                     { label: 'Total scheduled',   value: monthPosts.length },
@@ -313,7 +313,7 @@ export default function Calendar() {
                     { label: 'Platforms covered', value: new Set(monthPosts.flatMap(p => p.platforms || [])).size },
                   ].map(stat => (
                     <div key={stat.label} className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500">{stat.label}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">{stat.label}</span>
                       <span className="text-sm font-extrabold">{stat.value}</span>
                     </div>
                   ))}
@@ -321,16 +321,16 @@ export default function Calendar() {
               </div>
 
               {/* SCHEDULING WINDOW */}
-              <div className="bg-white border border-gray-100 rounded-2xl p-5">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Scheduling Window</p>
+              <div className="bg-surface border border-theme rounded-2xl p-5">
+                <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">Scheduling Window</p>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-base">{plan === 'agency' ? '🏢' : plan === 'pro' ? '⚡' : '🔓'}</span>
                   <span className="text-xs font-bold capitalize">{plan} Plan</span>
                 </div>
-                <p className="text-xs text-gray-500 mb-1">
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
                   Schedule up to <span className="font-bold text-black">{forwardLimitLabel}</span> ahead.
                 </p>
-                <p className="text-xs text-gray-300">
+                <p className="text-xs text-gray-300 dark:text-gray-600">
                   Until {limitDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                 </p>
                 {plan !== 'agency' && (
@@ -342,10 +342,10 @@ export default function Calendar() {
               </div>
 
               {/* UPCOMING */}
-              <div className="bg-white border border-gray-100 rounded-2xl p-5">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Upcoming</p>
+              <div className="bg-surface border border-theme rounded-2xl p-5">
+                <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">Upcoming</p>
                 {posts.filter(p => new Date(p.scheduled_at) >= today).slice(0, 4).length === 0 ? (
-                  <p className="text-xs text-gray-400 text-center py-2">No upcoming posts</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-2">No upcoming posts</p>
                 ) : (
                   <div className="space-y-2">
                     {posts.filter(p => new Date(p.scheduled_at) >= today).slice(0, 4).map(post => {
@@ -353,12 +353,12 @@ export default function Calendar() {
                       const dateKey = formatDateKey(d.getFullYear(), d.getMonth(), d.getDate())
                       return (
                         <Link key={post.id} href={`/queue?date=${dateKey}`}
-                          className="block p-2 hover:bg-gray-50 rounded-xl transition-all">
+                          className="block p-2 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-xl transition-all">
                           <div className="flex items-center gap-2">
                             <span className="text-sm flex-shrink-0">{PLATFORM_ICONS[(post.platforms || [])[0]] || '📱'}</span>
                             <div className="flex-1 min-w-0">
                               <p className="text-xs font-semibold truncate">{post.content?.slice(0, 30) || 'No content'}</p>
-                              <p className="text-xs text-gray-400">
+                              <p className="text-xs text-gray-400 dark:text-gray-500">
                                 {d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at {d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                               </p>
                             </div>

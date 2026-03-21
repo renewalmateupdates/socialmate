@@ -155,3 +155,81 @@ export const weeklyDigest = inngest.createFunction(
     return { sent }
   }
 )
+
+// Fetch post engagement metrics 1hr and 24hr after publish
+export const fetchPostAnalytics = inngest.createFunction(
+  { id: 'fetch-post-analytics', retries: 2 },
+  { event: 'post/published' },
+  async ({ event, step }) => {
+    const { postId, platformPostIds } = event.data as {
+      postId: string
+      userId: string
+      platformPostIds: Record<string, string>
+    }
+
+    async function fetchEngagement(): Promise<Record<string, { likes: number; replies: number; reposts: number }>> {
+      const analytics: Record<string, { likes: number; replies: number; reposts: number }> = {}
+
+      // Bluesky — public API, no auth needed
+      const bskyUri = platformPostIds?.bluesky
+      if (bskyUri) {
+        try {
+          const res = await fetch(`https://public.api.bsky.app/xrpc/app.bsky.feed.getPosts?uris=${encodeURIComponent(bskyUri)}`)
+          if (res.ok) {
+            const data = await res.json()
+            const post = data.posts?.[0]
+            if (post) {
+              analytics.bluesky = {
+                likes:   post.likeCount   ?? 0,
+                replies: post.replyCount  ?? 0,
+                reposts: post.repostCount ?? 0,
+              }
+            }
+          }
+        } catch { /* ignore */ }
+      }
+
+      // Mastodon — needs instance URL from user's connected account
+      const mastodonId = platformPostIds?.mastodon
+      if (mastodonId) {
+        try {
+          const { data: account } = await getSupabaseAdmin()
+            .from('connected_accounts')
+            .select('platform_user_id, access_token')
+            .eq('platform', 'mastodon')
+            .single()
+          if (account) {
+            const instance = account.platform_user_id?.split('@')[1]
+            if (instance) {
+              const res = await fetch(`https://${instance}/api/v1/statuses/${mastodonId}`, {
+                headers: { 'Authorization': `Bearer ${account.access_token}` },
+              })
+              if (res.ok) {
+                const data = await res.json()
+                analytics.mastodon = {
+                  likes:   data.favourites_count ?? 0,
+                  replies: data.replies_count    ?? 0,
+                  reposts: data.reblogs_count    ?? 0,
+                }
+              }
+            }
+          }
+        } catch { /* ignore */ }
+      }
+
+      return analytics
+    }
+
+    // Fetch at 1 hour
+    await step.sleepUntil('wait-1hr', new Date(Date.now() + 60 * 60 * 1000))
+    const analytics1h = await step.run('fetch-1hr', fetchEngagement)
+    await getSupabaseAdmin().from('posts').update({ analytics: { ...analytics1h, fetched_at_1h: new Date().toISOString() } }).eq('id', postId)
+
+    // Fetch at 24 hours
+    await step.sleepUntil('wait-24hr', new Date(Date.now() + 23 * 60 * 60 * 1000))
+    const analytics24h = await step.run('fetch-24hr', fetchEngagement)
+    await getSupabaseAdmin().from('posts').update({ analytics: { ...analytics24h, fetched_at_24h: new Date().toISOString() } }).eq('id', postId)
+
+    return { postId, analytics24h }
+  }
+)

@@ -122,8 +122,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
   const params = await searchParams
   const refCode = params?.ref || ''
 
-  // Check if the current user is the admin (server-side, so nothing leaks to the DOM)
-  let isAdmin    = false
+  // Check if user is logged in (server-side)
   let isLoggedIn = false
   try {
     const cookieStore = await cookies()
@@ -138,12 +137,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
       }
     )
     const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      isLoggedIn = true
-      if (user.id === process.env.ADMIN_USER_ID) isAdmin = true
-    }
+    if (user) isLoggedIn = true
   } catch {
-    // If auth check fails, both stay false — safe default
+    // If auth check fails, stays false — safe default
   }
 
   const live    = PLATFORMS.filter(p => p.status === 'live')
@@ -616,13 +612,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
                 {link.label}
               </Link>
             ))}
-            {/* Admin link — only rendered in DOM for admin user */}
-            {isAdmin && (
-              <Link href="/admin/affiliates"
-                className="text-xs text-gray-500 hover:text-white transition-all">
-                Admin
-              </Link>
-            )}
           </nav>
           <p className="text-xs text-gray-600">© 2026 SocialMate</p>
         </div>

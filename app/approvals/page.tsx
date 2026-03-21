@@ -86,7 +86,7 @@ export default function ApprovalsPage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-50">
+      <div className="flex h-screen items-center justify-center bg-theme">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
       </div>
     )
@@ -94,14 +94,14 @@ export default function ApprovalsPage() {
 
   if (plan === 'free') {
     return (
-      <div className="min-h-screen bg-gray-50 flex">
+      <div className="min-h-screen bg-theme flex">
         <Sidebar />
         <main className="md:ml-56 flex-1 p-4 md:p-8">
           <div className="max-w-3xl mx-auto">
-            <div className="bg-white border border-gray-100 rounded-2xl p-10 text-center">
+            <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
               <div className="text-4xl mb-4">✅</div>
               <h1 className="text-xl font-extrabold mb-2">Content Approval Workflows</h1>
-              <p className="text-sm text-gray-400 mb-6 max-w-sm mx-auto leading-relaxed">
+              <p className="text-sm text-gray-400 dark:text-gray-500 mb-6 max-w-sm mx-auto leading-relaxed">
                 Let team members submit posts for admin review before they go live. Available on Pro and Agency plans.
               </p>
               <Link href="/settings?tab=Plan"
@@ -116,7 +116,7 @@ export default function ApprovalsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <main className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
@@ -126,7 +126,7 @@ export default function ApprovalsPage() {
               <span className="text-2xl">✅</span>
               <h1 className="text-2xl font-extrabold tracking-tight">Content Approvals</h1>
             </div>
-            <p className="text-sm text-gray-400">Review posts submitted by team members before they go live.</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500">Review posts submitted by team members before they go live.</p>
           </div>
 
           <div className="grid grid-cols-3 gap-4 mb-8">
@@ -137,16 +137,16 @@ export default function ApprovalsPage() {
             ].map(stat => (
               <div key={stat.label} className={`border rounded-2xl p-5 text-center ${stat.bg}`}>
                 <p className={`text-3xl font-extrabold ${stat.color}`}>{stat.value}</p>
-                <p className="text-xs text-gray-500 font-semibold mt-0.5">{stat.label}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold mt-0.5">{stat.label}</p>
               </div>
             ))}
           </div>
 
-          <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-2xl p-1 mb-6 w-fit">
+          <div className="flex items-center gap-1 bg-surface border border-theme rounded-2xl p-1 mb-6 w-fit">
             {(['pending', 'approved', 'rejected'] as const).map(t => (
               <button key={t} onClick={() => setTab(t)}
                 className={`px-4 py-2 rounded-xl text-xs font-bold capitalize transition-all ${
-                  tab === t ? 'bg-black text-white' : 'text-gray-500 hover:text-black'
+                  tab === t ? 'bg-black text-white' : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
                 }`}>
                 {t} {t === 'pending' && pendingCount > 0 && `(${pendingCount})`}
               </button>
@@ -154,24 +154,24 @@ export default function ApprovalsPage() {
           </div>
 
           {filteredPosts.length === 0 ? (
-            <div className="bg-white border border-gray-100 rounded-2xl p-10 text-center">
+            <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
               <div className="text-4xl mb-3">
                 {tab === 'pending' ? '📭' : tab === 'approved' ? '✅' : '❌'}
               </div>
-              <p className="text-sm font-bold text-gray-700 mb-1">
+              <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
                 {tab === 'pending' ? 'No posts awaiting review' : tab === 'approved' ? 'No approved posts yet' : 'No rejected posts'}
               </p>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-gray-400 dark:text-gray-500">
                 {tab === 'pending' ? 'Team members can submit posts for approval from the Compose page.' : ''}
               </p>
             </div>
           ) : (
             <div className="space-y-4">
               {filteredPosts.map(post => (
-                <div key={post.id} className="bg-white border border-gray-100 rounded-2xl p-5">
+                <div key={post.id} className="bg-surface border border-theme rounded-2xl p-5">
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap line-clamp-4">{post.content}</p>
+                      <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap line-clamp-4">{post.content}</p>
                     </div>
                     <span className={`flex-shrink-0 text-xs font-bold px-2.5 py-1 rounded-full ${
                       post.approval_status === 'approved' ? 'bg-green-100 text-green-700' :
@@ -185,15 +185,15 @@ export default function ApprovalsPage() {
 
                   <div className="flex items-center gap-2 mb-4">
                     {post.platforms?.slice(0, 4).map(p => (
-                      <span key={p} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-semibold">{p}</span>
+                      <span key={p} className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded-full font-semibold">{p}</span>
                     ))}
-                    <span className="text-xs text-gray-400 ml-auto">
+                    <span className="text-xs text-gray-400 dark:text-gray-500 ml-auto">
                       {new Date(post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                     </span>
                   </div>
 
                   {(post.approval_status === 'pending' || post.approval_status === null) && (
-                    <div className="flex items-center gap-2 pt-3 border-t border-gray-50">
+                    <div className="flex items-center gap-2 pt-3 border-t border-theme">
                       <button
                         onClick={() => handleApprove(post)}
                         disabled={acting === post.id}
