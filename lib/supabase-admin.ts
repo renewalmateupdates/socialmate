@@ -2,6 +2,10 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js'
 
 let _adminClient: SupabaseClient | null = null
 
+/**
+ * Returns a singleton Supabase admin client using the service role key.
+ * Lazily initialized so it doesn't fail during Next.js build when env vars aren't present.
+ */
 export function getSupabaseAdmin(): SupabaseClient {
   if (!_adminClient) {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL

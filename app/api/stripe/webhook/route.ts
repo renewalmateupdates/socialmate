@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { createClient } from '@supabase/supabase-js'
@@ -32,7 +33,7 @@ const PRICE_TO_PLAN: Record<string, string> = {
 }
 
 const PLAN_CREDITS: Record<string, number> = {
-  free:   100,
+  free:   50,
   pro:    500,
   agency: 2000,
 }
@@ -42,10 +43,9 @@ const PLAN_MONTHLY_VALUE: Record<string, number> = {
   agency: 20.00,
 }
 
-const REFERRAL_UPGRADE_CREDITS: Record<string, number> = {
-  pro:    50,
-  agency: 100,
-}
+// Stacking credit model: every 5 paying referrals = +100 bonus credits
+const REFERRAL_CREDITS_PER_TIER = 100
+const REFERRAL_TIER_SIZE        = 5
 
 function safeDate(ts: number | null | undefined): string | null {
   if (!ts) return null
@@ -85,7 +85,7 @@ function resolveCreditsOnPlanChange(
   newPlan: string,
   currentCredits: number
 ): number {
-  const newPlanCredits = PLAN_CREDITS[newPlan] ?? 100
+  const newPlanCredits = PLAN_CREDITS[newPlan] ?? 50
   const isUpgrade = (
     (currentPlan === 'free'  && (newPlan === 'pro' || newPlan === 'agency')) ||
     (currentPlan === 'pro'   && newPlan === 'agency')
@@ -102,8 +102,6 @@ async function processReferralCredits(
   isNewSubscription: boolean
 ) {
   if (!isNewSubscription) return
-  const creditsToAward = REFERRAL_UPGRADE_CREDITS[plan]
-  if (!creditsToAward) return
   try {
     const { data: conversion } = await supabase
       .from('referral_conversions')
@@ -112,18 +110,7 @@ async function processReferralCredits(
       .single()
     if (!conversion) return
 
-    const { data: referrerSettings } = await supabase
-      .from('user_settings')
-      .select('ai_credits_remaining')
-      .eq('user_id', conversion.affiliate_user_id)
-      .single()
-    if (!referrerSettings) return
-
-    await supabase
-      .from('user_settings')
-      .update({ ai_credits_remaining: (referrerSettings.ai_credits_remaining ?? 0) + creditsToAward })
-      .eq('user_id', conversion.affiliate_user_id)
-
+    // Count paying referrals for this affiliate (including this new one)
     const { data: allConversions } = await supabase
       .from('referral_conversions')
       .select('status')
@@ -133,6 +120,28 @@ async function processReferralCredits(
       (r: any) => r.status === 'eligible' || r.status === 'paid'
     ).length
 
+    // Stacking model: award 100 credits at each multiple of 5 paying referrals
+    // previousPayingCount was payingCount - 1 (before this referral was counted)
+    const prevCount = payingCount - 1
+    const crossedTier = (
+      Math.floor(payingCount / REFERRAL_TIER_SIZE) > Math.floor(prevCount / REFERRAL_TIER_SIZE)
+    )
+
+    if (crossedTier) {
+      const { data: referrerSettings } = await supabase
+        .from('user_settings')
+        .select('ai_credits_remaining')
+        .eq('user_id', conversion.affiliate_user_id)
+        .single()
+      if (referrerSettings) {
+        await supabase
+          .from('user_settings')
+          .update({ ai_credits_remaining: (referrerSettings.ai_credits_remaining ?? 0) + REFERRAL_CREDITS_PER_TIER })
+          .eq('user_id', conversion.affiliate_user_id)
+      }
+    }
+
+    // Custom domain unlock at 3+ paying referrals
     if (payingCount >= 3) {
       await supabase
         .from('user_settings')
@@ -433,8 +442,8 @@ const creditsToSet = alreadyOnPlan
         white_label_tier:       null,
         stripe_subscription_id: null,
         plan_expires_at:        null,
-        ai_credits_remaining:   100,
-        ai_credits_total:       100,
+        ai_credits_remaining:   50,
+        ai_credits_total:       50,
         ai_credits_reset_at:    new Date().toISOString(),
       })
       .eq('stripe_subscription_id', subscription.id)

@@ -79,7 +79,7 @@ export default function BestTimes() {
   }
 
   const PlatformCard = ({ p }: { p: typeof PLATFORM_AVERAGES[0] }) => (
-    <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-all">
+    <div className="flex items-start gap-3 p-4 bg-gray-50 dark:bg-gray-800 rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
       <span className="text-2xl flex-shrink-0">{p.icon}</span>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
@@ -88,20 +88,20 @@ export default function BestTimes() {
             <span className="text-xs font-bold px-1.5 py-0.5 bg-blue-50 text-blue-500 rounded-full">Soon</span>
           )}
           {p.status === 'planned' && (
-            <span className="text-xs font-bold px-1.5 py-0.5 bg-gray-100 text-gray-400 rounded-full">Planned</span>
+            <span className="text-xs font-bold px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 rounded-full">Planned</span>
           )}
         </div>
-        <p className="text-xs text-gray-500 leading-relaxed">{p.best}</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{p.best}</p>
         <div className="flex items-center gap-1 mt-1.5">
           <span className="text-xs font-bold text-black">🏆 Peak:</span>
-          <span className="text-xs font-semibold text-gray-600">{p.peak}</span>
+          <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">{p.peak}</span>
         </div>
       </div>
     </div>
   )
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-5xl mx-auto">
@@ -109,23 +109,23 @@ export default function BestTimes() {
           {/* HEADER */}
           <div className="mb-8">
             <h1 className="text-2xl font-extrabold tracking-tight">Best Times to Post</h1>
-            <p className="text-sm text-gray-400 mt-0.5">
+            <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">
               Your personal posting heatmap + industry averages for every platform
             </p>
           </div>
 
           {/* PERSONAL HEATMAP */}
-          <div className="bg-white border border-gray-100 rounded-2xl p-5 md:p-6 mb-6">
+          <div className="bg-surface border border-theme rounded-2xl p-5 md:p-6 mb-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
               <div>
                 <h2 className="text-sm font-extrabold">Your Posting Heatmap</h2>
-                <p className="text-xs text-gray-400 mt-0.5">
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                   {postCount > 0
                     ? `Based on ${postCount} scheduled post${postCount !== 1 ? 's' : ''}`
                     : 'Schedule more posts to see your personal pattern'}
                 </p>
               </div>
-              <div className="flex items-center gap-2 text-xs text-gray-400 flex-shrink-0">
+              <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
                 <span>Less</span>
                 {['bg-gray-100', 'bg-black/20', 'bg-black/40', 'bg-black/70', 'bg-black'].map((c, i) => (
                   <div key={i} className={`w-3 h-3 rounded-sm ${c}`} />
@@ -135,11 +135,11 @@ export default function BestTimes() {
             </div>
 
             {loading ? (
-              <div className="bg-gray-100 rounded-xl h-48 animate-pulse" />
+              <div className="bg-gray-100 dark:bg-gray-800 rounded-xl h-48 animate-pulse" />
             ) : postCount < 5 ? (
-              <div className="bg-gray-50 rounded-2xl p-8 text-center">
-                <p className="text-sm font-bold text-gray-400 mb-2">Not enough data yet</p>
-                <p className="text-xs text-gray-400 mb-4">
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-8 text-center">
+                <p className="text-sm font-bold text-gray-400 dark:text-gray-500 mb-2">Not enough data yet</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
                   Schedule at least 5 posts to see your personal heatmap. Use the industry averages below for now.
                 </p>
                 <Link href="/compose"
@@ -155,14 +155,14 @@ export default function BestTimes() {
                   <div className="flex mb-1 ml-10">
                     {HOURS.map((h, i) => (
                       <div key={i} className="flex-1 text-center">
-                        {i % 3 === 0 && <span className="text-xs text-gray-400">{h}</span>}
+                        {i % 3 === 0 && <span className="text-xs text-gray-400 dark:text-gray-500">{h}</span>}
                       </div>
                     ))}
                   </div>
                   {/* Day rows */}
                   {DAYS.map((day, dayIdx) => (
                     <div key={day} className="flex items-center mb-1">
-                      <span className="text-xs text-gray-400 w-10 flex-shrink-0">{day}</span>
+                      <span className="text-xs text-gray-400 dark:text-gray-500 w-10 flex-shrink-0">{day}</span>
                       {HOURS.map((_, hourIdx) => (
                         <div key={hourIdx}
                           className={`flex-1 h-6 rounded-sm mr-0.5 transition-all ${getCellColor(dayIdx, hourIdx)}`}
@@ -177,17 +177,17 @@ export default function BestTimes() {
           </div>
 
           {/* INDUSTRY AVERAGES */}
-          <div className="bg-white border border-gray-100 rounded-2xl p-5 md:p-6">
+          <div className="bg-surface border border-theme rounded-2xl p-5 md:p-6">
             <div className="mb-5">
               <h2 className="text-sm font-extrabold">Industry Averages</h2>
-              <p className="text-xs text-gray-400 mt-0.5">
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                 General best practices — your audience may differ. Use your heatmap when you have enough data.
               </p>
             </div>
 
             <div className="mb-5">
               <div className="flex items-center gap-2 mb-3">
-                <p className="text-xs font-bold text-gray-700 uppercase tracking-wide">Live now</p>
+                <p className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Live now</p>
                 <span className="text-xs font-semibold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">4 platforms</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -197,7 +197,7 @@ export default function BestTimes() {
 
             <div className="mb-5">
               <div className="flex items-center gap-2 mb-3">
-                <p className="text-xs font-bold text-gray-700 uppercase tracking-wide">Coming very soon</p>
+                <p className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Coming very soon</p>
                 <span className="text-xs font-semibold bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">Awaiting approval</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -207,8 +207,8 @@ export default function BestTimes() {
 
             <div>
               <div className="flex items-center gap-2 mb-3">
-                <p className="text-xs font-bold text-gray-700 uppercase tracking-wide">Planned</p>
-                <span className="text-xs font-semibold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">On the roadmap</span>
+                <p className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Planned</p>
+                <span className="text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full">On the roadmap</span>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {PLANNED_PLATFORMS.map(p => <PlatformCard key={p.platform} p={p} />)}

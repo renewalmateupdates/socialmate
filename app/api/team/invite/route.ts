@@ -1,16 +1,13 @@
+export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { Resend } from 'resend'
+function getResend() { return new Resend(process.env.RESEND_API_KEY!) }
 import crypto from 'crypto'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
 const PLAN_SEAT_LIMITS: Record<string, number> = {
   free:   2,
@@ -46,7 +43,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Server-side seat limit check
-  const { data: settings } = await supabaseAdmin
+  const { data: settings } = await getSupabaseAdmin()
     .from('user_settings')
     .select('plan')
     .eq('user_id', user.id)
@@ -56,7 +53,7 @@ export async function POST(request: NextRequest) {
   const seatLimit = PLAN_SEAT_LIMITS[plan] ?? 2
 
   // Count existing members (not counting owner — owner is +1 implicit)
-  const { count: memberCount } = await supabaseAdmin
+  const { count: memberCount } = await getSupabaseAdmin()
     .from('team_members')
     .select('id', { count: 'exact', head: true })
     .eq('owner_id', user.id)
@@ -70,7 +67,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Check not already a member
-  const { data: existing } = await supabaseAdmin
+  const { data: existing } = await getSupabaseAdmin()
     .from('team_members')
     .select('id')
     .eq('owner_id', user.id)
@@ -82,7 +79,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Insert the team member record
-  const { data: member, error: insertError } = await supabaseAdmin
+  const { data: member, error: insertError } = await getSupabaseAdmin()
     .from('team_members')
     .insert({
       owner_id:  user.id,
@@ -103,7 +100,7 @@ export async function POST(request: NextRequest) {
   const token     = crypto.randomBytes(32).toString('hex')
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
 
-  const { error: tokenError } = await supabaseAdmin
+  const { error: tokenError } = await getSupabaseAdmin()
     .from('invite_tokens')
     .insert({
       token,
@@ -122,7 +119,7 @@ export async function POST(request: NextRequest) {
   const appUrl    = process.env.NEXT_PUBLIC_APP_URL!
   const inviteUrl = `${appUrl}/invite?token=${token}`
 
-  const { data: inviterSettings } = await supabaseAdmin
+  const { data: inviterSettings } = await getSupabaseAdmin()
     .from('user_settings')
     .select('display_name')
     .eq('user_id', user.id)
@@ -130,7 +127,7 @@ export async function POST(request: NextRequest) {
 
   const inviterName = inviterSettings?.display_name || user.email
 
-  const { error: emailError } = await resend.emails.send({
+  const { error: emailError } = await getResend().emails.send({
     from:    'SocialMate <hello@socialmate.studio>',
     to:      email.trim(),
     subject: `${inviterName} invited you to join SocialMate`,

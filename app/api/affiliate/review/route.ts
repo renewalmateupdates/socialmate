@@ -1,10 +1,11 @@
+export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { Resend } from 'resend'
+function getResend() { return new Resend(process.env.RESEND_API_KEY!) }
 
-const resend = new Resend(process.env.RESEND_API_KEY)
 
 function getAdminSupabase() {
   return createClient<any>(
@@ -74,7 +75,7 @@ export async function POST(req: NextRequest) {
 
       const referralLink = `${process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate-six.vercel.app'}/?ref=${settings?.referral_code}`
 
-      await resend.emails.send({
+      await getResend().emails.send({
         from: 'SocialMate <hello@socialmate.studio>',
         to: email,
         subject: '🎉 You\'re approved — welcome to the SocialMate Affiliate Program!',
@@ -119,7 +120,7 @@ export async function POST(req: NextRequest) {
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
     if (email) {
-      await resend.emails.send({
+      await getResend().emails.send({
         from: 'SocialMate <hello@socialmate.studio>',
         to: email,
         subject: 'Your SocialMate Affiliate Application',

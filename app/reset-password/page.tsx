@@ -54,8 +54,8 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <div className="border-b border-gray-100 bg-white px-8 py-4">
+    <div className="min-h-screen bg-theme flex flex-col">
+      <div className="border-b border-theme bg-surface px-8 py-4">
         <Link href="/" className="flex items-center gap-2 w-fit">
           <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
           <span className="font-bold text-base tracking-tight">SocialMate</span>
@@ -67,18 +67,18 @@ export default function ResetPassword() {
 
           {/* R2: still checking session */}
           {sessionChecking && (
-            <div className="bg-white border border-gray-100 rounded-3xl p-10 text-center">
+            <div className="bg-surface border border-theme rounded-3xl p-10 text-center">
               <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-sm text-gray-400">Verifying your reset link...</p>
+              <p className="text-sm text-gray-400 dark:text-gray-500">Verifying your reset link...</p>
             </div>
           )}
 
           {/* R2: expired or missing session */}
           {!sessionChecking && !sessionReady && !done && (
-            <div className="bg-white border border-gray-100 rounded-3xl p-10 text-center">
+            <div className="bg-surface border border-theme rounded-3xl p-10 text-center">
               <div className="text-6xl mb-6">⚠️</div>
               <h1 className="text-2xl font-extrabold tracking-tight mb-3">Link expired or invalid</h1>
-              <p className="text-gray-400 text-sm mb-6 leading-relaxed">
+              <p className="text-gray-400 dark:text-gray-500 text-sm mb-6 leading-relaxed">
                 This password reset link has expired or already been used. Reset links are valid for 1 hour.
               </p>
               <Link href="/forgot-password"
@@ -94,10 +94,10 @@ export default function ResetPassword() {
 
           {/* SUCCESS */}
           {done && (
-            <div className="bg-white border border-gray-100 rounded-3xl p-10 text-center">
+            <div className="bg-surface border border-theme rounded-3xl p-10 text-center">
               <div className="text-6xl mb-6">✅</div>
               <h1 className="text-2xl font-extrabold tracking-tight mb-3">Password updated!</h1>
-              <p className="text-gray-400 text-sm">Redirecting you to the dashboard...</p>
+              <p className="text-gray-400 dark:text-gray-500 text-sm">Redirecting you to the dashboard...</p>
             </div>
           )}
 
@@ -106,12 +106,12 @@ export default function ResetPassword() {
             <>
               <div className="text-center mb-8">
                 <h1 className="text-3xl font-extrabold tracking-tight mb-2">Choose a new password</h1>
-                <p className="text-gray-400 text-sm">Must be at least 6 characters</p>
+                <p className="text-gray-400 dark:text-gray-500 text-sm">Must be at least 6 characters</p>
               </div>
-              <div className="bg-white border border-gray-100 rounded-3xl p-8">
+              <div className="bg-surface border border-theme rounded-3xl p-8">
                 <form onSubmit={handleReset} className="space-y-4">
                   <div>
-                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">
+                    <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">
                       New Password
                     </label>
                     <div className="relative">
@@ -121,18 +121,18 @@ export default function ResetPassword() {
                         onChange={e => setPassword(e.target.value)}
                         placeholder="New password"
                         autoFocus
-                        className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 pr-12"
+                        className="w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-gray-400 pr-12"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(p => !p)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-black font-semibold">
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-500 hover:text-black font-semibold">
                         {showPassword ? 'Hide' : 'Show'}
                       </button>
                     </div>
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">
+                    <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">
                       Confirm Password
                     </label>
                     <input
@@ -143,7 +143,7 @@ export default function ResetPassword() {
                       className={`w-full px-4 py-3 text-sm border rounded-xl focus:outline-none transition-colors ${
                         confirmPassword && confirmPassword !== password ? 'border-red-300' :
                         confirmPassword && confirmPassword === password ? 'border-green-300' :
-                        'border-gray-200 focus:border-gray-400'
+                        'border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 focus:border-gray-400'
                       }`}
                     />
                     {confirmPassword && confirmPassword === password && (

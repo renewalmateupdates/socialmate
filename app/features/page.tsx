@@ -336,7 +336,7 @@ export default function Features() {
           <div className="flex items-start justify-between mb-4">
             <div>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">AI Credit Quick Reference</p>
-              <p className="text-sm font-extrabold">12 tools — 100 credits free every month</p>
+              <p className="text-sm font-extrabold">12 tools — 50 credits free every month</p>
             </div>
             <Link href="/pricing" className="text-xs font-bold text-gray-400 hover:text-white transition-all flex-shrink-0">
               See pricing →
@@ -353,7 +353,7 @@ export default function Features() {
               </div>
             ))}
           </div>
-          <p className="text-xs text-gray-500 mt-4">Credits refresh monthly. Unused credits bank — Free banks 150, Pro 750, Agency 3,000.</p>
+          <p className="text-xs text-gray-500 mt-4">Credits refresh monthly. Unused credits bank — Free banks 75, Pro 750, Agency 3,000.</p>
         </div>
 
         {/* CATEGORY FILTER */}
@@ -464,7 +464,7 @@ export default function Features() {
         <div className="bg-black rounded-2xl p-8 text-center text-white">
           <h2 className="text-2xl font-extrabold mb-2">Ready to get started?</h2>
           <p className="text-sm text-gray-400 mb-6 max-w-md mx-auto">
-            All of this — free to start. No credit card required. 100 AI credits activate after your first post.
+            All of this — free to start. No credit card required. 50 AI credits included free every month.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link href="/signup"

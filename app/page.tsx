@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import { cookies } from 'next/headers'
+import { createServerClient } from '@supabase/ssr'
 import ReferralBanner from '@/app/components/ReferralBanner'
 
 const PLATFORMS = [
@@ -21,17 +23,17 @@ const PLATFORMS = [
 ]
 
 const AI_TOOLS = [
-  { name: 'Caption Generator',    emoji: '✍️',  credits: '5 credits',    proOnly: false },
-  { name: 'Hashtag Generator',    emoji: '#️⃣', credits: '5 credits',    proOnly: false },
-  { name: 'Post Rewriter',        emoji: '🔁',  credits: '5 credits',    proOnly: false },
-  { name: 'Viral Hook Generator', emoji: '🎣',  credits: '5 credits',    proOnly: false },
-  { name: 'Thread Generator',     emoji: '🧵',  credits: '10 credits',   proOnly: false },
-  { name: 'Content Repurposer',   emoji: '♻️',  credits: '10 credits',   proOnly: false },
-  { name: 'Post Score',           emoji: '⚡',  credits: '5 credits',    proOnly: false },
-  { name: 'SM-Pulse',             emoji: '🔥',  credits: '20 credits',   proOnly: false },
-  { name: 'SM-Radar',             emoji: '📡',  credits: '20 credits',   proOnly: false },
+  { name: 'Caption Generator',    emoji: '✍️',  credits: '3 credits',    proOnly: false },
+  { name: 'Hashtag Generator',    emoji: '#️⃣', credits: '2 credits',    proOnly: false },
+  { name: 'Post Rewriter',        emoji: '🔁',  credits: '3 credits',    proOnly: false },
+  { name: 'Viral Hook Generator', emoji: '🎣',  credits: '4 credits',    proOnly: false },
+  { name: 'Thread Generator',     emoji: '🧵',  credits: '8 credits',    proOnly: false },
+  { name: 'Content Repurposer',   emoji: '♻️',  credits: '8 credits',    proOnly: false },
+  { name: 'Post Score',           emoji: '⚡',  credits: '2 credits',    proOnly: false },
+  { name: 'SM-Pulse',             emoji: '🔥',  credits: '10 credits',   proOnly: false },
+  { name: 'SM-Radar',             emoji: '📡',  credits: '10 credits',   proOnly: false },
   { name: 'Content Gap Detector', emoji: '🕳️', credits: '10 credits',   proOnly: false },
-  { name: 'AI Content Calendar',  emoji: '📅',  credits: '25 cr · Pro+', proOnly: true  },
+  { name: 'AI Content Calendar',  emoji: '📅',  credits: '20 cr · Pro+', proOnly: true  },
   { name: 'AI Image Generation',  emoji: '🎨',  credits: '25 cr · Pro+', proOnly: true  },
 ]
 
@@ -39,7 +41,7 @@ const FEATURES = [
   {
     icon: '📅',
     title: 'Smart Scheduling',
-    desc: 'Schedule across 16 platforms from one place. Bulk upload, automated queues, and platform-specific character limit enforcement built in.',
+    desc: 'Schedule across 4 live platforms today, with 12 more on the way. Bulk upload, automated queues, and platform-specific character limit enforcement built in.',
   },
   {
     icon: '🤖',
@@ -105,19 +107,40 @@ const COMPARISON = [
 ]
 
 const FOOTER_LINKS = [
-  { label: 'Features',  href: '/features'        },
-  { label: 'Pricing',   href: '/pricing'          },
-  { label: 'Affiliate', href: '/affiliate'        },
-  { label: 'Our Story', href: '/story'            },
-  { label: 'Blog',      href: '/blog'             },
-  { label: 'Privacy',   href: '/privacy'          },
-  { label: 'Terms',     href: '/terms'            },
-  { label: 'Admin',     href: '/admin/affiliates' },
+  { label: 'Features',        href: '/features'  },
+  { label: 'Pricing',         href: '/pricing'   },
+  { label: 'Roadmap',         href: '/roadmap'   },
+  { label: 'Affiliate',       href: '/affiliate' },
+  { label: 'Our Story',       href: '/story'     },
+  { label: 'Blog',            href: '/blog'      },
+  { label: 'Share Feedback',  href: '#feedback'  },
+  { label: 'Privacy',         href: '/privacy'   },
+  { label: 'Terms',           href: '/terms'     },
 ]
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ ref?: string }> }) {
   const params = await searchParams
   const refCode = params?.ref || ''
+
+  // Check if user is logged in (server-side)
+  let isLoggedIn = false
+  try {
+    const cookieStore = await cookies()
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll: () => cookieStore.getAll(),
+          setAll: () => {},
+        },
+      }
+    )
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) isLoggedIn = true
+  } catch {
+    // If auth check fails, stays false — safe default
+  }
 
   const live    = PLATFORMS.filter(p => p.status === 'live')
   const soon    = PLATFORMS.filter(p => p.status === 'soon')
@@ -133,12 +156,13 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
-            <span className="font-bold text-base tracking-tight">SocialMate</span>
+            <span className="font-bold text-base tracking-tight">SocialMate<span className="text-[10px] font-semibold bg-pink-500 text-white px-1.5 py-0.5 rounded-full align-super ml-1">Beta</span></span>
           </Link>
           <nav className="hidden md:flex items-center gap-1">
             {[
               { label: 'Features',  href: '/features'  },
               { label: 'Pricing',   href: '/pricing'   },
+              { label: 'Roadmap',   href: '/roadmap'   },
               { label: 'Platforms', href: '#platforms' },
               { label: 'Our Story', href: '/story'     },
             ].map(link => (
@@ -149,13 +173,22 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
             ))}
           </nav>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm font-semibold text-gray-500 hover:text-black transition-all hidden sm:block">
-              Sign in
-            </Link>
-            <Link href="/signup"
-              className="bg-black text-white text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
-              Get started free →
-            </Link>
+            {isLoggedIn ? (
+              <Link href="/dashboard"
+                className="bg-black text-white text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
+                Dashboard →
+              </Link>
+            ) : (
+              <>
+                <Link href="/login" className="text-sm font-semibold text-gray-500 hover:text-black transition-all hidden sm:block">
+                  Sign in
+                </Link>
+                <Link href="/signup"
+                  className="bg-black text-white text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
+                  Get started free →
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -163,7 +196,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
       {/* HERO */}
       <section className="max-w-4xl mx-auto px-6 pt-24 pb-20 text-center">
         <div className="inline-flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 text-xs font-bold px-4 py-2 rounded-full mb-8">
-          🌱 Free forever · No credit card required · 16 platforms · 12 AI tools
+          🌱 Free forever · No credit card required · 4 live platforms · 12 AI tools
         </div>
         <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight text-gray-900">
           Social media management,{' '}
@@ -172,7 +205,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         <p className="text-gray-500 text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
           The tools charging $99/month for basic scheduling have existed for years.
           SocialMate was built for everyone who decided to stop paying for them —
-          12 AI tools, 16 platforms, bulk scheduling, analytics, and a link in bio page, free to start.
+          12 AI tools, 4 live platforms (12 more coming), bulk scheduling, analytics, and a link in bio page, free to start.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
           <Link href="/signup"
@@ -189,9 +222,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         {/* STATS */}
         <div className="grid grid-cols-3 gap-6 mt-16 max-w-2xl mx-auto">
           {[
-            { value: '16',  label: 'Platforms supported' },
-            { value: '12',  label: 'AI tools included'   },
-            { value: '$0',  label: 'To get started'      },
+            { value: '4',   label: 'platforms live'    },
+            { value: '12',  label: 'AI tools included' },
+            { value: '$0',  label: 'To get started'    },
           ].map(stat => (
             <div key={stat.label} className="text-center">
               <p className="text-4xl font-extrabold tracking-tight">{stat.value}</p>
@@ -246,7 +279,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-10">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Platform support</p>
-            <h2 className="text-3xl font-extrabold tracking-tight mb-3">16 platforms. One dashboard.</h2>
+            <h2 className="text-3xl font-extrabold tracking-tight mb-3">4 live now, 12 coming soon.</h2>
             <p className="text-sm text-gray-500 max-w-lg mx-auto">
               4 platforms live now. LinkedIn, YouTube, Pinterest, and Reddit arriving very soon. 8 more on the roadmap.
             </p>
@@ -299,7 +332,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
             <h2 className="text-3xl font-extrabold tracking-tight mb-3">12 AI tools built in</h2>
             <p className="text-sm text-gray-500 max-w-xl mx-auto">
               Every tool runs on Google Gemini. 50 credits included free every month —
-              no separate AI subscription, no hidden costs.
+              no separate AI subscription, no hidden costs. Credits exist to keep the service sustainable for everyone.
             </p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
@@ -549,7 +582,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         <div className="max-w-3xl mx-auto px-6 text-center">
           <h2 className="text-4xl font-extrabold tracking-tight mb-4">Ready to get started?</h2>
           <p className="text-gray-400 mb-8 text-sm max-w-lg mx-auto">
-            Free forever. No card required. 50 AI credits included. Set up in 60 seconds.
+            Free forever. No card required. 50 AI credits per month, included free. Set up in 60 seconds.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/signup"
@@ -575,9 +608,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
           <nav className="flex items-center gap-5 flex-wrap">
             {FOOTER_LINKS.map(link => (
               <Link key={link.label} href={link.href}
-                className={`text-xs hover:text-white transition-all ${
-                  link.label === 'Admin' ? 'text-black select-none' : 'text-gray-500'
-                }`}>
+                className="text-xs text-gray-500 hover:text-white transition-all">
                 {link.label}
               </Link>
             ))}

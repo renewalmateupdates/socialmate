@@ -1,9 +1,10 @@
+export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { Resend } from 'resend'
+function getResend() { return new Resend(process.env.RESEND_API_KEY!) }
 
-const resend = new Resend(process.env.RESEND_API_KEY!)
 
 export async function POST(req: NextRequest) {
   const cookieStore = await cookies()
@@ -44,7 +45,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Email notification to you
-  await resend.emails.send({
+  await getResend().emails.send({
     from: 'SocialMate <hello@socialmate.studio>',
     to: 'renewalmate.updates@gmail.com',
     subject: `[${type.toUpperCase()}] New feedback from ${user?.email ?? 'anonymous'}`,

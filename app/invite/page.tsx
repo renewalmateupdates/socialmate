@@ -45,8 +45,8 @@ function InviteInner() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl border border-gray-100 p-8 max-w-md w-full text-center shadow-sm">
+    <div className="min-h-screen bg-theme flex items-center justify-center p-4">
+      <div className="bg-surface rounded-2xl border border-theme p-8 max-w-md w-full text-center shadow-sm">
 
         {status === 'loading' && (
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto" />
@@ -56,14 +56,14 @@ function InviteInner() {
           <>
             <div className="w-16 h-16 bg-black rounded-2xl flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6">S</div>
             <h1 className="text-2xl font-extrabold mb-2">You're invited!</h1>
-            <p className="text-gray-500 text-sm mb-6 leading-relaxed">
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-6 leading-relaxed">
               {user
                 ? 'Accept this invitation to join the workspace as a team member.'
                 : 'Sign in or create an account to accept this invitation.'}
             </p>
             {user && (
-              <p className="text-xs text-gray-400 mb-6">
-                Accepting as <span className="font-semibold text-gray-700">{user.email}</span>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mb-6">
+                Accepting as <span className="font-semibold text-gray-700 dark:text-gray-300">{user.email}</span>
               </p>
             )}
             <button onClick={handleAccept}
@@ -76,7 +76,7 @@ function InviteInner() {
         {status === 'accepting' && (
           <>
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto mb-4" />
-            <p className="text-gray-500 text-sm">Accepting invitation...</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">Accepting invitation...</p>
           </>
         )}
 
@@ -84,7 +84,7 @@ function InviteInner() {
           <>
             <div className="text-4xl mb-4">🎉</div>
             <h2 className="text-xl font-extrabold mb-2">You're in!</h2>
-            <p className="text-gray-500 text-sm">Redirecting you to the dashboard...</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">Redirecting you to the dashboard...</p>
           </>
         )}
 
@@ -92,7 +92,7 @@ function InviteInner() {
           <>
             <div className="text-4xl mb-4">❌</div>
             <h2 className="text-xl font-extrabold mb-2">Invalid Invite</h2>
-            <p className="text-gray-500 text-sm mb-6">{errorMsg}</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">{errorMsg}</p>
             <Link href="/login" className="text-sm font-semibold text-black underline">
               Go to login
             </Link>
@@ -106,7 +106,7 @@ function InviteInner() {
 export default function InvitePage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-theme flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
       </div>
     }>

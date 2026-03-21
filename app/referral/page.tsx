@@ -5,44 +5,44 @@ import PublicLayout from '@/components/PublicLayout'
 const SIGNUP_REWARDS = [
   { trigger: 'They publish their first post', reward: '+10 credits',  note: 'Both you and your referral receive +10 credits'          },
   { trigger: 'They upgrade to Pro',           reward: '+50 credits',  note: 'Credited after 7-day hold to protect against refunds'    },
-  { trigger: 'They upgrade to Agency',        reward: '+100 credits', note: 'Credited after 7-day hold to protect against refunds'    },
+  { trigger: 'They upgrade to Agency',        reward: '+50 credits',  note: 'Credited after 7-day hold to protect against refunds'    },
 ]
 
 const TIERS = [
   {
     paying: 5,
-    reward: '1 month Pro free',
+    reward: '+100 bonus credits',
     icon: '🎁',
-    desc: 'Your next billing cycle is on us',
+    desc: 'Every 5 paying referrals earns you +100 bonus credits, forever.',
     conditional: false,
   },
   {
     paying: 10,
-    reward: '3 months Pro free',
+    reward: '+100 bonus credits',
     icon: '⭐',
-    desc: 'A full quarter covered',
+    desc: 'Every 5 paying referrals earns you +100 bonus credits, forever.',
+    conditional: false,
+  },
+  {
+    paying: 15,
+    reward: '+100 bonus credits',
+    icon: '🚀',
+    desc: 'Every 5 paying referrals earns you +100 bonus credits, forever.',
+    conditional: false,
+  },
+  {
+    paying: 20,
+    reward: '+100 bonus credits',
+    icon: '💎',
+    desc: 'Every 5 paying referrals earns you +100 bonus credits, forever.',
     conditional: false,
   },
   {
     paying: 25,
-    reward: '6 months Pro free',
-    icon: '🚀',
-    desc: 'Half a year free — you\'ve earned it',
-    conditional: false,
-  },
-  {
-    paying: 50,
-    reward: 'Pro free while active',
-    icon: '💎',
-    desc: 'Pro is free as long as you maintain 50+ active referrals',
-    conditional: true,
-  },
-  {
-    paying: 100,
-    reward: 'Pro free while active',
+    reward: '+100 bonus credits',
     icon: '👑',
-    desc: 'Pro is free as long as you maintain 100+ active referrals',
-    conditional: true,
+    desc: 'Every 5 paying referrals earns you +100 bonus credits, forever.',
+    conditional: false,
   },
 ]
 
@@ -65,19 +65,19 @@ const FAQ = [
   },
   {
     q: 'Do tier rewards stack?',
-    a: 'Yes. If you hit 10 paying referrals after already claiming the 5-referral reward, you receive the additional 2 months on top. Each tier is incremental.',
+    a: 'Yes. Every 5 paying referrals earns you +100 bonus credits. Reach 10, earn another +100. Reach 15, earn another +100. Credits accumulate with no cap.',
   },
   {
-    q: 'What happens to conditional rewards if referrals drop?',
-    a: 'If your active referral count drops below the required threshold, the free Pro benefit pauses until you\'re back above it. Credits and previously earned free months are never taken away.',
+    q: 'When do milestone credits arrive?',
+    a: 'Bonus credits are credited automatically once your paying referral count crosses each multiple of 5. They\'re added to your AI credit balance and never expire.',
   },
   {
     q: 'What\'s the difference between referrals and the affiliate program?',
     a: 'The referral program is for everyone — earn credits and free Pro by sharing your link. The affiliate program is an application-based program for creators and marketers who want to earn cash commissions instead.',
   },
   {
-    q: 'What happens to my free Pro months if I\'m already on Pro?',
-    a: 'Free months are applied as billing credits to your account, extending your subscription at no cost.',
+    q: 'Do bonus credits expire?',
+    a: 'No. Milestone bonus credits are added permanently to your AI credit balance and never expire. They work exactly like regular AI credits.',
   },
 ]
 
@@ -190,7 +190,7 @@ export default function Referral() {
             ))}
           </div>
           <p className="text-xs text-gray-400 mt-4 pt-4 border-t border-gray-50">
-            Tiers 1–3 are permanent once earned. Tiers 4–5 remain active as long as you maintain the required number of active paying referrals.
+            All milestone rewards are permanent. Every 5 paying referrals earns you +100 bonus credits with no cap or expiry.
           </p>
         </div>
 

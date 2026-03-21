@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 import ThemeToggle from '@/components/ThemeToggle'
+import ComposeShortcut from '@/components/ComposeShortcut'
 
 const STRIPE_PRO_PRICE_ID    = 'price_1T9pay7OMwDowUuU7S3G3lNX'
 const STRIPE_AGENCY_PRICE_ID = 'price_1T9qAd7OMwDowUuUpzjxLlG2'
@@ -43,6 +44,7 @@ const NAV_BASE = [
       { icon: '📬', label: 'Social Inbox', href: '/social-inbox'           },
       { icon: '🎁', label: 'Referrals',    href: '/settings?tab=Referrals' },
       { icon: '🤝', label: 'Affiliate',    href: '/affiliate'              },
+      { icon: '🗺️', label: 'Roadmap',      href: '/roadmap'                },
     ],
   },
   {
@@ -68,14 +70,14 @@ const NAV_BASE = [
 ]
 
 const PLAN_BADGE: Record<string, { label: string; color: string }> = {
-  free:   { label: 'Free',   color: 'bg-gray-100 text-gray-500'     },
-  pro:    { label: 'Pro',    color: 'bg-blue-100 text-blue-600'     },
-  agency: { label: 'Agency', color: 'bg-purple-100 text-purple-600' },
+  free:   { label: 'Free',   color: 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'         },
+  pro:    { label: 'Pro',    color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400'       },
+  agency: { label: 'Agency', color: 'bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-400' },
 }
 
 function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
-  const [user, setUser]                     = useState<any>(null)
-  const [wsOpen, setWsOpen]                 = useState(false)
+  const [user, setUser]                         = useState<any>(null)
+  const [wsOpen, setWsOpen]                     = useState(false)
   const [showUpgradeNudge, setShowUpgradeNudge] = useState(false)
   const [checkoutLoading, setCheckoutLoading]   = useState(false)
   const pathname = usePathname()
@@ -135,9 +137,13 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
     return group
   })
 
-  const badge      = PLAN_BADGE[plan] || PLAN_BADGE.free
-  const creditsBar = creditsTotal > 0 ? Math.max(0, Math.min((credits / creditsTotal) * 100, 100)) : 0
-  const seatsBar   = seatsTotal   > 0 ? Math.min(100, (seatsUsed / seatsTotal) * 100) : 0
+  const badge          = PLAN_BADGE[plan] || PLAN_BADGE.free
+  const monthlyCredits = PLAN_CONFIG[plan]?.credits ?? 50
+  const monthlyRemaining = Math.min(credits, monthlyCredits)
+  const bankedCredits  = Math.max(0, credits - monthlyCredits)
+  const creditsBar     = monthlyCredits > 0 ? Math.max(0, Math.min((monthlyRemaining / monthlyCredits) * 100, 100)) : 0
+  const creditBarColor = monthlyRemaining < 10 ? 'bg-red-400' : monthlyRemaining < 20 ? 'bg-yellow-400' : 'bg-emerald-400'
+  const seatsBar       = seatsTotal > 0 ? Math.min(100, (seatsUsed / seatsTotal) * 100) : 0
 
   const isActive = (href: string) => {
     const base = href.split('?')[0]
@@ -145,15 +151,14 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   }
 
   return (
-    <div className="w-56 bg-white border-r border-gray-100 flex flex-col h-full">
+    <div className="w-56 bg-sidebar border-r border-theme flex flex-col h-full" style={{ backgroundColor: 'var(--sidebar-bg)', borderColor: 'var(--border)' }}>
 
       {/* HEADER */}
-      <div className="p-4 border-b border-gray-100 flex-shrink-0">
+      <div className="p-4 flex-shrink-0" style={{ borderBottom: '1px solid var(--border)' }}>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
-            <span className="font-bold text-base tracking-tight">SocialMate</span>
-            <span className="text-xs font-bold px-1.5 py-0.5 bg-pink-100 text-pink-600 rounded-full">Beta</span>
+            <div className="w-7 h-7 bg-black dark:bg-white rounded-lg flex items-center justify-center text-white dark:text-black text-sm font-bold">S</div>
+            <span className="font-bold text-base tracking-tight" style={{ color: 'var(--text)' }}>SocialMate<span className="text-[10px] font-semibold bg-pink-500 text-white px-1.5 py-0.5 rounded-full align-super ml-1">Beta</span></span>
           </div>
           <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${badge.color}`}>
             {badge.label}
@@ -164,42 +169,48 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
         <div className="relative">
           <button
             onClick={() => { setWsOpen(p => !p); setShowUpgradeNudge(false) }}
-            className="w-full flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl text-xs font-semibold text-gray-700 hover:border-gray-300 transition-all">
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all"
+            style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text-muted)' }}>
             <div className="flex items-center gap-2 min-w-0">
               <span className="text-base">{activeWorkspace?.is_personal ? '🏠' : '🏢'}</span>
               <span className="truncate">{activeWorkspace?.name || 'My Workspace'}</span>
             </div>
-            <span className="text-gray-400 flex-shrink-0 ml-1">{wsOpen ? '▲' : '▼'}</span>
+            <span className="flex-shrink-0 ml-1" style={{ color: 'var(--text-faint)' }}>{wsOpen ? '▲' : '▼'}</span>
           </button>
 
           {wsOpen && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-100 rounded-xl shadow-lg z-50 overflow-hidden">
+            <div className="absolute top-full left-0 right-0 mt-1 rounded-xl shadow-lg z-50 overflow-hidden"
+              style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
               {personalWorkspace && (
                 <button
                   onClick={() => { setActiveWorkspace(personalWorkspace); setWsOpen(false) }}
-                  className={`w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-left hover:bg-gray-50 transition-all ${
-                    activeWorkspace?.id === personalWorkspace.id ? 'bg-gray-50 text-black' : 'text-gray-600'
-                  }`}>
+                  className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-left transition-all hover:opacity-80"
+                  style={{
+                    background: activeWorkspace?.id === personalWorkspace.id ? 'var(--bg)' : 'transparent',
+                    color: activeWorkspace?.id === personalWorkspace.id ? 'var(--text)' : 'var(--text-muted)',
+                  }}>
                   <span>🏠</span>
                   <span className="truncate">My Workspace</span>
-                  {activeWorkspace?.id === personalWorkspace.id && <span className="ml-auto text-black">✓</span>}
+                  {activeWorkspace?.id === personalWorkspace.id && <span className="ml-auto" style={{ color: 'var(--text)' }}>✓</span>}
                 </button>
               )}
 
               {(plan === 'pro' || plan === 'agency') && clientWorkspaces.length > 0 && (
                 <>
-                  <div className="px-3 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-widest border-t border-gray-50">
+                  <div className="px-3 py-1.5 text-xs font-bold uppercase tracking-widest" style={{ borderTop: '1px solid var(--border)', color: 'var(--text-faint)' }}>
                     Clients
                   </div>
                   {clientWorkspaces.map((ws: any) => (
                     <button key={ws.id}
                       onClick={() => { setActiveWorkspace(ws); setWsOpen(false) }}
-                      className={`w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-left hover:bg-gray-50 transition-all ${
-                        activeWorkspace?.id === ws.id ? 'bg-gray-50 text-black' : 'text-gray-600'
-                      }`}>
+                      className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-left transition-all hover:opacity-80"
+                      style={{
+                        background: activeWorkspace?.id === ws.id ? 'var(--bg)' : 'transparent',
+                        color: activeWorkspace?.id === ws.id ? 'var(--text)' : 'var(--text-muted)',
+                      }}>
                       <span>🏢</span>
                       <span className="truncate">{ws.client_name || ws.name}</span>
-                      {activeWorkspace?.id === ws.id && <span className="ml-auto text-black">✓</span>}
+                      {activeWorkspace?.id === ws.id && <span className="ml-auto" style={{ color: 'var(--text)' }}>✓</span>}
                     </button>
                   ))}
                 </>
@@ -207,25 +218,29 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
 
               {plan === 'pro' && !atWsLimit && (
                 <Link href="/workspaces/new" onClick={() => setWsOpen(false)}
-                  className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-gray-400 hover:text-black hover:bg-gray-50 transition-all border-t border-gray-50">
+                  className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold transition-all hover:opacity-80"
+                  style={{ borderTop: '1px solid var(--border)', color: 'var(--text-faint)', display: 'flex' }}>
                   <span>+</span> Add client workspace
                 </Link>
               )}
               {plan === 'pro' && atWsLimit && (
                 <Link href="/settings?tab=Plan" onClick={() => setWsOpen(false)}
-                  className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-blue-500 hover:bg-blue-50 transition-all border-t border-gray-50">
+                  className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-blue-500 hover:opacity-80 transition-all"
+                  style={{ borderTop: '1px solid var(--border)', display: 'flex' }}>
                   <span>⚡</span> Upgrade for more workspaces
                 </Link>
               )}
               {plan === 'agency' && !atWsLimit && (
                 <Link href="/workspaces/new" onClick={() => setWsOpen(false)}
-                  className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-gray-400 hover:text-black hover:bg-gray-50 transition-all border-t border-gray-50">
+                  className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold transition-all hover:opacity-80"
+                  style={{ borderTop: '1px solid var(--border)', color: 'var(--text-faint)', display: 'flex' }}>
                   <span>+</span> Add client workspace
                 </Link>
               )}
               {plan === 'agency' && atWsLimit && (
                 <a href="mailto:support@socialmate.studio" onClick={() => setWsOpen(false)}
-                  className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-purple-500 hover:bg-purple-50 transition-all border-t border-gray-50">
+                  className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-purple-500 hover:opacity-80 transition-all"
+                  style={{ borderTop: '1px solid var(--border)', display: 'flex' }}>
                   <span>✉️</span> Contact us for more
                 </a>
               )}
@@ -233,21 +248,22 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
                 <>
                   <button
                     onClick={() => setShowUpgradeNudge(p => !p)}
-                    className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-purple-500 hover:bg-purple-50 transition-all border-t border-gray-50">
+                    className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-purple-500 hover:opacity-80 transition-all"
+                    style={{ borderTop: '1px solid var(--border)' }}>
                     <span>🏢</span>
                     <span>Client workspaces</span>
                     <span className="ml-auto text-purple-300 text-xs">Pro+</span>
                   </button>
                   {showUpgradeNudge && (
-                    <div className="px-3 py-3 bg-purple-50 border-t border-purple-100">
-                      <p className="text-xs text-purple-700 font-semibold mb-1">Client workspaces</p>
-                      <p className="text-xs text-purple-500 mb-2 leading-relaxed">
+                    <div className="px-3 py-3 bg-purple-50 dark:bg-purple-900/20" style={{ borderTop: '1px solid var(--border)' }}>
+                      <p className="text-xs text-purple-700 dark:text-purple-300 font-semibold mb-1">Client workspaces</p>
+                      <p className="text-xs text-purple-500 dark:text-purple-400 mb-2 leading-relaxed">
                         1 client workspace on Pro. Up to 5 on Agency.
                       </p>
                       <button
                         onClick={() => { setWsOpen(false); handleCheckout(STRIPE_PRO_PRICE_ID) }}
                         disabled={checkoutLoading}
-                        className="w-full text-center bg-black text-white text-xs font-bold px-3 py-1.5 rounded-lg hover:opacity-80 transition-all disabled:opacity-60">
+                        className="w-full text-center bg-black dark:bg-white text-white dark:text-black text-xs font-bold px-3 py-1.5 rounded-lg hover:opacity-80 transition-all disabled:opacity-60">
                         {checkoutLoading ? 'Loading...' : 'Upgrade to Pro →'}
                       </button>
                     </div>
@@ -263,7 +279,8 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
       <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
         {NAV.map((group, gi) => (
           <div key={group.section}>
-            <div className={`text-xs font-extrabold text-gray-600 uppercase tracking-widest px-3 py-2 mt-1 ${gi > 0 ? 'border-t border-gray-100' : ''}`}>
+            <div className={`text-xs font-extrabold uppercase tracking-widest px-3 py-2 mt-1 ${gi > 0 ? '' : ''}`}
+              style={{ color: 'var(--text-muted)', borderTop: gi > 0 ? '1px solid var(--border)' : 'none' }}>
               {group.section}
             </div>
             {group.items.map(item => {
@@ -271,10 +288,21 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
               return (
                 <Link key={item.label} href={item.href}
                   onClick={onNavClick}
-                  className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                    active ? 'bg-gray-100 text-black font-bold' : 'text-gray-500 hover:bg-gray-50 hover:text-black'
-                  }`}>
-                  <span>{item.icon}</span>{item.label}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
+                  style={{
+                    background: active ? 'var(--bg)' : 'transparent',
+                    color:      active ? 'var(--text)' : 'var(--text-muted)',
+                    fontWeight: active ? '700' : '500',
+                  }}>
+                  <span>{item.icon}</span>
+                  <span className="flex-1">{item.label}</span>
+                  {item.href === '/ai-features' && !loading && (
+                    <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${
+                      monthlyRemaining < 10 ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400' :
+                      monthlyRemaining < 20 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400' :
+                      'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
+                    }`}>{monthlyRemaining}</span>
+                  )}
                 </Link>
               )
             })}
@@ -283,43 +311,46 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
       </nav>
 
       {/* BOTTOM STATS */}
-      <div className="p-3 border-t border-gray-100 space-y-2.5 flex-shrink-0">
-        <div className="bg-gray-50 rounded-xl p-3">
+      <div className="p-3 space-y-2.5 flex-shrink-0" style={{ borderTop: '1px solid var(--border)' }}>
+        <div className="rounded-xl p-3" style={{ background: 'var(--bg)' }}>
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs font-semibold text-gray-500">AI Credits</span>
-            <span className="text-xs font-bold text-gray-700">
-              {loading ? '...' : `${credits}/${creditsTotal}`}
+            <span className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>AI Credits</span>
+            <span className="text-xs font-bold" style={{ color: 'var(--text)' }}>
+              {loading ? '...' : `${monthlyRemaining} left`}
             </span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-1.5">
-            <div className={`h-1.5 rounded-full transition-all ${
-              creditsBar < 20 ? 'bg-red-400' : creditsBar < 50 ? 'bg-yellow-400' : 'bg-black'
-            }`} style={{ width: `${creditsBar}%` }} />
+          <div className="w-full rounded-full h-1.5" style={{ background: 'var(--border-mid)' }}>
+            <div className={`h-1.5 rounded-full transition-all ${creditBarColor}`} style={{ width: `${creditsBar}%` }} />
           </div>
-          <p className="text-xs text-gray-400 mt-1">
-            {loading ? 'Loading...' : `${credits} remaining`}
+          <p className="text-xs mt-1" style={{ color: 'var(--text-faint)' }}>
+            {loading ? 'Loading...' : `of ${monthlyCredits} this month`}
           </p>
+          {!loading && bankedCredits > 0 && (
+            <p className="text-xs mt-0.5 font-semibold" style={{ color: 'var(--text-faint)' }}>
+              Bank: {bankedCredits} saved
+            </p>
+          )}
         </div>
 
-        <div className="bg-gray-50 rounded-xl p-3">
+        <div className="rounded-xl p-3" style={{ background: 'var(--bg)' }}>
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs font-semibold text-gray-500">Team Seats</span>
-            <span className="text-xs font-bold text-gray-700">
+            <span className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>Team Seats</span>
+            <span className="text-xs font-bold" style={{ color: 'var(--text)' }}>
               {loading ? '...' : `${seatsUsed}/${seatsTotal}`}
             </span>
           </div>
-          <div className="w-full bg-gray-200 rounded-full h-1.5">
-            <div className={`h-1.5 rounded-full transition-all ${seatsUsed >= seatsTotal ? 'bg-red-400' : 'bg-black'}`}
+          <div className="w-full rounded-full h-1.5" style={{ background: 'var(--border-mid)' }}>
+            <div className={`h-1.5 rounded-full transition-all ${seatsUsed >= seatsTotal ? 'bg-red-400' : 'bg-black dark:bg-white'}`}
               style={{ width: `${seatsBar}%` }} />
           </div>
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-xs mt-1" style={{ color: 'var(--text-faint)' }}>
             {loading ? 'Loading...' : `${seatsTotal - seatsUsed} seat${seatsTotal - seatsUsed !== 1 ? 's' : ''} left`}
           </p>
         </div>
 
         {plan === 'free' && (
           <button onClick={() => handleCheckout(STRIPE_PRO_PRICE_ID)} disabled={checkoutLoading}
-            className="w-full text-center bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
+            className="w-full text-center bg-black dark:bg-white text-white dark:text-black text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
             {checkoutLoading ? 'Loading...' : '⚡ Upgrade to Pro — $5/mo'}
           </button>
         )}
@@ -334,9 +365,10 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
         <ThemeToggle />
 
         <div className="px-1 pt-1">
-          <div className="text-xs text-gray-400 truncate mb-1">{user?.email}</div>
+          <div className="text-xs truncate mb-1" style={{ color: 'var(--text-faint)' }}>{user?.email}</div>
           <button onClick={handleSignOut}
-            className="text-xs text-gray-400 hover:text-black transition-all">
+            className="text-xs transition-all hover:opacity-80"
+            style={{ color: 'var(--text-faint)' }}>
             Sign out
           </button>
         </div>
@@ -350,29 +382,42 @@ export default function Sidebar() {
 
   return (
     <>
+      <ComposeShortcut />
+      {/* Mobile hamburger button */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="md:hidden fixed top-4 left-4 z-50 w-9 h-9 bg-white border border-gray-200 rounded-xl flex items-center justify-center shadow-sm hover:border-gray-400 transition-all">
+        className="md:hidden fixed top-4 left-4 z-50 w-9 h-9 rounded-xl flex items-center justify-center shadow-sm transition-all hover:opacity-80"
+        style={{ background: 'var(--surface)', border: '1px solid var(--border-mid)' }}
+        aria-label="Open navigation menu">
         <span className="text-lg">☰</span>
       </button>
 
+      {/* Mobile backdrop */}
       {mobileOpen && (
-        <div className="md:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
-          onClick={() => setMobileOpen(false)} />
+        <div
+          className="md:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+          onClick={() => setMobileOpen(false)}
+          aria-hidden="true"
+        />
       )}
 
+      {/* Mobile drawer */}
       <div className={`md:hidden fixed top-0 left-0 z-50 h-full overflow-y-auto transition-transform duration-300 ${
         mobileOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="relative">
-          <button onClick={() => setMobileOpen(false)}
-            className="absolute top-3 right-3 z-10 w-7 h-7 bg-gray-100 rounded-lg flex items-center justify-center text-xs font-bold text-gray-500 hover:bg-gray-200 transition-all">
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="absolute top-3 right-3 z-10 w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all hover:opacity-80"
+            style={{ background: 'var(--bg)', color: 'var(--text-muted)' }}
+            aria-label="Close navigation menu">
             ✕
           </button>
           <SidebarContent onNavClick={() => setMobileOpen(false)} />
         </div>
       </div>
 
+      {/* Desktop sidebar */}
       <div className="hidden md:block fixed left-0 top-0 h-screen z-40 overflow-y-auto">
         <SidebarContent />
       </div>

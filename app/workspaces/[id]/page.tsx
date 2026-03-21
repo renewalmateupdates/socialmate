@@ -137,7 +137,7 @@ export default function WorkspaceEdit() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex">
+      <div className="min-h-screen bg-theme flex">
         <Sidebar />
         <div className="md:ml-56 flex-1 p-4 md:p-8">
           <div className="max-w-2xl mx-auto space-y-4">
@@ -158,7 +158,7 @@ export default function WorkspaceEdit() {
   ]
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-2xl mx-auto">
@@ -203,7 +203,7 @@ export default function WorkspaceEdit() {
               { label: 'Platforms', value: `${selectedPlatforms.length} selected`,                icon: '📱' },
               { label: 'Status',    value: isActive ? 'Active' : 'Inactive',                     icon: isActive ? '🟢' : '⚪' },
             ].map(stat => (
-              <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-4">
+              <div key={stat.label} className="bg-surface border border-theme rounded-2xl p-4">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{stat.label}</span>
                   <span>{stat.icon}</span>
@@ -228,7 +228,7 @@ export default function WorkspaceEdit() {
 
           {/* TAB: DETAILS */}
           {tab === 'details' && (
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 md:p-6 space-y-5">
+            <div className="bg-surface border border-theme rounded-2xl p-5 md:p-6 space-y-5">
               <div>
                 <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-1.5">
                   Client Name <span className="text-red-400">*</span>
@@ -299,7 +299,7 @@ export default function WorkspaceEdit() {
 
           {/* TAB: PLATFORMS */}
           {tab === 'platforms' && (
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 md:p-6">
+            <div className="bg-surface border border-theme rounded-2xl p-5 md:p-6">
               <h2 className="text-sm font-extrabold mb-1">Client Platforms</h2>
               <p className="text-xs text-gray-400 mb-5">
                 Select the platforms this client is active on. This helps pre-fill compose options when this workspace is active.
@@ -339,7 +339,7 @@ export default function WorkspaceEdit() {
 
           {/* TAB: NOTES */}
           {tab === 'notes' && (
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 md:p-6">
+            <div className="bg-surface border border-theme rounded-2xl p-5 md:p-6">
               <div className="flex items-center justify-between mb-1">
                 <h2 className="text-sm font-extrabold">Internal Notes</h2>
                 <span className="text-xs text-gray-400 font-medium">Not visible to client</span>

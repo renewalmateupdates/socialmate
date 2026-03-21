@@ -212,15 +212,15 @@ function ToolCard({ tool, plan }: { tool: any; plan: string }) {
   const isLocked = tool.proOnly && plan === 'free'
 
   const inner = (
-    <div className={`bg-white border rounded-2xl p-5 transition-all group ${
+    <div className={`bg-surface border rounded-2xl p-5 transition-all group ${
       isLocked
-        ? 'border-gray-100 opacity-60'
-        : 'border-gray-100 hover:border-gray-300 hover:shadow-sm cursor-pointer'
+        ? 'border-theme opacity-60'
+        : 'border-theme hover:border-gray-300 hover:shadow-sm cursor-pointer'
     }`}>
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
           <span className="text-2xl">{tool.emoji}</span>
-          <p className="text-sm font-extrabold text-gray-900">{tool.label}</p>
+          <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">{tool.label}</p>
           {tool.proOnly && (
             <span className="text-xs font-bold px-2 py-0.5 bg-purple-50 text-purple-600 rounded-full">Pro+</span>
           )}
@@ -235,12 +235,12 @@ function ToolCard({ tool, plan }: { tool: any; plan: string }) {
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">What it does</p>
-          <p className="text-xs text-gray-600 leading-relaxed">{tool.what}</p>
+          <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">What it does</p>
+          <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{tool.what}</p>
         </div>
         <div>
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">How it works</p>
-          <p className="text-xs text-gray-500 leading-relaxed">{tool.how}</p>
+          <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">How it works</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{tool.how}</p>
         </div>
       </div>
       {!isLocked && tool.href && (
@@ -268,7 +268,7 @@ function ToolCard({ tool, plan }: { tool: any; plan: string }) {
 function Section({ title, tools, plan }: { title: string; tools: any[]; plan: string }) {
   return (
     <div className="mb-10">
-      <h2 className="text-base font-extrabold text-gray-900 mb-4">{title}</h2>
+      <h2 className="text-base font-extrabold text-gray-900 dark:text-gray-100 mb-4">{title}</h2>
       <div className="space-y-3">
         {tools.map(tool => <ToolCard key={tool.label} tool={tool} plan={plan} />)}
       </div>
@@ -290,30 +290,30 @@ export default function AIFeaturesPage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-50">
+      <div className="flex h-screen items-center justify-center bg-theme">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
-      <main className="ml-56 flex-1 p-8">
+      <main className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
 
           <div className="flex items-start justify-between mb-8">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">AI Features</h1>
-              <p className="text-sm text-gray-400 mt-1">All the tools available in your SocialMate account</p>
+              <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">All the tools available in your SocialMate account</p>
             </div>
             <div className={`text-right px-4 py-3 rounded-2xl border ${
               plan === 'agency' ? 'bg-purple-50 border-purple-100' :
               plan === 'pro'    ? 'bg-blue-50 border-blue-100'     :
               'bg-gray-50 border-gray-200'
             }`}>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wide">AI Credits</p>
-              <p className="text-xl font-extrabold text-gray-900">{credits} <span className="text-sm font-semibold text-gray-400">/ {creditsTotal}</span></p>
+              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">AI Credits</p>
+              <p className="text-xl font-extrabold text-gray-900 dark:text-gray-100">{credits} <span className="text-sm font-semibold text-gray-400 dark:text-gray-500">/ {creditsTotal}</span></p>
               {plan === 'free' && (
                 <Link href="/settings?tab=Plan" className="text-xs font-bold text-black hover:underline">
                   Get more credits →
@@ -322,7 +322,7 @@ export default function AIFeaturesPage() {
             </div>
           </div>
 
-          <div className="bg-black text-white rounded-2xl p-5 mb-8 flex items-center justify-between">
+          <div className="bg-black text-white rounded-2xl p-5 mb-4 flex items-center justify-between">
             <div>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">All tools live</p>
               <p className="text-sm font-extrabold">9 AI tools ready — including SM-Pulse, SM-Radar & Content Gap</p>
@@ -332,6 +332,15 @@ export default function AIFeaturesPage() {
               className="flex-shrink-0 bg-white text-black text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all">
               Open Compose →
             </Link>
+          </div>
+
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-3 mb-8 flex items-start gap-3">
+            <span className="text-lg flex-shrink-0">💡</span>
+            <p className="text-xs text-amber-800 leading-relaxed">
+              <strong>Why do AI tools cost credits?</strong> Every AI generation calls Google Gemini, which has real compute costs.
+              Credits keep SocialMate sustainable so we can stay free. Free plan includes 50 credits/month — enough to generate
+              ~15 captions, ~25 hashtag sets, or run ~5 SM-Pulse scans. Unused credits roll into your bank (up to 75 max).
+            </p>
           </div>
 
           <Section title="🤖 AI Tools" tools={AI_TOOLS} plan={plan} />

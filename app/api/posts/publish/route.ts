@@ -1,13 +1,11 @@
+export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { publishToAll } from '@/lib/publish'
+import { inngest } from '@/lib/inngest'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
 
 export async function POST(request: NextRequest) {
   const body = await request.json()
@@ -23,7 +21,7 @@ export async function POST(request: NextRequest) {
 
   if (fromInngest) {
     // Inngest call — fetch post directly with service role
-    const { data: post, error } = await supabaseAdmin
+    const { data: post, error } = await getSupabaseAdmin()
       .from('posts')
       .select('id, user_id, content, platforms, destinations, status, published_at')
       .eq('id', postId)
@@ -50,7 +48,7 @@ export async function POST(request: NextRequest) {
       if (r.success && r.postId) platformPostIds[r.platform] = r.postId
     })
 
-    await supabaseAdmin
+    await getSupabaseAdmin()
       .from('posts')
       .update({
         status: allFailed ? 'failed' : someFailed ? 'partial' : 'published',
@@ -59,8 +57,17 @@ export async function POST(request: NextRequest) {
       })
       .eq('id', postId)
 
-    // First-post credit trigger
+    // First-post credit trigger + streak update
     await handleFirstPostCredits(userId)
+    if (!allFailed) await updateStreak(userId)
+
+    // Emit analytics fetch event for Bluesky/Mastodon posts
+    if (!allFailed) {
+      const analyticsPlatforms = results.filter(r => r.success && (r.platform === 'bluesky' || r.platform === 'mastodon'))
+      if (analyticsPlatforms.length > 0) {
+        await inngest.send({ name: 'post/published', data: { postId, userId, platformPostIds } }).catch(() => {})
+      }
+    }
 
     return NextResponse.json({
       success: !allFailed,
@@ -126,6 +133,15 @@ export async function POST(request: NextRequest) {
       .eq('id', postId)
 
     await handleFirstPostCredits(userId)
+    if (!allFailed) await updateStreak(userId)
+
+    // Emit analytics fetch event for Bluesky/Mastodon posts
+    if (!allFailed) {
+      const analyticsPlatforms = results.filter(r => r.success && (r.platform === 'bluesky' || r.platform === 'mastodon'))
+      if (analyticsPlatforms.length > 0) {
+        await inngest.send({ name: 'post/published', data: { postId, userId, platformPostIds } }).catch(() => {})
+      }
+    }
 
     return NextResponse.json({
       success: !allFailed,
@@ -135,36 +151,69 @@ export async function POST(request: NextRequest) {
   }
 }
 
+async function updateStreak(userId: string) {
+  try {
+    const { data: settings } = await getSupabaseAdmin()
+      .from('user_settings')
+      .select('current_streak, longest_streak, last_post_date')
+      .eq('user_id', userId)
+      .single()
+
+    const today     = new Date().toISOString().split('T')[0]
+    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
+
+    const lastDate       = settings?.last_post_date
+    const currentStreak  = settings?.current_streak ?? 0
+    const longestStreak  = settings?.longest_streak ?? 0
+
+    if (lastDate === today) return // Already posted today — no change
+
+    const newStreak = lastDate === yesterday ? currentStreak + 1 : 1
+    const newLongest = Math.max(newStreak, longestStreak)
+
+    await getSupabaseAdmin()
+      .from('user_settings')
+      .update({
+        current_streak: newStreak,
+        longest_streak: newLongest,
+        last_post_date: today,
+      })
+      .eq('user_id', userId)
+  } catch (err) {
+    console.error('Streak update error:', err)
+  }
+}
+
 async function handleFirstPostCredits(userId: string) {
   try {
-    const { count } = await supabaseAdmin
+    const { count } = await getSupabaseAdmin()
       .from('posts')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', userId)
       .eq('status', 'published')
 
     if (count === 1) {
-      const { data: userSettings } = await supabaseAdmin
+      const { data: userSettings } = await getSupabaseAdmin()
         .from('user_settings')
         .select('ai_credits_remaining, referred_by')
         .eq('user_id', userId)
         .single()
 
       if (userSettings) {
-        await supabaseAdmin
+        await getSupabaseAdmin()
           .from('user_settings')
           .update({ ai_credits_remaining: (userSettings.ai_credits_remaining ?? 0) + 10 })
           .eq('user_id', userId)
 
         if (userSettings.referred_by) {
-          const { data: referrerSettings } = await supabaseAdmin
+          const { data: referrerSettings } = await getSupabaseAdmin()
             .from('user_settings')
             .select('ai_credits_remaining')
             .eq('user_id', userSettings.referred_by)
             .single()
 
           if (referrerSettings) {
-            await supabaseAdmin
+            await getSupabaseAdmin()
               .from('user_settings')
               .update({ ai_credits_remaining: (referrerSettings.ai_credits_remaining ?? 0) + 10 })
               .eq('user_id', userSettings.referred_by)

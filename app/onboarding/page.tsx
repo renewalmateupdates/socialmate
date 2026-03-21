@@ -48,7 +48,7 @@ const PLAN_DETAILS = {
     analytics: '30 days',
     features: [
       '4 live platforms now',
-      '100 AI credits / month',
+      '50 AI credits / month',
       '1 connected account per platform',
       '2 team seats',
       '100 posts / month',
@@ -319,28 +319,28 @@ function OnboardingInner() {
   )
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-theme flex flex-col">
 
-      <div className="bg-white border-b border-gray-100 px-6 py-4 flex items-center justify-between">
+      <div className="bg-surface border-b border-theme px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
           <span className="font-bold text-base tracking-tight">SocialMate</span>
           {step > 2 && <PlanBadge />}
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-xs text-gray-400 font-semibold">Step {step} of {STEPS.length}</span>
+          <span className="text-xs text-gray-400 dark:text-gray-500 font-semibold">Step {step} of {STEPS.length}</span>
           <button
             onClick={async () => {
               if (user) await supabase.from('profiles').update({ onboarding_completed: true }).eq('id', user.id)
               router.push('/dashboard')
             }}
-            className="text-xs text-gray-400 hover:text-black transition-colors font-semibold">
+            className="text-xs text-gray-400 dark:text-gray-500 hover:text-black transition-colors font-semibold">
             Skip setup →
           </button>
         </div>
       </div>
 
-      <div className="w-full bg-gray-100 h-1">
+      <div className="w-full bg-gray-100 dark:bg-gray-800 h-1">
         <div className="bg-black h-1 transition-all duration-500" style={{ width: `${progress}%` }} />
       </div>
 
@@ -349,13 +349,13 @@ function OnboardingInner() {
           <div key={s.id} className="flex items-center gap-1 flex-shrink-0">
             <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
               step === s.id ? 'bg-black text-white' :
-              step > s.id  ? 'bg-gray-200 text-gray-500' :
-              'text-gray-300'
+              step > s.id  ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400' :
+              'text-gray-300 dark:text-gray-600'
             }`}>
               <span>{step > s.id ? '✓' : s.id}</span>
               <span className="hidden md:inline">{s.label}</span>
             </div>
-            {i < STEPS.length - 1 && <div className={`w-4 h-px ${step > s.id ? 'bg-gray-300' : 'bg-gray-100'}`} />}
+            {i < STEPS.length - 1 && <div className={`w-4 h-px ${step > s.id ? 'bg-gray-300 dark:bg-gray-600' : 'bg-gray-100 dark:bg-gray-700'}`} />}
           </div>
         ))}
       </div>
@@ -365,19 +365,19 @@ function OnboardingInner() {
 
           {/* ── STEP 1 — WELCOME ── */}
           {step === 1 && (
-            <div className="bg-white border border-gray-100 rounded-3xl p-8 md:p-10">
+            <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
               <div className="text-center mb-8">
                 <div className="text-5xl mb-4">👋</div>
                 <h1 className="text-3xl font-extrabold tracking-tight mb-2">Welcome to SocialMate</h1>
-                <p className="text-gray-400 text-sm">Let's get you set up in under 3 minutes.</p>
+                <p className="text-gray-400 dark:text-gray-500 text-sm">Let's get you set up in under 3 minutes.</p>
               </div>
 
               <div className="mb-6">
-                <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-2">What should we call you?</label>
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-2">What should we call you?</label>
                 <input type="text" value={displayName} onChange={e => setDisplayName(e.target.value)}
                   placeholder="Your name or brand..."
                   onKeyDown={e => e.key === 'Enter' && displayName.trim() && setStep(2)}
-                  className="w-full px-4 py-3 text-lg font-semibold text-center border border-gray-200 rounded-2xl focus:outline-none focus:border-black transition-all"
+                  className="w-full px-4 py-3 text-lg font-semibold text-center border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-2xl focus:outline-none focus:border-black transition-all"
                   autoFocus />
               </div>
 
@@ -386,7 +386,7 @@ function OnboardingInner() {
                 <div className="grid grid-cols-2 gap-x-6 gap-y-2 mb-4">
                   {[
                     '4 live platforms now',
-                    '100 AI credits / month',
+                    '50 AI credits / month',
                     'Bulk Scheduler',
                     'Link in Bio page',
                     '2 team seats',
@@ -396,13 +396,13 @@ function OnboardingInner() {
                     'Media library (1 GB)',
                     '100 posts / month',
                   ].map(f => (
-                    <div key={f} className="flex items-center gap-2 text-xs text-gray-300">
+                    <div key={f} className="flex items-center gap-2 text-xs text-gray-300 dark:text-gray-400">
                       <span className="text-green-400 font-bold flex-shrink-0">✓</span>{f}
                     </div>
                   ))}
                 </div>
                 <div className="border-t border-gray-700 pt-4">
-                  <p className="text-xs text-gray-400">Need more? Choose Pro or Agency on the next step — or upgrade anytime later.</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">Need more? Choose Pro or Agency on the next step — or upgrade anytime later.</p>
                 </div>
               </div>
 
@@ -429,15 +429,15 @@ function OnboardingInner() {
               <div className="text-center mb-6">
                 <div className="text-5xl mb-3">📦</div>
                 <h2 className="text-2xl font-extrabold tracking-tight mb-1">Choose your plan</h2>
-                <p className="text-gray-400 text-sm">Start free or go straight to Pro or Agency — no pressure, upgrade anytime.</p>
+                <p className="text-gray-400 dark:text-gray-500 text-sm">Start free or go straight to Pro or Agency — no pressure, upgrade anytime.</p>
               </div>
 
               {(['free', 'pro', 'agency'] as const).map(p => {
                 const cfg = PLAN_DETAILS[p]
                 const isSelected = selectedPlan === p
                 return (
-                  <div key={p} className={`bg-white border-2 rounded-2xl p-6 transition-all cursor-pointer ${
-                    isSelected ? cfg.color : 'border-gray-100 hover:border-gray-300'
+                  <div key={p} className={`bg-surface border-2 rounded-2xl p-6 transition-all cursor-pointer ${
+                    isSelected ? cfg.color : 'border-gray-100 dark:border-gray-700 hover:border-gray-300'
                   }`} onClick={() => { if (p === 'free') setSelectedPlan('free') }}>
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
@@ -452,7 +452,7 @@ function OnboardingInner() {
                         </div>
                       </div>
                       {isSelected && p === 'free' && (
-                        <span className="text-xs font-bold bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full">Selected</span>
+                        <span className="text-xs font-bold bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-3 py-1.5 rounded-full">Selected</span>
                       )}
                     </div>
 
@@ -462,16 +462,16 @@ function OnboardingInner() {
                         { label: 'Platforms',   value: cfg.platforms + ' accounts'           },
                         { label: 'Team Seats',  value: cfg.seats + ' seats'                  },
                       ].map(stat => (
-                        <div key={stat.label} className="bg-gray-50 rounded-xl p-2">
+                        <div key={stat.label} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-2">
                           <p className="text-xs font-extrabold">{stat.value}</p>
-                          <p className="text-xs text-gray-400">{stat.label}</p>
+                          <p className="text-xs text-gray-400 dark:text-gray-500">{stat.label}</p>
                         </div>
                       ))}
                     </div>
 
                     <div className="grid grid-cols-2 gap-x-4 gap-y-1 mb-4">
                       {cfg.features.slice(0, 6).map(f => (
-                        <div key={f} className="flex items-center gap-1.5 text-xs text-gray-600">
+                        <div key={f} className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
                           <span className="text-green-500 font-bold flex-shrink-0">✓</span>{f}
                         </div>
                       ))}
@@ -480,7 +480,7 @@ function OnboardingInner() {
                     {p === 'free' && (
                       <button
                         onClick={() => { setSelectedPlan('free'); setStep(3) }}
-                        className="w-full py-2.5 border-2 border-gray-200 text-sm font-bold rounded-xl hover:border-black hover:bg-black hover:text-white transition-all">
+                        className="w-full py-2.5 border-2 border-gray-200 dark:border-gray-700 text-sm font-bold rounded-xl hover:border-black hover:bg-black hover:text-white transition-all">
                         Continue with Free →
                       </button>
                     )}
@@ -508,21 +508,21 @@ function OnboardingInner() {
                 )
               })}
 
-              <div className="bg-white border border-gray-100 rounded-2xl p-5">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-3">All AI tools included — every plan</p>
+              <div className="bg-surface border border-theme rounded-2xl p-5">
+                <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">All AI tools included — every plan</p>
                 <div className="grid grid-cols-2 gap-2">
                   {PLAN_DETAILS.free.aiTools.map(tool => (
-                    <div key={tool.name} className="flex items-center justify-between text-xs py-1.5 border-b border-gray-50 last:border-0">
-                      <span className="text-gray-700 font-semibold">{tool.name}</span>
-                      <span className="text-gray-400 font-bold">{tool.cost} cr</span>
+                    <div key={tool.name} className="flex items-center justify-between text-xs py-1.5 border-b border-gray-50 dark:border-gray-800 last:border-0">
+                      <span className="text-gray-700 dark:text-gray-300 font-semibold">{tool.name}</span>
+                      <span className="text-gray-400 dark:text-gray-500 font-bold">{tool.cost} cr</span>
                     </div>
                   ))}
                 </div>
-                <p className="text-xs text-gray-400 mt-3">Pro & Agency also unlock AI Content Calendar (20 cr) and AI Image Generation (25 cr).</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">Pro & Agency also unlock AI Content Calendar (20 cr) and AI Image Generation (25 cr).</p>
               </div>
 
               <button onClick={() => setStep(1)}
-                className="w-full py-2.5 border border-gray-200 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all text-gray-500">
+                className="w-full py-2.5 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all text-gray-500 dark:text-gray-400">
                 ← Back
               </button>
             </div>
@@ -530,7 +530,7 @@ function OnboardingInner() {
 
           {/* ── STEP 3 — USE CASE ── */}
           {step === 3 && (
-            <div className="bg-white border border-gray-100 rounded-3xl p-8 md:p-10">
+            <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
               {searchParams.get('upgraded') === 'true' && (
                 <div className="bg-green-50 border border-green-200 rounded-2xl px-4 py-3 mb-6 flex items-center gap-3">
                   <span className="text-xl">🎉</span>
@@ -543,23 +543,23 @@ function OnboardingInner() {
               <div className="text-center mb-8">
                 <div className="text-5xl mb-4">🎯</div>
                 <h2 className="text-2xl font-extrabold tracking-tight mb-2">How will you use SocialMate?</h2>
-                <p className="text-gray-400 text-sm">Helps us personalize your dashboard and tips</p>
+                <p className="text-gray-400 dark:text-gray-500 text-sm">Helps us personalize your dashboard and tips</p>
               </div>
               <div className="grid grid-cols-2 gap-3 mb-8">
                 {USE_CASES.map(uc => (
                   <button key={uc.id} onClick={() => setUseCase(uc.id)}
                     className={`p-4 rounded-2xl border-2 text-left transition-all ${
-                      useCase === uc.id ? 'border-black bg-black/5' : 'border-gray-100 hover:border-gray-300'
+                      useCase === uc.id ? 'border-black bg-black/5 dark:bg-white/5' : 'border-gray-100 dark:border-gray-700 hover:border-gray-300'
                     }`}>
                     <div className="text-2xl mb-2">{uc.icon}</div>
                     <p className="text-sm font-bold">{uc.label}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">{uc.desc}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{uc.desc}</p>
                   </button>
                 ))}
               </div>
               <div className="flex gap-3">
                 <button onClick={() => setStep(2)}
-                  className="px-6 py-3 border border-gray-200 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
+                  className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
                   ← Back
                 </button>
                 <button onClick={() => useCase ? setStep(4) : showToast('Pick an option to continue')}
@@ -572,12 +572,12 @@ function OnboardingInner() {
 
           {/* ── STEP 4 — PLATFORMS ── */}
           {step === 4 && (
-            <div className="bg-white border border-gray-100 rounded-3xl p-8 md:p-10">
+            <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
               <div className="text-center mb-6">
                 <div className="text-5xl mb-4">📱</div>
                 <h2 className="text-2xl font-extrabold tracking-tight mb-2">Which platforms do you use?</h2>
-                <p className="text-gray-400 text-sm">
-                  Your <span className={`font-bold ${selectedPlan === 'agency' ? 'text-purple-600' : 'text-black'}`}>{planConfig.label}</span> plan supports {maxPlatforms} connected account{maxPlatforms > 1 ? 's' : ''} · 4 live now · 12 more coming soon
+                <p className="text-gray-400 dark:text-gray-500 text-sm">
+                  Your <span className={`font-bold ${selectedPlan === 'agency' ? 'text-purple-600' : 'text-black dark:text-white'}`}>{planConfig.label}</span> plan supports {maxPlatforms} connected account{maxPlatforms > 1 ? 's' : ''} · 4 live now · 12 more coming soon
                 </p>
               </div>
 
@@ -595,15 +595,15 @@ function OnboardingInner() {
                       onClick={() => togglePlatform(p.id)}
                       className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${
                         !p.available || isAtLimit
-                          ? 'border-gray-50 bg-gray-50 opacity-40 cursor-not-allowed'
+                          ? 'border-gray-50 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 opacity-40 cursor-not-allowed'
                           : isSelected
-                          ? 'border-black bg-black/5'
-                          : 'border-gray-100 hover:border-gray-300'
+                          ? 'border-black bg-black/5 dark:bg-white/5'
+                          : 'border-gray-100 dark:border-gray-700 hover:border-gray-300'
                       }`}>
                       <span className="text-xl">{p.icon}</span>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-bold truncate">{p.label}</p>
-                        <p className="text-xs text-gray-400">{p.available ? p.desc : 'Coming soon'}</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500">{p.available ? p.desc : 'Coming soon'}</p>
                       </div>
                       {isSelected && p.available && <span className="text-black font-bold text-sm flex-shrink-0">✓</span>}
                     </button>
@@ -611,13 +611,13 @@ function OnboardingInner() {
                 })}
               </div>
 
-              <p className="text-xs text-center text-gray-400 mb-6">
+              <p className="text-xs text-center text-gray-400 dark:text-gray-500 mb-6">
                 {selectedPlatforms.length} / {maxPlatforms} accounts selected
               </p>
 
               <div className="flex gap-3">
                 <button onClick={() => setStep(3)}
-                  className="px-6 py-3 border border-gray-200 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
+                  className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
                   ← Back
                 </button>
                 {selectedPlatforms.length > 0 ? (
@@ -627,7 +627,7 @@ function OnboardingInner() {
                   </button>
                 ) : (
                   <button onClick={() => setStep(5)}
-                    className="flex-1 py-3 border border-gray-200 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all text-gray-500">
+                    className="flex-1 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all text-gray-500 dark:text-gray-400">
                     Skip for now →
                   </button>
                 )}
@@ -637,11 +637,11 @@ function OnboardingInner() {
 
           {/* ── STEP 5 — SECURITY / 2FA ── */}
           {step === 5 && (
-            <div className="bg-white border border-gray-100 rounded-3xl p-8 md:p-10">
+            <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
               <div className="text-center mb-6">
                 <div className="text-5xl mb-4">🔐</div>
                 <h2 className="text-2xl font-extrabold tracking-tight mb-2">Secure your account</h2>
-                <p className="text-gray-400 text-sm">Two-factor authentication adds a second layer of protection. Takes 60 seconds.</p>
+                <p className="text-gray-400 dark:text-gray-500 text-sm">Two-factor authentication adds a second layer of protection. Takes 60 seconds.</p>
               </div>
 
               {mfaDone ? (
@@ -652,7 +652,7 @@ function OnboardingInner() {
                 </div>
               ) : mfaStep === 'idle' ? (
                 <div className="space-y-4 mb-6">
-                  <div className="bg-gray-50 border border-gray-100 rounded-2xl p-5">
+                  <div className="bg-gray-50 dark:bg-gray-800 border border-theme rounded-2xl p-5">
                     <div className="flex items-start gap-4">
                       <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white text-lg flex-shrink-0">🛡️</div>
                       <div>
@@ -663,7 +663,7 @@ function OnboardingInner() {
                             'Blocks unauthorized logins even if password is leaked',
                             'Required for Agency plan team security compliance',
                           ].map(r => (
-                            <div key={r} className="flex items-center gap-2 text-xs text-gray-600">
+                            <div key={r} className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
                               <span className="text-green-500 font-bold flex-shrink-0">✓</span>{r}
                             </div>
                           ))}
@@ -680,22 +680,22 @@ function OnboardingInner() {
                 </div>
               ) : (
                 <div className="space-y-5 mb-6">
-                  <div className="bg-gray-50 rounded-2xl p-5">
-                    <p className="text-xs font-bold text-gray-500 mb-3 uppercase tracking-wide">Step 1 — Scan with your authenticator app</p>
+                  <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-5">
+                    <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wide">Step 1 — Scan with your authenticator app</p>
                     <div className="flex justify-center mb-4">
                       <img src={mfaQR} alt="2FA QR Code" className="w-40 h-40 rounded-xl" />
                     </div>
-                    <p className="text-xs text-gray-400 text-center mb-2">Can't scan? Enter this code manually:</p>
-                    <div className="bg-white border border-gray-200 rounded-xl px-4 py-2 text-center">
-                      <p className="text-xs font-mono font-bold tracking-widest text-gray-700 break-all">{mfaSecret}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 text-center mb-2">Can't scan? Enter this code manually:</p>
+                    <div className="bg-surface border border-theme-md rounded-xl px-4 py-2 text-center">
+                      <p className="text-xs font-mono font-bold tracking-widest text-gray-700 dark:text-gray-300 break-all">{mfaSecret}</p>
                     </div>
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-gray-500 mb-2 uppercase tracking-wide">Step 2 — Enter the 6-digit code</p>
+                    <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">Step 2 — Enter the 6-digit code</p>
                     <input type="text" inputMode="numeric" maxLength={6} value={mfaCode}
                       onChange={e => setMfaCode(e.target.value.replace(/\D/g, ''))}
                       placeholder="000000"
-                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-center font-mono tracking-widest outline-none focus:border-black transition-all" />
+                      className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl px-4 py-3 text-sm text-center font-mono tracking-widest outline-none focus:border-black transition-all" />
                     {mfaError && <p className="text-xs text-red-500 font-semibold mt-2">❌ {mfaError}</p>}
                   </div>
                   <button onClick={handleVerify2FA} disabled={mfaLoading || mfaCode.length !== 6}
@@ -709,31 +709,31 @@ function OnboardingInner() {
 
               <div className="flex gap-3">
                 <button onClick={() => setStep(4)}
-                  className="px-6 py-3 border border-gray-200 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
+                  className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
                   ← Back
                 </button>
                 <button onClick={() => setStep(6)}
                   className={`flex-1 py-3 text-sm font-bold rounded-2xl transition-all ${
                     mfaDone
                       ? 'bg-black text-white hover:opacity-80'
-                      : 'border border-gray-200 text-gray-500 hover:border-gray-400'
+                      : 'border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-400'
                   }`}>
                   {mfaDone ? 'Continue →' : 'Skip for now →'}
                 </button>
               </div>
               {!mfaDone && (
-                <p className="text-xs text-center text-gray-400 mt-2">You can enable 2FA anytime in Settings → Security</p>
+                <p className="text-xs text-center text-gray-400 dark:text-gray-500 mt-2">You can enable 2FA anytime in Settings → Security</p>
               )}
             </div>
           )}
 
           {/* ── STEP 6 — FIRST POST ── */}
           {step === 6 && (
-            <div className="bg-white border border-gray-100 rounded-3xl p-8 md:p-10">
+            <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
               <div className="text-center mb-6">
                 <div className="text-5xl mb-4">✏️</div>
                 <h2 className="text-2xl font-extrabold tracking-tight mb-2">Write your first post</h2>
-                <p className="text-gray-400 text-sm">Publish or schedule this to unlock your {planConfig.credits.toLocaleString()} AI credits</p>
+                <p className="text-gray-400 dark:text-gray-500 text-sm">Publish or schedule this to unlock your {planConfig.credits.toLocaleString()} AI credits</p>
               </div>
 
               <div className="bg-green-50 border border-green-100 rounded-2xl px-4 py-3 mb-5">
@@ -748,8 +748,8 @@ function OnboardingInner() {
                     { label: 'First post',         done: firstPost.trim().length > 0  },
                   ].map(item => (
                     <div key={item.label} className="flex items-center gap-1.5">
-                      <span className={`text-xs font-bold ${item.done ? 'text-green-600' : 'text-gray-400'}`}>{item.done ? '✓' : '○'}</span>
-                      <span className={`text-xs ${item.done ? 'text-green-700 font-semibold' : 'text-gray-400'}`}>{item.label}</span>
+                      <span className={`text-xs font-bold ${item.done ? 'text-green-600' : 'text-gray-400 dark:text-gray-500'}`}>{item.done ? '✓' : '○'}</span>
+                      <span className={`text-xs ${item.done ? 'text-green-700 font-semibold' : 'text-gray-400 dark:text-gray-500'}`}>{item.label}</span>
                     </div>
                   ))}
                 </div>
@@ -762,22 +762,22 @@ function OnboardingInner() {
                       const pl = PLATFORMS.find(pl => pl.id === p)
                       return pl ? <span key={p} className="text-lg">{pl.icon}</span> : null
                     })}
-                    {selectedPlatforms.length > 6 && <span className="text-xs text-gray-400">+{selectedPlatforms.length - 6} more</span>}
+                    {selectedPlatforms.length > 6 && <span className="text-xs text-gray-400 dark:text-gray-500">+{selectedPlatforms.length - 6} more</span>}
                   </div>
                 )}
                 <textarea value={firstPost} onChange={e => setFirstPost(e.target.value)}
                   placeholder={`Write something for your audience...\n\nTip: Use [brackets] for fill-in-the-blank sections`}
                   rows={5}
-                  className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-black transition-all resize-none"
+                  className="w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-black transition-all resize-none"
                   autoFocus />
                 <div className="flex items-center justify-between mt-1.5">
-                  <p className="text-xs text-gray-400">Saved as a draft — edit before publishing</p>
-                  <p className="text-xs text-gray-400">{firstPost.length} chars</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">Saved as a draft — edit before publishing</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">{firstPost.length} chars</p>
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-xl p-4 mb-6">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Need inspiration?</p>
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-6">
+                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-2">Need inspiration?</p>
                 <div className="space-y-1.5">
                   {[
                     "Excited to share something new with you all 🎉 [describe what's coming]",
@@ -786,7 +786,7 @@ function OnboardingInner() {
                     "Something I wish I knew earlier about [your niche]: [insight]",
                   ].map(idea => (
                     <button key={idea} onClick={() => setFirstPost(idea)}
-                      className="w-full text-left text-xs text-gray-500 hover:text-black p-2 rounded-lg hover:bg-white transition-all">
+                      className="w-full text-left text-xs text-gray-500 dark:text-gray-400 hover:text-black p-2 rounded-lg hover:bg-white dark:hover:bg-gray-700 transition-all">
                       → {idea.length > 70 ? idea.slice(0, 70) + '...' : idea}
                     </button>
                   ))}
@@ -795,7 +795,7 @@ function OnboardingInner() {
 
               <div className="flex gap-3">
                 <button onClick={() => setStep(5)}
-                  className="px-6 py-3 border border-gray-200 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
+                  className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
                   ← Back
                 </button>
                 {firstPost.trim() ? (
@@ -805,7 +805,7 @@ function OnboardingInner() {
                   </button>
                 ) : (
                   <button onClick={() => setStep(7)}
-                    className="flex-1 py-3 border border-gray-200 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all text-gray-500">
+                    className="flex-1 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all text-gray-500 dark:text-gray-400">
                     Skip for now →
                   </button>
                 )}
@@ -815,12 +815,12 @@ function OnboardingInner() {
 
           {/* ── STEP 7 — DONE ── */}
           {step === 7 && (
-            <div className="bg-white border border-gray-100 rounded-3xl p-8 md:p-10 text-center">
+            <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10 text-center">
               <div className="text-6xl mb-4">🚀</div>
               <h2 className="text-3xl font-extrabold tracking-tight mb-2">
                 You're all set, {displayName || 'friend'}!
               </h2>
-              <p className="text-gray-400 mb-2 text-sm">Your {planConfig.label} account is ready.</p>
+              <p className="text-gray-400 dark:text-gray-500 mb-2 text-sm">Your {planConfig.label} account is ready.</p>
               <div className="flex justify-center mb-6"><PlanBadge /></div>
 
               <div className={`rounded-2xl p-5 mb-6 text-left ${
@@ -870,16 +870,16 @@ function OnboardingInner() {
                   ] : []),
                 ].map(action => (
                   <div key={action.title}
-                    className="flex items-center gap-4 p-4 border border-gray-100 rounded-2xl hover:border-gray-300 transition-all group">
-                    <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
+                    className="flex items-center gap-4 p-4 border border-theme rounded-2xl hover:border-gray-300 dark:hover:border-gray-600 transition-all group">
+                    <div className="w-10 h-10 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
                       {action.icon}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold">{action.title}</p>
-                      <p className="text-xs text-gray-400">{action.desc}</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500">{action.desc}</p>
                     </div>
                     <Link href={action.href}
-                      className="text-xs font-bold text-gray-400 group-hover:text-black transition-colors flex-shrink-0">
+                      className="text-xs font-bold text-gray-400 dark:text-gray-500 group-hover:text-black transition-colors flex-shrink-0">
                       {action.cta} →
                     </Link>
                   </div>
@@ -890,7 +890,7 @@ function OnboardingInner() {
                 className="w-full py-4 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all disabled:opacity-50">
                 {saving ? 'Setting up your account...' : 'Go to Dashboard →'}
               </button>
-              <p className="text-xs text-gray-400 mt-4">
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-4">
                 Everything can be changed anytime in <Link href="/settings" className="underline">Settings</Link>
               </p>
             </div>
@@ -913,7 +913,7 @@ function OnboardingInner() {
 export default function Onboarding() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-theme flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
       </div>
     }>

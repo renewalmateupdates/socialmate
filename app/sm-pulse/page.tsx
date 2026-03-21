@@ -52,14 +52,14 @@ export default function SMPulsePage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-50">
+      <div className="flex h-screen items-center justify-center bg-theme">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <main className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
@@ -71,21 +71,21 @@ export default function SMPulsePage() {
                 <span className="text-2xl">🔥</span>
                 <h1 className="text-2xl font-extrabold tracking-tight">SM-Pulse</h1>
               </div>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-gray-400 dark:text-gray-500">
                 Scan what's trending in your niche right now — before it peaks.
               </p>
             </div>
             <div className="flex items-center gap-3 sm:text-right flex-shrink-0">
               <div>
-                <div className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Cost per scan</div>
-                <div className="text-xl font-extrabold">{CREDIT_COST} <span className="text-sm font-semibold text-gray-400">credits</span></div>
-                <div className="text-xs text-gray-400 mt-0.5">{credits} remaining</div>
+                <div className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">Cost per scan</div>
+                <div className="text-xl font-extrabold">{CREDIT_COST} <span className="text-sm font-semibold text-gray-400 dark:text-gray-500">credits</span></div>
+                <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{credits} remaining</div>
               </div>
             </div>
           </div>
 
           {/* HOW IT WORKS */}
-          <div className="bg-white border border-gray-100 rounded-2xl p-5 mb-6">
+          <div className="bg-surface border border-theme rounded-2xl p-5 mb-6">
             <h2 className="text-sm font-extrabold mb-4">How SM-Pulse works</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
@@ -98,8 +98,8 @@ export default function SMPulsePage() {
                     {item.step}
                   </div>
                   <div>
-                    <p className="text-xs font-bold text-gray-900 mb-1">{item.title}</p>
-                    <p className="text-xs text-gray-400 leading-relaxed">{item.desc}</p>
+                    <p className="text-xs font-bold text-gray-900 dark:text-gray-100 mb-1">{item.title}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 leading-relaxed">{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -107,8 +107,8 @@ export default function SMPulsePage() {
           </div>
 
           {/* NICHE INPUT */}
-          <div className="bg-white border border-gray-100 rounded-2xl p-5 mb-4">
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-2">
+          <div className="bg-surface border border-theme rounded-2xl p-5 mb-4">
+            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-2">
               Your niche or topic
             </label>
             <input
@@ -118,7 +118,7 @@ export default function SMPulsePage() {
               placeholder="e.g. fitness, SaaS marketing, cooking, personal finance..."
               className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400"
             />
-            <p className="text-xs text-gray-400 mt-1.5">Leave blank to default to social media content creation.</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">Leave blank to default to social media content creation.</p>
           </div>
 
           {/* SCAN BUTTON */}
@@ -157,11 +157,11 @@ export default function SMPulsePage() {
 
           {/* RESULTS */}
           {result && (
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 mb-6">
+            <div className="bg-surface border border-theme rounded-2xl p-5 mb-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-sm font-extrabold">Trending Now in Your Niche</h2>
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-400">Just scanned</span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500">Just scanned</span>
                   <button
                     onClick={() => { navigator.clipboard.writeText(result) }}
                     className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
@@ -170,12 +170,12 @@ export default function SMPulsePage() {
                 </div>
               </div>
               <div className="prose prose-sm max-w-none">
-                <pre className="text-xs text-gray-700 leading-relaxed whitespace-pre-wrap font-sans bg-gray-50 rounded-xl p-4">
+                <pre className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap font-sans bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
                   {result}
                 </pre>
               </div>
               <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                <p className="text-xs text-gray-400 flex-1">
+                <p className="text-xs text-gray-400 dark:text-gray-500 flex-1">
                   Use these trends to guide your next posts. Act within 24–48 hours for best reach.
                 </p>
                 <Link href="/compose"
@@ -186,23 +186,41 @@ export default function SMPulsePage() {
             </div>
           )}
 
-          {/* PREVIEW STATE */}
+          {/* PREVIEW STATE — blurred sample results */}
           {!result && !scanning && (
-            <div className="bg-white border border-gray-100 rounded-2xl p-5">
-              <h2 className="text-sm font-extrabold mb-4">What you'll see after scanning</h2>
-              <div className="space-y-3 opacity-40 pointer-events-none select-none">
-                {[1,2,3,4].map(i => (
-                  <div key={i} className="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0">
-                    <div className="w-7 h-7 bg-gray-200 rounded-full flex-shrink-0" />
-                    <div className="flex-1">
-                      <div className="w-36 h-3 bg-gray-200 rounded mb-1.5" />
-                      <div className="w-24 h-2.5 bg-gray-100 rounded" />
-                    </div>
-                    <div className="w-16 h-6 bg-gray-200 rounded-xl" />
-                  </div>
-                ))}
+            <div className="relative bg-surface border border-theme rounded-2xl overflow-hidden">
+              <div className="p-5 filter blur-sm pointer-events-none select-none" aria-hidden="true">
+                <h2 className="text-sm font-extrabold mb-4">🔥 Trending Now in Your Niche</h2>
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 text-xs text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap font-sans">
+{`## TOP TRENDING TOPICS THIS WEEK
+
+🚀 #1 — AI productivity workflows (+340% engagement spike)
+   Why it's trending: New ChatGPT feature dropped Tuesday, Reddit r/productivity exploded
+   Best format: "I tried X for 7 days" story format
+   Peak window: Next 18–24 hours
+
+📈 #2 — Founder burnout & mental health
+   Why it's trending: Viral Twitter thread, 3.2M impressions
+   Best format: Raw, vulnerable short-form video
+   Peak window: 2–3 days remaining
+
+🎯 #3 — "Silent quitting" → "Loud thriving"
+   Why it's trending: Counter-narrative gaining traction
+   Best format: Before/after carousel
+   Peak window: 4–5 days
+
+💡 RECOMMENDED ACTION:
+   Post on topic #1 within 24h using the story format.
+   Engage with the burnout thread before creating your post.`}
+                </div>
               </div>
-              <p className="text-xs text-center text-gray-400 mt-4">Enter your niche above and run a scan to see your trend report</p>
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/70 backdrop-blur-[2px]">
+                <div className="text-center px-6">
+                  <div className="text-3xl mb-3">🔥</div>
+                  <p className="text-sm font-extrabold mb-1">Your trend report appears here</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs">Enter your niche above and run a scan to unlock real-time trend intelligence for your content.</p>
+                </div>
+              </div>
             </div>
           )}
 

@@ -60,16 +60,16 @@ export default function EvergreenPage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-50">
+      <div className="flex h-screen items-center justify-center bg-theme">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
-      <main className="ml-56 flex-1 p-8">
+      <main className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
 
           <div className="mb-8">
@@ -77,7 +77,7 @@ export default function EvergreenPage() {
               <span className="text-2xl">♻️</span>
               <h1 className="text-2xl font-extrabold tracking-tight">Evergreen Recycling</h1>
             </div>
-            <p className="text-sm text-gray-400">Mark your best posts as evergreen and they'll automatically re-queue when your schedule is empty.</p>
+            <p className="text-sm text-gray-400 dark:text-gray-500">Mark your best posts as evergreen and they'll automatically re-queue when your schedule is empty.</p>
           </div>
 
           <div className="grid grid-cols-3 gap-4 mb-8">
@@ -86,10 +86,10 @@ export default function EvergreenPage() {
               { label: 'Evergreen posts',  value: evergreenPosts.length, icon: '♻️' },
               { label: 'Auto-requeue',     value: evergreenPosts.length > 0 ? 'Active' : 'No posts', icon: '🔄' },
             ].map(stat => (
-              <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-5 text-center">
+              <div key={stat.label} className="bg-surface border border-theme rounded-2xl p-5 text-center">
                 <div className="text-2xl mb-1">{stat.icon}</div>
                 <p className="text-2xl font-extrabold">{stat.value}</p>
-                <p className="text-xs text-gray-400 font-semibold mt-0.5">{stat.label}</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 font-semibold mt-0.5">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -102,13 +102,13 @@ export default function EvergreenPage() {
                   <div key={post.id} className="bg-white border-2 border-black rounded-2xl p-4">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-700 leading-relaxed line-clamp-2">{post.content}</p>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-2">{post.content}</p>
                         <div className="flex items-center gap-2 mt-2">
-                          <span className="text-xs text-gray-400">
+                          <span className="text-xs text-gray-400 dark:text-gray-500">
                             {new Date(post.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                           </span>
                           {post.platforms?.slice(0, 3).map(p => (
-                            <span key={p} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-semibold">{p}</span>
+                            <span key={p} className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded-full font-semibold">{p}</span>
                           ))}
                         </div>
                       </div>
@@ -128,10 +128,10 @@ export default function EvergreenPage() {
           <div>
             <h2 className="text-sm font-extrabold mb-4">📝 Published Posts — mark as evergreen</h2>
             {regularPosts.length === 0 ? (
-              <div className="bg-white border border-gray-100 rounded-2xl p-10 text-center">
+              <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
                 <div className="text-4xl mb-3">📭</div>
-                <p className="text-sm font-bold text-gray-700 mb-1">No published posts yet</p>
-                <p className="text-xs text-gray-400 mb-4">Publish some posts first, then come back to mark your best ones as evergreen.</p>
+                <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">No published posts yet</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">Publish some posts first, then come back to mark your best ones as evergreen.</p>
                 <Link href="/compose" className="text-xs font-bold px-4 py-2 bg-black text-white rounded-xl hover:opacity-80 transition-all">
                   Compose a post →
                 </Link>
@@ -139,16 +139,16 @@ export default function EvergreenPage() {
             ) : (
               <div className="space-y-3">
                 {regularPosts.map(post => (
-                  <div key={post.id} className="bg-white border border-gray-100 rounded-2xl p-4 hover:border-gray-300 transition-all">
+                  <div key={post.id} className="bg-surface border border-theme rounded-2xl p-4 hover:border-gray-300 transition-all">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-700 leading-relaxed line-clamp-2">{post.content}</p>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-2">{post.content}</p>
                         <div className="flex items-center gap-2 mt-2">
-                          <span className="text-xs text-gray-400">
+                          <span className="text-xs text-gray-400 dark:text-gray-500">
                             {new Date(post.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                           </span>
                           {post.platforms?.slice(0, 3).map(p => (
-                            <span key={p} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-semibold">{p}</span>
+                            <span key={p} className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded-full font-semibold">{p}</span>
                           ))}
                         </div>
                       </div>

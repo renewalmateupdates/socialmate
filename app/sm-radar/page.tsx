@@ -50,14 +50,14 @@ export default function SMRadarPage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-50">
+      <div className="flex h-screen items-center justify-center bg-theme">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <main className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
@@ -69,19 +69,19 @@ export default function SMRadarPage() {
                 <span className="text-2xl">📡</span>
                 <h1 className="text-2xl font-extrabold tracking-tight">SM-Radar</h1>
               </div>
-              <p className="text-sm text-gray-400">
+              <p className="text-sm text-gray-400 dark:text-gray-500">
                 AI analysis of real Reddit and YouTube data — content gaps, competitor weaknesses, and what to post this week.
               </p>
             </div>
             <div className="flex-shrink-0">
-              <div className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">Cost per report</div>
-              <div className="text-xl font-extrabold">{CREDIT_COST} <span className="text-sm font-semibold text-gray-400">credits</span></div>
-              <div className="text-xs text-gray-400 mt-0.5">{credits} remaining</div>
+              <div className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">Cost per report</div>
+              <div className="text-xl font-extrabold">{CREDIT_COST} <span className="text-sm font-semibold text-gray-400 dark:text-gray-500">credits</span></div>
+              <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{credits} remaining</div>
             </div>
           </div>
 
           {/* WHAT IT ANALYZES */}
-          <div className="bg-white border border-gray-100 rounded-2xl p-5 mb-6">
+          <div className="bg-surface border border-theme rounded-2xl p-5 mb-6">
             <h2 className="text-sm font-extrabold mb-4">What SM-Radar analyzes</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {[
@@ -92,11 +92,11 @@ export default function SMRadarPage() {
                 { icon: '📅', label: 'Timing signals',       desc: 'When your niche audience is most active and engaged'            },
                 { icon: '⚡', label: 'This week\'s opportunity', desc: 'One concrete content angle you should post on right now'    },
               ].map(item => (
-                <div key={item.label} className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
+                <div key={item.label} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
                   <span className="text-lg flex-shrink-0">{item.icon}</span>
                   <div>
-                    <p className="text-xs font-bold text-gray-900">{item.label}</p>
-                    <p className="text-xs text-gray-400 leading-relaxed mt-0.5">{item.desc}</p>
+                    <p className="text-xs font-bold text-gray-900 dark:text-gray-100">{item.label}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 leading-relaxed mt-0.5">{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -104,8 +104,8 @@ export default function SMRadarPage() {
           </div>
 
           {/* NICHE INPUT */}
-          <div className="bg-white border border-gray-100 rounded-2xl p-5 mb-4">
-            <label className="text-xs font-bold text-gray-500 uppercase tracking-wide block mb-2">
+          <div className="bg-surface border border-theme rounded-2xl p-5 mb-4">
+            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-2">
               Your niche or topic
             </label>
             <input
@@ -115,7 +115,7 @@ export default function SMRadarPage() {
               placeholder="e.g. fitness, SaaS marketing, cooking, personal finance..."
               className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400"
             />
-            <p className="text-xs text-gray-400 mt-1.5">Leave blank to default to social media content creation.</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">Leave blank to default to social media content creation.</p>
           </div>
 
           {/* GENERATE BUTTON */}
@@ -157,7 +157,7 @@ export default function SMRadarPage() {
           {/* RESULTS */}
           {result && (
             <>
-              <div className="bg-white border border-gray-100 rounded-2xl p-5 mb-4">
+              <div className="bg-surface border border-theme rounded-2xl p-5 mb-4">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-sm font-extrabold">Your Radar Report</h2>
                   <button
@@ -166,7 +166,7 @@ export default function SMRadarPage() {
                     Copy
                   </button>
                 </div>
-                <pre className="text-xs text-gray-700 leading-relaxed whitespace-pre-wrap font-sans bg-gray-50 rounded-xl p-4">
+                <pre className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap font-sans bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
                   {result}
                 </pre>
               </div>
@@ -184,23 +184,41 @@ export default function SMRadarPage() {
             </>
           )}
 
-          {/* PREVIEW STATE */}
+          {/* PREVIEW STATE — blurred sample report */}
           {!result && !generating && (
-            <div className="bg-white border border-gray-100 rounded-2xl p-5">
-              <h2 className="text-sm font-extrabold mb-4">What your report will include</h2>
-              <div className="space-y-3 opacity-40 pointer-events-none select-none">
-                {[1,2,3,4].map(i => (
-                  <div key={i} className="flex items-center gap-3 py-2 border-b border-gray-50 last:border-0">
-                    <div className="w-8 h-8 bg-gray-200 rounded-full flex-shrink-0" />
-                    <div className="flex-1">
-                      <div className="w-24 h-2.5 bg-gray-200 rounded mb-1.5" />
-                      <div className="w-48 h-3 bg-gray-300 rounded" />
-                    </div>
-                    <div className="w-32 h-2.5 bg-gray-100 rounded hidden sm:block" />
-                  </div>
-                ))}
+            <div className="relative bg-surface border border-theme rounded-2xl overflow-hidden">
+              <div className="p-5 filter blur-sm pointer-events-none select-none" aria-hidden="true">
+                <h2 className="text-sm font-extrabold mb-4">📡 Your Growth Intelligence Report</h2>
+                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 text-xs text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap font-sans">
+{`## SM-RADAR: PERSONAL GROWTH INTELLIGENCE
+
+📊 CONTENT GAP ANALYSIS
+   Your biggest missed opportunity: Long-form educational content
+   Competitors post 4x more "how-to" content than you
+   Gap score: 8.4/10 — HIGH priority
+
+🎯 YOUR #1 CONTENT STRATEGY THIS WEEK
+   Format: 5-step educational carousel
+   Topic: "How I [outcome] in [timeframe] without [common obstacle]"
+   Post on: Tuesday or Wednesday, 9–11am
+   Expected reach boost: +40–60% vs. your current average
+
+🔍 COMPETITOR WEAKNESSES YOU CAN EXPLOIT
+   • @competitor1 has 0 video content — video beats text 3:1 in your niche
+   • No one in your niche posts on Sundays — wide-open posting window
+   • "Personal story" posts get 2x engagement — underutilized by all competitors
+
+💡 THIS WEEK'S SINGLE BEST MOVE:
+   Record a 60-second "what I wish I knew" video and post Sunday at 10am.`}
+                </div>
               </div>
-              <p className="text-xs text-center text-gray-400 mt-4">Enter your niche above and generate a report to see real insights</p>
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/70 backdrop-blur-[2px]">
+                <div className="text-center px-6">
+                  <div className="text-3xl mb-3">📡</div>
+                  <p className="text-sm font-extrabold mb-1">Your growth report appears here</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xs">Enter your niche above and generate a report to unlock personalized content strategy intelligence.</p>
+                </div>
+              </div>
             </div>
           )}
 

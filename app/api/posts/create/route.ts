@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
@@ -62,7 +63,6 @@ export async function POST(request: NextRequest) {
         if (personalWs) {
           resolvedWorkspaceId = personalWs.id
         } else {
-          // Auto-create a personal workspace so free tier users can post
           const { data: newWs, error: wsError } = await adminSupabase
             .from('workspaces')
             .insert({
@@ -86,7 +86,6 @@ export async function POST(request: NextRequest) {
           }
         }
       } catch (wsErr) {
-        // Workspace resolution is non-fatal — log and continue
         console.error('Workspace resolution error:', wsErr)
       }
     }
@@ -146,7 +145,6 @@ export async function POST(request: NextRequest) {
 
     const isScheduled = !!scheduledAt
 
-    // Build insert object — only include workspace_id if we have one
     const insertData: Record<string, unknown> = {
       user_id:      user.id,
       content,
@@ -191,7 +189,6 @@ export async function POST(request: NextRequest) {
         })
       } catch (inngestErr) {
         console.error('Inngest send error (non-fatal):', inngestErr)
-        // Post was already saved — just log and continue
       }
 
       return NextResponse.json({ success: true, postId: post.id, status: 'scheduled' })
@@ -218,6 +215,14 @@ export async function POST(request: NextRequest) {
 
     if (draftId && !allFailed) {
       await supabase.from('posts').delete().eq('id', draftId).eq('user_id', user.id)
+    }
+
+    // Fire analytics fetch event for successfully published posts
+    if (!allFailed && Object.keys(platformPostIds).length > 0) {
+      await inngest.send({
+        name: 'post/published',
+        data: { postId: post.id, userId: user.id, platformPostIds },
+      }).catch(err => console.error('[Create] Failed to send post/published event:', err))
     }
 
     return NextResponse.json({

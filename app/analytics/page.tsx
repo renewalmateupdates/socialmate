@@ -7,7 +7,7 @@ import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 
 function SkeletonBox({ className }: { className?: string }) {
-  return <div className={`bg-gray-100 rounded-xl animate-pulse ${className}`} />
+  return <div className={`bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse ${className}`} />
 }
 
 type Post = {
@@ -294,7 +294,7 @@ export default function Analytics() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-theme flex">
       <Sidebar />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-7xl mx-auto">
@@ -302,10 +302,10 @@ export default function Analytics() {
           {/* MODALS */}
           {creditModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-              <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
+              <div className="bg-surface rounded-2xl p-6 max-w-sm w-full shadow-xl">
                 <div className="text-2xl mb-3">🔓</div>
                 <h2 className="text-sm font-extrabold mb-1">Unlock {RANGE_LABELS[creditModal.range]} history</h2>
-                <p className="text-xs text-gray-400 mb-4">
+                <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
                   This will spend <span className="font-bold text-black">{creditModal.cost} AI credits</span> from your balance ({credits} remaining).
                 </p>
                 <div className="flex items-center gap-3">
@@ -314,7 +314,7 @@ export default function Analytics() {
                     {credits < creditModal.cost ? 'Not enough credits' : `Spend ${creditModal.cost} credits →`}
                   </button>
                   <button onClick={() => setCreditModal(null)}
-                    className="px-4 py-2.5 border border-gray-200 text-xs font-bold text-gray-600 rounded-xl hover:border-gray-400 transition-all">
+                    className="px-4 py-2.5 border border-gray-200 dark:border-gray-600 text-xs font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all">
                     Cancel
                   </button>
                 </div>
@@ -324,16 +324,16 @@ export default function Analytics() {
 
           {radarModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-              <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
+              <div className="bg-surface rounded-2xl p-6 max-w-sm w-full shadow-xl">
                 <div className="text-2xl mb-3">📡</div>
                 <h2 className="text-sm font-extrabold mb-1">Run SM-Radar</h2>
-                <p className="text-xs text-gray-400 mb-1">Costs <span className="font-bold text-black">10 AI credits</span> ({credits} remaining)</p>
-                <p className="text-xs text-gray-400 mb-4">AI analysis of real Reddit and YouTube data — content gaps, competitor weaknesses, and what to post this week.</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mb-1">Costs <span className="font-bold text-black">10 AI credits</span> ({credits} remaining)</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">AI analysis of real Reddit and YouTube data — content gaps, competitor weaknesses, and what to post this week.</p>
                 <div className="mb-4">
-                  <label className="text-xs font-semibold text-gray-500 block mb-1">Your niche or topic</label>
+                  <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 block mb-1">Your niche or topic</label>
                   <input type="text" placeholder="e.g. fitness, tech reviews, cooking..."
                     value={nicheInput} onChange={e => setNicheInput(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400" />
+                    className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-gray-400" />
                 </div>
                 <div className="flex items-center gap-3">
                   <button onClick={handleRunRadar} disabled={credits < 10 || radarLoading}
@@ -341,7 +341,7 @@ export default function Analytics() {
                     {radarLoading ? 'Analyzing...' : credits < 10 ? 'Not enough credits' : 'Run SM-Radar — 10 credits'}
                   </button>
                   <button onClick={() => setRadarModal(false)}
-                    className="px-4 py-2.5 border border-gray-200 text-xs font-bold text-gray-600 rounded-xl hover:border-gray-400 transition-all">
+                    className="px-4 py-2.5 border border-gray-200 dark:border-gray-600 text-xs font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all">
                     Cancel
                   </button>
                 </div>
@@ -351,16 +351,16 @@ export default function Analytics() {
 
           {pulseModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-              <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
+              <div className="bg-surface rounded-2xl p-6 max-w-sm w-full shadow-xl">
                 <div className="text-2xl mb-3">🔥</div>
                 <h2 className="text-sm font-extrabold mb-1">Run SM-Pulse</h2>
-                <p className="text-xs text-gray-400 mb-1">Costs <span className="font-bold text-black">10 AI credits</span> ({credits} remaining)</p>
-                <p className="text-xs text-gray-400 mb-4">See what's trending in your niche right now — powered by real Reddit and YouTube data.</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mb-1">Costs <span className="font-bold text-black">10 AI credits</span> ({credits} remaining)</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">See what's trending in your niche right now — powered by real Reddit and YouTube data.</p>
                 <div className="mb-4">
-                  <label className="text-xs font-semibold text-gray-500 block mb-1">Your niche or topic</label>
+                  <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 block mb-1">Your niche or topic</label>
                   <input type="text" placeholder="e.g. fitness, tech reviews, cooking..."
                     value={nicheInput} onChange={e => setNicheInput(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400" />
+                    className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-gray-400" />
                 </div>
                 <div className="flex items-center gap-3">
                   <button onClick={handleRunPulse} disabled={credits < 10 || pulseLoading}
@@ -368,7 +368,7 @@ export default function Analytics() {
                     {pulseLoading ? 'Scanning trends...' : credits < 10 ? 'Not enough credits' : 'Run SM-Pulse — 10 credits'}
                   </button>
                   <button onClick={() => setPulseModal(false)}
-                    className="px-4 py-2.5 border border-gray-200 text-xs font-bold text-gray-600 rounded-xl hover:border-gray-400 transition-all">
+                    className="px-4 py-2.5 border border-gray-200 dark:border-gray-600 text-xs font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all">
                     Cancel
                   </button>
                 </div>
@@ -378,18 +378,18 @@ export default function Analytics() {
 
           {radarResult && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-              <div className="bg-white rounded-2xl p-6 max-w-2xl w-full shadow-xl max-h-[80vh] overflow-y-auto">
+              <div className="bg-surface rounded-2xl p-6 max-w-2xl w-full shadow-xl max-h-[80vh] overflow-y-auto">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <span className="text-xl">📡</span>
                     <h2 className="text-sm font-extrabold">SM-Radar Results</h2>
                   </div>
-                  <button onClick={() => setRadarResult(null)} className="text-gray-400 hover:text-black text-xl">✕</button>
+                  <button onClick={() => setRadarResult(null)} className="text-gray-400 dark:text-gray-500 hover:text-black text-xl">✕</button>
                 </div>
-                <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{radarResult}</div>
+                <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{radarResult}</div>
                 <div className="flex gap-3 mt-6">
                   <button onClick={() => navigator.clipboard.writeText(radarResult)}
-                    className="flex-1 py-2.5 border border-gray-200 text-xs font-bold text-gray-600 rounded-xl hover:border-gray-400 transition-all">
+                    className="flex-1 py-2.5 border border-gray-200 dark:border-gray-600 text-xs font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all">
                     Copy Results
                   </button>
                   <button onClick={() => setRadarResult(null)}
@@ -403,18 +403,18 @@ export default function Analytics() {
 
           {pulseResult && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-              <div className="bg-white rounded-2xl p-6 max-w-2xl w-full shadow-xl max-h-[80vh] overflow-y-auto">
+              <div className="bg-surface rounded-2xl p-6 max-w-2xl w-full shadow-xl max-h-[80vh] overflow-y-auto">
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <span className="text-xl">🔥</span>
                     <h2 className="text-sm font-extrabold">SM-Pulse Results</h2>
                   </div>
-                  <button onClick={() => setPulseResult(null)} className="text-gray-400 hover:text-black text-xl">✕</button>
+                  <button onClick={() => setPulseResult(null)} className="text-gray-400 dark:text-gray-500 hover:text-black text-xl">✕</button>
                 </div>
-                <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{pulseResult}</div>
+                <div className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{pulseResult}</div>
                 <div className="flex gap-3 mt-6">
                   <button onClick={() => navigator.clipboard.writeText(pulseResult)}
-                    className="flex-1 py-2.5 border border-gray-200 text-xs font-bold text-gray-600 rounded-xl hover:border-gray-400 transition-all">
+                    className="flex-1 py-2.5 border border-gray-200 dark:border-gray-600 text-xs font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all">
                     Copy Results
                   </button>
                   <button onClick={() => setPulseResult(null)}
@@ -440,11 +440,11 @@ export default function Analytics() {
             <div className="flex flex-wrap items-center gap-2">
               {plan === 'agency' && (
                 <button onClick={handleExportPDF}
-                  className="flex items-center gap-2 px-4 py-2 border border-gray-200 text-xs font-bold text-gray-600 rounded-xl hover:border-gray-400 transition-all">
+                  className="flex items-center gap-2 px-4 py-2 border border-gray-200 dark:border-gray-600 text-xs font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all">
                   📄 Export PDF
                 </button>
               )}
-              <div className="flex items-center gap-1 bg-white border border-gray-100 rounded-xl p-1 overflow-x-auto">
+              <div className="flex items-center gap-1 bg-surface border border-theme rounded-xl p-1 overflow-x-auto">
                 {(['14', '30', '90', '180'] as const).map(r => {
                   const isFree      = freeRanges.includes(r)
                   const creditCost  = creditRanges[r]
@@ -454,8 +454,8 @@ export default function Analytics() {
                     <button key={r} onClick={() => handleRangeClick(r)} disabled={isHardLocked}
                       className={`relative px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
                         isActive      ? 'bg-black text-white' :
-                        isHardLocked  ? 'text-gray-300 cursor-not-allowed' :
-                        'text-gray-500 hover:text-black'
+                        isHardLocked  ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' :
+                        'text-gray-500 dark:text-gray-400 hover:text-black'
                       }`}>
                       {RANGE_LABELS[r]}
                       {creditCost && !isFree && <span className="ml-1 text-amber-500 font-bold">{creditCost}cr</span>}
@@ -468,19 +468,19 @@ export default function Analytics() {
           </div>
 
           {plan === 'free' && (
-            <div className="mb-6 bg-gray-50 border border-gray-200 rounded-2xl px-5 py-3">
-              <p className="text-xs text-gray-500 font-semibold">
+            <div className="mb-6 bg-theme border border-theme-md rounded-2xl px-5 py-3">
+              <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold">
                 📊 Free plan includes 14-day & 30-day history
-                <span className="text-gray-400 font-normal"> · 90-day costs 2 credits · </span>
+                <span className="text-gray-400 dark:text-gray-500 font-normal"> · 90-day costs 2 credits · </span>
                 <Link href="/pricing" className="text-black font-bold underline">Upgrade to Pro to unlock 90-day free</Link>
               </p>
             </div>
           )}
           {plan === 'pro' && (
-            <div className="mb-6 bg-gray-50 border border-gray-200 rounded-2xl px-5 py-3">
-              <p className="text-xs text-gray-500 font-semibold">
+            <div className="mb-6 bg-theme border border-theme-md rounded-2xl px-5 py-3">
+              <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold">
                 📊 Pro plan includes up to 90-day history
-                <span className="text-gray-400 font-normal"> · 6-month costs 2 credits · </span>
+                <span className="text-gray-400 dark:text-gray-500 font-normal"> · 6-month costs 2 credits · </span>
                 <Link href="/pricing" className="text-black font-bold underline">Upgrade to Agency to unlock free</Link>
               </p>
             </div>
@@ -533,7 +533,7 @@ export default function Analytics() {
           {/* STAT CARDS */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
             {loading ? [1,2,3,4].map(i => (
-              <div key={i} className="bg-white border border-gray-100 rounded-2xl p-5">
+              <div key={i} className="bg-surface border border-theme rounded-2xl p-5">
                 <SkeletonBox className="h-3 w-16 mb-4" />
                 <SkeletonBox className="h-8 w-12 mb-2" />
                 <SkeletonBox className="h-3 w-20" />
@@ -545,13 +545,13 @@ export default function Analytics() {
                 { label: 'Avg / Week',       value: avgPerWeek,           icon: '📈', sub: 'posting frequency'         },
                 { label: 'Total Engagement', value: totalEngagement,      icon: '❤️', sub: 'likes, reactions, reposts' },
               ].map(stat => (
-                <div key={stat.label} className="bg-white border border-gray-100 rounded-2xl p-4 md:p-5">
+                <div key={stat.label} className="bg-surface border border-theme rounded-2xl p-4 md:p-5">
                   <div className="flex justify-between items-center mb-3">
-                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide leading-tight">{stat.label}</span>
+                    <span className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide leading-tight">{stat.label}</span>
                     <span className="text-base flex-shrink-0">{stat.icon}</span>
                   </div>
                   <div className="text-2xl md:text-3xl font-extrabold tracking-tight mb-1">{stat.value}</div>
-                  <div className="text-xs text-gray-400">{stat.sub}</div>
+                  <div className="text-xs text-gray-400 dark:text-gray-500">{stat.sub}</div>
                 </div>
               ))
             )}
@@ -559,24 +559,24 @@ export default function Analytics() {
 
           {/* STREAK / PEAK / STATUS */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 flex items-center gap-4">
+            <div className="bg-surface border border-theme rounded-2xl p-5 flex items-center gap-4">
               <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0">🔥</div>
               <div>
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Current Streak</p>
-                <p className="text-2xl font-extrabold tracking-tight">{currentStreak} <span className="text-sm font-semibold text-gray-400">days</span></p>
-                <p className="text-xs text-gray-400">Longest: {longestStreak} days</p>
+                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Current Streak</p>
+                <p className="text-2xl font-extrabold tracking-tight">{currentStreak} <span className="text-sm font-semibold text-gray-400 dark:text-gray-500">days</span></p>
+                <p className="text-xs text-gray-400 dark:text-gray-500">Longest: {longestStreak} days</p>
               </div>
             </div>
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 flex items-center gap-4">
+            <div className="bg-surface border border-theme rounded-2xl p-5 flex items-center gap-4">
               <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0">⏰</div>
               <div>
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Peak Hour</p>
+                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Peak Hour</p>
                 <p className="text-2xl font-extrabold tracking-tight">{peakHour.label}</p>
-                <p className="text-xs text-gray-400">{peakHour.count} posts at this hour</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500">{peakHour.count} posts at this hour</p>
               </div>
             </div>
-            <div className="bg-white border border-gray-100 rounded-2xl p-5">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Post Status</p>
+            <div className="bg-surface border border-theme rounded-2xl p-5">
+              <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">Post Status</p>
               {loading ? <SkeletonBox className="h-12" /> : (
                 <div className="space-y-2">
                   {[
@@ -586,7 +586,7 @@ export default function Analytics() {
                   ].map(s => (
                     <div key={s.label} className="flex items-center gap-2">
                       <div className={`w-2 h-2 rounded-full ${s.color}`} />
-                      <span className="text-xs text-gray-500 flex-1">{s.label}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400 flex-1">{s.label}</span>
                       <span className="text-xs font-bold">{s.count}</span>
                     </div>
                   ))}
@@ -596,7 +596,7 @@ export default function Analytics() {
           </div>
 
           {postsWithEngagement.length > 0 && (
-            <div className="bg-white border border-gray-100 rounded-2xl p-5 mb-6">
+            <div className="bg-surface border border-theme rounded-2xl p-5 mb-6">
               <h2 className="text-sm font-bold tracking-tight mb-4">Engagement by Post</h2>
               <div className="space-y-3">
                 {postsWithEngagement.slice(0, 5).map(post => {
@@ -604,7 +604,7 @@ export default function Analytics() {
                   const totalEng = Object.values(eng).reduce((s: number, e: any) =>
                     s + (e.likes || 0) + (e.reposts || 0) + (e.reactions || 0) + (e.replies || 0), 0)
                   return (
-                    <div key={post.id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-xl">
+                    <div key={post.id} className="flex items-center gap-4 p-3 bg-gray-50 dark:bg-gray-800 rounded-xl">
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-semibold truncate">{post.content?.slice(0, 60)}...</p>
                         <div className="flex items-center gap-2 mt-1">
@@ -621,7 +621,7 @@ export default function Analytics() {
                           </div>
                         ))}
                         <div className="text-center">
-                          <p className="text-xs text-gray-400">Total</p>
+                          <p className="text-xs text-gray-400 dark:text-gray-500">Total</p>
                           <p className="text-sm font-extrabold">{totalEng}</p>
                         </div>
                       </div>
@@ -636,7 +636,7 @@ export default function Analytics() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
 
-              <div className="bg-white border border-gray-100 rounded-2xl p-5">
+              <div className="bg-surface border border-theme rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Daily Activity</h2>
                 {loading ? <SkeletonBox className="h-32" /> : (
                   <div className="flex items-end gap-1 h-32">
@@ -647,7 +647,7 @@ export default function Analytics() {
                         </div>
                         <div className="w-full flex items-end justify-center" style={{ height: '112px' }}>
                           <div
-                            className={`w-full rounded-t-md transition-all ${day.count > 0 ? 'bg-black hover:opacity-70' : 'bg-gray-100'}`}
+                            className={`w-full rounded-t-md transition-all ${day.count > 0 ? 'bg-black hover:opacity-70' : 'bg-gray-100 dark:bg-gray-800'}`}
                             style={{ height: day.count > 0 ? `${Math.max((day.count / maxDailyCount) * 100, 8)}%` : '4px' }}
                           />
                         </div>
@@ -656,12 +656,12 @@ export default function Analytics() {
                   </div>
                 )}
                 <div className="flex justify-between mt-2">
-                  <span className="text-xs text-gray-400">{dailyCounts[0]?.label}</span>
-                  <span className="text-xs text-gray-400">{dailyCounts[dailyCounts.length - 1]?.label}</span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500">{dailyCounts[0]?.label}</span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500">{dailyCounts[dailyCounts.length - 1]?.label}</span>
                 </div>
               </div>
 
-              <div className="bg-white border border-gray-100 rounded-2xl p-5">
+              <div className="bg-surface border border-theme rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Best Days to Post</h2>
                 {loading ? <SkeletonBox className="h-24" /> : (
                   <div className="flex items-end gap-2 h-24">
@@ -672,12 +672,12 @@ export default function Analytics() {
                         <div key={i} className="flex-1 flex flex-col items-center gap-1">
                           <div className="w-full flex items-end justify-center" style={{ height: '72px' }}>
                             <div
-                              className={`w-full rounded-t-lg transition-all ${isTop ? 'bg-black' : day.count > 0 ? 'bg-gray-200' : 'bg-gray-100'}`}
+                              className={`w-full rounded-t-lg transition-all ${isTop ? 'bg-black' : day.count > 0 ? 'bg-gray-200 dark:bg-gray-700' : 'bg-gray-100 dark:bg-gray-800'}`}
                               style={{ height: day.count > 0 ? `${Math.max(pct, 10)}%` : '4px' }}
                             />
                           </div>
-                          <span className={`text-xs font-semibold ${isTop ? 'text-black' : 'text-gray-400'}`}>{day.day}</span>
-                          <span className="text-xs text-gray-400">{day.count}</span>
+                          <span className={`text-xs font-semibold ${isTop ? 'text-black dark:text-white' : 'text-gray-400 dark:text-gray-500'}`}>{day.day}</span>
+                          <span className="text-xs text-gray-400 dark:text-gray-500">{day.count}</span>
                         </div>
                       )
                     })}
@@ -685,7 +685,7 @@ export default function Analytics() {
                 )}
               </div>
 
-              <div className="bg-white border border-gray-100 rounded-2xl p-5">
+              <div className="bg-surface border border-theme rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Best Times to Post</h2>
                 {loading ? <SkeletonBox className="h-16" /> : (
                   <div>
@@ -703,21 +703,21 @@ export default function Analytics() {
                         )
                       })}
                     </div>
-                    <div className="flex justify-between mt-2 text-xs text-gray-400">
+                    <div className="flex justify-between mt-2 text-xs text-gray-400 dark:text-gray-500">
                       <span>12am</span><span>6am</span><span>12pm</span><span>6pm</span><span>11pm</span>
                     </div>
                     <div className="flex items-center gap-2 mt-3">
-                      <span className="text-xs text-gray-400">Less</span>
+                      <span className="text-xs text-gray-400 dark:text-gray-500">Less</span>
                       {['bg-gray-100','bg-gray-300','bg-gray-400','bg-gray-600','bg-black'].map((c, i) => (
                         <div key={i} className={`w-4 h-4 rounded ${c}`} />
                       ))}
-                      <span className="text-xs text-gray-400">More</span>
+                      <span className="text-xs text-gray-400 dark:text-gray-500">More</span>
                     </div>
                   </div>
                 )}
               </div>
 
-              <div className="bg-white border border-gray-100 rounded-2xl p-5">
+              <div className="bg-surface border border-theme rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Posts by Month — {now.getFullYear()}</h2>
                 {loading ? <SkeletonBox className="h-24" /> : (
                   <div className="flex items-end gap-1 md:gap-2 h-24">
@@ -727,11 +727,11 @@ export default function Analytics() {
                         <div key={i} className="flex-1 flex flex-col items-center gap-1">
                           <div className="w-full flex items-end justify-center" style={{ height: '72px' }}>
                             <div
-                              className={`w-full rounded-t-lg transition-all ${isCurrent ? 'bg-black' : m.count > 0 ? 'bg-gray-200' : 'bg-gray-100'}`}
+                              className={`w-full rounded-t-lg transition-all ${isCurrent ? 'bg-black' : m.count > 0 ? 'bg-gray-200 dark:bg-gray-700' : 'bg-gray-100 dark:bg-gray-800'}`}
                               style={{ height: m.count > 0 ? `${Math.max((m.count / maxMonthCount) * 100, 8)}%` : '4px' }}
                             />
                           </div>
-                          <span className={`text-xs ${isCurrent ? 'font-bold text-black' : 'text-gray-400'} hidden sm:block`}>{m.month}</span>
+                          <span className={`text-xs ${isCurrent ? 'font-bold text-black dark:text-white' : 'text-gray-400 dark:text-gray-500'} hidden sm:block`}>{m.month}</span>
                         </div>
                       )
                     })}
@@ -742,12 +742,12 @@ export default function Analytics() {
 
             {/* RIGHT COLUMN */}
             <div className="space-y-6">
-              <div className="bg-white border border-gray-100 rounded-2xl p-5">
+              <div className="bg-surface border border-theme rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Platform Breakdown</h2>
                 {loading
                   ? <div className="space-y-3">{[1,2,3,4].map(i => <SkeletonBox key={i} className="h-6" />)}</div>
                   : topPlatforms.length === 0
-                  ? <div className="text-center py-6"><p className="text-xs text-gray-400">No posts yet</p></div>
+                  ? <div className="text-center py-6"><p className="text-xs text-gray-400 dark:text-gray-500">No posts yet</p></div>
                   : (
                     <div className="space-y-3">
                       {topPlatforms.map(([platform, count]) => (
@@ -759,7 +759,7 @@ export default function Analytics() {
                             </div>
                             <span className="text-xs font-bold">{count}</span>
                           </div>
-                          <div className="w-full bg-gray-100 rounded-full h-2">
+                          <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2">
                             <div className="bg-black h-2 rounded-full transition-all"
                               style={{ width: `${(count / maxPlatformCount) * 100}%` }} />
                           </div>
@@ -770,7 +770,7 @@ export default function Analytics() {
                 }
               </div>
 
-              <div className="bg-white border border-gray-100 rounded-2xl p-5">
+              <div className="bg-surface border border-theme rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Content Insights</h2>
                 {loading ? <SkeletonBox className="h-32" /> : (
                   <div className="space-y-4">
@@ -781,11 +781,11 @@ export default function Analytics() {
                       { label: 'Posts with Engagement', value: postsWithEngagement.length, sub: 'synced from platforms', icon: '❤️' },
                     ].map(insight => (
                       <div key={insight.label} className="flex items-center gap-3">
-                        <div className="w-9 h-9 bg-gray-50 rounded-xl flex items-center justify-center text-base flex-shrink-0">{insight.icon}</div>
+                        <div className="w-9 h-9 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-base flex-shrink-0">{insight.icon}</div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs text-gray-400">{insight.label}</p>
+                          <p className="text-xs text-gray-400 dark:text-gray-500">{insight.label}</p>
                           <p className="text-sm font-bold truncate">{insight.value}</p>
-                          <p className="text-xs text-gray-400">{insight.sub}</p>
+                          <p className="text-xs text-gray-400 dark:text-gray-500">{insight.sub}</p>
                         </div>
                       </div>
                     ))}
@@ -793,7 +793,7 @@ export default function Analytics() {
                 )}
               </div>
 
-              <div className="bg-white border border-gray-100 rounded-2xl p-5">
+              <div className="bg-surface border border-theme rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-2">Consistency Score</h2>
                 {loading ? <SkeletonBox className="h-20" /> : (() => {
                   const score = Math.min(Math.round((parseFloat(avgPerWeek) / 7) * 100), 100)
@@ -803,13 +803,13 @@ export default function Analytics() {
                     <>
                       <div className="flex items-end gap-2 mb-2">
                         <span className={`text-4xl font-extrabold tracking-tight ${color}`}>{score}</span>
-                        <span className="text-gray-400 text-sm mb-1">/100</span>
+                        <span className="text-gray-400 dark:text-gray-500 text-sm mb-1">/100</span>
                       </div>
-                      <div className="w-full bg-gray-100 rounded-full h-2 mb-2">
+                      <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2 mb-2">
                         <div className="bg-black h-2 rounded-full transition-all" style={{ width: `${score}%` }} />
                       </div>
                       <p className={`text-xs font-semibold ${color}`}>{label}</p>
-                      <p className="text-xs text-gray-400 mt-1">Based on {avgPerWeek} posts/week average</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Based on {avgPerWeek} posts/week average</p>
                     </>
                   )
                 })()}
