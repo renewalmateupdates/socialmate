@@ -1,7 +1,6 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
 
 type RoadmapItem = {
   title:    string
@@ -74,16 +73,19 @@ export default function RoadmapClient() {
     if (!feedbackText.trim()) return
     setSending(true)
     try {
-      await supabase.from('feature_requests').insert({
-        request:    feedbackText.trim(),
-        email:      feedbackEmail.trim() || null,
-        created_at: new Date().toISOString(),
+      await fetch('/api/feature-requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: feedbackText.trim(),
+          email:   feedbackEmail.trim() || null,
+        }),
       })
       setFeedbackSent(true)
       setFeedbackText('')
       setFeedbackEmail('')
     } catch {
-      // Silently fail — table may not exist yet
+      // Silently fail
       setFeedbackSent(true)
     } finally {
       setSending(false)
@@ -206,8 +208,8 @@ export default function RoadmapClient() {
               <button
                 onClick={submitRequest}
                 disabled={!feedbackText.trim() || sending}
-                className="bg-black text-white text-sm font-bold px-6 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
-                {sending ? 'Sending...' : 'Submit request →'}
+                className="bg-pink-500 text-white text-sm font-bold px-6 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
+                {sending ? 'Sending...' : 'Submit idea →'}
               </button>
             </div>
           )}

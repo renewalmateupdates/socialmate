@@ -12,10 +12,10 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
   title: {
-    default: 'SocialMate — Free Social Media Scheduler for 16 Platforms',
+    default: 'SocialMate — Free Social Media Scheduler — 4 Platforms Live',
     template: '%s | SocialMate',
   },
-  description: 'Schedule posts to 16 social platforms for free. No per-channel fees, no post limits, no catch. The free-first alternative to Buffer and Hootsuite.',
+  description: 'Schedule posts to Bluesky, Discord, Telegram, and Mastodon for free. 12 more platforms coming soon. No per-channel fees, no post limits, no catch. The free-first alternative to Buffer and Hootsuite.',
   keywords: [
     'social media scheduler',
     'free buffer alternative',

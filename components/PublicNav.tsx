@@ -17,7 +17,7 @@ export default function PublicNav() {
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
-          <span className="font-bold text-base tracking-tight">SocialMate</span>
+          <span className="font-bold text-base tracking-tight">SocialMate<span className="text-[10px] font-semibold bg-pink-500 text-white px-1.5 py-0.5 rounded-full align-super ml-1">Beta</span></span>
         </Link>
         <nav className="hidden md:flex items-center gap-1">
           {NAV_LINKS.map(link => (

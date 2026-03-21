@@ -158,7 +158,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 bg-black dark:bg-white rounded-lg flex items-center justify-center text-white dark:text-black text-sm font-bold">S</div>
-            <span className="font-bold text-base tracking-tight" style={{ color: 'var(--text)' }}>SocialMate</span>
+            <span className="font-bold text-base tracking-tight" style={{ color: 'var(--text)' }}>SocialMate<span className="text-[10px] font-semibold bg-pink-500 text-white px-1.5 py-0.5 rounded-full align-super ml-1">Beta</span></span>
           </div>
           <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${badge.color}`}>
             {badge.label}

@@ -487,7 +487,7 @@ function SettingsInner() {
                     </div>
                     <p className="text-xs text-gray-400">
                       They upgrade to Pro → <span className="text-white font-bold">+50 credits</span> &nbsp;·&nbsp;
-                      They upgrade to Agency → <span className="text-white font-bold">+100 credits</span>
+                      They upgrade to Agency → <span className="text-white font-bold">+50 credits</span>
                     </p>
                   </div>
 
