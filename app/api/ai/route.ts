@@ -2,20 +2,28 @@ import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { Resend } from 'resend'
+
+let _resend: Resend | null = null
+function getResend() {
+  if (!_resend) _resend = new Resend(process.env.RESEND_API_KEY!)
+  return _resend
+}
 
 const CREDIT_COSTS: Record<string, number> = {
-  caption:     3,
-  hashtags:    2,
-  rewrite:     3,
-  hook:        4,
-  thread:      8,
-  repurpose:   8,
-  pulse:       10,
-  radar:       10,
+  caption:     5,
+  hashtags:    5,
+  rewrite:     5,
+  hook:        5,
+  thread:      10,
+  repurpose:   10,
+  pulse:       20,
+  radar:       20,
   content_gap: 10,
-  calendar:    20,
+  calendar:    25,
   image:       25,
-  score:       2,
+  score:       5,
 }
 
 async function fetchTrendingData(niche: string) {
@@ -198,6 +206,57 @@ export async function POST(req: NextRequest) {
 
     if (deductError) {
       return NextResponse.json({ error: 'Failed to deduct credits — please try again' }, { status: 500 })
+    }
+
+    // Low credits email — send at most once per calendar month
+    if (newCredits < 10) {
+      try {
+        const { data: creditSettings } = await getSupabaseAdmin()
+          .from('user_settings')
+          .select('notification_prefs, credits_low_email_sent_at')
+          .eq('user_id', user.id)
+          .single()
+
+        const prefs = (creditSettings?.notification_prefs ?? {}) as Record<string, boolean>
+        const lastSent = creditSettings?.credits_low_email_sent_at as string | null
+        const thisMonth = new Date().toISOString().slice(0, 7)
+        const alreadySentThisMonth = lastSent && lastSent.startsWith(thisMonth)
+
+        if (prefs.credits_low !== false && !alreadySentThisMonth) {
+          await getSupabaseAdmin()
+            .from('user_settings')
+            .update({ credits_low_email_sent_at: new Date().toISOString() })
+            .eq('user_id', user.id)
+
+          const { data: authUser } = await getSupabaseAdmin().auth.admin.getUserById(user.id)
+          const email = authUser?.user?.email
+
+          if (email) {
+            await getResend().emails.send({
+              from: 'SocialMate <notifications@socialmate.studio>',
+              to: email,
+              subject: `You're running low on AI credits — ${newCredits} remaining`,
+              html: `
+                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 32px; color: #111;">
+                  <div style="font-size: 20px; font-weight: 800; margin-bottom: 16px;">SocialMate</div>
+                  <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">Running low on AI credits</h2>
+                  <p style="color: #555; font-size: 14px; line-height: 1.6;">
+                    You have <strong>${newCredits} credits</strong> remaining this month.
+                    Credits reset on your monthly billing date.
+                  </p>
+                  <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'}/settings?tab=Plan"
+                    style="display: inline-block; background: #EC4899; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 14px; margin-top: 8px;">
+                    Get more credits →
+                  </a>
+                  <p style="color: #aaa; font-size: 12px; margin-top: 24px;">To disable these emails, go to Settings → Notifications.</p>
+                </div>
+              `,
+            })
+          }
+        }
+      } catch (emailErr) {
+        console.error('Credits low email failed (non-fatal):', emailErr)
+      }
     }
 
     const apiKey = process.env.GEMINI_API_KEY

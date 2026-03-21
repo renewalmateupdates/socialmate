@@ -21,17 +21,17 @@ const PLATFORMS = [
 ]
 
 const AI_TOOLS = [
-  { name: 'Caption Generator',    emoji: '✍️',  credits: '3 credits',    proOnly: false },
-  { name: 'Hashtag Generator',    emoji: '#️⃣', credits: '2 credits',    proOnly: false },
-  { name: 'Post Rewriter',        emoji: '🔁',  credits: '3 credits',    proOnly: false },
-  { name: 'Viral Hook Generator', emoji: '🎣',  credits: '4 credits',    proOnly: false },
-  { name: 'Thread Generator',     emoji: '🧵',  credits: '8 credits',    proOnly: false },
-  { name: 'Content Repurposer',   emoji: '♻️',  credits: '8 credits',    proOnly: false },
-  { name: 'Post Score',           emoji: '⚡',  credits: '2 credits',    proOnly: false },
-  { name: 'SM-Pulse',             emoji: '🔥',  credits: '10 credits',   proOnly: false },
-  { name: 'SM-Radar',             emoji: '📡',  credits: '10 credits',   proOnly: false },
+  { name: 'Caption Generator',    emoji: '✍️',  credits: '5 credits',    proOnly: false },
+  { name: 'Hashtag Generator',    emoji: '#️⃣', credits: '5 credits',    proOnly: false },
+  { name: 'Post Rewriter',        emoji: '🔁',  credits: '5 credits',    proOnly: false },
+  { name: 'Viral Hook Generator', emoji: '🎣',  credits: '5 credits',    proOnly: false },
+  { name: 'Thread Generator',     emoji: '🧵',  credits: '10 credits',   proOnly: false },
+  { name: 'Content Repurposer',   emoji: '♻️',  credits: '10 credits',   proOnly: false },
+  { name: 'Post Score',           emoji: '⚡',  credits: '5 credits',    proOnly: false },
+  { name: 'SM-Pulse',             emoji: '🔥',  credits: '20 credits',   proOnly: false },
+  { name: 'SM-Radar',             emoji: '📡',  credits: '20 credits',   proOnly: false },
   { name: 'Content Gap Detector', emoji: '🕳️', credits: '10 credits',   proOnly: false },
-  { name: 'AI Content Calendar',  emoji: '📅',  credits: '20 cr · Pro+', proOnly: true  },
+  { name: 'AI Content Calendar',  emoji: '📅',  credits: '25 cr · Pro+', proOnly: true  },
   { name: 'AI Image Generation',  emoji: '🎨',  credits: '25 cr · Pro+', proOnly: true  },
 ]
 
@@ -216,7 +216,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             {[
-              { icon: '🤖', value: '100',     label: 'AI credits / month'           },
+              { icon: '🤖', value: '50',      label: 'AI credits / month'           },
               { icon: '📅', value: '2 weeks', label: 'Scheduling window'            },
               { icon: '👥', value: '2',        label: 'Team seats included'         },
               { icon: '💾', value: '1 GB',     label: 'Media storage'               },
@@ -298,7 +298,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">AI-Powered</p>
             <h2 className="text-3xl font-extrabold tracking-tight mb-3">12 AI tools built in</h2>
             <p className="text-sm text-gray-500 max-w-xl mx-auto">
-              Every tool runs on Google Gemini. 100 credits included free every month —
+              Every tool runs on Google Gemini. 50 credits included free every month —
               no separate AI subscription, no hidden costs.
             </p>
           </div>
@@ -549,7 +549,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         <div className="max-w-3xl mx-auto px-6 text-center">
           <h2 className="text-4xl font-extrabold tracking-tight mb-4">Ready to get started?</h2>
           <p className="text-gray-400 mb-8 text-sm max-w-lg mx-auto">
-            Free forever. No card required. 100 AI credits on your first post. Set up in 60 seconds.
+            Free forever. No card required. 50 AI credits included. Set up in 60 seconds.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/signup"

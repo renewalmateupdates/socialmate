@@ -31,15 +31,15 @@ const COMING_SOON_PLATFORMS = [
 const DESTINATION_PLATFORMS = ['discord', 'telegram']
 
 const AI_TOOLS = [
-  { id: 'caption',   label: 'Caption',   emoji: '✍️',  credits: 3, desc: 'Generate a caption from your topic'     },
-  { id: 'hashtags',  label: 'Hashtags',  emoji: '#️⃣', credits: 2, desc: 'Generate relevant hashtags'             },
-  { id: 'rewrite',   label: 'Rewrite',   emoji: '🔁',  credits: 3, desc: 'Rewrite your post to be punchier'       },
-  { id: 'hook',      label: 'Hook',      emoji: '🎣',  credits: 4, desc: 'Generate 3 viral opening hooks'         },
-  { id: 'thread',    label: 'Thread',    emoji: '🧵',  credits: 8, desc: 'Turn your idea into a full thread'      },
-  { id: 'repurpose', label: 'Repurpose', emoji: '♻️',  credits: 8, desc: 'Reshape long content for this platform' },
+  { id: 'caption',   label: 'Caption',   emoji: '✍️',  credits: 5,  desc: 'Generate a caption from your topic'     },
+  { id: 'hashtags',  label: 'Hashtags',  emoji: '#️⃣', credits: 5,  desc: 'Generate relevant hashtags'             },
+  { id: 'rewrite',   label: 'Rewrite',   emoji: '🔁',  credits: 5,  desc: 'Rewrite your post to be punchier'       },
+  { id: 'hook',      label: 'Hook',      emoji: '🎣',  credits: 5,  desc: 'Generate 3 viral opening hooks'         },
+  { id: 'thread',    label: 'Thread',    emoji: '🧵',  credits: 10, desc: 'Turn your idea into a full thread'      },
+  { id: 'repurpose', label: 'Repurpose', emoji: '♻️',  credits: 10, desc: 'Reshape long content for this platform' },
 ]
 
-const SCORE_CREDIT_COST = 2
+const SCORE_CREDIT_COST = 5
 
 const STARTER_TEMPLATES = [
   {

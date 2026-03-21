@@ -79,7 +79,9 @@ export default function Drafts() {
         )
       }
     )
-    .subscribe()
+    .subscribe((status, err) => {
+      if (err) console.error('Realtime posts-status error:', err)
+    })
 
   return () => { supabase.removeChannel(channel) }
 }, [router])

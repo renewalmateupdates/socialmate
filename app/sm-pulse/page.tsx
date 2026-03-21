@@ -6,7 +6,7 @@ import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 
-const CREDIT_COST = 10
+const CREDIT_COST = 20
 
 export default function SMPulsePage() {
   const router = useRouter()

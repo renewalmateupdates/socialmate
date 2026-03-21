@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import CookieBanner from '@/components/CookieBanner'
+import FeedbackWidget from '@/components/FeedbackWidget'
 import { WorkspaceProvider } from '@/contexts/WorkspaceContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 
@@ -118,6 +119,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
           </WorkspaceProvider>
         </ThemeProvider>
+        <FeedbackWidget />
         <CookieBanner />
       </body>
     </html>
