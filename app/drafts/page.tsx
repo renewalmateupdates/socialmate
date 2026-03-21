@@ -275,11 +275,14 @@ export default function Drafts() {
                             replies: acc.replies + (post.analytics[p]?.replies ?? 0),
                             reposts: acc.reposts + (post.analytics[p]?.reposts ?? 0),
                           }), { likes: 0, replies: 0, reposts: 0 })
+                          if (totals.likes === 0 && totals.replies === 0 && totals.reposts === 0) return null
                           return (
-                            <div className="flex items-center gap-3 mt-2 pt-2 border-t border-gray-50 dark:border-gray-800">
-                              <span className="text-xs text-gray-400 dark:text-gray-500 font-semibold">❤️ {totals.likes}</span>
-                              <span className="text-xs text-gray-400 dark:text-gray-500 font-semibold">💬 {totals.replies}</span>
-                              <span className="text-xs text-gray-400 dark:text-gray-500 font-semibold">🔄 {totals.reposts}</span>
+                            <div
+                              title="Stats fetched 1h and 24h after publish"
+                              className="text-xs text-gray-400 dark:text-gray-500 flex gap-3 mt-2">
+                              <span>❤️ {totals.likes}</span>
+                              <span>💬 {totals.replies}</span>
+                              <span>🔄 {totals.reposts}</span>
                             </div>
                           )
                         })()}

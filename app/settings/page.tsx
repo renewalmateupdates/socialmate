@@ -54,13 +54,14 @@ function SettingsInner() {
   const [checkoutLoading, setCheckoutLoading]     = useState(false)
   const [creditPackLoading, setCreditPackLoading] = useState<string | null>(null)
   const [notifications, setNotifications] = useState({
-    postPublished: true,
-    postFailed:    true,
-    weeklyDigest:  false,
-    creditLow:     true,
-    teamActivity:  false,
-    productUpdates: true,
+    post_published: true,
+    post_failed:    true,
+    credits_low:    true,
+    team_joined:    true,
+    weekly_digest:  true,
   })
+  const [notifSaving, setNotifSaving]     = useState<string | null>(null)
+  const [notifSaved, setNotifSaved]       = useState<string | null>(null)
   const [copiedLink, setCopiedLink]                   = useState(false)
   const [confirmDeletePosts, setConfirmDeletePosts]   = useState(false)
   const [confirmDeleteAccount, setConfirmDeleteAccount] = useState(false)
@@ -120,6 +121,15 @@ function SettingsInner() {
         setWlLogoUrl(settings.white_label_logo_url || '')
         setWlDomain(settings.white_label_custom_domain || '')
         setWlColor(settings.white_label_brand_color || '#000000')
+        if (settings.notification_prefs) {
+          setNotifications(prev => ({
+            post_published: settings.notification_prefs.post_published ?? prev.post_published,
+            post_failed:    settings.notification_prefs.post_failed    ?? prev.post_failed,
+            credits_low:    settings.notification_prefs.credits_low    ?? prev.credits_low,
+            team_joined:    settings.notification_prefs.team_joined    ?? prev.team_joined,
+            weekly_digest:  settings.notification_prefs.weekly_digest  ?? prev.weekly_digest,
+          }))
+        }
       }
 
       const { data: profile } = await supabase
@@ -166,6 +176,20 @@ function SettingsInner() {
 
   const referralLink = referralCode ? `${appUrl}/?ref=${referralCode}` : ''
   const nextTier     = REFERRAL_TIERS.find(t => referralStats.payingReferrals < t.paying)
+
+  const handleNotifToggle = async (key: keyof typeof notifications) => {
+    const newVal  = !notifications[key]
+    const updated = { ...notifications, [key]: newVal }
+    setNotifications(updated)
+    setNotifSaving(key)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      await supabase.from('user_settings').update({ notification_prefs: updated }).eq('user_id', user.id)
+    }
+    setNotifSaving(null)
+    setNotifSaved(key)
+    setTimeout(() => setNotifSaved(null), 2000)
+  }
 
   const handleSave = async (tab: string) => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -568,33 +592,38 @@ function SettingsInner() {
           {/* ── NOTIFICATIONS ── */}
           {activeTab === 'Notifications' && (
             <div className="bg-surface border border-theme rounded-2xl p-6">
-              <h2 className="text-base font-extrabold mb-5">Notification Preferences</h2>
+              <h2 className="text-base font-extrabold mb-1">Notification Preferences</h2>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">Each toggle saves immediately. Changes take effect on the next event.</p>
               <div className="space-y-4">
-                {[
-                  { key: 'postPublished',  label: 'Post published',  desc: 'When a scheduled post goes live'               },
-                  { key: 'postFailed',     label: 'Post failed',     desc: 'When a scheduled post fails to publish'        },
-                  { key: 'weeklyDigest',   label: 'Weekly digest',   desc: 'Summary of your posting activity every Monday' },
-                  { key: 'creditLow',      label: 'Low AI credits',  desc: 'When your credits drop below 20'               },
-                  { key: 'teamActivity',   label: 'Team activity',   desc: 'When team members schedule or edit posts'      },
-                  { key: 'productUpdates', label: 'Product updates', desc: 'New features and platform announcements'       },
-                ].map(item => (
-                  <div key={item.key} className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
-                    <div>
+                {([
+                  { key: 'post_published' as const, label: 'Email me when a post publishes successfully', desc: 'Get notified every time a scheduled post goes live' },
+                  { key: 'post_failed'    as const, label: 'Email me when a post fails to publish',      desc: 'Get notified so you can retry or reschedule'       },
+                  { key: 'credits_low'    as const, label: 'Email me when I have fewer than 10 credits', desc: 'Avoid running out of AI credits unexpectedly'       },
+                  { key: 'team_joined'    as const, label: 'Email me when a team member joins',          desc: 'Know when someone accepts your workspace invite'   },
+                  { key: 'weekly_digest'  as const, label: 'Send me a weekly digest of my activity',     desc: 'Every Monday: posts published, credits used, stats' },
+                ] as { key: keyof typeof notifications; label: string; desc: string }[]).map(item => (
+                  <div key={item.key} className="flex items-center justify-between py-3 border-b border-gray-50 dark:border-gray-800 last:border-0">
+                    <div className="flex-1 min-w-0 pr-4">
                       <p className="text-sm font-bold">{item.label}</p>
-                      <p className="text-xs text-gray-400 dark:text-gray-500">{item.desc}</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{item.desc}</p>
+                      {notifSaving === item.key && (
+                        <p className="text-xs text-gray-400 mt-1">Saving...</p>
+                      )}
+                      {notifSaved === item.key && notifSaving !== item.key && (
+                        <p className="text-xs text-green-500 mt-1">Saved ✓</p>
+                      )}
                     </div>
                     <button
-                      onClick={() => setNotifications(prev => ({ ...prev, [item.key]: !prev[item.key as keyof typeof prev] }))}
-                      className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 ${notifications[item.key as keyof typeof notifications] ? 'bg-black' : 'bg-gray-200'}`}>
-                      <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${notifications[item.key as keyof typeof notifications] ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                      role="switch"
+                      aria-checked={notifications[item.key]}
+                      onClick={() => handleNotifToggle(item.key)}
+                      disabled={notifSaving === item.key}
+                      className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 disabled:opacity-60 ${notifications[item.key] ? 'bg-pink-500' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                      <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${notifications[item.key] ? 'translate-x-5' : 'translate-x-0.5'}`} />
                     </button>
                   </div>
                 ))}
               </div>
-              <button onClick={() => handleSave('Notifications')}
-                className={`mt-5 px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${savedTab === 'Notifications' ? 'bg-green-500 text-white' : 'bg-black text-white hover:opacity-80'}`}>
-                {savedTab === 'Notifications' ? '✓ Saved!' : 'Save Preferences'}
-              </button>
             </div>
           )}
 

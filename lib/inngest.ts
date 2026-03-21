@@ -108,10 +108,10 @@ export const weeklyDigest = inngest.createFunction(
         const email = emailMap[userId]
         if (!email) continue
 
-        // Check if user has opted out of weekly digest
+        // Check if user has opted out of weekly digest (key: weekly_digest, default: true)
         const userSettings = settings?.find(s => s.user_id === userId)
         const prefs = userSettings?.notification_prefs || {}
-        if (prefs.weeklyDigest === false) continue
+        if (prefs.weekly_digest === false) continue
 
         const posts = userPostMap[userId]
         const postCount = posts.length
