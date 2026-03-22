@@ -54,11 +54,11 @@ export async function POST(request: NextRequest) {
         const adminSupabase = getSupabaseAdmin()
 
         const { data: personalWs } = await adminSupabase
-          .from('workspaces')
-          .select('id')
-          .eq('owner_id', user.id)
-          .eq('is_personal', true)
-          .single()
+  .from('workspaces')
+  .select('id')
+  .eq('owner_id', user.id)
+  .eq('is_personal', true)
+  .single()
 
         if (personalWs) {
           resolvedWorkspaceId = personalWs.id
