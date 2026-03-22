@@ -142,7 +142,8 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   const monthlyRemaining = Math.min(credits, monthlyCredits)
   const bankedCredits  = Math.max(0, credits - monthlyCredits)
   const creditsBar     = monthlyCredits > 0 ? Math.max(0, Math.min((monthlyRemaining / monthlyCredits) * 100, 100)) : 0
-  const creditBarColor = monthlyRemaining < 10 ? 'bg-red-400' : monthlyRemaining < 20 ? 'bg-yellow-400' : 'bg-emerald-400'
+  // Credit bar color — red/yellow/accent based on remaining
+  const creditBarColor = monthlyRemaining < 10 ? '#f87171' : monthlyRemaining < 20 ? '#facc15' : 'var(--accent, #22c55e)'
   const seatsBar       = seatsTotal > 0 ? Math.min(100, (seatsUsed / seatsTotal) * 100) : 0
 
   const isActive = (href: string) => {
@@ -290,9 +291,11 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
                   onClick={onNavClick}
                   className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
                   style={{
-                    background: active ? 'var(--bg)' : 'transparent',
-                    color:      active ? 'var(--text)' : 'var(--text-muted)',
-                    fontWeight: active ? '700' : '500',
+                    background:  active ? 'var(--bg)' : 'transparent',
+                    color:       active ? 'var(--text)' : 'var(--text-muted)',
+                    fontWeight:  active ? '700' : '500',
+                    borderLeft:  active ? '3px solid var(--accent, #EC4899)' : '3px solid transparent',
+                    paddingLeft: active ? '10px' : '12px', // compensate for border width
                   }}>
                   <span>{item.icon}</span>
                   <span className="flex-1">{item.label}</span>
@@ -320,7 +323,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
             </span>
           </div>
           <div className="w-full rounded-full h-1.5" style={{ background: 'var(--border-mid)' }}>
-            <div className={`h-1.5 rounded-full transition-all ${creditBarColor}`} style={{ width: `${creditsBar}%` }} />
+            <div className="h-1.5 rounded-full transition-all" style={{ width: `${creditsBar}%`, background: creditBarColor }} />
           </div>
           <p className="text-xs mt-1" style={{ color: 'var(--text-faint)' }}>
             {loading ? 'Loading...' : `of ${monthlyCredits} this month`}

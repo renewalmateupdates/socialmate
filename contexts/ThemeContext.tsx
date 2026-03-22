@@ -30,7 +30,8 @@ const ThemeContext = createContext<ThemeContextType>({
 
 function applyTheme(mode: ThemeMode, accent: ThemeAccent) {
   const html = document.documentElement
-  // Apply .dark class so Tailwind dark: variants work
+
+  // Dark mode — apply .dark class so Tailwind dark: variants work
   if (mode === 'dark') {
     html.classList.add('dark')
     html.setAttribute('data-theme', 'dark')
@@ -38,12 +39,19 @@ function applyTheme(mode: ThemeMode, accent: ThemeAccent) {
     html.classList.remove('dark')
     html.setAttribute('data-theme', 'light')
   }
-  // Accent
+
+  // Accent — set data-accent attribute for CSS [data-accent] selectors
   if (accent === 'default') {
     html.removeAttribute('data-accent')
   } else {
     html.setAttribute('data-accent', accent)
   }
+
+  // Also set --accent as a CSS custom property directly so JS-rendered
+  // inline styles (like the toggle and nav indicator) pick it up instantly
+  const accentEntry = ACCENT_THEMES.find(t => t.id === accent)
+  const accentHex   = accentEntry?.color ?? '#000000'
+  html.style.setProperty('--accent', accentHex)
 }
 
 async function saveThemeToSupabase(mode: ThemeMode, accent: ThemeAccent) {
