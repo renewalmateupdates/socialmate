@@ -124,10 +124,11 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         setActiveWorkspace(personal)
         setWorkspaceName(personal.name || 'My Workspace')
       } else {
-        // No workspaces found (RLS may be blocking). Use a placeholder with
-        // NO id so the API routes know not to pass a workspace_id.
+        // No workspaces visible (RLS may be blocking anon client).
+        // Use a placeholder — the API routes look up the real workspace
+        // via the service-role admin client, so this is safe.
         const fallback: Workspace = {
-          id: '',           // empty string signals "no real workspace yet"
+          id: 'personal',   // sentinel value — never a real UUID, routes will ignore it
           name: 'My Workspace',
           is_personal: true,
           owner_id: user.id,

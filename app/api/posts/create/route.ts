@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
       const adminClient = getSupabaseAdmin()
 
       // If client sent a workspaceId, verify it actually belongs to this user
-      if (workspaceId && workspaceId !== user.id && workspaceId !== '') {
+      if (workspaceId && workspaceId !== user.id && workspaceId !== '' && workspaceId !== 'personal') {
         const { data: verifiedWs } = await adminClient
           .from('workspaces')
           .select('id')

@@ -140,18 +140,20 @@ function ComposeInner() {
   // Reload data whenever active workspace changes
   useEffect(() => {
     if (!activeWorkspace) return
-    const wsId = activeWorkspace.id
+    const wsId = activeWorkspace.id || null   // guard: empty string → null
 
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) { router.push('/login'); return }
 
-      // Load destinations scoped to this workspace
-      const { data: dests } = await supabase
+      // Load destinations scoped to this workspace (skip if no real workspace id)
+      const destQuery = supabase
         .from('post_destinations')
         .select('id, platform, label')
         .eq('user_id', data.user.id)
-        .eq('workspace_id', wsId)
         .order('created_at', { ascending: true })
+      const { data: dests } = wsId
+        ? await destQuery.eq('workspace_id', wsId)
+        : await destQuery
 
       // Fallback: load all destinations for this user if none found scoped
       const { data: allDests } = !dests?.length
