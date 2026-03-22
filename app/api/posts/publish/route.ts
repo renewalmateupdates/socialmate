@@ -5,6 +5,13 @@ import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { publishToAll } from '@/lib/publish'
 import { inngest } from '@/lib/inngest'
+import { Resend } from 'resend'
+
+let _resend: Resend | null = null
+function getResend() {
+  if (!_resend) _resend = new Resend(process.env.RESEND_API_KEY!)
+  return _resend
+}
 
 
 export async function POST(request: NextRequest) {
@@ -66,6 +73,41 @@ export async function POST(request: NextRequest) {
       const analyticsPlatforms = results.filter(r => r.success && (r.platform === 'bluesky' || r.platform === 'mastodon'))
       if (analyticsPlatforms.length > 0) {
         await inngest.send({ name: 'post/published', data: { postId, userId, platformPostIds } }).catch(() => {})
+      }
+    }
+
+    // Send post published success email (non-fatal)
+    if (!allFailed) {
+      try {
+        const { data: notifSettings } = await getSupabaseAdmin()
+          .from('user_settings')
+          .select('notification_prefs')
+          .eq('user_id', userId)
+          .single()
+
+        const prefs = (notifSettings?.notification_prefs ?? {}) as Record<string, boolean>
+
+        if (prefs.post_published !== false) {
+          const { data: authUser } = await getSupabaseAdmin().auth.admin.getUserById(userId)
+          if (authUser?.user?.email) {
+            await getResend().emails.send({
+              from: 'SocialMate <hello@socialmate.studio>',
+              to: authUser.user.email,
+              subject: 'Your post is live',
+              html: `
+                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
+                  <h2 style="color: #111;">Your post is live</h2>
+                  <p>Your post was published successfully.</p>
+                  <p><strong>Pro tip:</strong> Engage with replies in the first 30 minutes to maximize reach.</p>
+                  <a href="https://socialmate.studio/queue" style="display:inline-block; background:#EC4899; color:white; padding:12px 24px; border-radius:8px; text-decoration:none; margin-top:16px;">View in Queue →</a>
+                  <p style="margin-top:24px; color:#999; font-size:12px;">Turn off these emails in <a href="https://socialmate.studio/settings">Settings → Notifications</a></p>
+                </div>
+              `
+            })
+          }
+        }
+      } catch (emailErr) {
+        console.error('[PUBLISH] post published email failed (non-fatal):', emailErr)
       }
     }
 

@@ -91,7 +91,7 @@ const FEATURE_CATEGORIES = [
       {
         name: 'SM-Pulse',
         emoji: '🔥',
-        credits: '10 credits per scan',
+        credits: '20 credits per scan',
         proOnly: false,
         what: 'Scans Reddit and YouTube in real time to surface what is trending in your niche right now.',
         how: 'Analyzes trending topics, viral post formats, and engagement spikes. Returns top 3 trending topics, 3 content angles, 10 hashtags, and the best platform to post on right now.',
@@ -99,7 +99,7 @@ const FEATURE_CATEGORIES = [
       {
         name: 'SM-Radar',
         emoji: '📊',
-        credits: '10 credits per report',
+        credits: '20 credits per report',
         proOnly: false,
         what: 'Analyzes real trending data to surface content gaps, competitor weaknesses, and your single best content strategy this week.',
         how: 'Pulls from live Reddit and YouTube data to identify what topics are being asked about but not answered well, and hands you a concrete opportunity to act on.',
@@ -297,16 +297,16 @@ const FEATURE_CATEGORIES = [
 
 const CREDIT_SUMMARY = [
   { name: 'Caption Generator',    cost: '3 cr',  proOnly: false },
-  { name: 'Hashtag Generator',    cost: '2 cr',  proOnly: false },
-  { name: 'Post Rewrite',         cost: '3 cr',  proOnly: false },
-  { name: 'Viral Hook',           cost: '4 cr',  proOnly: false },
-  { name: 'Thread Generator',     cost: '8 cr',  proOnly: false },
-  { name: 'Content Repurposer',   cost: '8 cr',  proOnly: false },
-  { name: 'Post Score',           cost: '2 cr',  proOnly: false },
-  { name: 'SM-Pulse',             cost: '10 cr', proOnly: false },
-  { name: 'SM-Radar',             cost: '10 cr', proOnly: false },
+  { name: 'Hashtag Generator',    cost: '5 cr',  proOnly: false },
+  { name: 'Post Rewrite',         cost: '5 cr',  proOnly: false },
+  { name: 'Viral Hook',           cost: '5 cr',  proOnly: false },
+  { name: 'Thread Generator',     cost: '10 cr', proOnly: false },
+  { name: 'Content Repurposer',   cost: '10 cr', proOnly: false },
+  { name: 'Post Score',           cost: '5 cr',  proOnly: false },
+  { name: 'SM-Pulse',             cost: '20 cr', proOnly: false },
+  { name: 'SM-Radar',             cost: '20 cr', proOnly: false },
   { name: 'Content Gap',          cost: '10 cr', proOnly: false },
-  { name: 'AI Content Calendar',  cost: '20 cr', proOnly: true  },
+  { name: 'AI Content Calendar',  cost: '25 cr', proOnly: true  },
   { name: 'AI Image Generation',  cost: '25 cr', proOnly: true  },
 ]
 

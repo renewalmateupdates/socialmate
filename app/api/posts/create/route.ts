@@ -46,49 +46,26 @@ export async function POST(request: NextRequest) {
     if (!content?.trim()) return NextResponse.json({ error: 'Content is required' }, { status: 400 })
     if (!platforms?.length) return NextResponse.json({ error: 'Select at least one platform' }, { status: 400 })
 
-    // Resolve workspace — auto-create personal workspace for free tier users if missing
-    let resolvedWorkspaceId = workspaceId ?? null
-
-    if (!resolvedWorkspaceId) {
-      try {
-        const adminSupabase = getSupabaseAdmin()
-
-        const { data: personalWs } = await adminSupabase
-  .from('workspaces')
-  .select('id')
-  .eq('owner_id', user.id)
-  .eq('is_personal', true)
-  .single()
-
-        if (personalWs) {
-          resolvedWorkspaceId = personalWs.id
-        } else {
-          const { data: newWs, error: wsError } = await adminSupabase
-            .from('workspaces')
-            .insert({
-              owner_id:    user.id,
-              name:        'Personal',
-              is_personal: true,
-            })
-            .select('id')
-            .single()
-
-          if (wsError) {
-            console.error('Failed to create personal workspace:', {
-              message: wsError.message,
-              code:    wsError.code,
-              details: wsError.details,
-              hint:    wsError.hint,
-            })
-            // Non-fatal: proceed without workspace if insert fails
-          } else {
-            resolvedWorkspaceId = newWs?.id ?? null
-          }
-        }
-      } catch (wsErr) {
-        console.error('Workspace resolution error:', wsErr)
+    // Try to resolve workspace_id — best effort, non-blocking
+    let resolvedWorkspaceId: string | null = null
+    try {
+      if (workspaceId) {
+        resolvedWorkspaceId = workspaceId
+      } else {
+        const adminClient = getSupabaseAdmin()
+        const { data: ws } = await adminClient
+          .from('workspaces')
+          .select('id')
+          .eq('owner_id', user.id)
+          .eq('is_personal', true)
+          .maybeSingle()
+        resolvedWorkspaceId = ws?.id ?? null
       }
+    } catch (wsErr) {
+      console.error('[POST_CREATE] workspace lookup failed (non-fatal):', wsErr)
+      resolvedWorkspaceId = null
     }
+    console.log('[POST_CREATE] user:', user.id, 'workspace:', resolvedWorkspaceId)
 
     // Get plan
     const { data: settings } = await supabase
@@ -152,9 +129,7 @@ export async function POST(request: NextRequest) {
       status:       isScheduled ? 'scheduled' : 'draft',
       scheduled_at: scheduledAt || null,
       destinations: destinations || {},
-    }
-    if (resolvedWorkspaceId) {
-      insertData.workspace_id = resolvedWorkspaceId
+      workspace_id: resolvedWorkspaceId,
     }
 
     const { data: post, error: dbError } = await supabase

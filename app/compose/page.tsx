@@ -837,27 +837,29 @@ function ComposeInner() {
                 </div>
               )}
 
-              {/* ACTIONS */}
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={handlePublish}
-                  disabled={
-                    publishing ||
-                    !content.trim() ||
-                    charOver ||
-                    selectedPlatforms.length === 0 ||
-                    !!scheduleError ||
-                    missingDestinations.length > 0
-                  }
-                  className="flex-1 bg-black text-white text-sm font-bold py-3 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-                  {publishing
-                    ? (scheduleDate ? 'Scheduling...' : 'Publishing...')
-                    : (scheduleDate ? 'Schedule Post' : 'Post Now')}
-                </button>
-                <button onClick={handleSaveDraft} disabled={saving || !content.trim()}
-                  className="px-5 py-3 border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
-                  {saving ? 'Saving...' : currentDraftId ? 'Update Draft' : 'Save Draft'}
-                </button>
+              {/* ACTIONS — sticky on mobile */}
+              <div className="sticky bottom-0 bg-[var(--bg)] border-t border-[var(--border-mid)] pt-3 pb-3 -mx-1 px-1 lg:static lg:border-t-0 lg:bg-transparent lg:pt-0 lg:pb-0 lg:mx-0 lg:px-0">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handlePublish}
+                    disabled={
+                      publishing ||
+                      !content.trim() ||
+                      charOver ||
+                      selectedPlatforms.length === 0 ||
+                      !!scheduleError ||
+                      missingDestinations.length > 0
+                    }
+                    className="flex-1 bg-black text-white text-sm font-bold py-3 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                    {publishing
+                      ? (scheduleDate ? 'Scheduling...' : 'Publishing...')
+                      : (scheduleDate ? 'Schedule Post' : 'Post Now')}
+                  </button>
+                  <button onClick={handleSaveDraft} disabled={saving || !content.trim()}
+                    className="px-5 py-3 border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
+                    {saving ? 'Saving...' : currentDraftId ? 'Update Draft' : 'Save Draft'}
+                  </button>
+                </div>
               </div>
 
             </div>

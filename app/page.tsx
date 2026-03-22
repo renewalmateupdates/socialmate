@@ -23,17 +23,17 @@ const PLATFORMS = [
 ]
 
 const AI_TOOLS = [
-  { name: 'Caption Generator',    emoji: '✍️',  credits: '3 credits',    proOnly: false },
-  { name: 'Hashtag Generator',    emoji: '#️⃣', credits: '2 credits',    proOnly: false },
-  { name: 'Post Rewriter',        emoji: '🔁',  credits: '3 credits',    proOnly: false },
-  { name: 'Viral Hook Generator', emoji: '🎣',  credits: '4 credits',    proOnly: false },
-  { name: 'Thread Generator',     emoji: '🧵',  credits: '8 credits',    proOnly: false },
-  { name: 'Content Repurposer',   emoji: '♻️',  credits: '8 credits',    proOnly: false },
-  { name: 'Post Score',           emoji: '⚡',  credits: '2 credits',    proOnly: false },
-  { name: 'SM-Pulse',             emoji: '🔥',  credits: '10 credits',   proOnly: false },
-  { name: 'SM-Radar',             emoji: '📡',  credits: '10 credits',   proOnly: false },
+  { name: 'Caption Generator',    emoji: '✍️',  credits: '5 credits',    proOnly: false },
+  { name: 'Hashtag Generator',    emoji: '#️⃣', credits: '5 credits',    proOnly: false },
+  { name: 'Post Rewriter',        emoji: '🔁',  credits: '5 credits',    proOnly: false },
+  { name: 'Viral Hook Generator', emoji: '🎣',  credits: '5 credits',    proOnly: false },
+  { name: 'Thread Generator',     emoji: '🧵',  credits: '10 credits',   proOnly: false },
+  { name: 'Content Repurposer',   emoji: '♻️',  credits: '10 credits',   proOnly: false },
+  { name: 'Post Score',           emoji: '⚡',  credits: '5 credits',    proOnly: false },
+  { name: 'SM-Pulse',             emoji: '🔥',  credits: '20 credits',   proOnly: false },
+  { name: 'SM-Radar',             emoji: '📡',  credits: '20 credits',   proOnly: false },
   { name: 'Content Gap Detector', emoji: '🕳️', credits: '10 credits',   proOnly: false },
-  { name: 'AI Content Calendar',  emoji: '📅',  credits: '20 cr · Pro+', proOnly: true  },
+  { name: 'AI Content Calendar',  emoji: '📅',  credits: '25 cr · Pro+', proOnly: true  },
   { name: 'AI Image Generation',  emoji: '🎨',  credits: '25 cr · Pro+', proOnly: true  },
 ]
 
@@ -358,7 +358,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
                   <p className="font-extrabold text-lg">SM-Pulse</p>
                   <p className="text-xs text-gray-400">Real-time trend intelligence</p>
                 </div>
-                <span className="text-xs font-bold px-2.5 py-1 bg-white/20 rounded-full flex-shrink-0">10 credits</span>
+                <span className="text-xs font-bold px-2.5 py-1 bg-white/20 rounded-full flex-shrink-0">20 credits</span>
               </div>
               <p className="text-xs text-gray-400 leading-relaxed">
                 Scans Reddit and YouTube right now to surface trending topics, viral formats,
@@ -371,7 +371,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
                   <p className="font-extrabold text-lg">SM-Radar</p>
                   <p className="text-xs text-gray-400">Personal growth intelligence</p>
                 </div>
-                <span className="text-xs font-bold px-2.5 py-1 bg-gray-200 text-gray-600 rounded-full flex-shrink-0">10 credits</span>
+                <span className="text-xs font-bold px-2.5 py-1 bg-gray-200 text-gray-600 rounded-full flex-shrink-0">20 credits</span>
               </div>
               <p className="text-xs text-gray-500 leading-relaxed">
                 Analyzes live Reddit and YouTube data to surface content gaps, competitor weaknesses,

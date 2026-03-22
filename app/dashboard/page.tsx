@@ -426,7 +426,7 @@ function DashboardInner() {
                 </div>
                 <Link href="/sm-pulse"
                   className="text-xs font-bold px-4 py-2 bg-white dark:bg-gray-800 text-black dark:text-white rounded-xl hover:opacity-80 transition-all inline-block">
-                  Try SM-Pulse — 10 cr
+                  Try SM-Pulse — 20 cr
                 </Link>
               </div>
 

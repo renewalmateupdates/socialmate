@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
   // Find all users whose credits are due for reset
   const { data: users, error } = await getSupabaseAdmin()
     .from('user_settings')
-    .select('user_id, plan, ai_credits_remaining, ai_credits_reset_at')
+    .select('user_id, plan, ai_credits_remaining, monthly_credits_remaining, permanent_credits, ai_credits_reset_at')
     .or(`ai_credits_reset_at.is.null,ai_credits_reset_at.lt.${thirtyDaysAgo}`)
 
   if (error) {
@@ -41,15 +41,25 @@ export async function GET(req: NextRequest) {
     const bankCap     = PLAN_BANK[plan]    ?? 75
     const current     = user.ai_credits_remaining ?? 0
 
-    // Add monthly credits but cap at bank capacity
-    const newCredits  = Math.min(current + monthly, bankCap)
+    // Legacy system: Add monthly credits but cap at bank capacity
+    const newLegacyCredits = Math.min(current + monthly, bankCap)
+
+    // Two-bucket system: reset monthly to plan limit, do NOT touch permanent_credits
+    const updatePayload: Record<string, any> = {
+      ai_credits_remaining: newLegacyCredits,
+      ai_credits_reset_at:  new Date().toISOString(),
+    }
+
+    // Only update new columns if they exist (non-null means migration has run)
+    if (user.monthly_credits_remaining !== null && user.monthly_credits_remaining !== undefined) {
+      updatePayload.monthly_credits_remaining = monthly
+      updatePayload.monthly_credits_reset_at  = new Date().toISOString()
+      // permanent_credits intentionally NOT touched
+    }
 
     await getSupabaseAdmin()
       .from('user_settings')
-      .update({
-        ai_credits_remaining: newCredits,
-        ai_credits_reset_at:  new Date().toISOString(),
-      })
+      .update(updatePayload)
       .eq('user_id', user.user_id)
 
     resetCount++

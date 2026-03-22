@@ -52,49 +52,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, postId })
     }
  
-    // New draft — resolve workspace using admin client to bypass RLS
-    let resolvedWorkspaceId = workspaceId
-    if (!resolvedWorkspaceId) {
-      try {
-        const adminSupabase = getSupabaseAdmin()
-        const { data: personalWs, error: wsError } = await adminSupabase
+    // Try to resolve workspace_id — best effort, non-blocking
+    let resolvedWorkspaceId: string | null = null
+    try {
+      if (workspaceId) {
+        resolvedWorkspaceId = workspaceId
+      } else {
+        const adminClient = getSupabaseAdmin()
+        const { data: ws } = await adminClient
           .from('workspaces')
           .select('id')
           .eq('owner_id', user.id)
           .eq('is_personal', true)
-          .single()
- 
-        if (wsError || !personalWs) {
-          // Auto-create personal workspace if missing
-          const { data: newWs, error: createError } = await adminSupabase
-            .from('workspaces')
-            .insert({
-              owner_id: user.id,
-              name: 'Personal',
-              is_personal: true,
-            })
-            .select('id')
-            .single()
- 
-          if (createError) {
-            console.error('Workspace create error:', createError)
-          } else {
-            resolvedWorkspaceId = newWs?.id || null
-          }
-        } else {
-          resolvedWorkspaceId = personalWs.id
-        }
-      } catch (wsErr) {
-        console.error('Workspace resolution error:', wsErr)
+          .maybeSingle()
+        resolvedWorkspaceId = ws?.id ?? null
       }
+    } catch (wsErr) {
+      console.error('[POST_DRAFT] workspace lookup failed (non-fatal):', wsErr)
+      resolvedWorkspaceId = null
     }
- 
-    if (!resolvedWorkspaceId) {
-      return NextResponse.json({ 
-        error: 'No workspace found. Please contact support.',
-        detail: 'workspace_missing'
-      }, { status: 400 })
-    }
+    console.log('[POST_DRAFT] user:', user.id, 'workspace:', resolvedWorkspaceId)
  
     // Enforce monthly limit
     const { data: settings } = await supabase

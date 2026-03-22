@@ -5,18 +5,19 @@
 
 /* ── THEME VARIABLES ─────────────────────────────────────── */
 :root {
-  --bg:         #f9fafb;
-  --surface:    #ffffff;
-  --border:     #f3f4f6;
-  --border-mid: #e5e7eb;
-  --text:       #111827;
-  --text-muted: #6b7280;
-  --text-faint: #9ca3af;
-  --accent:     #000000;
-  --accent-fg:  #ffffff;
-  --sidebar-bg: #ffffff;
-  --background: #f9fafb;
-  --foreground: #111827;
+  --bg:           #f9fafb;
+  --surface:      #ffffff;
+  --border:       #f3f4f6;
+  --border-mid:   #e5e7eb;
+  --text:         #111827;
+  --text-muted:   #6b7280;
+  --text-faint:   #9ca3af;
+  --accent:       #000000;
+  --accent-fg:    #ffffff;
+  --accent-color: #EC4899;
+  --sidebar-bg:   #ffffff;
+  --background:   #f9fafb;
+  --foreground:   #111827;
 }
 
 /* Support both .dark class (Tailwind) and data-theme attribute */
@@ -45,6 +46,7 @@ body {
   color: var(--text);
   font-family: Arial, Helvetica, sans-serif;
   transition: background-color 0.2s ease, color 0.2s ease;
+  overflow-x: hidden;
 }
 
 /* ── Utility classes using CSS vars (use these in components) */

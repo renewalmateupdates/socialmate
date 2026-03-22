@@ -176,10 +176,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unknown tool' }, { status: 400 })
     }
 
-    // Server-side credit check and atomic deduction
+    // Server-side credit check and atomic deduction — two-bucket system
     const { data: settings, error: settingsError } = await supabase
       .from('user_settings')
-      .select('ai_credits_remaining')
+      .select('ai_credits_remaining, monthly_credits_remaining, permanent_credits')
       .eq('user_id', user.id)
       .single()
 
@@ -187,27 +187,61 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Could not load account settings' }, { status: 500 })
     }
 
-    const currentCredits = settings.ai_credits_remaining ?? 0
-    if (currentCredits < creditCost) {
+    // Two-bucket: monthly first, then permanent. Fall back to legacy ai_credits_remaining.
+    const monthlyCredits   = settings.monthly_credits_remaining ?? settings.ai_credits_remaining ?? 0
+    const permanentCredits = settings.permanent_credits ?? 0
+    const totalCredits     = monthlyCredits + permanentCredits
+    // Legacy fallback for installs without new columns
+    const legacyCredits    = settings.ai_credits_remaining ?? 0
+
+    const effectiveTotal = (settings.monthly_credits_remaining !== null && settings.monthly_credits_remaining !== undefined)
+      ? totalCredits
+      : legacyCredits
+
+    if (effectiveTotal < creditCost) {
       return NextResponse.json({
-        error: `Not enough credits. This tool costs ${creditCost} and you have ${currentCredits} remaining.`,
+        error: `Not enough credits. This tool costs ${creditCost} and you have ${effectiveTotal} remaining.`,
         creditsRequired: creditCost,
-        creditsRemaining: currentCredits,
+        creditsRemaining: effectiveTotal,
       }, { status: 402 })
     }
 
-    // Deduct credits before running — prevents retrying on error to farm credits
-    const newCredits = currentCredits - creditCost
+    // Deduct from monthly first, then permanent
+    let newMonthly   = monthlyCredits
+    let newPermanent = permanentCredits
+    let remaining    = creditCost
+
+    if (newMonthly >= remaining) {
+      newMonthly -= remaining
+      remaining = 0
+    } else {
+      remaining -= newMonthly
+      newMonthly = 0
+      newPermanent -= remaining
+      remaining = 0
+    }
+
+    const newLegacyCredits = Math.max(0, legacyCredits - creditCost)
+
+    // Build update payload — update both legacy and new columns
+    const updatePayload: Record<string, number> = {
+      ai_credits_remaining: newLegacyCredits,
+    }
+    if (settings.monthly_credits_remaining !== null && settings.monthly_credits_remaining !== undefined) {
+      updatePayload.monthly_credits_remaining = newMonthly
+      updatePayload.permanent_credits = newPermanent
+    }
+
     const { error: deductError } = await supabase
       .from('user_settings')
-      .update({ ai_credits_remaining: newCredits })
+      .update(updatePayload)
       .eq('user_id', user.id)
-      // Only deduct if credits haven't changed since we read them (race condition guard)
-      .eq('ai_credits_remaining', currentCredits)
 
     if (deductError) {
       return NextResponse.json({ error: 'Failed to deduct credits — please try again' }, { status: 500 })
     }
+
+    const newCredits = newLegacyCredits
 
     // Low credits email — send at most once per calendar month
     if (newCredits < 10) {
@@ -263,10 +297,12 @@ export async function POST(req: NextRequest) {
     const apiKey = process.env.GEMINI_API_KEY
     if (!apiKey) {
       // Refund credits if AI isn't configured
-      await supabase
-        .from('user_settings')
-        .update({ ai_credits_remaining: currentCredits })
-        .eq('user_id', user.id)
+      const refundPayload: Record<string, number> = { ai_credits_remaining: legacyCredits }
+      if (settings.monthly_credits_remaining !== null && settings.monthly_credits_remaining !== undefined) {
+        refundPayload.monthly_credits_remaining = monthlyCredits
+        refundPayload.permanent_credits = permanentCredits
+      }
+      await supabase.from('user_settings').update(refundPayload).eq('user_id', user.id)
       return NextResponse.json({ error: 'AI not configured' }, { status: 500 })
     }
 
@@ -285,15 +321,23 @@ export async function POST(req: NextRequest) {
       text = result.response.text()
     } catch (aiErr) {
       // Refund credits if Gemini fails
-      await supabase
-        .from('user_settings')
-        .update({ ai_credits_remaining: currentCredits })
-        .eq('user_id', user.id)
+      const refundPayload: Record<string, number> = { ai_credits_remaining: legacyCredits }
+      if (settings.monthly_credits_remaining !== null && settings.monthly_credits_remaining !== undefined) {
+        refundPayload.monthly_credits_remaining = monthlyCredits
+        refundPayload.permanent_credits = permanentCredits
+      }
+      await supabase.from('user_settings').update(refundPayload).eq('user_id', user.id)
       console.error('Gemini error:', aiErr)
       return NextResponse.json({ error: 'AI generation failed — credits refunded' }, { status: 500 })
     }
 
-    return NextResponse.json({ result: text, creditCost, creditsRemaining: newCredits })
+    return NextResponse.json({
+      result: text,
+      creditCost,
+      creditsRemaining: newCredits,
+      creditsMonthly: newMonthly,
+      creditsPermanent: newPermanent,
+    })
 
   } catch (err) {
     console.error('AI route error:', err)

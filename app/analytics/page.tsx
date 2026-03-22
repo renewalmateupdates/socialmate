@@ -336,9 +336,9 @@ export default function Analytics() {
                     className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-gray-400" />
                 </div>
                 <div className="flex items-center gap-3">
-                  <button onClick={handleRunRadar} disabled={credits < 10 || radarLoading}
+                  <button onClick={handleRunRadar} disabled={credits < 20 || radarLoading}
                     className="flex-1 bg-black text-white text-xs font-bold py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
-                    {radarLoading ? 'Analyzing...' : credits < 10 ? 'Not enough credits' : 'Run SM-Radar — 10 credits'}
+                    {radarLoading ? 'Analyzing...' : credits < 20 ? 'Not enough credits' : 'Run SM-Radar — 20 credits'}
                   </button>
                   <button onClick={() => setRadarModal(false)}
                     className="px-4 py-2.5 border border-gray-200 dark:border-gray-600 text-xs font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all">
@@ -363,9 +363,9 @@ export default function Analytics() {
                     className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-gray-400" />
                 </div>
                 <div className="flex items-center gap-3">
-                  <button onClick={handleRunPulse} disabled={credits < 10 || pulseLoading}
+                  <button onClick={handleRunPulse} disabled={credits < 20 || pulseLoading}
                     className="flex-1 bg-black text-white text-xs font-bold py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
-                    {pulseLoading ? 'Scanning trends...' : credits < 10 ? 'Not enough credits' : 'Run SM-Pulse — 10 credits'}
+                    {pulseLoading ? 'Scanning trends...' : credits < 20 ? 'Not enough credits' : 'Run SM-Pulse — 20 credits'}
                   </button>
                   <button onClick={() => setPulseModal(false)}
                     className="px-4 py-2.5 border border-gray-200 dark:border-gray-600 text-xs font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all">
@@ -492,7 +492,7 @@ export default function Analytics() {
                 <span className="text-2xl flex-shrink-0">📡</span>
                 <div>
                   <p className="text-xs font-extrabold">SM-Radar — Real Trend Intelligence</p>
-                  <p className="text-xs text-gray-400 mt-0.5">AI analysis of real Reddit and YouTube data — content gaps, competitor weaknesses, and what to post this week. 10 credits.</p>
+                  <p className="text-xs text-gray-400 mt-0.5">AI analysis of real Reddit and YouTube data — content gaps, competitor weaknesses, and what to post this week. 20 credits.</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 flex-shrink-0">
@@ -819,7 +819,7 @@ export default function Analytics() {
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-xl">🔥</span>
                   <p className="text-xs font-extrabold">SM-Pulse</p>
-                  <span className="text-xs font-bold px-2 py-0.5 bg-white text-black rounded-full">10 credits</span>
+                  <span className="text-xs font-bold px-2 py-0.5 bg-white text-black rounded-full">20 credits</span>
                 </div>
                 <p className="text-xs text-gray-400 leading-relaxed mb-3">
                   See what's trending in your niche right now — powered by real Reddit and YouTube data.

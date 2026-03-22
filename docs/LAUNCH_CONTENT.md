@@ -1,67 +1,71 @@
 # SocialMate Launch Content
 
-10 ready-to-post pieces for Bluesky (under 300 chars each) + Reddit launch post.
+10 ready-to-post pieces for Bluesky (under 300 chars each) + Reddit launch post + Discord messages.
 Voice: solo founder, honest, no hype. Direct.
 
 ---
 
-## ANGLE 1 — THE PROBLEM (2 posts)
+## BLUESKY POSTS
+
+---
+
+### ANGLE 1 — THE PROBLEM (2 posts)
 
 **Post 1**
-Buffer removed their free plan. Hootsuite is $99/month. I needed something free that just worked — so I built it. socialmate.studio
+Buffer killed their free plan. Hootsuite is $99/mo. I needed free scheduling that actually worked — so I built it. 4 platforms live now. socialmate.studio
 
 ---
 
 **Post 2**
-If you've been paying $20/month just to schedule 5 posts/week across 3 accounts, you're being overcharged. There's a better way now. socialmate.studio — free forever.
+Why are you paying $20/mo just to schedule 5 posts? The platforms are free. The APIs are free. The scheduler shouldn't cost you this much. socialmate.studio — free forever.
 
 ---
 
-## ANGLE 2 — THE PRODUCT (2 posts)
+### ANGLE 2 — THE PRODUCT (2 posts)
 
 **Post 3**
-SocialMate: schedule posts to Bluesky, Discord, Telegram, and Mastodon from one place. Free. No per-channel fee. No post limit. Built it because I needed it. socialmate.studio
+SocialMate: one compose window → Bluesky, Discord, Telegram, Mastodon. Schedule or post now. 50 AI credits/month included. Free, no card. 12 more platforms shipping. socialmate.studio
 
 ---
 
 **Post 4**
-One compose window → 4 platforms → one click. Bluesky, Discord, Telegram, Mastodon. 12 more platforms coming. Free to use. socialmate.studio
+Built the thing I wanted: bulk scheduler, AI captions, hashtag collections, link-in-bio, team seats — all free. Why free? Because I hate per-channel fees. socialmate.studio
 
 ---
 
-## ANGLE 3 — THE UNDERDOG STORY (2 posts)
+### ANGLE 3 — THE UNDERDOG STORY (2 posts)
 
 **Post 5**
-Solo founder, bootstrapped, no funding. Built this in my spare time because Buffer pricing was insulting. If you root for the underdog, come try it. socialmate.studio
+Solo founder. Bootstrapped. No VC. Built this because Buffer pricing felt like a tax on small creators. If you root for the underdog — come try it and tell me what's broken. socialmate.studio
 
 ---
 
 **Post 6**
-No VC. No team. No marketing budget. Just a dev who got tired of paying $20/month to schedule tweets. Building in public. socialmate.studio — free while I find product-market fit.
+6 months of evenings and weekends. No team. No budget. Just me, Next.js, and a grudge against social media scheduling prices. It works. socialmate.studio — free while I find PMF.
 
 ---
 
-## ANGLE 4 — SOCIAL PROOF HOOK (2 posts)
+### ANGLE 4 — SOCIAL PROOF HOOK (2 posts)
 
 **Post 7**
-Hey ex-Buffer free plan users — where did you end up? I built a free alternative. 4 platforms live, 12 more coming. Would love your honest feedback. socialmate.studio
+Ex-Buffer free plan users — where did you end up? Genuinely curious. I built an alternative. Would love honest feedback from people who actually used Buffer before. socialmate.studio
 
 ---
 
 **Post 8**
-If you left Hootsuite or Buffer because of pricing, I built this for you. Free scheduling for Bluesky, Discord, Telegram, Mastodon. No card required. socialmate.studio
+If you left Hootsuite or Buffer over pricing: I built this for you. Scheduling to Bluesky, Discord, Telegram, Mastodon. Free forever. No card. Tell me what's missing. socialmate.studio
 
 ---
 
-## ANGLE 5 — DIRECT CTA (2 posts)
+### ANGLE 5 — DIRECT CTA (2 posts)
 
 **Post 9**
-socialmate.studio — free forever, no credit card. Schedule to 4 platforms now, 16 by end of year. 50 AI credits/month included. Takes 60 seconds to set up.
+Free social media scheduler. 4 platforms live. 50 AI credits/month. Bulk scheduler. Link-in-bio. Team seats. No card required. Takes about 90 seconds to set up. socialmate.studio
 
 ---
 
 **Post 10**
-Free social media scheduler. Bluesky + Discord + Telegram + Mastodon. 50 AI credits/month. No card. No catch. socialmate.studio
+Running a small account, a newsletter, or a dev project and tired of paying for scheduling? Here: socialmate.studio — free forever, no catch, built by one person who got annoyed.
 
 ---
 
@@ -149,3 +153,36 @@ Happy to answer questions.
 
 *Link: socialmate.studio*
 *Free forever plan available — no credit card required*
+
+---
+
+---
+
+## DISCORD MESSAGES
+
+Short, community-first messages for indie/SaaS Discord servers. Not salesy.
+
+---
+
+**Discord 1** — for #show-and-tell or #showcase channels
+Built a free social media scheduler this year — supports Bluesky, Discord, Telegram, Mastodon. Buffer killed their free plan and I needed something. Would love honest feedback if anyone wants to poke at it: socialmate.studio
+
+---
+
+**Discord 2** — for #tools or #resources channels
+Free tool if useful: socialmate.studio — social media scheduler that supports Bluesky, Discord, Telegram, Mastodon. 50 AI credits/month included (captions, hashtags, thread gen). No card, no catch. Built it because I couldn't justify Buffer's pricing.
+
+---
+
+**Discord 3** — for #marketing or #growth channels
+Hot take: social media scheduling shouldn't cost $20/month. Made something free: socialmate.studio — 4 platforms live, 12 more coming. Curious if anyone's tried building audience on Bluesky or Mastodon. What's working?
+
+---
+
+**Discord 4** — for #indie-makers or #buildinpublic channels
+6 months of side project work shipped: socialmate.studio — free social media scheduler. Solo founder, no VC, just annoyed at Buffer pricing. Happy to swap feedback if anyone's working on something similar.
+
+---
+
+**Discord 5** — for #feedback or #beta-testers channels
+Looking for honest feedback on a free social media tool I built. socialmate.studio — scheduling, AI tools, bulk uploader, link-in-bio, analytics. 4 platforms live. Tell me what's missing or broken. Will actually read everything.
