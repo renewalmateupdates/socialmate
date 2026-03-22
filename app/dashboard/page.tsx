@@ -34,7 +34,7 @@ type DashStats = {
 function CreditSuccessModal({ onDismiss }: { onDismiss: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-3xl p-8 max-w-sm w-full mx-4 text-center shadow-2xl">
+      <div className="bg-white dark:bg-gray-800 rounded-3xl p-8 max-w-sm w-full mx-4 text-center shadow-2xl">
         <div className="text-5xl mb-4">🎉</div>
         <h2 className="text-xl font-extrabold mb-2">Credits Added!</h2>
         <p className="text-sm text-gray-500 leading-relaxed mb-2">

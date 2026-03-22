@@ -50,27 +50,27 @@ export default function Blog() {
         <div className="grid grid-cols-2 gap-4">
           {rest.map((post, i) => (
             <Link key={i} href={`/blog/${post.slug}`}
-              className="bg-white border border-gray-100 rounded-2xl p-5 hover:border-gray-300 transition-all block">
+              className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-5 hover:border-gray-300 dark:hover:border-gray-500 transition-all block">
               <div className="flex items-center gap-2 mb-3">
-                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${CATEGORY_COLORS[post.category] || 'bg-gray-100 text-gray-500'}`}>
+                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${CATEGORY_COLORS[post.category] || 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}`}>
                   {post.category}
                 </span>
-                <span className="text-xs text-gray-400">{post.readTime}</span>
+                <span className="text-xs text-gray-400 dark:text-gray-500">{post.readTime}</span>
               </div>
               <div className="text-2xl mb-2">{post.emoji}</div>
-              <h2 className="text-sm font-extrabold mb-2 leading-snug">{post.title}</h2>
-              <p className="text-xs text-gray-500 leading-relaxed mb-3">{post.excerpt}</p>
+              <h2 className="text-sm font-extrabold mb-2 leading-snug text-gray-900 dark:text-gray-100">{post.title}</h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-3">{post.excerpt}</p>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-400">{post.date}</span>
-                <span className="text-xs font-bold text-gray-400">Read →</span>
+                <span className="text-xs text-gray-400 dark:text-gray-500">{post.date}</span>
+                <span className="text-xs font-bold text-gray-400 dark:text-gray-500">Read →</span>
               </div>
             </Link>
           ))}
         </div>
 
-        <div className="mt-8 bg-white border border-gray-100 rounded-2xl p-6 text-center">
-          <p className="text-sm font-extrabold mb-1">Want to try SocialMate?</p>
-          <p className="text-xs text-gray-400 mb-4">Free forever. No credit card. No catch.</p>
+        <div className="mt-8 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 text-center">
+          <p className="text-sm font-extrabold mb-1 text-gray-900 dark:text-gray-100">Want to try SocialMate?</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">Free forever. No credit card. No catch.</p>
           <Link href="/signup"
             className="inline-block bg-black text-white text-xs font-bold px-5 py-2.5 rounded-xl hover:opacity-80 transition-all">
             Start scheduling for free →

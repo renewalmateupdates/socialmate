@@ -77,22 +77,22 @@ export default function FeedbackWidget() {
       {open && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center px-4 pointer-events-none">
           <div
-            className="w-full max-w-sm bg-white rounded-2xl shadow-2xl p-6 pointer-events-auto"
+            className="w-full max-w-sm bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 pointer-events-auto"
             onClick={e => e.stopPropagation()}
           >
             {done ? (
               <div className="text-center py-6">
                 <div className="text-4xl mb-3">🙏</div>
-                <p className="text-sm font-bold">Thanks! We read every message ✓</p>
-                <p className="text-xs text-gray-400 mt-1">Goes straight to the founder.</p>
+                <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Thanks! We read every message ✓</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Goes straight to the founder.</p>
               </div>
             ) : (
               <>
                 <div className="flex items-center justify-between mb-5">
-                  <p className="text-sm font-extrabold">Send Feedback</p>
+                  <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">Send Feedback</p>
                   <button
                     onClick={handleClose}
-                    className="text-gray-400 hover:text-gray-600 transition-all text-xl leading-none w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100">
+                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-all text-xl leading-none w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
                     ×
                   </button>
                 </div>
@@ -103,8 +103,8 @@ export default function FeedbackWidget() {
                     <button key={t.id} onClick={() => setType(t.id)}
                       className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all border ${
                         type === t.id
-                          ? 'bg-black text-white border-black'
-                          : 'border-gray-200 text-gray-500 hover:border-gray-400'
+                          ? 'bg-black dark:bg-white text-white dark:text-black border-black dark:border-white'
+                          : 'border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-400'
                       }`}>
                       {t.emoji} {t.label}
                     </button>
@@ -120,7 +120,7 @@ export default function FeedbackWidget() {
                     "Share anything on your mind..."
                   }
                   rows={4}
-                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 outline-none resize-none focus:border-gray-400 transition-all placeholder:text-gray-300 mb-3"
+                  className="w-full text-sm border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl px-3 py-2.5 outline-none resize-none focus:border-gray-400 dark:focus:border-gray-400 transition-all placeholder:text-gray-300 dark:placeholder:text-gray-500 mb-3"
                 />
 
                 {/* Email */}
@@ -130,8 +130,8 @@ export default function FeedbackWidget() {
                   onChange={e => setEmail(e.target.value)}
                   readOnly={!!userEmail}
                   placeholder="Your email (optional)"
-                  className={`w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 outline-none focus:border-gray-400 transition-all mb-4 ${
-                    userEmail ? 'bg-gray-50 text-gray-400 cursor-not-allowed' : ''
+                  className={`w-full text-sm border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl px-3 py-2.5 outline-none focus:border-gray-400 dark:focus:border-gray-400 transition-all mb-4 ${
+                    userEmail ? 'bg-gray-50 dark:bg-gray-600 text-gray-400 dark:text-gray-500 cursor-not-allowed' : ''
                   }`}
                 />
 
@@ -142,7 +142,7 @@ export default function FeedbackWidget() {
                   {loading ? 'Sending...' : 'Send Feedback →'}
                 </button>
 
-                <p className="text-xs text-gray-300 text-center mt-2">
+                <p className="text-xs text-gray-300 dark:text-gray-500 text-center mt-2">
                   Goes straight to the founder
                 </p>
               </>
