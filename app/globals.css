@@ -15,12 +15,20 @@
   --accent:       #000000;
   --accent-fg:    #ffffff;
   --accent-color: #EC4899;
-  --sidebar-bg:   #ffffff;
   --background:   #f9fafb;
   --foreground:   #111827;
+
+  /* Sidebar theme vars — default (white sidebar) */
+  --sidebar-bg:     #ffffff;
+  --sidebar-fg:     #111827;
+  --sidebar-muted:  #6b7280;
+  --sidebar-faint:  #9ca3af;
+  --sidebar-border: #f3f4f6;
+  --sidebar-active: #f9fafb;
+  --sidebar-accent: #000000;
 }
 
-/* Support both .dark class (Tailwind) and data-theme attribute */
+/* Dark mode — base content area */
 .dark,
 [data-theme="dark"] {
   --bg:         #0f1117;
@@ -30,16 +38,77 @@
   --text:       #f1f5f9;
   --text-muted: #94a3b8;
   --text-faint: #64748b;
-  --sidebar-bg: #13151f;
   --background: #0f1117;
   --foreground: #f1f5f9;
+
+  /* Default dark sidebar */
+  --sidebar-bg:     #13151f;
+  --sidebar-fg:     #f1f5f9;
+  --sidebar-muted:  #94a3b8;
+  --sidebar-faint:  #64748b;
+  --sidebar-border: #2a2d3a;
+  --sidebar-active: #0f1117;
+  --sidebar-accent: #f1f5f9;
 }
 
-[data-accent="midnight"] { --accent: #3b5bdb; --accent-fg: #ffffff; }
-[data-accent="forest"]   { --accent: #2f9e44; --accent-fg: #ffffff; }
-[data-accent="rose"]     { --accent: #e64980; --accent-fg: #ffffff; }
-[data-accent="slate"]    { --accent: #495057; --accent-fg: #ffffff; }
-[data-accent="amber"]    { --accent: #f08c00; --accent-fg: #ffffff; }
+/* ── SIDEBAR COLOR THEMES ──────────────────────────────────── */
+/* These apply regardless of dark/light mode — the sidebar       */
+/* takes on the theme color in both modes.                       */
+
+[data-sidebar="midnight"] {
+  --sidebar-bg:     #1e1b4b;
+  --sidebar-fg:     #e0e7ff;
+  --sidebar-muted:  #a5b4fc;
+  --sidebar-faint:  #818cf8;
+  --sidebar-border: #312e81;
+  --sidebar-active: #312e81;
+  --sidebar-accent: #a5b4fc;
+  --accent:         #818cf8;
+}
+
+[data-sidebar="forest"] {
+  --sidebar-bg:     #14532d;
+  --sidebar-fg:     #dcfce7;
+  --sidebar-muted:  #86efac;
+  --sidebar-faint:  #4ade80;
+  --sidebar-border: #166534;
+  --sidebar-active: #166534;
+  --sidebar-accent: #86efac;
+  --accent:         #4ade80;
+}
+
+[data-sidebar="rose"] {
+  --sidebar-bg:     #881337;
+  --sidebar-fg:     #ffe4e6;
+  --sidebar-muted:  #fda4af;
+  --sidebar-faint:  #fb7185;
+  --sidebar-border: #9f1239;
+  --sidebar-active: #9f1239;
+  --sidebar-accent: #fda4af;
+  --accent:         #fb7185;
+}
+
+[data-sidebar="slate"] {
+  --sidebar-bg:     #0f172a;
+  --sidebar-fg:     #e2e8f0;
+  --sidebar-muted:  #94a3b8;
+  --sidebar-faint:  #64748b;
+  --sidebar-border: #1e293b;
+  --sidebar-active: #1e293b;
+  --sidebar-accent: #94a3b8;
+  --accent:         #7dd3fc;
+}
+
+[data-sidebar="amber"] {
+  --sidebar-bg:     #78350f;
+  --sidebar-fg:     #fef3c7;
+  --sidebar-muted:  #fcd34d;
+  --sidebar-faint:  #fbbf24;
+  --sidebar-border: #92400e;
+  --sidebar-active: #92400e;
+  --sidebar-accent: #fcd34d;
+  --accent:         #fbbf24;
+}
 
 body {
   background-color: var(--bg);

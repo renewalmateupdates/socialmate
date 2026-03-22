@@ -2,16 +2,17 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { supabase } from '@/lib/supabase'
 
-export type ThemeMode   = 'light' | 'dark'
-export type ThemeAccent = 'default' | 'midnight' | 'forest' | 'rose' | 'slate' | 'amber'
+export type ThemeMode    = 'light' | 'dark'
+export type ThemeAccent  = 'default' | 'midnight' | 'forest' | 'rose' | 'slate' | 'amber'
 
+/** The swatch color is the sidebar background color for that theme */
 export const ACCENT_THEMES: { id: ThemeAccent; label: string; color: string }[] = [
-  { id: 'default',  label: 'Default',  color: '#000000' },
-  { id: 'midnight', label: 'Midnight', color: '#3b5bdb' },
-  { id: 'forest',   label: 'Forest',   color: '#2f9e44' },
-  { id: 'rose',     label: 'Rose',     color: '#e64980' },
-  { id: 'slate',    label: 'Slate',    color: '#495057' },
-  { id: 'amber',    label: 'Amber',    color: '#f08c00' },
+  { id: 'default',  label: 'Default',  color: '#ffffff' },   // white sidebar
+  { id: 'midnight', label: 'Midnight', color: '#1e1b4b' },   // deep indigo
+  { id: 'forest',   label: 'Forest',   color: '#14532d' },   // dark green
+  { id: 'rose',     label: 'Rose',     color: '#881337' },   // deep crimson
+  { id: 'slate',    label: 'Slate',    color: '#0f172a' },   // dark blue-slate
+  { id: 'amber',    label: 'Amber',    color: '#78350f' },   // warm amber
 ]
 
 type ThemeContextType = {
@@ -47,11 +48,13 @@ function applyTheme(mode: ThemeMode, accent: ThemeAccent) {
     html.setAttribute('data-accent', accent)
   }
 
-  // Also set --accent as a CSS custom property directly so JS-rendered
-  // inline styles (like the toggle and nav indicator) pick it up instantly
-  const accentEntry = ACCENT_THEMES.find(t => t.id === accent)
-  const accentHex   = accentEntry?.color ?? '#000000'
-  html.style.setProperty('--accent', accentHex)
+  // Apply sidebar theme via data-sidebar attribute
+  // CSS [data-sidebar="X"] rules in globals.css set all sidebar-specific vars
+  if (accent === 'default') {
+    html.removeAttribute('data-sidebar')
+  } else {
+    html.setAttribute('data-sidebar', accent)
+  }
 }
 
 async function saveThemeToSupabase(mode: ThemeMode, accent: ThemeAccent) {
