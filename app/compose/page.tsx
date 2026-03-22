@@ -303,8 +303,9 @@ function ComposeInner() {
       const data = await res.json()
       if (!res.ok || data.error) { setAiError('Something went wrong. Please try again.'); return }
       setAiResult(data.result)
-      setCredits(credits - tool.credits)
-      showToast(`Used ${tool.credits} credit${tool.credits > 1 ? 's' : ''} · ${credits - tool.credits} remaining`, 'info')
+      const newCredits = typeof data.creditsRemaining === 'number' ? data.creditsRemaining : credits - tool.credits
+      setCredits(newCredits)
+      showToast(`Used ${tool.credits} credit${tool.credits > 1 ? 's' : ''} · ${newCredits} remaining`, 'info')
     } catch {
       setAiError('Network error. Please try again.')
     } finally {
@@ -345,7 +346,8 @@ function ComposeInner() {
       } catch {
         setScoreResult({ score: 0, label: 'Unknown', strengths: [], improvements: [], verdict: data.result })
       }
-      setCredits(credits - SCORE_CREDIT_COST)
+      const newCredits = typeof data.creditsRemaining === 'number' ? data.creditsRemaining : credits - SCORE_CREDIT_COST
+      setCredits(newCredits)
     } catch {
       setScoreError('Network error. Please try again.')
     }
