@@ -53,19 +53,32 @@ export async function POST(request: NextRequest) {
     }
  
     // Try to resolve workspace_id — best effort, non-blocking
+    // IMPORTANT: always validate via admin client; never trust the client-provided
+    // workspaceId blindly (it may be a fake fallback value like the user's own auth UUID)
     let resolvedWorkspaceId: string | null = null
     try {
-      if (workspaceId) {
-        resolvedWorkspaceId = workspaceId
-      } else {
-        const adminClient = getSupabaseAdmin()
-        const { data: ws } = await adminClient
+      const adminClient = getSupabaseAdmin()
+
+      // If client sent a workspaceId, verify it actually belongs to this user
+      if (workspaceId && workspaceId !== user.id && workspaceId !== '') {
+        const { data: verifiedWs } = await adminClient
+          .from('workspaces')
+          .select('id')
+          .eq('id', workspaceId)
+          .eq('owner_id', user.id)
+          .maybeSingle()
+        resolvedWorkspaceId = verifiedWs?.id ?? null
+      }
+
+      // If we still don't have one, look up their personal workspace
+      if (!resolvedWorkspaceId) {
+        const { data: personalWs } = await adminClient
           .from('workspaces')
           .select('id')
           .eq('owner_id', user.id)
           .eq('is_personal', true)
           .maybeSingle()
-        resolvedWorkspaceId = ws?.id ?? null
+        resolvedWorkspaceId = personalWs?.id ?? null
       }
     } catch (wsErr) {
       console.error('[POST_DRAFT] workspace lookup failed (non-fatal):', wsErr)

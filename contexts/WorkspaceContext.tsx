@@ -124,8 +124,10 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         setActiveWorkspace(personal)
         setWorkspaceName(personal.name || 'My Workspace')
       } else {
+        // No workspaces found (RLS may be blocking). Use a placeholder with
+        // NO id so the API routes know not to pass a workspace_id.
         const fallback: Workspace = {
-          id: user.id,
+          id: '',           // empty string signals "no real workspace yet"
           name: 'My Workspace',
           is_personal: true,
           owner_id: user.id,
