@@ -468,9 +468,10 @@ function ComposeInner() {
   }
 
   return (
-    <div className="min-h-screen bg-theme flex">
+    <div className="min-h-dvh bg-theme flex">
       <Sidebar />
-      <div className="md:ml-56 flex-1 p-4 md:p-8">
+      <div className="md:ml-56 flex-1 flex flex-col overflow-y-auto">
+        <div className="flex-1 p-4 md:p-8">
         <div className="max-w-5xl mx-auto">
 
           <div className="flex items-center justify-between mb-6">
@@ -839,8 +840,8 @@ function ComposeInner() {
                 </div>
               )}
 
-              {/* ACTIONS — sticky on mobile */}
-              <div className="sticky bottom-0 bg-[var(--bg)] border-t border-[var(--border-mid)] pt-3 pb-3 -mx-1 px-1 lg:static lg:border-t-0 lg:bg-transparent lg:pt-0 lg:pb-0 lg:mx-0 lg:px-0">
+              {/* ACTIONS — sticky on mobile so keyboard doesn't push buttons off screen */}
+              <div className="sticky bottom-0 bg-theme border-t border-theme-md pt-3 pb-4 -mx-1 px-1 lg:static lg:border-t-0 lg:bg-transparent lg:pt-0 lg:pb-0 lg:mx-0 lg:px-0">
                 <div className="flex items-center gap-3">
                   <button
                     onClick={handlePublish}
@@ -917,6 +918,7 @@ function ComposeInner() {
             </div>
 
           </div>
+        </div>
         </div>
       </div>
 
