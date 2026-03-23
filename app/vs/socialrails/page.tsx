@@ -21,7 +21,7 @@ const COMPARISON = [
   { feature: 'Discord support',        socialrails: '❌',                   socialmate: '✅'                    },
   { feature: 'Telegram support',       socialrails: '❌',                   socialmate: '✅'                    },
   { feature: 'AI writing tools',       socialrails: 'Limited',             socialmate: '12 tools free'         },
-  { feature: 'AI credits',            socialrails: 'Add-on',              socialmate: '100/month free'        },
+  { feature: 'AI credits',            socialrails: 'Add-on',              socialmate: '50/month free'        },
   { feature: 'Bulk scheduling',        socialrails: '✅',                   socialmate: '✅ Free'               },
   { feature: 'Link in bio',            socialrails: '❌',                   socialmate: '✅ Free'               },
   { feature: 'Competitor tracking',    socialrails: '❌',                   socialmate: '✅ Free'               },
@@ -35,8 +35,8 @@ const COMPARISON = [
 
 export default function VsSocialRails() {
   return (
-    <div className="min-h-screen bg-white">
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
+    <div className="min-h-screen bg-white dark:bg-gray-950">
+      <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>

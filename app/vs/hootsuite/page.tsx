@@ -19,7 +19,7 @@ const COMPARISON = [
   { feature: 'Platforms',              hootsuite: '20+ (paid)',            socialmate: '16 (free)'               },
   { feature: 'Team seats',             hootsuite: '1 user on Standard',   socialmate: '2 seats free'            },
   { feature: 'AI writing tools',       hootsuite: 'OwlyWriter AI (paid)', socialmate: '12 tools free'           },
-  { feature: 'AI credits',            hootsuite: 'Limited/paid',         socialmate: '100/month free'           },
+  { feature: 'AI credits',            hootsuite: 'Limited/paid',         socialmate: '50/month free'           },
   { feature: 'Bulk scheduling',        hootsuite: 'Advanced plan only',   socialmate: '✅ Free'                  },
   { feature: 'Link in bio',            hootsuite: '❌',                    socialmate: '✅ Free'                  },
   { feature: 'Competitor tracking',    hootsuite: 'Streams (paid)',        socialmate: '✅ Free'                  },
@@ -57,8 +57,8 @@ const FAQ = [
 
 export default function VsHootsuite() {
   return (
-    <div className="min-h-screen bg-white">
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
+    <div className="min-h-screen bg-white dark:bg-gray-950">
+      <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>

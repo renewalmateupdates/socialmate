@@ -32,7 +32,6 @@ const PROTECTED_PATHS = [
   '/best-times',
   '/competitor-tracking',
   '/content-gap',
-  '/story',
   '/search',
 ]
 

@@ -20,7 +20,7 @@ const COMPARISON = [
   { feature: 'Posts per month (free)', buffer: '10 per channel',     socialmate: '100 across all channels' },
   { feature: 'Team seats (free)',      buffer: '1',                  socialmate: '2'                       },
   { feature: 'AI writing tools',       buffer: '1 (AI Assistant)',   socialmate: '12 tools included'       },
-  { feature: 'AI credits',            buffer: 'Paid add-on',        socialmate: '100/month free'           },
+  { feature: 'AI credits',            buffer: 'Paid add-on',        socialmate: '50/month free'            },
   { feature: 'Bulk scheduling',        buffer: 'Paid plans only',    socialmate: '✅ Free'                  },
   { feature: 'Link in bio',            buffer: 'Separate product',   socialmate: '✅ Built in, free'        },
   { feature: 'Competitor tracking',    buffer: '❌',                  socialmate: '✅ Free (3 accounts)'    },
@@ -60,9 +60,9 @@ const FAQ = [
 
 export default function VsBuffer() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-gray-950">
       {/* NAV */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
+      <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>

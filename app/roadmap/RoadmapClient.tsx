@@ -93,13 +93,13 @@ export default function RoadmapClient() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-gray-950">
       {/* NAV */}
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
+      <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
-            <span className="font-bold text-base tracking-tight">SocialMate</span>
+            <div className="w-7 h-7 bg-black dark:bg-white rounded-lg flex items-center justify-center text-white dark:text-black text-sm font-bold">S</div>
+            <span className="font-bold text-base tracking-tight text-gray-900 dark:text-gray-100">SocialMate</span>
           </Link>
           <nav className="hidden md:flex items-center gap-1">
             {[
@@ -108,14 +108,14 @@ export default function RoadmapClient() {
               { label: 'Blog',     href: '/blog'     },
             ].map(l => (
               <Link key={l.label} href={l.href}
-                className="px-4 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-black hover:bg-gray-50 transition-all">
+                className="px-4 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-black dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
                 {l.label}
               </Link>
             ))}
           </nav>
           <div className="flex items-center gap-3">
-            <Link href="/login"  className="text-sm font-semibold text-gray-500 hover:text-black transition-all hidden sm:block">Sign in</Link>
-            <Link href="/signup" className="bg-black text-white text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
+            <Link href="/login"  className="text-sm font-semibold text-gray-500 hover:text-black dark:hover:text-white transition-all hidden sm:block">Sign in</Link>
+            <Link href="/signup" className="bg-black dark:bg-white text-white dark:text-black text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
               Get started free →
             </Link>
           </div>
@@ -126,9 +126,9 @@ export default function RoadmapClient() {
 
         {/* HERO */}
         <div className="mb-14">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Public roadmap</p>
-          <h1 className="text-4xl font-extrabold tracking-tight mb-4">What we're building</h1>
-          <p className="text-gray-500 text-sm max-w-2xl leading-relaxed">
+          <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Public roadmap</p>
+          <h1 className="text-4xl font-extrabold tracking-tight mb-4 text-gray-900 dark:text-gray-100">What we're building</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm max-w-2xl leading-relaxed">
             SocialMate is built in public. This is what's in progress, what's coming next, what's planned,
             and what's already shipped. Feature requests welcome at the bottom.
           </p>
@@ -156,19 +156,19 @@ export default function RoadmapClient() {
             <div key={status} className="mb-12">
               <div className="flex items-center gap-3 mb-6">
                 <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${cfg.dot}`} />
-                <h2 className="text-lg font-extrabold tracking-tight">{cfg.label}</h2>
-                <span className="text-xs font-bold text-gray-400">{items.length} item{items.length !== 1 ? 's' : ''}</span>
+                <h2 className="text-lg font-extrabold tracking-tight text-gray-900 dark:text-gray-100">{cfg.label}</h2>
+                <span className="text-xs font-bold text-gray-400 dark:text-gray-500">{items.length} item{items.length !== 1 ? 's' : ''}</span>
               </div>
               <div className="space-y-3">
                 {items.map((item, i) => (
-                  <div key={i} className="flex items-start gap-4 p-4 bg-white border border-gray-100 rounded-2xl hover:border-gray-200 transition-all">
+                  <div key={i} className="flex items-start gap-4 p-4 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl hover:border-gray-200 dark:hover:border-gray-600 transition-all">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <p className="text-sm font-extrabold">{item.title}</p>
-                        <span className="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">{item.category}</span>
+                        <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">{item.title}</p>
+                        <span className="text-xs font-bold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">{item.category}</span>
                         {item.status === 'shipped' && <span className="text-xs">✅</span>}
                       </div>
-                      <p className="text-xs text-gray-500 leading-relaxed">{item.desc}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{item.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -178,9 +178,9 @@ export default function RoadmapClient() {
         })}
 
         {/* FEATURE REQUEST FORM */}
-        <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 mt-8">
-          <h2 className="text-lg font-extrabold tracking-tight mb-2">Request a feature</h2>
-          <p className="text-xs text-gray-500 mb-5 leading-relaxed">
+        <div className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 mt-8">
+          <h2 className="text-lg font-extrabold tracking-tight mb-2 text-gray-900 dark:text-gray-100">Request a feature</h2>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-5 leading-relaxed">
             Have an idea that's not on the roadmap? Tell us. We read every submission and it genuinely shapes what we build.
           </p>
           {feedbackSent ? (
@@ -196,14 +196,14 @@ export default function RoadmapClient() {
                 onChange={e => setFeedbackText(e.target.value)}
                 placeholder="What should we build? Be specific — the more detail, the better."
                 rows={4}
-                className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl resize-none focus:outline-none focus:border-gray-400"
+                className="w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 rounded-xl resize-none focus:outline-none focus:border-gray-400 dark:focus:border-gray-400"
               />
               <input
                 type="email"
                 value={feedbackEmail}
                 onChange={e => setFeedbackEmail(e.target.value)}
                 placeholder="Your email (optional — we'll update you when it ships)"
-                className="w-full px-4 py-3 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400"
+                className="w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 rounded-xl focus:outline-none focus:border-gray-400 dark:focus:border-gray-400"
               />
               <button
                 onClick={submitRequest}
@@ -217,16 +217,16 @@ export default function RoadmapClient() {
       </div>
 
       {/* FOOTER */}
-      <footer className="border-t border-gray-100 py-8">
+      <footer className="border-t border-gray-100 dark:border-gray-800 py-8">
         <div className="max-w-5xl mx-auto px-6 flex items-center justify-between flex-wrap gap-4">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">S</div>
-            <span className="font-bold text-sm">SocialMate</span>
+            <div className="w-6 h-6 bg-black dark:bg-white rounded-lg flex items-center justify-center text-white dark:text-black text-xs font-bold">S</div>
+            <span className="font-bold text-sm text-gray-900 dark:text-gray-100">SocialMate</span>
           </Link>
-          <div className="flex items-center gap-6 text-xs text-gray-400">
-            <Link href="/features" className="hover:text-black">Features</Link>
-            <Link href="/pricing"  className="hover:text-black">Pricing</Link>
-            <Link href="/blog"     className="hover:text-black">Blog</Link>
+          <div className="flex items-center gap-6 text-xs text-gray-400 dark:text-gray-500">
+            <Link href="/features" className="hover:text-black dark:hover:text-white">Features</Link>
+            <Link href="/pricing"  className="hover:text-black dark:hover:text-white">Pricing</Link>
+            <Link href="/blog"     className="hover:text-black dark:hover:text-white">Blog</Link>
           </div>
         </div>
       </footer>
