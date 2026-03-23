@@ -70,7 +70,7 @@ export default function TermsOfService() {
 
           <section>
             <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">6. Refund policy</h2>
-            <p>We offer refunds on subscription charges within 7 days of the initial purchase if the Service is not functioning as described. After 7 days, subscription charges are non-refundable. AI credit packs are non-refundable once any credits have been used. To request a refund, contact <a href="mailto:socialmate.updates@gmail.com" className="text-black font-semibold underline">socialmate.updates@gmail.com</a>.</p>
+            <p>We offer refunds on subscription charges within 7 days of the initial purchase if the Service is not functioning as described. After 7 days, subscription charges are non-refundable. AI credit packs are non-refundable once any credits have been used. To request a refund, contact <a href="mailto:socialmate.updates@gmail.com" className="text-black dark:text-gray-100 font-semibold underline">socialmate.updates@gmail.com</a>.</p>
           </section>
 
           <section>
@@ -120,14 +120,14 @@ export default function TermsOfService() {
 
           <section>
             <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">15. Contact</h2>
-            <p>For questions about these Terms, contact us at <a href="mailto:socialmate.updates@gmail.com" className="text-black font-semibold underline">socialmate.updates@gmail.com</a></p>
+            <p>For questions about these Terms, contact us at <a href="mailto:socialmate.updates@gmail.com" className="text-black dark:text-gray-100 font-semibold underline">socialmate.updates@gmail.com</a></p>
           </section>
 
         </div>
 
         <div className="mt-16 pt-8 border-t border-gray-100 flex items-center justify-between">
           <p className="text-xs text-gray-400">© 2026 Gilgamesh Enterprise LLC. All rights reserved.</p>
-          <Link href="/privacy" className="text-xs font-semibold text-black hover:underline">Privacy Policy →</Link>
+          <Link href="/privacy" className="text-xs font-semibold text-black dark:text-gray-100 hover:underline">Privacy Policy →</Link>
         </div>
       </div>
     </div>

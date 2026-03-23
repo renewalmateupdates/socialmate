@@ -22,7 +22,7 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">1. Who we are</h2>
             <p>SocialMate is a social media scheduling and content management platform operated by Gilgamesh Enterprise LLC ("we", "us", "our"). Our service is available at socialmate-six.vercel.app and associated domains.</p>
-            <p className="mt-2">For privacy-related questions, contact us at: <a href="mailto:socialmate.updates@gmail.com" className="text-black font-semibold underline">socialmate.updates@gmail.com</a></p>
+            <p className="mt-2">For privacy-related questions, contact us at: <a href="mailto:socialmate.updates@gmail.com" className="text-black dark:text-gray-100 font-semibold underline">socialmate.updates@gmail.com</a></p>
           </section>
 
           <section>
@@ -105,7 +105,7 @@ export default function PrivacyPolicy() {
               <li>Export your data in a portable format</li>
               <li>Opt out of non-essential communications</li>
             </ul>
-            <p className="mt-3">To exercise these rights, email us at <a href="mailto:socialmate.updates@gmail.com" className="text-black font-semibold underline">socialmate.updates@gmail.com</a>. We will respond within 30 days.</p>
+            <p className="mt-3">To exercise these rights, email us at <a href="mailto:socialmate.updates@gmail.com" className="text-black dark:text-gray-100 font-semibold underline">socialmate.updates@gmail.com</a>. We will respond within 30 days.</p>
           </section>
 
           <section>
@@ -127,7 +127,7 @@ export default function PrivacyPolicy() {
 
         <div className="mt-16 pt-8 border-t border-gray-100 flex items-center justify-between">
           <p className="text-xs text-gray-400">© 2026 Gilgamesh Enterprise LLC. All rights reserved.</p>
-          <Link href="/terms" className="text-xs font-semibold text-black hover:underline">Terms of Service →</Link>
+          <Link href="/terms" className="text-xs font-semibold text-black dark:text-gray-100 hover:underline">Terms of Service →</Link>
         </div>
       </div>
     </div>

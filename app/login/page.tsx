@@ -1,10 +1,10 @@
 'use client'
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
-export default function Login() {
+function LoginInner() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -21,6 +21,8 @@ export default function Login() {
   const [mfaLoading, setMfaLoading] = useState(false)
 
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('redirect') || '/dashboard'
 
   const handleGoogleLogin = async () => {
     setGoogleLoading(true)
@@ -69,7 +71,7 @@ export default function Login() {
           setLoading(false)
           return
         }
-        window.location.href = '/dashboard'
+        window.location.href = redirectTo
       }
     } catch {
       setError('Something went wrong. Please try again.')
@@ -101,7 +103,7 @@ export default function Login() {
       return
     }
 
-    window.location.href = '/dashboard'
+    window.location.href = redirectTo
   }
 
   // ── 2FA challenge screen ──
@@ -341,5 +343,17 @@ export default function Login() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function Login() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-theme flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
+      </div>
+    }>
+      <LoginInner />
+    </Suspense>
   )
 }

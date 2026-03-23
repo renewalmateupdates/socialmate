@@ -301,7 +301,13 @@ function ComposeInner() {
         }),
       })
       const data = await res.json()
-      if (!res.ok || data.error) { setAiError('Something went wrong. Please try again.'); return }
+      if (!res.ok || data.error) {
+        const msg = data.error === 'rate_limited'
+          ? (data.message || "You're going too fast — wait 30 seconds and try again.")
+          : 'Something went wrong. Please try again.'
+        setAiError(msg)
+        return
+      }
       setAiResult(data.result)
       const newCredits = typeof data.creditsRemaining === 'number' ? data.creditsRemaining : credits - tool.credits
       setCredits(newCredits)
@@ -326,7 +332,14 @@ function ComposeInner() {
         body: JSON.stringify({ tool: 'score', content, platform: activePlatform?.name || 'general' }),
       })
       const data = await res.json()
-      if (!res.ok || data.error) { setScoreError('Scoring failed. Please try again.'); setScoring(false); return }
+      if (!res.ok || data.error) {
+        const msg = data.error === 'rate_limited'
+          ? (data.message || "You're going too fast — wait 30 seconds and try again.")
+          : 'Scoring failed. Please try again.'
+        setScoreError(msg)
+        setScoring(false)
+        return
+      }
       try {
         const raw = data.result
         const scoreMatch        = raw.match(/SCORE:\s*(\d+)/i)

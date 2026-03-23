@@ -319,7 +319,7 @@ export async function POST(req: NextRequest) {
     try {
       const result = await model.generateContent(prompt)
       text = result.response.text()
-    } catch (aiErr) {
+    } catch (aiErr: any) {
       // Refund credits if Gemini fails
       const refundPayload: Record<string, number> = { ai_credits_remaining: legacyCredits }
       if (settings.monthly_credits_remaining !== null && settings.monthly_credits_remaining !== undefined) {
@@ -328,6 +328,20 @@ export async function POST(req: NextRequest) {
       }
       await supabase.from('user_settings').update(refundPayload).eq('user_id', user.id)
       console.error('Gemini error:', aiErr)
+
+      // Specific handling for rate limit errors
+      const isRateLimit = aiErr?.status === 429
+        || String(aiErr?.message).includes('429')
+        || String(aiErr?.message).toLowerCase().includes('rate limit')
+        || String(aiErr?.message).toLowerCase().includes('quota')
+        || String(aiErr?.message).toLowerCase().includes('resource_exhausted')
+      if (isRateLimit) {
+        return NextResponse.json(
+          { error: 'rate_limited', message: "You're going too fast — wait 30 seconds and try again." },
+          { status: 429 }
+        )
+      }
+
       return NextResponse.json({ error: 'AI generation failed — credits refunded' }, { status: 500 })
     }
 

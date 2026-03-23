@@ -210,7 +210,7 @@ export default function Pricing() {
       if (data.url) {
         window.location.href = data.url
       } else if (data.error === 'Unauthorized') {
-        router.push('/login?redirect=/pricing')
+        router.push(`/login?redirect=${encodeURIComponent('/pricing')}`)
       }
     } catch {
       console.error('Checkout failed')

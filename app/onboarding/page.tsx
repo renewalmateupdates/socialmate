@@ -38,7 +38,7 @@ const PLAN_DETAILS = {
     color: 'border-gray-200',
     badge: 'bg-gray-100 text-gray-600',
     icon: '🆓',
-    credits: 100,
+    credits: 50,
     creditBank: 150,
     platforms: 1,
     seats: 2,
@@ -287,6 +287,7 @@ function OnboardingInner() {
     setSaving(true)
     await supabase.from('profiles').update({
       full_name: displayName,
+      display_name: displayName,
       onboarding_completed: true,
     }).eq('id', user.id)
 
@@ -410,7 +411,7 @@ function OnboardingInner() {
                 <div className="flex items-start gap-3">
                   <span className="text-xl">⚡</span>
                   <div>
-                    <p className="text-xs font-extrabold text-blue-800 mb-1">100 free AI credits activate after setup</p>
+                    <p className="text-xs font-extrabold text-blue-800 mb-1">50 bonus AI credits added to your bank!</p>
                     <p className="text-xs text-blue-600 leading-relaxed">Connect a platform → publish your first post → credits unlock instantly. Refer a friend after and you both earn 25 more.</p>
                   </div>
                 </div>
@@ -832,7 +833,7 @@ function OnboardingInner() {
                   <div className="flex items-center gap-3">
                     <span className="text-3xl">⚡</span>
                     <div>
-                      <p className="text-sm font-extrabold text-green-700">{planConfig.credits.toLocaleString()} AI credits unlocked!</p>
+                      <p className="text-sm font-extrabold text-green-700">50 bonus AI credits added to your bank!</p>
                       <p className="text-xs text-green-600 mt-0.5">Refer a friend and you both earn another 25 credits on top.</p>
                     </div>
                   </div>
