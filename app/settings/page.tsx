@@ -105,6 +105,8 @@ function SettingsInner() {
   const [wlCheckoutLoading, setWlCheckoutLoading] = useState(false)
   const [wlActivated, setWlActivated]           = useState(false)
 
+  const [creditPref, setCreditPref] = useState<'monthly_first' | 'bank_first'>('monthly_first')
+
   // Credit purchase success toast
   useEffect(() => {
     if (searchParams.get('credits') === 'purchased') {
@@ -122,7 +124,7 @@ function SettingsInner() {
 
       const { data: settings } = await supabase
         .from('user_settings')
-        .select('referral_code, white_label_active, white_label_tier, white_label_brand_name, white_label_logo_url, white_label_custom_domain, white_label_brand_color, notification_prefs')
+        .select('referral_code, white_label_active, white_label_tier, white_label_brand_name, white_label_logo_url, white_label_custom_domain, white_label_brand_color, notification_prefs, credit_source_preference')
         .eq('user_id', user.id)
         .single()
 
@@ -134,6 +136,9 @@ function SettingsInner() {
         setWlLogoUrl(settings.white_label_logo_url || '')
         setWlDomain(settings.white_label_custom_domain || '')
         setWlColor(settings.white_label_brand_color || '#000000')
+        if (settings.credit_source_preference) {
+          setCreditPref(settings.credit_source_preference as 'monthly_first' | 'bank_first')
+        }
         if (settings.notification_prefs) {
           setNotifications(prev => ({
             post_published: settings.notification_prefs.post_published ?? prev.post_published,
@@ -264,6 +269,15 @@ function SettingsInner() {
     finally { setCreditPackLoading(null) }
   }
 
+  const saveCreditPreference = async (pref: 'monthly_first' | 'bank_first') => {
+    setCreditPref(pref)
+    if (!userId) return
+    await supabase
+      .from('user_settings')
+      .update({ credit_source_preference: pref })
+      .eq('user_id', userId)
+  }
+
   const handlePortal = async () => {
     setCheckoutLoading(true)
     try {
@@ -380,7 +394,7 @@ function SettingsInner() {
             <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">Manage your account, plan, and preferences</p>
           </div>
 
-          <div className="flex items-center gap-1 mb-6 bg-surface border border-theme rounded-2xl p-1.5 flex-wrap">
+          <div className="flex items-center gap-1 mb-6 bg-surface border border-theme rounded-2xl p-1.5 flex-wrap overflow-x-auto">
             {TABS.map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)}
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === tab ? 'bg-black text-white' : 'text-gray-500 hover:text-black'}`}>
@@ -529,6 +543,36 @@ function SettingsInner() {
                       </div>
                     ))}
                   </div>
+                </div>
+              </div>
+
+              {/* CREDIT SOURCE PREFERENCE */}
+              <div className="mt-6">
+                <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--text)' }}>Credit Usage Preference</h3>
+                <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>
+                  Choose which credits AI tools use first.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => saveCreditPreference('monthly_first')}
+                    className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold border transition-all text-left ${
+                      creditPref === 'monthly_first'
+                        ? 'bg-black text-white border-black dark:bg-white dark:text-black'
+                        : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300'
+                    }`}>
+                    Monthly first
+                    <p className="font-normal text-xs opacity-70 mt-0.5">Use monthly allowance before bank</p>
+                  </button>
+                  <button
+                    onClick={() => saveCreditPreference('bank_first')}
+                    className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold border transition-all text-left ${
+                      creditPref === 'bank_first'
+                        ? 'bg-black text-white border-black dark:bg-white dark:text-black'
+                        : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300'
+                    }`}>
+                    Bank first
+                    <p className="font-normal text-xs opacity-70 mt-0.5">Save monthly credits, use bank</p>
+                  </button>
                 </div>
               </div>
             </div>

@@ -119,7 +119,7 @@ function PlatformCard({
         <button
           onClick={() => onConnect(platform)}
           disabled={isConnecting}
-          className="text-xs font-semibold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex-shrink-0">
+          className="text-xs font-semibold px-3 py-2.5 min-h-[44px] bg-black text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex-shrink-0">
           {isConnecting ? 'Connecting...' : isConnected ? '+ Add' : 'Connect'}
         </button>
       )}

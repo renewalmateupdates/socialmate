@@ -20,7 +20,7 @@ const COMPARISON = [
   { feature: 'Posts per month (free)', buffer: '10 per channel',     socialmate: '100 across all channels' },
   { feature: 'Team seats (free)',      buffer: '1',                  socialmate: '2'                       },
   { feature: 'AI writing tools',       buffer: '1 (AI Assistant)',   socialmate: '12 tools included'       },
-  { feature: 'AI credits',            buffer: 'Paid add-on',        socialmate: '50/month free'            },
+  { feature: 'AI credits',            buffer: 'Paid add-on',        socialmate: '100/month free'           },
   { feature: 'Bulk scheduling',        buffer: 'Paid plans only',    socialmate: '✅ Free'                  },
   { feature: 'Link in bio',            buffer: 'Separate product',   socialmate: '✅ Built in, free'        },
   { feature: 'Competitor tracking',    buffer: '❌',                  socialmate: '✅ Free (3 accounts)'    },
@@ -60,16 +60,16 @@ const FAQ = [
 
 export default function VsBuffer() {
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-950">
+    <div className="min-h-screen bg-white dark:bg-gray-900">
       {/* NAV */}
-      <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
+      <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
-            <span className="font-bold text-base tracking-tight">SocialMate</span>
+            <span className="font-bold text-base tracking-tight dark:text-gray-100">SocialMate</span>
           </Link>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm font-semibold text-gray-500 hover:text-black transition-all hidden sm:block">Sign in</Link>
+            <Link href="/login" className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-all hidden sm:block">Sign in</Link>
             <Link href="/signup" className="bg-black text-white text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
               Get started free →
             </Link>
@@ -84,10 +84,10 @@ export default function VsBuffer() {
           <div className="inline-flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-xs font-bold px-4 py-2 rounded-full mb-6">
             ⚠️ Buffer removed their free plan in 2023
           </div>
-          <h1 className="text-4xl font-extrabold tracking-tight mb-4">
+          <h1 className="text-4xl font-extrabold tracking-tight mb-4 dark:text-gray-100">
             SocialMate vs Buffer (2026)
           </h1>
-          <p className="text-gray-500 max-w-2xl mx-auto text-sm leading-relaxed">
+          <p className="text-gray-500 dark:text-gray-400 max-w-2xl mx-auto text-sm leading-relaxed">
             Buffer was the go-to free social media scheduler for years. Then they removed the free plan,
             switched to per-channel pricing, and left individual creators and small businesses looking for an alternative.
             Here's how SocialMate compares.
@@ -110,18 +110,18 @@ export default function VsBuffer() {
 
         {/* COMPARISON TABLE */}
         <div className="mb-12">
-          <h2 className="text-xl font-extrabold tracking-tight mb-6">Feature comparison</h2>
-          <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden">
-            <div className="grid grid-cols-3 bg-gray-50 border-b border-gray-100 px-5 py-3">
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">Feature</span>
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-wide text-center">Buffer</span>
-              <span className="text-xs font-bold text-black uppercase tracking-wide text-center">SocialMate</span>
+          <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-gray-100">Feature comparison</h2>
+          <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl overflow-hidden">
+            <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-100 dark:border-gray-600 px-5 py-3">
+              <span className="text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wide">Feature</span>
+              <span className="text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wide text-center">Buffer</span>
+              <span className="text-xs font-bold text-black dark:text-gray-100 uppercase tracking-wide text-center">SocialMate</span>
             </div>
             {COMPARISON.map((row, i) => (
-              <div key={i} className={`grid grid-cols-3 px-5 py-3 items-center border-b border-gray-50 last:border-0 ${i % 2 === 0 ? 'bg-white' : 'bg-gray-50/30'}`}>
-                <span className="text-xs font-semibold text-gray-700">{row.feature}</span>
-                <span className="text-xs text-gray-400 text-center">{row.buffer}</span>
-                <span className="text-xs font-bold text-black text-center">{row.socialmate}</span>
+              <div key={i} className={`grid grid-cols-3 px-5 py-3 items-center border-b border-gray-50 dark:border-gray-700 last:border-0 ${i % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50/30 dark:bg-gray-750'}`}>
+                <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{row.feature}</span>
+                <span className="text-xs text-gray-400 dark:text-gray-500 text-center">{row.buffer}</span>
+                <span className="text-xs font-bold text-black dark:text-gray-100 text-center">{row.socialmate}</span>
               </div>
             ))}
           </div>
@@ -129,7 +129,7 @@ export default function VsBuffer() {
 
         {/* 5 REASONS */}
         <div className="mb-12">
-          <h2 className="text-xl font-extrabold tracking-tight mb-6">5 reasons to switch from Buffer to SocialMate</h2>
+          <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-gray-100">5 reasons to switch from Buffer to SocialMate</h2>
           <div className="space-y-4">
             {[
               {
@@ -158,11 +158,11 @@ export default function VsBuffer() {
                 desc: 'These are features Buffer either doesn\'t have or locks behind paid plans. On SocialMate, they\'re included on the free tier.',
               },
             ].map((r, i) => (
-              <div key={i} className="flex gap-4 p-5 bg-white border border-gray-100 rounded-2xl hover:border-gray-300 transition-all">
+              <div key={i} className="flex gap-4 p-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl hover:border-gray-300 dark:hover:border-gray-600 transition-all">
                 <div className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center text-sm font-extrabold flex-shrink-0">{r.n}</div>
                 <div>
-                  <p className="text-sm font-extrabold mb-1">{r.title}</p>
-                  <p className="text-xs text-gray-500 leading-relaxed">{r.desc}</p>
+                  <p className="text-sm font-extrabold mb-1 dark:text-gray-100">{r.title}</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{r.desc}</p>
                 </div>
               </div>
             ))}
@@ -171,12 +171,12 @@ export default function VsBuffer() {
 
         {/* FAQ */}
         <div className="mb-12">
-          <h2 className="text-xl font-extrabold tracking-tight mb-6">Frequently asked questions</h2>
+          <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-gray-100">Frequently asked questions</h2>
           <div className="space-y-4">
             {FAQ.map((faq, i) => (
-              <div key={i} className="p-5 bg-white border border-gray-100 rounded-2xl">
-                <p className="text-sm font-extrabold mb-2">{faq.q}</p>
-                <p className="text-xs text-gray-500 leading-relaxed">{faq.a}</p>
+              <div key={i} className="p-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl">
+                <p className="text-sm font-extrabold mb-2 dark:text-gray-100">{faq.q}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{faq.a}</p>
               </div>
             ))}
           </div>
@@ -197,17 +197,17 @@ export default function VsBuffer() {
       </div>
 
       {/* FOOTER */}
-      <footer className="border-t border-gray-100 py-8">
+      <footer className="border-t border-gray-100 dark:border-gray-800 py-8">
         <div className="max-w-5xl mx-auto px-6 flex items-center justify-between flex-wrap gap-4">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-6 h-6 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">S</div>
-            <span className="font-bold text-sm tracking-tight">SocialMate</span>
+            <span className="font-bold text-sm tracking-tight dark:text-gray-100">SocialMate</span>
           </Link>
-          <div className="flex items-center gap-6 text-xs text-gray-400">
-            <Link href="/pricing" className="hover:text-black transition-colors">Pricing</Link>
-            <Link href="/vs/hootsuite" className="hover:text-black transition-colors">vs Hootsuite</Link>
-            <Link href="/vs/later" className="hover:text-black transition-colors">vs Later</Link>
-            <Link href="/blog" className="hover:text-black transition-colors">Blog</Link>
+          <div className="flex items-center gap-6 text-xs text-gray-400 dark:text-gray-500">
+            <Link href="/pricing" className="hover:text-black dark:hover:text-white transition-colors">Pricing</Link>
+            <Link href="/vs/hootsuite" className="hover:text-black dark:hover:text-white transition-colors">vs Hootsuite</Link>
+            <Link href="/vs/later" className="hover:text-black dark:hover:text-white transition-colors">vs Later</Link>
+            <Link href="/blog" className="hover:text-black dark:hover:text-white transition-colors">Blog</Link>
           </div>
         </div>
       </footer>

@@ -30,7 +30,7 @@ export default function NewWorkspace() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
   const router = useRouter()
-  const { plan, workspaces, setActiveWorkspace } = useWorkspace()
+  const { plan, workspaces, setActiveWorkspace, refreshWorkspaces } = useWorkspace()
 
   useEffect(() => {
     const check = async () => {
@@ -62,31 +62,31 @@ export default function NewWorkspace() {
     }
 
     setSaving(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { router.push('/login'); return }
 
-    const res = await fetch('/api/workspaces/create', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        name:             clientName.trim(),
-        clientName:       clientName.trim(),
-        industry:         industry || null,
-        website:          website  || null,
-        notes:            notes    || null,
-        defaultPlatforms: selectedPlatforms,
-      }),
-    })
-    const data = await res.json()
+    const { data, error } = await supabase
+      .from('workspaces')
+      .insert({
+        owner_id:          user.id,
+        name:              clientName.trim(),
+        client_name:       clientName.trim(),
+        industry:          industry || null,
+        website:           website  || null,
+        notes:             notes    || null,
+        default_platforms: selectedPlatforms,
+        is_personal:       false,
+        created_at:        new Date().toISOString(),
+      })
+      .select()
+      .single()
 
-    if (!res.ok || data.error) {
-      showToast(data.error || 'Failed to create workspace', 'error')
-      setSaving(false)
-      return
-    }
+    if (error) { showToast('Failed to create workspace', 'error'); setSaving(false); return }
 
-    setActiveWorkspace(data.workspace)
+    setActiveWorkspace(data)
+    await refreshWorkspaces()
     showToast(`Workspace created for ${clientName}`, 'success')
-    setTimeout(() => router.push('/dashboard'), 1000)
+    setTimeout(() => router.push('/workspaces'), 1000)
   }
 
   if (!authChecked) {
@@ -246,7 +246,7 @@ export default function NewWorkspace() {
               <div>
                 <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">Industry</label>
                 <select value={industry} onChange={e => setIndustry(e.target.value)}
-                  className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-gray-400 bg-white dark:bg-gray-800 dark:text-gray-100">
+                  className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 bg-white">
                   <option value="">Select an industry...</option>
                   {INDUSTRIES.map(i => <option key={i} value={i}>{i}</option>)}
                 </select>

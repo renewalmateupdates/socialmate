@@ -180,6 +180,7 @@ function OnboardingInner() {
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([])
   const [firstPost, setFirstPost] = useState('')
   const [saving, setSaving] = useState(false)
+  const [hasFinished, setHasFinished] = useState(false)
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null)
   const [toast, setToast] = useState<{ message: string; type: 'error' | 'info' } | null>(null)
 
@@ -284,19 +285,38 @@ function OnboardingInner() {
   }
 
   const handleFinish = async () => {
+    if (hasFinished) return // prevent double-invoke (React StrictMode / double-click)
+    setHasFinished(true)
     setSaving(true)
+
+    // Check if already completed (server-side guard against double award)
+    const { data: currentSettings } = await supabase
+      .from('user_settings')
+      .select('onboarding_completed, ai_credits_remaining')
+      .eq('user_id', user.id)
+      .single()
+
     await supabase.from('profiles').update({
       full_name: displayName,
       display_name: displayName,
       onboarding_completed: true,
     }).eq('id', user.id)
 
-    await supabase.from('user_settings').upsert({
+    const upsertPayload: Record<string, any> = {
       user_id: user.id,
       display_name: displayName,
       use_case: useCase,
       default_platforms: selectedPlatforms,
-    }, { onConflict: 'user_id' })
+      onboarding_completed: true,
+    }
+
+    // Only award onboarding credits once
+    if (!currentSettings?.onboarding_completed) {
+      const currentCredits = currentSettings?.ai_credits_remaining ?? 50
+      upsertPayload.ai_credits_remaining = currentCredits + 50
+    }
+
+    await supabase.from('user_settings').upsert(upsertPayload, { onConflict: 'user_id' })
 
     if (firstPost.trim()) {
       await supabase.from('posts').insert({

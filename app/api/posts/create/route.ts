@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
+import { createClient } from '@supabase/supabase-js'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { publishToAll } from '@/lib/publish'
 import { inngest } from '@/lib/inngest'
@@ -19,24 +20,24 @@ const PLAN_SCHEDULE_WEEKS: Record<string, number> = {
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    const cookieStore = await cookies()
+  const cookieStore = await cookies()
 
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll: () => cookieStore.getAll(),
-          setAll: (cookiesToSet) => {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
-          },
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll: () => cookieStore.getAll(),
+        setAll: (cookiesToSet) => {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            cookieStore.set(name, value, options)
+          )
         },
-      }
-    )
+      },
+    }
+  )
 
+  try {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -46,39 +47,46 @@ export async function POST(request: NextRequest) {
     if (!content?.trim()) return NextResponse.json({ error: 'Content is required' }, { status: 400 })
     if (!platforms?.length) return NextResponse.json({ error: 'Select at least one platform' }, { status: 400 })
 
-    // Try to resolve workspace_id — best effort, non-blocking
-    // IMPORTANT: always validate via admin client; never trust the client-provided
-    // workspaceId blindly (it may be a fake fallback value like the user's own auth UUID)
-    let resolvedWorkspaceId: string | null = null
-    try {
-      const adminClient = getSupabaseAdmin()
+    // Resolve workspace using admin client to bypass RLS
+    let resolvedWorkspaceId = workspaceId || null
+    if (!resolvedWorkspaceId) {
+      const adminSupabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
 
-      // If client sent a workspaceId, verify it actually belongs to this user
-      if (workspaceId && workspaceId !== user.id && workspaceId !== '' && workspaceId !== 'personal') {
-        const { data: verifiedWs } = await adminClient
-          .from('workspaces')
-          .select('id')
-          .eq('id', workspaceId)
-          .eq('owner_id', user.id)
-          .maybeSingle()
-        resolvedWorkspaceId = verifiedWs?.id ?? null
-      }
+      const { data: personalWs } = await adminSupabase
+        .from('workspaces')
+        .select('id')
+        .eq('owner_id', user.id)
+        .eq('is_personal', true)
+        .single()
 
-      // If we still don't have one, look up their personal workspace
-      if (!resolvedWorkspaceId) {
-        const { data: personalWs } = await adminClient
+      if (personalWs) {
+        resolvedWorkspaceId = personalWs.id
+      } else {
+        const { data: newWs, error: wsError } = await adminSupabase
           .from('workspaces')
+          .insert({
+            owner_id:    user.id,
+            name:        'Personal',
+            is_personal: true,
+          })
           .select('id')
-          .eq('owner_id', user.id)
-          .eq('is_personal', true)
-          .maybeSingle()
-        resolvedWorkspaceId = personalWs?.id ?? null
+          .single()
+
+        if (wsError) {
+          console.error('Failed to create personal workspace:', wsError)
+          return NextResponse.json({ error: 'Failed to initialize workspace', detail: wsError.message }, { status: 500 })
+        }
+
+        resolvedWorkspaceId = newWs?.id || null
       }
-    } catch (wsErr) {
-      console.error('[POST_CREATE] workspace lookup failed (non-fatal):', wsErr)
-      resolvedWorkspaceId = null
     }
-    console.log('[POST_CREATE] user:', user.id, 'workspace:', resolvedWorkspaceId)
+
+    if (!resolvedWorkspaceId) {
+      return NextResponse.json({ error: 'No workspace found. Please contact support.' }, { status: 400 })
+    }
 
     // Get plan
     const { data: settings } = await supabase
@@ -89,7 +97,7 @@ export async function POST(request: NextRequest) {
 
     const plan = settings?.plan || 'free'
 
-    // Server-side scheduling window enforcement
+    // Scheduling window enforcement
     if (scheduledAt) {
       const scheduleDate  = new Date(scheduledAt)
       const now           = new Date()
@@ -135,33 +143,28 @@ export async function POST(request: NextRequest) {
 
     const isScheduled = !!scheduledAt
 
-    const insertData: Record<string, unknown> = {
-      user_id:      user.id,
-      content,
-      platforms,
-      status:       isScheduled ? 'scheduled' : 'draft',
-      scheduled_at: scheduledAt || null,
-      destinations: destinations || {},
-      workspace_id: resolvedWorkspaceId,
-    }
-
     const { data: post, error: dbError } = await supabase
       .from('posts')
-      .insert(insertData)
+      .insert({
+        user_id:      user.id,
+        workspace_id: resolvedWorkspaceId,
+        content,
+        platforms,
+        status:       isScheduled ? 'scheduled' : 'draft',
+        scheduled_at: scheduledAt || null,
+        destinations: destinations || {},
+      })
       .select()
       .single()
 
     if (dbError || !post) {
       console.error('Post insert error:', {
         message: dbError?.message,
-        code:    dbError?.code,
+        code: dbError?.code,
         details: dbError?.details,
-        hint:    dbError?.hint,
+        hint: dbError?.hint,
       })
-      return NextResponse.json({
-        error:  'Failed to save post',
-        detail: dbError?.message,
-      }, { status: 500 })
+      return NextResponse.json({ error: 'Failed to save post', detail: dbError?.message }, { status: 500 })
     }
 
     if (isScheduled) {
@@ -169,7 +172,6 @@ export async function POST(request: NextRequest) {
         await supabase.from('posts').delete().eq('id', draftId).eq('user_id', user.id)
       }
 
-      // Wrap inngest in try/catch — a failed event send must NOT crash post creation
       try {
         await inngest.send({
           name: 'post/scheduled',
@@ -183,8 +185,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Post Now — publish immediately
-    const results   = await publishToAll(user.id, platforms, content, destinations || {})
-    const allFailed = results.every(r => !r.success)
+    const results    = await publishToAll(user.id, platforms, content, destinations || {})
+    const allFailed  = results.every(r => !r.success)
     const someFailed = results.some(r => !r.success)
 
     const platformPostIds: Record<string, string> = {}
@@ -192,7 +194,8 @@ export async function POST(request: NextRequest) {
 
     const finalStatus = allFailed ? 'failed' : someFailed ? 'partial' : 'published'
 
-    await supabase
+    console.log('[publish] Updating post status to published:', post.id)
+    const { error: updateError } = await getSupabaseAdmin()
       .from('posts')
       .update({
         status:            finalStatus,
@@ -200,17 +203,17 @@ export async function POST(request: NextRequest) {
         platform_post_ids: platformPostIds,
       })
       .eq('id', post.id)
+    if (updateError) console.error('[publish] Status update failed:', updateError)
 
     if (draftId && !allFailed) {
       await supabase.from('posts').delete().eq('id', draftId).eq('user_id', user.id)
     }
 
-    // Fire analytics fetch event for successfully published posts
     if (!allFailed && Object.keys(platformPostIds).length > 0) {
       await inngest.send({
         name: 'post/published',
         data: { postId: post.id, userId: user.id, platformPostIds },
-      }).catch(err => console.error('[Create] Failed to send post/published event:', err))
+      }).catch(err => console.error('Failed to send post/published event:', err))
     }
 
     return NextResponse.json({
@@ -220,17 +223,8 @@ export async function POST(request: NextRequest) {
       status:  finalStatus,
     })
 
-  } catch (error) {
-    console.error('Post create error:', {
-      message: (error as any)?.message,
-      code:    (error as any)?.code,
-      details: (error as any)?.details,
-      hint:    (error as any)?.hint,
-      stack:   (error as any)?.stack,
-    })
-    return NextResponse.json({
-      error:  'Failed to create post',
-      detail: (error as any)?.message,
-    }, { status: 500 })
+  } catch (err: any) {
+    console.error('Post create route error:', err)
+    return NextResponse.json({ error: 'Failed to save post', detail: err?.message }, { status: 500 })
   }
 }

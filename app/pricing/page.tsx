@@ -22,10 +22,10 @@ const PLANS = [
     annualSaving: 0,
     description: 'Everything you need to get started — no credit card, no catch.',
     badge: null,
-    color: 'border-gray-200 dark:border-gray-700',
-    headerBg: 'bg-gray-50 dark:bg-gray-800',
-    headerText: 'text-gray-900 dark:text-gray-100',
-    subText: 'text-gray-400 dark:text-gray-500',
+    color: 'border-gray-200',
+    headerBg: 'bg-gray-50',
+    headerText: 'text-gray-900',
+    subText: 'text-gray-400',
     features: [
       { label: '4 live platforms now',             note: '12 more coming soon' },
       { label: '1 connected account per platform'                              },
@@ -47,7 +47,7 @@ const PLANS = [
     ctaHref: '/signup',
     monthlyPriceId: null,
     annualPriceId: null,
-    ctaStyle: 'border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700',
+    ctaStyle: 'border-2 border-gray-300 text-gray-700 hover:bg-gray-50',
   },
   {
     name: 'Pro',
@@ -57,7 +57,7 @@ const PLANS = [
     annualSaving: 5,
     description: 'For creators and small businesses who want to grow faster.',
     badge: 'Most Popular',
-    color: 'border-amber-400',
+    color: 'border-black',
     headerBg: 'bg-black',
     headerText: 'text-white',
     subText: 'text-gray-300',
@@ -82,7 +82,7 @@ const PLANS = [
     ctaHref: null,
     monthlyPriceId: STRIPE_PRO_PRICE_ID,
     annualPriceId: STRIPE_PRO_ANNUAL_PRICE_ID,
-    ctaStyle: 'bg-white text-black hover:opacity-80 border-2 border-white',
+    ctaStyle: 'bg-amber-400 hover:bg-amber-500 text-black border-2 border-amber-400 font-bold',
   },
   {
     name: 'Agency',
@@ -92,10 +92,10 @@ const PLANS = [
     annualSaving: 31,
     description: 'For agencies and power users managing multiple brands.',
     badge: null,
-    color: 'border-purple-500',
-    headerBg: 'bg-purple-50 dark:bg-purple-950',
-    headerText: 'text-gray-900 dark:text-gray-100',
-    subText: 'text-gray-500 dark:text-gray-400',
+    color: 'border-purple-300',
+    headerBg: 'bg-purple-50',
+    headerText: 'text-gray-900',
+    subText: 'text-gray-500',
     features: [
       { label: 'Everything in Pro'                                              },
       { label: '10 connected accounts per platform'                            },
@@ -120,17 +120,17 @@ const PLANS = [
 ]
 
 const AI_CREDITS = [
-  { feature: 'Caption Generator',       cost: '5 credits',  proOnly: false },
-  { feature: 'Hashtag Generator',       cost: '5 credits',  proOnly: false },
-  { feature: 'Post Rewrite / Improver', cost: '5 credits',  proOnly: false },
-  { feature: 'Viral Hook Generator',    cost: '5 credits',  proOnly: false },
-  { feature: 'Thread Generator',        cost: '10 credits', proOnly: false },
-  { feature: 'Content Repurposer',      cost: '10 credits', proOnly: false },
-  { feature: 'Post Score',              cost: '5 credits',  proOnly: false },
-  { feature: 'SM-Pulse',                cost: '20 credits', proOnly: false },
-  { feature: 'SM-Radar',                cost: '20 credits', proOnly: false },
+  { feature: 'Caption Generator',       cost: '3 credits',  proOnly: false },
+  { feature: 'Hashtag Generator',       cost: '2 credits',  proOnly: false },
+  { feature: 'Post Rewrite / Improver', cost: '3 credits',  proOnly: false },
+  { feature: 'Viral Hook Generator',    cost: '4 credits',  proOnly: false },
+  { feature: 'Thread Generator',        cost: '8 credits',  proOnly: false },
+  { feature: 'Content Repurposer',      cost: '8 credits',  proOnly: false },
+  { feature: 'Post Score',              cost: '2 credits',  proOnly: false },
+  { feature: 'SM-Pulse',                cost: '10 credits', proOnly: false },
+  { feature: 'SM-Radar',                cost: '10 credits', proOnly: false },
   { feature: 'Content Gap Detector',    cost: '10 credits', proOnly: false },
-  { feature: 'AI Content Calendar',     cost: '25 credits', proOnly: true  },
+  { feature: 'AI Content Calendar',     cost: '20 credits', proOnly: true  },
   { feature: 'AI Image Generation',     cost: '25 credits', proOnly: true  },
 ]
 
@@ -232,7 +232,7 @@ export default function Pricing() {
       if (data.url) {
         window.location.href = data.url
       } else if (data.error === 'Unauthorized') {
-        router.push('/login?redirect=/settings/plan')
+        router.push(`/login?redirect=${encodeURIComponent('/settings/plan')}`)
       } else if (data.error) {
         alert(data.error)
       }
@@ -249,19 +249,19 @@ export default function Pricing() {
 
         {/* HEADER */}
         <div className="text-center mb-14">
-          <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Pricing</p>
-          <h1 className="text-4xl font-extrabold tracking-tight mb-4 text-gray-900 dark:text-gray-100">
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Pricing</p>
+          <h1 className="text-4xl font-extrabold tracking-tight mb-4">
             Simple, honest pricing
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 text-sm max-w-xl mx-auto leading-relaxed">
+          <p className="text-gray-500 text-sm max-w-xl mx-auto leading-relaxed">
             Buffer charges $18/mo for 5 platforms. Hootsuite charges $99/mo. SocialMate gives you all 16 platforms, 12 AI tools, and a Link in Bio page — starting at $0.
           </p>
 
-          <div className="flex items-center justify-center gap-1 mt-8 bg-gray-100 dark:bg-gray-800 rounded-2xl p-1 w-fit mx-auto">
+          <div className="flex items-center justify-center gap-1 mt-8 bg-gray-100 rounded-2xl p-1 w-fit mx-auto">
             {(['monthly', 'annual'] as Interval[]).map(i => (
               <button key={i} onClick={() => setInterval(i)}
                 className={`px-5 py-2 rounded-xl text-sm font-bold transition-all ${
-                  interval === i ? 'bg-white dark:bg-gray-700 text-black dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
+                  interval === i ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'
                 }`}>
                 {i === 'monthly' ? 'Monthly' : (
                   <span className="flex items-center gap-2">
@@ -279,16 +279,12 @@ export default function Pricing() {
           {PLANS.map(plan => {
             const priceId = annual ? plan.annualPriceId : plan.monthlyPriceId
             return (
-              <div key={plan.name} className={`bg-white dark:bg-gray-800 border-2 rounded-2xl overflow-hidden flex flex-col ${plan.color}`}>
+              <div key={plan.name} className={`bg-white border-2 rounded-2xl overflow-hidden flex flex-col ${plan.color}`}>
                 <div className={`px-6 py-6 ${plan.headerBg}`}>
                   <div className="flex items-center justify-between mb-3">
                     <h2 className={`text-lg font-extrabold ${plan.headerText}`}>{plan.name}</h2>
                     {plan.badge && (
-                      <span className={`text-xs font-bold px-3 py-1 rounded-full ${
-                        plan.name === 'Pro'
-                          ? 'bg-amber-400 text-black'
-                          : 'bg-white dark:bg-gray-700 text-black dark:text-white'
-                      }`}>{plan.badge}</span>
+                      <span className="text-xs font-bold px-3 py-1 bg-white text-black rounded-full">{plan.badge}</span>
                     )}
                   </div>
 
@@ -322,9 +318,9 @@ export default function Pricing() {
                     {plan.features.map((f, i) => (
                       <li key={i} className="flex items-start gap-2">
                         <span className="text-green-500 mt-0.5 flex-shrink-0 font-bold">✓</span>
-                        <span className="text-xs text-gray-600 dark:text-gray-400">
+                        <span className="text-xs text-gray-600">
                           {f.label}
-                          {f.note && <span className="text-gray-400 dark:text-gray-500"> — {f.note}</span>}
+                          {f.note && <span className="text-gray-400"> — {f.note}</span>}
                         </span>
                       </li>
                     ))}
@@ -349,39 +345,39 @@ export default function Pricing() {
         </div>
 
         {/* WHITE LABEL ADD-ON */}
-        <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 mb-8">
+        <div className="bg-white border border-gray-100 rounded-2xl p-6 mb-8">
           <div className="mb-5">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-base font-extrabold text-gray-900 dark:text-gray-100">White Label Add-on</h3>
-              <span className="text-xs font-bold px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full">Pro & Agency only</span>
+              <h3 className="text-base font-extrabold">White Label Add-on</h3>
+              <span className="text-xs font-bold px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">Pro & Agency only</span>
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-400">Remove SocialMate branding entirely. Your logo, your colors, your domain. Two tiers based on how deep you want to go.</p>
+            <p className="text-xs text-gray-500">Remove SocialMate branding entirely. Your logo, your colors, your domain. Two tiers based on how deep you want to go.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {WHITE_LABEL_TIERS.map(wl => (
-              <div key={wl.name} className={`border-2 rounded-2xl p-5 ${wl.highlight ? 'border-black dark:border-white' : 'border-gray-100 dark:border-gray-700'}`}>
+              <div key={wl.name} className={`border-2 rounded-2xl p-5 ${wl.highlight ? 'border-black' : 'border-gray-100'}`}>
                 {wl.highlight && (
-                  <span className="text-xs font-bold bg-black dark:bg-white text-white dark:text-black px-2 py-0.5 rounded-full mb-3 inline-block">Best for agencies</span>
+                  <span className="text-xs font-bold bg-black text-white px-2 py-0.5 rounded-full mb-3 inline-block">Best for agencies</span>
                 )}
                 <div className="flex items-start justify-between mb-4">
                   <div>
-                    <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">{wl.name}</p>
-                    <p className="text-xl font-extrabold mt-0.5 text-gray-900 dark:text-gray-100">{wl.price}</p>
+                    <p className="text-sm font-extrabold">{wl.name}</p>
+                    <p className="text-xl font-extrabold mt-0.5">{wl.price}</p>
                   </div>
                   <button
                     onClick={() => handleWhiteLabelCheckout(wl.tier, wl.name)}
                     disabled={loading === wl.name}
                     className={`text-xs font-bold px-4 py-2 rounded-xl transition-all disabled:opacity-60 ${
                       wl.highlight
-                        ? 'bg-black dark:bg-white text-white dark:text-black hover:opacity-80'
-                        : 'border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-black dark:hover:border-white'
+                        ? 'bg-black text-white hover:opacity-80'
+                        : 'border border-gray-200 text-gray-700 hover:border-black'
                     }`}>
                     {loading === wl.name ? 'Loading...' : 'Add to plan →'}
                   </button>
                 </div>
                 <ul className="space-y-2">
                   {wl.features.map((f, i) => (
-                    <li key={i} className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+                    <li key={i} className="flex items-center gap-2 text-xs text-gray-600">
                       <span className="text-green-500 font-bold flex-shrink-0">✓</span>{f}
                     </li>
                   ))}
@@ -392,36 +388,36 @@ export default function Pricing() {
         </div>
 
         {/* AI CREDIT COSTS */}
-        <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 mb-8">
+        <div className="bg-white border border-gray-100 rounded-2xl p-6 mb-8">
           <div className="flex items-start justify-between mb-5">
             <div>
-              <h3 className="text-base font-extrabold mb-1 text-gray-900 dark:text-gray-100">AI Credit Costs</h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 max-w-xl">
+              <h3 className="text-base font-extrabold mb-1">AI Credit Costs</h3>
+              <p className="text-xs text-gray-500 max-w-xl">
                 Credits refresh monthly. Unused credits roll over into your bank — Free banks up to 150, Pro up to 750, Agency up to 3,000. Banks reset every 6 months.
               </p>
             </div>
             <Link href="/ai-features"
-              className="text-xs font-bold text-black dark:text-white hover:underline flex-shrink-0 ml-4">
+              className="text-xs font-bold text-black hover:underline flex-shrink-0 ml-4">
               See all tools →
             </Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
             {AI_CREDITS.map((item, i) => (
-              <div key={i} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 rounded-xl px-3 py-2.5">
-                <span className="text-xs text-gray-700 dark:text-gray-300 font-semibold">
+              <div key={i} className="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2.5">
+                <span className="text-xs text-gray-700 font-semibold">
                   {item.feature}
                   {item.proOnly && (
-                    <span className="ml-1.5 text-xs font-bold text-purple-500 bg-purple-50 dark:bg-purple-950 px-1.5 py-0.5 rounded-full">Pro+</span>
+                    <span className="ml-1.5 text-xs font-bold text-purple-500 bg-purple-50 px-1.5 py-0.5 rounded-full">Pro+</span>
                   )}
                 </span>
-                <span className="text-xs font-extrabold text-gray-900 dark:text-gray-100 ml-3 flex-shrink-0">{item.cost}</span>
+                <span className="text-xs font-extrabold text-gray-900 ml-3 flex-shrink-0">{item.cost}</span>
               </div>
             ))}
           </div>
           <div className="mt-4 flex items-center justify-between">
-            <p className="text-xs text-gray-400 dark:text-gray-500">Editing AI-generated content is always free — credits only charge on generation.</p>
+            <p className="text-xs text-gray-400">Editing AI-generated content is always free — credits only charge on generation.</p>
             <Link href="/settings?tab=Plan"
-              className="text-xs font-bold text-black dark:text-white hover:underline flex-shrink-0">
+              className="text-xs font-bold text-black hover:underline flex-shrink-0">
               Buy credit packs →
             </Link>
           </div>
@@ -456,13 +452,13 @@ export default function Pricing() {
         </div>
 
         {/* FAQ */}
-        <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6">
-          <h3 className="text-base font-extrabold mb-6 text-gray-900 dark:text-gray-100">Frequently asked questions</h3>
+        <div className="bg-white border border-gray-100 rounded-2xl p-6">
+          <h3 className="text-base font-extrabold mb-6">Frequently asked questions</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {FAQ.map((item, i) => (
               <div key={i}>
-                <p className="text-xs font-extrabold mb-1.5 text-gray-900 dark:text-gray-100">{item.q}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{item.a}</p>
+                <p className="text-xs font-extrabold mb-1.5">{item.q}</p>
+                <p className="text-xs text-gray-500 leading-relaxed">{item.a}</p>
               </div>
             ))}
           </div>
@@ -470,8 +466,8 @@ export default function Pricing() {
 
         {/* BOTTOM CTA */}
         <div className="text-center mt-12">
-          <h2 className="text-2xl font-extrabold mb-2 text-gray-900 dark:text-gray-100">Ready to get started?</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">No card required. Free forever. 50 AI credits per month, included free.</p>
+          <h2 className="text-2xl font-extrabold mb-2">Ready to get started?</h2>
+          <p className="text-sm text-gray-500 mb-6">No card required. Free forever. 50 AI credits per month, included free.</p>
           <div className="flex items-center justify-center gap-4">
             <Link href="/signup"
               className="bg-black text-white font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm">

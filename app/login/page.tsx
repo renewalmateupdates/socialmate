@@ -71,7 +71,7 @@ function LoginInner() {
           setLoading(false)
           return
         }
-        window.location.href = redirectTo
+        router.push(redirectTo)
       }
     } catch {
       setError('Something went wrong. Please try again.')
@@ -103,7 +103,7 @@ function LoginInner() {
       return
     }
 
-    window.location.href = redirectTo
+    router.push(redirectTo)
   }
 
   // ── 2FA challenge screen ──
@@ -348,11 +348,7 @@ function LoginInner() {
 
 export default function Login() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-theme flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
-      </div>
-    }>
+    <Suspense>
       <LoginInner />
     </Suspense>
   )
