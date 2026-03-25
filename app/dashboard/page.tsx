@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
+import DashboardTour from '@/components/DashboardTour'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 
 const PLATFORM_ICONS: Record<string, string> = {
@@ -183,6 +184,7 @@ function DashboardInner() {
   return (
     <div className="flex min-h-screen bg-theme">
       {showCreditModal && <CreditSuccessModal onDismiss={handleCreditModalDismiss} />}
+      {user && <DashboardTour userId={user.id} />}
       <Sidebar />
       <main className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
@@ -209,7 +211,7 @@ function DashboardInner() {
                 className="px-3 py-2 border border-gray-200 bg-white dark:bg-gray-800 dark:text-white rounded-xl text-xs font-semibold hover:border-gray-400 transition-all">
                 📅 Bulk Schedule
               </Link>
-              <Link href="/compose"
+              <Link href="/compose" id="tour-compose"
                 className="px-4 py-2 bg-black text-white rounded-xl text-xs font-semibold hover:opacity-80 transition-all">
                 ✏️ Compose
               </Link>
@@ -238,7 +240,7 @@ function DashboardInner() {
                 </p>
               </div>
               {plan === 'free' && (
-                <Link href="/settings?tab=Plan"
+                <Link href="/settings?tab=Plan" id="tour-upgrade"
                   className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all flex-shrink-0">
                   Upgrade
                 </Link>
@@ -246,7 +248,7 @@ function DashboardInner() {
             </div>
 
             {/* Credits card */}
-            <div className="col-span-2 bg-surface border border-theme rounded-2xl px-4 py-3">
+            <div id="tour-ai-credits" className="col-span-2 bg-surface border border-theme rounded-2xl px-4 py-3">
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-xs font-semibold text-gray-400 dark:text-gray-500">AI Credits</span>
                 <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{credits.toLocaleString()} total</span>
