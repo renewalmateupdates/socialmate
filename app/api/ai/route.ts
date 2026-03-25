@@ -201,7 +201,7 @@ export async function POST(req: NextRequest) {
     let earnedDeduct  = 0
     let paidDeduct    = 0
 
-    function takeFrom(available: number): number {
+    const takeFrom = (available: number): number => {
       const take = Math.min(remaining, available)
       remaining -= take
       return take
