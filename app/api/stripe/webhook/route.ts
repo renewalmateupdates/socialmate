@@ -350,16 +350,17 @@ const creditsToSet = alreadyOnPlan
     : PLAN_CREDITS[plan] ?? 100
 
     await supabase.from('user_settings').upsert({
-      user_id:                userId,
+      user_id:                    userId,
       plan,
-      white_label_active:     whiteLabelActive,
-      white_label_tier:       whiteLabelTier,
-      stripe_customer_id:     customerId,
-      stripe_subscription_id: subscription.id,
-      plan_expires_at:        safeDate((subscription as any).current_period_end),
-      ai_credits_remaining:   creditsToSet,
-      ai_credits_total:       PLAN_CREDITS[plan] ?? 100,
-      ai_credits_reset_at:    new Date().toISOString(),
+      white_label_active:         whiteLabelActive,
+      white_label_tier:           whiteLabelTier,
+      stripe_customer_id:         customerId,
+      stripe_subscription_id:     subscription.id,
+      plan_expires_at:            safeDate((subscription as any).current_period_end),
+      ai_credits_remaining:       creditsToSet,
+      monthly_credits_remaining:  creditsToSet,
+      ai_credits_total:           PLAN_CREDITS[plan] ?? 100,
+      ai_credits_reset_at:        new Date().toISOString(),
     }, { onConflict: 'user_id' })
 
     if (userId) {
@@ -407,9 +408,10 @@ const creditsToSet = alreadyOnPlan
         plan,
         current?.ai_credits_remaining ?? 0
       )
-      updatePayload.ai_credits_remaining = creditsToSet
-      updatePayload.ai_credits_total     = PLAN_CREDITS[plan] ?? 100
-      updatePayload.ai_credits_reset_at  = new Date().toISOString()
+      updatePayload.ai_credits_remaining      = creditsToSet
+      updatePayload.monthly_credits_remaining = creditsToSet
+      updatePayload.ai_credits_total          = PLAN_CREDITS[plan] ?? 100
+      updatePayload.ai_credits_reset_at       = new Date().toISOString()
     }
     // No plan change = renewal, don't touch credits
 

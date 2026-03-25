@@ -78,14 +78,20 @@ function QueueInner() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
 
-      const { data } = await supabase
+      let queueQuery = supabase
         .from('posts')
         .select('*')
         .eq('user_id', user.id)
-        .eq('workspace_id', activeWorkspace.id)
         .eq('status', 'scheduled')
         .gte('scheduled_at', new Date().toISOString())
         .order('scheduled_at', { ascending: true })
+
+      // Only filter by workspace for client workspaces; personal shows all
+      if (!activeWorkspace.is_personal) {
+        queueQuery = queueQuery.eq('workspace_id', activeWorkspace.id)
+      }
+
+      const { data } = await queueQuery
 
       setPosts(data || [])
       setLoading(false)

@@ -62,8 +62,9 @@ export default function Drafts() {
       .eq('user_id', user.id)
       .in('status', ['draft', 'scheduled', 'published', 'partial', 'failed'])
       .order('created_at', { ascending: false })
-    // Scope to active workspace if available and it has a real UUID
-    if (activeWorkspace?.id && activeWorkspace.id !== 'personal') {
+    // Only filter by workspace_id for client (non-personal) workspaces
+    // Personal workspace shows ALL user posts regardless of workspace_id
+    if (activeWorkspace && !activeWorkspace.is_personal) {
       query = query.eq('workspace_id', activeWorkspace.id)
     }
     const { data } = await query
