@@ -210,7 +210,7 @@ export default function Pricing() {
       if (data.url) {
         window.location.href = data.url
       } else if (data.error === 'Unauthorized') {
-        router.push(`/login?redirect=${encodeURIComponent('/pricing')}`)
+        router.push(`/login?redirect=${encodeURIComponent('/settings/plan')}`)
       }
     } catch {
       console.error('Checkout failed')
@@ -232,7 +232,7 @@ export default function Pricing() {
       if (data.url) {
         window.location.href = data.url
       } else if (data.error === 'Unauthorized') {
-        router.push('/login?redirect=/pricing')
+        router.push('/login?redirect=/settings/plan')
       } else if (data.error) {
         alert(data.error)
       }
