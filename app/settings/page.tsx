@@ -394,7 +394,7 @@ function SettingsInner() {
             <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">Manage your account, plan, and preferences</p>
           </div>
 
-          <div className="flex items-center gap-1 mb-6 bg-surface border border-theme rounded-2xl p-1.5 flex-wrap">
+          <div className="flex items-center gap-1 mb-6 bg-surface border border-theme rounded-2xl p-1.5 flex-wrap overflow-x-auto">
             {TABS.map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)}
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === tab ? 'bg-black text-white' : 'text-gray-500 hover:text-black'}`}>
