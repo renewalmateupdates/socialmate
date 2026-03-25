@@ -30,7 +30,7 @@ export default function NewWorkspace() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
   const router = useRouter()
-  const { plan, workspaces, setActiveWorkspace } = useWorkspace()
+  const { plan, workspaces, setActiveWorkspace, refreshWorkspaces } = useWorkspace()
 
   useEffect(() => {
     const check = async () => {
@@ -84,8 +84,9 @@ export default function NewWorkspace() {
     if (error) { showToast('Failed to create workspace', 'error'); setSaving(false); return }
 
     setActiveWorkspace(data)
+    await refreshWorkspaces()
     showToast(`Workspace created for ${clientName}`, 'success')
-    setTimeout(() => router.push('/dashboard'), 1000)
+    setTimeout(() => router.push('/workspaces'), 1000)
   }
 
   if (!authChecked) {

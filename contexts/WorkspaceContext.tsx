@@ -69,6 +69,7 @@ type WorkspaceContextType = {
   activeWorkspace: Workspace | null
   activeWorkspaceId: string | null
   setActiveWorkspace: (ws: Workspace) => void
+  refreshWorkspaces: () => Promise<void>
   seatsUsed: number
   seatsTotal: number
   platformsConnected: number
@@ -88,6 +89,7 @@ const WorkspaceContext = createContext<WorkspaceContextType>({
   activeWorkspace: null,
   activeWorkspaceId: null,
   setActiveWorkspace: () => {},
+  refreshWorkspaces: async () => {},
   seatsUsed: 1,
   seatsTotal: 2,
   platformsConnected: 0,
@@ -177,6 +179,17 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       .eq('user_id', userId)
   }, [userId])
 
+  const refreshWorkspaces = useCallback(async () => {
+    if (!userId) return
+    const { data: ws } = await supabase
+      .from('workspaces')
+      .select('*')
+      .eq('owner_id', userId)
+    if (ws && ws.length > 0) {
+      setWorkspaces(ws)
+    }
+  }, [userId])
+
   const planConfig = PLAN_CONFIG[plan]
 
   return (
@@ -190,6 +203,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       activeWorkspace,
       activeWorkspaceId: activeWorkspace?.id ?? null,
       setActiveWorkspace,
+      refreshWorkspaces,
       seatsUsed,
       seatsTotal: planConfig.seats,
       platformsConnected,
