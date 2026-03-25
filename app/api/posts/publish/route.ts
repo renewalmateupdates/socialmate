@@ -123,14 +123,17 @@ export async function POST(request: NextRequest) {
       if (r.success && r.postId) platformPostIds[r.platform] = r.postId
     })
 
-    await supabase
+    const finalStatus = allFailed ? 'failed' : someFailed ? 'partial' : 'published'
+    console.log('[publish] Updating post status to published:', postId)
+    const { error: updateError } = await getSupabaseAdmin()
       .from('posts')
       .update({
-        status: allFailed ? 'failed' : someFailed ? 'partial' : 'published',
+        status: finalStatus,
         published_at: allFailed ? null : new Date().toISOString(),
         platform_post_ids: platformPostIds,
       })
       .eq('id', postId)
+    if (updateError) console.error('[publish] Status update failed:', updateError)
 
     await handleFirstPostCredits(userId)
     if (!allFailed) await updateStreak(userId)
@@ -146,7 +149,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: !allFailed,
       results,
-      status: allFailed ? 'failed' : someFailed ? 'partial' : 'published',
+      status: finalStatus,
     })
   }
 }
