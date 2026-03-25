@@ -248,41 +248,53 @@ function DashboardInner() {
             </div>
 
             {/* Credits card */}
-            <div id="tour-ai-credits" className="col-span-2 bg-surface border border-theme rounded-2xl px-4 py-3">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-xs font-semibold text-gray-400 dark:text-gray-500">AI Credits</span>
-                <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{credits.toLocaleString()} total</span>
+            <div id="tour-ai-credits" className="col-span-2 bg-surface border border-theme rounded-2xl px-4 py-4">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-extrabold uppercase tracking-wider text-gray-400 dark:text-gray-500">AI Credits</span>
+                <span className="text-2xl font-extrabold text-gray-900 dark:text-white">{credits.toLocaleString()}</span>
               </div>
-              <div className="w-full h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden mb-2">
-                <div className={`h-full rounded-full transition-all ${creditColor}`} style={{ width: `${creditPct}%` }} />
-              </div>
-              {/* Three pools */}
-              <div className="space-y-0.5">
-                <div className="flex items-center justify-between text-xs text-gray-400 dark:text-gray-500">
-                  <span>📅 Monthly</span>
-                  <span>{monthlyCredits.toLocaleString()} / {monthlyLimit.toLocaleString()}</span>
+
+              {/* Visual pool blocks */}
+              <div className="flex flex-col sm:flex-row gap-2 mb-3">
+                {/* Monthly */}
+                <div className="flex-1 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-800 px-3 py-2">
+                  <div className="text-xs text-blue-400 font-semibold mb-0.5">📅 Monthly</div>
+                  <div className="text-base font-extrabold text-blue-700 dark:text-blue-300">
+                    {monthlyCredits.toLocaleString()}
+                    <span className="text-xs font-normal text-blue-400 ml-1">/ {monthlyLimit.toLocaleString()}</span>
+                  </div>
+                  <div className="w-full h-1 bg-blue-100 dark:bg-blue-900 rounded-full mt-1.5 overflow-hidden">
+                    <div className="h-full bg-blue-400 rounded-full" style={{ width: `${Math.min(100, monthlyLimit > 0 ? (monthlyCredits / monthlyLimit) * 100 : 0)}%` }} />
+                  </div>
                 </div>
+
+                {/* Earned — only if non-zero */}
                 {earnedCredits > 0 && (
-                  <div className="flex items-center justify-between text-xs text-gray-400 dark:text-gray-500">
-                    <span>🎁 Earned</span>
-                    <span>{earnedCredits.toLocaleString()}</span>
+                  <div className="flex-1 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-800 px-3 py-2">
+                    <div className="text-xs text-amber-500 font-semibold mb-0.5">🎁 Earned</div>
+                    <div className="text-base font-extrabold text-amber-700 dark:text-amber-300">{earnedCredits.toLocaleString()}</div>
                   </div>
                 )}
+
+                {/* Paid — only if non-zero */}
                 {paidCredits > 0 && (
-                  <div className="flex items-center justify-between text-xs text-gray-400 dark:text-gray-500">
-                    <span>💳 Purchased</span>
-                    <span>{paidCredits.toLocaleString()}</span>
+                  <div className="flex-1 rounded-xl bg-purple-50 dark:bg-purple-950/30 border border-purple-100 dark:border-purple-800 px-3 py-2">
+                    <div className="text-xs text-purple-500 font-semibold mb-0.5">💳 Purchased</div>
+                    <div className="text-base font-extrabold text-purple-700 dark:text-purple-300">{paidCredits.toLocaleString()}</div>
                   </div>
                 )}
               </div>
+
               {creditPct < 20 && (
-                <Link href="/settings?tab=Plan" className="text-xs font-bold text-blue-600 hover:underline mt-1.5 block">
+                <Link href="/settings?tab=Plan" className="text-xs font-bold text-blue-600 hover:underline block mb-2">
                   Get more credits →
                 </Link>
               )}
+
               {/* Credit source toggle */}
-              <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-                <p className="text-xs text-gray-400 mb-2">Use credits from:</p>
+              <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
+                <p className="text-xs text-gray-400 mb-1.5">Draw from:</p>
                 <div className="flex gap-1 flex-wrap">
                   {(['monthly_first', 'earned_first', 'paid_first'] as const).map(opt => (
                     <button
@@ -294,7 +306,7 @@ function DashboardInner() {
                           : 'bg-transparent text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-600 hover:border-gray-400'
                       }`}
                     >
-                      {opt === 'monthly_first' ? '📅 Monthly first' : opt === 'earned_first' ? '🎁 Earned first' : '💳 Paid first'}
+                      {opt === 'monthly_first' ? '📅 Monthly' : opt === 'earned_first' ? '🎁 Earned' : '💳 Paid'}
                     </button>
                   ))}
                 </div>
