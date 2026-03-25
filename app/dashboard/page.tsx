@@ -257,31 +257,31 @@ function DashboardInner() {
 
               {/* Visual pool blocks */}
               <div className="flex flex-col sm:flex-row gap-2 mb-3">
-                {/* Monthly */}
-                <div className="flex-1 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-800 px-3 py-2">
-                  <div className="text-xs text-blue-400 font-semibold mb-0.5">📅 Monthly</div>
-                  <div className="text-base font-extrabold text-blue-700 dark:text-blue-300">
-                    {monthlyCredits.toLocaleString()}
-                    <span className="text-xs font-normal text-blue-400 ml-1">/ {monthlyLimit.toLocaleString()}</span>
-                  </div>
-                  <div className="w-full h-1 bg-blue-100 dark:bg-blue-900 rounded-full mt-1.5 overflow-hidden">
-                    <div className="h-full bg-blue-400 rounded-full" style={{ width: `${Math.min(100, monthlyLimit > 0 ? (monthlyCredits / monthlyLimit) * 100 : 0)}%` }} />
+                {/* Monthly — always shown */}
+                <div className="flex-1 rounded-lg p-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
+                  <div className="text-xs text-blue-600 dark:text-blue-400 font-semibold mb-1">📅 Monthly</div>
+                  <div className="text-lg font-bold text-blue-700 dark:text-blue-300">{monthlyCredits.toLocaleString()}</div>
+                  <div className="text-xs text-blue-500 dark:text-blue-500">/ {monthlyLimit.toLocaleString()} this month</div>
+                  <div className="w-full bg-blue-200 dark:bg-blue-900 rounded-full h-1 mt-2">
+                    <div className="bg-blue-500 h-1 rounded-full transition-all" style={{ width: `${Math.min(100, (monthlyCredits / Math.max(1, monthlyLimit)) * 100)}%` }} />
                   </div>
                 </div>
 
-                {/* Earned — only if non-zero */}
+                {/* Earned — only if > 0 */}
                 {earnedCredits > 0 && (
-                  <div className="flex-1 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-800 px-3 py-2">
-                    <div className="text-xs text-amber-500 font-semibold mb-0.5">🎁 Earned</div>
-                    <div className="text-base font-extrabold text-amber-700 dark:text-amber-300">{earnedCredits.toLocaleString()}</div>
+                  <div className="flex-1 rounded-lg p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800">
+                    <div className="text-xs text-amber-600 dark:text-amber-400 font-semibold mb-1">🎁 Earned</div>
+                    <div className="text-lg font-bold text-amber-700 dark:text-amber-300">{earnedCredits.toLocaleString()}</div>
+                    <div className="text-xs text-amber-500">from referrals &amp; bonuses</div>
                   </div>
                 )}
 
-                {/* Paid — only if non-zero */}
+                {/* Paid — only if > 0 */}
                 {paidCredits > 0 && (
-                  <div className="flex-1 rounded-xl bg-purple-50 dark:bg-purple-950/30 border border-purple-100 dark:border-purple-800 px-3 py-2">
-                    <div className="text-xs text-purple-500 font-semibold mb-0.5">💳 Purchased</div>
-                    <div className="text-base font-extrabold text-purple-700 dark:text-purple-300">{paidCredits.toLocaleString()}</div>
+                  <div className="flex-1 rounded-lg p-3 bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800">
+                    <div className="text-xs text-purple-600 dark:text-purple-400 font-semibold mb-1">💳 Purchased</div>
+                    <div className="text-lg font-bold text-purple-700 dark:text-purple-300">{paidCredits.toLocaleString()}</div>
+                    <div className="text-xs text-purple-500">one-time credit pack</div>
                   </div>
                 )}
               </div>

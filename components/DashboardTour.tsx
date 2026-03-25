@@ -59,14 +59,23 @@ export default function DashboardTour({ userId }: Props) {
   const [pos, setPos]         = useState<{ top: number; left: number; width: number; height: number } | null>(null)
 
   useEffect(() => {
-    // Check if tour has already been completed
+    // Fast check: localStorage (prevents flash before DB responds)
+    const localDone = localStorage.getItem(`tour_completed_${userId}`) === 'true'
+    if (localDone) return
+
+    // Authoritative check: DB
     supabase
       .from('user_settings')
       .select('first_tour_completed')
       .eq('user_id', userId)
       .single()
       .then(({ data }) => {
-        if (!data?.first_tour_completed) setActive(true)
+        if (data?.first_tour_completed) {
+          // Sync to localStorage so next load is instant
+          localStorage.setItem(`tour_completed_${userId}`, 'true')
+        } else {
+          setActive(true)
+        }
       })
   }, [userId])
 
@@ -85,6 +94,9 @@ export default function DashboardTour({ userId }: Props) {
 
   const completeTour = async (dismissed = false) => {
     setActive(false)
+    // Save to localStorage immediately (fast, prevents re-show on reload)
+    localStorage.setItem(`tour_completed_${userId}`, 'true')
+    // Save to DB (authoritative, survives localStorage clear)
     await supabase
       .from('user_settings')
       .update({ first_tour_completed: true })

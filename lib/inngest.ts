@@ -25,26 +25,41 @@ export const publishScheduledPost = inngest.createFunction(
     // Sleep until the scheduled time
     await step.sleepUntil('wait-until-scheduled', new Date(scheduledAt))
 
+    // Idempotency guard: check post hasn't already been published before sleeping ends
+    const postCheck = await step.run('check-post-status', async () => {
+      const { data: post } = await getSupabaseAdmin()
+        .from('posts')
+        .select('id, status, published_at')
+        .eq('id', postId)
+        .single()
+      return post
+    })
+
+    if (postCheck && postCheck.status !== 'scheduled') {
+      console.log(`[PUBLISH-GUARD] Post ${postId} already has status="${postCheck.status}" — skipping publish`)
+      return { skipped: true, reason: 'already_processed', status: postCheck.status }
+    }
+
     // Publish the post (wrapped in step for retry isolation)
     const result = await step.run('publish-post', async () => {
       // ── IDEMPOTENCY GUARD ─────────────────────────────────────────────────
       // Check DB state before doing ANYTHING. If Inngest retries after a
       // transient error, this guard prevents the post from being sent twice.
-      const { data: postCheck } = await getSupabaseAdmin()
+      const { data: innerPostCheck } = await getSupabaseAdmin()
         .from('posts')
         .select('status, published_at, platform_post_ids')
         .eq('id', postId)
         .single()
 
       const alreadyTerminal =
-        postCheck?.status === 'published' ||
-        postCheck?.status === 'partial'   ||
-        postCheck?.status === 'failed'    ||
-        !!postCheck?.published_at
+        innerPostCheck?.status === 'published' ||
+        innerPostCheck?.status === 'partial'   ||
+        innerPostCheck?.status === 'failed'    ||
+        !!innerPostCheck?.published_at
 
       if (alreadyTerminal) {
-        console.log(`[PUBLISH-GUARD] Post ${postId} already in terminal state (${postCheck?.status}), skipping`)
-        return { skipped: true, status: postCheck?.status }
+        console.log(`[PUBLISH-GUARD] Post ${postId} already in terminal state (${innerPostCheck?.status}), skipping`)
+        return { skipped: true, status: innerPostCheck?.status }
       }
       // ─────────────────────────────────────────────────────────────────────
 
@@ -56,10 +71,10 @@ export const publishScheduledPost = inngest.createFunction(
 
       const data = await res.json().catch(() => ({}))
 
-      // 409 = publish route guard caught a duplicate (race condition)
+      // 409 = already published (idempotency) — treat as success, don't retry
       if (res.status === 409) {
-        console.log(`[PUBLISH-GUARD] Post ${postId} returned 409 — already published, skipping`)
-        return { skipped: true, status: 'published' }
+        console.log(`[PUBLISH-GUARD] Post ${postId} already published (409) — treating as success`)
+        return { skipped: true, status: 'already_published' }
       }
 
       if (!res.ok) {

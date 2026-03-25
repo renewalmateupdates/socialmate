@@ -194,16 +194,30 @@ export async function POST(request: NextRequest) {
 
     const finalStatus = allFailed ? 'failed' : someFailed ? 'partial' : 'published'
 
-    console.log('[publish] Updating post status to published:', post.id)
-    const { error: updateError } = await getSupabaseAdmin()
+    // Step 1: Update status + published_at (CRITICAL — must succeed)
+    const { error: statusError } = await getSupabaseAdmin()
       .from('posts')
       .update({
-        status:            finalStatus,
-        published_at:      allFailed ? null : new Date().toISOString(),
-        platform_post_ids: platformPostIds,
+        status:       finalStatus,
+        published_at: allFailed ? null : new Date().toISOString(),
       })
       .eq('id', post.id)
-    if (updateError) console.error('[publish] Status update failed:', updateError)
+    if (statusError) {
+      console.error('[publish] CRITICAL: status update failed:', statusError)
+    } else {
+      console.log('[publish] Status updated →', finalStatus, 'for post:', post.id)
+    }
+
+    // Step 2: Update platform_post_ids (non-critical — column may not exist yet)
+    if (Object.keys(platformPostIds).length > 0) {
+      getSupabaseAdmin()
+        .from('posts')
+        .update({ platform_post_ids: platformPostIds })
+        .eq('id', post.id)
+        .then(({ error }) => {
+          if (error) console.warn('[publish] platform_post_ids update skipped (non-fatal):', error.message)
+        })
+    }
 
     if (draftId && !allFailed) {
       await supabase.from('posts').delete().eq('id', draftId).eq('user_id', user.id)

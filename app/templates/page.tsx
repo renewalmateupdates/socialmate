@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
+import { useWorkspace } from '@/contexts/WorkspaceContext'
 
 function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse ${className}`} />
@@ -78,6 +79,7 @@ export default function Templates() {
   const [savingStarter, setSavingStarter] = useState<string | null>(null)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const router = useRouter()
+  const { activeWorkspace } = useWorkspace()
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type })
@@ -89,16 +91,24 @@ export default function Templates() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
       setUserId(user.id)
-      const { data } = await supabase
+
+      let templatesQuery = supabase
         .from('post_templates')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
+
+      // Filter by workspace if in a client workspace
+      if (activeWorkspace && !activeWorkspace.is_personal) {
+        templatesQuery = templatesQuery.eq('workspace_id', activeWorkspace.id)
+      }
+
+      const { data } = await templatesQuery
       setTemplates(data || [])
       setLoading(false)
     }
     load()
-  }, [router])
+  }, [router, activeWorkspace])
 
   const handleSave = async () => {
     if (!title.trim() || !content.trim()) { showToast('Title and content required', 'error'); return }
