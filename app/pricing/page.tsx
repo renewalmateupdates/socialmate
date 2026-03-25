@@ -82,7 +82,7 @@ const PLANS = [
     ctaHref: null,
     monthlyPriceId: STRIPE_PRO_PRICE_ID,
     annualPriceId: STRIPE_PRO_ANNUAL_PRICE_ID,
-    ctaStyle: 'bg-white text-black hover:opacity-80 border-2 border-white',
+    ctaStyle: 'bg-amber-400 hover:bg-amber-500 text-black border-2 border-amber-400 font-bold',
   },
   {
     name: 'Agency',
@@ -210,7 +210,7 @@ export default function Pricing() {
       if (data.url) {
         window.location.href = data.url
       } else if (data.error === 'Unauthorized') {
-        router.push('/login?redirect=/pricing')
+        router.push(`/login?redirect=${encodeURIComponent('/settings/plan')}`)
       }
     } catch {
       console.error('Checkout failed')
@@ -232,7 +232,7 @@ export default function Pricing() {
       if (data.url) {
         window.location.href = data.url
       } else if (data.error === 'Unauthorized') {
-        router.push('/login?redirect=/pricing')
+        router.push(`/login?redirect=${encodeURIComponent('/settings/plan')}`)
       } else if (data.error) {
         alert(data.error)
       }
