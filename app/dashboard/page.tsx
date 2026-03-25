@@ -66,7 +66,7 @@ function DashboardInner() {
   const [recentPosts, setRecentPosts] = useState<Post[]>([])
   const [weekCounts, setWeekCounts] = useState<number[]>([0,0,0,0,0,0,0])
   const [streak, setStreak] = useState(0)
-  const { plan, credits } = useWorkspace()
+  const { plan, credits, activeWorkspace } = useWorkspace()
 
   useEffect(() => {
     if (searchParams.get('credits') === 'added') setShowCreditModal(true)
@@ -173,7 +173,14 @@ function DashboardInner() {
           {/* HEADER */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
             <div>
-              <h1 className="text-2xl font-extrabold tracking-tight">{greeting}, {displayName} 👋</h1>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-2xl font-extrabold tracking-tight">{greeting}, {displayName} 👋</h1>
+                {activeWorkspace && !activeWorkspace.is_personal && (
+                  <span className="text-xs font-bold px-2.5 py-1 bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 rounded-full">
+                    🏢 {activeWorkspace.client_name || activeWorkspace.name}
+                  </span>
+                )}
+              </div>
               <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">
                 {stats.todayCount > 0
                   ? `${stats.todayCount} post${stats.todayCount !== 1 ? 's' : ''} scheduled today · ${stats.upcomingCount} coming up`

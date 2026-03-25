@@ -103,7 +103,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [userId, setUserId]                 = useState<string | null>(null)
   const [workspaceName, setWorkspaceName]   = useState('My Workspace')
   const [workspaces, setWorkspaces]         = useState<Workspace[]>([])
-  const [activeWorkspace, setActiveWorkspace] = useState<Workspace | null>(null)
+  const [activeWorkspace, setActiveWorkspaceState] = useState<Workspace | null>(null)
   const [seatsUsed, setSeatsUsed]           = useState(1)
   const [platformsConnected, setPlatformsConnected] = useState(0)
   const [loading, setLoading]               = useState(true)
@@ -123,8 +123,12 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       if (ws && ws.length > 0) {
         setWorkspaces(ws)
         const personal = ws.find((w: Workspace) => w.is_personal) || ws[0]
-        setActiveWorkspace(personal)
+        setActiveWorkspaceState(personal)
         setWorkspaceName(personal.name || 'My Workspace')
+        // Persist to cookie for server-side access
+        if (personal.id && personal.id !== 'personal') {
+          document.cookie = `active_workspace_id=${personal.id}; path=/; max-age=86400`
+        }
       } else {
         // No workspaces visible (RLS may be blocking anon client).
         // Use a placeholder — the API routes look up the real workspace
@@ -136,7 +140,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
           owner_id: user.id,
         }
         setWorkspaces([fallback])
-        setActiveWorkspace(fallback)
+        setActiveWorkspaceState(fallback)
       }
 
       const { data: settings } = await supabase
@@ -173,6 +177,14 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     load()
   }, [])
 
+  const setActiveWorkspace = useCallback((ws: Workspace) => {
+    setActiveWorkspaceState(ws)
+    // Persist to cookie so server components / API routes can read it
+    if (ws.id && ws.id !== 'personal') {
+      document.cookie = `active_workspace_id=${ws.id}; path=/; max-age=86400`
+    }
+  }, [])
+
   const setCredits = useCallback(async (newCredits: number) => {
     setCreditsState(newCredits)
     if (!userId) return
@@ -190,6 +202,12 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       .eq('owner_id', userId)
     if (ws && ws.length > 0) {
       setWorkspaces(ws)
+      // Update active workspace data if it changed
+      setActiveWorkspaceState(prev => {
+        if (!prev) return prev
+        const updated = ws.find((w: Workspace) => w.id === prev.id)
+        return updated || prev
+      })
     }
   }, [userId])
 
