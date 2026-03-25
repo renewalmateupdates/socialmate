@@ -307,6 +307,21 @@ function OnboardingInner() {
       })
     }
 
+    // Award 50 bonus onboarding credits to bank (permanent_credits + ai_credits_remaining)
+    const { data: settingsNow } = await supabase
+      .from('user_settings')
+      .select('ai_credits_remaining, permanent_credits')
+      .eq('user_id', user.id)
+      .single()
+
+    const currentCredits   = settingsNow?.ai_credits_remaining ?? 50
+    const currentPermanent = settingsNow?.permanent_credits     ?? 0
+
+    await supabase.from('user_settings').update({
+      ai_credits_remaining: currentCredits + 50,
+      permanent_credits:    currentPermanent + 50,
+    }).eq('user_id', user.id)
+
     setSaving(false)
     router.push('/dashboard')
   }
@@ -411,8 +426,8 @@ function OnboardingInner() {
                 <div className="flex items-start gap-3">
                   <span className="text-xl">⚡</span>
                   <div>
-                    <p className="text-xs font-extrabold text-blue-800 mb-1">50 bonus AI credits added to your bank!</p>
-                    <p className="text-xs text-blue-600 leading-relaxed">Connect a platform → publish your first post → credits unlock instantly. Refer a friend after and you both earn 25 more.</p>
+                    <p className="text-xs font-extrabold text-blue-800 mb-1">Complete setup and earn 50 bonus AI credits</p>
+                    <p className="text-xs text-blue-600 leading-relaxed">Finish all setup steps and they'll go straight into your credit bank. Refer a friend after and you both earn 25 more.</p>
                   </div>
                 </div>
               </div>

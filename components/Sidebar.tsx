@@ -311,10 +311,10 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
                   <span className="flex-1">{item.label}</span>
                   {item.href === '/ai-features' && !loading && (
                     <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${
-                      monthlyRemaining < 10 ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400' :
-                      monthlyRemaining < 20 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400' :
+                      credits < 10 ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400' :
+                      credits < 20 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400' :
                       'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
-                    }`}>{monthlyRemaining}</span>
+                    }`}>{credits}</span>
                   )}
                 </Link>
               )
@@ -329,20 +329,15 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs font-semibold" style={{ color: 'var(--sidebar-muted)' }}>AI Credits</span>
             <span className="text-xs font-bold" style={{ color: 'var(--sidebar-fg)' }}>
-              {loading ? '...' : `${monthlyRemaining} left`}
+              {loading ? '...' : `${credits} left`}
             </span>
           </div>
           <div className="w-full rounded-full h-1.5" style={{ background: 'var(--sidebar-border)' }}>
             <div className="h-1.5 rounded-full transition-all" style={{ width: `${creditsBar}%`, background: creditBarColor }} />
           </div>
           <p className="text-xs mt-1" style={{ color: 'var(--sidebar-faint)' }}>
-            {loading ? 'Loading...' : `of ${monthlyCredits} this month`}
+            {loading ? 'Loading...' : `${monthlyRemaining} of ${monthlyCredits} this month${bankedCredits > 0 ? ` · Bank: ${bankedCredits} saved` : ''}`}
           </p>
-          {!loading && bankedCredits > 0 && (
-            <p className="text-xs mt-0.5 font-semibold" style={{ color: 'var(--sidebar-faint)' }}>
-              Bank: {bankedCredits} saved
-            </p>
-          )}
         </div>
 
         <div className="rounded-xl p-3" style={{ background: 'var(--sidebar-active)' }}>
