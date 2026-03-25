@@ -57,7 +57,7 @@ const PLANS = [
     annualSaving: 5,
     description: 'For creators and small businesses who want to grow faster.',
     badge: 'Most Popular',
-    color: 'border-black',
+    color: 'border-amber-400',
     headerBg: 'bg-black',
     headerText: 'text-white',
     subText: 'text-gray-300',
@@ -92,7 +92,7 @@ const PLANS = [
     annualSaving: 31,
     description: 'For agencies and power users managing multiple brands.',
     badge: null,
-    color: 'border-purple-300 dark:border-purple-700',
+    color: 'border-purple-500',
     headerBg: 'bg-purple-50 dark:bg-purple-950',
     headerText: 'text-gray-900 dark:text-gray-100',
     subText: 'text-gray-500 dark:text-gray-400',
@@ -284,7 +284,11 @@ export default function Pricing() {
                   <div className="flex items-center justify-between mb-3">
                     <h2 className={`text-lg font-extrabold ${plan.headerText}`}>{plan.name}</h2>
                     {plan.badge && (
-                      <span className="text-xs font-bold px-3 py-1 bg-white dark:bg-gray-700 text-black dark:text-white rounded-full">{plan.badge}</span>
+                      <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                        plan.name === 'Pro'
+                          ? 'bg-amber-400 text-black'
+                          : 'bg-white dark:bg-gray-700 text-black dark:text-white'
+                      }`}>{plan.badge}</span>
                     )}
                   </div>
 

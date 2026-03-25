@@ -75,8 +75,8 @@ const PLAN_DETAILS = {
   pro: {
     label: 'Pro',
     price: '$5/mo',
-    color: 'border-black',
-    badge: 'bg-black text-white',
+    color: 'border-amber-400',
+    badge: 'bg-amber-400 text-black',
     icon: '⚡',
     credits: 500,
     creditBank: 750,
@@ -461,7 +461,7 @@ function OnboardingInner() {
                         <div>
                           <div className="flex items-center gap-2">
                             <p className="text-base font-extrabold">{cfg.label}</p>
-                            {p === 'pro' && <span className="text-xs font-bold bg-black text-white px-2 py-0.5 rounded-full">Most popular</span>}
+                            {p === 'pro' && <span className="text-xs font-bold bg-amber-400 text-black px-2 py-0.5 rounded-full">Most popular</span>}
                             {p === 'agency' && <span className="text-xs font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">Best for teams</span>}
                           </div>
                           <p className="text-xl font-extrabold">{cfg.price}</p>
