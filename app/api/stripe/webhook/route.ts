@@ -130,7 +130,7 @@ async function processReferralCredits(
     if (crossedTier) {
       const { data: referrerSettings } = await supabase
         .from('user_settings')
-        .select('ai_credits_remaining, permanent_credits')
+        .select('ai_credits_remaining, earned_credits')
         .eq('user_id', conversion.affiliate_user_id)
         .single()
       if (referrerSettings) {
@@ -138,7 +138,7 @@ async function processReferralCredits(
           .from('user_settings')
           .update({
             ai_credits_remaining: (referrerSettings.ai_credits_remaining ?? 0) + REFERRAL_CREDITS_PER_TIER,
-            permanent_credits: (referrerSettings.permanent_credits ?? 0) + REFERRAL_CREDITS_PER_TIER,
+            earned_credits: (referrerSettings.earned_credits ?? 0) + REFERRAL_CREDITS_PER_TIER,
           })
           .eq('user_id', conversion.affiliate_user_id)
       }
@@ -297,14 +297,14 @@ export async function POST(req: NextRequest) {
 
       const { data: settings } = await supabase
         .from('user_settings')
-        .select('ai_credits_remaining, permanent_credits')
+        .select('ai_credits_remaining, paid_credits')
         .eq('user_id', userId)
         .single()
-      const currentLegacy    = settings?.ai_credits_remaining ?? 0
-      const currentPermanent = settings?.permanent_credits ?? 0
+      const currentLegacy = settings?.ai_credits_remaining ?? 0
+      const currentPaid   = settings?.paid_credits ?? 0
       const updatePayload: Record<string, number> = {
         ai_credits_remaining: currentLegacy + creditsToAdd,
-        permanent_credits: currentPermanent + creditsToAdd,
+        paid_credits: currentPaid + creditsToAdd,
       }
       await supabase
         .from('user_settings')

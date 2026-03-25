@@ -171,7 +171,7 @@ export async function POST(req: NextRequest) {
     // Server-side credit check and atomic deduction
     const { data: settings, error: settingsError } = await supabase
       .from('user_settings')
-      .select('ai_credits_remaining, monthly_credits_remaining, permanent_credits, credit_source_preference')
+      .select('ai_credits_remaining, monthly_credits_remaining, earned_credits, paid_credits, credit_source_preference')
       .eq('user_id', user.id)
       .single()
 
@@ -181,11 +181,11 @@ export async function POST(req: NextRequest) {
 
     const creditPref = settings.credit_source_preference || 'monthly_first'
 
-    // Two-bucket credit system: monthly + permanent (bank) credits
-    // Falls back to legacy ai_credits_remaining if two-bucket columns not populated
-    const monthlyCredits   = settings.monthly_credits_remaining ?? settings.ai_credits_remaining ?? 0
-    const permanentCredits = settings.permanent_credits ?? 0
-    const totalCredits     = monthlyCredits + permanentCredits
+    // Three-bucket credit system: monthly + earned + paid
+    const monthlyCredits = settings.monthly_credits_remaining ?? settings.ai_credits_remaining ?? 0
+    const earnedCredits  = settings.earned_credits ?? 0
+    const paidCredits    = settings.paid_credits ?? 0
+    const totalCredits   = monthlyCredits + earnedCredits + paidCredits
 
     if (totalCredits < creditCost) {
       return NextResponse.json({
@@ -195,22 +195,37 @@ export async function POST(req: NextRequest) {
       }, { status: 402 })
     }
 
-    // Deduct from preferred bucket first, overflow to the other
-    let monthlyDeduct: number
-    let bankDeduct: number
+    // Deduct based on preference order — three-pool system
+    let remaining = creditCost
+    let monthlyDeduct = 0
+    let earnedDeduct  = 0
+    let paidDeduct    = 0
 
-    if (creditPref === 'bank_first') {
-      bankDeduct    = Math.min(creditCost, permanentCredits)
-      monthlyDeduct = creditCost - bankDeduct
-    } else {
-      // monthly_first (default)
-      monthlyDeduct = Math.min(creditCost, monthlyCredits)
-      bankDeduct    = creditCost - monthlyDeduct
+    function takeFrom(available: number): number {
+      const take = Math.min(remaining, available)
+      remaining -= take
+      return take
     }
 
-    const newMonthly   = monthlyCredits - monthlyDeduct
-    const newPermanent = permanentCredits - bankDeduct
-    const newLegacy    = Math.max(0, (settings.ai_credits_remaining ?? 0) - creditCost)
+    if (creditPref === 'earned_first') {
+      earnedDeduct  = takeFrom(earnedCredits)
+      monthlyDeduct = takeFrom(monthlyCredits)
+      paidDeduct    = takeFrom(paidCredits)
+    } else if (creditPref === 'paid_first') {
+      paidDeduct    = takeFrom(paidCredits)
+      monthlyDeduct = takeFrom(monthlyCredits)
+      earnedDeduct  = takeFrom(earnedCredits)
+    } else {
+      // monthly_first (default)
+      monthlyDeduct = takeFrom(monthlyCredits)
+      earnedDeduct  = takeFrom(earnedCredits)
+      paidDeduct    = takeFrom(paidCredits)
+    }
+
+    const newMonthly = monthlyCredits - monthlyDeduct
+    const newEarned  = earnedCredits  - earnedDeduct
+    const newPaid    = paidCredits    - paidDeduct
+    const newLegacy  = Math.max(0, (settings.ai_credits_remaining ?? 0) - creditCost)
 
     const updatePayload: Record<string, number> = {
       ai_credits_remaining: newLegacy,
@@ -218,9 +233,8 @@ export async function POST(req: NextRequest) {
     if (settings.monthly_credits_remaining !== null && settings.monthly_credits_remaining !== undefined) {
       updatePayload.monthly_credits_remaining = newMonthly
     }
-    if (permanentCredits > 0 && bankDeduct > 0) {
-      updatePayload.permanent_credits = newPermanent
-    }
+    if (earnedDeduct > 0) updatePayload.earned_credits = newEarned
+    if (paidDeduct   > 0) updatePayload.paid_credits   = newPaid
 
     const { error: deductError } = await supabase
       .from('user_settings')
@@ -238,7 +252,8 @@ export async function POST(req: NextRequest) {
       if (settings.monthly_credits_remaining !== null && settings.monthly_credits_remaining !== undefined) {
         refundPayload.monthly_credits_remaining = monthlyCredits
       }
-      if (bankDeduct > 0) refundPayload.permanent_credits = permanentCredits
+      if (earnedDeduct > 0) refundPayload.earned_credits = earnedCredits
+      if (paidDeduct   > 0) refundPayload.paid_credits   = paidCredits
       await supabase.from('user_settings').update(refundPayload).eq('user_id', user.id)
       return NextResponse.json({ error: 'AI not configured' }, { status: 500 })
     }
@@ -262,7 +277,8 @@ export async function POST(req: NextRequest) {
       if (settings.monthly_credits_remaining !== null && settings.monthly_credits_remaining !== undefined) {
         refundPayload.monthly_credits_remaining = monthlyCredits
       }
-      if (bankDeduct > 0) refundPayload.permanent_credits = permanentCredits
+      if (earnedDeduct > 0) refundPayload.earned_credits = earnedCredits
+      if (paidDeduct   > 0) refundPayload.paid_credits   = paidCredits
       await supabase.from('user_settings').update(refundPayload).eq('user_id', user.id)
 
       const isRateLimit =

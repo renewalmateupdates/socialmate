@@ -85,7 +85,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
 
   const {
     workspaces, activeWorkspace, setActiveWorkspace,
-    plan, credits, creditsTotal, seatsUsed, seatsTotal, loading,
+    plan, credits, creditsTotal, monthlyCredits, earnedCredits, paidCredits, seatsUsed, seatsTotal, loading,
   } = useWorkspace()
 
   useEffect(() => {
@@ -137,14 +137,13 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
     return group
   })
 
-  const badge          = PLAN_BADGE[plan] || PLAN_BADGE.free
-  const monthlyCredits = PLAN_CONFIG[plan]?.credits ?? 50
-  const monthlyRemaining = Math.min(credits, monthlyCredits)
-  const bankedCredits  = Math.max(0, credits - monthlyCredits)
-  const creditsBar     = monthlyCredits > 0 ? Math.max(0, Math.min((monthlyRemaining / monthlyCredits) * 100, 100)) : 0
-  // Credit bar color — red/yellow/accent based on remaining
-  const creditBarColor = monthlyRemaining < 10 ? '#f87171' : monthlyRemaining < 20 ? '#facc15' : 'var(--accent, #22c55e)'
-  const seatsBar       = seatsTotal > 0 ? Math.min(100, (seatsUsed / seatsTotal) * 100) : 0
+  const badge         = PLAN_BADGE[plan] || PLAN_BADGE.free
+  const monthlyLimit  = PLAN_CONFIG[plan]?.credits ?? 50
+  const totalCredits  = credits  // already sum of all pools from context
+  const creditsBar    = monthlyLimit > 0 ? Math.max(0, Math.min((monthlyCredits / monthlyLimit) * 100, 100)) : 0
+  // Credit bar color — red/yellow/accent based on monthly remaining
+  const creditBarColor = monthlyCredits < 10 ? '#f87171' : monthlyCredits < 20 ? '#facc15' : 'var(--accent, #22c55e)'
+  const seatsBar      = seatsTotal > 0 ? Math.min(100, (seatsUsed / seatsTotal) * 100) : 0
 
   const isActive = (href: string) => {
     const base = href.split('?')[0]
@@ -329,15 +328,32 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs font-semibold" style={{ color: 'var(--sidebar-muted)' }}>AI Credits</span>
             <span className="text-xs font-bold" style={{ color: 'var(--sidebar-fg)' }}>
-              {loading ? '...' : `${credits} left`}
+              {loading ? '...' : `${totalCredits} left`}
             </span>
           </div>
-          <div className="w-full rounded-full h-1.5" style={{ background: 'var(--sidebar-border)' }}>
+          <div className="w-full rounded-full h-1.5 mb-2" style={{ background: 'var(--sidebar-border)' }}>
             <div className="h-1.5 rounded-full transition-all" style={{ width: `${creditsBar}%`, background: creditBarColor }} />
           </div>
-          <p className="text-xs mt-1" style={{ color: 'var(--sidebar-faint)' }}>
-            {loading ? 'Loading...' : `${monthlyRemaining} of ${monthlyCredits} this month${bankedCredits > 0 ? ` · Bank: ${bankedCredits} saved` : ''}`}
-          </p>
+
+          {/* Three pools */}
+          <div className="space-y-1 mt-1">
+            <div className="flex justify-between text-xs" style={{ color: 'var(--sidebar-faint)' }}>
+              <span>📅 Monthly</span>
+              <span>{loading ? '...' : `${monthlyCredits} / ${monthlyLimit}`}</span>
+            </div>
+            {!loading && earnedCredits > 0 && (
+              <div className="flex justify-between text-xs" style={{ color: 'var(--sidebar-faint)' }}>
+                <span>🎁 Earned</span>
+                <span>{earnedCredits}</span>
+              </div>
+            )}
+            {!loading && paidCredits > 0 && (
+              <div className="flex justify-between text-xs" style={{ color: 'var(--sidebar-faint)' }}>
+                <span>💳 Purchased</span>
+                <span>{paidCredits}</span>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="rounded-xl p-3" style={{ background: 'var(--sidebar-active)' }}>

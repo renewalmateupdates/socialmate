@@ -63,6 +63,9 @@ type WorkspaceContextType = {
   setCredits: (credits: number) => void
   creditsUsed: number
   creditsTotal: number
+  monthlyCredits: number
+  earnedCredits: number
+  paidCredits: number
   workspaceName: string
   setWorkspaceName: (name: string) => void
   workspaces: Workspace[]
@@ -83,6 +86,9 @@ const WorkspaceContext = createContext<WorkspaceContextType>({
   setCredits: () => {},
   creditsUsed: 0,
   creditsTotal: 75,
+  monthlyCredits: 50,
+  earnedCredits: 0,
+  paidCredits: 0,
   workspaceName: 'My Workspace',
   setWorkspaceName: () => {},
   workspaces: [],
@@ -100,6 +106,9 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [plan, setPlan]                     = useState<Plan>('free')
   const [credits, setCreditsState]          = useState(50)
   const [creditsUsed, setCreditsUsed]       = useState(0)
+  const [monthlyCredits, setMonthlyCredits] = useState(50)
+  const [earnedCredits, setEarnedCredits]   = useState(0)
+  const [paidCredits, setPaidCredits]       = useState(0)
   const [userId, setUserId]                 = useState<string | null>(null)
   const [workspaceName, setWorkspaceName]   = useState('My Workspace')
   const [workspaces, setWorkspaces]         = useState<Workspace[]>([])
@@ -145,14 +154,20 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
       const { data: settings } = await supabase
         .from('user_settings')
-        .select('plan, ai_credits_remaining, ai_credits_used, ai_credits_total')
+        .select('plan, ai_credits_remaining, ai_credits_used, ai_credits_total, monthly_credits_remaining, earned_credits, paid_credits')
         .eq('user_id', user.id)
         .single()
 
       if (settings) {
         const p = (settings.plan as Plan) || 'free'
         setPlan(p)
-        setCreditsState(settings.ai_credits_remaining ?? PLAN_CONFIG[p].credits)
+        const monthly = settings.monthly_credits_remaining ?? settings.ai_credits_remaining ?? PLAN_CONFIG[p].credits
+        const earned  = settings.earned_credits ?? 0
+        const paid    = settings.paid_credits ?? 0
+        setMonthlyCredits(monthly)
+        setEarnedCredits(earned)
+        setPaidCredits(paid)
+        setCreditsState(monthly + earned + paid)
         setCreditsUsed(settings.ai_credits_used ?? 0)
       }
 
@@ -219,6 +234,9 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       credits, setCredits,
       creditsUsed,
       creditsTotal: planConfig.creditBank,
+      monthlyCredits,
+      earnedCredits,
+      paidCredits,
       workspaceName, setWorkspaceName,
       workspaces,
       activeWorkspace,

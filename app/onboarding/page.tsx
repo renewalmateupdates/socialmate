@@ -336,19 +336,19 @@ function OnboardingInner() {
       })
     }
 
-    // Award 50 bonus onboarding credits to bank (permanent_credits + ai_credits_remaining)
+    // Award 50 bonus onboarding credits to earned_credits pool
     const { data: settingsNow } = await supabase
       .from('user_settings')
-      .select('ai_credits_remaining, permanent_credits')
+      .select('ai_credits_remaining, earned_credits')
       .eq('user_id', user.id)
       .single()
 
-    const currentCredits   = settingsNow?.ai_credits_remaining ?? 50
-    const currentPermanent = settingsNow?.permanent_credits     ?? 0
+    const currentCredits = settingsNow?.ai_credits_remaining ?? 50
+    const currentEarned  = settingsNow?.earned_credits        ?? 0
 
     await supabase.from('user_settings').update({
       ai_credits_remaining: currentCredits + 50,
-      permanent_credits:    currentPermanent + 50,
+      earned_credits:       currentEarned + 50,
     }).eq('user_id', user.id)
 
     setSaving(false)
