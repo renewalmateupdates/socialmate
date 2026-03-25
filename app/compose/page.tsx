@@ -31,15 +31,15 @@ const COMING_SOON_PLATFORMS = [
 const DESTINATION_PLATFORMS = ['discord', 'telegram']
 
 const AI_TOOLS = [
-  { id: 'caption',   label: 'Caption',   emoji: '✍️',  credits: 3, desc: 'Generate a caption from your topic'     },
-  { id: 'hashtags',  label: 'Hashtags',  emoji: '#️⃣', credits: 2, desc: 'Generate relevant hashtags'             },
-  { id: 'rewrite',   label: 'Rewrite',   emoji: '🔁',  credits: 3, desc: 'Rewrite your post to be punchier'       },
-  { id: 'hook',      label: 'Hook',      emoji: '🎣',  credits: 4, desc: 'Generate 3 viral opening hooks'         },
-  { id: 'thread',    label: 'Thread',    emoji: '🧵',  credits: 8, desc: 'Turn your idea into a full thread'      },
-  { id: 'repurpose', label: 'Repurpose', emoji: '♻️',  credits: 8, desc: 'Reshape long content for this platform' },
+  { id: 'caption',   label: 'Caption',   emoji: '✍️',  credits: 5,  desc: 'Generate a caption from your topic'     },
+  { id: 'hashtags',  label: 'Hashtags',  emoji: '#️⃣', credits: 5,  desc: 'Generate relevant hashtags'             },
+  { id: 'rewrite',   label: 'Rewrite',   emoji: '🔁',  credits: 5,  desc: 'Rewrite your post to be punchier'       },
+  { id: 'hook',      label: 'Hook',      emoji: '🎣',  credits: 5,  desc: 'Generate 3 viral opening hooks'         },
+  { id: 'thread',    label: 'Thread',    emoji: '🧵',  credits: 10, desc: 'Turn your idea into a full thread'      },
+  { id: 'repurpose', label: 'Repurpose', emoji: '♻️',  credits: 10, desc: 'Reshape long content for this platform' },
 ]
 
-const SCORE_CREDIT_COST = 2
+const SCORE_CREDIT_COST = 5
 
 const STARTER_TEMPLATES = [
   {
@@ -123,6 +123,9 @@ function ComposeInner() {
 
   const [destinations, setDestinations] = useState<Record<string, Destination[]>>({})
   const [selectedDestinations, setSelectedDestinations] = useState<Record<string, string>>({})
+  const [connectedPlatforms, setConnectedPlatforms] = useState<Set<string>>(new Set())
+  const [rateLimitedUntil, setRateLimitedUntil] = useState<number | null>(null)
+  const [rateLimitCountdown, setRateLimitCountdown] = useState(0)
 
   const planConfig = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
   const maxScheduleDate = (() => {
@@ -140,18 +143,20 @@ function ComposeInner() {
   // Reload data whenever active workspace changes
   useEffect(() => {
     if (!activeWorkspace) return
-    const wsId = activeWorkspace.id
+    const wsId = activeWorkspace.id || null   // guard: empty string → null
 
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) { router.push('/login'); return }
 
-      // Load destinations scoped to this workspace
-      const { data: dests } = await supabase
+      // Load destinations scoped to this workspace (skip if no real workspace id)
+      const destQuery = supabase
         .from('post_destinations')
         .select('id, platform, label')
         .eq('user_id', data.user.id)
-        .eq('workspace_id', wsId)
         .order('created_at', { ascending: true })
+      const { data: dests } = wsId
+        ? await destQuery.eq('workspace_id', wsId)
+        : await destQuery
 
       // Fallback: load all destinations for this user if none found scoped
       const { data: allDests } = !dests?.length
@@ -177,6 +182,18 @@ function ComposeInner() {
         })
         setSelectedDestinations(autoSelected)
       }
+
+      // Load connected accounts (Bluesky, Mastodon, Telegram, LinkedIn, etc.)
+      const { data: accountsData } = await supabase
+        .from('connected_accounts')
+        .select('platform')
+        .eq('user_id', data.user.id)
+      const platformsSet = new Set<string>(accountsData?.map((a: any) => a.platform) || [])
+      // Discord/Telegram are connected via post_destinations — mark them connected if they have any
+      if (destData.length > 0) {
+        destData.forEach((d: Destination) => platformsSet.add(d.platform))
+      }
+      setConnectedPlatforms(platformsSet)
 
       // Load draft if editing
       const draftId = searchParams.get('draft')
@@ -275,6 +292,27 @@ function ComposeInner() {
     setScheduleDate(val)
   }
 
+  const handleRateLimit = () => {
+    const until = Date.now() + 30_000
+    setRateLimitedUntil(until)
+    setRateLimitCountdown(30)
+  }
+
+  useEffect(() => {
+    if (!rateLimitedUntil) return
+    const interval = setInterval(() => {
+      const remaining = Math.ceil((rateLimitedUntil - Date.now()) / 1000)
+      if (remaining <= 0) {
+        setRateLimitedUntil(null)
+        setRateLimitCountdown(0)
+        clearInterval(interval)
+      } else {
+        setRateLimitCountdown(remaining)
+      }
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [rateLimitedUntil])
+
   const handleAiTool = async (tool: typeof AI_TOOLS[0]) => {
     setAiError('')
     if (!content.trim()) {
@@ -299,10 +337,19 @@ function ComposeInner() {
         }),
       })
       const data = await res.json()
-      if (!res.ok || data.error) { setAiError('Something went wrong. Please try again.'); return }
+      if (!res.ok || data.error) {
+        if (data.error === 'rate_limited') {
+          handleRateLimit()
+          setAiError(data.message || "You're going too fast — wait 30 seconds and try again.")
+        } else {
+          setAiError('Something went wrong. Please try again.')
+        }
+        return
+      }
       setAiResult(data.result)
-      setCredits(credits - tool.credits)
-      showToast(`Used ${tool.credits} credit${tool.credits > 1 ? 's' : ''} · ${credits - tool.credits} remaining`, 'info')
+      const newCredits = typeof data.creditsRemaining === 'number' ? data.creditsRemaining : credits - tool.credits
+      setCredits(newCredits)
+      showToast(`Used ${tool.credits} credit${tool.credits > 1 ? 's' : ''} · ${newCredits} remaining`, 'info')
     } catch {
       setAiError('Network error. Please try again.')
     } finally {
@@ -323,7 +370,16 @@ function ComposeInner() {
         body: JSON.stringify({ tool: 'score', content, platform: activePlatform?.name || 'general' }),
       })
       const data = await res.json()
-      if (!res.ok || data.error) { setScoreError('Scoring failed. Please try again.'); setScoring(false); return }
+      if (!res.ok || data.error) {
+        if (data.error === 'rate_limited') {
+          handleRateLimit()
+          setScoreError(data.message || "You're going too fast — wait 30 seconds and try again.")
+        } else {
+          setScoreError('Scoring failed. Please try again.')
+        }
+        setScoring(false)
+        return
+      }
       try {
         const raw = data.result
         const scoreMatch        = raw.match(/SCORE:\s*(\d+)/i)
@@ -343,7 +399,8 @@ function ComposeInner() {
       } catch {
         setScoreResult({ score: 0, label: 'Unknown', strengths: [], improvements: [], verdict: data.result })
       }
-      setCredits(credits - SCORE_CREDIT_COST)
+      const newCredits = typeof data.creditsRemaining === 'number' ? data.creditsRemaining : credits - SCORE_CREDIT_COST
+      setCredits(newCredits)
     } catch {
       setScoreError('Network error. Please try again.')
     }
@@ -466,9 +523,10 @@ function ComposeInner() {
   }
 
   return (
-    <div className="min-h-screen bg-theme flex">
+    <div className="min-h-dvh bg-theme flex">
       <Sidebar />
-      <div className="md:ml-56 flex-1 p-4 md:p-8">
+      <div className="md:ml-56 flex-1 flex flex-col overflow-y-auto">
+        <div className="flex-1 p-4 md:p-8">
         <div className="max-w-5xl mx-auto">
 
           <div className="flex items-center justify-between mb-6">
@@ -575,6 +633,20 @@ function ComposeInner() {
                 </div>
               )}
 
+              {/* UNCONNECTED PLATFORM WARNINGS */}
+              {selectedPlatforms
+                .filter(id => !connectedPlatforms.has(id))
+                .map(id => {
+                  const p = PLATFORMS.find(pl => pl.id === id)
+                  if (!p) return null
+                  return (
+                    <div key={id} className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded-lg flex items-center gap-2 border border-amber-200 dark:border-amber-800">
+                      <span>⚠️</span>
+                      <span>No {p.name} account connected — <Link href="/accounts" className="underline font-semibold">Connect one in Accounts →</Link></span>
+                    </div>
+                  )
+                })}
+
               {/* DESTINATION SELECTOR */}
               {selectedPlatforms.some(p => DESTINATION_PLATFORMS.includes(p)) && (
                 <div className="bg-surface border border-theme rounded-2xl p-4">
@@ -663,13 +735,21 @@ function ComposeInner() {
                   <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">AI Tools</p>
                   <span className="text-xs font-bold text-gray-500 dark:text-gray-400">{credits} credits remaining</span>
                 </div>
+
+                {rateLimitedUntil && (
+                  <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl px-4 py-3 text-sm text-orange-700 dark:text-orange-300 mb-3">
+                    <span className="font-semibold">Rate limit reached.</span> Try again in 0:{String(rateLimitCountdown).padStart(2, '0')}
+                    <p className="text-xs mt-1 opacity-75">You're generating too fast — this prevents spam and keeps SocialMate free for everyone.</p>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-4">
                   {AI_TOOLS.map(tool => (
                     <button key={tool.id} onClick={() => handleAiTool(tool)}
-                      disabled={aiLoading} title={tool.desc}
+                      disabled={aiLoading || !!rateLimitedUntil} title={tool.desc}
                       className={`p-3 rounded-xl border text-center transition-all ${
                         activeAiTool === tool.id ? 'bg-black text-white border-black'
-                        : aiLoading ? 'bg-gray-50 dark:bg-gray-900 border-gray-100 text-gray-300 dark:text-gray-600 cursor-not-allowed'
+                        : (aiLoading || !!rateLimitedUntil) ? 'bg-gray-50 dark:bg-gray-900 border-gray-100 text-gray-300 dark:text-gray-600 cursor-not-allowed'
                         : 'bg-white dark:bg-gray-900 border-gray-200 hover:border-gray-400 text-gray-700'
                       }`}>
                       <div className="text-lg mb-1">{tool.emoji}</div>
@@ -724,7 +804,7 @@ function ComposeInner() {
                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">AI predicts how your post will perform before you publish</p>
                   </div>
                   <button onClick={handleScorePost}
-                    disabled={scoring || !content.trim() || credits < SCORE_CREDIT_COST}
+                    disabled={scoring || !content.trim() || credits < SCORE_CREDIT_COST || !!rateLimitedUntil}
                     className="flex items-center gap-2 px-4 py-2 bg-black text-white text-xs font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed self-start sm:self-auto">
                     {scoring ? (
                       <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Scoring...</>
@@ -837,27 +917,29 @@ function ComposeInner() {
                 </div>
               )}
 
-              {/* ACTIONS */}
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={handlePublish}
-                  disabled={
-                    publishing ||
-                    !content.trim() ||
-                    charOver ||
-                    selectedPlatforms.length === 0 ||
-                    !!scheduleError ||
-                    missingDestinations.length > 0
-                  }
-                  className="flex-1 bg-black text-white text-sm font-bold py-3 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-                  {publishing
-                    ? (scheduleDate ? 'Scheduling...' : 'Publishing...')
-                    : (scheduleDate ? 'Schedule Post' : 'Post Now')}
-                </button>
-                <button onClick={handleSaveDraft} disabled={saving || !content.trim()}
-                  className="px-5 py-3 border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
-                  {saving ? 'Saving...' : currentDraftId ? 'Update Draft' : 'Save Draft'}
-                </button>
+              {/* ACTIONS — sticky on mobile so keyboard doesn't push buttons off screen */}
+              <div className="sticky bottom-0 bg-theme border-t border-theme-md pt-3 pb-4 -mx-1 px-1 lg:static lg:border-t-0 lg:bg-transparent lg:pt-0 lg:pb-0 lg:mx-0 lg:px-0">
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={handlePublish}
+                    disabled={
+                      publishing ||
+                      !content.trim() ||
+                      charOver ||
+                      selectedPlatforms.length === 0 ||
+                      !!scheduleError ||
+                      missingDestinations.length > 0
+                    }
+                    className="flex-1 bg-black text-white text-sm font-bold py-3 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                    {publishing
+                      ? (scheduleDate ? 'Scheduling...' : 'Publishing...')
+                      : (scheduleDate ? 'Schedule Post' : 'Post Now')}
+                  </button>
+                  <button onClick={handleSaveDraft} disabled={saving || !content.trim()}
+                    className="px-5 py-3 border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
+                    {saving ? 'Saving...' : currentDraftId ? 'Update Draft' : 'Save Draft'}
+                  </button>
+                </div>
               </div>
 
             </div>
@@ -913,6 +995,7 @@ function ComposeInner() {
             </div>
 
           </div>
+        </div>
         </div>
       </div>
 

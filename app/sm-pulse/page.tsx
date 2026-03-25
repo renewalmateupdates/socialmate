@@ -6,7 +6,7 @@ import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 
-const CREDIT_COST = 10
+const CREDIT_COST = 20
 
 export default function SMPulsePage() {
   const router = useRouter()
@@ -42,7 +42,7 @@ export default function SMPulsePage() {
       const data = await res.json()
       if (!res.ok || data.error) { setError('Scan failed. Please try again.'); setScanning(false); return }
       setResult(data.result)
-      setCredits(credits - CREDIT_COST)
+      setCredits(typeof data.creditsRemaining === 'number' ? data.creditsRemaining : credits - CREDIT_COST)
       setLastScanned('Just now')
     } catch {
       setError('Network error. Please try again.')

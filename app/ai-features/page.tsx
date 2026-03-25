@@ -10,7 +10,7 @@ const AI_TOOLS = [
   {
     emoji: '✍️',
     label: 'Caption Generator',
-    credits: '3 credits',
+    credits: '5 credits',
     what: 'Generates platform-optimized captions based on your topic and tone.',
     how: 'Powered by Google Gemini. Analyzes your topic and platform to generate captions that match character limits, tone, and engagement patterns.',
     href: '/compose',
@@ -20,7 +20,7 @@ const AI_TOOLS = [
   {
     emoji: '#️⃣',
     label: 'Hashtag Generator',
-    credits: '2 credits',
+    credits: '5 credits',
     what: 'Generates a set of relevant, high-performing hashtags for your post.',
     how: 'AI analyzes your caption content and niche to suggest hashtags that balance reach and relevance.',
     href: '/compose',
@@ -30,7 +30,7 @@ const AI_TOOLS = [
   {
     emoji: '🔁',
     label: 'Post Rewrite / Improver',
-    credits: '3 credits',
+    credits: '5 credits',
     what: 'Takes your existing caption and makes it sharper, more engaging, and better structured.',
     how: 'AI rewrites for stronger hooks, better readability, and platform-appropriate tone.',
     href: '/compose',
@@ -40,7 +40,7 @@ const AI_TOOLS = [
   {
     emoji: '🎣',
     label: 'Viral Hook Generator',
-    credits: '4 credits',
+    credits: '5 credits',
     what: 'Generates 3 scroll-stopping opening lines designed to drive clicks and engagement.',
     how: 'Trained on viral content patterns across TikTok, YouTube, LinkedIn and Reddit.',
     href: '/compose',
@@ -50,7 +50,7 @@ const AI_TOOLS = [
   {
     emoji: '🧵',
     label: 'Thread Generator',
-    credits: '8 credits',
+    credits: '10 credits',
     what: 'Turns a single topic or idea into a structured multi-part thread.',
     how: 'AI structures your idea into a narrative arc with a hook, supporting points, and a strong CTA.',
     href: '/compose',
@@ -60,7 +60,7 @@ const AI_TOOLS = [
   {
     emoji: '♻️',
     label: 'Content Repurposer',
-    credits: '8 credits',
+    credits: '10 credits',
     what: 'Paste a blog post, transcript, or long caption and get platform-ready content out the other side.',
     how: 'AI extracts key ideas from long-form content and reshapes them into short-form posts for each platform.',
     href: '/compose',
@@ -68,9 +68,19 @@ const AI_TOOLS = [
     proOnly: false,
   },
   {
+    emoji: '⚡',
+    label: 'Post Score',
+    credits: '5 credits',
+    what: 'Get an AI score (0–100) on your post with specific strengths and improvements.',
+    how: 'AI evaluates your post for hook strength, readability, platform fit, and engagement potential.',
+    href: '/compose',
+    available: true,
+    proOnly: false,
+  },
+  {
     emoji: '📅',
     label: 'AI Content Calendar',
-    credits: '20 credits',
+    credits: '25 credits',
     what: 'Generate a full 30-day content calendar based on your niche, platforms, and posting goals.',
     how: 'AI plans a content strategy around your niche, then generates individual posts for each day. Fully editable before publishing.',
     href: '/compose',
@@ -93,7 +103,7 @@ const GROWTH_TOOLS = [
   {
     emoji: '🔥',
     label: 'SM-Pulse',
-    credits: '10 credits per scan',
+    credits: '20 credits per scan',
     what: 'Scans social platforms to surface what is trending in your niche right now.',
     how: 'Analyzes trending hashtags, viral post formats, and engagement spikes across Reddit, YouTube, and connected platforms.',
     href: '/sm-pulse',
@@ -103,7 +113,7 @@ const GROWTH_TOOLS = [
   {
     emoji: '📊',
     label: 'SM-Radar',
-    credits: '10 credits per report',
+    credits: '20 credits per report',
     what: 'Analyzes your personal post performance to surface what is actually working for your audience.',
     how: 'SM-Radar pulls data from your connected accounts and identifies patterns in your best-performing content — timing, format, length, and tone.',
     href: '/sm-radar',
@@ -234,12 +244,12 @@ function ToolCard({ tool, plan }: { tool: any; plan: string }) {
         </div>
       </div>
       {!isLocked && tool.href && (
-        <div className="mt-3 pt-3 border-t border-gray-50">
-          <span className="text-xs font-bold text-black group-hover:underline">Use this tool →</span>
+        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+          <span className="text-xs font-bold text-black dark:text-white group-hover:underline">Use this tool →</span>
         </div>
       )}
       {isLocked && (
-        <div className="mt-3 pt-3 border-t border-gray-50">
+        <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
           <span className="text-xs font-bold text-purple-500">Upgrade to Pro to unlock →</span>
         </div>
       )}
@@ -298,14 +308,14 @@ export default function AIFeaturesPage() {
               <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">All the tools available in your SocialMate account</p>
             </div>
             <div className={`text-right px-4 py-3 rounded-2xl border ${
-              plan === 'agency' ? 'bg-purple-50 border-purple-100' :
-              plan === 'pro'    ? 'bg-blue-50 border-blue-100'     :
-              'bg-gray-50 border-gray-200'
+              plan === 'agency' ? 'bg-purple-50 dark:bg-purple-950 border-purple-100 dark:border-purple-800' :
+              plan === 'pro'    ? 'bg-blue-50 dark:bg-blue-950 border-blue-100 dark:border-blue-800'     :
+              'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
             }`}>
               <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">AI Credits</p>
               <p className="text-xl font-extrabold text-gray-900 dark:text-gray-100">{credits} <span className="text-sm font-semibold text-gray-400 dark:text-gray-500">/ {creditsTotal}</span></p>
               {plan === 'free' && (
-                <Link href="/settings?tab=Plan" className="text-xs font-bold text-black hover:underline">
+                <Link href="/settings?tab=Plan" className="text-xs font-bold text-black dark:text-white hover:underline">
                   Get more credits →
                 </Link>
               )}
@@ -324,9 +334,9 @@ export default function AIFeaturesPage() {
             </Link>
           </div>
 
-          <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-3 mb-8 flex items-start gap-3">
+          <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-2xl px-5 py-3 mb-8 flex items-start gap-3">
             <span className="text-lg flex-shrink-0">💡</span>
-            <p className="text-xs text-amber-800 leading-relaxed">
+            <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
               <strong>Why do AI tools cost credits?</strong> Every AI generation calls Google Gemini, which has real compute costs.
               Credits keep SocialMate sustainable so we can stay free. Free plan includes 50 credits/month — enough to generate
               ~15 captions, ~25 hashtag sets, or run ~5 SM-Pulse scans. Unused credits roll into your bank (up to 75 max).

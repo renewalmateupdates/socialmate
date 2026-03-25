@@ -1,6 +1,5 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
 
 type FeedbackType = 'bug' | 'feature' | 'general'
 
@@ -11,21 +10,30 @@ const TYPES: { id: FeedbackType; label: string; emoji: string }[] = [
 ]
 
 export default function FeedbackWidget() {
-  const [open, setOpen]       = useState(false)
-  const [type, setType]       = useState<FeedbackType>('general')
-  const [message, setMessage] = useState('')
-  const [email, setEmail]     = useState('')
-  const [loading, setLoading] = useState(false)
-  const [done, setDone]       = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [open, setOpen]         = useState(false)
+  const [type, setType]         = useState<FeedbackType>('general')
+  const [message, setMessage]   = useState('')
+  const [email, setEmail]       = useState('')
+  const [loading, setLoading]   = useState(false)
+  const [done, setDone]         = useState(false)
+  const [userEmail, setUserEmail] = useState<string | null>(null)
 
+  // Try to pre-fill email from Supabase session
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user?.email) {
-        setEmail(data.user.email)
-        setIsLoggedIn(true)
+    try {
+      const rawSession = localStorage.getItem('supabase-session')
+        || Object.keys(localStorage).reduce<string | null>((acc, k) => {
+          if (k.includes('supabase') && k.includes('auth') && !acc) {
+            return localStorage.getItem(k)
+          }
+          return acc
+        }, null)
+      if (rawSession) {
+        const parsed = JSON.parse(rawSession)
+        const e = parsed?.user?.email || parsed?.session?.user?.email
+        if (e) { setEmail(e); setUserEmail(e) }
       }
-    })
+    } catch { /* silent */ }
   }, [])
 
   const handleSubmit = async () => {
@@ -35,7 +43,7 @@ export default function FeedbackWidget() {
       await fetch('/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, message, email: email.trim() }),
+        body: JSON.stringify({ type, message, email: email.trim() || undefined }),
       })
       setDone(true)
       setMessage('')
@@ -50,87 +58,106 @@ export default function FeedbackWidget() {
     }
   }
 
+  const handleClose = () => {
+    setOpen(false)
+    setDone(false)
+  }
+
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <>
+      {/* Backdrop */}
       {open && (
-        <div className="mb-3 w-80 bg-white border border-gray-200 rounded-2xl shadow-2xl p-5">
-          {done ? (
-            <div className="text-center py-4">
-              <div className="text-3xl mb-2">🙏</div>
-              <p className="text-sm font-bold">Thanks for the feedback!</p>
-              <p className="text-xs text-gray-400 mt-1">It goes straight to the founder.</p>
-            </div>
-          ) : (
-            <>
-              <div className="flex items-center justify-between mb-4">
-                <p className="text-sm font-extrabold">Share Feedback</p>
-                <button onClick={() => setOpen(false)}
-                  className="text-gray-300 hover:text-gray-500 transition-all text-xl leading-none">
-                  ×
-                </button>
-              </div>
+        <div
+          className="fixed inset-0 z-[60] bg-black/40"
+          onClick={handleClose}
+        />
+      )}
 
-              {/* TYPE SELECTOR */}
-              <div className="flex gap-2 mb-4">
-                {TYPES.map(t => (
-                  <button key={t.id} onClick={() => setType(t.id)}
-                    className={`flex-1 py-1.5 rounded-xl text-xs font-bold transition-all border ${
-                      type === t.id
-                        ? 'bg-pink-500 text-white border-pink-500'
-                        : 'border-gray-200 text-gray-500 hover:border-pink-300'
-                    }`}>
-                    {t.emoji} {t.label}
+      {/* Modal */}
+      {open && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center px-4 pointer-events-none">
+          <div
+            className="w-full max-w-sm bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 pointer-events-auto"
+            onClick={e => e.stopPropagation()}
+          >
+            {done ? (
+              <div className="text-center py-6">
+                <div className="text-4xl mb-3">🙏</div>
+                <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Thanks! We read every message ✓</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Goes straight to the founder.</p>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between mb-5">
+                  <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">Send Feedback</p>
+                  <button
+                    onClick={handleClose}
+                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-all text-xl leading-none w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                    ×
                   </button>
-                ))}
-              </div>
+                </div>
 
-              <textarea
-                value={message}
-                onChange={e => setMessage(e.target.value)}
-                placeholder={
-                  type === 'bug'     ? "What's broken? What did you expect?" :
-                  type === 'feature' ? "What would make SocialMate better?" :
-                  "Share anything on your mind..."
-                }
-                rows={4}
-                className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 outline-none resize-none focus:border-pink-400 transition-all placeholder:text-gray-300 mb-3"
-              />
+                {/* TYPE SELECTOR */}
+                <div className="flex gap-2 mb-4">
+                  {TYPES.map(t => (
+                    <button key={t.id} onClick={() => setType(t.id)}
+                      className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all border ${
+                        type === t.id
+                          ? 'bg-black dark:bg-white text-white dark:text-black border-black dark:border-white'
+                          : 'border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-400'
+                      }`}>
+                      {t.emoji} {t.label}
+                    </button>
+                  ))}
+                </div>
 
-              {!isLoggedIn && (
+                <textarea
+                  value={message}
+                  onChange={e => setMessage(e.target.value)}
+                  placeholder={
+                    type === 'bug'     ? "What's broken? What did you expect?" :
+                    type === 'feature' ? "What would make SocialMate better?" :
+                    "Share anything on your mind..."
+                  }
+                  rows={4}
+                  className="w-full text-sm border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl px-3 py-2.5 outline-none resize-none focus:border-gray-400 dark:focus:border-gray-400 transition-all placeholder:text-gray-300 dark:placeholder:text-gray-500 mb-3"
+                />
+
+                {/* Email */}
                 <input
                   type="email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
+                  readOnly={!!userEmail}
                   placeholder="Your email (optional)"
-                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2.5 outline-none focus:border-pink-400 transition-all mb-3"
+                  className={`w-full text-sm border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-xl px-3 py-2.5 outline-none focus:border-gray-400 dark:focus:border-gray-400 transition-all mb-4 ${
+                    userEmail ? 'bg-gray-50 dark:bg-gray-600 text-gray-400 dark:text-gray-500 cursor-not-allowed' : ''
+                  }`}
                 />
-              )}
 
-              {isLoggedIn && email && (
-                <p className="text-xs text-gray-400 mb-3">Sending as {email}</p>
-              )}
+                <button
+                  onClick={handleSubmit}
+                  disabled={!message.trim() || loading}
+                  className="w-full bg-pink-500 text-white text-sm font-bold py-3 rounded-xl hover:bg-pink-600 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                  {loading ? 'Sending...' : 'Send Feedback →'}
+                </button>
 
-              <button
-                onClick={handleSubmit}
-                disabled={!message.trim() || loading}
-                className="w-full bg-pink-500 text-white text-xs font-bold py-2.5 rounded-xl hover:bg-pink-600 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-                {loading ? 'Sending...' : 'Send Feedback →'}
-              </button>
-
-              <p className="text-xs text-gray-300 text-center mt-2">
-                Goes straight to the founder
-              </p>
-            </>
-          )}
+                <p className="text-xs text-gray-300 dark:text-gray-500 text-center mt-2">
+                  Goes straight to the founder
+                </p>
+              </>
+            )}
+          </div>
         </div>
       )}
 
+      {/* Floating trigger button — bottom right */}
       <button
         onClick={() => setOpen(o => !o)}
-        title="Share feedback"
-        className="w-12 h-12 bg-pink-500 hover:bg-pink-600 text-white rounded-full shadow-lg transition-all flex items-center justify-center text-lg font-bold">
+        className="fixed bottom-6 right-6 z-50 w-12 h-12 bg-pink-500 hover:bg-pink-600 text-white rounded-full shadow-lg transition-all flex items-center justify-center text-lg font-bold"
+        title="Send feedback">
         {open ? '×' : '💬'}
       </button>
-    </div>
+    </>
   )
 }

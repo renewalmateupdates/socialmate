@@ -5,6 +5,13 @@ import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { publishToAll } from '@/lib/publish'
 import { inngest } from '@/lib/inngest'
+import { Resend } from 'resend'
+
+let _resend: Resend | null = null
+function getResend() {
+  if (!_resend) _resend = new Resend(process.env.RESEND_API_KEY!)
+  return _resend
+}
 
 
 export async function POST(request: NextRequest) {
@@ -66,6 +73,52 @@ export async function POST(request: NextRequest) {
       const analyticsPlatforms = results.filter(r => r.success && (r.platform === 'bluesky' || r.platform === 'mastodon'))
       if (analyticsPlatforms.length > 0) {
         await inngest.send({ name: 'post/published', data: { postId, userId, platformPostIds } }).catch(() => {})
+      }
+    }
+
+    // Send post published success email (non-fatal)
+    if (!allFailed) {
+      try {
+        const { data: notifSettings } = await getSupabaseAdmin()
+          .from('user_settings')
+          .select('notification_prefs')
+          .eq('user_id', userId)
+          .single()
+
+        const prefs = (notifSettings?.notification_prefs ?? {}) as Record<string, boolean>
+
+        if (prefs.post_published !== false) {
+          const { data: authUser } = await getSupabaseAdmin().auth.admin.getUserById(userId)
+          if (authUser?.user?.email) {
+            const successfulPlatforms = results
+              .filter(r => r.success)
+              .map(r => r.platform)
+              .join(', ')
+
+            const postContent = post.content || ''
+            const postPreview = postContent.substring(0, 100) + (postContent.length > 100 ? '...' : '')
+
+            await getResend().emails.send({
+              from: 'SocialMate <notifications@socialmate.studio>',
+              to: authUser.user.email,
+              subject: `Your post is live ✓`,
+              html: `
+                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
+                  <div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                    <h2 style="margin: 0 0 8px; color: #15803d; font-size: 18px;">Your post is live ✓</h2>
+                    <p style="margin: 0; color: #166534; font-size: 14px;">Published to: <strong>${successfulPlatforms}</strong></p>
+                  </div>
+                  ${postPreview ? `<p style="color: #374151; font-size: 14px; background: #f9fafb; padding: 12px; border-radius: 6px; border: 1px solid #e5e7eb;">"${postPreview}"</p>` : ''}
+                  <p style="color: #6b7280; font-size: 13px;">💡 Tip: Engage with replies in the first 30 minutes — the algorithm rewards early engagement.</p>
+                  <a href="https://socialmate.studio/queue" style="display: inline-block; background: #000; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-size: 14px; margin-top: 8px;">View in Queue →</a>
+                  <p style="color: #9ca3af; font-size: 11px; margin-top: 20px;">To disable these emails, go to Settings → Notifications.</p>
+                </div>
+              `
+            })
+          }
+        }
+      } catch (emailErr) {
+        console.error('[PUBLISH] post published email failed (non-fatal):', emailErr)
       }
     }
 
@@ -143,6 +196,54 @@ export async function POST(request: NextRequest) {
       const analyticsPlatforms = results.filter(r => r.success && (r.platform === 'bluesky' || r.platform === 'mastodon'))
       if (analyticsPlatforms.length > 0) {
         await inngest.send({ name: 'post/published', data: { postId, userId, platformPostIds } }).catch(() => {})
+      }
+    }
+
+    // Send post published success email for direct (Post Now) publishes
+    if (!allFailed) {
+      try {
+        const { data: notifSettings } = await getSupabaseAdmin()
+          .from('user_settings')
+          .select('notification_prefs')
+          .eq('user_id', userId)
+          .single()
+
+        const prefs = (notifSettings?.notification_prefs ?? {}) as Record<string, boolean>
+
+        if (prefs.post_published !== false) {
+          const { data: authUser } = await getSupabaseAdmin().auth.admin.getUserById(userId)
+          if (authUser?.user?.email) {
+            const successfulPlatforms = results
+              .filter(r => r.success)
+              .map(r => r.platform)
+              .join(', ')
+
+            const postContent = post.content || ''
+            const postPreview = postContent.substring(0, 100) + (postContent.length > 100 ? '...' : '')
+
+            await getResend().emails.send({
+              from: 'SocialMate <notifications@socialmate.studio>',
+              to: authUser.user.email,
+              subject: `Your post is live ✓`,
+              html: `
+                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 24px;">
+                  <div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                    <h2 style="margin: 0 0 8px; color: #15803d; font-size: 18px;">Your post is live ✓</h2>
+                    <p style="margin: 0; color: #166534; font-size: 14px;">Published to: <strong>${successfulPlatforms}</strong></p>
+                  </div>
+                  ${postPreview ? `<p style="color: #374151; font-size: 14px; background: #f9fafb; padding: 12px; border-radius: 6px; border: 1px solid #e5e7eb;">"${postPreview}"</p>` : ''}
+                  <p style="color: #6b7280; font-size: 13px;">💡 Tip: Engage with replies in the first 30 minutes — the algorithm rewards early engagement.</p>
+                  <a href="https://socialmate.studio/queue" style="display: inline-block; background: #000; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-size: 14px; margin-top: 8px;">View in Queue →</a>
+                  <p style="color: #9ca3af; font-size: 11px; margin-top: 20px;">To disable these emails, go to Settings → Notifications.</p>
+                </div>
+              `
+            }).catch(emailErr => {
+              console.error('[PUBLISH] post published email failed (non-fatal):', emailErr)
+            })
+          }
+        }
+      } catch (emailErr) {
+        console.error('[PUBLISH] post published email failed (non-fatal):', emailErr)
       }
     }
 

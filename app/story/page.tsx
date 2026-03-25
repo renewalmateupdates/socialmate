@@ -34,14 +34,14 @@ export default function Story() {
       <div className="max-w-3xl mx-auto px-6 py-16">
 
         <div className="mb-10">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">The Story</p>
-          <h1 className="text-3xl font-extrabold tracking-tight mb-4">Why SocialMate exists</h1>
-          <p className="text-gray-500 text-sm leading-relaxed">
+          <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">The Story</p>
+          <h1 className="text-3xl font-extrabold tracking-tight mb-4 text-gray-900 dark:text-gray-100">Why SocialMate exists</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
             SocialMate — Automate your content. Accelerate your growth.
           </p>
         </div>
 
-        <div className="bg-white border border-gray-100 rounded-2xl p-8 mb-6 space-y-5">
+        <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-8 mb-6 space-y-5">
           {[
             {
               title: 'Where this started',
@@ -65,22 +65,22 @@ export default function Story() {
             },
           ].map((section, i) => (
             <div key={i}>
-              <h2 className="text-base font-extrabold mb-2">{section.title}</h2>
-              <p className="text-sm text-gray-600 leading-relaxed">{section.body}</p>
+              <h2 className="text-base font-extrabold mb-2 text-gray-900 dark:text-gray-100">{section.title}</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{section.body}</p>
             </div>
           ))}
 
-          <div className="pt-2 border-t border-gray-100">
-            <p className="text-sm text-gray-500 leading-relaxed italic">
+          <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
+            <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed italic">
               "I want to turn a dark world into a bright future — one creator at a time."
             </p>
             <p className="text-xs text-gray-400 mt-2">— The solo founder behind SocialMate</p>
           </div>
         </div>
 
-        <div className="bg-white border border-gray-100 rounded-2xl p-8 mb-6">
-          <h2 className="text-base font-extrabold mb-1">Support the mission</h2>
-          <p className="text-xs text-gray-500 mb-6 leading-relaxed">
+        <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-8 mb-6">
+          <h2 className="text-base font-extrabold mb-1 text-gray-900 dark:text-gray-100">Support the mission</h2>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-6 leading-relaxed">
             SocialMate is fully bootstrapped — no investors, no funding rounds, no safety net. If this product has brought you value and you want to help keep it growing, any contribution goes directly toward server costs, API access, and building more features faster.
           </p>
           <div className="flex items-center gap-3 mb-4 flex-wrap">
@@ -89,21 +89,21 @@ export default function Story() {
                 onClick={() => { setSelectedAmount(amount); setCustomAmount('') }}
                 className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all border ${
                   selectedAmount === amount && !customAmount
-                    ? 'bg-black text-white border-black'
-                    : 'bg-white border-gray-200 text-gray-700 hover:border-gray-400'
+                    ? 'bg-black dark:bg-white text-white dark:text-black border-black dark:border-white'
+                    : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-400'
                 }`}>
                 ${amount}
               </button>
             ))}
-            <div className="flex items-center border border-gray-200 rounded-xl overflow-hidden">
-              <span className="px-3 text-sm text-gray-400 bg-gray-50 h-full flex items-center py-2.5">$</span>
+            <div className="flex items-center border border-gray-200 dark:border-gray-600 rounded-xl overflow-hidden">
+              <span className="px-3 text-sm text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-700 h-full flex items-center py-2.5">$</span>
               <input
                 type="number"
                 placeholder="Custom"
                 value={customAmount}
                 min="1"
                 onChange={e => { setCustomAmount(e.target.value); setSelectedAmount(null) }}
-                className="w-24 px-3 py-2.5 text-sm outline-none"
+                className="w-24 px-3 py-2.5 text-sm outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               />
             </div>
           </div>
@@ -113,22 +113,22 @@ export default function Story() {
             className="bg-black text-white text-sm font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
             {loading ? 'Redirecting...' : 'Support SocialMate ❤️'}
           </button>
-          <p className="text-xs text-gray-400 mt-3">
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
             Payments processed securely via Stripe. This is a voluntary contribution — not a subscription.
           </p>
         </div>
 
         <div className="flex items-center gap-3 flex-wrap">
           <Link href="/pricing"
-            className="text-xs font-bold px-4 py-2 bg-black text-white rounded-xl hover:opacity-80 transition-all">
+            className="text-xs font-bold px-4 py-2 bg-black dark:bg-white text-white dark:text-black rounded-xl hover:opacity-80 transition-all">
             View Pricing
           </Link>
           <Link href="/features"
-            className="text-xs font-bold px-4 py-2 border border-gray-200 text-gray-600 rounded-xl hover:border-gray-400 transition-all">
+            className="text-xs font-bold px-4 py-2 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 rounded-xl hover:border-gray-400 dark:hover:border-gray-400 transition-all">
             Explore Features
           </Link>
           <Link href="/signup"
-            className="text-xs font-bold px-4 py-2 border border-gray-200 text-gray-600 rounded-xl hover:border-gray-400 transition-all">
+            className="text-xs font-bold px-4 py-2 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 rounded-xl hover:border-gray-400 dark:hover:border-gray-400 transition-all">
             Get Started Free
           </Link>
         </div>

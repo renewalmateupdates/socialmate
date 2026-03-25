@@ -2,16 +2,17 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
 import { supabase } from '@/lib/supabase'
 
-export type ThemeMode   = 'light' | 'dark'
-export type ThemeAccent = 'default' | 'midnight' | 'forest' | 'rose' | 'slate' | 'amber'
+export type ThemeMode    = 'light' | 'dark'
+export type ThemeAccent  = 'default' | 'midnight' | 'forest' | 'rose' | 'slate' | 'amber'
 
+/** The swatch color is the sidebar background color for that theme */
 export const ACCENT_THEMES: { id: ThemeAccent; label: string; color: string }[] = [
-  { id: 'default',  label: 'Default',  color: '#000000' },
-  { id: 'midnight', label: 'Midnight', color: '#3b5bdb' },
-  { id: 'forest',   label: 'Forest',   color: '#2f9e44' },
-  { id: 'rose',     label: 'Rose',     color: '#e64980' },
-  { id: 'slate',    label: 'Slate',    color: '#495057' },
-  { id: 'amber',    label: 'Amber',    color: '#f08c00' },
+  { id: 'default',  label: 'Default',  color: '#ffffff' },   // white sidebar
+  { id: 'midnight', label: 'Midnight', color: '#1e1b4b' },   // deep indigo
+  { id: 'forest',   label: 'Forest',   color: '#14532d' },   // dark green
+  { id: 'rose',     label: 'Rose',     color: '#881337' },   // deep crimson
+  { id: 'slate',    label: 'Slate',    color: '#0f172a' },   // dark blue-slate
+  { id: 'amber',    label: 'Amber',    color: '#78350f' },   // warm amber
 ]
 
 type ThemeContextType = {
@@ -30,7 +31,8 @@ const ThemeContext = createContext<ThemeContextType>({
 
 function applyTheme(mode: ThemeMode, accent: ThemeAccent) {
   const html = document.documentElement
-  // Apply .dark class so Tailwind dark: variants work
+
+  // Dark mode — apply .dark class so Tailwind dark: variants work
   if (mode === 'dark') {
     html.classList.add('dark')
     html.setAttribute('data-theme', 'dark')
@@ -38,11 +40,20 @@ function applyTheme(mode: ThemeMode, accent: ThemeAccent) {
     html.classList.remove('dark')
     html.setAttribute('data-theme', 'light')
   }
-  // Accent
+
+  // Accent — set data-accent attribute for CSS [data-accent] selectors
   if (accent === 'default') {
     html.removeAttribute('data-accent')
   } else {
     html.setAttribute('data-accent', accent)
+  }
+
+  // Apply sidebar theme via data-sidebar attribute
+  // CSS [data-sidebar="X"] rules in globals.css set all sidebar-specific vars
+  if (accent === 'default') {
+    html.removeAttribute('data-sidebar')
+  } else {
+    html.setAttribute('data-sidebar', accent)
   }
 }
 

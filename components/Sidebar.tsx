@@ -142,7 +142,8 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   const monthlyRemaining = Math.min(credits, monthlyCredits)
   const bankedCredits  = Math.max(0, credits - monthlyCredits)
   const creditsBar     = monthlyCredits > 0 ? Math.max(0, Math.min((monthlyRemaining / monthlyCredits) * 100, 100)) : 0
-  const creditBarColor = monthlyRemaining < 10 ? 'bg-red-400' : monthlyRemaining < 20 ? 'bg-yellow-400' : 'bg-emerald-400'
+  // Credit bar color — red/yellow/accent based on remaining
+  const creditBarColor = monthlyRemaining < 10 ? '#f87171' : monthlyRemaining < 20 ? '#facc15' : 'var(--accent, #22c55e)'
   const seatsBar       = seatsTotal > 0 ? Math.min(100, (seatsUsed / seatsTotal) * 100) : 0
 
   const isActive = (href: string) => {
@@ -151,16 +152,18 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   }
 
   return (
-    <div className="w-56 bg-sidebar border-r border-theme flex flex-col h-full" style={{ backgroundColor: 'var(--sidebar-bg)', borderColor: 'var(--border)' }}>
+    <div className="w-56 flex flex-col h-full" style={{ backgroundColor: 'var(--sidebar-bg)', borderRight: '1px solid var(--sidebar-border)', color: 'var(--sidebar-fg)' }}>
 
       {/* HEADER */}
-      <div className="p-4 flex-shrink-0" style={{ borderBottom: '1px solid var(--border)' }}>
+      <div className="p-4 flex-shrink-0" style={{ borderBottom: '1px solid var(--sidebar-border)' }}>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black dark:bg-white rounded-lg flex items-center justify-center text-white dark:text-black text-sm font-bold">S</div>
-            <span className="font-bold text-base tracking-tight" style={{ color: 'var(--text)' }}>SocialMate<span className="text-[10px] font-semibold bg-pink-500 text-white px-1.5 py-0.5 rounded-full align-super ml-1">Beta</span></span>
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold"
+              style={{ background: 'var(--sidebar-fg)', color: 'var(--sidebar-bg)' }}>S</div>
+            <span className="font-bold text-base tracking-tight" style={{ color: 'var(--sidebar-fg)' }}>SocialMate<span className="text-[10px] font-semibold bg-pink-500 text-white px-1.5 py-0.5 rounded-full align-super ml-1">Beta</span></span>
           </div>
-          <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${badge.color}`}>
+          <span className="text-xs font-bold px-2 py-0.5 rounded-full"
+            style={{ background: 'var(--sidebar-active)', color: 'var(--sidebar-muted)' }}>
             {badge.label}
           </span>
         </div>
@@ -170,34 +173,34 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
           <button
             onClick={() => { setWsOpen(p => !p); setShowUpgradeNudge(false) }}
             className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all"
-            style={{ background: 'var(--bg)', border: '1px solid var(--border)', color: 'var(--text-muted)' }}>
+            style={{ background: 'var(--sidebar-active)', border: '1px solid var(--sidebar-border)', color: 'var(--sidebar-muted)' }}>
             <div className="flex items-center gap-2 min-w-0">
               <span className="text-base">{activeWorkspace?.is_personal ? '🏠' : '🏢'}</span>
               <span className="truncate">{activeWorkspace?.name || 'My Workspace'}</span>
             </div>
-            <span className="flex-shrink-0 ml-1" style={{ color: 'var(--text-faint)' }}>{wsOpen ? '▲' : '▼'}</span>
+            <span className="flex-shrink-0 ml-1" style={{ color: 'var(--sidebar-faint)' }}>{wsOpen ? '▲' : '▼'}</span>
           </button>
 
           {wsOpen && (
             <div className="absolute top-full left-0 right-0 mt-1 rounded-xl shadow-lg z-50 overflow-hidden"
-              style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+              style={{ background: 'var(--sidebar-active)', border: '1px solid var(--sidebar-border)' }}>
               {personalWorkspace && (
                 <button
                   onClick={() => { setActiveWorkspace(personalWorkspace); setWsOpen(false) }}
                   className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-left transition-all hover:opacity-80"
                   style={{
-                    background: activeWorkspace?.id === personalWorkspace.id ? 'var(--bg)' : 'transparent',
-                    color: activeWorkspace?.id === personalWorkspace.id ? 'var(--text)' : 'var(--text-muted)',
+                    background: activeWorkspace?.id === personalWorkspace.id ? 'var(--sidebar-border)' : 'transparent',
+                    color: activeWorkspace?.id === personalWorkspace.id ? 'var(--sidebar-fg)' : 'var(--sidebar-muted)',
                   }}>
                   <span>🏠</span>
                   <span className="truncate">My Workspace</span>
-                  {activeWorkspace?.id === personalWorkspace.id && <span className="ml-auto" style={{ color: 'var(--text)' }}>✓</span>}
+                  {activeWorkspace?.id === personalWorkspace.id && <span className="ml-auto" style={{ color: 'var(--sidebar-fg)' }}>✓</span>}
                 </button>
               )}
 
               {(plan === 'pro' || plan === 'agency') && clientWorkspaces.length > 0 && (
                 <>
-                  <div className="px-3 py-1.5 text-xs font-bold uppercase tracking-widest" style={{ borderTop: '1px solid var(--border)', color: 'var(--text-faint)' }}>
+                  <div className="px-3 py-1.5 text-xs font-bold uppercase tracking-widest" style={{ borderTop: '1px solid var(--sidebar-border)', color: 'var(--sidebar-faint)' }}>
                     Clients
                   </div>
                   {clientWorkspaces.map((ws: any) => (
@@ -205,12 +208,12 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
                       onClick={() => { setActiveWorkspace(ws); setWsOpen(false) }}
                       className="w-full flex items-center gap-2 px-3 py-2.5 text-xs font-semibold text-left transition-all hover:opacity-80"
                       style={{
-                        background: activeWorkspace?.id === ws.id ? 'var(--bg)' : 'transparent',
-                        color: activeWorkspace?.id === ws.id ? 'var(--text)' : 'var(--text-muted)',
+                        background: activeWorkspace?.id === ws.id ? 'var(--sidebar-border)' : 'transparent',
+                        color: activeWorkspace?.id === ws.id ? 'var(--sidebar-fg)' : 'var(--sidebar-muted)',
                       }}>
                       <span>🏢</span>
                       <span className="truncate">{ws.client_name || ws.name}</span>
-                      {activeWorkspace?.id === ws.id && <span className="ml-auto" style={{ color: 'var(--text)' }}>✓</span>}
+                      {activeWorkspace?.id === ws.id && <span className="ml-auto" style={{ color: 'var(--sidebar-fg)' }}>✓</span>}
                     </button>
                   ))}
                 </>
@@ -270,6 +273,14 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
                   )}
                 </>
               )}
+              {plan === 'pro' && (
+                <button
+                  onClick={() => { setWsOpen(false); router.push('/pricing') }}
+                  className="w-full text-left px-3 py-2 text-xs font-semibold text-purple-400 hover:text-purple-300 transition-colors"
+                  style={{ borderTop: '1px solid var(--border)' }}>
+                  🚀 Upgrade to Agency — $20/mo
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -279,8 +290,8 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
       <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
         {NAV.map((group, gi) => (
           <div key={group.section}>
-            <div className={`text-xs font-extrabold uppercase tracking-widest px-3 py-2 mt-1 ${gi > 0 ? '' : ''}`}
-              style={{ color: 'var(--text-muted)', borderTop: gi > 0 ? '1px solid var(--border)' : 'none' }}>
+            <div className="text-xs font-extrabold uppercase tracking-widest px-3 py-2 mt-1"
+              style={{ color: 'var(--sidebar-faint)', borderTop: gi > 0 ? '1px solid var(--sidebar-border)' : 'none' }}>
               {group.section}
             </div>
             {group.items.map(item => {
@@ -290,18 +301,20 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
                   onClick={onNavClick}
                   className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
                   style={{
-                    background: active ? 'var(--bg)' : 'transparent',
-                    color:      active ? 'var(--text)' : 'var(--text-muted)',
-                    fontWeight: active ? '700' : '500',
+                    background:  active ? 'var(--sidebar-active)' : 'transparent',
+                    color:       active ? 'var(--sidebar-fg)' : 'var(--sidebar-muted)',
+                    fontWeight:  active ? '700' : '500',
+                    borderLeft:  active ? '3px solid var(--sidebar-accent)' : '3px solid transparent',
+                    paddingLeft: active ? '10px' : '12px',
                   }}>
                   <span>{item.icon}</span>
                   <span className="flex-1">{item.label}</span>
                   {item.href === '/ai-features' && !loading && (
                     <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${
-                      monthlyRemaining < 10 ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400' :
-                      monthlyRemaining < 20 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400' :
+                      credits < 10 ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400' :
+                      credits < 20 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400' :
                       'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
-                    }`}>{monthlyRemaining}</span>
+                    }`}>{credits}</span>
                   )}
                 </Link>
               )
@@ -311,39 +324,34 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
       </nav>
 
       {/* BOTTOM STATS */}
-      <div className="p-3 space-y-2.5 flex-shrink-0" style={{ borderTop: '1px solid var(--border)' }}>
-        <div className="rounded-xl p-3" style={{ background: 'var(--bg)' }}>
+      <div className="p-3 space-y-2.5 flex-shrink-0" style={{ borderTop: '1px solid var(--sidebar-border)' }}>
+        <div className="rounded-xl p-3" style={{ background: 'var(--sidebar-active)' }}>
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>AI Credits</span>
-            <span className="text-xs font-bold" style={{ color: 'var(--text)' }}>
-              {loading ? '...' : `${monthlyRemaining} left`}
+            <span className="text-xs font-semibold" style={{ color: 'var(--sidebar-muted)' }}>AI Credits</span>
+            <span className="text-xs font-bold" style={{ color: 'var(--sidebar-fg)' }}>
+              {loading ? '...' : `${credits} left`}
             </span>
           </div>
-          <div className="w-full rounded-full h-1.5" style={{ background: 'var(--border-mid)' }}>
-            <div className={`h-1.5 rounded-full transition-all ${creditBarColor}`} style={{ width: `${creditsBar}%` }} />
+          <div className="w-full rounded-full h-1.5" style={{ background: 'var(--sidebar-border)' }}>
+            <div className="h-1.5 rounded-full transition-all" style={{ width: `${creditsBar}%`, background: creditBarColor }} />
           </div>
-          <p className="text-xs mt-1" style={{ color: 'var(--text-faint)' }}>
-            {loading ? 'Loading...' : `of ${monthlyCredits} this month`}
+          <p className="text-xs mt-1" style={{ color: 'var(--sidebar-faint)' }}>
+            {loading ? 'Loading...' : `${monthlyRemaining} of ${monthlyCredits} this month${bankedCredits > 0 ? ` · Bank: ${bankedCredits} saved` : ''}`}
           </p>
-          {!loading && bankedCredits > 0 && (
-            <p className="text-xs mt-0.5 font-semibold" style={{ color: 'var(--text-faint)' }}>
-              Bank: {bankedCredits} saved
-            </p>
-          )}
         </div>
 
-        <div className="rounded-xl p-3" style={{ background: 'var(--bg)' }}>
+        <div className="rounded-xl p-3" style={{ background: 'var(--sidebar-active)' }}>
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>Team Seats</span>
-            <span className="text-xs font-bold" style={{ color: 'var(--text)' }}>
+            <span className="text-xs font-semibold" style={{ color: 'var(--sidebar-muted)' }}>Team Seats</span>
+            <span className="text-xs font-bold" style={{ color: 'var(--sidebar-fg)' }}>
               {loading ? '...' : `${seatsUsed}/${seatsTotal}`}
             </span>
           </div>
-          <div className="w-full rounded-full h-1.5" style={{ background: 'var(--border-mid)' }}>
-            <div className={`h-1.5 rounded-full transition-all ${seatsUsed >= seatsTotal ? 'bg-red-400' : 'bg-black dark:bg-white'}`}
-              style={{ width: `${seatsBar}%` }} />
+          <div className="w-full rounded-full h-1.5" style={{ background: 'var(--sidebar-border)' }}>
+            <div className="h-1.5 rounded-full transition-all"
+              style={{ width: `${seatsBar}%`, background: seatsUsed >= seatsTotal ? '#f87171' : 'var(--sidebar-accent)' }} />
           </div>
-          <p className="text-xs mt-1" style={{ color: 'var(--text-faint)' }}>
+          <p className="text-xs mt-1" style={{ color: 'var(--sidebar-faint)' }}>
             {loading ? 'Loading...' : `${seatsTotal - seatsUsed} seat${seatsTotal - seatsUsed !== 1 ? 's' : ''} left`}
           </p>
         </div>
@@ -365,10 +373,10 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
         <ThemeToggle />
 
         <div className="px-1 pt-1">
-          <div className="text-xs truncate mb-1" style={{ color: 'var(--text-faint)' }}>{user?.email}</div>
+          <div className="text-xs truncate mb-1" style={{ color: 'var(--sidebar-faint)' }}>{user?.email}</div>
           <button onClick={handleSignOut}
-            className="text-xs transition-all hover:opacity-80"
-            style={{ color: 'var(--text-faint)' }}>
+            className="text-xs transition-all hover:opacity-70"
+            style={{ color: 'var(--sidebar-muted)' }}>
             Sign out
           </button>
         </div>

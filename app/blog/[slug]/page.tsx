@@ -552,25 +552,25 @@ function renderContent(content: string) {
       elements.push(<div key={key++} className="h-2" />)
     } else if (trimmed.startsWith('## ')) {
       elements.push(
-        <h2 key={key++} className="text-xl font-extrabold tracking-tight mt-8 mb-3">
+        <h2 key={key++} className="text-xl font-extrabold tracking-tight mt-8 mb-3 dark:text-gray-100">
           {trimmed.slice(3)}
         </h2>
       )
     } else if (trimmed.startsWith('**') && trimmed.endsWith('**')) {
       elements.push(
-        <p key={key++} className="text-sm font-bold text-black mt-4 mb-1">
+        <p key={key++} className="text-sm font-bold text-black dark:text-gray-100 mt-4 mb-1">
           {trimmed.slice(2, -2)}
         </p>
       )
     } else if (trimmed.startsWith('- ')) {
       elements.push(
-        <li key={key++} className="text-sm text-gray-600 leading-relaxed ml-4 list-disc">
+        <li key={key++} className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed ml-4 list-disc">
           {trimmed.slice(2)}
         </li>
       )
     } else {
       elements.push(
-        <p key={key++} className="text-sm text-gray-600 leading-relaxed">
+        <p key={key++} className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
           {trimmed}
         </p>
       )
@@ -585,19 +585,19 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
 
   if (!post) {
     return (
-      <div className="min-h-screen bg-white">
-        <nav className="border-b border-gray-100 px-8 py-4 flex items-center justify-between sticky top-0 bg-white/95 backdrop-blur z-40">
+      <div className="min-h-screen bg-white dark:bg-gray-900">
+        <nav className="border-b border-gray-100 dark:border-gray-800 px-8 py-4 flex items-center justify-between sticky top-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur z-40">
           <Link href="/" className="flex items-center gap-2">
             <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
-            <span className="font-bold text-base tracking-tight">SocialMate</span>
+            <span className="font-bold text-base tracking-tight dark:text-gray-100">SocialMate</span>
           </Link>
-          <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-500">
-            <Link href="/" className="hover:text-black transition-colors">Home</Link>
-            <Link href="/pricing" className="hover:text-black transition-colors">Pricing</Link>
-            <Link href="/blog" className="hover:text-black transition-colors">Blog</Link>
+          <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-500 dark:text-gray-400">
+            <Link href="/" className="hover:text-black dark:hover:text-white transition-colors">Home</Link>
+            <Link href="/pricing" className="hover:text-black dark:hover:text-white transition-colors">Pricing</Link>
+            <Link href="/blog" className="hover:text-black dark:hover:text-white transition-colors">Blog</Link>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm font-semibold text-gray-500 hover:text-black transition-colors hidden sm:block">Sign in</Link>
+            <Link href="/login" className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors hidden sm:block">Sign in</Link>
             <Link href="/signup" className="bg-black text-white text-sm font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
               Get started free →
             </Link>
@@ -605,8 +605,8 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
         </nav>
         <div className="max-w-2xl mx-auto px-6 py-32 text-center">
           <div className="text-5xl mb-6">✍️</div>
-          <h1 className="text-3xl font-extrabold tracking-tight mb-4">This post is coming soon</h1>
-          <p className="text-gray-400 leading-relaxed mb-8">
+          <h1 className="text-3xl font-extrabold tracking-tight mb-4 dark:text-gray-100">This post is coming soon</h1>
+          <p className="text-gray-400 dark:text-gray-500 leading-relaxed mb-8">
             We only publish real, genuinely useful content. This one is still being written. Check back soon.
           </p>
           <Link href="/blog" className="inline-block bg-black text-white text-sm font-bold px-8 py-4 rounded-2xl hover:opacity-80 transition-all">
@@ -622,19 +622,19 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
     .slice(0, 3)
 
   return (
-    <div className="min-h-screen bg-white">
-      <nav className="border-b border-gray-100 px-8 py-4 flex items-center justify-between sticky top-0 bg-white/95 backdrop-blur z-40">
+    <div className="min-h-screen bg-white dark:bg-gray-900">
+      <nav className="border-b border-gray-100 dark:border-gray-800 px-8 py-4 flex items-center justify-between sticky top-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur z-40">
         <Link href="/" className="flex items-center gap-2">
           <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
-          <span className="font-bold text-base tracking-tight">SocialMate</span>
+          <span className="font-bold text-base tracking-tight dark:text-gray-100">SocialMate</span>
         </Link>
-        <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-500">
-          <Link href="/" className="hover:text-black transition-colors">Home</Link>
-          <Link href="/pricing" className="hover:text-black transition-colors">Pricing</Link>
-          <Link href="/blog" className="hover:text-black transition-colors">Blog</Link>
+        <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-500 dark:text-gray-400">
+          <Link href="/" className="hover:text-black dark:hover:text-white transition-colors">Home</Link>
+          <Link href="/pricing" className="hover:text-black dark:hover:text-white transition-colors">Pricing</Link>
+          <Link href="/blog" className="hover:text-black dark:hover:text-white transition-colors">Blog</Link>
         </div>
         <div className="flex items-center gap-3">
-          <Link href="/login" className="text-sm font-semibold text-gray-500 hover:text-black transition-colors hidden sm:block">Sign in</Link>
+          <Link href="/login" className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors hidden sm:block">Sign in</Link>
           <Link href="/signup" className="bg-black text-white text-sm font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
             Get started free →
           </Link>
@@ -642,8 +642,8 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
       </nav>
 
       <div className="max-w-3xl mx-auto px-6 py-16">
-        <div className="flex items-center gap-2 text-xs text-gray-400 mb-8">
-          <Link href="/blog" className="hover:text-black transition-colors">Blog</Link>
+        <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 mb-8">
+          <Link href="/blog" className="hover:text-black dark:hover:text-white transition-colors">Blog</Link>
           <span>→</span>
           <span className={`font-bold px-2 py-0.5 rounded-full ${CATEGORY_COLORS[post.category] || 'bg-gray-100 text-gray-600'}`}>
             {post.category}
@@ -651,9 +651,9 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
         </div>
 
         <div className="mb-10">
-          <h1 className="text-4xl font-extrabold tracking-tight leading-tight mb-4">{post.title}</h1>
-          <p className="text-lg text-gray-400 leading-relaxed mb-6">{post.excerpt}</p>
-          <div className="flex items-center gap-4 text-xs text-gray-400 border-t border-gray-100 pt-4">
+          <h1 className="text-4xl font-extrabold tracking-tight leading-tight mb-4 dark:text-gray-100">{post.title}</h1>
+          <p className="text-lg text-gray-400 dark:text-gray-500 leading-relaxed mb-6">{post.excerpt}</p>
+          <div className="flex items-center gap-4 text-xs text-gray-400 dark:text-gray-500 border-t border-gray-100 dark:border-gray-800 pt-4">
             <span>📅 {post.date}</span>
             <span>⏱ {post.readTime}</span>
           </div>
@@ -676,21 +676,21 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
 
         {otherPosts.length > 0 && (
           <div>
-            <h2 className="text-lg font-extrabold tracking-tight mb-6">More from the blog</h2>
+            <h2 className="text-lg font-extrabold tracking-tight mb-6 dark:text-gray-100">More from the blog</h2>
             <div className="space-y-3">
               {otherPosts.map(([slug, p]) => (
                 <Link key={slug} href={`/blog/${slug}`}
-                  className="flex items-center gap-4 p-4 border border-gray-100 rounded-2xl hover:border-gray-300 transition-all group">
+                  className="flex items-center gap-4 p-4 border border-gray-100 dark:border-gray-800 rounded-2xl hover:border-gray-300 dark:hover:border-gray-600 transition-all group">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold truncate group-hover:text-gray-600 transition-colors">{p.title}</p>
-                    <p className="text-xs text-gray-400 mt-0.5">{p.date} · {p.readTime}</p>
+                    <p className="text-sm font-bold truncate group-hover:text-gray-600 dark:text-gray-100 dark:group-hover:text-gray-300 transition-colors">{p.title}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{p.date} · {p.readTime}</p>
                   </div>
-                  <span className="text-gray-300 group-hover:text-black transition-colors">→</span>
+                  <span className="text-gray-300 dark:text-gray-600 group-hover:text-black dark:group-hover:text-white transition-colors">→</span>
                 </Link>
               ))}
             </div>
             <div className="mt-4 text-center">
-              <Link href="/blog" className="text-sm font-semibold text-gray-500 hover:text-black transition-colors">
+              <Link href="/blog" className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">
                 View all posts →
               </Link>
             </div>
@@ -698,18 +698,18 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
         )}
       </div>
 
-      <footer className="border-t border-gray-100 px-8 py-8">
+      <footer className="border-t border-gray-100 dark:border-gray-800 px-8 py-8">
         <div className="max-w-5xl mx-auto flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">S</div>
-            <span className="font-bold text-sm tracking-tight">SocialMate</span>
-            <span className="text-xs text-gray-400 ml-2">© 2026</span>
+            <span className="font-bold text-sm tracking-tight dark:text-gray-100">SocialMate</span>
+            <span className="text-xs text-gray-400 dark:text-gray-500 ml-2">© 2026</span>
           </div>
-          <div className="flex items-center gap-6 text-xs text-gray-400">
-            <Link href="/pricing" className="hover:text-black transition-colors">Pricing</Link>
-            <Link href="/blog" className="hover:text-black transition-colors">Blog</Link>
-            <Link href="/privacy" className="hover:text-black transition-colors">Privacy</Link>
-            <Link href="/terms" className="hover:text-black transition-colors">Terms</Link>
+          <div className="flex items-center gap-6 text-xs text-gray-400 dark:text-gray-500">
+            <Link href="/pricing" className="hover:text-black dark:hover:text-white transition-colors">Pricing</Link>
+            <Link href="/blog" className="hover:text-black dark:hover:text-white transition-colors">Blog</Link>
+            <Link href="/privacy" className="hover:text-black dark:hover:text-white transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-black dark:hover:text-white transition-colors">Terms</Link>
           </div>
         </div>
       </footer>

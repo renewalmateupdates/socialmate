@@ -1,6 +1,40 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+// Routes that require authentication — redirect to /login if no session
+const PROTECTED_PATHS = [
+  '/dashboard',
+  '/analytics',
+  '/compose',
+  '/calendar',
+  '/queue',
+  '/drafts',
+  '/settings',
+  '/accounts',
+  '/ai-features',
+  '/sm-pulse',
+  '/sm-radar',
+  '/bulk-scheduler',
+  '/hashtags',
+  '/affiliate',
+  '/notifications',
+  '/team',
+  '/workspaces',
+  '/onboarding',
+  '/inbox',
+  '/social-inbox',
+  '/link-in-bio',
+  '/rss-import',
+  '/media',
+  '/templates',
+  '/approvals',
+  '/evergreen',
+  '/best-times',
+  '/competitor-tracking',
+  '/content-gap',
+  '/search',
+]
+
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
@@ -23,7 +57,17 @@ export async function proxy(request: NextRequest) {
     }
   )
 
-  await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  // Auth guard — redirect unauthenticated users on protected routes
+  const { pathname } = request.nextUrl
+  const isProtected = PROTECTED_PATHS.some(path => pathname.startsWith(path))
+
+  if (isProtected && !user) {
+    const loginUrl = new URL('/login', request.url)
+    loginUrl.searchParams.set('next', pathname)
+    return NextResponse.redirect(loginUrl)
+  }
 
   // Capture referral code from ?ref=CODE and store in cookie for 30 days
   const { searchParams } = new URL(request.url)

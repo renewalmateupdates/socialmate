@@ -91,7 +91,7 @@ const FEATURE_CATEGORIES = [
       {
         name: 'SM-Pulse',
         emoji: '🔥',
-        credits: '10 credits per scan',
+        credits: '20 credits per scan',
         proOnly: false,
         what: 'Scans Reddit and YouTube in real time to surface what is trending in your niche right now.',
         how: 'Analyzes trending topics, viral post formats, and engagement spikes. Returns top 3 trending topics, 3 content angles, 10 hashtags, and the best platform to post on right now.',
@@ -99,7 +99,7 @@ const FEATURE_CATEGORIES = [
       {
         name: 'SM-Radar',
         emoji: '📊',
-        credits: '10 credits per report',
+        credits: '20 credits per report',
         proOnly: false,
         what: 'Analyzes real trending data to surface content gaps, competitor weaknesses, and your single best content strategy this week.',
         how: 'Pulls from live Reddit and YouTube data to identify what topics are being asked about but not answered well, and hands you a concrete opportunity to act on.',
@@ -297,16 +297,16 @@ const FEATURE_CATEGORIES = [
 
 const CREDIT_SUMMARY = [
   { name: 'Caption Generator',    cost: '3 cr',  proOnly: false },
-  { name: 'Hashtag Generator',    cost: '2 cr',  proOnly: false },
-  { name: 'Post Rewrite',         cost: '3 cr',  proOnly: false },
-  { name: 'Viral Hook',           cost: '4 cr',  proOnly: false },
-  { name: 'Thread Generator',     cost: '8 cr',  proOnly: false },
-  { name: 'Content Repurposer',   cost: '8 cr',  proOnly: false },
-  { name: 'Post Score',           cost: '2 cr',  proOnly: false },
-  { name: 'SM-Pulse',             cost: '10 cr', proOnly: false },
-  { name: 'SM-Radar',             cost: '10 cr', proOnly: false },
+  { name: 'Hashtag Generator',    cost: '5 cr',  proOnly: false },
+  { name: 'Post Rewrite',         cost: '5 cr',  proOnly: false },
+  { name: 'Viral Hook',           cost: '5 cr',  proOnly: false },
+  { name: 'Thread Generator',     cost: '10 cr', proOnly: false },
+  { name: 'Content Repurposer',   cost: '10 cr', proOnly: false },
+  { name: 'Post Score',           cost: '5 cr',  proOnly: false },
+  { name: 'SM-Pulse',             cost: '20 cr', proOnly: false },
+  { name: 'SM-Radar',             cost: '20 cr', proOnly: false },
   { name: 'Content Gap',          cost: '10 cr', proOnly: false },
-  { name: 'AI Content Calendar',  cost: '20 cr', proOnly: true  },
+  { name: 'AI Content Calendar',  cost: '25 cr', proOnly: true  },
   { name: 'AI Image Generation',  cost: '25 cr', proOnly: true  },
 ]
 
@@ -323,9 +323,9 @@ export default function Features() {
 
         {/* HEADER */}
         <div className="mb-10">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Full feature set</p>
-          <h1 className="text-4xl font-extrabold tracking-tight mb-3">Everything SocialMate can do</h1>
-          <p className="text-sm text-gray-500 max-w-2xl leading-relaxed">
+          <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Full feature set</p>
+          <h1 className="text-4xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">Everything SocialMate can do</h1>
+          <p className="text-sm text-gray-500 dark:text-gray-400 max-w-2xl leading-relaxed">
             Every tool, every feature, exactly what it does, and what it costs.
             Scheduling is always free. AI features use credits so you stay in control of what you spend.
           </p>
@@ -362,8 +362,8 @@ export default function Features() {
             <button key={cat} onClick={() => setActiveCategory(cat)}
               className={`text-xs font-bold px-4 py-2 rounded-xl transition-all ${
                 activeCategory === cat
-                  ? 'bg-black text-white'
-                  : 'bg-white border border-gray-200 text-gray-500 hover:border-gray-400'
+                  ? 'bg-black dark:bg-white text-white dark:text-black'
+                  : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500'
               }`}>
               {cat}
             </button>
@@ -376,42 +376,42 @@ export default function Features() {
             <div className="flex items-start justify-between mb-2">
               <div className="flex items-center gap-2">
                 <span className="text-xl">{section.emoji}</span>
-                <h2 className="text-base font-extrabold tracking-tight">{section.category}</h2>
+                <h2 className="text-base font-extrabold tracking-tight text-gray-900 dark:text-gray-100">{section.category}</h2>
               </div>
             </div>
             {section.desc && (
-              <p className="text-xs text-gray-500 mb-5 ml-8">{section.desc}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-5 ml-8">{section.desc}</p>
             )}
             <div className="grid grid-cols-1 gap-3">
               {section.features.map(f => (
                 <div key={f.name}
-                  className="bg-white border border-gray-100 rounded-2xl p-5 hover:border-gray-300 transition-all">
+                  className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-5 hover:border-gray-300 dark:hover:border-gray-500 transition-all">
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-xl">{f.emoji}</span>
-                      <h3 className="text-sm font-extrabold">{f.name}</h3>
+                      <h3 className="text-sm font-extrabold text-gray-900 dark:text-gray-100">{f.name}</h3>
                       {f.proOnly && (
-                        <span className="text-xs font-bold px-2 py-0.5 bg-purple-50 text-purple-600 rounded-full">Pro+</span>
+                        <span className="text-xs font-bold px-2 py-0.5 bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 rounded-full">Pro+</span>
                       )}
                     </div>
                     <span className={`text-xs font-bold px-3 py-1 rounded-full flex-shrink-0 ${
                       f.credits === 'Free' || f.credits === 'Always free'
-                        ? 'bg-green-50 text-green-600'
+                        ? 'bg-green-50 dark:bg-green-950 text-green-600 dark:text-green-400'
                         : f.credits.includes('add-on')
-                        ? 'bg-gray-100 text-gray-500'
-                        : 'bg-black text-white'
+                        ? 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
+                        : 'bg-black dark:bg-white text-white dark:text-black'
                     }`}>
                       {f.credits}
                     </span>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">What it does</p>
-                      <p className="text-xs text-gray-600 leading-relaxed">{f.what}</p>
+                      <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">What it does</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{f.what}</p>
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">How it works</p>
-                      <p className="text-xs text-gray-600 leading-relaxed">{f.how}</p>
+                      <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">How it works</p>
+                      <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{f.how}</p>
                     </div>
                   </div>
                 </div>
@@ -421,12 +421,12 @@ export default function Features() {
         ))}
 
         {/* PLATFORM NOTE */}
-        <div className="bg-gray-50 border border-gray-100 rounded-2xl p-6 mb-10">
+        <div className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 mb-10">
           <div className="flex items-start gap-4">
             <span className="text-3xl">📱</span>
             <div>
-              <h3 className="text-sm font-extrabold mb-1">Platform support — 16 total</h3>
-              <p className="text-xs text-gray-500 leading-relaxed mb-3">
+              <h3 className="text-sm font-extrabold mb-1 text-gray-900 dark:text-gray-100">Platform support — 16 total</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-3">
                 4 platforms are live right now. LinkedIn, YouTube, Pinterest, and Reddit are coming very soon — code complete, awaiting platform approval. 8 more are on the roadmap.
               </p>
               <div className="flex flex-wrap gap-2">
@@ -445,9 +445,9 @@ export default function Features() {
                   { name: 'Threads',   icon: '🧵', status: 'planned' },
                 ].map(p => (
                   <div key={p.name} className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${
-                    p.status === 'live'    ? 'bg-green-50 text-green-700 border border-green-200' :
-                    p.status === 'soon'    ? 'bg-blue-50 text-blue-600 border border-blue-100' :
-                    'bg-white text-gray-400 border border-gray-100'
+                    p.status === 'live'    ? 'bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800' :
+                    p.status === 'soon'    ? 'bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900' :
+                    'bg-white dark:bg-gray-700 text-gray-400 dark:text-gray-500 border border-gray-100 dark:border-gray-600'
                   }`}>
                     <span>{p.icon}</span>
                     <span>{p.name}</span>

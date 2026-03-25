@@ -79,7 +79,9 @@ export default function Drafts() {
           )
         }
       )
-      .subscribe()
+      .subscribe((status, err) => {
+      if (err) console.error('Realtime posts-status error:', err)
+    })
 
     // Auto-refresh every 30s when there are past-due scheduled posts
     const interval = setInterval(async () => {

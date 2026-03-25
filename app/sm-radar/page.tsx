@@ -6,7 +6,7 @@ import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 
-const CREDIT_COST = 10
+const CREDIT_COST = 20
 
 export default function SMRadarPage() {
   const router = useRouter()
@@ -41,7 +41,7 @@ export default function SMRadarPage() {
       const data = await res.json()
       if (!res.ok || data.error) { setError('Report generation failed. Please try again.'); setGenerating(false); return }
       setResult(data.result)
-      setCredits(credits - CREDIT_COST)
+      setCredits(typeof data.creditsRemaining === 'number' ? data.creditsRemaining : credits - CREDIT_COST)
     } catch {
       setError('Network error. Please try again.')
     }
