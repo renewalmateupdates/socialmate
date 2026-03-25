@@ -1,6 +1,8 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { supabase } from '@/lib/supabase'
+import Sidebar from '@/components/Sidebar'
 
 type RoadmapItem = {
   title:    string
@@ -68,6 +70,15 @@ export default function RoadmapClient() {
   const [feedbackEmail, setFeedbackEmail] = useState('')
   const [feedbackSent, setFeedbackSent]   = useState(false)
   const [sending, setSending]             = useState(false)
+  const [isAuthed, setIsAuthed]           = useState(false)
+  const [authChecked, setAuthChecked]     = useState(false)
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setIsAuthed(!!data.user)
+      setAuthChecked(true)
+    })
+  }, [])
 
   async function submitRequest() {
     if (!feedbackText.trim()) return
@@ -92,37 +103,39 @@ export default function RoadmapClient() {
     }
   }
 
-  return (
-    <div className="min-h-screen bg-white dark:bg-gray-950">
-      {/* NAV */}
-      <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black dark:bg-white rounded-lg flex items-center justify-center text-white dark:text-black text-sm font-bold">S</div>
-            <span className="font-bold text-base tracking-tight text-gray-900 dark:text-gray-100">SocialMate</span>
-          </Link>
-          <nav className="hidden md:flex items-center gap-1">
-            {[
-              { label: 'Features', href: '/features' },
-              { label: 'Pricing',  href: '/pricing'  },
-              { label: 'Blog',     href: '/blog'     },
-            ].map(l => (
-              <Link key={l.label} href={l.href}
-                className="px-4 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-black dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
-                {l.label}
-              </Link>
-            ))}
-          </nav>
-          <div className="flex items-center gap-3">
-            <Link href="/login"  className="text-sm font-semibold text-gray-500 hover:text-black dark:hover:text-white transition-all hidden sm:block">Sign in</Link>
-            <Link href="/signup" className="bg-black dark:bg-white text-white dark:text-black text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
-              Get started free →
-            </Link>
-          </div>
-        </div>
-      </header>
+  if (!authChecked) return null
 
-      <div className="max-w-4xl mx-auto px-6 py-16">
+  const publicNav = (
+    <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
+      <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="w-7 h-7 bg-black dark:bg-white rounded-lg flex items-center justify-center text-white dark:text-black text-sm font-bold">S</div>
+          <span className="font-bold text-base tracking-tight text-gray-900 dark:text-gray-100">SocialMate</span>
+        </Link>
+        <nav className="hidden md:flex items-center gap-1">
+          {[
+            { label: 'Features', href: '/features' },
+            { label: 'Pricing',  href: '/pricing'  },
+            { label: 'Blog',     href: '/blog'     },
+          ].map(l => (
+            <Link key={l.label} href={l.href}
+              className="px-4 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-black dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+              {l.label}
+            </Link>
+          ))}
+        </nav>
+        <div className="flex items-center gap-3">
+          <Link href="/login"  className="text-sm font-semibold text-gray-500 hover:text-black dark:hover:text-white transition-all hidden sm:block">Sign in</Link>
+          <Link href="/signup" className="bg-black dark:bg-white text-white dark:text-black text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
+            Get started free →
+          </Link>
+        </div>
+      </div>
+    </header>
+  )
+
+  const roadmapContent = (
+    <div className="max-w-4xl mx-auto px-6 py-16">
 
         {/* HERO */}
         <div className="mb-14">
@@ -215,21 +228,43 @@ export default function RoadmapClient() {
           )}
         </div>
       </div>
+    </div>
+  )
 
-      {/* FOOTER */}
-      <footer className="border-t border-gray-100 dark:border-gray-800 py-8">
-        <div className="max-w-5xl mx-auto px-6 flex items-center justify-between flex-wrap gap-4">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-black dark:bg-white rounded-lg flex items-center justify-center text-white dark:text-black text-xs font-bold">S</div>
-            <span className="font-bold text-sm text-gray-900 dark:text-gray-100">SocialMate</span>
-          </Link>
-          <div className="flex items-center gap-6 text-xs text-gray-400 dark:text-gray-500">
-            <Link href="/features" className="hover:text-black dark:hover:text-white">Features</Link>
-            <Link href="/pricing"  className="hover:text-black dark:hover:text-white">Pricing</Link>
-            <Link href="/blog"     className="hover:text-black dark:hover:text-white">Blog</Link>
-          </div>
+  const publicFooter = (
+    <footer className="border-t border-gray-100 dark:border-gray-800 py-8">
+      <div className="max-w-5xl mx-auto px-6 flex items-center justify-between flex-wrap gap-4">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="w-6 h-6 bg-black dark:bg-white rounded-lg flex items-center justify-center text-white dark:text-black text-xs font-bold">S</div>
+          <span className="font-bold text-sm text-gray-900 dark:text-gray-100">SocialMate</span>
+        </Link>
+        <div className="flex items-center gap-6 text-xs text-gray-400 dark:text-gray-500">
+          <Link href="/features" className="hover:text-black dark:hover:text-white">Features</Link>
+          <Link href="/pricing"  className="hover:text-black dark:hover:text-white">Pricing</Link>
+          <Link href="/blog"     className="hover:text-black dark:hover:text-white">Blog</Link>
         </div>
-      </footer>
+      </div>
+    </footer>
+  )
+
+  if (isAuthed) {
+    return (
+      <div className="flex h-screen overflow-hidden bg-white dark:bg-gray-950">
+        <Sidebar />
+        <main className="flex-1 overflow-y-auto">
+          <div className="max-w-4xl mx-auto p-8">
+            {roadmapContent}
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-white dark:bg-gray-950">
+      {publicNav}
+      {roadmapContent}
+      {publicFooter}
     </div>
   )
 }
