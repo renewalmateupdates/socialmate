@@ -21,11 +21,12 @@ const PLANS = [
     annualMonthly: 0,
     annualSaving: 0,
     description: 'Everything you need to get started — no credit card, no catch.',
-    badge: null,
-    color: 'border-gray-200',
-    headerBg: 'bg-gray-50',
-    headerText: 'text-gray-900',
-    subText: 'text-gray-400',
+    badge: 'Always Free',
+    badgeStyle: 'bg-emerald-100 text-emerald-700',
+    cardBg: 'bg-emerald-50 dark:bg-emerald-950/20',
+    color: 'border-2 border-emerald-400',
+    headerText: 'text-gray-900 dark:text-gray-100',
+    subText: 'text-gray-500 dark:text-gray-400',
     features: [
       { label: '4 live platforms now',             note: '12 more coming soon' },
       { label: '1 connected account per platform'                              },
@@ -47,7 +48,7 @@ const PLANS = [
     ctaHref: '/signup',
     monthlyPriceId: null,
     annualPriceId: null,
-    ctaStyle: 'border-2 border-gray-300 text-gray-700 hover:bg-gray-50',
+    ctaStyle: 'border-2 border-emerald-500 text-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/30',
   },
   {
     name: 'Pro',
@@ -57,10 +58,11 @@ const PLANS = [
     annualSaving: 5,
     description: 'For creators and small businesses who want to grow faster.',
     badge: 'Most Popular',
-    color: 'border-black',
-    headerBg: 'bg-black',
-    headerText: 'text-white',
-    subText: 'text-gray-300',
+    badgeStyle: 'bg-amber-100 text-amber-700',
+    cardBg: 'bg-amber-50 dark:bg-amber-950/20',
+    color: 'border-2 border-amber-400',
+    headerText: 'text-gray-900 dark:text-gray-100',
+    subText: 'text-gray-500 dark:text-gray-400',
     features: [
       { label: 'Everything in Free'                                             },
       { label: '5 connected accounts per platform'                             },
@@ -82,7 +84,7 @@ const PLANS = [
     ctaHref: null,
     monthlyPriceId: STRIPE_PRO_PRICE_ID,
     annualPriceId: STRIPE_PRO_ANNUAL_PRICE_ID,
-    ctaStyle: 'bg-amber-400 hover:bg-amber-500 text-black border-2 border-amber-400 font-bold',
+    ctaStyle: 'bg-amber-400 hover:bg-amber-500 text-black font-bold',
   },
   {
     name: 'Agency',
@@ -91,11 +93,12 @@ const PLANS = [
     annualMonthly: 17.42,
     annualSaving: 31,
     description: 'For agencies and power users managing multiple brands.',
-    badge: null,
-    color: 'border-purple-300',
-    headerBg: 'bg-purple-50',
-    headerText: 'text-gray-900',
-    subText: 'text-gray-500',
+    badge: 'Power Users',
+    badgeStyle: 'bg-purple-100 text-purple-700',
+    cardBg: 'bg-purple-50 dark:bg-purple-950/20',
+    color: 'border-2 border-purple-500',
+    headerText: 'text-gray-900 dark:text-gray-100',
+    subText: 'text-gray-500 dark:text-gray-400',
     features: [
       { label: 'Everything in Pro'                                              },
       { label: '10 connected accounts per platform'                            },
@@ -115,7 +118,7 @@ const PLANS = [
     ctaHref: null,
     monthlyPriceId: STRIPE_AGENCY_PRICE_ID,
     annualPriceId: STRIPE_AGENCY_ANNUAL_PRICE_ID,
-    ctaStyle: 'bg-purple-600 text-white hover:opacity-80 border-2 border-purple-600',
+    ctaStyle: 'bg-purple-600 hover:bg-purple-700 text-white font-bold',
   },
 ]
 
@@ -279,12 +282,12 @@ export default function Pricing() {
           {PLANS.map(plan => {
             const priceId = annual ? plan.annualPriceId : plan.monthlyPriceId
             return (
-              <div key={plan.name} className={`bg-white border-2 rounded-2xl overflow-hidden flex flex-col ${plan.color}`}>
-                <div className={`px-6 py-6 ${plan.headerBg}`}>
+              <div key={plan.name} className={`${plan.cardBg} ${plan.color} rounded-2xl overflow-hidden flex flex-col`}>
+                <div className="px-6 py-6">
                   <div className="flex items-center justify-between mb-3">
                     <h2 className={`text-lg font-extrabold ${plan.headerText}`}>{plan.name}</h2>
                     {plan.badge && (
-                      <span className="text-xs font-bold px-3 py-1 bg-white text-black rounded-full">{plan.badge}</span>
+                      <span className={`text-xs font-bold px-3 py-1 rounded-full ${plan.badgeStyle}`}>{plan.badge}</span>
                     )}
                   </div>
 
