@@ -228,7 +228,6 @@ export default function RoadmapClient() {
           )}
         </div>
       </div>
-    </div>
   )
 
   const publicFooter = (
