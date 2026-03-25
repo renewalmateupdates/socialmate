@@ -124,6 +124,8 @@ function ComposeInner() {
   const [destinations, setDestinations] = useState<Record<string, Destination[]>>({})
   const [selectedDestinations, setSelectedDestinations] = useState<Record<string, string>>({})
   const [connectedPlatforms, setConnectedPlatforms] = useState<Set<string>>(new Set())
+  const [rateLimitedUntil, setRateLimitedUntil] = useState<number | null>(null)
+  const [rateLimitCountdown, setRateLimitCountdown] = useState(0)
 
   const planConfig = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
   const maxScheduleDate = (() => {
@@ -290,6 +292,27 @@ function ComposeInner() {
     setScheduleDate(val)
   }
 
+  const handleRateLimit = () => {
+    const until = Date.now() + 30_000
+    setRateLimitedUntil(until)
+    setRateLimitCountdown(30)
+  }
+
+  useEffect(() => {
+    if (!rateLimitedUntil) return
+    const interval = setInterval(() => {
+      const remaining = Math.ceil((rateLimitedUntil - Date.now()) / 1000)
+      if (remaining <= 0) {
+        setRateLimitedUntil(null)
+        setRateLimitCountdown(0)
+        clearInterval(interval)
+      } else {
+        setRateLimitCountdown(remaining)
+      }
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [rateLimitedUntil])
+
   const handleAiTool = async (tool: typeof AI_TOOLS[0]) => {
     setAiError('')
     if (!content.trim()) {
@@ -315,10 +338,12 @@ function ComposeInner() {
       })
       const data = await res.json()
       if (!res.ok || data.error) {
-        const msg = data.error === 'rate_limited'
-          ? (data.message || "You're going too fast — wait 30 seconds and try again.")
-          : 'Something went wrong. Please try again.'
-        setAiError(msg)
+        if (data.error === 'rate_limited') {
+          handleRateLimit()
+          setAiError(data.message || "You're going too fast — wait 30 seconds and try again.")
+        } else {
+          setAiError('Something went wrong. Please try again.')
+        }
         return
       }
       setAiResult(data.result)
@@ -346,10 +371,12 @@ function ComposeInner() {
       })
       const data = await res.json()
       if (!res.ok || data.error) {
-        const msg = data.error === 'rate_limited'
-          ? (data.message || "You're going too fast — wait 30 seconds and try again.")
-          : 'Scoring failed. Please try again.'
-        setScoreError(msg)
+        if (data.error === 'rate_limited') {
+          handleRateLimit()
+          setScoreError(data.message || "You're going too fast — wait 30 seconds and try again.")
+        } else {
+          setScoreError('Scoring failed. Please try again.')
+        }
         setScoring(false)
         return
       }
@@ -708,13 +735,21 @@ function ComposeInner() {
                   <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">AI Tools</p>
                   <span className="text-xs font-bold text-gray-500 dark:text-gray-400">{credits} credits remaining</span>
                 </div>
+
+                {rateLimitedUntil && (
+                  <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl px-4 py-3 text-sm text-orange-700 dark:text-orange-300 mb-3">
+                    <span className="font-semibold">Rate limit reached.</span> Try again in 0:{String(rateLimitCountdown).padStart(2, '0')}
+                    <p className="text-xs mt-1 opacity-75">You're generating too fast — this prevents spam and keeps SocialMate free for everyone.</p>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-4">
                   {AI_TOOLS.map(tool => (
                     <button key={tool.id} onClick={() => handleAiTool(tool)}
-                      disabled={aiLoading} title={tool.desc}
+                      disabled={aiLoading || !!rateLimitedUntil} title={tool.desc}
                       className={`p-3 rounded-xl border text-center transition-all ${
                         activeAiTool === tool.id ? 'bg-black text-white border-black'
-                        : aiLoading ? 'bg-gray-50 dark:bg-gray-900 border-gray-100 text-gray-300 dark:text-gray-600 cursor-not-allowed'
+                        : (aiLoading || !!rateLimitedUntil) ? 'bg-gray-50 dark:bg-gray-900 border-gray-100 text-gray-300 dark:text-gray-600 cursor-not-allowed'
                         : 'bg-white dark:bg-gray-900 border-gray-200 hover:border-gray-400 text-gray-700'
                       }`}>
                       <div className="text-lg mb-1">{tool.emoji}</div>
@@ -769,7 +804,7 @@ function ComposeInner() {
                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">AI predicts how your post will perform before you publish</p>
                   </div>
                   <button onClick={handleScorePost}
-                    disabled={scoring || !content.trim() || credits < SCORE_CREDIT_COST}
+                    disabled={scoring || !content.trim() || credits < SCORE_CREDIT_COST || !!rateLimitedUntil}
                     className="flex items-center gap-2 px-4 py-2 bg-black text-white text-xs font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed self-start sm:self-auto">
                     {scoring ? (
                       <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Scoring...</>
