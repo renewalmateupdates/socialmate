@@ -27,6 +27,27 @@ export const publishScheduledPost = inngest.createFunction(
 
     // Publish the post (wrapped in step for retry isolation)
     const result = await step.run('publish-post', async () => {
+      // ── IDEMPOTENCY GUARD ─────────────────────────────────────────────────
+      // Check DB state before doing ANYTHING. If Inngest retries after a
+      // transient error, this guard prevents the post from being sent twice.
+      const { data: postCheck } = await getSupabaseAdmin()
+        .from('posts')
+        .select('status, published_at, platform_post_ids')
+        .eq('id', postId)
+        .single()
+
+      const alreadyTerminal =
+        postCheck?.status === 'published' ||
+        postCheck?.status === 'partial'   ||
+        postCheck?.status === 'failed'    ||
+        !!postCheck?.published_at
+
+      if (alreadyTerminal) {
+        console.log(`[PUBLISH-GUARD] Post ${postId} already in terminal state (${postCheck?.status}), skipping`)
+        return { skipped: true, status: postCheck?.status }
+      }
+      // ─────────────────────────────────────────────────────────────────────
+
       const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/posts/publish`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -35,8 +56,15 @@ export const publishScheduledPost = inngest.createFunction(
 
       const data = await res.json().catch(() => ({}))
 
+      // 409 = publish route guard caught a duplicate (race condition)
+      if (res.status === 409) {
+        console.log(`[PUBLISH-GUARD] Post ${postId} returned 409 — already published, skipping`)
+        return { skipped: true, status: 'published' }
+      }
+
       if (!res.ok) {
-        // Mark post as failed so it doesn't stay stuck in 'scheduled' state
+        // Mark post as failed so it doesn't stay stuck in 'scheduled' state.
+        // The fail route uses .eq('status','scheduled') so it's idempotent.
         await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/posts/fail`, {
           method:  'POST',
           headers: { 'Content-Type': 'application/json' },

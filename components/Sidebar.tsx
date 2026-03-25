@@ -64,7 +64,7 @@ const NAV_BASE = [
       { icon: '⚙️', label: 'Settings',      href: '/settings'     },
       { icon: '🔔', label: 'Notifications', href: '/notifications' },
       { icon: '🔎', label: 'Search',        href: '/search'        },
-      { icon: '💛', label: 'Our Story',     href: '/story'         },
+      { icon: '💛', label: 'Our Story',     href: '/story',  newTab: true },
     ],
   },
 ]
@@ -274,7 +274,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
               )}
               {plan === 'pro' && (
                 <button
-                  onClick={() => { setWsOpen(false); router.push('/pricing') }}
+                  onClick={() => { setWsOpen(false); router.push('/settings/plan') }}
                   className="w-full text-left px-3 py-2 text-xs font-semibold text-purple-400 hover:text-purple-300 transition-colors"
                   style={{ borderTop: '1px solid var(--border)' }}>
                   🚀 Upgrade to Agency — $20/mo
@@ -298,6 +298,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
               return (
                 <Link key={item.label} href={item.href}
                   onClick={onNavClick}
+                  {...((item as any).newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                   className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
                   style={{
                     background:  active ? 'var(--sidebar-active)' : 'transparent',

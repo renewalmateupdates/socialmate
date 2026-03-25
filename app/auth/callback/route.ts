@@ -123,8 +123,8 @@ export async function GET(request: NextRequest) {
                 <hr style="border: none; border-top: 1px solid #eee; margin: 16px 0;" />
                 <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 8px;">Welcome aboard! 🎉</h2>
                 <p style="color: #555; font-size: 15px; line-height: 1.6;">
-                  Your account is all set. You're on the <strong>Free plan</strong> with access to
-                  AI tools, scheduling, and all 16 platforms right out of the gate.
+                  Your account is all set. You're on the <strong>Free plan</strong> — schedule posts to
+                  Bluesky, Discord, Telegram, Mastodon and more, with new platforms being added regularly.
                 </p>
                 <div style="background: #f9f9f9; border-radius: 12px; padding: 20px; margin: 24px 0;">
                   <div style="font-size: 13px; font-weight: 700; color: #111; margin-bottom: 12px;">Here's what you can do right now:</div>

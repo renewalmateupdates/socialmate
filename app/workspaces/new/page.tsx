@@ -62,26 +62,29 @@ export default function NewWorkspace() {
     }
 
     setSaving(true)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { router.push('/login'); return }
 
-    const { data, error } = await supabase
-      .from('workspaces')
-      .insert({
-        owner_id:          user.id,
-        name:              clientName.trim(),
-        client_name:       clientName.trim(),
-        industry:          industry || null,
-        website:           website  || null,
-        notes:             notes    || null,
-        default_platforms: selectedPlatforms,
-        is_personal:       false,
-        created_at:        new Date().toISOString(),
-      })
-      .select()
-      .single()
+    // Use the API route (admin client) to bypass RLS
+    const res = await fetch('/api/workspaces/create', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({
+        name:             clientName.trim(),
+        clientName:       clientName.trim(),
+        industry:         industry || null,
+        website:          website  || null,
+        notes:            notes    || null,
+        defaultPlatforms: selectedPlatforms,
+      }),
+    })
+    const json = await res.json().catch(() => ({}))
 
-    if (error) { showToast('Failed to create workspace', 'error'); setSaving(false); return }
+    if (!res.ok || !json.workspace) {
+      showToast(json.detail || json.error || 'Failed to create workspace', 'error')
+      setSaving(false)
+      return
+    }
+
+    const data = json.workspace
 
     setActiveWorkspace(data)
     await refreshWorkspaces()

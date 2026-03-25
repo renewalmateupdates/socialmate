@@ -352,7 +352,9 @@ function OnboardingInner() {
     }).eq('user_id', user.id)
 
     setSaving(false)
-    router.push('/dashboard')
+    // Use full page reload so WorkspaceContext re-fetches fresh credits from DB
+    // (Next.js router.push reuses the cached context and may show stale credits)
+    window.location.href = '/dashboard?welcome=1'
   }
 
   const progress = ((step - 1) / (STEPS.length - 1)) * 100

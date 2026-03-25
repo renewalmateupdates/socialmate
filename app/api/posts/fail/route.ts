@@ -14,19 +14,20 @@ export async function POST(request: NextRequest) {
 
   const adminSupabase = getSupabaseAdmin()
 
-  // Get post to find owner
-  const { data: post } = await adminSupabase
-    .from('posts')
-    .select('user_id, content')
-    .eq('id', postId)
-    .single()
-
-  // Mark as failed
-  await adminSupabase
+  // Mark as failed — ONLY if still 'scheduled' (idempotent guard against duplicate emails)
+  const { data: updatedRows } = await adminSupabase
     .from('posts')
     .update({ status: 'failed' })
     .eq('id', postId)
     .eq('status', 'scheduled')
+    .select('user_id, content')
+
+  // If no rows were updated, this post was already processed (retry scenario) — skip email
+  const post = updatedRows?.[0] ?? null
+  if (!post) {
+    console.log('[FAIL-GUARD] Post', postId, 'already processed or not scheduled — skipping failure email')
+    return NextResponse.json({ success: true, skipped: true })
+  }
 
   // Send post failed email if enabled
   if (post?.user_id) {

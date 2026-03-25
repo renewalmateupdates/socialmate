@@ -82,14 +82,13 @@ export async function POST(request: NextRequest) {
         .select()
 
       if (fallbackError) {
-        console.error('[STATUS-UPDATE] Fallback update also failed:', fallbackError)
-        // Return a 500 so Inngest retries the whole step
-        return NextResponse.json(
-          { error: 'Status update failed', detail: fallbackError.message },
-          { status: 500 }
-        )
+        // Log but do NOT return 500 — returning 500 causes Inngest to retry the
+        // entire step and re-publish the post. The idempotency guard in inngest.ts
+        // (checking post status before publishing) is the correct safety net.
+        console.error('[STATUS-UPDATE] Fallback update also failed — post was published but status stuck:', fallbackError)
+      } else {
+        console.log('[STATUS-UPDATE] Fallback update succeeded')
       }
-      console.log('[STATUS-UPDATE] Fallback update succeeded')
     } else {
       console.log('[STATUS-UPDATE] Update succeeded for post', postId, '→', finalStatusInngest)
     }

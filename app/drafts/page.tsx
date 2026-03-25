@@ -157,7 +157,12 @@ export default function Drafts() {
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
-              <h1 className="text-2xl font-extrabold tracking-tight">Posts</h1>
+              <h1 className="text-2xl font-extrabold tracking-tight">
+                Posts
+                {activeWorkspace && !activeWorkspace.is_personal && (
+                  <span className="ml-2 text-sm font-semibold text-purple-500">— {activeWorkspace.client_name || activeWorkspace.name}</span>
+                )}
+              </h1>
               <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">
                 {loading ? 'Loading...' : `${draftCount} draft${draftCount !== 1 ? 's' : ''} · ${scheduledCount} scheduled · ${publishedCount} published`}
               </p>
