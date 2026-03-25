@@ -56,41 +56,32 @@ export async function POST(request: NextRequest) {
     })
 
     const finalStatusInngest = allFailed ? 'failed' : someFailed ? 'partial' : 'published'
-    console.log('[STATUS-UPDATE] Attempting to set post', postId, 'to', finalStatusInngest)
+    console.log('[STATUS-UPDATE] Setting post', postId, '→', finalStatusInngest)
 
-    // Try full update first
-    const { error: updateError } = await getSupabaseAdmin()
+    // Step 1: Status + published_at ONLY (critical — never mix with platform_post_ids)
+    const { error: statusError } = await getSupabaseAdmin()
       .from('posts')
       .update({
-        status:            finalStatusInngest,
-        published_at:      allFailed ? null : new Date().toISOString(),
-        platform_post_ids: platformPostIds,
+        status:       finalStatusInngest,
+        published_at: allFailed ? null : new Date().toISOString(),
       })
       .eq('id', postId)
-      .select()
 
-    if (updateError) {
-      console.error('[STATUS-UPDATE] Full update failed, trying fallback:', updateError)
-      // Fallback: update just status + published_at without platform_post_ids
-      const { error: fallbackError } = await getSupabaseAdmin()
-        .from('posts')
-        .update({
-          status:       finalStatusInngest,
-          published_at: allFailed ? null : new Date().toISOString(),
-        })
-        .eq('id', postId)
-        .select()
-
-      if (fallbackError) {
-        // Log but do NOT return 500 — returning 500 causes Inngest to retry the
-        // entire step and re-publish the post. The idempotency guard in inngest.ts
-        // (checking post status before publishing) is the correct safety net.
-        console.error('[STATUS-UPDATE] Fallback update also failed — post was published but status stuck:', fallbackError)
-      } else {
-        console.log('[STATUS-UPDATE] Fallback update succeeded')
-      }
+    if (statusError) {
+      console.error('[STATUS-UPDATE] CRITICAL: status update failed:', statusError)
     } else {
-      console.log('[STATUS-UPDATE] Update succeeded for post', postId, '→', finalStatusInngest)
+      console.log('[STATUS-UPDATE] Status confirmed →', finalStatusInngest, 'for post', postId)
+    }
+
+    // Step 2: platform_post_ids separately (non-critical, column may not exist)
+    if (Object.keys(platformPostIds).length > 0) {
+      getSupabaseAdmin()
+        .from('posts')
+        .update({ platform_post_ids: platformPostIds })
+        .eq('id', postId)
+        .then(({ error }) => {
+          if (error) console.warn('[STATUS-UPDATE] platform_post_ids skipped (non-fatal):', error.message)
+        })
     }
 
     // First-post credit trigger + streak update
@@ -206,28 +197,32 @@ export async function POST(request: NextRequest) {
     })
 
     const finalStatus = allFailed ? 'failed' : someFailed ? 'partial' : 'published'
-    console.log('[publish] Updating post status to', finalStatus, 'for post:', postId)
-    const { error: updateError } = await getSupabaseAdmin()
+    console.log('[publish] Setting post', postId, '→', finalStatus)
+
+    // Step 1: Status + published_at ONLY (critical — never mix with platform_post_ids)
+    const { error: statusError } = await getSupabaseAdmin()
       .from('posts')
       .update({
-        status:            finalStatus,
-        published_at:      allFailed ? null : new Date().toISOString(),
-        platform_post_ids: platformPostIds,
+        status:       finalStatus,
+        published_at: allFailed ? null : new Date().toISOString(),
       })
       .eq('id', postId)
-      .select()
 
-    if (updateError) {
-      console.error('[publish] Status update failed, trying fallback:', updateError)
-      const { error: fallbackError } = await getSupabaseAdmin()
-        .from('posts')
-        .update({ status: finalStatus, published_at: allFailed ? null : new Date().toISOString() })
-        .eq('id', postId)
-        .select()
-      if (fallbackError) console.error('[publish] Fallback status update failed:', fallbackError)
-      else console.log('[publish] Fallback status update succeeded → ', finalStatus)
+    if (statusError) {
+      console.error('[publish] CRITICAL: status update failed:', statusError)
     } else {
-      console.log('[publish] Status update succeeded → ', finalStatus)
+      console.log('[publish] Status confirmed →', finalStatus, 'for post', postId)
+    }
+
+    // Step 2: platform_post_ids separately (non-critical, column may not exist)
+    if (Object.keys(platformPostIds).length > 0) {
+      getSupabaseAdmin()
+        .from('posts')
+        .update({ platform_post_ids: platformPostIds })
+        .eq('id', postId)
+        .then(({ error }) => {
+          if (error) console.warn('[publish] platform_post_ids skipped (non-fatal):', error.message)
+        })
     }
 
     await handleFirstPostCredits(userId)
