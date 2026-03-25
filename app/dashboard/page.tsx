@@ -66,6 +66,7 @@ function DashboardInner() {
   const [recentPosts, setRecentPosts] = useState<Post[]>([])
   const [weekCounts, setWeekCounts] = useState<number[]>([0,0,0,0,0,0,0])
   const [streak, setStreak] = useState(0)
+  const [creditSource, setCreditSource] = useState<'monthly_first' | 'earned_first' | 'paid_first'>('monthly_first')
   const { plan, credits, activeWorkspace, monthlyCredits, earnedCredits, paidCredits } = useWorkspace()
 
   useEffect(() => {
@@ -75,6 +76,21 @@ function DashboardInner() {
   const handleCreditModalDismiss = () => {
     setShowCreditModal(false)
     window.location.href = '/dashboard'
+  }
+
+  useEffect(() => {
+    if (!user) return
+    supabase.from('user_settings').select('credit_source_preference').eq('user_id', user.id).single()
+      .then(({ data }) => {
+        if (data?.credit_source_preference) setCreditSource(data.credit_source_preference as any)
+      })
+  }, [user])
+
+  const handleCreditSourceChange = async (source: typeof creditSource) => {
+    setCreditSource(source)
+    if (user) {
+      await supabase.from('user_settings').update({ credit_source_preference: source }).eq('user_id', user.id)
+    }
   }
 
   useEffect(() => {
@@ -262,6 +278,25 @@ function DashboardInner() {
                   Get more credits →
                 </Link>
               )}
+              {/* Credit source toggle */}
+              <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                <p className="text-xs text-gray-400 mb-2">Use credits from:</p>
+                <div className="flex gap-1 flex-wrap">
+                  {(['monthly_first', 'earned_first', 'paid_first'] as const).map(opt => (
+                    <button
+                      key={opt}
+                      onClick={() => handleCreditSourceChange(opt)}
+                      className={`px-2 py-1 rounded-lg text-xs font-semibold transition-all border ${
+                        creditSource === opt
+                          ? 'bg-black dark:bg-white text-white dark:text-black border-transparent'
+                          : 'bg-transparent text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-600 hover:border-gray-400'
+                      }`}
+                    >
+                      {opt === 'monthly_first' ? '📅 Monthly first' : opt === 'earned_first' ? '🎁 Earned first' : '💳 Paid first'}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Stat cards */}

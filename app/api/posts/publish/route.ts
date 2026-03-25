@@ -57,15 +57,42 @@ export async function POST(request: NextRequest) {
 
     const finalStatusInngest = allFailed ? 'failed' : someFailed ? 'partial' : 'published'
     console.log('[STATUS-UPDATE] Attempting to set post', postId, 'to', finalStatusInngest)
-    const { data: updateData, error: updateError } = await getSupabaseAdmin()
+
+    // Try full update first
+    const { error: updateError } = await getSupabaseAdmin()
       .from('posts')
       .update({
-        status: finalStatusInngest,
-        published_at: allFailed ? null : new Date().toISOString(),
+        status:            finalStatusInngest,
+        published_at:      allFailed ? null : new Date().toISOString(),
         platform_post_ids: platformPostIds,
       })
       .eq('id', postId)
-    console.log('[STATUS-UPDATE] Result:', { updateData, updateError })
+      .select()
+
+    if (updateError) {
+      console.error('[STATUS-UPDATE] Full update failed, trying fallback:', updateError)
+      // Fallback: update just status + published_at without platform_post_ids
+      const { error: fallbackError } = await getSupabaseAdmin()
+        .from('posts')
+        .update({
+          status:       finalStatusInngest,
+          published_at: allFailed ? null : new Date().toISOString(),
+        })
+        .eq('id', postId)
+        .select()
+
+      if (fallbackError) {
+        console.error('[STATUS-UPDATE] Fallback update also failed:', fallbackError)
+        // Return a 500 so Inngest retries the whole step
+        return NextResponse.json(
+          { error: 'Status update failed', detail: fallbackError.message },
+          { status: 500 }
+        )
+      }
+      console.log('[STATUS-UPDATE] Fallback update succeeded')
+    } else {
+      console.log('[STATUS-UPDATE] Update succeeded for post', postId, '→', finalStatusInngest)
+    }
 
     // First-post credit trigger + streak update
     await handleFirstPostCredits(userId)
@@ -180,16 +207,29 @@ export async function POST(request: NextRequest) {
     })
 
     const finalStatus = allFailed ? 'failed' : someFailed ? 'partial' : 'published'
-    console.log('[publish] Updating post status to published:', postId)
+    console.log('[publish] Updating post status to', finalStatus, 'for post:', postId)
     const { error: updateError } = await getSupabaseAdmin()
       .from('posts')
       .update({
-        status: finalStatus,
-        published_at: allFailed ? null : new Date().toISOString(),
+        status:            finalStatus,
+        published_at:      allFailed ? null : new Date().toISOString(),
         platform_post_ids: platformPostIds,
       })
       .eq('id', postId)
-    if (updateError) console.error('[publish] Status update failed:', updateError)
+      .select()
+
+    if (updateError) {
+      console.error('[publish] Status update failed, trying fallback:', updateError)
+      const { error: fallbackError } = await getSupabaseAdmin()
+        .from('posts')
+        .update({ status: finalStatus, published_at: allFailed ? null : new Date().toISOString() })
+        .eq('id', postId)
+        .select()
+      if (fallbackError) console.error('[publish] Fallback status update failed:', fallbackError)
+      else console.log('[publish] Fallback status update succeeded → ', finalStatus)
+    } else {
+      console.log('[publish] Status update succeeded → ', finalStatus)
+    }
 
     await handleFirstPostCredits(userId)
     if (!allFailed) await updateStreak(userId)
