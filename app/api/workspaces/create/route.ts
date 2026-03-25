@@ -50,11 +50,11 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (error) {
-      console.error('[WORKSPACE_CREATE] Insert error:', {
-        message: error.message,
-        code: error.code,
-        details: error.details,
-        hint: error.hint,
+      console.error('[workspace-create] Supabase error:', {
+        message: error?.message,
+        code: error?.code,
+        details: error?.details,
+        hint: error?.hint,
       })
       return NextResponse.json({ error: 'Failed to create workspace', detail: error.message }, { status: 500 })
     }
