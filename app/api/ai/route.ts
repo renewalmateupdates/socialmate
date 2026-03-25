@@ -224,12 +224,32 @@ export async function POST(req: NextRequest) {
     try {
       const result = await model.generateContent(prompt)
       text = result.response.text()
-    } catch (aiErr) {
-      // Refund credits if Gemini fails
+    } catch (aiErr: any) {
+      // Refund credits on any Gemini failure
       await supabase
         .from('user_settings')
         .update({ ai_credits_remaining: currentCredits })
         .eq('user_id', user.id)
+
+      const isRateLimit =
+        aiErr?.status === 429 ||
+        aiErr?.statusCode === 429 ||
+        (aiErr?.message && (
+          aiErr.message.includes('429') ||
+          aiErr.message.includes('RESOURCE_EXHAUSTED') ||
+          aiErr.message.includes('Resource has been exhausted') ||
+          aiErr.message.toLowerCase().includes('rate limit') ||
+          aiErr.message.toLowerCase().includes('quota')
+        ))
+
+      if (isRateLimit) {
+        console.warn('[AI] Rate limited by Gemini — credits refunded:', aiErr?.message)
+        return NextResponse.json(
+          { error: 'rate_limited', message: "You're generating too fast — wait 30 seconds and try again." },
+          { status: 429 }
+        )
+      }
+
       console.error('Gemini error:', aiErr)
       return NextResponse.json({ error: 'AI generation failed — credits refunded' }, { status: 500 })
     }
