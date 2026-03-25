@@ -55,14 +55,17 @@ export async function POST(request: NextRequest) {
       if (r.success && r.postId) platformPostIds[r.platform] = r.postId
     })
 
-    await getSupabaseAdmin()
+    const finalStatusInngest = allFailed ? 'failed' : someFailed ? 'partial' : 'published'
+    console.log('[STATUS-UPDATE] Attempting to set post', postId, 'to', finalStatusInngest)
+    const { data: updateData, error: updateError } = await getSupabaseAdmin()
       .from('posts')
       .update({
-        status: allFailed ? 'failed' : someFailed ? 'partial' : 'published',
+        status: finalStatusInngest,
         published_at: allFailed ? null : new Date().toISOString(),
         platform_post_ids: platformPostIds,
       })
       .eq('id', postId)
+    console.log('[STATUS-UPDATE] Result:', { updateData, updateError })
 
     // First-post credit trigger + streak update
     await handleFirstPostCredits(userId)
