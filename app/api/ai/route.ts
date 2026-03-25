@@ -171,7 +171,7 @@ export async function POST(req: NextRequest) {
     // Server-side credit check and atomic deduction
     const { data: settings, error: settingsError } = await supabase
       .from('user_settings')
-      .select('ai_credits_remaining')
+      .select('ai_credits_remaining, monthly_credits_remaining, permanent_credits, credit_source_preference')
       .eq('user_id', user.id)
       .single()
 
@@ -179,23 +179,53 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Could not load account settings' }, { status: 500 })
     }
 
-    const currentCredits = settings.ai_credits_remaining ?? 0
-    if (currentCredits < creditCost) {
+    const creditPref = settings.credit_source_preference || 'monthly_first'
+
+    // Two-bucket credit system: monthly + permanent (bank) credits
+    // Falls back to legacy ai_credits_remaining if two-bucket columns not populated
+    const monthlyCredits   = settings.monthly_credits_remaining ?? settings.ai_credits_remaining ?? 0
+    const permanentCredits = settings.permanent_credits ?? 0
+    const totalCredits     = monthlyCredits + permanentCredits
+
+    if (totalCredits < creditCost) {
       return NextResponse.json({
-        error: `Not enough credits. This tool costs ${creditCost} and you have ${currentCredits} remaining.`,
+        error: `Not enough credits. This tool costs ${creditCost} and you have ${totalCredits} remaining.`,
         creditsRequired: creditCost,
-        creditsRemaining: currentCredits,
+        creditsRemaining: totalCredits,
       }, { status: 402 })
     }
 
-    // Deduct credits before running — prevents retrying on error to farm credits
-    const newCredits = currentCredits - creditCost
+    // Deduct from preferred bucket first, overflow to the other
+    let monthlyDeduct: number
+    let bankDeduct: number
+
+    if (creditPref === 'bank_first') {
+      bankDeduct    = Math.min(creditCost, permanentCredits)
+      monthlyDeduct = creditCost - bankDeduct
+    } else {
+      // monthly_first (default)
+      monthlyDeduct = Math.min(creditCost, monthlyCredits)
+      bankDeduct    = creditCost - monthlyDeduct
+    }
+
+    const newMonthly   = monthlyCredits - monthlyDeduct
+    const newPermanent = permanentCredits - bankDeduct
+    const newLegacy    = Math.max(0, (settings.ai_credits_remaining ?? 0) - creditCost)
+
+    const updatePayload: Record<string, number> = {
+      ai_credits_remaining: newLegacy,
+    }
+    if (settings.monthly_credits_remaining !== null && settings.monthly_credits_remaining !== undefined) {
+      updatePayload.monthly_credits_remaining = newMonthly
+    }
+    if (permanentCredits > 0 && bankDeduct > 0) {
+      updatePayload.permanent_credits = newPermanent
+    }
+
     const { error: deductError } = await supabase
       .from('user_settings')
-      .update({ ai_credits_remaining: newCredits })
+      .update(updatePayload)
       .eq('user_id', user.id)
-      // Only deduct if credits haven't changed since we read them (race condition guard)
-      .eq('ai_credits_remaining', currentCredits)
 
     if (deductError) {
       return NextResponse.json({ error: 'Failed to deduct credits — please try again' }, { status: 500 })
@@ -204,10 +234,12 @@ export async function POST(req: NextRequest) {
     const apiKey = process.env.GEMINI_API_KEY
     if (!apiKey) {
       // Refund credits if AI isn't configured
-      await supabase
-        .from('user_settings')
-        .update({ ai_credits_remaining: currentCredits })
-        .eq('user_id', user.id)
+      const refundPayload: Record<string, number> = { ai_credits_remaining: settings.ai_credits_remaining ?? 0 }
+      if (settings.monthly_credits_remaining !== null && settings.monthly_credits_remaining !== undefined) {
+        refundPayload.monthly_credits_remaining = monthlyCredits
+      }
+      if (bankDeduct > 0) refundPayload.permanent_credits = permanentCredits
+      await supabase.from('user_settings').update(refundPayload).eq('user_id', user.id)
       return NextResponse.json({ error: 'AI not configured' }, { status: 500 })
     }
 
@@ -226,10 +258,12 @@ export async function POST(req: NextRequest) {
       text = result.response.text()
     } catch (aiErr: any) {
       // Refund credits on any Gemini failure
-      await supabase
-        .from('user_settings')
-        .update({ ai_credits_remaining: currentCredits })
-        .eq('user_id', user.id)
+      const refundPayload: Record<string, number> = { ai_credits_remaining: settings.ai_credits_remaining ?? 0 }
+      if (settings.monthly_credits_remaining !== null && settings.monthly_credits_remaining !== undefined) {
+        refundPayload.monthly_credits_remaining = monthlyCredits
+      }
+      if (bankDeduct > 0) refundPayload.permanent_credits = permanentCredits
+      await supabase.from('user_settings').update(refundPayload).eq('user_id', user.id)
 
       const isRateLimit =
         aiErr?.status === 429 ||
@@ -254,7 +288,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'AI generation failed — credits refunded' }, { status: 500 })
     }
 
-    return NextResponse.json({ result: text, creditCost, creditsRemaining: newCredits })
+    return NextResponse.json({ result: text, creditCost, creditsRemaining: newLegacy })
 
   } catch (err) {
     console.error('AI route error:', err)
