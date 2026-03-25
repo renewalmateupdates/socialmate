@@ -140,7 +140,7 @@ function AccountsInner() {
   const [showMastodonModal, setShowMastodonModal] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { plan } = useWorkspace()
+  const { plan, activeWorkspace } = useWorkspace()
 
   const planConfig = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
   const accountsPerPlatform = planConfig.accountsPerPlatform
@@ -153,11 +153,17 @@ function AccountsInner() {
   const refreshAccounts = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
-    const { data } = await supabase
+    let q = supabase
       .from('connected_accounts')
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
+    if (activeWorkspace && !activeWorkspace.is_personal) {
+      q = q.eq('workspace_id', activeWorkspace.id) as typeof q
+    } else {
+      q = q.is('workspace_id', null) as typeof q
+    }
+    const { data } = await q
     setAccounts(data || [])
   }
 
@@ -199,16 +205,22 @@ function AccountsInner() {
     const getData = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
-      const { data } = await supabase
+      let q = supabase
         .from('connected_accounts')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
+      if (activeWorkspace && !activeWorkspace.is_personal) {
+        q = q.eq('workspace_id', activeWorkspace.id) as typeof q
+      } else {
+        q = q.is('workspace_id', null) as typeof q
+      }
+      const { data } = await q
       setAccounts(data || [])
       setLoading(false)
     }
     getData()
-  }, [router])
+  }, [router, activeWorkspace])
 
   const handleDisconnect = async (id: string, platform: string) => {
     setDisconnecting(id)
@@ -267,7 +279,11 @@ function AccountsInner() {
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Accounts</h1>
               <p className="text-sm text-gray-400 mt-0.5">Connect and manage your social media accounts</p>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Connected accounts are shared across all your workspaces.</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                {activeWorkspace && !activeWorkspace.is_personal
+                  ? `Showing accounts for workspace: ${activeWorkspace.name}. Switch to Personal workspace to manage personal accounts.`
+                  : 'Showing your personal workspace accounts. Switch to a client workspace to manage that workspace\'s accounts.'}
+              </p>
             </div>
             <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 bg-surface border border-theme rounded-xl px-4 py-2.5 self-start sm:self-auto">
               {accounts.length} connected · {accountsPerPlatform} per platform on {planConfig.label}

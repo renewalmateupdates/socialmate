@@ -148,22 +148,26 @@ function ComposeInner() {
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) { router.push('/login'); return }
 
-      // Load destinations scoped to this workspace (skip if no real workspace id)
+      // Load destinations scoped to this workspace
       const destQuery = supabase
         .from('post_destinations')
         .select('id, platform, label')
         .eq('user_id', data.user.id)
         .order('created_at', { ascending: true })
-      const { data: dests } = wsId
-        ? await destQuery.eq('workspace_id', wsId)
-        : await destQuery
 
-      // Fallback: load all destinations for this user if none found scoped
-      const { data: allDests } = !dests?.length
+      const destsResult = activeWorkspace && !activeWorkspace.is_personal
+        ? await destQuery.eq('workspace_id', activeWorkspace.id)
+        : await destQuery.is('workspace_id', null)
+      const dests = destsResult.data
+
+      // For client workspaces: no fallback — they have their own isolated accounts
+      // For personal workspace: fallback to all user's personal destinations
+      const { data: allDests } = (!dests?.length && activeWorkspace?.is_personal)
         ? await supabase
             .from('post_destinations')
             .select('id, platform, label')
             .eq('user_id', data.user.id)
+            .is('workspace_id', null)
             .order('created_at', { ascending: true })
         : { data: null }
 
@@ -183,11 +187,21 @@ function ComposeInner() {
         setSelectedDestinations(autoSelected)
       }
 
-      // Load connected accounts (Bluesky, Mastodon, Telegram, LinkedIn, etc.)
-      const { data: accountsData } = await supabase
+      // Load connected accounts — scoped to workspace for client workspaces
+      let accountsQuery = supabase
         .from('connected_accounts')
         .select('platform')
         .eq('user_id', data.user.id)
+
+      // For client workspaces, only show accounts connected to THIS workspace
+      if (activeWorkspace && !activeWorkspace.is_personal) {
+        accountsQuery = accountsQuery.eq('workspace_id', activeWorkspace.id)
+      } else {
+        // Personal workspace: show accounts with no workspace_id (personal accounts)
+        accountsQuery = accountsQuery.is('workspace_id', null)
+      }
+
+      const { data: accountsData } = await accountsQuery
       const platformsSet = new Set<string>(accountsData?.map((a: any) => a.platform) || [])
       // Discord/Telegram are connected via post_destinations — mark them connected if they have any
       if (destData.length > 0) {
