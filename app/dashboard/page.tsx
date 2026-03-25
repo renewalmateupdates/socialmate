@@ -66,7 +66,7 @@ function DashboardInner() {
   const [recentPosts, setRecentPosts] = useState<Post[]>([])
   const [weekCounts, setWeekCounts] = useState<number[]>([0,0,0,0,0,0,0])
   const [streak, setStreak] = useState(0)
-  const { plan, credits } = useWorkspace()
+  const { plan, credits, activeWorkspace, monthlyCredits, earnedCredits, paidCredits } = useWorkspace()
 
   useEffect(() => {
     if (searchParams.get('credits') === 'added') setShowCreditModal(true)
@@ -158,9 +158,10 @@ function DashboardInner() {
   const DAYS         = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
   const maxWeekCount = Math.max(...weekCounts, 1)
 
-  // Credits display — use bank capacity so 2500/3000 makes sense
+  // Credits display — monthly bar shows monthly pool usage
+  const monthlyLimit = planConfig?.credits ?? 50
   const bankCap      = planConfig?.creditBank ?? 150
-  const creditPct    = Math.min((credits / bankCap) * 100, 100)
+  const creditPct    = monthlyLimit > 0 ? Math.min((monthlyCredits / monthlyLimit) * 100, 100) : 0
   const creditColor  = creditPct > 50 ? 'bg-green-500' : creditPct > 20 ? 'bg-yellow-400' : 'bg-red-400'
 
   return (
@@ -173,7 +174,14 @@ function DashboardInner() {
           {/* HEADER */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
             <div>
-              <h1 className="text-2xl font-extrabold tracking-tight">{greeting}, {displayName} 👋</h1>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-2xl font-extrabold tracking-tight">{greeting}, {displayName} 👋</h1>
+                {activeWorkspace && !activeWorkspace.is_personal && (
+                  <span className="text-xs font-bold px-2.5 py-1 bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 rounded-full">
+                    🏢 {activeWorkspace.client_name || activeWorkspace.name}
+                  </span>
+                )}
+              </div>
               <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">
                 {stats.todayCount > 0
                   ? `${stats.todayCount} post${stats.todayCount !== 1 ? 's' : ''} scheduled today · ${stats.upcomingCount} coming up`
@@ -225,19 +233,35 @@ function DashboardInner() {
             <div className="col-span-2 bg-surface border border-theme rounded-2xl px-4 py-3">
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-xs font-semibold text-gray-400 dark:text-gray-500">AI Credits</span>
-                <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{credits.toLocaleString()} remaining</span>
+                <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{credits.toLocaleString()} total</span>
               </div>
-              <div className="w-full h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden mb-1.5">
+              <div className="w-full h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden mb-2">
                 <div className={`h-full rounded-full transition-all ${creditColor}`} style={{ width: `${creditPct}%` }} />
               </div>
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-gray-400 dark:text-gray-500">banks up to {bankCap.toLocaleString()}</p>
-                {creditPct < 20 && (
-                  <Link href="/settings?tab=Plan" className="text-xs font-bold text-blue-600 hover:underline">
-                    Get more →
-                  </Link>
+              {/* Three pools */}
+              <div className="space-y-0.5">
+                <div className="flex items-center justify-between text-xs text-gray-400 dark:text-gray-500">
+                  <span>📅 Monthly</span>
+                  <span>{monthlyCredits.toLocaleString()} / {monthlyLimit.toLocaleString()}</span>
+                </div>
+                {earnedCredits > 0 && (
+                  <div className="flex items-center justify-between text-xs text-gray-400 dark:text-gray-500">
+                    <span>🎁 Earned</span>
+                    <span>{earnedCredits.toLocaleString()}</span>
+                  </div>
+                )}
+                {paidCredits > 0 && (
+                  <div className="flex items-center justify-between text-xs text-gray-400 dark:text-gray-500">
+                    <span>💳 Purchased</span>
+                    <span>{paidCredits.toLocaleString()}</span>
+                  </div>
                 )}
               </div>
+              {creditPct < 20 && (
+                <Link href="/settings?tab=Plan" className="text-xs font-bold text-blue-600 hover:underline mt-1.5 block">
+                  Get more credits →
+                </Link>
+              )}
             </div>
 
             {/* Stat cards */}

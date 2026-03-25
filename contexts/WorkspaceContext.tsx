@@ -63,6 +63,9 @@ type WorkspaceContextType = {
   setCredits: (credits: number) => void
   creditsUsed: number
   creditsTotal: number
+  monthlyCredits: number
+  earnedCredits: number
+  paidCredits: number
   workspaceName: string
   setWorkspaceName: (name: string) => void
   workspaces: Workspace[]
@@ -83,6 +86,9 @@ const WorkspaceContext = createContext<WorkspaceContextType>({
   setCredits: () => {},
   creditsUsed: 0,
   creditsTotal: 75,
+  monthlyCredits: 50,
+  earnedCredits: 0,
+  paidCredits: 0,
   workspaceName: 'My Workspace',
   setWorkspaceName: () => {},
   workspaces: [],
@@ -100,10 +106,13 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [plan, setPlan]                     = useState<Plan>('free')
   const [credits, setCreditsState]          = useState(50)
   const [creditsUsed, setCreditsUsed]       = useState(0)
+  const [monthlyCredits, setMonthlyCredits] = useState(50)
+  const [earnedCredits, setEarnedCredits]   = useState(0)
+  const [paidCredits, setPaidCredits]       = useState(0)
   const [userId, setUserId]                 = useState<string | null>(null)
   const [workspaceName, setWorkspaceName]   = useState('My Workspace')
   const [workspaces, setWorkspaces]         = useState<Workspace[]>([])
-  const [activeWorkspace, setActiveWorkspace] = useState<Workspace | null>(null)
+  const [activeWorkspace, setActiveWorkspaceState] = useState<Workspace | null>(null)
   const [seatsUsed, setSeatsUsed]           = useState(1)
   const [platformsConnected, setPlatformsConnected] = useState(0)
   const [loading, setLoading]               = useState(true)
@@ -123,8 +132,12 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       if (ws && ws.length > 0) {
         setWorkspaces(ws)
         const personal = ws.find((w: Workspace) => w.is_personal) || ws[0]
-        setActiveWorkspace(personal)
+        setActiveWorkspaceState(personal)
         setWorkspaceName(personal.name || 'My Workspace')
+        // Persist to cookie for server-side access
+        if (personal.id && personal.id !== 'personal') {
+          document.cookie = `active_workspace_id=${personal.id}; path=/; max-age=86400`
+        }
       } else {
         // No workspaces visible (RLS may be blocking anon client).
         // Use a placeholder — the API routes look up the real workspace
@@ -136,19 +149,25 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
           owner_id: user.id,
         }
         setWorkspaces([fallback])
-        setActiveWorkspace(fallback)
+        setActiveWorkspaceState(fallback)
       }
 
       const { data: settings } = await supabase
         .from('user_settings')
-        .select('plan, ai_credits_remaining, ai_credits_used, ai_credits_total')
+        .select('plan, ai_credits_remaining, ai_credits_used, ai_credits_total, monthly_credits_remaining, earned_credits, paid_credits')
         .eq('user_id', user.id)
         .single()
 
       if (settings) {
         const p = (settings.plan as Plan) || 'free'
         setPlan(p)
-        setCreditsState(settings.ai_credits_remaining ?? PLAN_CONFIG[p].credits)
+        const monthly = settings.monthly_credits_remaining ?? settings.ai_credits_remaining ?? PLAN_CONFIG[p].credits
+        const earned  = settings.earned_credits ?? 0
+        const paid    = settings.paid_credits ?? 0
+        setMonthlyCredits(monthly)
+        setEarnedCredits(earned)
+        setPaidCredits(paid)
+        setCreditsState(monthly + earned + paid)
         setCreditsUsed(settings.ai_credits_used ?? 0)
       }
 
@@ -173,6 +192,14 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     load()
   }, [])
 
+  const setActiveWorkspace = useCallback((ws: Workspace) => {
+    setActiveWorkspaceState(ws)
+    // Persist to cookie so server components / API routes can read it
+    if (ws.id && ws.id !== 'personal') {
+      document.cookie = `active_workspace_id=${ws.id}; path=/; max-age=86400`
+    }
+  }, [])
+
   const setCredits = useCallback(async (newCredits: number) => {
     setCreditsState(newCredits)
     if (!userId) return
@@ -190,6 +217,12 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       .eq('owner_id', userId)
     if (ws && ws.length > 0) {
       setWorkspaces(ws)
+      // Update active workspace data if it changed
+      setActiveWorkspaceState(prev => {
+        if (!prev) return prev
+        const updated = ws.find((w: Workspace) => w.id === prev.id)
+        return updated || prev
+      })
     }
   }, [userId])
 
@@ -201,6 +234,9 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       credits, setCredits,
       creditsUsed,
       creditsTotal: planConfig.creditBank,
+      monthlyCredits,
+      earnedCredits,
+      paidCredits,
       workspaceName, setWorkspaceName,
       workspaces,
       activeWorkspace,

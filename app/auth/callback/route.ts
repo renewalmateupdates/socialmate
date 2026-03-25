@@ -154,9 +154,15 @@ export async function GET(request: NextRequest) {
         .select('onboarding_completed')
         .eq('id', session.user.id)
         .single()
- 
-      const redirectTo = profile?.onboarding_completed ? '/dashboard' : '/onboarding'
-      return NextResponse.redirect(new URL(redirectTo, requestUrl.origin))
+
+      // Read the ?redirect= param passed through from the login page (Google OAuth path)
+      const redirectParam = requestUrl.searchParams.get('redirect')
+      const defaultRedirect = profile?.onboarding_completed ? '/dashboard' : '/onboarding'
+      // Only use redirectParam for authenticated pages — skip onboarding redirect check
+      const finalRedirect = !profile?.onboarding_completed
+        ? '/onboarding'
+        : (redirectParam || defaultRedirect)
+      return NextResponse.redirect(new URL(finalRedirect, requestUrl.origin))
     }
   }
  

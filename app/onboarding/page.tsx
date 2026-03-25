@@ -35,7 +35,10 @@ const PLAN_DETAILS = {
   free: {
     label: 'Free',
     price: '$0/mo',
-    color: 'border-gray-200',
+    color: 'border-emerald-400',
+    cardBg: 'bg-emerald-50 dark:bg-emerald-950/20',
+    badgeBg: 'bg-emerald-100 text-emerald-700',
+    badgeLabel: 'Always Free',
     badge: 'bg-gray-100 text-gray-600',
     icon: '🆓',
     credits: 50,
@@ -76,6 +79,9 @@ const PLAN_DETAILS = {
     label: 'Pro',
     price: '$5/mo',
     color: 'border-amber-400',
+    cardBg: 'bg-amber-50 dark:bg-amber-950/20',
+    badgeBg: 'bg-amber-100 text-amber-700',
+    badgeLabel: 'Most Popular',
     badge: 'bg-amber-400 text-black',
     icon: '⚡',
     credits: 500,
@@ -118,6 +124,9 @@ const PLAN_DETAILS = {
     label: 'Agency',
     price: '$20/mo',
     color: 'border-purple-500',
+    cardBg: 'bg-purple-50 dark:bg-purple-950/20',
+    badgeBg: 'bg-purple-100 text-purple-700',
+    badgeLabel: 'Power Users',
     badge: 'bg-purple-600 text-white',
     icon: '🏢',
     credits: 2000,
@@ -327,19 +336,19 @@ function OnboardingInner() {
       })
     }
 
-    // Award 50 bonus onboarding credits to bank (permanent_credits + ai_credits_remaining)
+    // Award 50 bonus onboarding credits to earned_credits pool
     const { data: settingsNow } = await supabase
       .from('user_settings')
-      .select('ai_credits_remaining, permanent_credits')
+      .select('ai_credits_remaining, earned_credits')
       .eq('user_id', user.id)
       .single()
 
-    const currentCredits   = settingsNow?.ai_credits_remaining ?? 50
-    const currentPermanent = settingsNow?.permanent_credits     ?? 0
+    const currentCredits = settingsNow?.ai_credits_remaining ?? 50
+    const currentEarned  = settingsNow?.earned_credits        ?? 0
 
     await supabase.from('user_settings').update({
       ai_credits_remaining: currentCredits + 50,
-      permanent_credits:    currentPermanent + 50,
+      earned_credits:       currentEarned + 50,
     }).eq('user_id', user.id)
 
     setSaving(false)
@@ -472,23 +481,21 @@ function OnboardingInner() {
                 const cfg = PLAN_DETAILS[p]
                 const isSelected = selectedPlan === p
                 return (
-                  <div key={p} className={`bg-surface border-2 rounded-2xl p-6 transition-all cursor-pointer ${
-                    isSelected ? cfg.color : 'border-gray-100 dark:border-gray-700 hover:border-gray-300'
-                  }`} onClick={() => { if (p === 'free') setSelectedPlan('free') }}>
+                  <div key={p} className={`border-2 rounded-2xl p-6 transition-all cursor-pointer ${cfg.color} ${isSelected ? cfg.cardBg : 'bg-surface hover:opacity-90'}`}
+                    onClick={() => { if (p === 'free') setSelectedPlan('free') }}>
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
                         <span className="text-2xl">{cfg.icon}</span>
                         <div>
                           <div className="flex items-center gap-2">
                             <p className="text-base font-extrabold">{cfg.label}</p>
-                            {p === 'pro' && <span className="text-xs font-bold bg-amber-400 text-black px-2 py-0.5 rounded-full">Most popular</span>}
-                            {p === 'agency' && <span className="text-xs font-bold bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">Best for teams</span>}
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${cfg.badgeBg}`}>{cfg.badgeLabel}</span>
                           </div>
                           <p className="text-xl font-extrabold">{cfg.price}</p>
                         </div>
                       </div>
                       {isSelected && p === 'free' && (
-                        <span className="text-xs font-bold bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-3 py-1.5 rounded-full">Selected</span>
+                        <span className="text-xs font-bold bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full">Selected</span>
                       )}
                     </div>
 
@@ -516,7 +523,7 @@ function OnboardingInner() {
                     {p === 'free' && (
                       <button
                         onClick={() => { setSelectedPlan('free'); setStep(3) }}
-                        className="w-full py-2.5 border-2 border-gray-200 dark:border-gray-700 text-sm font-bold rounded-xl hover:border-black hover:bg-black hover:text-white transition-all">
+                        className="w-full py-2.5 border-2 border-emerald-500 text-emerald-700 text-sm font-bold rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-all">
                         Continue with Free →
                       </button>
                     )}
@@ -524,9 +531,9 @@ function OnboardingInner() {
                       <button
                         onClick={() => handlePlanCheckout('pro')}
                         disabled={checkoutLoading === 'pro'}
-                        className="w-full py-2.5 bg-black text-white text-sm font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                        className="w-full py-2.5 bg-amber-400 hover:bg-amber-500 text-black text-sm font-bold rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2">
                         {checkoutLoading === 'pro' ? (
-                          <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Processing...</>
+                          <><div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />Processing...</>
                         ) : 'Start Pro — $5/month →'}
                       </button>
                     )}
@@ -534,7 +541,7 @@ function OnboardingInner() {
                       <button
                         onClick={() => handlePlanCheckout('agency')}
                         disabled={checkoutLoading === 'agency'}
-                        className="w-full py-2.5 bg-purple-600 text-white text-sm font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                        className="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2">
                         {checkoutLoading === 'agency' ? (
                           <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Processing...</>
                         ) : 'Start Agency — $20/month →'}

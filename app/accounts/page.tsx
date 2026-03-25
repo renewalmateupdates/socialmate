@@ -267,6 +267,7 @@ function AccountsInner() {
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Accounts</h1>
               <p className="text-sm text-gray-400 mt-0.5">Connect and manage your social media accounts</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Connected accounts are shared across all your workspaces.</p>
             </div>
             <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 bg-surface border border-theme rounded-xl px-4 py-2.5 self-start sm:self-auto">
               {accounts.length} connected · {accountsPerPlatform} per platform on {planConfig.label}

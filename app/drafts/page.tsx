@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
+import { useWorkspace } from '@/contexts/WorkspaceContext'
 
 function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse ${className}`} />
@@ -45,6 +46,7 @@ export default function Drafts() {
   const [filter, setFilter] = useState<FilterType>('all')
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const router = useRouter()
+  const { activeWorkspace } = useWorkspace()
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type })
@@ -54,15 +56,28 @@ export default function Drafts() {
   const loadPosts = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/login'); return }
-    const { data } = await supabase
+    let query = supabase
       .from('posts')
       .select('*')
       .eq('user_id', user.id)
       .in('status', ['draft', 'scheduled', 'published', 'partial', 'failed'])
       .order('created_at', { ascending: false })
+    // Scope to active workspace if available and it has a real UUID
+    if (activeWorkspace?.id && activeWorkspace.id !== 'personal') {
+      query = query.eq('workspace_id', activeWorkspace.id)
+    }
+    const { data } = await query
     setPosts(data || [])
     setLoading(false)
   }
+
+  // Reload when active workspace changes
+  useEffect(() => {
+    if (activeWorkspace) {
+      setLoading(true)
+      loadPosts()
+    }
+  }, [activeWorkspace?.id])
 
   useEffect(() => {
     loadPosts()
