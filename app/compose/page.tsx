@@ -123,6 +123,7 @@ function ComposeInner() {
 
   const [destinations, setDestinations] = useState<Record<string, Destination[]>>({})
   const [selectedDestinations, setSelectedDestinations] = useState<Record<string, string>>({})
+  const [connectedPlatforms, setConnectedPlatforms] = useState<Set<string>>(new Set())
 
   const planConfig = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
   const maxScheduleDate = (() => {
@@ -179,6 +180,18 @@ function ComposeInner() {
         })
         setSelectedDestinations(autoSelected)
       }
+
+      // Load connected accounts (Bluesky, Mastodon, Telegram, LinkedIn, etc.)
+      const { data: accountsData } = await supabase
+        .from('connected_accounts')
+        .select('platform')
+        .eq('user_id', data.user.id)
+      const platformsSet = new Set<string>(accountsData?.map((a: any) => a.platform) || [])
+      // Discord/Telegram are connected via post_destinations — mark them connected if they have any
+      if (destData.length > 0) {
+        destData.forEach((d: Destination) => platformsSet.add(d.platform))
+      }
+      setConnectedPlatforms(platformsSet)
 
       // Load draft if editing
       const draftId = searchParams.get('draft')
@@ -592,6 +605,20 @@ function ComposeInner() {
                   <p className="text-xs font-semibold text-amber-700">Select at least one platform to compose a post.</p>
                 </div>
               )}
+
+              {/* UNCONNECTED PLATFORM WARNINGS */}
+              {selectedPlatforms
+                .filter(id => !connectedPlatforms.has(id))
+                .map(id => {
+                  const p = PLATFORMS.find(pl => pl.id === id)
+                  if (!p) return null
+                  return (
+                    <div key={id} className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-3 py-2 rounded-lg flex items-center gap-2 border border-amber-200 dark:border-amber-800">
+                      <span>⚠️</span>
+                      <span>No {p.name} account connected — <Link href="/accounts" className="underline font-semibold">Connect one in Accounts →</Link></span>
+                    </div>
+                  )
+                })}
 
               {/* DESTINATION SELECTOR */}
               {selectedPlatforms.some(p => DESTINATION_PLATFORMS.includes(p)) && (
