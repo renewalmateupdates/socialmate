@@ -64,7 +64,7 @@ function getTodayDate() {
 
 export default function BulkScheduler() {
   const [user, setUser] = useState<any>(null)
-  const { plan } = useWorkspace()
+  const { plan, activeWorkspace } = useWorkspace()
   const planConfig = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
   const maxRows = PLAN_MAX_ROWS[plan] ?? 10
 
@@ -208,16 +208,21 @@ export default function BulkScheduler() {
 
     for (const post of valid) {
       const scheduledAt = new Date(`${post.date}T${post.time}:00`).toISOString()
-      const { error } = await supabase.from('posts').insert({
-        user_id: user.id,
-        content: post.content.trim(),
-        platforms: post.platforms,
-        status: 'scheduled',
-        scheduled_at: scheduledAt,
+      // Use API route so workspace_id is set and Inngest event fires for auto-publish
+      const res = await fetch('/api/posts/create', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({
+          content:     post.content.trim(),
+          platforms:   post.platforms,
+          scheduledAt,
+          workspaceId: activeWorkspace?.is_personal ? null : (activeWorkspace?.id ?? null),
+        }),
       })
       const idx = updatedPosts.findIndex(p => p.id === post.id)
-      if (error) {
-        updatedPosts[idx] = { ...updatedPosts[idx], status: 'error', error: error.message }
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}))
+        updatedPosts[idx] = { ...updatedPosts[idx], status: 'error', error: err.error || 'Failed to save' }
       } else {
         updatedPosts[idx] = { ...updatedPosts[idx], status: 'saved' }
         saved++
@@ -253,7 +258,12 @@ export default function BulkScheduler() {
           {/* HEADER */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-2xl font-extrabold tracking-tight">Bulk Scheduler</h1>
+              <h1 className="text-2xl font-extrabold tracking-tight">
+                Bulk Scheduler
+                {activeWorkspace && !activeWorkspace.is_personal && (
+                  <span className="ml-2 text-sm font-semibold text-purple-500">— {activeWorkspace.client_name || activeWorkspace.name}</span>
+                )}
+              </h1>
               <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">Write and schedule multiple posts at once</p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">

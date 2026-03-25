@@ -66,13 +66,19 @@ export default function Calendar() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
 
-      const { data } = await supabase
+      let calQuery = supabase
         .from('posts')
         .select('*')
         .eq('user_id', user.id)
-        .eq('workspace_id', activeWorkspace.id)
         .not('scheduled_at', 'is', null)
         .order('scheduled_at', { ascending: true })
+
+      // Only filter by workspace for client workspaces; personal shows all
+      if (!activeWorkspace.is_personal) {
+        calQuery = calQuery.eq('workspace_id', activeWorkspace.id)
+      }
+
+      const { data } = await calQuery
 
       setPosts(data || [])
       setLoading(false)
