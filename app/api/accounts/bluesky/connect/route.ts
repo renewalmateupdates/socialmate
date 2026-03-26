@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json()
-  const { handle, appPassword } = body
+  const { handle, appPassword, workspaceId } = body
 
   if (!handle || !appPassword) {
     return NextResponse.json({ error: 'Handle and app password are required' }, { status: 400 })
@@ -67,13 +67,21 @@ export async function POST(request: NextRequest) {
     profile_image_url = profile.avatar || null
   }
 
-  const { data: existing } = await supabase
+  // Check for existing account in THIS workspace (or personal if no workspaceId)
+  let existingQuery = supabase
     .from('connected_accounts')
     .select('id')
     .eq('user_id', user.id)
     .eq('platform', 'bluesky')
     .eq('platform_user_id', did)
-    .single()
+
+  if (workspaceId) {
+    existingQuery = existingQuery.eq('workspace_id', workspaceId) as typeof existingQuery
+  } else {
+    existingQuery = existingQuery.is('workspace_id', null) as typeof existingQuery
+  }
+
+  const { data: existing } = await existingQuery.single()
 
   if (existing) {
     await supabase
@@ -89,14 +97,15 @@ export async function POST(request: NextRequest) {
     const { error: dbError } = await supabase
       .from('connected_accounts')
       .insert({
-        user_id: user.id,
-        platform: 'bluesky',
+        user_id:          user.id,
+        platform:         'bluesky',
         platform_user_id: did,
         account_name,
         profile_image_url,
-        access_token: accessJwt,
-        refresh_token: refreshJwt,
-        scope: 'atproto',
+        access_token:     accessJwt,
+        refresh_token:    refreshJwt,
+        scope:            'atproto',
+        workspace_id:     workspaceId ?? null,
       })
 
     if (dbError) {

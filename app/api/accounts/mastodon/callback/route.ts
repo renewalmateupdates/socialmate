@@ -101,17 +101,19 @@ export async function GET(request: NextRequest) {
       .update({ access_token, account_name, profile_image_url })
       .eq('id', existing.id)
   } else {
+    const pendingWorkspaceId = cookieStore.get('pending_workspace_id')?.value ?? null
     const { error: dbError } = await supabase
       .from('connected_accounts')
       .insert({
-        user_id: user.id,
-        platform: 'mastodon',
+        user_id:          user.id,
+        platform:         'mastodon',
         platform_user_id,
         account_name,
         profile_image_url,
         access_token,
-        refresh_token: null,
-        scope: 'read write',
+        refresh_token:    null,
+        scope:            'read write',
+        workspace_id:     pendingWorkspaceId || null,
       })
 
     if (dbError) {
@@ -121,5 +123,6 @@ export async function GET(request: NextRequest) {
   }
 
   cookieStore.delete('mastodon_oauth')
+  cookieStore.delete('pending_workspace_id')
   return NextResponse.redirect(`${appUrl}/accounts?success=mastodon_connected`)
 }

@@ -58,8 +58,15 @@ export async function POST(request: NextRequest) {
     const finalStatusInngest = allFailed ? 'failed' : someFailed ? 'partial' : 'published'
     console.log('[STATUS-UPDATE] Setting post', postId, '→', finalStatusInngest)
 
-    // Step 1: Status + published_at ONLY (critical — never mix with platform_post_ids)
-    const { error: statusError } = await getSupabaseAdmin()
+    // Create a FRESH admin client for the critical update (avoid singleton staleness)
+    const { createClient } = await import('@supabase/supabase-js')
+    const freshAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { autoRefreshToken: false, persistSession: false } }
+    )
+
+    const { error: statusError } = await freshAdmin
       .from('posts')
       .update({
         status:       finalStatusInngest,
@@ -68,9 +75,28 @@ export async function POST(request: NextRequest) {
       .eq('id', postId)
 
     if (statusError) {
-      console.error('[STATUS-UPDATE] CRITICAL: status update failed:', statusError)
+      console.error('[STATUS-UPDATE] CRITICAL: fresh admin update failed:', JSON.stringify(statusError))
+      // Try singleton admin as fallback
+      const { error: singletonError } = await getSupabaseAdmin()
+        .from('posts')
+        .update({ status: finalStatusInngest, published_at: allFailed ? null : new Date().toISOString() })
+        .eq('id', postId)
+      if (singletonError) {
+        console.error('[STATUS-UPDATE] Singleton fallback also failed:', JSON.stringify(singletonError))
+        // Return 500 so Inngest retries (idempotency guard will catch repeat publishes)
+        return NextResponse.json({ error: 'Status update failed', detail: singletonError.message }, { status: 500 })
+      } else {
+        console.log('[STATUS-UPDATE] Singleton fallback succeeded →', finalStatusInngest)
+      }
     } else {
-      console.log('[STATUS-UPDATE] Status confirmed →', finalStatusInngest, 'for post', postId)
+      // Verify the update took effect
+      const { data: verify } = await freshAdmin.from('posts').select('status').eq('id', postId).single()
+      console.log('[STATUS-UPDATE] Verified DB status:', verify?.status, '(expected:', finalStatusInngest, ')')
+      if (verify?.status !== finalStatusInngest) {
+        console.error('[STATUS-UPDATE] MISMATCH — update said success but DB still shows:', verify?.status)
+        return NextResponse.json({ error: 'Status update mismatch', expected: finalStatusInngest, got: verify?.status }, { status: 500 })
+      }
+      console.log('[STATUS-UPDATE] CONFIRMED →', finalStatusInngest, 'for post', postId)
     }
 
     // Step 2: platform_post_ids separately (non-critical, column may not exist)

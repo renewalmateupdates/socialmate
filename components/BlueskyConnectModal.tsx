@@ -5,9 +5,10 @@ import { useState } from 'react'
 interface BlueskyConnectModalProps {
   onSuccess: (handle: string, displayName: string) => void
   onClose: () => void
+  workspaceId?: string | null
 }
 
-export default function BlueskyConnectModal({ onSuccess, onClose }: BlueskyConnectModalProps) {
+export default function BlueskyConnectModal({ onSuccess, onClose, workspaceId }: BlueskyConnectModalProps) {
   const [handle, setHandle] = useState('')
   const [appPassword, setAppPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -27,7 +28,7 @@ export default function BlueskyConnectModal({ onSuccess, onClose }: BlueskyConne
       const res = await fetch('/api/accounts/bluesky/connect', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ handle: handle.trim(), appPassword: appPassword.trim() }),
+        body: JSON.stringify({ handle: handle.trim(), appPassword: appPassword.trim(), workspaceId: workspaceId ?? null }),
       })
 
       const data = await res.json()

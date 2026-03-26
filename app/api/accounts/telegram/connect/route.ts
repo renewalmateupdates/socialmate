@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json()
-  const { botToken } = body
+  const { botToken, workspaceId } = body
 
   if (!botToken) {
     return NextResponse.json({ error: 'Bot token is required' }, { status: 400 })
@@ -50,14 +50,21 @@ export async function POST(request: NextRequest) {
   const account_name = username || first_name || 'Telegram Bot'
   const platform_user_id = String(id)
 
-  // Check if this bot is already connected
-  const { data: existing } = await supabase
+  // Check for existing account in THIS workspace (or personal if no workspaceId)
+  let existingQuery = supabase
     .from('connected_accounts')
     .select('id')
     .eq('user_id', user.id)
     .eq('platform', 'telegram')
     .eq('platform_user_id', platform_user_id)
-    .single()
+
+  if (workspaceId) {
+    existingQuery = existingQuery.eq('workspace_id', workspaceId) as typeof existingQuery
+  } else {
+    existingQuery = existingQuery.is('workspace_id', null) as typeof existingQuery
+  }
+
+  const { data: existing } = await existingQuery.single()
 
   if (existing) {
     await supabase
@@ -71,14 +78,15 @@ export async function POST(request: NextRequest) {
     const { error: dbError } = await supabase
       .from('connected_accounts')
       .insert({
-        user_id: user.id,
-        platform: 'telegram',
+        user_id:          user.id,
+        platform:         'telegram',
         platform_user_id,
         account_name,
         profile_image_url: null,
-        access_token: botToken,
-        refresh_token: null,
-        scope: 'bot',
+        access_token:     botToken,
+        refresh_token:    null,
+        scope:            'bot',
+        workspace_id:     workspaceId ?? null,
       })
 
     if (dbError) {

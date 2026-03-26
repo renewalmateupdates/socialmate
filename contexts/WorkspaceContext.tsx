@@ -131,12 +131,22 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
 
       if (ws && ws.length > 0) {
         setWorkspaces(ws)
-        const personal = ws.find((w: Workspace) => w.is_personal) || ws[0]
-        setActiveWorkspaceState(personal)
-        setWorkspaceName(personal.name || 'My Workspace')
-        // Persist to cookie for server-side access
-        if (personal.id && personal.id !== 'personal') {
-          document.cookie = `active_workspace_id=${personal.id}; path=/; max-age=86400`
+        // Check if there's a saved workspace preference from the cookie
+        const cookieWorkspaceId = document.cookie
+          .split('; ')
+          .find(c => c.startsWith('active_workspace_id='))
+          ?.split('=')[1]
+
+        const savedWorkspace = cookieWorkspaceId
+          ? ws.find((w: Workspace) => w.id === cookieWorkspaceId)
+          : null
+
+        const initial = savedWorkspace || ws.find((w: Workspace) => w.is_personal) || ws[0]
+        setActiveWorkspaceState(initial)
+        setWorkspaceName(initial.name || 'My Workspace')
+        // Always keep cookie in sync
+        if (initial.id && initial.id !== 'personal') {
+          document.cookie = `active_workspace_id=${initial.id}; path=/; max-age=86400`
         }
       } else {
         // No workspaces visible (RLS may be blocking anon client).
