@@ -61,6 +61,15 @@ export const publishScheduledPost = inngest.createFunction(
         console.log(`[PUBLISH-GUARD] Post ${postId} already in terminal state (${innerPostCheck?.status}), skipping`)
         return { skipped: true, status: innerPostCheck?.status }
       }
+
+      const hasExistingPostIds = innerPostCheck?.platform_post_ids &&
+        typeof innerPostCheck.platform_post_ids === 'object' &&
+        Object.keys(innerPostCheck.platform_post_ids).length > 0
+
+      if (hasExistingPostIds) {
+        console.log(`[PUBLISH-GUARD] Post ${postId} already has platform_post_ids — skipping to avoid duplicate publish`)
+        return { skipped: true, reason: 'platform_post_ids already set' }
+      }
       // ─────────────────────────────────────────────────────────────────────
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/posts/publish`, {
