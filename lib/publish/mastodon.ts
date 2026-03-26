@@ -3,18 +3,29 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 const MAX_MASTODON_LENGTH = 500
 
-export async function publishToMastodon(userId: string, content: string): Promise<string> {
+export async function publishToMastodon(userId: string, content: string, workspaceId?: string | null): Promise<string> {
   // Enforce 500 character limit (Mastodon default; some instances allow more)
   if (content.length > MAX_MASTODON_LENGTH) {
     throw new Error(`Post exceeds Mastodon's ${MAX_MASTODON_LENGTH} character limit (${content.length} chars). Please shorten your post.`)
   }
 
-  const { data: account, error: accountError } = await getSupabaseAdmin()
+  // Build workspace-scoped query — personal accounts have workspace_id = null
+  let query = getSupabaseAdmin()
     .from('connected_accounts')
     .select('access_token, platform_user_id')
     .eq('user_id', userId)
     .eq('platform', 'mastodon')
-    .single()
+
+  if (workspaceId) {
+    query = query.eq('workspace_id', workspaceId)
+  } else {
+    query = query.is('workspace_id', null)
+  }
+
+  const { data: account, error: accountError } = await query
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   if (accountError || !account) {
     throw new Error('No Mastodon account connected. Go to Accounts to connect your Mastodon account.')

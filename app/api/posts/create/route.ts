@@ -88,6 +88,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No workspace found. Please contact support.' }, { status: 400 })
     }
 
+    // Determine account workspace: personal accounts have workspace_id = null in connected_accounts
+    const { data: wsInfo } = await getSupabaseAdmin()
+      .from('workspaces')
+      .select('is_personal')
+      .eq('id', resolvedWorkspaceId)
+      .maybeSingle()
+    const accountWorkspaceId: string | null = wsInfo?.is_personal ? null : resolvedWorkspaceId
+
     // Get plan
     const { data: settings } = await supabase
       .from('user_settings')
@@ -185,7 +193,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Post Now — publish immediately
-    const results    = await publishToAll(user.id, platforms, content, destinations || {})
+    const results    = await publishToAll(user.id, platforms, content, destinations || {}, accountWorkspaceId)
     const allFailed  = results.every(r => !r.success)
     const someFailed = results.some(r => !r.success)
 

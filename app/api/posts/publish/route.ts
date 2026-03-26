@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     // Inngest call — fetch post directly with service role
     const { data: post, error } = await getSupabaseAdmin()
       .from('posts')
-      .select('id, user_id, content, platforms, destinations, status, published_at')
+      .select('id, user_id, content, platforms, destinations, status, published_at, workspace_id')
       .eq('id', postId)
       .single()
 
@@ -44,9 +44,20 @@ export async function POST(request: NextRequest) {
 
     userId = post.user_id
 
+    // Resolve account workspace: personal accounts have workspace_id = null in connected_accounts
+    let accountWorkspaceId: string | null = null
+    if (post.workspace_id) {
+      const { data: wsInfo } = await getSupabaseAdmin()
+        .from('workspaces')
+        .select('is_personal')
+        .eq('id', post.workspace_id)
+        .maybeSingle()
+      accountWorkspaceId = wsInfo?.is_personal ? null : post.workspace_id
+    }
+
     // Actually publish to platforms
     const destinations = post.destinations || {}
-    const results = await publishToAll(userId, post.platforms, post.content, destinations)
+    const results = await publishToAll(userId, post.platforms, post.content, destinations, accountWorkspaceId)
     const allFailed  = results.every(r => !r.success)
     const someFailed = results.some(r => !r.success)
 
@@ -199,7 +210,7 @@ export async function POST(request: NextRequest) {
 
     const { data: post, error } = await supabase
       .from('posts')
-      .select('id, user_id, content, platforms, destinations, status, published_at')
+      .select('id, user_id, content, platforms, destinations, status, published_at, workspace_id')
       .eq('id', postId)
       .eq('user_id', userId)
       .single()
@@ -212,8 +223,19 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Already published' }, { status: 409 })
     }
 
+    // Resolve account workspace: personal accounts have workspace_id = null in connected_accounts
+    let accountWorkspaceId: string | null = null
+    if (post.workspace_id) {
+      const { data: wsInfo } = await getSupabaseAdmin()
+        .from('workspaces')
+        .select('is_personal')
+        .eq('id', post.workspace_id)
+        .maybeSingle()
+      accountWorkspaceId = wsInfo?.is_personal ? null : post.workspace_id
+    }
+
     const destinations = post.destinations || {}
-    const results = await publishToAll(userId, post.platforms, post.content, destinations)
+    const results = await publishToAll(userId, post.platforms, post.content, destinations, accountWorkspaceId)
     const allFailed  = results.every(r => !r.success)
     const someFailed = results.some(r => !r.success)
 

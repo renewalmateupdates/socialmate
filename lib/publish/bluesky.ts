@@ -3,13 +3,24 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 const MAX_BLUESKY_LENGTH = 300
 
-export async function publishToBluesky(userId: string, content: string): Promise<string> {
-  const { data: account, error: accountError } = await getSupabaseAdmin()
+export async function publishToBluesky(userId: string, content: string, workspaceId?: string | null): Promise<string> {
+  // Build workspace-scoped query — personal accounts have workspace_id = null
+  let query = getSupabaseAdmin()
     .from('connected_accounts')
-    .select('access_token, refresh_token, platform_user_id, account_name')
+    .select('id, access_token, refresh_token, platform_user_id, account_name')
     .eq('user_id', userId)
     .eq('platform', 'bluesky')
-    .single()
+
+  if (workspaceId) {
+    query = query.eq('workspace_id', workspaceId)
+  } else {
+    query = query.is('workspace_id', null)
+  }
+
+  const { data: account, error: accountError } = await query
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
 
   if (accountError || !account) {
     throw new Error('No Bluesky account connected. Go to Accounts to connect your Bluesky account.')
@@ -41,12 +52,11 @@ export async function publishToBluesky(userId: string, content: string): Promise
     accessJwt = session.accessJwt
     did = session.did
 
-    // Persist refreshed tokens
+    // Persist refreshed tokens (scope to specific account row by id)
     await getSupabaseAdmin()
       .from('connected_accounts')
       .update({ access_token: session.accessJwt, refresh_token: session.refreshJwt })
-      .eq('user_id', userId)
-      .eq('platform', 'bluesky')
+      .eq('id', account.id)
   } else {
     // Token refresh failed — try with existing token, log warning
     const errBody = await sessionRes.json().catch(() => ({}))
