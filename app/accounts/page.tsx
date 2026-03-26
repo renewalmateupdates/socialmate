@@ -500,7 +500,16 @@ function AccountsInner() {
                 className="flex-1 text-sm font-semibold px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
                 Cancel
               </button>
-              <button onClick={() => { setShowDiscordModal(false); window.open('/api/accounts/discord/connect', '_blank') }}
+              <button onClick={() => {
+                // Save workspace context before OAuth redirect
+                if (activeWorkspace && !activeWorkspace.is_personal) {
+                  document.cookie = `pending_workspace_id=${activeWorkspace.id}; path=/; max-age=300`
+                } else {
+                  document.cookie = `pending_workspace_id=; path=/; max-age=0`
+                }
+                setShowDiscordModal(false)
+                window.open('/api/accounts/discord/connect', '_blank')
+              }}
                 className="flex-1 text-sm font-semibold px-4 py-2.5 bg-indigo-600 text-white rounded-xl hover:opacity-80 transition-all">
                 Continue to Discord →
               </button>
@@ -510,13 +519,24 @@ function AccountsInner() {
       )}
 
       {showBlueskyModal && (
-        <BlueskyConnectModal onSuccess={handleBlueskySuccess} onClose={() => setShowBlueskyModal(false)} />
+        <BlueskyConnectModal
+          onSuccess={handleBlueskySuccess}
+          onClose={() => setShowBlueskyModal(false)}
+          workspaceId={activeWorkspace && !activeWorkspace.is_personal ? activeWorkspace.id : null}
+        />
       )}
       {showTelegramModal && (
-        <TelegramConnectModal onSuccess={handleTelegramSuccess} onClose={() => setShowTelegramModal(false)} />
+        <TelegramConnectModal
+          onSuccess={handleTelegramSuccess}
+          onClose={() => setShowTelegramModal(false)}
+          workspaceId={activeWorkspace && !activeWorkspace.is_personal ? activeWorkspace.id : null}
+        />
       )}
       {showMastodonModal && (
-        <MastodonConnectModal onClose={() => setShowMastodonModal(false)} />
+        <MastodonConnectModal
+          onClose={() => setShowMastodonModal(false)}
+          workspaceId={activeWorkspace && !activeWorkspace.is_personal ? activeWorkspace.id : null}
+        />
       )}
 
       {toast && (

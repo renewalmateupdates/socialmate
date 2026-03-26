@@ -5,9 +5,10 @@ import { useState } from 'react'
 interface TelegramConnectModalProps {
   onSuccess: (username: string) => void
   onClose: () => void
+  workspaceId?: string | null
 }
 
-export default function TelegramConnectModal({ onSuccess, onClose }: TelegramConnectModalProps) {
+export default function TelegramConnectModal({ onSuccess, onClose, workspaceId }: TelegramConnectModalProps) {
   const [botToken, setBotToken] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -26,7 +27,7 @@ export default function TelegramConnectModal({ onSuccess, onClose }: TelegramCon
       const res = await fetch('/api/accounts/telegram/connect', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ botToken: botToken.trim() }),
+        body: JSON.stringify({ botToken: botToken.trim(), workspaceId: workspaceId ?? null }),
       })
 
       const data = await res.json()

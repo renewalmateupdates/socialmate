@@ -90,11 +90,12 @@ export async function GET(request: NextRequest) {
       .update({ access_token, refresh_token, expires_at, scope })
       .eq('id', existing.id)
   } else {
+    const pendingWorkspaceId = cookieStore.get('pending_workspace_id')?.value ?? null
     const { error: dbError } = await supabase
       .from('connected_accounts')
       .insert({
-        user_id: user.id,
-        platform: 'discord',
+        user_id:          user.id,
+        platform:         'discord',
         platform_user_id: discordUser.id,
         account_name,
         profile_image_url,
@@ -102,6 +103,7 @@ export async function GET(request: NextRequest) {
         refresh_token,
         expires_at,
         scope,
+        workspace_id:     pendingWorkspaceId || null,
       })
 
     if (dbError) {
@@ -111,5 +113,6 @@ export async function GET(request: NextRequest) {
   }
 
   cookieStore.delete('discord_oauth_state')
+  cookieStore.delete('pending_workspace_id')
   return NextResponse.redirect(`${appUrl}/accounts?success=discord_connected`)
 }

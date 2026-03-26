@@ -4,9 +4,10 @@ import { useState } from 'react'
 
 interface MastodonConnectModalProps {
   onClose: () => void
+  workspaceId?: string | null
 }
 
-export default function MastodonConnectModal({ onClose }: MastodonConnectModalProps) {
+export default function MastodonConnectModal({ onClose, workspaceId }: MastodonConnectModalProps) {
   const [instance, setInstance] = useState('')
   const [error, setError] = useState<string | null>(null)
 
@@ -26,6 +27,12 @@ export default function MastodonConnectModal({ onClose }: MastodonConnectModalPr
       return
     }
 
+    // Save workspace context before OAuth redirect
+    if (workspaceId) {
+      document.cookie = `pending_workspace_id=${workspaceId}; path=/; max-age=300`
+    } else {
+      document.cookie = `pending_workspace_id=; path=/; max-age=0`
+    }
     window.location.href = `/api/accounts/mastodon/connect?instance=${encodeURIComponent(cleaned)}`
   }
 
