@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Use admin client to bypass RLS for workspace creation
+    console.log('[WORKSPACE-CREATE] Attempting insert:', { owner_id: user.id, name: name.trim(), is_personal: false })
     const { data, error } = await getSupabaseAdmin()
       .from('workspaces')
       .insert({
