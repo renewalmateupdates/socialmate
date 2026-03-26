@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { supabase } from '@/lib/supabase'
 
 export type ThemeMode    = 'light' | 'dark'
-export type ThemeAccent  = 'default' | 'midnight' | 'forest' | 'rose' | 'slate' | 'amber' | 'ocean' | 'grape' | 'charcoal' | 'coffee' | 'candy' | 'mint' | 'lavender' | 'sky' | 'peach' | 'rainbow' | 'neon-green' | 'neon-pink' | 'neon-blue' | 'neon-orange' | 'neon-purple'
+export type ThemeAccent  = 'default' | 'midnight' | 'forest' | 'rose' | 'slate' | 'amber' | 'ocean' | 'grape' | 'charcoal' | 'coffee' | 'candy' | 'mint' | 'lavender' | 'sky' | 'peach' | 'rainbow' | 'tiedye' | 'northern-lights' | 'acid' | 'cosmic' | 'psychedelic'
 
 /** The swatch color is the sidebar background color for that theme */
 export const ACCENT_THEMES: { id: ThemeAccent; label: string; color: string }[] = [
@@ -24,12 +24,12 @@ export const ACCENT_THEMES: { id: ThemeAccent; label: string; color: string }[] 
   { id: 'sky',      label: 'Sky',      color: '#e0f2fe' },   // pastel sky blue
   { id: 'peach',    label: 'Peach',    color: '#ffedd5' },   // soft peach
   { id: 'rainbow',  label: 'Rainbow',  color: '#1a0533' },   // dark base with rainbow shimmer
-  // Neons
-  { id: 'neon-green',  label: 'Neon Green',  color: '#39ff14' },   // electric green on black
-  { id: 'neon-pink',   label: 'Neon Pink',   color: '#ff2d78' },   // hot pink on black
-  { id: 'neon-blue',   label: 'Neon Blue',   color: '#00d4ff' },   // electric cyan on black
-  { id: 'neon-orange', label: 'Neon Orange', color: '#ff6a00' },   // neon orange on black
-  { id: 'neon-purple', label: 'Neon Purple', color: '#bf00ff' },   // electric purple on black
+  // Trippy / Tie-Dye
+  { id: 'tiedye',         label: 'Tie-Dye',        color: '#0d0d0d' },   // all-color spiral on black
+  { id: 'northern-lights', label: 'Northern Lights', color: '#020b18' },  // aurora borealis
+  { id: 'acid',           label: 'Acid',           color: '#050508' },   // lime/yellow psychedelic
+  { id: 'cosmic',         label: 'Cosmic',         color: '#020010' },   // deep space nebula
+  { id: 'psychedelic',    label: 'Psychedelic',    color: '#08000f' },   // trippy pink/orange/teal
 ]
 
 type ThemeContextType = {
