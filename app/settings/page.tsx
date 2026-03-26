@@ -6,8 +6,8 @@ import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 
-const STRIPE_PRO_PRICE_ID    = 'price_1T9pay7OMwDowUuU7S3G3lNX'
-const STRIPE_AGENCY_PRICE_ID = 'price_1T9qAd7OMwDowUuUpzjxLlG2'
+const STRIPE_PRO_PRICE_ID    = 'price_1T9S2v7OMwDowUuULHznqUD5'
+const STRIPE_AGENCY_PRICE_ID = 'price_1TFMHp7OMwDowUuUgeLAeJNY'
 
 const ALL_TABS    = ['Profile', 'Plan', 'Referrals', 'Notifications', 'Security', 'White Label']
 const FREE_TABS   = ['Profile', 'Plan', 'Notifications', 'Security']
@@ -22,10 +22,10 @@ const REFERRAL_TIERS = [
 ]
 
 const CREDIT_PACKS = [
-  { label: 'Starter',  credits: 100,  price: '$1.99',  priceId: 'price_1TA0jd7OMwDowUuULUw5W7EQ', popular: false },
-  { label: 'Popular',  credits: 300,  price: '$4.99',  priceId: 'price_1TA0l37OMwDowUuUU5JpIcDK', popular: true  },
-  { label: 'Pro Pack', credits: 750,  price: '$9.99',  priceId: 'price_1TA0nA7OMwDowUuU5wHTbucn', popular: false },
-  { label: 'Max Pack', credits: 2000, price: '$19.99', priceId: 'price_1TA0nS7OMwDowUuUKURJ7ZM4', popular: false },
+  { label: 'Starter',  credits: 100,  price: '$1.99',  priceId: 'price_1TFMI47OMwDowUuUhTrbe3oq', popular: false },
+  { label: 'Popular',  credits: 300,  price: '$4.99',  priceId: 'price_1TFMI77OMwDowUuU0wDZWcCL', popular: true  },
+  { label: 'Pro Pack', credits: 750,  price: '$9.99',  priceId: 'price_1TFMIA7OMwDowUuUwI3SEGCR', popular: false },
+  { label: 'Max Pack', credits: 2000, price: '$19.99', priceId: 'price_1TFMID7OMwDowUuU2sQgbIx9', popular: false },
 ]
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
