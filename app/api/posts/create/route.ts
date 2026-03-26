@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const body = await request.json()
-    const { content, platforms, scheduledAt, destinations, draftId, workspaceId } = body
+    const { content, platforms, scheduledAt, destinations, draftId, workspaceId, selectedAccountIds } = body
 
     if (!content?.trim()) return NextResponse.json({ error: 'Content is required' }, { status: 400 })
     if (!platforms?.length) return NextResponse.json({ error: 'Select at least one platform' }, { status: 400 })
@@ -188,7 +188,7 @@ export async function POST(request: NextRequest) {
     // ── POST NOW PATH ───────────────────────────────────────────
     // Publish to platforms first, then insert with the correct final status.
     // This eliminates the "insert as draft → update to published" race condition.
-    const results    = await publishToAll(user.id, platforms, content, destinations || {}, accountWorkspaceId)
+    const results    = await publishToAll(user.id, platforms, content, destinations || {}, accountWorkspaceId, selectedAccountIds || {})
     const allFailed  = results.every(r => !r.success)
     const someFailed = results.some(r => !r.success)
     const finalStatus = allFailed ? 'failed' : someFailed ? 'partial' : 'published'

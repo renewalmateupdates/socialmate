@@ -19,11 +19,12 @@ export type PublishResult = {
 // e.g. { discord: 'uuid-of-destination', telegram: 'uuid-of-destination' }
 // workspaceId: null for personal workspace accounts, UUID for client workspace accounts
 export async function publishToAll(
-  userId:       string,
-  platforms:    string[],
-  content:      string,
-  destinations: Record<string, string> = {},
-  workspaceId:  string | null = null
+  userId:             string,
+  platforms:          string[],
+  content:            string,
+  destinations:       Record<string, string> = {},
+  workspaceId:        string | null = null,
+  selectedAccountIds: Record<string, string> = {}
 ): Promise<PublishResult[]> {
   const results: PublishResult[] = []
 
@@ -37,13 +38,13 @@ export async function publishToAll(
           postId = await publishToDiscord(userId, content, destId)
           break
         case 'bluesky':
-          postId = await publishToBluesky(userId, content, workspaceId)
+          postId = await publishToBluesky(userId, content, workspaceId, selectedAccountIds['bluesky'])
           break
         case 'telegram':
           postId = await publishToTelegram(userId, content, destId)
           break
         case 'mastodon':
-          postId = await publishToMastodon(userId, content, workspaceId)
+          postId = await publishToMastodon(userId, content, workspaceId, selectedAccountIds['mastodon'])
           break
         case 'youtube':
           postId = await publishToYouTube(userId, content)

@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
 
     // Actually publish to platforms
     const destinations = post.destinations || {}
-    const results = await publishToAll(userId, post.platforms, post.content, destinations, accountWorkspaceId)
+    const results = await publishToAll(userId, post.platforms, post.content, destinations, accountWorkspaceId, {})
     const allFailed  = results.every(r => !r.success)
     const someFailed = results.some(r => !r.success)
 
@@ -235,7 +235,7 @@ export async function POST(request: NextRequest) {
     }
 
     const destinations = post.destinations || {}
-    const results = await publishToAll(userId, post.platforms, post.content, destinations, accountWorkspaceId)
+    const results = await publishToAll(userId, post.platforms, post.content, destinations, accountWorkspaceId, {})
     const allFailed  = results.every(r => !r.success)
     const someFailed = results.some(r => !r.success)
 

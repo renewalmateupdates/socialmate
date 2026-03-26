@@ -3,15 +3,17 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 const MAX_BLUESKY_LENGTH = 300
 
-export async function publishToBluesky(userId: string, content: string, workspaceId?: string | null): Promise<string> {
-  // Build workspace-scoped query — personal accounts have workspace_id = null
+export async function publishToBluesky(userId: string, content: string, workspaceId?: string | null, accountId?: string): Promise<string> {
+  // If a specific account ID was selected, query by it directly
   let query = getSupabaseAdmin()
     .from('connected_accounts')
     .select('id, access_token, refresh_token, platform_user_id, account_name')
     .eq('user_id', userId)
     .eq('platform', 'bluesky')
 
-  if (workspaceId) {
+  if (accountId) {
+    query = query.eq('id', accountId)
+  } else if (workspaceId) {
     query = query.eq('workspace_id', workspaceId)
   } else {
     query = query.is('workspace_id', null)
