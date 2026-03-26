@@ -40,6 +40,7 @@ export async function POST(req: NextRequest) {
       type: 'credit_pack',
       price_id: priceId,
     },
+    automatic_tax: { enabled: true },
     success_url: `${appUrl}/settings?tab=Plan&credits=purchased`,
     cancel_url: `${appUrl}/settings?tab=Plan`,
   })

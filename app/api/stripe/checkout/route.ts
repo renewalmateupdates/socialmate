@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
     customer_email: user.email,
     line_items: [{ price: priceId, quantity: 1 }],
     metadata: { user_id: user.id },
+    automatic_tax: { enabled: true },
     success_url: successUrl,
     cancel_url: fromOnboarding ? `${appUrl}/onboarding?step=2` : `${appUrl}/pricing`,
   })
