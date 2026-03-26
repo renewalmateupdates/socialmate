@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { supabase } from '@/lib/supabase'
 
 export type ThemeMode    = 'light' | 'dark'
-export type ThemeAccent  = 'default' | 'midnight' | 'forest' | 'rose' | 'slate' | 'amber' | 'ocean' | 'grape' | 'charcoal' | 'coffee' | 'candy' | 'mint' | 'lavender' | 'sky' | 'peach' | 'aurora' | 'neon-green' | 'neon-pink' | 'neon-blue' | 'neon-orange' | 'neon-purple'
+export type ThemeAccent  = 'default' | 'midnight' | 'forest' | 'rose' | 'slate' | 'amber' | 'ocean' | 'grape' | 'charcoal' | 'coffee' | 'candy' | 'mint' | 'lavender' | 'sky' | 'peach' | 'rainbow' | 'neon-green' | 'neon-pink' | 'neon-blue' | 'neon-orange' | 'neon-purple'
 
 /** The swatch color is the sidebar background color for that theme */
 export const ACCENT_THEMES: { id: ThemeAccent; label: string; color: string }[] = [
@@ -23,7 +23,7 @@ export const ACCENT_THEMES: { id: ThemeAccent; label: string; color: string }[] 
   { id: 'lavender', label: 'Lavender', color: '#ede9fe' },   // soft lavender
   { id: 'sky',      label: 'Sky',      color: '#e0f2fe' },   // pastel sky blue
   { id: 'peach',    label: 'Peach',    color: '#ffedd5' },   // soft peach
-  { id: 'aurora',   label: 'Aurora',   color: '#0d1f2d' },   // dark aurora/prismatic
+  { id: 'rainbow',  label: 'Rainbow',  color: '#1a0533' },   // dark base with rainbow shimmer
   // Neons
   { id: 'neon-green',  label: 'Neon Green',  color: '#39ff14' },   // electric green on black
   { id: 'neon-pink',   label: 'Neon Pink',   color: '#ff2d78' },   // hot pink on black
