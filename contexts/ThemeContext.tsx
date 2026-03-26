@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { supabase } from '@/lib/supabase'
 
 export type ThemeMode    = 'light' | 'dark'
-export type ThemeAccent  = 'default' | 'midnight' | 'forest' | 'rose' | 'slate' | 'amber' | 'ocean' | 'grape' | 'charcoal' | 'coffee' | 'candy' | 'mint' | 'lavender' | 'sky' | 'peach' | 'aurora'
+export type ThemeAccent  = 'default' | 'midnight' | 'forest' | 'rose' | 'slate' | 'amber' | 'ocean' | 'grape' | 'charcoal' | 'coffee' | 'candy' | 'mint' | 'lavender' | 'sky' | 'peach' | 'aurora' | 'neon-green' | 'neon-pink' | 'neon-blue' | 'neon-orange' | 'neon-purple'
 
 /** The swatch color is the sidebar background color for that theme */
 export const ACCENT_THEMES: { id: ThemeAccent; label: string; color: string }[] = [
@@ -24,6 +24,12 @@ export const ACCENT_THEMES: { id: ThemeAccent; label: string; color: string }[] 
   { id: 'sky',      label: 'Sky',      color: '#e0f2fe' },   // pastel sky blue
   { id: 'peach',    label: 'Peach',    color: '#ffedd5' },   // soft peach
   { id: 'aurora',   label: 'Aurora',   color: '#0d1f2d' },   // dark aurora/prismatic
+  // Neons
+  { id: 'neon-green',  label: 'Neon Green',  color: '#39ff14' },   // electric green on black
+  { id: 'neon-pink',   label: 'Neon Pink',   color: '#ff2d78' },   // hot pink on black
+  { id: 'neon-blue',   label: 'Neon Blue',   color: '#00d4ff' },   // electric cyan on black
+  { id: 'neon-orange', label: 'Neon Orange', color: '#ff6a00' },   // neon orange on black
+  { id: 'neon-purple', label: 'Neon Purple', color: '#bf00ff' },   // electric purple on black
 ]
 
 type ThemeContextType = {
