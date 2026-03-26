@@ -304,7 +304,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'AI generation failed — credits refunded' }, { status: 500 })
     }
 
-    return NextResponse.json({ result: text, creditCost, creditsRemaining: newLegacy })
+    return NextResponse.json({ result: text, creditCost, creditsRemaining: newMonthly + newEarned + newPaid })
 
   } catch (err) {
     console.error('AI route error:', err)

@@ -98,7 +98,7 @@ function getLocalDateString() {
 function ComposeInner() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { credits, setCredits, plan, activeWorkspace } = useWorkspace()
+  const { credits, setCredits, refreshCredits, plan, activeWorkspace } = useWorkspace()
 
   const [loading, setLoading] = useState(true)
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['discord'])
@@ -361,9 +361,10 @@ function ComposeInner() {
         return
       }
       setAiResult(data.result)
-      const newCredits = typeof data.creditsRemaining === 'number' ? data.creditsRemaining : credits - tool.credits
-      setCredits(newCredits)
-      showToast(`Used ${tool.credits} credit${tool.credits > 1 ? 's' : ''} · ${newCredits} remaining`, 'info')
+      const newTotal = typeof data.creditsRemaining === 'number' ? data.creditsRemaining : credits - tool.credits
+      setCredits(newTotal)
+      await refreshCredits()
+      showToast(`Used ${tool.credits} credit${tool.credits > 1 ? 's' : ''} · ${newTotal} remaining`, 'info')
     } catch {
       setAiError('Network error. Please try again.')
     } finally {
@@ -415,6 +416,7 @@ function ComposeInner() {
       }
       const newCredits = typeof data.creditsRemaining === 'number' ? data.creditsRemaining : credits - SCORE_CREDIT_COST
       setCredits(newCredits)
+      await refreshCredits()
     } catch {
       setScoreError('Network error. Please try again.')
     }

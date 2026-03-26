@@ -110,6 +110,50 @@
   --accent:         #fbbf24;
 }
 
+[data-sidebar="ocean"] {
+  --sidebar-bg:     #0c4a6e;
+  --sidebar-fg:     #e0f2fe;
+  --sidebar-muted:  #7dd3fc;
+  --sidebar-faint:  #38bdf8;
+  --sidebar-border: #075985;
+  --sidebar-active: #075985;
+  --sidebar-accent: #7dd3fc;
+  --accent:         #38bdf8;
+}
+
+[data-sidebar="grape"] {
+  --sidebar-bg:     #4c1d95;
+  --sidebar-fg:     #ede9fe;
+  --sidebar-muted:  #c4b5fd;
+  --sidebar-faint:  #a78bfa;
+  --sidebar-border: #5b21b6;
+  --sidebar-active: #5b21b6;
+  --sidebar-accent: #c4b5fd;
+  --accent:         #a78bfa;
+}
+
+[data-sidebar="charcoal"] {
+  --sidebar-bg:     #1c1917;
+  --sidebar-fg:     #f5f5f4;
+  --sidebar-muted:  #a8a29e;
+  --sidebar-faint:  #78716c;
+  --sidebar-border: #292524;
+  --sidebar-active: #292524;
+  --sidebar-accent: #a8a29e;
+  --accent:         #d6d3d1;
+}
+
+[data-sidebar="coffee"] {
+  --sidebar-bg:     #3b1a08;
+  --sidebar-fg:     #fdf6ee;
+  --sidebar-muted:  #d4a27a;
+  --sidebar-faint:  #b07d55;
+  --sidebar-border: #4e2510;
+  --sidebar-active: #4e2510;
+  --sidebar-accent: #d4a27a;
+  --accent:         #c2854c;
+}
+
 body {
   background-color: var(--bg);
   color: var(--text);

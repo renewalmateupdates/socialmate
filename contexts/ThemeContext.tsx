@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { supabase } from '@/lib/supabase'
 
 export type ThemeMode    = 'light' | 'dark'
-export type ThemeAccent  = 'default' | 'midnight' | 'forest' | 'rose' | 'slate' | 'amber'
+export type ThemeAccent  = 'default' | 'midnight' | 'forest' | 'rose' | 'slate' | 'amber' | 'ocean' | 'grape' | 'charcoal' | 'coffee'
 
 /** The swatch color is the sidebar background color for that theme */
 export const ACCENT_THEMES: { id: ThemeAccent; label: string; color: string }[] = [
@@ -13,6 +13,10 @@ export const ACCENT_THEMES: { id: ThemeAccent; label: string; color: string }[] 
   { id: 'rose',     label: 'Rose',     color: '#881337' },   // deep crimson
   { id: 'slate',    label: 'Slate',    color: '#0f172a' },   // dark blue-slate
   { id: 'amber',    label: 'Amber',    color: '#78350f' },   // warm amber
+  { id: 'ocean',    label: 'Ocean',    color: '#0c4a6e' },   // deep ocean blue
+  { id: 'grape',    label: 'Grape',    color: '#4c1d95' },   // deep violet/grape
+  { id: 'charcoal', label: 'Charcoal', color: '#1c1917' },   // near-black charcoal
+  { id: 'coffee',   label: 'Coffee',   color: '#3b1a08' },   // warm espresso brown
 ]
 
 type ThemeContextType = {
