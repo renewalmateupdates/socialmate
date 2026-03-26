@@ -12,7 +12,7 @@ const FEATURE_CATEGORIES = [
       {
         name: 'Caption Generator',
         emoji: '✍️',
-        credits: '3 credits',
+        credits: '5 credits',
         proOnly: false,
         what: 'Generates platform-optimized captions based on your topic and tone.',
         how: 'Powered by Google Gemini. Analyzes your topic and platform to generate captions that match character limits, tone, and engagement patterns.',
@@ -20,7 +20,7 @@ const FEATURE_CATEGORIES = [
       {
         name: 'Hashtag Generator',
         emoji: '#️⃣',
-        credits: '2 credits',
+        credits: '5 credits',
         proOnly: false,
         what: 'Generates a set of relevant, high-performing hashtags for your post.',
         how: 'AI analyzes your caption content and niche to suggest hashtags that balance reach and relevance.',
@@ -28,7 +28,7 @@ const FEATURE_CATEGORIES = [
       {
         name: 'Post Rewrite / Improver',
         emoji: '🔁',
-        credits: '3 credits',
+        credits: '5 credits',
         proOnly: false,
         what: 'Takes your existing caption and makes it sharper, more engaging, and better structured.',
         how: 'AI rewrites for stronger hooks, better readability, and platform-appropriate tone.',
@@ -36,7 +36,7 @@ const FEATURE_CATEGORIES = [
       {
         name: 'Viral Hook Generator',
         emoji: '🎣',
-        credits: '4 credits',
+        credits: '5 credits',
         proOnly: false,
         what: 'Generates 3 scroll-stopping opening lines designed to drive clicks and engagement.',
         how: 'Trained on viral content patterns across TikTok, YouTube, LinkedIn and Reddit.',
@@ -44,7 +44,7 @@ const FEATURE_CATEGORIES = [
       {
         name: 'Thread Generator',
         emoji: '🧵',
-        credits: '8 credits',
+        credits: '10 credits',
         proOnly: false,
         what: 'Turns a single topic or idea into a structured multi-part thread with a hook, supporting points, and a CTA.',
         how: 'AI structures your idea into a full narrative arc — ready to copy and post.',
@@ -52,7 +52,7 @@ const FEATURE_CATEGORIES = [
       {
         name: 'Content Repurposer',
         emoji: '♻️',
-        credits: '8 credits',
+        credits: '10 credits',
         proOnly: false,
         what: 'Paste a blog post, transcript, or long caption and get platform-ready short-form content out the other side.',
         how: 'AI extracts key ideas from long-form content and reshapes them into posts optimized for each platform.',
@@ -60,7 +60,7 @@ const FEATURE_CATEGORIES = [
       {
         name: 'Post Score',
         emoji: '⚡',
-        credits: '2 credits',
+        credits: '5 credits',
         proOnly: false,
         what: 'AI predicts how your post will perform before you publish — with a score out of 100, strengths, and improvements.',
         how: 'Scores your post against engagement patterns on the selected platform. Shows what to fix before it goes live.',
@@ -68,7 +68,7 @@ const FEATURE_CATEGORIES = [
       {
         name: 'AI Content Calendar',
         emoji: '📅',
-        credits: '20 credits',
+        credits: '25 credits',
         proOnly: true,
         what: 'Generate a full 30-day content calendar based on your niche, platforms, and posting goals.',
         how: 'AI plans a content strategy around your niche, then generates individual posts for each day. Fully editable before publishing.',
