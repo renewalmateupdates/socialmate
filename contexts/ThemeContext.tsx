@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { supabase } from '@/lib/supabase'
 
 export type ThemeMode    = 'light' | 'dark'
-export type ThemeAccent  = 'default' | 'midnight' | 'forest' | 'rose' | 'slate' | 'amber' | 'ocean' | 'grape' | 'charcoal' | 'coffee'
+export type ThemeAccent  = 'default' | 'midnight' | 'forest' | 'rose' | 'slate' | 'amber' | 'ocean' | 'grape' | 'charcoal' | 'coffee' | 'candy' | 'mint' | 'lavender' | 'sky' | 'peach' | 'aurora'
 
 /** The swatch color is the sidebar background color for that theme */
 export const ACCENT_THEMES: { id: ThemeAccent; label: string; color: string }[] = [
@@ -17,6 +17,13 @@ export const ACCENT_THEMES: { id: ThemeAccent; label: string; color: string }[] 
   { id: 'grape',    label: 'Grape',    color: '#4c1d95' },   // deep violet/grape
   { id: 'charcoal', label: 'Charcoal', color: '#1c1917' },   // near-black charcoal
   { id: 'coffee',   label: 'Coffee',   color: '#3b1a08' },   // warm espresso brown
+  // Pastels & prismatic
+  { id: 'candy',    label: 'Candy',    color: '#fce7f3' },   // cotton candy pink
+  { id: 'mint',     label: 'Mint',     color: '#d1fae5' },   // pastel mint green
+  { id: 'lavender', label: 'Lavender', color: '#ede9fe' },   // soft lavender
+  { id: 'sky',      label: 'Sky',      color: '#e0f2fe' },   // pastel sky blue
+  { id: 'peach',    label: 'Peach',    color: '#ffedd5' },   // soft peach
+  { id: 'aurora',   label: 'Aurora',   color: '#0d1f2d' },   // dark aurora/prismatic
 ]
 
 type ThemeContextType = {
