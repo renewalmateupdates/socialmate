@@ -211,15 +211,29 @@
   --accent:         #f97316;
 }
 
-[data-sidebar="aurora"] {
-  --sidebar-bg:     #0d1f2d;
-  --sidebar-fg:     #5eead4;
-  --sidebar-muted:  #2dd4bf;
-  --sidebar-faint:  #0d9488;
-  --sidebar-border: #0f2d3d;
-  --sidebar-active: #0a1f2e;
-  --sidebar-accent: #5eead4;
-  --accent:         #34d399;
+[data-sidebar="rainbow"] {
+  --sidebar-bg:     #1a0533;
+  --sidebar-fg:     #ffffff;
+  --sidebar-muted:  #e8d5ff;
+  --sidebar-faint:  #a78bcc;
+  --sidebar-border: #2d0a55;
+  --sidebar-active: #240845;
+  --sidebar-accent: #ff79c6;
+  --accent:         #ff79c6;
+}
+
+/* Rainbow gradient shimmer layered over the solid background-color */
+[data-sidebar="rainbow"] .w-56 {
+  background-image: linear-gradient(
+    175deg,
+    rgba(255, 50,  130, 0.18) 0%,
+    rgba(200, 50,  255, 0.14) 18%,
+    rgba(80,  80,  255, 0.12) 34%,
+    rgba(50,  200, 230, 0.12) 50%,
+    rgba(50,  220, 120, 0.12) 66%,
+    rgba(220, 210, 50,  0.14) 82%,
+    rgba(255, 100, 50,  0.18) 100%
+  );
 }
 
 /* ── NEON THEMES ───────────────────────────────────────────── */
