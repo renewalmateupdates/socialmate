@@ -151,40 +151,33 @@ export async function POST(request: NextRequest) {
 
     const isScheduled = !!scheduledAt
 
-    const { data: post, error: dbError } = await supabase
-      .from('posts')
-      .insert({
-        user_id:      user.id,
-        workspace_id: resolvedWorkspaceId,
-        content,
-        platforms,
-        status:       isScheduled ? 'scheduled' : 'draft',
-        scheduled_at: scheduledAt || null,
-        destinations: destinations || {},
-      })
-      .select()
-      .single()
-
-    if (dbError || !post) {
-      console.error('Post insert error:', {
-        message: dbError?.message,
-        code: dbError?.code,
-        details: dbError?.details,
-        hint: dbError?.hint,
-      })
-      return NextResponse.json({ error: 'Failed to save post', detail: dbError?.message }, { status: 500 })
-    }
-
+    // ── SCHEDULED PATH ─────────────────────────────────────────
     if (isScheduled) {
+      const { data: post, error: dbError } = await supabase
+        .from('posts')
+        .insert({
+          user_id:      user.id,
+          workspace_id: resolvedWorkspaceId,
+          content,
+          platforms,
+          status:       'scheduled',
+          scheduled_at: scheduledAt,
+          destinations: destinations || {},
+        })
+        .select()
+        .single()
+
+      if (dbError || !post) {
+        console.error('Scheduled post insert error:', { message: dbError?.message, code: dbError?.code })
+        return NextResponse.json({ error: 'Failed to save post', detail: dbError?.message }, { status: 500 })
+      }
+
       if (draftId) {
         await supabase.from('posts').delete().eq('id', draftId).eq('user_id', user.id)
       }
 
       try {
-        await inngest.send({
-          name: 'post/scheduled',
-          data: { postId: post.id, scheduledAt },
-        })
+        await inngest.send({ name: 'post/scheduled', data: { postId: post.id, scheduledAt } })
       } catch (inngestErr) {
         console.error('Inngest send error (non-fatal):', inngestErr)
       }
@@ -192,60 +185,48 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: true, postId: post.id, status: 'scheduled' })
     }
 
-    // Post Now — publish immediately
+    // ── POST NOW PATH ───────────────────────────────────────────
+    // Publish to platforms first, then insert with the correct final status.
+    // This eliminates the "insert as draft → update to published" race condition.
     const results    = await publishToAll(user.id, platforms, content, destinations || {}, accountWorkspaceId)
     const allFailed  = results.every(r => !r.success)
     const someFailed = results.some(r => !r.success)
+    const finalStatus = allFailed ? 'failed' : someFailed ? 'partial' : 'published'
 
     const platformPostIds: Record<string, string> = {}
     results.forEach(r => { if (r.success && r.postId) platformPostIds[r.platform] = r.postId })
 
-    const finalStatus = allFailed ? 'failed' : someFailed ? 'partial' : 'published'
-
-    // Step 1: Update status + published_at — use session client first (owns the post),
-    // fall back to admin if needed
-    const { error: sessionUpdateError } = await supabase
+    // Insert once with the correct status — no update step needed
+    const { data: post, error: dbError } = await supabase
       .from('posts')
-      .update({
+      .insert({
+        user_id:      user.id,
+        workspace_id: resolvedWorkspaceId,
+        content,
+        platforms,
         status:       finalStatus,
         published_at: allFailed ? null : new Date().toISOString(),
+        destinations: destinations || {},
       })
-      .eq('id', post.id)
+      .select('id')
+      .single()
 
-    if (sessionUpdateError) {
-      console.warn('[publish] Session update failed, trying admin:', sessionUpdateError.message)
-      const { error: adminUpdateError } = await getSupabaseAdmin()
-        .from('posts')
-        .update({
-          status:       finalStatus,
-          published_at: allFailed ? null : new Date().toISOString(),
-        })
-        .eq('id', post.id)
-      if (adminUpdateError) {
-        console.error('[publish] CRITICAL: both update paths failed. Session:', sessionUpdateError.message, 'Admin:', adminUpdateError.message)
-      } else {
-        console.log('[publish] Admin update succeeded →', finalStatus, 'for post:', post.id)
-      }
-    } else {
-      console.log('[publish] Session update succeeded →', finalStatus, 'for post:', post.id)
+    if (dbError || !post) {
+      console.error('Post Now insert error:', { message: dbError?.message, code: dbError?.code })
+      // Post was published on platforms but couldn't be tracked — still return success
+      return NextResponse.json({ success: !allFailed, results, status: finalStatus })
     }
 
-    // Verify the update took effect
-    const { data: verified } = await getSupabaseAdmin()
-      .from('posts')
-      .select('status')
-      .eq('id', post.id)
-      .single()
-    console.log('[publish] Verified post status in DB:', verified?.status, '(expected:', finalStatus, ')')
+    console.log('[publish] Inserted post', post.id, '→', finalStatus)
 
-    // Step 2: Update platform_post_ids (non-critical — column may not exist yet)
+    // Non-critical: save platform post IDs (column may not exist)
     if (Object.keys(platformPostIds).length > 0) {
       getSupabaseAdmin()
         .from('posts')
         .update({ platform_post_ids: platformPostIds })
         .eq('id', post.id)
         .then(({ error }) => {
-          if (error) console.warn('[publish] platform_post_ids update skipped (non-fatal):', error.message)
+          if (error) console.warn('[publish] platform_post_ids skipped (non-fatal):', error.message)
         })
     }
 

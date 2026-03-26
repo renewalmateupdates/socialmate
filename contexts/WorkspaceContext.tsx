@@ -73,6 +73,7 @@ type WorkspaceContextType = {
   activeWorkspaceId: string | null
   setActiveWorkspace: (ws: Workspace) => void
   refreshWorkspaces: () => Promise<void>
+  refreshCredits: () => Promise<void>
   seatsUsed: number
   seatsTotal: number
   platformsConnected: number
@@ -96,6 +97,7 @@ const WorkspaceContext = createContext<WorkspaceContextType>({
   activeWorkspaceId: null,
   setActiveWorkspace: () => {},
   refreshWorkspaces: async () => {},
+  refreshCredits: async () => {},
   seatsUsed: 1,
   seatsTotal: 2,
   platformsConnected: 0,
@@ -210,14 +212,9 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const setCredits = useCallback(async (newCredits: number) => {
+  const setCredits = useCallback((newCredits: number) => {
     setCreditsState(newCredits)
-    if (!userId) return
-    await supabase
-      .from('user_settings')
-      .update({ ai_credits_remaining: newCredits })
-      .eq('user_id', userId)
-  }, [userId])
+  }, [])
 
   const refreshWorkspaces = useCallback(async () => {
     if (!userId) return
@@ -233,6 +230,26 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         const updated = ws.find((w: Workspace) => w.id === prev.id)
         return updated || prev
       })
+    }
+  }, [userId])
+
+  const refreshCredits = useCallback(async () => {
+    if (!userId) return
+    const { data: settings } = await supabase
+      .from('user_settings')
+      .select('plan, ai_credits_remaining, monthly_credits_remaining, earned_credits, paid_credits')
+      .eq('user_id', userId)
+      .single()
+    if (settings) {
+      const p = (settings.plan as Plan) || 'free'
+      setPlan(p)
+      const monthly = settings.monthly_credits_remaining ?? settings.ai_credits_remaining ?? PLAN_CONFIG[p].credits
+      const earned  = settings.earned_credits ?? 0
+      const paid    = settings.paid_credits ?? 0
+      setMonthlyCredits(monthly)
+      setEarnedCredits(earned)
+      setPaidCredits(paid)
+      setCreditsState(monthly + earned + paid)
     }
   }, [userId])
 
@@ -253,6 +270,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       activeWorkspaceId: activeWorkspace?.id ?? null,
       setActiveWorkspace,
       refreshWorkspaces,
+      refreshCredits,
       seatsUsed,
       seatsTotal: planConfig.seats,
       platformsConnected,
