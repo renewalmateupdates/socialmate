@@ -4,12 +4,12 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import PublicLayout from '@/components/PublicLayout'
 
-const STRIPE_PRO_PRICE_ID               = 'price_1T9pay7OMwDowUuU7S3G3lNX'
-const STRIPE_AGENCY_PRICE_ID            = 'price_1T9qAd7OMwDowUuUpzjxLlG2'
-const STRIPE_PRO_ANNUAL_PRICE_ID        = 'price_1TA0Iv7OMwDowUuUaAA77Ye1'
-const STRIPE_AGENCY_ANNUAL_PRICE_ID     = 'price_1TA0JQ7OMwDowUuUp4NnHEfO'
-const STRIPE_WHITE_LABEL_BASIC_PRICE_ID = 'price_1T9qAu7OMwDowUuUsqM2jwoC'
-const STRIPE_WHITE_LABEL_PRO_PRICE_ID   = 'price_1TBnnS7OMwDowUuUsr09eHVg'
+const STRIPE_PRO_PRICE_ID               = 'price_1T9S2v7OMwDowUuULHznqUD5'
+const STRIPE_AGENCY_PRICE_ID            = 'price_1TFMHp7OMwDowUuUgeLAeJNY'
+const STRIPE_PRO_ANNUAL_PRICE_ID        = 'price_1TFMHx7OMwDowUuUl9PqWxMs'
+const STRIPE_AGENCY_ANNUAL_PRICE_ID     = 'price_1TFMI07OMwDowUuUoHfKJEpo'
+const STRIPE_WHITE_LABEL_BASIC_PRICE_ID = 'price_1TFMHt7OMwDowUuU56Fzw4fE'
+const STRIPE_WHITE_LABEL_PRO_PRICE_ID   = 'price_1TFMIG7OMwDowUuUcjNNGB0Q'
 
 type Interval = 'monthly' | 'annual'
 

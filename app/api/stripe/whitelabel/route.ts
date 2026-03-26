@@ -5,8 +5,8 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
 const WHITE_LABEL_PRICES: Record<string, string> = {
-  basic: 'price_1T9qAu7OMwDowUuUsqM2jwoC',
-  pro:   'price_1TBnnS7OMwDowUuUsr09eHVg',
+  basic: 'price_1TFMHt7OMwDowUuU56Fzw4fE',
+  pro:   'price_1TFMIG7OMwDowUuUcjNNGB0Q',
 }
 
 export async function POST(req: NextRequest) {

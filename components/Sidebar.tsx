@@ -7,8 +7,8 @@ import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 import ThemeToggle from '@/components/ThemeToggle'
 import ComposeShortcut from '@/components/ComposeShortcut'
 
-const STRIPE_PRO_PRICE_ID    = 'price_1T9pay7OMwDowUuU7S3G3lNX'
-const STRIPE_AGENCY_PRICE_ID = 'price_1T9qAd7OMwDowUuUpzjxLlG2'
+const STRIPE_PRO_PRICE_ID    = 'price_1T9S2v7OMwDowUuULHznqUD5'
+const STRIPE_AGENCY_PRICE_ID = 'price_1TFMHp7OMwDowUuUgeLAeJNY'
 
 const NAV_BASE = [
   {

@@ -28,8 +28,8 @@ const USE_CASES = [
   { id: 'other',     label: 'Just Exploring',      icon: '🔍', desc: 'Checking it out'              },
 ]
 
-const STRIPE_PRO_PRICE_ID    = 'price_1T9pay7OMwDowUuU7S3G3lNX'
-const STRIPE_AGENCY_PRICE_ID = 'price_1T9qAd7OMwDowUuUpzjxLlG2'
+const STRIPE_PRO_PRICE_ID    = 'price_1T9S2v7OMwDowUuULHznqUD5'
+const STRIPE_AGENCY_PRICE_ID = 'price_1TFMHp7OMwDowUuUgeLAeJNY'
 
 const PLAN_DETAILS = {
   free: {

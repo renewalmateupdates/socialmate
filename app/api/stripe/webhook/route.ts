@@ -4,18 +4,18 @@ import { stripe } from '@/lib/stripe'
 import { createClient } from '@supabase/supabase-js'
 import Stripe from 'stripe'
 
-const STRIPE_PRO_PRICE_ID               = 'price_1T9pay7OMwDowUuU7S3G3lNX'
-const STRIPE_AGENCY_PRICE_ID            = 'price_1T9qAd7OMwDowUuUpzjxLlG2'
-const STRIPE_PRO_ANNUAL_PRICE_ID        = 'price_1TA0Iv7OMwDowUuUaAA77Ye1'
-const STRIPE_AGENCY_ANNUAL_PRICE_ID     = 'price_1TA0JQ7OMwDowUuUp4NnHEfO'
-const STRIPE_WHITE_LABEL_BASIC_PRICE_ID = 'price_1T9qAu7OMwDowUuUsqM2jwoC'
-const STRIPE_WHITE_LABEL_PRO_PRICE_ID   = 'price_1TBnnS7OMwDowUuUsr09eHVg'
+const STRIPE_PRO_PRICE_ID               = 'price_1T9S2v7OMwDowUuULHznqUD5'
+const STRIPE_AGENCY_PRICE_ID            = 'price_1TFMHp7OMwDowUuUgeLAeJNY'
+const STRIPE_PRO_ANNUAL_PRICE_ID        = 'price_1TFMHx7OMwDowUuUl9PqWxMs'
+const STRIPE_AGENCY_ANNUAL_PRICE_ID     = 'price_1TFMI07OMwDowUuUoHfKJEpo'
+const STRIPE_WHITE_LABEL_BASIC_PRICE_ID = 'price_1TFMHt7OMwDowUuU56Fzw4fE'
+const STRIPE_WHITE_LABEL_PRO_PRICE_ID   = 'price_1TFMIG7OMwDowUuUcjNNGB0Q'
 
 const CREDIT_PACK_PRICES: Record<string, number> = {
-  'price_1TA0jd7OMwDowUuULUw5W7EQ': 100,
-  'price_1TA0l37OMwDowUuUU5JpIcDK': 300,
-  'price_1TA0nA7OMwDowUuU5wHTbucn': 750,
-  'price_1TA0nS7OMwDowUuUKURJ7ZM4': 2000,
+  'price_1TFMI47OMwDowUuUhTrbe3oq': 100,
+  'price_1TFMI77OMwDowUuU0wDZWcCL': 300,
+  'price_1TFMIA7OMwDowUuUwI3SEGCR': 750,
+  'price_1TFMID7OMwDowUuU2sQgbIx9': 2000,
 }
 
 const PLAN_PRICES = new Set([

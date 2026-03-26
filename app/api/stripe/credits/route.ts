@@ -5,10 +5,10 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
 const VALID_CREDIT_PRICE_IDS = new Set([
-  'price_1TA0jd7OMwDowUuULUw5W7EQ', // Starter  100cr
-  'price_1TA0l37OMwDowUuUU5JpIcDK', // Popular  300cr
-  'price_1TA0nA7OMwDowUuU5wHTbucn', // Pro Pack 750cr
-  'price_1TA0nS7OMwDowUuUKURJ7ZM4', // Max Pack 2000cr
+  'price_1TFMI47OMwDowUuUhTrbe3oq', // Starter  100cr
+  'price_1TFMI77OMwDowUuU0wDZWcCL', // Popular  300cr
+  'price_1TFMIA7OMwDowUuUwI3SEGCR', // Pro Pack 750cr
+  'price_1TFMID7OMwDowUuU2sQgbIx9', // Max Pack 2000cr
 ])
 
 export async function POST(req: NextRequest) {
