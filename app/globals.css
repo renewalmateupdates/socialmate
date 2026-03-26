@@ -222,6 +222,64 @@
   --accent:         #34d399;
 }
 
+/* ── NEON THEMES ───────────────────────────────────────────── */
+/* All neons: near-black bg, electric color for text & accents  */
+
+[data-sidebar="neon-green"] {
+  --sidebar-bg:     #050a00;
+  --sidebar-fg:     #39ff14;
+  --sidebar-muted:  #22d600;
+  --sidebar-faint:  #15a300;
+  --sidebar-border: #0d1f05;
+  --sidebar-active: #0a1700;
+  --sidebar-accent: #39ff14;
+  --accent:         #39ff14;
+}
+
+[data-sidebar="neon-pink"] {
+  --sidebar-bg:     #0d0008;
+  --sidebar-fg:     #ff2d78;
+  --sidebar-muted:  #e0005f;
+  --sidebar-faint:  #a8004a;
+  --sidebar-border: #200015;
+  --sidebar-active: #16000e;
+  --sidebar-accent: #ff2d78;
+  --accent:         #ff2d78;
+}
+
+[data-sidebar="neon-blue"] {
+  --sidebar-bg:     #00060d;
+  --sidebar-fg:     #00d4ff;
+  --sidebar-muted:  #00aacf;
+  --sidebar-faint:  #007a99;
+  --sidebar-border: #001a22;
+  --sidebar-active: #001219;
+  --sidebar-accent: #00d4ff;
+  --accent:         #00d4ff;
+}
+
+[data-sidebar="neon-orange"] {
+  --sidebar-bg:     #0d0500;
+  --sidebar-fg:     #ff6a00;
+  --sidebar-muted:  #d45700;
+  --sidebar-faint:  #a34200;
+  --sidebar-border: #1f0d00;
+  --sidebar-active: #160900;
+  --sidebar-accent: #ff6a00;
+  --accent:         #ff6a00;
+}
+
+[data-sidebar="neon-purple"] {
+  --sidebar-bg:     #08000d;
+  --sidebar-fg:     #bf00ff;
+  --sidebar-muted:  #9900cc;
+  --sidebar-faint:  #6d0099;
+  --sidebar-border: #160022;
+  --sidebar-active: #0f0019;
+  --sidebar-accent: #bf00ff;
+  --accent:         #bf00ff;
+}
+
 body {
   background-color: var(--bg);
   color: var(--text);
