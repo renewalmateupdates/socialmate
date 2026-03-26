@@ -194,19 +194,41 @@ export async function POST(request: NextRequest) {
 
     const finalStatus = allFailed ? 'failed' : someFailed ? 'partial' : 'published'
 
-    // Step 1: Update status + published_at (CRITICAL — must succeed)
-    const { error: statusError } = await getSupabaseAdmin()
+    // Step 1: Update status + published_at — use session client first (owns the post),
+    // fall back to admin if needed
+    const { error: sessionUpdateError } = await supabase
       .from('posts')
       .update({
         status:       finalStatus,
         published_at: allFailed ? null : new Date().toISOString(),
       })
       .eq('id', post.id)
-    if (statusError) {
-      console.error('[publish] CRITICAL: status update failed:', statusError)
+
+    if (sessionUpdateError) {
+      console.warn('[publish] Session update failed, trying admin:', sessionUpdateError.message)
+      const { error: adminUpdateError } = await getSupabaseAdmin()
+        .from('posts')
+        .update({
+          status:       finalStatus,
+          published_at: allFailed ? null : new Date().toISOString(),
+        })
+        .eq('id', post.id)
+      if (adminUpdateError) {
+        console.error('[publish] CRITICAL: both update paths failed. Session:', sessionUpdateError.message, 'Admin:', adminUpdateError.message)
+      } else {
+        console.log('[publish] Admin update succeeded →', finalStatus, 'for post:', post.id)
+      }
     } else {
-      console.log('[publish] Status updated →', finalStatus, 'for post:', post.id)
+      console.log('[publish] Session update succeeded →', finalStatus, 'for post:', post.id)
     }
+
+    // Verify the update took effect
+    const { data: verified } = await getSupabaseAdmin()
+      .from('posts')
+      .select('status')
+      .eq('id', post.id)
+      .single()
+    console.log('[publish] Verified post status in DB:', verified?.status, '(expected:', finalStatus, ')')
 
     // Step 2: Update platform_post_ids (non-critical — column may not exist yet)
     if (Object.keys(platformPostIds).length > 0) {
@@ -228,6 +250,36 @@ export async function POST(request: NextRequest) {
         name: 'post/published',
         data: { postId: post.id, userId: user.id, platformPostIds },
       }).catch(err => console.error('Failed to send post/published event:', err))
+    }
+
+    // Send success email for Post Now (non-fatal)
+    if (!allFailed) {
+      try {
+        const { data: notifSettings } = await getSupabaseAdmin()
+          .from('user_settings')
+          .select('notification_prefs')
+          .eq('user_id', user.id)
+          .single()
+        const prefs = (notifSettings?.notification_prefs ?? {}) as Record<string, boolean>
+        if (prefs.post_published !== false) {
+          const { data: authUser } = await getSupabaseAdmin().auth.admin.getUserById(user.id)
+          if (authUser?.user?.email) {
+            const Resend = (await import('resend')).Resend
+            const resend = new Resend(process.env.RESEND_API_KEY!)
+            const successfulPlatforms = (results as any[])
+              .filter((r: any) => r.success)
+              .map((r: any) => r.platform)
+              .join(', ')
+            const postPreview = (content || '').substring(0, 100) + ((content || '').length > 100 ? '...' : '')
+            await resend.emails.send({
+              from: 'SocialMate <notifications@socialmate.studio>',
+              to: authUser.user.email,
+              subject: `Your post is live ✓`,
+              html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;"><div style="background:#f0fdf4;border-left:4px solid #22c55e;padding:16px;border-radius:8px;margin-bottom:20px;"><h2 style="margin:0 0 8px;color:#15803d;font-size:18px;">Your post is live ✓</h2><p style="margin:0;color:#166534;font-size:14px;">Published to: <strong>${successfulPlatforms}</strong></p></div>${postPreview ? `<p style="color:#374151;font-size:14px;background:#f9fafb;padding:12px;border-radius:6px;border:1px solid #e5e7eb;">"${postPreview}"</p>` : ''}<p style="color:#6b7280;font-size:13px;">💡 Tip: Engage with replies in the first 30 minutes — the algorithm rewards early engagement.</p><a href="https://socialmate.studio/drafts" style="display:inline-block;background:#000;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;font-size:14px;margin-top:8px;">View in Drafts →</a><p style="color:#9ca3af;font-size:11px;margin-top:20px;">To disable these emails, go to Settings → Notifications.</p></div>`,
+            }).catch(() => {})
+          }
+        }
+      } catch { /* non-fatal */ }
     }
 
     return NextResponse.json({
