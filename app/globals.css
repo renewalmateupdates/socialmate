@@ -260,10 +260,10 @@
   );
 }
 
-/* ── LISA FRANK THEMES ──────────────────────────────────────── */
-/* Super bright 90s neon-pastel on deep dark bases              */
+/* ── ACTIVITY BOOK SERIES ────────────────────────────────────── */
+/* Renamed from Lisa Frank — same vibrant 90s neon energy       */
 
-[data-sidebar="lf-unicorn"] {
+[data-sidebar="glitter-dream"] {
   --sidebar-bg:     #1a0028;
   --sidebar-fg:     #ff99ee;
   --sidebar-muted:  #dd66cc;
@@ -273,7 +273,7 @@
   --sidebar-accent: #ff66cc;
   --accent:         #ff66cc;
 }
-[data-sidebar="lf-unicorn"] .w-56 {
+[data-sidebar="glitter-dream"] .w-56 {
   background-image: linear-gradient(
     165deg,
     rgba(255, 50,  180, 0.30) 0%,
@@ -286,7 +286,7 @@
   );
 }
 
-[data-sidebar="lf-dolphin"] {
+[data-sidebar="mermaid"] {
   --sidebar-bg:     #00101e;
   --sidebar-fg:     #00ffee;
   --sidebar-muted:  #00ccdd;
@@ -296,7 +296,7 @@
   --sidebar-accent: #00ffee;
   --accent:         #ff44cc;
 }
-[data-sidebar="lf-dolphin"] .w-56 {
+[data-sidebar="mermaid"] .w-56 {
   background-image: linear-gradient(
     170deg,
     rgba(0,   255, 220, 0.28) 0%,
@@ -309,7 +309,7 @@
   );
 }
 
-[data-sidebar="lf-leopard"] {
+[data-sidebar="wild-safari"] {
   --sidebar-bg:     #0d0800;
   --sidebar-fg:     #ffee00;
   --sidebar-muted:  #ddaa00;
@@ -319,7 +319,7 @@
   --sidebar-accent: #ffee00;
   --accent:         #ff6600;
 }
-[data-sidebar="lf-leopard"] .w-56 {
+[data-sidebar="wild-safari"] .w-56 {
   background-image: linear-gradient(
     160deg,
     rgba(255, 220, 0,   0.28) 0%,
@@ -334,7 +334,7 @@
   );
 }
 
-[data-sidebar="lf-pony"] {
+[data-sidebar="rainbow-ranch"] {
   --sidebar-bg:     #1a0015;
   --sidebar-fg:     #ff88ff;
   --sidebar-muted:  #dd55dd;
@@ -344,7 +344,7 @@
   --sidebar-accent: #ff55ff;
   --accent:         #ff55ff;
 }
-[data-sidebar="lf-pony"] .w-56 {
+[data-sidebar="rainbow-ranch"] .w-56 {
   background-image: linear-gradient(
     165deg,
     rgba(255, 50,  200, 0.28) 0%,
@@ -356,6 +356,212 @@
     rgba(255, 50,  200, 0.28) 72%,
     rgba(255, 120, 100, 0.24) 84%,
     rgba(255, 50,  200, 0.26) 100%
+  );
+}
+
+/* ── FEMININE ───────────────────────────────────────────────── */
+
+[data-sidebar="rose-gold"] {
+  --sidebar-bg:     #2a1520;
+  --sidebar-fg:     #ffd4e0;
+  --sidebar-muted:  #e8a0b4;
+  --sidebar-faint:  #c47090;
+  --sidebar-border: #3d2030;
+  --sidebar-active: #1f1018;
+  --sidebar-accent: #ffb3cc;
+  --accent:         #e8899a;
+}
+[data-sidebar="rose-gold"] .w-56 {
+  background-image: linear-gradient(
+    155deg,
+    rgba(255, 185, 150, 0.38) 0%,
+    rgba(212, 140, 110, 0.32) 14%,
+    rgba(255, 210, 160, 0.35) 28%,
+    rgba(200, 110, 140, 0.32) 42%,
+    rgba(255, 175, 130, 0.30) 56%,
+    rgba(220, 130, 160, 0.34) 70%,
+    rgba(255, 215, 155, 0.35) 84%,
+    rgba(210, 145, 165, 0.36) 100%
+  );
+}
+
+[data-sidebar="bubblegum"] {
+  --sidebar-bg:     #4a0035;
+  --sidebar-fg:     #ffd6f0;
+  --sidebar-muted:  #ff80cc;
+  --sidebar-faint:  #e040a0;
+  --sidebar-border: #660048;
+  --sidebar-active: #3a0028;
+  --sidebar-accent: #ff40bb;
+  --accent:         #ff40bb;
+}
+[data-sidebar="bubblegum"] .w-56 {
+  background-image: linear-gradient(
+    165deg,
+    rgba(255,  50, 180, 0.42) 0%,
+    rgba(255, 120, 210, 0.36) 18%,
+    rgba(240,  40, 160, 0.40) 36%,
+    rgba(255, 160, 230, 0.32) 52%,
+    rgba(220,  20, 150, 0.42) 68%,
+    rgba(255,  90, 195, 0.38) 84%,
+    rgba(255,  50, 180, 0.42) 100%
+  );
+}
+
+/* ── FLOWERS ────────────────────────────────────────────────── */
+
+[data-sidebar="cherry-blossom"] {
+  --sidebar-bg:     #fef0f4;
+  --sidebar-fg:     #6b1a3a;
+  --sidebar-muted:  #c06080;
+  --sidebar-faint:  #d88090;
+  --sidebar-border: #f9d4e0;
+  --sidebar-active: #fff5f8;
+  --sidebar-accent: #c06080;
+  --accent:         #e8607a;
+}
+[data-sidebar="cherry-blossom"] .w-56 {
+  background-image:
+    radial-gradient(ellipse 35% 28% at 20% 18%, rgba(255, 160, 185, 0.50) 0%, transparent 65%),
+    radial-gradient(ellipse 28% 22% at 78% 28%, rgba(255, 185, 205, 0.44) 0%, transparent 65%),
+    radial-gradient(ellipse 40% 28% at 50% 62%, rgba(255, 140, 168, 0.42) 0%, transparent 65%),
+    radial-gradient(ellipse 25% 32% at 88% 80%, rgba(255, 168, 192, 0.46) 0%, transparent 65%),
+    radial-gradient(ellipse 30% 25% at 12% 84%, rgba(255, 152, 178, 0.42) 0%, transparent 65%);
+}
+
+[data-sidebar="sunflower"] {
+  --sidebar-bg:     #1c1400;
+  --sidebar-fg:     #fef08a;
+  --sidebar-muted:  #fbbf24;
+  --sidebar-faint:  #d97706;
+  --sidebar-border: #2e2200;
+  --sidebar-active: #140f00;
+  --sidebar-accent: #fde047;
+  --accent:         #f59e0b;
+}
+[data-sidebar="sunflower"] .w-56 {
+  background-image: linear-gradient(
+    150deg,
+    rgba(255, 220,  30, 0.44) 0%,
+    rgba(255, 180,  20, 0.38) 15%,
+    rgba(255, 140,  10, 0.34) 30%,
+    rgba(240, 200,  40, 0.40) 45%,
+    rgba(255, 160,  15, 0.36) 60%,
+    rgba(220, 190,  10, 0.42) 75%,
+    rgba(255, 215,  30, 0.40) 88%,
+    rgba(255, 220,  30, 0.44) 100%
+  );
+}
+
+[data-sidebar="wildflower"] {
+  --sidebar-bg:     #0d1a06;
+  --sidebar-fg:     #e8fcd4;
+  --sidebar-muted:  #86efac;
+  --sidebar-faint:  #4ade80;
+  --sidebar-border: #1a2e0a;
+  --sidebar-active: #091202;
+  --sidebar-accent: #a8e890;
+  --accent:         #f472b6;
+}
+[data-sidebar="wildflower"] .w-56 {
+  background-image: linear-gradient(
+    165deg,
+    rgba(244, 114, 182, 0.40) 0%,
+    rgba(168,  85, 247, 0.34) 14%,
+    rgba(251, 191,  36, 0.36) 28%,
+    rgba(59,  130, 246, 0.32) 42%,
+    rgba(239,  68,  68, 0.34) 56%,
+    rgba(52,  211, 153, 0.36) 70%,
+    rgba(251, 113, 133, 0.34) 84%,
+    rgba(167, 243, 208, 0.32) 100%
+  );
+}
+
+/* ── CAMO ───────────────────────────────────────────────────── */
+
+[data-sidebar="woodland-camo"] {
+  --sidebar-bg:     #1e2810;
+  --sidebar-fg:     #d4e6c3;
+  --sidebar-muted:  #8aad60;
+  --sidebar-faint:  #5a7a40;
+  --sidebar-border: #2e3c18;
+  --sidebar-active: #161e0a;
+  --sidebar-accent: #9abe70;
+  --accent:         #7aaa45;
+}
+[data-sidebar="woodland-camo"] .w-56 {
+  background-image:
+    radial-gradient(ellipse 62% 46% at 18% 27%, rgba(40,  60, 20, 0.82) 0%, transparent 60%),
+    radial-gradient(ellipse 46% 62% at 80% 18%, rgba(20,  35, 10, 0.76) 0%, transparent 58%),
+    radial-gradient(ellipse 56% 40% at 50% 66%, rgba(90,  70, 30, 0.72) 0%, transparent 62%),
+    radial-gradient(ellipse 40% 56% at 86% 82%, rgba(40,  60, 20, 0.76) 0%, transparent 58%),
+    radial-gradient(ellipse 50% 44% at 20% 86%, rgba(20,  35, 10, 0.72) 0%, transparent 62%),
+    radial-gradient(ellipse 36% 50% at 64% 46%, rgba(60,  80, 25, 0.66) 0%, transparent 60%);
+}
+
+[data-sidebar="desert-camo"] {
+  --sidebar-bg:     #2a2010;
+  --sidebar-fg:     #f5e6c8;
+  --sidebar-muted:  #d4a050;
+  --sidebar-faint:  #a07030;
+  --sidebar-border: #3c3018;
+  --sidebar-active: #1e1808;
+  --sidebar-accent: #e0b870;
+  --accent:         #c89040;
+}
+[data-sidebar="desert-camo"] .w-56 {
+  background-image:
+    radial-gradient(ellipse 56% 44% at 22% 26%, rgba(160, 130,  70, 0.76) 0%, transparent 62%),
+    radial-gradient(ellipse 44% 58% at 76% 20%, rgba(120,  90,  40, 0.72) 0%, transparent 60%),
+    radial-gradient(ellipse 58% 40% at 50% 68%, rgba(180, 150,  80, 0.68) 0%, transparent 62%),
+    radial-gradient(ellipse 38% 54% at 84% 80%, rgba(140, 110,  60, 0.74) 0%, transparent 58%),
+    radial-gradient(ellipse 50% 42% at 18% 84%, rgba(100,  80,  35, 0.70) 0%, transparent 62%);
+}
+
+[data-sidebar="pink-camo"] {
+  --sidebar-bg:     #2a0e1e;
+  --sidebar-fg:     #ffd4ec;
+  --sidebar-muted:  #ff80cc;
+  --sidebar-faint:  #cc5090;
+  --sidebar-border: #3e1830;
+  --sidebar-active: #1e0814;
+  --sidebar-accent: #ff90d0;
+  --accent:         #ff60b0;
+}
+[data-sidebar="pink-camo"] .w-56 {
+  background-image:
+    radial-gradient(ellipse 58% 46% at 20% 26%, rgba(220,  60, 150, 0.72) 0%, transparent 62%),
+    radial-gradient(ellipse 44% 62% at 78% 18%, rgba(160,  30, 100, 0.68) 0%, transparent 60%),
+    radial-gradient(ellipse 56% 40% at 50% 68%, rgba(255, 120, 180, 0.62) 0%, transparent 62%),
+    radial-gradient(ellipse 40% 54% at 86% 82%, rgba(200,  50, 130, 0.70) 0%, transparent 58%),
+    radial-gradient(ellipse 52% 44% at 18% 84%, rgba(140,  20,  90, 0.66) 0%, transparent 62%),
+    radial-gradient(ellipse 36% 48% at 64% 44%, rgba(240, 100, 170, 0.62) 0%, transparent 60%);
+}
+
+/* ── BOLD ───────────────────────────────────────────────────── */
+
+[data-sidebar="fire"] {
+  --sidebar-bg:     #1c0500;
+  --sidebar-fg:     #fed7aa;
+  --sidebar-muted:  #f97316;
+  --sidebar-faint:  #c2410c;
+  --sidebar-border: #2e0a00;
+  --sidebar-active: #140300;
+  --sidebar-accent: #fb923c;
+  --accent:         #ef4444;
+}
+[data-sidebar="fire"] .w-56 {
+  background-image: linear-gradient(
+    175deg,
+    rgba(255, 100,  20, 0.52) 0%,
+    rgba(255,  55,  10, 0.48) 12%,
+    rgba(255, 185,  30, 0.44) 24%,
+    rgba(240,  40,  10, 0.50) 36%,
+    rgba(255, 125,  20, 0.46) 48%,
+    rgba(200,  20,   5, 0.52) 60%,
+    rgba(255, 155,  30, 0.46) 72%,
+    rgba(255,  80,  15, 0.50) 84%,
+    rgba(255, 100,  20, 0.52) 100%
   );
 }
 
