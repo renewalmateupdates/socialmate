@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { supabase } from '@/lib/supabase'
 
 export type ThemeMode    = 'light' | 'dark'
-export type ThemeAccent  = 'default' | 'midnight' | 'forest' | 'rose' | 'slate' | 'amber' | 'ocean' | 'grape' | 'charcoal' | 'coffee' | 'candy' | 'mint' | 'lavender' | 'sky' | 'peach' | 'rainbow' | 'northern-lights' | 'lf-unicorn' | 'lf-dolphin' | 'lf-leopard' | 'lf-pony'
+export type ThemeAccent  = 'default' | 'midnight' | 'forest' | 'rose' | 'slate' | 'amber' | 'ocean' | 'grape' | 'charcoal' | 'coffee' | 'candy' | 'mint' | 'lavender' | 'sky' | 'peach' | 'rainbow' | 'northern-lights' | 'glitter-dream' | 'mermaid' | 'wild-safari' | 'rainbow-ranch' | 'rose-gold' | 'bubblegum' | 'cherry-blossom' | 'sunflower' | 'wildflower' | 'woodland-camo' | 'desert-camo' | 'pink-camo' | 'fire'
 
 /** The swatch color is the sidebar background color for that theme */
 export const ACCENT_THEMES: { id: ThemeAccent; label: string; color: string }[] = [
@@ -25,11 +25,24 @@ export const ACCENT_THEMES: { id: ThemeAccent; label: string; color: string }[] 
   { id: 'peach',    label: 'Peach',    color: '#ffedd5' },   // soft peach
   { id: 'rainbow',  label: 'Rainbow',  color: '#1a0533' },   // dark base with rainbow shimmer
   { id: 'northern-lights', label: 'Northern Lights', color: '#020b18' },  // aurora borealis
-  // Lisa Frank
-  { id: 'lf-unicorn',  label: 'LF Unicorn',  color: '#1a0028' },  // hot pink + purple + gold
-  { id: 'lf-dolphin',  label: 'LF Dolphin',  color: '#00101e' },  // electric aqua + pink
-  { id: 'lf-leopard',  label: 'LF Leopard',  color: '#0d0800' },  // rainbow leopard print
-  { id: 'lf-pony',     label: 'LF Pony',     color: '#1a0015' },  // full Lisa Frank rainbow
+  // Activity book series
+  { id: 'glitter-dream',  label: 'Glitter Dream',  color: '#1a0028' },  // hot pink + purple shimmer
+  { id: 'mermaid',        label: 'Mermaid',        color: '#00101e' },  // electric aqua + pink
+  { id: 'wild-safari',    label: 'Wild Safari',    color: '#0d0800' },  // neon leopard rainbow
+  { id: 'rainbow-ranch',  label: 'Rainbow Ranch',  color: '#1a0015' },  // full spectrum pony
+  // Feminine
+  { id: 'rose-gold',      label: 'Rose Gold',      color: '#2a1520' },  // warm pink-gold metallic
+  { id: 'bubblegum',      label: 'Bubblegum',      color: '#4a0035' },  // hot magenta + bright pink
+  // Flowers
+  { id: 'cherry-blossom', label: 'Cherry Blossom', color: '#fef0f4' },  // soft Japanese pink petals
+  { id: 'sunflower',      label: 'Sunflower',      color: '#1c1400' },  // golden yellow bloom
+  { id: 'wildflower',     label: 'Wildflower',     color: '#0d1a06' },  // meadow multi-color
+  // Camo
+  { id: 'woodland-camo',  label: 'Woodland Camo',  color: '#1e2810' },  // military green/brown
+  { id: 'desert-camo',    label: 'Desert Camo',    color: '#2a2010' },  // tan/sand military
+  { id: 'pink-camo',      label: 'Pink Camo',      color: '#2a0e1e' },  // hot pink camo
+  // Bold
+  { id: 'fire',           label: 'Fire',           color: '#1c0500' },  // orange-red flame
 ]
 
 type ThemeContextType = {
