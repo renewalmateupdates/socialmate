@@ -5,6 +5,7 @@ import CookieBanner from '@/components/CookieBanner'
 import FeedbackWidget from '@/components/FeedbackWidget'
 import { WorkspaceProvider } from '@/contexts/WorkspaceContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
+import { Analytics } from '@vercel/analytics/next'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -136,6 +137,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </ThemeProvider>
         <FeedbackWidget />
         <CookieBanner />
+        <Analytics />
       </body>
     </html>
   )
