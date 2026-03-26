@@ -5,18 +5,18 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 
 const CREDIT_COSTS: Record<string, number> = {
-  caption:     3,
-  hashtags:    2,
-  rewrite:     3,
-  hook:        4,
-  thread:      8,
-  repurpose:   8,
-  pulse:       10,
-  radar:       10,
+  caption:     5,
+  hashtags:    5,
+  rewrite:     5,
+  hook:        5,
+  thread:      10,
+  repurpose:   10,
+  pulse:       20,
+  radar:       20,
   content_gap: 10,
-  calendar:    20,
+  calendar:    25,
   image:       25,
-  score:       2,
+  score:       5,
 }
 
 async function fetchTrendingData(niche: string) {
