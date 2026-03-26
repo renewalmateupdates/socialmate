@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { supabase } from '@/lib/supabase'
 
 export type ThemeMode    = 'light' | 'dark'
-export type ThemeAccent  = 'default' | 'midnight' | 'forest' | 'rose' | 'slate' | 'amber' | 'ocean' | 'grape' | 'charcoal' | 'coffee' | 'candy' | 'mint' | 'lavender' | 'sky' | 'peach' | 'rainbow' | 'tiedye' | 'northern-lights' | 'acid' | 'cosmic' | 'psychedelic'
+export type ThemeAccent  = 'default' | 'midnight' | 'forest' | 'rose' | 'slate' | 'amber' | 'ocean' | 'grape' | 'charcoal' | 'coffee' | 'candy' | 'mint' | 'lavender' | 'sky' | 'peach' | 'rainbow' | 'northern-lights' | 'lf-unicorn' | 'lf-dolphin' | 'lf-leopard' | 'lf-pony'
 
 /** The swatch color is the sidebar background color for that theme */
 export const ACCENT_THEMES: { id: ThemeAccent; label: string; color: string }[] = [
@@ -24,12 +24,12 @@ export const ACCENT_THEMES: { id: ThemeAccent; label: string; color: string }[] 
   { id: 'sky',      label: 'Sky',      color: '#e0f2fe' },   // pastel sky blue
   { id: 'peach',    label: 'Peach',    color: '#ffedd5' },   // soft peach
   { id: 'rainbow',  label: 'Rainbow',  color: '#1a0533' },   // dark base with rainbow shimmer
-  // Trippy / Tie-Dye
-  { id: 'tiedye',         label: 'Tie-Dye',        color: '#0d0d0d' },   // all-color spiral on black
   { id: 'northern-lights', label: 'Northern Lights', color: '#020b18' },  // aurora borealis
-  { id: 'acid',           label: 'Acid',           color: '#050508' },   // lime/yellow psychedelic
-  { id: 'cosmic',         label: 'Cosmic',         color: '#020010' },   // deep space nebula
-  { id: 'psychedelic',    label: 'Psychedelic',    color: '#08000f' },   // trippy pink/orange/teal
+  // Lisa Frank
+  { id: 'lf-unicorn',  label: 'LF Unicorn',  color: '#1a0028' },  // hot pink + purple + gold
+  { id: 'lf-dolphin',  label: 'LF Dolphin',  color: '#00101e' },  // electric aqua + pink
+  { id: 'lf-leopard',  label: 'LF Leopard',  color: '#0d0800' },  // rainbow leopard print
+  { id: 'lf-pony',     label: 'LF Pony',     color: '#1a0015' },  // full Lisa Frank rainbow
 ]
 
 type ThemeContextType = {

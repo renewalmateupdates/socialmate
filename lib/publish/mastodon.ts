@@ -3,7 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 const MAX_MASTODON_LENGTH = 500
 
-export async function publishToMastodon(userId: string, content: string, workspaceId?: string | null): Promise<string> {
+export async function publishToMastodon(userId: string, content: string, workspaceId?: string | null, accountId?: string): Promise<string> {
   // Enforce 500 character limit (Mastodon default; some instances allow more)
   if (content.length > MAX_MASTODON_LENGTH) {
     throw new Error(`Post exceeds Mastodon's ${MAX_MASTODON_LENGTH} character limit (${content.length} chars). Please shorten your post.`)
@@ -16,7 +16,9 @@ export async function publishToMastodon(userId: string, content: string, workspa
     .eq('user_id', userId)
     .eq('platform', 'mastodon')
 
-  if (workspaceId) {
+  if (accountId) {
+    query = query.eq('id', accountId)
+  } else if (workspaceId) {
     query = query.eq('workspace_id', workspaceId)
   } else {
     query = query.is('workspace_id', null)

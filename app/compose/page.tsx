@@ -90,6 +90,13 @@ type Destination = {
   label: string
 }
 
+type ConnectedAccount = {
+  id: string
+  platform: string
+  account_name: string
+  platform_user_id: string
+}
+
 function getLocalDateString() {
   const d = new Date()
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -98,7 +105,7 @@ function getLocalDateString() {
 function ComposeInner() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const { credits, setCredits, refreshCredits, plan, activeWorkspace } = useWorkspace()
+  const { credits, setCredits, applyCredits, plan, activeWorkspace } = useWorkspace()
 
   const [loading, setLoading] = useState(true)
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['discord'])
@@ -124,6 +131,8 @@ function ComposeInner() {
   const [destinations, setDestinations] = useState<Record<string, Destination[]>>({})
   const [selectedDestinations, setSelectedDestinations] = useState<Record<string, string>>({})
   const [connectedPlatforms, setConnectedPlatforms] = useState<Set<string>>(new Set())
+  const [connectedAccounts, setConnectedAccounts] = useState<Record<string, ConnectedAccount[]>>({})
+  const [selectedAccountIds, setSelectedAccountIds] = useState<Record<string, string>>({})
   const [rateLimitedUntil, setRateLimitedUntil] = useState<number | null>(null)
   const [rateLimitCountdown, setRateLimitCountdown] = useState(0)
 
@@ -187,23 +196,38 @@ function ComposeInner() {
         setSelectedDestinations(autoSelected)
       }
 
-      // Load connected accounts — scoped to workspace for client workspaces
+      // Load connected accounts with full details — scoped to workspace
       let accountsQuery = supabase
         .from('connected_accounts')
-        .select('platform')
+        .select('id, platform, account_name, platform_user_id')
         .eq('user_id', data.user.id)
 
-      // For client workspaces, only show accounts connected to THIS workspace
       if (activeWorkspace && !activeWorkspace.is_personal) {
         accountsQuery = accountsQuery.eq('workspace_id', activeWorkspace.id)
       } else {
-        // Personal workspace: show accounts with no workspace_id (personal accounts)
         accountsQuery = accountsQuery.is('workspace_id', null)
       }
 
       const { data: accountsData } = await accountsQuery
-      const platformsSet = new Set<string>(accountsData?.map((a: any) => a.platform) || [])
-      // Discord/Telegram are connected via post_destinations — mark them connected if they have any
+
+      // Group accounts by platform
+      const byPlatform: Record<string, ConnectedAccount[]> = {}
+      ;(accountsData || []).forEach((acc: ConnectedAccount) => {
+        if (!byPlatform[acc.platform]) byPlatform[acc.platform] = []
+        byPlatform[acc.platform].push(acc)
+      })
+      setConnectedAccounts(byPlatform)
+
+      // Auto-select first account for each platform
+      const autoSelected: Record<string, string> = {}
+      Object.entries(byPlatform).forEach(([platform, accounts]) => {
+        if (accounts.length > 0) autoSelected[platform] = accounts[0].id
+      })
+      setSelectedAccountIds(autoSelected)
+
+      // Build connected platforms set
+      const platformsSet = new Set<string>(Object.keys(byPlatform))
+      // Discord/Telegram are connected via post_destinations
       if (destData.length > 0) {
         destData.forEach((d: Destination) => platformsSet.add(d.platform))
       }
@@ -362,8 +386,11 @@ function ComposeInner() {
       }
       setAiResult(data.result)
       const newTotal = typeof data.creditsRemaining === 'number' ? data.creditsRemaining : credits - tool.credits
-      setCredits(newTotal)
-      await refreshCredits()
+      if (typeof data.monthlyRemaining === 'number') {
+        applyCredits(data.monthlyRemaining, data.earnedRemaining ?? 0, data.paidRemaining ?? 0)
+      } else {
+        setCredits(newTotal)
+      }
       showToast(`Used ${tool.credits} credit${tool.credits > 1 ? 's' : ''} · ${newTotal} remaining`, 'info')
     } catch {
       setAiError('Network error. Please try again.')
@@ -415,8 +442,11 @@ function ComposeInner() {
         setScoreResult({ score: 0, label: 'Unknown', strengths: [], improvements: [], verdict: data.result })
       }
       const newCredits = typeof data.creditsRemaining === 'number' ? data.creditsRemaining : credits - SCORE_CREDIT_COST
-      setCredits(newCredits)
-      await refreshCredits()
+      if (typeof data.monthlyRemaining === 'number') {
+        applyCredits(data.monthlyRemaining, data.earnedRemaining ?? 0, data.paidRemaining ?? 0)
+      } else {
+        setCredits(newCredits)
+      }
     } catch {
       setScoreError('Network error. Please try again.')
     }
@@ -460,6 +490,7 @@ function ComposeInner() {
           destinations: selectedDestinations,
           draftId: currentDraftId || undefined,
           workspaceId: activeWorkspace?.id,
+          selectedAccountIds,
         }),
       })
 
@@ -626,6 +657,37 @@ function ComposeInner() {
                       <span>{p.icon}</span>{p.name}
                     </button>
                   ))}
+                </div>
+                {/* Multi-account selectors — shown when a selected platform has 2+ accounts */}
+                {selectedPlatforms.some(pid => (connectedAccounts[pid]?.length ?? 0) > 1) && (
+                  <div className="mt-3 space-y-2">
+                    {selectedPlatforms
+                      .filter(pid => (connectedAccounts[pid]?.length ?? 0) > 1)
+                      .map(pid => {
+                        const accounts = connectedAccounts[pid]
+                        const platformInfo = PLATFORMS.find(p => p.id === pid)
+                        return (
+                          <div key={pid} className="flex items-center gap-2">
+                            <span className="text-xs text-gray-500 dark:text-gray-400 w-20 flex-shrink-0">
+                              {platformInfo?.icon} {platformInfo?.name}
+                            </span>
+                            <select
+                              value={selectedAccountIds[pid] || ''}
+                              onChange={e => setSelectedAccountIds(prev => ({ ...prev, [pid]: e.target.value }))}
+                              className="flex-1 text-xs bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1.5 text-gray-800 dark:text-gray-200 focus:outline-none focus:border-blue-400 transition-colors"
+                            >
+                              {accounts.map((acc: ConnectedAccount) => (
+                                <option key={acc.id} value={acc.id}>
+                                  @{acc.account_name || acc.platform_user_id}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        )
+                      })}
+                  </div>
+                )}
+                <div className="flex flex-wrap gap-2">
                   {soonPlatforms.map(p => (
                     <div key={p.id} title={`${p.name} — coming soon`}
                       className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border border-dashed border-blue-100 text-blue-300 cursor-not-allowed select-none">

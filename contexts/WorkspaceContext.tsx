@@ -74,6 +74,7 @@ type WorkspaceContextType = {
   setActiveWorkspace: (ws: Workspace) => void
   refreshWorkspaces: () => Promise<void>
   refreshCredits: () => Promise<void>
+  applyCredits: (monthly: number, earned: number, paid: number) => void
   seatsUsed: number
   seatsTotal: number
   platformsConnected: number
@@ -98,6 +99,7 @@ const WorkspaceContext = createContext<WorkspaceContextType>({
   setActiveWorkspace: () => {},
   refreshWorkspaces: async () => {},
   refreshCredits: async () => {},
+  applyCredits: () => {},
   seatsUsed: 1,
   seatsTotal: 2,
   platformsConnected: 0,
@@ -253,6 +255,13 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     }
   }, [userId])
 
+  const applyCredits = useCallback((monthly: number, earned: number, paid: number) => {
+    setMonthlyCredits(monthly)
+    setEarnedCredits(earned)
+    setPaidCredits(paid)
+    setCreditsState(monthly + earned + paid)
+  }, [])
+
   const planConfig = PLAN_CONFIG[plan]
 
   return (
@@ -271,6 +280,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       setActiveWorkspace,
       refreshWorkspaces,
       refreshCredits,
+      applyCredits,
       seatsUsed,
       seatsTotal: planConfig.seats,
       platformsConnected,
