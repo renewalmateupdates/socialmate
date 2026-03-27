@@ -447,14 +447,15 @@ const creditsToSet = alreadyOnPlan
     await supabase
       .from('user_settings')
       .update({
-        plan:                   'free',
-        white_label_active:     false,
-        white_label_tier:       null,
-        stripe_subscription_id: null,
-        plan_expires_at:        null,
-        ai_credits_remaining:   50,
-        ai_credits_total:       50,
-        ai_credits_reset_at:    new Date().toISOString(),
+        plan:                      'free',
+        white_label_active:        false,
+        white_label_tier:          null,
+        stripe_subscription_id:    null,
+        plan_expires_at:           null,
+        monthly_credits_remaining: 50,
+        ai_credits_remaining:      50,
+        ai_credits_total:          50,
+        ai_credits_reset_at:       new Date().toISOString(),
       })
       .eq('stripe_subscription_id', subscription.id)
 
