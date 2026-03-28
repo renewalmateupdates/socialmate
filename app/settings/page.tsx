@@ -394,10 +394,23 @@ function SettingsInner() {
             <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">Manage your account, plan, and preferences</p>
           </div>
 
-          <div className="flex items-center gap-1 mb-6 bg-surface border border-theme rounded-2xl p-1.5 flex-wrap overflow-x-auto">
+          {/* Mobile: dropdown selector */}
+          <div className="mb-6 sm:hidden">
+            <select
+              value={activeTab}
+              onChange={e => setActiveTab(e.target.value)}
+              className="w-full border border-theme rounded-2xl px-4 py-3 text-sm font-bold bg-surface text-gray-700 dark:text-gray-200 outline-none focus:border-gray-400 transition-all">
+              {TABS.map(tab => (
+                <option key={tab} value={tab}>{tab}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Desktop: pill tabs */}
+          <div className="hidden sm:flex items-center gap-1 mb-6 bg-surface border border-theme rounded-2xl p-1.5">
             {TABS.map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === tab ? 'bg-black text-white' : 'text-gray-500 hover:text-black'}`}>
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${activeTab === tab ? 'bg-black text-white dark:bg-white dark:text-black' : 'text-gray-500 hover:text-black dark:hover:text-white'}`}>
                 {tab}
               </button>
             ))}
