@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import ReferralBanner from '@/app/components/ReferralBanner'
 import LandingHeader from '@/components/LandingHeader'
+import UserStatsCounter from '@/components/UserStatsCounter'
 
 const PLATFORMS = [
   { name: 'Discord',     icon: '💬', status: 'live'    },
@@ -193,6 +194,11 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
               <p className="text-xs text-gray-400 font-semibold mt-1">{stat.label}</p>
             </div>
           ))}
+        </div>
+
+        {/* Live user stats */}
+        <div className="mt-6">
+          <UserStatsCounter />
         </div>
       </section>
 
