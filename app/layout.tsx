@@ -54,7 +54,7 @@ export const metadata: Metadata = {
     title: 'SocialMate — Free Social Media Scheduler for 16 Platforms',
     description: 'Schedule posts to 16 social platforms for free. No per-channel fees. No post limits. Better than Buffer at zero cost.',
     images: ['/og-image.png'],
-    creator: '@socialmate',
+    creator: '@socialmatehq',
   },
   robots: {
     index: true,
@@ -128,6 +128,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="SocialMate" />
+        {/* Pinterest domain verification */}
+        <meta name="p:domain_verify" content="36117bcd9adbfb7d01695c4aa0266d3c" />
       </head>
       <body className={inter.className}>
         <ThemeProvider>
