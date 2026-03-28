@@ -649,7 +649,7 @@ function ComposeInner() {
                 <div className="flex flex-wrap gap-2">
                   {livePlatforms.map(p => (
                     <button key={p.id} onClick={() => togglePlatform(p.id)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                      className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
                         selectedPlatforms.includes(p.id)
                           ? 'bg-black text-white border-black'
                           : 'bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-400'
@@ -690,14 +690,14 @@ function ComposeInner() {
                 <div className="flex flex-wrap gap-2">
                   {soonPlatforms.map(p => (
                     <div key={p.id} title={`${p.name} — coming soon`}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border border-dashed border-blue-100 text-blue-300 cursor-not-allowed select-none">
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border border-dashed border-blue-100 text-blue-300 cursor-not-allowed select-none">
                       <span>{p.icon}</span><span>{p.name}</span>
                       <span className="text-xs font-bold text-blue-300 ml-0.5">· Soon</span>
                     </div>
                   ))}
                   {COMING_SOON_PLATFORMS.map(p => (
                     <div key={p.id} title={`${p.name} — coming soon`}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold border border-dashed border-gray-200 dark:border-gray-700 text-gray-300 dark:text-gray-600 cursor-not-allowed select-none">
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border border-dashed border-gray-200 dark:border-gray-700 text-gray-300 dark:text-gray-600 cursor-not-allowed select-none">
                       <span>{p.icon}</span><span>{p.name}</span>
                       <span className="text-xs font-normal text-gray-300 dark:text-gray-600 ml-0.5">· Soon</span>
                     </div>
