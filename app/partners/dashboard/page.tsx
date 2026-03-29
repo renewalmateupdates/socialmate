@@ -219,7 +219,7 @@ export default function PartnersDashboardPage() {
             <div style={{ flex: 1 }}>
               <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: gold }}>W-9 Required</p>
               <p style={{ margin: '4px 0 8px', fontSize: 13, color: muted }}>
-                Your lifetime earnings have reached $599. You must submit a W-9 form within 60 days to avoid forfeiture of funds.
+                Your earnings this year have reached $599. You must submit a W-9 form within 60 days to avoid forfeiture of funds.
                 {profile.w9_forfeiture_deadline && ` Deadline: ${new Date(profile.w9_forfeiture_deadline).toLocaleDateString()}`}
               </p>
               <a href="#w9-section" style={{ fontSize: 13, color: gold, fontWeight: 700, textDecoration: 'none' }}>
@@ -259,11 +259,11 @@ export default function PartnersDashboardPage() {
         {/* Stats cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 32 }}>
           {[
-            { label: 'Pending',   value: cents(profile.total_earnings_cents - profile.available_balance_cents - profile.paid_out_cents < 0 ? 0 : profile.total_earnings_cents - profile.available_balance_cents - profile.paid_out_cents), sub: '60-day hold', icon: '⏳' },
-            { label: 'Available', value: cents(profile.available_balance_cents), sub: 'Ready for payout', icon: '✅' },
-            { label: 'Paid Out',  value: cents(profile.paid_out_cents), sub: 'Total disbursed', icon: '💳' },
-            { label: 'Lifetime',  value: cents(profile.lifetime_earnings_cents), sub: 'All-time earnings', icon: '🏆' },
-            { label: 'Active Referrals', value: profile.active_referral_count, sub: commission_label + ' commission', icon: '👥' },
+            { label: 'Pending',         value: cents(Math.max(0, profile.total_earnings_cents - profile.available_balance_cents - profile.paid_out_cents)), sub: '60-day hold',                       icon: '⏳' },
+            { label: 'Available',       value: cents(profile.available_balance_cents),    sub: 'Ready to request payout',            icon: '✅' },
+            { label: 'Paid Out',        value: cents(profile.paid_out_cents),              sub: 'Total disbursed to date',            icon: '💳' },
+            { label: `${new Date().getFullYear()} Earnings`, value: cents(profile.lifetime_earnings_cents), sub: 'Resets Jan 1 · W-9 required at $600', icon: '📅' },
+            { label: 'Active Referrals', value: profile.active_referral_count,            sub: commission_label + ' on every renewal', icon: '👥' },
           ].map(stat => (
             <div key={stat.label} style={{
               background: surface, border: `1px solid ${border}`,
@@ -308,7 +308,10 @@ export default function PartnersDashboardPage() {
 
           {/* Referral link */}
           <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 14, padding: 24 }}>
-            <h3 style={{ margin: '0 0 16px', fontSize: 13, fontWeight: 700, color: muted, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Your Referral Link</h3>
+            <div style={{ marginBottom: 16 }}>
+              <h3 style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 700, color: muted, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Your Referral Link</h3>
+              <p style={{ margin: 0, fontSize: 11, color: '#4b5563' }}>Earns {commission_label} on every signup that subscribes — monthly, 3mo, 6mo, or 12mo.</p>
+            </div>
             <div style={{ background: '#0a0a0a', border: `1px solid ${border}`, borderRadius: 10, padding: '10px 14px', marginBottom: 12, fontSize: 12, color: '#9ca3af', fontFamily: 'monospace', wordBreak: 'break-all' }}>
               {referral_link}
             </div>
@@ -328,31 +331,50 @@ export default function PartnersDashboardPage() {
 
           {/* Promo codes */}
           <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 14, padding: 24 }}>
-            <h3 style={{ margin: '0 0 16px', fontSize: 13, fontWeight: 700, color: muted, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Your Promo Codes</h3>
+            <div style={{ marginBottom: 16 }}>
+              <h3 style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 700, color: muted, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Your Promo Codes</h3>
+              <p style={{ margin: 0, fontSize: 11, color: '#4b5563' }}>Share these with your audience. You earn commission on every sub and renewal.</p>
+            </div>
             {promo_codes.length === 0 ? (
               <p style={{ fontSize: 13, color: muted, margin: 0 }}>Promo codes will appear here after account setup.</p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {promo_codes.map(code => (
-                  <div key={code.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
-                    <div>
-                      <div style={{ fontFamily: 'monospace', fontSize: 15, fontWeight: 800, color: gold, letterSpacing: '0.05em' }}>
-                        {code.code}
+                  <div key={code.id} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+                    background: '#0a0a0a', border: `1px solid ${border}`, borderRadius: 10, padding: '10px 14px',
+                  }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                        <span style={{ fontFamily: 'monospace', fontSize: 14, fontWeight: 800, color: gold, letterSpacing: '0.05em' }}>
+                          {code.code}
+                        </span>
+                        <span style={{
+                          fontSize: 10, fontWeight: 700, color: '#9ca3af',
+                          background: '#1a1a1a', border: `1px solid ${border}`,
+                          padding: '1px 6px', borderRadius: 4,
+                        }}>
+                          {code.description}
+                        </span>
                       </div>
-                      <div style={{ fontSize: 11, color: muted, marginTop: 1 }}>
-                        {code.description} · Used {code.times_used}x
+                      <div style={{ fontSize: 11, color: '#4b5563', marginTop: 3 }}>
+                        {code.times_used > 0
+                          ? `Used ${code.times_used}x — earning you commission on every renewal`
+                          : 'Not yet used — share it to start earning'}
                       </div>
                     </div>
                     <button
                       onClick={() => copy(code.code, code.id)}
                       style={{
-                        padding: '5px 12px', borderRadius: 8, border: `1px solid ${border}`,
-                        background: 'transparent', color: copied === code.id ? '#22c55e' : muted,
-                        fontSize: 12, fontWeight: 600, cursor: 'pointer', flexShrink: 0,
-                        fontFamily: 'inherit',
+                        padding: '6px 14px', borderRadius: 8,
+                        border: `1px solid ${copied === code.id ? 'rgba(34,197,94,0.4)' : 'rgba(245,158,11,0.3)'}`,
+                        background: copied === code.id ? 'rgba(34,197,94,0.12)' : 'rgba(245,158,11,0.08)',
+                        color: copied === code.id ? '#22c55e' : gold,
+                        fontSize: 12, fontWeight: 700, cursor: 'pointer', flexShrink: 0,
+                        fontFamily: 'inherit', transition: 'all 0.15s',
                       }}
                     >
-                      {copied === code.id ? '✓' : 'Copy'}
+                      {copied === code.id ? '✓ Copied' : 'Copy'}
                     </button>
                   </div>
                 ))}
