@@ -581,7 +581,17 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
               </Link>
             ))}
           </nav>
-          <p className="text-xs text-gray-600">© 2026 SocialMate</p>
+          <div className="flex items-center gap-4 flex-wrap">
+            <a href="https://www.producthunt.com/products/socialmate-2?embed=true&utm_source=embed&utm_medium=post_embed"
+              target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#FF6154] hover:bg-[#e5564a] text-white text-xs font-semibold rounded-lg transition-colors">
+              <svg width="14" height="14" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13 0C5.82 0 0 5.82 0 13s5.82 13 13 13 13-5.82 13-13S20.18 0 13 0zm2.17 17.33H10.5V8.67h4.67c1.38 0 2.5 1.12 2.5 2.5v3.66c0 1.38-1.12 2.5-2.5 2.5z" fill="white"/>
+              </svg>
+              Featured on Product Hunt
+            </a>
+            <p className="text-xs text-gray-600">© 2026 SocialMate</p>
+          </div>
         </div>
       </footer>
 
