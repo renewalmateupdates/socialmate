@@ -106,7 +106,7 @@ export default function Referral() {
         </div>
 
         {/* GET YOUR LINK CTA */}
-        <div className="bg-black text-white rounded-2xl p-6 mb-8 flex items-center justify-between gap-6">
+        <div className="bg-black text-white rounded-2xl p-6 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <p className="font-extrabold mb-1">Get your personal referral link</p>
             <p className="text-xs text-gray-400 leading-relaxed">
@@ -114,13 +114,13 @@ export default function Referral() {
             </p>
           </div>
           <Link href="/login"
-            className="bg-white text-black text-sm font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all flex-shrink-0">
+            className="bg-white text-black text-sm font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all w-full sm:w-auto text-center flex-shrink-0">
             Sign in to get link →
           </Link>
         </div>
 
         {/* REFERRAL VS AFFILIATE CALLOUT */}
-        <div className="grid grid-cols-2 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
           <div className="bg-white border-2 border-black rounded-2xl p-5">
             <div className="text-lg mb-2">🎁</div>
             <h3 className="text-sm font-extrabold mb-1">Referral Program</h3>
@@ -197,7 +197,7 @@ export default function Referral() {
         {/* FAQ */}
         <div className="bg-white border border-gray-100 rounded-2xl p-6 mb-8">
           <h2 className="text-base font-extrabold mb-5">Common questions</h2>
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {FAQ.map((item, i) => (
               <div key={i}>
                 <p className="text-xs font-bold mb-1">{item.q}</p>

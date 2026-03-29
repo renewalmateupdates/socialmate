@@ -180,6 +180,13 @@ export default function PartnersDashboardPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: dark }}>
+      <style>{`
+        .partner-grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }
+        @media (max-width: 640px) {
+          .partner-grid-2col { grid-template-columns: 1fr !important; }
+          .partner-stats-grid { grid-template-columns: 1fr 1fr !important; }
+        }
+      `}</style>
       <PartnersHeader email={userEmail} />
 
       <main style={{ maxWidth: 1100, margin: '0 auto', padding: '40px 24px' }}>
@@ -297,7 +304,7 @@ export default function PartnersDashboardPage() {
           </div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
+        <div className="partner-grid-2col">
 
           {/* Referral link */}
           <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 14, padding: 24 }}>
@@ -574,7 +581,7 @@ function W9UploadForm({ affiliateId, onSuccess }: { affiliateId: string; onSucce
   }
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+    <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
       <div style={{ gridColumn: '1 / -1' }}>
         <label style={{ display: 'block', fontSize: 11, color: muted, marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Legal Name *</label>
         <input value={legalName} onChange={e => setLegalName(e.target.value)} style={inputStyle} placeholder="Full legal name" />

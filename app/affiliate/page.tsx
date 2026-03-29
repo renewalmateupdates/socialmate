@@ -126,7 +126,7 @@ export default function AffiliatePage() {
           </div>
 
           {/* STATS */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-3">
             {[
               { label: 'Total Referrals',   value: stats.totalReferrals,   sub: 'signed up'       },
               { label: 'Paying Referrals',  value: stats.payingReferrals,  sub: 'on a paid plan'  },
@@ -222,9 +222,9 @@ export default function AffiliatePage() {
                     <div className="text-xs text-purple-600 dark:text-purple-500 mt-0.5">At 100 referrals</div>
                   </div>
                 </div>
-                <Link href="/settings?tab=Plan"
+                <Link href="/partners"
                   className="inline-block bg-black dark:bg-white text-white dark:text-black text-sm font-bold px-5 py-2.5 rounded-xl hover:opacity-80 transition-all">
-                  Apply to Affiliate Program →
+                  Apply to Partner Program →
                 </Link>
                 <p className="text-xs text-gray-400 dark:text-gray-500">
                   Application-based. Reviewed within 3–5 business days.
