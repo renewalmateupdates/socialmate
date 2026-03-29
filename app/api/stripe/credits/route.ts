@@ -41,6 +41,7 @@ export async function POST(req: NextRequest) {
       price_id: priceId,
     },
     automatic_tax: { enabled: true },
+    allow_promotion_codes: true,
     success_url: `${appUrl}/settings?tab=Plan&credits=purchased`,
     cancel_url: `${appUrl}/settings?tab=Plan`,
   })

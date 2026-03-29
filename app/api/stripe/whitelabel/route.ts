@@ -52,6 +52,7 @@ export async function POST(req: NextRequest) {
       type: 'white_label',
       white_label_tier: tier,
     },
+    allow_promotion_codes: true,
     success_url: `${appUrl}/settings?tab=White Label&white_label=activated`,
     cancel_url: `${appUrl}/settings?tab=White Label`,
   }
