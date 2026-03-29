@@ -1,0 +1,638 @@
+'use client'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+
+// ─── Types ─────────────────────────────────────────────────────────────────
+
+interface AffiliateProfile {
+  id: string
+  email: string
+  full_name: string | null
+  status: string
+  commission_rate: number
+  active_referral_count: number
+  total_earnings_cents: number
+  available_balance_cents: number
+  paid_out_cents: number
+  lifetime_earnings_cents: number
+  w9_required: boolean
+  w9_submitted: boolean
+  w9_forfeiture_deadline: string | null
+  w9_funds_forfeited: boolean
+  stripe_account_id: string | null
+  stripe_account_status: string | null
+  tos_agreed: boolean
+  onboarding_completed: boolean
+  notes: string | null
+  created_at: string
+}
+
+interface PayoutRequest {
+  id: string
+  affiliate_id: string
+  amount_cents: number
+  status: string
+  requested_at: string
+  affiliate_email?: string
+}
+
+interface RevenueStats {
+  gross_revenue_cents: number
+  total_commissions_cents: number
+  net_to_joshua_cents: number
+  pending_payouts_cents: number
+  forfeited_cents: number
+  sm_give_cents: number
+}
+
+// ─── Helpers ───────────────────────────────────────────────────────────────
+
+function cents(n: number) { return `$${(n / 100).toFixed(2)}` }
+
+const STATUS_BADGE: Record<string, { bg: string; color: string }> = {
+  pending:    { bg: 'rgba(245,158,11,0.15)', color: '#F59E0B' },
+  active:     { bg: 'rgba(34,197,94,0.15)',  color: '#22c55e' },
+  suspended:  { bg: 'rgba(249,115,22,0.15)', color: '#f97316' },
+  terminated: { bg: 'rgba(239,68,68,0.15)',  color: '#ef4444' },
+  requested:  { bg: 'rgba(124,58,237,0.15)', color: '#7C3AED' },
+  approved:   { bg: 'rgba(34,197,94,0.15)',  color: '#22c55e' },
+  paid:       { bg: 'rgba(34,197,94,0.15)',  color: '#22c55e' },
+  rejected:   { bg: 'rgba(239,68,68,0.15)',  color: '#ef4444' },
+}
+
+function StatusBadge({ status }: { status: string }) {
+  const s = STATUS_BADGE[status] ?? { bg: 'rgba(107,114,128,0.15)', color: '#6b7280' }
+  return (
+    <span style={{
+      background: s.bg, color: s.color, fontSize: 11, fontWeight: 700,
+      padding: '3px 8px', borderRadius: 6, textTransform: 'capitalize',
+    }}>
+      {status}
+    </span>
+  )
+}
+
+const dark    = '#0a0a0a'
+const surface = '#111111'
+const border  = '#222222'
+const muted   = '#6b7280'
+const gold    = '#F59E0B'
+const purple  = '#7C3AED'
+
+// ─── Component ─────────────────────────────────────────────────────────────
+
+export default function AdminPartnersClient() {
+  const router = useRouter()
+
+  const [affiliates, setAffiliates]     = useState<AffiliateProfile[]>([])
+  const [payouts, setPayouts]           = useState<PayoutRequest[]>([])
+  const [stats, setStats]               = useState<RevenueStats | null>(null)
+  const [loading, setLoading]           = useState(true)
+  const [activeTab, setActiveTab]       = useState<'affiliates' | 'payouts' | 'revenue' | 'invite'>('affiliates')
+  const [filterStatus, setFilterStatus] = useState<string>('all')
+  const [selected, setSelected]         = useState<AffiliateProfile | null>(null)
+
+  // Invite form
+  const [inviteEmail, setInviteEmail]     = useState('')
+  const [inviteLoading, setInviteLoading] = useState(false)
+  const [inviteResult, setInviteResult]   = useState<string | null>(null)
+
+  // Action
+  const [actionLoading, setActionLoading] = useState(false)
+  const [actionNote, setActionNote]       = useState('')
+
+  // Promo code gen
+  const [promoCode, setPromoCode]         = useState('')
+  const [promoDiscount, setPromoDiscount] = useState('20')
+  const [promoMonths, setPromoMonths]     = useState('3')
+  const [promoLoading, setPromoLoading]   = useState(false)
+
+  useEffect(() => { fetchAll() }, [])
+
+  async function fetchAll() {
+    setLoading(true)
+    const [a, p, s] = await Promise.all([
+      fetch('/api/partners/stats?admin=true').then(r => r.json()),
+      fetch('/api/partners/payout?admin=true').then(r => r.json()),
+      fetch('/api/partners/stats?admin=true&type=revenue').then(r => r.json()),
+    ])
+    if (a.forbidden) { router.push('/dashboard'); return }
+    setAffiliates(a.affiliates ?? [])
+    setPayouts(p.payouts ?? [])
+    setStats(s.revenue ?? null)
+    setLoading(false)
+  }
+
+  async function sendInvite() {
+    if (!inviteEmail.trim()) return
+    setInviteLoading(true)
+    setInviteResult(null)
+    const res = await fetch('/api/partners/invite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: inviteEmail.trim() }),
+    })
+    const json = await res.json()
+    setInviteResult(res.ok ? `✓ Invite sent to ${inviteEmail}` : `Error: ${json.error}`)
+    if (res.ok) setInviteEmail('')
+    setInviteLoading(false)
+  }
+
+  async function updateAffiliateStatus(id: string, status: string) {
+    setActionLoading(true)
+    const res = await fetch('/api/partners/stats', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, status, notes: actionNote }),
+    })
+    if (res.ok) { setSelected(null); setActionNote(''); await fetchAll() }
+    setActionLoading(false)
+  }
+
+  async function approvePayout(id: string) {
+    setActionLoading(true)
+    await fetch('/api/partners/payout', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, action: 'approve' }),
+    })
+    await fetchAll()
+    setActionLoading(false)
+  }
+
+  async function rejectPayout(id: string) {
+    setActionLoading(true)
+    await fetch('/api/partners/payout', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, action: 'reject' }),
+    })
+    await fetchAll()
+    setActionLoading(false)
+  }
+
+  async function generatePromoCode() {
+    if (!selected) return
+    setPromoLoading(true)
+    await fetch('/api/partners/stats', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'generate_promo',
+        affiliate_id: selected.id,
+        code: promoCode,
+        discount_value: Number(promoDiscount),
+        duration_months: Number(promoMonths),
+      }),
+    })
+    setPromoLoading(false)
+    setPromoCode('')
+    await fetchAll()
+  }
+
+  const filtered = filterStatus === 'all'
+    ? affiliates
+    : affiliates.filter(a => a.status === filterStatus)
+
+  const counts = {
+    all:        affiliates.length,
+    pending:    affiliates.filter(a => a.status === 'pending').length,
+    active:     affiliates.filter(a => a.status === 'active').length,
+    suspended:  affiliates.filter(a => a.status === 'suspended').length,
+    terminated: affiliates.filter(a => a.status === 'terminated').length,
+  }
+
+  const pendingPayouts = payouts.filter(p => p.status === 'requested')
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', background: dark, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ width: 32, height: 32, borderRadius: '50%', border: `3px solid ${gold}`, borderTopColor: 'transparent', animation: 'spin 0.7s linear infinite' }} />
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ minHeight: '100vh', background: dark }}>
+
+      {/* Header */}
+      <header style={{ background: surface, borderBottom: `1px solid ${border}`, padding: '16px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div>
+          <h1 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#f1f1f1', letterSpacing: '-0.02em' }}>Partner Admin</h1>
+          <p style={{ margin: '2px 0 0', fontSize: 12, color: muted }}>Manage affiliates, payouts, and invites</p>
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {pendingPayouts.length > 0 && (
+            <span style={{ background: 'rgba(245,158,11,0.15)', color: gold, fontSize: 12, fontWeight: 700, padding: '4px 10px', borderRadius: 20, border: `1px solid rgba(245,158,11,0.3)` }}>
+              {pendingPayouts.length} payout{pendingPayouts.length > 1 ? 's' : ''} pending
+            </span>
+          )}
+        </div>
+      </header>
+
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px' }}>
+
+        {/* Revenue overview */}
+        {stats && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14, marginBottom: 32 }}>
+            {[
+              { label: 'Gross Revenue',     value: cents(stats.gross_revenue_cents),      color: '#f1f1f1' },
+              { label: 'Affiliate Payouts', value: cents(stats.total_commissions_cents),   color: gold },
+              { label: 'Net to Joshua',     value: cents(stats.net_to_joshua_cents),       color: '#22c55e' },
+              { label: 'Pending Payouts',   value: cents(stats.pending_payouts_cents),     color: purple },
+              { label: 'SM-Give Allocation',value: cents(stats.sm_give_cents),             color: '#60a5fa' },
+            ].map(s => (
+              <div key={s.label} style={{ background: surface, border: `1px solid ${border}`, borderRadius: 12, padding: '16px 18px' }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: s.color, letterSpacing: '-0.02em' }}>{s.value}</div>
+                <div style={{ fontSize: 11, color: muted, marginTop: 3, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{s.label}</div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Tabs */}
+        <div style={{ display: 'flex', gap: 4, background: '#0a0a0a', borderRadius: 12, padding: 4, marginBottom: 28, width: 'fit-content' }}>
+          {[
+            { key: 'affiliates', label: `Affiliates (${affiliates.length})` },
+            { key: 'payouts',    label: `Payouts${pendingPayouts.length > 0 ? ` (${pendingPayouts.length})` : ''}` },
+            { key: 'revenue',    label: 'Revenue' },
+            { key: 'invite',     label: 'Send Invite' },
+          ].map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key as any)}
+              style={{
+                padding: '8px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
+                fontSize: 13, fontWeight: 700, fontFamily: 'inherit',
+                background: activeTab === tab.key ? '#1a1a1a' : 'transparent',
+                color: activeTab === tab.key ? '#f1f1f1' : muted,
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* AFFILIATES TAB */}
+        {activeTab === 'affiliates' && (
+          <div>
+            {/* Filter */}
+            <div style={{ display: 'flex', gap: 6, marginBottom: 20 }}>
+              {Object.entries(counts).map(([k, n]) => (
+                <button
+                  key={k}
+                  onClick={() => setFilterStatus(k)}
+                  style={{
+                    padding: '5px 12px', borderRadius: 8, border: `1px solid ${filterStatus === k ? gold : border}`,
+                    background: filterStatus === k ? 'rgba(245,158,11,0.1)' : 'transparent',
+                    color: filterStatus === k ? gold : muted,
+                    fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                  }}
+                >
+                  {k} ({n})
+                </button>
+              ))}
+            </div>
+
+            {/* Table */}
+            <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 14, overflow: 'hidden' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                <thead>
+                  <tr style={{ borderBottom: `1px solid ${border}` }}>
+                    {['Affiliate', 'Status', 'Referrals', 'Lifetime', 'Available', 'W-9', 'Stripe', 'Actions'].map(h => (
+                      <th key={h} style={{ textAlign: 'left', padding: '14px 16px', fontSize: 11, color: muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map(a => (
+                    <tr key={a.id} style={{ borderTop: `1px solid ${border}` }}>
+                      <td style={{ padding: '14px 16px' }}>
+                        <div style={{ fontWeight: 700, color: '#f1f1f1', fontSize: 13 }}>{a.full_name || '(no name)'}</div>
+                        <div style={{ fontSize: 11, color: muted, marginTop: 1 }}>{a.email}</div>
+                      </td>
+                      <td style={{ padding: '14px 16px' }}><StatusBadge status={a.status} /></td>
+                      <td style={{ padding: '14px 16px', color: '#d1d5db' }}>{a.active_referral_count}</td>
+                      <td style={{ padding: '14px 16px', color: gold, fontWeight: 700 }}>{cents(a.lifetime_earnings_cents)}</td>
+                      <td style={{ padding: '14px 16px', color: '#22c55e' }}>{cents(a.available_balance_cents)}</td>
+                      <td style={{ padding: '14px 16px' }}>
+                        {a.w9_submitted
+                          ? <span style={{ fontSize: 11, color: '#22c55e', fontWeight: 700 }}>✓ Filed</span>
+                          : a.w9_required
+                          ? <span style={{ fontSize: 11, color: '#f87171', fontWeight: 700 }}>⚠ Required</span>
+                          : <span style={{ fontSize: 11, color: muted }}>—</span>}
+                      </td>
+                      <td style={{ padding: '14px 16px' }}>
+                        {a.stripe_account_status
+                          ? <StatusBadge status={a.stripe_account_status} />
+                          : <span style={{ fontSize: 11, color: muted }}>—</span>}
+                      </td>
+                      <td style={{ padding: '14px 16px' }}>
+                        <button
+                          onClick={() => setSelected(a)}
+                          style={{
+                            padding: '5px 10px', borderRadius: 6, border: `1px solid ${border}`,
+                            background: 'transparent', color: muted, fontSize: 11,
+                            fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                          }}
+                        >
+                          Manage
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {filtered.length === 0 && (
+                    <tr>
+                      <td colSpan={8} style={{ padding: '32px', textAlign: 'center', color: muted, fontSize: 13 }}>No affiliates found</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* PAYOUTS TAB */}
+        {activeTab === 'payouts' && (
+          <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 14, overflow: 'hidden' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+              <thead>
+                <tr style={{ borderBottom: `1px solid ${border}` }}>
+                  {['Affiliate', 'Amount', 'Status', 'Requested', 'Actions'].map(h => (
+                    <th key={h} style={{ textAlign: 'left', padding: '14px 16px', fontSize: 11, color: muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {payouts.map(p => (
+                  <tr key={p.id} style={{ borderTop: `1px solid ${border}` }}>
+                    <td style={{ padding: '14px 16px', color: '#d1d5db' }}>{p.affiliate_email ?? p.affiliate_id.slice(0, 8)}</td>
+                    <td style={{ padding: '14px 16px', color: gold, fontWeight: 700 }}>{cents(p.amount_cents)}</td>
+                    <td style={{ padding: '14px 16px' }}><StatusBadge status={p.status} /></td>
+                    <td style={{ padding: '14px 16px', color: muted }}>{new Date(p.requested_at).toLocaleDateString()}</td>
+                    <td style={{ padding: '14px 16px' }}>
+                      {p.status === 'requested' && (
+                        <div style={{ display: 'flex', gap: 6 }}>
+                          <button
+                            onClick={() => approvePayout(p.id)}
+                            disabled={actionLoading}
+                            style={{
+                              padding: '5px 10px', borderRadius: 6, border: 'none',
+                              background: 'rgba(34,197,94,0.15)', color: '#22c55e',
+                              fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+                            }}
+                          >
+                            Approve
+                          </button>
+                          <button
+                            onClick={() => rejectPayout(p.id)}
+                            disabled={actionLoading}
+                            style={{
+                              padding: '5px 10px', borderRadius: 6, border: 'none',
+                              background: 'rgba(239,68,68,0.15)', color: '#ef4444',
+                              fontSize: 11, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+                            }}
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+                {payouts.length === 0 && (
+                  <tr>
+                    <td colSpan={5} style={{ padding: '32px', textAlign: 'center', color: muted, fontSize: 13 }}>No payout requests</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* REVENUE TAB */}
+        {activeTab === 'revenue' && stats && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+            <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 14, padding: 28 }}>
+              <h3 style={{ margin: '0 0 20px', fontSize: 14, fontWeight: 700, color: '#f1f1f1' }}>Revenue Breakdown</h3>
+              {[
+                { label: 'Gross Revenue (all subscriptions)',  value: cents(stats.gross_revenue_cents),     color: '#f1f1f1' },
+                { label: 'Total Affiliate Commissions',        value: `−${cents(stats.total_commissions_cents)}`, color: '#f87171' },
+                { label: 'Net Revenue to Gilgamesh LLC',       value: cents(stats.net_to_joshua_cents),     color: '#22c55e' },
+              ].map(row => (
+                <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: `1px solid ${border}` }}>
+                  <span style={{ fontSize: 13, color: muted }}>{row.label}</span>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: row.color }}>{row.value}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 14, padding: 28 }}>
+              <h3 style={{ margin: '0 0 20px', fontSize: 14, fontWeight: 700, color: '#f1f1f1' }}>Unclaimed / Forfeited Funds</h3>
+              {[
+                { label: 'Pending Payouts (in queue)',    value: cents(stats.pending_payouts_cents), color: purple },
+                { label: 'SM-Give Allocation (forfeited)', value: cents(stats.sm_give_cents),        color: '#60a5fa' },
+                { label: 'Gilgamesh Share (forfeited)',    value: cents(stats.forfeited_cents / 2),  color: '#9ca3af' },
+              ].map(row => (
+                <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: `1px solid ${border}` }}>
+                  <span style={{ fontSize: 13, color: muted }}>{row.label}</span>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: row.color }}>{row.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* INVITE TAB */}
+        {activeTab === 'invite' && (
+          <div style={{ maxWidth: 500 }}>
+            <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 14, padding: 32 }}>
+              <h3 style={{ margin: '0 0 8px', fontSize: 16, fontWeight: 800, color: '#f1f1f1' }}>Send Affiliate Invite</h3>
+              <p style={{ fontSize: 13, color: muted, margin: '0 0 24px', lineHeight: 1.6 }}>
+                Type any email address to send a branded invite. They'll receive an Accept/Decline email with a 7-day expiry link.
+              </p>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <input
+                  type="email"
+                  value={inviteEmail}
+                  onChange={e => setInviteEmail(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && sendInvite()}
+                  placeholder="partner@example.com"
+                  style={{
+                    flex: 1, padding: '10px 14px', borderRadius: 10,
+                    background: '#0a0a0a', border: `1px solid ${border}`,
+                    color: '#f1f1f1', fontSize: 14, outline: 'none', fontFamily: 'inherit',
+                  }}
+                />
+                <button
+                  onClick={sendInvite}
+                  disabled={inviteLoading || !inviteEmail.trim()}
+                  style={{
+                    padding: '10px 20px', borderRadius: 10, border: 'none',
+                    background: `linear-gradient(135deg, ${gold}, ${purple})`,
+                    color: '#fff', fontSize: 13, fontWeight: 700,
+                    cursor: inviteEmail ? 'pointer' : 'not-allowed',
+                    opacity: inviteLoading ? 0.6 : 1, flexShrink: 0,
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  {inviteLoading ? 'Sending...' : 'Send Invite'}
+                </button>
+              </div>
+              {inviteResult && (
+                <p style={{
+                  marginTop: 14, fontSize: 13, fontWeight: 600,
+                  color: inviteResult.startsWith('✓') ? '#22c55e' : '#f87171',
+                }}>
+                  {inviteResult}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
+      </div>
+
+      {/* ── AFFILIATE MANAGEMENT DRAWER ─────────────────────────── */}
+      {selected && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)',
+          display: 'flex', alignItems: 'flex-end', justifyContent: 'flex-end',
+          zIndex: 50,
+        }} onClick={() => setSelected(null)}>
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              width: 440, height: '100vh', background: '#0f0f0f',
+              borderLeft: `1px solid ${border}`, overflowY: 'auto',
+              padding: 28,
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#f1f1f1' }}>Manage Affiliate</h3>
+              <button
+                onClick={() => setSelected(null)}
+                style={{ background: 'none', border: 'none', color: muted, fontSize: 20, cursor: 'pointer', lineHeight: 1 }}
+              >×</button>
+            </div>
+
+            {/* Profile info */}
+            <div style={{ background: surface, borderRadius: 12, padding: 18, marginBottom: 20, border: `1px solid ${border}` }}>
+              <p style={{ margin: '0 0 4px', fontSize: 15, fontWeight: 800, color: '#f1f1f1' }}>{selected.full_name || '(no name)'}</p>
+              <p style={{ margin: '0 0 12px', fontSize: 13, color: muted }}>{selected.email}</p>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <StatusBadge status={selected.status} />
+                {selected.w9_required && !selected.w9_submitted && <span style={{ fontSize: 11, color: '#f87171', fontWeight: 700, background: 'rgba(239,68,68,0.1)', padding: '3px 8px', borderRadius: 6 }}>W-9 Required</span>}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 14 }}>
+                {[
+                  { label: 'Lifetime', value: cents(selected.lifetime_earnings_cents) },
+                  { label: 'Available', value: cents(selected.available_balance_cents) },
+                  { label: 'Referrals', value: selected.active_referral_count },
+                  { label: 'Rate', value: `${(selected.commission_rate * 100).toFixed(0)}%` },
+                ].map(s => (
+                  <div key={s.label} style={{ background: '#0a0a0a', borderRadius: 8, padding: '10px 12px', border: `1px solid ${border}` }}>
+                    <div style={{ fontSize: 14, fontWeight: 800, color: gold }}>{s.value}</div>
+                    <div style={{ fontSize: 11, color: muted, marginTop: 2 }}>{s.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Status actions */}
+            <div style={{ marginBottom: 20 }}>
+              <p style={{ fontSize: 11, color: muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 10px' }}>Update Status</p>
+              <textarea
+                value={actionNote}
+                onChange={e => setActionNote(e.target.value)}
+                placeholder="Admin note (optional)"
+                rows={2}
+                style={{
+                  width: '100%', padding: '9px 12px', borderRadius: 8,
+                  background: '#0a0a0a', border: `1px solid ${border}`,
+                  color: '#f1f1f1', fontSize: 13, resize: 'vertical',
+                  boxSizing: 'border-box', marginBottom: 10, fontFamily: 'inherit',
+                  outline: 'none',
+                }}
+              />
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {[
+                  { status: 'active',     label: 'Activate',   bg: 'rgba(34,197,94,0.15)',   color: '#22c55e' },
+                  { status: 'suspended',  label: 'Suspend',    bg: 'rgba(249,115,22,0.15)',  color: '#f97316' },
+                  { status: 'terminated', label: 'Terminate',  bg: 'rgba(239,68,68,0.15)',   color: '#ef4444' },
+                ].map(a => (
+                  <button
+                    key={a.status}
+                    onClick={() => updateAffiliateStatus(selected.id, a.status)}
+                    disabled={actionLoading || selected.status === a.status}
+                    style={{
+                      padding: '7px 14px', borderRadius: 8, border: 'none',
+                      background: a.bg, color: a.color, fontSize: 12, fontWeight: 700,
+                      cursor: selected.status === a.status ? 'not-allowed' : 'pointer',
+                      opacity: selected.status === a.status ? 0.4 : 1,
+                      fontFamily: 'inherit',
+                    }}
+                  >
+                    {a.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Generate promo code */}
+            <div style={{ marginBottom: 20 }}>
+              <p style={{ fontSize: 11, color: muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 10px' }}>Generate Custom Promo Code</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <input
+                  value={promoCode} onChange={e => setPromoCode(e.target.value.toUpperCase())}
+                  placeholder="PROMO20"
+                  style={{ padding: '9px 12px', borderRadius: 8, background: '#0a0a0a', border: `1px solid ${border}`, color: '#f1f1f1', fontSize: 13, outline: 'none', fontFamily: 'monospace' }}
+                />
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input
+                    type="number" value={promoDiscount} onChange={e => setPromoDiscount(e.target.value)}
+                    placeholder="Discount %"
+                    style={{ flex: 1, padding: '9px 12px', borderRadius: 8, background: '#0a0a0a', border: `1px solid ${border}`, color: '#f1f1f1', fontSize: 13, outline: 'none', fontFamily: 'inherit' }}
+                  />
+                  <input
+                    type="number" value={promoMonths} onChange={e => setPromoMonths(e.target.value)}
+                    placeholder="Months"
+                    style={{ flex: 1, padding: '9px 12px', borderRadius: 8, background: '#0a0a0a', border: `1px solid ${border}`, color: '#f1f1f1', fontSize: 13, outline: 'none', fontFamily: 'inherit' }}
+                  />
+                </div>
+                <button
+                  onClick={generatePromoCode}
+                  disabled={promoLoading || !promoCode.trim()}
+                  style={{
+                    padding: '9px', borderRadius: 8, border: 'none',
+                    background: `rgba(245,158,11,0.15)`, color: gold,
+                    fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+                  }}
+                >
+                  {promoLoading ? 'Generating...' : 'Generate Code'}
+                </button>
+              </div>
+            </div>
+
+            {/* W-9 info */}
+            {selected.w9_required && (
+              <div style={{ background: 'rgba(245,158,11,0.06)', border: `1px solid rgba(245,158,11,0.2)`, borderRadius: 10, padding: 16 }}>
+                <p style={{ margin: '0 0 6px', fontSize: 12, fontWeight: 700, color: gold }}>W-9 Status</p>
+                <p style={{ margin: 0, fontSize: 12, color: muted, lineHeight: 1.6 }}>
+                  {selected.w9_submitted
+                    ? 'W-9 submitted. Review in Supabase Storage under affiliate-tax-docs.'
+                    : `Not submitted. Deadline: ${selected.w9_forfeiture_deadline ? new Date(selected.w9_forfeiture_deadline).toLocaleDateString() : 'N/A'}`}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+    </div>
+  )
+}
