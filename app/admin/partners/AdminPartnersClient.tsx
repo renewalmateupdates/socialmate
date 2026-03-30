@@ -36,6 +36,15 @@ interface PayoutRequest {
   affiliate_email?: string
 }
 
+interface FeedbackItem {
+  id: string
+  user_id: string | null
+  type: string
+  message: string
+  email: string | null
+  created_at: string
+}
+
 interface RevenueStats {
   gross_revenue_cents: number
   total_commissions_cents: number
@@ -87,8 +96,9 @@ export default function AdminPartnersClient() {
   const [affiliates, setAffiliates]     = useState<AffiliateProfile[]>([])
   const [payouts, setPayouts]           = useState<PayoutRequest[]>([])
   const [stats, setStats]               = useState<RevenueStats | null>(null)
+  const [feedback, setFeedback]         = useState<FeedbackItem[]>([])
   const [loading, setLoading]           = useState(true)
-  const [activeTab, setActiveTab]       = useState<'affiliates' | 'payouts' | 'revenue' | 'invite'>('affiliates')
+  const [activeTab, setActiveTab]       = useState<'affiliates' | 'payouts' | 'revenue' | 'invite' | 'feedback'>('affiliates')
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [selected, setSelected]         = useState<AffiliateProfile | null>(null)
 
@@ -102,24 +112,28 @@ export default function AdminPartnersClient() {
   const [actionNote, setActionNote]       = useState('')
 
   // Promo code gen
-  const [promoCode, setPromoCode]         = useState('')
-  const [promoDiscount, setPromoDiscount] = useState('20')
-  const [promoMonths, setPromoMonths]     = useState('3')
-  const [promoLoading, setPromoLoading]   = useState(false)
+  const [promoCode, setPromoCode]             = useState('')
+  const [promoDiscount, setPromoDiscount]     = useState('20')
+  const [promoMonths, setPromoMonths]         = useState('3')
+  const [promoLoading, setPromoLoading]       = useState(false)
+  const [allPromosLoading, setAllPromosLoading] = useState(false)
+  const [allPromosResult, setAllPromosResult] = useState<string | null>(null)
 
   useEffect(() => { fetchAll() }, [])
 
   async function fetchAll() {
     setLoading(true)
-    const [a, p, s] = await Promise.all([
+    const [a, p, s, f] = await Promise.all([
       fetch('/api/partners/stats?admin=true').then(r => r.json()),
       fetch('/api/partners/payout?admin=true').then(r => r.json()),
       fetch('/api/partners/stats?admin=true&type=revenue').then(r => r.json()),
+      fetch('/api/feedback').then(r => r.json()).catch(() => ({ feedback: [] })),
     ])
     if (a.forbidden) { router.push('/dashboard'); return }
     setAffiliates(a.affiliates ?? [])
     setPayouts(p.payouts ?? [])
     setStats(s.revenue ?? null)
+    setFeedback(f.feedback ?? [])
     setLoading(false)
   }
 
@@ -171,6 +185,10 @@ export default function AdminPartnersClient() {
     setActionLoading(false)
   }
 
+  function extractBase(email: string): string {
+    return email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 8)
+  }
+
   async function generatePromoCode() {
     if (!selected) return
     setPromoLoading(true)
@@ -187,6 +205,29 @@ export default function AdminPartnersClient() {
     })
     setPromoLoading(false)
     setPromoCode('')
+    await fetchAll()
+  }
+
+  async function generateAllPromos() {
+    if (!selected) return
+    setAllPromosLoading(true)
+    setAllPromosResult(null)
+    const res = await fetch('/api/partners/stats', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'generate_all_promos',
+        affiliate_id: selected.id,
+        email_prefix: extractBase(selected.email),
+      }),
+    })
+    const json = await res.json()
+    if (res.ok) {
+      setAllPromosResult(`✓ Created ${json.created} codes${json.skipped > 0 ? `, ${json.skipped} already existed` : ''} — Stripe promotion codes generated`)
+    } else {
+      setAllPromosResult(`Error: ${json.error}`)
+    }
+    setAllPromosLoading(false)
     await fetchAll()
   }
 
@@ -257,6 +298,7 @@ export default function AdminPartnersClient() {
             { key: 'affiliates', label: `Affiliates (${affiliates.length})` },
             { key: 'payouts',    label: `Payouts${pendingPayouts.length > 0 ? ` (${pendingPayouts.length})` : ''}` },
             { key: 'revenue',    label: 'Revenue' },
+            { key: 'feedback',   label: `Feedback${feedback.length > 0 ? ` (${feedback.length})` : ''}` },
             { key: 'invite',     label: 'Send Invite' },
           ].map(tab => (
             <button
@@ -447,6 +489,59 @@ export default function AdminPartnersClient() {
           </div>
         )}
 
+        {/* FEEDBACK TAB */}
+        {activeTab === 'feedback' && (
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#f1f1f1' }}>
+                User Feedback Inbox
+              </h3>
+              <span style={{ fontSize: 12, color: muted }}>{feedback.length} message{feedback.length !== 1 ? 's' : ''}</span>
+            </div>
+            {feedback.length === 0 ? (
+              <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 14, padding: 40, textAlign: 'center' }}>
+                <div style={{ fontSize: 32, marginBottom: 12 }}>📭</div>
+                <p style={{ fontSize: 14, color: muted, margin: 0 }}>No feedback yet. The pink bubble on every page sends messages here.</p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {feedback.map(item => {
+                  const typeColor: Record<string, string> = {
+                    bug: '#f87171', feature: '#60a5fa', general: '#a3a3a3',
+                  }
+                  const typeEmoji: Record<string, string> = {
+                    bug: '🐛', feature: '💡', general: '💬',
+                  }
+                  return (
+                    <div key={item.id} style={{
+                      background: surface, border: `1px solid ${border}`,
+                      borderRadius: 12, padding: '16px 20px',
+                      borderLeft: `3px solid ${typeColor[item.type] ?? '#4b5563'}`,
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ fontSize: 14 }}>{typeEmoji[item.type] ?? '💬'}</span>
+                          <span style={{
+                            fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
+                            letterSpacing: '0.08em', color: typeColor[item.type] ?? muted,
+                          }}>{item.type}</span>
+                          {item.email && (
+                            <span style={{ fontSize: 12, color: muted }}>from {item.email}</span>
+                          )}
+                        </div>
+                        <span style={{ fontSize: 11, color: '#4b5563' }}>
+                          {new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                      <p style={{ fontSize: 13, color: '#d1d5db', margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{item.message}</p>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* INVITE TAB */}
         {activeTab === 'invite' && (
           <div style={{ maxWidth: 500 }}>
@@ -583,9 +678,40 @@ export default function AdminPartnersClient() {
               </div>
             </div>
 
-            {/* Generate promo code */}
+            {/* Generate promo codes */}
             <div style={{ marginBottom: 20 }}>
-              <p style={{ fontSize: 11, color: muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 10px' }}>Generate Custom Promo Code</p>
+              <p style={{ fontSize: 11, color: muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 10px' }}>Promo Codes</p>
+
+              {/* Generate all standard codes */}
+              <div style={{ background: 'rgba(124,58,237,0.06)', border: `1px solid rgba(124,58,237,0.2)`, borderRadius: 10, padding: 14, marginBottom: 12 }}>
+                <p style={{ margin: '0 0 6px', fontSize: 12, fontWeight: 700, color: purple }}>Standard Code Set</p>
+                <p style={{ margin: '0 0 10px', fontSize: 11, color: muted, lineHeight: 1.5 }}>
+                  Generates 8 codes ({extractBase(selected.email)}1M, 3M, 6M, 1Y, CR1, CR2, WLB, WLP) and creates matching Stripe promotion codes.
+                </p>
+                <button
+                  onClick={generateAllPromos}
+                  disabled={allPromosLoading}
+                  style={{
+                    width: '100%', padding: '9px', borderRadius: 8, border: 'none',
+                    background: `rgba(124,58,237,0.2)`, color: purple,
+                    fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+                    opacity: allPromosLoading ? 0.6 : 1,
+                  }}
+                >
+                  {allPromosLoading ? 'Generating...' : 'Generate All Standard Codes'}
+                </button>
+                {allPromosResult && (
+                  <p style={{
+                    margin: '8px 0 0', fontSize: 12, fontWeight: 600,
+                    color: allPromosResult.startsWith('✓') ? '#22c55e' : '#f87171',
+                  }}>
+                    {allPromosResult}
+                  </p>
+                )}
+              </div>
+
+              {/* Manual single code */}
+              <p style={{ fontSize: 11, color: muted, fontWeight: 600, margin: '0 0 8px' }}>Custom Single Code</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <input
                   value={promoCode} onChange={e => setPromoCode(e.target.value.toUpperCase())}
@@ -611,6 +737,7 @@ export default function AdminPartnersClient() {
                     padding: '9px', borderRadius: 8, border: 'none',
                     background: `rgba(245,158,11,0.15)`, color: gold,
                     fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+                    opacity: promoLoading || !promoCode.trim() ? 0.6 : 1,
                   }}
                 >
                   {promoLoading ? 'Generating...' : 'Generate Code'}

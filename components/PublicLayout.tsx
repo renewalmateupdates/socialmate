@@ -115,16 +115,6 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
                 Featured on Product Hunt
               </a>
 
-              {/* Fazier badge */}
-              <a href="https://fazier.com/launches/socialmate.studio" target="_blank" rel="noopener noreferrer">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="https://fazier.com/api/v1//public/badges/launch_badges.svg?badge_type=launched&theme=light"
-                  width={120}
-                  alt="Fazier badge"
-                  className="opacity-80 hover:opacity-100 transition-opacity"
-                />
-              </a>
             </div>
 
             <p className="text-xs text-gray-400 dark:text-gray-500">© 2026 SocialMate · All rights reserved</p>

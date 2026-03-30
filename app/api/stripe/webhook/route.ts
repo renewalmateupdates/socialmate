@@ -367,6 +367,35 @@ const creditsToSet = alreadyOnPlan
       await processReferralCredits(supabase, userId, plan, true)
       await processAffiliateCommission(supabase, userId, plan, true)
     }
+
+    // Track affiliate promo code usage
+    try {
+      if (session.discounts && session.discounts.length > 0) {
+        for (const discount of session.discounts) {
+          if (discount.promotion_code) {
+            const promoCodeId = typeof discount.promotion_code === 'string'
+              ? discount.promotion_code
+              : discount.promotion_code.id
+
+            // stripe_coupon_id stores "couponId|promoCodeId" or just couponId
+            const { data: promoRecord } = await supabase
+              .from('affiliate_promo_codes')
+              .select('id, times_used')
+              .like('stripe_coupon_id', `%${promoCodeId}%`)
+              .maybeSingle()
+
+            if (promoRecord) {
+              await supabase
+                .from('affiliate_promo_codes')
+                .update({ times_used: (promoRecord.times_used ?? 0) + 1 })
+                .eq('id', promoRecord.id)
+            }
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('Promo code usage tracking failed (non-fatal):', err)
+    }
   }
 
   // ── SUBSCRIPTION UPDATED ────────────────────────────────────────────────────

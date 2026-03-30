@@ -909,6 +909,289 @@ One practical note: most scheduling tools publish exactly at the scheduled time 
 SocialMate's Best Times feature tells you when your specific audience is most active, so you can schedule posts to go out at those times and then be ready to engage when they do.
     `,
   },
+
+  'socialmate-gives-back-sm-give': {
+    title:    'How SocialMate Gives Back: Introducing SM-Give',
+    category: 'Our Story',
+    date:     'Apr 1, 2026',
+    readTime: '3 min read',
+    excerpt:  'Every subscription, every donation, every unclaimed affiliate check — a piece goes to real people who need it most.',
+    content: `
+## A Tool With a Mission
+
+SocialMate was built from nothing. No investors. No funding rounds. No safety net. Just a deep belief that tools like this should exist for people who don't have enterprise budgets.
+
+That same belief — that resources should reach the people who need them most — drives SM-Give.
+
+## What SM-Give Is
+
+SM-Give is SocialMate's built-in giving program. It's not a marketing campaign. It's not a promise we'll fulfill "someday." It's baked into how the business works from day one.
+
+Three things happen automatically:
+
+**2% of every subscription** goes directly to SM-Give. Every paid plan — Pro at $5/month, Agency at $20/month — contributes a slice to the program monthly, after Stripe fees and applicable taxes.
+
+**10% of every voluntary support donation** on the Story page is earmarked for SM-Give. If someone believes in what we're building and chips in, a tenth of that goes to something even more tangible.
+
+**75% of unclaimed affiliate commissions** fund SM-Give. Affiliates who miss the payout deadline each cycle forfeit their balance. Rather than keeping it, we send 75% to charity.
+
+## Where the Money Goes
+
+Three areas. No corporate charity fluff — just direct impact.
+
+**School Supply Bookbags.** Fully stocked backpacks for kids at underprivileged schools. Real supplies — notebooks, pencils, folders, crayons, scissors, rulers. Not dollar-store fillers. We believe a child shouldn't walk into their first day of school without the tools to learn.
+
+**Diaper Bags for Struggling Parents.** Quality essentials for new parents who are struggling — especially single parents. Real diapers, real wipes, real baby clothes. Not cheap onesies. Something a new parent can actually use.
+
+**Homeless Care Packages.** Hygiene essentials, socks, warm beanies, snacks, a handwritten note. Distributed through local shelters and outreach organizations. Because dignity matters.
+
+## Why 2% and Not More?
+
+Honesty. We need to be able to sustain this program long-term, which means accounting for infrastructure costs, Stripe fees, taxes, and everything it takes to operate. We're not a nonprofit — we're a bootstrapped company with a giving program built in.
+
+2% is a real number. It's not the largest number. But it's a number we can honor every month, regardless of how big or small the month is, and grow over time as the product grows.
+
+## This Doesn't Make SocialMate a Charity
+
+SocialMate is still a product built to help creators and small businesses. SM-Give doesn't change that. It just means that when you use SocialMate — when you schedule a post, upgrade your plan, or refer someone — a piece of that goes somewhere that matters.
+
+We think that's the right way to build.
+    `,
+  },
+
+  'discord-scheduling-grow-your-server': {
+    title:    'How to Schedule Discord Posts and Grow Your Server in 2026',
+    category: 'Guides',
+    date:     'Apr 1, 2026',
+    readTime: '5 min read',
+    excerpt:  'Discord isn\'t just for gaming anymore. Here\'s how to use scheduled posts to keep your community engaged daily.',
+    content: `
+## Discord Has a Content Problem
+
+Most Discord servers go quiet. There's a flurry of activity at launch, a gradual decline in messages, and eventually the server becomes a ghost town that the owner is too embarrassed to archive.
+
+The root cause is almost always the same: there's no consistent content. The community has nowhere to rally around, nothing to respond to, no rhythm to the space.
+
+Scheduled posts fix this.
+
+## Why Discord Scheduling Is Different
+
+Unlike Twitter or Instagram, Discord is built for conversation. When you post to a channel, you're not broadcasting — you're starting a thread. That means scheduled posts on Discord work best when they're designed to get responses, not just be read.
+
+The best Discord content formats for scheduled posting:
+- **Daily check-in questions** — "What are you working on today?" in your #general channel at 9 AM
+- **Weekly showcase prompts** — "Share what you built this week" in your #share channel every Friday
+- **Resource drops** — One useful link, tool, or tip posted consistently in #resources
+- **Polls and votes** — What to name something, what feature to build next, what collab to pursue
+
+## How to Schedule Discord Posts with SocialMate
+
+SocialMate connects directly to Discord via webhooks. Here's the setup:
+
+**Step 1: Create a webhook in your Discord server.**
+Go to your server settings → Integrations → Webhooks → New Webhook. Copy the webhook URL.
+
+**Step 2: Add the webhook as a destination in SocialMate.**
+Go to Accounts → Destinations → Add Destination → Select Discord → paste your webhook URL → name the channel and save.
+
+**Step 3: Compose and schedule.**
+Open the Compose screen, write your post, select Discord, choose your channel destination, pick a date and time, and hit Schedule. SocialMate's Inngest-powered scheduler handles the rest — even if you close the browser.
+
+## What to Schedule and When
+
+The goal isn't to post more — it's to post consistently at the right times.
+
+**Best times for Discord:** Mid-morning (9-11 AM) and early evening (7-9 PM) in your community's main time zone. If your server is international, pick a time that works for two major regions and rotate.
+
+**Best cadence:** 1-2 scheduled posts per day max. Discord feels different when it's being used naturally versus when it feels like a broadcast channel. Don't over-automate.
+
+**Types of posts to automate:**
+- Community rituals (daily questions, weekly wins)
+- Announcements and product updates
+- Content drops (links, resources, guides)
+
+**Types of posts to never automate:**
+- Replies to members
+- Reactions to current events
+- Personal check-ins
+
+## Growing Your Server With Consistent Content
+
+Consistency does two things for Discord growth:
+
+First, it gives members a reason to come back. If they know every Monday morning there's a discussion thread in #strategy, some members will make that a habit. Habits drive retention.
+
+Second, it gives you something to promote. "We post daily in our Discord" is a better value proposition than "join our Discord." Consistent content is the thing you invite people into.
+
+**The 30-day plan:**
+- Week 1: Set up your content calendar. Schedule one post per day for the first two weeks.
+- Week 2: Monitor which posts get the most replies. Double down on those formats.
+- Week 3: Promote your Discord in your other channels. "We're discussing X in the Discord this week."
+- Week 4: Review engagement. Cut what didn't land. Add what did.
+
+## One More Thing
+
+SocialMate supports media attachments on Discord posts — images, videos, and files. If you're running a creative community, schedule posts with example work, inspiration, or WIPs. Visual content consistently outperforms text-only in Discord channels.
+    `,
+  },
+
+  'mastodon-scheduling-free-tool': {
+    title:    'How to Schedule Mastodon Posts for Free (No Paid Tools)',
+    category: 'Guides',
+    date:     'Apr 1, 2026',
+    readTime: '4 min read',
+    excerpt:  'Mastodon has no algorithm — which means consistency is everything. Here\'s a free way to stay consistent.',
+    content: `
+## The Mastodon Consistency Challenge
+
+Mastodon doesn't have an algorithm that amplifies your posts when you're not online. There's no "for you" page showing your content to strangers hours after you posted. If you're not posting when people are looking at their feeds, you're invisible.
+
+This makes consistency more important on Mastodon than almost anywhere else.
+
+The problem: most creators post in bursts. A flurry of toots during a productive week, then silence for two weeks. That pattern kills Mastodon growth.
+
+Scheduling solves it.
+
+## What Mastodon Scheduling Actually Does
+
+When you schedule a post for Mastodon, you're not just picking a time — you're committing to being present in the feed at a moment when your audience is actively scrolling. Mastodon users tend to be habitual: they check their feed at the same times each day.
+
+Scheduled posts let you:
+- Show up consistently without being chained to a posting schedule
+- Front-load content creation to your most productive times
+- Post at optimal times regardless of your time zone
+
+## How to Connect Mastodon to SocialMate
+
+SocialMate connects to any Mastodon instance via OAuth — not just mastodon.social. If you're on fosstodon.org, hachyderm.io, infosec.exchange, or any other instance, the connection process is the same.
+
+**Step 1:** Go to Accounts in SocialMate and click "Connect Mastodon."
+
+**Step 2:** Enter your instance URL (e.g., mastodon.social or fosstodon.org).
+
+**Step 3:** Authorize SocialMate in the OAuth flow on your instance.
+
+That's it. Your account is connected. SocialMate stores your OAuth token securely and uses it for every scheduled post.
+
+## The 500 Character Limit Is a Feature
+
+Mastodon's default 500-character limit (some instances allow more) forces you to be direct. It's easy to schedule posts on Mastodon because there's a natural length ceiling — you can't write a novel.
+
+Mastodon content that performs well:
+- **Takes and opinions** — Mastodon rewards genuine perspective. Say something you actually believe.
+- **Questions** — The Mastodon community is engaged and will reply. "What are you working on?" gets answers.
+- **Links with context** — Don't just paste a URL. Add 2-3 sentences on why it matters.
+- **Short threads** — Some instances support threaded toots. Start a thread with your main point and expand in replies.
+
+## Best Posting Times for Mastodon
+
+Mastodon's audience skews toward tech, creative, and academic communities. Based on engagement patterns:
+
+- **Morning (7-9 AM UTC):** European users are most active
+- **Afternoon (1-3 PM UTC):** Transatlantic peak — both European and early US users
+- **Evening (6-9 PM UTC):** US prime time
+
+If you're growing a specific niche (dev, design, writing), check when the active users in your instance tend to engage. Your instance's local feed is a good signal.
+
+## A 30-Day Consistency Plan for Mastodon
+
+**Week 1:** Schedule 2 posts per day — morning and afternoon. Mix opinions with questions.
+
+**Week 2:** Identify which formats get the most boosts and replies. Double down.
+
+**Week 3:** Add one thread per week — a longer-form take broken into 4-5 connected toots.
+
+**Week 4:** Review your follower growth. Consistent posters on Mastodon typically see 10-25% follower growth in the first month compared to irregular posters.
+
+## The Free Part
+
+SocialMate's free plan includes Mastodon scheduling with a 2-week scheduling window and unlimited scheduled posts. You don't need a paid plan to maintain a consistent Mastodon presence.
+
+If you want to schedule further ahead (up to 3 months on the Agency plan), that's available on Pro and above — but for most Mastodon creators, two weeks is plenty.
+    `,
+  },
+
+  'how-to-repurpose-content-across-platforms': {
+    title:    'How to Repurpose Content Across 4 Platforms Without Burning Out',
+    category: 'Tips',
+    date:     'Apr 1, 2026',
+    readTime: '5 min read',
+    excerpt:  'You don\'t need four different content strategies. One post, four platforms, zero burnout — here\'s the system.',
+    content: `
+## The Multi-Platform Mistake
+
+Most creators who try to post on multiple platforms burn out within three months. The reason is almost always the same: they're treating each platform as a separate content machine that requires original posts, separate writing sessions, and a different brain for each one.
+
+That's not sustainable. And it's not necessary.
+
+The fix is a repurposing system — a single piece of content broken down and adapted for each platform rather than created from scratch.
+
+## The Core Concept: One Idea, Four Formats
+
+Every piece of content starts as an idea, not a post. When you think in ideas instead of posts, repurposing becomes natural.
+
+Here's an example. The idea: "People overthink their content strategy."
+
+- **Bluesky (300 chars):** "Most people are spending 80% of their time optimizing a strategy and 20% actually posting. Flip that. The algorithm rewards volume, not perfection."
+- **Mastodon (500 chars):** Same core idea with an additional supporting point — add what you'd tell someone who asked "but what about quality?"
+- **Telegram:** The full take — two or three paragraphs, written conversationally, like a newsletter entry.
+- **Discord:** A question version — "Do you over-plan your content or under-plan it?" — designed to start a conversation.
+
+Same idea. Four different executions. One writing session.
+
+## How to Build Your Repurposing System
+
+**Step 1: Write the long version first.**
+
+Write your full thought — as long as it needs to be. Don't edit for platform yet. Just get the idea out. This becomes your source material.
+
+**Step 2: Extract the core sentence.**
+
+What's the one sentence that contains the entire point? That's your Bluesky post (or the first line of a Bluesky thread).
+
+**Step 3: Expand for Mastodon.**
+
+Take the core sentence and add one supporting point. Stay under 500 characters. Don't add fluff — just the most useful expansion of the idea.
+
+**Step 4: Use the full version for Telegram.**
+
+Telegram's format is conversational and long-form friendly. Paste your full thought, break it into short paragraphs, and add a question at the end to drive replies.
+
+**Step 5: Convert to a conversation starter for Discord.**
+
+Take the core idea and reframe it as a question or prompt. "What do you think about X?" or "Have you tried Y?" Discord rewards posts that get replies, not statements.
+
+## The SocialMate Workflow
+
+SocialMate's compose screen lets you write once and post to multiple platforms simultaneously. Here's the workflow:
+
+1. Write your full version in the compose area
+2. Select all four platforms (Discord, Bluesky, Mastodon, Telegram)
+3. Post it directly, or schedule it for your optimal time
+
+For platform-specific versions, create separate drafts and use SocialMate's AI Caption Rewriter to adapt tone for each platform without rewriting from scratch.
+
+## Common Repurposing Mistakes
+
+**Posting the identical text everywhere.** Each platform has norms. Twitter/X and Bluesky reward short and punchy. Mastodon rewards thoughtful and slightly longer. Telegram and Discord reward conversational and personal. Identical text on all four feels off and gets ignored.
+
+**Changing content but not format.** A wall-of-text paragraph that works on Telegram will get skipped on Bluesky. Format matters as much as content.
+
+**Repurposing too fast.** If you post the same idea across all platforms within an hour, followers who are on multiple platforms will see it duplicated. Stagger by 24-48 hours.
+
+## The Sustainable Schedule
+
+A repurposed content system lets you maintain 4 platforms with 2-3 writing sessions per week. The math:
+
+- Monday writing session → Post on Discord and Bluesky Monday, Mastodon and Telegram Tuesday
+- Wednesday writing session → Post Wednesday/Thursday across platforms
+- Friday writing session → Weekend posts across platforms
+
+That's 4 platforms, 6-8 posts per week, 3 sessions. Fully sustainable without a team.
+
+SocialMate's scheduling queue handles the spacing automatically once you've created the posts. Set it and forget it.
+    `,
+  },
 }
 
 const CATEGORY_COLORS: Record<string, string> = {

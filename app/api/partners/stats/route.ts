@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
+import { stripe } from '@/lib/stripe'
 
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
 
@@ -167,6 +168,45 @@ export async function PATCH(req: NextRequest) {
   return NextResponse.json({ success: true })
 }
 
+// ── Stripe coupon helper ──────────────────────────────────────────────────
+
+async function createStripeCouponForCode(params: {
+  code: string
+  discount_value: number
+  stripe_duration: 'once' | 'repeating' | 'forever'
+  stripe_duration_months?: number
+  description: string
+  affiliate_id: string
+}): Promise<{ coupon_id: string | null; promo_code_id: string | null }> {
+  try {
+    const coupon = await stripe.coupons.create({
+      percent_off: params.discount_value,
+      duration: params.stripe_duration,
+      ...(params.stripe_duration === 'repeating' && params.stripe_duration_months
+        ? { duration_in_months: params.stripe_duration_months }
+        : {}),
+      name: `${params.code} — ${params.description}`,
+      metadata: { affiliate_id: params.affiliate_id, promo_code: params.code },
+    })
+
+    const promoCode = await stripe.promotionCodes.create({
+      coupon: coupon.id,
+      code: params.code,
+      metadata: { affiliate_id: params.affiliate_id },
+    })
+
+    return { coupon_id: coupon.id, promo_code_id: promoCode.id }
+  } catch (err: any) {
+    // Duplicate code in Stripe — try to find existing promotion code
+    if (err?.code === 'resource_already_exists') {
+      console.warn(`Stripe promo code already exists for ${params.code}, skipping Stripe creation`)
+    } else {
+      console.warn(`Stripe coupon creation failed for ${params.code}:`, err?.message)
+    }
+    return { coupon_id: null, promo_code_id: null }
+  }
+}
+
 // ── POST — admin generate custom promo code ───────────────────────────────
 
 export async function POST(req: NextRequest) {
@@ -180,22 +220,122 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json()
 
+  // ── Single custom promo code ──
   if (body.action === 'generate_promo') {
     const { affiliate_id, code, discount_value, duration_months } = body
     if (!affiliate_id || !code) return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
 
     const db = getAdminSupabase()
+    const upperCode = (code as string).toUpperCase()
+    const description = duration_months
+      ? `${discount_value}% off for ${duration_months} months`
+      : `${discount_value}% off`
+
     const { error } = await db.from('affiliate_promo_codes').insert({
       affiliate_id,
-      code: code.toUpperCase(),
+      code: upperCode,
       discount_type: 'percent',
       discount_value,
       duration_months,
-      description: `${discount_value}% off for ${duration_months} months`,
+      description,
     })
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    // Create Stripe coupon + promo code (non-fatal if fails)
+    const { coupon_id, promo_code_id } = await createStripeCouponForCode({
+      code: upperCode,
+      discount_value,
+      stripe_duration: 'once',
+      description,
+      affiliate_id,
+    })
+
+    if (coupon_id) {
+      // Store as "couponId|promoCodeId" so webhook can look up by promo_code_id
+      const stripeValue = promo_code_id ? `${coupon_id}|${promo_code_id}` : coupon_id
+      await db.from('affiliate_promo_codes')
+        .update({ stripe_coupon_id: stripeValue })
+        .eq('code', upperCode)
+        .eq('affiliate_id', affiliate_id)
+    }
+
     return NextResponse.json({ success: true })
+  }
+
+  // ── Bulk generate all 8 standard promo codes for an affiliate ──
+  if (body.action === 'generate_all_promos') {
+    const { affiliate_id, email_prefix } = body
+    if (!affiliate_id || !email_prefix) {
+      return NextResponse.json({ error: 'Missing affiliate_id or email_prefix' }, { status: 400 })
+    }
+
+    const BASE = (email_prefix as string).replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 8)
+
+    const standardCodes: Array<{
+      code: string
+      discount_value: number
+      duration_months: number | null
+      description: string
+      stripe_duration: 'once' | 'repeating'
+      stripe_duration_months?: number
+    }> = [
+      { code: `${BASE}1M`,  discount_value: 15, duration_months: 1,    description: '15% off for 1 month',           stripe_duration: 'repeating', stripe_duration_months: 1  },
+      { code: `${BASE}3M`,  discount_value: 20, duration_months: 3,    description: '20% off for 3 months',          stripe_duration: 'repeating', stripe_duration_months: 3  },
+      { code: `${BASE}6M`,  discount_value: 15, duration_months: 6,    description: '15% off for 6 months',          stripe_duration: 'repeating', stripe_duration_months: 6  },
+      { code: `${BASE}1Y`,  discount_value: 10, duration_months: 12,   description: '10% off annual plan',           stripe_duration: 'once'      },
+      { code: `${BASE}CR1`, discount_value: 10, duration_months: null, description: '10% off credit pack',           stripe_duration: 'once'      },
+      { code: `${BASE}CR2`, discount_value: 15, duration_months: null, description: '15% off premium credits',       stripe_duration: 'once'      },
+      { code: `${BASE}WLB`, discount_value: 15, duration_months: null, description: '15% off White Label Basic',     stripe_duration: 'once'      },
+      { code: `${BASE}WLP`, discount_value: 20, duration_months: null, description: '20% off White Label Pro',       stripe_duration: 'once'      },
+    ]
+
+    const db = getAdminSupabase()
+    const results: Array<{ code: string; success: boolean; error?: string }> = []
+
+    for (const def of standardCodes) {
+      // Insert into DB
+      const { error: insertError } = await db.from('affiliate_promo_codes').insert({
+        affiliate_id,
+        code: def.code,
+        discount_type: 'percent',
+        discount_value: def.discount_value,
+        duration_months: def.duration_months,
+        description: def.description,
+      })
+
+      if (insertError) {
+        // Already exists — not fatal, continue
+        console.warn(`DB insert skipped for ${def.code}: ${insertError.message}`)
+        results.push({ code: def.code, success: false, error: insertError.message })
+        continue
+      }
+
+      // Create Stripe coupon + promotion code
+      const { coupon_id, promo_code_id } = await createStripeCouponForCode({
+        code: def.code,
+        discount_value: def.discount_value,
+        stripe_duration: def.stripe_duration,
+        stripe_duration_months: def.stripe_duration_months,
+        description: def.description,
+        affiliate_id,
+      })
+
+      if (coupon_id) {
+        // Store as "couponId|promoCodeId" so webhook can match by promo_code_id
+        const stripeValue = promo_code_id ? `${coupon_id}|${promo_code_id}` : coupon_id
+        await db.from('affiliate_promo_codes')
+          .update({ stripe_coupon_id: stripeValue })
+          .eq('code', def.code)
+          .eq('affiliate_id', affiliate_id)
+      }
+
+      results.push({ code: def.code, success: true })
+    }
+
+    const created = results.filter(r => r.success).length
+    const skipped = results.filter(r => !r.success).length
+    return NextResponse.json({ success: true, created, skipped, results })
   }
 
   return NextResponse.json({ error: 'Unknown action' }, { status: 400 })
