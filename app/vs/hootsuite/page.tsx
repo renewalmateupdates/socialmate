@@ -15,11 +15,11 @@ export const metadata: Metadata = {
 const COMPARISON = [
   { feature: 'Starting price',         hootsuite: '$99/month',            socialmate: '$0 — free forever'       },
   { feature: 'Free plan',              hootsuite: '❌ No free plan',       socialmate: '✅ Genuinely free'        },
-  { feature: 'Posts per month (free)', hootsuite: '—',                     socialmate: '100'                      },
+  { feature: 'Posts per month (free)', hootsuite: '—',                     socialmate: 'Unlimited'                },
   { feature: 'Platforms',              hootsuite: '20+ (paid)',            socialmate: '16 (free)'               },
   { feature: 'Team seats',             hootsuite: '1 user on Standard',   socialmate: '2 seats free'            },
   { feature: 'AI writing tools',       hootsuite: 'OwlyWriter AI (paid)', socialmate: '12 tools free'           },
-  { feature: 'AI credits',            hootsuite: 'Limited/paid',         socialmate: '100/month free'           },
+  { feature: 'AI credits',            hootsuite: 'Limited/paid',         socialmate: '75/month free'            },
   { feature: 'Bulk scheduling',        hootsuite: 'Advanced plan only',   socialmate: '✅ Free'                  },
   { feature: 'Link in bio',            hootsuite: '❌',                    socialmate: '✅ Free'                  },
   { feature: 'Competitor tracking',    hootsuite: 'Streams (paid)',        socialmate: '✅ Free'                  },
@@ -64,6 +64,19 @@ export default function VsHootsuite() {
             <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
             <span className="font-bold text-base tracking-tight dark:text-gray-100">SocialMate</span>
           </Link>
+          <nav className="hidden md:flex items-center gap-1">
+            {[
+              { label: 'Features',  href: '/features'  },
+              { label: 'Pricing',   href: '/pricing'   },
+              { label: 'Roadmap',   href: '/roadmap'   },
+              { label: 'vs Buffer', href: '/vs/buffer' },
+            ].map(l => (
+              <Link key={l.label} href={l.href}
+                className="px-3 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-black dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+                {l.label}
+              </Link>
+            ))}
+          </nav>
           <div className="flex items-center gap-3">
             <Link href="/login" className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-all hidden sm:block">Sign in</Link>
             <Link href="/signup" className="bg-black text-white text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
@@ -148,7 +161,7 @@ export default function VsHootsuite() {
         <div className="bg-black text-white rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3 dark:text-gray-100">Start for free today</h2>
           <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
-            16 platforms, 12 AI tools, 100 posts/month, link in bio, competitor tracking — all free. No card required.
+            16 platforms, 12 AI tools, unlimited posts, link in bio, competitor tracking — all free. No card required.
           </p>
           <Link href="/signup"
             className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">

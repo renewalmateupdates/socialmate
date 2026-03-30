@@ -13,11 +13,8 @@ type RoadmapItem = {
 
 const ROADMAP: RoadmapItem[] = [
   // ── IN PROGRESS ──────────────────────────────────────────
-  { title: 'Dark mode overhaul',         desc: 'Full dark mode support across all pages with proper Tailwind dark: variants and Supabase sync.',               status: 'in-progress',  category: 'Design'        },
-  { title: 'Mobile layout audit',        desc: 'Full 375px audit across every page. Hamburger nav, proper touch targets, mobile-optimized forms.',              status: 'in-progress',  category: 'Mobile'        },
   { title: 'Analytics improvements',     desc: 'GitHub-style posting heatmap, platform breakdown charts, best-times visualization, and recent posts table.',     status: 'in-progress',  category: 'Analytics'     },
   { title: 'Media Library',              desc: 'Upload, compress, and reuse images and videos across posts. Client-side compression to 1920px and 2MB max.',     status: 'in-progress',  category: 'Media'         },
-  { title: 'Bulk Scheduler',             desc: 'CSV upload with PapaParse, row validation, preview table with edit capability, and batch scheduling.',           status: 'in-progress',  category: 'Scheduling'    },
 
   // ── COMING SOON ───────────────────────────────────────────
   { title: 'LinkedIn publishing',        desc: 'Full UGC Posts API integration. Requires LinkedIn developer app approval (r/w_member_social).',                 status: 'coming-soon',  category: 'Platforms'     },
@@ -37,11 +34,14 @@ const ROADMAP: RoadmapItem[] = [
   { title: 'Threads',                    desc: 'Threads API integration once the API becomes publicly available.',                                                status: 'planned',      category: 'Platforms'     },
   { title: 'Reddit',                     desc: 'Reddit API integration for posting to subreddits. Respects rate limits and flair requirements.',                 status: 'planned',      category: 'Platforms'     },
   { title: 'Browser extension',          desc: 'Save content from any webpage directly to SocialMate drafts or queue with one click.',                           status: 'planned',      category: 'Tools'         },
-  { title: 'AI image generation',        desc: 'Generate social images from post text using Gemini Imagen. Pro+ feature.',                                       status: 'planned',      category: 'AI'            },
   { title: 'Post analytics per platform', desc: 'Platform-specific engagement data (impressions, clicks, follows) returned from each platform API.',             status: 'planned',      category: 'Analytics'     },
   { title: 'Competitor tracking',        desc: 'Track competitor accounts on Bluesky/Mastodon. Inngest fetches and surfaces their content every 6 hours.',       status: 'planned',      category: 'Intelligence'  },
 
   // ── SHIPPED ───────────────────────────────────────────────
+  { title: 'Dark mode',                  desc: 'Full dark mode across all pages with Tailwind dark: variants, system preference detection, and Supabase sync.',  status: 'shipped',      category: 'Design'        },
+  { title: 'Mobile layout',             desc: 'Fully responsive across all pages — hamburger nav, proper touch targets, mobile-optimized forms and compose.',    status: 'shipped',      category: 'Mobile'        },
+  { title: 'Bulk Scheduler',            desc: 'CSV upload with PapaParse, row validation, preview table with inline editing, and batch scheduling.',             status: 'shipped',      category: 'Scheduling'    },
+  { title: 'AI Image Generation',        desc: 'Generate on-brand social images from your post content using Gemini Imagen. Pro+ feature, 25 credits.',          status: 'shipped',      category: 'AI'            },
   { title: 'Bluesky publishing',         desc: 'Full AT Protocol integration with token refresh and post URI tracking.',                                         status: 'shipped',      category: 'Platforms'     },
   { title: 'Discord publishing',         desc: 'Webhook-based posting to Discord channels. Multiple destination support.',                                       status: 'shipped',      category: 'Platforms'     },
   { title: 'Telegram publishing',        desc: 'Bot token + chat ID based posting. HTML parse mode support.',                                                    status: 'shipped',      category: 'Platforms'     },
@@ -103,8 +103,6 @@ export default function RoadmapClient() {
     }
   }
 
-  if (!authChecked) return null
-
   const publicNav = (
     <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
       <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
@@ -114,12 +112,18 @@ export default function RoadmapClient() {
         </Link>
         <nav className="hidden md:flex items-center gap-1">
           {[
-            { label: 'Features', href: '/features' },
-            { label: 'Pricing',  href: '/pricing'  },
-            { label: 'Blog',     href: '/blog'     },
+            { label: 'Features',  href: '/features'  },
+            { label: 'Pricing',   href: '/pricing'   },
+            { label: 'Roadmap',   href: '/roadmap'   },
+            { label: 'Blog',      href: '/blog'      },
+            { label: 'Story',     href: '/story'     },
           ].map(l => (
             <Link key={l.label} href={l.href}
-              className="px-4 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-black dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                l.href === '/roadmap'
+                  ? 'bg-gray-900 dark:bg-white text-white dark:text-black'
+                  : 'text-gray-500 hover:text-black dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800'
+              }`}>
               {l.label}
             </Link>
           ))}

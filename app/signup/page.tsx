@@ -179,9 +179,25 @@ function SignupForm() {
 
           {/* RIGHT — FORM */}
           <div>
-            <div className="text-center mb-6 md:hidden">
-              <h1 className="text-2xl font-extrabold tracking-tight mb-1">Create free account</h1>
-              <p className="text-gray-400 dark:text-gray-500 text-sm">No credit card required</p>
+            {/* MOBILE HERO (shows only on small screens) */}
+            <div className="md:hidden mb-6">
+              <div className="inline-flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 text-xs font-bold px-3 py-1.5 rounded-full mb-4">
+                🎉 Free forever · No credit card
+              </div>
+              <h1 className="text-2xl font-extrabold tracking-tight mb-2">
+                Professional tools,<br />zero cost
+              </h1>
+              <p className="text-gray-400 dark:text-gray-500 text-sm mb-4 leading-relaxed">
+                Schedule to 16 platforms, get 12 AI tools, and grow your audience — completely free.
+              </p>
+              <div className="grid grid-cols-2 gap-2 mb-2">
+                {PERKS.map(perk => (
+                  <div key={perk} className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2">
+                    <span className="text-green-500 text-xs font-bold">✓</span>
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300 leading-tight">{perk}</span>
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="bg-surface border border-theme rounded-3xl p-8">

@@ -17,10 +17,10 @@ const COMPARISON = [
   { feature: 'Free plan',              buffer: '❌ Removed',         socialmate: '✅ Genuinely free'        },
   { feature: 'Pricing model',          buffer: 'Per channel',        socialmate: 'Flat rate'                },
   { feature: 'Platforms supported',    buffer: '8–10',               socialmate: '16 (growing)'            },
-  { feature: 'Posts per month (free)', buffer: '10 per channel',     socialmate: '100 across all channels' },
+  { feature: 'Posts per month (free)', buffer: '10 per channel',     socialmate: 'Unlimited'               },
   { feature: 'Team seats (free)',      buffer: '1',                  socialmate: '2'                       },
   { feature: 'AI writing tools',       buffer: '1 (AI Assistant)',   socialmate: '12 tools included'       },
-  { feature: 'AI credits',            buffer: 'Paid add-on',        socialmate: '100/month free'           },
+  { feature: 'AI credits',            buffer: 'Paid add-on',        socialmate: '75/month free'            },
   { feature: 'Bulk scheduling',        buffer: 'Paid plans only',    socialmate: '✅ Free'                  },
   { feature: 'Link in bio',            buffer: 'Separate product',   socialmate: '✅ Built in, free'        },
   { feature: 'Competitor tracking',    buffer: '❌',                  socialmate: '✅ Free (3 accounts)'    },
@@ -68,6 +68,19 @@ export default function VsBuffer() {
             <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
             <span className="font-bold text-base tracking-tight dark:text-gray-100">SocialMate</span>
           </Link>
+          <nav className="hidden md:flex items-center gap-1">
+            {[
+              { label: 'Features',   href: '/features'    },
+              { label: 'Pricing',    href: '/pricing'     },
+              { label: 'Roadmap',    href: '/roadmap'     },
+              { label: 'vs Hootsuite', href: '/vs/hootsuite' },
+            ].map(l => (
+              <Link key={l.label} href={l.href}
+                className="px-3 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-black dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+                {l.label}
+              </Link>
+            ))}
+          </nav>
           <div className="flex items-center gap-3">
             <Link href="/login" className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-all hidden sm:block">Sign in</Link>
             <Link href="/signup" className="bg-black text-white text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
@@ -104,7 +117,7 @@ export default function VsBuffer() {
           <div className="border-2 border-green-200 bg-green-50 rounded-2xl p-6 text-center">
             <p className="text-xs font-bold text-green-600 uppercase tracking-widest mb-2">SocialMate</p>
             <p className="text-3xl font-extrabold text-green-700 mb-1">$0/month</p>
-            <p className="text-xs text-green-600">All 16 platforms · 100 posts/mo · 12 AI tools</p>
+            <p className="text-xs text-green-600">All 16 platforms · Unlimited posts · 12 AI tools</p>
           </div>
         </div>
 
@@ -186,7 +199,7 @@ export default function VsBuffer() {
         <div className="bg-black text-white rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Ready to switch from Buffer?</h2>
           <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
-            Create your free account in 60 seconds. All 16 platforms, 12 AI tools, 100 posts/month — no credit card required.
+            Create your free account in 60 seconds. All 16 platforms, 12 AI tools, unlimited posts — no credit card required.
           </p>
           <Link href="/signup"
             className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
