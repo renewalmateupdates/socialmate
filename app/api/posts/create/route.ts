@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const body = await request.json()
-    const { content, platforms, scheduledAt, destinations, draftId, workspaceId, selectedAccountIds } = body
+    const { content, platforms, scheduledAt, destinations, draftId, workspaceId, selectedAccountIds, mediaUrls } = body
 
     if (!content?.trim()) return NextResponse.json({ error: 'Content is required' }, { status: 400 })
     if (!platforms?.length) return NextResponse.json({ error: 'Select at least one platform' }, { status: 400 })
@@ -176,6 +176,17 @@ export async function POST(request: NextRequest) {
         await supabase.from('posts').delete().eq('id', draftId).eq('user_id', user.id)
       }
 
+      // Non-critical: store media URLs for scheduled post publish
+      if (mediaUrls?.length > 0) {
+        getSupabaseAdmin()
+          .from('posts')
+          .update({ media_urls: mediaUrls })
+          .eq('id', post.id)
+          .then(({ error }) => {
+            if (error) console.warn('[media] media_urls column not found (non-fatal):', error.message)
+          })
+      }
+
       try {
         await inngest.send({ name: 'post/scheduled', data: { postId: post.id, scheduledAt } })
       } catch (inngestErr) {
@@ -188,7 +199,7 @@ export async function POST(request: NextRequest) {
     // ── POST NOW PATH ───────────────────────────────────────────
     // Publish to platforms first, then insert with the correct final status.
     // This eliminates the "insert as draft → update to published" race condition.
-    const results    = await publishToAll(user.id, platforms, content, destinations || {}, accountWorkspaceId, selectedAccountIds || {})
+    const results    = await publishToAll(user.id, platforms, content, destinations || {}, accountWorkspaceId, selectedAccountIds || {}, mediaUrls || [])
     const allFailed  = results.every(r => !r.success)
     const someFailed = results.some(r => !r.success)
     const finalStatus = allFailed ? 'failed' : someFailed ? 'partial' : 'published'
