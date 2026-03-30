@@ -296,7 +296,7 @@ const FEATURE_CATEGORIES = [
 ]
 
 const CREDIT_SUMMARY = [
-  { name: 'Caption Generator',    cost: '3 cr',  proOnly: false },
+  { name: 'Caption Generator',    cost: '5 cr',  proOnly: false },
   { name: 'Hashtag Generator',    cost: '5 cr',  proOnly: false },
   { name: 'Post Rewrite',         cost: '5 cr',  proOnly: false },
   { name: 'Viral Hook',           cost: '5 cr',  proOnly: false },

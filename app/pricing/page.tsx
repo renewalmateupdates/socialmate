@@ -73,7 +73,7 @@ const PLANS = [
       { label: '10 GB media storage'                                           },
       { label: '1-month scheduling window'                                     },
       { label: '90-day analytics history'                                      },
-      { label: 'AI Content Calendar',              note: '20 credits'         },
+      { label: 'AI Content Calendar',              note: '25 credits'         },
       { label: 'AI Image Generation',              note: '25 credits'         },
       { label: 'Custom domain for Link in Bio'                                 },
       { label: 'Referral & affiliate program'                                  },
@@ -123,17 +123,17 @@ const PLANS = [
 ]
 
 const AI_CREDITS = [
-  { feature: 'Caption Generator',       cost: '3 credits',  proOnly: false },
-  { feature: 'Hashtag Generator',       cost: '2 credits',  proOnly: false },
-  { feature: 'Post Rewrite / Improver', cost: '3 credits',  proOnly: false },
-  { feature: 'Viral Hook Generator',    cost: '4 credits',  proOnly: false },
-  { feature: 'Thread Generator',        cost: '8 credits',  proOnly: false },
-  { feature: 'Content Repurposer',      cost: '8 credits',  proOnly: false },
-  { feature: 'Post Score',              cost: '2 credits',  proOnly: false },
-  { feature: 'SM-Pulse',                cost: '10 credits', proOnly: false },
-  { feature: 'SM-Radar',                cost: '10 credits', proOnly: false },
+  { feature: 'Caption Generator',       cost: '5 credits',  proOnly: false },
+  { feature: 'Hashtag Generator',       cost: '5 credits',  proOnly: false },
+  { feature: 'Post Rewrite / Improver', cost: '5 credits',  proOnly: false },
+  { feature: 'Viral Hook Generator',    cost: '5 credits',  proOnly: false },
+  { feature: 'Thread Generator',        cost: '10 credits', proOnly: false },
+  { feature: 'Content Repurposer',      cost: '10 credits', proOnly: false },
+  { feature: 'Post Score',              cost: '5 credits',  proOnly: false },
+  { feature: 'SM-Pulse',                cost: '20 credits', proOnly: false },
+  { feature: 'SM-Radar',                cost: '20 credits', proOnly: false },
   { feature: 'Content Gap Detector',    cost: '10 credits', proOnly: false },
-  { feature: 'AI Content Calendar',     cost: '20 credits', proOnly: true  },
+  { feature: 'AI Content Calendar',     cost: '25 credits', proOnly: true  },
   { feature: 'AI Image Generation',     cost: '25 credits', proOnly: true  },
 ]
 
@@ -396,7 +396,7 @@ export default function Pricing() {
             <div>
               <h3 className="text-base font-extrabold mb-1">AI Credit Costs</h3>
               <p className="text-xs text-gray-500 max-w-xl">
-                Credits refresh monthly. Unused credits roll over into your bank — Free banks up to 150, Pro up to 750, Agency up to 3,000. Banks reset every 6 months.
+                Credits refresh monthly. Unused credits roll over into your bank — Free banks up to 75, Pro up to 750, Agency up to 3,000. Banks reset every 6 months.
               </p>
             </div>
             <Link href="/ai-features"
@@ -439,11 +439,14 @@ export default function Pricing() {
               { label: 'Starter',  credits: '100 cr',   price: '$1.99'  },
               { label: 'Popular',  credits: '300 cr',   price: '$4.99',  badge: true },
               { label: 'Pro Pack', credits: '750 cr',   price: '$9.99'  },
-              { label: 'Max Pack', credits: '2,000 cr', price: '$19.99' },
-            ].map(pack => (
-              <div key={pack.label} className={`bg-white/10 rounded-xl p-4 text-center relative ${pack.badge ? 'ring-2 ring-white' : ''}`}>
+              { label: 'Max Pack', credits: '2,000 cr', price: '$19.99', bestValue: true },
+            ].map((pack: any) => (
+              <div key={pack.label} className={`bg-white/10 rounded-xl p-4 text-center relative ${pack.badge ? 'ring-2 ring-white' : ''} ${pack.bestValue ? 'ring-2 ring-amber-400' : ''}`}>
                 {pack.badge && (
                   <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-xs font-bold bg-white text-black px-2 py-0.5 rounded-full">Popular</span>
+                )}
+                {pack.bestValue && (
+                  <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-xs font-bold bg-amber-400 text-black px-2 py-0.5 rounded-full">Best value</span>
                 )}
                 <p className="text-sm font-extrabold mb-0.5">{pack.label}</p>
                 <p className="text-xs text-gray-400 mb-2">{pack.credits}</p>
