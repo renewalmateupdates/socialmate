@@ -1,19 +1,27 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
 
 const NAV_LINKS = [
   { label: 'Features',  href: '/features' },
-  { label: 'AI Tools',  href: '/features'  },
   { label: 'Pricing',   href: '/pricing'   },
+  { label: 'Roadmap',   href: '/roadmap'   },
   { label: 'Our Story', href: '/story'     },
   { label: 'Blog',      href: '/blog'      },
 ]
 
 export default function PublicNav() {
-  const pathname    = usePathname()
+  const pathname = usePathname()
   const [open, setOpen] = useState(false)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setIsLoggedIn(!!data.user)
+    })
+  }, [])
 
   return (
     <header
@@ -49,20 +57,35 @@ export default function PublicNav() {
           <Link href="/partners" className="text-sm font-semibold text-amber-500 hover:text-amber-400 transition-all">
             Partners
           </Link>
-          <Link href="/login" className="text-sm font-semibold text-gray-500 hover:text-black dark:hover:text-white transition-all">
-            Sign in
-          </Link>
-          <Link href="/signup"
-            className="bg-black dark:bg-white text-white dark:text-black text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
-            Get started free →
-          </Link>
+          {isLoggedIn ? (
+            <Link href="/dashboard"
+              className="bg-black dark:bg-white text-white dark:text-black text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
+              Dashboard →
+            </Link>
+          ) : (
+            <>
+              <Link href="/login" className="text-sm font-semibold text-gray-500 hover:text-black dark:hover:text-white transition-all">
+                Sign in
+              </Link>
+              <Link href="/signup"
+                className="bg-black dark:bg-white text-white dark:text-black text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
+                Get started free →
+              </Link>
+            </>
+          )}
         </div>
 
-        {/* Mobile: Sign in + Hamburger */}
+        {/* Mobile: Sign in/Dashboard + Hamburger */}
         <div className="flex md:hidden items-center gap-2">
-          <Link href="/login" className="text-sm font-semibold text-gray-500 hover:text-black dark:hover:text-white transition-all px-2 py-1">
-            Sign in
-          </Link>
+          {isLoggedIn ? (
+            <Link href="/dashboard" className="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-all px-2 py-1">
+              Dashboard
+            </Link>
+          ) : (
+            <Link href="/login" className="text-sm font-semibold text-gray-500 hover:text-black dark:hover:text-white transition-all px-2 py-1">
+              Sign in
+            </Link>
+          )}
           <button
             onClick={() => setOpen(true)}
             className="w-10 h-10 rounded-xl flex flex-col items-center justify-center gap-[5px] hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
@@ -120,11 +143,19 @@ export default function PublicNav() {
 
             {/* Bottom CTAs */}
             <div className="p-4 border-t border-gray-100 dark:border-gray-800 space-y-2 flex-shrink-0">
-              <Link href="/signup"
-                onClick={() => setOpen(false)}
-                className="flex items-center justify-center w-full px-4 py-3 rounded-xl bg-black dark:bg-white text-white dark:text-black text-sm font-bold hover:opacity-80 transition-all">
-                Get started free →
-              </Link>
+              {isLoggedIn ? (
+                <Link href="/dashboard"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center justify-center w-full px-4 py-3 rounded-xl bg-black dark:bg-white text-white dark:text-black text-sm font-bold hover:opacity-80 transition-all">
+                  Dashboard →
+                </Link>
+              ) : (
+                <Link href="/signup"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center justify-center w-full px-4 py-3 rounded-xl bg-black dark:bg-white text-white dark:text-black text-sm font-bold hover:opacity-80 transition-all">
+                  Get started free →
+                </Link>
+              )}
             </div>
           </div>
         </>
