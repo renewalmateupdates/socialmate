@@ -42,7 +42,7 @@ const PLAN_DETAILS = {
     badge: 'bg-gray-100 text-gray-600',
     icon: '🆓',
     credits: 50,
-    creditBank: 150,
+    creditBank: 75,
     platforms: 1,
     seats: 2,
     posts: 100,
@@ -63,15 +63,15 @@ const PLAN_DETAILS = {
       'Analytics dashboard',
     ],
     aiTools: [
-      { name: 'Caption Generator', cost: 3 },
-      { name: 'Hashtag Generator', cost: 2 },
-      { name: 'Post Rewrite',      cost: 3 },
-      { name: 'Viral Hook',        cost: 4 },
-      { name: 'Thread Generator',  cost: 8 },
-      { name: 'Content Repurposer',cost: 8 },
-      { name: 'Post Score',        cost: 2 },
-      { name: 'SM-Pulse',          cost: 10 },
-      { name: 'SM-Radar',          cost: 10 },
+      { name: 'Caption Generator', cost: 5  },
+      { name: 'Hashtag Generator', cost: 5  },
+      { name: 'Post Rewrite',      cost: 5  },
+      { name: 'Viral Hook',        cost: 5  },
+      { name: 'Thread Generator',  cost: 10 },
+      { name: 'Content Repurposer',cost: 10 },
+      { name: 'Post Score',        cost: 5  },
+      { name: 'SM-Pulse',          cost: 20 },
+      { name: 'SM-Radar',          cost: 20 },
       { name: 'Content Gap',       cost: 10 },
     ],
   },
@@ -101,22 +101,22 @@ const PLAN_DETAILS = {
       '10 GB media storage',
       '1-month scheduling window',
       '90-day analytics history',
-      'AI Content Calendar (20 cr)',
+      'AI Content Calendar (25 cr)',
       'AI Image Generation (25 cr)',
       'White Label add-on available',
     ],
     aiTools: [
-      { name: 'Caption Generator',   cost: 3  },
-      { name: 'Hashtag Generator',   cost: 2  },
-      { name: 'Post Rewrite',        cost: 3  },
-      { name: 'Viral Hook',          cost: 4  },
-      { name: 'Thread Generator',    cost: 8  },
-      { name: 'Content Repurposer',  cost: 8  },
-      { name: 'Post Score',          cost: 2  },
-      { name: 'SM-Pulse',            cost: 10 },
-      { name: 'SM-Radar',            cost: 10 },
+      { name: 'Caption Generator',   cost: 5  },
+      { name: 'Hashtag Generator',   cost: 5  },
+      { name: 'Post Rewrite',        cost: 5  },
+      { name: 'Viral Hook',          cost: 5  },
+      { name: 'Thread Generator',    cost: 10 },
+      { name: 'Content Repurposer',  cost: 10 },
+      { name: 'Post Score',          cost: 5  },
+      { name: 'SM-Pulse',            cost: 20 },
+      { name: 'SM-Radar',            cost: 20 },
       { name: 'Content Gap',         cost: 10 },
-      { name: 'AI Content Calendar', cost: 20 },
+      { name: 'AI Content Calendar', cost: 25 },
       { name: 'AI Image Generation', cost: 25 },
     ],
   },
@@ -151,17 +151,17 @@ const PLAN_DETAILS = {
       'White Label add-on available',
     ],
     aiTools: [
-      { name: 'Caption Generator',   cost: 3  },
-      { name: 'Hashtag Generator',   cost: 2  },
-      { name: 'Post Rewrite',        cost: 3  },
-      { name: 'Viral Hook',          cost: 4  },
-      { name: 'Thread Generator',    cost: 8  },
-      { name: 'Content Repurposer',  cost: 8  },
-      { name: 'Post Score',          cost: 2  },
-      { name: 'SM-Pulse',            cost: 10 },
-      { name: 'SM-Radar',            cost: 10 },
+      { name: 'Caption Generator',   cost: 5  },
+      { name: 'Hashtag Generator',   cost: 5  },
+      { name: 'Post Rewrite',        cost: 5  },
+      { name: 'Viral Hook',          cost: 5  },
+      { name: 'Thread Generator',    cost: 10 },
+      { name: 'Content Repurposer',  cost: 10 },
+      { name: 'Post Score',          cost: 5  },
+      { name: 'SM-Pulse',            cost: 20 },
+      { name: 'SM-Radar',            cost: 20 },
       { name: 'Content Gap',         cost: 10 },
-      { name: 'AI Content Calendar', cost: 20 },
+      { name: 'AI Content Calendar', cost: 25 },
       { name: 'AI Image Generation', cost: 25 },
     ],
   },
@@ -868,32 +868,18 @@ function OnboardingInner() {
               <p className="text-gray-400 dark:text-gray-500 mb-2 text-sm">Your {planConfig.label} account is ready.</p>
               <div className="flex justify-center mb-6"><PlanBadge /></div>
 
-              <div className={`rounded-2xl p-5 mb-6 text-left ${
-                firstPost.trim() && selectedPlatforms.length > 0
-                  ? 'bg-green-50 border border-green-200'
-                  : 'bg-amber-50 border border-amber-100'
-              }`}>
-                {firstPost.trim() && selectedPlatforms.length > 0 ? (
-                  <div className="flex items-center gap-3">
-                    <span className="text-3xl">⚡</span>
-                    <div>
-                      <p className="text-sm font-extrabold text-green-700">50 bonus AI credits added to your bank!</p>
-                      <p className="text-xs text-green-600 mt-0.5">Refer a friend and you both earn another 25 credits on top.</p>
-                    </div>
+              <div className="bg-green-50 border border-green-200 rounded-2xl p-5 mb-6 text-left">
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl">⚡</span>
+                  <div>
+                    <p className="text-sm font-extrabold text-green-700">50 bonus AI credits added to your account!</p>
+                    <p className="text-xs text-green-600 mt-0.5">
+                      {firstPost.trim()
+                        ? 'Your draft is saved and ready in the dashboard. Refer a friend to earn 25 more credits.'
+                        : 'Ready to use right now. Refer a friend and you both earn 25 more credits on top.'}
+                    </p>
                   </div>
-                ) : (
-                  <div className="flex items-start gap-3">
-                    <span className="text-2xl mt-0.5">⚡</span>
-                    <div>
-                      <p className="text-sm font-extrabold text-amber-700">Credits activate on your first post</p>
-                      <p className="text-xs text-amber-600 mt-0.5">
-                        {!selectedPlatforms.length
-                          ? 'Connect a platform and publish one post from the dashboard to unlock your credits.'
-                          : 'Publish or schedule your first post from the dashboard to unlock your credits.'}
-                      </p>
-                    </div>
-                  </div>
-                )}
+                </div>
               </div>
 
               {mfaDone && (
