@@ -102,10 +102,12 @@ export default function AdminPartnersClient() {
   const [actionNote, setActionNote]       = useState('')
 
   // Promo code gen
-  const [promoCode, setPromoCode]         = useState('')
-  const [promoDiscount, setPromoDiscount] = useState('20')
-  const [promoMonths, setPromoMonths]     = useState('3')
-  const [promoLoading, setPromoLoading]   = useState(false)
+  const [promoCode, setPromoCode]             = useState('')
+  const [promoDiscount, setPromoDiscount]     = useState('20')
+  const [promoMonths, setPromoMonths]         = useState('3')
+  const [promoLoading, setPromoLoading]       = useState(false)
+  const [allPromosLoading, setAllPromosLoading] = useState(false)
+  const [allPromosResult, setAllPromosResult] = useState<string | null>(null)
 
   useEffect(() => { fetchAll() }, [])
 
@@ -171,6 +173,10 @@ export default function AdminPartnersClient() {
     setActionLoading(false)
   }
 
+  function extractBase(email: string): string {
+    return email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '').toUpperCase().slice(0, 8)
+  }
+
   async function generatePromoCode() {
     if (!selected) return
     setPromoLoading(true)
@@ -187,6 +193,29 @@ export default function AdminPartnersClient() {
     })
     setPromoLoading(false)
     setPromoCode('')
+    await fetchAll()
+  }
+
+  async function generateAllPromos() {
+    if (!selected) return
+    setAllPromosLoading(true)
+    setAllPromosResult(null)
+    const res = await fetch('/api/partners/stats', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'generate_all_promos',
+        affiliate_id: selected.id,
+        email_prefix: extractBase(selected.email),
+      }),
+    })
+    const json = await res.json()
+    if (res.ok) {
+      setAllPromosResult(`✓ Created ${json.created} codes${json.skipped > 0 ? `, ${json.skipped} already existed` : ''} — Stripe promotion codes generated`)
+    } else {
+      setAllPromosResult(`Error: ${json.error}`)
+    }
+    setAllPromosLoading(false)
     await fetchAll()
   }
 
@@ -583,9 +612,40 @@ export default function AdminPartnersClient() {
               </div>
             </div>
 
-            {/* Generate promo code */}
+            {/* Generate promo codes */}
             <div style={{ marginBottom: 20 }}>
-              <p style={{ fontSize: 11, color: muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 10px' }}>Generate Custom Promo Code</p>
+              <p style={{ fontSize: 11, color: muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 10px' }}>Promo Codes</p>
+
+              {/* Generate all standard codes */}
+              <div style={{ background: 'rgba(124,58,237,0.06)', border: `1px solid rgba(124,58,237,0.2)`, borderRadius: 10, padding: 14, marginBottom: 12 }}>
+                <p style={{ margin: '0 0 6px', fontSize: 12, fontWeight: 700, color: purple }}>Standard Code Set</p>
+                <p style={{ margin: '0 0 10px', fontSize: 11, color: muted, lineHeight: 1.5 }}>
+                  Generates 8 codes ({extractBase(selected.email)}1M, 3M, 6M, 1Y, CR1, CR2, WLB, WLP) and creates matching Stripe promotion codes.
+                </p>
+                <button
+                  onClick={generateAllPromos}
+                  disabled={allPromosLoading}
+                  style={{
+                    width: '100%', padding: '9px', borderRadius: 8, border: 'none',
+                    background: `rgba(124,58,237,0.2)`, color: purple,
+                    fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+                    opacity: allPromosLoading ? 0.6 : 1,
+                  }}
+                >
+                  {allPromosLoading ? 'Generating...' : 'Generate All Standard Codes'}
+                </button>
+                {allPromosResult && (
+                  <p style={{
+                    margin: '8px 0 0', fontSize: 12, fontWeight: 600,
+                    color: allPromosResult.startsWith('✓') ? '#22c55e' : '#f87171',
+                  }}>
+                    {allPromosResult}
+                  </p>
+                )}
+              </div>
+
+              {/* Manual single code */}
+              <p style={{ fontSize: 11, color: muted, fontWeight: 600, margin: '0 0 8px' }}>Custom Single Code</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <input
                   value={promoCode} onChange={e => setPromoCode(e.target.value.toUpperCase())}
@@ -611,6 +671,7 @@ export default function AdminPartnersClient() {
                     padding: '9px', borderRadius: 8, border: 'none',
                     background: `rgba(245,158,11,0.15)`, color: gold,
                     fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+                    opacity: promoLoading || !promoCode.trim() ? 0.6 : 1,
                   }}
                 >
                   {promoLoading ? 'Generating...' : 'Generate Code'}
