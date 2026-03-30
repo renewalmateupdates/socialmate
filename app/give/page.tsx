@@ -101,10 +101,28 @@ export default function GivePage() {
 
         <p style={{
           fontSize: 18, color: '#9ca3af', lineHeight: 1.7,
-          margin: '0 auto 40px', maxWidth: 600,
+          margin: '0 auto 28px', maxWidth: 600,
         }}>
-          SocialMate isn&apos;t just a tool — it&apos;s a company built on purpose. A portion of every unclaimed affiliate contribution goes directly to three causes close to our hearts: kids heading to school, parents starting over, and people who need to feel seen.
+          SocialMate isn&apos;t just a tool — it&apos;s a company built on purpose. We give back in three ways: a share of every subscription, a portion of every voluntary support donation, and all unclaimed affiliate contributions. Three causes, one commitment.
         </p>
+
+        {/* Give stats */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 16, flexWrap: 'wrap', marginBottom: 32 }}>
+          {[
+            { value: '2%', label: 'of every subscription', sub: 'after Stripe fees & taxes' },
+            { value: '10%', label: 'of support donations', sub: 'voluntary contributions' },
+            { value: '75%', label: 'of unclaimed affiliate', sub: 'commission proceeds' },
+          ].map(stat => (
+            <div key={stat.value} style={{
+              background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)',
+              borderRadius: 14, padding: '16px 24px', textAlign: 'center', minWidth: 140,
+            }}>
+              <div style={{ fontSize: 28, fontWeight: 900, color: amber, letterSpacing: '-0.02em' }}>{stat.value}</div>
+              <div style={{ fontSize: 12, color: '#d1d5db', fontWeight: 600, marginTop: 4 }}>{stat.label}</div>
+              <div style={{ fontSize: 10, color: '#6b7280', marginTop: 2 }}>{stat.sub}</div>
+            </div>
+          ))}
+        </div>
 
         <div style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
           {['🎒 School Supplies', '👶 Baby Essentials', '🏠 Homeless Packages'].map(tag => (
@@ -193,27 +211,27 @@ export default function GivePage() {
             </p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 20, marginBottom: 36 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 36 }}>
             {[
               {
                 step: '01',
-                label: 'Affiliate earns a commission',
-                detail: 'Every referral is tracked and credited to the referring affiliate partner.',
+                label: '2% from every subscription',
+                detail: 'Every paid SocialMate plan automatically allocates 2% of net revenue (after Stripe fees and applicable taxes) to SM-Give monthly.',
               },
               {
                 step: '02',
-                label: 'Payout deadline passes',
-                detail: 'Affiliates must file the necessary claim form before the payout deadline each cycle.',
+                label: '10% from support donations',
+                detail: 'When someone voluntarily supports SocialMate via the story page, 10% of that contribution is earmarked for SM-Give.',
               },
               {
                 step: '03',
-                label: 'Unclaimed proceeds redirected',
-                detail: 'Any unclaimed balance — approximately 75% of it — is allocated directly to SM-Give.',
+                label: 'Unclaimed affiliate proceeds',
+                detail: 'Affiliates who miss the payout deadline forfeit their balance. 75% of those unclaimed funds go to SM-Give.',
               },
               {
                 step: '04',
                 label: 'Packages assembled & distributed',
-                detail: 'We purchase supplies and distribute through local shelters, schools, and community programs.',
+                detail: 'Funds are pooled quarterly. We purchase supplies and distribute through shelters, schools, and community programs.',
               },
             ].map(item => (
               <div key={item.step} style={{

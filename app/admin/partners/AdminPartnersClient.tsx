@@ -36,6 +36,15 @@ interface PayoutRequest {
   affiliate_email?: string
 }
 
+interface FeedbackItem {
+  id: string
+  user_id: string | null
+  type: string
+  message: string
+  email: string | null
+  created_at: string
+}
+
 interface RevenueStats {
   gross_revenue_cents: number
   total_commissions_cents: number
@@ -87,8 +96,9 @@ export default function AdminPartnersClient() {
   const [affiliates, setAffiliates]     = useState<AffiliateProfile[]>([])
   const [payouts, setPayouts]           = useState<PayoutRequest[]>([])
   const [stats, setStats]               = useState<RevenueStats | null>(null)
+  const [feedback, setFeedback]         = useState<FeedbackItem[]>([])
   const [loading, setLoading]           = useState(true)
-  const [activeTab, setActiveTab]       = useState<'affiliates' | 'payouts' | 'revenue' | 'invite'>('affiliates')
+  const [activeTab, setActiveTab]       = useState<'affiliates' | 'payouts' | 'revenue' | 'invite' | 'feedback'>('affiliates')
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [selected, setSelected]         = useState<AffiliateProfile | null>(null)
 
@@ -113,15 +123,17 @@ export default function AdminPartnersClient() {
 
   async function fetchAll() {
     setLoading(true)
-    const [a, p, s] = await Promise.all([
+    const [a, p, s, f] = await Promise.all([
       fetch('/api/partners/stats?admin=true').then(r => r.json()),
       fetch('/api/partners/payout?admin=true').then(r => r.json()),
       fetch('/api/partners/stats?admin=true&type=revenue').then(r => r.json()),
+      fetch('/api/feedback').then(r => r.json()).catch(() => ({ feedback: [] })),
     ])
     if (a.forbidden) { router.push('/dashboard'); return }
     setAffiliates(a.affiliates ?? [])
     setPayouts(p.payouts ?? [])
     setStats(s.revenue ?? null)
+    setFeedback(f.feedback ?? [])
     setLoading(false)
   }
 
@@ -286,6 +298,7 @@ export default function AdminPartnersClient() {
             { key: 'affiliates', label: `Affiliates (${affiliates.length})` },
             { key: 'payouts',    label: `Payouts${pendingPayouts.length > 0 ? ` (${pendingPayouts.length})` : ''}` },
             { key: 'revenue',    label: 'Revenue' },
+            { key: 'feedback',   label: `Feedback${feedback.length > 0 ? ` (${feedback.length})` : ''}` },
             { key: 'invite',     label: 'Send Invite' },
           ].map(tab => (
             <button
@@ -473,6 +486,59 @@ export default function AdminPartnersClient() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* FEEDBACK TAB */}
+        {activeTab === 'feedback' && (
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: '#f1f1f1' }}>
+                User Feedback Inbox
+              </h3>
+              <span style={{ fontSize: 12, color: muted }}>{feedback.length} message{feedback.length !== 1 ? 's' : ''}</span>
+            </div>
+            {feedback.length === 0 ? (
+              <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 14, padding: 40, textAlign: 'center' }}>
+                <div style={{ fontSize: 32, marginBottom: 12 }}>📭</div>
+                <p style={{ fontSize: 14, color: muted, margin: 0 }}>No feedback yet. The pink bubble on every page sends messages here.</p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {feedback.map(item => {
+                  const typeColor: Record<string, string> = {
+                    bug: '#f87171', feature: '#60a5fa', general: '#a3a3a3',
+                  }
+                  const typeEmoji: Record<string, string> = {
+                    bug: '🐛', feature: '💡', general: '💬',
+                  }
+                  return (
+                    <div key={item.id} style={{
+                      background: surface, border: `1px solid ${border}`,
+                      borderRadius: 12, padding: '16px 20px',
+                      borderLeft: `3px solid ${typeColor[item.type] ?? '#4b5563'}`,
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{ fontSize: 14 }}>{typeEmoji[item.type] ?? '💬'}</span>
+                          <span style={{
+                            fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
+                            letterSpacing: '0.08em', color: typeColor[item.type] ?? muted,
+                          }}>{item.type}</span>
+                          {item.email && (
+                            <span style={{ fontSize: 12, color: muted }}>from {item.email}</span>
+                          )}
+                        </div>
+                        <span style={{ fontSize: 11, color: '#4b5563' }}>
+                          {new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      </div>
+                      <p style={{ fontSize: 13, color: '#d1d5db', margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{item.message}</p>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
         )}
 

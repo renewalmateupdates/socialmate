@@ -111,15 +111,15 @@ const COMPARISON = [
 ]
 
 const FOOTER_LINKS = [
-  { label: 'Features',        href: '/features'  },
-  { label: 'Pricing',         href: '/pricing'   },
-  { label: 'Roadmap',         href: '/roadmap'   },
-  { label: 'Affiliate',       href: '/affiliate' },
-  { label: 'Our Story',       href: '/story'     },
-  { label: 'Blog',            href: '/blog'      },
-  { label: 'Share Feedback',  href: '#feedback'  },
-  { label: 'Privacy',         href: '/privacy'   },
-  { label: 'Terms',           href: '/terms'     },
+  { label: 'Features',  href: '/features'  },
+  { label: 'Pricing',   href: '/pricing'   },
+  { label: 'Roadmap',   href: '/roadmap'   },
+  { label: 'Affiliate', href: '/affiliate' },
+  { label: 'Our Story', href: '/story'     },
+  { label: 'Blog',      href: '/blog'      },
+  { label: 'SM-Give',   href: '/give'      },
+  { label: 'Privacy',   href: '/privacy'   },
+  { label: 'Terms',     href: '/terms'     },
 ]
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ ref?: string }> }) {
@@ -545,6 +545,41 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
               className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-all">
               See how pricing works →
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* SM-GIVE */}
+      <section className="py-16 bg-white dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="bg-gray-950 dark:bg-gray-900 rounded-2xl px-8 py-10 flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-lg">❤️</span>
+                <span className="text-xs font-bold text-amber-400 uppercase tracking-widest">SM-Give Initiative</span>
+              </div>
+              <h2 className="text-xl font-extrabold text-white mb-3 tracking-tight">
+                Every subscription supports something bigger.
+              </h2>
+              <p className="text-sm text-gray-400 leading-relaxed max-w-md">
+                2% of every SocialMate subscription goes directly to SM-Give — funding school supply bookbags,
+                baby essentials for struggling parents, and homeless care packages. No corporate partners. No sponsors. Just us.
+              </p>
+            </div>
+            <div className="flex flex-col items-center gap-3 flex-shrink-0">
+              <div className="flex gap-4">
+                {['🎒 School Supplies', '👶 Baby Essentials', '🏠 Homeless Care'].map(tag => (
+                  <div key={tag} className="text-center">
+                    <div className="text-xl mb-1">{tag.split(' ')[0]}</div>
+                    <div className="text-xs text-gray-500 font-medium leading-tight">{tag.slice(3)}</div>
+                  </div>
+                ))}
+              </div>
+              <Link href="/give"
+                className="text-xs font-bold text-amber-400 hover:text-amber-300 transition-all border border-amber-400/30 hover:border-amber-400/60 px-5 py-2 rounded-xl mt-2">
+                Learn about SM-Give →
+              </Link>
+            </div>
           </div>
         </div>
       </section>
