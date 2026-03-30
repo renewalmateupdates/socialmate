@@ -54,6 +54,9 @@ export default function PublicNav() {
 
         {/* Desktop right actions */}
         <div className="hidden md:flex items-center gap-3 flex-shrink-0">
+          <Link href="/give" className="text-sm font-semibold text-rose-400 hover:text-rose-300 transition-all">
+            ❤️ Give
+          </Link>
           <Link href="/partners" className="text-sm font-semibold text-amber-500 hover:text-amber-400 transition-all">
             Partners
           </Link>
@@ -133,6 +136,11 @@ export default function PublicNav() {
                 </Link>
               ))}
               <div className="pt-2 border-t border-gray-100 dark:border-gray-800 mt-2">
+                <Link href="/give"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all">
+                  ❤️ SM-Give
+                </Link>
                 <Link href="/partners"
                   onClick={() => setOpen(false)}
                   className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/20 transition-all">
