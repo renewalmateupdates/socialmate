@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import CookieBanner from '@/components/CookieBanner'
@@ -76,6 +76,13 @@ export const metadata: Metadata = {
   alternates: { canonical: APP_URL },
 }
 
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  themeColor: '#000000',
+}
+
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',
@@ -124,7 +131,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Anti-flash: must be first script to prevent white flash on dark mode */}
         <script dangerouslySetInnerHTML={{ __html: antiFlashScript }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
-        <meta name="theme-color" content="#000000" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="SocialMate" />
