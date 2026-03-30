@@ -68,6 +68,7 @@ function DashboardInner() {
   const [weekCounts, setWeekCounts] = useState<number[]>([0,0,0,0,0,0,0])
   const [streak, setStreak] = useState(0)
   const [creditSource, setCreditSource] = useState<'monthly_first' | 'earned_first' | 'paid_first'>('monthly_first')
+  const [welcomeDismissed, setWelcomeDismissed] = useState(true) // default true to avoid flash
   const { plan, credits, activeWorkspace, monthlyCredits, earnedCredits, paidCredits } = useWorkspace()
 
   useEffect(() => {
@@ -155,6 +156,10 @@ function DashboardInner() {
       setUser(user)
       setProfile(profile)
       setLoading(false)
+
+      // Show welcome banner for brand-new users who haven't dismissed it
+      const dismissed = localStorage.getItem('sm-welcome-dismissed')
+      if (!dismissed) setWelcomeDismissed(false)
     }
     init()
   }, [router])
@@ -217,6 +222,37 @@ function DashboardInner() {
               </Link>
             </div>
           </div>
+
+          {/* WELCOME BANNER — first-time users only */}
+          {!welcomeDismissed && stats.published === 0 && stats.scheduled === 0 && (
+            <div className="relative bg-gradient-to-r from-black to-gray-800 dark:from-gray-800 dark:to-gray-900 rounded-2xl p-5 mb-6 text-white overflow-hidden">
+              {/* subtle texture */}
+              <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle at 80% 50%, white 1px, transparent 1px)', backgroundSize: '24px 24px' }} />
+              <button
+                onClick={() => { setWelcomeDismissed(true); localStorage.setItem('sm-welcome-dismissed', '1') }}
+                className="absolute top-3 right-3 w-7 h-7 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-all text-white/60 hover:text-white text-sm"
+                aria-label="Dismiss">✕</button>
+              <div className="relative">
+                <p className="text-xs font-bold text-white/60 uppercase tracking-widest mb-1">Welcome to SocialMate 🎉</p>
+                <h2 className="text-lg font-extrabold mb-4">Let's get your first post out there.</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {[
+                    { step: '1', title: 'Connect an account', sub: 'Link Bluesky, Discord, Telegram, or Mastodon', href: '/accounts', cta: 'Connect →' },
+                    { step: '2', title: 'Write your first post', sub: 'Use AI tools to craft the perfect caption', href: '/compose', cta: 'Compose →' },
+                    { step: '3', title: 'Schedule or publish', sub: 'Pick a time or go live instantly', href: '/compose', cta: 'Schedule →' },
+                  ].map(s => (
+                    <a key={s.step} href={s.href}
+                      className="bg-white/10 hover:bg-white/15 transition-all rounded-xl p-4 group cursor-pointer">
+                      <div className="w-6 h-6 rounded-full bg-white/20 text-white text-xs font-extrabold flex items-center justify-center mb-2">{s.step}</div>
+                      <p className="text-sm font-bold mb-0.5">{s.title}</p>
+                      <p className="text-xs text-white/60 mb-2 leading-snug">{s.sub}</p>
+                      <span className="text-xs font-bold text-white/80 group-hover:text-white transition-colors">{s.cta}</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* TOP STRIP — Plan + Credits + Stats */}
           <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
@@ -424,7 +460,14 @@ function DashboardInner() {
                   <Link href="/drafts" className="text-xs text-gray-400 dark:text-gray-500 hover:text-black transition-all">View drafts →</Link>
                 </div>
                 {recentPosts.length === 0 ? (
-                  <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-6">Your drafts and published posts appear here.</p>
+                  <div className="text-center py-8">
+                    <div className="text-3xl mb-2">✍️</div>
+                    <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Nothing here yet</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">Every post you draft or publish will show up here.</p>
+                    <Link href="/compose" className="px-4 py-2 bg-black text-white text-xs font-bold rounded-xl hover:opacity-80 transition-all">
+                      Write your first post →
+                    </Link>
+                  </div>
                 ) : (
                   <div className="space-y-2">
                     {recentPosts.map(post => (
