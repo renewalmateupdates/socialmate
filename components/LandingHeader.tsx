@@ -9,13 +9,16 @@ const NAV_LINKS = [
   { label: 'Roadmap',   href: '/roadmap'   },
   { label: 'Platforms', href: '#platforms' },
   { label: 'Our Story', href: '/story'     },
+  { label: 'Blog',      href: '/blog'      },
 ]
 
 export default function LandingHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
+    <header
+      className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800"
+      style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
@@ -38,6 +41,9 @@ export default function LandingHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
 
         {/* Right side */}
         <div className="flex items-center gap-3">
+          <Link href="/partners" className="hidden md:block text-sm font-semibold text-amber-500 hover:text-amber-400 transition-all">
+            Partners
+          </Link>
           {isLoggedIn ? (
             <Link href="/dashboard"
               className="bg-black dark:bg-white text-white dark:text-black text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
@@ -77,8 +83,15 @@ export default function LandingHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
               {link.label}
             </Link>
           ))}
+          <div className="pt-2 border-t border-gray-100 dark:border-gray-800 mt-2">
+            <Link href="/partners"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/20 transition-all">
+              🤝 Partners Portal
+            </Link>
+          </div>
           {!isLoggedIn && (
-            <div className="pt-2 border-t border-gray-100 dark:border-gray-800 mt-2">
+            <div className="pt-1">
               <Link href="/login"
                 onClick={() => setMobileMenuOpen(false)}
                 className="block px-4 py-3 rounded-xl text-sm font-semibold text-gray-500 hover:text-black dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">

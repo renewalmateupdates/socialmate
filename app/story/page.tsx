@@ -40,7 +40,6 @@ export default function Story() {
     }
   }
 
-  if (!authChecked) return null
 
   const content = (
     <div className="max-w-3xl mx-auto px-6 py-16">
@@ -86,7 +85,7 @@ export default function Story() {
           <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed italic">
             "I want to turn a dark world into a bright future — one creator at a time."
           </p>
-          <p className="text-xs text-gray-400 mt-2">— The solo founder behind SocialMate</p>
+          <p className="text-xs text-gray-400 mt-2">— Joshua Bostic, founder of SocialMate</p>
         </div>
       </div>
 
