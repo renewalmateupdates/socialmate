@@ -183,7 +183,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         <p className="text-xs text-gray-400 dark:text-gray-500">No card required · Free forever · Setup in 60 seconds</p>
 
         {/* STATS */}
-        <div className="grid grid-cols-3 gap-6 mt-16 max-w-2xl mx-auto">
+        <div className="grid grid-cols-3 gap-4 sm:gap-6 mt-12 sm:mt-16 max-w-2xl mx-auto">
           {[
             { value: '4',   label: 'platforms live'    },
             { value: '12',  label: 'AI tools included' },
@@ -391,7 +391,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
             </p>
           </div>
 
-          <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl overflow-x-auto">
             {/* TABLE HEADER */}
             <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700 px-6 py-4">
               <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Feature</span>

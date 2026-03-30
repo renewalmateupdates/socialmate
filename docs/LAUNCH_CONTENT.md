@@ -186,3 +186,88 @@ Hot take: social media scheduling shouldn't cost $20/month. Made something free:
 
 **Discord 5** — for #feedback or #beta-testers channels
 Looking for honest feedback on a free social media tool I built. socialmate.studio — scheduling, AI tools, bulk uploader, link-in-bio, analytics. 4 platforms live. Tell me what's missing or broken. Will actually read everything.
+
+---
+
+## HACKER NEWS — Show HN
+
+**Title:** Show HN: SocialMate – Free social media scheduler I built after Buffer killed their free plan
+
+**Post body:**
+
+I spent the last 6 months building a social media scheduling tool. It's free. Here's why I built it and what it can do.
+
+**Why:** Buffer removed their free plan in 2023. Hootsuite starts at $99/month. For solo creators, devs with side projects, and small businesses — you're paying $15-99/month just to schedule posts. The APIs are free. I didn't understand why the scheduler wasn't.
+
+**What it does:** One compose window → schedule to Bluesky, Discord, Telegram, and Mastodon simultaneously. 12 more platforms in development (LinkedIn, YouTube, Instagram, TikTok, Pinterest, X/Twitter, Reddit, Threads, Facebook, Snapchat, Lemon8, BeReal).
+
+**Stack:** Next.js 14 (App Router), Supabase (auth + DB + storage), Stripe, Inngest for scheduling queue, Resend for email, Google Gemini 2.5 Flash for AI features, Vercel.
+
+**What's live and working:**
+- Scheduling to 4 platforms (Bluesky, Discord, Telegram, Mastodon)
+- Bulk scheduler (CSV upload, 50 posts at once)
+- 12 AI tools — captions, hashtags, thread generator, content calendar, trending hooks, post score, SM-Pulse trend scanner, SM-Radar content analyzer, competitor tracking, best times
+- Link-in-Bio page builder
+- Team collaboration with role-based access
+- Post approval workflow
+- Analytics — streaks, platform breakdown, best posting times
+- White-label mode for agencies
+- Affiliate program — 30-40% recurring commission
+- Dark mode + custom accent colors
+
+**Free plan:** 4 platforms, 50 AI credits/month, 100 posts/month, 2 team seats.
+
+**Paid:** $5/month Pro, $20/month Agency.
+
+**What's honest:** Mobile is rough in some spots. 12 platforms are still in progress. I'm one person. This is a real beta.
+
+**Ask:** If you've dealt with social media scheduling and have opinions on what tools get wrong — I'd genuinely love to hear it.
+
+socialmate.studio
+
+---
+
+## REDDIT — r/Entrepreneur
+
+**Title:** I got tired of paying $20/mo just to schedule posts — so I built a free alternative. Here's what I learned.
+
+(Use same body as r/SaaS post above — it applies equally to r/Entrepreneur)
+
+---
+
+## REDDIT — r/startups
+
+**Title:** 6 months of solo building: launched a free social media scheduler today. AMA.
+
+**Body:** Same body as r/SaaS but open the comments section for AMA. Replace the "honest ask" section with:
+
+"Launched on Product Hunt today as well. Happy to answer anything about the build, the stack, or the decisions I made. What do you wish you'd known before building a SaaS?"
+
+---
+
+## PRODUCT HUNT COMMENT TEMPLATE (pin as first comment)
+
+Hey PH community 👋
+
+I'm Joshua, the solo founder behind SocialMate.
+
+Quick background: I started this after Buffer killed their free plan and I couldn't justify the pricing to keep scheduling content for my side projects. So I built it myself.
+
+**What's live today:**
+- Scheduling to Bluesky, Discord, Telegram, Mastodon
+- Bulk CSV scheduler
+- 12 AI tools (captions, hashtags, thread gen, content calendar, best times, and more)
+- Link-in-Bio builder
+- Analytics + streak tracker
+- Team collaboration
+- Affiliate program (30–40% recurring commissions)
+- Full dark mode + accent colors
+
+**What's coming:** LinkedIn, Instagram, TikTok, YouTube, Pinterest, X/Twitter, Reddit, Threads, Facebook, Snapchat, Lemon8, and BeReal.
+
+The free plan is genuinely free — no card, no tricks. I just want feedback from people who actually need this.
+
+Use code **SMPH411** at checkout for 3 months free on Pro.
+
+Happy to answer any questions in the comments. Roast it, I'm ready.
+

@@ -513,14 +513,413 @@ The algorithm rewards accounts that post regularly. An audience that knows to ex
 Get the consistency right first. Then optimize timing on top of it.
     `,
   },
+  'how-to-schedule-posts-on-bluesky': {
+    title:    'How to Schedule Posts on Bluesky in 2026',
+    category: 'Guides',
+    date:     'Mar 20, 2026',
+    readTime: '4 min read',
+    excerpt:  'Bluesky is growing fast. Here\'s how to schedule posts, maintain consistency, and grow your following without spending hours online.',
+    content: `
+## Why Bluesky Scheduling Matters
+
+Bluesky crossed 30 million users in 2024 and has continued growing as users looking for an open, algorithm-light alternative to X/Twitter have moved over. For creators, marketers, and small businesses, Bluesky represents one of the most engagement-friendly platforms available right now — but only if you post consistently.
+
+Most people can't be online at the exact right moment every day. That's where scheduling comes in.
+
+## What You Need to Schedule on Bluesky
+
+To schedule Bluesky posts, you need:
+
+1. A Bluesky account (free at bsky.app)
+2. A scheduling tool that supports the AT Protocol (the open standard Bluesky is built on)
+3. Your content planned in advance
+
+SocialMate supports Bluesky natively. Connect your account once, and you can compose, schedule, and publish posts from the same dashboard you use for Discord, Telegram, and Mastodon.
+
+## How to Connect Bluesky to SocialMate
+
+1. Sign in at socialmate.studio
+2. Go to Settings → Accounts
+3. Click "Connect" next to Bluesky
+4. Enter your Bluesky handle and an App Password (generated in your Bluesky settings under Privacy & Security)
+5. Click Connect
+
+The App Password system means you never give third-party tools your main account password. You can revoke access anytime from within Bluesky.
+
+## Scheduling Your First Bluesky Post
+
+Once connected:
+
+1. Go to Compose in the sidebar
+2. Write your post (up to 300 characters on Bluesky)
+3. Select Bluesky as your platform (or select multiple platforms to post simultaneously)
+4. Click "Schedule" instead of "Post Now"
+5. Pick your date and time
+6. Confirm
+
+Your post will publish automatically at the scheduled time. If something goes wrong (network issue, token expiry), SocialMate retries and notifies you.
+
+## Best Times to Post on Bluesky
+
+Based on general engagement patterns for decentralized social platforms:
+
+- **Tuesday–Thursday** outperform weekends
+- **9–11am and 5–7pm** in your audience's primary time zone tend to perform best
+- **Avoid Sunday mornings** — engagement is low across most platforms
+
+SocialMate's Best Times tool analyzes your own post performance over time and tells you exactly when your specific audience is most active. Use it after you've posted 20+ times.
+
+## Cross-Posting to Multiple Platforms
+
+One of the highest-leverage things you can do with a scheduling tool is write a post once and send it to multiple platforms simultaneously. SocialMate lets you compose one post and distribute it to Bluesky, Mastodon, Discord, and Telegram at the same time.
+
+Some notes on cross-posting:
+- Bluesky and Mastodon have similar character limits and both reward conversational, direct content
+- Discord posts look better with slightly more context (Discord audiences expect threads and conversations, not standalone announcements)
+- Telegram works well for longer-form updates
+
+The platform toggles in SocialMate's composer let you customize the message per platform if you want to tweak tone or length.
+
+## Building a Consistent Bluesky Presence
+
+Consistency beats volume on Bluesky. 1 post a day performed better than 5 posts in one day followed by silence. Use the bulk scheduler to upload a week's worth of content at once, then let it run.
+
+The Calendar view in SocialMate shows all your scheduled Bluesky posts at a glance. Drag and drop to reschedule. Add content when you see gaps.
+
+Bluesky's algorithm currently rewards recency and engagement over reach — which means posting consistently and responding to replies matters more than posting volume.
+    `,
+  },
+  'social-media-scheduling-for-small-business': {
+    title:    'Social Media Scheduling for Small Businesses: The Practical Guide',
+    category: 'Guides',
+    date:     'Mar 18, 2026',
+    readTime: '5 min read',
+    excerpt:  'Small businesses don\'t need a $99/month tool to post consistently. Here\'s a practical system that works without a big budget.',
+    content: `
+## The Real Problem for Small Businesses
+
+Most small businesses manage social media themselves — the owner, a part-time hire, or whoever has a few extra minutes. The challenge isn't content ideas. It's consistency. It's finding time to post when you're also running everything else.
+
+Scheduling tools were built to solve this. Write content in one focused session. Schedule it across the week. Move on.
+
+The problem is that most scheduling tools are priced for agencies and enterprise teams — not for the coffee shop, the freelance photographer, or the small e-commerce brand trying to stay active on social without a dedicated social media manager.
+
+## What Small Businesses Actually Need
+
+You don't need 15 social accounts managed simultaneously. You don't need a content approval workflow with 8 people. You don't need white-label reports.
+
+What most small businesses need:
+
+- Post scheduling to 3-5 platforms
+- A way to batch content creation (write a week's worth in one sitting)
+- Basic analytics (what's working, when to post)
+- One or two team members with access
+- Something that costs under $10/month, or free
+
+That's it. Most scheduling tools charge $50–250/month for those features because they bundle them into enterprise packages. You're paying for complexity you don't need.
+
+## A Simple Social Media System for Small Businesses
+
+**Step 1: Pick 2-3 platforms and commit**
+
+Spreading thin across every platform produces nothing. Pick the platforms where your customers actually spend time. For local businesses: Facebook and Instagram. For B2B: LinkedIn. For tech/creator audiences: Bluesky and Twitter/X. For community-oriented brands: Discord and Telegram.
+
+**Step 2: Block 2 hours on Monday morning**
+
+Use this time to create all your content for the week. Not to post it — to write it, create the visuals, and schedule it. By Monday afternoon, your whole week should be queued and ready.
+
+**Step 3: Use templates**
+
+Most small business social content follows 4-5 patterns: product/service post, behind-the-scenes, customer story, educational tip, call-to-action. Build a template for each. Use AI tools to generate first drafts. Edit to match your voice.
+
+**Step 4: Schedule everything at once**
+
+With SocialMate's bulk scheduler, you can upload a CSV of posts and schedule them all at once. No clicking through 20 individual posts. Upload, review, confirm.
+
+**Step 5: Review once a week**
+
+Check your analytics once per week — not daily. What got engagement? What got ignored? Adjust next week's content based on what you see.
+
+## What SocialMate Costs for Small Businesses
+
+SocialMate's free plan covers most of what a small business needs:
+
+- 4 live platforms (Bluesky, Discord, Telegram, Mastodon) — more platforms shipping throughout 2026
+- 100 posts per month
+- Bulk scheduler
+- 50 AI credits/month for captions and hashtags
+- 2 team seats
+- Analytics for the last 30 days
+
+If you need more — more posts, more platforms, more team members — the Pro plan is $5/month. That's less than a cup of coffee.
+
+There's no credit card required for the free plan. No trial period. No "free for 14 days, then $99/month."
+
+## The AI Shortcut for Content Creation
+
+The part of social media that takes the most time isn't posting — it's deciding what to say. AI tools solve this.
+
+SocialMate includes a Caption Generator, Viral Hook Generator, Hashtag Suggester, and Post Rewriter. Use them to go from a rough idea to a polished post in under 2 minutes.
+
+Here's the workflow: Take a photo or describe what you want to post. Run it through the Caption Generator. Get 3 options. Edit the best one to sound like you. Done.
+
+At 50 free AI credits per month, that's 50 posts created with AI assistance — enough to post more than once a day.
+
+## Getting Started
+
+1. Create a free account at socialmate.studio
+2. Connect your first platform (takes 2 minutes)
+3. Schedule your first post
+4. Block 2 hours next Monday for your first content batch
+
+The first week of consistent posting is the hardest. After that, it becomes a system.
+    `,
+  },
+  'free-social-media-tools-for-creators': {
+    title:    'The Best Free Social Media Tools for Creators in 2026',
+    category: 'Resources',
+    date:     'Mar 15, 2026',
+    readTime: '6 min read',
+    excerpt:  'A complete list of free tools for creators — scheduling, analytics, design, and AI — with honest takes on what\'s actually useful.',
+    content: `
+## Why Free Tools Matter for Creators
+
+Most content creators aren't monetized yet, or are in the early stages where a $50/month tool budget doesn't make sense. The good news: 2026 has more genuinely free tools available than any previous year. The bad news: a lot of "free" tools are actually trials or freemium products with aggressive upsell flows.
+
+This guide covers tools that are either completely free or have free tiers that are actually useful — not just enough to get you hooked.
+
+## Scheduling & Publishing
+
+**SocialMate (free plan)**
+Best for: multi-platform scheduling without per-channel fees.
+Free tier includes: Bluesky, Discord, Telegram, Mastodon, 100 posts/month, bulk scheduler, 50 AI credits, 2 team seats, analytics, link-in-bio page.
+Why it stands out: Most schedulers charge per connected account. SocialMate charges nothing on the free plan regardless of how many accounts you connect.
+Link: socialmate.studio
+
+**Buffer (free plan)**
+Best for: Instagram and Facebook scheduling.
+Free tier: 3 channels, 10 posts per channel.
+Honest take: The free tier is very limited. Fine for someone just starting out with 1-2 platforms. Gets expensive fast once you need more.
+
+## AI Writing Tools
+
+**SocialMate AI (included free)**
+Included in SocialMate's free plan. Caption generator, viral hook generator, hashtag suggester, post rewriter, thread generator, content calendar, post scoring, and more. 50 credits/month free.
+
+**ChatGPT (free tier)**
+Good for: generating first drafts, brainstorming content ideas, rewriting posts in different styles.
+Limitation: Doesn't directly integrate with your scheduler. Manual copy-paste workflow.
+
+**Claude.ai (free tier)**
+Good for: longer-form content, more nuanced tone matching.
+Better than ChatGPT for: staying on-brand, understanding context across a conversation.
+
+## Design
+
+**Canva (free plan)**
+The standard for creator design. Templates for every platform and post type. Free tier covers most use cases for individual creators.
+Limitation: Some templates and premium elements require a paid account.
+
+**Adobe Express (free plan)**
+Similar to Canva. Better integration with Adobe tools if you use Photoshop/Lightroom. Free tier is generous.
+
+## Analytics
+
+**SocialMate Analytics (free)**
+Post performance, engagement rates, posting streak, best times to post, platform breakdown. Available in the free plan for the last 30 days of history.
+
+**Native Platform Analytics**
+Every platform has free built-in analytics. Bluesky, Twitter/X, LinkedIn, and Instagram all offer engagement data. Not as consolidated as a third-party tool but zero cost.
+
+## Link in Bio
+
+**SocialMate Link in Bio (free)**
+Built into SocialMate's free plan. Create a simple landing page with links to all your profiles, content, and CTAs. No Linktree subscription needed.
+
+**Linktree (free plan)**
+The most recognized link-in-bio tool. Free tier is functional but limited in customization.
+
+## Hashtag Research
+
+**SocialMate Hashtag Manager (free)**
+Save hashtag collections, get AI-generated hashtag suggestions based on your content. Included in the free plan.
+
+## Content Idea Generation
+
+**SocialMate SM-Pulse (free credits)**
+Trend scanner that identifies what's getting engagement in your niche right now. Uses your AI credit balance.
+
+**AnswerThePublic (limited free)**
+Shows what questions people are searching related to your topic. Useful for content ideas with SEO value.
+
+**Google Trends (completely free)**
+Underrated for content creators. Shows seasonal and trending topics. Use it to write content tied to things people are actively searching.
+
+## The Stack That Works for Most Creators
+
+For a creator starting with no budget:
+
+1. **SocialMate** — scheduling, AI tools, analytics, link-in-bio (free)
+2. **Canva** — graphics and video thumbnails (free)
+3. **ChatGPT or Claude** — content brainstorming and first drafts (free tier)
+4. **Google Trends** — content idea research (free)
+5. **Native analytics** — platform-specific data (free)
+
+That's a complete toolkit at $0/month. The only thing you'd need to upgrade for is either more volume (more posts, more platforms, longer scheduling windows) or more team seats — both of which are available on SocialMate's $5/month Pro plan when you're ready.
+    `,
+  },
+  'how-to-grow-bluesky-following': {
+    title:    'How to Grow Your Bluesky Following in 2026 (What\'s Actually Working)',
+    category: 'Growth',
+    date:     'Mar 12, 2026',
+    readTime: '5 min read',
+    excerpt:  'Bluesky rewards genuine interaction over gaming the algorithm. Here\'s what\'s working for creators building audiences there in 2026.',
+    content: `
+## Bluesky Is Different — That's the Point
+
+Bluesky's growth model is fundamentally different from Twitter/X, Instagram, or TikTok. There's no viral algorithm pushing content to users who don't follow you. There's no "for you page" that rewards posting frequency or using trending audio.
+
+What Bluesky has instead: a transparent, open protocol (AT Protocol), optional algorithmic feeds built by third parties, and an audience that is actively suspicious of tactics that feel manipulative.
+
+This means the playbook that works on TikTok or Instagram doesn't work here. But a different playbook does.
+
+## What's Working on Bluesky Right Now
+
+**1. Being a real person in public**
+
+The highest-performing Bluesky accounts are people who share genuine perspectives, reactions, work-in-progress updates, and opinions. Not polished brand content. Not announcement posts. Actual thoughts.
+
+If you're a developer, show what you're building. If you're a writer, share sentences you're working on. If you run a business, share the reality of what that's like. Bluesky's culture currently rewards transparency.
+
+**2. Consistency over volume**
+
+One quality post per day outperforms five posts on one day followed by a week of silence. Bluesky's feed is chronological by default — timing matters more than it does on algorithmic platforms.
+
+Scheduling tools help with this. Use SocialMate to queue content for the week, then let it run. Your audience will start to expect your posts.
+
+**3. Replying to other people**
+
+The fastest way to get followers on Bluesky isn't to post great content and wait. It's to reply to other people's posts with substance. Find threads in your niche. Add to the conversation. When someone reads your reply and finds it interesting, they check your profile. If your profile has consistent content they like, they follow.
+
+High-effort replies are currently the highest-ROI activity on Bluesky.
+
+**4. Using Starter Packs**
+
+Bluesky's Starter Packs feature lets users follow a curated list of accounts in one click. Getting included in a popular Starter Pack in your niche can produce a significant follower spike. To get included: be active, post consistently, and connect with people who run Starter Packs in your area.
+
+**5. Cross-posting from other platforms — selectively**
+
+Content that performs well on other platforms can be republished on Bluesky, but context matters. A thread that works on X/Twitter might need to be trimmed for Bluesky's culture. A personal story that did well on LinkedIn can be adapted for Bluesky with a more casual tone.
+
+SocialMate's cross-posting feature lets you write once and distribute to multiple platforms. Use it for evergreen content, but tweak for platform culture.
+
+## What Doesn't Work on Bluesky
+
+**Follow-for-follow**: Bluesky users don't engage with this tactic. Most will follow back and then mute you.
+
+**Engagement bait ("comment below")**: Works poorly. Bluesky's community tends to be skeptical of manufactured engagement.
+
+**Pure promotional content**: Announcement-only accounts don't grow on Bluesky. Mix promotion with genuine content.
+
+**Posting and ghosting**: Not responding to replies signals you're broadcasting, not participating. Even a short "thanks for this" reply makes a difference.
+
+## Tracking Your Bluesky Growth
+
+SocialMate's Analytics dashboard shows your posting streak, engagement rates per platform, and best times to post based on your actual performance data.
+
+Check it weekly (not daily — daily analytics lead to overthinking). Look for:
+- Which posts got the most engagement — what did they have in common?
+- What time of day your Bluesky posts tend to perform best
+- Your posting frequency — are you consistent?
+
+Adjust based on what you see. Growth on Bluesky is slower than TikTok but the audience is more engaged, more loyal, and more likely to convert to newsletter subscribers, customers, or collaborators.
+
+## A Realistic Timeline
+
+Week 1-4: Connect with your first 50 followers. This is the hardest part. Post daily. Reply to others.
+Month 2-3: 50-200 followers. Your replies are producing follow-backs. Your content is finding its voice.
+Month 4-6: 200-1,000 followers if consistent. Starter Pack inclusions start happening. Content occasionally breaks out.
+
+Slow by Instagram standards. But these followers actually read what you write.
+    `,
+  },
+  'social-media-scheduling-vs-posting-manually': {
+    title:    'Scheduling vs. Posting Manually: Which Is Better for Social Media?',
+    category: 'Tips',
+    date:     'Mar 10, 2026',
+    readTime: '4 min read',
+    excerpt:  'The debate has been settled by data. Here\'s when to schedule, when to post live, and how to combine both for maximum impact.',
+    content: `
+## The Debate
+
+There's a recurring argument in social media circles about scheduling: some people swear by posting in real time because it feels more authentic. Others batch everything and schedule a week out.
+
+Both sides have valid points. The answer, like most things in marketing, is "it depends on what you're trying to do."
+
+## The Case for Scheduling
+
+**Consistency**: The biggest benefit of scheduling is not having to remember to post. Consistency matters more than timing on most platforms. An audience that sees you every weekday grows faster than one that sees you 5 times one week and zero the next.
+
+**Batching is more efficient**: Writing 7 posts in a focused 90-minute session is more efficient than writing 1 post every morning while your coffee cools. Creative work has setup cost — you get into a flow when doing a batch and the quality goes up.
+
+**Time zone coverage**: If your audience is split across time zones, scheduling lets you reach them at optimal times without being awake at 3am. A post scheduled for 9am EST reaches your US East Coast audience at peak morning, your West Coast audience before they start work, and your European audience in the afternoon.
+
+**Stress reduction**: Knowing your content is handled for the week reduces the daily anxiety of "I haven't posted today." That cognitive load compounds over time.
+
+## The Case for Manual Posting
+
+**Reacting to news and trends**: Some content needs to go out now. If something happens in your industry or the news that's directly relevant to your audience, scheduling doesn't help. The window for timely content is often hours, not days.
+
+**Authentic engagement bait**: Posting and then immediately being in the comments for the first hour of a post's life dramatically increases engagement. Algorithms on most platforms reward early engagement velocity. If you schedule something and then miss the first hour, you lose that.
+
+**Personal and spontaneous content**: Some of the best-performing content feels spontaneous because it is — a thought you had while walking, a reaction to something that just happened. That can't be scheduled.
+
+## The Best Approach: Scheduled Foundation + Manual Layer
+
+The highest-performing social media accounts use a hybrid approach:
+
+**Scheduled (70% of content):**
+- Regular educational posts, tips, guides
+- Product/service updates that are planned
+- Repurposed content from other formats
+- Evergreen content that doesn't need to be timely
+
+**Manual (30% of content):**
+- Reactions to breaking news
+- Behind-the-scenes and spontaneous moments
+- Replies and conversation-starting comments on others' posts
+- Anything that's time-sensitive
+
+The scheduled content keeps you consistent and handles the bulk of your volume. The manual content keeps you feeling human and timely.
+
+## How to Set This Up
+
+With SocialMate, build your scheduled queue on Monday morning: compose 5-7 posts, spread them across the week, and schedule them. That's your foundation.
+
+During the week, any time you have an impulse to post something timely, go to Compose and hit "Post Now" — it bypasses the scheduling flow entirely.
+
+Check your calendar once a day (30 seconds) to confirm nothing needs to be changed.
+
+That's it. 90 minutes on Monday + a few minutes of opportunistic posting throughout the week = a consistent, human, engaged social presence.
+
+## What About Engagement Timing?
+
+One practical note: most scheduling tools publish exactly at the scheduled time but don't automatically engage with the replies. Block 15-20 minutes after your most important scheduled posts to reply to comments. That engagement window is as important as the post itself.
+
+SocialMate's Best Times feature tells you when your specific audience is most active, so you can schedule posts to go out at those times and then be ready to engage when they do.
+    `,
+  },
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  Strategy: 'bg-purple-50 text-purple-600',
-  Industry: 'bg-blue-50 text-blue-600',
-  Guide: 'bg-green-50 text-green-600',
-  Tips: 'bg-green-50 text-green-600',
+  Strategy:  'bg-purple-50 text-purple-600',
+  Industry:  'bg-blue-50 text-blue-600',
+  Guide:     'bg-green-50 text-green-600',
+  Guides:    'bg-green-50 text-green-600',
+  Tips:      'bg-green-50 text-green-600',
   Analytics: 'bg-yellow-50 text-yellow-700',
+  Resources: 'bg-blue-50 text-blue-600',
+  Growth:    'bg-pink-50 text-pink-600',
 }
 
 export async function generateMetadata(

@@ -26,13 +26,18 @@ export default function PartnersHeader({ email }: { email?: string }) {
           <Link href="/partners/dashboard" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
             <div style={{
               width: 32, height: 32, borderRadius: 8,
-              background: 'linear-gradient(135deg, #F59E0B, #7C3AED)',
+              background: '#000000',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 14, fontWeight: 800, color: '#fff',
+              flexShrink: 0,
             }}>S</div>
-            <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               <span style={{ fontSize: 15, fontWeight: 800, color: '#f1f1f1', letterSpacing: '-0.02em' }}>SocialMate</span>
-              <span style={{ fontSize: 11, color: '#F59E0B', fontWeight: 600, marginLeft: 6, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Partners</span>
+              <span style={{
+                fontSize: 10, color: '#000', fontWeight: 800,
+                background: '#F59E0B', padding: '2px 7px', borderRadius: 4,
+                textTransform: 'uppercase', letterSpacing: '0.06em',
+              }}>Partners</span>
             </div>
           </Link>
 

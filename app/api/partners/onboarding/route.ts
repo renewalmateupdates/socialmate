@@ -161,35 +161,35 @@ export async function POST(req: NextRequest) {
       .update({ onboarding_completed: true, status: 'active' })
       .eq('id', profile.id)
 
-    // Generate promo codes
+    // Generate promo codes — one per subscription type + one for credits
     const email = user.email || profile.email
     const base  = email.split('@')[0].replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 8)
 
-    const code3m = base + '3M'
-    const code6m = base + '6M'
+    const codeDefs: [string, number | null, number, string, string][] = [
+      // [suffix, duration_months (null = forever), discount_value, description, label]
+      ['MONTHLY', 1,    10, '10% off — monthly billing',      'Monthly subscription'],
+      ['3M',      3,    20, '20% off for 3 months',            '3-month subscription'],
+      ['6M',      6,    15, '15% off for 6 months',            '6-month subscription'],
+      ['12M',     12,   10, '10% off for 12 months',           '12-month subscription'],
+      ['CR',      null, 15, '15% off AI credit packs',         'Credit pack purchases'],
+    ]
 
-    // Check for collisions and insert
-    for (const [code, months, discount, desc] of [
-      [code3m, 3, 20, '20% off for 3 months'],
-      [code6m, 6, 15, '15% off for 6 months'],
-    ] as [string, number, number, string][]) {
+    for (const [suffix, durationMonths, discountValue, desc] of codeDefs) {
+      let code = base + suffix
       const { data: existing } = await db
         .from('affiliate_promo_codes')
         .select('id')
         .eq('code', code)
         .maybeSingle()
-
-      const finalCode = existing
-        ? code + Math.random().toString(36).slice(2, 5).toUpperCase()
-        : code
+      if (existing) code = code + Math.random().toString(36).slice(2, 4).toUpperCase()
 
       await db.from('affiliate_promo_codes').insert({
-        affiliate_id:   profile.id,
-        code:           finalCode,
-        discount_type:  'percent',
-        discount_value: discount,
-        duration_months: months,
-        description:    desc,
+        affiliate_id:    profile.id,
+        code,
+        discount_type:   'percent',
+        discount_value:  discountValue,
+        duration_months: durationMonths,
+        description:     desc,
       })
     }
 

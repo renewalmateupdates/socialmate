@@ -123,17 +123,17 @@ const PLANS = [
 ]
 
 const AI_CREDITS = [
-  { feature: 'Caption Generator',       cost: '5 credits',  proOnly: false },
-  { feature: 'Hashtag Generator',       cost: '5 credits',  proOnly: false },
-  { feature: 'Post Rewrite / Improver', cost: '5 credits',  proOnly: false },
-  { feature: 'Viral Hook Generator',    cost: '5 credits',  proOnly: false },
-  { feature: 'Thread Generator',        cost: '10 credits', proOnly: false },
-  { feature: 'Content Repurposer',      cost: '10 credits', proOnly: false },
-  { feature: 'Post Score',              cost: '5 credits',  proOnly: false },
-  { feature: 'SM-Pulse',                cost: '20 credits', proOnly: false },
-  { feature: 'SM-Radar',                cost: '20 credits', proOnly: false },
+  { feature: 'Caption Generator',       cost: '3 credits',  proOnly: false },
+  { feature: 'Hashtag Generator',       cost: '2 credits',  proOnly: false },
+  { feature: 'Post Rewrite / Improver', cost: '3 credits',  proOnly: false },
+  { feature: 'Viral Hook Generator',    cost: '4 credits',  proOnly: false },
+  { feature: 'Thread Generator',        cost: '8 credits',  proOnly: false },
+  { feature: 'Content Repurposer',      cost: '8 credits',  proOnly: false },
+  { feature: 'Post Score',              cost: '2 credits',  proOnly: false },
+  { feature: 'SM-Pulse',                cost: '10 credits', proOnly: false },
+  { feature: 'SM-Radar',                cost: '10 credits', proOnly: false },
   { feature: 'Content Gap Detector',    cost: '10 credits', proOnly: false },
-  { feature: 'AI Content Calendar',     cost: '25 credits', proOnly: true  },
+  { feature: 'AI Content Calendar',     cost: '20 credits', proOnly: true  },
   { feature: 'AI Image Generation',     cost: '25 credits', proOnly: true  },
 ]
 

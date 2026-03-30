@@ -147,12 +147,19 @@ function PartnersLoginInner() {
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 10, textDecoration: 'none' }}>
           <div style={{
             width: 32, height: 32, borderRadius: 8,
-            background: `linear-gradient(135deg, ${gold}, ${purple})`,
+            background: '#000000',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 14, fontWeight: 800, color: '#fff',
+            flexShrink: 0,
           }}>S</div>
-          <span style={{ fontSize: 16, fontWeight: 800, color: '#f1f1f1' }}>SocialMate</span>
-          <span style={{ fontSize: 11, color: gold, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Partners</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: 16, fontWeight: 800, color: '#f1f1f1' }}>SocialMate</span>
+            <span style={{
+              fontSize: 10, color: '#000', fontWeight: 800,
+              background: gold, padding: '2px 7px', borderRadius: 4,
+              textTransform: 'uppercase', letterSpacing: '0.06em',
+            }}>Partners</span>
+          </div>
         </Link>
         <Link href="/" style={{ fontSize: 13, color: muted, textDecoration: 'none' }}>← Back to SocialMate</Link>
       </header>

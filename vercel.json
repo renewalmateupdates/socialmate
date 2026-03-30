@@ -7,6 +7,10 @@
     {
       "path": "/api/cron/w9-withholding-alerts",
       "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/reset-yearly-earnings",
+      "schedule": "0 0 1 1 *"
     }
   ]
 }
