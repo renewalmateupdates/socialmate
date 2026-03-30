@@ -9,13 +9,16 @@ const NAV_LINKS = [
   { label: 'Roadmap',   href: '/roadmap'   },
   { label: 'Platforms', href: '#platforms' },
   { label: 'Our Story', href: '/story'     },
+  { label: 'Blog',      href: '/blog'      },
 ]
 
 export default function LandingHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
+    <header
+      className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800"
+      style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
@@ -38,6 +41,9 @@ export default function LandingHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
 
         {/* Right side */}
         <div className="flex items-center gap-3">
+          <Link href="/partners" className="hidden md:block text-sm font-semibold text-amber-500 hover:text-amber-400 transition-all">
+            Partners
+          </Link>
           {isLoggedIn ? (
             <Link href="/dashboard"
               className="bg-black dark:bg-white text-white dark:text-black text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
