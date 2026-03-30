@@ -138,10 +138,17 @@ export default function Story() {
           className="text-xs font-bold px-4 py-2 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 rounded-xl hover:border-gray-400 dark:hover:border-gray-400 transition-all">
           Explore Features
         </Link>
-        <Link href="/signup"
-          className="text-xs font-bold px-4 py-2 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 rounded-xl hover:border-gray-400 dark:hover:border-gray-400 transition-all">
-          Get Started Free
-        </Link>
+        {isAuthed ? (
+          <Link href="/dashboard"
+            className="text-xs font-bold px-4 py-2 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 rounded-xl hover:border-gray-400 dark:hover:border-gray-400 transition-all">
+            Back to Dashboard →
+          </Link>
+        ) : (
+          <Link href="/signup"
+            className="text-xs font-bold px-4 py-2 border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 rounded-xl hover:border-gray-400 dark:hover:border-gray-400 transition-all">
+            Get Started Free
+          </Link>
+        )}
       </div>
     </div>
   )

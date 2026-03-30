@@ -24,7 +24,7 @@ That's a lot when the business you're posting for barely makes enough to justify
 
 I looked for a free alternative. What I found were free tiers that gave you two channels, a handful of scheduled posts, and constant prompts to upgrade. Not useful.
 
-So I started building SocialMate in my spare time. That was in late 2024.
+So I started building SocialMate in my spare time. That was in early February 2026.
 
 ## What We Decided Early On
 
@@ -44,9 +44,9 @@ These are real people with real needs. The existing tools weren't built for them
 
 ## What Makes SocialMate Different
 
-We support 16 platforms and we're adding more. The free plan includes all of them. Connecting Discord and Bluesky and Mastodon and Telegram doesn't cost more than connecting just one.
+We're live with four platforms right now — Discord, Bluesky, Mastodon, and Telegram — with LinkedIn, YouTube, Pinterest, Reddit, Instagram, TikTok, Facebook, and Threads coming soon as platform approvals come through. We're building toward 16 total. Every platform you can connect is included on the free plan at no extra cost.
 
-We built 12 AI tools into the platform. Not one AI tool on a restricted tier — twelve, available from day one. Caption generation, hashtag sets, viral hook writing, post rewriting, thread generation, content repurposing, post scoring, SM-Pulse trend analysis, SM-Radar competitive intelligence, content gap detection, AI content calendar, and more.
+We built 12 AI tools into the platform — caption generation, hashtag sets, viral hook writing, post rewriting, thread generation, content repurposing, post scoring, SM-Pulse trend analysis, SM-Radar competitive intelligence, content gap detection, AI content calendar, and AI image generation. All tools are accessible on the free tier through a monthly credit allowance (75 credits/month free, more on paid plans). Credits reset monthly so you always have access — the system is designed to be generous, not to wall things off.
 
 We built in features that other tools charge for separately: bulk scheduling, a link in bio page, evergreen content recycling, competitor tracking, RSS import, team collaboration with content approval workflows.
 
@@ -102,11 +102,11 @@ Anything less than that is a trial with a free label on it.
 
 SocialMate's free plan includes:
 
-- All 16 supported platforms (Discord, Bluesky, Telegram, Mastodon, LinkedIn, YouTube, Pinterest, and 9 more on the roadmap)
-- 100 posts per month
+- 4 live platforms now: Discord, Bluesky, Telegram, Mastodon (LinkedIn, YouTube, Pinterest, Reddit and more coming soon as approvals clear)
+- Unlimited scheduled posts
 - 2-week scheduling window
 - 2 team seats
-- 50 AI credits per month (caption generation, hashtag sets, post scoring, and more)
+- 75 AI credits per month (caption generation, hashtag sets, post scoring, and more — credits reset monthly)
 - Analytics covering the last 30 days
 - A link in bio page (no separate Linktree subscription needed)
 - Competitor tracking for up to 3 accounts
