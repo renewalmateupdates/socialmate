@@ -1,9 +1,11 @@
 import PublicNav from './PublicNav'
+import PHLaunchBanner from './PHLaunchBanner'
 import Link from 'next/link'
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+      <PHLaunchBanner />
       <PublicNav />
       <main>{children}</main>
       <footer className="border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 mt-16">
@@ -30,7 +32,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
             ))}
           </nav>
           <div className="flex items-center gap-4 flex-wrap">
-            <a href="https://www.producthunt.com/products/socialmate-2?embed=true&utm_source=embed&utm_medium=post_embed"
+            <a href="https://www.producthunt.com/posts/socialmate-2"
               target="_blank" rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#FF6154] hover:bg-[#e5564a] text-white text-xs font-semibold rounded-lg transition-colors">
               <svg width="14" height="14" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">

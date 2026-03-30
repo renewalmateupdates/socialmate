@@ -4,6 +4,7 @@ import { createServerClient } from '@supabase/ssr'
 import ReferralBanner from '@/app/components/ReferralBanner'
 import LandingHeader from '@/components/LandingHeader'
 import UserStatsCounter from '@/components/UserStatsCounter'
+import PHLaunchBanner from '@/components/PHLaunchBanner'
 
 const PLATFORMS = [
   { name: 'Discord',     icon: '💬', status: 'live'    },
@@ -152,6 +153,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
     <div className="min-h-screen bg-white dark:bg-gray-950">
 
       {refCode && <ReferralBanner refCode={refCode} />}
+      <PHLaunchBanner />
 
       {/* NAV */}
       <LandingHeader isLoggedIn={isLoggedIn} />
@@ -582,7 +584,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
             ))}
           </nav>
           <div className="flex items-center gap-4 flex-wrap">
-            <a href="https://www.producthunt.com/products/socialmate-2?embed=true&utm_source=embed&utm_medium=post_embed"
+            <a href="https://www.producthunt.com/posts/socialmate-2"
               target="_blank" rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#FF6154] hover:bg-[#e5564a] text-white text-xs font-semibold rounded-lg transition-colors">
               <svg width="14" height="14" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
