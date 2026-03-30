@@ -783,6 +783,27 @@ function ComposeInner() {
                 </div>
               )}
 
+              {/* STARTER TEMPLATES QUICK STRIP — only shown when textarea is empty */}
+              {!content && !searchParams.get('draft') && !searchParams.get('starterTemplate') && !searchParams.get('template') && (
+                <div className="bg-surface border border-theme rounded-2xl p-4">
+                  <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">Starter Templates</p>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      { id: 'starter-1', label: '🚀 Product Launch'     },
+                      { id: 'starter-2', label: '💡 Tips & Tricks'      },
+                      { id: 'starter-3', label: '🤔 Engagement Hook'    },
+                      { id: 'starter-4', label: '👀 Behind the Scenes'  },
+                      { id: 'starter-5', label: '📰 Weekly Roundup'     },
+                    ].map(t => (
+                      <Link key={t.id} href={`?starterTemplate=${t.id}`}
+                        className="text-xs font-semibold px-3 py-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-gray-400 hover:bg-white dark:hover:bg-gray-700 transition-all">
+                        {t.label}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* TEXT AREA */}
               <div className="bg-surface border border-theme rounded-2xl p-4">
                 <textarea
@@ -1024,12 +1045,43 @@ function ComposeInner() {
 
             {/* DESKTOP PREVIEW */}
             <div className="hidden lg:block space-y-4">
+              {/* QUICK START — shown when no content yet */}
+              {!content && (
+                <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-4 text-white">
+                  <p className="text-xs font-bold uppercase tracking-wide text-gray-400 mb-3">Quick Start</p>
+                  <div className="space-y-2">
+                    {[
+                      { emoji: '1️⃣', text: 'Connect a social account', href: '/accounts' },
+                      { emoji: '2️⃣', text: 'Write your post or use an AI tool', href: null },
+                      { emoji: '3️⃣', text: 'Post now or schedule it', href: null },
+                    ].map((step, i) => (
+                      step.href
+                        ? <a key={i} href={step.href} className="flex items-center gap-2 text-xs text-gray-300 hover:text-white transition-colors">
+                            <span>{step.emoji}</span> <span className="underline underline-offset-2">{step.text}</span>
+                          </a>
+                        : <div key={i} className="flex items-center gap-2 text-xs text-gray-400">
+                            <span>{step.emoji}</span> <span>{step.text}</span>
+                          </div>
+                    ))}
+                  </div>
+                  <div className="mt-4 pt-3 border-t border-white/10">
+                    <p className="text-xs text-gray-500 mb-2">Try a starter template:</p>
+                    <Link href="?starterTemplate=starter-1" className="block w-full text-center py-2 bg-white/10 hover:bg-white/20 text-xs font-bold rounded-lg transition-all">
+                      🚀 Product Launch Template
+                    </Link>
+                  </div>
+                </div>
+              )}
+
               <div className="bg-surface border border-theme rounded-2xl p-4 sticky top-8">
                 <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">Preview</p>
                 <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 min-h-32">
                   {content
-                    ? <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{content}</p>
-                    : <p className="text-xs text-gray-300 dark:text-gray-600 text-center mt-8">Your post preview appears here</p>
+                    ? <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{content}</p>
+                    : <div className="text-center mt-6">
+                        <p className="text-xs text-gray-300 dark:text-gray-600 mb-3">Your post preview appears here</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500">Start typing or use an AI tool ↙</p>
+                      </div>
                   }
                 </div>
                 {content && selectedPlatforms.length > 0 && (

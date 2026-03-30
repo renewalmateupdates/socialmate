@@ -318,6 +318,31 @@ function AccountsInner() {
             )}
           </div>
 
+          {/* FIRST-TIME EMPTY STATE */}
+          {!loading && accounts.length === 0 && (
+            <div className="mb-8 bg-gradient-to-r from-black to-gray-800 rounded-2xl p-6 text-white">
+              <div className="flex items-start gap-4">
+                <span className="text-3xl flex-shrink-0">🔌</span>
+                <div className="flex-1">
+                  <p className="font-extrabold text-lg tracking-tight mb-1">Connect your first social account</p>
+                  <p className="text-gray-300 text-sm leading-relaxed mb-4">
+                    Pick one of the four live platforms below to get started. You can connect as many as you want — all free.
+                  </p>
+                  <div className="flex flex-wrap gap-3">
+                    {LIVE_PLATFORMS.map(platform => {
+                      const meta = PLATFORM_META[platform]
+                      return (
+                        <div key={platform} className="flex items-center gap-2 bg-white/10 border border-white/20 rounded-xl px-3 py-2 text-sm font-semibold">
+                          <span>{meta.icon}</span> {meta.label}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* STAT CARDS */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
             {loading ? [1,2,3].map(i => <SkeletonBox key={i} className="h-20 rounded-2xl" />) : (
