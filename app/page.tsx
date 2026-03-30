@@ -5,6 +5,7 @@ import ReferralBanner from '@/app/components/ReferralBanner'
 import LandingHeader from '@/components/LandingHeader'
 import UserStatsCounter from '@/components/UserStatsCounter'
 import PHLaunchBanner from '@/components/PHLaunchBanner'
+import HeroLaunchBadge from '@/components/HeroLaunchBadge'
 
 const PLATFORMS = [
   { name: 'Discord',     icon: '💬', status: 'live'    },
@@ -160,6 +161,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
 
       {/* HERO */}
       <section className="max-w-4xl mx-auto px-6 pt-24 pb-20 text-center">
+        <HeroLaunchBadge />
         <div className="inline-flex items-center gap-2 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 text-xs font-bold px-4 py-2 rounded-full mb-8">
           🌱 Free forever · No credit card required · 4 live platforms · 12 AI tools
         </div>
