@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, useRef, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Sidebar from '@/components/Sidebar'
@@ -127,6 +127,11 @@ function ComposeInner() {
   const [scoring, setScoring] = useState(false)
   const [scoreError, setScoreError] = useState('')
   const [showPreview, setShowPreview] = useState(false)
+
+  // Media attachments
+  type MediaItem = { file: File; preview: string; url?: string; type: 'image' | 'video'; uploading: boolean }
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>([])
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [destinations, setDestinations] = useState<Record<string, Destination[]>>({})
   const [selectedDestinations, setSelectedDestinations] = useState<Record<string, string>>({})
@@ -470,7 +475,7 @@ function ComposeInner() {
   }
 
   const handlePublish = async () => {
-    if (!content.trim() || charOver || selectedPlatforms.length === 0 || !!scheduleError) return
+    if (!content.trim() || charOver || selectedPlatforms.length === 0 || !!scheduleError || mediaStillUploading) return
     setPublishing(true)
     setPublishResults(null)
     try {
@@ -491,6 +496,7 @@ function ComposeInner() {
           draftId: currentDraftId || undefined,
           workspaceId: activeWorkspace?.id,
           selectedAccountIds,
+          mediaUrls: uploadedMediaUrls.length > 0 ? uploadedMediaUrls : undefined,
         }),
       })
 
@@ -504,6 +510,7 @@ function ComposeInner() {
         setScheduleTime('')
         setCurrentDraftId(null)
         setScoreResult(null)
+        clearMedia()
       } else {
         setPublishResults(data.results || [])
         const allFailed  = data.results?.every((r: PublishResult) => !r.success)
@@ -515,6 +522,7 @@ function ComposeInner() {
           setContent('')
           setCurrentDraftId(null)
           setScoreResult(null)
+          clearMedia()
         }
       }
     } catch {
@@ -548,6 +556,64 @@ function ComposeInner() {
       setSaving(false)
     }
   }
+
+  const handleMediaSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || [])
+    if (!files.length) return
+    e.target.value = '' // reset so same file can be reselected
+
+    const MAX_FILES = 4
+    const slots     = MAX_FILES - mediaItems.length
+    if (slots <= 0) return
+    const toAdd = files.slice(0, slots)
+
+    for (const file of toAdd) {
+      const type    = file.type.startsWith('video/') ? 'video' : 'image'
+      const preview = type === 'image' ? URL.createObjectURL(file) : ''
+      const item: MediaItem = { file, preview, type, uploading: true }
+
+      setMediaItems(prev => [...prev, item])
+
+      try {
+        const form = new FormData()
+        form.append('file', file)
+        const res  = await fetch('/api/media/upload', { method: 'POST', body: form })
+        const data = await res.json()
+
+        if (res.ok && data.url) {
+          setMediaItems(prev => prev.map(m =>
+            m.preview === preview && m.file === file
+              ? { ...m, url: data.url, uploading: false }
+              : m
+          ))
+        } else {
+          showToast(data.error || 'Upload failed — try a smaller file', 'error')
+          setMediaItems(prev => prev.filter(m => !(m.preview === preview && m.file === file)))
+          if (preview) URL.revokeObjectURL(preview)
+        }
+      } catch {
+        showToast('Upload failed — check your connection', 'error')
+        setMediaItems(prev => prev.filter(m => !(m.preview === preview && m.file === file)))
+        if (preview) URL.revokeObjectURL(preview)
+      }
+    }
+  }
+
+  const removeMediaItem = (preview: string, file: File) => {
+    setMediaItems(prev => {
+      const item = prev.find(m => m.preview === preview && m.file === file)
+      if (item?.preview) URL.revokeObjectURL(item.preview)
+      return prev.filter(m => !(m.preview === preview && m.file === file))
+    })
+  }
+
+  const clearMedia = () => {
+    mediaItems.forEach(m => { if (m.preview) URL.revokeObjectURL(m.preview) })
+    setMediaItems([])
+  }
+
+  const uploadedMediaUrls = mediaItems.filter(m => m.url).map(m => m.url!)
+  const mediaStillUploading = mediaItems.some(m => m.uploading)
 
   const scoreColor = scoreResult
     ? scoreResult.score >= 80 ? 'text-green-600'
@@ -813,7 +879,7 @@ function ComposeInner() {
                   rows={8}
                   className="w-full text-sm outline-none resize-none text-gray-800 dark:text-gray-200 placeholder-gray-300 dark:placeholder-gray-600"
                 />
-                <div className="flex items-center justify-between pt-3 border-t border-gray-50 mt-2">
+                <div className="flex items-center justify-between pt-3 border-t border-gray-50 dark:border-gray-800 mt-2">
                   {charLimit !== null ? (
                     <span className={`text-xs font-bold ${charOver ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
                       {charCount} / {charLimit.toLocaleString()}
@@ -825,6 +891,79 @@ function ComposeInner() {
                   <span className="text-xs text-gray-400 dark:text-gray-500">
                     {selectedPlatforms.length} platform{selectedPlatforms.length !== 1 ? 's' : ''} selected
                   </span>
+                </div>
+
+                {/* MEDIA ATTACHMENTS */}
+                <div className="mt-3 pt-3 border-t border-gray-50 dark:border-gray-800">
+                  {mediaItems.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {mediaItems.map((item, idx) => (
+                        <div key={idx} className="relative group w-20 h-20 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                          {item.type === 'image' && item.preview ? (
+                            <img src={item.preview} className="w-full h-full object-cover" alt="" />
+                          ) : (
+                            <span className="text-2xl">{item.type === 'video' ? '🎬' : '🖼️'}</span>
+                          )}
+                          {item.uploading && (
+                            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            </div>
+                          )}
+                          {!item.uploading && item.url && (
+                            <div className="absolute top-1 left-1">
+                              <span className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center text-white text-[9px] font-bold">✓</span>
+                            </div>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => removeMediaItem(item.preview, item.file)}
+                            className="absolute top-0.5 right-0.5 w-5 h-5 bg-black/70 text-white rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center font-bold">
+                            ×
+                          </button>
+                          <div className="absolute bottom-0 left-0 right-0 bg-black/50 px-1 py-0.5">
+                            <p className="text-[9px] text-white truncate">{item.file.name}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={mediaItems.length >= 4}
+                      className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-gray-400 dark:hover:border-gray-500 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                      <span>📎</span>
+                      {mediaItems.length === 0 ? 'Attach image / video' : `${mediaItems.length}/4 attached`}
+                    </button>
+                    {mediaItems.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={clearMedia}
+                        className="text-xs text-red-400 hover:text-red-600 transition-colors font-semibold">
+                        Remove all
+                      </button>
+                    )}
+                    {mediaStillUploading && (
+                      <span className="text-xs text-amber-600 font-semibold flex items-center gap-1">
+                        <div className="w-3 h-3 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
+                        Uploading...
+                      </span>
+                    )}
+                    <span className="text-xs text-gray-400 dark:text-gray-500">
+                      Discord, Bluesky, Mastodon, Telegram · JPEG, PNG, GIF, WebP, MP4
+                    </span>
+                  </div>
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/jpg,image/png,image/gif,image/webp,video/mp4,video/quicktime,video/webm"
+                    multiple
+                    onChange={handleMediaSelect}
+                    className="hidden"
+                  />
                 </div>
               </div>
 
@@ -1027,7 +1166,8 @@ function ComposeInner() {
                       charOver ||
                       selectedPlatforms.length === 0 ||
                       !!scheduleError ||
-                      missingDestinations.length > 0
+                      missingDestinations.length > 0 ||
+                      mediaStillUploading
                     }
                     className="flex-1 bg-black text-white text-sm font-bold py-3 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
                     {publishing

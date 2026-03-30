@@ -6,7 +6,8 @@ const MAX_DISCORD_LENGTH = 2000
 export async function publishToDiscord(
   userId: string,
   content: string,
-  destinationId?: string
+  destinationId?: string,
+  mediaUrls?: string[]
 ): Promise<string> {
   // Enforce 2000 character limit
   if (content.length > MAX_DISCORD_LENGTH) {
@@ -50,15 +51,35 @@ export async function publishToDiscord(
     throw new Error('Invalid Discord webhook URL. Please check your destination configuration.')
   }
 
-  const res = await fetch(webhookUrl, {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify({ content }),
-  })
+  let res: Response
+
+  if (mediaUrls && mediaUrls.length > 0) {
+    // Use multipart/form-data to attach files
+    const form = new FormData()
+    form.append('payload_json', JSON.stringify({ content }))
+
+    for (let i = 0; i < Math.min(mediaUrls.length, 10); i++) {
+      try {
+        const mediaRes = await fetch(mediaUrls[i])
+        const blob     = await mediaRes.blob()
+        const ext      = mediaUrls[i].split('?')[0].split('.').pop() || 'jpg'
+        form.append(`files[${i}]`, blob, `attachment_${i}.${ext}`)
+      } catch (fetchErr) {
+        console.warn(`[Discord] Failed to fetch media ${i}:`, fetchErr)
+      }
+    }
+
+    res = await fetch(webhookUrl, { method: 'POST', body: form })
+  } else {
+    res = await fetch(webhookUrl, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ content }),
+    })
+  }
 
   // Discord returns 204 No Content on success
   if (res.status === 204 || res.ok) {
-    // Discord doesn't return the message ID on webhook posts (204 No Content)
     const messageId = `discord-${Date.now()}`
     console.log(`[Discord] Published to webhook (${webhookUrl.split('/').slice(-2, -1)[0]})`)
     return messageId
@@ -72,7 +93,6 @@ export async function publishToDiscord(
     const errJson = JSON.parse(errText)
     errDetail = errJson.message || errDetail
   } catch {
-    // Not JSON, use text snippet
     if (errText.length < 200) errDetail = errText || errDetail
   }
 
