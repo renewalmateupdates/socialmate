@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { createClient } from '@supabase/supabase-js'
 import Stripe from 'stripe'
+import { Resend } from 'resend'
 
 const STRIPE_PRO_PRICE_ID               = 'price_1T9S2v7OMwDowUuULHznqUD5'
 const STRIPE_AGENCY_PRICE_ID            = 'price_1TFMHp7OMwDowUuUgeLAeJNY'
@@ -268,6 +269,108 @@ export async function POST(req: NextRequest) {
     const userId   = session.metadata?.user_id
     const type     = session.metadata?.type
     const priceId  = session.metadata?.price_id
+
+    // ── Studio Stax listing payment ──
+    if (session.metadata?.studio_stax === 'true') {
+      const { listing_id, billing_type, slot_quarter, slot_start, slot_end, token } = session.metadata
+      const paymentIntentId = session.payment_intent as string
+
+      if (listing_id) {
+        // Fetch listing for email
+        const { data: listing } = await supabase
+          .from('curated_listings')
+          .select('id, name, tagline, applicant_name, applicant_email')
+          .eq('id', listing_id)
+          .single()
+
+        // Insert slot
+        await supabase.from('studio_stax_slots').insert({
+          listing_id,
+          buyer_email:        listing?.applicant_email ?? session.customer_email,
+          buyer_name:         listing?.applicant_name ?? '',
+          billing_type,
+          slot_quarter:       slot_quarter ?? '',
+          amount_paid_cents:  session.amount_total ?? 0,
+          stripe_payment_id:  paymentIntentId,
+          status:             'active',
+          starts_at:          slot_start ?? new Date().toISOString(),
+          expires_at:         slot_end   ?? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+        })
+
+        // Update listing — mark live, clear token
+        await supabase
+          .from('curated_listings')
+          .update({
+            status:                   'live',
+            checkout_token:           null,
+            checkout_token_expires:   null,
+            stripe_payment_intent_id: paymentIntentId,
+          })
+          .eq('id', listing_id)
+
+        // Send confirmation email
+        if (listing?.applicant_email) {
+          try {
+            const resend   = new Resend(process.env.RESEND_API_KEY)
+            const appUrl   = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
+            const listingUrl = `${appUrl}/studio-stax`
+            const renewalPrice = 80
+            await resend.emails.send({
+              from:    'SocialMate <hello@socialmate.studio>',
+              to:      listing.applicant_email,
+              subject: `🎉 ${listing.name} is now live in Studio Stax`,
+              html: `<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:0;background:#f9fafb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <div style="max-width:560px;margin:0 auto;padding:32px 16px;">
+    <div style="background:#fff;border-radius:16px;overflow:hidden;border:1px solid #e5e7eb;">
+      <div style="background:#111;padding:24px 32px;text-align:center;">
+        <p style="margin:0;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#9ca3af;">Studio Stax</p>
+        <h1 style="margin:6px 0 0;font-size:22px;font-weight:800;color:#fff;">You're live 🎉</h1>
+      </div>
+      <div style="padding:32px;">
+        <p style="margin:0 0 16px;font-size:14px;color:#374151;">Hey ${listing.applicant_name},</p>
+        <p style="margin:0 0 16px;font-size:14px;color:#6b7280;line-height:1.6;">
+          Payment confirmed — <strong>${listing.name}</strong> is now live in Studio Stax.
+          Donate to SM-Give to climb the rankings (the more you give, the higher you appear in the directory).
+        </p>
+
+        <a href="${listingUrl}" style="display:block;text-align:center;background:#111;color:#fff;font-weight:700;font-size:14px;padding:14px 24px;border-radius:12px;text-decoration:none;margin-bottom:24px;">
+          View your listing in Studio Stax →
+        </a>
+
+        <div style="background:#f9fafb;border-radius:12px;padding:16px 20px;margin-bottom:24px;">
+          <p style="margin:0 0 8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;">What's next</p>
+          <ul style="margin:0;padding-left:16px;font-size:13px;color:#374151;line-height:1.8;">
+            <li>Donate to SM-Give to climb the rankings</li>
+            <li>You'll get renewal reminders at 30, 14, and 7 days before expiry</li>
+            <li>Renewal locks in at $${renewalPrice}/year</li>
+            <li>${billing_type === 'annual' ? 'We\'ll write your blog feature when your year is up' : 'Upgrade to annual at any time to get a blog feature'}</li>
+          </ul>
+        </div>
+
+        <div style="border:1px solid #e5e7eb;border-radius:12px;padding:16px 20px;">
+          <p style="margin:0 0 4px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#9ca3af;">From the SocialMate family</p>
+          <p style="margin:0 0 10px;font-size:13px;font-weight:700;color:#111;">Track every recurring expense free with RenewalMate</p>
+          <p style="margin:0 0 12px;font-size:12px;color:#6b7280;line-height:1.5;">
+            Keep tabs on your Studio Stax subscription — and all your other tools — with RenewalMate. Always free to start.
+          </p>
+          <a href="https://renewalmate.com" style="font-size:12px;font-weight:700;color:#f59e0b;text-decoration:none;">renewalmate.com →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`,
+            })
+          } catch (emailErr) {
+            console.error('[StaxWebhook] Confirmation email failed:', emailErr)
+          }
+        }
+      }
+
+      return NextResponse.json({ received: true })
+    }
 
     // ── Credit pack — one-time payment ──
     if (type === 'credit_pack' && priceId && userId) {

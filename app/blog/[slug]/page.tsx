@@ -931,7 +931,7 @@ Three things happen automatically:
 
 **2% of every subscription** goes directly to SM-Give. Every paid plan — Pro at $5/month, Agency at $20/month — contributes a slice to the program monthly, after Stripe fees and applicable taxes.
 
-**10% of every voluntary support donation** on the Story page is earmarked for SM-Give. If someone believes in what we're building and chips in, a tenth of that goes to something even more tangible.
+**50% of every voluntary support donation** on the Story page goes directly to SM-Give. If someone believes in what we're building and chips in, half of that goes to something even more tangible.
 
 **75% of unclaimed affiliate commissions** fund SM-Give. Affiliates who miss the payout deadline each cycle forfeit their balance. Rather than keeping it, we send 75% to charity.
 

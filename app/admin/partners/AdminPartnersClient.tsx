@@ -168,6 +168,23 @@ export default function AdminPartnersClient() {
     setListingActionLoading(false)
   }
 
+  async function sendPaymentLink(id: string) {
+    setListingActionLoading(true)
+    const res  = await fetch('/api/listings/admin', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, action: 'send_payment_link' }),
+    })
+    const data = await res.json()
+    if (res.ok) {
+      alert(`Payment link sent to applicant!\n\nDirect link (backup):\n${data.checkoutUrl}`)
+    } else {
+      alert(`Error: ${data.error}`)
+    }
+    await fetchAll()
+    setListingActionLoading(false)
+  }
+
   async function sendInvite() {
     if (!inviteEmail.trim()) return
     setInviteLoading(true)
@@ -613,14 +630,25 @@ export default function AdminPartnersClient() {
                           <a href={listing.url} target="_blank" rel="noopener noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>{listing.url}</a>
                         </div>
                       </div>
-                      <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-                        {listing.status !== 'approved' && (
+                      <div style={{ display: 'flex', gap: 8, flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                        {/* Primary action: approve + send payment link */}
+                        {listing.status === 'pending' && (
                           <button
-                            onClick={() => updateListingStatus(listing.id, 'approved')}
+                            onClick={() => sendPaymentLink(listing.id)}
                             disabled={listingActionLoading}
-                            style={{ padding: '6px 14px', borderRadius: 8, border: 'none', background: 'rgba(34,197,94,0.15)', color: '#22c55e', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', opacity: listingActionLoading ? 0.6 : 1 }}
+                            style={{ padding: '6px 14px', borderRadius: 8, border: 'none', background: '#22c55e', color: '#000', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', opacity: listingActionLoading ? 0.6 : 1 }}
                           >
-                            Approve
+                            ✅ Approve & Send Payment Link
+                          </button>
+                        )}
+                        {/* Resend link if already approved but maybe they didn't pay */}
+                        {listing.status === 'approved' && (
+                          <button
+                            onClick={() => sendPaymentLink(listing.id)}
+                            disabled={listingActionLoading}
+                            style={{ padding: '6px 14px', borderRadius: 8, border: `1px solid rgba(34,197,94,0.4)`, background: 'transparent', color: '#22c55e', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', opacity: listingActionLoading ? 0.6 : 1 }}
+                          >
+                            Resend Payment Link
                           </button>
                         )}
                         {listing.status !== 'rejected' && (
