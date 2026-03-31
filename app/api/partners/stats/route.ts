@@ -190,7 +190,7 @@ async function createStripeCouponForCode(params: {
     })
 
     const promoCode = await stripe.promotionCodes.create({
-      coupon: coupon.id,
+      promotion: { type: 'coupon', coupon: coupon.id },
       code: params.code,
       metadata: { affiliate_id: params.affiliate_id },
     })
