@@ -1380,6 +1380,16 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
         )}
       </div>
 
+      {/* SM-Give strip */}
+      <div className="border-t border-gray-100 dark:border-gray-800 mt-16 pt-10 pb-4">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            ❤️ <span className="font-semibold text-gray-700 dark:text-gray-300">2% of every SocialMate subscription</span> goes to SM-Give — our charity initiative.{' '}
+            <a href="/give" className="text-amber-500 hover:text-amber-400 font-semibold transition-colors">Learn about SM-Give →</a>
+          </p>
+        </div>
+      </div>
+
       <footer className="border-t border-gray-100 dark:border-gray-800 px-8 py-8">
         <div className="max-w-5xl mx-auto flex items-center justify-between flex-wrap gap-4">
           <div className="flex items-center gap-2">
