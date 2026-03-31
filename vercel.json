@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/reset-yearly-earnings",
       "schedule": "0 0 1 1 *"
+    },
+    {
+      "path": "/api/cron/studio-stax-renewals",
+      "schedule": "0 9 * * *"
     }
   ]
 }

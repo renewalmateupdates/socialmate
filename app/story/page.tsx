@@ -126,7 +126,7 @@ export default function Story() {
         </button>
         <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
           Payments processed securely via Stripe. This is a voluntary contribution — not a subscription.{' '}
-          <Link href="/give" className="text-amber-500 hover:text-amber-400 font-semibold">10% of every donation goes to SM-Give ❤️</Link>
+          <Link href="/give" className="text-amber-500 hover:text-amber-400 font-semibold">50% of every donation goes to SM-Give ❤️</Link>
         </p>
       </div>
 

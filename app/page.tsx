@@ -396,30 +396,35 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
           </div>
 
           <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl overflow-x-auto">
-            {/* TABLE HEADER */}
-            <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700 px-6 py-4">
-              <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Feature</span>
-              <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide text-center">Industry Standard</span>
-              <span className="text-xs font-bold text-black dark:text-white uppercase tracking-wide text-center">SocialMate</span>
-            </div>
-
-            {COMPARISON.filter(r => !r.header).map((row, i) => (
-              <div key={i} className={`grid grid-cols-3 px-6 py-3.5 items-center ${
-                i % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50/50 dark:bg-gray-800/50'
-              } border-b border-gray-50 dark:border-gray-700 last:border-0`}>
-                <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{row.label}</span>
-                <span className="text-xs text-gray-400 dark:text-gray-500 text-center">{row.industry}</span>
-                <span className="text-xs font-bold text-black dark:text-white text-center">{row.socialmate}</span>
+            <div className="min-w-[420px]">
+              {/* TABLE HEADER */}
+              <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700 px-4 md:px-6 py-4">
+                <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Feature</span>
+                <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide text-center">Industry</span>
+                <span className="text-xs font-bold text-black dark:text-white uppercase tracking-wide text-center">SocialMate</span>
               </div>
-            ))}
+
+              {COMPARISON.filter(r => !r.header).map((row, i) => (
+                <div key={i} className={`grid grid-cols-3 px-4 md:px-6 py-3.5 items-center ${
+                  i % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50/50 dark:bg-gray-800/50'
+                } border-b border-gray-50 dark:border-gray-700 last:border-0`}>
+                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{row.label}</span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500 text-center">{row.industry}</span>
+                  <span className="text-xs font-bold text-black dark:text-white text-center">{row.socialmate}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="mt-8 bg-black rounded-2xl p-6 text-white text-center">
             <p className="text-sm font-extrabold mb-1">
               Everything above. Free to start. $5/month to grow.
             </p>
-            <p className="text-xs text-gray-400 mb-5">
+            <p className="text-xs text-gray-400 mb-1">
               No per-seat fees. No feature gating for basics. No removed free plan.
+            </p>
+            <p className="text-xs text-amber-400 mb-5">
+              Features marked "✅ Free" are <strong>always free</strong>. AI tools use credits — free users get 50/month to keep infrastructure sustainable.
             </p>
             <Link href="/signup"
               className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
@@ -481,32 +486,32 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         </div>
       </section>
 
-      {/* EARLY ACCESS */}
+      {/* HOW WE STAY FREE */}
       <section className="py-20 bg-white dark:bg-gray-950">
         <div className="max-w-4xl mx-auto px-6 text-center">
-          <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">Early access</p>
-          <h2 className="text-3xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">Be part of the first wave</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl mx-auto mb-12">
-            SocialMate is built in public, shaped by real users.
-            The people who join now help decide what gets built next —
-            and lock in current plan limits before anything changes.
+          <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">Built to last</p>
+          <h2 className="text-3xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">
+            Free should mean free.<br className="hidden md:block" /> Not a limited demo.
+          </h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-12 leading-relaxed">
+            SocialMate keeps infrastructure sustainable through a credit system — so we can give every free user tools that actually work without burning out. AI generation is the only thing credits gate, and free users get 50 every month. Everything else — scheduling, analytics, link in bio, bulk upload — is free, always.
           </p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-10">
             {[
               {
-                icon: '🛠',
-                title: 'Built with early users',
-                desc: 'Your feedback directly shapes features and priorities. Not a suggestion box — actual influence over the roadmap.',
+                icon: '🆓',
+                title: 'Genuinely generous free tier',
+                desc: 'Scheduling, bulk upload, analytics, link in bio, competitor tracking, 2 team seats, and 50 AI credits per month — all at $0. No hidden paywalls on the basics.',
+              },
+              {
+                icon: '⚡',
+                title: 'Credits only gate AI costs',
+                desc: "AI generation uses real compute — we use credits to keep that sustainable, not as a lever to squeeze upgrades. The credit system lets the free tier thrive.",
               },
               {
                 icon: '🔒',
-                title: 'Grandfathered pricing',
-                desc: 'Join now and lock in current plan limits. If pricing ever changes, early users are fully grandfathered.',
-              },
-              {
-                icon: '🗺️',
-                title: "Shape what's next",
-                desc: 'Vote on features, request integrations, and see your ideas ship. Early users get direct founder access.',
+                title: 'Grandfathered pricing, always',
+                desc: 'Join now and your plan limits lock in. If pricing ever changes, early users are protected. No surprise upgrades, no bait-and-switch.',
               },
             ].map((card, i) => (
               <div key={i} className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 text-left hover:border-gray-300 dark:hover:border-gray-500 transition-all">
@@ -518,8 +523,39 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
           </div>
           <Link href="/signup"
             className="inline-block bg-black text-white font-bold px-8 py-4 rounded-2xl hover:opacity-80 transition-all">
-            Join early access — it's free →
+            Start free — no card needed →
           </Link>
+        </div>
+      </section>
+
+      {/* TESTIMONIALS PLACEHOLDER */}
+      <section className="py-20 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">From the community</p>
+            <h2 className="text-3xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">What creators are saying</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Real people. Real results. Testimonials coming as the community grows.</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="bg-white dark:bg-gray-800 border border-dashed border-gray-200 dark:border-gray-700 rounded-2xl p-6 flex flex-col gap-3 opacity-40">
+                <div className="flex gap-1">{['★','★','★','★','★'].map((s, idx) => <span key={idx} className="text-amber-400 text-sm">{s}</span>)}</div>
+                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full w-5/6" />
+                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full w-full" />
+                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full w-4/6" />
+                <div className="flex items-center gap-2 mt-2">
+                  <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700" />
+                  <div>
+                    <div className="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-full w-20 mb-1" />
+                    <div className="h-2 bg-gray-100 dark:bg-gray-600 rounded-full w-14" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="text-center text-xs text-gray-400 dark:text-gray-600 mt-6">
+            Be one of the first — <Link href="/signup" className="underline hover:text-gray-600 dark:hover:text-gray-400">join SocialMate free today</Link>
+          </p>
         </div>
       </section>
 
@@ -567,7 +603,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
               </p>
             </div>
             <div className="flex flex-col items-center gap-3 flex-shrink-0">
-              <div className="flex gap-4">
+              <div className="flex flex-wrap justify-center gap-4">
                 {['🎒 School Supplies', '👶 Baby Essentials', '🏠 Homeless Care'].map(tag => (
                   <div key={tag} className="text-center">
                     <div className="text-xl mb-1">{tag.split(' ')[0]}</div>
