@@ -15,7 +15,7 @@ const CATEGORIES = [
 ]
 
 interface PricingInfo {
-  annual: { price: number; collectivePrice: number; standardPrice: number; collectiveActive: boolean; slotsFilled: number; slotsMax: number }
+  annual: { price: number; foundingPrice: number; standardPrice: number; foundingFull: boolean; slotsFilled: number; slotsRemaining: number; slotsTotal: number }
   quarterly: { price: number; targetQuarter: string; isMidQuarter: boolean; startsAt: string; endsAt: string }
   currentQuarter: string
 }
@@ -189,12 +189,16 @@ export default function StudioStaxApplyPage() {
                   <p className="text-xl font-extrabold text-amber-600 dark:text-amber-400">
                     ${(pricing.annual.price / 100).toFixed(0)}<span className="text-xs font-semibold text-gray-500">/year</span>
                   </p>
-                  {pricing.annual.collectiveActive ? (
-                    <p className="text-[10px] text-green-600 dark:text-green-400 font-bold mt-0.5">✅ Collective price unlocked — 100+ buyers this quarter</p>
-                  ) : (
+                  {pricing.annual.foundingFull ? (
                     <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
-                      Drops to ${(pricing.annual.collectivePrice / 100).toFixed(0)}/yr when 100 buy this quarter
-                      <span className="ml-1 font-bold text-amber-600">({pricing.annual.slotsFilled}/100 filled)</span>
+                      Standard rate — founding 100 slots filled this quarter
+                    </p>
+                  ) : (
+                    <p className="text-[10px] mt-0.5">
+                      <span className="text-green-600 dark:text-green-400 font-bold">Founding price — </span>
+                      <span className="text-gray-500 dark:text-gray-400">
+                        {pricing.annual.slotsRemaining} of {pricing.annual.slotsTotal} spots left at this rate. Goes to ${(pricing.annual.standardPrice / 100).toFixed(0)} after.
+                      </span>
                     </p>
                   )}
                 </div>

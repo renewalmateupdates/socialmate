@@ -1,6 +1,6 @@
 -- Studio Stax quarterly slot tracking
--- Tracks purchases per quarter to power the collective pricing model.
--- When 100+ buyers are in a quarter, the annual price drops to $99.
+-- Tracks purchases per quarter to power the founding-price model.
+-- First 100 buyers each quarter get the $99 founding rate; price goes up to $149 after slots fill.
 -- Quarterly slots always start at the beginning of the next quarter if purchased mid-quarter.
 
 create table if not exists studio_stax_slots (
@@ -28,12 +28,14 @@ create table if not exists studio_stax_slots (
 create index if not exists idx_stax_slots_quarter on studio_stax_slots(slot_quarter);
 create index if not exists idx_stax_slots_expires on studio_stax_slots(expires_at, status);
 
--- View: how many active paid slots are in the current quarter
+-- View: how many active paid slots are in each quarter
+-- founding_full = true when 100 slots are taken (price locks to $149 for remainder of quarter)
 create or replace view studio_stax_quarter_counts as
 select
   slot_quarter,
   count(*) as slot_count,
-  count(*) >= 100 as collective_unlocked
+  count(*) >= 100 as founding_full,
+  greatest(0, 100 - count(*)) as slots_remaining
 from studio_stax_slots
 where status = 'active'
 group by slot_quarter;
