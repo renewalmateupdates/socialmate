@@ -5,8 +5,9 @@ import { usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
 const NAV_LINKS = [
-  { label: 'Features',  href: '/features' },
+  { label: 'Features',  href: '/features'  },
   { label: 'Pricing',   href: '/pricing'   },
+  { label: 'Listings',  href: '/listings'  },
   { label: 'Roadmap',   href: '/roadmap'   },
   { label: 'Our Story', href: '/story'     },
   { label: 'Blog',      href: '/blog'      },

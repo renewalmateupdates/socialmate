@@ -54,6 +54,22 @@ interface RevenueStats {
   sm_give_cents: number
 }
 
+interface ListingItem {
+  id: string
+  name: string
+  tagline: string
+  url: string
+  category: string
+  status: string
+  applicant_name: string
+  applicant_email: string
+  mission_statement: string | null
+  why_apply: string | null
+  smgive_donated_cents: number
+  admin_notes: string | null
+  created_at: string
+}
+
 // ─── Helpers ───────────────────────────────────────────────────────────────
 
 function cents(n: number) { return `$${(n / 100).toFixed(2)}` }
@@ -97,8 +113,10 @@ export default function AdminPartnersClient() {
   const [payouts, setPayouts]           = useState<PayoutRequest[]>([])
   const [stats, setStats]               = useState<RevenueStats | null>(null)
   const [feedback, setFeedback]         = useState<FeedbackItem[]>([])
+  const [listings, setListings]         = useState<ListingItem[]>([])
   const [loading, setLoading]           = useState(true)
-  const [activeTab, setActiveTab]       = useState<'affiliates' | 'payouts' | 'revenue' | 'invite' | 'feedback'>('affiliates')
+  const [listingActionLoading, setListingActionLoading] = useState(false)
+  const [activeTab, setActiveTab]       = useState<'affiliates' | 'payouts' | 'revenue' | 'invite' | 'feedback' | 'listings'>('affiliates')
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [selected, setSelected]         = useState<AffiliateProfile | null>(null)
 
@@ -123,18 +141,31 @@ export default function AdminPartnersClient() {
 
   async function fetchAll() {
     setLoading(true)
-    const [a, p, s, f] = await Promise.all([
+    const [a, p, s, f, l] = await Promise.all([
       fetch('/api/partners/stats?admin=true').then(r => r.json()),
       fetch('/api/partners/payout?admin=true').then(r => r.json()),
       fetch('/api/partners/stats?admin=true&type=revenue').then(r => r.json()),
       fetch('/api/feedback').then(r => r.json()).catch(() => ({ feedback: [] })),
+      fetch('/api/listings/admin').then(r => r.json()).catch(() => ({ listings: [] })),
     ])
     if (a.forbidden) { router.push('/dashboard'); return }
     setAffiliates(a.affiliates ?? [])
     setPayouts(p.payouts ?? [])
     setStats(s.revenue ?? null)
     setFeedback(f.feedback ?? [])
+    setListings(l.listings ?? [])
     setLoading(false)
+  }
+
+  async function updateListingStatus(id: string, status: string, admin_notes?: string) {
+    setListingActionLoading(true)
+    await fetch('/api/listings/admin', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, status, admin_notes }),
+    })
+    await fetchAll()
+    setListingActionLoading(false)
   }
 
   async function sendInvite() {
@@ -299,6 +330,7 @@ export default function AdminPartnersClient() {
             { key: 'payouts',    label: `Payouts${pendingPayouts.length > 0 ? ` (${pendingPayouts.length})` : ''}` },
             { key: 'revenue',    label: 'Revenue' },
             { key: 'feedback',   label: `Feedback${feedback.length > 0 ? ` (${feedback.length})` : ''}` },
+            { key: 'listings',   label: `Listings${listings.filter(l => l.status === 'pending').length > 0 ? ` (${listings.filter(l => l.status === 'pending').length})` : ''}` },
             { key: 'invite',     label: 'Send Invite' },
           ].map(tab => (
             <button
@@ -537,6 +569,99 @@ export default function AdminPartnersClient() {
                     </div>
                   )
                 })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* LISTINGS TAB */}
+        {activeTab === 'listings' && (
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+              <div>
+                <p style={{ margin: 0, fontSize: 16, fontWeight: 800, color: '#f1f1f1' }}>Curated Listing Applications</p>
+                <p style={{ margin: '3px 0 0', fontSize: 12, color: muted }}>Review and approve tool applications for the public directory</p>
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <span style={{ background: 'rgba(245,158,11,0.15)', color: gold, fontSize: 12, fontWeight: 700, padding: '4px 10px', borderRadius: 20 }}>
+                  {listings.filter(l => l.status === 'pending').length} pending
+                </span>
+                <span style={{ background: 'rgba(34,197,94,0.15)', color: '#22c55e', fontSize: 12, fontWeight: 700, padding: '4px 10px', borderRadius: 20 }}>
+                  {listings.filter(l => l.status === 'approved').length} approved
+                </span>
+              </div>
+            </div>
+            {listings.length === 0 ? (
+              <div style={{ background: surface, border: `1px solid ${border}`, borderRadius: 14, padding: 48, textAlign: 'center' }}>
+                <p style={{ margin: 0, fontSize: 14, color: muted }}>No applications yet. Share the listings page to get your first applicants.</p>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {listings.map(listing => (
+                  <div key={listing.id} style={{ background: surface, border: `1px solid ${listing.status === 'pending' ? 'rgba(245,158,11,0.4)' : border}`, borderRadius: 14, padding: 20 }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 12 }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+                          <span style={{ fontSize: 15, fontWeight: 800, color: '#f1f1f1' }}>{listing.name}</span>
+                          <StatusBadge status={listing.status} />
+                          <span style={{ fontSize: 11, color: muted, background: '#1a1a1a', padding: '2px 8px', borderRadius: 6, fontWeight: 600 }}>{listing.category}</span>
+                        </div>
+                        <p style={{ margin: '0 0 6px', fontSize: 13, color: '#9ca3af', fontStyle: 'italic' }}>{listing.tagline}</p>
+                        <div style={{ display: 'flex', gap: 16, fontSize: 12, color: muted }}>
+                          <span>By: <span style={{ color: '#d1d5db', fontWeight: 600 }}>{listing.applicant_name}</span></span>
+                          <span>{listing.applicant_email}</span>
+                          <a href={listing.url} target="_blank" rel="noopener noreferrer" style={{ color: '#60a5fa', textDecoration: 'none' }}>{listing.url}</a>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                        {listing.status !== 'approved' && (
+                          <button
+                            onClick={() => updateListingStatus(listing.id, 'approved')}
+                            disabled={listingActionLoading}
+                            style={{ padding: '6px 14px', borderRadius: 8, border: 'none', background: 'rgba(34,197,94,0.15)', color: '#22c55e', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', opacity: listingActionLoading ? 0.6 : 1 }}
+                          >
+                            Approve
+                          </button>
+                        )}
+                        {listing.status !== 'rejected' && (
+                          <button
+                            onClick={() => updateListingStatus(listing.id, 'rejected')}
+                            disabled={listingActionLoading}
+                            style={{ padding: '6px 14px', borderRadius: 8, border: 'none', background: 'rgba(239,68,68,0.15)', color: '#f87171', fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', opacity: listingActionLoading ? 0.6 : 1 }}
+                          >
+                            Reject
+                          </button>
+                        )}
+                        {listing.status !== 'pending' && (
+                          <button
+                            onClick={() => updateListingStatus(listing.id, 'pending')}
+                            disabled={listingActionLoading}
+                            style={{ padding: '6px 14px', borderRadius: 8, border: `1px solid ${border}`, background: 'transparent', color: muted, fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', opacity: listingActionLoading ? 0.6 : 1 }}
+                          >
+                            Reset
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    {(listing.mission_statement || listing.why_apply) && (
+                      <div style={{ background: '#0a0a0a', borderRadius: 10, padding: 14, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {listing.mission_statement && (
+                          <div>
+                            <p style={{ margin: '0 0 3px', fontSize: 11, color: muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Mission</p>
+                            <p style={{ margin: 0, fontSize: 12, color: '#d1d5db', lineHeight: 1.6 }}>{listing.mission_statement}</p>
+                          </div>
+                        )}
+                        {listing.why_apply && (
+                          <div>
+                            <p style={{ margin: '0 0 3px', fontSize: 11, color: muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Why Apply</p>
+                            <p style={{ margin: 0, fontSize: 12, color: '#d1d5db', lineHeight: 1.6 }}>{listing.why_apply}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    <p style={{ margin: '10px 0 0', fontSize: 11, color: muted }}>Applied {new Date(listing.created_at).toLocaleDateString()}</p>
+                  </div>
+                ))}
               </div>
             )}
           </div>
