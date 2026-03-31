@@ -137,7 +137,7 @@ export default function PrivacyPolicy() {
           {/* ── 8. Advertising and Data Sales ── */}
           <section>
             <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">8. Advertising and Data Sales Policy</h2>
-            <p>SocialMate never sells user data to advertisers. We never display third-party advertisements within the platform. We do not share personal data with listing applicants or approved listing partners in the /listings directory beyond what you explicitly choose to share. Approved listings are curated directory entries on a dedicated page and do not receive access to user data, usage patterns, or any other information collected by the Service.</p>
+            <p>SocialMate never sells user data to advertisers. We never display third-party advertisements within the platform. We do not share personal data with listing applicants or approved listing partners in Studio Stax (/studio-stax) beyond what you explicitly choose to share. Approved listings are curated directory entries on a dedicated page and do not receive access to user data, usage patterns, or any other information collected by the Service.</p>
           </section>
 
           {/* ── 9. Data Storage & Security ── */}

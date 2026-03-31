@@ -154,13 +154,13 @@ export default function TermsOfService() {
           {/* ── 12. Curated Listings ── */}
           <section>
             <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">12. Curated Listings</h2>
-            <p>SocialMate offers a curated listings directory at <span className="font-semibold">socialmate.studio/listings</span>. Listings are available to founder-approved tools and services for a $149/year fee. Approval is at the sole discretion of Gilgamesh Enterprise LLC. No refunds are issued for rejected applications (there is no charge until after approval). Listing fees are non-refundable once a listing goes live. Listings may be removed for any reason including violation of the "by the people, for the people" philosophy or any of these Terms. Rankings within the directory are determined by SM-Give donation amounts and are not influenced by additional payment.</p>
+            <p>SocialMate offers a curated directory called <span className="font-semibold">Studio Stax</span> at <span className="font-semibold">socialmate.studio/studio-stax</span>. Listings are available to founder-approved tools and services. Approval is at the sole discretion of Gilgamesh Enterprise LLC. No refunds are issued for rejected applications (there is no charge until after approval). Listing fees are non-refundable once a listing goes live. Listings may be removed for any reason including violation of the "by the people, for the people" philosophy or any of these Terms. Rankings within the directory are determined by SM-Give donation amounts and are not influenced by additional payment.</p>
           </section>
 
           {/* ── 13. No Advertisements ── */}
           <section>
             <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">13. No Advertisements</h2>
-            <p>SocialMate does not and will never display third-party advertisements within the platform. The Company will not sell user data to advertisers. The Company will not sell SocialMate to any third party without discontinuing the service first. Curated Listings in the /listings directory are a separate paid feature and do not constitute advertising as they appear only on a dedicated directory page, not within the scheduling or analytics features of the app.</p>
+            <p>SocialMate does not and will never display third-party advertisements within the platform. The Company will not sell user data to advertisers. The Company will not sell SocialMate to any third party without discontinuing the service first. Studio Stax (/studio-stax) is a separate paid feature and do not constitute advertising as they appear only on a dedicated directory page, not within the scheduling or analytics features of the app.</p>
           </section>
 
           {/* ── 14. Newsletter ── */}

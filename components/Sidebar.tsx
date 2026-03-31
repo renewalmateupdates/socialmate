@@ -1,11 +1,18 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 import ThemeToggle from '@/components/ThemeToggle'
 import ComposeShortcut from '@/components/ComposeShortcut'
+
+const COLLAPSED_KEY = 'sidebar_collapsed_sections'
+
+function getStoredCollapsed(): Record<string, boolean> {
+  if (typeof window === 'undefined') return {}
+  try { return JSON.parse(localStorage.getItem(COLLAPSED_KEY) || '{}') } catch { return {} }
+}
 
 const STRIPE_PRO_PRICE_ID    = 'price_1T9S2v7OMwDowUuULHznqUD5'
 const STRIPE_AGENCY_PRICE_ID = 'price_1TFMHp7OMwDowUuUgeLAeJNY'
@@ -80,8 +87,19 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   const [wsOpen, setWsOpen]                     = useState(false)
   const [showUpgradeNudge, setShowUpgradeNudge] = useState(false)
   const [checkoutLoading, setCheckoutLoading]   = useState(false)
+  const [collapsed, setCollapsed]               = useState<Record<string, boolean>>({})
   const pathname = usePathname()
   const router   = useRouter()
+
+  useEffect(() => { setCollapsed(getStoredCollapsed()) }, [])
+
+  const toggleSection = useCallback((section: string) => {
+    setCollapsed(prev => {
+      const next = { ...prev, [section]: !prev[section] }
+      try { localStorage.setItem(COLLAPSED_KEY, JSON.stringify(next)) } catch {}
+      return next
+    })
+  }, [])
 
   const {
     workspaces, activeWorkspace, setActiveWorkspace,
@@ -287,40 +305,51 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
 
       {/* NAV */}
       <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
-        {NAV.map((group, gi) => (
-          <div key={group.section}>
-            <div className="text-xs font-extrabold uppercase tracking-widest px-3 py-2 mt-1"
-              style={{ color: 'var(--sidebar-faint)', borderTop: gi > 0 ? '1px solid var(--sidebar-border)' : 'none' }}>
-              {group.section}
+        {NAV.map((group, gi) => {
+          const isCollapsed = !!collapsed[group.section]
+          return (
+            <div key={group.section}>
+              <button
+                onClick={() => toggleSection(group.section)}
+                className="w-full flex items-center justify-between px-3 py-2 mt-1 rounded-lg transition-all hover:opacity-70"
+                style={{ borderTop: gi > 0 ? '1px solid var(--sidebar-border)' : 'none' }}>
+                <span className="text-xs font-extrabold uppercase tracking-widest"
+                  style={{ color: 'var(--sidebar-faint)' }}>
+                  {group.section}
+                </span>
+                <span className="text-xs" style={{ color: 'var(--sidebar-faint)' }}>
+                  {isCollapsed ? '▸' : '▾'}
+                </span>
+              </button>
+              {!isCollapsed && group.items.map(item => {
+                const active = isActive(item.href)
+                return (
+                  <Link key={item.label} href={item.href}
+                    onClick={onNavClick}
+                    {...((item as any).newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
+                    style={{
+                      background:  active ? 'var(--sidebar-active)' : 'transparent',
+                      color:       active ? 'var(--sidebar-fg)' : 'var(--sidebar-muted)',
+                      fontWeight:  active ? '700' : '500',
+                      borderLeft:  active ? '3px solid var(--sidebar-accent)' : '3px solid transparent',
+                      paddingLeft: active ? '10px' : '12px',
+                    }}>
+                    <span>{item.icon}</span>
+                    <span className="flex-1">{item.label}</span>
+                    {item.href === '/ai-features' && !loading && (
+                      <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${
+                        credits < 10 ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400' :
+                        credits < 20 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400' :
+                        'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
+                      }`}>{credits}</span>
+                    )}
+                  </Link>
+                )
+              })}
             </div>
-            {group.items.map(item => {
-              const active = isActive(item.href)
-              return (
-                <Link key={item.label} href={item.href}
-                  onClick={onNavClick}
-                  {...((item as any).newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
-                  style={{
-                    background:  active ? 'var(--sidebar-active)' : 'transparent',
-                    color:       active ? 'var(--sidebar-fg)' : 'var(--sidebar-muted)',
-                    fontWeight:  active ? '700' : '500',
-                    borderLeft:  active ? '3px solid var(--sidebar-accent)' : '3px solid transparent',
-                    paddingLeft: active ? '10px' : '12px',
-                  }}>
-                  <span>{item.icon}</span>
-                  <span className="flex-1">{item.label}</span>
-                  {item.href === '/ai-features' && !loading && (
-                    <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${
-                      credits < 10 ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400' :
-                      credits < 20 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400' :
-                      'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
-                    }`}>{credits}</span>
-                  )}
-                </Link>
-              )
-            })}
-          </div>
-        ))}
+          )
+        })}
       </nav>
 
       {/* BOTTOM STATS */}
@@ -386,6 +415,19 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
           </button>
         )}
 
+        {/* STUDIO STAX SUGGESTIVE — pro & agency only */}
+        {(plan === 'pro' || plan === 'agency') && (
+          <Link href="/studio-stax/apply"
+            className="w-full flex items-center gap-2 rounded-xl px-3 py-2.5 transition-all hover:opacity-80"
+            style={{ background: 'var(--sidebar-active)', border: '1px solid var(--sidebar-border)' }}>
+            <span className="text-base flex-shrink-0">📦</span>
+            <div className="min-w-0">
+              <p className="text-xs font-bold leading-tight" style={{ color: 'var(--sidebar-fg)' }}>Get listed in Studio Stax</p>
+              <p className="text-[10px] leading-tight mt-0.5 truncate" style={{ color: 'var(--sidebar-faint)' }}>Founder-approved directory · from $49/qtr</p>
+            </div>
+          </Link>
+        )}
+
         {/* THEME TOGGLE */}
         <ThemeToggle />
 
@@ -427,7 +469,7 @@ export default function Sidebar() {
       )}
 
       {/* Mobile drawer */}
-      <div className={`md:hidden fixed top-0 left-0 z-50 h-full overflow-y-auto transition-transform duration-300 ${
+      <div className={`md:hidden fixed top-0 left-0 z-50 h-full w-64 max-w-[85vw] overflow-y-auto transition-transform duration-300 ${
         mobileOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
         <div className="relative">
