@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import SmGiveDonateWidget from '@/components/SmGiveDonateWidget'
 
 // Amber/warm design tokens
 const amber   = '#F59E0B'
@@ -103,14 +104,15 @@ export default function GivePage() {
           fontSize: 18, color: '#9ca3af', lineHeight: 1.7,
           margin: '0 auto 28px', maxWidth: 600,
         }}>
-          SocialMate isn&apos;t just a tool — it&apos;s a company built on purpose. We give back in three ways: a share of every subscription, a portion of every voluntary support donation, and all unclaimed affiliate contributions. Three causes, one commitment.
+          SocialMate isn&apos;t just a tool — it&apos;s a company built on purpose. We give back four ways: 2% of every subscription, 100% of direct SM-Give donations, 50% of founder-support contributions, and 75% of unclaimed affiliate proceeds.
         </p>
 
         {/* Give stats */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: 16, flexWrap: 'wrap', marginBottom: 32 }}>
           {[
             { value: '2%', label: 'of every subscription', sub: 'after Stripe fees & taxes' },
-            { value: '10%', label: 'of support donations', sub: 'voluntary contributions' },
+            { value: '100%', label: 'of direct SM-Give donations', sub: 'charity-only flow' },
+            { value: '50%', label: 'of founder-support donations', sub: 'split with the founder' },
             { value: '75%', label: 'of unclaimed affiliate', sub: 'commission proceeds' },
           ].map(stat => (
             <div key={stat.value} style={{
@@ -220,16 +222,21 @@ export default function GivePage() {
               },
               {
                 step: '02',
-                label: '10% from support donations',
-                detail: 'When someone voluntarily supports SocialMate via the story page, 10% of that contribution is earmarked for SM-Give.',
+                label: '100% of direct SM-Give donations',
+                detail: 'When someone donates via the "Donate to SM-Give" flow, 100% of that contribution is sent directly to SM-Give — nothing held back.',
               },
               {
                 step: '03',
-                label: 'Unclaimed affiliate proceeds',
-                detail: 'Affiliates who miss the payout deadline forfeit their balance. 75% of those unclaimed funds go to SM-Give.',
+                label: '50% of founder-support donations',
+                detail: 'When someone chooses "Support the Founder," 50% is allocated to SM-Give. The other 50% supports the founder\'s operating costs.',
               },
               {
                 step: '04',
+                label: '75% of unclaimed affiliate proceeds',
+                detail: 'Affiliates who miss the payout deadline forfeit their balance. 75% of those unclaimed funds go to SM-Give.',
+              },
+              {
+                step: '05',
                 label: 'Packages assembled & distributed',
                 detail: 'Funds are pooled quarterly. We purchase supplies and distribute through shelters, schools, and community programs.',
               },
@@ -282,6 +289,19 @@ export default function GivePage() {
         </p>
       </section>
 
+      {/* Direct Donation */}
+      <section style={{ maxWidth: 880, margin: '0 auto', padding: '0 24px 72px', width: '100%' }}>
+        <div style={{ textAlign: 'center', marginBottom: 32 }}>
+          <h2 style={{ fontSize: 26, fontWeight: 800, color: '#f1f1f1', margin: '0 0 10px', letterSpacing: '-0.02em' }}>
+            Give directly to SM-Give
+          </h2>
+          <p style={{ fontSize: 15, color: '#9ca3af', margin: '0 auto', maxWidth: 480, lineHeight: 1.7 }}>
+            Skip the middleman. 100% of your donation funds school supplies, baby essentials, and homeless care packages.
+          </p>
+        </div>
+        <SmGiveDonateWidget />
+      </section>
+
       {/* Bottom CTA */}
       <section style={{
         maxWidth: 880, margin: '0 auto 72px', padding: '0 24px', width: '100%',
@@ -292,10 +312,10 @@ export default function GivePage() {
           padding: '48px 40px', textAlign: 'center',
         }}>
           <h2 style={{ fontSize: 26, fontWeight: 800, color: '#f1f1f1', margin: '0 0 12px', letterSpacing: '-0.02em' }}>
-            Want to contribute directly?
+            More ways to support
           </h2>
           <p style={{ fontSize: 15, color: muted, margin: '0 auto 28px', maxWidth: 480, lineHeight: 1.7 }}>
-            The best way to support SM-Give right now is to use SocialMate, share it with others, or become an affiliate partner. Every subscription and referral fuels both the product and the giving.
+            Use SocialMate, share it with others, or become an affiliate partner. Every subscription and referral fuels both the product and the giving.
           </p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: 14, flexWrap: 'wrap' }}>
             <Link href="/signup" style={{

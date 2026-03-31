@@ -7,19 +7,28 @@ import { supabase } from '@/lib/supabase'
 
 const DONATION_AMOUNTS = [5, 10, 25, 50]
 
-export default function Story() {
+type DonationType = 'charity' | 'founder_support'
+
+function DonationCard({
+  type,
+  title,
+  subtitle,
+  badge,
+  buttonLabel,
+  buttonClass,
+  footerNote,
+}: {
+  type: DonationType
+  title: string
+  subtitle: string
+  badge: string
+  buttonLabel: string
+  buttonClass: string
+  footerNote: React.ReactNode
+}) {
   const [customAmount, setCustomAmount] = useState('')
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
-  const [isAuthed, setIsAuthed] = useState(false)
-  const [authChecked, setAuthChecked] = useState(false)
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setIsAuthed(!!data.user)
-      setAuthChecked(true)
-    })
-  }, [])
 
   const handleDonate = async () => {
     const amount = customAmount ? parseFloat(customAmount) : selectedAmount
@@ -29,7 +38,7 @@ export default function Story() {
       const res = await fetch('/api/donations/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount }),
+        body: JSON.stringify({ amount, donation_type: type }),
       })
       const data = await res.json()
       if (data.url) window.location.href = data.url
@@ -39,6 +48,65 @@ export default function Story() {
       setLoading(false)
     }
   }
+
+  return (
+    <div className="flex-1 min-w-0 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 flex flex-col gap-4">
+      <div>
+        <span className="inline-block text-xs font-bold px-2.5 py-1 rounded-lg mb-3 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+          {badge}
+        </span>
+        <h3 className="text-base font-extrabold text-gray-900 dark:text-gray-100 mb-1">{title}</h3>
+        <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{subtitle}</p>
+      </div>
+
+      <div className="flex items-center gap-2 flex-wrap">
+        {DONATION_AMOUNTS.map(amount => (
+          <button key={amount}
+            onClick={() => { setSelectedAmount(amount); setCustomAmount('') }}
+            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all border ${
+              selectedAmount === amount && !customAmount
+                ? 'bg-black dark:bg-white text-white dark:text-black border-black dark:border-white'
+                : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-400'
+            }`}>
+            ${amount}
+          </button>
+        ))}
+        <div className="flex items-center border border-gray-200 dark:border-gray-600 rounded-xl overflow-hidden">
+          <span className="px-3 text-sm text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-700 h-full flex items-center py-2">$</span>
+          <input
+            type="number"
+            placeholder="Custom"
+            value={customAmount}
+            min="1"
+            onChange={e => { setCustomAmount(e.target.value); setSelectedAmount(null) }}
+            className="w-20 px-3 py-2 text-sm outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+          />
+        </div>
+      </div>
+
+      <div className="mt-auto">
+        <button
+          onClick={handleDonate}
+          disabled={(!selectedAmount && !customAmount) || loading}
+          className={`w-full text-sm font-bold px-6 py-3 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed ${buttonClass}`}>
+          {loading ? 'Redirecting...' : buttonLabel}
+        </button>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-3 leading-relaxed">{footerNote}</p>
+      </div>
+    </div>
+  )
+}
+
+export default function Story() {
+  const [isAuthed, setIsAuthed] = useState(false)
+  const [authChecked, setAuthChecked] = useState(false)
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      setIsAuthed(!!data.user)
+      setAuthChecked(true)
+    })
+  }, [])
 
 
   const content = (
@@ -89,45 +157,41 @@ export default function Story() {
         </div>
       </div>
 
-      <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-8 mb-6">
+      <div className="mb-6">
         <h2 className="text-base font-extrabold mb-1 text-gray-900 dark:text-gray-100">Support the mission</h2>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mb-6 leading-relaxed">
-          SocialMate is fully bootstrapped — no investors, no funding rounds, no safety net. If this product has brought you value and you want to help keep it growing, any contribution goes directly toward server costs, API access, and building more features faster.
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-5 leading-relaxed">
+          SocialMate is fully bootstrapped — no investors, no funding rounds, no safety net. Choose how you want to contribute below.
         </p>
-        <div className="flex items-center gap-3 mb-4 flex-wrap">
-          {DONATION_AMOUNTS.map(amount => (
-            <button key={amount}
-              onClick={() => { setSelectedAmount(amount); setCustomAmount('') }}
-              className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all border ${
-                selectedAmount === amount && !customAmount
-                  ? 'bg-black dark:bg-white text-white dark:text-black border-black dark:border-white'
-                  : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-400'
-              }`}>
-              ${amount}
-            </button>
-          ))}
-          <div className="flex items-center border border-gray-200 dark:border-gray-600 rounded-xl overflow-hidden">
-            <span className="px-3 text-sm text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-700 h-full flex items-center py-2.5">$</span>
-            <input
-              type="number"
-              placeholder="Custom"
-              value={customAmount}
-              min="1"
-              onChange={e => { setCustomAmount(e.target.value); setSelectedAmount(null) }}
-              className="w-24 px-3 py-2.5 text-sm outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            />
-          </div>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <DonationCard
+            type="charity"
+            title="Donate to SM-Give ❤️"
+            badge="100% to charity"
+            subtitle="Every dollar goes directly to SM-Give — school supplies, baby essentials, and homeless care packages. Nothing held back."
+            buttonLabel="Donate to SM-Give ❤️"
+            buttonClass="bg-red-500 hover:bg-red-600 text-white"
+            footerNote={
+              <>
+                100% goes directly to charity.{' '}
+                <Link href="/give" className="text-amber-500 hover:text-amber-400 font-semibold">Learn about SM-Give →</Link>
+              </>
+            }
+          />
+          <DonationCard
+            type="founder_support"
+            title="Support the Founder 💛"
+            badge="50% to charity"
+            subtitle="Half supports SM-Give directly. The other half goes to the founder — fueling server costs, APIs, and building faster."
+            buttonLabel="Support the Founder 💛"
+            buttonClass="bg-amber-500 hover:bg-amber-600 text-white"
+            footerNote={
+              <>
+                50% goes to SM-Give, 50% supports the founder.{' '}
+                Payments via Stripe — voluntary, not a subscription.
+              </>
+            }
+          />
         </div>
-        <button
-          onClick={handleDonate}
-          disabled={(!selectedAmount && !customAmount) || loading}
-          className="bg-black text-white text-sm font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-          {loading ? 'Redirecting...' : 'Support SocialMate ❤️'}
-        </button>
-        <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
-          Payments processed securely via Stripe. This is a voluntary contribution — not a subscription.{' '}
-          <Link href="/give" className="text-amber-500 hover:text-amber-400 font-semibold">10% of every donation goes to SM-Give ❤️</Link>
-        </p>
       </div>
 
       <div className="flex items-center gap-3 flex-wrap">
