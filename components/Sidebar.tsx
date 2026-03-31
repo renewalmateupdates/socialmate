@@ -45,6 +45,7 @@ const NAV_BASE = [
       { icon: '🎁', label: 'Referrals',    href: '/affiliate'  },
       { icon: '🤝', label: 'Partners',     href: '/partners'   },
       { icon: '🗺️', label: 'Roadmap',      href: '/roadmap'                },
+      { icon: '❤️', label: 'SM-Give',      href: '/give'                   },
     ],
   },
   {
@@ -308,7 +309,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
                     paddingLeft: active ? '10px' : '12px',
                   }}>
                   <span>{item.icon}</span>
-                  <span className="flex-1">{item.label}</span>
+                  <span className="flex-1" style={item.href === '/give' && !active ? { color: '#f43f5e' } : undefined}>{item.label}</span>
                   {item.href === '/ai-features' && !loading && (
                     <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${
                       credits < 10 ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400' :
