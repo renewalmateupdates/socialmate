@@ -24,6 +24,7 @@ function SignupForm() {
   const [done, setDone] = useState(false)
   const [refCode, setRefCode] = useState('')
   const [ageConfirmed, setAgeConfirmed] = useState(false)
+  const [newsletterOptIn, setNewsletterOptIn] = useState(true)
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -78,7 +79,7 @@ function SignupForm() {
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
-        data: { referral_code: refCode || null },
+        data: { referral_code: refCode || null, newsletter_opted_in: newsletterOptIn },
       },
     })
     if (error) {
@@ -227,6 +228,19 @@ function SignupForm() {
                   I confirm I am 13 years of age or older
                 </span>
               </button>
+
+              {/* Newsletter opt-in */}
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={newsletterOptIn}
+                  onChange={e => setNewsletterOptIn(e.target.checked)}
+                  className="mt-0.5 rounded border-gray-300 text-black focus:ring-black"
+                />
+                <span className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                  Send me the monthly SocialMate newsletter — what we shipped, what&apos;s coming, and tips for growing your audience. Unsubscribe anytime.
+                </span>
+              </label>
 
               {/* Google Button */}
               <button
