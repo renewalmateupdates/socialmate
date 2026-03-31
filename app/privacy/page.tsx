@@ -15,7 +15,7 @@ export default function PrivacyPolicy() {
         </div>
 
         <h1 className="text-4xl font-extrabold tracking-tight mb-2 text-gray-900 dark:text-gray-100">Privacy Policy</h1>
-        <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">Last updated: March 27, 2026 · Gilgamesh Enterprise LLC</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">Last updated: April 1, 2026 · Gilgamesh Enterprise LLC</p>
         <p className="text-xs text-gray-400 dark:text-gray-500 mb-12">Your privacy matters to us. This policy explains what data we collect, why we collect it, and how we protect it.</p>
 
         <div className="space-y-10 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
@@ -42,6 +42,9 @@ export default function PrivacyPolicy() {
               <li>Client workspace names and descriptions</li>
               <li>Communications you send to our support team</li>
               <li>Prompts and instructions you enter into AI features</li>
+              <li>Newsletter opt-in preference (stored in Supabase user metadata)</li>
+              <li>SM-Give donation history, if you choose to make in-app donations</li>
+              <li>Affiliate program participation data, including referral activity and payout information</li>
             </ul>
 
             <p className="font-semibold text-gray-900 dark:text-gray-100 mb-2">2.2 Information Collected Automatically</p>
@@ -113,9 +116,33 @@ export default function PrivacyPolicy() {
             <p className="mt-2">In the event of a business acquisition, merger, or sale of substantially all of our assets, your data may be transferred to the acquiring entity, subject to the same privacy protections. We will notify you via email or prominent in-app notice before such a transfer.</p>
           </section>
 
-          {/* ── 6. Data Storage & Security ── */}
+          {/* ── 6. Affiliate Program Data ── */}
           <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">6. Data Storage and Security</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">6. Affiliate Program Data</h2>
+            <p>If you participate in the SocialMate affiliate program, we collect and store additional data in order to administer the program and meet our legal obligations:</p>
+            <ul className="list-disc pl-5 space-y-1 mt-2">
+              <li><span className="font-semibold">Affiliate earnings and commission data</span> — referral counts, conversion events, commission amounts, and payout history</li>
+              <li><span className="font-semibold">Tax documentation</span> — W-9 or equivalent forms required for IRS reporting. This data is stored securely and used solely for tax compliance purposes. It is never shared with other users or third parties except as required by law.</li>
+              <li><span className="font-semibold">Stripe Connect account information</span> — Stripe processes all affiliate payouts. We share only the data necessary to facilitate payment. Please review <a href="https://stripe.com/privacy" target="_blank" rel="noopener noreferrer" className="underline">stripe.com/privacy</a> for details on how Stripe handles this data.</li>
+            </ul>
+            <p className="mt-3">Affiliate data is retained for 7 years to comply with tax reporting requirements, even after you leave the program or close your account.</p>
+          </section>
+
+          {/* ── 7. SM-Give Data ── */}
+          <section>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">7. SM-Give Data</h2>
+            <p>When you make a voluntary in-app donation through the SM-Give program, we store the donation amount and a reference to the platform session or feature that initiated the donation. This data is used for SM-Give reporting and charitable allocation purposes. It is not shared with third parties beyond what is necessary to process the transaction via Stripe.</p>
+          </section>
+
+          {/* ── 8. Advertising and Data Sales ── */}
+          <section>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">8. Advertising and Data Sales Policy</h2>
+            <p>SocialMate never sells user data to advertisers. We never display third-party advertisements within the platform. We do not share personal data with listing applicants or approved listing partners in the /listings directory beyond what you explicitly choose to share. Approved listings are curated directory entries on a dedicated page and do not receive access to user data, usage patterns, or any other information collected by the Service.</p>
+          </section>
+
+          {/* ── 9. Data Storage & Security ── */}
+          <section>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">9. Data Storage and Security</h2>
             <p>Your data is stored on Supabase's infrastructure, hosted on AWS in the United States. We implement the following security measures:</p>
             <ul className="list-disc pl-5 space-y-1 mt-2">
               <li>Row Level Security (RLS) on all database tables — users can only access their own data</li>
@@ -128,16 +155,16 @@ export default function PrivacyPolicy() {
             <p className="mt-3">Despite these measures, no method of internet transmission or electronic storage is 100% secure. We cannot guarantee absolute security. In the event of a data breach that affects your rights and freedoms, we will notify you and relevant authorities as required by applicable law within 72 hours of becoming aware of the breach.</p>
           </section>
 
-          {/* ── 7. International Transfers ── */}
+          {/* ── 10. International Transfers ── */}
           <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">7. International Data Transfers</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">10. International Data Transfers</h2>
             <p>Our Service is operated from the United States. If you are accessing the Service from outside the United States, your personal data will be transferred to, processed, and stored in the United States.</p>
             <p className="mt-2">For EEA, UK, and Swiss users: When we transfer your personal data to the United States, we rely on Standard Contractual Clauses (SCCs) approved by the European Commission, and/or other applicable data transfer mechanisms, to ensure adequate protection of your data. By using the Service, you acknowledge that your data will be processed in the United States, where data protection laws may differ from those in your country.</p>
           </section>
 
-          {/* ── 8. Data Retention ── */}
+          {/* ── 11. Data Retention ── */}
           <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">8. Data Retention</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">11. Data Retention</h2>
             <p>We retain your data for as long as your account is active or as needed to provide the Service. Specific retention periods:</p>
             <ul className="list-disc pl-5 space-y-1 mt-2">
               <li>Account data, posts, and content: retained while your account is active; deleted within 30 days of account deletion</li>
@@ -150,9 +177,9 @@ export default function PrivacyPolicy() {
             <p className="mt-3">After the applicable retention period, data is securely deleted or anonymized.</p>
           </section>
 
-          {/* ── 9. Your Rights ── */}
+          {/* ── 12. Your Rights ── */}
           <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">9. Your Privacy Rights</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">12. Your Privacy Rights</h2>
             <p className="mb-2">Depending on your location, you have the following rights regarding your personal data:</p>
 
             <p className="font-semibold text-gray-900 dark:text-gray-100 mb-1">All Users:</p>
@@ -185,9 +212,9 @@ export default function PrivacyPolicy() {
             <p className="mt-2">To exercise any of these rights, email <a href="mailto:socialmate.updates@gmail.com" className="font-semibold underline text-gray-900 dark:text-gray-100">socialmate.updates@gmail.com</a> with your request. We will respond within <span className="font-semibold">30 days</span>. We may need to verify your identity before processing certain requests. We will not charge a fee for reasonable requests.</p>
           </section>
 
-          {/* ── 10. Account Deletion ── */}
+          {/* ── 13. Account Deletion ── */}
           <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">10. Account Deletion and Data Removal</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">13. Account Deletion and Data Removal</h2>
             <p>You can request deletion of your account and personal data at any time by:</p>
             <ul className="list-disc pl-5 space-y-1 mt-2">
               <li>Emailing <a href="mailto:socialmate.updates@gmail.com" className="font-semibold underline text-gray-900 dark:text-gray-100">socialmate.updates@gmail.com</a> with "Delete My Account" in the subject line, or</li>
@@ -204,9 +231,9 @@ export default function PrivacyPolicy() {
             <p className="mt-3">Note: Deleted data cannot be recovered. Connected social platform posts that were already published will remain on those platforms and must be deleted directly on each platform.</p>
           </section>
 
-          {/* ── 11. Cookies ── */}
+          {/* ── 14. Cookies ── */}
           <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">11. Cookies and Tracking</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">14. Cookies and Tracking</h2>
             <p>SocialMate uses the following types of cookies:</p>
             <ul className="list-disc pl-5 space-y-2 mt-2">
               <li><span className="font-semibold">Essential / Authentication Cookies:</span> Required for you to log in and use the Service. Cannot be disabled. These include session tokens managed by Supabase Auth.</li>
@@ -216,23 +243,23 @@ export default function PrivacyPolicy() {
             <p className="mt-3">We do <span className="font-semibold">not</span> use: advertising cookies, Google Analytics, Facebook Pixel, retargeting cookies, or any third-party tracking cookies.</p>
           </section>
 
-          {/* ── 12. Children's Privacy ── */}
+          {/* ── 15. Children's Privacy ── */}
           <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">12. Children's Privacy</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">15. Children's Privacy</h2>
             <p>SocialMate is not directed at, designed for, or intended to be used by children under the age of 13. We do not knowingly collect personal information from children under 13.</p>
             <p className="mt-2">Users between 13 and 17 years of age must have verifiable parental or legal guardian consent prior to using the Service. By using the Service, users in this age range represent that they have obtained such consent.</p>
             <p className="mt-2">If you believe we have inadvertently collected personal information from a child under 13, please contact us immediately at <a href="mailto:socialmate.updates@gmail.com" className="font-semibold underline text-gray-900 dark:text-gray-100">socialmate.updates@gmail.com</a>. We will promptly delete such information.</p>
           </section>
 
-          {/* ── 13. Do Not Track ── */}
+          {/* ── 16. Do Not Track ── */}
           <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">13. Do Not Track</h2>
-            <p>Some browsers transmit "Do Not Track" signals. Because there is no consistent industry standard for how to respond to these signals, SocialMate does not currently alter its data collection practices based on Do Not Track signals. Our use of analytics is limited to the privacy-friendly Vercel Analytics described in Section 11.</p>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">16. Do Not Track</h2>
+            <p>Some browsers transmit "Do Not Track" signals. Because there is no consistent industry standard for how to respond to these signals, SocialMate does not currently alter its data collection practices based on Do Not Track signals. Our use of analytics is limited to the privacy-friendly Vercel Analytics described in Section 14.</p>
           </section>
 
-          {/* ── 14. Changes ── */}
+          {/* ── 17. Changes ── */}
           <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">14. Changes to This Privacy Policy</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">17. Changes to This Privacy Policy</h2>
             <p>We may update this Privacy Policy from time to time. When we make material changes, we will:</p>
             <ul className="list-disc pl-5 space-y-1 mt-2">
               <li>Update the "Last updated" date at the top of this page</li>
@@ -243,9 +270,9 @@ export default function PrivacyPolicy() {
             <p className="mt-2">We encourage you to review this Privacy Policy periodically to stay informed about how we protect your data.</p>
           </section>
 
-          {/* ── 15. Contact ── */}
+          {/* ── 18. Contact ── */}
           <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">15. Contact Us</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">18. Contact Us</h2>
             <p>For any privacy-related questions, concerns, or requests, please contact us:</p>
             <div className="mt-3 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
               <p className="font-semibold text-gray-900 dark:text-gray-100">Gilgamesh Enterprise LLC</p>

@@ -15,7 +15,7 @@ export default function TermsOfService() {
         </div>
 
         <h1 className="text-4xl font-extrabold tracking-tight mb-2 text-gray-900 dark:text-gray-100">Terms of Service</h1>
-        <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">Last updated: March 27, 2026 · Gilgamesh Enterprise LLC</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">Last updated: April 1, 2026 · Gilgamesh Enterprise LLC</p>
         <p className="text-xs text-gray-400 dark:text-gray-500 mb-12">Please read these Terms carefully before using SocialMate. By accessing or using the Service, you agree to be bound by these Terms.</p>
 
         <div className="space-y-10 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
@@ -122,33 +122,56 @@ export default function TermsOfService() {
             <p className="mt-2">To request a refund consideration, contact <a href="mailto:socialmate.updates@gmail.com" className="font-semibold underline text-gray-900 dark:text-gray-100">socialmate.updates@gmail.com</a> with your account email and Stripe transaction ID. We will respond within 5 business days.</p>
           </section>
 
-          {/* ── 9. Connected Platforms ── */}
+          {/* ── 9. SM-Give ── */}
           <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">9. Connected Third-Party Platforms</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">9. SM-Give Charitable Program</h2>
+            <p>SocialMate operates SM-Give, a voluntary charitable contribution program. 2% of all subscription revenue, 10% of all in-app donations received through the platform's story/donation page, and 75% of unclaimed affiliate commissions (held more than 90 days) are directed to charitable causes selected by Gilgamesh Enterprise LLC. Users who make in-app donations do so voluntarily. SM-Give proceeds are not tax-deductible by the user through SocialMate. No portion of subscription fees are individually earmarked for charity; the 2% contribution is made by Gilgamesh Enterprise LLC from its own revenue share.</p>
+          </section>
+
+          {/* ── 10. Connected Platforms ── */}
+          <section>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">10. Connected Third-Party Platforms</h2>
             <p>By connecting a social media account to SocialMate, you authorize us to access your account and perform actions on your behalf within the scope of the permissions you explicitly grant (e.g., creating posts, reading analytics). You represent that you have the right and authority to grant this access.</p>
             <p className="mt-2">We are not responsible for: (a) actions taken on connected platforms that result from your instructions or scheduled posts; (b) content that violates a platform's terms of service, even if it does not violate ours; (c) the loss of access, suspension, or banning of your social media accounts by third-party platforms; (d) disruptions in platform availability due to third-party API changes, outages, or policy changes.</p>
             <p className="mt-2">Platform integrations may be discontinued at any time due to changes in third-party API policies or terms. We will make reasonable efforts to notify users of planned platform discontinuations with reasonable advance notice.</p>
             <p className="mt-2">You can disconnect any platform at any time from your account settings. Upon disconnection, we will cease accessing that platform on your behalf and will delete stored OAuth tokens for that platform.</p>
           </section>
 
-          {/* ── 10. Affiliate Program ── */}
+          {/* ── 11. Affiliate Program ── */}
           <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">10. Affiliate and Referral Program</h2>
-            <p>Our affiliate program offers recurring commissions to eligible participants who refer paying subscribers. Program details:</p>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">11. Affiliate &amp; Partner Program</h2>
+            <p>SocialMate operates an affiliate program through which approved partners ("Affiliates") earn commission for referring paying customers. Affiliates must complete onboarding including W-9 or equivalent tax documentation. Commissions are subject to a 30-day hold period before becoming eligible for payout. Gilgamesh Enterprise LLC reserves the right to terminate affiliate relationships, withhold commissions resulting from fraudulent referrals, and modify commission rates with 30 days' notice. Unclaimed commissions older than 90 days may be redirected to SM-Give. Affiliates are independent contractors, not employees.</p>
+            <p className="mt-3">Additional program details:</p>
             <ul className="list-disc pl-5 space-y-2 mt-2">
               <li>Base commission: 30% recurring on referred subscriber payments</li>
               <li>Scaled commission: 40% recurring at 100+ active referred subscribers</li>
               <li>Affiliates must maintain an active paid SocialMate subscription to be eligible</li>
-              <li>Commission payments are subject to a 60-day lock period to account for refunds and chargebacks</li>
               <li>Commissions are forfeited on cancelled, refunded, or charged-back transactions</li>
             </ul>
             <p className="mt-3">Prohibited affiliate conduct includes: self-referrals, cookie stuffing, misleading advertising, spam, or any deceptive marketing practices. We reserve the right to audit affiliate activity and to withhold or reverse commissions where fraud or abuse is suspected. Commission fraud will result in immediate termination and permanent forfeiture of all pending and future commissions.</p>
-            <p className="mt-2">We reserve the right to modify commission rates, payment terms, or terminate the affiliate program at any time with 30 days notice to active affiliates.</p>
           </section>
 
-          {/* ── 11. DMCA ── */}
+          {/* ── 12. Curated Listings ── */}
           <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">11. Digital Millennium Copyright Act (DMCA)</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">12. Curated Listings</h2>
+            <p>SocialMate offers a curated listings directory at <span className="font-semibold">socialmate.studio/listings</span>. Listings are available to founder-approved tools and services for a $149/year fee. Approval is at the sole discretion of Gilgamesh Enterprise LLC. No refunds are issued for rejected applications (there is no charge until after approval). Listing fees are non-refundable once a listing goes live. Listings may be removed for any reason including violation of the "by the people, for the people" philosophy or any of these Terms. Rankings within the directory are determined by SM-Give donation amounts and are not influenced by additional payment.</p>
+          </section>
+
+          {/* ── 13. No Advertisements ── */}
+          <section>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">13. No Advertisements</h2>
+            <p>SocialMate does not and will never display third-party advertisements within the platform. The Company will not sell user data to advertisers. The Company will not sell SocialMate to any third party without discontinuing the service first. Curated Listings in the /listings directory are a separate paid feature and do not constitute advertising as they appear only on a dedicated directory page, not within the scheduling or analytics features of the app.</p>
+          </section>
+
+          {/* ── 14. Newsletter ── */}
+          <section>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">14. Newsletter and Communications</h2>
+            <p>By creating an account, you may opt in to receive the SocialMate monthly newsletter, which covers product updates, new features, and creator tips. You can opt out at any time by clicking the unsubscribe link in any newsletter email. Transactional emails related to your account (billing receipts, password resets, post scheduling failures, etc.) cannot be unsubscribed from as they are required for service operation.</p>
+          </section>
+
+          {/* ── 15. DMCA ── */}
+          <section>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">15. Digital Millennium Copyright Act (DMCA)</h2>
             <p>Gilgamesh Enterprise LLC respects intellectual property rights and expects users to do the same. In accordance with the DMCA (17 U.S.C. § 512), we will respond to valid notices of alleged copyright infringement.</p>
             <p className="mt-2"><span className="font-semibold">To submit a DMCA takedown notice, send a written notice to our designated agent containing:</span></p>
             <ul className="list-disc pl-5 space-y-1 mt-2">
@@ -167,17 +190,17 @@ export default function TermsOfService() {
             <p className="mt-2"><span className="font-semibold">Repeat Infringers:</span> We maintain a policy of terminating the accounts of users who are determined to be repeat copyright infringers.</p>
           </section>
 
-          {/* ── 12. Intellectual Property ── */}
+          {/* ── 16. Intellectual Property ── */}
           <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">12. Intellectual Property</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">16. Intellectual Property</h2>
             <p>The Service, including all software, designs, text, graphics, logos, icons, and other materials (excluding Your Content), is the exclusive property of Gilgamesh Enterprise LLC or its licensors and is protected by copyright, trademark, and other intellectual property laws.</p>
             <p className="mt-2">We grant you a limited, non-exclusive, non-transferable, revocable license to access and use the Service for your personal or business purposes in accordance with these Terms. This license does not include: selling, reselling, or commercially exploiting the Service; modifying, copying, or creating derivative works of the Service; using data mining or similar data gathering tools on the Service; framing or mirroring any portion of the Service without our consent.</p>
             <p className="mt-2">The "SocialMate" name, logo, and related marks are trademarks of Gilgamesh Enterprise LLC. You may not use our trademarks without prior written permission.</p>
           </section>
 
-          {/* ── 13. Indemnification ── */}
+          {/* ── 17. Indemnification ── */}
           <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">13. Indemnification</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">17. Indemnification</h2>
             <p>To the fullest extent permitted by applicable law, you agree to defend, indemnify, and hold harmless Gilgamesh Enterprise LLC, its officers, directors, members, employees, contractors, agents, licensors, and service providers from and against any and all claims, damages, obligations, losses, liabilities, costs, or debt, and expenses (including but not limited to reasonable attorney's fees) arising from or related to:</p>
             <ul className="list-disc pl-5 space-y-1 mt-2">
               <li>Your use of or access to the Service;</li>
@@ -190,9 +213,9 @@ export default function TermsOfService() {
             <p className="mt-3">We reserve the right, at our own expense, to assume exclusive defense and control of any matter subject to indemnification by you. You agree to cooperate with our defense of such claims.</p>
           </section>
 
-          {/* ── 14. Disclaimers ── */}
+          {/* ── 18. Disclaimers ── */}
           <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">14. Disclaimers and Warranties</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">18. Disclaimers and Warranties</h2>
             <p className="uppercase font-semibold">THE SERVICE IS PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, NON-INFRINGEMENT, OR COURSE OF PERFORMANCE.</p>
             <p className="mt-3">WITHOUT LIMITING THE FOREGOING, GILGAMESH ENTERPRISE LLC SPECIFICALLY DISCLAIMS ANY WARRANTY THAT:</p>
             <ul className="list-disc pl-5 space-y-1 mt-2 uppercase font-medium">
@@ -205,9 +228,9 @@ export default function TermsOfService() {
             <p className="mt-3">Some jurisdictions do not allow the exclusion of certain warranties. In such jurisdictions, the above exclusions apply to the maximum extent permitted by law.</p>
           </section>
 
-          {/* ── 15. Limitation of Liability ── */}
+          {/* ── 19. Limitation of Liability ── */}
           <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">15. Limitation of Liability</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">19. Limitation of Liability</h2>
             <p className="uppercase font-semibold">TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL GILGAMESH ENTERPRISE LLC, ITS MEMBERS, OFFICERS, DIRECTORS, EMPLOYEES, AGENTS, OR LICENSORS BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES, INCLUDING BUT NOT LIMITED TO:</p>
             <ul className="list-disc pl-5 space-y-1 mt-2 uppercase font-medium">
               <li>LOSS OF PROFITS, REVENUE, OR BUSINESS;</li>
@@ -221,9 +244,9 @@ export default function TermsOfService() {
             <p className="mt-3">The limitations in this section apply regardless of the form of action, whether based in contract, tort, negligence, strict liability, or otherwise, even if we have been advised of the possibility of such damages. Some jurisdictions do not allow the limitation or exclusion of certain damages; in such jurisdictions, our liability is limited to the maximum extent permitted by law.</p>
           </section>
 
-          {/* ── 16. Arbitration ── */}
+          {/* ── 20. Arbitration ── */}
           <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">16. Binding Arbitration and Class Action Waiver</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">20. Binding Arbitration and Class Action Waiver</h2>
             <p className="font-semibold text-gray-900 dark:text-gray-100">PLEASE READ THIS SECTION CAREFULLY. IT AFFECTS YOUR LEGAL RIGHTS, INCLUDING YOUR RIGHT TO FILE A LAWSUIT IN COURT AND TO HAVE A JURY TRIAL.</p>
 
             <p className="mt-3"><span className="font-semibold">Informal Resolution First:</span> Before initiating any arbitration or legal proceeding, you agree to give us at least <span className="font-semibold">60 days written notice</span> of your dispute by emailing <a href="mailto:socialmate.updates@gmail.com" className="font-semibold underline text-gray-900 dark:text-gray-100">socialmate.updates@gmail.com</a> with the subject line "Dispute Notice." We will attempt to resolve the dispute informally during this period.</p>
@@ -245,30 +268,30 @@ export default function TermsOfService() {
             <p className="mt-3"><span className="font-semibold">Severability:</span> If any portion of this arbitration agreement is found unenforceable, that portion shall be severed and the remainder shall continue in full force and effect.</p>
           </section>
 
-          {/* ── 17. Termination ── */}
+          {/* ── 21. Termination ── */}
           <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">17. Termination</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">21. Termination</h2>
             <p>These Terms are effective until terminated by either party. You may terminate your account at any time by contacting us or through your account settings. We may terminate or suspend your access to the Service immediately, without prior notice or liability, for any reason, including but not limited to: violation of these Terms; fraudulent, abusive, or illegal activity; extended account inactivity (defined as 12+ consecutive months of no login); or at our sole discretion.</p>
-            <p className="mt-2">Upon termination: (a) your right to use the Service immediately ceases; (b) all outstanding subscription charges become immediately due; (c) earned but unpaid affiliate commissions within the lock period may be forfeited; (d) your data will be handled per our Privacy Policy.</p>
-            <p className="mt-2">Provisions that by their nature should survive termination shall survive, including Sections 5 (Content), 12 (Intellectual Property), 13 (Indemnification), 14 (Disclaimers), 15 (Limitation of Liability), 16 (Arbitration), and 20 (General).</p>
+            <p className="mt-2">Upon termination: (a) your right to use the Service immediately ceases; (b) all outstanding subscription charges become immediately due; (c) earned but unpaid affiliate commissions within the hold period may be forfeited; (d) your data will be handled per our Privacy Policy.</p>
+            <p className="mt-2">Provisions that by their nature should survive termination shall survive, including Sections 5 (Content), 16 (Intellectual Property), 17 (Indemnification), 18 (Disclaimers), 19 (Limitation of Liability), 20 (Arbitration), and 24 (General).</p>
           </section>
 
-          {/* ── 18. White Label ── */}
+          {/* ── 22. White Label ── */}
           <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">18. White Label Licenses</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">22. White Label Licenses</h2>
             <p>White Label subscription tiers grant you the right to present SocialMate under your own brand to your clients. White label licenses are non-exclusive and non-transferable. You may not sublicense white label rights to third parties. You remain responsible for ensuring your clients comply with these Terms. We reserve the right to revoke white label access for any Terms violation.</p>
             <p className="mt-2">You may not use a white label license to create a product that directly competes with SocialMate or to resell access to the underlying SocialMate platform as a standalone product.</p>
           </section>
 
-          {/* ── 19. Governing Law ── */}
+          {/* ── 23. Governing Law ── */}
           <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">19. Governing Law</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">23. Governing Law</h2>
             <p>These Terms and any dispute arising hereunder shall be governed by and construed in accordance with the laws of the <span className="font-semibold">State of Wyoming, United States</span>, without regard to its conflict of law provisions. To the extent court proceedings are permitted under these Terms, you consent to the exclusive jurisdiction and venue of the state and federal courts located in Wyoming.</p>
           </section>
 
-          {/* ── 20. General ── */}
+          {/* ── 24. General ── */}
           <section>
-            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">20. General Provisions</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">24. General Provisions</h2>
             <ul className="list-disc pl-5 space-y-2">
               <li><span className="font-semibold">Entire Agreement:</span> These Terms, together with the Privacy Policy and any supplemental policies, constitute the entire agreement between you and Gilgamesh Enterprise LLC regarding the Service.</li>
               <li><span className="font-semibold">Severability:</span> If any provision of these Terms is held to be invalid or unenforceable, that provision shall be limited or eliminated to the minimum extent necessary, and the remaining provisions shall remain in full force and effect.</li>

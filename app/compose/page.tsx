@@ -893,6 +893,22 @@ function ComposeInner() {
                   </span>
                 </div>
 
+                {/* BULK SCHEDULER PROMPT — shown when over char limit */}
+                {charOver && (
+                  <div className="mt-2 flex items-start gap-2 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2.5">
+                    <span className="text-red-500 text-sm mt-0.5">⚠️</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-red-700 dark:text-red-400 font-medium leading-relaxed">
+                        {charCount - charLimit!} characters over {activePlatform?.name}&apos;s {charLimit?.toLocaleString()}-character limit.
+                        Split into a timed sequence instead.
+                      </p>
+                      <Link href="/bulk-scheduler" className="inline-flex items-center gap-1 text-xs font-bold text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 mt-1 transition-colors">
+                        Use Bulk Scheduler →
+                      </Link>
+                    </div>
+                  </div>
+                )}
+
                 {/* MEDIA ATTACHMENTS */}
                 <div className="mt-3 pt-3 border-t border-gray-50 dark:border-gray-800">
                   {mediaItems.length > 0 && (
