@@ -20,4 +20,6 @@ export const stripe = {
   get webhooks() { return getStripe().webhooks },
   get prices() { return getStripe().prices },
   get paymentIntents() { return getStripe().paymentIntents },
+  get coupons() { return getStripe().coupons },
+  get promotionCodes() { return getStripe().promotionCodes },
 }
