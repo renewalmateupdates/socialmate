@@ -26,19 +26,17 @@ function PartnersLoginInner() {
   const [checkingSession, setCheckingSession] = useState(true)
   const [inviteValid, setInviteValid] = useState<null | { email: string; valid: boolean }>(null)
 
+  const ADMIN_EMAIL = 'socialmatehq@gmail.com'
+
   // Check for existing session
   useEffect(() => {
     async function checkSession() {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        // First: check if admin via dedicated endpoint (most reliable)
-        const adminRes = await fetch('/api/admin/check')
-        if (adminRes.ok) {
-          const adminJson = await adminRes.json()
-          if (adminJson.isAdmin) {
-            router.push('/admin/affiliates')
-            return
-          }
+        // Direct client-side admin check — most reliable (no server cookie dependency)
+        if (user.email === ADMIN_EMAIL) {
+          router.push('/admin/affiliates')
+          return
         }
         // Then: check affiliate status
         const res = await fetch('/api/partners/stats')
@@ -122,14 +120,10 @@ function PartnersLoginInner() {
         return
       }
       if (data.user) {
-        // Admin check first
-        const adminRes = await fetch('/api/admin/check')
-        if (adminRes.ok) {
-          const adminJson = await adminRes.json()
-          if (adminJson.isAdmin) {
-            router.push('/admin/affiliates')
-            return
-          }
+        // Direct admin check — no server cookie dependency
+        if (data.user.email === ADMIN_EMAIL) {
+          router.push('/admin/affiliates')
+          return
         }
         const res = await fetch('/api/partners/stats')
         if (res.ok) {

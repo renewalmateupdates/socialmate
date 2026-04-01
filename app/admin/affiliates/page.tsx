@@ -22,8 +22,8 @@ export default async function AdminAffiliatesPage() {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  const adminEmail = process.env.ADMIN_EMAIL
-  if (!user || (adminEmail && user.email !== adminEmail) || (!adminEmail && !user.id)) {
+  const adminEmail = process.env.ADMIN_EMAIL || 'socialmatehq@gmail.com'
+  if (!user || user.email !== adminEmail) {
     redirect('/dashboard')
   }
 

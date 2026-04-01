@@ -22,9 +22,8 @@ export default async function AdminPartnersPage() {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  const adminEmail = process.env.ADMIN_EMAIL
-  // If ADMIN_EMAIL is set, enforce it. If not set, block everyone (no env = no access).
-  if (!user || !adminEmail || user.email !== adminEmail) {
+  const adminEmail = process.env.ADMIN_EMAIL || 'socialmatehq@gmail.com'
+  if (!user || user.email !== adminEmail) {
     redirect('/dashboard')
   }
 
