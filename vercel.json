@@ -15,6 +15,10 @@
     {
       "path": "/api/cron/studio-stax-renewals",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/affiliate-auto-reject",
+      "schedule": "0 10 * * *"
     }
   ]
 }

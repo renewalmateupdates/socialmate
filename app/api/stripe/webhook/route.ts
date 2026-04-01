@@ -251,6 +251,41 @@ async function handleAffiliateChurn(
   }
 }
 
+// ── Regenerate a single-use promo code after it's been redeemed ─────────────
+async function regenerateAffiliatePromoCode(
+  supabase: ReturnType<typeof getSupabase>,
+  promoRecord: { id: string; code: string; stripe_coupon_id: string; code_template?: string | null }
+) {
+  try {
+    const couponId = promoRecord.stripe_coupon_id?.split('|')[0]
+    if (!couponId) return
+
+    // Use original template to build new code, or derive from current code
+    const template = promoRecord.code_template || promoRecord.code
+    // Strip any trailing 2-char suffix from previous regenerations (e.g. "GILGAMES3MAB" → "GILGAMES3M")
+    const base = template.length > 2 ? template : template
+    const suffix = Math.random().toString(36).slice(2, 4).toUpperCase()
+    const newCode = `${base}${suffix}`
+
+    const newPromo = await stripe.promotionCodes.create({
+      coupon: couponId,
+      code: newCode,
+      max_redemptions: 1,
+      metadata: { regenerated_from: promoRecord.code },
+    })
+
+    await supabase.from('affiliate_promo_codes')
+      .update({
+        code:             newCode,
+        stripe_coupon_id: `${couponId}|${newPromo.id}`,
+        times_used:       0,
+      })
+      .eq('id', promoRecord.id)
+  } catch (err) {
+    console.warn('Promo code regeneration failed (non-fatal):', err)
+  }
+}
+
 export async function POST(req: NextRequest) {
   const supabase = getSupabase()
   const body     = await req.text()
@@ -414,6 +449,58 @@ export async function POST(req: NextRequest) {
         .update(updatePayload)
         .eq('user_id', userId)
 
+      // Track affiliate promo code commission for credit pack purchases
+      try {
+        if (session.discounts && session.discounts.length > 0) {
+          for (const discount of session.discounts) {
+            if (discount.promotion_code) {
+              const promoCodeId = typeof discount.promotion_code === 'string'
+                ? discount.promotion_code
+                : discount.promotion_code.id
+
+              const { data: promoRecord } = await supabase
+                .from('affiliate_promo_codes')
+                .select('id, affiliate_id, times_used, code, stripe_coupon_id, code_template')
+                .like('stripe_coupon_id', `%${promoCodeId}%`)
+                .maybeSingle()
+
+              if (promoRecord?.affiliate_id) {
+                // 10% on Starter/Popular, 15% on Pro/Max
+                const CREDIT_PACK_RATES: Record<string, number> = {
+                  'price_1TFMI47OMwDowUuUhTrbe3oq': 0.10, // Starter 100cr
+                  'price_1TFMI77OMwDowUuU0wDZWcCL': 0.10, // Popular 300cr
+                  'price_1TFMIA7OMwDowUuUwI3SEGCR': 0.15, // Pro Pack 750cr
+                  'price_1TFMID7OMwDowUuU2sQgbIx9': 0.15, // Max Pack 2000cr
+                }
+                const rate = CREDIT_PACK_RATES[priceId] ?? 0.10
+                const amountCents = session.amount_total ?? 0
+                const commissionCents = Math.floor(amountCents * rate)
+
+                if (commissionCents > 0) {
+                  await supabase.from('affiliate_conversions').insert({
+                    affiliate_id:      promoRecord.affiliate_id,
+                    amount_cents:      amountCents,
+                    commission_cents:  commissionCents,
+                    status:            'holding',
+                    converted_at:      new Date().toISOString(),
+                    conversion_type:   'credit_pack',
+                    stripe_session_id: session.id,
+                  })
+                }
+
+                // Track usage + issue fresh single-use code
+                await supabase.from('affiliate_promo_codes')
+                  .update({ times_used: (promoRecord.times_used ?? 0) + 1 })
+                  .eq('id', promoRecord.id)
+                await regenerateAffiliatePromoCode(supabase, promoRecord)
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('Credit pack affiliate commission failed (non-fatal):', err)
+      }
+
       return NextResponse.json({ received: true })
     }
 
@@ -471,7 +558,7 @@ const creditsToSet = alreadyOnPlan
       await processAffiliateCommission(supabase, userId, plan, true)
     }
 
-    // Track affiliate promo code usage
+    // Track affiliate promo code usage + regenerate (single-use codes)
     try {
       if (session.discounts && session.discounts.length > 0) {
         for (const discount of session.discounts) {
@@ -483,7 +570,7 @@ const creditsToSet = alreadyOnPlan
             // stripe_coupon_id stores "couponId|promoCodeId" or just couponId
             const { data: promoRecord } = await supabase
               .from('affiliate_promo_codes')
-              .select('id, times_used')
+              .select('id, times_used, code, stripe_coupon_id, code_template, affiliate_id')
               .like('stripe_coupon_id', `%${promoCodeId}%`)
               .maybeSingle()
 
@@ -492,6 +579,8 @@ const creditsToSet = alreadyOnPlan
                 .from('affiliate_promo_codes')
                 .update({ times_used: (promoRecord.times_used ?? 0) + 1 })
                 .eq('id', promoRecord.id)
+              // Regenerate single-use code so affiliate always has a fresh one
+              await regenerateAffiliatePromoCode(supabase, promoRecord)
             }
           }
         }

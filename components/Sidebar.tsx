@@ -50,7 +50,7 @@ const NAV_BASE = [
       { icon: '🔭', label: 'Competitors',  href: '/competitor-tracking'    },
       { icon: '📬', label: 'Social Inbox', href: '/social-inbox'           },
       { icon: '🎁', label: 'Referrals',    href: '/affiliate'  },
-      { icon: '🤝', label: 'Partners',     href: '/partners'   },
+      { icon: '🤝', label: 'Partners',     href: '/partners', adminHref: '/admin' },
       { icon: '🗺️', label: 'Roadmap',      href: '/roadmap'                },
     ],
   },
@@ -322,9 +322,13 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
                 </span>
               </button>
               {!isCollapsed && group.items.map(item => {
-                const active = isActive(item.href)
+                const ADMIN_EMAIL = 'socialmatehq@gmail.com'
+                const isAdminUser = user?.email === ADMIN_EMAIL
+                const resolvedHref = isAdminUser && (item as any).adminHref ? (item as any).adminHref : item.href
+                const resolvedLabel = isAdminUser && (item as any).adminHref ? `${item.label} ⚙️` : item.label
+                const active = isActive(resolvedHref)
                 return (
-                  <Link key={item.label} href={item.href}
+                  <Link key={item.label} href={resolvedHref}
                     onClick={onNavClick}
                     {...((item as any).newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                     className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
@@ -336,7 +340,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
                       paddingLeft: active ? '10px' : '12px',
                     }}>
                     <span>{item.icon}</span>
-                    <span className="flex-1">{item.label}</span>
+                    <span className="flex-1">{resolvedLabel}</span>
                     {item.href === '/ai-features' && !loading && (
                       <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${
                         credits < 10 ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400' :

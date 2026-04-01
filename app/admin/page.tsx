@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation'
+import AdminHubClient from './AdminHubClient'
 
 export default function AdminRootPage() {
-  redirect('/admin/partners')
+  return <AdminHubClient />
 }
