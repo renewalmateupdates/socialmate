@@ -41,6 +41,12 @@ export default function AccessDeniedPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { setState('not_logged_in'); return }
 
+      // Admin shortcut — never show the application form to admin
+      if (user.email === 'socialmatehq@gmail.com') {
+        window.location.href = '/admin/partners'
+        return
+      }
+
       // Load affiliate status
       const res = await fetch('/api/affiliate/stats')
       if (res.ok) {
