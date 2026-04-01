@@ -19,8 +19,8 @@ export async function GET() {
       }
     )
     const { data: { user } } = await supabase.auth.getUser()
-    const adminEmail = process.env.ADMIN_EMAIL
-    const isAdmin = !!(user && adminEmail && user.email === adminEmail)
+    const adminEmail = process.env.ADMIN_EMAIL || 'socialmatehq@gmail.com'
+    const isAdmin = !!(user && user.email === adminEmail)
     return NextResponse.json({ isAdmin, email: isAdmin ? user?.email : null })
   } catch {
     return NextResponse.json({ isAdmin: false })
