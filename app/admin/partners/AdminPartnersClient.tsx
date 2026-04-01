@@ -140,11 +140,13 @@ export default function AdminPartnersClient() {
   const [promoLoading, setPromoLoading]       = useState(false)
   const [allPromosLoading, setAllPromosLoading] = useState(false)
   const [allPromosResult, setAllPromosResult] = useState<string | null>(null)
+  const [authError, setAuthError] = useState(false)
 
   useEffect(() => { fetchAll() }, [])
 
   async function fetchAll() {
     setLoading(true)
+    setAuthError(false)
     const [a, p, s, f, l] = await Promise.all([
       fetch('/api/partners/stats?admin=true').then(r => r.json()),
       fetch('/api/partners/payout?admin=true').then(r => r.json()),
@@ -152,7 +154,11 @@ export default function AdminPartnersClient() {
       fetch('/api/feedback').then(r => r.json()).catch(() => ({ feedback: [] })),
       fetch('/api/listings/admin').then(r => r.json()).catch(() => ({ listings: [] })),
     ])
-    if (a.forbidden) return  // stay on page, don't redirect admin out
+    if (a.forbidden || a.error) {
+      setAuthError(true)
+      setLoading(false)
+      return
+    }
     setAffiliates(a.affiliates ?? [])
     setPayouts(p.payouts ?? [])
     setStats(s.revenue ?? null)
@@ -316,6 +322,23 @@ export default function AdminPartnersClient() {
       <div style={{ minHeight: '100vh', background: dark, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ width: 32, height: 32, borderRadius: '50%', border: `3px solid ${gold}`, borderTopColor: 'transparent', animation: 'spin 0.7s linear infinite' }} />
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    )
+  }
+
+  if (authError) {
+    return (
+      <div style={{ minHeight: '100vh', background: dark, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ textAlign: 'center', maxWidth: 400, padding: 32 }}>
+          <p style={{ fontSize: 16, fontWeight: 700, color: '#f87171', marginBottom: 8 }}>Session expired</p>
+          <p style={{ fontSize: 13, color: muted, marginBottom: 20 }}>Your admin session timed out. Sign out and sign back in to reload this page.</p>
+          <button
+            onClick={() => window.location.reload()}
+            style={{ padding: '10px 20px', background: gold, color: '#000', fontWeight: 700, fontSize: 13, borderRadius: 8, border: 'none', cursor: 'pointer' }}
+          >
+            Retry
+          </button>
+        </div>
       </div>
     )
   }
