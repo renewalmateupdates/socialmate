@@ -83,6 +83,11 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ affiliates: affiliates ?? [] })
   }
 
+  // ── Admin shortcut: return isAdmin flag so partner portal can redirect ──
+  if (adminEmail && user.email === adminEmail) {
+    return NextResponse.json({ isAdmin: true, profile: null })
+  }
+
   // ── Affiliate view: own profile ───────────────────────────────────────
   const { data: profile } = await db
     .from('affiliate_profiles')

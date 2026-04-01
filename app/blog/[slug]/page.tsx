@@ -1311,12 +1311,15 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
           <span className="font-bold text-base tracking-tight dark:text-gray-100">SocialMate</span>
         </Link>
         <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-500 dark:text-gray-400">
-          <Link href="/" className="hover:text-black dark:hover:text-white transition-colors">Home</Link>
-          <Link href="/pricing" className="hover:text-black dark:hover:text-white transition-colors">Pricing</Link>
-          <Link href="/blog" className="hover:text-black dark:hover:text-white transition-colors">Blog</Link>
+          <Link href="/features"    className="hover:text-black dark:hover:text-white transition-colors">Features</Link>
+          <Link href="/pricing"     className="hover:text-black dark:hover:text-white transition-colors">Pricing</Link>
+          <Link href="/studio-stax" className="hover:text-black dark:hover:text-white transition-colors">Studio Stax</Link>
+          <Link href="/roadmap"     className="hover:text-black dark:hover:text-white transition-colors">Roadmap</Link>
+          <Link href="/blog"        className="font-bold text-black dark:text-white">Blog</Link>
         </div>
         <div className="flex items-center gap-3">
-          <Link href="/login" className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors hidden sm:block">Sign in</Link>
+          <Link href="/give"   className="text-sm font-semibold text-rose-400 hover:text-rose-300 transition-all hidden sm:block">❤️ Give</Link>
+          <Link href="/login"  className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors hidden sm:block">Sign in</Link>
           <Link href="/signup" className="bg-black text-white text-sm font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
             Get started free →
           </Link>
