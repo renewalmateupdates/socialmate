@@ -484,9 +484,9 @@ export default function Pricing() {
         <div className="text-center mt-12">
           <h2 className="text-2xl font-extrabold mb-2">Ready to get started?</h2>
           <p className="text-sm text-gray-500 mb-6">No card required. Free forever. 50 AI credits per month, included free.</p>
-          <div className="flex items-center justify-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/signup"
-              className="bg-black text-white font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm">
+              className="bg-black text-white font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm w-full sm:w-auto text-center">
               Create free account →
             </Link>
             <Link href="/features"

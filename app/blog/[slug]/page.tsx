@@ -1,5 +1,64 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
+
+// ── DB post shape ─────────────────────────────────────────────────────────────
+type DbPost = {
+  slug: string
+  title: string
+  excerpt: string | null
+  content: string
+  category: string
+  author: string
+  published_at: string
+}
+
+function dbPostToPost(db: DbPost) {
+  const wordCount  = db.content.trim().split(/\s+/).length
+  const readMins   = Math.max(1, Math.round(wordCount / 200))
+  const dateStr    = new Date(db.published_at).toLocaleDateString('en-US', {
+    month: 'long', day: 'numeric', year: 'numeric',
+  })
+  return {
+    title:    db.title,
+    category: db.category || 'Studio Stax',
+    date:     dateStr,
+    readTime: `${readMins} min read`,
+    excerpt:  db.excerpt || '',
+    content:  db.content,
+    author:   db.author,
+  }
+}
+
+async function getDbPost(slug: string): Promise<ReturnType<typeof dbPostToPost> | null> {
+  try {
+    const admin = getSupabaseAdmin()
+    const { data } = await admin
+      .from('blog_posts')
+      .select('slug, title, excerpt, content, category, author, published_at')
+      .eq('slug', slug)
+      .single()
+    if (!data) return null
+    return dbPostToPost(data as DbPost)
+  } catch {
+    return null
+  }
+}
+
+async function getAllDbPosts(): Promise<Array<[string, ReturnType<typeof dbPostToPost>]>> {
+  try {
+    const admin = getSupabaseAdmin()
+    const { data } = await admin
+      .from('blog_posts')
+      .select('slug, title, excerpt, content, category, author, published_at')
+      .order('published_at', { ascending: false })
+      .limit(20)
+    if (!data) return []
+    return (data as DbPost[]).map(d => [d.slug, dbPostToPost(d)])
+  } catch {
+    return []
+  }
+}
 
 const POSTS: Record<string, {
   title: string
@@ -1209,7 +1268,7 @@ export async function generateMetadata(
   { params }: { params: Promise<{ slug: string }> }
 ): Promise<Metadata> {
   const { slug } = await params
-  const post = POSTS[slug]
+  const post = POSTS[slug] ?? (await getDbPost(slug))
   if (!post) return { title: 'Post not found — SocialMate Blog' }
   return {
     title: `${post.title} — SocialMate Blog`,
@@ -1263,7 +1322,7 @@ function renderContent(content: string) {
 
 export default async function BlogPost({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const post = POSTS[slug]
+  const post = POSTS[slug] ?? (await getDbPost(slug))
 
   if (!post) {
     return (
@@ -1299,7 +1358,12 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
     )
   }
 
-  const otherPosts = Object.entries(POSTS)
+  const dbPosts    = await getAllDbPosts()
+  const allPosts   = [
+    ...Object.entries(POSTS),
+    ...dbPosts.filter(([s]) => !POSTS[s]), // deduplicate: skip if slug exists in POSTS
+  ]
+  const otherPosts = allPosts
     .filter(([s]) => s !== slug)
     .slice(0, 3)
 
