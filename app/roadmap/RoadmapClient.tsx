@@ -37,7 +37,7 @@ const ROADMAP: RoadmapItem[] = [
   { title: 'Competitor tracking',        desc: 'Track competitor accounts on Bluesky/Mastodon. Inngest fetches and surfaces their content every 6 hours.',       status: 'planned',      category: 'Intelligence'  },
 
   // ── SHIPPED ───────────────────────────────────────────────
-  { title: 'Studio Stax directory',      desc: 'Founder-curated directory of tools, creators, and projects. Ranked by SM-Give donations. First 100 annual listings lock in the founding rate ($99/yr). Apply at /studio-stax.', status: 'shipped', category: 'Platform' },
+  { title: 'Studio Stax directory',      desc: 'Founder-curated directory of tools, creators, and projects. Ranked by SM-Give donations. Annual listings from $99/yr. Apply at /studio-stax.', status: 'shipped', category: 'Platform' },
   { title: 'Image & video upload',       desc: 'Attach images and videos directly in the compose screen. Uploads to Supabase Storage and publishes to Discord, Bluesky, Mastodon, and Telegram.', status: 'shipped', category: 'Media' },
   { title: 'SM-Give charity program',    desc: '50% of every donation goes directly to SM-Give — funding school supplies, baby essentials, and homeless care packages. No strings attached.', status: 'shipped', category: 'Platform' },
   { title: 'Dark mode',                  desc: 'Full dark mode across all pages with Tailwind dark: variants, system preference detection, and Supabase sync.',  status: 'shipped',      category: 'Design'        },
