@@ -152,7 +152,7 @@ export default function AdminPartnersClient() {
       fetch('/api/feedback').then(r => r.json()).catch(() => ({ feedback: [] })),
       fetch('/api/listings/admin').then(r => r.json()).catch(() => ({ listings: [] })),
     ])
-    if (a.forbidden) { router.push('/dashboard'); return }
+    if (a.forbidden) return  // stay on page, don't redirect admin out
     setAffiliates(a.affiliates ?? [])
     setPayouts(p.payouts ?? [])
     setStats(s.revenue ?? null)
@@ -873,7 +873,7 @@ export default function AdminPartnersClient() {
               <div style={{ background: 'rgba(124,58,237,0.06)', border: `1px solid rgba(124,58,237,0.2)`, borderRadius: 10, padding: 14, marginBottom: 12 }}>
                 <p style={{ margin: '0 0 6px', fontSize: 12, fontWeight: 700, color: purple }}>Standard Code Set</p>
                 <p style={{ margin: '0 0 10px', fontSize: 11, color: muted, lineHeight: 1.5 }}>
-                  Generates 8 codes ({extractBase(selected.email)}1M, 3M, 6M, 1Y, CR1, CR2, WLB, WLP) and creates matching Stripe promotion codes.
+                  Generates 6 codes ({extractBase(selected.email)}1M, 3M, 6M, 1Y, CR1, CR2) and creates matching Stripe promotion codes.
                 </p>
                 <button
                   onClick={generateAllPromos}
