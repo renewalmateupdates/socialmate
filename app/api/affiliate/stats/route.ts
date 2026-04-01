@@ -5,7 +5,6 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-const ADMIN_USER_ID    = process.env.ADMIN_USER_ID
 const ADMIN_EMAIL_ADDR = process.env.ADMIN_EMAIL || 'socialmatehq@gmail.com'
 
 function getAdminSupabase() {
@@ -44,10 +43,7 @@ export async function GET(req: NextRequest) {
 
   // Admin view — all applications
   if (isAdmin) {
-    const isAdminUser = ADMIN_USER_ID
-      ? user.id === ADMIN_USER_ID
-      : user.email === ADMIN_EMAIL_ADDR
-    if (!isAdminUser) {
+    if (user.email !== ADMIN_EMAIL_ADDR) {
       return NextResponse.json({ forbidden: true }, { status: 403 })
     }
     const { data: applications } = await adminSupabase
