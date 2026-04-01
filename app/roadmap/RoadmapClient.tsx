@@ -1,8 +1,6 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
-import Sidebar from '@/components/Sidebar'
 
 type RoadmapItem = {
   title:    string
@@ -51,7 +49,8 @@ const ROADMAP: RoadmapItem[] = [
   { title: 'Telegram publishing',        desc: 'Bot token + chat ID based posting. HTML parse mode support.',                                                    status: 'shipped',      category: 'Platforms'     },
   { title: 'Mastodon publishing',        desc: 'Per-instance OAuth with token exchange. Supports any Mastodon instance.',                                        status: 'shipped',      category: 'Platforms'     },
   { title: 'Stripe billing',             desc: 'Free, Pro ($5/mo), and Agency ($20/mo) plans with credit pack purchases.',                                       status: 'shipped',      category: 'Platform'      },
-  { title: 'Affiliate system',           desc: 'Referral codes, conversion tracking, tiered commissions, and affiliate dashboard.',                              status: 'shipped',      category: 'Growth'        },
+  { title: 'Affiliate & partner program', desc: 'Full affiliate portal with application flow, tiered promo codes, single-use regenerating codes, commission tracking, and admin hub.',  status: 'shipped', category: 'Growth' },
+  { title: 'Collapsible sidebar',        desc: 'Every sidebar section is collapsible and drag-to-reorder. Theme panel lets you pick a color scheme and toggle dark mode — all persisted.',    status: 'shipped', category: 'Design' },
   { title: 'AI caption tools',           desc: 'Caption generator, hashtag generator, post rewriter, viral hook generator — all on free tier.',                 status: 'shipped',      category: 'AI'            },
   { title: 'Link in Bio builder',        desc: 'Bio page builder with profile, links, themes, and a public URL at /[username].',                                 status: 'shipped',      category: 'Tools'         },
   { title: 'Workspace system',           desc: 'Personal workspace auto-created on signup. Client workspaces on Pro+.',                                          status: 'shipped',      category: 'Teams'         },
@@ -74,15 +73,6 @@ export default function RoadmapClient() {
   const [feedbackEmail, setFeedbackEmail] = useState('')
   const [feedbackSent, setFeedbackSent]   = useState(false)
   const [sending, setSending]             = useState(false)
-  const [isAuthed, setIsAuthed]           = useState(false)
-  const [authChecked, setAuthChecked]     = useState(false)
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setIsAuthed(!!data.user)
-      setAuthChecked(true)
-    })
-  }, [])
 
   async function submitRequest() {
     if (!feedbackText.trim()) return
@@ -151,10 +141,24 @@ export default function RoadmapClient() {
         <div className="mb-14">
           <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Public roadmap</p>
           <h1 className="text-4xl font-extrabold tracking-tight mb-4 text-gray-900 dark:text-gray-100">What we're building</h1>
-          <p className="text-gray-500 dark:text-gray-400 text-sm max-w-2xl leading-relaxed">
+          <p className="text-gray-500 dark:text-gray-400 text-sm max-w-2xl leading-relaxed mb-8">
             SocialMate is built in public. This is what's in progress, what's coming next, what's planned,
             and what's already shipped. Feature requests welcome at the bottom.
           </p>
+
+          {/* Beta milestone */}
+          <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 max-w-2xl">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Beta milestone — exit to v1.0</p>
+              <span className="text-xs font-bold text-gray-500 dark:text-gray-400">Goal: 500 users</span>
+            </div>
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
+              <div className="bg-black dark:bg-white h-2 rounded-full transition-all" style={{ width: '4%' }} />
+            </div>
+            <p className="text-xs text-gray-400 dark:text-gray-500 leading-relaxed">
+              When we hit 500 users, SocialMate exits beta — full v1.0 release, expanded platform support, and locked-in pricing for everyone who joined early.
+            </p>
+          </div>
         </div>
 
         {/* STATUS LEGEND */}
@@ -265,19 +269,6 @@ export default function RoadmapClient() {
       </div>
     </footer>
   )
-
-  if (isAuthed) {
-    return (
-      <div className="flex h-screen overflow-hidden bg-white dark:bg-gray-950">
-        <Sidebar />
-        <main className="flex-1 overflow-y-auto">
-          <div className="max-w-4xl mx-auto p-8">
-            {roadmapContent}
-          </div>
-        </main>
-      </div>
-    )
-  }
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
