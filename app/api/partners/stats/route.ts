@@ -287,13 +287,11 @@ export async function POST(req: NextRequest) {
       stripe_duration_months?: number
     }> = [
       { code: `${BASE}1M`,  discount_value: 15, duration_months: 1,    description: '15% off for 1 month',           stripe_duration: 'repeating', stripe_duration_months: 1  },
-      { code: `${BASE}3M`,  discount_value: 20, duration_months: 3,    description: '20% off for 3 months',          stripe_duration: 'repeating', stripe_duration_months: 3  },
-      { code: `${BASE}6M`,  discount_value: 22, duration_months: 6,    description: '22% off for 6 months',          stripe_duration: 'repeating', stripe_duration_months: 6  },
+      { code: `${BASE}3M`,  discount_value: 15, duration_months: 3,    description: '15% off for 3 months',          stripe_duration: 'repeating', stripe_duration_months: 3  },
+      { code: `${BASE}6M`,  discount_value: 20, duration_months: 6,    description: '20% off for 6 months',          stripe_duration: 'repeating', stripe_duration_months: 6  },
       { code: `${BASE}1Y`,  discount_value: 25, duration_months: 12,   description: '25% off annual plan',           stripe_duration: 'once'      },
       { code: `${BASE}CR1`, discount_value: 10, duration_months: null, description: '10% off Starter/Popular credits', stripe_duration: 'once'    },
       { code: `${BASE}CR2`, discount_value: 15, duration_months: null, description: '15% off Pro/Max credits',       stripe_duration: 'once'      },
-      { code: `${BASE}WLB`, discount_value: 15, duration_months: null, description: '15% off White Label Basic',     stripe_duration: 'once'      },
-      { code: `${BASE}WLP`, discount_value: 20, duration_months: null, description: '20% off White Label Pro',       stripe_duration: 'once'      },
     ]
 
     const db = getAdminSupabase()
