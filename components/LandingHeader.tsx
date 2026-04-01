@@ -19,7 +19,7 @@ export default function LandingHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
     <header
       className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800"
       style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <div className="w-7 h-7 bg-black dark:bg-white rounded-lg flex items-center justify-center text-white dark:text-black text-sm font-bold">S</div>
@@ -58,7 +58,7 @@ export default function LandingHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
                 Sign in
               </Link>
               <Link href="/signup"
-                className="bg-black dark:bg-white text-white dark:text-black text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
+                className="hidden sm:inline-block bg-black dark:bg-white text-white dark:text-black text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
                 Get started free →
               </Link>
             </>
@@ -67,7 +67,7 @@ export default function LandingHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
           {/* Hamburger — mobile only */}
           <button
             onClick={() => setMobileMenuOpen(prev => !prev)}
-            className="md:hidden flex flex-col justify-center items-center w-9 h-9 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all gap-1.5"
+            className="md:hidden flex flex-col justify-center items-center w-11 h-11 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all gap-1.5"
             aria-label="Toggle menu">
             <span className={`block w-4 h-0.5 bg-gray-700 dark:bg-gray-300 transition-all ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`} />
             <span className={`block w-4 h-0.5 bg-gray-700 dark:bg-gray-300 transition-all ${mobileMenuOpen ? 'opacity-0' : ''}`} />

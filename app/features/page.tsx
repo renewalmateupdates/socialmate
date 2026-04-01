@@ -342,7 +342,7 @@ export default function Features() {
               See pricing →
             </Link>
           </div>
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
             {CREDIT_SUMMARY.map(tool => (
               <div key={tool.name} className="bg-white/10 rounded-xl p-2.5 text-center relative">
                 {tool.proOnly && (

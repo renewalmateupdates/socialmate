@@ -1,7 +1,36 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
-const POSTS = [
+async function getDbPosts() {
+  try {
+    const admin = getSupabaseAdmin()
+    const { data } = await admin
+      .from('blog_posts')
+      .select('slug, title, excerpt, category, author, published_at, content')
+      .order('published_at', { ascending: false })
+      .limit(30)
+    if (!data) return []
+    return data.map((d: any) => {
+      const wordCount = (d.content || '').trim().split(/\s+/).length
+      const readMins  = Math.max(1, Math.round(wordCount / 200))
+      return {
+        slug:      d.slug as string,
+        title:     d.title as string,
+        date:      new Date(d.published_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }),
+        category:  (d.category || 'Studio Stax') as string,
+        excerpt:   (d.excerpt || '') as string,
+        readTime:  `${readMins} min read`,
+        emoji:     '🛠️',
+        featured:  false,
+      }
+    })
+  } catch {
+    return []
+  }
+}
+
+const STATIC_POSTS = [
   { slug: 'why-we-built-socialmate',                         title: 'Why We Built SocialMate: The Full Story',                        date: 'March 2026',    category: 'Our Story',   excerpt: 'Built by a deli worker in spare moments. Here\'s why SocialMate exists and what we\'re building toward.',              readTime: '4 min read', emoji: '❤️',  featured: true  },
   { slug: 'socialmate-gives-back-sm-give',                   title: 'How SocialMate Gives Back: Introducing SM-Give',                 date: 'April 2026',    category: 'Our Story',   excerpt: 'Every subscription, every donation, every unclaimed affiliate check — a piece goes to real people who need it most.',   readTime: '3 min read', emoji: '🫶',  featured: false },
   { slug: 'discord-scheduling-grow-your-server',             title: 'How to Schedule Discord Posts and Grow Your Server in 2026',    date: 'April 2026',    category: 'Guides',      excerpt: 'Discord isn\'t just for gaming anymore. Here\'s how to use scheduled posts to keep your community engaged daily.',   readTime: '5 min read', emoji: '💬',  featured: false },
@@ -25,11 +54,20 @@ const CATEGORY_COLORS: Record<string, string> = {
   'Resources':   'bg-blue-50 text-blue-600',
   'Growth':      'bg-pink-50 text-pink-600',
   'Comparisons': 'bg-orange-50 text-orange-600',
+  'studio-stax': 'bg-amber-50 text-amber-600',
+  'Studio Stax': 'bg-amber-50 text-amber-600',
 }
 
-export default function Blog() {
-  const featured = POSTS.find(p => p.featured)
-  const rest = POSTS.filter(p => !p.featured)
+export default async function Blog() {
+  const dbPosts  = await getDbPosts()
+  const slugSet  = new Set(STATIC_POSTS.map(p => p.slug))
+  // Merge: static first, then any DB posts not already in static list
+  const allPosts = [
+    ...STATIC_POSTS,
+    ...dbPosts.filter(p => !slugSet.has(p.slug)),
+  ]
+  const featured = allPosts.find(p => p.featured)
+  const rest = allPosts.filter(p => !p.featured)
 
   return (
     <PublicLayout>
