@@ -36,17 +36,40 @@ const COMPARISON = [
 export default function VsSocialRails() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
-      <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
-            <span className="font-bold text-base tracking-tight dark:text-gray-100">SocialMate</span>
+      <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+          <Link href="/" className="flex items-center gap-2 flex-shrink-0">
+            <div className="w-7 h-7 bg-black dark:bg-white rounded-lg flex items-center justify-center text-white dark:text-black text-sm font-bold">S</div>
+            <span className="font-bold text-base tracking-tight text-gray-900 dark:text-gray-100">
+              SocialMate
+              <span className="text-[10px] font-semibold bg-pink-500 text-white px-1.5 py-0.5 rounded-full align-super ml-1">Beta</span>
+            </span>
           </Link>
-          <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-all hidden sm:block">Sign in</Link>
-            <Link href="/signup" className="bg-black text-white text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
+          <nav className="hidden md:flex items-center gap-1 flex-1 justify-center">
+            {[
+              { label: 'Features',    href: '/features'    },
+              { label: 'Pricing',     href: '/pricing'     },
+              { label: 'Studio Stax', href: '/studio-stax' },
+              { label: 'Roadmap',     href: '/roadmap'     },
+              { label: 'Our Story',   href: '/story'       },
+              { label: 'Blog',        href: '/blog'        },
+            ].map(l => (
+              <Link key={l.label} href={l.href}
+                className="px-4 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-black dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+                {l.label}
+              </Link>
+            ))}
+          </nav>
+          <div className="hidden md:flex items-center gap-3 flex-shrink-0">
+            <Link href="/give" className="text-sm font-semibold text-rose-400 hover:text-rose-300 transition-all">❤️ Give</Link>
+            <Link href="/partners" className="text-sm font-semibold text-amber-500 hover:text-amber-400 transition-all">Partners</Link>
+            <Link href="/login" className="text-sm font-semibold text-gray-500 hover:text-black dark:hover:text-white transition-all">Sign in</Link>
+            <Link href="/signup" className="bg-black dark:bg-white text-white dark:text-black text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
               Get started free →
             </Link>
+          </div>
+          <div className="flex md:hidden items-center gap-2">
+            <Link href="/login" className="text-sm font-semibold text-gray-500 hover:text-black dark:hover:text-white transition-all px-2 py-1">Sign in</Link>
           </div>
         </div>
       </header>

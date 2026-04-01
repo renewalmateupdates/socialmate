@@ -5,12 +5,12 @@ import { usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
 const NAV_LINKS = [
-  { label: 'Features',  href: '/features'  },
-  { label: 'Pricing',   href: '/pricing'   },
-  { label: 'Listings',  href: '/listings'  },
-  { label: 'Roadmap',   href: '/roadmap'   },
-  { label: 'Our Story', href: '/story'     },
-  { label: 'Blog',      href: '/blog'      },
+  { label: 'Features',    href: '/features'    },
+  { label: 'Pricing',     href: '/pricing'     },
+  { label: 'Studio Stax', href: '/studio-stax' },
+  { label: 'Roadmap',     href: '/roadmap'     },
+  { label: 'Our Story',   href: '/story'       },
+  { label: 'Blog',        href: '/blog'        },
 ]
 
 export default function PublicNav() {
@@ -92,7 +92,7 @@ export default function PublicNav() {
           )}
           <button
             onClick={() => setOpen(true)}
-            className="w-10 h-10 rounded-xl flex flex-col items-center justify-center gap-[5px] hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+            className="w-11 h-11 rounded-xl flex flex-col items-center justify-center gap-[5px] hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
             aria-label="Open menu">
             <span className="block w-5 h-0.5 bg-gray-700 dark:bg-gray-300 rounded-full" />
             <span className="block w-5 h-0.5 bg-gray-700 dark:bg-gray-300 rounded-full" />
@@ -117,7 +117,7 @@ export default function PublicNav() {
               <span className="font-bold text-sm text-gray-900 dark:text-gray-100">Menu</span>
               <button
                 onClick={() => setOpen(false)}
-                className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-all text-gray-500 dark:text-gray-400 text-lg font-bold"
+                className="w-11 h-11 rounded-xl flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-all text-gray-500 dark:text-gray-400 text-lg font-bold"
                 aria-label="Close menu">
                 ✕
               </button>

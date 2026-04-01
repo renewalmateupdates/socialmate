@@ -6,12 +6,41 @@ import Link from 'next/link'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 import ThemeToggle from '@/components/ThemeToggle'
 import ComposeShortcut from '@/components/ComposeShortcut'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
-const COLLAPSED_KEY = 'sidebar_collapsed_sections'
+const COLLAPSED_KEY  = 'sidebar_collapsed_sections'
+const ORDER_KEY      = 'sidebar_section_order'
+const STATS_VIS_KEY  = 'sidebar_stats_visible'
 
 function getStoredCollapsed(): Record<string, boolean> {
   if (typeof window === 'undefined') return {}
   try { return JSON.parse(localStorage.getItem(COLLAPSED_KEY) || '{}') } catch { return {} }
+}
+
+function getStoredOrder(defaultOrder: string[]): string[] {
+  if (typeof window === 'undefined') return defaultOrder
+  try {
+    const stored = JSON.parse(localStorage.getItem(ORDER_KEY) || '[]') as string[]
+    // Only use stored order if it has the same sections (handles new sections being added)
+    if (stored.length === defaultOrder.length && defaultOrder.every(s => stored.includes(s))) {
+      return stored
+    }
+  } catch {}
+  return defaultOrder
 }
 
 const STRIPE_PRO_PRICE_ID    = 'price_1T9S2v7OMwDowUuULHznqUD5'
@@ -50,7 +79,7 @@ const NAV_BASE = [
       { icon: '🔭', label: 'Competitors',  href: '/competitor-tracking'    },
       { icon: '📬', label: 'Social Inbox', href: '/social-inbox'           },
       { icon: '🎁', label: 'Referrals',    href: '/affiliate'  },
-      { icon: '🤝', label: 'Partners',     href: '/partners', adminHref: '/admin' },
+      { icon: '🤝', label: 'Partners',     href: '/partners'   },
       { icon: '🗺️', label: 'Roadmap',      href: '/roadmap'                },
     ],
   },
@@ -76,6 +105,53 @@ const NAV_BASE = [
   },
 ]
 
+// ── Sortable section header ───────────────────────────────────────────────────
+function SortableSectionHeader({
+  section, isCollapsed, onToggle, showBorder,
+}: {
+  section: string
+  isCollapsed: boolean
+  onToggle: () => void
+  showBorder: boolean
+}) {
+  const {
+    attributes, listeners, setNodeRef, transform, transition, isDragging,
+  } = useSortable({ id: section })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    borderTop: showBorder ? '1px solid var(--sidebar-border)' : 'none',
+  }
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center justify-between px-3 py-2 mt-1 rounded-lg transition-all hover:opacity-70 group"
+      >
+        {/* Drag handle — only visible on hover */}
+        <span
+          {...attributes}
+          {...listeners}
+          className="mr-1.5 cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-40 hover:!opacity-80 transition-opacity text-xs select-none flex-shrink-0"
+          style={{ color: 'var(--sidebar-faint)', touchAction: 'none' }}
+          onClick={e => e.stopPropagation()}
+          title="Drag to reorder"
+        >⠿</span>
+        <span className="text-xs font-extrabold uppercase tracking-widest flex-1 text-left"
+          style={{ color: 'var(--sidebar-faint)' }}>
+          {section}
+        </span>
+        <span className="text-xs" style={{ color: 'var(--sidebar-faint)' }}>
+          {isCollapsed ? '▸' : '▾'}
+        </span>
+      </button>
+    </div>
+  )
+}
+
 const PLAN_BADGE: Record<string, { label: string; color: string }> = {
   free:   { label: 'Free',   color: 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'         },
   pro:    { label: 'Pro',    color: 'bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400'       },
@@ -88,15 +164,48 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   const [showUpgradeNudge, setShowUpgradeNudge] = useState(false)
   const [checkoutLoading, setCheckoutLoading]   = useState(false)
   const [collapsed, setCollapsed]               = useState<Record<string, boolean>>({})
+  const [sectionOrder, setSectionOrder]         = useState<string[]>(NAV_BASE.map(g => g.section))
+  const [statsVisible, setStatsVisible]         = useState(true)
   const pathname = usePathname()
   const router   = useRouter()
 
-  useEffect(() => { setCollapsed(getStoredCollapsed()) }, [])
+  useEffect(() => {
+    setCollapsed(getStoredCollapsed())
+    setSectionOrder(getStoredOrder(NAV_BASE.map(g => g.section)))
+    try {
+      const stored = localStorage.getItem(STATS_VIS_KEY)
+      if (stored !== null) setStatsVisible(stored !== 'false')
+    } catch {}
+  }, [])
+
+  const toggleStats = useCallback(() => {
+    setStatsVisible(prev => {
+      const next = !prev
+      try { localStorage.setItem(STATS_VIS_KEY, String(next)) } catch {}
+      return next
+    })
+  }, [])
 
   const toggleSection = useCallback((section: string) => {
     setCollapsed(prev => {
       const next = { ...prev, [section]: !prev[section] }
       try { localStorage.setItem(COLLAPSED_KEY, JSON.stringify(next)) } catch {}
+      return next
+    })
+  }, [])
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  )
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    setSectionOrder(prev => {
+      const oldIndex = prev.indexOf(active.id as string)
+      const newIndex = prev.indexOf(over.id as string)
+      const next = arrayMove(prev, oldIndex, newIndex)
+      try { localStorage.setItem(ORDER_KEY, JSON.stringify(next)) } catch {}
       return next
     })
   }, [])
@@ -139,7 +248,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   const wsLimit           = PLAN_CONFIG[plan]?.clientWorkspaces ?? 0
   const atWsLimit         = clientWorkspaces.length >= wsLimit
 
-  const NAV = NAV_BASE.map(group => {
+  const NAV_ENRICHED = NAV_BASE.map(group => {
     if (group.section === 'Manage' && (plan === 'agency' || plan === 'pro')) {
       const hasWs = group.items.find(i => i.href === '/workspaces')
       if (!hasWs) {
@@ -155,6 +264,11 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
     return group
   })
 
+  // Apply user-defined section order
+  const NAV = sectionOrder
+    .map(s => NAV_ENRICHED.find(g => g.section === s))
+    .filter(Boolean) as typeof NAV_ENRICHED
+
   const badge         = PLAN_BADGE[plan] || PLAN_BADGE.free
   const monthlyLimit  = PLAN_CONFIG[plan]?.credits ?? 50
   const totalCredits  = credits  // already sum of all pools from context
@@ -162,6 +276,9 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   // Credit bar color — red/yellow/accent based on monthly remaining
   const creditBarColor = monthlyCredits < 10 ? '#f87171' : monthlyCredits < 20 ? '#facc15' : 'var(--accent, #22c55e)'
   const seatsBar      = seatsTotal > 0 ? Math.min(100, (seatsUsed / seatsTotal) * 100) : 0
+
+  const ADMIN_EMAIL   = 'socialmatehq@gmail.com'
+  const isAdminUser   = user?.email === ADMIN_EMAIL
 
   const isActive = (href: string) => {
     const base = href.split('?')[0]
@@ -305,106 +422,121 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
 
       {/* NAV */}
       <nav className="flex-1 p-3 space-y-0.5 overflow-y-auto">
-        {NAV.map((group, gi) => {
-          const isCollapsed = !!collapsed[group.section]
-          return (
-            <div key={group.section}>
-              <button
-                onClick={() => toggleSection(group.section)}
-                className="w-full flex items-center justify-between px-3 py-2 mt-1 rounded-lg transition-all hover:opacity-70"
-                style={{ borderTop: gi > 0 ? '1px solid var(--sidebar-border)' : 'none' }}>
-                <span className="text-xs font-extrabold uppercase tracking-widest"
-                  style={{ color: 'var(--sidebar-faint)' }}>
-                  {group.section}
-                </span>
-                <span className="text-xs" style={{ color: 'var(--sidebar-faint)' }}>
-                  {isCollapsed ? '▸' : '▾'}
-                </span>
-              </button>
-              {!isCollapsed && group.items.map(item => {
-                const ADMIN_EMAIL = 'socialmatehq@gmail.com'
-                const isAdminUser = user?.email === ADMIN_EMAIL
-                const resolvedHref = isAdminUser && (item as any).adminHref ? (item as any).adminHref : item.href
-                const resolvedLabel = isAdminUser && (item as any).adminHref ? `${item.label} ⚙️` : item.label
-                const active = isActive(resolvedHref)
-                return (
-                  <Link key={item.label} href={resolvedHref}
-                    onClick={onNavClick}
-                    {...((item as any).newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
-                    style={{
-                      background:  active ? 'var(--sidebar-active)' : 'transparent',
-                      color:       active ? 'var(--sidebar-fg)' : 'var(--sidebar-muted)',
-                      fontWeight:  active ? '700' : '500',
-                      borderLeft:  active ? '3px solid var(--sidebar-accent)' : '3px solid transparent',
-                      paddingLeft: active ? '10px' : '12px',
-                    }}>
-                    <span>{item.icon}</span>
-                    <span className="flex-1">{resolvedLabel}</span>
-                    {item.href === '/ai-features' && !loading && (
-                      <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${
-                        credits < 10 ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400' :
-                        credits < 20 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400' :
-                        'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
-                      }`}>{credits}</span>
-                    )}
-                  </Link>
-                )
-              })}
-            </div>
-          )
-        })}
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={sectionOrder} strategy={verticalListSortingStrategy}>
+            {NAV.map((group, gi) => {
+              const isCollapsed = !!collapsed[group.section]
+              return (
+                <div key={group.section}>
+                  <SortableSectionHeader
+                    section={group.section}
+                    isCollapsed={isCollapsed}
+                    onToggle={() => toggleSection(group.section)}
+                    showBorder={gi > 0}
+                  />
+                  {!isCollapsed && group.items.map(item => {
+                    // Admin: Partners link goes directly to the admin portal
+                    const href   = isAdminUser && item.href === '/partners' ? '/admin' : item.href
+                    const active = isActive(href)
+                    return (
+                      <Link key={item.label} href={href}
+                        onClick={onNavClick}
+                        {...((item as any).newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
+                        style={{
+                          background:  active ? 'var(--sidebar-active)' : 'transparent',
+                          color:       active ? 'var(--sidebar-fg)' : 'var(--sidebar-muted)',
+                          fontWeight:  active ? '700' : '500',
+                          borderLeft:  active ? '3px solid var(--sidebar-accent)' : '3px solid transparent',
+                          paddingLeft: active ? '10px' : '12px',
+                        }}>
+                        <span>{item.icon}</span>
+                        <span className="flex-1">{item.label}{isAdminUser && item.href === '/partners' ? ' ⚙️' : ''}</span>
+                        {item.href === '/ai-features' && !loading && (
+                          <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${
+                            credits < 10 ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400' :
+                            credits < 20 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400' :
+                            'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
+                          }`}>{credits}</span>
+                        )}
+                      </Link>
+                    )
+                  })}
+                </div>
+              )
+            })}
+          </SortableContext>
+        </DndContext>
       </nav>
 
       {/* BOTTOM STATS */}
       <div className="p-3 space-y-2.5 flex-shrink-0" style={{ borderTop: '1px solid var(--sidebar-border)' }}>
-        <div className="rounded-xl p-3" style={{ background: 'var(--sidebar-active)' }}>
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs font-semibold" style={{ color: 'var(--sidebar-muted)' }}>AI Credits</span>
-            <span className="text-xs font-bold" style={{ color: 'var(--sidebar-fg)' }}>
-              {loading ? '...' : `${totalCredits} left`}
-            </span>
-          </div>
-          <div className="w-full rounded-full h-1.5 mb-2" style={{ background: 'var(--sidebar-border)' }}>
-            <div className="h-1.5 rounded-full transition-all" style={{ width: `${creditsBar}%`, background: creditBarColor }} />
-          </div>
 
-          {/* Three pools */}
-          <div className="space-y-1 mt-1">
-            <div className="flex justify-between text-xs" style={{ color: 'var(--sidebar-faint)' }}>
-              <span>📅 Monthly</span>
-              <span>{loading ? '...' : `${monthlyCredits} / ${monthlyLimit}`}</span>
+        {/* Stats section collapse toggle */}
+        <button
+          onClick={toggleStats}
+          className="w-full flex items-center gap-1.5 px-1 py-0.5 transition-all hover:opacity-70"
+          title={statsVisible ? 'Hide stats' : 'Show stats'}
+        >
+          <span className="text-xs" style={{ color: 'var(--sidebar-faint)' }}>
+            {statsVisible ? '▾' : '▸'}
+          </span>
+          <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--sidebar-faint)' }}>
+            Stats
+          </span>
+        </button>
+
+        {statsVisible && (
+          <>
+            <div className="rounded-xl p-3" style={{ background: 'var(--sidebar-active)' }}>
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-xs font-semibold" style={{ color: 'var(--sidebar-muted)' }}>AI Credits</span>
+                <span className="text-xs font-bold" style={{ color: 'var(--sidebar-fg)' }}>
+                  {loading ? '...' : `${totalCredits} left`}
+                </span>
+              </div>
+              <div className="w-full rounded-full h-1.5 mb-2" style={{ background: 'var(--sidebar-border)' }}>
+                <div className="h-1.5 rounded-full transition-all" style={{ width: `${creditsBar}%`, background: creditBarColor }} />
+              </div>
+
+              {/* Three pools */}
+              <div className="space-y-1 mt-1">
+                <div className="flex justify-between text-xs" style={{ color: 'var(--sidebar-faint)' }}>
+                  <span>📅 Monthly</span>
+                  <span>{loading ? '...' : `${monthlyCredits} / ${monthlyLimit}`}</span>
+                </div>
+                {!loading && earnedCredits > 0 && (
+                  <div className="flex justify-between text-xs" style={{ color: 'var(--sidebar-faint)' }}>
+                    <span>🎁 Earned</span>
+                    <span>{earnedCredits}</span>
+                  </div>
+                )}
+                {!loading && paidCredits > 0 && (
+                  <div className="flex justify-between text-xs" style={{ color: 'var(--sidebar-faint)' }}>
+                    <span>💳 Purchased</span>
+                    <span>{paidCredits}</span>
+                  </div>
+                )}
+              </div>
             </div>
-            {!loading && earnedCredits > 0 && (
-              <div className="flex justify-between text-xs" style={{ color: 'var(--sidebar-faint)' }}>
-                <span>🎁 Earned</span>
-                <span>{earnedCredits}</span>
-              </div>
-            )}
-            {!loading && paidCredits > 0 && (
-              <div className="flex justify-between text-xs" style={{ color: 'var(--sidebar-faint)' }}>
-                <span>💳 Purchased</span>
-                <span>{paidCredits}</span>
-              </div>
-            )}
-          </div>
-        </div>
 
-        <div className="rounded-xl p-3" style={{ background: 'var(--sidebar-active)' }}>
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs font-semibold" style={{ color: 'var(--sidebar-muted)' }}>Team Seats</span>
-            <span className="text-xs font-bold" style={{ color: 'var(--sidebar-fg)' }}>
-              {loading ? '...' : `${seatsUsed}/${seatsTotal}`}
-            </span>
-          </div>
-          <div className="w-full rounded-full h-1.5" style={{ background: 'var(--sidebar-border)' }}>
-            <div className="h-1.5 rounded-full transition-all"
-              style={{ width: `${seatsBar}%`, background: seatsUsed >= seatsTotal ? '#f87171' : 'var(--sidebar-accent)' }} />
-          </div>
-          <p className="text-xs mt-1" style={{ color: 'var(--sidebar-faint)' }}>
-            {loading ? 'Loading...' : `${seatsTotal - seatsUsed} seat${seatsTotal - seatsUsed !== 1 ? 's' : ''} left`}
-          </p>
-        </div>
+            <div className="rounded-xl p-3" style={{ background: 'var(--sidebar-active)' }}>
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-xs font-semibold" style={{ color: 'var(--sidebar-muted)' }}>Team Seats</span>
+                <span className="text-xs font-bold" style={{ color: 'var(--sidebar-fg)' }}>
+                  {loading ? '...' : `${seatsUsed}/${seatsTotal}`}
+                </span>
+              </div>
+              <div className="w-full rounded-full h-1.5" style={{ background: 'var(--sidebar-border)' }}>
+                <div className="h-1.5 rounded-full transition-all"
+                  style={{ width: `${seatsBar}%`, background: seatsUsed >= seatsTotal ? '#f87171' : 'var(--sidebar-accent)' }} />
+              </div>
+              <p className="text-xs mt-1" style={{ color: 'var(--sidebar-faint)' }}>
+                {loading ? 'Loading...' : `${seatsTotal - seatsUsed} seat${seatsTotal - seatsUsed !== 1 ? 's' : ''} left`}
+              </p>
+            </div>
+          </>
+        )}
 
         {plan === 'free' && (
           <button onClick={() => handleCheckout(STRIPE_PRO_PRICE_ID)} disabled={checkoutLoading}
@@ -427,7 +559,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
             <span className="text-base flex-shrink-0">📦</span>
             <div className="min-w-0">
               <p className="text-xs font-bold leading-tight" style={{ color: 'var(--sidebar-fg)' }}>Get listed in Studio Stax</p>
-              <p className="text-[10px] leading-tight mt-0.5 truncate" style={{ color: 'var(--sidebar-faint)' }}>Founder-approved directory · from $49/qtr</p>
+              <p className="text-[10px] leading-tight mt-0.5 truncate" style={{ color: 'var(--sidebar-faint)' }}>Founder-approved directory · from $100/yr</p>
             </div>
           </Link>
         )}

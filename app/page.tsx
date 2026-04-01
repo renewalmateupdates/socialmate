@@ -111,15 +111,16 @@ const COMPARISON = [
 ]
 
 const FOOTER_LINKS = [
-  { label: 'Features',  href: '/features'  },
-  { label: 'Pricing',   href: '/pricing'   },
-  { label: 'Roadmap',   href: '/roadmap'   },
-  { label: 'Affiliate', href: '/affiliate' },
-  { label: 'Our Story', href: '/story'     },
-  { label: 'Blog',      href: '/blog'      },
-  { label: 'SM-Give',   href: '/give'      },
-  { label: 'Privacy',   href: '/privacy'   },
-  { label: 'Terms',     href: '/terms'     },
+  { label: 'Features',    href: '/features'    },
+  { label: 'Pricing',     href: '/pricing'     },
+  { label: 'Studio Stax', href: '/studio-stax' },
+  { label: 'Roadmap',     href: '/roadmap'     },
+  { label: 'Affiliate',   href: '/affiliate'   },
+  { label: 'Our Story',   href: '/story'       },
+  { label: 'Blog',        href: '/blog'        },
+  { label: 'SM-Give',     href: '/give'        },
+  { label: 'Privacy',     href: '/privacy'     },
+  { label: 'Terms',       href: '/terms'       },
 ]
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ ref?: string }> }) {
@@ -165,7 +166,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         <div className="inline-flex items-center gap-2 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 text-xs font-bold px-4 py-2 rounded-full mb-8">
           🌱 Free forever · No credit card required · 4 live platforms · 12 AI tools
         </div>
-        <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight text-gray-900 dark:text-gray-100">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight text-gray-900 dark:text-gray-100">
           Social media management,{' '}
           <span className="text-gray-400 dark:text-gray-500">finally built for everyone.</span>
         </h1>
@@ -493,9 +494,18 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
           <h2 className="text-3xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">
             Free should mean free.<br className="hidden md:block" /> Not a limited demo.
           </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-12 leading-relaxed">
+          <p className="text-sm text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-8 leading-relaxed">
             SocialMate keeps infrastructure sustainable through a credit system — so we can give every free user tools that actually work without burning out. AI generation is the only thing credits gate, and free users get 50 every month. Everything else — scheduling, analytics, link in bio, bulk upload — is free, always.
           </p>
+
+          {/* NO-ADS BADGE */}
+          <div className="inline-flex items-center gap-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl px-5 py-3 mb-12">
+            <span className="text-base">🚫</span>
+            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              No ads in your feed. No data selling. Just clean tools that actually work — we suggest, never spam.
+            </span>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-10">
             {[
               {
@@ -588,7 +598,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
       {/* SM-GIVE */}
       <section className="py-16 bg-white dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800">
         <div className="max-w-4xl mx-auto px-6">
-          <div className="bg-gray-950 dark:bg-gray-900 rounded-2xl px-8 py-10 flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="bg-gray-950 dark:bg-gray-900 rounded-2xl px-5 sm:px-8 py-8 sm:py-10 flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-lg">❤️</span>

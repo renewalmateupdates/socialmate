@@ -1,32 +1,6 @@
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
 import AdminPartnersClient from './AdminPartnersClient'
 
-export default async function AdminPartnersPage() {
-  const cookieStore = await cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() { return cookieStore.getAll() },
-        setAll(cookiesToSet: { name: string; value: string; options?: any }[]) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
-          )
-        },
-      },
-    }
-  )
-
-  const { data: { user } } = await supabase.auth.getUser()
-
-  const adminEmail = process.env.ADMIN_EMAIL
-  // If ADMIN_EMAIL is set, enforce it. If not set, block everyone (no env = no access).
-  if (!user || !adminEmail || user.email !== adminEmail) {
-    redirect('/dashboard')
-  }
-
+// Auth handled client-side — server-side cookie auth was blocking admin
+export default function AdminPartnersPage() {
   return <AdminPartnersClient />
 }

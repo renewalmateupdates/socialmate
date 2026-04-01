@@ -180,46 +180,36 @@ export default function StudioStaxApplyPage() {
 
           {/* Pricing note — dynamic */}
           <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 space-y-3">
-            <p className="text-xs font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wide">Listing Options (after approval)</p>
+            <p className="text-xs font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wide">Listing Price (after approval)</p>
             {pricing ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {/* Annual */}
-                <div className="bg-white dark:bg-amber-950/30 rounded-xl p-3 border border-amber-200 dark:border-amber-700">
-                  <p className="text-xs font-extrabold text-gray-900 dark:text-gray-100 mb-0.5">Annual</p>
-                  <p className="text-xl font-extrabold text-amber-600 dark:text-amber-400">
-                    ${(pricing.annual.price / 100).toFixed(0)}<span className="text-xs font-semibold text-gray-500">/year</span>
-                  </p>
-                  {pricing.annual.foundingFull ? (
-                    <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
-                      Standard rate — founding 100 slots filled this quarter
+              <div className="bg-white dark:bg-amber-950/30 rounded-xl p-4 border border-amber-200 dark:border-amber-700">
+                <div className="flex items-start justify-between mb-2">
+                  <div>
+                    <p className="text-xs font-extrabold text-gray-900 dark:text-gray-100 mb-0.5">Annual listing</p>
+                    <p className="text-2xl font-extrabold text-amber-600 dark:text-amber-400">
+                      ${(pricing.annual.price / 100).toFixed(0)}<span className="text-xs font-semibold text-gray-500">/year</span>
                     </p>
-                  ) : (
-                    <p className="text-[10px] mt-0.5">
-                      <span className="text-green-600 dark:text-green-400 font-bold">Founding price — </span>
-                      <span className="text-gray-500 dark:text-gray-400">
-                        {pricing.annual.slotsRemaining} of {pricing.annual.slotsTotal} spots left at this rate. Goes to ${(pricing.annual.standardPrice / 100).toFixed(0)} after.
-                      </span>
-                    </p>
+                  </div>
+                  {!pricing.annual.foundingFull && (
+                    <span className="bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">Founding price</span>
                   )}
                 </div>
-                {/* Quarterly */}
-                <div className="bg-white dark:bg-amber-950/30 rounded-xl p-3 border border-amber-200 dark:border-amber-700">
-                  <p className="text-xs font-extrabold text-gray-900 dark:text-gray-100 mb-0.5">Quarterly</p>
-                  <p className="text-xl font-extrabold text-amber-600 dark:text-amber-400">
-                    ${(pricing.quarterly.price / 100).toFixed(0)}<span className="text-xs font-semibold text-gray-500">/quarter</span>
+                {pricing.annual.foundingFull ? (
+                  <p className="text-[11px] text-gray-500 dark:text-gray-400">
+                    Standard rate — all {pricing.annual.slotsTotal.toLocaleString()} founding spots are filled.
                   </p>
-                  <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
-                    {pricing.quarterly.isMidQuarter
-                      ? `Starts ${pricing.quarterly.targetQuarter} (next quarter — first-come, first-served)`
-                      : `Current quarter: ${pricing.quarterly.targetQuarter}`}
+                ) : (
+                  <p className="text-[11px] text-gray-600 dark:text-gray-400">
+                    🔒 <strong>{pricing.annual.slotsRemaining.toLocaleString()} of {pricing.annual.slotsTotal.toLocaleString()}</strong> founding spots remaining.
+                    Goes to ${(pricing.annual.standardPrice / 100).toFixed(0)}/yr after. Early renewal: $80/yr.
                   </p>
-                </div>
+                )}
               </div>
             ) : (
               <p className="text-xs text-amber-700 dark:text-amber-300">Loading pricing...</p>
             )}
             <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
-              💳 <strong>No charge today.</strong> Joshua reviews every application personally and responds within 48 hours. If approved, you&apos;ll receive a payment link via email with your chosen option.
+              💳 <strong>No charge today.</strong> Joshua reviews every application personally and responds within 48 hours. If approved, you&apos;ll receive a secure payment link via email.
             </p>
           </div>
 

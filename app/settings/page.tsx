@@ -9,8 +9,8 @@ import { useWorkspace } from '@/contexts/WorkspaceContext'
 const STRIPE_PRO_PRICE_ID    = 'price_1T9S2v7OMwDowUuULHznqUD5'
 const STRIPE_AGENCY_PRICE_ID = 'price_1TFMHp7OMwDowUuUgeLAeJNY'
 
-const ALL_TABS    = ['Profile', 'Plan', 'Referrals', 'Notifications', 'Security', 'White Label']
-const FREE_TABS   = ['Profile', 'Plan', 'Notifications', 'Security']
+const ALL_TABS    = ['Profile', 'Plan', 'Referrals', 'Notifications', 'Security', 'White Label', 'Appearance']
+const FREE_TABS   = ['Profile', 'Plan', 'Notifications', 'Security', 'Appearance']
 
 // Every 5 paying referrals = +100 bonus credits (stacking, no cap)
 const REFERRAL_TIERS = [
@@ -106,6 +106,15 @@ function SettingsInner() {
   const [wlActivated, setWlActivated]           = useState(false)
 
   const [creditPref, setCreditPref] = useState<'monthly_first' | 'bank_first'>('monthly_first')
+
+  // Appearance — sidebar stats visibility
+  const [sidebarStatsVisible, setSidebarStatsVisible] = useState(true)
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('sidebar_stats_visible')
+      if (stored !== null) setSidebarStatsVisible(stored !== 'false')
+    } catch {}
+  }, [])
 
   // Credit purchase success toast
   useEffect(() => {
@@ -1103,6 +1112,33 @@ function SettingsInner() {
                   )}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* ── APPEARANCE ── */}
+          {activeTab === 'Appearance' && (
+            <div className="bg-surface border border-theme rounded-2xl p-6">
+              <h2 className="text-base font-extrabold mb-1">Appearance</h2>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">Customize how the app looks and behaves.</p>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between py-3 border-b border-gray-50 dark:border-gray-800">
+                  <div className="flex-1 min-w-0 pr-4">
+                    <p className="text-sm font-bold">Sidebar stats</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Show the AI Credits and Team Seats panels at the bottom of the sidebar.</p>
+                  </div>
+                  <button
+                    role="switch"
+                    aria-checked={sidebarStatsVisible}
+                    onClick={() => {
+                      const next = !sidebarStatsVisible
+                      setSidebarStatsVisible(next)
+                      try { localStorage.setItem('sidebar_stats_visible', String(next)) } catch {}
+                    }}
+                    className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 ${sidebarStatsVisible ? 'bg-pink-500' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                    <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${sidebarStatsVisible ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 

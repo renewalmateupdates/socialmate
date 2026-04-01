@@ -2,29 +2,25 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import PublicLayout from '@/components/PublicLayout'
-import Link from 'next/link'
-
-const ANNUAL_FOUNDING  = 99
-const ANNUAL_STANDARD  = 149
-const QUARTERLY        = 49
-const FOUNDING_LIMIT   = 100
 
 interface CheckoutData {
-  listing: { id: string; name: string; tagline: string; applicant_name: string }
-  slotsFilled: number
+  listing:        { id: string; name: string; tagline: string; applicant_name: string }
+  slotsFilled:    number
   slotsRemaining: number
-  currentQuarter: string
-  isMidQuarter: boolean
-  nextQuarter: string
-  valid: boolean
-  expired?: boolean
+  foundingFull:   boolean
+  currentTier:    'founding' | 'standard'
+  annualPrice:    number
+  foundingPrice:  number
+  standardPrice:  number
+  slotsTotal:     number
+  valid:          boolean
+  expired?:       boolean
 }
 
 function CheckoutInner() {
-  const params   = useSearchParams()
-  const token    = params.get('token') || ''
+  const params    = useSearchParams()
+  const token     = params.get('token') || ''
   const [data, setData]       = useState<CheckoutData | null>(null)
-  const [billing, setBilling] = useState<'annual' | 'quarterly'>('annual')
   const [loading, setLoading] = useState(true)
   const [paying, setPaying]   = useState(false)
   const [error, setError]     = useState('')
@@ -42,9 +38,9 @@ function CheckoutInner() {
     setError('')
     try {
       const res  = await fetch('/api/studio-stax/checkout', {
-        method: 'POST',
+        method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, billingType: billing }),
+        body:    JSON.stringify({ token }),
       })
       const json = await res.json()
       if (json.url) {
@@ -59,150 +55,138 @@ function CheckoutInner() {
     }
   }
 
-  const annualPrice    = data && data.slotsRemaining > 0 ? ANNUAL_FOUNDING : ANNUAL_STANDARD
-  const foundingActive = data ? data.slotsRemaining > 0 : false
-  const quarterTarget  = data?.isMidQuarter ? data.nextQuarter : data?.currentQuarter
+  if (loading) return (
+    <div className="max-w-lg mx-auto px-6 py-24 text-center">
+      <div className="w-8 h-8 border-2 border-gray-300 border-t-black dark:border-t-white rounded-full animate-spin mx-auto" />
+    </div>
+  )
 
-  if (loading) {
-    return (
-      <div className="max-w-lg mx-auto px-6 py-24 text-center">
-        <div className="text-3xl mb-4">⏳</div>
-        <p className="text-sm text-gray-500">Loading your checkout...</p>
-      </div>
-    )
-  }
+  if (!token || !data?.valid) return (
+    <div className="max-w-lg mx-auto px-6 py-20 text-center">
+      <div className="text-4xl mb-4">{data?.expired ? '⏰' : '🔗'}</div>
+      <h1 className="text-xl font-extrabold mb-3 text-gray-900 dark:text-gray-100">
+        {data?.expired ? 'This link has expired' : 'Invalid checkout link'}
+      </h1>
+      <p className="text-sm text-gray-500 mb-6">
+        {data?.expired
+          ? "Checkout links expire after 7 days. Contact us and we'll send a fresh one."
+          : "This link is not valid. Make sure you're using the link from your approval email."}
+      </p>
+      <a href="mailto:hello@socialmate.studio" className="text-sm font-semibold text-amber-500 hover:text-amber-400">
+        hello@socialmate.studio →
+      </a>
+    </div>
+  )
 
-  if (!token || (data && !data.valid)) {
-    return (
-      <div className="max-w-lg mx-auto px-6 py-24 text-center">
-        <div className="text-5xl mb-6">🔒</div>
-        <h1 className="text-2xl font-extrabold mb-3 text-gray-900 dark:text-gray-100">
-          {data?.expired ? 'Link expired' : 'Invalid link'}
-        </h1>
-        <p className="text-sm text-gray-500 mb-6">
-          {data?.expired
-            ? 'This checkout link has expired. Reply to your approval email to request a new one.'
-            : 'This link is invalid. Make sure you used the full URL from your approval email.'}
-        </p>
-        <a href="mailto:hello@socialmate.studio"
-          className="text-sm font-bold text-amber-500 hover:text-amber-400">
-          hello@socialmate.studio →
-        </a>
-      </div>
-    )
-  }
+  const price          = (data.annualPrice / 100)
+  const isFoundingTier = !data.foundingFull
 
   return (
     <div className="max-w-lg mx-auto px-6 py-16">
-      {/* Header */}
-      <div className="text-center mb-10">
-        <div className="inline-flex items-center gap-2 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-full px-4 py-1.5 text-xs font-bold text-green-700 dark:text-green-400 mb-4">
-          ✅ Application approved
+      <div className="text-center mb-8">
+        <div className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-full px-4 py-1.5 text-xs font-bold text-amber-700 dark:text-amber-400 mb-4">
+          Studio Stax — Secure Checkout
         </div>
-        <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100 mb-2">
+        <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100 mb-1">
           Complete your listing
         </h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          <span className="font-bold text-gray-900 dark:text-gray-100">{data?.listing.name}</span>
-          {' '}is approved for Studio Stax. Choose your plan below.
+          You're approved, <strong>{data.listing.applicant_name}</strong>. Finish payment to go live.
         </p>
       </div>
 
-      {/* Billing toggle */}
-      <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-2xl p-1 mb-6">
-        {(['annual', 'quarterly'] as const).map(b => (
-          <button key={b} onClick={() => setBilling(b)}
-            className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all ${
-              billing === b ? 'bg-white dark:bg-gray-700 text-black dark:text-white shadow-sm' : 'text-gray-500 hover:text-black dark:hover:text-white'
-            }`}>
-            {b === 'annual' ? 'Annual' : 'Quarterly'}
-          </button>
-        ))}
+      {/* Listing preview */}
+      <div className="bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 mb-6">
+        <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">Your listing</p>
+        <p className="font-extrabold text-gray-900 dark:text-gray-100">{data.listing.name}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{data.listing.tagline}</p>
       </div>
 
-      {/* Price card */}
-      <div className={`rounded-2xl border-2 p-6 mb-6 ${
-        billing === 'annual' ? 'border-amber-400 bg-amber-50 dark:bg-amber-950/20' : 'border-blue-400 bg-blue-50 dark:bg-blue-950/20'
+      {/* Pricing card */}
+      <div className={`rounded-2xl p-6 mb-6 border-2 ${
+        isFoundingTier
+          ? 'border-amber-400 bg-amber-50 dark:bg-amber-950/20'
+          : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900'
       }`}>
-        {billing === 'annual' ? (
+        <div className="flex items-start justify-between mb-3">
           <div>
-            <div className="flex items-end gap-2 mb-2">
-              <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">${annualPrice}</span>
-              <span className="text-sm text-gray-500 mb-1.5">/year</span>
-              {foundingActive && annualPrice === ANNUAL_FOUNDING && (
-                <span className="ml-auto text-xs font-bold bg-amber-200 dark:bg-amber-900 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded-full">
-                  Founding price
-                </span>
-              )}
+            <p className="text-xs font-bold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-0.5">Annual listing</p>
+            <div className="flex items-baseline gap-1">
+              <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">${price}</span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">/year</span>
             </div>
-            {foundingActive ? (
-              <p className="text-xs text-green-700 dark:text-green-400 font-semibold mb-3">
-                {data!.slotsRemaining} of {FOUNDING_LIMIT} founding spots still available this quarter.
-                After they fill, the price goes to ${ANNUAL_STANDARD}/year.
-              </p>
-            ) : (
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                Founding spots are filled for this quarter. Standard annual rate.
-              </p>
-            )}
-            <ul className="space-y-1.5 text-xs text-gray-600 dark:text-gray-400">
-              <li className="flex items-center gap-2"><span className="text-green-500 font-bold">✓</span> Listed for a full year</li>
-              <li className="flex items-center gap-2"><span className="text-green-500 font-bold">✓</span> Renewal reminder emails at 30/14/7 days before expiry</li>
-              <li className="flex items-center gap-2"><span className="text-green-500 font-bold">✓</span> Early renewal at $80/year (saves you ${ANNUAL_STANDARD - 80})</li>
-              <li className="flex items-center gap-2"><span className="text-green-500 font-bold">✓</span> Blog feature written when your year is up</li>
-            </ul>
+          </div>
+          {isFoundingTier && (
+            <span className="bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full">Founding price</span>
+          )}
+        </div>
+
+        {isFoundingTier ? (
+          <div className="space-y-1">
+            <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">
+              🔒 {data.slotsRemaining.toLocaleString()} of {data.slotsTotal.toLocaleString()} founding spots remaining
+            </p>
+            <p className="text-xs text-amber-600 dark:text-amber-500">
+              Price goes to ${data.standardPrice / 100}/yr after founding slots fill — lock in $100 now.
+            </p>
+            <p className="text-xs text-amber-600 dark:text-amber-500">
+              Early renewal rate: $80/yr (20% off).
+            </p>
           </div>
         ) : (
-          <div>
-            <div className="flex items-end gap-2 mb-2">
-              <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">${QUARTERLY}</span>
-              <span className="text-sm text-gray-500 mb-1.5">/quarter</span>
-            </div>
-            <p className="text-xs text-blue-700 dark:text-blue-400 font-semibold mb-3">
-              {data?.isMidQuarter
-                ? `Starts ${quarterTarget} (we're mid-quarter — your slot begins next quarter)`
-                : `Current quarter: ${quarterTarget}`}
+          <div className="space-y-1">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              All {data.slotsTotal.toLocaleString()} founding spots are filled — joining at the standard rate.
             </p>
-            <ul className="space-y-1.5 text-xs text-gray-600 dark:text-gray-400">
-              <li className="flex items-center gap-2"><span className="text-green-500 font-bold">✓</span> Listed for one full quarter</li>
-              <li className="flex items-center gap-2"><span className="text-green-500 font-bold">✓</span> Renew each quarter to stay listed</li>
-              <li className="flex items-center gap-2"><span className="text-amber-500 font-bold">→</span> Annual saves you ${(QUARTERLY * 4) - annualPrice}/year vs quarterly</li>
-            </ul>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              Early renewal rate: $120/yr (20% off).
+            </p>
           </div>
         )}
+
+        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+          {['Listed for 12 months', 'SM-Give donation ranking', 'Renewal reminder emails at 30/14/7 days', 'Blog feature article'].map(item => (
+            <div key={item} className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+              <span className="text-green-500 font-bold">✓</span>
+              {item}
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* What happens next */}
-      <div className="bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 mb-6">
-        <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">After payment</p>
-        <ol className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
-          <li>1. Your listing goes live in Studio Stax immediately</li>
-          <li>2. Donate to SM-Give to climb the rankings</li>
-          <li>3. We write your blog feature when your year is up</li>
-        </ol>
-      </div>
+      {error && (
+        <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl p-3 mb-4 text-sm text-red-600 dark:text-red-400">
+          {error}
+        </div>
+      )}
 
-      {error && <p className="text-sm text-red-500 mb-4">{error}</p>}
-
-      <button onClick={handlePay} disabled={paying}
-        className="w-full bg-black dark:bg-white text-white dark:text-black font-bold py-4 rounded-2xl hover:opacity-80 transition-all disabled:opacity-50 text-sm">
-        {paying ? 'Redirecting to payment...' : `Pay $${billing === 'annual' ? annualPrice : QUARTERLY} → complete listing`}
+      <button
+        onClick={handlePay}
+        disabled={paying}
+        className="w-full bg-black dark:bg-white text-white dark:text-black font-bold py-4 rounded-2xl text-base hover:opacity-80 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+        {paying ? 'Redirecting to payment...' : `Pay $${price} — Go live →`}
       </button>
 
-      <p className="text-xs text-gray-400 dark:text-gray-500 text-center mt-3">
-        Processed securely via Stripe. Questions?{' '}
-        <a href="mailto:hello@socialmate.studio" className="underline">hello@socialmate.studio</a>
+      <p className="text-xs text-center text-gray-400 dark:text-gray-500 mt-3">
+        Secure payment via Stripe · One-time annual payment · No subscription
       </p>
+
+      <div className="mt-8 border border-gray-100 dark:border-gray-800 rounded-2xl p-4">
+        <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">From the SocialMate family</p>
+        <p className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-1">Track subscriptions free with RenewalMate</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Keep tabs on your Studio Stax renewal and all your tools automatically.</p>
+        <a href="https://renewalmate.com" className="text-xs font-bold text-amber-500 hover:text-amber-400">renewalmate.com →</a>
+      </div>
     </div>
   )
 }
 
-export default function StudioStaxCheckout() {
+export default function StudioStaxCheckoutPage() {
   return (
     <PublicLayout>
       <Suspense fallback={
         <div className="max-w-lg mx-auto px-6 py-24 text-center">
-          <p className="text-sm text-gray-500">Loading...</p>
+          <div className="w-8 h-8 border-2 border-gray-300 border-t-black rounded-full animate-spin mx-auto" />
         </div>
       }>
         <CheckoutInner />

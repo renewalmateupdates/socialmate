@@ -342,7 +342,7 @@ export default function Features() {
               See pricing →
             </Link>
           </div>
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
             {CREDIT_SUMMARY.map(tool => (
               <div key={tool.name} className="bg-white/10 rounded-xl p-2.5 text-center relative">
                 {tool.proOnly && (
@@ -457,6 +457,16 @@ export default function Features() {
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* SM-Give strip */}
+        <div className="border-t border-gray-100 dark:border-gray-800 mt-16 pt-10 pb-4">
+          <div className="max-w-4xl mx-auto px-6 text-center">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              ❤️ <span className="font-semibold text-gray-700 dark:text-gray-300">2% of every SocialMate subscription</span> goes to SM-Give — our charity initiative.{' '}
+              <a href="/give" className="text-amber-500 hover:text-amber-400 font-semibold transition-colors">Learn about SM-Give →</a>
+            </p>
           </div>
         </div>
 

@@ -59,6 +59,41 @@ const STARTER_TEMPLATES = [
     platforms: ['bluesky', 'mastodon'],
     content: `This week in [your niche] 📰\n\n→ [Thing 1 that happened or that you learned]\n→ [Thing 2]\n→ [Thing 3]\n\nMy take: [One sentence opinion or insight]\n\nFollowing along? Subscribe so you don't miss next week's. 🔔`,
   },
+  {
+    id: 'starter-6',
+    title: 'Milestone Celebration',
+    category: 'Announcement',
+    platforms: ['bluesky', 'discord', 'mastodon', 'telegram'],
+    content: `We just hit [milestone — followers / orders / months / years]! 🎉\n\nHonestly didn't know if we'd get here when we started.\n\nThank you to everyone who [followed / bought / supported / shared]. This is yours too.\n\nNext goal: [next milestone]. Let's go. 🚀`,
+  },
+  {
+    id: 'starter-7',
+    title: 'Hot Take / Controversial Opinion',
+    category: 'Engagement',
+    platforms: ['bluesky', 'mastodon'],
+    content: `Unpopular opinion: [Your honest take on something in your niche] 🌶️\n\nEvery [expert / influencer / brand] tells you to [common advice]. I think that's wrong.\n\nHere's why: [2–3 sentences with your reasoning]\n\nChange my mind 👇`,
+  },
+  {
+    id: 'starter-8',
+    title: 'Customer / Community Spotlight',
+    category: 'Engagement',
+    platforms: ['discord', 'bluesky', 'telegram'],
+    content: `Shoutout to [person / community member / customer] 🙌\n\n[What they did, built, or said that was noteworthy — be specific]\n\nThis is exactly why we do what we do.\n\nTag someone who deserves a spotlight this week 👇`,
+  },
+  {
+    id: 'starter-9',
+    title: 'New Content / Blog Post Drop',
+    category: 'Promotional',
+    platforms: ['bluesky', 'mastodon', 'discord'],
+    content: `Just published: [Title of your post / video / resource] 📝\n\n[One sentence that captures the main value — what will someone learn or get?]\n\nIf you've ever [problem or situation], this one's for you.\n\n🔗 Link in bio / [direct link]\n\n(RT/share if you found it useful — helps more people find it!)`,
+  },
+  {
+    id: 'starter-10',
+    title: 'Lessons Learned / Reflection',
+    category: 'Personal',
+    platforms: ['bluesky', 'mastodon', 'telegram'],
+    content: `[Timeframe] ago I [what you started / launched / tried]. Here's what I learned 🧵\n\n✅ What worked: [2–3 honest points]\n❌ What didn't: [1–2 honest points]\n💡 What I'd do differently: [Key insight]\n\nBuilding in public because I wish someone had told me this earlier. Questions?`,
+  },
 ]
 
 export default function Templates() {

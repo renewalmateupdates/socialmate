@@ -172,9 +172,10 @@ const STEPS = [
   { id: 2, label: 'Your Plan' },
   { id: 3, label: 'About You' },
   { id: 4, label: 'Platforms' },
-  { id: 5, label: 'Security'  },
-  { id: 6, label: 'First Post'},
-  { id: 7, label: "You're in!"},
+  { id: 5, label: 'Connect'   },
+  { id: 6, label: 'Security'  },
+  { id: 7, label: 'First Post'},
+  { id: 8, label: "You're in!"},
 ]
 
 function OnboardingInner() {
@@ -453,13 +454,24 @@ function OnboardingInner() {
                 </div>
               </div>
 
-              <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 mb-6">
+              <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 mb-4">
                 <div className="flex items-start gap-3">
                   <span className="text-xl">⚡</span>
                   <div>
                     <p className="text-xs font-extrabold text-blue-800 mb-1">Complete setup and earn 50 bonus AI credits</p>
                     <p className="text-xs text-blue-600 leading-relaxed">Finish all setup steps and they'll go straight into your credit bank. Refer a friend after and you both earn 25 more.</p>
                   </div>
+                </div>
+              </div>
+
+              <div className="border border-gray-100 dark:border-gray-700 rounded-2xl p-4 mb-6 space-y-2">
+                <div className="flex items-start gap-3">
+                  <span className="text-base">❤️</span>
+                  <p className="text-xs text-gray-600 dark:text-gray-400"><span className="font-bold text-gray-800 dark:text-gray-200">2% of every subscription goes to SM-Give</span> — our community charity initiative, built into the product from day one.</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="text-base">🚫</span>
+                  <p className="text-xs text-gray-600 dark:text-gray-400"><span className="font-bold text-gray-800 dark:text-gray-200">No ads. No selling your data.</span> We suggest tools and features we believe in — we never spam.</p>
                 </div>
               </div>
 
@@ -656,9 +668,18 @@ function OnboardingInner() {
                 })}
               </div>
 
-              <p className="text-xs text-center text-gray-400 dark:text-gray-500 mb-6">
+              <p className="text-xs text-center text-gray-400 dark:text-gray-500 mb-4">
                 {selectedPlatforms.length} / {maxPlatforms} accounts selected
               </p>
+
+              <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 border border-theme rounded-2xl px-4 py-3 mb-6">
+                <span className="text-xl flex-shrink-0">📦</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-gray-800 dark:text-gray-200">Studio Stax — get your studio or creative service listed in our founder-approved directory.</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Founding price: $100/yr for the first 1,000 spots.</p>
+                </div>
+                <Link href="/studio-stax" className="text-xs font-bold text-black dark:text-white flex-shrink-0 hover:underline">Learn more →</Link>
+              </div>
 
               <div className="flex gap-3">
                 <button onClick={() => setStep(3)}
@@ -680,8 +701,54 @@ function OnboardingInner() {
             </div>
           )}
 
-          {/* ── STEP 5 — SECURITY / 2FA ── */}
+          {/* ── STEP 5 — CONNECT ACCOUNTS ── */}
           {step === 5 && (
+            <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
+              <div className="text-center mb-6">
+                <div className="text-5xl mb-4">🔗</div>
+                <h2 className="text-2xl font-extrabold tracking-tight mb-2">Connect Your First Account</h2>
+                <p className="text-gray-400 dark:text-gray-500 text-sm">Link a real account to start posting — all 4 live platforms are ready now.</p>
+              </div>
+
+              <div className="space-y-3 mb-6">
+                {[
+                  { id: 'bluesky',  icon: '🦋', label: 'Bluesky',  desc: 'Connect your Bluesky handle to post to the decentralized web.'  },
+                  { id: 'mastodon', icon: '🐘', label: 'Mastodon', desc: 'Link your Mastodon account on any instance.'                     },
+                  { id: 'discord',  icon: '💬', label: 'Discord',  desc: 'Post announcements to your Discord server channels.'             },
+                  { id: 'telegram', icon: '✈️', label: 'Telegram', desc: 'Publish to your Telegram channel or group.'                     },
+                ].map(platform => (
+                  <div key={platform.id} className="flex items-center gap-4 p-4 border border-theme rounded-2xl">
+                    <span className="text-2xl flex-shrink-0">{platform.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold">{platform.label}</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500">{platform.desc}</p>
+                    </div>
+                    <a href="/accounts" target="_blank" rel="noopener noreferrer"
+                      className="text-xs font-bold bg-black text-white px-3 py-1.5 rounded-xl hover:opacity-80 transition-all flex-shrink-0 whitespace-nowrap">
+                      Connect {platform.label} →
+                    </a>
+                  </div>
+                ))}
+              </div>
+
+              <p className="text-xs text-center text-gray-400 dark:text-gray-500 mb-1">Opens connection page in a new tab</p>
+              <p className="text-xs text-center text-gray-400 dark:text-gray-500 mb-6">You can always connect accounts from Settings → Accounts</p>
+
+              <div className="flex gap-3">
+                <button onClick={() => setStep(4)}
+                  className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
+                  ← Back
+                </button>
+                <button onClick={() => setStep(6)}
+                  className="flex-1 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all text-gray-500 dark:text-gray-400">
+                  Skip for now →
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ── STEP 6 — SECURITY / 2FA ── */}
+          {step === 6 && (
             <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
               <div className="text-center mb-6">
                 <div className="text-5xl mb-4">🔐</div>
@@ -753,11 +820,11 @@ function OnboardingInner() {
               )}
 
               <div className="flex gap-3">
-                <button onClick={() => setStep(4)}
+                <button onClick={() => setStep(5)}
                   className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
                   ← Back
                 </button>
-                <button onClick={() => setStep(6)}
+                <button onClick={() => setStep(7)}
                   className={`flex-1 py-3 text-sm font-bold rounded-2xl transition-all ${
                     mfaDone
                       ? 'bg-black text-white hover:opacity-80'
@@ -772,8 +839,8 @@ function OnboardingInner() {
             </div>
           )}
 
-          {/* ── STEP 6 — FIRST POST ── */}
-          {step === 6 && (
+          {/* ── STEP 7 — FIRST POST ── */}
+          {step === 7 && (
             <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
               <div className="text-center mb-6">
                 <div className="text-5xl mb-4">✏️</div>
@@ -839,17 +906,17 @@ function OnboardingInner() {
               </div>
 
               <div className="flex gap-3">
-                <button onClick={() => setStep(5)}
+                <button onClick={() => setStep(6)}
                   className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
                   ← Back
                 </button>
                 {firstPost.trim() ? (
-                  <button onClick={() => setStep(7)}
+                  <button onClick={() => setStep(8)}
                     className="flex-1 py-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all">
                     Save Draft & Continue →
                   </button>
                 ) : (
-                  <button onClick={() => setStep(7)}
+                  <button onClick={() => setStep(8)}
                     className="flex-1 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all text-gray-500 dark:text-gray-400">
                     Skip for now →
                   </button>
@@ -858,8 +925,8 @@ function OnboardingInner() {
             </div>
           )}
 
-          {/* ── STEP 7 — DONE ── */}
-          {step === 7 && (
+          {/* ── STEP 8 — DONE ── */}
+          {step === 8 && (
             <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10 text-center">
               <div className="text-6xl mb-4">🚀</div>
               <h2 className="text-3xl font-extrabold tracking-tight mb-2">
@@ -892,7 +959,7 @@ function OnboardingInner() {
               <div className="space-y-3 mb-8 text-left">
                 {[
                   { icon: '✏️', title: 'Compose a post',        desc: 'Write, schedule, and use AI tools',           href: '/compose',          cta: 'Start writing'   },
-                  { icon: '🤖', title: 'Explore AI Features',   desc: `${planConfig.aiTools.length} tools — captions, hooks, scoring & more`, href: '/ai-features', cta: 'Explore tools'   },
+                  { icon: '🤖', title: 'Explore AI Features',   desc: `${planConfig.aiTools.length >= 12 ? planConfig.aiTools.length : 12} AI tools — captions, hooks, scoring & more`, href: '/ai-features', cta: 'Explore tools'   },
                   { icon: '📆', title: 'Bulk Scheduler',        desc: 'Plan a whole week of content at once',         href: '/bulk-scheduler',   cta: 'Open scheduler'  },
                   { icon: '🔗', title: 'Set up Link in Bio',    desc: 'Your free bio page — no Linktree needed',      href: '/link-in-bio',      cta: 'Build page'      },
                   { icon: '📊', title: 'Analytics',             desc: `Up to ${planConfig.analytics} of history`,    href: '/analytics',        cta: 'View analytics'  },

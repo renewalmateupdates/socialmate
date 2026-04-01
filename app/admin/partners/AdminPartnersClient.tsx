@@ -129,6 +129,10 @@ export default function AdminPartnersClient() {
   const [actionLoading, setActionLoading] = useState(false)
   const [actionNote, setActionNote]       = useState('')
 
+  // Launch email
+  const [launchEmailSending, setLaunchEmailSending] = useState(false)
+  const [launchEmailResult, setLaunchEmailResult]   = useState<{ sent: number; failed: number } | null>(null)
+
   // Promo code gen
   const [promoCode, setPromoCode]             = useState('')
   const [promoDiscount, setPromoDiscount]     = useState('20')
@@ -279,6 +283,20 @@ export default function AdminPartnersClient() {
     await fetchAll()
   }
 
+  const handleSendLaunchEmail = async () => {
+    if (!confirm('Send the launch day email to ALL users? This cannot be undone.')) return
+    setLaunchEmailSending(true)
+    try {
+      const res = await fetch('/api/newsletter/launch', { method: 'POST' })
+      const data = await res.json()
+      setLaunchEmailResult({ sent: data.sent, failed: data.failed })
+    } catch {
+      alert('Failed to send launch email')
+    } finally {
+      setLaunchEmailSending(false)
+    }
+  }
+
   const filtered = filterStatus === 'all'
     ? affiliates
     : affiliates.filter(a => a.status === filterStatus)
@@ -321,6 +339,22 @@ export default function AdminPartnersClient() {
       </header>
 
       <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px' }}>
+
+        {/* Launch email */}
+        <div style={{ marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button
+            onClick={handleSendLaunchEmail}
+            disabled={launchEmailSending}
+            style={{ padding: '8px 16px', background: '#ff6154', color: 'white', border: 'none', borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: launchEmailSending ? 'not-allowed' : 'pointer', opacity: launchEmailSending ? 0.6 : 1 }}
+          >
+            {launchEmailSending ? 'Sending...' : '📧 Send Launch Email to All Users'}
+          </button>
+          {launchEmailResult && (
+            <span style={{ fontSize: 12, color: '#4ade80' }}>
+              ✅ Sent to {launchEmailResult.sent} users ({launchEmailResult.failed} failed)
+            </span>
+          )}
+        </div>
 
         {/* Revenue overview */}
         {stats && (

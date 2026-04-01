@@ -1,5 +1,64 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
+
+// ── DB post shape ─────────────────────────────────────────────────────────────
+type DbPost = {
+  slug: string
+  title: string
+  excerpt: string | null
+  content: string
+  category: string
+  author: string
+  published_at: string
+}
+
+function dbPostToPost(db: DbPost) {
+  const wordCount  = db.content.trim().split(/\s+/).length
+  const readMins   = Math.max(1, Math.round(wordCount / 200))
+  const dateStr    = new Date(db.published_at).toLocaleDateString('en-US', {
+    month: 'long', day: 'numeric', year: 'numeric',
+  })
+  return {
+    title:    db.title,
+    category: db.category || 'Studio Stax',
+    date:     dateStr,
+    readTime: `${readMins} min read`,
+    excerpt:  db.excerpt || '',
+    content:  db.content,
+    author:   db.author,
+  }
+}
+
+async function getDbPost(slug: string): Promise<ReturnType<typeof dbPostToPost> | null> {
+  try {
+    const admin = getSupabaseAdmin()
+    const { data } = await admin
+      .from('blog_posts')
+      .select('slug, title, excerpt, content, category, author, published_at')
+      .eq('slug', slug)
+      .single()
+    if (!data) return null
+    return dbPostToPost(data as DbPost)
+  } catch {
+    return null
+  }
+}
+
+async function getAllDbPosts(): Promise<Array<[string, ReturnType<typeof dbPostToPost>]>> {
+  try {
+    const admin = getSupabaseAdmin()
+    const { data } = await admin
+      .from('blog_posts')
+      .select('slug, title, excerpt, content, category, author, published_at')
+      .order('published_at', { ascending: false })
+      .limit(20)
+    if (!data) return []
+    return (data as DbPost[]).map(d => [d.slug, dbPostToPost(d)])
+  } catch {
+    return []
+  }
+}
 
 const POSTS: Record<string, {
   title: string
@@ -1209,7 +1268,7 @@ export async function generateMetadata(
   { params }: { params: Promise<{ slug: string }> }
 ): Promise<Metadata> {
   const { slug } = await params
-  const post = POSTS[slug]
+  const post = POSTS[slug] ?? (await getDbPost(slug))
   if (!post) return { title: 'Post not found — SocialMate Blog' }
   return {
     title: `${post.title} — SocialMate Blog`,
@@ -1263,7 +1322,7 @@ function renderContent(content: string) {
 
 export default async function BlogPost({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const post = POSTS[slug]
+  const post = POSTS[slug] ?? (await getDbPost(slug))
 
   if (!post) {
     return (
@@ -1299,7 +1358,12 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
     )
   }
 
-  const otherPosts = Object.entries(POSTS)
+  const dbPosts    = await getAllDbPosts()
+  const allPosts   = [
+    ...Object.entries(POSTS),
+    ...dbPosts.filter(([s]) => !POSTS[s]), // deduplicate: skip if slug exists in POSTS
+  ]
+  const otherPosts = allPosts
     .filter(([s]) => s !== slug)
     .slice(0, 3)
 
@@ -1311,12 +1375,15 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
           <span className="font-bold text-base tracking-tight dark:text-gray-100">SocialMate</span>
         </Link>
         <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-500 dark:text-gray-400">
-          <Link href="/" className="hover:text-black dark:hover:text-white transition-colors">Home</Link>
-          <Link href="/pricing" className="hover:text-black dark:hover:text-white transition-colors">Pricing</Link>
-          <Link href="/blog" className="hover:text-black dark:hover:text-white transition-colors">Blog</Link>
+          <Link href="/features"    className="hover:text-black dark:hover:text-white transition-colors">Features</Link>
+          <Link href="/pricing"     className="hover:text-black dark:hover:text-white transition-colors">Pricing</Link>
+          <Link href="/studio-stax" className="hover:text-black dark:hover:text-white transition-colors">Studio Stax</Link>
+          <Link href="/roadmap"     className="hover:text-black dark:hover:text-white transition-colors">Roadmap</Link>
+          <Link href="/blog"        className="font-bold text-black dark:text-white">Blog</Link>
         </div>
         <div className="flex items-center gap-3">
-          <Link href="/login" className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors hidden sm:block">Sign in</Link>
+          <Link href="/give"   className="text-sm font-semibold text-rose-400 hover:text-rose-300 transition-all hidden sm:block">❤️ Give</Link>
+          <Link href="/login"  className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors hidden sm:block">Sign in</Link>
           <Link href="/signup" className="bg-black text-white text-sm font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
             Get started free →
           </Link>
@@ -1378,6 +1445,16 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
             </div>
           </div>
         )}
+      </div>
+
+      {/* SM-Give strip */}
+      <div className="border-t border-gray-100 dark:border-gray-800 mt-16 pt-10 pb-4">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            ❤️ <span className="font-semibold text-gray-700 dark:text-gray-300">2% of every SocialMate subscription</span> goes to SM-Give — our charity initiative.{' '}
+            <a href="/give" className="text-amber-500 hover:text-amber-400 font-semibold transition-colors">Learn about SM-Give →</a>
+          </p>
+        </div>
       </div>
 
       <footer className="border-t border-gray-100 dark:border-gray-800 px-8 py-8">
