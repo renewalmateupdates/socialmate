@@ -474,6 +474,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
 
         {/* Stats section collapse toggle */}
         <button
+          id="tour-sidebar-collapse"
           onClick={toggleStats}
           className="w-full flex items-center gap-1.5 px-1 py-0.5 transition-all hover:opacity-70"
           title={statsVisible ? 'Hide stats' : 'Show stats'}

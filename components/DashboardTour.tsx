@@ -41,6 +41,13 @@ const TOUR_STEPS: TourStep[] = [
     position: 'right',
   },
   {
+    id: 'sidebar-customize',
+    title: 'Make the sidebar yours',
+    description: 'Click any section label to collapse it. Drag sections to reorder them. Pick a color theme or toggle dark mode under the Theme section at the bottom — all saved automatically.',
+    anchor: 'tour-sidebar-collapse',
+    position: 'right',
+  },
+  {
     id: 'upgrade',
     title: 'Unlock more anytime',
     description: 'Need more AI credits, connected accounts, or client workspaces? Upgrade for $5/month.',

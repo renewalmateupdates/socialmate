@@ -187,6 +187,22 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         </div>
         <p className="text-xs text-gray-400 dark:text-gray-500">No card required · Free forever · Setup in 60 seconds</p>
 
+        {/* BETA MILESTONE */}
+        <div className="mt-10 max-w-md mx-auto bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl px-5 py-4 text-left">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Beta milestone</p>
+            <Link href="/roadmap" className="text-xs font-semibold text-gray-400 hover:text-black dark:hover:text-white transition-all">See roadmap →</Link>
+          </div>
+          <div className="flex items-center justify-between mb-1.5">
+            <p className="text-xs text-gray-500 dark:text-gray-400">500 users to exit beta &amp; ship v1.0</p>
+            <span className="text-xs font-bold text-gray-700 dark:text-gray-300">4%</span>
+          </div>
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+            <div className="bg-black dark:bg-white h-1.5 rounded-full" style={{ width: '4%' }} />
+          </div>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">Early users lock in current pricing forever.</p>
+        </div>
+
         {/* STATS */}
         <div className="grid grid-cols-3 gap-4 sm:gap-6 mt-12 sm:mt-16 max-w-2xl mx-auto">
           {[

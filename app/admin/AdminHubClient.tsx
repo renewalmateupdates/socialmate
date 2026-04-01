@@ -76,7 +76,7 @@ export default function AdminHubClient() {
         fetch('/api/feedback'),
       ])
       const appsJson = await appsRes.json()
-      if (appsJson.forbidden) { router.push('/dashboard'); return }
+      if (appsJson.forbidden) return  // stay on page, don't redirect admin out
       setApplications(appsJson.applications || [])
       if (feedbackRes.ok) {
         const fJson = await feedbackRes.json()
