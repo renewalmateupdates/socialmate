@@ -436,7 +436,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
                   />
                   {!isCollapsed && group.items.map(item => {
                     // Admin: Partners link goes directly to the admin portal
-                    const href   = isAdminUser && item.href === '/partners' ? '/admin/affiliates' : item.href
+                    const href   = isAdminUser && item.href === '/partners' ? '/admin' : item.href
                     const active = isActive(href)
                     return (
                       <Link key={item.label} href={href}
