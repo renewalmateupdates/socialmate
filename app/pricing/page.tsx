@@ -173,7 +173,7 @@ const FAQ = [
   },
   {
     q: 'Will prices go up?',
-    a: "Current pricing is locked for all active subscribers. If pricing ever changes, you'll know well in advance and grandfathered rates will be honored — no surprises.",
+    a: "We keep pricing as low as sustainably possible. Infrastructure costs are real, and pricing may adjust over time — but we'll always communicate changes clearly and in advance. No surprise charges, ever.",
   },
   {
     q: 'What happens when I run out of AI credits?',

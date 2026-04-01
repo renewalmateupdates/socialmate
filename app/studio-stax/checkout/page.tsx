@@ -127,7 +127,7 @@ function CheckoutInner() {
               🔒 {data.slotsRemaining.toLocaleString()} of {data.slotsTotal.toLocaleString()} founding spots remaining
             </p>
             <p className="text-xs text-amber-600 dark:text-amber-500">
-              Price goes to ${data.standardPrice / 100}/yr after founding slots fill — lock in $100 now.
+              Founding rate: $100/yr. Price goes to ${data.standardPrice / 100}/yr after founding slots fill.
             </p>
             <p className="text-xs text-amber-600 dark:text-amber-500">
               Early renewal rate: $80/yr (20% off).

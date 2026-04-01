@@ -200,7 +200,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
           <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
             <div className="bg-black dark:bg-white h-1.5 rounded-full" style={{ width: '4%' }} />
           </div>
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">Early users lock in current pricing forever.</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">Be part of the v1.0 launch.</p>
         </div>
 
         {/* STATS */}
@@ -536,8 +536,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
               },
               {
                 icon: '🔒',
-                title: 'Grandfathered pricing, always',
-                desc: 'Join now and your plan limits lock in. If pricing ever changes, early users are protected. No surprise upgrades, no bait-and-switch.',
+                title: 'No bait-and-switch',
+                desc: 'Free means free. The free plan is not a trial, not a countdown, and not designed to frustrate you into upgrading. What you see is what you get.',
               },
             ].map((card, i) => (
               <div key={i} className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 text-left hover:border-gray-300 dark:hover:border-gray-500 transition-all">
