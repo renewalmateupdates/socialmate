@@ -22,8 +22,9 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
-const COLLAPSED_KEY = 'sidebar_collapsed_sections'
-const ORDER_KEY     = 'sidebar_section_order'
+const COLLAPSED_KEY  = 'sidebar_collapsed_sections'
+const ORDER_KEY      = 'sidebar_section_order'
+const STATS_VIS_KEY  = 'sidebar_stats_visible'
 
 function getStoredCollapsed(): Record<string, boolean> {
   if (typeof window === 'undefined') return {}
@@ -164,12 +165,25 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   const [checkoutLoading, setCheckoutLoading]   = useState(false)
   const [collapsed, setCollapsed]               = useState<Record<string, boolean>>({})
   const [sectionOrder, setSectionOrder]         = useState<string[]>(NAV_BASE.map(g => g.section))
+  const [statsVisible, setStatsVisible]         = useState(true)
   const pathname = usePathname()
   const router   = useRouter()
 
   useEffect(() => {
     setCollapsed(getStoredCollapsed())
     setSectionOrder(getStoredOrder(NAV_BASE.map(g => g.section)))
+    try {
+      const stored = localStorage.getItem(STATS_VIS_KEY)
+      if (stored !== null) setStatsVisible(stored !== 'false')
+    } catch {}
+  }, [])
+
+  const toggleStats = useCallback(() => {
+    setStatsVisible(prev => {
+      const next = !prev
+      try { localStorage.setItem(STATS_VIS_KEY, String(next)) } catch {}
+      return next
+    })
   }, [])
 
   const toggleSection = useCallback((section: string) => {
@@ -452,53 +466,72 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
 
       {/* BOTTOM STATS */}
       <div className="p-3 space-y-2.5 flex-shrink-0" style={{ borderTop: '1px solid var(--sidebar-border)' }}>
-        <div className="rounded-xl p-3" style={{ background: 'var(--sidebar-active)' }}>
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs font-semibold" style={{ color: 'var(--sidebar-muted)' }}>AI Credits</span>
-            <span className="text-xs font-bold" style={{ color: 'var(--sidebar-fg)' }}>
-              {loading ? '...' : `${totalCredits} left`}
-            </span>
-          </div>
-          <div className="w-full rounded-full h-1.5 mb-2" style={{ background: 'var(--sidebar-border)' }}>
-            <div className="h-1.5 rounded-full transition-all" style={{ width: `${creditsBar}%`, background: creditBarColor }} />
-          </div>
 
-          {/* Three pools */}
-          <div className="space-y-1 mt-1">
-            <div className="flex justify-between text-xs" style={{ color: 'var(--sidebar-faint)' }}>
-              <span>📅 Monthly</span>
-              <span>{loading ? '...' : `${monthlyCredits} / ${monthlyLimit}`}</span>
+        {/* Stats section collapse toggle */}
+        <button
+          onClick={toggleStats}
+          className="w-full flex items-center gap-1.5 px-1 py-0.5 transition-all hover:opacity-70"
+          title={statsVisible ? 'Hide stats' : 'Show stats'}
+        >
+          <span className="text-xs" style={{ color: 'var(--sidebar-faint)' }}>
+            {statsVisible ? '▾' : '▸'}
+          </span>
+          <span className="text-xs font-bold uppercase tracking-widest" style={{ color: 'var(--sidebar-faint)' }}>
+            Stats
+          </span>
+        </button>
+
+        {statsVisible && (
+          <>
+            <div className="rounded-xl p-3" style={{ background: 'var(--sidebar-active)' }}>
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-xs font-semibold" style={{ color: 'var(--sidebar-muted)' }}>AI Credits</span>
+                <span className="text-xs font-bold" style={{ color: 'var(--sidebar-fg)' }}>
+                  {loading ? '...' : `${totalCredits} left`}
+                </span>
+              </div>
+              <div className="w-full rounded-full h-1.5 mb-2" style={{ background: 'var(--sidebar-border)' }}>
+                <div className="h-1.5 rounded-full transition-all" style={{ width: `${creditsBar}%`, background: creditBarColor }} />
+              </div>
+
+              {/* Three pools */}
+              <div className="space-y-1 mt-1">
+                <div className="flex justify-between text-xs" style={{ color: 'var(--sidebar-faint)' }}>
+                  <span>📅 Monthly</span>
+                  <span>{loading ? '...' : `${monthlyCredits} / ${monthlyLimit}`}</span>
+                </div>
+                {!loading && earnedCredits > 0 && (
+                  <div className="flex justify-between text-xs" style={{ color: 'var(--sidebar-faint)' }}>
+                    <span>🎁 Earned</span>
+                    <span>{earnedCredits}</span>
+                  </div>
+                )}
+                {!loading && paidCredits > 0 && (
+                  <div className="flex justify-between text-xs" style={{ color: 'var(--sidebar-faint)' }}>
+                    <span>💳 Purchased</span>
+                    <span>{paidCredits}</span>
+                  </div>
+                )}
+              </div>
             </div>
-            {!loading && earnedCredits > 0 && (
-              <div className="flex justify-between text-xs" style={{ color: 'var(--sidebar-faint)' }}>
-                <span>🎁 Earned</span>
-                <span>{earnedCredits}</span>
-              </div>
-            )}
-            {!loading && paidCredits > 0 && (
-              <div className="flex justify-between text-xs" style={{ color: 'var(--sidebar-faint)' }}>
-                <span>💳 Purchased</span>
-                <span>{paidCredits}</span>
-              </div>
-            )}
-          </div>
-        </div>
 
-        <div className="rounded-xl p-3" style={{ background: 'var(--sidebar-active)' }}>
-          <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs font-semibold" style={{ color: 'var(--sidebar-muted)' }}>Team Seats</span>
-            <span className="text-xs font-bold" style={{ color: 'var(--sidebar-fg)' }}>
-              {loading ? '...' : `${seatsUsed}/${seatsTotal}`}
-            </span>
-          </div>
-          <div className="w-full rounded-full h-1.5" style={{ background: 'var(--sidebar-border)' }}>
-            <div className="h-1.5 rounded-full transition-all"
-              style={{ width: `${seatsBar}%`, background: seatsUsed >= seatsTotal ? '#f87171' : 'var(--sidebar-accent)' }} />
-          </div>
-          <p className="text-xs mt-1" style={{ color: 'var(--sidebar-faint)' }}>
-            {loading ? 'Loading...' : `${seatsTotal - seatsUsed} seat${seatsTotal - seatsUsed !== 1 ? 's' : ''} left`}
-          </p>
-        </div>
+            <div className="rounded-xl p-3" style={{ background: 'var(--sidebar-active)' }}>
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-xs font-semibold" style={{ color: 'var(--sidebar-muted)' }}>Team Seats</span>
+                <span className="text-xs font-bold" style={{ color: 'var(--sidebar-fg)' }}>
+                  {loading ? '...' : `${seatsUsed}/${seatsTotal}`}
+                </span>
+              </div>
+              <div className="w-full rounded-full h-1.5" style={{ background: 'var(--sidebar-border)' }}>
+                <div className="h-1.5 rounded-full transition-all"
+                  style={{ width: `${seatsBar}%`, background: seatsUsed >= seatsTotal ? '#f87171' : 'var(--sidebar-accent)' }} />
+              </div>
+              <p className="text-xs mt-1" style={{ color: 'var(--sidebar-faint)' }}>
+                {loading ? 'Loading...' : `${seatsTotal - seatsUsed} seat${seatsTotal - seatsUsed !== 1 ? 's' : ''} left`}
+              </p>
+            </div>
+          </>
+        )}
 
         {plan === 'free' && (
           <button onClick={() => handleCheckout(STRIPE_PRO_PRICE_ID)} disabled={checkoutLoading}

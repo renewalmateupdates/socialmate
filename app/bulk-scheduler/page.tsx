@@ -25,13 +25,6 @@ const COMING_SOON_PLATFORMS = [
   { id: 'twitter',   label: 'X/Twitter',  icon: '🐦' },
 ]
 
-const HOURS = [
-  '06','07','08','09','10','11','12',
-  '13','14','15','16','17','18','19',
-  '20','21','22',
-]
-const MINUTES = ['00','15','30','45']
-
 const PLAN_MAX_ROWS: Record<string, number> = {
   free:   10,
   pro:    50,
@@ -80,17 +73,10 @@ export default function BulkScheduler() {
     '3 months'
 
   const [posts, setPosts] = useState<BulkPost[]>([
-    { id: makeId(), content: '', platforms: ['discord'], date: getNextDate(1), time: '09:00', status: 'ready' },
-    { id: makeId(), content: '', platforms: ['discord'], date: getNextDate(2), time: '09:00', status: 'ready' },
-    { id: makeId(), content: '', platforms: ['discord'], date: getNextDate(3), time: '09:00', status: 'ready' },
+    { id: makeId(), content: '', platforms: ['discord'], date: '', time: '09:00', status: 'ready' },
   ])
-  // Track per-row minute selection separately since BulkPost.time is HH:MM string
-  const getHour   = (t: string) => t.split(':')[0] ?? '09'
-  const getMinute = (t: string) => t.split(':')[1] ?? '00'
   const [defaultPlatforms, setDefaultPlatforms] = useState<string[]>(['discord'])
-  const [defaultHour, setDefaultHour]     = useState('09')
-  const [defaultMinute, setDefaultMinute] = useState('00')
-  const defaultTime = `${defaultHour}:${defaultMinute}`
+  const [defaultTime, setDefaultTime] = useState('09:00')
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const router = useRouter()
@@ -114,17 +100,11 @@ export default function BulkScheduler() {
       showToast(`Your ${plan} plan supports up to ${maxRows} posts per session. Upgrade for more.`, 'error')
       return
     }
-    const lastPost = posts[posts.length - 1]
-    const lastDate = lastPost?.date || getNextDate(1)
-    const d = new Date(lastDate)
-    d.setDate(d.getDate() + 1)
-    const nextDate = d.toISOString().split('T')[0]
-    const clampedDate = nextDate > maxScheduleDate ? maxScheduleDate : nextDate
     setPosts(prev => [...prev, {
       id: makeId(),
       content: '',
       platforms: [...defaultPlatforms],
-      date: clampedDate,
+      date: '',
       time: defaultTime,
       status: 'ready',
     }])
@@ -161,7 +141,7 @@ export default function BulkScheduler() {
   }
 
   const applyDefaultsToAll = () => {
-    setPosts(prev => prev.map(p => ({ ...p, platforms: [...defaultPlatforms], time: defaultTime })))
+    setPosts(prev => prev.map(p => ({ ...p, platforms: [...defaultPlatforms], time: defaultTime, status: 'ready', error: undefined })))
     showToast('Defaults applied to all rows', 'success')
   }
 
@@ -238,7 +218,7 @@ export default function BulkScheduler() {
     setPosts(prev => {
       const remaining = prev.filter(p => p.status !== 'saved')
       return remaining.length === 0
-        ? [{ id: makeId(), content: '', platforms: [...defaultPlatforms], date: getNextDate(1), time: defaultTime, status: 'ready' }]
+        ? [{ id: makeId(), content: '', platforms: [...defaultPlatforms], date: '', time: defaultTime, status: 'ready' }]
         : remaining
     })
   }
@@ -267,12 +247,6 @@ export default function BulkScheduler() {
               <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">Write and schedule multiple posts at once</p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
-              {savedPosts > 0 && (
-                <button onClick={clearSaved}
-                  className="text-xs font-bold px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
-                  Clear saved ({savedPosts})
-                </button>
-              )}
               <Link href="/calendar"
                 className="text-xs font-bold px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
                 📅 Calendar
@@ -330,15 +304,9 @@ export default function BulkScheduler() {
               </div>
               <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
                 <div className="flex items-center gap-1">
-                  <select value={defaultHour} onChange={e => setDefaultHour(e.target.value)}
-                    className="px-2 py-1.5 text-xs border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none bg-white dark:bg-gray-800 dark:text-gray-100 font-semibold">
-                    {HOURS.map(h => <option key={h} value={h}>{h}</option>)}
-                  </select>
-                  <span className="text-xs font-bold text-gray-400 dark:text-gray-500">:</span>
-                  <select value={defaultMinute} onChange={e => setDefaultMinute(e.target.value)}
-                    className="px-2 py-1.5 text-xs border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none bg-white dark:bg-gray-800 dark:text-gray-100 font-semibold">
-                    {MINUTES.map(m => <option key={m} value={m}>{m}</option>)}
-                  </select>
+                  <input type="time" value={defaultTime}
+                    onChange={e => setDefaultTime(e.target.value)}
+                    className="px-2.5 py-1.5 text-xs border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none bg-white dark:bg-gray-800 dark:text-gray-100 font-semibold" />
                 </div>
                 <button onClick={autoFillDates}
                   className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all whitespace-nowrap">
@@ -386,19 +354,9 @@ export default function BulkScheduler() {
                           ? 'border-red-300 text-red-500'
                           : 'border-gray-200 dark:border-gray-600 focus:border-gray-400'
                       }`} />
-                    <div className="flex items-center gap-0.5">
-                      <select value={getHour(post.time)}
-                        onChange={e => updatePost(post.id, 'time', `${e.target.value}:${getMinute(post.time)}`)}
-                        className="px-2 py-1.5 text-xs border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none bg-white dark:bg-gray-800 dark:text-gray-100 font-semibold">
-                        {HOURS.map(h => <option key={h} value={h}>{h}</option>)}
-                      </select>
-                      <span className="text-xs font-bold text-gray-400 dark:text-gray-500">:</span>
-                      <select value={getMinute(post.time)}
-                        onChange={e => updatePost(post.id, 'time', `${getHour(post.time)}:${e.target.value}`)}
-                        className="px-2 py-1.5 text-xs border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none bg-white dark:bg-gray-800 dark:text-gray-100 font-semibold">
-                        {MINUTES.map(m => <option key={m} value={m}>{m}</option>)}
-                      </select>
-                    </div>
+                    <input type="time" value={post.time}
+                      onChange={e => updatePost(post.id, 'time', e.target.value)}
+                      className="px-2.5 py-1.5 text-xs border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none bg-white dark:bg-gray-800 dark:text-gray-100 font-semibold" />
                     <button onClick={() => removeRow(post.id)}
                       disabled={posts.length <= 1}
                       className="text-xs text-gray-300 hover:text-red-400 transition-all disabled:opacity-20 flex-shrink-0 ml-auto sm:ml-0">
@@ -453,27 +411,35 @@ export default function BulkScheduler() {
             ))}
           </div>
 
-          {/* ADD + SAVE */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3 flex-wrap">
-              <button onClick={addRow} disabled={atRowLimit}
-                className="flex items-center gap-2 text-xs font-bold px-5 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-2xl hover:border-gray-500 transition-all text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white disabled:opacity-40 disabled:cursor-not-allowed">
-                + Add another post
-              </button>
+          {/* ADD ROW BUTTON — centered below last post */}
+          <div className="flex justify-center mb-4">
+            <button onClick={addRow} disabled={atRowLimit}
+              className="flex items-center gap-2 text-sm font-bold px-6 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-2xl hover:border-gray-500 dark:hover:border-gray-400 transition-all text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white disabled:opacity-40 disabled:cursor-not-allowed group">
+              <span className="text-lg leading-none group-hover:scale-110 transition-transform">+</span>
+              <span>{atRowLimit ? `Limit reached (${maxRows})` : 'Add another post'}</span>
               {atRowLimit && plan !== 'agency' && (
-                <Link href="/settings?tab=Plan" className="text-xs font-bold underline text-gray-400 dark:text-gray-500">
-                  Upgrade for more rows →
+                <Link href="/settings?tab=Plan" onClick={e => e.stopPropagation()}
+                  className="text-xs font-bold underline text-black dark:text-white ml-1">
+                  Upgrade →
                 </Link>
               )}
-            </div>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-              <p className="text-xs text-gray-400 dark:text-gray-500">{readyCount} post{readyCount !== 1 ? 's' : ''} ready</p>
-              <button onClick={handleSaveAll}
-                disabled={saving || readyCount === 0}
-                className="bg-black text-white text-sm font-bold px-8 py-3 rounded-2xl hover:opacity-80 transition-all disabled:opacity-40">
-                {saving ? 'Scheduling...' : `Schedule ${readyCount > 0 ? readyCount : ''} Post${readyCount !== 1 ? 's' : ''} →`}
+            </button>
+          </div>
+
+          {/* SAVE */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-end gap-3">
+            <p className="text-xs text-gray-400 dark:text-gray-500">{readyCount} post{readyCount !== 1 ? 's' : ''} ready</p>
+            {savedPosts > 0 && (
+              <button onClick={clearSaved}
+                className="text-xs font-bold px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
+                Clear saved ({savedPosts})
               </button>
-            </div>
+            )}
+            <button onClick={handleSaveAll}
+              disabled={saving || readyCount === 0}
+              className="bg-black text-white text-sm font-bold px-8 py-3 rounded-2xl hover:opacity-80 transition-all disabled:opacity-40">
+              {saving ? 'Scheduling...' : `Schedule ${readyCount > 0 ? readyCount : ''} Post${readyCount !== 1 ? 's' : ''} →`}
+            </button>
           </div>
 
           {/* TIPS */}
