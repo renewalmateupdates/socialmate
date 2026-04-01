@@ -21,6 +21,7 @@ export default function Story() {
   const handleDonate = async () => {
     const amount = customAmount ? parseFloat(customAmount) : selectedAmount
     if (!amount || amount <= 0) return
+    if (amount > 2500) return
     setLoading(true)
     try {
       const res = await fetch('/api/donations/create', {
