@@ -277,6 +277,9 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   const creditBarColor = monthlyCredits < 10 ? '#f87171' : monthlyCredits < 20 ? '#facc15' : 'var(--accent, #22c55e)'
   const seatsBar      = seatsTotal > 0 ? Math.min(100, (seatsUsed / seatsTotal) * 100) : 0
 
+  const ADMIN_EMAIL   = 'socialmatehq@gmail.com'
+  const isAdminUser   = user?.email === ADMIN_EMAIL
+
   const isActive = (href: string) => {
     const base = href.split('?')[0]
     return pathname === base || pathname === href
@@ -432,9 +435,11 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
                     showBorder={gi > 0}
                   />
                   {!isCollapsed && group.items.map(item => {
-                    const active = isActive(item.href)
+                    // Admin: Partners link goes directly to the admin portal
+                    const href   = isAdminUser && item.href === '/partners' ? '/admin/affiliates' : item.href
+                    const active = isActive(href)
                     return (
-                      <Link key={item.label} href={item.href}
+                      <Link key={item.label} href={href}
                         onClick={onNavClick}
                         {...((item as any).newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                         className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-all"
@@ -446,7 +451,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
                           paddingLeft: active ? '10px' : '12px',
                         }}>
                         <span>{item.icon}</span>
-                        <span className="flex-1">{item.label}</span>
+                        <span className="flex-1">{item.label}{isAdminUser && item.href === '/partners' ? ' ⚙️' : ''}</span>
                         {item.href === '/ai-features' && !loading && (
                           <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${
                             credits < 10 ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400' :

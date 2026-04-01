@@ -9,6 +9,8 @@ const dark   = '#0a0a0a'
 const border  = '#222222'
 const muted   = '#6b7280'
 
+const ADMIN_EMAIL = 'socialmatehq@gmail.com'
+
 export default function AccessDeniedPage() {
   const [loggedIn, setLoggedIn]   = useState(false)
   const [applying, setApplying]   = useState(false)
@@ -19,6 +21,11 @@ export default function AccessDeniedPage() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
+      // Admin should never see this page — send them straight to the portal
+      if (user?.email === ADMIN_EMAIL) {
+        window.location.replace('/admin/affiliates')
+        return
+      }
       setLoggedIn(!!user)
       if (user?.email) setForm(f => ({ ...f, email: user.email ?? '' }))
     })
