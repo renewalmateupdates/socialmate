@@ -35,7 +35,7 @@ function PartnersLoginInner() {
       if (user) {
         // Direct client-side admin check — most reliable (no server cookie dependency)
         if (user.email === ADMIN_EMAIL) {
-          router.push('/admin/affiliates')
+          router.push('/admin')
           return
         }
         // Then: check affiliate status
@@ -122,7 +122,7 @@ function PartnersLoginInner() {
       if (data.user) {
         // Direct admin check — no server cookie dependency
         if (data.user.email === ADMIN_EMAIL) {
-          router.push('/admin/affiliates')
+          router.push('/admin')
           return
         }
         const res = await fetch('/api/partners/stats')

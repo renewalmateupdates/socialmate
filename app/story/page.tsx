@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
-import Sidebar from '@/components/Sidebar'
 import { supabase } from '@/lib/supabase'
 
 const DONATION_AMOUNTS = [5, 10, 25, 50]
@@ -12,12 +11,10 @@ export default function Story() {
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
   const [isAuthed, setIsAuthed] = useState(false)
-  const [authChecked, setAuthChecked] = useState(false)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       setIsAuthed(!!data.user)
-      setAuthChecked(true)
     })
   }, [])
 
@@ -113,6 +110,7 @@ export default function Story() {
               placeholder="Custom"
               value={customAmount}
               min="1"
+              max="2500"
               onChange={e => { setCustomAmount(e.target.value); setSelectedAmount(null) }}
               className="w-24 px-3 py-2.5 text-sm outline-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
             />
@@ -127,6 +125,9 @@ export default function Story() {
         <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
           Payments processed securely via Stripe. This is a voluntary contribution — not a subscription.{' '}
           <Link href="/give" className="text-amber-500 hover:text-amber-400 font-semibold">50% of every donation goes to SM-Give ❤️</Link>
+        </p>
+        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+          Custom donations are capped at $2,500.
         </p>
       </div>
 
@@ -153,19 +154,6 @@ export default function Story() {
       </div>
     </div>
   )
-
-  if (isAuthed) {
-    return (
-      <div className="flex h-screen overflow-hidden bg-white dark:bg-gray-950">
-        <Sidebar />
-        <main className="flex-1 overflow-y-auto">
-          <div className="max-w-4xl mx-auto p-8">
-            {content}
-          </div>
-        </main>
-      </div>
-    )
-  }
 
   return <PublicLayout>{content}</PublicLayout>
 }

@@ -268,11 +268,11 @@ async function regenerateAffiliatePromoCode(
     const newCode = `${base}${suffix}`
 
     const newPromo = await stripe.promotionCodes.create({
-      coupon: couponId,
+      promotion: { type: 'coupon', coupon: couponId },
       code: newCode,
       max_redemptions: 1,
       metadata: { regenerated_from: promoRecord.code },
-    })
+    } as any)
 
     await supabase.from('affiliate_promo_codes')
       .update({

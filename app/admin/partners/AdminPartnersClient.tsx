@@ -381,7 +381,7 @@ export default function AdminPartnersClient() {
             { key: 'payouts',    label: `Payouts${pendingPayouts.length > 0 ? ` (${pendingPayouts.length})` : ''}` },
             { key: 'revenue',    label: 'Revenue' },
             { key: 'feedback',   label: `Feedback${feedback.length > 0 ? ` (${feedback.length})` : ''}` },
-            { key: 'listings',   label: `Listings${listings.filter(l => l.status === 'pending').length > 0 ? ` (${listings.filter(l => l.status === 'pending').length})` : ''}` },
+            { key: 'listings',   label: `Stax${listings.filter(l => l.status === 'pending').length > 0 ? ` (${listings.filter(l => l.status === 'pending').length})` : ''}` },
             { key: 'invite',     label: 'Send Invite' },
           ].map(tab => (
             <button
