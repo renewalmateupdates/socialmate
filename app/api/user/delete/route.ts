@@ -5,7 +5,9 @@ import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2025-01-27.acacia' })
+function getStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-02-25.clover' })
+}
 
 export async function POST(req: NextRequest) {
   const cookieStore = await cookies()
@@ -43,7 +45,7 @@ export async function POST(req: NextRequest) {
 
     if (profile?.stripe_subscription_id) {
       try {
-        await stripe.subscriptions.cancel(profile.stripe_subscription_id)
+        await getStripe().subscriptions.cancel(profile.stripe_subscription_id)
       } catch (stripeErr) {
         // Log but don't block — subscription may already be cancelled
         console.error('[Delete User] Stripe cancel error:', stripeErr)

@@ -110,7 +110,7 @@ export default function GivePage() {
         <div style={{ display: 'flex', justifyContent: 'center', gap: 16, flexWrap: 'wrap', marginBottom: 32 }}>
           {[
             { value: '2%', label: 'of every subscription', sub: 'after Stripe fees & taxes' },
-            { value: '10%', label: 'of support donations', sub: 'voluntary contributions' },
+            { value: '50%', label: 'of support donations', sub: 'voluntary contributions' },
             { value: '75%', label: 'of unclaimed affiliate', sub: 'commission proceeds' },
           ].map(stat => (
             <div key={stat.value} style={{
@@ -220,8 +220,8 @@ export default function GivePage() {
               },
               {
                 step: '02',
-                label: '10% from support donations',
-                detail: 'When someone voluntarily supports SocialMate via the story page, 10% of that contribution is earmarked for SM-Give.',
+                label: '50% from support donations',
+                detail: 'When someone voluntarily supports SocialMate via the story page, 50% of that contribution goes directly to SM-Give.',
               },
               {
                 step: '03',

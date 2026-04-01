@@ -113,7 +113,7 @@ export async function GET(req: NextRequest) {
   }
 
   // Fetch listing names
-  const listingIds = [...new Set((slots ?? []).map((s: any) => s.listing_id).filter(Boolean))]
+  const listingIds = Array.from(new Set((slots ?? []).map((s: any) => s.listing_id).filter(Boolean)))
   const listingNameMap: Record<string, string> = {}
   if (listingIds.length > 0) {
     const { data: listingRows } = await admin

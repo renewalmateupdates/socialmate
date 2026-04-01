@@ -31,6 +31,12 @@ function PartnersLoginInner() {
     async function checkSession() {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
+        // Admin bypass — check if this user is the admin
+        const adminCheck = await fetch('/api/listings/admin')
+        if (adminCheck.ok) {
+          router.push('/admin/affiliates')
+          return
+        }
         // Check if approved affiliate
         const res = await fetch('/api/partners/stats')
         if (res.ok) {
@@ -113,6 +119,12 @@ function PartnersLoginInner() {
         return
       }
       if (data.user) {
+        // Admin bypass
+        const adminCheck = await fetch('/api/listings/admin')
+        if (adminCheck.ok) {
+          router.push('/admin/affiliates')
+          return
+        }
         const res = await fetch('/api/partners/stats')
         if (res.ok) {
           const json = await res.json()
