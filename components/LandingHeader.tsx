@@ -4,12 +4,12 @@ import { useState } from 'react'
 import Link from 'next/link'
 
 const NAV_LINKS = [
-  { label: 'Features',  href: '/features'  },
-  { label: 'Pricing',   href: '/pricing'   },
-  { label: 'Roadmap',   href: '/roadmap'   },
-  { label: 'Platforms', href: '#platforms' },
-  { label: 'Our Story', href: '/story'     },
-  { label: 'Blog',      href: '/blog'      },
+  { label: 'Features',     href: '/features'     },
+  { label: 'Pricing',      href: '/pricing'      },
+  { label: 'Studio Stax',  href: '/studio-stax'  },
+  { label: 'Roadmap',      href: '/roadmap'      },
+  { label: 'Our Story',    href: '/story'        },
+  { label: 'Blog',         href: '/blog'         },
 ]
 
 export default function LandingHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
@@ -41,6 +41,9 @@ export default function LandingHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
 
         {/* Right side */}
         <div className="flex items-center gap-3">
+          <Link href="/give" className="hidden md:block text-sm font-semibold text-rose-400 hover:text-rose-300 transition-all">
+            ❤️ Give
+          </Link>
           <Link href="/partners" className="hidden md:block text-sm font-semibold text-amber-500 hover:text-amber-400 transition-all">
             Partners
           </Link>
@@ -84,6 +87,11 @@ export default function LandingHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
             </Link>
           ))}
           <div className="pt-2 border-t border-gray-100 dark:border-gray-800 mt-2">
+            <Link href="/give"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all">
+              ❤️ SM-Give
+            </Link>
             <Link href="/partners"
               onClick={() => setMobileMenuOpen(false)}
               className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/20 transition-all">

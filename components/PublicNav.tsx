@@ -5,12 +5,12 @@ import { usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
 const NAV_LINKS = [
-  { label: 'Features',  href: '/features'  },
-  { label: 'Pricing',   href: '/pricing'   },
-  { label: 'Listings',  href: '/listings'  },
-  { label: 'Roadmap',   href: '/roadmap'   },
-  { label: 'Our Story', href: '/story'     },
-  { label: 'Blog',      href: '/blog'      },
+  { label: 'Features',    href: '/features'    },
+  { label: 'Pricing',     href: '/pricing'     },
+  { label: 'Studio Stax', href: '/studio-stax' },
+  { label: 'Roadmap',     href: '/roadmap'     },
+  { label: 'Our Story',   href: '/story'       },
+  { label: 'Blog',        href: '/blog'        },
 ]
 
 export default function PublicNav() {

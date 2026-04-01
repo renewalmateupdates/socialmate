@@ -31,16 +31,15 @@ function PartnersLoginInner() {
     async function checkSession() {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
-        // Admin bypass — check if this user is the admin
-        const adminCheck = await fetch('/api/listings/admin')
-        if (adminCheck.ok) {
-          router.push('/admin/affiliates')
-          return
-        }
-        // Check if approved affiliate
+        // Single call — stats returns isAdmin flag for the owner account
         const res = await fetch('/api/partners/stats')
         if (res.ok) {
           const json = await res.json()
+          // Admin: redirect straight to admin panel
+          if (json.isAdmin) {
+            router.push('/admin/affiliates')
+            return
+          }
           if (json.profile?.status === 'active') {
             router.push('/partners/dashboard')
             return
@@ -119,15 +118,13 @@ function PartnersLoginInner() {
         return
       }
       if (data.user) {
-        // Admin bypass
-        const adminCheck = await fetch('/api/listings/admin')
-        if (adminCheck.ok) {
-          router.push('/admin/affiliates')
-          return
-        }
         const res = await fetch('/api/partners/stats')
         if (res.ok) {
           const json = await res.json()
+          if (json.isAdmin) {
+            router.push('/admin/affiliates')
+            return
+          }
           if (json.profile?.status === 'active' || json.profile?.status === 'suspended') {
             if (!json.profile.onboarding_completed) {
               router.push('/partners/onboarding')

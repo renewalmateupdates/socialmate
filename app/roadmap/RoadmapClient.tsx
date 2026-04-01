@@ -116,11 +116,12 @@ export default function RoadmapClient() {
         </Link>
         <nav className="hidden md:flex items-center gap-1">
           {[
-            { label: 'Features',  href: '/features'  },
-            { label: 'Pricing',   href: '/pricing'   },
-            { label: 'Roadmap',   href: '/roadmap'   },
-            { label: 'Blog',      href: '/blog'      },
-            { label: 'Story',     href: '/story'     },
+            { label: 'Features',    href: '/features'    },
+            { label: 'Pricing',     href: '/pricing'     },
+            { label: 'Studio Stax', href: '/studio-stax' },
+            { label: 'Roadmap',     href: '/roadmap'     },
+            { label: 'Blog',        href: '/blog'        },
+            { label: 'Our Story',   href: '/story'       },
           ].map(l => (
             <Link key={l.label} href={l.href}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
@@ -133,6 +134,7 @@ export default function RoadmapClient() {
           ))}
         </nav>
         <div className="flex items-center gap-3">
+          <Link href="/give" className="text-sm font-semibold text-rose-400 hover:text-rose-300 transition-all hidden sm:block">❤️ Give</Link>
           <Link href="/login"  className="text-sm font-semibold text-gray-500 hover:text-black dark:hover:text-white transition-all hidden sm:block">Sign in</Link>
           <Link href="/signup" className="bg-black dark:bg-white text-white dark:text-black text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
             Get started free →
