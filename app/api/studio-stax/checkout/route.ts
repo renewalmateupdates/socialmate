@@ -2,11 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import Stripe from 'stripe'
-
-// Pricing constants — annual only, no quarterly
-const ANNUAL_FOUNDING_CENTS  = 10000  // $100 — first 1000 slots
-const ANNUAL_STANDARD_CENTS  = 15000  // $150 — after 1000 slots
-const FOUNDING_SLOT_LIMIT    = 1000
+import { ANNUAL_FOUNDER_CENTS, ANNUAL_STANDARD_CENTS, FOUNDING_SLOT_LIMIT } from '@/app/api/studio-stax/pricing/route'
 
 function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-02-25.clover' })
@@ -25,16 +21,6 @@ async function validateToken(token: string) {
   return { valid: true, expired: false, listing }
 }
 
-async function getFoundingSlotCount() {
-  const admin = getSupabaseAdmin()
-  const { count } = await admin
-    .from('studio_stax_slots')
-    .select('*', { count: 'exact', head: true })
-    .eq('tier', 'founding')
-    .eq('status', 'active')
-  return count ?? 0
-}
-
 // GET — validate token and return pricing info
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get('token') || ''
@@ -43,7 +29,16 @@ export async function GET(req: NextRequest) {
   const { valid, expired, listing } = await validateToken(token)
   if (!valid) return NextResponse.json({ valid: false, expired })
 
-  const slotsFilled    = await getFoundingSlotCount()
+  const admin = getSupabaseAdmin()
+
+  // Count all currently active (paid, non-expired) slots — source of truth for pricing tier
+  const { count } = await admin
+    .from('studio_stax_slots')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'active')
+    .gt('expires_at', new Date().toISOString())
+
+  const slotsFilled    = count ?? 0
   const foundingFull   = slotsFilled >= FOUNDING_SLOT_LIMIT
   const slotsRemaining = Math.max(0, FOUNDING_SLOT_LIMIT - slotsFilled)
 
@@ -54,8 +49,8 @@ export async function GET(req: NextRequest) {
     slotsRemaining,
     foundingFull,
     currentTier:    foundingFull ? 'standard' : 'founding',
-    annualPrice:    foundingFull ? ANNUAL_STANDARD_CENTS : ANNUAL_FOUNDING_CENTS,
-    foundingPrice:  ANNUAL_FOUNDING_CENTS,
+    annualPrice:    foundingFull ? ANNUAL_STANDARD_CENTS : ANNUAL_FOUNDER_CENTS,
+    founderPrice:   ANNUAL_FOUNDER_CENTS,
     standardPrice:  ANNUAL_STANDARD_CENTS,
     slotsTotal:     FOUNDING_SLOT_LIMIT,
   })
@@ -73,15 +68,24 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: expired ? 'Checkout link expired' : 'Invalid checkout link' }, { status: 400 })
   }
 
-  const slotsFilled  = await getFoundingSlotCount()
+  const admin = getSupabaseAdmin()
+  const now   = new Date()
+
+  // Count all currently active annual slots to determine founding price
+  const { count } = await admin
+    .from('studio_stax_slots')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'active')
+    .gt('expires_at', now.toISOString())
+
+  const slotsFilled  = count ?? 0
   const foundingFull = slotsFilled >= FOUNDING_SLOT_LIMIT
   const tier         = foundingFull ? 'standard' : 'founding'
-  const unitAmount   = foundingFull ? ANNUAL_STANDARD_CENTS : ANNUAL_FOUNDING_CENTS
+  const unitAmount   = foundingFull ? ANNUAL_STANDARD_CENTS : ANNUAL_FOUNDER_CENTS
   const tierLabel    = foundingFull
-    ? 'standard rate ($150/yr)'
-    : `founding rate ($100/yr — ${FOUNDING_SLOT_LIMIT - slotsFilled} spots left)`
+    ? `standard rate ($${ANNUAL_STANDARD_CENTS / 100}/yr)`
+    : `founder rate ($${ANNUAL_FOUNDER_CENTS / 100}/yr — ${FOUNDING_SLOT_LIMIT - slotsFilled} spot${FOUNDING_SLOT_LIMIT - slotsFilled !== 1 ? 's' : ''} left)`
 
-  const now      = new Date()
   const slotEnd  = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000)
   const appUrl   = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
 
@@ -103,17 +107,20 @@ export async function POST(req: NextRequest) {
       success_url:    `${appUrl}/studio-stax/checkout/success?billing=annual`,
       cancel_url:     `${appUrl}/studio-stax/checkout?token=${token}`,
       metadata: {
-        studio_stax: 'true',
-        listing_id:  listing!.id,
-        billing_type: 'annual',
+        studio_stax:    'true',
+        listing_id:     listing!.id,
+        billing_type:   'annual',
         tier,
-        slot_start:  now.toISOString(),
-        slot_end:    slotEnd.toISOString(),
+        amount_cents:   String(unitAmount),
+        // slot_quarter stores cycle year for DB compat (schema requires non-null)
+        slot_quarter:   String(now.getUTCFullYear()),
+        slot_start:     now.toISOString(),
+        slot_end:       slotEnd.toISOString(),
         token,
       },
     })
 
-    await getSupabaseAdmin()
+    await admin
       .from('curated_listings')
       .update({ chosen_billing_type: 'annual' })
       .eq('id', listing!.id)

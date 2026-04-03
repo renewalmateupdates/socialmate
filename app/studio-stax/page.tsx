@@ -57,7 +57,7 @@ export default async function StudioStaxPage() {
               className="inline-flex items-center gap-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all text-sm">
               Apply for a Listing →
             </Link>
-            <span className="text-xs text-gray-400 dark:text-gray-500">Starting at $99/quarter · founder-reviewed · limited spots</span>
+            <span className="text-xs text-gray-400 dark:text-gray-500">$100/year founder price · first 100 spots · goes to $150 after</span>
           </div>
         </div>
 
@@ -82,7 +82,7 @@ export default async function StudioStaxPage() {
           <div className="text-center py-24">
             <div className="text-6xl mb-6">🌱</div>
             <h2 className="text-2xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">First listings coming soon</h2>
-            <p className="text-gray-400 dark:text-gray-500 mb-8 max-w-md mx-auto text-sm">Be among the first tools featured in Studio Stax. Apply now and get founding member pricing.</p>
+            <p className="text-gray-400 dark:text-gray-500 mb-8 max-w-md mx-auto text-sm">Be among the first 100 tools in Studio Stax. Apply now and lock in the $100/year founder price before it goes to $150.</p>
             <Link href="/studio-stax/apply" className="inline-flex items-center gap-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all text-sm">
               Apply Now →
             </Link>

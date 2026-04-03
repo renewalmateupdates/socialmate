@@ -349,7 +349,9 @@ export async function POST(req: NextRequest) {
             const resend   = new Resend(process.env.RESEND_API_KEY)
             const appUrl   = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
             const listingUrl = `${appUrl}/studio-stax`
-            const renewalPrice = 80
+            // Renewal = 20% off what they paid. $100 founder → $80. $150 standard → $120.
+            const paidCents    = session.amount_total ?? 0
+            const renewalPrice = Math.round(paidCents * 0.80 / 100)
             await resend.emails.send({
               from:    'SocialMate <hello@socialmate.studio>',
               to:      listing.applicant_email,
@@ -380,7 +382,7 @@ export async function POST(req: NextRequest) {
             <li>Donate to SM-Give to climb the rankings</li>
             <li>You'll get renewal reminders at 30, 14, and 7 days before expiry</li>
             <li>Renewal locks in at $${renewalPrice}/year</li>
-            <li>${billing_type === 'annual' ? 'We\'ll write your blog feature when your year is up' : 'Upgrade to annual at any time to get a blog feature'}</li>
+            <li>Blog feature article written at 3 months and every 3 months you stay active</li>
           </ul>
         </div>
 

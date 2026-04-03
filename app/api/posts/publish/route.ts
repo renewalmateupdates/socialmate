@@ -69,56 +69,50 @@ export async function POST(request: NextRequest) {
     const finalStatusInngest = allFailed ? 'failed' : someFailed ? 'partial' : 'published'
     console.log('[STATUS-UPDATE] Setting post', postId, '→', finalStatusInngest)
 
-    // Create a FRESH admin client for the critical update (avoid singleton staleness)
-    const { createClient } = await import('@supabase/supabase-js')
-    const freshAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!,
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    )
-
-    const { error: statusError } = await freshAdmin
-      .from('posts')
-      .update({
-        status:       finalStatusInngest,
-        published_at: allFailed ? null : new Date().toISOString(),
-      })
-      .eq('id', postId)
-
-    if (statusError) {
-      console.error('[STATUS-UPDATE] CRITICAL: fresh admin update failed:', JSON.stringify(statusError))
-      // Try singleton admin as fallback
-      const { error: singletonError } = await getSupabaseAdmin()
-        .from('posts')
-        .update({ status: finalStatusInngest, published_at: allFailed ? null : new Date().toISOString() })
-        .eq('id', postId)
-      if (singletonError) {
-        console.error('[STATUS-UPDATE] Singleton fallback also failed:', JSON.stringify(singletonError))
-        // Return 500 so Inngest retries (idempotency guard will catch repeat publishes)
-        return NextResponse.json({ error: 'Status update failed', detail: singletonError.message }, { status: 500 })
-      } else {
-        console.log('[STATUS-UPDATE] Singleton fallback succeeded →', finalStatusInngest)
-      }
-    } else {
-      // Verify the update took effect
-      const { data: verify } = await freshAdmin.from('posts').select('status').eq('id', postId).single()
-      console.log('[STATUS-UPDATE] Verified DB status:', verify?.status, '(expected:', finalStatusInngest, ')')
-      if (verify?.status !== finalStatusInngest) {
-        console.error('[STATUS-UPDATE] MISMATCH — update said success but DB still shows:', verify?.status)
-        return NextResponse.json({ error: 'Status update mismatch', expected: finalStatusInngest, got: verify?.status }, { status: 500 })
-      }
-      console.log('[STATUS-UPDATE] CONFIRMED →', finalStatusInngest, 'for post', postId)
-    }
-
-    // Step 2: platform_post_ids separately (non-critical, column may not exist)
+    // Step 1: platform_post_ids FIRST (synchronous) — this is the idempotency key.
+    // If a retry happens after this write, the inner guard will see these IDs and skip,
+    // preventing double-posts even if the status update below fails.
     if (Object.keys(platformPostIds).length > 0) {
-      getSupabaseAdmin()
+      const { error: pidError } = await getSupabaseAdmin()
         .from('posts')
         .update({ platform_post_ids: platformPostIds })
         .eq('id', postId)
-        .then(({ error }) => {
-          if (error) console.warn('[STATUS-UPDATE] platform_post_ids skipped (non-fatal):', error.message)
+      if (pidError) console.warn('[STATUS-UPDATE] platform_post_ids write failed (non-fatal):', pidError.message)
+      else console.log('[STATUS-UPDATE] platform_post_ids saved for post', postId)
+    }
+
+    // Step 2: Update status with retries.
+    // publishedOk=true tells Inngest the post was sent to the platform even if this returns 500,
+    // so Inngest will NOT call the fail route.
+    let statusError: Error | null = null
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      const { error } = await getSupabaseAdmin()
+        .from('posts')
+        .update({
+          status:       finalStatusInngest,
+          published_at: allFailed ? null : new Date().toISOString(),
         })
+        .eq('id', postId)
+      if (!error) {
+        statusError = null
+        console.log(`[STATUS-UPDATE] Status set → ${finalStatusInngest} for post ${postId} (attempt ${attempt})`)
+        break
+      }
+      statusError = new Error(error.message)
+      console.warn(`[STATUS-UPDATE] Attempt ${attempt} failed:`, error.message)
+      if (attempt < 3) await new Promise(r => setTimeout(r, 300 * attempt))
+    }
+
+    if (statusError) {
+      console.error('[STATUS-UPDATE] All 3 attempts failed for post', postId, statusError.message)
+      // publishedOk: true tells Inngest the post was sent — do NOT mark as failed.
+      // Inngest will retry; on retry the platform_post_ids guard will catch it and skip.
+      return NextResponse.json({
+        publishedOk: !allFailed,
+        error: 'Status update failed after 3 attempts',
+        detail: statusError.message,
+        status: finalStatusInngest,
+      }, { status: 500 })
     }
 
     // First-post credit trigger + streak update
