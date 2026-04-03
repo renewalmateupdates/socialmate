@@ -6,9 +6,11 @@ import { Resend } from 'resend'
 const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM   = 'SocialMate <hello@socialmate.studio>'
 
-// Tier-based renewal pricing
-const RENEWAL_FOUNDING_USD = 80   // founding members renew at $80 (20% off $100)
-const RENEWAL_STANDARD_USD = 120  // standard members renew at $120 (20% off $150)
+// Renewal = 20% off what the member originally paid.
+// We derive this from amount_paid_cents — no tier column dependency.
+function renewalPrice(amountPaidCents: number): number {
+  return Math.round(amountPaidCents * 0.80 / 100) // returns dollars
+}
 
 function daysUntil(date: string): number {
   const diff = new Date(date).getTime() - Date.now()
@@ -135,13 +137,12 @@ export async function GET(req: NextRequest) {
   const now        = new Date()
   let sent = 0, errors = 0, reclaims = 0
 
-  const appUrl     = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
-  const renewalLink = `${appUrl}/studio-stax/apply`
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
 
   // ── 1. Renewal reminder emails ────────────────────────────────────────────
   const { data: slots, error } = await admin
     .from('studio_stax_slots')
-    .select('id, buyer_name, buyer_email, listing_id, tier, expires_at, renewal_email_30_sent, renewal_email_14_sent, renewal_email_7_sent')
+    .select('id, buyer_name, buyer_email, listing_id, amount_paid_cents, expires_at, renewal_email_30_sent, renewal_email_14_sent, renewal_email_7_sent, renewal_token')
     .eq('status', 'active')
     .gt('expires_at', now.toISOString())
 
@@ -170,19 +171,30 @@ export async function GET(req: NextRequest) {
 
     if (!needsEmail) continue
 
-    const toolName      = listingNameMap[slot.listing_id] || 'your tool'
-    const tier          = slot.tier || 'founding'
-    const renewalPrice  = tier === 'founding' ? RENEWAL_FOUNDING_USD : RENEWAL_STANDARD_USD
-    const subject       = days <= 7
+    const toolName     = listingNameMap[slot.listing_id] || 'your tool'
+    const renewal      = renewalPrice(slot.amount_paid_cents ?? 10000)
+    // Derive tier label from amount paid (no tier column dependency)
+    const tierLabel    = (slot.amount_paid_cents ?? 10000) <= 10000 ? 'founding' : 'standard'
+    // Generate a fresh renewal token (valid 14 days) so the link is unique per send
+    const { randomUUID } = await import('crypto')
+    const token        = slot.renewal_token || randomUUID()
+    const tokenExpires = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000)
+    if (!slot.renewal_token) {
+      await admin.from('studio_stax_slots')
+        .update({ renewal_token: token, renewal_token_expires: tokenExpires.toISOString() })
+        .eq('id', slot.id)
+    }
+    const renewalLink  = `${appUrl}/studio-stax/renew?token=${token}`
+    const subject      = days <= 7
       ? `🚨 ${days} days left — renew ${toolName} in Studio Stax`
       : days <= 14
-      ? `⚠️ 2 weeks left — renew your Studio Stax listing at $${renewalPrice}/yr`
+      ? `⚠️ 2 weeks left — renew your Studio Stax listing at $${renewal}/yr`
       : `Your Studio Stax listing for ${toolName} expires in ${days} days`
 
     try {
       await resend.emails.send({
         from: FROM, to: slot.buyer_email, subject,
-        html: renewalEmail({ name: slot.buyer_name, toolName, daysLeft: days, expiresAt: slot.expires_at, renewalLink, renewalPrice, tier }),
+        html: renewalEmail({ name: slot.buyer_name, toolName, daysLeft: days, expiresAt: slot.expires_at, renewalLink, renewalPrice: renewal, tier: tierLabel }),
       })
       const updateField = days <= 7 ? 'renewal_email_7_sent' : days <= 14 ? 'renewal_email_14_sent' : 'renewal_email_30_sent'
       await admin.from('studio_stax_slots').update({ [updateField]: true }).eq('id', slot.id)
@@ -193,45 +205,53 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  // ── 2. Reclaim slot logic — when founding member lapses, offer first standard member founding rate ──
+  // ── 2. Expire lapsed slots + reclaim offer ────────────────────────────────
+  // Mark any expired active slots as expired
   const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000)
-  const { data: expiredFoundingSlots } = await admin
+  const { data: justExpiredSlots } = await admin
     .from('studio_stax_slots')
-    .select('id, listing_id')
-    .eq('tier', 'founding')
+    .select('id, listing_id, amount_paid_cents')
     .eq('status', 'active')
     .lt('expires_at', now.toISOString())
     .gt('expires_at', yesterday.toISOString()) // expired in last 24h
 
-  if (expiredFoundingSlots && expiredFoundingSlots.length > 0) {
-    // Mark those slots as expired
-    for (const lapsed of expiredFoundingSlots) {
+  if (justExpiredSlots && justExpiredSlots.length > 0) {
+    for (const lapsed of justExpiredSlots) {
       await admin.from('studio_stax_slots').update({ status: 'expired' }).eq('id', lapsed.id)
     }
 
-    // For each opened slot, find the earliest standard-tier active slot that hasn't been offered yet
-    const { data: standardSlots } = await admin
-      .from('studio_stax_slots')
-      .select('id, buyer_name, buyer_email, listing_id, reclaim_offer_sent')
-      .eq('tier', 'standard')
-      .eq('status', 'active')
-      .eq('reclaim_offer_sent', false)
-      .order('created_at', { ascending: true })
-      .limit(expiredFoundingSlots.length)
+    // Count how many of the just-expired slots were founder-priced (≤$100)
+    const expiredFounderCount = justExpiredSlots.filter(s => (s.amount_paid_cents ?? 0) <= 10000).length
 
-    for (const stdSlot of standardSlots ?? []) {
-      const toolName = listingNameMap[stdSlot.listing_id] || 'your tool'
-      try {
-        await resend.emails.send({
-          from: FROM,
-          to:   stdSlot.buyer_email,
-          subject: `🎉 A founding spot just opened in Studio Stax — it's yours`,
-          html: reclaimEmail({ name: stdSlot.buyer_name, toolName, offerLink: renewalLink }),
-        })
-        await admin.from('studio_stax_slots').update({ reclaim_offer_sent: true }).eq('id', stdSlot.id)
-        reclaims++
-      } catch (err) {
-        console.error(`[StaxRenewals] Reclaim email failed for ${stdSlot.buyer_email}:`, err)
+    if (expiredFounderCount > 0) {
+      // Find earliest standard-priced active slots that haven't received a reclaim offer
+      const { data: standardSlots } = await admin
+        .from('studio_stax_slots')
+        .select('id, buyer_name, buyer_email, listing_id, reclaim_offer_sent, amount_paid_cents')
+        .eq('status', 'active')
+        .gt('amount_paid_cents', 10000) // standard tier (paid $150)
+        .or('reclaim_offer_sent.is.null,reclaim_offer_sent.eq.false')
+        .order('created_at', { ascending: true })
+        .limit(expiredFounderCount)
+
+      for (const stdSlot of standardSlots ?? []) {
+        const toolName = listingNameMap[stdSlot.listing_id] || 'your tool'
+        const { randomUUID } = await import('crypto')
+        const reclaimToken = randomUUID()
+        await admin.from('studio_stax_slots')
+          .update({ renewal_token: reclaimToken, renewal_token_expires: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString(), reclaim_offer_sent: true })
+          .eq('id', stdSlot.id)
+        try {
+          await resend.emails.send({
+            from: FROM,
+            to:   stdSlot.buyer_email,
+            subject: `🎉 A founding spot just opened in Studio Stax — it's yours`,
+            html: reclaimEmail({ name: stdSlot.buyer_name, toolName, offerLink: `${appUrl}/studio-stax/renew?token=${reclaimToken}` }),
+          })
+          reclaims++
+        } catch (err) {
+          console.error(`[StaxRenewals] Reclaim email failed for ${stdSlot.buyer_email}:`, err)
+        }
       }
     }
   }

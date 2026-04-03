@@ -47,7 +47,7 @@ export const publishScheduledPost = inngest.createFunction(
       // transient error, this guard prevents the post from being sent twice.
       const { data: innerPostCheck } = await getSupabaseAdmin()
         .from('posts')
-        .select('status, published_at, platform_post_ids')
+        .select('status, published_at, platform_post_ids, platforms')
         .eq('id', postId)
         .single()
 
@@ -62,13 +62,25 @@ export const publishScheduledPost = inngest.createFunction(
         return { skipped: true, status: innerPostCheck?.status }
       }
 
-      const hasExistingPostIds = innerPostCheck?.platform_post_ids &&
-        typeof innerPostCheck.platform_post_ids === 'object' &&
-        Object.keys(innerPostCheck.platform_post_ids).length > 0
+      const existingPostIds = (innerPostCheck?.platform_post_ids &&
+        typeof innerPostCheck.platform_post_ids === 'object')
+        ? innerPostCheck.platform_post_ids as Record<string, string>
+        : null
+      const hasExistingPostIds = existingPostIds && Object.keys(existingPostIds).length > 0
 
       if (hasExistingPostIds) {
-        console.log(`[PUBLISH-GUARD] Post ${postId} already has platform_post_ids — skipping to avoid duplicate publish`)
-        return { skipped: true, reason: 'platform_post_ids already set' }
+        // Post was published in a previous attempt but the status write failed.
+        // Repair the status now so the post doesn't stay stuck as 'scheduled'.
+        const allPlatforms: string[] = innerPostCheck?.platforms || []
+        const publishedCount = Object.keys(existingPostIds).length
+        const repairedStatus = publishedCount >= allPlatforms.length ? 'published' : 'partial'
+        await getSupabaseAdmin()
+          .from('posts')
+          .update({ status: repairedStatus, published_at: new Date().toISOString() })
+          .eq('id', postId)
+          .eq('status', 'scheduled') // safe guard — only repair if still scheduled
+        console.log(`[PUBLISH-GUARD] Post ${postId} platform_post_ids already set — repaired status → ${repairedStatus}`)
+        return { skipped: true, reason: 'platform_post_ids already set', repaired: repairedStatus }
       }
       // ─────────────────────────────────────────────────────────────────────
 
@@ -87,16 +99,24 @@ export const publishScheduledPost = inngest.createFunction(
       }
 
       if (!res.ok) {
-        // Mark post as failed so it doesn't stay stuck in 'scheduled' state.
-        // The fail route uses .eq('status','scheduled') so it's idempotent.
-        await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/posts/fail`, {
-          method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ postId }),
-        }).catch(err => console.error('[Inngest] Failed to mark post as failed:', err))
-
         const errMsg = data.error || `HTTP ${res.status}`
-        console.error(`[Inngest] Publish failed for post ${postId}: ${errMsg}`)
+
+        // 'publishedOk: true' means the post WAS sent to the platform but the DB
+        // status update failed. Do NOT mark as failed — that would be a lie.
+        // Inngest will retry; the platform_post_ids guard will catch the duplicate.
+        if (!data.publishedOk) {
+          // Platform publish genuinely failed — safe to mark as failed in DB.
+          await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/posts/fail`, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ postId }),
+          }).catch(err => console.error('[Inngest] Failed to mark post as failed:', err))
+          console.error(`[Inngest] Publish failed for post ${postId}: ${errMsg}`)
+        } else {
+          // Post was published but DB update failed — retry without calling fail route.
+          console.warn(`[Inngest] Post ${postId} published OK but DB update failed — retrying (${errMsg})`)
+        }
+
         throw new Error(`Publish failed: ${errMsg}`)
       }
 

@@ -307,8 +307,9 @@ export async function POST(req: NextRequest) {
 
     // ── Studio Stax listing payment ──
     if (session.metadata?.studio_stax === 'true') {
-      const { listing_id, billing_type, slot_quarter, slot_start, slot_end, token } = session.metadata
+      const { listing_id, billing_type, slot_quarter, slot_start, slot_end, token, studio_stax_renew, slot_id } = session.metadata
       const paymentIntentId = session.payment_intent as string
+      const isRenewal = studio_stax_renew === 'true'
 
       if (listing_id) {
         // Fetch listing for email
@@ -318,21 +319,47 @@ export async function POST(req: NextRequest) {
           .eq('id', listing_id)
           .single()
 
+        const now      = new Date()
+        const newStart = slot_start ?? now.toISOString()
+        const newEnd   = slot_end   ?? new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000).toISOString()
+
+        if (isRenewal && slot_id) {
+          // Renewal: expire the old slot, insert a new one carrying over original amount
+          const originalMeta = session.metadata?.original_amount
+          const originalCents = originalMeta ? parseInt(originalMeta) : (session.amount_total ?? 0)
+
+          await supabase.from('studio_stax_slots').update({ status: 'expired' }).eq('id', slot_id)
+          await supabase.from('studio_stax_slots').insert({
+            listing_id,
+            buyer_email:        listing?.applicant_email ?? session.customer_email,
+            buyer_name:         listing?.applicant_name ?? '',
+            billing_type:       'annual',
+            slot_quarter:       slot_quarter ?? String(now.getUTCFullYear()),
+            amount_paid_cents:  originalCents, // preserve original amount for future renewal pricing
+            stripe_payment_id:  paymentIntentId,
+            status:             'active',
+            starts_at:          newStart,
+            expires_at:         newEnd,
+            renewal_token:      null,
+            renewal_token_expires: null,
+          })
+        } else {
         // Insert slot
         await supabase.from('studio_stax_slots').insert({
           listing_id,
           buyer_email:        listing?.applicant_email ?? session.customer_email,
           buyer_name:         listing?.applicant_name ?? '',
-          billing_type,
-          slot_quarter:       slot_quarter ?? '',
+          billing_type:       billing_type ?? 'annual',
+          slot_quarter:       slot_quarter ?? String(now.getUTCFullYear()),
           amount_paid_cents:  session.amount_total ?? 0,
           stripe_payment_id:  paymentIntentId,
           status:             'active',
-          starts_at:          slot_start ?? new Date().toISOString(),
-          expires_at:         slot_end   ?? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+          starts_at:          newStart,
+          expires_at:         newEnd,
         })
+        }
 
-        // Update listing — mark live, clear token
+        // Update listing — mark live (idempotent; already live on renewal)
         await supabase
           .from('curated_listings')
           .update({
@@ -343,17 +370,19 @@ export async function POST(req: NextRequest) {
           })
           .eq('id', listing_id)
 
-        // Send confirmation email
+        // Send confirmation/renewal email
         if (listing?.applicant_email) {
           try {
             const resend   = new Resend(process.env.RESEND_API_KEY)
             const appUrl   = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
             const listingUrl = `${appUrl}/studio-stax`
-            const renewalPrice = 80
+            // Renewal = 20% off what they paid. $100 founder → $80. $150 standard → $120.
+            const paidCents    = session.amount_total ?? 0
+            const renewalPrice = Math.round(paidCents * 0.80 / 100)
             await resend.emails.send({
               from:    'SocialMate <hello@socialmate.studio>',
               to:      listing.applicant_email,
-              subject: `🎉 ${listing.name} is now live in Studio Stax`,
+              subject: isRenewal ? `✅ ${listing.name} renewed in Studio Stax` : `🎉 ${listing.name} is now live in Studio Stax`,
               html: `<!DOCTYPE html>
 <html>
 <body style="margin:0;padding:0;background:#f9fafb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
@@ -380,7 +409,7 @@ export async function POST(req: NextRequest) {
             <li>Donate to SM-Give to climb the rankings</li>
             <li>You'll get renewal reminders at 30, 14, and 7 days before expiry</li>
             <li>Renewal locks in at $${renewalPrice}/year</li>
-            <li>${billing_type === 'annual' ? 'We\'ll write your blog feature when your year is up' : 'Upgrade to annual at any time to get a blog feature'}</li>
+            <li>Blog feature article written at 3 months and every 3 months you stay active</li>
           </ul>
         </div>
 

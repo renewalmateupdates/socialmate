@@ -4,7 +4,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { Resend } from 'resend'
 
-const REFUND_WINDOW_DAYS = 30  // Generate blog post 30 days after payment (past refund window)
+const BLOG_INTERVAL_DAYS = 90  // First article at 3 months; repeat every 3 months while active
 
 function getGemini() {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
@@ -66,17 +66,21 @@ export async function GET(req: NextRequest) {
   const admin   = getSupabaseAdmin()
   const resend  = new Resend(process.env.RESEND_API_KEY)
   const appUrl  = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
-  const cutoff  = new Date(Date.now() - REFUND_WINDOW_DAYS * 24 * 60 * 60 * 1000)
+  const now     = new Date()
+  const cutoff  = new Date(now.getTime() - BLOG_INTERVAL_DAYS * 24 * 60 * 60 * 1000)
 
   let generated = 0, errors = 0
 
-  // Find active slots past the refund window where blog hasn't been generated yet
+  // Find active slots where:
+  // - created_at is at least 90 days ago (past the first article threshold)
+  // - last_blog_at is null (never had one) OR is more than 90 days ago (due for next)
+  // This implements: first article at 3 months, then every 3 months while active
   const { data: slots } = await admin
     .from('studio_stax_slots')
-    .select('id, listing_id, buyer_name, buyer_email, created_at, blog_article_generated')
+    .select('id, listing_id, buyer_name, buyer_email, created_at, blog_articles_count, last_blog_at')
     .eq('status', 'active')
-    .eq('blog_article_generated', false)
     .lt('created_at', cutoff.toISOString())
+    .or(`last_blog_at.is.null,last_blog_at.lt.${cutoff.toISOString()}`)
 
   for (const slot of slots ?? []) {
     try {
@@ -102,27 +106,31 @@ export async function GET(req: NextRequest) {
 
       const blogSlug = `studio-stax-${slug}`
 
+      // Append article number to slug for repeats (e.g. studio-stax-toolname-2)
+      const articleNum  = (slot.blog_articles_count ?? 0) + 1
+      const fullSlug    = articleNum === 1 ? blogSlug : `${blogSlug}-${articleNum}`
+
       // Store generated blog post in DB
       await admin.from('blog_posts').upsert({
-        slug:          blogSlug,
+        slug:          fullSlug,
         title,
         excerpt,
         content,
         category:      'studio-stax',
         author:        'SocialMate AI',
         listing_id:    listing.id,
-        published_at:  new Date().toISOString(),
-        created_at:    new Date().toISOString(),
+        published_at:  now.toISOString(),
+        created_at:    now.toISOString(),
       }, { onConflict: 'slug' })
 
-      // Mark blog as generated on slot
+      // Update slot: increment article count + track last_blog_at
       await admin
         .from('studio_stax_slots')
-        .update({ blog_article_generated: true })
+        .update({ blog_articles_count: articleNum, last_blog_at: now.toISOString() })
         .eq('id', slot.id)
 
       // Notify lister
-      const blogUrl = `${appUrl}/blog/${blogSlug}`
+      const blogUrl = `${appUrl}/blog/${fullSlug}`
       await resend.emails.send({
         from:    'SocialMate <hello@socialmate.studio>',
         to:      slot.buyer_email,

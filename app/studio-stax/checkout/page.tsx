@@ -9,9 +9,9 @@ interface CheckoutData {
   slotsRemaining: number
   foundingFull:   boolean
   currentTier:    'founding' | 'standard'
-  annualPrice:    number
-  foundingPrice:  number
-  standardPrice:  number
+  annualPrice:    number   // in cents
+  founderPrice:   number   // in cents
+  standardPrice:  number   // in cents
   slotsTotal:     number
   valid:          boolean
   expired?:       boolean
@@ -79,7 +79,9 @@ function CheckoutInner() {
   )
 
   const price          = (data.annualPrice / 100)
+  const renewalPrice   = data.currentTier === 'founding' ? data.founderPrice * 0.8 / 100 : data.standardPrice * 0.8 / 100
   const isFoundingTier = !data.foundingFull
+  const pctFilled      = Math.min(100, Math.round((data.slotsFilled / data.slotsTotal) * 100))
 
   return (
     <div className="max-w-lg mx-auto px-6 py-16">
@@ -102,6 +104,26 @@ function CheckoutInner() {
         <p className="text-sm text-gray-500 dark:text-gray-400">{data.listing.tagline}</p>
       </div>
 
+      {/* Founder progress bar */}
+      <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-bold text-amber-700 dark:text-amber-400">
+            {isFoundingTier ? '🔥 Founder spots available' : '✅ Founder spots filled'}
+          </span>
+          <span className="text-xs font-bold text-amber-700 dark:text-amber-400">
+            {data.slotsFilled} / {data.slotsTotal} claimed
+          </span>
+        </div>
+        <div className="w-full bg-amber-100 dark:bg-amber-900/30 rounded-full h-1.5 mb-2">
+          <div className="bg-amber-500 h-1.5 rounded-full transition-all" style={{ width: `${pctFilled}%` }} />
+        </div>
+        <p className="text-xs text-amber-600 dark:text-amber-500">
+          {isFoundingTier
+            ? `${data.slotsRemaining} of ${data.slotsTotal} founder spots remain at $${data.founderPrice / 100}/yr. Price rises to $${data.standardPrice / 100} after.`
+            : `All ${data.slotsTotal} founder spots are filled — joining at the standard rate.`}
+        </p>
+      </div>
+
       {/* Pricing card */}
       <div className={`rounded-2xl p-6 mb-6 border-2 ${
         isFoundingTier
@@ -117,35 +139,37 @@ function CheckoutInner() {
             </div>
           </div>
           {isFoundingTier && (
-            <span className="bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full">Founding price</span>
+            <span className="bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full">Founder price</span>
           )}
         </div>
 
         {isFoundingTier ? (
-          <div className="space-y-1">
-            <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">
-              🔒 {data.slotsRemaining.toLocaleString()} of {data.slotsTotal.toLocaleString()} founding spots remaining
+          <div className="space-y-1 mb-4">
+            <p className="text-xs text-amber-600 dark:text-amber-500">
+              Founder rate: ${data.founderPrice / 100}/yr. Price goes to ${data.standardPrice / 100}/yr after founding spots fill.
             </p>
             <p className="text-xs text-amber-600 dark:text-amber-500">
-              Founding rate: $100/yr. Price goes to ${data.standardPrice / 100}/yr after founding slots fill.
-            </p>
-            <p className="text-xs text-amber-600 dark:text-amber-500">
-              Early renewal rate: $80/yr (20% off).
+              Early renewal rate: ${renewalPrice}/yr (20% off).
             </p>
           </div>
         ) : (
-          <div className="space-y-1">
+          <div className="space-y-1 mb-4">
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              All {data.slotsTotal.toLocaleString()} founding spots are filled — joining at the standard rate.
+              All {data.slotsTotal} founding spots are filled — joining at the standard rate.
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Early renewal rate: $120/yr (20% off).
+              Early renewal rate: ${renewalPrice}/yr (20% off).
             </p>
           </div>
         )}
 
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
-          {['Listed for 12 months', 'SM-Give donation ranking', 'Renewal reminder emails at 30/14/7 days', 'Blog feature article'].map(item => (
+        <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+          {[
+            'Listed for 12 months from purchase date',
+            'SM-Give donation ranking — give more, rank higher',
+            'Renewal reminder emails at 30/14/7 days',
+            'Blog feature article at 3 months, then every 3 months active',
+          ].map(item => (
             <div key={item} className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
               <span className="text-green-500 font-bold">✓</span>
               {item}
