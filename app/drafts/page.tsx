@@ -132,14 +132,20 @@ export default function Drafts() {
     setDeleting(null)
   }
 
-  const draftCount     = posts.filter(d => d.status === 'draft').length
-  const scheduledCount = posts.filter(d => d.status === 'scheduled').length
-  const publishedCount = posts.filter(d => ['published', 'partial'].includes(d.status)).length
-  const failedCount    = posts.filter(d => d.status === 'failed').length
+  // A "failed" post that has platform_post_ids is actually published — treat as published
+  const effectiveStatus = (p: any) =>
+    p.status === 'failed' && p.platform_post_ids && Object.keys(p.platform_post_ids).length > 0
+      ? 'published'
+      : p.status
+
+  const draftCount     = posts.filter(d => effectiveStatus(d) === 'draft').length
+  const scheduledCount = posts.filter(d => effectiveStatus(d) === 'scheduled').length
+  const publishedCount = posts.filter(d => ['published', 'partial'].includes(effectiveStatus(d))).length
+  const failedCount    = posts.filter(d => effectiveStatus(d) === 'failed').length
 
   const filtered = filter === 'all'       ? posts :
-                   filter === 'published' ? posts.filter(d => ['published', 'partial', 'failed'].includes(d.status)) :
-                   posts.filter(d => d.status === filter)
+                   filter === 'published' ? posts.filter(d => ['published', 'partial'].includes(effectiveStatus(d))) :
+                   posts.filter(d => effectiveStatus(d) === filter)
 
   const statusConfig: Record<string, { label: string; bg: string; text: string; icon: string }> = {
     draft:     { label: 'Draft',     bg: 'bg-gray-100 dark:bg-gray-800',   text: 'text-gray-500 dark:text-gray-400',   icon: '📂' },
@@ -237,11 +243,12 @@ export default function Drafts() {
           ) : (
             <div className="space-y-3">
               {filtered.map(post => {
-                const isConfirming = confirmDelete === post.id
-                const isDeleting   = deleting === post.id
-                const status       = statusConfig[post.status] || statusConfig.draft
-                const isEditable   = ['draft', 'scheduled'].includes(post.status)
-                const isPublished  = ['published', 'partial', 'failed'].includes(post.status)
+                const isConfirming  = confirmDelete === post.id
+                const isDeleting    = deleting === post.id
+                const resolvedStatus = effectiveStatus(post)
+                const status        = statusConfig[resolvedStatus] || statusConfig.draft
+                const isEditable    = ['draft', 'scheduled'].includes(resolvedStatus)
+                const isPublished   = ['published', 'partial'].includes(resolvedStatus)
 
                 return (
                   <div key={post.id}
@@ -330,7 +337,7 @@ export default function Drafts() {
                     {isConfirming && (
                       <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center gap-2">
                         <p className="text-xs text-red-600 font-semibold flex-1">
-                          Permanently delete this {post.status === 'scheduled' ? 'scheduled post' : post.status === 'published' ? 'published post record' : 'draft'}? This cannot be undone.
+                          Permanently delete this {resolvedStatus === 'scheduled' ? 'scheduled post' : resolvedStatus === 'published' ? 'published post record' : 'draft'}? This cannot be undone.
                         </p>
                         <div className="flex items-center gap-2 flex-shrink-0">
                           <button onClick={() => handleDelete(post.id)} disabled={isDeleting}
