@@ -15,17 +15,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const now  = new Date()
 
   const core: MetadataRoute.Sitemap = [
-    { url: base,                   lastModified: now, changeFrequency: 'weekly',  priority: 1   },
-    { url: `${base}/pricing`,      lastModified: now, changeFrequency: 'weekly',  priority: 0.9 },
-    { url: `${base}/features`,     lastModified: now, changeFrequency: 'weekly',  priority: 0.9 },
-    { url: `${base}/signup`,       lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${base}/login`,        lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
-    { url: `${base}/story`,        lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
-    { url: `${base}/roadmap`,      lastModified: now, changeFrequency: 'weekly',  priority: 0.7 },
-    { url: `${base}/affiliate`,    lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${base}/blog`,         lastModified: now, changeFrequency: 'weekly',  priority: 0.8 },
-    { url: `${base}/privacy`,      lastModified: now, changeFrequency: 'yearly',  priority: 0.3 },
-    { url: `${base}/terms`,        lastModified: now, changeFrequency: 'yearly',  priority: 0.3 },
+    { url: base,                          lastModified: now, changeFrequency: 'weekly',  priority: 1   },
+    { url: `${base}/pricing`,             lastModified: now, changeFrequency: 'weekly',  priority: 0.9 },
+    { url: `${base}/features`,            lastModified: now, changeFrequency: 'weekly',  priority: 0.9 },
+    { url: `${base}/studio-stax`,         lastModified: now, changeFrequency: 'weekly',  priority: 0.8 },
+    { url: `${base}/studio-stax/apply`,   lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/give`,                lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/partners`,            lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${base}/signup`,              lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/login`,               lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${base}/story`,               lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/roadmap`,             lastModified: now, changeFrequency: 'weekly',  priority: 0.7 },
+    { url: `${base}/affiliate`,           lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${base}/blog`,                lastModified: now, changeFrequency: 'weekly',  priority: 0.8 },
+    { url: `${base}/privacy`,             lastModified: now, changeFrequency: 'yearly',  priority: 0.3 },
+    { url: `${base}/terms`,               lastModified: now, changeFrequency: 'yearly',  priority: 0.3 },
   ]
 
   const comparisons: MetadataRoute.Sitemap = [
@@ -34,6 +38,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/vs/later`,         lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/vs/zoho-social`,   lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/vs/socialrails`,   lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/metricool`,     lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/publer`,        lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/planable`,      lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
   ]
 
   const blogPosts: MetadataRoute.Sitemap = BLOG_SLUGS.map(slug => ({
