@@ -306,8 +306,14 @@ function ComposeInner() {
     : null
 
   const charCount = content.length
-  const charLimit = activePlatform?.limit ?? null
-  const charOver  = charLimit !== null && charCount > charLimit
+
+  // Per-platform character status — check ALL selected platforms, not just the first
+  const overLimitPlatforms = selectedPlatforms
+    .map(id => PLATFORMS.find(pl => pl.id === id))
+    .filter((p): p is (typeof PLATFORMS)[0] => !!p && charCount > p.limit)
+    .sort((a, b) => a.limit - b.limit) // most restrictive first
+
+  const charOver  = overLimitPlatforms.length > 0
 
   const missingDestinations = selectedPlatforms
     .filter(p => DESTINATION_PLATFORMS.includes(p))
@@ -876,20 +882,33 @@ function ComposeInner() {
                   value={content}
                   onChange={e => { setContent(e.target.value); setScoreResult(null) }}
                   placeholder="What do you want to post? Write your content here, or use an AI tool to generate it..."
-                  rows={8}
-                  className="w-full text-sm outline-none resize-none text-gray-800 dark:text-gray-200 placeholder-gray-300 dark:placeholder-gray-600"
+                  rows={5}
+                  className="w-full text-sm outline-none resize-none text-gray-800 dark:text-gray-200 placeholder-gray-300 dark:placeholder-gray-600 sm:min-h-[200px]"
                 />
-                <div className="flex items-center justify-between pt-3 border-t border-gray-50 dark:border-gray-800 mt-2">
-                  {charLimit !== null ? (
-                    <span className={`text-xs font-bold ${charOver ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
-                      {charCount} / {charLimit.toLocaleString()}
-                      {charOver && ' — over limit'}
-                    </span>
-                  ) : (
+                <div className="flex items-center justify-between pt-3 border-t border-gray-50 dark:border-gray-800 mt-2 gap-2 flex-wrap">
+                  {selectedPlatforms.length === 0 ? (
                     <span className="text-xs text-gray-300 dark:text-gray-600">Select a platform to see character limit</span>
+                  ) : (
+                    <div className="flex items-center gap-3 flex-wrap">
+                      {selectedPlatforms.map(id => {
+                        const p = PLATFORMS.find(pl => pl.id === id)
+                        if (!p) return null
+                        const over    = charCount > p.limit
+                        const nearPct = charCount / p.limit
+                        const color   = over         ? 'text-red-500'
+                                      : nearPct > 0.9 ? 'text-amber-500'
+                                      : 'text-gray-400 dark:text-gray-500'
+                        return (
+                          <span key={id} className={`text-xs font-bold flex items-center gap-1 ${color}`}>
+                            <span className="text-sm leading-none">{p.icon}</span>
+                            <span>{charCount.toLocaleString()}<span className="font-normal text-gray-300 dark:text-gray-600">/{p.limit.toLocaleString()}</span>{over && ' ⚠️'}</span>
+                          </span>
+                        )
+                      })}
+                    </div>
                   )}
-                  <span className="text-xs text-gray-400 dark:text-gray-500">
-                    {selectedPlatforms.length} platform{selectedPlatforms.length !== 1 ? 's' : ''} selected
+                  <span className="text-xs text-gray-400 dark:text-gray-500 ml-auto flex-shrink-0">
+                    {selectedPlatforms.length} platform{selectedPlatforms.length !== 1 ? 's' : ''}
                   </span>
                 </div>
 
@@ -899,7 +918,7 @@ function ComposeInner() {
                     <span className="text-red-500 text-sm mt-0.5">⚠️</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs text-red-700 dark:text-red-400 font-medium leading-relaxed">
-                        {charCount - charLimit!} characters over {activePlatform?.name}&apos;s {charLimit?.toLocaleString()}-character limit.
+                        {charCount - overLimitPlatforms[0].limit} characters over {overLimitPlatforms[0].name}&apos;s {overLimitPlatforms[0].limit.toLocaleString()}-character limit.
                         Split into a timed sequence instead.
                       </p>
                       <Link href="/bulk-scheduler" className="inline-flex items-center gap-1 text-xs font-bold text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 mt-1 transition-colors">
@@ -1172,7 +1191,8 @@ function ComposeInner() {
               )}
 
               {/* ACTIONS — sticky on mobile so keyboard doesn't push buttons off screen */}
-              <div className="sticky bottom-0 bg-theme border-t border-theme-md pt-3 pb-4 -mx-1 px-1 lg:static lg:border-t-0 lg:bg-transparent lg:pt-0 lg:pb-0 lg:mx-0 lg:px-0">
+              <div className="sticky bottom-0 bg-theme border-t border-theme-md pt-3 pb-4 -mx-1 px-1 lg:static lg:border-t-0 lg:bg-transparent lg:pt-0 lg:pb-0 lg:mx-0 lg:px-0"
+                style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
                 <div className="flex items-center gap-3">
                   <button
                     onClick={handlePublish}
