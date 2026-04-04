@@ -168,6 +168,8 @@ export default function Calendar() {
             {/* CALENDAR */}
             <div className="xl:col-span-3">
               <div className="bg-surface border border-theme rounded-2xl overflow-hidden">
+                <div className="overflow-x-auto">
+                <div className="min-w-[320px]">
                 <div className="flex items-center justify-between px-4 md:px-6 py-4 border-b border-theme">
                   <button onClick={prevMonth}
                     className="w-8 h-8 flex items-center justify-center rounded-xl border border-gray-200 dark:border-gray-600 hover:border-gray-400 transition-all text-sm">
@@ -250,6 +252,8 @@ export default function Calendar() {
                     })}
                   </div>
                 )}
+                </div>{/* end min-w */}
+                </div>{/* end overflow-x-auto */}
               </div>
             </div>
 

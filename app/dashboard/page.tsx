@@ -205,6 +205,7 @@ function DashboardInner() {
   const planConfig   = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
   const todayDayIdx  = new Date().getDay()
   const DAYS         = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+  const DAYS_XS      = ['S','M','T','W','T','F','S']
   const maxWeekCount = Math.max(...weekCounts, 1)
 
   // Credits display — monthly bar shows monthly pool usage
@@ -433,7 +434,10 @@ function DashboardInner() {
                             ? <div className={`w-full rounded-t-lg ${isToday ? 'bg-black dark:bg-white' : 'bg-gray-200 dark:bg-gray-700'}`} style={{ height: `${pct}%` }} />
                             : <div className="w-full h-1 bg-gray-100 dark:bg-gray-800 rounded" />}
                         </div>
-                        <span className={`text-xs font-semibold ${isToday ? 'text-black dark:text-white' : 'text-gray-400 dark:text-gray-500'}`}>{day}</span>
+                        <span className={`text-xs font-semibold ${isToday ? 'text-black dark:text-white' : 'text-gray-400 dark:text-gray-500'}`}>
+                          <span className="hidden sm:inline">{day}</span>
+                          <span className="sm:hidden">{DAYS_XS[i]}</span>
+                        </span>
                         <span className="text-xs text-gray-400 dark:text-gray-500">{count > 0 ? count : ''}</span>
                       </div>
                     )
