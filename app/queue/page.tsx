@@ -5,6 +5,15 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
+import {
+  DndContext, closestCenter, PointerSensor, TouchSensor,
+  useSensor, useSensors, DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext, verticalListSortingStrategy,
+  useSortable, arrayMove,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse ${className}`} />
@@ -52,6 +61,122 @@ function dateParamToDateString(param: string): string | null {
   return d.toDateString()
 }
 
+function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel, cancelling, handleCancel }: {
+  post: any
+  isHighlighted: boolean
+  confirmCancel: string | null
+  setConfirmCancel: (id: string | null) => void
+  cancelling: string | null
+  handleCancel: (id: string) => void
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: post.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+    zIndex:  isDragging ? 50 : undefined,
+  }
+
+  const isConfirming = confirmCancel === post.id
+  const isCancelling = cancelling   === post.id
+
+  return (
+    <div ref={setNodeRef} style={style}
+      className={`bg-surface border rounded-2xl p-4 md:p-5 transition-all ${
+        isDragging    ? 'shadow-xl border-gray-300'  :
+        isHighlighted ? 'border-blue-100 hover:border-blue-300' :
+        'border-theme hover:border-gray-300'
+      }`}>
+      <div className="flex items-start gap-3">
+
+        {/* Drag handle */}
+        <button
+          {...attributes} {...listeners}
+          className="flex-shrink-0 mt-1 text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 cursor-grab active:cursor-grabbing touch-none px-0.5 py-1 rounded select-none"
+          aria-label="Drag to reorder">
+          <svg width="10" height="16" viewBox="0 0 10 16" fill="currentColor">
+            <circle cx="2" cy="2"  r="1.5" /><circle cx="8" cy="2"  r="1.5" />
+            <circle cx="2" cy="8"  r="1.5" /><circle cx="8" cy="8"  r="1.5" />
+            <circle cx="2" cy="14" r="1.5" /><circle cx="8" cy="14" r="1.5" />
+          </svg>
+        </button>
+
+        <div className="flex-1 min-w-0">
+          {post.scheduled_at && (
+            <div className="mb-2">
+              <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                {new Date(post.scheduled_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            </div>
+          )}
+          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-2 mb-3">
+            {post.content || <span className="text-gray-300 dark:text-gray-600 italic">No content</span>}
+          </p>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {(post.platforms || []).map((p: string) => (
+              <span key={p} className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 px-2 py-0.5 rounded-full">
+                <span>{PLATFORM_ICONS[p] || '📱'}</span>
+                <span className="hidden sm:inline">{PLATFORM_NAMES[p] || p}</span>
+              </span>
+            ))}
+          </div>
+
+          {post.analytics && (() => {
+            const allPlatforms = ['bluesky', 'mastodon'].filter(p => post.analytics[p])
+            if (allPlatforms.length === 0) return null
+            const totals = allPlatforms.reduce((acc: { likes: number; replies: number; reposts: number }, p: string) => ({
+              likes:   acc.likes   + (post.analytics[p]?.likes   ?? 0),
+              replies: acc.replies + (post.analytics[p]?.replies ?? 0),
+              reposts: acc.reposts + (post.analytics[p]?.reposts ?? 0),
+            }), { likes: 0, replies: 0, reposts: 0 })
+            if (totals.likes === 0 && totals.replies === 0 && totals.reposts === 0) return null
+            return (
+              <div className="text-xs text-gray-400 dark:text-gray-500 flex gap-3 mt-2">
+                <span>❤️ {totals.likes}</span>
+                <span>💬 {totals.replies}</span>
+                <span>🔄 {totals.reposts}</span>
+              </div>
+            )
+          })()}
+        </div>
+
+        {!isConfirming && (
+          <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 flex-shrink-0">
+            <Link href={`/compose?draft=${post.id}`}
+              className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
+              Edit
+            </Link>
+            <button onClick={() => setConfirmCancel(post.id)}
+              className="text-xs font-bold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all">
+              Unschedule
+            </button>
+          </div>
+        )}
+      </div>
+
+      {isConfirming && (
+        <div className="mt-3 pt-3 border-t border-theme flex flex-col sm:flex-row sm:items-center gap-2">
+          <p className="text-xs text-red-600 font-semibold flex-1">Move this post back to drafts?</p>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button onClick={() => handleCancel(post.id)} disabled={isCancelling}
+              className="text-xs font-bold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center gap-1.5">
+              {isCancelling
+                ? <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Moving...</>
+                : 'Yes, unschedule'}
+            </button>
+            <button onClick={() => setConfirmCancel(null)}
+              className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function QueueInner() {
   const [posts, setPosts]               = useState<any[]>([])
   const [loading, setLoading]           = useState(true)
@@ -64,9 +189,54 @@ function QueueInner() {
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const { activeWorkspace } = useWorkspace()
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor,   { activationConstraint: { delay: 200, tolerance: 5 } }),
+  )
+
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type })
     setTimeout(() => setToast(null), 3000)
+  }
+
+  const handleDragEnd = async (event: DragEndEvent, dateKey: string) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+
+    const dayPosts = [...(grouped[dateKey] || [])].sort(
+      (a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime()
+    )
+    const oldIdx = dayPosts.findIndex(p => p.id === active.id)
+    const newIdx = dayPosts.findIndex(p => p.id === over.id)
+    if (oldIdx === -1 || newIdx === -1) return
+
+    // The sorted times stay fixed; only the assignment changes
+    const sortedTimes = dayPosts.map(p => p.scheduled_at)
+    const reordered   = arrayMove(dayPosts, oldIdx, newIdx)
+
+    // Build DB updates for posts whose time actually changed
+    const updates: Array<{ id: string; scheduled_at: string }> = []
+    reordered.forEach((post, i) => {
+      if (post.scheduled_at !== sortedTimes[i]) {
+        updates.push({ id: post.id, scheduled_at: sortedTimes[i] })
+      }
+    })
+    if (updates.length === 0) return
+
+    // Optimistic local update
+    setPosts(prev => {
+      const map = Object.fromEntries(updates.map(u => [u.id, u.scheduled_at]))
+      return prev
+        .map(p => map[p.id] ? { ...p, scheduled_at: map[p.id] } : p)
+        .sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())
+    })
+
+    // Persist to DB
+    await Promise.all(
+      updates.map(u =>
+        supabase.from('posts').update({ scheduled_at: u.scheduled_at }).eq('id', u.id)
+      )
+    )
   }
 
   // Reload posts when active workspace changes
@@ -227,97 +397,28 @@ function QueueInner() {
                         {grouped[dateKey].length} post{grouped[dateKey].length !== 1 ? 's' : ''}
                       </span>
                     </div>
-                    <div className="space-y-3">
-                      {grouped[dateKey].map(post => {
-                        const isConfirming = confirmCancel === post.id
-                        const isCancelling = cancelling   === post.id
-                        return (
-                          <div key={post.id}
-                            className={`bg-surface border rounded-2xl p-4 md:p-5 transition-all ${
-                              isHighlighted ? 'border-blue-100 hover:border-blue-300' : 'border-theme hover:border-gray-300'
-                            }`}>
-                            <div className="flex items-start gap-4">
-                              <div className="flex-1 min-w-0">
-                                {post.scheduled_at && (
-                                  <div className="mb-2">
-                                    <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
-                                      {new Date(post.scheduled_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-                                    </span>
-                                  </div>
-                                )}
-                                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-2 mb-3">
-                                  {post.content || <span className="text-gray-300 dark:text-gray-600 italic">No content</span>}
-                                </p>
-                                <div className="flex items-center gap-1.5 flex-wrap">
-                                  {(post.platforms || []).map((p: string) => (
-                                    <span key={p} className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 px-2 py-0.5 rounded-full">
-                                      <span>{PLATFORM_ICONS[p] || '📱'}</span>
-                                      <span className="hidden sm:inline">{PLATFORM_NAMES[p] || p}</span>
-                                    </span>
-                                  ))}
-                                </div>
-
-                                {/* Engagement metrics for published posts */}
-                                {post.analytics && (() => {
-                                  const allPlatforms = ['bluesky', 'mastodon'].filter(p => post.analytics[p])
-                                  if (allPlatforms.length === 0) return null
-                                  const totals = allPlatforms.reduce((acc: { likes: number; replies: number; reposts: number }, p: string) => ({
-                                    likes:   acc.likes   + (post.analytics[p]?.likes   ?? 0),
-                                    replies: acc.replies + (post.analytics[p]?.replies ?? 0),
-                                    reposts: acc.reposts + (post.analytics[p]?.reposts ?? 0),
-                                  }), { likes: 0, replies: 0, reposts: 0 })
-                                  if (totals.likes === 0 && totals.replies === 0 && totals.reposts === 0) return null
-                                  return (
-                                    <div
-                                      title="Stats fetched 1h and 24h after publish"
-                                      className="text-xs text-gray-400 dark:text-gray-500 flex gap-3 mt-2">
-                                      <span>❤️ {totals.likes}</span>
-                                      <span>💬 {totals.replies}</span>
-                                      <span>🔄 {totals.reposts}</span>
-                                    </div>
-                                  )
-                                })()}
-                              </div>
-
-                              {!isConfirming && (
-                                <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 flex-shrink-0">
-                                  <Link href={`/compose?draft=${post.id}`}
-                                    className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
-                                    Edit
-                                  </Link>
-                                  <button onClick={() => setConfirmCancel(post.id)}
-                                    className="text-xs font-bold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all">
-                                    Unschedule
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-
-                            {isConfirming && (
-                              <div className="mt-3 pt-3 border-t border-theme flex flex-col sm:flex-row sm:items-center gap-2">
-                                <p className="text-xs text-red-600 font-semibold flex-1">
-                                  Move this post back to drafts?
-                                </p>
-                                <div className="flex items-center gap-2 flex-shrink-0">
-                                  <button
-                                    onClick={() => handleCancel(post.id)}
-                                    disabled={isCancelling}
-                                    className="text-xs font-bold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center gap-1.5">
-                                    {isCancelling ? (
-                                      <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Moving...</>
-                                    ) : 'Yes, unschedule'}
-                                  </button>
-                                  <button onClick={() => setConfirmCancel(null)}
-                                    className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
-                                    Cancel
-                                  </button>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                        )
-                      })}
-                    </div>
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={e => handleDragEnd(e, dateKey)}>
+                      <SortableContext
+                        items={grouped[dateKey].map(p => p.id)}
+                        strategy={verticalListSortingStrategy}>
+                        <div className="space-y-3">
+                          {grouped[dateKey].map(post => (
+                            <SortablePostCard
+                              key={post.id}
+                              post={post}
+                              isHighlighted={isHighlighted}
+                              confirmCancel={confirmCancel}
+                              setConfirmCancel={setConfirmCancel}
+                              cancelling={cancelling}
+                              handleCancel={handleCancel}
+                            />
+                          ))}
+                        </div>
+                      </SortableContext>
+                    </DndContext>
                   </div>
                 )
               })}
