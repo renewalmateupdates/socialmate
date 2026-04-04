@@ -1,0 +1,50 @@
+# SocialMate
+
+> Free social media scheduling platform with AI content tools, analytics, team collaboration, and a built-in charity initiative.
+
+SocialMate is a web-based social media management tool built for creators, small businesses, and agencies. It is free to start with no credit card required and no per-channel fees.
+
+## What SocialMate does
+
+- Schedule and publish posts to Bluesky, Discord, Telegram, and Mastodon (Instagram, TikTok, Reddit, Facebook, and Threads in review)
+- 12 AI-powered tools: caption generation, hashtag research, competitor tracking, content gap analysis, best-time suggestions, trend scanning, evergreen recycling, and more
+- Bulk scheduler — upload and schedule many posts at once
+- Link-in-bio page builder
+- Analytics dashboard with per-platform engagement tracking
+- Team collaboration and multi-client workspaces (agency tier)
+- RSS import for automated content sharing
+
+## Pricing
+
+- Free: unlimited posts, 2 team seats, 75 AI credits/month, all core features
+- Pro: $5/month — more accounts, 500 AI credits/month, client workspaces
+- Agency: $20/month — unlimited workspaces, 2000 AI credits/month, white-label options
+
+## Studio Stax
+
+A curated directory of social media tools and services. Founding listings at $100/year (first 100 spots), standard at $150/year. Listings rank by SM-Give charitable donations — the more a studio gives, the higher it appears.
+
+## SM-Give
+
+A built-in charity initiative. Studios listed in Studio Stax can donate through the platform to climb the directory rankings. Giving more = higher visibility.
+
+## Company
+
+- Built by: Gilgamesh Enterprise LLC (Wyoming LLC)
+- Founder: Joshua Bostic
+- Contact: hello@socialmate.studio
+- Website: https://socialmate.studio
+- Pricing: https://socialmate.studio/pricing
+- Blog: https://socialmate.studio/blog
+- Roadmap: https://socialmate.studio/roadmap
+
+## Comparisons
+
+SocialMate compared to competitors:
+- vs Buffer: https://socialmate.studio/vs/buffer
+- vs Hootsuite: https://socialmate.studio/vs/hootsuite
+- vs Later: https://socialmate.studio/vs/later
+- vs Zoho Social: https://socialmate.studio/vs/zoho-social
+- vs Metricool: https://socialmate.studio/vs/metricool
+- vs Publer: https://socialmate.studio/vs/publer
+- vs Planable: https://socialmate.studio/vs/planable
