@@ -230,7 +230,7 @@ export default function BulkScheduler() {
   const atRowLimit    = posts.length >= maxRows
 
   return (
-    <div className="min-h-screen bg-theme flex">
+    <div className="min-h-dvh bg-theme flex">
       <Sidebar />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-5xl mx-auto">
@@ -307,7 +307,7 @@ export default function BulkScheduler() {
                   <input type="time" value={defaultTime}
                     onChange={e => setDefaultTime(e.target.value)}
                     style={{ fontSize: '16px' }}
-                    className="px-2.5 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none bg-white dark:bg-gray-800 dark:text-gray-100 font-semibold" />
+                    className="px-2.5 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none bg-white dark:bg-gray-800 dark:text-gray-100 font-semibold" />
                 </div>
                 <button onClick={autoFillDates}
                   className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all whitespace-nowrap">
@@ -351,7 +351,7 @@ export default function BulkScheduler() {
                       min={today} max={maxScheduleDate}
                       onChange={e => handleDateChange(post.id, e.target.value)}
                       style={{ fontSize: '16px' }}
-                      className={`px-2.5 py-1.5 border rounded-xl focus:outline-none font-semibold bg-white dark:bg-gray-800 dark:text-gray-100 ${
+                      className={`px-2.5 py-2.5 border rounded-xl focus:outline-none font-semibold bg-white dark:bg-gray-800 dark:text-gray-100 ${
                         post.date < today || post.date > maxScheduleDate
                           ? 'border-red-300 text-red-500'
                           : 'border-gray-200 dark:border-gray-600 focus:border-gray-400'
@@ -359,7 +359,7 @@ export default function BulkScheduler() {
                     <input type="time" value={post.time}
                       onChange={e => updatePost(post.id, 'time', e.target.value)}
                       style={{ fontSize: '16px' }}
-                      className="px-2.5 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none bg-white dark:bg-gray-800 dark:text-gray-100 font-semibold" />
+                      className="px-2.5 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none bg-white dark:bg-gray-800 dark:text-gray-100 font-semibold" />
                     <button onClick={() => removeRow(post.id)}
                       disabled={posts.length <= 1}
                       className="text-xs text-gray-300 hover:text-red-400 transition-all disabled:opacity-20 flex-shrink-0 ml-auto sm:ml-0">
