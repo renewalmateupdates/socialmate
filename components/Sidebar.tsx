@@ -627,13 +627,13 @@ export default function Sidebar() {
   return (
     <>
       <ComposeShortcut />
-      {/* Mobile hamburger button */}
+      {/* Mobile hamburger button — min 44×44px touch target for iOS */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="md:hidden fixed top-4 left-4 z-50 w-9 h-9 rounded-xl flex items-center justify-center shadow-sm transition-all hover:opacity-80"
+        className="md:hidden fixed top-3 left-3 z-50 w-11 h-11 rounded-xl flex items-center justify-center shadow-sm transition-all active:scale-95"
         style={{ background: 'var(--surface)', border: '1px solid var(--border-mid)' }}
         aria-label="Open navigation menu">
-        <span className="text-lg">☰</span>
+        <span className="text-xl leading-none">☰</span>
       </button>
 
       {/* Mobile backdrop */}
@@ -652,7 +652,7 @@ export default function Sidebar() {
         <div className="relative">
           <button
             onClick={() => setMobileOpen(false)}
-            className="absolute top-3 right-3 z-10 w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold transition-all hover:opacity-80"
+            className="absolute top-3 right-3 z-10 w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold transition-all active:scale-95 hover:opacity-80"
             style={{ background: 'var(--bg)', color: 'var(--text-muted)' }}
             aria-label="Close navigation menu">
             ✕

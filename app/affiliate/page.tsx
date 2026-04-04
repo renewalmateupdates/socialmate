@@ -256,6 +256,168 @@ export default function AffiliatePage() {
             </div>
           </div>
 
+          {/* ── AFFILIATE RESOURCES & GUIDELINES ── */}
+          <div className="bg-surface border border-theme rounded-2xl p-6 space-y-6">
+            <div>
+              <h2 className="text-sm font-extrabold mb-1">Affiliate Resources & Guidelines</h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Everything you need to promote SocialMate effectively and compliantly.
+              </p>
+            </div>
+
+            {/* Commission structure */}
+            <div>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3">Commission Structure</h3>
+              <div className="space-y-2">
+                {[
+                  { range: '1–99 active referrals',  rate: '30% recurring', color: 'bg-gray-50 dark:bg-gray-800 border-theme' },
+                  { range: '100+ active referrals',  rate: '40% recurring', color: 'bg-purple-50 dark:bg-purple-950/30 border-purple-100 dark:border-purple-900' },
+                ].map(tier => (
+                  <div key={tier.range} className={`flex items-center justify-between px-4 py-3 rounded-xl border ${tier.color}`}>
+                    <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{tier.range}</span>
+                    <span className="text-sm font-extrabold text-gray-900 dark:text-gray-100">{tier.rate}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {[
+                  { label: 'At 10 users ($20/mo plan)', value: '~$60/mo' },
+                  { label: 'At 20 users ($20/mo plan)', value: '~$120/mo' },
+                  { label: 'At 100 users ($20/mo plan)', value: '~$800/mo' },
+                ].map(ex => (
+                  <div key={ex.label} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3 border border-theme text-center">
+                    <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">{ex.value}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{ex.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Payout details */}
+            <div>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3">Payout Details</h3>
+              <div className="space-y-2 text-sm">
+                {[
+                  { icon: '💳', label: 'Payout method',       value: 'Stripe (direct deposit or debit)'           },
+                  { icon: '⏱',  label: 'Holding period',      value: '60 days — protects against cancellations & fraud' },
+                  { icon: '🔁',  label: 'Recurring?',          value: 'Yes — earn on every renewal, not just first payment' },
+                  { icon: '➕',  label: 'Add-on commissions',  value: 'White-label add-ons ($20–$40) also attributed to you' },
+                  { icon: '🔗',  label: 'Tracking methods',    value: 'Referral link OR promo code — both fully attributed' },
+                ].map(item => (
+                  <div key={item.label} className="flex items-start gap-3 py-2 border-b border-gray-50 dark:border-gray-800 last:border-0">
+                    <span className="text-base flex-shrink-0 mt-0.5">{item.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-xs font-bold text-gray-500 dark:text-gray-400 block">{item.label}</span>
+                      <span className="text-sm text-gray-800 dark:text-gray-200">{item.value}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Suggested copy */}
+            <div>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3">Suggested Promo Copy</h3>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">Copy and adapt these for your audience. Replace [YOUR_CODE] with your promo code.</p>
+              <div className="space-y-3">
+                {[
+                  {
+                    label: 'Short (social post)',
+                    text: `I schedule my Bluesky, Discord & Telegram posts with SocialMate — and it's actually free. No credit card, no post limits. Use code [YOUR_CODE] at signup. socialmate.studio`,
+                  },
+                  {
+                    label: 'Medium (caption/email)',
+                    text: `If you're tired of paying $99/month for Hootsuite or hitting free-plan limits, SocialMate is worth checking out. It's genuinely free — bulk scheduler, calendar, AI tools, all included. I've been using it for [PLATFORM] scheduling and it saves me hours every week. Sign up with code [YOUR_CODE] at socialmate.studio`,
+                  },
+                  {
+                    label: 'Long (blog/review)',
+                    text: `SocialMate is a free social media scheduler built for creators and small businesses who don't want to pay enterprise prices. It supports Bluesky, Discord, Telegram, and Mastodon natively — plus Instagram, TikTok, and others coming soon. The bulk scheduler alone makes it worth trying. There's no credit card required and the free plan doesn't artificially cap your posts. Use referral code [YOUR_CODE] when you sign up at socialmate.studio to get started.`,
+                  },
+                ].map(copy => (
+                  <div key={copy.label} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-theme">
+                    <p className="text-xs font-bold text-gray-400 dark:text-gray-500 mb-2">{copy.label}</p>
+                    <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{copy.text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Guidelines / Do's and Don'ts */}
+            <div>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3">Promotion Guidelines</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs font-bold text-green-600 mb-2">✅ Do</p>
+                  <ul className="space-y-1.5">
+                    {[
+                      'Disclose that you earn a commission (required by FTC/ASA)',
+                      'Share your honest experience with the product',
+                      'Use your unique referral link or promo code — both track correctly',
+                      'Promote on social posts, blogs, newsletters, YouTube, podcasts',
+                      'Emphasize the free plan — it converts better than paid pitch',
+                    ].map(item => (
+                      <li key={item} className="text-xs text-gray-600 dark:text-gray-400 flex items-start gap-1.5">
+                        <span className="text-green-500 flex-shrink-0 mt-0.5">•</span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-red-500 mb-2">❌ Don&apos;t</p>
+                  <ul className="space-y-1.5">
+                    {[
+                      'Don\'t make false or misleading claims about the product',
+                      'Don\'t bid on branded keywords (SocialMate) in paid ads',
+                      'Don\'t spam communities, DMs, or forums with bulk promo',
+                      'Don\'t self-refer or create fake accounts to game commissions',
+                      'Don\'t share your promo code in coupon/deal sites unless approved',
+                    ].map(item => (
+                      <li key={item} className="text-xs text-gray-600 dark:text-gray-400 flex items-start gap-1.5">
+                        <span className="text-red-400 flex-shrink-0 mt-0.5">•</span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* FAQ */}
+            <div>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3">FAQ</h3>
+              <div className="space-y-3">
+                {[
+                  {
+                    q: 'Does it matter if they use my link or my promo code?',
+                    a: 'No — both attribute to you equally. Use whichever converts better for your audience. Promo codes work well in video content; links work better in blogs and newsletters.',
+                  },
+                  {
+                    q: 'When does the 60-day hold start?',
+                    a: 'From the date of the referred user\'s payment. After 60 days with no refund or chargeback, that commission becomes eligible for payout.',
+                  },
+                  {
+                    q: 'Do I earn on renewals?',
+                    a: 'Yes. As long as your referred user stays subscribed, you earn on every billing cycle — monthly, quarterly, or annual.',
+                  },
+                  {
+                    q: 'What happens if they downgrade or cancel?',
+                    a: 'Future commissions from that user stop. If they cancel within the 60-day window, the commission from that payment is voided.',
+                  },
+                  {
+                    q: 'Is there a minimum payout threshold?',
+                    a: 'Stripe payouts are processed once your balance clears the 60-day hold. Contact support if you have questions about your specific payout timing.',
+                  },
+                ].map(faq => (
+                  <div key={faq.q} className="border-b border-gray-50 dark:border-gray-800 pb-3 last:border-0 last:pb-0">
+                    <p className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-1">{faq.q}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{faq.a}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
         </div>
       </main>
     </div>
