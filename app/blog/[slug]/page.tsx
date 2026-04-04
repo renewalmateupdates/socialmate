@@ -2293,6 +2293,32 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
           <p className="text-white/30 text-xs mt-3">16 platforms · Unlimited posts · Free forever</p>
         </div>
 
+        {/* ── Compare tools strip ── */}
+        <div className="mb-12 p-6 border border-gray-100 dark:border-gray-800 rounded-2xl">
+          <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">Comparing tools?</p>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { label: 'vs Hootsuite',    href: '/vs/hootsuite'    },
+              { label: 'vs Buffer',       href: '/vs/buffer'       },
+              { label: 'vs Later',        href: '/vs/later'        },
+              { label: 'vs Sendible',     href: '/vs/sendible'     },
+              { label: 'vs Metricool',    href: '/vs/metricool'    },
+              { label: 'vs Publer',       href: '/vs/publer'       },
+              { label: 'vs Planable',     href: '/vs/planable'     },
+              { label: 'vs Sprout Social',href: '/vs/sprout-social'},
+            ].map(c => (
+              <Link key={c.href} href={c.href}
+                className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-full hover:border-gray-500 dark:hover:border-gray-400 text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-all">
+                {c.label}
+              </Link>
+            ))}
+            <Link href="/vs"
+              className="text-xs font-bold px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 transition-all">
+              See all comparisons →
+            </Link>
+          </div>
+        </div>
+
         {otherPosts.length > 0 && (
           <div>
             <h2 className="text-lg font-extrabold tracking-tight mb-6 dark:text-gray-100">More from the blog</h2>
