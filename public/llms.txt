@@ -40,11 +40,28 @@ A built-in charity initiative. Studios listed in Studio Stax can donate through 
 
 ## Comparisons
 
+Full comparison hub: https://socialmate.studio/vs
+
 SocialMate compared to competitors:
-- vs Buffer: https://socialmate.studio/vs/buffer
 - vs Hootsuite: https://socialmate.studio/vs/hootsuite
+- vs Buffer: https://socialmate.studio/vs/buffer
 - vs Later: https://socialmate.studio/vs/later
-- vs Zoho Social: https://socialmate.studio/vs/zoho-social
+- vs Sendible: https://socialmate.studio/vs/sendible
 - vs Metricool: https://socialmate.studio/vs/metricool
 - vs Publer: https://socialmate.studio/vs/publer
 - vs Planable: https://socialmate.studio/vs/planable
+- vs Zoho Social: https://socialmate.studio/vs/zoho-social
+
+## Blog
+
+SocialMate publishes guides, tips, and updates at https://socialmate.studio/blog (26 posts as of April 2026).
+
+Selected articles:
+- How to Schedule Telegram Posts for Free: https://socialmate.studio/blog/how-to-schedule-telegram-posts-free
+- Bluesky vs Twitter/X in 2026: https://socialmate.studio/blog/bluesky-vs-twitter-where-to-post-2026
+- Best Free Hootsuite Alternative: https://socialmate.studio/blog/free-hootsuite-alternative-2026
+- Social Media Automation for Solo Creators: https://socialmate.studio/blog/social-media-automation-solo-creators
+- How to Grow a Discord Server: https://socialmate.studio/blog/how-to-grow-discord-server-2026
+- Mastodon vs Bluesky 2026: https://socialmate.studio/blog/mastodon-vs-bluesky-2026
+- Free AI Social Media Tools 2026: https://socialmate.studio/blog/ai-social-media-tools-free-2026
+- Discord Community Management: https://socialmate.studio/blog/discord-community-management-guide
