@@ -746,7 +746,8 @@ function ComposeInner() {
                             <select
                               value={selectedAccountIds[pid] || ''}
                               onChange={e => setSelectedAccountIds(prev => ({ ...prev, [pid]: e.target.value }))}
-                              className="flex-1 text-xs bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1.5 text-gray-800 dark:text-gray-200 focus:outline-none focus:border-blue-400 transition-colors"
+                              style={{ fontSize: '16px' }}
+                              className="flex-1 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-2 py-1.5 text-gray-800 dark:text-gray-200 focus:outline-none focus:border-blue-400 transition-colors"
                             >
                               {accounts.map((acc: ConnectedAccount) => (
                                 <option key={acc.id} value={acc.id}>
@@ -830,7 +831,8 @@ function ComposeInner() {
                                   ...prev,
                                   [platformId]: e.target.value,
                                 }))}
-                                className="w-full px-3 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-gray-400 bg-white dark:bg-gray-900 font-semibold">
+                                style={{ fontSize: '16px' }}
+                                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-gray-400 bg-white dark:bg-gray-900 font-semibold">
                                 {platformDests.map(d => (
                                   <option key={d.id} value={d.id}>{d.label}</option>
                                 ))}
@@ -1154,10 +1156,12 @@ function ComposeInner() {
                     min={todayLocal}
                     max={maxScheduleDate}
                     onChange={e => handleDateChange(e.target.value)}
-                    className="flex-1 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none focus:border-black dark:bg-gray-900 transition-all" />
+                    style={{ fontSize: '16px' }}
+                    className="flex-1 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 outline-none focus:border-black dark:bg-gray-900 transition-all" />
                   <input type="time" value={scheduleTime}
                     onChange={e => setScheduleTime(e.target.value)}
-                    className="flex-1 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-sm outline-none focus:border-black dark:bg-gray-900 transition-all" />
+                    style={{ fontSize: '16px' }}
+                    className="flex-1 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 outline-none focus:border-black dark:bg-gray-900 transition-all" />
                 </div>
                 {scheduleError && (
                   <div className="mt-2 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 flex items-center justify-between gap-3">

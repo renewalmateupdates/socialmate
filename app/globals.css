@@ -573,6 +573,19 @@ body {
   overflow-x: hidden;
 }
 
+/* ── iOS: prevent page zoom when tapping inputs ───────────────
+   iOS Safari zooms the viewport when an input/select/textarea
+   has font-size < 16px. This global rule ensures 16px on touch
+   devices without changing the visual size (Tailwind still wins
+   on larger screens since the rule is media-scoped to touch). */
+@media (hover: none) and (pointer: coarse) {
+  input,
+  select,
+  textarea {
+    font-size: max(16px, 1em) !important;
+  }
+}
+
 /* ── Utility classes using CSS vars (use these in components) */
 .bg-theme        { background-color: var(--bg); }
 .bg-surface      { background-color: var(--surface); }
