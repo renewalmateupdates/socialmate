@@ -2,58 +2,58 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'SocialMate vs Later (2026) — Full Comparison',
-  description: "Later's free plan is Instagram-only with 1 profile and 30 posts/month. SocialMate supports Discord, Bluesky, Telegram, and Mastodon for free — no Instagram lock-in.",
+  title: 'SocialMate vs Loomly (2026) — Full Comparison',
+  description: 'Loomly has no free plan and starts at $32/month. SocialMate is free forever with bulk scheduling, Discord/Bluesky/Telegram/Mastodon, and 12 AI tools included.',
   openGraph: {
-    title:       'SocialMate vs Later (2026)',
-    description: "Later free plan: Instagram-only, 1 profile, 30 posts/month. SocialMate: 16 platforms including Discord and Bluesky, unlimited posts, free.",
-    url:         'https://socialmate.studio/vs/later',
+    title:       'SocialMate vs Loomly (2026)',
+    description: 'Loomly charges $32/month with no free plan and per-workspace pricing. SocialMate is free forever — no credit card, no per-brand fees.',
+    url:         'https://socialmate.studio/vs/loomly',
   },
-  alternates: { canonical: 'https://socialmate.studio/vs/later' },
+  alternates: { canonical: 'https://socialmate.studio/vs/loomly' },
 }
 
 const COMPARISON = [
-  { feature: 'Starting price',          later: '$18/month (Starter)',        socialmate: '$0 — free forever'       },
-  { feature: 'Free plan platforms',     later: 'Instagram only',             socialmate: '16 platforms'            },
-  { feature: 'Free plan profiles',      later: '1 profile',                  socialmate: 'Multiple'                },
-  { feature: 'Free plan post limit',    later: '30 posts/month',             socialmate: 'Unlimited'               },
-  { feature: 'Discord support',         later: '❌',                          socialmate: '✅'                      },
-  { feature: 'Telegram support',        later: '❌',                          socialmate: '✅'                      },
-  { feature: 'Mastodon support',        later: '❌',                          socialmate: '✅'                      },
-  { feature: 'Bluesky support',         later: '❌',                          socialmate: '✅'                      },
-  { feature: 'TikTok support',          later: '✅ (paid plans)',             socialmate: '✅'                      },
-  { feature: 'AI writing tools',        later: 'Basic AI captions',          socialmate: '12 tools included'       },
-  { feature: 'AI credits free tier',    later: 'None on free plan',          socialmate: '75/month free'            },
-  { feature: 'Bulk scheduling',         later: 'Paid plans',                 socialmate: '✅ Free'                  },
-  { feature: 'Link in bio',             later: '✅ (Linkin.bio — paid)',      socialmate: '✅ Free'                  },
-  { feature: 'Hashtag manager',         later: '✅ (paid plans)',             socialmate: '✅ Free'                  },
-  { feature: 'Competitor tracking',     later: '❌',                          socialmate: '✅ Free (3 accounts)'    },
-  { feature: 'RSS import',              later: '❌',                          socialmate: '✅ Free'                  },
-  { feature: 'Evergreen recycling',     later: '❌',                          socialmate: '✅ Free'                  },
-  { feature: 'Team seats (free)',        later: '1',                          socialmate: '2'                       },
-  { feature: 'Client workspaces',       later: 'Agency plan only',           socialmate: 'Pro+: from $5/mo'        },
+  { feature: 'Starting price',            loomly: '$32/month (Base)',           socialmate: '$0 — free forever'       },
+  { feature: 'Free plan',                 loomly: '❌ None',                     socialmate: '✅ Free forever'         },
+  { feature: 'Users on starting plan',    loomly: '2 users',                    socialmate: '2 users free'            },
+  { feature: 'Social accounts (starter)', loomly: '10 accounts',                socialmate: 'No hard cap (free tier)' },
+  { feature: 'Pricing model',             loomly: 'Per workspace (base)',       socialmate: 'Flat rate'               },
+  { feature: 'Multi-brand cost',          loomly: 'Extra per workspace',        socialmate: 'Included free'           },
+  { feature: 'Discord support',           loomly: '❌',                          socialmate: '✅'                      },
+  { feature: 'Telegram support',          loomly: '❌',                          socialmate: '✅'                      },
+  { feature: 'Mastodon support',          loomly: '❌',                          socialmate: '✅'                      },
+  { feature: 'Bluesky support',           loomly: '❌',                          socialmate: '✅'                      },
+  { feature: 'AI writing tools',          loomly: 'Basic AI assist',            socialmate: '12 tools included'       },
+  { feature: 'AI credits free tier',      loomly: 'N/A (no free plan)',         socialmate: '75/month free'            },
+  { feature: 'Bulk scheduling',           loomly: 'Paid plans',                 socialmate: '✅ Free'                  },
+  { feature: 'Link in bio',               loomly: '❌',                          socialmate: '✅ Free'                  },
+  { feature: 'Hashtag manager',           loomly: 'Paid plans',                 socialmate: '✅ Free'                  },
+  { feature: 'Evergreen recycling',       loomly: '❌',                          socialmate: '✅ Free'                  },
+  { feature: 'Competitor tracking',       loomly: 'Higher tiers',               socialmate: '✅ Free (3 accounts)'    },
+  { feature: 'RSS import',                loomly: 'Paid plans',                 socialmate: '✅ Free'                  },
+  { feature: 'Content approval workflows', loomly: '✅ Strong',                 socialmate: '✅ Free'                  },
 ]
 
 const FAQ = [
   {
-    q: "Is Later's free plan really Instagram-only?",
-    a: "Yes. Later's free plan supports only Instagram with 1 profile and 30 posts per month. To add other platforms like TikTok, Pinterest, or Facebook, you must upgrade to a paid plan starting at $18/month. SocialMate's free plan supports all 16 platforms from day one.",
+    q: 'Does Loomly have a free plan?',
+    a: 'No. Loomly has no free plan of any kind. Their cheapest option is the Base plan at $32/month, which supports 2 users and 10 social accounts. SocialMate is completely free to start with no credit card required.',
   },
   {
-    q: 'Does Later support Discord, Bluesky, or Mastodon?',
-    a: 'No. Later is focused on visual platforms — primarily Instagram and TikTok. It does not support Discord, Bluesky, Telegram, or Mastodon. If your audience is building on any of these platforms, Later is not a viable option. SocialMate supports all four on the free plan.',
+    q: 'Why does Loomly get expensive for multiple brands?',
+    a: 'Loomly charges per "base" — their term for a workspace. Each brand or client you manage requires its own base, and costs stack quickly. SocialMate uses flat-rate pricing with no per-workspace fees, so managing multiple brands does not multiply your bill.',
   },
   {
-    q: 'Does SocialMate have a visual content calendar like Later?',
-    a: 'Yes. SocialMate has a full drag-and-drop content calendar for scheduling and visualizing your posting schedule across all platforms. Unlike Later, you are not limited to Instagram or a 30-post monthly cap.',
+    q: 'Which platforms does SocialMate support that Loomly does not?',
+    a: 'SocialMate supports Discord, Telegram, Mastodon, and Bluesky — none of which Loomly covers. If your audience is on decentralized or community-first platforms, Loomly is not an option.',
   },
   {
     q: 'Is SocialMate actually free with no catch?',
-    a: 'Yes. Free tier includes unlimited posts, 75 AI credits/month, bulk scheduling, link in bio, hashtag manager, competitor tracking, RSS import, and evergreen recycling. No credit card required and no platform restrictions.',
+    a: 'Yes. The free tier includes unlimited posts, 75 AI credits/month, bulk scheduling, link in bio, hashtag manager, competitor tracking, RSS import, and evergreen recycling. No credit card required and no trial countdown.',
   },
 ]
 
-export default function VsLaterPage() {
+export default function VsLoomlyPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       {/* NAV */}
@@ -78,10 +78,10 @@ export default function VsLaterPage() {
             Updated April 2026
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight mb-4 dark:text-white">
-            SocialMate vs Later
+            SocialMate vs Loomly
           </h1>
           <p className="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-            Later&apos;s free plan is Instagram-only with 30 posts per month. SocialMate supports 16 platforms including Discord and Bluesky — all free.
+            Loomly has no free plan and charges per workspace — costs multiply fast. SocialMate is free forever with no per-brand fees.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-black text-white font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -96,26 +96,26 @@ export default function VsLaterPage() {
         {/* VERDICT BANNER */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
           <div className="bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-2xl p-6">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Later</p>
-            <p className="font-extrabold text-lg mb-2 dark:text-white">Great for Instagram, useless beyond it</p>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Loomly</p>
+            <p className="font-extrabold text-lg mb-2 dark:text-white">Good for approvals, costly for growth</p>
             <ul className="space-y-1 text-xs text-gray-500 dark:text-gray-400">
-              <li>✅ Strong Instagram visual planner</li>
-              <li>✅ Good TikTok support on paid plans</li>
-              <li>❌ Free plan: Instagram only, 30 posts/mo</li>
-              <li>❌ No Discord, Telegram, Mastodon, or Bluesky</li>
-              <li>❌ Paid plans start at $18/mo</li>
+              <li>✅ Strong content approval workflows</li>
+              <li>✅ Clean calendar UI</li>
+              <li>❌ No free plan — $32/month minimum</li>
+              <li>❌ Per-workspace pricing inflates multi-brand costs</li>
+              <li>❌ No Discord, Telegram, Mastodon, Bluesky</li>
               <li>❌ Bulk scheduling locked to paid plans</li>
             </ul>
           </div>
           <div className="bg-black text-white rounded-2xl p-6">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">All platforms. No limits. Free.</p>
+            <p className="font-extrabold text-lg mb-2">All platforms. All tools. $0.</p>
             <ul className="space-y-1 text-xs text-gray-300">
-              <li>✅ 16 platforms on free plan</li>
+              <li>✅ Free forever — no trial countdown</li>
+              <li>✅ 12 AI tools on free tier</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
-              <li>✅ Unlimited posts, no monthly cap</li>
               <li>✅ Bulk scheduling free</li>
-              <li>✅ 12 AI tools included free</li>
+              <li>✅ No per-workspace fees</li>
               <li>✅ No credit card required</li>
             </ul>
           </div>
@@ -127,13 +127,13 @@ export default function VsLaterPage() {
           <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
             <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
               <span>Feature</span>
-              <span>Later</span>
+              <span>Loomly</span>
               <span>SocialMate</span>
             </div>
             {COMPARISON.map((row, i) => (
               <div key={i} className={`grid grid-cols-3 px-5 py-3.5 text-sm border-t border-gray-50 dark:border-gray-800 ${i % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50/50 dark:bg-gray-800/30'}`}>
                 <span className="font-semibold text-gray-700 dark:text-gray-300 text-xs">{row.feature}</span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">{row.later}</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">{row.loomly}</span>
                 <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">{row.socialmate}</span>
               </div>
             ))}
@@ -142,28 +142,28 @@ export default function VsLaterPage() {
 
         {/* WHY SWITCH */}
         <div className="mb-12">
-          <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">Why people switch from Later</h2>
+          <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">Why people switch from Loomly</h2>
           <div className="space-y-4">
             {[
               {
                 n: '1',
-                title: "Later's free plan is barely a free plan",
-                desc: "One Instagram profile and 30 posts per month is not a usable free tier for anyone who posts regularly. SocialMate's free plan has no monthly post cap and covers all 16 supported platforms — not just Instagram.",
+                title: 'No free plan means you pay before you know if it fits',
+                desc: 'Loomly offers no free tier — just a 15-day trial. Once it ends, you are paying $32/month or starting over. SocialMate has a permanent free plan with no trial expiry, so you can evaluate it at your own pace without spending a cent.',
               },
               {
                 n: '2',
-                title: "Later is useless if you're building on alternative platforms",
-                desc: 'Discord, Bluesky, Telegram, and Mastodon are where engaged communities are growing outside the algorithm. Later supports none of them. If even one part of your audience is on these platforms, Later cannot help you reach them.',
+                title: 'Per-workspace pricing punishes multi-brand users',
+                desc: 'Loomly\'s "base" model means each additional brand or client workspace adds to your bill. If you manage three brands, you are paying for three bases. SocialMate\'s flat-rate pricing covers all your workspaces without multiplication.',
               },
               {
                 n: '3',
-                title: 'Bulk scheduling should not be a paid feature',
-                desc: "Later requires a paid plan to bulk schedule content. If you batch-create content for the month, you should not have to pay just to upload it all at once. SocialMate's bulk scheduler is free — upload a full month of posts in one go.",
+                title: 'Approval workflows are great — but not everyone needs them',
+                desc: 'Loomly\'s standout feature is content approval, which is valuable for agencies with client sign-off requirements. Solo creators and small teams pay for that complexity whether they use it or not. SocialMate gives you approvals without the price premium.',
               },
               {
                 n: '4',
-                title: '12 AI tools vs a basic caption helper',
-                desc: 'SocialMate includes caption generation, hashtag research, viral hook writing, thread generation, content repurposing, post scoring, and more — all on the free tier. Later has basic AI caption suggestions behind a paywall.',
+                title: 'SocialMate covers the platforms Loomly skips',
+                desc: 'Discord, Telegram, Mastodon, and Bluesky are not supported by Loomly. If any part of your audience is on these platforms — community servers, group chats, the fediverse, or the Bluesky timeline — Loomly is not an option. SocialMate covers all of them, free.',
               },
             ].map((r) => (
               <div key={r.n} className="flex gap-4 p-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl hover:border-gray-300 dark:hover:border-gray-600 transition-all">
@@ -192,9 +192,9 @@ export default function VsLaterPage() {
 
         {/* CTA */}
         <div className="bg-black text-white rounded-2xl p-8 text-center">
-          <h2 className="text-2xl font-extrabold tracking-tight mb-3">Not just an Instagram tool.</h2>
+          <h2 className="text-2xl font-extrabold tracking-tight mb-3">Skip the $32/month — start free today</h2>
           <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
-            SocialMate covers 16 platforms — including Discord, Bluesky, Telegram, and Mastodon. Unlimited posts. 12 AI tools. Free forever.
+            SocialMate is free forever — bulk scheduling, 12 AI tools, 16 platforms, no per-workspace fees. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             Create free account →
@@ -213,8 +213,9 @@ export default function VsLaterPage() {
           <div className="flex items-center gap-6 text-xs text-gray-400 dark:text-gray-500">
             <Link href="/pricing" className="hover:text-black dark:hover:text-white transition-colors">Pricing</Link>
             <Link href="/vs/buffer" className="hover:text-black dark:hover:text-white transition-colors">vs Buffer</Link>
-            <Link href="/vs/sendible" className="hover:text-black dark:hover:text-white transition-colors">vs Sendible</Link>
-            <Link href="/vs/metricool" className="hover:text-black dark:hover:text-white transition-colors">vs Metricool</Link>
+            <Link href="/vs/hootsuite" className="hover:text-black dark:hover:text-white transition-colors">vs Hootsuite</Link>
+            <Link href="/vs/coschedule" className="hover:text-black dark:hover:text-white transition-colors">vs CoSchedule</Link>
+            <Link href="/vs/meetedgar" className="hover:text-black dark:hover:text-white transition-colors">vs MeetEdgar</Link>
             <Link href="/blog" className="hover:text-black dark:hover:text-white transition-colors">Blog</Link>
           </div>
         </div>

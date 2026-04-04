@@ -3,10 +3,10 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Other Social Media Tools (2026) — Full Comparisons',
-  description: 'See how SocialMate compares to Hootsuite, Buffer, Later, Sprout Social, Metricool, Planable, Sendible, SocialPilot, and more. Free plan, no credit card, no limits.',
+  description: 'See how SocialMate compares to Hootsuite, Buffer, Later, Sprout Social, Loomly, CoSchedule, MeetEdgar, Metricool, Sendible, SocialPilot, and more. Free plan, no credit card.',
   openGraph: {
     title:       'SocialMate vs Other Social Media Tools (2026)',
-    description: 'Honest, detailed comparisons between SocialMate and 11 popular social media scheduling tools. Free plan always available.',
+    description: 'Honest, detailed comparisons between SocialMate and 14 popular social media scheduling tools. Free plan always available.',
     url:         'https://socialmate.studio/vs',
   },
   alternates: { canonical: 'https://socialmate.studio/vs' },
@@ -102,6 +102,33 @@ const COMPARISONS = [
     angle:       'Powerful if you already use Zoho CRM. Overkill — and confusing — if you just want to schedule posts.',
     tag:         'CRM-first tool',
     tagColor:    'bg-teal-50 text-teal-600',
+  },
+  {
+    slug:        'loomly',
+    name:        'Loomly',
+    emoji:       '📅',
+    headline:    'Loomly starts at $32/month — no free plan',
+    angle:       'Per-workspace pricing means your costs multiply fast. SocialMate gives you multi-brand management for free.',
+    tag:         'Per-workspace pricing',
+    tagColor:    'bg-orange-50 text-orange-600',
+  },
+  {
+    slug:        'coschedule',
+    name:        'CoSchedule',
+    emoji:       '🗓️',
+    headline:    "CoSchedule free plan can't auto-publish",
+    angle:       "Free tier requires you to manually click publish every time. If you want actual scheduling, you're paying from day one.",
+    tag:         'No free auto-publish',
+    tagColor:    'bg-red-50 text-red-600',
+  },
+  {
+    slug:        'meetedgar',
+    name:        'MeetEdgar',
+    emoji:       '🔄',
+    headline:    'MeetEdgar charges $29/month for evergreen recycling',
+    angle:       "MeetEdgar's main selling point — content recycling — is free on SocialMate. And we support Bluesky, Discord, and Mastodon too.",
+    tag:         'Recycling not worth $29',
+    tagColor:    'bg-purple-50 text-purple-600',
   },
 ]
 

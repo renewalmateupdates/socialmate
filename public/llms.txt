@@ -52,11 +52,14 @@ SocialMate compared to competitors:
 - vs Planable: https://socialmate.studio/vs/planable
 - vs Sprout Social: https://socialmate.studio/vs/sprout-social
 - vs SocialPilot: https://socialmate.studio/vs/socialpilot
+- vs Loomly: https://socialmate.studio/vs/loomly
+- vs CoSchedule: https://socialmate.studio/vs/coschedule
+- vs MeetEdgar: https://socialmate.studio/vs/meetedgar
 - vs Zoho Social: https://socialmate.studio/vs/zoho-social
 
 ## Blog
 
-SocialMate publishes guides, tips, and updates at https://socialmate.studio/blog (26 posts as of April 2026).
+SocialMate publishes guides, tips, and updates at https://socialmate.studio/blog (26 posts as of April 2026). Comparison hub covers 14 tools.
 
 Selected articles:
 - How to Schedule Telegram Posts for Free: https://socialmate.studio/blog/how-to-schedule-telegram-posts-free

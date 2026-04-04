@@ -2307,6 +2307,9 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
               { label: 'vs Planable',     href: '/vs/planable'     },
               { label: 'vs Sprout Social', href: '/vs/sprout-social' },
               { label: 'vs SocialPilot',  href: '/vs/socialpilot'  },
+              { label: 'vs Loomly',       href: '/vs/loomly'       },
+              { label: 'vs CoSchedule',   href: '/vs/coschedule'   },
+              { label: 'vs MeetEdgar',    href: '/vs/meetedgar'    },
             ].map(c => (
               <Link key={c.href} href={c.href}
                 className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-full hover:border-gray-500 dark:hover:border-gray-400 text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-all">

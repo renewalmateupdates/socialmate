@@ -211,6 +211,24 @@ export default function Analytics() {
     }
   }
 
+  // 14-day trail: true = posted that day
+  const trailDays: boolean[] = []
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(todayMidnight); d.setDate(todayMidnight.getDate() - i)
+    trailDays.push(posts.some(p => {
+      const pd = new Date(p.created_at); pd.setHours(0, 0, 0, 0)
+      return pd.getTime() === d.getTime()
+    }))
+  }
+  const streakMessage = currentStreak === 0 ? 'Start your streak today!'
+    : currentStreak < 4  ? 'Great start — keep going!'
+    : currentStreak < 7  ? 'Building momentum!'
+    : currentStreak < 14 ? '🔥 One week streak!'
+    : currentStreak < 30 ? '🔥🔥 Two weeks strong!'
+    : '🔥🔥🔥 Legendary creator!'
+
+  const bestDay = dayOfWeekCounts.reduce((a, b) => a.count > b.count ? a : b)
+
   const oldestPost     = posts[0]
   const weeksSinceFirst = oldestPost
     ? Math.max((now.getTime() - new Date(oldestPost.created_at).getTime()) / (7 * 24 * 3600000), 1)
@@ -559,13 +577,24 @@ export default function Analytics() {
 
           {/* STREAK / PEAK / STATUS */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <div className="bg-surface border border-theme rounded-2xl p-5 flex items-center gap-4">
-              <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0">🔥</div>
-              <div>
-                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Current Streak</p>
-                <p className="text-2xl font-extrabold tracking-tight">{currentStreak} <span className="text-sm font-semibold text-gray-400 dark:text-gray-500">days</span></p>
-                <p className="text-xs text-gray-400 dark:text-gray-500">Longest: {longestStreak} days</p>
+            <div className="bg-surface border border-theme rounded-2xl p-5">
+              <div className="flex items-center gap-4 mb-3">
+                <div className="w-12 h-12 bg-orange-50 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0">
+                  {currentStreak >= 30 ? '🏆' : '🔥'}
+                </div>
+                <div>
+                  <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Current Streak</p>
+                  <p className="text-2xl font-extrabold tracking-tight">{currentStreak} <span className="text-sm font-semibold text-gray-400 dark:text-gray-500">days</span></p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">Longest: {longestStreak} days</p>
+                </div>
               </div>
+              {/* 14-day posting trail */}
+              <div className="flex items-center gap-0.5 mb-1.5">
+                {trailDays.map((active, i) => (
+                  <div key={i} className={`flex-1 h-2 rounded-sm transition-all ${active ? 'bg-orange-400' : 'bg-gray-100 dark:bg-gray-800'}`} />
+                ))}
+              </div>
+              <p className={`text-xs font-semibold ${currentStreak > 0 ? 'text-orange-500' : 'text-gray-400 dark:text-gray-500'}`}>{streakMessage}</p>
             </div>
             <div className="bg-surface border border-theme rounded-2xl p-5 flex items-center gap-4">
               <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0">⏰</div>
@@ -640,48 +669,60 @@ export default function Analytics() {
                 <h2 className="text-sm font-bold tracking-tight mb-4">Daily Activity</h2>
                 {loading ? <SkeletonBox className="h-32" /> : (
                   <div className="flex items-end gap-1 h-32">
-                    {dailyCounts.map((day, i) => (
-                      <div key={i} className="flex-1 flex flex-col items-center gap-1 group relative">
-                        <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap z-10">
-                          {day.count} · {day.label}
+                    {dailyCounts.map((day, i) => {
+                      const isToday = day.date.toDateString() === now.toDateString()
+                      return (
+                        <div key={i} className="flex-1 flex flex-col items-center gap-1 group relative">
+                          <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-1.5 py-0.5 rounded opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap z-10">
+                            {day.count} · {day.label}{isToday ? ' · Today' : ''}
+                          </div>
+                          <div className="w-full flex items-end justify-center" style={{ height: '112px' }}>
+                            <div
+                              className={`w-full rounded-t-md transition-all ${
+                                isToday ? 'bg-orange-400 hover:opacity-70' : day.count > 0 ? 'bg-black hover:opacity-70' : 'bg-gray-100 dark:bg-gray-800'
+                              }`}
+                              style={{ height: day.count > 0 || isToday ? `${Math.max((day.count / maxDailyCount) * 100, 8)}%` : '4px' }}
+                            />
+                          </div>
                         </div>
-                        <div className="w-full flex items-end justify-center" style={{ height: '112px' }}>
-                          <div
-                            className={`w-full rounded-t-md transition-all ${day.count > 0 ? 'bg-black hover:opacity-70' : 'bg-gray-100 dark:bg-gray-800'}`}
-                            style={{ height: day.count > 0 ? `${Math.max((day.count / maxDailyCount) * 100, 8)}%` : '4px' }}
-                          />
-                        </div>
-                      </div>
-                    ))}
+                      )
+                    })}
                   </div>
                 )}
                 <div className="flex justify-between mt-2">
                   <span className="text-xs text-gray-400 dark:text-gray-500">{dailyCounts[0]?.label}</span>
-                  <span className="text-xs text-gray-400 dark:text-gray-500">{dailyCounts[dailyCounts.length - 1]?.label}</span>
+                  <span className="text-xs font-semibold text-orange-400">Today</span>
                 </div>
               </div>
 
               <div className="bg-surface border border-theme rounded-2xl p-5">
                 <h2 className="text-sm font-bold tracking-tight mb-4">Best Days to Post</h2>
                 {loading ? <SkeletonBox className="h-24" /> : (
-                  <div className="flex items-end gap-2 h-24">
-                    {dayOfWeekCounts.map((day, i) => {
-                      const pct   = maxDayCount > 0 ? (day.count / maxDayCount) * 100 : 0
-                      const isTop = day.count === maxDayCount && day.count > 0
-                      return (
-                        <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                          <div className="w-full flex items-end justify-center" style={{ height: '72px' }}>
-                            <div
-                              className={`w-full rounded-t-lg transition-all ${isTop ? 'bg-black' : day.count > 0 ? 'bg-gray-200 dark:bg-gray-700' : 'bg-gray-100 dark:bg-gray-800'}`}
-                              style={{ height: day.count > 0 ? `${Math.max(pct, 10)}%` : '4px' }}
-                            />
+                  <>
+                    <div className="flex items-end gap-2 h-24">
+                      {dayOfWeekCounts.map((day, i) => {
+                        const pct   = maxDayCount > 0 ? (day.count / maxDayCount) * 100 : 0
+                        const isTop = day.count === maxDayCount && day.count > 0
+                        return (
+                          <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                            <div className="w-full flex items-end justify-center" style={{ height: '72px' }}>
+                              <div
+                                className={`w-full rounded-t-lg transition-all ${isTop ? 'bg-black' : day.count > 0 ? 'bg-gray-200 dark:bg-gray-700' : 'bg-gray-100 dark:bg-gray-800'}`}
+                                style={{ height: day.count > 0 ? `${Math.max(pct, 10)}%` : '4px' }}
+                              />
+                            </div>
+                            <span className={`text-xs font-semibold ${isTop ? 'text-black dark:text-white' : 'text-gray-400 dark:text-gray-500'}`}>{day.day}</span>
+                            <span className="text-xs text-gray-400 dark:text-gray-500">{day.count}</span>
                           </div>
-                          <span className={`text-xs font-semibold ${isTop ? 'text-black dark:text-white' : 'text-gray-400 dark:text-gray-500'}`}>{day.day}</span>
-                          <span className="text-xs text-gray-400 dark:text-gray-500">{day.count}</span>
-                        </div>
-                      )
-                    })}
-                  </div>
+                        )
+                      })}
+                    </div>
+                    {bestDay.count > 0 && (
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
+                        You post most on <span className="font-bold text-black dark:text-white">{bestDay.day}s</span> — {bestDay.count} post{bestDay.count !== 1 ? 's' : ''} this period
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
 
@@ -731,7 +772,10 @@ export default function Analytics() {
                               style={{ height: m.count > 0 ? `${Math.max((m.count / maxMonthCount) * 100, 8)}%` : '4px' }}
                             />
                           </div>
-                          <span className={`text-xs ${isCurrent ? 'font-bold text-black dark:text-white' : 'text-gray-400 dark:text-gray-500'} hidden sm:block`}>{m.month}</span>
+                          <span className={`text-xs ${isCurrent ? 'font-bold text-black dark:text-white' : 'text-gray-400 dark:text-gray-500'}`}>
+                            <span className="hidden sm:inline">{m.month}</span>
+                            <span className="sm:hidden">{m.month.slice(0, 1)}</span>
+                          </span>
                         </div>
                       )
                     })}

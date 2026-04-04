@@ -66,6 +66,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/vs/socialpilot`,  lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/vs/zoho-social`,  lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/vs/socialrails`,  lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${base}/vs/loomly`,       lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/coschedule`,   lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/meetedgar`,    lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
   ]
 
   const blogPosts: MetadataRoute.Sitemap = BLOG_SLUGS.map(slug => ({
