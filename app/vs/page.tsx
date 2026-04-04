@@ -3,10 +3,10 @@ import Link from 'next/link'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Other Social Media Tools (2026) — Full Comparisons',
-  description: 'See how SocialMate compares to Hootsuite, Buffer, Later, Metricool, Planable, Sendible, and more. Free plan, no credit card, no limits.',
+  description: 'See how SocialMate compares to Hootsuite, Buffer, Later, Sprout Social, Metricool, Planable, Sendible, SocialPilot, and more. Free plan, no credit card, no limits.',
   openGraph: {
     title:       'SocialMate vs Other Social Media Tools (2026)',
-    description: 'Honest, detailed comparisons between SocialMate and the most popular social media scheduling tools. Free plan always available.',
+    description: 'Honest, detailed comparisons between SocialMate and 11 popular social media scheduling tools. Free plan always available.',
     url:         'https://socialmate.studio/vs',
   },
   alternates: { canonical: 'https://socialmate.studio/vs' },

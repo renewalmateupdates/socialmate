@@ -50,6 +50,8 @@ SocialMate compared to competitors:
 - vs Metricool: https://socialmate.studio/vs/metricool
 - vs Publer: https://socialmate.studio/vs/publer
 - vs Planable: https://socialmate.studio/vs/planable
+- vs Sprout Social: https://socialmate.studio/vs/sprout-social
+- vs SocialPilot: https://socialmate.studio/vs/socialpilot
 - vs Zoho Social: https://socialmate.studio/vs/zoho-social
 
 ## Blog
