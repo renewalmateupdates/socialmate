@@ -95,10 +95,60 @@ function DashboardInner() {
     }
   }
 
+  const applyPosts = (posts: Post[]) => {
+    const now        = new Date()
+    const weekAgo    = new Date(now); weekAgo.setDate(now.getDate() - 7)
+    const todayStart = new Date(now); todayStart.setHours(0, 0, 0, 0)
+    const todayEnd   = new Date(now); todayEnd.setHours(23, 59, 59, 999)
+
+    // Treat failed posts that have platform_post_ids as published (repair display only)
+    const normalised = posts.map(p =>
+      p.status === 'failed' && (p as any).platform_post_ids && Object.keys((p as any).platform_post_ids).length > 0
+        ? { ...p, status: 'published' }
+        : p
+    )
+
+    setStats({
+      scheduled:     normalised.filter(p => p.status === 'scheduled' && new Date(p.scheduled_at) > now).length,
+      drafts:        normalised.filter(p => p.status === 'draft').length,
+      thisWeek:      normalised.filter(p => new Date(p.created_at) >= weekAgo).length,
+      published:     normalised.filter(p => p.status === 'published').length,
+      todayCount:    normalised.filter(p => p.status === 'scheduled' && new Date(p.scheduled_at) >= todayStart && new Date(p.scheduled_at) <= todayEnd).length,
+      upcomingCount: normalised.filter(p => p.status === 'scheduled' && new Date(p.scheduled_at) > now).length,
+    })
+
+    setUpcomingPosts(normalised.filter(p => p.status === 'scheduled' && new Date(p.scheduled_at) > now).slice(0, 4))
+    setRecentPosts(
+      normalised
+        .filter(p => p.status === 'draft' || p.status === 'published')
+        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 3)
+    )
+
+    const counts = [0,0,0,0,0,0,0]
+    normalised.forEach(p => {
+      const d = new Date(p.created_at)
+      if (d >= weekAgo) counts[d.getDay()]++
+    })
+    setWeekCounts(counts)
+  }
+
   useEffect(() => {
+    let currentUserId: string | null = null
+
+    const loadPosts = async (uid: string) => {
+      const { data: posts } = await supabase
+        .from('posts')
+        .select('id, content, platforms, status, scheduled_at, created_at, platform_post_ids')
+        .eq('user_id', uid)
+        .order('scheduled_at', { ascending: true })
+      if (posts) applyPosts(posts as Post[])
+    }
+
     const init = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
+      currentUserId = user.id
 
       const { data: profile } = await supabase
         .from('profiles')
@@ -108,42 +158,7 @@ function DashboardInner() {
 
       if (!profile?.onboarding_completed) { router.push('/onboarding'); return }
 
-      const { data: posts } = await supabase
-        .from('posts')
-        .select('id, content, platforms, status, scheduled_at, created_at')
-        .eq('user_id', user.id)
-        .order('scheduled_at', { ascending: true })
-
-      if (posts) {
-        const now       = new Date()
-        const weekAgo   = new Date(now); weekAgo.setDate(now.getDate() - 7)
-        const todayStart = new Date(now); todayStart.setHours(0, 0, 0, 0)
-        const todayEnd   = new Date(now); todayEnd.setHours(23, 59, 59, 999)
-
-        setStats({
-          scheduled:     posts.filter(p => p.status === 'scheduled' && new Date(p.scheduled_at) > now).length,
-          drafts:        posts.filter(p => p.status === 'draft').length,
-          thisWeek:      posts.filter(p => new Date(p.created_at) >= weekAgo).length,
-          published:     posts.filter(p => p.status === 'published').length,
-          todayCount:    posts.filter(p => p.status === 'scheduled' && new Date(p.scheduled_at) >= todayStart && new Date(p.scheduled_at) <= todayEnd).length,
-          upcomingCount: posts.filter(p => p.status === 'scheduled' && new Date(p.scheduled_at) > now).length,
-        })
-
-        setUpcomingPosts(posts.filter(p => p.status === 'scheduled' && new Date(p.scheduled_at) > now).slice(0, 4))
-        setRecentPosts(
-          posts
-            .filter(p => p.status === 'draft' || p.status === 'published')
-            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-            .slice(0, 3)
-        )
-
-        const counts = [0,0,0,0,0,0,0]
-        posts.forEach(p => {
-          const d = new Date(p.created_at)
-          if (d >= weekAgo) counts[d.getDay()]++
-        })
-        setWeekCounts(counts)
-      }
+      await loadPosts(user.id)
 
       // Load posting streak
       const { data: settingsData } = await supabase
@@ -162,6 +177,18 @@ function DashboardInner() {
       if (!dismissed) setWelcomeDismissed(false)
     }
     init()
+
+    // Realtime: re-fetch stats whenever any post changes status
+    const channel = supabase
+      .channel('dashboard-posts')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'posts' },
+        () => { if (currentUserId) loadPosts(currentUserId) }
+      )
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
   }, [router])
 
   if (loading) {
