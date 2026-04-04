@@ -95,7 +95,7 @@ export default function AdminAffiliatesClient() {
   }
 
   return (
-    <div className="min-h-screen bg-theme p-8">
+    <div className="min-h-dvh bg-theme p-8">
       <div className="max-w-5xl mx-auto">
 
         <div className="mb-8 flex items-center justify-between">

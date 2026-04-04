@@ -57,7 +57,7 @@ export default function SMRadarPage() {
   }
 
   return (
-    <div className="min-h-screen bg-theme flex">
+    <div className="min-h-dvh bg-theme flex">
       <Sidebar />
       <main className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">

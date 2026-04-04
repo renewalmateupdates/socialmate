@@ -45,7 +45,7 @@ function InviteInner() {
   }
 
   return (
-    <div className="min-h-screen bg-theme flex items-center justify-center p-4">
+    <div className="min-h-dvh bg-theme flex items-center justify-center p-4">
       <div className="bg-surface rounded-2xl border border-theme p-8 max-w-md w-full text-center shadow-sm">
 
         {status === 'loading' && (
@@ -106,7 +106,7 @@ function InviteInner() {
 export default function InvitePage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-theme flex items-center justify-center">
+      <div className="min-h-dvh bg-theme flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
       </div>
     }>

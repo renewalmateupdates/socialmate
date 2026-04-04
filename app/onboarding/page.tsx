@@ -367,7 +367,7 @@ function OnboardingInner() {
   )
 
   return (
-    <div className="min-h-screen bg-theme flex flex-col">
+    <div className="min-h-dvh bg-theme flex flex-col">
 
       <div className="bg-surface border-b border-theme px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -1011,7 +1011,7 @@ function OnboardingInner() {
 export default function Onboarding() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-theme flex items-center justify-center">
+      <div className="min-h-dvh bg-theme flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
       </div>
     }>

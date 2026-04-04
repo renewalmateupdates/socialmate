@@ -94,7 +94,7 @@ export default function NewWorkspace() {
 
   if (!authChecked) {
     return (
-      <div className="min-h-screen bg-theme flex">
+      <div className="min-h-dvh bg-theme flex">
         <Sidebar />
         <div className="md:ml-56 flex-1 flex items-center justify-center">
           <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin" />
@@ -106,7 +106,7 @@ export default function NewWorkspace() {
   // Free: upgrade wall
   if (plan === 'free') {
     return (
-      <div className="min-h-screen bg-theme flex">
+      <div className="min-h-dvh bg-theme flex">
         <Sidebar />
         <div className="md:ml-56 flex-1 p-8 flex items-center justify-center">
           <div className="max-w-md text-center">
@@ -146,7 +146,7 @@ export default function NewWorkspace() {
   // At limit
   if (clientCount >= limit) {
     return (
-      <div className="min-h-screen bg-theme flex">
+      <div className="min-h-dvh bg-theme flex">
         <Sidebar />
         <div className="md:ml-56 flex-1 p-8 flex items-center justify-center">
           <div className="max-w-md text-center">
@@ -191,7 +191,7 @@ export default function NewWorkspace() {
   }
 
   return (
-    <div className="min-h-screen bg-theme flex">
+    <div className="min-h-dvh bg-theme flex">
       <Sidebar />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-xl mx-auto">

@@ -84,7 +84,7 @@ export default function AffiliatePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-theme flex">
+      <div className="min-h-dvh bg-theme flex">
         <Sidebar />
         <div className="md:ml-56 flex-1 flex items-center justify-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black dark:border-white" />
@@ -94,7 +94,7 @@ export default function AffiliatePage() {
   }
 
   return (
-    <div className="min-h-screen bg-theme flex">
+    <div className="min-h-dvh bg-theme flex">
       <Sidebar />
       <main className="md:ml-56 flex-1 overflow-y-auto p-4 md:p-8">
         <div className="max-w-3xl mx-auto space-y-6">

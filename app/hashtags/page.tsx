@@ -109,7 +109,7 @@ export default function Hashtags() {
   const tagCount = tags.split(/[\s,]+/).filter(t => t.trim().length > 0).length
 
   return (
-    <div className="min-h-screen bg-theme flex">
+    <div className="min-h-dvh bg-theme flex">
       <Sidebar />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">

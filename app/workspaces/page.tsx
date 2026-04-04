@@ -49,7 +49,7 @@ export default function Workspaces() {
   // Free users: upgrade wall
   if (plan === 'free') {
     return (
-      <div className="min-h-screen bg-theme flex">
+      <div className="min-h-dvh bg-theme flex">
         <Sidebar />
         <div className="md:ml-56 flex-1 p-8 flex items-center justify-center">
           <div className="max-w-md text-center">
@@ -86,7 +86,7 @@ export default function Workspaces() {
   const clientWs   = workspaces.filter((w: any) => !w.is_personal)
 
   return (
-    <div className="min-h-screen bg-theme flex">
+    <div className="min-h-dvh bg-theme flex">
       <Sidebar />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-4xl mx-auto">

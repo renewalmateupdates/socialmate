@@ -383,7 +383,7 @@ function SettingsInner() {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-theme flex">
+      <div className="min-h-dvh bg-theme flex">
         <Sidebar />
         <div className="md:ml-56 flex-1 flex items-center justify-center">
           <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin" />
@@ -393,7 +393,7 @@ function SettingsInner() {
   }
 
   return (
-    <div className="min-h-screen bg-theme flex">
+    <div className="min-h-dvh bg-theme flex">
       <Sidebar />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-3xl mx-auto">
@@ -1158,7 +1158,7 @@ function SettingsInner() {
 export default function Settings() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-theme flex items-center justify-center">
+      <div className="min-h-dvh bg-theme flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin" />
       </div>
     }>

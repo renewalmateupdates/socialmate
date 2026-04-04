@@ -93,7 +93,7 @@ function SignupForm() {
 
   if (done) {
     return (
-      <div className="min-h-screen bg-theme flex flex-col">
+      <div className="min-h-dvh bg-theme flex flex-col">
         <div className="border-b border-theme bg-surface px-8 py-4">
           <Link href="/" className="flex items-center gap-2 w-fit">
             <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
@@ -135,7 +135,7 @@ function SignupForm() {
   }
 
   return (
-    <div className="min-h-screen bg-theme flex flex-col">
+    <div className="min-h-dvh bg-theme flex flex-col">
       <div className="border-b border-theme bg-surface px-8 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
@@ -372,7 +372,7 @@ function SignupForm() {
 
 export default function Signup() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-theme flex items-center justify-center"><div className="w-6 h-6 border-2 border-gray-200 dark:border-gray-700 border-t-black rounded-full animate-spin" /></div>}>
+    <Suspense fallback={<div className="min-h-dvh bg-theme flex items-center justify-center"><div className="w-6 h-6 border-2 border-gray-200 dark:border-gray-700 border-t-black rounded-full animate-spin" /></div>}>
       <SignupForm />
     </Suspense>
   )

@@ -133,13 +133,13 @@ export default function AdminHubClient() {
   }
 
   if (loading) return (
-    <div className="min-h-screen bg-theme flex items-center justify-center">
+    <div className="min-h-dvh bg-theme flex items-center justify-center">
       <div className="text-gray-400 text-sm">Loading admin hub...</div>
     </div>
   )
 
   return (
-    <div className="min-h-screen bg-theme p-6 md:p-8">
+    <div className="min-h-dvh bg-theme p-6 md:p-8">
       <div className="max-w-5xl mx-auto">
 
         {/* Header */}

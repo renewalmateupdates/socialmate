@@ -2,58 +2,57 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'SocialMate vs Buffer (2026) — Full Comparison',
-  description: "Buffer's free plan limits you to 3 channels and 10 queued posts total. SocialMate's free plan includes bulk scheduling, no channel cap, and 12 AI tools.",
+  title: 'SocialMate vs Sendible (2026) — Full Comparison',
+  description: 'Sendible starts at $29/mo for only 1 user and 6 profiles with no free plan. SocialMate is free forever with no profile limits and 12 AI tools included.',
   openGraph: {
-    title:       'SocialMate vs Buffer (2026)',
-    description: "Buffer free plan: 3 channels, 10 queued posts, no bulk scheduling. SocialMate free plan: no channel cap, bulk scheduler included, 12 AI tools.",
-    url:         'https://socialmate.studio/vs/buffer',
+    title:       'SocialMate vs Sendible (2026)',
+    description: 'Sendible charges $29/mo for just 1 user and 6 profiles. SocialMate is free — no credit card, no profile cap, no agency pricing required.',
+    url:         'https://socialmate.studio/vs/sendible',
   },
-  alternates: { canonical: 'https://socialmate.studio/vs/buffer' },
+  alternates: { canonical: 'https://socialmate.studio/vs/sendible' },
 }
 
 const COMPARISON = [
-  { feature: 'Starting price',          buffer: '$6/month (Essentials)',     socialmate: '$0 — free forever'       },
-  { feature: 'Free plan channels',      buffer: '3 channels',                socialmate: 'No hard cap'             },
-  { feature: 'Free plan queue limit',   buffer: '10 posts per channel',      socialmate: 'Unlimited'               },
-  { feature: 'Bulk scheduling',         buffer: '❌ Not available',           socialmate: '✅ Free'                  },
-  { feature: 'Analytics',              buffer: 'Paid add-on',               socialmate: '✅ Built-in free'         },
-  { feature: 'Engagement / Reply inbox', buffer: 'Paid add-on',             socialmate: '✅ Included'              },
-  { feature: 'Discord support',         buffer: '❌',                         socialmate: '✅'                      },
-  { feature: 'Telegram support',        buffer: '❌',                         socialmate: '✅'                      },
-  { feature: 'Mastodon support',        buffer: '❌',                         socialmate: '✅'                      },
-  { feature: 'Bluesky support',         buffer: '✅ (basic)',                 socialmate: '✅'                      },
-  { feature: 'AI writing tools',        buffer: 'AI assistant (paid)',       socialmate: '12 tools included free'  },
-  { feature: 'AI credits free tier',    buffer: 'None on free plan',         socialmate: '75/month free'            },
-  { feature: 'Link in bio',             buffer: 'Start page (limited free)', socialmate: '✅ Free'                  },
-  { feature: 'Hashtag manager',         buffer: '❌',                         socialmate: '✅ Free'                  },
-  { feature: 'Competitor tracking',     buffer: '❌',                         socialmate: '✅ Free (3 accounts)'    },
-  { feature: 'RSS import',              buffer: '❌',                         socialmate: '✅ Free'                  },
-  { feature: 'Evergreen recycling',     buffer: '❌',                         socialmate: '✅ Free'                  },
-  { feature: 'Team seats (free)',        buffer: '1',                         socialmate: '2'                       },
-  { feature: 'Client workspaces',       buffer: 'Not available',             socialmate: 'Pro+: from $5/mo'        },
+  { feature: 'Starting price',          sendible: '$29/month (Creator)',      socialmate: '$0 — free forever'       },
+  { feature: 'Free plan',               sendible: '❌ None',                   socialmate: '✅ Free forever'         },
+  { feature: 'Users on starting plan',  sendible: '1 user',                   socialmate: '2 users free'            },
+  { feature: 'Profiles on starting plan', sendible: '6 profiles',             socialmate: 'No hard cap (free tier)' },
+  { feature: 'Pricing model',           sendible: 'Agency-tiered',            socialmate: 'Flat rate'               },
+  { feature: 'Discord support',         sendible: '❌',                        socialmate: '✅'                      },
+  { feature: 'Telegram support',        sendible: '❌',                        socialmate: '✅'                      },
+  { feature: 'Mastodon support',        sendible: '❌',                        socialmate: '✅'                      },
+  { feature: 'Bluesky support',         sendible: '❌',                        socialmate: '✅'                      },
+  { feature: 'AI writing tools',        sendible: 'Basic AI assist',          socialmate: '12 tools included'       },
+  { feature: 'AI credits free tier',    sendible: 'N/A (no free plan)',       socialmate: '75/month free'            },
+  { feature: 'Bulk scheduling',         sendible: 'Paid plans',               socialmate: '✅ Free'                  },
+  { feature: 'Link in bio',             sendible: '❌',                        socialmate: '✅ Free'                  },
+  { feature: 'Hashtag manager',         sendible: 'Paid plans',               socialmate: '✅ Free'                  },
+  { feature: 'Competitor tracking',     sendible: 'Higher tiers',             socialmate: '✅ Free (3 accounts)'    },
+  { feature: 'RSS import',              sendible: '✅ Paid plans',             socialmate: '✅ Free'                  },
+  { feature: 'Evergreen recycling',     sendible: '✅ Paid plans',             socialmate: '✅ Free'                  },
+  { feature: 'Client workspaces',       sendible: 'White-label ($199+/mo)',   socialmate: 'Pro+: from $5/mo'        },
 ]
 
 const FAQ = [
   {
-    q: "How limited is Buffer's free plan really?",
-    a: "Buffer free limits you to 3 connected channels and only 10 queued posts per channel at any given time. That means if you post daily, you can only schedule 10 days out. There is no bulk scheduling, no AI tools, and no analytics on the free plan. SocialMate's free plan has none of these caps.",
+    q: 'Does Sendible have a free plan?',
+    a: 'No. Sendible has no free plan at all. Their cheapest option is the Creator plan at $29/month, which gives you 1 user and 6 social profiles. SocialMate is completely free to start with no credit card required.',
   },
   {
-    q: 'Did Buffer remove their analytics and reply tools?',
-    a: 'Yes. Buffer separated their analytics (formerly Buffer Analyze) and engagement inbox (formerly Buffer Reply) into paid add-ons. If you want a complete tool in one product, you will pay extra — or choose SocialMate, where analytics and engagement are built in.',
+    q: 'Who is Sendible built for?',
+    a: 'Sendible is primarily designed for agencies managing multiple client accounts. That means the pricing tiers, onboarding, and feature set are all built around agency workflows. If you are a solo creator, small team, or indie brand, you will be paying agency prices for features you do not need.',
   },
   {
-    q: 'Does SocialMate have a post queue like Buffer?',
-    a: "Yes. SocialMate has a full scheduling calendar and queue system. Unlike Buffer, there is no 10-post limit on the queue. You can schedule months of content at once using the bulk scheduler — free.",
+    q: 'Which platforms does SocialMate support that Sendible does not?',
+    a: 'SocialMate supports Discord, Telegram, Mastodon, and Bluesky — none of which Sendible covers. If your community is on any of these growing platforms, Sendible simply is not an option.',
   },
   {
     q: 'Is SocialMate actually free with no catch?',
-    a: 'Yes. Free tier includes unlimited posts, 75 AI credits/month, bulk scheduling, link in bio, hashtag manager, competitor tracking, RSS import, and evergreen recycling. No credit card required.',
+    a: 'Yes. Free tier includes unlimited posts, 75 AI credits/month, bulk scheduling, link in bio, hashtag manager, competitor tracking, RSS import, and evergreen recycling. No credit card required and no free trial countdown.',
   },
 ]
 
-export default function VsBufferPage() {
+export default function VsSendiblePage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
       {/* NAV */}
@@ -78,10 +77,10 @@ export default function VsBufferPage() {
             Updated April 2026
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight mb-4 dark:text-white">
-            SocialMate vs Buffer
+            SocialMate vs Sendible
           </h1>
           <p className="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-            Buffer free plan: 3 channels, 10 queued posts, no bulk scheduling. SocialMate free plan: no caps, bulk scheduler, 12 AI tools included.
+            Sendible starts at $29/mo for 1 user and 6 profiles — with no free plan. SocialMate is free forever, no credit card required.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-black text-white font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -96,26 +95,26 @@ export default function VsBufferPage() {
         {/* VERDICT BANNER */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
           <div className="bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-2xl p-6">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Buffer</p>
-            <p className="font-extrabold text-lg mb-2 dark:text-white">Simple scheduler, fragmented feature set</p>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Sendible</p>
+            <p className="font-extrabold text-lg mb-2 dark:text-white">Agency tool with agency pricing</p>
             <ul className="space-y-1 text-xs text-gray-500 dark:text-gray-400">
-              <li>✅ Clean, simple UI</li>
-              <li>✅ Reliable posting queue</li>
-              <li>❌ Free plan capped at 3 channels + 10 posts</li>
-              <li>❌ No bulk scheduling on any plan</li>
-              <li>❌ Analytics and Reply tools are paid add-ons</li>
-              <li>❌ No Discord, Telegram, or Mastodon support</li>
+              <li>✅ Strong client reporting</li>
+              <li>✅ White-label options for agencies</li>
+              <li>❌ No free plan at all</li>
+              <li>❌ $29/mo for only 1 user + 6 profiles</li>
+              <li>❌ No Discord, Telegram, Mastodon, Bluesky</li>
+              <li>❌ Overkill complexity for solo users</li>
             </ul>
           </div>
           <div className="bg-black text-white rounded-2xl p-6">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">Everything in one. No add-ons. No caps.</p>
+            <p className="font-extrabold text-lg mb-2">Full feature set. Zero dollars.</p>
             <ul className="space-y-1 text-xs text-gray-300">
-              <li>✅ Unlimited posts, no queue cap</li>
-              <li>✅ Bulk scheduling free</li>
-              <li>✅ Analytics built in — no add-on</li>
+              <li>✅ Free forever — no trial countdown</li>
               <li>✅ 12 AI tools on free tier</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
+              <li>✅ Bulk scheduling free</li>
+              <li>✅ 2 team seats on free plan</li>
               <li>✅ No credit card required</li>
             </ul>
           </div>
@@ -127,13 +126,13 @@ export default function VsBufferPage() {
           <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
             <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
               <span>Feature</span>
-              <span>Buffer</span>
+              <span>Sendible</span>
               <span>SocialMate</span>
             </div>
             {COMPARISON.map((row, i) => (
               <div key={i} className={`grid grid-cols-3 px-5 py-3.5 text-sm border-t border-gray-50 dark:border-gray-800 ${i % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50/50 dark:bg-gray-800/30'}`}>
                 <span className="font-semibold text-gray-700 dark:text-gray-300 text-xs">{row.feature}</span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">{row.buffer}</span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">{row.sendible}</span>
                 <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">{row.socialmate}</span>
               </div>
             ))}
@@ -142,28 +141,28 @@ export default function VsBufferPage() {
 
         {/* WHY SWITCH */}
         <div className="mb-12">
-          <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">Why people switch from Buffer</h2>
+          <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">Why people switch from Sendible</h2>
           <div className="space-y-4">
             {[
               {
                 n: '1',
-                title: 'The free plan queue limit is unusable for real content',
-                desc: 'Buffer lets you queue only 10 posts per channel on the free plan. That is less than two weeks of daily posting. Once you hit the limit you either pay or manually delete old posts to make room. SocialMate has no queue limit at all.',
+                title: 'Sendible has no free plan — at all',
+                desc: 'There is no trial that converts to free. Once your trial ends, you pay $29/month or you are locked out. SocialMate has no trial countdown — the free plan is permanent, with full access to bulk scheduling, AI tools, and more.',
               },
               {
                 n: '2',
-                title: 'Buffer dropped bulk scheduling entirely',
-                desc: "Buffer has never had a true bulk scheduler. If you want to upload 30 posts at once from a CSV or spreadsheet, you cannot do it in Buffer on any plan. SocialMate's bulk scheduler is free and supports mass CSV uploads.",
+                title: '$29/mo is a lot for 1 user and 6 profiles',
+                desc: 'Sendible\'s Creator plan gives you exactly 1 user seat and 6 social profiles. If you manage more than 6 accounts or want to add a collaborator, you move to the next tier. SocialMate gives you more flexibility at $0.',
               },
               {
                 n: '3',
-                title: 'Analytics and Reply are separate paid products now',
-                desc: 'Buffer spun off their analytics and engagement inbox into add-ons after years of being bundled. You now need to pay separately for features that used to be included. SocialMate keeps analytics and engagement built in at no extra cost.',
+                title: 'Sendible is built for agencies — not for you',
+                desc: 'Sendible\'s onboarding, pricing structure, and feature set are designed around agencies managing dozens of client accounts. If you are building your own brand or running a small team, the complexity and cost are not worth it.',
               },
               {
                 n: '4',
-                title: 'SocialMate covers platforms Buffer does not',
-                desc: 'Discord, Telegram, and Mastodon are not supported by Buffer. If your community exists on any of these platforms, Buffer simply cannot help you. SocialMate covers all three on the free plan.',
+                title: 'SocialMate covers platforms Sendible ignores',
+                desc: 'Discord, Telegram, Mastodon, and Bluesky are not supported by Sendible. If any part of your audience lives on these platforms, you need a tool that covers them. SocialMate does — on the free plan.',
               },
             ].map((r) => (
               <div key={r.n} className="flex gap-4 p-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl hover:border-gray-300 dark:hover:border-gray-600 transition-all">
@@ -192,9 +191,9 @@ export default function VsBufferPage() {
 
         {/* CTA */}
         <div className="bg-black text-white rounded-2xl p-8 text-center">
-          <h2 className="text-2xl font-extrabold tracking-tight mb-3">Done working around Buffer&apos;s limits?</h2>
+          <h2 className="text-2xl font-extrabold tracking-tight mb-3">Why pay $29/mo when $0 works?</h2>
           <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is unlimited posts, bulk scheduling, 12 AI tools, 16 platforms — completely free to start. No credit card required.
+            SocialMate is free forever — bulk scheduling, 12 AI tools, 16 platforms, no credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             Create free account →
@@ -212,7 +211,7 @@ export default function VsBufferPage() {
           </Link>
           <div className="flex items-center gap-6 text-xs text-gray-400 dark:text-gray-500">
             <Link href="/pricing" className="hover:text-black dark:hover:text-white transition-colors">Pricing</Link>
-            <Link href="/vs/sendible" className="hover:text-black dark:hover:text-white transition-colors">vs Sendible</Link>
+            <Link href="/vs/buffer" className="hover:text-black dark:hover:text-white transition-colors">vs Buffer</Link>
             <Link href="/vs/later" className="hover:text-black dark:hover:text-white transition-colors">vs Later</Link>
             <Link href="/vs/metricool" className="hover:text-black dark:hover:text-white transition-colors">vs Metricool</Link>
             <Link href="/blog" className="hover:text-black dark:hover:text-white transition-colors">Blog</Link>

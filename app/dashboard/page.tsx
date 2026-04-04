@@ -215,7 +215,7 @@ function DashboardInner() {
   const creditColor  = creditPct > 50 ? 'bg-green-500' : creditPct > 20 ? 'bg-yellow-400' : 'bg-red-400'
 
   return (
-    <div className="flex min-h-screen bg-theme">
+    <div className="flex min-h-dvh bg-theme">
       {showCreditModal && <CreditSuccessModal onDismiss={handleCreditModalDismiss} />}
       {user && <DashboardTour userId={user.id} />}
       <Sidebar />

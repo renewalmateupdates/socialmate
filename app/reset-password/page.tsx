@@ -54,7 +54,7 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="min-h-screen bg-theme flex flex-col">
+    <div className="min-h-dvh bg-theme flex flex-col">
       <div className="border-b border-theme bg-surface px-8 py-4">
         <Link href="/" className="flex items-center gap-2 w-fit">
           <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
