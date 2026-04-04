@@ -166,6 +166,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   const [collapsed, setCollapsed]               = useState<Record<string, boolean>>({})
   const [sectionOrder, setSectionOrder]         = useState<string[]>(NAV_BASE.map(g => g.section))
   const [statsVisible, setStatsVisible]         = useState(true)
+  const [scheduledCount, setScheduledCount]     = useState(0)
   const pathname = usePathname()
   const router   = useRouter()
 
@@ -217,6 +218,40 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUser(data.user))
+  }, [])
+
+  // Scheduled post count badge on Queue link
+  useEffect(() => {
+    let uid: string | null = null
+
+    const fetchCount = async (userId: string) => {
+      const now = new Date().toISOString()
+      const { count } = await supabase
+        .from('posts')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('status', 'scheduled')
+        .gt('scheduled_at', now)
+      setScheduledCount(count ?? 0)
+    }
+
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data.user) return
+      uid = data.user.id
+      fetchCount(uid)
+    })
+
+    const channel = supabase
+      .channel('sidebar-scheduled')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'posts' },
+        () => { if (uid) fetchCount(uid) }
+      )
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'posts' },
+        () => { if (uid) fetchCount(uid) }
+      )
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
   }, [])
 
   const handleSignOut = async () => {
@@ -458,6 +493,11 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
                             credits < 20 ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400' :
                             'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
                           }`}>{credits}</span>
+                        )}
+                        {item.href === '/queue' && scheduledCount > 0 && (
+                          <span className="text-xs font-bold px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400">
+                            {scheduledCount}
+                          </span>
                         )}
                       </Link>
                     )

@@ -29,7 +29,7 @@ export default async function StudioStaxPage() {
   const { data: listings } = await supabase
     .from('curated_listings')
     .select('id, name, tagline, description, url, logo_url, category, tags, smgive_donated_cents, consecutive_featured_months, created_at')
-    .eq('status', 'approved')
+    .eq('status', 'live')
     .order('smgive_donated_cents', { ascending: false })
 
   const byCategory: Record<string, typeof listings> = {}
