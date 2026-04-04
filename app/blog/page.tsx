@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import BlogClientList from '@/components/BlogClientList'
 
 async function getDbPosts() {
   try {
@@ -45,18 +46,19 @@ const STATIC_POSTS = [
   { slug: 'how-to-use-ai-for-social-media-captions',         title: 'How to Use AI to Write Better Social Media Captions',            date: 'Feb 2026',      category: 'Tips',        excerpt: 'AI caption tools can save hours every week. Here\'s how to use them without sounding like a robot.',                    readTime: '3 min read', emoji: '✍️', featured: false },
   { slug: 'why-your-hashtag-strategy-isnt-working',          title: 'Why Your Hashtag Strategy Isn\'t Working (And How to Fix It)',   date: 'Jan 2026',      category: 'Tips',        excerpt: 'Spamming 30 hashtags stopped working years ago. Here\'s what actually drives reach in 2026.',                          readTime: '4 min read', emoji: '#️⃣', featured: false },
   { slug: 'real-cost-of-social-media-management-tools-2025', title: 'The Real Cost of Social Media Management Tools in 2026',        date: 'Dec 2025',      category: 'Guides',      excerpt: 'We did the math on what popular scheduling tools actually cost. The numbers are eye-opening.',                          readTime: '5 min read', emoji: '💰',  featured: false },
+  { slug: 'how-to-schedule-telegram-posts-free',             title: 'How to Schedule Telegram Posts for Free in 2026',               date: 'April 2026',    category: 'Guides',      excerpt: 'Telegram is one of the most underrated platforms for creators and communities. Here\'s how to schedule posts to it without paying for anything.',   readTime: '5 min read', emoji: '✈️',  featured: false },
+  { slug: 'bluesky-vs-twitter-where-to-post-2026',           title: 'Bluesky vs Twitter/X in 2026: Where Should You Actually Post?', date: 'April 2026',    category: 'Comparisons', excerpt: 'Bluesky has crossed 30 million users. X/Twitter still has hundreds of millions. Here\'s the honest breakdown of where your time is better spent.',  readTime: '5 min read', emoji: '⚖️',  featured: false },
+  { slug: 'social-media-content-calendar-template-2026',     title: 'How to Build a Social Media Content Calendar (Free Template + System)', date: 'April 2026', category: 'Resources', excerpt: 'A content calendar you actually use is worth more than a perfect one you abandon. Here\'s a simple system and a free template.',                  readTime: '6 min read', emoji: '📅',  featured: false },
+  { slug: 'best-time-to-post-on-bluesky',                    title: 'The Best Times to Post on Bluesky in 2026 (Data + Tips)',       date: 'April 2026',    category: 'Tips',        excerpt: 'Bluesky is mostly chronological, which means timing matters more here than on algorithm-heavy platforms. Here\'s what\'s working.',                readTime: '4 min read', emoji: '💡',  featured: false },
+  { slug: 'discord-community-management-guide',              title: 'Discord Community Management: How to Keep Members Engaged in 2026', date: 'April 2026', category: 'Guides',      excerpt: 'Most Discord servers go quiet within 60 days of launch. Here\'s what separates the ones that stay active from the ones that become ghost towns.',  readTime: '6 min read', emoji: '💬',  featured: false },
+  { slug: 'social-media-automation-solo-creators',           title: 'Social Media Automation for Solo Creators: Do More in Less Time', date: 'April 2026',   category: 'Tips',        excerpt: 'Solo creators who automate the right things post more consistently, burn out less, and grow faster. Here\'s exactly what to automate.',           readTime: '5 min read', emoji: '💡',  featured: false },
+  { slug: 'free-hootsuite-alternative-2026',                 title: 'The Best Free Hootsuite Alternative in 2026',                    date: 'April 2026',    category: 'Comparisons', excerpt: 'Hootsuite removed their free plan. Prices start at $99/month. Here are the best free alternatives that actually work.',                           readTime: '5 min read', emoji: '⚖️',  featured: false },
+  { slug: 'how-to-grow-discord-server-2026',                 title: 'How to Grow a Discord Server from 0 in 2026',                   date: 'April 2026',    category: 'Growth',      excerpt: 'Growing a Discord server from scratch is slow if you don\'t have a system. Here\'s a proven approach for getting your first 500 members.',        readTime: '6 min read', emoji: '📈',  featured: false },
+  { slug: 'ai-social-media-tools-free-2026',                 title: 'The Best Free AI Social Media Tools in 2026',                   date: 'April 2026',    category: 'Resources',   excerpt: 'AI tools for social media have gotten genuinely useful in 2026. Here\'s a guide to the best free options and what they\'re actually good at.',     readTime: '5 min read', emoji: '🧰',  featured: false },
+  { slug: 'how-to-post-consistently-social-media',           title: 'How to Post Consistently on Social Media (Without Burning Out)', date: 'April 2026',    category: 'Tips',        excerpt: 'Consistency is the single biggest factor in social media growth. Here\'s a system for staying consistent that doesn\'t require willpower.',        readTime: '5 min read', emoji: '💡',  featured: false },
+  { slug: 'mastodon-vs-bluesky-2026',                        title: 'Mastodon vs Bluesky in 2026: Which Decentralized Platform Should You Use?', date: 'April 2026', category: 'Comparisons', excerpt: 'Both are open, decentralized alternatives to X/Twitter. They\'re quite different. Here\'s how to decide which one is worth your time.',      readTime: '5 min read', emoji: '⚖️',  featured: false },
+  { slug: 'social-media-scheduling-agencies-freelancers',    title: 'Social Media Scheduling for Agencies and Freelancers: The Practical Guide', date: 'April 2026', category: 'Guides', excerpt: 'Managing social media for multiple clients is a different challenge. Here\'s how to build a system that scales without burning out.',             readTime: '6 min read', emoji: '📋',  featured: false },
 ]
-
-const CATEGORY_COLORS: Record<string, string> = {
-  'Our Story':   'bg-purple-50 text-purple-600',
-  'Guides':      'bg-green-50 text-green-600',
-  'Tips':        'bg-yellow-50 text-yellow-600',
-  'Resources':   'bg-blue-50 text-blue-600',
-  'Growth':      'bg-pink-50 text-pink-600',
-  'Comparisons': 'bg-orange-50 text-orange-600',
-  'studio-stax': 'bg-amber-50 text-amber-600',
-  'Studio Stax': 'bg-amber-50 text-amber-600',
-}
 
 export default async function Blog() {
   const dbPosts  = await getDbPosts()
@@ -66,8 +68,6 @@ export default async function Blog() {
     ...STATIC_POSTS,
     ...dbPosts.filter(p => !slugSet.has(p.slug)),
   ]
-  const featured = allPosts.find(p => p.featured)
-  const rest = allPosts.filter(p => !p.featured)
 
   return (
     <PublicLayout>
@@ -78,43 +78,8 @@ export default async function Blog() {
           <p className="text-sm text-gray-400">Tips, guides, and updates from SocialMate</p>
         </div>
 
-        {/* FEATURED */}
-        {featured && (
-          <Link href={`/blog/${featured.slug}`} className="block bg-black text-white rounded-2xl p-7 mb-6 hover:opacity-90 transition-all">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-xs font-bold px-2 py-0.5 bg-white/20 rounded-full">
-                {featured.category}
-              </span>
-              <span className="text-xs text-gray-400">{featured.date} · {featured.readTime}</span>
-            </div>
-            <div className="text-3xl mb-3">{featured.emoji}</div>
-            <h2 className="text-lg font-extrabold mb-2">{featured.title}</h2>
-            <p className="text-sm text-gray-400 leading-relaxed mb-4">{featured.excerpt}</p>
-            <span className="text-xs font-bold text-white/60">Read more →</span>
-          </Link>
-        )}
-
-        {/* GRID */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {rest.map((post, i) => (
-            <Link key={i} href={`/blog/${post.slug}`}
-              className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-5 hover:border-gray-300 dark:hover:border-gray-500 transition-all block">
-              <div className="flex items-center gap-2 mb-3">
-                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${CATEGORY_COLORS[post.category] || 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}`}>
-                  {post.category}
-                </span>
-                <span className="text-xs text-gray-400 dark:text-gray-500">{post.readTime}</span>
-              </div>
-              <div className="text-2xl mb-2">{post.emoji}</div>
-              <h2 className="text-sm font-extrabold mb-2 leading-snug text-gray-900 dark:text-gray-100">{post.title}</h2>
-              <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-3">{post.excerpt}</p>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-400 dark:text-gray-500">{post.date}</span>
-                <span className="text-xs font-bold text-gray-400 dark:text-gray-500">Read →</span>
-              </div>
-            </Link>
-          ))}
-        </div>
+        {/* Search, category filters, featured post, and grid — all client-side */}
+        <BlogClientList allPosts={allPosts} />
 
         <div className="mt-8 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 text-center">
           <p className="text-sm font-extrabold mb-1 text-gray-900 dark:text-gray-100">Want to try SocialMate?</p>

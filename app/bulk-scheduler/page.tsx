@@ -306,7 +306,8 @@ export default function BulkScheduler() {
                 <div className="flex items-center gap-1">
                   <input type="time" value={defaultTime}
                     onChange={e => setDefaultTime(e.target.value)}
-                    className="px-2.5 py-1.5 text-xs border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none bg-white dark:bg-gray-800 dark:text-gray-100 font-semibold" />
+                    style={{ fontSize: '16px' }}
+                    className="px-2.5 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none bg-white dark:bg-gray-800 dark:text-gray-100 font-semibold" />
                 </div>
                 <button onClick={autoFillDates}
                   className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all whitespace-nowrap">
@@ -349,14 +350,16 @@ export default function BulkScheduler() {
                     <input type="date" value={post.date}
                       min={today} max={maxScheduleDate}
                       onChange={e => handleDateChange(post.id, e.target.value)}
-                      className={`px-2.5 py-1.5 text-xs border rounded-xl focus:outline-none font-semibold ${
+                      style={{ fontSize: '16px' }}
+                      className={`px-2.5 py-1.5 border rounded-xl focus:outline-none font-semibold bg-white dark:bg-gray-800 dark:text-gray-100 ${
                         post.date < today || post.date > maxScheduleDate
                           ? 'border-red-300 text-red-500'
                           : 'border-gray-200 dark:border-gray-600 focus:border-gray-400'
                       }`} />
                     <input type="time" value={post.time}
                       onChange={e => updatePost(post.id, 'time', e.target.value)}
-                      className="px-2.5 py-1.5 text-xs border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none bg-white dark:bg-gray-800 dark:text-gray-100 font-semibold" />
+                      style={{ fontSize: '16px' }}
+                      className="px-2.5 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none bg-white dark:bg-gray-800 dark:text-gray-100 font-semibold" />
                     <button onClick={() => removeRow(post.id)}
                       disabled={posts.length <= 1}
                       className="text-xs text-gray-300 hover:text-red-400 transition-all disabled:opacity-20 flex-shrink-0 ml-auto sm:ml-0">
@@ -464,9 +467,11 @@ export default function BulkScheduler() {
       </div>
 
       {toast && (
-        <div className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${
-          toast.type === 'success' ? 'bg-black text-white' : 'bg-red-500 text-white'
-        }`}>
+        <div
+          style={{ bottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
+          className={`fixed right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${
+            toast.type === 'success' ? 'bg-black text-white' : 'bg-red-500 text-white'
+          }`}>
           {toast.type === 'success' ? '✅' : '❌'} {toast.message}
         </div>
       )}
