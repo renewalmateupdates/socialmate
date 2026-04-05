@@ -11,11 +11,12 @@ type RoadmapItem = {
 
 const ROADMAP: RoadmapItem[] = [
   // ── IN PROGRESS ──────────────────────────────────────────
-  { title: 'Analytics improvements',     desc: 'GitHub-style posting heatmap, platform breakdown charts, best-times visualization, and recent posts table.',     status: 'in-progress',  category: 'Analytics'     },
   { title: 'Media Library',              desc: 'Upload, compress, and reuse images and videos across posts. Client-side compression to 1920px and 2MB max.',     status: 'in-progress',  category: 'Media'         },
   { title: 'Blog auto-generation',       desc: 'Gemini writes a blog feature for each Studio Stax lister once past the refund window. Lister gets notified by email when it\'s live.', status: 'in-progress', category: 'Platform' },
 
   // ── COMING SOON ───────────────────────────────────────────
+  { title: 'Calendar view',              desc: 'Monthly calendar showing all scheduled, published, and draft posts. Click any day to see what\'s queued. Full day-by-day visibility.',   status: 'coming-soon',  category: 'Scheduling'    },
+  { title: 'Streak notifications',       desc: 'Automated streak tracking with at-risk alerts — get notified when your posting streak is about to break.',        status: 'coming-soon',  category: 'Analytics'     },
   { title: 'LinkedIn publishing',        desc: 'Full UGC Posts API integration. Requires LinkedIn developer app approval (r/w_member_social).',                 status: 'coming-soon',  category: 'Platforms'     },
   { title: 'YouTube Community Posts',    desc: 'Post to YouTube Community tab (requires 500+ subscribers). OAuth token management complete.',                    status: 'coming-soon',  category: 'Platforms'     },
   { title: 'Pinterest publishing',       desc: 'Pin creation via Pinterest v5 API with board selection. OAuth complete.',                                        status: 'coming-soon',  category: 'Platforms'     },
@@ -51,6 +52,8 @@ const ROADMAP: RoadmapItem[] = [
   { title: 'Stripe billing',             desc: 'Free, Pro ($5/mo), and Agency ($20/mo) plans with credit pack purchases.',                                       status: 'shipped',      category: 'Platform'      },
   { title: 'Affiliate & partner program', desc: 'Full affiliate portal with application flow, tiered promo codes, single-use regenerating codes, commission tracking, and admin hub.',  status: 'shipped', category: 'Growth' },
   { title: 'Collapsible sidebar',        desc: 'Every sidebar section is collapsible and drag-to-reorder. Theme panel lets you pick a color scheme and toggle dark mode — all persisted.',    status: 'shipped', category: 'Design' },
+  { title: 'Queue drag-to-reorder',      desc: 'Drag posts within a day group to reorder them. Scheduled times redistribute automatically to match the new order.',  status: 'shipped', category: 'Scheduling' },
+  { title: 'Analytics polish',           desc: '14-day streak trail, streak milestone messages, today highlighted in daily activity chart, best-day callout, mobile month labels.', status: 'shipped', category: 'Analytics' },
   { title: 'AI caption tools',           desc: 'Caption generator, hashtag generator, post rewriter, viral hook generator — all on free tier.',                 status: 'shipped',      category: 'AI'            },
   { title: 'Link in Bio builder',        desc: 'Bio page builder with profile, links, themes, and a public URL at /[username].',                                 status: 'shipped',      category: 'Tools'         },
   { title: 'Workspace system',           desc: 'Personal workspace auto-created on signup. Client workspaces on Pro+.',                                          status: 'shipped',      category: 'Teams'         },
