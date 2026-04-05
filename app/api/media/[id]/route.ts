@@ -6,8 +6,9 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -24,7 +25,7 @@ export async function DELETE(
   const { data: item, error: fetchError } = await admin
     .from('media_items')
     .select('id, user_id, storage_path')
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (fetchError || !item) {
@@ -50,7 +51,7 @@ export async function DELETE(
   const { error: dbError } = await admin
     .from('media_items')
     .delete()
-    .eq('id', params.id)
+    .eq('id', id)
 
   if (dbError) {
     console.error('[api/media/[id]] DB delete error:', dbError)
