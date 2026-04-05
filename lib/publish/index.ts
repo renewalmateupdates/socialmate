@@ -5,6 +5,7 @@ import { publishToMastodon }  from './mastodon'
 import { publishToYouTube }   from './youtube'
 import { publishToLinkedIn }  from './linkedin'
 import { publishToPinterest } from './pinterest'
+import { publishToTwitter }   from './twitter'
 
 export type PublishResult = {
   platform:  string
@@ -57,6 +58,9 @@ export async function publishToAll(
           break
         case 'pinterest':
           postId = await publishToPinterest(userId, content, destId)
+          break
+        case 'twitter':
+          postId = await publishToTwitter(userId, content, workspaceId, selectedAccountIds['twitter'], media)
           break
         default:
           results.push({

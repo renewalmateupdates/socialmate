@@ -44,7 +44,7 @@ const PLATFORM_META: Record<string, {
   facebook:  { icon: '📘', color: 'bg-blue-50 border-blue-200',     label: 'Facebook',    status: 'coming_soon', statusNote: 'Awaiting API approval'             },
   tiktok:    { icon: '🎵', color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700',     label: 'TikTok',      status: 'coming_soon', statusNote: 'Awaiting API approval'             },
   threads:   { icon: '🧵', color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700',     label: 'Threads',     status: 'coming_soon', statusNote: 'Awaiting API approval'             },
-  twitter:   { icon: '🐦', color: 'bg-sky-50 border-sky-200',       label: 'X / Twitter', status: 'planned',     statusNote: 'Planned integration'              },
+  twitter:   { icon: '🐦', color: 'bg-sky-50 border-sky-200',       label: 'X / Twitter', status: 'coming_soon', statusNote: 'Beta — connect your X account'    },
   snapchat:  { icon: '👻', color: 'bg-yellow-50 border-yellow-200', label: 'Snapchat',    status: 'planned',     statusNote: 'Planned integration'              },
   lemon8:    { icon: '🍋', color: 'bg-yellow-50 border-yellow-200', label: 'Lemon8',      status: 'planned',     statusNote: 'Planned integration'              },
   bereal:    { icon: '📷', color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700',     label: 'BeReal',      status: 'planned',     statusNote: 'Planned integration'              },
@@ -174,6 +174,7 @@ function AccountsInner() {
     if (success === 'mastodon_connected')  showToast('Mastodon connected successfully!', 'success')
     if (success === 'pinterest_connected') showToast('Pinterest connected successfully!', 'success')
     if (success === 'linkedin_connected')  showToast('LinkedIn connected successfully!', 'success')
+    if (success === 'twitter_connected')   showToast('X (Twitter) connected successfully!', 'success')
     if (success === 'youtube_connected')   showToast('YouTube connected successfully!', 'success')
     if (error === 'discord_denied')                showToast('Discord connection cancelled', 'error')
     if (error === 'mastodon_denied')               showToast('Mastodon connection cancelled', 'error')
@@ -188,6 +189,10 @@ function AccountsInner() {
     if (error === 'pinterest_token_failed')        showToast('Failed to connect Pinterest — please try again', 'error')
     if (error === 'pinterest_db_error')            showToast('Something went wrong saving your account', 'error')
     if (error === 'linkedin_denied')               showToast('LinkedIn connection cancelled', 'error')
+    if (error === 'twitter_denied')                showToast('X connection cancelled', 'error')
+    if (error === 'twitter_token_failed')          showToast('Failed to connect X — please try again', 'error')
+    if (error === 'twitter_user_failed')           showToast('Failed to fetch X profile — please try again', 'error')
+    if (error === 'twitter_db_error')              showToast('X connected but failed to save — please try again', 'error')
     if (error === 'linkedin_invalid_state')        showToast('Security check failed — please try again', 'error')
     if (error === 'linkedin_token_failed')         showToast('Failed to connect LinkedIn — please try again', 'error')
     if (error === 'linkedin_db_error')             showToast('Something went wrong saving your account', 'error')
@@ -244,6 +249,7 @@ function AccountsInner() {
     if (platform === 'pinterest') { window.open('/api/accounts/pinterest/connect', '_blank'); return }
     if (platform === 'linkedin')  { window.open('/api/accounts/linkedin/connect', '_blank');  return }
     if (platform === 'youtube')   { window.open('/api/accounts/youtube/connect', '_blank');   return }
+    if (platform === 'twitter')   { window.open('/api/accounts/twitter/connect', '_blank');   return }
     setConnectingPlatform(platform)
     showToast(`${PLATFORM_META[platform]?.label || platform} integration coming soon!`, 'success')
     setTimeout(() => setConnectingPlatform(null), 2000)

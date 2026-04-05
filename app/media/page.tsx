@@ -46,7 +46,7 @@ export default function MediaLibrary() {
       if (!user) { router.push('/login'); return }
       setUserId(user.id)
       const { data } = await supabase
-        .from('media_files')
+        .from('media_items')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
@@ -73,7 +73,7 @@ export default function MediaLibrary() {
       return
     }
 
-    const currentUsed  = files.reduce((sum, f) => sum + (f.file_size || 0), 0)
+    const currentUsed  = files.reduce((sum, f) => sum + (f.size_bytes || 0), 0)
     const incomingSize = selected.reduce((sum, f) => sum + f.size, 0)
     const storageLimit = PLAN_STORAGE_LIMITS[plan] ?? PLAN_STORAGE_LIMITS.free
     if (currentUsed + incomingSize > storageLimit) {
@@ -95,14 +95,14 @@ export default function MediaLibrary() {
       if (uploadError) { showToast(`Failed to upload ${file.name}`, 'error'); continue }
       const { data: urlData } = supabase.storage.from('media').getPublicUrl(path)
       const { data: record } = await supabase
-        .from('media_files')
+        .from('media_items')
         .insert({
-          user_id:   userId,
-          file_name: file.name,
-          file_path: path,
-          file_url:  urlData.publicUrl,
-          file_type: file.type,
-          file_size: file.size,
+          user_id:      userId,
+          filename:     file.name,
+          storage_path: path,
+          url:          urlData.publicUrl,
+          mime_type:    file.type,
+          size_bytes:   file.size,
         })
         .select()
         .single()
@@ -115,8 +115,8 @@ export default function MediaLibrary() {
 
   const handleDelete = async (file: any) => {
     setDeleting(file.id)
-    await supabase.storage.from('media').remove([file.file_path])
-    await supabase.from('media_files').delete().eq('id', file.id)
+    await supabase.storage.from('media').remove([file.storage_path])
+    await supabase.from('media_items').delete().eq('id', file.id)
     setFiles(prev => prev.filter(f => f.id !== file.id))
     if (selectedFile?.id === file.id) setSelectedFile(null)
     setConfirmDelete(null)
@@ -137,12 +137,12 @@ export default function MediaLibrary() {
   }
 
   const filtered = files.filter(f => {
-    if (filter === 'Images') return f.file_type?.startsWith('image/')
-    if (filter === 'Videos') return f.file_type?.startsWith('video/')
+    if (filter === 'Images') return f.mime_type?.startsWith('image/')
+    if (filter === 'Videos') return f.mime_type?.startsWith('video/')
     return true
   })
 
-  const totalSize     = files.reduce((sum, f) => sum + (f.file_size || 0), 0)
+  const totalSize     = files.reduce((sum, f) => sum + (f.size_bytes || 0), 0)
   const storageLimit  = PLAN_STORAGE_LIMITS[plan] ?? PLAN_STORAGE_LIMITS.free
   const storagePercent = Math.min((totalSize / storageLimit) * 100, 100)
   const storageLimitGB = storageLimit / (1024 * 1024 * 1024)
@@ -221,17 +221,17 @@ export default function MediaLibrary() {
           {selectedFile && (
             <div className="bg-surface border border-theme-md rounded-2xl p-4 mb-6 flex flex-col sm:flex-row gap-4">
               <div className="w-full sm:w-32 h-32 bg-gray-50 dark:bg-gray-800 rounded-xl overflow-hidden flex-shrink-0">
-                {selectedFile.file_type?.startsWith('image/') ? (
-                  <img src={selectedFile.file_url} alt={selectedFile.file_name} className="w-full h-full object-cover" />
+                {selectedFile.mime_type?.startsWith('image/') ? (
+                  <img src={selectedFile.url} alt={selectedFile.filename} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-4xl">🎥</div>
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold truncate mb-1">{selectedFile.file_name}</p>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">{formatSize(selectedFile.file_size || 0)}</p>
+                <p className="text-sm font-bold truncate mb-1">{selectedFile.filename}</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">{formatSize(selectedFile.size_bytes || 0)}</p>
                 <div className="flex flex-wrap gap-2">
-                  <button onClick={() => handleCopy(selectedFile.file_url, selectedFile.id)}
+                  <button onClick={() => handleCopy(selectedFile.url, selectedFile.id)}
                     className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition-all ${
                       copied === selectedFile.id
                         ? 'bg-green-500 text-white border-green-500'
@@ -296,8 +296,8 @@ export default function MediaLibrary() {
                       isSelected ? 'border-black' : 'border-theme hover:border-gray-300'
                     }`}>
                     <div className="aspect-square bg-gray-50 dark:bg-gray-800 relative overflow-hidden">
-                      {file.file_type?.startsWith('image/') ? (
-                        <img src={file.file_url} alt={file.file_name} className="w-full h-full object-cover" />
+                      {file.mime_type?.startsWith('image/') ? (
+                        <img src={file.url} alt={file.filename} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
                           <span className="text-4xl">🎥</span>
@@ -310,8 +310,8 @@ export default function MediaLibrary() {
                       )}
                     </div>
                     <div className="p-2.5">
-                      <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate">{file.file_name}</p>
-                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{formatSize(file.file_size || 0)}</p>
+                      <p className="text-xs font-semibold text-gray-700 dark:text-gray-300 truncate">{file.filename}</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{formatSize(file.size_bytes || 0)}</p>
                     </div>
                   </button>
                 )

@@ -320,3 +320,132 @@ export const fetchPostAnalytics = inngest.createFunction(
     return { postId, analytics24h }
   }
 )
+
+// Evergreen content recycler — runs daily at 6am UTC
+// Re-queues evergreen posts when a user's schedule runs low
+export const evergreenRecycler = inngest.createFunction(
+  { id: 'evergreen-recycler', name: 'Evergreen Content Recycler', retries: 2 },
+  { cron: '0 6 * * *' },
+  async ({ step }) => {
+    const result = await step.run('recycle-evergreen-posts', async () => {
+      // Check kill switch
+      const { data: flag } = await getSupabaseAdmin()
+        .from('feature_flags')
+        .select('enabled')
+        .eq('flag', 'evergreen_recycling')
+        .maybeSingle()
+
+      if (flag && flag.enabled === false) {
+        console.log('[Evergreen] Kill switch active — skipping recycler run')
+        return { recycled: 0, skipped: true }
+      }
+
+      const db = getSupabaseAdmin()
+      const now = new Date()
+      const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+      const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+
+      // Find all distinct user+workspace combos that have evergreen posts
+      // not queued in the last 7 days
+      const { data: candidates } = await db
+        .from('posts')
+        .select('user_id, workspace_id')
+        .eq('is_evergreen', true)
+
+      if (!candidates?.length) return { recycled: 0, checked: 0 }
+
+      // Deduplicate user+workspace combos
+      const combos = [...new Map(
+        candidates.map(p => [`${p.user_id}:${p.workspace_id ?? 'null'}`, p])
+      ).values()]
+
+      let recycled = 0
+
+      for (const { user_id, workspace_id } of combos) {
+        // Count scheduled posts in next 7 days for this user+workspace
+        const { count } = await db
+          .from('posts')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user_id)
+          .eq('status', 'scheduled')
+          .gte('scheduled_at', now.toISOString())
+          .lte('scheduled_at', sevenDaysFromNow.toISOString())
+          .eq(workspace_id ? 'workspace_id' : 'user_id', workspace_id ?? user_id)
+
+        // Skip if they already have 3+ posts scheduled in the next week
+        if ((count ?? 0) >= 3) continue
+
+        // Find best candidate: least-recently-queued evergreen post for this combo
+        let evQuery = db
+          .from('posts')
+          .select('id, content, platforms, destinations, evergreen_queue_count, workspace_id')
+          .eq('user_id', user_id)
+          .eq('is_evergreen', true)
+          .eq('status', 'published')
+
+        if (workspace_id) {
+          evQuery = evQuery.eq('workspace_id', workspace_id)
+        } else {
+          evQuery = evQuery.is('workspace_id', null)
+        }
+
+        const { data: evPosts } = await evQuery
+          .or(`evergreen_last_queued_at.is.null,evergreen_last_queued_at.lt.${sevenDaysAgo.toISOString()}`)
+          .order('evergreen_last_queued_at', { ascending: true, nullsFirst: true })
+          .limit(1)
+
+        if (!evPosts?.length) continue
+
+        const post = evPosts[0]
+
+        // Schedule 24-48 hours from now, at a random time between 9am-7pm UTC
+        const hoursAhead = 24 + Math.floor(Math.random() * 24)
+        const scheduledAt = new Date(now.getTime() + hoursAhead * 60 * 60 * 1000)
+        scheduledAt.setUTCHours(9 + Math.floor(Math.random() * 10), 0, 0, 0)
+
+        // Create the recycled post (copy, not marked evergreen to avoid loops)
+        const { data: newPost, error: insertError } = await db
+          .from('posts')
+          .insert({
+            user_id,
+            workspace_id: post.workspace_id,
+            content: post.content,
+            platforms: post.platforms,
+            destinations: post.destinations,
+            status: 'scheduled',
+            scheduled_at: scheduledAt.toISOString(),
+            is_evergreen: false,
+          })
+          .select('id')
+          .single()
+
+        if (insertError) {
+          console.error('[Evergreen] Insert failed:', insertError.message)
+          continue
+        }
+
+        // Update the source evergreen post's last-queued timestamp
+        await db
+          .from('posts')
+          .update({
+            evergreen_last_queued_at: now.toISOString(),
+            evergreen_queue_count: (post.evergreen_queue_count || 0) + 1,
+          })
+          .eq('id', post.id)
+
+        // Schedule the new post via Inngest
+        await inngest.send({
+          name: 'post/scheduled',
+          data: { postId: newPost.id, scheduledAt: scheduledAt.toISOString() },
+        })
+
+        recycled++
+        console.log(`[Evergreen] Recycled post ${post.id} → new post ${newPost.id} at ${scheduledAt.toISOString()}`)
+      }
+
+      return { recycled, checked: combos.length }
+    })
+
+    return result
+  }
+)
