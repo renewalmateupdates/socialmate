@@ -28,7 +28,7 @@ const PLANS = [
     headerText: 'text-gray-900 dark:text-gray-100',
     subText: 'text-gray-500 dark:text-gray-400',
     features: [
-      { label: '4 live platforms now',             note: '12 more coming soon' },
+      { label: '5 live platforms now',             note: '11 more coming soon' },
       { label: '1 connected account per platform'                              },
       { label: '2 team seats'                                                  },
       { label: '100 posts / month'                                             },
@@ -185,7 +185,7 @@ const FAQ = [
   },
   {
     q: 'What platforms are live right now?',
-    a: 'Discord, Bluesky, Telegram, and Mastodon are live. LinkedIn, YouTube, Pinterest, and Reddit are coming very soon — code complete, awaiting platform approval. 8 more are planned.',
+    a: 'Discord, Bluesky, Telegram, Mastodon, and X/Twitter are live. LinkedIn, YouTube, Pinterest, and Reddit are coming very soon — code complete, awaiting platform approval. 7 more are planned.',
   },
   {
     q: 'Is White Label available on Free?',
