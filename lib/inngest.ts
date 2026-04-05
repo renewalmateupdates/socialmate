@@ -355,9 +355,9 @@ export const evergreenRecycler = inngest.createFunction(
       if (!candidates?.length) return { recycled: 0, checked: 0 }
 
       // Deduplicate user+workspace combos
-      const combos = [...new Map(
+      const combos = Array.from(new Map(
         candidates.map(p => [`${p.user_id}:${p.workspace_id ?? 'null'}`, p])
-      ).values()]
+      ).values())
 
       let recycled = 0
 
