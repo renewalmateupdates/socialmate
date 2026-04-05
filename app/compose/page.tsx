@@ -11,6 +11,7 @@ const PLATFORMS = [
   { id: 'bluesky',   name: 'Bluesky',   icon: '🦋', limit: 300,   live: true  },
   { id: 'telegram',  name: 'Telegram',  icon: '✈️', limit: 4096,  live: true  },
   { id: 'mastodon',  name: 'Mastodon',  icon: '🐘', limit: 500,   live: true  },
+  { id: 'twitter',   name: 'X',         icon: '🐦', limit: 280,   live: true  },
   { id: 'linkedin',  name: 'LinkedIn',  icon: '💼', limit: 3000,  live: false },
   { id: 'youtube',   name: 'YouTube',   icon: '▶️', limit: 5000,  live: false },
   { id: 'pinterest', name: 'Pinterest', icon: '📌', limit: 500,   live: false },
@@ -19,7 +20,6 @@ const PLATFORMS = [
 
 const COMING_SOON_PLATFORMS = [
   { id: 'instagram', name: 'Instagram', icon: '📸' },
-  { id: 'twitter',   name: 'Twitter/X', icon: '🐦' },
   { id: 'tiktok',    name: 'TikTok',    icon: '🎵' },
   { id: 'facebook',  name: 'Facebook',  icon: '📘' },
   { id: 'threads',   name: 'Threads',   icon: '🧵' },
