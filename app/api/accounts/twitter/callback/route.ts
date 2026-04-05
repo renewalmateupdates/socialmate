@@ -62,7 +62,8 @@ export async function GET(request: NextRequest) {
   }
 
   const { data: twitterUser } = await userRes.json()
-  const account_name      = `@${twitterUser.username}` || twitterUser.name || 'X Account'
+  const rawUsername       = twitterUser.username?.replace(/^@/, '') || ''
+  const account_name      = rawUsername ? `@${rawUsername}` : (twitterUser.name || 'X Account')
   const profile_image_url = twitterUser.profile_image_url?.replace('_normal', '_400x400') || null
   const platform_user_id  = twitterUser.id
 
