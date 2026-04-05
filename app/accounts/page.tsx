@@ -138,6 +138,7 @@ function AccountsInner() {
   const [showBlueskyModal, setShowBlueskyModal] = useState(false)
   const [showTelegramModal, setShowTelegramModal] = useState(false)
   const [showMastodonModal, setShowMastodonModal] = useState(false)
+  const [twitterQuota, setTwitterQuota] = useState<{ used: number; limit: number; plan: string } | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
   const { plan, activeWorkspace } = useWorkspace()
@@ -223,6 +224,15 @@ function AccountsInner() {
       const { data } = await q
       setAccounts(data || [])
       setLoading(false)
+
+      // Fetch Twitter quota if Twitter is connected
+      const twitterConnected = (data || []).some((a: Account) => a.platform === 'twitter')
+      if (twitterConnected) {
+        fetch('/api/accounts/twitter/quota')
+          .then(r => r.json())
+          .then(d => { if (!d.error) setTwitterQuota(d) })
+          .catch(() => {})
+      }
     }
     getData()
   }, [router, activeWorkspace])
@@ -403,6 +413,28 @@ function AccountsInner() {
                           </button>
                         )}
                       </div>
+
+                      {account.platform === 'twitter' && twitterQuota && !isConfirming && (
+                        <div className="mt-3 pt-3 border-t border-sky-100">
+                          {(() => {
+                            const pct = twitterQuota.limit > 0 ? Math.min((twitterQuota.used / twitterQuota.limit) * 100, 100) : 0
+                            const barColor = pct >= 80 ? 'bg-red-400' : pct >= 50 ? 'bg-yellow-400' : 'bg-green-400'
+                            return (
+                              <>
+                                <div className="flex items-center justify-between mb-1.5">
+                                  <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">X tweets this month</span>
+                                  <span className={`text-xs font-bold ${pct >= 80 ? 'text-red-500' : pct >= 50 ? 'text-yellow-600' : 'text-green-600'}`}>
+                                    {twitterQuota.used} / {twitterQuota.limit}
+                                  </span>
+                                </div>
+                                <div className="w-full h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                                  <div className={`h-full rounded-full transition-all ${barColor}`} style={{ width: `${pct}%` }} />
+                                </div>
+                              </>
+                            )
+                          })()}
+                        </div>
+                      )}
 
                       {isConfirming && (
                         <div className="mt-3 pt-3 border-t border-white/60 flex flex-col sm:flex-row items-start sm:items-center gap-2">

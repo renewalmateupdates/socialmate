@@ -70,6 +70,8 @@ function DashboardInner() {
   const [streak, setStreak] = useState(0)
   const [creditSource, setCreditSource] = useState<'monthly_first' | 'earned_first' | 'paid_first'>('monthly_first')
   const [welcomeDismissed, setWelcomeDismissed] = useState(true) // default true to avoid flash
+  const [xBannerDismissed, setXBannerDismissed] = useState(true) // default true to avoid flash
+  const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>([])
   const { plan, credits, activeWorkspace, monthlyCredits, earnedCredits, paidCredits } = useWorkspace()
 
   useEffect(() => {
@@ -177,6 +179,18 @@ function DashboardInner() {
       // Show welcome banner for brand-new users who haven't dismissed it
       const dismissed = localStorage.getItem('sm-welcome-dismissed')
       if (!dismissed) setWelcomeDismissed(false)
+
+      // Load connected platforms for X banner
+      const { data: accounts } = await supabase
+        .from('connected_accounts')
+        .select('platform')
+        .eq('user_id', user.id)
+      const platforms = (accounts || []).map((a: { platform: string }) => a.platform)
+      setConnectedPlatforms(platforms)
+
+      // Show X banner if X not connected and not dismissed
+      const xDismissed = localStorage.getItem('sm-x-banner-dismissed')
+      if (!xDismissed && !platforms.includes('twitter')) setXBannerDismissed(false)
     }
     init()
 
@@ -297,6 +311,23 @@ function DashboardInner() {
                   ))}
                 </div>
               </div>
+            </div>
+          )}
+
+          {/* X/TWITTER BANNER — show if X not connected and not dismissed */}
+          {!xBannerDismissed && !connectedPlatforms.includes('twitter') && (
+            <div className="relative flex items-center gap-3 bg-sky-50 border border-sky-200 rounded-2xl px-5 py-3.5 mb-4">
+              <span className="text-xl flex-shrink-0">🐦</span>
+              <p className="text-sm font-semibold text-sky-800 flex-1">
+                X/Twitter is now live —{' '}
+                <a href="/accounts" className="underline font-bold hover:text-sky-600 transition-colors">
+                  connect your account to schedule tweets →
+                </a>
+              </p>
+              <button
+                onClick={() => { setXBannerDismissed(true); localStorage.setItem('sm-x-banner-dismissed', '1') }}
+                className="w-7 h-7 flex items-center justify-center rounded-lg bg-sky-100 hover:bg-sky-200 transition-all text-sky-500 hover:text-sky-700 text-sm flex-shrink-0"
+                aria-label="Dismiss">✕</button>
             </div>
           )}
 

@@ -61,31 +61,40 @@ export default function StudioStaxPortalPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
 
-      // Use maybeSingle so missing table or missing row both return null gracefully
-      const { data: listingData } = await supabase
-        .from('studio_stax_listings')
-        .select('id, user_id, studio_name, description, category, website_url, logo_url, status, renewal_date, sm_give_total, rank')
-        .eq('user_id', user.id)
-        .maybeSingle()
+      try {
+        // Use maybeSingle so missing table or missing row both return null gracefully
+        const { data: listingData } = await supabase
+          .from('studio_stax_listings')
+          .select('id, user_id, studio_name, description, category, website_url, logo_url, status, renewal_date, sm_give_total, rank')
+          .eq('user_id', user.id)
+          .maybeSingle()
 
-      if (!listingData) {
+        if (!listingData) {
+          setNoListing(true)
+          setLoading(false)
+          return
+        }
+
+        setListing(listingData as Listing)
+        setEditDesc(listingData.description ?? '')
+        setEditUrl(listingData.website_url ?? '')
+
+        // Load donation history — table may not exist yet, so wrap gracefully
+        try {
+          const { data: donationData } = await supabase
+            .from('sm_give_donations')
+            .select('id, listing_id, user_id, amount, created_at')
+            .eq('listing_id', listingData.id)
+            .order('created_at', { ascending: false })
+          setDonations(Array.from(donationData ?? []) as Donation[])
+        } catch {
+          setDonations([])
+        }
+      } catch {
+        // Table may not exist yet — treat as no listing found
         setNoListing(true)
-        setLoading(false)
-        return
       }
 
-      setListing(listingData as Listing)
-      setEditDesc(listingData.description ?? '')
-      setEditUrl(listingData.website_url ?? '')
-
-      // Load donation history
-      const { data: donationData } = await supabase
-        .from('sm_give_donations')
-        .select('id, listing_id, user_id, amount, created_at')
-        .eq('listing_id', listingData.id)
-        .order('created_at', { ascending: false })
-
-      setDonations(Array.from(donationData ?? []) as Donation[])
       setLoading(false)
     }
     init()
@@ -96,18 +105,22 @@ export default function StudioStaxPortalPage() {
     setEditSaving(true)
     setEditError('')
     setEditSuccess(false)
-    const { error } = await supabase
-      .from('studio_stax_listings')
-      .update({ description: editDesc, website_url: editUrl })
-      .eq('id', listing.id)
+    try {
+      const { error } = await supabase
+        .from('studio_stax_listings')
+        .update({ description: editDesc, website_url: editUrl })
+        .eq('id', listing.id)
 
-    if (error) {
-      setEditError(error.message || 'Failed to save changes.')
-    } else {
-      setListing(l => l ? { ...l, description: editDesc, website_url: editUrl } : l)
-      setEditMode(false)
-      setEditSuccess(true)
-      setTimeout(() => setEditSuccess(false), 3000)
+      if (error) {
+        setEditError(error.message || 'Failed to save changes.')
+      } else {
+        setListing(l => l ? { ...l, description: editDesc, website_url: editUrl } : l)
+        setEditMode(false)
+        setEditSuccess(true)
+        setTimeout(() => setEditSuccess(false), 3000)
+      }
+    } catch {
+      setEditError('Network error. Please try again.')
     }
     setEditSaving(false)
   }
