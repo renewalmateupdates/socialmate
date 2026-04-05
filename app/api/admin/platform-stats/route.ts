@@ -1,0 +1,98 @@
+export const dynamic = 'force-dynamic'
+import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
+import { createServerClient } from '@supabase/ssr'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
+
+async function requireAdmin() {
+  const cookieStore = await cookies()
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
+  )
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+  const { data: settings } = await getSupabaseAdmin()
+    .from('user_settings')
+    .select('is_admin')
+    .eq('user_id', user.id)
+    .maybeSingle()
+  return settings?.is_admin ? user : null
+}
+
+export async function GET() {
+  const admin = await requireAdmin()
+  if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+  const db = getSupabaseAdmin()
+
+  const now = new Date()
+  const todayStart = new Date(now); todayStart.setUTCHours(0, 0, 0, 0)
+  const weekStart  = new Date(now); weekStart.setUTCDate(now.getUTCDate() - 7); weekStart.setUTCHours(0, 0, 0, 0)
+  const monthStart = new Date(now); monthStart.setUTCDate(1); monthStart.setUTCHours(0, 0, 0, 0)
+
+  // Fetch all published posts with platforms, user_id, created_at
+  const { data: posts, error } = await db
+    .from('posts')
+    .select('user_id, platforms, status, created_at')
+    .in('status', ['published', 'failed'])
+    .order('created_at', { ascending: false })
+    .limit(5000)
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  const allPosts = posts ?? []
+
+  // Per-platform aggregation
+  const platformStats: Record<string, { total: number; failed: number }> = {}
+  for (const post of allPosts) {
+    const platforms: string[] = Array.isArray(post.platforms) ? post.platforms : []
+    for (const p of platforms) {
+      if (!platformStats[p]) platformStats[p] = { total: 0, failed: 0 }
+      platformStats[p].total++
+      if (post.status === 'failed') platformStats[p].failed++
+    }
+  }
+
+  // Time-range counts (published only)
+  const published = allPosts.filter(p => p.status === 'published')
+  const postsToday = published.filter(p => new Date(p.created_at) >= todayStart).length
+  const postsWeek  = published.filter(p => new Date(p.created_at) >= weekStart).length
+  const postsMonth = published.filter(p => new Date(p.created_at) >= monthStart).length
+
+  // Top posting users
+  const userCount: Record<string, number> = {}
+  for (const p of published) {
+    userCount[p.user_id] = (userCount[p.user_id] || 0) + 1
+  }
+  const topUserIds = Object.entries(userCount)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(e => e[0])
+
+  // Fetch emails for top users
+  const { data: topUserSettings } = await db
+    .from('user_settings')
+    .select('user_id, email')
+    .in('user_id', topUserIds.length ? topUserIds : ['none'])
+
+  const emailMap: Record<string, string> = {}
+  for (const u of topUserSettings ?? []) { emailMap[u.user_id] = u.email }
+
+  const topUsers = topUserIds.map(uid => ({
+    user_id: uid,
+    email: emailMap[uid] || uid,
+    post_count: userCount[uid],
+  }))
+
+  return NextResponse.json({
+    platform_stats: platformStats,
+    posts_today: postsToday,
+    posts_week:  postsWeek,
+    posts_month: postsMonth,
+    top_users:   topUsers,
+    total_published: published.length,
+    total_failed:    allPosts.filter(p => p.status === 'failed').length,
+  })
+}
