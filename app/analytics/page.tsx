@@ -51,6 +51,7 @@ export default function Analytics() {
   const [posts, setPosts]           = useState<Post[]>([])
   const [loading, setLoading]       = useState(true)
   const [range, setRange]           = useState<'14' | '30' | '90' | '180'>('30')
+  const [platformFilter, setPlatformFilter] = useState<string>('all')
   const [radarDismissed, setRadarDismissed] = useState(false)
   const [creditModal, setCreditModal]       = useState<{ range: string; cost: number } | null>(null)
   const [radarModal, setRadarModal]         = useState(false)
@@ -158,7 +159,10 @@ export default function Analytics() {
   const rangeStart = new Date(now)
   rangeStart.setDate(now.getDate() - rangeDays)
 
-  const filteredPosts = posts.filter(p => new Date(p.created_at) >= rangeStart)
+  const rangeFilteredPosts = posts.filter(p => new Date(p.created_at) >= rangeStart)
+  const filteredPosts = platformFilter === 'all'
+    ? rangeFilteredPosts
+    : rangeFilteredPosts.filter(p => p.platforms?.includes(platformFilter))
   const scheduled     = filteredPosts.filter(p => p.status === 'scheduled')
   const drafts        = filteredPosts.filter(p => p.status === 'draft')
   const published     = filteredPosts.filter(p => p.status === 'published')
@@ -321,6 +325,58 @@ export default function Analytics() {
     printWindow.print()
   }
 
+  const handleExportCSV = () => {
+    const rows: string[][] = [
+      ['Date', 'Content', 'Platforms', 'Status', 'Scheduled At', 'Likes', 'Reposts', 'Replies', 'Total Engagement'],
+    ]
+    filteredPosts.forEach(p => {
+      const eng = p.analytics ? Object.values(p.analytics).reduce((s: number, e: any) =>
+        s + (e.likes || 0) + (e.reposts || 0) + (e.reactions || 0) + (e.replies || 0), 0) : 0
+      const likes    = p.analytics ? Object.values(p.analytics).reduce((s: number, e: any) => s + (e.likes || 0), 0) : 0
+      const reposts  = p.analytics ? Object.values(p.analytics).reduce((s: number, e: any) => s + (e.reposts || 0), 0) : 0
+      const replies  = p.analytics ? Object.values(p.analytics).reduce((s: number, e: any) => s + (e.replies || 0), 0) : 0
+      rows.push([
+        new Date(p.created_at).toLocaleDateString(),
+        `"${(p.content || '').replace(/"/g, '""').slice(0, 200)}"`,
+        (p.platforms || []).join('; '),
+        p.status,
+        p.scheduled_at ? new Date(p.scheduled_at).toLocaleString() : '',
+        String(likes),
+        String(reposts),
+        String(replies),
+        String(eng),
+      ])
+    })
+    const csv  = rows.map(r => r.join(',')).join('\n')
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
+    a.href     = url
+    a.download = `socialmate-analytics-${range}d-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  // Best performing post (highest total engagement among published posts)
+  const bestPost = postsWithEngagement.length > 0
+    ? postsWithEngagement.reduce((best, p) => {
+        const engA = Object.values(p.analytics || {}).reduce((s: number, e: any) =>
+          s + (e.likes || 0) + (e.reposts || 0) + (e.reactions || 0) + (e.replies || 0), 0)
+        const engB = Object.values(best.analytics || {}).reduce((s: number, e: any) =>
+          s + (e.likes || 0) + (e.reposts || 0) + (e.reactions || 0) + (e.replies || 0), 0)
+        return engA > engB ? p : best
+      })
+    : null
+  const bestPostEngagement = bestPost
+    ? Object.values(bestPost.analytics || {}).reduce((s: number, e: any) =>
+        s + (e.likes || 0) + (e.reposts || 0) + (e.reactions || 0) + (e.replies || 0), 0)
+    : 0
+
+  // All platforms seen across all posts (for filter dropdown)
+  const allPlatforms = Array.from(
+    new Set(posts.flatMap(p => p.platforms || []))
+  ).sort()
+
   return (
     <div className="min-h-dvh bg-theme flex">
       <Sidebar />
@@ -466,10 +522,29 @@ export default function Analytics() {
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
+              {/* Platform filter */}
+              <select
+                value={platformFilter}
+                onChange={e => setPlatformFilter(e.target.value)}
+                className="px-3 py-2 text-xs font-semibold border border-gray-200 dark:border-gray-600 rounded-xl bg-surface text-gray-700 dark:text-gray-300 focus:outline-none focus:border-gray-400 cursor-pointer">
+                <option value="all">All Platforms</option>
+                {allPlatforms.map(p => (
+                  <option key={p} value={p}>
+                    {(PLATFORM_ICONS[p] ?? '') + ' ' + p.charAt(0).toUpperCase() + p.slice(1)}
+                  </option>
+                ))}
+              </select>
+
+              {/* CSV export — available to all plans */}
+              <button onClick={handleExportCSV}
+                className="flex items-center gap-1.5 px-3 py-2 border border-gray-200 dark:border-gray-600 text-xs font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all">
+                ⬇️ CSV
+              </button>
+
               {plan === 'agency' && (
                 <button onClick={handleExportPDF}
                   className="flex items-center gap-2 px-4 py-2 border border-gray-200 dark:border-gray-600 text-xs font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all">
-                  📄 Export PDF
+                  📄 PDF
                 </button>
               )}
               <div className="flex items-center gap-1 bg-surface border border-theme rounded-xl p-1 overflow-x-auto">
@@ -600,6 +675,37 @@ export default function Analytics() {
             )}
           </div>
 
+          {/* Empty state — no posts in this filter/range */}
+          {!loading && rangeFilteredPosts.length === 0 && (
+            <div className="bg-surface border border-theme rounded-2xl p-10 text-center mb-6">
+              <p className="text-4xl mb-3">📊</p>
+              <p className="font-extrabold text-gray-700 dark:text-gray-200 mb-1">No posts in this period</p>
+              <p className="text-sm text-gray-400 dark:text-gray-500 mb-5">
+                Start publishing to see your analytics appear here.
+              </p>
+              <Link href="/compose"
+                className="inline-block text-sm font-bold px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-xl hover:opacity-80 transition-all">
+                Create your first post →
+              </Link>
+            </div>
+          )}
+
+          {!loading && rangeFilteredPosts.length > 0 && platformFilter !== 'all' && filteredPosts.length === 0 && (
+            <div className="bg-surface border border-theme rounded-2xl p-8 text-center mb-6">
+              <p className="text-3xl mb-2">{PLATFORM_ICONS[platformFilter] ?? '📱'}</p>
+              <p className="font-bold text-gray-700 dark:text-gray-200 mb-1">
+                No posts on {platformFilter.charAt(0).toUpperCase() + platformFilter.slice(1)} in this period
+              </p>
+              <p className="text-sm text-gray-400 dark:text-gray-500 mb-4">
+                Try a different platform filter or date range.
+              </p>
+              <button onClick={() => setPlatformFilter('all')}
+                className="text-sm font-bold px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
+                Show all platforms
+              </button>
+            </div>
+          )}
+
           {/* STREAK / PEAK / STATUS */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <div className="bg-surface border border-theme rounded-2xl p-5">
@@ -648,6 +754,45 @@ export default function Analytics() {
               )}
             </div>
           </div>
+
+          {/* Best Performing Post */}
+          {!loading && bestPost && (
+            <div className="bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-900/20 dark:to-yellow-900/20 border border-amber-200 dark:border-amber-700 rounded-2xl p-5 mb-6">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-xl">🏆</span>
+                <h2 className="text-sm font-extrabold tracking-tight">Best Performing Post</h2>
+                <span className="ml-auto text-xs font-bold text-amber-600 dark:text-amber-400">
+                  {bestPostEngagement} engagements
+                </span>
+              </div>
+              <div className="flex items-start gap-4">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-800 dark:text-gray-100 leading-relaxed line-clamp-3">
+                    {bestPost.content?.slice(0, 160)}{(bestPost.content?.length ?? 0) > 160 ? '…' : ''}
+                  </p>
+                  <div className="flex items-center gap-2 mt-2 flex-wrap">
+                    {bestPost.platforms?.map(p => (
+                      <span key={p} className="text-base" title={p}>{PLATFORM_ICONS[p] ?? '📱'}</span>
+                    ))}
+                    <span className="text-xs text-gray-400 dark:text-gray-500">
+                      {bestPost.scheduled_at
+                        ? new Date(bestPost.scheduled_at).toLocaleDateString([], { month: 'short', day: 'numeric' })
+                        : new Date(bestPost.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex-shrink-0 grid grid-cols-2 gap-2 text-center">
+                  {Object.entries(bestPost.analytics || {}).map(([platform, data]: [string, any]) => (
+                    <div key={platform} className="bg-white dark:bg-gray-800 rounded-xl px-3 py-2 shadow-sm">
+                      <span className="text-xs block">{PLATFORM_ICONS[platform] ?? '📱'}</span>
+                      <p className="text-sm font-extrabold">{(data.likes || 0) + (data.reposts || 0) + (data.reactions || 0)}</p>
+                      <p className="text-xs text-gray-400">eng.</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
 
           {postsWithEngagement.length > 0 && (
             <div className="bg-surface border border-theme rounded-2xl p-5 mb-6">

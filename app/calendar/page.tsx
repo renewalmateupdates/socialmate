@@ -11,7 +11,7 @@ interface Post {
   content: string
   platforms: string[]
   scheduled_at: string | null
-  status: 'scheduled' | 'published' | 'draft'
+  status: 'scheduled' | 'published' | 'draft' | 'failed'
   created_at: string
 }
 
@@ -25,13 +25,15 @@ const PLATFORM_ICONS: Record<string, string> = {
 const STATUS_DOT: Record<string, string> = {
   scheduled: 'bg-blue-400',
   published: 'bg-green-400',
-  draft: 'bg-gray-300 dark:bg-gray-500',
+  draft:     'bg-gray-300 dark:bg-gray-500',
+  failed:    'bg-red-400',
 }
 
 const STATUS_BADGE: Record<string, string> = {
   scheduled: 'bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
   published: 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300',
-  draft: 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+  draft:     'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+  failed:    'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300',
 }
 
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -205,6 +207,9 @@ export default function CalendarPage() {
                   </span>
                   <span className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-500 inline-block" />Draft
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-400 inline-block" />Failed
                   </span>
                 </div>
                 <button onClick={goToToday}
@@ -384,9 +389,13 @@ export default function CalendarPage() {
                             {post.status}
                           </span>
                           <Link
-                            href={post.status === 'draft' ? `/compose?id=${post.id}` : '/queue'}
-                            className="text-xs text-blue-500 hover:text-blue-700 dark:hover:text-blue-300 font-semibold transition-colors">
-                            {post.status === 'draft' ? 'Edit →' : 'View in Queue →'}
+                            href={post.status === 'draft' || post.status === 'failed' ? `/compose?id=${post.id}` : '/queue'}
+                            className={`text-xs font-semibold transition-colors ${
+                              post.status === 'failed'
+                                ? 'text-red-500 hover:text-red-700 dark:hover:text-red-300'
+                                : 'text-blue-500 hover:text-blue-700 dark:hover:text-blue-300'
+                            }`}>
+                            {post.status === 'draft' ? 'Edit →' : post.status === 'failed' ? 'Retry →' : 'View in Queue →'}
                           </Link>
                         </div>
                       </div>
@@ -397,8 +406,8 @@ export default function CalendarPage() {
             </div>
           )}
 
-          {/* Mobile legend */}
-          <div className="flex sm:hidden items-center justify-center gap-4 text-xs text-gray-400 dark:text-gray-500 pb-4">
+          {/* Legend — mobile shows below calendar, desktop shows inline in header */}
+          <div className="flex sm:hidden items-center justify-center gap-4 text-xs text-gray-400 dark:text-gray-500 pb-4 flex-wrap">
             <span className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-blue-400 inline-block" />Scheduled
             </span>
@@ -407,6 +416,9 @@ export default function CalendarPage() {
             </span>
             <span className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-500 inline-block" />Draft
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-red-400 inline-block" />Failed
             </span>
           </div>
 
