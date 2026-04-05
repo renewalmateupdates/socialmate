@@ -44,6 +44,27 @@ const BLOG_SLUGS = [
   'social-media-analytics-free-tools',
   'discord-for-creators-2026',
   'how-to-repurpose-one-post-ten-platforms',
+  // 20 new posts (Apr 2026 batch 3)
+  'x-twitter-scheduling-free',
+  'bluesky-for-creators-2026',
+  'social-media-tools-comparison-2026',
+  'discord-bot-vs-scheduler',
+  'mastodon-guide-2026',
+  'free-social-media-scheduler-no-credit-card',
+  'social-media-workflow-creators',
+  'bluesky-algorithm-2026',
+  'telegram-channel-growth',
+  'social-media-scheduling-cost-breakdown',
+  'hashtag-strategy-bluesky-mastodon',
+  'content-repurposing-system',
+  'social-media-for-nonprofits',
+  'best-time-post-discord',
+  'ai-content-creation-social-media',
+  'social-media-strategy-small-team',
+  'scheduling-vs-posting-manually-2026',
+  'grow-audience-multiple-platforms',
+  'social-media-analytics-what-matters',
+  'decentralized-social-media-2026',
 ]
 
 export default function sitemap(): MetadataRoute.Sitemap {
