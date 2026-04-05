@@ -47,7 +47,7 @@ function getReadIds(): Set<string> {
 }
 
 function saveReadIds(ids: Set<string>) {
-  try { localStorage.setItem(LS_KEY, JSON.stringify([...ids])) } catch {}
+  try { localStorage.setItem(LS_KEY, JSON.stringify(Array.from(ids))) } catch {}
 }
 
 function formatTime(iso: string) {
