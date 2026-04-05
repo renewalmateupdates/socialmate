@@ -58,6 +58,10 @@ export default async function StudioStaxPage() {
               Apply for a Listing →
             </Link>
             <span className="text-xs text-gray-400 dark:text-gray-500">$100/year founder price · first 100 spots · goes to $150 after</span>
+            <Link href="/studio-stax/portal"
+              className="text-xs font-semibold text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+              Lister Portal →
+            </Link>
           </div>
         </div>
 
