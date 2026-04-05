@@ -85,6 +85,16 @@ export default function Analytics() {
       setPosts(data || [])
       setLoading(false)
       fetch('/api/analytics/sync', { method: 'POST' }).catch(() => {})
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        fetch('/api/streaks/sync', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+          },
+          body: JSON.stringify({ workspace_id: activeWorkspace?.id }),
+        }).catch(() => {})
+      })
     }
     getData()
   }, [router, activeWorkspace?.id])
@@ -544,6 +554,21 @@ export default function Analytics() {
               <Link href="/compose"
                 className="inline-block mt-3 text-xs font-bold px-3 py-1.5 bg-orange-500 text-white rounded-xl hover:opacity-80 transition-all">
                 Create a post now →
+              </Link>
+            </div>
+          )}
+
+          {!loading && currentStreak > 2 && daysSinceLastPost === 1 && (
+            <div className="mb-6 bg-amber-50 border border-amber-100 rounded-2xl px-5 py-4 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <span className="text-xl">⚠️</span>
+                <div>
+                  <p className="text-xs font-extrabold text-amber-800">Streak at risk — post today to keep it alive!</p>
+                  <p className="text-xs text-amber-700 mt-0.5">You're on a {currentStreak}-day streak. You haven't posted yet today.</p>
+                </div>
+              </div>
+              <Link href="/compose" className="flex-shrink-0 text-xs font-bold px-3 py-1.5 bg-amber-500 text-white rounded-xl hover:opacity-80 transition-all">
+                Post now →
               </Link>
             </div>
           )}
