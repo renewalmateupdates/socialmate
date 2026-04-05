@@ -130,6 +130,42 @@ const COMPARISONS = [
     tag:         'Recycling not worth $29',
     tagColor:    'bg-purple-50 text-purple-600',
   },
+  {
+    slug:        'iconosquare',
+    name:        'Iconosquare',
+    emoji:       '📸',
+    headline:    'Iconosquare starts at $49/month — analytics-first, not scheduling-first',
+    angle:       "Iconosquare is an analytics tool that added scheduling, not the other way around. You're paying for data you probably don't need yet.",
+    tag:         'Analytics-first, expensive',
+    tagColor:    'bg-blue-50 text-blue-600',
+  },
+  {
+    slug:        'tailwind-social',
+    name:        'Tailwind',
+    emoji:       '📌',
+    headline:    "Tailwind's free plan is limited to 20 posts/month",
+    angle:       "Tailwind was built for Pinterest and Instagram. If you're on Bluesky, Discord, Mastodon, or Telegram — Tailwind doesn't support them at all.",
+    tag:         'Pinterest/Instagram only',
+    tagColor:    'bg-pink-50 text-pink-600',
+  },
+  {
+    slug:        'crowdfire',
+    name:        'Crowdfire',
+    emoji:       '🔥',
+    headline:    "Crowdfire free plan: 3 accounts, 10 scheduled posts total",
+    angle:       "Crowdfire's free tier is practically unusable for real scheduling. And most of the differentiating features — curated content, advanced analytics — require paid plans.",
+    tag:         'Minimal free tier',
+    tagColor:    'bg-orange-50 text-orange-600',
+  },
+  {
+    slug:        'pallyy',
+    name:        'Pallyy',
+    emoji:       '🎨',
+    headline:    "Pallyy free plan: 1 social group, 15 scheduled posts/month",
+    angle:       "Pallyy's UI looks great but the free plan barely lets you get started. Heavy Instagram/TikTok focus means Bluesky, Discord, and Mastodon users get nothing.",
+    tag:         'Visual-first, limited free',
+    tagColor:    'bg-purple-50 text-purple-600',
+  },
 ]
 
 const SOCIALMATE_WINS = [

@@ -29,6 +29,21 @@ const BLOG_SLUGS = [
   'how-to-post-consistently-social-media',
   'mastodon-vs-bluesky-2026',
   'social-media-scheduling-agencies-freelancers',
+  // 14 more posts (Apr 2026 batch 2)
+  'best-social-media-scheduler-creators-2026',
+  'how-to-schedule-posts-instagram-free',
+  'social-media-content-ideas-2026',
+  'how-to-use-bluesky-for-business',
+  'pinterest-scheduling-free-tools',
+  'social-media-burnout-creators',
+  'how-to-grow-mastodon-following',
+  'small-business-social-media-guide-2026',
+  'free-link-in-bio-tools',
+  'twitter-x-alternatives-2026',
+  'content-calendar-for-small-business',
+  'social-media-analytics-free-tools',
+  'discord-for-creators-2026',
+  'how-to-repurpose-one-post-ten-platforms',
 ]
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -68,9 +83,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/vs/socialpilot`,  lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/vs/zoho-social`,  lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/vs/socialrails`,  lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${base}/vs/loomly`,       lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${base}/vs/coschedule`,   lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${base}/vs/meetedgar`,    lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/loomly`,         lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/coschedule`,     lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/meetedgar`,      lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/iconosquare`,    lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/tailwind-social`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/crowdfire`,      lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/pallyy`,         lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
   ]
 
   const blogPosts: MetadataRoute.Sitemap = BLOG_SLUGS.map(slug => ({

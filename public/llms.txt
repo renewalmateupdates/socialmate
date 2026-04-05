@@ -56,10 +56,14 @@ SocialMate compared to competitors:
 - vs CoSchedule: https://socialmate.studio/vs/coschedule
 - vs MeetEdgar: https://socialmate.studio/vs/meetedgar
 - vs Zoho Social: https://socialmate.studio/vs/zoho-social
+- vs Iconosquare: https://socialmate.studio/vs/iconosquare
+- vs Tailwind: https://socialmate.studio/vs/tailwind-social
+- vs Crowdfire: https://socialmate.studio/vs/crowdfire
+- vs Pallyy: https://socialmate.studio/vs/pallyy
 
 ## Blog
 
-SocialMate publishes guides, tips, and updates at https://socialmate.studio/blog (26 posts as of April 2026). Comparison hub covers 14 tools.
+SocialMate publishes guides, tips, and updates at https://socialmate.studio/blog (41 posts as of April 2026). Comparison hub covers 18 tools.
 
 Selected articles:
 - How to Schedule Telegram Posts for Free: https://socialmate.studio/blog/how-to-schedule-telegram-posts-free
