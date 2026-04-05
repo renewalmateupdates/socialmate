@@ -90,6 +90,52 @@ export async function publishToTwitter(
     throw new Error('No X account connected. Go to Accounts to connect your X account.')
   }
 
+  // ─── Per-workspace X quota enforcement ────────────────────────────────────
+  // Free tier API cap: 1,500 tweets/month for the entire app.
+  // We enforce conservative per-workspace monthly limits to protect shared quota.
+  //   Free workspace  → 50 tweets / calendar month
+  //   Pro workspace   → 200 tweets / calendar month
+  //   Agency          → 500 tweets / calendar month
+  //
+  // Quota is tracked by counting published posts with platform='twitter' this month.
+  const TWITTER_QUOTA: Record<string, number> = { free: 50, pro: 200, agency: 500 }
+
+  // Fetch workspace plan
+  const { data: wsData } = await getSupabaseAdmin()
+    .from('workspaces')
+    .select('plan')
+    .eq('id', workspaceId ?? '')
+    .maybeSingle()
+  const plan = (wsData?.plan as string | null) ?? 'free'
+  const monthlyLimit = TWITTER_QUOTA[plan] ?? TWITTER_QUOTA.free
+
+  // Count tweets published this calendar month
+  const monthStart = new Date()
+  monthStart.setDate(1)
+  monthStart.setHours(0, 0, 0, 0)
+
+  let tweetCountQuery = getSupabaseAdmin()
+    .from('posts')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .contains('platforms', ['twitter'])
+    .eq('status', 'published')
+    .gte('published_at', monthStart.toISOString())
+
+  if (workspaceId) {
+    tweetCountQuery = tweetCountQuery.eq('workspace_id', workspaceId)
+  }
+
+  const { count: tweetCount } = await tweetCountQuery
+
+  if ((tweetCount ?? 0) >= monthlyLimit) {
+    throw new Error(
+      `You've reached your X posting limit for this month (${monthlyLimit} tweets). ` +
+      `Upgrade your plan for a higher limit, or wait until next month.`
+    )
+  }
+  // ──────────────────────────────────────────────────────────────────────────
+
   // Enforce character limit (unicode-safe)
   const tweetText = content.length > MAX_TWEET_LENGTH
     ? content.slice(0, MAX_TWEET_LENGTH - 1) + '…'

@@ -29,7 +29,7 @@ const ROADMAP: RoadmapItem[] = [
   // ── PLANNED ───────────────────────────────────────────────
   { title: 'Instagram publishing',       desc: 'Instagram Graph API integration. Requires Facebook Business account and Meta app review.',                       status: 'planned',      category: 'Platforms'     },
   { title: 'TikTok publishing',          desc: 'TikTok Content Posting API. Requires TikTok developer app approval.',                                            status: 'planned',      category: 'Platforms'     },
-  { title: 'Twitter / X publishing',     desc: 'X API v2 Basic tier integration. Requires developer account and API key approval.',                              status: 'planned',      category: 'Platforms'     },
+  { title: 'X (Twitter) publishing',      desc: 'X API v2 with OAuth 2.0 + PKCE, auto token refresh, image upload (up to 4), and per-workspace quota management. Connect your X account under Accounts.', status: 'coming-soon', category: 'Platforms' },
   { title: 'Facebook Pages',             desc: 'Facebook Graph API for posting to Business Pages. Requires Meta app review.',                                    status: 'planned',      category: 'Platforms'     },
   { title: 'Threads',                    desc: 'Threads API integration once the API becomes publicly available.',                                                status: 'planned',      category: 'Platforms'     },
   { title: 'Reddit',                     desc: 'Reddit API integration for posting to subreddits. Respects rate limits and flair requirements.',                 status: 'planned',      category: 'Platforms'     },
