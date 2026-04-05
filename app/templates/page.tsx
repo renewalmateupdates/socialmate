@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
@@ -10,7 +10,7 @@ function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse ${className}`} />
 }
 
-const CATEGORIES = ['All', 'Promotional', 'Educational', 'Engagement', 'Announcement', 'Personal', 'Other']
+const CATEGORIES = ['All', 'Promotional', 'Educational', 'Engagement', 'Announcement', 'Personal', 'Question', 'Poll', 'Thread', 'Other']
 
 const PLATFORM_ICONS: Record<string, string> = {
   instagram: '📸', twitter: '🐦', linkedin: '💼', tiktok: '🎵',
@@ -19,11 +19,18 @@ const PLATFORM_ICONS: Record<string, string> = {
   mastodon: '🐘', snapchat: '👻', lemon8: '🍋', bereal: '📷',
 }
 
+const PLATFORM_LABELS: Record<string, string> = {
+  bluesky: 'Bluesky', discord: 'Discord', telegram: 'Telegram', mastodon: 'Mastodon',
+  instagram: 'Instagram', twitter: 'X/Twitter', linkedin: 'LinkedIn', tiktok: 'TikTok',
+  youtube: 'YouTube', pinterest: 'Pinterest', reddit: 'Reddit', threads: 'Threads',
+}
+
 // Only show live platforms in the template platform picker
 const LIVE_PLATFORM_IDS = ['discord', 'bluesky', 'telegram', 'mastodon']
 const SOON_PLATFORM_IDS = ['linkedin', 'youtube', 'pinterest', 'reddit']
 
 const STARTER_TEMPLATES = [
+  // ─── Promotional ───────────────────────────────────────────────
   {
     id: 'starter-1',
     title: 'Product / Service Launch',
@@ -32,6 +39,28 @@ const STARTER_TEMPLATES = [
     content: `🚀 Introducing [product/service name]!\n\n[One sentence describing what it does and who it's for.]\n\nHere's what makes it different:\n✅ [Benefit 1]\n✅ [Benefit 2]\n✅ [Benefit 3]\n\n[Call to action — link in bio / comment below / DM us]`,
   },
   {
+    id: 'starter-9',
+    title: 'New Content / Blog Post Drop',
+    category: 'Promotional',
+    platforms: ['bluesky', 'mastodon', 'discord'],
+    content: `Just published: [Title of your post / video / resource] 📝\n\n[One sentence that captures the main value — what will someone learn or get?]\n\nIf you've ever [problem or situation], this one's for you.\n\n🔗 Link in bio / [direct link]\n\n(RT/share if you found it useful — helps more people find it!)`,
+  },
+  {
+    id: 'starter-promo3',
+    title: 'Limited-Time Offer',
+    category: 'Promotional',
+    platforms: ['bluesky', 'discord', 'telegram'],
+    content: `⏰ [X]% off [product/service] — this weekend only.\n\n[One compelling sentence about what they're getting.]\n\nUse code [CODE] at checkout.\n\nOffer ends [date/day]. Link in bio 👇`,
+  },
+  {
+    id: 'starter-promo4',
+    title: 'Waitlist / Pre-Launch',
+    category: 'Promotional',
+    platforms: ['bluesky', 'mastodon'],
+    content: `We're building something new 👀\n\n[One teaser sentence — what's the problem it solves?]\n\nWe're opening early access to [X] people first.\n\n🔗 Join the waitlist (link in bio) — spots are limited.\n\nWho do you know who needs this? Tag them 👇`,
+  },
+  // ─── Educational ───────────────────────────────────────────────
+  {
     id: 'starter-2',
     title: 'Quick Tip / How-To',
     category: 'Educational',
@@ -39,32 +68,33 @@ const STARTER_TEMPLATES = [
     content: `💡 [Topic] tip that changed everything for me:\n\n[Tip in one clear sentence.]\n\nHere's how to do it:\n1️⃣ [Step 1]\n2️⃣ [Step 2]\n3️⃣ [Step 3]\n\nSave this for later and share with someone who needs it! 👇`,
   },
   {
+    id: 'starter-10',
+    title: 'Lessons Learned / Reflection',
+    category: 'Educational',
+    platforms: ['bluesky', 'mastodon', 'telegram'],
+    content: `[Timeframe] ago I [what you started / launched / tried]. Here's what I learned 🧵\n\n✅ What worked: [2–3 honest points]\n❌ What didn't: [1–2 honest points]\n💡 What I'd do differently: [Key insight]\n\nBuilding in public because I wish someone had told me this earlier. Questions?`,
+  },
+  {
+    id: 'starter-edu3',
+    title: 'Common Mistake + Fix',
+    category: 'Educational',
+    platforms: ['bluesky', 'mastodon', 'discord'],
+    content: `Most people [do X wrong]. Here's why it's costing them 👇\n\nThe mistake: [Describe the common error in 1–2 sentences]\n\nWhy it matters: [Impact / consequence]\n\nThe fix: [Clear actionable solution]\n\nSave this and stop making it 🙏`,
+  },
+  {
+    id: 'starter-edu4',
+    title: 'Resources Roundup',
+    category: 'Educational',
+    platforms: ['bluesky', 'mastodon'],
+    content: `[Number] resources I wish I had when starting [topic/niche] 📚\n\n→ [Resource 1] — [why it's great in one sentence]\n→ [Resource 2] — [why it's great]\n→ [Resource 3] — [why it's great]\n→ [Resource 4] — [why it's great]\n\nBookmark this. Which one are you trying first? 👇`,
+  },
+  // ─── Engagement ────────────────────────────────────────────────
+  {
     id: 'starter-3',
     title: 'Engagement Question',
     category: 'Engagement',
     platforms: ['bluesky', 'discord', 'mastodon'],
     content: `[Relatable observation or bold statement about your niche.] 🤔\n\nI used to think [common misconception], but now I know [what you actually believe].\n\nWhat do you think — am I wrong?\n\nDrop your take below 👇`,
-  },
-  {
-    id: 'starter-4',
-    title: 'Behind the Scenes',
-    category: 'Personal',
-    platforms: ['discord', 'telegram'],
-    content: `A little behind the scenes of [what you're working on] 👀\n\n[Short honest description of what your day/process looks like.]\n\nThe part nobody tells you about [your field/work]:\n[Honest, unexpected insight]\n\nAnything you want to know more about? Ask me below 👇`,
-  },
-  {
-    id: 'starter-5',
-    title: 'Weekly Roundup',
-    category: 'Announcement',
-    platforms: ['bluesky', 'mastodon'],
-    content: `This week in [your niche] 📰\n\n→ [Thing 1 that happened or that you learned]\n→ [Thing 2]\n→ [Thing 3]\n\nMy take: [One sentence opinion or insight]\n\nFollowing along? Subscribe so you don't miss next week's. 🔔`,
-  },
-  {
-    id: 'starter-6',
-    title: 'Milestone Celebration',
-    category: 'Announcement',
-    platforms: ['bluesky', 'discord', 'mastodon', 'telegram'],
-    content: `We just hit [milestone — followers / orders / months / years]! 🎉\n\nHonestly didn't know if we'd get here when we started.\n\nThank you to everyone who [followed / bought / supported / shared]. This is yours too.\n\nNext goal: [next milestone]. Let's go. 🚀`,
   },
   {
     id: 'starter-7',
@@ -80,19 +110,101 @@ const STARTER_TEMPLATES = [
     platforms: ['discord', 'bluesky', 'telegram'],
     content: `Shoutout to [person / community member / customer] 🙌\n\n[What they did, built, or said that was noteworthy — be specific]\n\nThis is exactly why we do what we do.\n\nTag someone who deserves a spotlight this week 👇`,
   },
+  // ─── Announcement ──────────────────────────────────────────────
   {
-    id: 'starter-9',
-    title: 'New Content / Blog Post Drop',
-    category: 'Promotional',
-    platforms: ['bluesky', 'mastodon', 'discord'],
-    content: `Just published: [Title of your post / video / resource] 📝\n\n[One sentence that captures the main value — what will someone learn or get?]\n\nIf you've ever [problem or situation], this one's for you.\n\n🔗 Link in bio / [direct link]\n\n(RT/share if you found it useful — helps more people find it!)`,
+    id: 'starter-5',
+    title: 'Weekly Roundup',
+    category: 'Announcement',
+    platforms: ['bluesky', 'mastodon'],
+    content: `This week in [your niche] 📰\n\n→ [Thing 1 that happened or that you learned]\n→ [Thing 2]\n→ [Thing 3]\n\nMy take: [One sentence opinion or insight]\n\nFollowing along? Subscribe so you don't miss next week's. 🔔`,
   },
   {
-    id: 'starter-10',
-    title: 'Lessons Learned / Reflection',
+    id: 'starter-6',
+    title: 'Milestone Celebration',
+    category: 'Announcement',
+    platforms: ['bluesky', 'discord', 'mastodon', 'telegram'],
+    content: `We just hit [milestone — followers / orders / months / years]! 🎉\n\nHonestly didn't know if we'd get here when we started.\n\nThank you to everyone who [followed / bought / supported / shared]. This is yours too.\n\nNext goal: [next milestone]. Let's go. 🚀`,
+  },
+  {
+    id: 'starter-ann3',
+    title: 'Platform / Feature Update',
+    category: 'Announcement',
+    platforms: ['discord', 'telegram', 'bluesky'],
+    content: `Big update to [product/community/platform] 🛠️\n\nWhat's new:\n• [Feature / change 1]\n• [Feature / change 2]\n• [Feature / change 3]\n\nWhy we made this: [One honest sentence about the reason]\n\nQuestions or feedback? Drop them below 👇`,
+  },
+  // ─── Personal ──────────────────────────────────────────────────
+  {
+    id: 'starter-4',
+    title: 'Behind the Scenes',
     category: 'Personal',
+    platforms: ['discord', 'telegram'],
+    content: `A little behind the scenes of [what you're working on] 👀\n\n[Short honest description of what your day/process looks like.]\n\nThe part nobody tells you about [your field/work]:\n[Honest, unexpected insight]\n\nAnything you want to know more about? Ask me below 👇`,
+  },
+  {
+    id: 'starter-per2',
+    title: 'Introduce Yourself',
+    category: 'Personal',
+    platforms: ['bluesky', 'mastodon', 'discord'],
+    content: `Hey, I'm [name] 👋\n\nI [what you do in one sentence].\n\nI post about:\n→ [Topic 1]\n→ [Topic 2]\n→ [Topic 3]\n\nIf any of that sounds like your thing, follow along — I post every [frequency].\n\nWho are you and what brings you here? Drop it below 👇`,
+  },
+  // ─── Question ──────────────────────────────────────────────────
+  {
+    id: 'starter-q1',
+    title: 'Open Question to Community',
+    category: 'Question',
+    platforms: ['bluesky', 'mastodon', 'discord'],
+    content: `Quick question for my community 🙋\n\n[Your genuine question in one clear sentence?]\n\nI'm asking because [1–2 sentence context — why you want to know]\n\nEvery answer genuinely helps. 🙏`,
+  },
+  {
+    id: 'starter-q2',
+    title: 'This or That',
+    category: 'Question',
+    platforms: ['bluesky', 'discord', 'mastodon'],
+    content: `This or That 👇\n\n[Option A] vs [Option B] — which do you prefer for [context]?\n\nI'm firmly in the [Option A/B] camp, but I know this is controversial.\n\nReply with your pick and why 🔥`,
+  },
+  {
+    id: 'starter-q3',
+    title: 'Ask Me Anything',
+    category: 'Question',
+    platforms: ['discord', 'telegram', 'bluesky'],
+    content: `AMA time 🎤\n\nI've been [doing X / building Y / working in Z] for [timeframe].\n\nAsk me anything about:\n• [Topic 1]\n• [Topic 2]\n• [Topic 3]\n\nDrop your question below — I'll answer every single one 👇`,
+  },
+  // ─── Poll ──────────────────────────────────────────────────────
+  {
+    id: 'starter-poll1',
+    title: 'Community Poll',
+    category: 'Poll',
+    platforms: ['bluesky', 'discord', 'mastodon'],
+    content: `📊 Quick poll:\n\n[Your question]\n\n🅰️ [Option A]\n🅱️ [Option B]\n🆎 [Option C — optional]\n🆚 [Option D — optional]\n\nVote below! I'll share results on [day/date].`,
+  },
+  {
+    id: 'starter-poll2',
+    title: 'Feature / Direction Vote',
+    category: 'Poll',
+    platforms: ['discord', 'telegram'],
+    content: `Help me decide what to build/make next 🗳️\n\nI'm torn between:\n\n1️⃣ [Option 1] — [brief description]\n2️⃣ [Option 2] — [brief description]\n3️⃣ [Option 3] — [brief description]\n\nComment your vote (1, 2, or 3). Most votes wins — building it this week!`,
+  },
+  // ─── Thread ────────────────────────────────────────────────────
+  {
+    id: 'starter-thread1',
+    title: 'Thread Opener (How I did X)',
+    category: 'Thread',
+    platforms: ['bluesky', 'mastodon'],
+    content: `How I [achieved result] in [timeframe] — a thread 🧵\n\n[One punchy sentence on what this thread delivers]\n\n(Thread follows — hit follow so you don't miss the end 👇)`,
+  },
+  {
+    id: 'starter-thread2',
+    title: 'Thread Opener (X Things)',
+    category: 'Thread',
+    platforms: ['bluesky', 'mastodon'],
+    content: `[Number] things I learned about [topic] that nobody talks about 🧵\n\nMost people know [common surface-level truth]. This thread goes deeper.\n\nThread ↓`,
+  },
+  {
+    id: 'starter-thread3',
+    title: 'Storytime Thread',
+    category: 'Thread',
     platforms: ['bluesky', 'mastodon', 'telegram'],
-    content: `[Timeframe] ago I [what you started / launched / tried]. Here's what I learned 🧵\n\n✅ What worked: [2–3 honest points]\n❌ What didn't: [1–2 honest points]\n💡 What I'd do differently: [Key insight]\n\nBuilding in public because I wish someone had told me this earlier. Questions?`,
+    content: `Story time: the day [something happened that changed how you think] 📖\n\n[One gripping sentence to hook them — make them need to keep reading]\n\nThread ↓ (worth it, I promise)`,
   },
 ]
 
@@ -107,12 +219,15 @@ export default function Templates() {
   const [category, setCategory] = useState('Other')
   const [platforms, setPlatforms] = useState<string[]>([])
   const [activeCategory, setActiveCategory] = useState('All')
+  const [searchQuery, setSearchQuery] = useState('')
   const [saving, setSaving] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const [copied, setCopied] = useState<string | null>(null)
   const [savingStarter, setSavingStarter] = useState<string | null>(null)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+  const [starterCategory, setStarterCategory] = useState('All')
+  const [starterSearch, setStarterSearch] = useState('')
   const router = useRouter()
   const { activeWorkspace } = useWorkspace()
 
@@ -133,7 +248,6 @@ export default function Templates() {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
 
-      // Filter by workspace if in a client workspace
       if (activeWorkspace && !activeWorkspace.is_personal) {
         templatesQuery = templatesQuery.eq('workspace_id', activeWorkspace.id)
       }
@@ -231,9 +345,37 @@ export default function Templates() {
     setPlatforms(prev => prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id])
   }
 
-  const filtered = activeCategory === 'All'
-    ? templates
-    : templates.filter(t => t.category === activeCategory)
+  // Filtered user templates — category + search
+  const filtered = useMemo(() => {
+    let result = templates
+    if (activeCategory !== 'All') result = result.filter(t => t.category === activeCategory)
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase()
+      result = result.filter(t =>
+        t.title.toLowerCase().includes(q) ||
+        t.content.toLowerCase().includes(q) ||
+        (t.category || '').toLowerCase().includes(q)
+      )
+    }
+    return result
+  }, [templates, activeCategory, searchQuery])
+
+  // Filtered starter templates
+  const filteredStarters = useMemo(() => {
+    let result = STARTER_TEMPLATES
+    if (starterCategory !== 'All') result = result.filter(t => t.category === starterCategory)
+    if (starterSearch.trim()) {
+      const q = starterSearch.toLowerCase()
+      result = result.filter(t =>
+        t.title.toLowerCase().includes(q) ||
+        t.content.toLowerCase().includes(q) ||
+        t.category.toLowerCase().includes(q)
+      )
+    }
+    return result
+  }, [starterCategory, starterSearch])
+
+  const starterCategories = Array.from(new Set(['All', ...STARTER_TEMPLATES.map(t => t.category)]))
 
   return (
     <div className="min-h-dvh bg-theme flex">
@@ -269,7 +411,7 @@ export default function Templates() {
                     <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">Title</label>
                     <input type="text" value={title} onChange={e => setTitle(e.target.value)}
                       placeholder="e.g. Product Launch Announcement"
-                      className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-gray-400 dark:focus:border-gray-400"
+                      className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-gray-400 dark:focus:border-gray-400 dark:bg-gray-900 dark:text-gray-100"
                       autoFocus />
                   </div>
                   <div>
@@ -291,7 +433,7 @@ export default function Templates() {
                   <textarea value={content} onChange={e => setContent(e.target.value)}
                     placeholder="Excited to announce [product/service]! 🎉&#10;&#10;[Describe key benefit]&#10;&#10;[Call to action] 👇"
                     rows={6}
-                    className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-gray-400 resize-none" />
+                    className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-gray-400 resize-none dark:bg-gray-900 dark:text-gray-100" />
                   <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{content.length} chars</p>
                 </div>
 
@@ -337,19 +479,39 @@ export default function Templates() {
             </div>
           )}
 
-          {/* CATEGORY FILTER */}
-          {templates.length > 0 && (
-            <div className="flex items-center gap-1 flex-wrap mb-5">
-              {CATEGORIES.map(cat => (
-                <button key={cat} onClick={() => setActiveCategory(cat)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
-                    activeCategory === cat
-                      ? 'bg-black text-white border-black'
-                      : 'bg-surface border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-gray-400'
-                  }`}>
-                  {cat}
-                </button>
-              ))}
+          {/* USER TEMPLATES SEARCH + FILTER */}
+          {(templates.length > 0 || searchQuery) && (
+            <div className="space-y-3 mb-5">
+              {/* Search bar */}
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm pointer-events-none">🔍</span>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="Search your templates..."
+                  className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-gray-400 dark:bg-gray-900 dark:text-gray-100"
+                />
+                {searchQuery && (
+                  <button onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
+                    ✕
+                  </button>
+                )}
+              </div>
+              {/* Category pills */}
+              <div className="flex items-center gap-1 flex-wrap">
+                {CATEGORIES.map(cat => (
+                  <button key={cat} onClick={() => setActiveCategory(cat)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                      activeCategory === cat
+                        ? 'bg-black text-white border-black'
+                        : 'bg-surface border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-gray-400'
+                    }`}>
+                    {cat}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
@@ -358,7 +520,7 @@ export default function Templates() {
             <div className="space-y-3">
               {[1,2,3].map(i => <SkeletonBox key={i} className="h-28" />)}
             </div>
-          ) : filtered.length > 0 && (
+          ) : filtered.length > 0 ? (
             <div className="space-y-3 mb-10">
               {filtered.map(t => {
                 const isConfirming = confirmDelete === t.id
@@ -373,7 +535,6 @@ export default function Templates() {
                           {t.category || 'Other'}
                         </span>
                       </div>
-                      {/* Always visible actions */}
                       {!isConfirming && (
                         <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap">
                           <button onClick={() => handleCopy(t)}
@@ -384,7 +545,7 @@ export default function Templates() {
                             }`}>
                             {copied === t.id ? '✓' : 'Copy'}
                           </button>
-                          <Link href={`/compose?template=${t.id}`}
+                          <Link href={`/compose?content=${encodeURIComponent(t.content)}`}
                             className="text-xs font-bold px-2.5 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all">
                             Use →
                           </Link>
@@ -405,14 +566,17 @@ export default function Templates() {
                     </p>
 
                     {t.platforms && t.platforms.length > 0 && (
-                      <div className="flex items-center gap-1 mb-2">
+                      <div className="flex items-center gap-1.5 flex-wrap mb-2">
                         {t.platforms.map((p: string) => (
-                          <span key={p} className="text-sm">{PLATFORM_ICONS[p]}</span>
+                          <span key={p}
+                            className="inline-flex items-center gap-1 text-[10px] font-semibold bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-500 dark:text-gray-400 px-1.5 py-0.5 rounded-md">
+                            <span className="text-sm leading-none">{PLATFORM_ICONS[p]}</span>
+                            <span>{PLATFORM_LABELS[p] || p}</span>
+                          </span>
                         ))}
                       </div>
                     )}
 
-                    {/* CONFIRM DELETE — below content, full width */}
                     {isConfirming && (
                       <div className="mt-3 pt-3 border-t border-theme flex flex-col sm:flex-row sm:items-center gap-2">
                         <p className="text-xs text-red-600 font-semibold flex-1">
@@ -436,67 +600,123 @@ export default function Templates() {
                 )
               })}
             </div>
-          )}
+          ) : templates.length > 0 && (searchQuery || activeCategory !== 'All') ? (
+            <div className="mb-10 bg-gray-50 dark:bg-gray-800 border border-theme rounded-2xl p-6 text-center">
+              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 mb-1">No templates match your search</p>
+              <button onClick={() => { setSearchQuery(''); setActiveCategory('All') }}
+                className="text-xs text-black dark:text-white font-bold underline mt-1">
+                Clear filters
+              </button>
+            </div>
+          ) : null}
 
           {/* STARTER TEMPLATES */}
           <div>
             <div className="flex items-center gap-2 mb-3">
               <h2 className="text-sm font-bold tracking-tight">Starter Templates</h2>
-              <span className="text-xs font-semibold px-2 py-0.5 bg-blue-50 text-blue-600 rounded-full">Free to use</span>
+              <span className="text-xs font-semibold px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full">
+                {STARTER_TEMPLATES.length} templates
+              </span>
             </div>
             <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
               Ready-made formats for the 4 live platforms. Hit "Use →" to open in Compose, or "Save" to add to your collection.
             </p>
-            <div className="space-y-3">
-              {STARTER_TEMPLATES.map(t => (
-                <div key={t.id}
-                  className="bg-surface border border-theme rounded-2xl p-4 md:p-5 hover:border-gray-300 dark:hover:border-gray-600 transition-all">
-                  <div className="flex items-start justify-between gap-3 mb-2">
-                    <div className="flex items-center gap-2 flex-wrap min-w-0">
-                      <p className="text-sm font-extrabold truncate">{t.title}</p>
-                      <span className="text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full flex-shrink-0">
-                        {t.category}
-                      </span>
-                    </div>
-                    {/* Always visible */}
-                    <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap">
-                      <button onClick={() => handleCopy(t)}
-                        className={`text-xs font-bold px-2.5 py-1.5 rounded-xl transition-all border ${
-                          copied === t.id
-                            ? 'bg-green-500 text-white border-green-500'
-                            : 'border-gray-200 dark:border-gray-600 hover:border-gray-400'
-                        }`}>
-                        {copied === t.id ? '✓' : 'Copy'}
-                      </button>
-                      <Link href={`/compose?starterTemplate=${t.id}`}
-                        className="text-xs font-bold px-2.5 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all">
-                        Use →
-                      </Link>
-                      <button onClick={() => handleSaveStarter(t)} disabled={savingStarter === t.id}
-                        className="text-xs font-bold px-2.5 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
-                        {savingStarter === t.id ? 'Saving...' : 'Save'}
-                      </button>
-                    </div>
-                  </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-3 whitespace-pre-line mb-3">
-                    {t.content}
-                  </p>
-                  <div className="flex items-center gap-1">
-                    {t.platforms.map(p => (
-                      <span key={p} className="text-sm">{PLATFORM_ICONS[p]}</span>
-                    ))}
-                  </div>
-                </div>
-              ))}
+
+            {/* Starter search + filter */}
+            <div className="space-y-3 mb-4">
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 text-sm pointer-events-none">🔍</span>
+                <input
+                  type="text"
+                  value={starterSearch}
+                  onChange={e => setStarterSearch(e.target.value)}
+                  placeholder="Search starter templates..."
+                  className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-gray-400 dark:bg-gray-900 dark:text-gray-100"
+                />
+                {starterSearch && (
+                  <button onClick={() => setStarterSearch('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
+                    ✕
+                  </button>
+                )}
+              </div>
+              <div className="flex items-center gap-1 flex-wrap">
+                {starterCategories.map(cat => (
+                  <button key={cat} onClick={() => setStarterCategory(cat)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                      starterCategory === cat
+                        ? 'bg-black text-white border-black'
+                        : 'bg-surface border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-gray-400'
+                    }`}>
+                    {cat}
+                  </button>
+                ))}
+              </div>
             </div>
+
+            {filteredStarters.length === 0 ? (
+              <div className="bg-gray-50 dark:bg-gray-800 border border-theme rounded-2xl p-6 text-center">
+                <p className="text-xs font-bold text-gray-400 dark:text-gray-500 mb-1">No starter templates match your search</p>
+                <button onClick={() => { setStarterSearch(''); setStarterCategory('All') }}
+                  className="text-xs text-black dark:text-white font-bold underline mt-1">
+                  Clear filters
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {filteredStarters.map(t => (
+                  <div key={t.id}
+                    className="bg-surface border border-theme rounded-2xl p-4 md:p-5 hover:border-gray-300 dark:hover:border-gray-600 transition-all">
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div className="flex items-center gap-2 flex-wrap min-w-0">
+                        <p className="text-sm font-extrabold truncate">{t.title}</p>
+                        <span className="text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full flex-shrink-0">
+                          {t.category}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap">
+                        <button onClick={() => handleCopy(t)}
+                          className={`text-xs font-bold px-2.5 py-1.5 rounded-xl transition-all border ${
+                            copied === t.id
+                              ? 'bg-green-500 text-white border-green-500'
+                              : 'border-gray-200 dark:border-gray-600 hover:border-gray-400'
+                          }`}>
+                          {copied === t.id ? '✓' : 'Copy'}
+                        </button>
+                        <Link href={`/compose?content=${encodeURIComponent(t.content)}`}
+                          className="text-xs font-bold px-2.5 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all">
+                          Use →
+                        </Link>
+                        <button onClick={() => handleSaveStarter(t)} disabled={savingStarter === t.id}
+                          className="text-xs font-bold px-2.5 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
+                          {savingStarter === t.id ? 'Saving...' : 'Save'}
+                        </button>
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-3 whitespace-pre-line mb-3">
+                      {t.content}
+                    </p>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {t.platforms.map(p => (
+                        <span key={p}
+                          className="inline-flex items-center gap-1 text-[10px] font-semibold bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-500 dark:text-gray-400 px-1.5 py-0.5 rounded-md">
+                          <span className="text-sm leading-none">{PLATFORM_ICONS[p]}</span>
+                          <span>{PLATFORM_LABELS[p] || p}</span>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* EMPTY STATE */}
+          {/* EMPTY STATE — no saved templates yet */}
           {!loading && templates.length === 0 && !showForm && (
             <div className="mt-8 bg-gray-50 dark:bg-gray-800 border border-theme rounded-2xl p-6 text-center">
               <p className="text-xs text-gray-400 dark:text-gray-500">
                 You haven't saved any templates yet. Use a starter above or{' '}
-                <button onClick={() => setShowForm(true)} className="text-black font-bold underline">
+                <button onClick={() => setShowForm(true)} className="text-black dark:text-white font-bold underline">
                   create your own
                 </button>.
               </p>
