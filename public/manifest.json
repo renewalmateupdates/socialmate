@@ -1,32 +1,75 @@
 {
+  "id": "https://socialmate.studio/",
   "name": "SocialMate",
   "short_name": "SocialMate",
-  "description": "Free social media scheduler for 16 platforms",
+  "description": "Free social media scheduler — post to 16 platforms with AI tools, analytics, and a built-in content queue.",
   "start_url": "/dashboard",
+  "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
   "background_color": "#ffffff",
   "theme_color": "#000000",
   "orientation": "portrait-primary",
+  "lang": "en-US",
+  "dir": "ltr",
+  "categories": ["productivity", "social", "utilities"],
   "icons": [
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
-  "categories": ["productivity", "social"],
+  "shortcuts": [
+    {
+      "name": "New Post",
+      "short_name": "Compose",
+      "description": "Write and schedule a new post",
+      "url": "/compose",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Queue",
+      "short_name": "Queue",
+      "description": "View your scheduled posts",
+      "url": "/queue",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Analytics",
+      "short_name": "Analytics",
+      "description": "View your posting analytics",
+      "url": "/analytics",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
   "screenshots": [
     {
       "src": "/og-image.png",
       "sizes": "1200x630",
-      "type": "image/png"
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "SocialMate dashboard"
     }
-  ]
+  ],
+  "prefer_related_applications": false
 }

@@ -1,0 +1,22 @@
+User-agent: *
+Allow: /
+
+# App pages — no crawling needed
+Disallow: /dashboard
+Disallow: /compose
+Disallow: /queue
+Disallow: /calendar
+Disallow: /analytics
+Disallow: /bulk-scheduler
+Disallow: /settings
+Disallow: /workspace
+Disallow: /affiliate
+Disallow: /inbox
+Disallow: /bio-link
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://socialmate.studio/sitemap.xml
+
+# llms.txt (AI crawler discoverability)
+# https://socialmate.studio/llms.txt

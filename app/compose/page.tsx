@@ -659,7 +659,7 @@ function ComposeInner() {
             </div>
             <button
               onClick={() => setShowPreview(p => !p)}
-              className="lg:hidden text-xs font-bold px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-gray-400 transition-all">
+              className="lg:hidden text-xs font-bold px-3 py-2.5 min-h-[44px] border border-gray-200 dark:border-gray-700 rounded-xl hover:border-gray-400 transition-all">
               {showPreview ? 'Hide Preview' : 'Preview'}
             </button>
           </div>
@@ -678,7 +678,7 @@ function ComposeInner() {
           {templateBanner && (
             <div className="mb-4 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 flex items-center justify-between">
               <p className="text-xs font-semibold text-blue-700">📋 {templateBanner}</p>
-              <button onClick={() => setTemplateBanner(null)} className="text-xs text-blue-400 hover:text-blue-700 ml-4 font-bold">✕</button>
+              <button onClick={() => setTemplateBanner(null)} className="text-xs text-blue-400 hover:text-blue-700 ml-4 font-bold w-8 h-8 flex items-center justify-center rounded-lg hover:bg-blue-100 transition-colors flex-shrink-0">✕</button>
             </div>
           )}
 
@@ -721,7 +721,7 @@ function ComposeInner() {
                 <div className="flex flex-wrap gap-2">
                   {livePlatforms.map(p => (
                     <button key={p.id} onClick={() => togglePlatform(p.id)}
-                      className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
+                      className={`flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] rounded-xl text-xs font-bold transition-all border ${
                         selectedPlatforms.includes(p.id)
                           ? 'bg-black text-white border-black'
                           : 'bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-400'
@@ -763,14 +763,14 @@ function ComposeInner() {
                 <div className="flex flex-wrap gap-2">
                   {soonPlatforms.map(p => (
                     <div key={p.id} title={`${p.name} — coming soon`}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border border-dashed border-blue-100 text-blue-300 cursor-not-allowed select-none">
+                      className="flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] rounded-xl text-xs font-bold border border-dashed border-blue-100 text-blue-300 cursor-not-allowed select-none">
                       <span>{p.icon}</span><span>{p.name}</span>
                       <span className="text-xs font-bold text-blue-300 ml-0.5">· Soon</span>
                     </div>
                   ))}
                   {COMING_SOON_PLATFORMS.map(p => (
                     <div key={p.id} title={`${p.name} — coming soon`}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold border border-dashed border-gray-200 dark:border-gray-700 text-gray-300 dark:text-gray-600 cursor-not-allowed select-none">
+                      className="flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] rounded-xl text-xs font-bold border border-dashed border-gray-200 dark:border-gray-700 text-gray-300 dark:text-gray-600 cursor-not-allowed select-none">
                       <span>{p.icon}</span><span>{p.name}</span>
                       <span className="text-xs font-normal text-gray-300 dark:text-gray-600 ml-0.5">· Soon</span>
                     </div>
@@ -870,7 +870,7 @@ function ComposeInner() {
                       { id: 'starter-5', label: '📰 Weekly Roundup'     },
                     ].map(t => (
                       <Link key={t.id} href={`?starterTemplate=${t.id}`}
-                        className="text-xs font-semibold px-3 py-1.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-gray-400 hover:bg-white dark:hover:bg-gray-700 transition-all">
+                        className="text-xs font-semibold px-3 py-2.5 min-h-[44px] inline-flex items-center bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-gray-400 hover:bg-white dark:hover:bg-gray-700 transition-all">
                         {t.label}
                       </Link>
                     ))}
@@ -885,13 +885,14 @@ function ComposeInner() {
                   onChange={e => { setContent(e.target.value); setScoreResult(null) }}
                   placeholder="What do you want to post? Write your content here, or use an AI tool to generate it..."
                   rows={5}
-                  className="w-full text-sm outline-none resize-none text-gray-800 dark:text-gray-200 placeholder-gray-300 dark:placeholder-gray-600 sm:min-h-[200px]"
+                  className="w-full outline-none resize-none text-gray-800 dark:text-gray-200 placeholder-gray-300 dark:placeholder-gray-600 min-h-[120px] sm:min-h-[200px]"
+                  style={{ fontSize: '16px' }}
                 />
                 <div className="flex items-center justify-between pt-3 border-t border-gray-50 dark:border-gray-800 mt-2 gap-2 flex-wrap">
                   {selectedPlatforms.length === 0 ? (
                     <span className="text-xs text-gray-300 dark:text-gray-600">Select a platform to see character limit</span>
                   ) : (
-                    <div className="flex items-center gap-3 flex-wrap">
+                    <div className="flex items-center gap-2 flex-wrap">
                       {selectedPlatforms.map(id => {
                         const p = PLATFORMS.find(pl => pl.id === id)
                         if (!p) return null
@@ -900,10 +901,13 @@ function ComposeInner() {
                         const color   = over         ? 'text-red-500'
                                       : nearPct > 0.9 ? 'text-amber-500'
                                       : 'text-gray-400 dark:text-gray-500'
+                        const bg      = over         ? 'bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg px-2 py-0.5'
+                                      : nearPct > 0.9 ? 'bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg px-2 py-0.5'
+                                      : ''
                         return (
-                          <span key={id} className={`text-xs font-bold flex items-center gap-1 ${color}`}>
+                          <span key={id} className={`text-xs font-semibold flex items-center gap-1 ${color} ${bg}`}>
                             <span className="text-sm leading-none">{p.icon}</span>
-                            <span>{charCount.toLocaleString()}<span className="font-normal text-gray-300 dark:text-gray-600">/{p.limit.toLocaleString()}</span>{over && ' ⚠️'}</span>
+                            <span>{charCount.toLocaleString()}<span className="font-normal opacity-60">/{p.limit.toLocaleString()}</span>{over && ' ⚠️'}</span>
                           </span>
                         )
                       })}
@@ -970,7 +974,7 @@ function ComposeInner() {
                       type="button"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={mediaItems.length >= 4}
-                      className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-xl hover:border-gray-400 dark:hover:border-gray-500 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                      className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2.5 min-h-[44px] border border-gray-200 dark:border-gray-700 rounded-xl hover:border-gray-400 dark:hover:border-gray-500 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
                       <span>📎</span>
                       {mediaItems.length === 0 ? 'Attach image / video' : `${mediaItems.length}/4 attached`}
                     </button>
@@ -1055,15 +1059,15 @@ function ComposeInner() {
                     <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap mb-3">{aiResult}</p>
                     <div className="flex flex-wrap items-center gap-2">
                       <button onClick={handleInsertResult}
-                        className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-lg hover:opacity-80 transition-all">
+                        className="text-xs font-bold px-3 py-2.5 min-h-[44px] bg-black text-white rounded-lg hover:opacity-80 transition-all">
                         Insert below
                       </button>
                       <button onClick={handleReplaceWithResult}
-                        className="text-xs font-bold px-3 py-1.5 border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg hover:border-gray-500 transition-all">
+                        className="text-xs font-bold px-3 py-2.5 min-h-[44px] border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg hover:border-gray-500 transition-all">
                         Replace post
                       </button>
                       <button onClick={() => { setAiResult(''); setActiveAiTool(null) }}
-                        className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-all ml-auto">
+                        className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-all ml-auto min-h-[44px] px-2">
                         Dismiss
                       </button>
                     </div>
@@ -1080,7 +1084,7 @@ function ComposeInner() {
                   </div>
                   <button onClick={handleScorePost}
                     disabled={scoring || !content.trim() || credits < SCORE_CREDIT_COST || !!rateLimitedUntil}
-                    className="flex items-center gap-2 px-4 py-2 bg-black text-white text-xs font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed self-start sm:self-auto">
+                    className="flex items-center gap-2 px-4 py-2.5 min-h-[44px] bg-black text-white text-xs font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed self-start sm:self-auto">
                     {scoring ? (
                       <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Scoring...</>
                     ) : `⚡ Score Post — ${SCORE_CREDIT_COST} cr`}
