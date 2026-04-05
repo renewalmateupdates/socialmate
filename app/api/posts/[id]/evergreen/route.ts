@@ -5,8 +5,9 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params
   const authHeader = request.headers.get('Authorization')
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null
 
@@ -21,8 +22,6 @@ export async function PATCH(
 
   const { data: { user } } = await supabaseUser.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  const { id } = params
 
   const { data: post } = await getSupabaseAdmin()
     .from('posts')
