@@ -191,22 +191,17 @@ export default function AffiliatePage() {
         {
           label: 'Twitter / X',
           icon: '𝕏',
-          text: `I've been scheduling my social posts with SocialMate — actually free, no credit card. Bulk scheduler, AI tools, calendar. Grab it here: ${referralLink}`,
+          text: `I've been using @socialmatehq to schedule posts across Bluesky, Discord, Mastodon, and Telegram — all for free. Try it: ${referralLink}`,
         },
         {
-          label: 'LinkedIn',
-          icon: '🔷',
-          text: `If you manage social media for your brand or clients, check out SocialMate. It's genuinely free — bulk scheduling, AI content tools, multi-platform support (Bluesky, Discord, Telegram + more). No limits, no trial gimmicks.\n\nI use it to save hours every week. Sign up here: ${referralLink}`,
-        },
-        {
-          label: 'Discord / Community',
+          label: 'Discord',
           icon: '💬',
-          text: `Hey, if anyone needs a free social scheduler — check out SocialMate. No paywall, no credit card. It handles Bluesky, Discord, Telegram, Mastodon and more. Link: ${referralLink}`,
+          text: `Hey, found this free social media scheduler that actually works for Bluesky/Discord/Mastodon — ${referralLink}`,
         },
         {
-          label: 'Blog / Newsletter',
-          icon: '📝',
-          text: `SocialMate is a free social media scheduler built for creators who don't want to pay enterprise prices. It supports Bluesky, Discord, Telegram, and Mastodon natively, with a bulk scheduler, content calendar, and AI tools included on the free plan — no credit card required.\n\nI've been using it for my [PLATFORM] content and it saves me hours every week. Sign up here: ${referralLink}`,
+          label: 'General',
+          icon: '🔗',
+          text: `Free social media scheduler with AI tools — no credit card needed: ${referralLink}`,
         },
       ]
     : []
@@ -215,9 +210,25 @@ export default function AffiliatePage() {
     return (
       <div className="min-h-dvh bg-theme flex">
         <Sidebar />
-        <div className="md:ml-56 flex-1 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black dark:border-white" />
-        </div>
+        <main className="md:ml-56 flex-1 overflow-y-auto p-4 md:p-8">
+          <div className="max-w-3xl mx-auto space-y-6 animate-pulse">
+            {/* Header skeleton */}
+            <div className="space-y-2">
+              <div className="h-7 bg-gray-200 dark:bg-gray-800 rounded-lg w-48" />
+              <div className="h-4 bg-gray-100 dark:bg-gray-800/60 rounded w-80" />
+            </div>
+            {/* Stats skeleton */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="bg-gray-100 dark:bg-gray-800 rounded-2xl p-4 h-24" />
+              ))}
+            </div>
+            {/* Milestone skeleton */}
+            <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl h-24" />
+            {/* Link skeleton */}
+            <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl h-48" />
+          </div>
+        </main>
       </div>
     )
   }
@@ -242,13 +253,16 @@ export default function AffiliatePage() {
             <div className="bg-surface border border-theme rounded-2xl p-4 col-span-2 sm:col-span-1 flex flex-col justify-between gap-2">
               <div className="flex items-start justify-between">
                 <div>
-                  <div className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 leading-none">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-lg opacity-70" aria-hidden>🙋</span>
+                  </div>
+                  <div className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 leading-none tabular-nums">
                     {stats.totalReferrals}
                   </div>
                   <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 mt-1">Total Referrals</div>
                 </div>
                 {referralTrend.some(v => v > 0) && (
-                  <span className="text-pink-500">
+                  <span className="text-pink-500 mt-1">
                     <Sparkline data={referralTrend} />
                   </span>
                 )}
@@ -257,15 +271,17 @@ export default function AffiliatePage() {
             </div>
 
             <div className="bg-surface border border-theme rounded-2xl p-4 flex flex-col justify-between gap-1">
-              <div className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 leading-none">{stats.payingReferrals}</div>
+              <span className="text-lg opacity-70" aria-hidden>⚡</span>
+              <div className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 leading-none tabular-nums">{stats.payingReferrals}</div>
               <div>
-                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Active Referrals</div>
+                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Active / Paying</div>
                 <div className="text-xs text-gray-400 dark:text-gray-500">on a paid plan</div>
               </div>
             </div>
 
             <div className="bg-surface border border-theme rounded-2xl p-4 flex flex-col justify-between gap-1">
-              <div className="text-3xl font-extrabold text-green-600 dark:text-green-400 leading-none">
+              <span className="text-lg opacity-70" aria-hidden>💰</span>
+              <div className="text-3xl font-extrabold text-green-600 dark:text-green-400 leading-none tabular-nums">
                 {stats.totalEarnings > 0
                   ? `$${stats.totalEarnings.toFixed(0)}`
                   : stats.creditsEarned > 0
@@ -274,7 +290,7 @@ export default function AffiliatePage() {
               </div>
               <div>
                 <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">
-                  {stats.totalEarnings > 0 ? 'Total Earnings' : 'Credits Earned'}
+                  {stats.totalEarnings > 0 ? 'Est. Earnings' : 'Credits Earned'}
                 </div>
                 <div className="text-xs text-gray-400 dark:text-gray-500">
                   {stats.totalEarnings > 0
@@ -285,12 +301,13 @@ export default function AffiliatePage() {
             </div>
 
             <div className="bg-surface border border-theme rounded-2xl p-4 flex flex-col justify-between gap-1">
-              <div className="text-3xl font-extrabold text-amber-600 dark:text-amber-400 leading-none">
+              <span className="text-lg opacity-70" aria-hidden>⏳</span>
+              <div className="text-3xl font-extrabold text-amber-600 dark:text-amber-400 leading-none tabular-nums">
                 {stats.pendingPayout > 0 ? `$${stats.pendingPayout.toFixed(0)}` : '—'}
               </div>
               <div>
                 <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Pending Payout</div>
-                <div className="text-xs text-gray-400 dark:text-gray-500">awaiting 60-day hold</div>
+                <div className="text-xs text-gray-400 dark:text-gray-500">60-day hold</div>
               </div>
             </div>
           </div>
@@ -325,16 +342,19 @@ export default function AffiliatePage() {
 
             {/* Link display + copy */}
             <div className="flex flex-col sm:flex-row items-stretch gap-3 mb-2">
-              <div className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 font-mono text-sm text-gray-700 dark:text-gray-300 truncate select-all">
-                {referralLink || 'Generating…'}
-              </div>
+              <input
+                readOnly
+                value={referralLink || 'Generating your link…'}
+                onClick={e => (e.target as HTMLInputElement).select()}
+                className="flex-1 min-w-0 bg-gray-50 dark:bg-gray-800/80 border-2 border-gray-200 dark:border-gray-700 focus:border-pink-400 dark:focus:border-pink-500 outline-none rounded-xl px-4 py-3 font-mono text-sm text-gray-700 dark:text-gray-200 cursor-text transition-colors"
+              />
               <button
                 onClick={copyLink}
                 disabled={!referralLink}
-                className={`flex-shrink-0 px-6 py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-40 ${
+                className={`flex-shrink-0 px-7 py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-40 active:scale-95 ${
                   copied
-                    ? 'bg-green-500 text-white'
-                    : 'bg-black dark:bg-white text-white dark:text-black hover:opacity-80 active:scale-95'
+                    ? 'bg-green-500 text-white shadow-lg shadow-green-500/20'
+                    : 'bg-black dark:bg-white text-white dark:text-black hover:opacity-80'
                 }`}>
                 {copied ? '✓ Copied!' : 'Copy Link'}
               </button>
@@ -362,11 +382,11 @@ export default function AffiliatePage() {
           <div className="bg-surface border border-theme rounded-2xl p-6">
             <h2 className="text-sm font-extrabold mb-4">Payout History</h2>
             {conversions.length === 0 ? (
-              <div className="text-center py-8">
-                <div className="text-3xl mb-2">💸</div>
-                <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">No conversions yet</p>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
-                  Payouts will appear here once your referrals upgrade.
+              <div className="text-center py-10">
+                <div className="text-4xl mb-3">💸</div>
+                <p className="text-sm font-bold text-gray-600 dark:text-gray-300">No payouts yet</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 max-w-xs mx-auto">
+                  Once your referrals upgrade to a paid plan, their conversions will appear here.
                 </p>
               </div>
             ) : (
@@ -383,20 +403,22 @@ export default function AffiliatePage() {
                     {conversions.map(c => {
                       const date   = c.converted_at ? new Date(c.converted_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'
                       const amount = c.payout_amount != null ? `$${c.payout_amount.toFixed(2)}` : c.total_earned != null ? `${c.total_earned} cr` : '—'
-                      const status = c.payout_status ?? c.status ?? 'pending'
+                      const rawStatus = c.payout_status ?? c.status ?? 'pending'
+                      const status = rawStatus === 'eligible' ? 'pending' : rawStatus
+                      const statusLabel = status === 'paid' ? '✓ Paid' : status === 'pending' ? '⏳ Pending' : status
                       const statusStyle =
                         status === 'paid'
-                          ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                          ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-100 dark:border-green-800'
                           : status === 'pending'
-                          ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                          : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                          ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-100 dark:border-amber-800'
+                          : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border border-gray-200 dark:border-gray-700'
                       return (
-                        <tr key={c.id} className="border-b border-gray-50 dark:border-gray-800 last:border-0">
+                        <tr key={c.id} className="border-b border-gray-50 dark:border-gray-800/60 last:border-0">
                           <td className="py-3 pr-4 text-gray-600 dark:text-gray-400 text-xs whitespace-nowrap">{date}</td>
-                          <td className="py-3 pr-4 text-right font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap">{amount}</td>
+                          <td className="py-3 pr-4 text-right font-bold text-gray-900 dark:text-gray-100 whitespace-nowrap">{amount}</td>
                           <td className="py-3 text-right">
-                            <span className={`inline-block px-2.5 py-1 rounded-lg text-xs font-bold capitalize ${statusStyle}`}>
-                              {status === 'eligible' ? 'pending' : status}
+                            <span className={`inline-block px-2.5 py-1 rounded-lg text-xs font-bold ${statusStyle}`}>
+                              {statusLabel}
                             </span>
                           </td>
                         </tr>
@@ -410,34 +432,34 @@ export default function AffiliatePage() {
 
           {/* ── PERFORMANCE TIPS ── */}
           <div className="bg-surface border border-theme rounded-2xl p-6">
-            <h2 className="text-sm font-extrabold mb-1">How to promote SocialMate</h2>
+            <h2 className="text-sm font-extrabold mb-1">How to get more referrals</h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
               Actionable tips that actually convert.
             </p>
-            <div className="space-y-3">
+            <div className="space-y-0">
               {[
                 {
-                  icon: '💬',
-                  title: 'Share in Discord communities',
-                  desc: 'Drop your link in creator, marketing, or indie-maker Discords where people talk about tools. Be genuine — explain why you use it.',
+                  icon: '🎯',
+                  title: 'Share in Bluesky, Mastodon & Discord communities',
+                  desc: 'Drop your link in creator, marketing, or indie-maker communities where people talk about tools. Be genuine — explain why you use it.',
                 },
                 {
                   icon: '✍️',
                   title: 'Write a comparison post',
-                  desc: '"SocialMate vs Hootsuite" or "Free Hootsuite alternatives" searches convert extremely well. A short blog post targeting those keywords pays off long-term.',
+                  desc: '"SocialMate vs Buffer" or "free Buffer alternatives" searches convert extremely well. A short blog post targeting those keywords pays off long-term.',
                 },
                 {
-                  icon: '🎬',
-                  title: 'Post a workflow walkthrough',
-                  desc: 'A 60-second screen recording of how you schedule a week of posts is one of the highest-converting formats on TikTok, YouTube Shorts, or Reels.',
+                  icon: '📹',
+                  title: 'Record a quick walkthrough of your workflow',
+                  desc: 'A 60-second screen recording of how you schedule a week of posts is one of the highest-converting formats on YouTube Shorts, TikTok, or Reels.',
                 },
                 {
-                  icon: '📧',
-                  title: 'Add it to your newsletter',
-                  desc: 'A single mention in your newsletter footer or a "tools I use" section consistently drives sign-ups — especially with a warm audience.',
+                  icon: '🔗',
+                  title: 'Add your link to your bio / link-in-bio page',
+                  desc: 'A passive placement in your profile bio or Linktree drives consistent sign-ups with zero ongoing effort.',
                 },
               ].map(tip => (
-                <div key={tip.title} className="flex items-start gap-3.5 py-3 border-b border-gray-50 dark:border-gray-800 last:border-0">
+                <div key={tip.title} className="flex items-start gap-3.5 py-3.5 border-b border-gray-50 dark:border-gray-800 last:border-0">
                   <span className="text-xl flex-shrink-0 mt-0.5">{tip.icon}</span>
                   <div>
                     <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{tip.title}</p>
