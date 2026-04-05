@@ -65,6 +65,7 @@ function DashboardInner() {
   })
   const [upcomingPosts, setUpcomingPosts] = useState<Post[]>([])
   const [recentPosts, setRecentPosts] = useState<Post[]>([])
+  const [allPosts, setAllPosts] = useState<Post[]>([])
   const [weekCounts, setWeekCounts] = useState<number[]>([0,0,0,0,0,0,0])
   const [streak, setStreak] = useState(0)
   const [creditSource, setCreditSource] = useState<'monthly_first' | 'earned_first' | 'paid_first'>('monthly_first')
@@ -117,6 +118,7 @@ function DashboardInner() {
       upcomingCount: normalised.filter(p => p.status === 'scheduled' && new Date(p.scheduled_at) > now).length,
     })
 
+    setAllPosts(normalised)
     setUpcomingPosts(normalised.filter(p => p.status === 'scheduled' && new Date(p.scheduled_at) > now).slice(0, 4))
     setRecentPosts(
       normalised
@@ -208,6 +210,22 @@ function DashboardInner() {
   const DAYS_XS      = ['S','M','T','W','T','F','S']
   const maxWeekCount = Math.max(...weekCounts, 1)
 
+  // Streak calculation from posts
+  const todayMidnight = new Date(); todayMidnight.setHours(0,0,0,0)
+  let currentStreak = 0, tempStreak = 0, currentStreakDone = false
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(todayMidnight); d.setDate(todayMidnight.getDate() - i)
+    const hasPost = allPosts.some(p => { const pd = new Date(p.created_at); pd.setHours(0,0,0,0); return pd.getTime() === d.getTime() })
+    if (hasPost) { tempStreak++; if (!currentStreakDone) currentStreak = tempStreak }
+    else { if (!currentStreakDone) currentStreakDone = true; tempStreak = 0 }
+  }
+  const postedToday = allPosts.some(p => { const pd = new Date(p.created_at); pd.setHours(0,0,0,0); return pd.getTime() === todayMidnight.getTime() })
+  const trailDays: boolean[] = []
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(todayMidnight); d.setDate(todayMidnight.getDate() - i)
+    trailDays.push(allPosts.some(p => { const pd = new Date(p.created_at); pd.setHours(0,0,0,0); return pd.getTime() === d.getTime() }))
+  }
+
   // Credits display — monthly bar shows monthly pool usage
   const monthlyLimit = planConfig?.credits ?? 50
   const bankCap      = planConfig?.creditBank ?? 150
@@ -281,6 +299,43 @@ function DashboardInner() {
               </div>
             </div>
           )}
+
+          {/* STREAK CARD */}
+          <div className="bg-surface border border-theme rounded-2xl p-4 mb-4">
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div className="flex items-center gap-3">
+                <span className="text-3xl">🔥</span>
+                <div>
+                  <div className="text-2xl font-extrabold text-orange-500 leading-none">
+                    {currentStreak} day{currentStreak !== 1 ? '' : ''} streak
+                  </div>
+                  <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Keep showing up — consistency wins.</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-1">
+                {trailDays.map((active, i) => (
+                  <div key={i} className={`w-3 h-3 rounded-full ${active ? 'bg-orange-400' : 'bg-gray-200 dark:bg-gray-700'}`} />
+                ))}
+              </div>
+            </div>
+            <div className="mt-3">
+              {postedToday ? (
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-3 py-1.5 rounded-full">
+                  ✓ Posted today
+                </span>
+              ) : currentStreak > 0 ? (
+                <Link href="/compose"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-700 px-3 py-1.5 rounded-full hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-all">
+                  Keep your streak alive →
+                </Link>
+              ) : (
+                <Link href="/compose"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">
+                  Start your streak — post today →
+                </Link>
+              )}
+            </div>
+          </div>
 
           {/* TOP STRIP — Plan + Credits + Stats */}
           <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
@@ -393,21 +448,6 @@ function DashboardInner() {
               </div>
             ))}
 
-            {/* Streak card */}
-            <div className="col-span-2 bg-surface border border-theme rounded-2xl p-3 flex items-center gap-3">
-              <div className="text-2xl">🔥</div>
-              <div>
-                <div className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">Posting Streak</div>
-                <div className="text-xl font-extrabold text-orange-500">
-                  {streak} day{streak !== 1 ? 's' : ''}
-                </div>
-              </div>
-              {streak >= 7 && (
-                <div className="ml-auto text-xs font-bold bg-orange-50 text-orange-600 px-2 py-1 rounded-full">
-                  🏆 On fire!
-                </div>
-              )}
-            </div>
           </div>
 
           {/* MAIN GRID */}

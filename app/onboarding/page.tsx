@@ -956,11 +956,16 @@ function OnboardingInner() {
                 </div>
               )}
 
+              <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800 rounded-2xl px-4 py-3 mb-4 flex items-center gap-3">
+                <span className="text-xl flex-shrink-0">🔥</span>
+                <p className="text-xs text-orange-700 dark:text-orange-400 font-semibold">Post every day to build a streak — your dashboard tracks consecutive days and keeps you on a roll.</p>
+              </div>
+
               <div className="space-y-3 mb-8 text-left">
                 {[
                   { icon: '✏️', title: 'Compose a post',        desc: 'Write, schedule, and use AI tools',           href: '/compose',          cta: 'Start writing'   },
                   { icon: '🤖', title: 'Explore AI Features',   desc: `${planConfig.aiTools.length >= 12 ? planConfig.aiTools.length : 12} AI tools — captions, hooks, scoring & more`, href: '/ai-features', cta: 'Explore tools'   },
-                  { icon: '📆', title: 'Bulk Scheduler',        desc: 'Plan a whole week of content at once',         href: '/bulk-scheduler',   cta: 'Open scheduler'  },
+                  { icon: '📆', title: 'Bulk Scheduler & Calendar', desc: 'Plan a week at once — switch to Calendar view for a visual overview', href: '/bulk-scheduler',   cta: 'Open scheduler'  },
                   { icon: '🔗', title: 'Set up Link in Bio',    desc: 'Your free bio page — no Linktree needed',      href: '/link-in-bio',      cta: 'Build page'      },
                   { icon: '📊', title: 'Analytics',             desc: `Up to ${planConfig.analytics} of history`,    href: '/analytics',        cta: 'View analytics'  },
                   ...(selectedPlatforms.length === 0 ? [
