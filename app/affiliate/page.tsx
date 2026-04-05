@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase'
 
 const appUrl = 'https://socialmate.studio'
 
-const MILESTONE_STEP = 5
+const MILESTONE_STEP    = 5
 const MILESTONE_CREDITS = 100
 
 function getMilestoneProgress(payingReferrals: number) {
@@ -17,20 +17,99 @@ function getMilestoneProgress(payingReferrals: number) {
   return { nextMultiple, prevMultiple, progress: Math.max(0, Math.min(100, progress)) }
 }
 
+type Conversion = {
+  id: string
+  status: string
+  total_earned: number | null
+  converted_at: string | null
+  payout_amount?: number | null
+  payout_status?: string | null
+  payout_date?: string | null
+}
+
+type AffiliateData = {
+  status: string
+  commission_rate?: number
+  active_referral_count?: number
+}
+
+// ── Sparkline ────────────────────────────────────────────────────────────────
+function Sparkline({ data }: { data: number[] }) {
+  if (data.length < 2) return null
+  const max    = Math.max(...data, 1)
+  const points = data.map((v, i) => {
+    const x = (i / (data.length - 1)) * 100
+    const y = 100 - (v / max) * 100
+    return `${x},${y}`
+  }).join(' ')
+  return (
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-16 h-8 opacity-60" aria-hidden>
+      <polyline
+        points={points}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        vectorEffect="non-scaling-stroke"
+      />
+    </svg>
+  )
+}
+
+// ── CopyableTemplate ─────────────────────────────────────────────────────────
+function CopyableTemplate({ label, icon, text }: { label: string; icon: string; text: string }) {
+  const [copied, setCopied] = useState(false)
+  function copy() {
+    navigator.clipboard.writeText(text)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+  return (
+    <div className="bg-gray-50 dark:bg-gray-800/60 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-100 dark:border-gray-700">
+        <span className="text-xs font-bold text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+          <span>{icon}</span>
+          {label}
+        </span>
+        <button
+          onClick={copy}
+          className={`text-xs font-bold px-3 py-1 rounded-lg transition-all ${
+            copied
+              ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400'
+              : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+          }`}>
+          {copied ? '✓ Copied!' : 'Copy'}
+        </button>
+      </div>
+      <p className="px-4 py-3 text-xs text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{text}</p>
+    </div>
+  )
+}
+
+// ── Main Page ────────────────────────────────────────────────────────────────
 export default function AffiliatePage() {
   const router = useRouter()
-  const [userId, setUserId]               = useState<string | null>(null)
-  const [referralCode, setReferralCode]   = useState<string | null>(null)
-  const [copied, setCopied]               = useState(false)
-  const [loading, setLoading]             = useState(true)
-  const [stats, setStats]                 = useState({ totalReferrals: 0, payingReferrals: 0, creditsEarned: 0 })
-  const [affiliateStatus, setAffiliateStatus] = useState<string | null>(null)
+
+  const [referralCode, setReferralCode]         = useState<string | null>(null)
+  const [copied, setCopied]                     = useState(false)
+  const [loading, setLoading]                   = useState(true)
+  const [conversions, setConversions]           = useState<Conversion[]>([])
+  const [affiliateData, setAffiliateData]       = useState<AffiliateData | null>(null)
+  const [stats, setStats]                       = useState({
+    totalReferrals:   0,
+    payingReferrals:  0,
+    creditsEarned:    0,
+    totalEarnings:    0,
+    pendingPayout:    0,
+  })
+  // Monthly buckets for sparkline (last 6 months)
+  const [referralTrend, setReferralTrend]       = useState<number[]>([])
 
   useEffect(() => {
     const init = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
-      setUserId(user.id)
 
       // Load or generate referral code
       const { data: settings } = await supabase
@@ -48,23 +127,45 @@ export default function AffiliatePage() {
       }
       setReferralCode(code)
 
-      // Load referral stats
-      const { data: conversions } = await supabase
+      // Load referral conversions
+      const { data: convRows } = await supabase
         .from('referral_conversions')
-        .select('status, total_earned')
+        .select('id, status, total_earned, converted_at, payout_amount, payout_status, payout_date')
         .eq('affiliate_user_id', user.id)
+        .order('converted_at', { ascending: false })
 
-      if (conversions) {
-        const paying      = conversions.filter(c => c.status === 'eligible' || c.status === 'paid').length
-        const credits     = conversions.reduce((sum, c) => sum + (c.total_earned ?? 0), 0)
-        setStats({ totalReferrals: conversions.length, payingReferrals: paying, creditsEarned: credits })
-      }
+      const rows: Conversion[] = convRows ?? []
+      setConversions(rows)
 
-      // Load affiliate program status (if any)
+      // Compute stats
+      const paying       = rows.filter(c => c.status === 'eligible' || c.status === 'paid').length
+      const credits      = rows.reduce((s, c) => s + (c.total_earned ?? 0), 0)
+      const totalEarned  = rows.reduce((s, c) => s + (c.payout_amount ?? 0), 0)
+      const pending      = rows.filter(c => c.payout_status === 'pending').reduce((s, c) => s + (c.payout_amount ?? 0), 0)
+      setStats({
+        totalReferrals:  rows.length,
+        payingReferrals: paying,
+        creditsEarned:   credits,
+        totalEarnings:   totalEarned,
+        pendingPayout:   pending,
+      })
+
+      // Build sparkline — count sign-ups per month for last 6 months
+      const now    = new Date()
+      const months = Array.from({ length: 6 }, (_, i) => {
+        const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1)
+        return d.toISOString().slice(0, 7) // "YYYY-MM"
+      })
+      const monthlyCounts = months.map(mo =>
+        rows.filter(c => (c.converted_at ?? '').startsWith(mo)).length
+      )
+      setReferralTrend(monthlyCounts)
+
+      // Load affiliate program status
       const res = await fetch('/api/affiliate/stats')
       if (res.ok) {
         const json = await res.json()
-        if (json.affiliate?.status) setAffiliateStatus(json.affiliate.status)
+        if (json.affiliate) setAffiliateData(json.affiliate)
       }
 
       setLoading(false)
@@ -79,8 +180,36 @@ export default function AffiliatePage() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  const referralLink = referralCode ? `${appUrl}/?ref=${referralCode}` : ''
+  const referralLink  = referralCode ? `${appUrl}/?ref=${referralCode}` : ''
   const { nextMultiple, progress } = getMilestoneProgress(stats.payingReferrals)
+  const affiliateStatus = affiliateData?.status ?? null
+  const commissionRate  = affiliateData?.commission_rate ?? 0.30
+
+  // Share templates (populated once referralLink is known)
+  const shareTemplates = referralLink
+    ? [
+        {
+          label: 'Twitter / X',
+          icon: '𝕏',
+          text: `I've been scheduling my social posts with SocialMate — actually free, no credit card. Bulk scheduler, AI tools, calendar. Grab it here: ${referralLink}`,
+        },
+        {
+          label: 'LinkedIn',
+          icon: '🔷',
+          text: `If you manage social media for your brand or clients, check out SocialMate. It's genuinely free — bulk scheduling, AI content tools, multi-platform support (Bluesky, Discord, Telegram + more). No limits, no trial gimmicks.\n\nI use it to save hours every week. Sign up here: ${referralLink}`,
+        },
+        {
+          label: 'Discord / Community',
+          icon: '💬',
+          text: `Hey, if anyone needs a free social scheduler — check out SocialMate. No paywall, no credit card. It handles Bluesky, Discord, Telegram, Mastodon and more. Link: ${referralLink}`,
+        },
+        {
+          label: 'Blog / Newsletter',
+          icon: '📝',
+          text: `SocialMate is a free social media scheduler built for creators who don't want to pay enterprise prices. It supports Bluesky, Discord, Telegram, and Mastodon natively, with a bulk scheduler, content calendar, and AI tools included on the free plan — no credit card required.\n\nI've been using it for my [PLATFORM] content and it saves me hours every week. Sign up here: ${referralLink}`,
+        },
+      ]
+    : []
 
   if (loading) {
     return (
@@ -99,78 +228,237 @@ export default function AffiliatePage() {
       <main className="md:ml-56 flex-1 overflow-y-auto p-4 md:p-8">
         <div className="max-w-3xl mx-auto space-y-6">
 
+          {/* ── HEADER ── */}
           <div>
-            <h1 className="text-2xl font-extrabold tracking-tight">Referral & Affiliate</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight">Referral &amp; Affiliate</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-              Share SocialMate and earn credits for every paying referral.
+              Share SocialMate and earn credits — or cash commissions if you&apos;re in the partner program.
             </p>
           </div>
 
-          {/* REFERRAL LINK */}
-          <div className="bg-surface border border-theme rounded-2xl p-6">
-            <h2 className="text-sm font-extrabold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3">Your Referral Link</h2>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-3">
-              <div className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 text-sm text-gray-600 dark:text-gray-400 font-mono truncate">
-                {referralLink || 'Generating...'}
+          {/* ── STATS GRID ── */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {/* Total Referrals — with sparkline */}
+            <div className="bg-surface border border-theme rounded-2xl p-4 col-span-2 sm:col-span-1 flex flex-col justify-between gap-2">
+              <div className="flex items-start justify-between">
+                <div>
+                  <div className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 leading-none">
+                    {stats.totalReferrals}
+                  </div>
+                  <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 mt-1">Total Referrals</div>
+                </div>
+                {referralTrend.some(v => v > 0) && (
+                  <span className="text-pink-500">
+                    <Sparkline data={referralTrend} />
+                  </span>
+                )}
               </div>
-              <button
-                onClick={copyLink}
-                disabled={!referralLink}
-                className="bg-black dark:bg-white text-white dark:text-black text-sm font-bold px-5 py-2.5 rounded-xl hover:opacity-80 transition-all flex-shrink-0 disabled:opacity-40">
-                {copied ? '✓ Copied!' : 'Copy Link'}
-              </button>
+              <div className="text-xs text-gray-400 dark:text-gray-500">signed up via your link</div>
             </div>
-            <p className="text-xs text-gray-400 dark:text-gray-500">
-              Share this link anywhere. When someone signs up and upgrades, you earn credits automatically.
-            </p>
-          </div>
 
-          {/* STATS */}
-          <div className="grid grid-cols-3 gap-3">
-            {[
-              { label: 'Total Referrals',   value: stats.totalReferrals,   sub: 'signed up'       },
-              { label: 'Paying Referrals',  value: stats.payingReferrals,  sub: 'on a paid plan'  },
-              { label: 'Credits Earned',    value: stats.creditsEarned,    sub: 'from referrals'  },
-            ].map(stat => (
-              <div key={stat.label} className="bg-surface border border-theme rounded-2xl p-5 text-center">
-                <div className="text-2xl font-extrabold text-gray-900 dark:text-gray-100">{stat.value}</div>
-                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 mt-0.5">{stat.label}</div>
-                <div className="text-xs text-gray-400 dark:text-gray-500">{stat.sub}</div>
+            <div className="bg-surface border border-theme rounded-2xl p-4 flex flex-col justify-between gap-1">
+              <div className="text-3xl font-extrabold text-gray-900 dark:text-gray-100 leading-none">{stats.payingReferrals}</div>
+              <div>
+                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Active Referrals</div>
+                <div className="text-xs text-gray-400 dark:text-gray-500">on a paid plan</div>
               </div>
-            ))}
+            </div>
+
+            <div className="bg-surface border border-theme rounded-2xl p-4 flex flex-col justify-between gap-1">
+              <div className="text-3xl font-extrabold text-green-600 dark:text-green-400 leading-none">
+                {stats.totalEarnings > 0
+                  ? `$${stats.totalEarnings.toFixed(0)}`
+                  : stats.creditsEarned > 0
+                  ? `${stats.creditsEarned}`
+                  : '—'}
+              </div>
+              <div>
+                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">
+                  {stats.totalEarnings > 0 ? 'Total Earnings' : 'Credits Earned'}
+                </div>
+                <div className="text-xs text-gray-400 dark:text-gray-500">
+                  {stats.totalEarnings > 0
+                    ? `${(commissionRate * 100).toFixed(0)}% commission`
+                    : 'from referrals'}
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-surface border border-theme rounded-2xl p-4 flex flex-col justify-between gap-1">
+              <div className="text-3xl font-extrabold text-amber-600 dark:text-amber-400 leading-none">
+                {stats.pendingPayout > 0 ? `$${stats.pendingPayout.toFixed(0)}` : '—'}
+              </div>
+              <div>
+                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">Pending Payout</div>
+                <div className="text-xs text-gray-400 dark:text-gray-500">awaiting 60-day hold</div>
+              </div>
+            </div>
           </div>
 
-          {/* MILESTONE PROGRESS */}
-          <div className="bg-surface border border-theme rounded-2xl p-6">
+          {/* ── MILESTONE PROGRESS ── */}
+          <div className="bg-surface border border-theme rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-extrabold">Milestone Progress</h2>
               <span className="text-xs text-gray-400 dark:text-gray-500">
                 {stats.payingReferrals} / {nextMultiple} paying referrals
               </span>
             </div>
-            <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-3 mb-3">
+            <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2.5 mb-3">
               <div
-                className="bg-pink-500 h-3 rounded-full transition-all"
+                className="bg-pink-500 h-2.5 rounded-full transition-all duration-500"
                 style={{ width: `${progress}%` }} />
             </div>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              Reach <span className="font-bold text-gray-900 dark:text-gray-100">{nextMultiple} paying referrals</span> to earn{' '}
+              Reach{' '}
+              <span className="font-bold text-gray-900 dark:text-gray-100">{nextMultiple} paying referrals</span>{' '}
+              to earn{' '}
               <span className="font-bold text-pink-500">+{MILESTONE_CREDITS} bonus credits</span>.{' '}
-              Every 5 paying referrals earns you +{MILESTONE_CREDITS} bonus credits, forever.
+              Repeats every 5 paying referrals, forever.
             </p>
           </div>
 
-          {/* HOW IT WORKS */}
+          {/* ── REFERRAL LINK ── */}
+          <div className="bg-surface border border-theme rounded-2xl p-6">
+            <h2 className="text-sm font-extrabold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-4">
+              Your Referral Link
+            </h2>
+
+            {/* Link display + copy */}
+            <div className="flex flex-col sm:flex-row items-stretch gap-3 mb-2">
+              <div className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 font-mono text-sm text-gray-700 dark:text-gray-300 truncate select-all">
+                {referralLink || 'Generating…'}
+              </div>
+              <button
+                onClick={copyLink}
+                disabled={!referralLink}
+                className={`flex-shrink-0 px-6 py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-40 ${
+                  copied
+                    ? 'bg-green-500 text-white'
+                    : 'bg-black dark:bg-white text-white dark:text-black hover:opacity-80 active:scale-95'
+                }`}>
+                {copied ? '✓ Copied!' : 'Copy Link'}
+              </button>
+            </div>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">
+              Share anywhere. When someone signs up and upgrades, you earn automatically.
+            </p>
+
+            {/* Share templates */}
+            {shareTemplates.length > 0 && (
+              <>
+                <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3">
+                  Ready-to-share templates
+                </h3>
+                <div className="space-y-3">
+                  {shareTemplates.map(t => (
+                    <CopyableTemplate key={t.label} label={t.label} icon={t.icon} text={t.text} />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* ── PAYOUT HISTORY ── */}
+          <div className="bg-surface border border-theme rounded-2xl p-6">
+            <h2 className="text-sm font-extrabold mb-4">Payout History</h2>
+            {conversions.length === 0 ? (
+              <div className="text-center py-8">
+                <div className="text-3xl mb-2">💸</div>
+                <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">No conversions yet</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                  Payouts will appear here once your referrals upgrade.
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto -mx-2 px-2">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-gray-100 dark:border-gray-800">
+                      <th className="text-left text-xs font-bold text-gray-400 dark:text-gray-500 pb-2 pr-4">Date</th>
+                      <th className="text-right text-xs font-bold text-gray-400 dark:text-gray-500 pb-2 pr-4">Amount</th>
+                      <th className="text-right text-xs font-bold text-gray-400 dark:text-gray-500 pb-2">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {conversions.map(c => {
+                      const date   = c.converted_at ? new Date(c.converted_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—'
+                      const amount = c.payout_amount != null ? `$${c.payout_amount.toFixed(2)}` : c.total_earned != null ? `${c.total_earned} cr` : '—'
+                      const status = c.payout_status ?? c.status ?? 'pending'
+                      const statusStyle =
+                        status === 'paid'
+                          ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                          : status === 'pending'
+                          ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                          : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400'
+                      return (
+                        <tr key={c.id} className="border-b border-gray-50 dark:border-gray-800 last:border-0">
+                          <td className="py-3 pr-4 text-gray-600 dark:text-gray-400 text-xs whitespace-nowrap">{date}</td>
+                          <td className="py-3 pr-4 text-right font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap">{amount}</td>
+                          <td className="py-3 text-right">
+                            <span className={`inline-block px-2.5 py-1 rounded-lg text-xs font-bold capitalize ${statusStyle}`}>
+                              {status === 'eligible' ? 'pending' : status}
+                            </span>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* ── PERFORMANCE TIPS ── */}
+          <div className="bg-surface border border-theme rounded-2xl p-6">
+            <h2 className="text-sm font-extrabold mb-1">How to promote SocialMate</h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+              Actionable tips that actually convert.
+            </p>
+            <div className="space-y-3">
+              {[
+                {
+                  icon: '💬',
+                  title: 'Share in Discord communities',
+                  desc: 'Drop your link in creator, marketing, or indie-maker Discords where people talk about tools. Be genuine — explain why you use it.',
+                },
+                {
+                  icon: '✍️',
+                  title: 'Write a comparison post',
+                  desc: '"SocialMate vs Hootsuite" or "Free Hootsuite alternatives" searches convert extremely well. A short blog post targeting those keywords pays off long-term.',
+                },
+                {
+                  icon: '🎬',
+                  title: 'Post a workflow walkthrough',
+                  desc: 'A 60-second screen recording of how you schedule a week of posts is one of the highest-converting formats on TikTok, YouTube Shorts, or Reels.',
+                },
+                {
+                  icon: '📧',
+                  title: 'Add it to your newsletter',
+                  desc: 'A single mention in your newsletter footer or a "tools I use" section consistently drives sign-ups — especially with a warm audience.',
+                },
+              ].map(tip => (
+                <div key={tip.title} className="flex items-start gap-3.5 py-3 border-b border-gray-50 dark:border-gray-800 last:border-0">
+                  <span className="text-xl flex-shrink-0 mt-0.5">{tip.icon}</span>
+                  <div>
+                    <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{tip.title}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 leading-relaxed">{tip.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ── HOW IT WORKS ── */}
           <div className="bg-surface border border-theme rounded-2xl p-6">
             <h2 className="text-sm font-extrabold mb-4">How it works</h2>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
-                { step: '1', icon: '🔗', title: 'Share your link', desc: 'Send your referral link to anyone who might benefit from SocialMate.' },
-                { step: '2', icon: '✅', title: 'They upgrade',    desc: 'When they sign up and upgrade to Pro or Agency, they become a paying referral.' },
-                { step: '3', icon: '🎁', title: 'You earn credits', desc: 'Every 5 paying referrals earns you +100 bonus AI credits added to your balance.' },
+                { step: '1', title: 'Share your link', desc: 'Send your referral link to anyone who might benefit from SocialMate.' },
+                { step: '2', title: 'They upgrade',    desc: 'When they sign up and upgrade to Pro or Agency, they become a paying referral.' },
+                { step: '3', title: 'You earn',        desc: 'Every 5 paying referrals earns +100 bonus AI credits. Affiliate members earn 30–40% cash.' },
               ].map(item => (
                 <div key={item.step} className="flex flex-col items-start gap-2">
-                  <div className="w-8 h-8 rounded-full bg-pink-100 text-pink-600 flex items-center justify-center text-sm font-bold flex-shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 flex items-center justify-center text-sm font-bold flex-shrink-0">
                     {item.step}
                   </div>
                   <div>
@@ -182,33 +470,58 @@ export default function AffiliatePage() {
             </div>
           </div>
 
-          {/* AFFILIATE PROGRAM SECTION */}
+          {/* ── CREDIT REWARDS TABLE ── */}
+          <div className="bg-surface border border-theme rounded-2xl p-6">
+            <h2 className="text-sm font-extrabold mb-3">Credit rewards</h2>
+            <div className="space-y-0">
+              {[
+                { trigger: 'They publish their first post', reward: '+10 credits',  note: 'You both receive +10 credits'  },
+                { trigger: 'They upgrade to Pro',           reward: '+50 credits',  note: '7-day hold for refund protection' },
+                { trigger: 'They upgrade to Agency',        reward: '+50 credits',  note: '7-day hold for refund protection' },
+                { trigger: 'Every 5 paying referrals',      reward: '+100 credits', note: 'Milestone bonus, stacks forever'  },
+              ].map((item, i) => (
+                <div key={i} className="flex items-center justify-between py-3 border-b border-gray-50 dark:border-gray-800 last:border-0">
+                  <div>
+                    <p className="text-sm font-bold">{item.trigger}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{item.note}</p>
+                  </div>
+                  <span className="text-sm font-extrabold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-3 py-1.5 rounded-xl flex-shrink-0 ml-4">
+                    {item.reward}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ── AFFILIATE PROGRAM ── */}
           <div className="bg-surface border border-theme rounded-2xl p-6">
             <h2 className="text-sm font-extrabold mb-1">Affiliate Program (Cash Commissions)</h2>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
-              Apply to the affiliate program to earn 30–40% recurring cash commissions instead of credits.
-              Requires application and approval.
+              Apply to earn 30–40% recurring cash commissions instead of credits. Requires approval.
             </p>
+
             {affiliateStatus === 'active' ? (
-              <div className="bg-green-50 border border-green-100 rounded-xl px-4 py-3 flex items-center gap-3">
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800 rounded-xl px-4 py-3 flex items-center gap-3">
                 <span className="text-green-600 text-lg">✅</span>
                 <div>
-                  <p className="text-sm font-bold text-green-700">Affiliate status: Active</p>
-                  <p className="text-xs text-green-600">You&apos;re earning cash commissions on every referral.</p>
+                  <p className="text-sm font-bold text-green-700 dark:text-green-400">Affiliate status: Active</p>
+                  <p className="text-xs text-green-600 dark:text-green-500">
+                    You&apos;re earning {(commissionRate * 100).toFixed(0)}% cash commissions on every referral.
+                  </p>
                 </div>
               </div>
             ) : affiliateStatus === 'pending_review' ? (
-              <div className="bg-yellow-50 border border-yellow-100 rounded-xl px-4 py-3 flex items-center gap-3">
-                <span className="text-yellow-600 text-lg">⏳</span>
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 rounded-xl px-4 py-3 flex items-center gap-3">
+                <span className="text-amber-600 text-lg">⏳</span>
                 <div>
-                  <p className="text-sm font-bold text-yellow-700">Application under review</p>
-                  <p className="text-xs text-yellow-600">We&apos;ll notify you by email once a decision is made.</p>
+                  <p className="text-sm font-bold text-amber-700 dark:text-amber-400">Application under review</p>
+                  <p className="text-xs text-amber-600 dark:text-amber-500">We&apos;ll notify you by email within 3–5 business days.</p>
                 </div>
               </div>
             ) : affiliateStatus === 'rejected' ? (
-              <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3">
-                <p className="text-sm font-bold text-red-700">Application not approved</p>
-                <p className="text-xs text-red-600 mt-0.5">Contact support if you have questions.</p>
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-xl px-4 py-3">
+                <p className="text-sm font-bold text-red-700 dark:text-red-400">Application not approved</p>
+                <p className="text-xs text-red-600 dark:text-red-500 mt-0.5">Contact support if you have questions.</p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -233,45 +546,22 @@ export default function AffiliatePage() {
             )}
           </div>
 
-          {/* CREDIT REWARDS TABLE */}
-          <div className="bg-surface border border-theme rounded-2xl p-6">
-            <h2 className="text-sm font-extrabold mb-3">Credit rewards</h2>
-            <div className="space-y-3">
-              {[
-                { trigger: 'They publish their first post', reward: '+10 credits',  note: 'You both receive +10 credits'  },
-                { trigger: 'They upgrade to Pro',           reward: '+50 credits',  note: '7-day hold for refund protection' },
-                { trigger: 'They upgrade to Agency',        reward: '+50 credits',  note: '7-day hold for refund protection' },
-                { trigger: 'Every 5 paying referrals',      reward: '+100 credits', note: 'Milestone bonus, stacks forever'  },
-              ].map((item, i) => (
-                <div key={i} className="flex items-center justify-between py-2.5 border-b border-gray-50 dark:border-gray-800 last:border-0">
-                  <div>
-                    <p className="text-sm font-bold">{item.trigger}</p>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{item.note}</p>
-                  </div>
-                  <span className="text-sm font-extrabold text-green-600 bg-green-50 px-3 py-1.5 rounded-xl flex-shrink-0 ml-4">
-                    {item.reward}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-
           {/* ── AFFILIATE RESOURCES & GUIDELINES ── */}
           <div className="bg-surface border border-theme rounded-2xl p-6 space-y-6">
             <div>
-              <h2 className="text-sm font-extrabold mb-1">Affiliate Resources & Guidelines</h2>
+              <h2 className="text-sm font-extrabold mb-1">Affiliate Resources &amp; Guidelines</h2>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 Everything you need to promote SocialMate effectively and compliantly.
               </p>
             </div>
 
-            {/* Commission structure */}
+            {/* Commission earnings examples */}
             <div>
               <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3">Commission Structure</h3>
-              <div className="space-y-2">
+              <div className="space-y-2 mb-3">
                 {[
-                  { range: '1–99 active referrals',  rate: '30% recurring', color: 'bg-gray-50 dark:bg-gray-800 border-theme' },
-                  { range: '100+ active referrals',  rate: '40% recurring', color: 'bg-purple-50 dark:bg-purple-950/30 border-purple-100 dark:border-purple-900' },
+                  { range: '1–99 active referrals', rate: '30% recurring', color: 'bg-gray-50 dark:bg-gray-800 border-theme' },
+                  { range: '100+ active referrals', rate: '40% recurring', color: 'bg-purple-50 dark:bg-purple-950/30 border-purple-100 dark:border-purple-900' },
                 ].map(tier => (
                   <div key={tier.range} className={`flex items-center justify-between px-4 py-3 rounded-xl border ${tier.color}`}>
                     <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">{tier.range}</span>
@@ -279,7 +569,7 @@ export default function AffiliatePage() {
                   </div>
                 ))}
               </div>
-              <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {[
                   { label: 'At 10 users ($20/mo plan)', value: '~$60/mo' },
                   { label: 'At 20 users ($20/mo plan)', value: '~$120/mo' },
@@ -296,15 +586,15 @@ export default function AffiliatePage() {
             {/* Payout details */}
             <div>
               <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3">Payout Details</h3>
-              <div className="space-y-2 text-sm">
+              <div className="space-y-0 text-sm">
                 {[
-                  { icon: '💳', label: 'Payout method',       value: 'Stripe (direct deposit or debit)'           },
-                  { icon: '⏱',  label: 'Holding period',      value: '60 days — protects against cancellations & fraud' },
-                  { icon: '🔁',  label: 'Recurring?',          value: 'Yes — earn on every renewal, not just first payment' },
-                  { icon: '➕',  label: 'Add-on commissions',  value: 'White-label add-ons ($20–$40) also attributed to you' },
-                  { icon: '🔗',  label: 'Tracking methods',    value: 'Referral link OR promo code — both fully attributed' },
+                  { icon: '💳', label: 'Payout method',      value: 'Stripe (direct deposit or debit)'                },
+                  { icon: '⏱',  label: 'Holding period',     value: '60 days — protects against cancellations & fraud' },
+                  { icon: '🔁', label: 'Recurring?',          value: 'Yes — earn on every renewal, not just first payment' },
+                  { icon: '➕', label: 'Add-on commissions',  value: 'White-label add-ons ($20–$40) also attributed to you' },
+                  { icon: '🔗', label: 'Tracking methods',    value: 'Referral link OR promo code — both fully attributed' },
                 ].map(item => (
-                  <div key={item.label} className="flex items-start gap-3 py-2 border-b border-gray-50 dark:border-gray-800 last:border-0">
+                  <div key={item.label} className="flex items-start gap-3 py-2.5 border-b border-gray-50 dark:border-gray-800 last:border-0">
                     <span className="text-base flex-shrink-0 mt-0.5">{item.icon}</span>
                     <div className="flex-1 min-w-0">
                       <span className="text-xs font-bold text-gray-500 dark:text-gray-400 block">{item.label}</span>
@@ -315,46 +605,19 @@ export default function AffiliatePage() {
               </div>
             </div>
 
-            {/* Suggested copy */}
-            <div>
-              <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3">Suggested Promo Copy</h3>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">Copy and adapt these for your audience. Replace [YOUR_CODE] with your promo code.</p>
-              <div className="space-y-3">
-                {[
-                  {
-                    label: 'Short (social post)',
-                    text: `I schedule my Bluesky, Discord & Telegram posts with SocialMate — and it's actually free. No credit card, no post limits. Use code [YOUR_CODE] at signup. socialmate.studio`,
-                  },
-                  {
-                    label: 'Medium (caption/email)',
-                    text: `If you're tired of paying $99/month for Hootsuite or hitting free-plan limits, SocialMate is worth checking out. It's genuinely free — bulk scheduler, calendar, AI tools, all included. I've been using it for [PLATFORM] scheduling and it saves me hours every week. Sign up with code [YOUR_CODE] at socialmate.studio`,
-                  },
-                  {
-                    label: 'Long (blog/review)',
-                    text: `SocialMate is a free social media scheduler built for creators and small businesses who don't want to pay enterprise prices. It supports Bluesky, Discord, Telegram, and Mastodon natively — plus Instagram, TikTok, and others coming soon. The bulk scheduler alone makes it worth trying. There's no credit card required and the free plan doesn't artificially cap your posts. Use referral code [YOUR_CODE] when you sign up at socialmate.studio to get started.`,
-                  },
-                ].map(copy => (
-                  <div key={copy.label} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-theme">
-                    <p className="text-xs font-bold text-gray-400 dark:text-gray-500 mb-2">{copy.label}</p>
-                    <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{copy.text}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Guidelines / Do's and Don'ts */}
+            {/* Guidelines */}
             <div>
               <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3">Promotion Guidelines</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs font-bold text-green-600 mb-2">✅ Do</p>
+                  <p className="text-xs font-bold text-green-600 dark:text-green-500 mb-2">✅ Do</p>
                   <ul className="space-y-1.5">
                     {[
                       'Disclose that you earn a commission (required by FTC/ASA)',
                       'Share your honest experience with the product',
-                      'Use your unique referral link or promo code — both track correctly',
+                      'Use your referral link or promo code — both track correctly',
                       'Promote on social posts, blogs, newsletters, YouTube, podcasts',
-                      'Emphasize the free plan — it converts better than paid pitch',
+                      'Emphasize the free plan — it converts better than a paid pitch',
                     ].map(item => (
                       <li key={item} className="text-xs text-gray-600 dark:text-gray-400 flex items-start gap-1.5">
                         <span className="text-green-500 flex-shrink-0 mt-0.5">•</span>
@@ -364,14 +627,14 @@ export default function AffiliatePage() {
                   </ul>
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-red-500 mb-2">❌ Don&apos;t</p>
+                  <p className="text-xs font-bold text-red-500 dark:text-red-400 mb-2">❌ Don&apos;t</p>
                   <ul className="space-y-1.5">
                     {[
-                      'Don\'t make false or misleading claims about the product',
-                      'Don\'t bid on branded keywords (SocialMate) in paid ads',
-                      'Don\'t spam communities, DMs, or forums with bulk promo',
-                      'Don\'t self-refer or create fake accounts to game commissions',
-                      'Don\'t share your promo code in coupon/deal sites unless approved',
+                      "Don't make false or misleading claims about the product",
+                      "Don't bid on branded keywords (SocialMate) in paid ads",
+                      "Don't spam communities, DMs, or forums with bulk promo",
+                      "Don't self-refer or create fake accounts to game commissions",
+                      "Don't share your code on coupon/deal sites unless approved",
                     ].map(item => (
                       <li key={item} className="text-xs text-gray-600 dark:text-gray-400 flex items-start gap-1.5">
                         <span className="text-red-400 flex-shrink-0 mt-0.5">•</span>
@@ -390,11 +653,11 @@ export default function AffiliatePage() {
                 {[
                   {
                     q: 'Does it matter if they use my link or my promo code?',
-                    a: 'No — both attribute to you equally. Use whichever converts better for your audience. Promo codes work well in video content; links work better in blogs and newsletters.',
+                    a: 'No — both attribute to you equally. Promo codes work well in video content; links work better in blogs and newsletters.',
                   },
                   {
                     q: 'When does the 60-day hold start?',
-                    a: 'From the date of the referred user\'s payment. After 60 days with no refund or chargeback, that commission becomes eligible for payout.',
+                    a: "From the date of the referred user's payment. After 60 days with no refund or chargeback, that commission becomes eligible for payout.",
                   },
                   {
                     q: 'Do I earn on renewals?',
@@ -406,7 +669,7 @@ export default function AffiliatePage() {
                   },
                   {
                     q: 'Is there a minimum payout threshold?',
-                    a: 'Stripe payouts are processed once your balance clears the 60-day hold. Contact support if you have questions about your specific payout timing.',
+                    a: 'Stripe payouts are processed once your balance clears the 60-day hold. Contact support if you have questions about payout timing.',
                   },
                 ].map(faq => (
                   <div key={faq.q} className="border-b border-gray-50 dark:border-gray-800 pb-3 last:border-0 last:pb-0">

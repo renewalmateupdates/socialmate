@@ -627,38 +627,51 @@ export default function Sidebar() {
   return (
     <>
       <ComposeShortcut />
-      {/* Mobile hamburger button — min 44×44px touch target for iOS */}
+
+      {/* Mobile hamburger button — safe-area-inset aware, min 44×44px touch target for iOS */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="md:hidden fixed top-3 left-3 z-50 w-11 h-11 rounded-xl flex items-center justify-center shadow-sm transition-all active:scale-95"
-        style={{ background: 'var(--surface)', border: '1px solid var(--border-mid)' }}
+        className="md:hidden fixed left-3 z-50 min-w-[44px] min-h-[44px] rounded-xl flex items-center justify-center shadow-sm transition-all active:scale-95"
+        style={{
+          background: 'var(--surface)',
+          border: '1px solid var(--border-mid)',
+          top: 'calc(env(safe-area-inset-top, 0px) + 12px)',
+        }}
         aria-label="Open navigation menu">
         <span className="text-xl leading-none">☰</span>
       </button>
 
       {/* Mobile backdrop */}
-      {mobileOpen && (
-        <div
-          className="md:hidden fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
-          onClick={() => setMobileOpen(false)}
-          aria-hidden="true"
-        />
-      )}
+      <div
+        className={`md:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ${
+          mobileOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={() => setMobileOpen(false)}
+        aria-hidden="true"
+      />
 
-      {/* Mobile drawer */}
-      <div className={`md:hidden fixed top-0 left-0 z-50 h-full w-64 max-w-[85vw] overflow-y-auto transition-transform duration-300 ${
-        mobileOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}>
-        <div className="relative">
-          <button
-            onClick={() => setMobileOpen(false)}
-            className="absolute top-3 right-3 z-10 w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold transition-all active:scale-95 hover:opacity-80"
-            style={{ background: 'var(--bg)', color: 'var(--text-muted)' }}
-            aria-label="Close navigation menu">
-            ✕
-          </button>
-          <SidebarContent onNavClick={() => setMobileOpen(false)} />
-        </div>
+      {/* Mobile drawer — slides in from left */}
+      <div
+        className={`md:hidden fixed top-0 left-0 z-50 h-full w-full max-w-[85vw] sm:max-w-xs overflow-y-auto transition-transform duration-300 ease-in-out shadow-2xl ${
+          mobileOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+        style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+      >
+        {/* Close button inside drawer */}
+        <button
+          onClick={() => setMobileOpen(false)}
+          className="absolute z-10 min-w-[44px] min-h-[44px] rounded-xl flex items-center justify-center text-sm font-bold transition-all active:scale-95 hover:opacity-80"
+          style={{
+            top: 'calc(env(safe-area-inset-top, 0px) + 8px)',
+            right: '8px',
+            background: 'var(--sidebar-active)',
+            color: 'var(--sidebar-muted)',
+            border: '1px solid var(--sidebar-border)',
+          }}
+          aria-label="Close navigation menu">
+          ✕
+        </button>
+        <SidebarContent onNavClick={() => setMobileOpen(false)} />
       </div>
 
       {/* Desktop sidebar */}

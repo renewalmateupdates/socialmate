@@ -1,10 +1,37 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
+
+const EDITABLE_PLATFORMS = [
+  { id: 'discord',   name: 'Discord',   icon: '💬', limit: 2000  },
+  { id: 'bluesky',   name: 'Bluesky',   icon: '🦋', limit: 300   },
+  { id: 'telegram',  name: 'Telegram',  icon: '✈️', limit: 4096  },
+  { id: 'mastodon',  name: 'Mastodon',  icon: '🐘', limit: 500   },
+  { id: 'twitter',   name: 'X',         icon: '🐦', limit: 280   },
+  { id: 'linkedin',  name: 'LinkedIn',  icon: '💼', limit: 3000  },
+  { id: 'youtube',   name: 'YouTube',   icon: '▶️', limit: 5000  },
+  { id: 'pinterest', name: 'Pinterest', icon: '📌', limit: 500   },
+  { id: 'reddit',    name: 'Reddit',    icon: '🤖', limit: 40000 },
+]
+
+function toLocalDatetimeValue(isoString: string | null): string {
+  if (!isoString) return ''
+  const d = new Date(isoString)
+  // Format as YYYY-MM-DDTHH:mm for datetime-local input
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
+type EditState = {
+  content: string
+  platforms: string[]
+  scheduled_at: string // local datetime-local value
+  saving: boolean
+}
 
 function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse ${className}`} />
@@ -45,6 +72,8 @@ export default function Drafts() {
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
   const [filter, setFilter] = useState<FilterType>('all')
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+  // Inline edit state: maps post.id -> EditState
+  const [editMap, setEditMap] = useState<Record<string, EditState>>({})
   const router = useRouter()
   const { activeWorkspace } = useWorkspace()
 
@@ -121,6 +150,80 @@ export default function Drafts() {
     setLoading(true)
     loadPosts()
   }
+
+  const openEdit = useCallback((post: any) => {
+    setEditMap(prev => ({
+      ...prev,
+      [post.id]: {
+        content: post.content || '',
+        platforms: Array.from(post.platforms || []),
+        scheduled_at: toLocalDatetimeValue(post.scheduled_at),
+        saving: false,
+      },
+    }))
+    setConfirmDelete(null)
+  }, [])
+
+  const closeEdit = useCallback((id: string) => {
+    setEditMap(prev => {
+      const next = { ...prev }
+      delete next[id]
+      return next
+    })
+  }, [])
+
+  const updateEditField = useCallback((id: string, field: keyof Omit<EditState, 'saving'>, value: any) => {
+    setEditMap(prev => {
+      if (!prev[id]) return prev
+      return { ...prev, [id]: { ...prev[id], [field]: value } }
+    })
+  }, [])
+
+  const toggleEditPlatform = useCallback((id: string, platformId: string) => {
+    setEditMap(prev => {
+      if (!prev[id]) return prev
+      const current = prev[id].platforms
+      const next = current.includes(platformId)
+        ? current.filter(p => p !== platformId)
+        : [...current, platformId]
+      return { ...prev, [id]: { ...prev[id], platforms: next } }
+    })
+  }, [])
+
+  const saveEdit = useCallback(async (postId: string) => {
+    const es = editMap[postId]
+    if (!es) return
+    setEditMap(prev => ({ ...prev, [postId]: { ...prev[postId], saving: true } }))
+
+    // Convert local datetime-local value back to ISO
+    let scheduledAtIso: string | null = null
+    if (es.scheduled_at) {
+      scheduledAtIso = new Date(es.scheduled_at).toISOString()
+    }
+
+    const { error } = await supabase
+      .from('posts')
+      .update({
+        content: es.content,
+        platforms: es.platforms,
+        scheduled_at: scheduledAtIso,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', postId)
+
+    if (error) {
+      showToast('Failed to save changes', 'error')
+      setEditMap(prev => ({ ...prev, [postId]: { ...prev[postId], saving: false } }))
+      return
+    }
+
+    setPosts(prev => prev.map(p => p.id === postId
+      ? { ...p, content: es.content, platforms: es.platforms, scheduled_at: scheduledAtIso }
+      : p
+    ))
+    showToast('Post updated', 'success')
+    closeEdit(postId)
+  }, [editMap, closeEdit])
 
   const handleDelete = async (id: string) => {
     setDeleting(id)
@@ -243,98 +346,220 @@ export default function Drafts() {
           ) : (
             <div className="space-y-3">
               {filtered.map(post => {
-                const isConfirming  = confirmDelete === post.id
-                const isDeleting    = deleting === post.id
+                const isConfirming   = confirmDelete === post.id
+                const isDeleting     = deleting === post.id
                 const resolvedStatus = effectiveStatus(post)
-                const status        = statusConfig[resolvedStatus] || statusConfig.draft
-                const isEditable    = ['draft', 'scheduled'].includes(resolvedStatus)
-                const isPublished   = ['published', 'partial'].includes(resolvedStatus)
+                const status         = statusConfig[resolvedStatus] || statusConfig.draft
+                const isEditable     = ['draft', 'scheduled'].includes(resolvedStatus)
+                const isPublished    = ['published', 'partial'].includes(resolvedStatus)
+                const editState      = editMap[post.id]
+                const isEditing      = !!editState
 
                 return (
                   <div key={post.id}
                     className="bg-surface border border-theme rounded-2xl p-4 md:p-5 hover:border-gray-300 dark:hover:border-gray-600 transition-all">
 
-                    <div className="flex items-start gap-4">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap mb-2">
-                          <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${status.bg} ${status.text}`}>
-                            {status.icon} {status.label}
-                          </span>
-                          {post.scheduled_at && post.status === 'scheduled' && (
-                            <span className="text-xs text-gray-400 dark:text-gray-500">
-                              {new Date(post.scheduled_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                              {' '}at{' '}
-                              {new Date(post.scheduled_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                    {/* ── Normal card view ── */}
+                    {!isEditing && (
+                      <div className="flex items-start gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap mb-2">
+                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${status.bg} ${status.text}`}>
+                              {status.icon} {status.label}
                             </span>
-                          )}
-                          {post.published_at && isPublished && (
-                            <span className="text-xs text-gray-400 dark:text-gray-500">
-                              {new Date(post.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                              {' '}at{' '}
-                              {new Date(post.published_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                          )}
-                          <span className="text-xs text-gray-300 dark:text-gray-600 ml-auto">{timeAgo(post.created_at)}</span>
+                            {post.scheduled_at && post.status === 'scheduled' && (
+                              <span className="text-xs text-gray-400 dark:text-gray-500">
+                                {new Date(post.scheduled_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                {' '}at{' '}
+                                {new Date(post.scheduled_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            )}
+                            {post.published_at && isPublished && (
+                              <span className="text-xs text-gray-400 dark:text-gray-500">
+                                {new Date(post.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                                {' '}at{' '}
+                                {new Date(post.published_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            )}
+                            <span className="text-xs text-gray-300 dark:text-gray-600 ml-auto">{timeAgo(post.created_at)}</span>
+                          </div>
+
+                          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-2 mb-3">
+                            {post.content || <span className="text-gray-300 dark:text-gray-600 italic">No content</span>}
+                          </p>
+
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            {(post.platforms || []).slice(0, 6).map((p: string) => (
+                              <span key={p} className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 px-2 py-0.5 rounded-full">
+                                <span>{PLATFORM_ICONS[p] || '📱'}</span>
+                                <span className="hidden sm:inline">{PLATFORM_NAMES[p] || p}</span>
+                              </span>
+                            ))}
+                            {(post.platforms || []).length > 6 && (
+                              <span className="text-xs text-gray-400 dark:text-gray-500">+{post.platforms.length - 6} more</span>
+                            )}
+                            {(!post.platforms || post.platforms.length === 0) && (
+                              <span className="text-xs text-gray-300 dark:text-gray-600">No platforms selected</span>
+                            )}
+                          </div>
+
+                          {/* Engagement metrics for published posts */}
+                          {isPublished && post.analytics && (() => {
+                            const allPlatforms = ['bluesky', 'mastodon'].filter(p => post.analytics[p])
+                            if (allPlatforms.length === 0) return null
+                            const totals = allPlatforms.reduce((acc: { likes: number; replies: number; reposts: number }, p: string) => ({
+                              likes:   acc.likes   + (post.analytics[p]?.likes   ?? 0),
+                              replies: acc.replies + (post.analytics[p]?.replies ?? 0),
+                              reposts: acc.reposts + (post.analytics[p]?.reposts ?? 0),
+                            }), { likes: 0, replies: 0, reposts: 0 })
+                            if (totals.likes === 0 && totals.replies === 0 && totals.reposts === 0) return null
+                            return (
+                              <div
+                                title="Stats fetched 1h and 24h after publish"
+                                className="text-xs text-gray-400 dark:text-gray-500 flex gap-3 mt-2">
+                                <span>❤️ {totals.likes}</span>
+                                <span>💬 {totals.replies}</span>
+                                <span>🔄 {totals.reposts}</span>
+                              </div>
+                            )
+                          })()}
                         </div>
 
-                        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-2 mb-3">
-                          {post.content || <span className="text-gray-300 dark:text-gray-600 italic">No content</span>}
-                        </p>
-
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          {(post.platforms || []).slice(0, 6).map((p: string) => (
-                            <span key={p} className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 px-2 py-0.5 rounded-full">
-                              <span>{PLATFORM_ICONS[p] || '📱'}</span>
-                              <span className="hidden sm:inline">{PLATFORM_NAMES[p] || p}</span>
-                            </span>
-                          ))}
-                          {(post.platforms || []).length > 6 && (
-                            <span className="text-xs text-gray-400 dark:text-gray-500">+{post.platforms.length - 6} more</span>
-                          )}
-                          {(!post.platforms || post.platforms.length === 0) && (
-                            <span className="text-xs text-gray-300 dark:text-gray-600">No platforms selected</span>
-                          )}
-                        </div>
-
-                        {/* Engagement metrics for published posts */}
-                        {isPublished && post.analytics && (() => {
-                          const allPlatforms = ['bluesky', 'mastodon'].filter(p => post.analytics[p])
-                          if (allPlatforms.length === 0) return null
-                          const totals = allPlatforms.reduce((acc: { likes: number; replies: number; reposts: number }, p: string) => ({
-                            likes:   acc.likes   + (post.analytics[p]?.likes   ?? 0),
-                            replies: acc.replies + (post.analytics[p]?.replies ?? 0),
-                            reposts: acc.reposts + (post.analytics[p]?.reposts ?? 0),
-                          }), { likes: 0, replies: 0, reposts: 0 })
-                          if (totals.likes === 0 && totals.replies === 0 && totals.reposts === 0) return null
-                          return (
-                            <div
-                              title="Stats fetched 1h and 24h after publish"
-                              className="text-xs text-gray-400 dark:text-gray-500 flex gap-3 mt-2">
-                              <span>❤️ {totals.likes}</span>
-                              <span>💬 {totals.replies}</span>
-                              <span>🔄 {totals.reposts}</span>
-                            </div>
-                          )
-                        })()}
+                        {!isConfirming && (
+                          <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                            {isEditable && (
+                              <button
+                                onClick={() => openEdit(post)}
+                                className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all">
+                                Edit
+                              </button>
+                            )}
+                            <button onClick={() => setConfirmDelete(post.id)}
+                              className="text-xs font-bold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all">
+                              Delete
+                            </button>
+                          </div>
+                        )}
                       </div>
+                    )}
 
-                      {!isConfirming && (
-                        <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                          {isEditable && (
-                            <Link href={`/compose?draft=${post.id}`}
-                              className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all">
-                              Edit →
-                            </Link>
-                          )}
-                          <button onClick={() => setConfirmDelete(post.id)}
-                            className="text-xs font-bold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all">
-                            Delete
+                    {/* ── Inline edit form ── */}
+                    {isEditing && editState && (
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500">Editing post</span>
+                          <button
+                            onClick={() => closeEdit(post.id)}
+                            className="text-xs font-bold text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+                            ✕ Cancel
                           </button>
                         </div>
-                      )}
-                    </div>
 
-                    {isConfirming && (
+                        {/* Content textarea */}
+                        <div>
+                          <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Content</label>
+                          <textarea
+                            value={editState.content}
+                            onChange={e => updateEditField(post.id, 'content', e.target.value)}
+                            rows={5}
+                            className="w-full text-sm rounded-xl px-3 py-2.5 resize-none outline-none transition-all"
+                            style={{
+                              background: 'var(--bg)',
+                              border: '1px solid var(--border-mid)',
+                              color: 'var(--text)',
+                            }}
+                            placeholder="What do you want to say?"
+                          />
+                          {/* Per-platform character counters */}
+                          {editState.platforms.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-1.5">
+                              {editState.platforms.map(pid => {
+                                const platform = EDITABLE_PLATFORMS.find(p => p.id === pid)
+                                if (!platform) return null
+                                const len  = editState.content.length
+                                const over = len > platform.limit
+                                return (
+                                  <span
+                                    key={pid}
+                                    className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                                      over
+                                        ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
+                                        : len > platform.limit * 0.9
+                                        ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                                        : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
+                                    }`}>
+                                    {platform.icon} {len}/{platform.limit}
+                                  </span>
+                                )
+                              })}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Platform selection */}
+                        <div>
+                          <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-2 block">Platforms</label>
+                          <div className="flex flex-wrap gap-2">
+                            {EDITABLE_PLATFORMS.map(platform => {
+                              const selected = editState.platforms.includes(platform.id)
+                              return (
+                                <button
+                                  key={platform.id}
+                                  type="button"
+                                  onClick={() => toggleEditPlatform(post.id, platform.id)}
+                                  className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-xl transition-all ${
+                                    selected
+                                      ? 'bg-black text-white dark:bg-white dark:text-black'
+                                      : 'border text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500'
+                                  }`}
+                                  style={!selected ? { borderColor: 'var(--border-mid)', background: 'var(--bg)' } : {}}>
+                                  <span>{platform.icon}</span>
+                                  <span>{platform.name}</span>
+                                </button>
+                              )
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Scheduled time (only for scheduled posts or drafts) */}
+                        <div>
+                          <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">
+                            Scheduled time <span className="font-normal">(leave blank for draft)</span>
+                          </label>
+                          <input
+                            type="datetime-local"
+                            value={editState.scheduled_at}
+                            onChange={e => updateEditField(post.id, 'scheduled_at', e.target.value)}
+                            className="text-sm rounded-xl px-3 py-2.5 outline-none transition-all"
+                            style={{
+                              background: 'var(--bg)',
+                              border: '1px solid var(--border-mid)',
+                              color: 'var(--text)',
+                            }}
+                          />
+                        </div>
+
+                        {/* Save / Cancel */}
+                        <div className="flex items-center gap-2 pt-1">
+                          <button
+                            onClick={() => saveEdit(post.id)}
+                            disabled={editState.saving}
+                            className="text-xs font-bold px-4 py-2 bg-black text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center gap-1.5">
+                            {editState.saving
+                              ? <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Saving...</>
+                              : 'Save changes'}
+                          </button>
+                          <button
+                            onClick={() => closeEdit(post.id)}
+                            className="text-xs font-bold px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all"
+                            style={{ color: 'var(--text-muted)' }}>
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    {isConfirming && !isEditing && (
                       <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center gap-2">
                         <p className="text-xs text-red-600 font-semibold flex-1">
                           Permanently delete this {resolvedStatus === 'scheduled' ? 'scheduled post' : resolvedStatus === 'published' ? 'published post record' : 'draft'}? This cannot be undone.

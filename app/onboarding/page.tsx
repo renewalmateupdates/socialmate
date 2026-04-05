@@ -5,18 +5,18 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
 const PLATFORMS = [
-  { id: 'discord',   label: 'Discord',     icon: '💬', desc: 'Announcements',  available: true  },
-  { id: 'bluesky',   label: 'Bluesky',     icon: '🦋', desc: 'Decentralized',  available: true  },
-  { id: 'mastodon',  label: 'Mastodon',    icon: '🐘', desc: 'Federated',      available: true  },
-  { id: 'telegram',  label: 'Telegram',    icon: '✈️', desc: 'Channels',       available: true  },
-  { id: 'linkedin',  label: 'LinkedIn',    icon: '💼', desc: 'Coming soon',    available: false },
-  { id: 'youtube',   label: 'YouTube',     icon: '▶️', desc: 'Coming soon',    available: false },
-  { id: 'pinterest', label: 'Pinterest',   icon: '📌', desc: 'Coming soon',    available: false },
-  { id: 'reddit',    label: 'Reddit',      icon: '🤖', desc: 'Coming soon',    available: false },
-  { id: 'instagram', label: 'Instagram',   icon: '📸', desc: 'Coming soon',    available: false },
-  { id: 'tiktok',    label: 'TikTok',      icon: '🎵', desc: 'Coming soon',    available: false },
-  { id: 'twitter',   label: 'X / Twitter', icon: '🐦', desc: 'Coming soon',    available: false },
-  { id: 'threads',   label: 'Threads',     icon: '🧵', desc: 'Coming soon',    available: false },
+  { id: 'discord',   label: 'Discord',     icon: '💬', desc: 'Announcements',  available: true,  isNew: false },
+  { id: 'bluesky',   label: 'Bluesky',     icon: '🦋', desc: 'Decentralized',  available: true,  isNew: false },
+  { id: 'mastodon',  label: 'Mastodon',    icon: '🐘', desc: 'Federated',      available: true,  isNew: false },
+  { id: 'telegram',  label: 'Telegram',    icon: '✈️', desc: 'Channels',       available: true,  isNew: false },
+  { id: 'twitter',   label: 'X / Twitter', icon: '🐦', desc: '280 char tweets', available: true,  isNew: true  },
+  { id: 'linkedin',  label: 'LinkedIn',    icon: '💼', desc: 'Coming soon',    available: false, isNew: false },
+  { id: 'youtube',   label: 'YouTube',     icon: '▶️', desc: 'Coming soon',    available: false, isNew: false },
+  { id: 'pinterest', label: 'Pinterest',   icon: '📌', desc: 'Coming soon',    available: false, isNew: false },
+  { id: 'reddit',    label: 'Reddit',      icon: '🤖', desc: 'Coming soon',    available: false, isNew: false },
+  { id: 'instagram', label: 'Instagram',   icon: '📸', desc: 'Coming soon',    available: false, isNew: false },
+  { id: 'tiktok',    label: 'TikTok',      icon: '🎵', desc: 'Coming soon',    available: false, isNew: false },
+  { id: 'threads',   label: 'Threads',     icon: '🧵', desc: 'Coming soon',    available: false, isNew: false },
 ]
 
 const USE_CASES = [
@@ -634,7 +634,7 @@ function OnboardingInner() {
                 <div className="text-5xl mb-4">📱</div>
                 <h2 className="text-2xl font-extrabold tracking-tight mb-2">Which platforms do you use?</h2>
                 <p className="text-gray-400 dark:text-gray-500 text-sm">
-                  Your <span className={`font-bold ${selectedPlan === 'agency' ? 'text-purple-600' : 'text-black dark:text-white'}`}>{planConfig.label}</span> plan supports {maxPlatforms} connected account{maxPlatforms > 1 ? 's' : ''} · 4 live now · 12 more coming soon
+                  Your <span className={`font-bold ${selectedPlan === 'agency' ? 'text-purple-600' : 'text-black dark:text-white'}`}>{planConfig.label}</span> plan supports {maxPlatforms} connected account{maxPlatforms > 1 ? 's' : ''} · 5 live now · 11 more coming soon
                 </p>
               </div>
 
@@ -659,7 +659,12 @@ function OnboardingInner() {
                       }`}>
                       <span className="text-xl">{p.icon}</span>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold truncate">{p.label}</p>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <p className="text-xs font-bold truncate">{p.label}</p>
+                          {p.isNew && (
+                            <span className="text-[10px] font-extrabold px-1.5 py-0.5 bg-sky-100 text-sky-700 rounded-full leading-none flex-shrink-0">🆕 New</span>
+                          )}
+                        </div>
                         <p className="text-xs text-gray-400 dark:text-gray-500">{p.available ? p.desc : 'Coming soon'}</p>
                       </div>
                       {isSelected && p.available && <span className="text-black font-bold text-sm flex-shrink-0">✓</span>}
@@ -707,25 +712,31 @@ function OnboardingInner() {
               <div className="text-center mb-6">
                 <div className="text-5xl mb-4">🔗</div>
                 <h2 className="text-2xl font-extrabold tracking-tight mb-2">Connect Your First Account</h2>
-                <p className="text-gray-400 dark:text-gray-500 text-sm">Link a real account to start posting — all 4 live platforms are ready now.</p>
+                <p className="text-gray-400 dark:text-gray-500 text-sm">Link a real account to start posting — all 5 live platforms are ready now.</p>
               </div>
 
               <div className="space-y-3 mb-6">
                 {[
-                  { id: 'bluesky',  icon: '🦋', label: 'Bluesky',  desc: 'Connect your Bluesky handle to post to the decentralized web.'  },
-                  { id: 'mastodon', icon: '🐘', label: 'Mastodon', desc: 'Link your Mastodon account on any instance.'                     },
-                  { id: 'discord',  icon: '💬', label: 'Discord',  desc: 'Post announcements to your Discord server channels.'             },
-                  { id: 'telegram', icon: '✈️', label: 'Telegram', desc: 'Publish to your Telegram channel or group.'                     },
+                  { id: 'bluesky',  icon: '🦋', label: 'Bluesky',     desc: 'Connect your Bluesky handle to post to the decentralized web.',  isNew: false },
+                  { id: 'mastodon', icon: '🐘', label: 'Mastodon',    desc: 'Link your Mastodon account on any instance.',                    isNew: false },
+                  { id: 'discord',  icon: '💬', label: 'Discord',     desc: 'Post announcements to your Discord server channels.',            isNew: false },
+                  { id: 'telegram', icon: '✈️', label: 'Telegram',    desc: 'Publish to your Telegram channel or group.',                    isNew: false },
+                  { id: 'twitter',  icon: '🐦', label: 'X / Twitter', desc: 'Schedule tweets — 280 characters, up to 4 images.',             isNew: true  },
                 ].map(platform => (
                   <div key={platform.id} className="flex items-center gap-4 p-4 border border-theme rounded-2xl">
                     <span className="text-2xl flex-shrink-0">{platform.icon}</span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold">{platform.label}</p>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-sm font-bold">{platform.label}</p>
+                        {platform.isNew && (
+                          <span className="text-[10px] font-extrabold px-1.5 py-0.5 bg-sky-100 text-sky-700 rounded-full leading-none">🆕 New</span>
+                        )}
+                      </div>
                       <p className="text-xs text-gray-400 dark:text-gray-500">{platform.desc}</p>
                     </div>
                     <a href="/accounts" target="_blank" rel="noopener noreferrer"
                       className="text-xs font-bold bg-black text-white px-3 py-1.5 rounded-xl hover:opacity-80 transition-all flex-shrink-0 whitespace-nowrap">
-                      Connect {platform.label} →
+                      Connect →
                     </a>
                   </div>
                 ))}
