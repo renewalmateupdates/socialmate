@@ -4504,6 +4504,16 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
               { label: 'vs Tailwind',     href: '/vs/tailwind-social' },
               { label: 'vs Crowdfire',    href: '/vs/crowdfire'      },
               { label: 'vs Pallyy',       href: '/vs/pallyy'         },
+              { label: 'vs Agorapulse',   href: '/vs/agorapulse'     },
+              { label: 'vs Sprinklr',     href: '/vs/sprinklr'       },
+              { label: 'vs SocialBee',    href: '/vs/socialbee'      },
+              { label: 'vs ContentStudio', href: '/vs/contentstudio' },
+              { label: 'vs Missinglettr', href: '/vs/missinglettr'   },
+              { label: 'vs Post Planner', href: '/vs/postplanner'    },
+              { label: 'vs RecurPost',    href: '/vs/recurpost'      },
+              { label: 'vs Nuelink',      href: '/vs/nuelink'        },
+              { label: 'vs Fedica',       href: '/vs/fedica'         },
+              { label: 'vs Statusbrew',   href: '/vs/statusbrew'     },
             ].map(c => (
               <Link key={c.href} href={c.href}
                 className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-full hover:border-gray-500 dark:hover:border-gray-400 text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-all">

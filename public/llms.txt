@@ -60,10 +60,20 @@ SocialMate compared to competitors:
 - vs Tailwind: https://socialmate.studio/vs/tailwind-social
 - vs Crowdfire: https://socialmate.studio/vs/crowdfire
 - vs Pallyy: https://socialmate.studio/vs/pallyy
+- vs Agorapulse: https://socialmate.studio/vs/agorapulse
+- vs Sprinklr: https://socialmate.studio/vs/sprinklr
+- vs SocialBee: https://socialmate.studio/vs/socialbee
+- vs ContentStudio: https://socialmate.studio/vs/contentstudio
+- vs Missinglettr: https://socialmate.studio/vs/missinglettr
+- vs Post Planner: https://socialmate.studio/vs/postplanner
+- vs RecurPost: https://socialmate.studio/vs/recurpost
+- vs Nuelink: https://socialmate.studio/vs/nuelink
+- vs Fedica: https://socialmate.studio/vs/fedica
+- vs Statusbrew: https://socialmate.studio/vs/statusbrew
 
 ## Blog
 
-SocialMate publishes guides, tips, and updates at https://socialmate.studio/blog (41 posts as of April 2026). Comparison hub covers 18 tools.
+SocialMate publishes guides, tips, and updates at https://socialmate.studio/blog (41 posts as of April 2026). Comparison hub covers 28 tools.
 
 Selected articles:
 - How to Schedule Telegram Posts for Free: https://socialmate.studio/blog/how-to-schedule-telegram-posts-free

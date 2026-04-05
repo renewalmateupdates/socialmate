@@ -111,6 +111,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/vs/tailwind-social`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/vs/crowdfire`,      lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/vs/pallyy`,         lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/agorapulse`,     lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/sprinklr`,       lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/socialbee`,      lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/contentstudio`,  lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/missinglettr`,   lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/postplanner`,    lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/recurpost`,      lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/nuelink`,        lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/fedica`,         lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/statusbrew`,     lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
   ]
 
   const blogPosts: MetadataRoute.Sitemap = BLOG_SLUGS.map(slug => ({
