@@ -372,6 +372,20 @@ function QueueInner() {
             </div>
           </div>
 
+          {/* X / Twitter callout banner */}
+          <Link href="/compose?platform=twitter"
+            className="flex items-center justify-between gap-3 mb-4 bg-sky-50 dark:bg-sky-950/30 border border-sky-100 dark:border-sky-900 rounded-2xl px-5 py-3 hover:border-sky-300 dark:hover:border-sky-700 transition-all group">
+            <div className="flex items-center gap-2.5">
+              <span className="text-lg">🐦</span>
+              <p className="text-xs font-semibold text-sky-700 dark:text-sky-400">
+                <span className="font-extrabold">New: Post to X</span> — schedule tweets alongside your other platforms
+              </p>
+            </div>
+            <span className="text-xs font-bold text-sky-500 dark:text-sky-400 group-hover:text-sky-700 dark:group-hover:text-sky-300 flex-shrink-0 hidden sm:block">
+              Schedule a tweet →
+            </span>
+          </Link>
+
           {targetDate && targetDateString && (
             <div className="mb-6 bg-blue-50 border border-blue-100 rounded-2xl px-5 py-3 flex items-center gap-3">
               <span className="text-blue-500">📅</span>

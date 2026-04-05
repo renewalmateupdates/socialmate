@@ -756,6 +756,12 @@ function SettingsInner() {
           )}
 
           {/* ── PUSH NOTIFICATIONS ── */}
+          {activeTab === 'Notifications' && !pushSupported && (
+            <div className="bg-surface border border-theme rounded-2xl p-6">
+              <h2 className="text-base font-extrabold mb-1">Push Notifications</h2>
+              <p className="text-xs text-gray-400 dark:text-gray-500">Push notifications are not supported in this browser. Try a modern browser like Chrome or Firefox on desktop.</p>
+            </div>
+          )}
           {activeTab === 'Notifications' && pushSupported && (
             <div className="bg-surface border border-theme rounded-2xl p-6">
               <h2 className="text-base font-extrabold mb-1">Push Notifications</h2>
@@ -763,24 +769,40 @@ function SettingsInner() {
               {pushPermission === 'denied' ? (
                 <p className="text-xs text-gray-400 dark:text-gray-500">Notifications blocked in browser settings. Enable them in your browser to use push notifications.</p>
               ) : (
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-bold">{pushSubscribed ? 'Push notifications are on' : 'Push notifications are off'}</p>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                      {pushSubscribed ? 'You will receive browser push notifications from SocialMate' : 'Turn on to receive browser push notifications'}
-                    </p>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-bold">{pushSubscribed ? 'Push notifications are on' : 'Push notifications are off'}</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                        {pushSubscribed ? 'You will receive browser push notifications from SocialMate' : 'Turn on to receive browser push notifications'}
+                      </p>
+                    </div>
+                    <button
+                      onClick={pushSubscribed ? pushUnsubscribe : pushSubscribe}
+                      disabled={pushLoading}
+                      className={`ml-4 flex-shrink-0 px-5 py-2 text-xs font-bold rounded-xl transition-all disabled:opacity-50 flex items-center gap-2 ${
+                        pushSubscribed
+                          ? 'border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-gray-500 dark:hover:border-gray-400'
+                          : 'bg-black text-white hover:opacity-80'
+                      }`}>
+                      {pushLoading && <div className="w-3 h-3 border-2 border-current/30 border-t-current rounded-full animate-spin" />}
+                      {pushSubscribed ? 'Turn off' : 'Turn on'}
+                    </button>
                   </div>
-                  <button
-                    onClick={pushSubscribed ? pushUnsubscribe : pushSubscribe}
-                    disabled={pushLoading}
-                    className={`ml-4 flex-shrink-0 px-5 py-2 text-xs font-bold rounded-xl transition-all disabled:opacity-50 flex items-center gap-2 ${
-                      pushSubscribed
-                        ? 'border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-gray-500 dark:hover:border-gray-400'
-                        : 'bg-black text-white hover:opacity-80'
-                    }`}>
-                    {pushLoading && <div className="w-3 h-3 border-2 border-current/30 border-t-current rounded-full animate-spin" />}
-                    {pushSubscribed ? 'Turn off' : 'Turn on'}
-                  </button>
+                  {pushSubscribed && (
+                    <div className="pt-4 border-t border-theme">
+                      <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3">Test your push subscription</p>
+                      <button
+                        onClick={async () => {
+                          try {
+                            await fetch('/api/notifications/test', { method: 'POST' })
+                          } catch {}
+                        }}
+                        className="px-4 py-2 border border-gray-200 dark:border-gray-600 text-xs font-bold rounded-xl hover:border-gray-400 transition-all">
+                        Send test notification
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
