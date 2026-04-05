@@ -61,13 +61,14 @@ function dateParamToDateString(param: string): string | null {
   return d.toDateString()
 }
 
-function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel, cancelling, handleCancel }: {
+function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel, cancelling, handleCancel, onEvergreenToggle }: {
   post: any
   isHighlighted: boolean
   confirmCancel: string | null
   setConfirmCancel: (id: string | null) => void
   cancelling: string | null
   handleCancel: (id: string) => void
+  onEvergreenToggle: (id: string, current: boolean) => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: post.id })
@@ -81,6 +82,7 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
 
   const isConfirming = confirmCancel === post.id
   const isCancelling = cancelling   === post.id
+  const [evergreenLoading, setEvergreenLoading] = useState(false)
 
   return (
     <div ref={setNodeRef} style={style}
@@ -144,6 +146,26 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
 
         {!isConfirming && (
           <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 flex-shrink-0">
+            {post.status === 'published' && (
+              <button
+                onClick={async () => {
+                  setEvergreenLoading(true)
+                  await onEvergreenToggle(post.id, !!post.is_evergreen)
+                  setEvergreenLoading(false)
+                }}
+                disabled={evergreenLoading}
+                title={post.is_evergreen ? 'Disable evergreen recycling' : 'Enable evergreen recycling'}
+                className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition-all disabled:opacity-50 flex items-center gap-1 ${
+                  post.is_evergreen
+                    ? 'bg-green-50 dark:bg-green-900/20 border-green-300 dark:border-green-700 text-green-700 dark:text-green-400 hover:border-green-500'
+                    : 'border-gray-200 dark:border-gray-600 text-gray-400 hover:border-gray-400 hover:text-gray-600'
+                }`}>
+                {evergreenLoading
+                  ? <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  : '♻️'}
+                <span>Evergreen</span>
+              </button>
+            )}
             <Link href={`/compose?draft=${post.id}`}
               className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
               Edit
@@ -281,6 +303,22 @@ function QueueInner() {
     return () => clearTimeout(timeout)
   }, [loading, targetDate])
 
+  const handleEvergreenToggle = async (id: string, current: boolean) => {
+    const { data: { session } } = await supabase.auth.getSession()
+    const token = session?.access_token
+    const res = await fetch(`/api/posts/${id}/evergreen`, {
+      method: 'PATCH',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    })
+    if (res.ok) {
+      const updated = await res.json()
+      setPosts(prev => prev.map(p => p.id === id ? { ...p, is_evergreen: updated.is_evergreen } : p))
+      showToast(updated.is_evergreen ? 'Marked as evergreen' : 'Evergreen disabled', 'success')
+    } else {
+      showToast('Failed to update evergreen status', 'error')
+    }
+  }
+
   const handleCancel = async (id: string) => {
     setCancelling(id)
     const { error } = await supabase
@@ -414,6 +452,7 @@ function QueueInner() {
                               setConfirmCancel={setConfirmCancel}
                               cancelling={cancelling}
                               handleCancel={handleCancel}
+                              onEvergreenToggle={handleEvergreenToggle}
                             />
                           ))}
                         </div>

@@ -213,6 +213,12 @@ export default function AdminHubClient() {
                 <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm">Partners + Studio Stax</div>
                 <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">Listings, payouts, revenue</div>
               </a>
+              <a href="/admin/feature-flags"
+                className="bg-surface border border-theme rounded-2xl p-5 text-left hover:border-gray-300 dark:hover:border-gray-600 transition-all block">
+                <div className="text-2xl mb-2">🚩</div>
+                <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm">Feature Flags</div>
+                <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">Enable or disable features globally</div>
+              </a>
             </div>
           </div>
         )}
