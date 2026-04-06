@@ -972,6 +972,19 @@ function OnboardingInner() {
                 <p className="text-xs text-orange-700 dark:text-orange-400 font-semibold">Post every day to build a streak — your dashboard tracks consecutive days and keeps you on a roll.</p>
               </div>
 
+              {/* SM-Give story card */}
+              <div className="rounded-2xl p-5 mb-6 text-left" style={{ background: 'linear-gradient(135deg, #FFF7ED 0%, #FEF3C7 100%)', border: '1px solid #FED7AA' }}>
+                <p className="text-sm font-extrabold text-amber-800 mb-2">Every plan powers something bigger 🧡</p>
+                <p className="text-xs text-amber-700 leading-relaxed mb-3">
+                  50% of every paid subscription goes to SM-Give — funding school supplies, baby essentials,
+                  and care packages for people experiencing homelessness. When you upgrade, you&apos;re not just
+                  getting more features. You&apos;re helping someone who needs it.
+                </p>
+                <Link href="/give" className="text-xs font-bold text-amber-800 underline underline-offset-2 hover:text-amber-900 transition-colors">
+                  Learn more →
+                </Link>
+              </div>
+
               <div className="space-y-3 mb-8 text-left">
                 {[
                   { icon: '✏️', title: 'Compose a post',        desc: 'Write, schedule, and use AI tools',           href: '/compose',          cta: 'Start writing'   },
