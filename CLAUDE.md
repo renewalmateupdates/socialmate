@@ -1,0 +1,220 @@
+# SocialMate — Claude Code Project Context
+
+> Drop this file in the root of the repo. Claude Code reads it automatically every session.
+
+---
+
+## Who I Am
+
+**Joshua Bostic** — Founder & CEO, Gilgamesh Enterprise LLC (Wyoming LLC).
+Solo bootstrapped builder. Working a Walmart deli job + part-time HR. Building SocialMate nights and weekends.
+Vision: Creator OS — the home base for any creator, streamer, business, or person who wants to build online.
+Mission: Power to the people. Tear down gatekeeping walls. Build the door.
+
+---
+
+## What SocialMate Is
+
+A multi-platform social media scheduler and AI-powered Creator OS.
+Live at: **socialmate.studio**
+Launched: March 26, 2026. 100% bootstrapped. $0.27 infra cost at launch.
+GitHub: github.com/renewalmateupdates/socialmate
+
+**The pitch:** What competitors charge $99/month for, we give for $5 — or free.
+
+---
+
+## Tech Stack
+
+| Layer | Tech |
+|---|---|
+| Framework | Next.js 15/16 (App Router) |
+| Language | TypeScript |
+| UI | React 19 + Tailwind CSS v4 |
+| Database | Supabase (PostgreSQL + RLS) |
+| Auth | Supabase Auth |
+| Background jobs | Inngest (scheduled post delivery) |
+| Payments | Stripe (subscriptions + webhooks) |
+| AI | Google Gemini API |
+| Deployment | Vercel (auto-deploy from GitHub) |
+| Analytics | Vercel Analytics |
+
+---
+
+## Known TypeScript / Next.js 15 Gotchas
+
+These have burned us before — always apply:
+
+- **Route params must be Promise**: `{ params }: { params: Promise<{ id: string }> }` and `const { id } = await params`
+- **No spread on iterators**: Use `Array.from(set)` not `[...set]` — TypeScript downlevel compat issue
+- **Map.values() spread**: Use `Array.from(new Map(...).values())` not `[...new Map(...).values()]`
+
+---
+
+## Platforms
+
+**Live now:** Bluesky, Discord, Telegram, Mastodon, X/Twitter (pay-per-use, $0.01/tweet)
+**Coming soon:** LinkedIn, YouTube, Pinterest, Reddit
+**Roadmap:** Instagram, Facebook, TikTok, Threads, Tumblr, Pixelfed
+
+---
+
+## Pricing & Plans
+
+| Plan | Price | Credits/mo | Seats | Client Workspaces |
+|---|---|---|---|---|
+| Free | $0 | 50 | 2 | 0 |
+| Pro | $5/mo | 500 | 5 | 0 |
+| Agency | $20/mo | 2,000 | 15 | 5 |
+| Pro Annual | $55/yr | 500 | 5 | 0 |
+| Agency Annual | $209/yr | 2,000 | 15 | 5 |
+
+**Add-ons:**
+- White Label Basic: $20/mo (custom logo/colors/branding)
+- White Label Pro: $40/mo (everything + custom domain)
+- Credit packs: $1.99 (100cr) / $4.99 (300cr) / $9.99 (750cr) / $19.99 (2,000cr)
+
+**Affiliate structure:**
+- 30% recurring on all subscription payments (Pro, Agency, promos, white label)
+- Milestone: 100+ active recurring payments → jumps to 40% forever
+- Flat 10% on Starter + Popular credit packs
+- Flat 15% on Pro + Max credit packs
+
+**X/Twitter quota enforcement:**
+- Free: 50 tweets/month | Pro: 200/month | Agency: 500/month
+- Tracked by counting published posts with `platforms @> ['twitter']` this calendar month
+
+---
+
+## Key Infrastructure Decisions
+
+- **Infrastructure sustainability is always a priority** — Joshua is ballin on a budget. Every new feature needs quota gating or a clear cost model.
+- **Credits system:** Three pools — monthly (resets), earned (referrals/milestones), purchased (never expire). Consumed in that order.
+- **Publish-first architecture:** Post status is set atomically to prevent race conditions.
+- **Idempotency guards** on all scheduled jobs — nothing fires twice.
+- **RLS on all tables** — users only access their own data.
+- **Feature flags table** in Supabase — admin-only write, for kill switches.
+- **Inngest cron `'0 6 * * *'`** — evergreen recycling runs daily.
+- If a feature could have API costs, gate it like AI credits. Build for free-tier sustainability first.
+
+---
+
+## What's Been Built (as of early April 2026)
+
+**Core:**
+- Post scheduling (Now + future via Inngest), drafts, queue, calendar, bulk scheduling
+- Multi-account per platform (Bluesky, Mastodon verified)
+- 12 AI tools (Google Gemini): Caption, Rewrite, Hook, Thread + 8 more
+- Three-pool credit system with real-time sidebar updates
+- Workspace isolation (personal + client, cookie-scoped)
+- 5-step onboarding tour + SM-Give card on final step
+- 29 sidebar color themes
+- Referral system (+25 credits per paying referral, milestone bonuses)
+
+**Platforms:**
+- Bluesky, Discord, Telegram, Mastodon — live
+- X/Twitter — live (pay-per-use, quota enforced)
+- Twitch clips — OAuth connect/disconnect, clip browser, thumbnail grid, one-click schedule
+- YouTube clips — RSS-based (no API key needed), video grid
+
+**Pages/Features:**
+- `/clips` — Twitch/YouTube tab switcher, connected/not-connected state
+- `/admin/users` — searchable user table
+- `/admin/affiliates` — payout management
+- `/admin/studio-stax` — listing approval/suspend
+- `/admin/feedback` — unified feedback inbox
+- `/admin/platform-stats` — per-platform success rates
+- Studio Stax lister portal
+- Affiliate dashboard with real commission rates
+- Link in Bio builder (free on all plans)
+- Competitor tracking (3 accounts on free)
+- Evergreen recycling
+- RSS/blog import
+- FeedbackButton component (floating bottom-left pill)
+- Mobile hamburger fixed (iPhone 14 notch, `env(safe-area-inset-top)`, 44×44px touch target)
+
+**SEO:**
+- 28+ `/vs/` comparison pages
+- 61+ blog posts
+- `sitemap.ts` updated
+- `public/llms.txt` updated
+
+---
+
+## Known Issues / Bugs (fix these when touched)
+
+- **X/Twitter missing from bulk scheduling** — needs to be added to the platform list there
+- **Bulk scheduling has no character limit enforcement** — each platform has different limits; needs per-platform validation
+- **Bulk scheduling: auto-fill dates fills consecutive dates** — user wants it to fill the pre-selected day of week instead (e.g. if Monday is selected, fill all Mondays)
+- **Bulk scheduling: no media upload option** — needs media attach capability
+- **Discord in bulk scheduling doesn't warn if no account connected** — should check for connected account and show warning/block before scheduling
+- **White label pricing cards** on pricing page need to be more enticing — rewrite copy to be compelling add-on sells. Don't change prices, just make them feel valuable.
+
+---
+
+## Pending / In Progress (from last session)
+
+- Public Twitch clips (any channel, not just own) + quota gating (free=100, pro=1000/month) via `usage_events` table
+- Supabase migrations to run: `clip_connections`, `feedback`, `usage_events`
+- White label pricing — $20/$40 confirmed. Cards need better copy.
+- Studio Stax ranking: SM-Give donation weight (primary) + listing age/tenure + admin featured spots
+- Twitch env vars still needed in Vercel: `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`, redirect: `https://socialmate.studio/api/clips/twitch/callback`
+- Discord management tools (future — moderation, welcome messages, role automation)
+- Gilgamesh's Guide landing page (future — free PDF, business/creator/self-dev guide for entrepreneurs)
+
+---
+
+## Coding Rules
+
+- **Always consider infrastructure cost** — if it hits an external API, it needs quota gating
+- **Use prebuilt/existing patterns** — don't reinvent. Reuse existing auth, RLS, Inngest, Stripe patterns already in the codebase
+- **Token efficiency matters** — run focused, targeted tasks. Use plan mode (Shift+Tab) for complex multi-file work before writing code
+- **Mobile first** — always check iPhone notch, touch targets (44×44px min), safe area insets
+- **No hardcoded wrong numbers** — check actual Stripe price IDs in Appendix B before touching payment code
+- **Don't break what works** — UI/UX must flow cleanly. If unsure, ask before touching working flows
+- **Commit frequently** with descriptive messages
+
+---
+
+## Stripe Live Price IDs (DO NOT GUESS THESE)
+
+| Product | Price ID | Amount |
+|---|---|---|
+| Pro Monthly | price_1T9S2v7OMwDowUuULHznqUD5 | $5.00/mo |
+| Agency Monthly | price_1TFMHp7OMwDowUuUgeLAeJNY | $20.00/mo |
+| Pro Annual | price_1TFMHx7OMwDowUuUl9PqWxMs | $55.00/yr |
+| Agency Annual | price_1TFMI07OMwDowUuUoHfKJEpo | $209.00/yr |
+| White Label Basic | price_1TFMHt7OMwDowUuU56Fzw4fE | $20.00/mo |
+| White Label Pro | price_1TFMIG7OMwDowUuUcjNNGB0Q | $40.00/mo |
+| Credits Starter (100cr) | price_1TFMI47OMwDowUuUhTrbe3oq | $1.99 |
+| Credits Popular (300cr) | price_1TFMI77OMwDowUuU0wDZWcCL | $4.99 |
+| Credits Pro (750cr) | price_1TFMIA7OMwDowUuUwI3SEGCR | $9.99 |
+| Credits Max (2000cr) | price_1TFMID7OMwDowUuU2sQgbIx9 | $19.99 |
+| Donation $5 | price_1TFMIJ7OMwDowUuUj5amigA0 | $5.00 |
+| Donation $10 | price_1TFMIM7OMwDowUuUcmN2hPwT | $10.00 |
+| Donation $25 | price_1TFMIQ7OMwDowUuUfdZXeATH | $25.00 |
+| Donation $50 | price_1TFMIT7OMwDowUuUHgqWqtUZ | $50.00 |
+
+---
+
+## What NOT to Touch Without Asking
+
+- Stripe webhook handler — it's verified and working, live payments depend on it
+- RLS policies — they're in place for security, don't remove or bypass
+- Inngest publish jobs — idempotency guards are critical, don't remove them
+- The three-pool credit system logic — complex, tested, working
+- Any env vars — don't suggest hardcoding these
+
+---
+
+## Context: The Human Behind This
+
+Joshua works a deli job and builds this in his spare hours. He's solo, bootstrapped, budget-conscious. Every decision needs to consider:
+
+1. Does this cost money at scale?
+2. Can we use a free tier, prebuilt solution, or existing pattern instead?
+3. Does this break anything that's already working?
+
+He's not building features for features' sake. He's building toward 2,000–4,000 paying Pro users and $10k–$20k MRR in 12 months. Every task should move the needle on stability, growth, or user trust.
+
+**Goal: Power to the people. Build the door.**
