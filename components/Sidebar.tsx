@@ -323,7 +323,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   }
 
   return (
-    <div className="w-56 flex flex-col h-full" style={{ backgroundColor: 'var(--sidebar-bg)', borderRight: '1px solid var(--sidebar-border)', color: 'var(--sidebar-fg)' }}>
+    <div className="w-56 flex flex-col h-full overflow-x-hidden" style={{ backgroundColor: 'var(--sidebar-bg)', borderRight: '1px solid var(--sidebar-border)', color: 'var(--sidebar-fg)' }}>
 
       {/* HEADER */}
       <div className="p-4 flex-shrink-0" style={{ borderBottom: '1px solid var(--sidebar-border)' }}>

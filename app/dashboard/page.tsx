@@ -226,14 +226,17 @@ function DashboardInner() {
 
   // Streak calculation from posts
   const todayMidnight = new Date(); todayMidnight.setHours(0,0,0,0)
+  const postedToday = allPosts.some(p => { const pd = new Date(p.created_at); pd.setHours(0,0,0,0); return pd.getTime() === todayMidnight.getTime() })
+  // If not posted today, start streak scan from yesterday so an active streak
+  // stays visible as "X days — post today to keep it going!"
+  const streakStartOffset = postedToday ? 0 : 1
   let currentStreak = 0, tempStreak = 0, currentStreakDone = false
-  for (let i = 0; i < 365; i++) {
+  for (let i = streakStartOffset; i < 365 + streakStartOffset; i++) {
     const d = new Date(todayMidnight); d.setDate(todayMidnight.getDate() - i)
     const hasPost = allPosts.some(p => { const pd = new Date(p.created_at); pd.setHours(0,0,0,0); return pd.getTime() === d.getTime() })
     if (hasPost) { tempStreak++; if (!currentStreakDone) currentStreak = tempStreak }
     else { if (!currentStreakDone) currentStreakDone = true; tempStreak = 0 }
   }
-  const postedToday = allPosts.some(p => { const pd = new Date(p.created_at); pd.setHours(0,0,0,0); return pd.getTime() === todayMidnight.getTime() })
   const trailDays: boolean[] = []
   for (let i = 13; i >= 0; i--) {
     const d = new Date(todayMidnight); d.setDate(todayMidnight.getDate() - i)
@@ -333,31 +336,53 @@ function DashboardInner() {
 
           {/* STREAK CARD */}
           <div className="bg-surface border border-theme rounded-2xl p-4 mb-4">
-            <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="flex items-start justify-between flex-wrap gap-4">
               <div className="flex items-center gap-3">
-                <span className="text-3xl">🔥</span>
+                <span className="text-3xl">{currentStreak > 0 ? '🔥' : '💤'}</span>
                 <div>
                   <div className="text-2xl font-extrabold text-orange-500 leading-none">
-                    {currentStreak} day{currentStreak !== 1 ? '' : ''} streak
+                    {currentStreak} day{currentStreak !== 1 ? 's' : ''} streak
                   </div>
-                  <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Keep showing up — consistency wins.</div>
+                  <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                    {currentStreak > 0 && !postedToday
+                      ? 'Post today to keep it going!'
+                      : 'Keep showing up — consistency wins.'}
+                  </div>
                 </div>
               </div>
-              <div className="flex items-center gap-1">
-                {trailDays.map((active, i) => (
-                  <div key={i} className={`w-3 h-3 rounded-full ${active ? 'bg-orange-400' : 'bg-gray-200 dark:bg-gray-700'}`} />
-                ))}
+              {/* 14-day trail with day letters */}
+              <div className="flex items-end gap-1">
+                {trailDays.map((active, i) => {
+                  const isToday   = i === 13
+                  const dayOffset = 13 - i
+                  const d = new Date(todayMidnight); d.setDate(todayMidnight.getDate() - dayOffset)
+                  const dayLetter = ['S','M','T','W','T','F','S'][d.getDay()]
+                  return (
+                    <div key={i} className="flex flex-col items-center gap-0.5">
+                      <div className={`w-2.5 h-2.5 rounded-full transition-all ${
+                        active
+                          ? 'bg-orange-400'
+                          : isToday && currentStreak > 0
+                            ? 'bg-transparent ring-1 ring-orange-400'
+                            : 'bg-gray-200 dark:bg-gray-700'
+                      }`} />
+                      <span className={`text-[8px] font-semibold ${
+                        isToday ? 'text-orange-400' : 'text-gray-300 dark:text-gray-600'
+                      }`}>{dayLetter}</span>
+                    </div>
+                  )
+                })}
               </div>
             </div>
             <div className="mt-3">
               {postedToday ? (
                 <span className="inline-flex items-center gap-1.5 text-xs font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-3 py-1.5 rounded-full">
-                  ✓ Posted today
+                  ✓ Posted today — streak safe
                 </span>
               ) : currentStreak > 0 ? (
                 <Link href="/compose"
                   className="inline-flex items-center gap-1.5 text-xs font-bold bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-700 px-3 py-1.5 rounded-full hover:bg-amber-100 dark:hover:bg-amber-900/50 transition-all">
-                  Keep your streak alive →
+                  🔥 Post today to extend your {currentStreak}-day streak →
                 </Link>
               ) : (
                 <Link href="/compose"
