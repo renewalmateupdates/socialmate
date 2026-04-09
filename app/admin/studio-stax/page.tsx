@@ -15,6 +15,8 @@ interface Listing {
   why_apply: string | null
   smgive_donated_cents: number
   admin_notes: string | null
+  admin_featured: boolean
+  admin_featured_note: string | null
   created_at: string
   checkout_token: string | null
   checkout_token_expires: string | null
@@ -109,6 +111,32 @@ export default function AdminStudioStaxPage() {
     }
   }
 
+  async function handleToggleFeatured(id: string, currentlyFeatured: boolean, note?: string) {
+    setActionLoading(true)
+    try {
+      const res = await fetch('/api/listings/admin', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id,
+          admin_featured: !currentlyFeatured,
+          admin_featured_note: note || null,
+        }),
+      })
+      const json = await res.json()
+      if (json.success) {
+        showToast(currentlyFeatured ? 'Removed from featured' : '⭐ Marked as featured')
+        setSelected(null)
+        await load()
+      } else {
+        showToast(json.error || 'Action failed', false)
+      }
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const featuredCount = listings.filter(l => l.admin_featured).length
   const filtered = filter === 'all' ? listings : listings.filter(l => l.status === filter)
 
   const statusCounts: Record<string, number> = {}
@@ -165,6 +193,13 @@ export default function AdminStudioStaxPage() {
             <div className="text-sm font-semibold text-gray-700 dark:text-gray-300">Total SM-Give</div>
             <div className="text-xs text-gray-400 mt-0.5">Donated across all listings</div>
           </div>
+          <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-5">
+            <div className="text-3xl font-black text-amber-600 dark:text-amber-400 mb-1">
+              {featuredCount} <span className="text-lg">/ 5</span>
+            </div>
+            <div className="text-sm font-semibold text-gray-700 dark:text-gray-300">⭐ Editor's Picks</div>
+            <div className="text-xs text-gray-400 mt-0.5">Always rank first</div>
+          </div>
         </div>
 
         {/* Filter tabs */}
@@ -201,6 +236,7 @@ export default function AdminStudioStaxPage() {
                   <tr className="border-b border-theme bg-gray-50 dark:bg-gray-800/50">
                     <th className="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest">Studio</th>
                     <th className="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest">Status</th>
+                    <th className="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest">Featured</th>
                     <th className="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest">SM-Give</th>
                     <th className="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest">Renewal</th>
                     <th className="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest">Applied</th>
@@ -220,6 +256,19 @@ export default function AdminStudioStaxPage() {
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_BADGE[listing.status] || ''}`}>
                           {listing.status.charAt(0).toUpperCase() + listing.status.slice(1)}
                         </span>
+                      </td>
+                      <td className="px-5 py-3">
+                        <button
+                          onClick={() => handleToggleFeatured(listing.id, listing.admin_featured)}
+                          disabled={actionLoading || (!listing.admin_featured && featuredCount >= 5)}
+                          title={!listing.admin_featured && featuredCount >= 5 ? 'Max 5 featured slots' : ''}
+                          className={`text-xs font-bold px-2.5 py-1 rounded-xl transition-all disabled:opacity-40 ${
+                            listing.admin_featured
+                              ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-700'
+                              : 'border border-gray-200 dark:border-gray-700 text-gray-400 hover:border-amber-300 hover:text-amber-600'
+                          }`}>
+                          {listing.admin_featured ? '⭐ Featured' : '☆ Pin'}
+                        </button>
                       </td>
                       <td className="px-5 py-3 text-gray-600 dark:text-gray-400 text-xs">
                         {listing.smgive_donated_cents > 0 ? `$${(listing.smgive_donated_cents / 100).toFixed(2)}` : '—'}
@@ -313,6 +362,30 @@ export default function AdminStudioStaxPage() {
                 </ListingRow>
                 {selected.renewal_date && (
                   <ListingRow label="Renewal date">{new Date(selected.renewal_date).toLocaleDateString()}</ListingRow>
+                )}
+
+                {/* Editor's Pick toggle */}
+                {selected.status === 'active' && (
+                  <div className={`flex items-center justify-between p-3 rounded-xl border ${
+                    selected.admin_featured
+                      ? 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800'
+                      : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+                  }`}>
+                    <div>
+                      <p className="text-xs font-bold text-gray-700 dark:text-gray-300">⭐ Editor's Pick</p>
+                      <p className="text-xs text-gray-400 mt-0.5">Pinned listings always rank first ({featuredCount}/5 slots used)</p>
+                    </div>
+                    <button
+                      onClick={() => handleToggleFeatured(selected.id, selected.admin_featured, adminNotes)}
+                      disabled={actionLoading || (!selected.admin_featured && featuredCount >= 5)}
+                      className={`text-xs font-bold px-3 py-1.5 rounded-xl transition-all disabled:opacity-40 ${
+                        selected.admin_featured
+                          ? 'bg-amber-500 text-white hover:opacity-80'
+                          : 'bg-black dark:bg-white text-white dark:text-black hover:opacity-80'
+                      }`}>
+                      {selected.admin_featured ? 'Unpin' : 'Pin as featured'}
+                    </button>
+                  </div>
                 )}
 
                 {/* Admin notes */}

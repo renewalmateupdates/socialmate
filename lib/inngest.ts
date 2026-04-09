@@ -47,7 +47,7 @@ export const publishScheduledPost = inngest.createFunction(
       // transient error, this guard prevents the post from being sent twice.
       const { data: innerPostCheck } = await getSupabaseAdmin()
         .from('posts')
-        .select('status, published_at, platform_post_ids, platforms')
+        .select('user_id, status, published_at, platform_post_ids, platforms')
         .eq('id', postId)
         .single()
 
@@ -112,6 +112,18 @@ export const publishScheduledPost = inngest.createFunction(
             body:    JSON.stringify({ postId }),
           }).catch(err => console.error('[Inngest] Failed to mark post as failed:', err))
           console.error(`[Inngest] Publish failed for post ${postId}: ${errMsg}`)
+          // Fire-and-forget failure notification
+          if (innerPostCheck?.user_id) {
+            getSupabaseAdmin()
+              .from('notifications')
+              .insert({
+                user_id:    innerPostCheck.user_id,
+                type:       'post_failed',
+                message:    `A scheduled post failed to publish. Check your connected accounts.`,
+                action_url: '/queue',
+              })
+              .then(({ error }) => { if (error) console.warn('[notifications] insert failed:', error.message) })
+          }
         } else {
           // Post was published but DB update failed — retry without calling fail route.
           console.warn(`[Inngest] Post ${postId} published OK but DB update failed — retrying (${errMsg})`)
@@ -124,6 +136,22 @@ export const publishScheduledPost = inngest.createFunction(
         status:    data.status,
         platforms: data.results?.map((r: any) => `${r.platform}:${r.success ? 'ok' : 'fail'}`),
       })
+
+      // Fire-and-forget success notification
+      if (innerPostCheck?.user_id) {
+        const platformList = (innerPostCheck.platforms || []).join(', ')
+        getSupabaseAdmin()
+          .from('notifications')
+          .insert({
+            user_id:    innerPostCheck.user_id,
+            type:       'post_published',
+            message:    platformList
+              ? `Post published successfully to ${platformList}.`
+              : 'Post published successfully.',
+            action_url: '/queue',
+          })
+          .then(({ error }) => { if (error) console.warn('[notifications] insert failed:', error.message) })
+      }
 
       return data
     })

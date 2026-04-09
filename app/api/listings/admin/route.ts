@@ -49,8 +49,22 @@ export async function PATCH(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
 
   const body = await req.json()
-  const { id, status, admin_notes, action } = body
+  const { id, status, admin_notes, action, admin_featured, admin_featured_note } = body
   const db = getAdminSupabase()
+
+  // ── Toggle admin featured ───────────────────────────────────────────────────
+  if (typeof admin_featured === 'boolean') {
+    const { error } = await db
+      .from('curated_listings')
+      .update({
+        admin_featured,
+        admin_featured_note: admin_featured_note || null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', id)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ success: true })
+  }
 
   // ── Send payment link ───────────────────────────────────────────────────────
   if (action === 'send_payment_link') {
