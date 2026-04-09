@@ -118,7 +118,7 @@ These have burned us before — always apply:
 - YouTube clips — RSS-based (no API key needed), video grid
 
 **Pages/Features:**
-- `/clips` — Twitch/YouTube tab switcher, connected/not-connected state
+- `/clips` — Twitch/YouTube tab switcher, connected/not-connected state, "Search Any Channel" with quota counter
 - `/admin/users` — searchable user table
 - `/admin/affiliates` — payout management
 - `/admin/studio-stax` — listing approval/suspend
@@ -143,24 +143,31 @@ These have burned us before — always apply:
 
 ## Known Issues / Bugs (fix these when touched)
 
-- **X/Twitter missing from bulk scheduling** — needs to be added to the platform list there
-- **Bulk scheduling has no character limit enforcement** — each platform has different limits; needs per-platform validation
-- **Bulk scheduling: auto-fill dates fills consecutive dates** — user wants it to fill the pre-selected day of week instead (e.g. if Monday is selected, fill all Mondays)
-- **Bulk scheduling: no media upload option** — needs media attach capability
-- **Discord in bulk scheduling doesn't warn if no account connected** — should check for connected account and show warning/block before scheduling
-- **White label pricing cards** on pricing page need to be more enticing — rewrite copy to be compelling add-on sells. Don't change prices, just make them feel valuable.
+*(All bulk scheduler + white label bugs from prior sessions have been fixed.)*
+
+- No open bugs currently tracked — add new ones here as discovered.
 
 ---
 
-## Pending / In Progress (from last session)
+## Pending / In Progress
 
-- Public Twitch clips (any channel, not just own) + quota gating (free=100, pro=1000/month) via `usage_events` table
-- Supabase migrations to run: `clip_connections`, `feedback`, `usage_events`
-- White label pricing — $20/$40 confirmed. Cards need better copy.
-- Studio Stax ranking: SM-Give donation weight (primary) + listing age/tenure + admin featured spots
-- Twitch env vars still needed in Vercel: `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`, redirect: `https://socialmate.studio/api/clips/twitch/callback`
+- **Twitch env vars** still needed in Vercel: `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`, redirect: `https://socialmate.studio/api/clips/twitch/callback`
+- **Supabase migrations** to confirm ran: `usage_events`, `notifications`, `competitor_accounts`, `hashtag_collections`, `studio_stax_admin_featured` — check Supabase dashboard
 - Discord management tools (future — moderation, welcome messages, role automation)
 - Gilgamesh's Guide landing page (future — free PDF, business/creator/self-dev guide for entrepreneurs)
+
+---
+
+## Session 4 Completed (April 2026)
+
+- ✅ Bulk scheduler: X/Twitter added, per-platform char limits, day-of-week auto-fill, media upload, Discord no-account warning
+- ✅ `/clips` Vercel prerender fix — extracted `ClipsPageClient.tsx`, server `page.tsx` wraps in `<Suspense>`
+- ✅ White label pricing cards on `/pricing` — rewritten with ROI-focused copy + taglines
+- ✅ Studio Stax ranking — admin featured spots + age-weighted donation formula + admin toggle UI in `/admin/studio-stax`
+- ✅ Public Twitch clips — `/api/clips/twitch/public` (client_credentials, any channel, quota-gated) + "Search Any Channel" UI + quota progress bar on `/clips`
+- ✅ Supabase migrations: `competitor_accounts`, `hashtag_collections`, `usage_events`, `notifications`, `studio_stax_admin_featured`
+- ✅ Notification system — `/api/notifications` (GET/PATCH), `NotificationBell` component, wired into `Sidebar` header
+- ✅ Inngest: fire-and-forget `post_published` / `post_failed` notifications on publish success/failure
 
 ---
 

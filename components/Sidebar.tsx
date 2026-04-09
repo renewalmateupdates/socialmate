@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 import ThemeToggle from '@/components/ThemeToggle'
 import ComposeShortcut from '@/components/ComposeShortcut'
+import NotificationBell from '@/components/NotificationBell'
 import {
   DndContext,
   closestCenter,
@@ -332,10 +333,13 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
               style={{ background: 'var(--sidebar-fg)', color: 'var(--sidebar-bg)' }}>S</div>
             <span className="font-bold text-base tracking-tight" style={{ color: 'var(--sidebar-fg)' }}>SocialMate<span className="text-[10px] font-semibold bg-pink-500 text-white px-1.5 py-0.5 rounded-full align-super ml-1">Beta</span></span>
           </div>
-          <span className="text-xs font-bold px-2 py-0.5 rounded-full"
-            style={{ background: 'var(--sidebar-active)', color: 'var(--sidebar-muted)' }}>
-            {badge.label}
-          </span>
+          <div className="flex items-center gap-1.5">
+            <NotificationBell />
+            <span className="text-xs font-bold px-2 py-0.5 rounded-full"
+              style={{ background: 'var(--sidebar-active)', color: 'var(--sidebar-muted)' }}>
+              {badge.label}
+            </span>
+          </div>
         </div>
 
         {/* WORKSPACE SWITCHER */}

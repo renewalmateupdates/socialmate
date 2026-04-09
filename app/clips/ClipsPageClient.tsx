@@ -71,6 +71,14 @@ export default function ClipsPage() {
   const [disconnecting, setDisconnecting] = useState(false)
   const [toast, setToast]             = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
+  // ── Public channel search state ────────────────────────────────────────────
+  const [publicChannel, setPublicChannel]       = useState('')
+  const [publicClips, setPublicClips]           = useState<Clip[]>([])
+  const [publicChannelInfo, setPublicChannelInfo] = useState<{ id: string; name: string; avatar: string } | null>(null)
+  const [publicQuota, setPublicQuota]           = useState<{ used: number; limit: number | null; plan: string } | null>(null)
+  const [publicLoading, setPublicLoading]       = useState(false)
+  const [publicError, setPublicError]           = useState('')
+
   // ── YouTube state ──────────────────────────────────────────────────────────
   const [ytVideos, setYtVideos]               = useState<YTVideo[]>([])
   const [ytConnected, setYtConnected]         = useState(false)
@@ -214,6 +222,32 @@ export default function ClipsPage() {
     }
   }
 
+  // ── Search public Twitch channel ───────────────────────────────────────────
+  const searchPublicChannel = useCallback(async () => {
+    const ch = publicChannel.trim().replace(/^@/, '')
+    if (!ch) return
+    setPublicLoading(true)
+    setPublicError('')
+    setPublicClips([])
+    setPublicChannelInfo(null)
+    try {
+      const res = await fetch(`/api/clips/twitch/public?channel=${encodeURIComponent(ch)}`)
+      const data = await res.json()
+      if (!res.ok) {
+        setPublicError(data.error || 'Failed to fetch clips')
+        if (data.quota) setPublicQuota(data.quota)
+        return
+      }
+      setPublicClips(data.clips || [])
+      setPublicChannelInfo(data.channel || null)
+      setPublicQuota(data.quota || null)
+    } catch {
+      setPublicError('Network error — please try again')
+    } finally {
+      setPublicLoading(false)
+    }
+  }, [publicChannel])
+
   // unified layout with platform tab switcher
   return (
     <div className="max-w-5xl mx-auto py-8 px-4">
@@ -302,6 +336,99 @@ export default function ClipsPage() {
                   {clips.map(clip => <ClipCard key={clip.id} clip={clip} />)}
                 </div>
               )}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Search Any Channel (always visible in Twitch tab) ── */}
+      {activePlatform === 'twitch' && (
+        <div className="mt-12">
+          <div className="flex items-center gap-3 mb-5">
+            <div className="flex-1 h-px" style={{ background: 'var(--border-mid)' }} />
+            <span className="text-xs font-bold uppercase tracking-widest px-3" style={{ color: 'var(--text-faint)' }}>Search Any Channel</span>
+            <div className="flex-1 h-px" style={{ background: 'var(--border-mid)' }} />
+          </div>
+
+          {/* Quota bar */}
+          {publicQuota && publicQuota.limit !== null && (
+            <div className="mb-5 rounded-xl px-4 py-3 flex items-center gap-4" style={{ background: 'var(--surface)', border: '1px solid var(--border-mid)' }}>
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs font-semibold" style={{ color: 'var(--text-muted)' }}>
+                    Channel lookups this month
+                  </span>
+                  <span className="text-xs font-bold" style={{ color: publicQuota.used >= publicQuota.limit ? '#ef4444' : 'var(--text)' }}>
+                    {publicQuota.used} / {publicQuota.limit}
+                  </span>
+                </div>
+                <div className="h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--border-mid)' }}>
+                  <div
+                    className="h-full rounded-full transition-all"
+                    style={{
+                      width: `${Math.min((publicQuota.used / publicQuota.limit) * 100, 100)}%`,
+                      background: publicQuota.used >= publicQuota.limit ? '#ef4444' : publicQuota.used / publicQuota.limit > 0.8 ? '#f59e0b' : '#9146FF',
+                    }}
+                  />
+                </div>
+              </div>
+              {publicQuota.used >= publicQuota.limit && publicQuota.plan !== 'agency' && (
+                <a href="/pricing" className="shrink-0 text-xs font-bold px-3 py-1.5 rounded-lg text-white" style={{ background: '#9146FF' }}>
+                  Upgrade
+                </a>
+              )}
+            </div>
+          )}
+
+          {/* Search input */}
+          <div className="flex gap-2 mb-6">
+            <input
+              type="text"
+              value={publicChannel}
+              onChange={e => setPublicChannel(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') searchPublicChannel() }}
+              placeholder="Enter Twitch channel name (e.g. ninja)"
+              className="flex-1 text-sm rounded-xl px-4 py-3 outline-none transition-all"
+              style={{ border: '1px solid var(--border-mid)', background: 'var(--surface-hover)', color: 'var(--text)' }}
+            />
+            <button
+              onClick={searchPublicChannel}
+              disabled={publicLoading || !publicChannel.trim()}
+              className="px-5 py-3 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+              style={{ background: '#9146FF' }}
+            >
+              {publicLoading ? '⏳' : 'Search'}
+            </button>
+          </div>
+
+          {/* Error */}
+          {publicError && (
+            <div className="mb-4 rounded-xl px-4 py-3 text-sm font-semibold flex items-center gap-2 bg-red-50 text-red-700 border border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700">
+              <span>❌</span> {publicError}
+            </div>
+          )}
+
+          {/* Results */}
+          {publicChannelInfo && (
+            <div className="mb-4 flex items-center gap-3">
+              {publicChannelInfo.avatar ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={publicChannelInfo.avatar} alt={publicChannelInfo.name} className="w-9 h-9 rounded-full" />
+              ) : (
+                <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm" style={{ background: '#9146FF' }}>
+                  {publicChannelInfo.name[0].toUpperCase()}
+                </div>
+              )}
+              <div>
+                <p className="text-sm font-extrabold" style={{ color: 'var(--text)' }}>{publicChannelInfo.name}</p>
+                <p className="text-xs" style={{ color: 'var(--text-faint)' }}>{publicClips.length} top clips</p>
+              </div>
+            </div>
+          )}
+
+          {publicClips.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {publicClips.map(clip => <ClipCard key={clip.id} clip={clip} />)}
             </div>
           )}
         </div>

@@ -143,11 +143,12 @@ const WHITE_LABEL_TIERS = [
     price: '$20/mo',
     priceId: STRIPE_WHITE_LABEL_BASIC_PRICE_ID,
     tier: 'basic' as const,
+    tagline: 'Sell it as your own tool. Keep 100% of the value.',
     features: [
-      'Remove SocialMate branding',
-      'Add your own logo',
-      'Custom brand colors',
-      'Your brand name throughout the app',
+      'Your logo replaces SocialMate everywhere',
+      'Brand colors applied across the full app',
+      'Your agency name in the browser tab, emails, and UI',
+      'Charge clients whatever you want — we never appear',
     ],
     highlight: false,
   },
@@ -156,11 +157,12 @@ const WHITE_LABEL_TIERS = [
     price: '$40/mo',
     priceId: STRIPE_WHITE_LABEL_PRO_PRICE_ID,
     tier: 'pro' as const,
+    tagline: 'Your own SaaS product. Zero dev work. Live in hours.',
     features: [
       'Everything in Basic',
-      'Custom domain (app.yourbrand.com)',
-      'Full client rebrand — SocialMate never visible',
-      'Priority support',
+      'Custom domain — clients see app.youragency.com',
+      'SocialMate is completely invisible, even in the URL',
+      'Deliver a $99/mo tool. Keep the entire margin.',
     ],
     highlight: true,
   },
@@ -354,7 +356,7 @@ export default function Pricing() {
               <h3 className="text-base font-extrabold">White Label Add-on</h3>
               <span className="text-xs font-bold px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">Pro & Agency only</span>
             </div>
-            <p className="text-xs text-gray-500">Remove SocialMate branding entirely. Your logo, your colors, your domain. Two tiers based on how deep you want to go.</p>
+            <p className="text-xs text-gray-500">Turn SocialMate into your own branded product. Agencies are charging $99–$299/mo for tools built on exactly this. Your clients never know we exist.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {WHITE_LABEL_TIERS.map(wl => (
@@ -366,6 +368,7 @@ export default function Pricing() {
                   <div>
                     <p className="text-sm font-extrabold">{wl.name}</p>
                     <p className="text-xl font-extrabold mt-0.5">{wl.price}</p>
+                    <p className="text-xs text-gray-500 mt-1 leading-snug max-w-[180px]">{wl.tagline}</p>
                   </div>
                   <button
                     onClick={() => handleWhiteLabelCheckout(wl.tier, wl.name)}

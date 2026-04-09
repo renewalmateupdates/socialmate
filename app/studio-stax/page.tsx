@@ -28,13 +28,27 @@ export default async function StudioStaxPage() {
 
   const { data: listings } = await supabase
     .from('curated_listings')
-    .select('id, name, tagline, description, url, logo_url, category, tags, smgive_donated_cents, consecutive_featured_months, created_at')
+    .select('id, name, tagline, description, url, logo_url, category, tags, smgive_donated_cents, consecutive_featured_months, admin_featured, created_at')
     .eq('status', 'live')
-    .order('smgive_donated_cents', { ascending: false })
+
+  // Ranking formula:
+  // 1. Admin featured (editor's picks) always first
+  // 2. Then by donation amount (primary signal)
+  // 3. Tie-break: age bonus — 5% boost per 30-day tenure bracket (loyalty reward)
+  const now = Date.now()
+  const ranked = (listings ?? []).slice().sort((a, b) => {
+    if (a.admin_featured && !b.admin_featured) return -1
+    if (!a.admin_featured && b.admin_featured) return 1
+    const ageMonthsA = Math.floor((now - new Date(a.created_at).getTime()) / (1000 * 60 * 60 * 24 * 30))
+    const ageMonthsB = Math.floor((now - new Date(b.created_at).getTime()) / (1000 * 60 * 60 * 24 * 30))
+    const scoreA = (a.smgive_donated_cents ?? 0) * (1 + Math.min(ageMonthsA, 12) * 0.05)
+    const scoreB = (b.smgive_donated_cents ?? 0) * (1 + Math.min(ageMonthsB, 12) * 0.05)
+    return scoreB - scoreA
+  })
 
   const byCategory: Record<string, typeof listings> = {}
   for (const cat of CATEGORIES) {
-    byCategory[cat.id] = (listings ?? []).filter(l => l.category === cat.id).slice(0, 5)
+    byCategory[cat.id] = ranked.filter(l => l.category === cat.id).slice(0, 5)
   }
   const hasAny = Object.values(byCategory).some(arr => arr && arr.length > 0)
 
