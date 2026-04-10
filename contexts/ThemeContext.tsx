@@ -3,46 +3,38 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { supabase } from '@/lib/supabase'
 
 export type ThemeMode    = 'light' | 'dark'
-export type ThemeAccent  = 'default' | 'midnight' | 'forest' | 'rose' | 'slate' | 'amber' | 'ocean' | 'grape' | 'charcoal' | 'coffee' | 'candy' | 'mint' | 'lavender' | 'sky' | 'peach' | 'rainbow' | 'northern-lights' | 'glitter-dream' | 'mermaid' | 'wild-safari' | 'rainbow-ranch' | 'rose-gold' | 'bubblegum' | 'cherry-blossom' | 'sunflower' | 'wildflower' | 'woodland-camo' | 'desert-camo' | 'pink-camo' | 'fire'
+export type ThemeAccent  = 'default' | 'midnight' | 'forest' | 'rose' | 'ocean' | 'velvet' | 'coffee' | 'candy' | 'mint' | 'lavender' | 'sky' | 'peach' | 'cherry-blossom' | 'cosmos' | 'northern-lights' | 'glitter-dream' | 'mermaid' | 'wild-safari' | 'unicorn' | 'bubblegum' | 'wildflower' | 'golden-hour' | 'tropics' | 'galaxy'
 
 /** The swatch color is the sidebar background color for that theme */
 export const ACCENT_THEMES: { id: ThemeAccent; label: string; color: string }[] = [
-  { id: 'default',  label: 'Default',  color: '#ffffff' },   // white sidebar
-  { id: 'midnight', label: 'Midnight', color: '#1e1b4b' },   // deep indigo
-  { id: 'forest',   label: 'Forest',   color: '#14532d' },   // dark green
-  { id: 'rose',     label: 'Rose',     color: '#881337' },   // deep crimson
-  { id: 'slate',    label: 'Slate',    color: '#0f172a' },   // dark blue-slate
-  { id: 'amber',    label: 'Amber',    color: '#78350f' },   // warm amber
-  { id: 'ocean',    label: 'Ocean',    color: '#0c4a6e' },   // deep ocean blue
-  { id: 'grape',    label: 'Grape',    color: '#4c1d95' },   // deep violet/grape
-  { id: 'charcoal', label: 'Charcoal', color: '#1c1917' },   // near-black charcoal
-  { id: 'coffee',   label: 'Coffee',   color: '#3b1a08' },   // warm espresso brown
-  // Pastels & prismatic
-  { id: 'candy',    label: 'Candy',    color: '#fce7f3' },   // cotton candy pink
-  { id: 'mint',     label: 'Mint',     color: '#d1fae5' },   // pastel mint green
-  { id: 'lavender', label: 'Lavender', color: '#ede9fe' },   // soft lavender
-  { id: 'sky',      label: 'Sky',      color: '#e0f2fe' },   // pastel sky blue
-  { id: 'peach',    label: 'Peach',    color: '#ffedd5' },   // soft peach
-  { id: 'rainbow',  label: 'Rainbow',  color: '#1a0533' },   // dark base with rainbow shimmer
-  { id: 'northern-lights', label: 'Northern Lights', color: '#020b18' },  // aurora borealis
-  // Activity book series
-  { id: 'glitter-dream',  label: 'Glitter Dream',  color: '#1a0028' },  // hot pink + purple shimmer
-  { id: 'mermaid',        label: 'Mermaid',        color: '#00101e' },  // electric aqua + pink
-  { id: 'wild-safari',    label: 'Wild Safari',    color: '#0d0800' },  // neon leopard rainbow
-  { id: 'rainbow-ranch',  label: 'Rainbow Ranch',  color: '#1a0015' },  // full spectrum pony
-  // Feminine
-  { id: 'rose-gold',      label: 'Rose Gold',      color: '#2a1520' },  // warm pink-gold metallic
-  { id: 'bubblegum',      label: 'Bubblegum',      color: '#4a0035' },  // hot magenta + bright pink
-  // Flowers
-  { id: 'cherry-blossom', label: 'Cherry Blossom', color: '#fef0f4' },  // soft Japanese pink petals
-  { id: 'sunflower',      label: 'Sunflower',      color: '#1c1400' },  // golden yellow bloom
-  { id: 'wildflower',     label: 'Wildflower',     color: '#0d1a06' },  // meadow multi-color
-  // Camo
-  { id: 'woodland-camo',  label: 'Woodland Camo',  color: '#1e2810' },  // military green/brown
-  { id: 'desert-camo',    label: 'Desert Camo',    color: '#2a2010' },  // tan/sand military
-  { id: 'pink-camo',      label: 'Pink Camo',      color: '#2a0e1e' },  // hot pink camo
-  // Bold
-  { id: 'fire',           label: 'Fire',           color: '#1c0500' },  // orange-red flame
+  // Classic dark solids
+  { id: 'default',        label: 'Default',        color: '#ffffff' },   // white sidebar
+  { id: 'midnight',       label: 'Midnight',       color: '#1e1b4b' },   // deep indigo
+  { id: 'forest',         label: 'Forest',         color: '#14532d' },   // dark green
+  { id: 'rose',           label: 'Rose',           color: '#881337' },   // deep crimson
+  { id: 'ocean',          label: 'Ocean',          color: '#0c4a6e' },   // deep ocean blue
+  { id: 'velvet',         label: 'Velvet',         color: '#4c1d95' },   // deep luxe purple
+  { id: 'coffee',         label: 'Coffee',         color: '#3b1a08' },   // warm espresso brown
+  // Pastels
+  { id: 'candy',          label: 'Candy',          color: '#fce7f3' },   // cotton candy pink
+  { id: 'mint',           label: 'Mint',           color: '#d1fae5' },   // pastel mint green
+  { id: 'lavender',       label: 'Lavender',       color: '#ede9fe' },   // soft lavender
+  { id: 'sky',            label: 'Sky',            color: '#e0f2fe' },   // pastel sky blue
+  { id: 'peach',          label: 'Peach',          color: '#ffedd5' },   // soft peach
+  { id: 'cherry-blossom', label: 'Cherry Blossom', color: '#fef0f4' },   // soft Japanese pink
+  // Shimmer & gradient
+  { id: 'cosmos',         label: 'Cosmos',         color: '#1a0533' },   // dark space shimmer
+  { id: 'northern-lights',label: 'Northern Lights',color: '#020b18' },   // aurora borealis
+  { id: 'glitter-dream',  label: 'Glitter Dream',  color: '#1a0028' },   // hot pink + purple sparkle
+  { id: 'mermaid',        label: 'Mermaid',        color: '#00101e' },   // electric aqua + pink
+  { id: 'wild-safari',    label: 'Wild Safari',    color: '#0d0800' },   // neon leopard spectrum
+  { id: 'unicorn',        label: 'Unicorn',        color: '#1a0015' },   // full spectrum magic
+  { id: 'bubblegum',      label: 'Bubblegum',      color: '#4a0035' },   // hot magenta + bright pink
+  { id: 'wildflower',     label: 'Wildflower',     color: '#0d1a06' },   // meadow floral
+  // New
+  { id: 'golden-hour',    label: 'Golden Hour',    color: '#1c0f00' },   // warm sunset gold
+  { id: 'tropics',        label: 'Tropics',        color: '#001810' },   // bright turquoise/coral
+  { id: 'galaxy',         label: 'Galaxy',         color: '#04020f' },   // deep space nebula
 ]
 
 type ThemeContextType = {
