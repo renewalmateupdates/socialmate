@@ -28,13 +28,24 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('notifications')
-    .select('id, type, message, action_url, read, created_at')
+    .select('id, type, title, message, data, is_read, created_at')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(20)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ notifications: data ?? [] })
+
+  // Normalize to the shape NotificationBell expects
+  const notifications = (data ?? []).map((n: any) => ({
+    id:         n.id,
+    type:       n.type,
+    message:    n.title ? `${n.title}: ${n.message}` : (n.message ?? ''),
+    action_url: n.data?.action_url ?? null,
+    read:       n.is_read ?? false,
+    created_at: n.created_at,
+  }))
+
+  return NextResponse.json({ notifications })
 }
 
 // PATCH — mark one or all notifications as read
@@ -49,9 +60,9 @@ export async function PATCH(req: NextRequest) {
   if (markAllRead) {
     const { error } = await supabase
       .from('notifications')
-      .update({ read: true })
+      .update({ is_read: true })
       .eq('user_id', user.id)
-      .eq('read', false)
+      .eq('is_read', false)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
     return NextResponse.json({ success: true })
   }
@@ -59,7 +70,7 @@ export async function PATCH(req: NextRequest) {
   if (id) {
     const { error } = await supabase
       .from('notifications')
-      .update({ read: true })
+      .update({ is_read: true })
       .eq('id', id)
       .eq('user_id', user.id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
