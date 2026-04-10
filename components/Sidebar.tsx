@@ -327,15 +327,15 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
 
       {/* HEADER */}
       <div className="p-4 flex-shrink-0" style={{ borderBottom: '1px solid var(--sidebar-border)' }}>
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center text-sm font-bold"
+        <div className="flex items-center justify-between mb-3 gap-2">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <div className="w-7 h-7 flex-shrink-0 rounded-lg flex items-center justify-center text-sm font-bold"
               style={{ background: 'var(--sidebar-fg)', color: 'var(--sidebar-bg)' }}>S</div>
-            <span className="font-bold text-base tracking-tight" style={{ color: 'var(--sidebar-fg)' }}>SocialMate<span className="text-[10px] font-semibold bg-pink-500 text-white px-1.5 py-0.5 rounded-full align-super ml-1">Beta</span></span>
+            <span className="font-bold text-sm tracking-tight truncate" style={{ color: 'var(--sidebar-fg)' }}>SocialMate<span className="text-[10px] font-semibold bg-pink-500 text-white px-1.5 py-0.5 rounded-full align-super ml-1">Beta</span></span>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1 flex-shrink-0">
             <NotificationBell />
-            <span className="text-xs font-bold px-2 py-0.5 rounded-full"
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap"
               style={{ background: 'var(--sidebar-active)', color: 'var(--sidebar-muted)' }}>
               {badge.label}
             </span>
