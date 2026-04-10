@@ -114,6 +114,7 @@ const FOOTER_LINKS = [
   { label: 'Features',    href: '/features'    },
   { label: 'Pricing',     href: '/pricing'     },
   { label: 'Studio Stax', href: '/studio-stax' },
+  { label: 'Enki',        href: '/enki'        },
   { label: 'Roadmap',     href: '/roadmap'     },
   { label: 'Affiliate',   href: '/affiliate'   },
   { label: 'Our Story',   href: '/story'       },

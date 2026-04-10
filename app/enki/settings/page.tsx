@@ -1,0 +1,379 @@
+'use client'
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import Link from 'next/link'
+import { createBrowserClient } from '@supabase/ssr'
+
+const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+
+interface Profile {
+  tier: 'citizen' | 'commander' | 'emperor'
+  guardian_mode: 'approval' | 'autonomous' | 'dormant'
+  alpaca_connected: boolean
+  coinbase_connected: boolean
+  cloud_runner: boolean
+}
+
+const TIER_LABEL: Record<string, string> = {
+  citizen:   'Citizen',
+  commander: 'Commander',
+  emperor:   'Emperor',
+}
+
+const TIER_COLOR: Record<string, string> = {
+  citizen:   'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+  commander: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+  emperor:   'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-400',
+}
+
+const TIER_FEATURES: Record<string, string[]> = {
+  citizen: [
+    'Paper trading (no real money)',
+    'Fortress Guard active (read-only)',
+    '7-signal confidence scoring',
+    'Public leaderboard ranking',
+    'Upgrade to unlock live trading',
+  ],
+  commander: [
+    'Live trading via Alpaca (stocks)',
+    'Live trading via Coinbase (crypto)',
+    'Approval mode — you confirm each trade',
+    'PDT guardian (day trade tracking)',
+    'Fortress Guard + trailing stops',
+    'Upgrade to Emperor for full autonomy',
+  ],
+  emperor: [
+    'Live trading via Alpaca + Coinbase',
+    'Autonomous mode — zero intervention',
+    'Cloud Runner — always-on execution',
+    'Priority signal processing',
+    'Fortress Guard + all safety layers',
+    'Empire-level conquest tracking',
+  ],
+}
+
+export default function EnkiSettingsPage() {
+  const router = useRouter()
+  const [loading, setLoading]     = useState(true)
+  const [saving, setSaving]       = useState(false)
+  const [authed, setAuthed]       = useState(false)
+  const [profile, setProfile]     = useState<Profile | null>(null)
+  const [mode, setMode]           = useState<'approval' | 'autonomous' | 'dormant'>('approval')
+  const [saved, setSaved]         = useState(false)
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) { router.push('/login?next=/enki/settings'); return }
+      setAuthed(true)
+      loadProfile()
+    })
+  }, [])
+
+  async function loadProfile() {
+    setLoading(true)
+    try {
+      const res = await fetch('/api/enki/profile')
+      const json = await res.json()
+      if (json.profile) {
+        setProfile(json.profile)
+        setMode(json.profile.guardian_mode)
+      }
+    } catch (e) {
+      console.error('Enki settings load error:', e)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function saveMode() {
+    if (!profile) return
+    setSaving(true)
+    try {
+      await fetch('/api/enki/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guardian_mode: mode }),
+      })
+      setProfile(p => p ? { ...p, guardian_mode: mode } : p)
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2500)
+    } catch (e) {
+      console.error('Save error:', e)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function pauseGuardian() {
+    if (!confirm('This will set your guardian to Dormant and pause all autonomous activity. Continue?')) return
+    setMode('dormant')
+    setSaving(true)
+    try {
+      await fetch('/api/enki/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guardian_mode: 'dormant' }),
+      })
+      setProfile(p => p ? { ...p, guardian_mode: 'dormant' } : p)
+    } catch (e) {
+      console.error('Pause error:', e)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (!authed || loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 border-2 border-amber-400 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-sm text-gray-400">Loading settings…</p>
+        </div>
+      </div>
+    )
+  }
+
+  const tier = profile?.tier ?? 'citizen'
+  const isCommander = tier === 'commander' || tier === 'emperor'
+  const isEmperor   = tier === 'emperor'
+
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+      {/* Header */}
+      <div className="bg-black dark:bg-gray-950 border-b border-gray-800 px-6 py-4">
+        <div className="max-w-3xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-amber-400 rounded-lg flex items-center justify-center text-black font-extrabold text-sm">E</div>
+            <div>
+              <p className="text-white font-bold text-sm leading-none">Enki</p>
+              <p className="text-gray-500 text-xs">Settings</p>
+            </div>
+          </div>
+          <nav className="flex items-center gap-4 text-sm">
+            <Link href="/enki/dashboard" className="text-gray-400 hover:text-white transition-colors">Dashboard</Link>
+            <Link href="/enki/trades"    className="text-gray-400 hover:text-white transition-colors">Trades</Link>
+            <Link href="/enki/leaderboard" className="text-gray-400 hover:text-white transition-colors">Leaderboard</Link>
+            <Link href="/enki/settings"  className="text-amber-400 font-semibold">Settings</Link>
+          </nav>
+        </div>
+      </div>
+
+      <div className="max-w-3xl mx-auto px-6 py-10 space-y-8">
+
+        {/* Tier card */}
+        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Your Tier</h2>
+            <span className={`text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${TIER_COLOR[tier]}`}>
+              {TIER_LABEL[tier]}
+            </span>
+          </div>
+          <ul className="space-y-2">
+            {TIER_FEATURES[tier].map(f => (
+              <li key={f} className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <span className="text-amber-400 mt-0.5">▸</span>
+                {f}
+              </li>
+            ))}
+          </ul>
+          {!isEmperor && (
+            <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+              <Link
+                href="/enki#pricing"
+                className="inline-block text-sm font-semibold text-amber-500 hover:text-amber-400 transition-colors"
+              >
+                Upgrade tier →
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Guardian mode */}
+        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">Guardian Mode</h2>
+          <p className="text-sm text-gray-500 mb-5">Controls how Enki executes trades on your behalf.</p>
+
+          <div className="space-y-3">
+            {/* Approval */}
+            <label className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-colors ${
+              mode === 'approval'
+                ? 'border-amber-400 bg-amber-50 dark:bg-amber-950/20'
+                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+            }`}>
+              <input
+                type="radio"
+                name="mode"
+                value="approval"
+                checked={mode === 'approval'}
+                onChange={() => setMode('approval')}
+                disabled={!isCommander}
+                className="mt-1 accent-amber-400"
+              />
+              <div>
+                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                  Approval Mode
+                  {!isCommander && <span className="ml-2 text-xs text-gray-400">(Commander+)</span>}
+                </p>
+                <p className="text-xs text-gray-500 mt-0.5">Enki identifies trades and waits for your confirmation before executing.</p>
+              </div>
+            </label>
+
+            {/* Autonomous */}
+            <label className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-colors ${
+              mode === 'autonomous'
+                ? 'border-green-400 bg-green-50 dark:bg-green-950/20'
+                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+            } ${!isEmperor ? 'opacity-50 cursor-not-allowed' : ''}`}>
+              <input
+                type="radio"
+                name="mode"
+                value="autonomous"
+                checked={mode === 'autonomous'}
+                onChange={() => setMode('autonomous')}
+                disabled={!isEmperor}
+                className="mt-1 accent-green-500"
+              />
+              <div>
+                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                  Autonomous Mode
+                  {!isEmperor && <span className="ml-2 text-xs text-gray-400">(Emperor only)</span>}
+                </p>
+                <p className="text-xs text-gray-500 mt-0.5">Zero intervention. Enki executes when confidence hits 6/10+. Fortress Guard always active.</p>
+              </div>
+            </label>
+
+            {/* Dormant */}
+            <label className={`flex items-start gap-3 p-4 rounded-xl border cursor-pointer transition-colors ${
+              mode === 'dormant'
+                ? 'border-gray-400 bg-gray-50 dark:bg-gray-800/30'
+                : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+            }`}>
+              <input
+                type="radio"
+                name="mode"
+                value="dormant"
+                checked={mode === 'dormant'}
+                onChange={() => setMode('dormant')}
+                className="mt-1 accent-gray-500"
+              />
+              <div>
+                <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Dormant</p>
+                <p className="text-xs text-gray-500 mt-0.5">Guardian is paused. No trades execute. Portfolio monitoring continues.</p>
+              </div>
+            </label>
+          </div>
+
+          <div className="flex items-center gap-3 mt-5">
+            <button
+              onClick={saveMode}
+              disabled={saving || mode === profile?.guardian_mode}
+              className="px-5 py-2.5 bg-amber-400 hover:bg-amber-300 disabled:opacity-50 disabled:cursor-not-allowed text-black text-sm font-bold rounded-xl transition-colors"
+            >
+              {saving ? 'Saving…' : 'Save Mode'}
+            </button>
+            {saved && <span className="text-green-500 text-sm font-medium">Saved</span>}
+          </div>
+        </div>
+
+        {/* Broker connections */}
+        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">Broker Connections</h2>
+          <p className="text-sm text-gray-500 mb-5">
+            Broker connections are managed by the Enki desktop app. Install the app, add your API keys there, and the guardian syncs automatically.
+          </p>
+
+          <div className="space-y-3">
+            {/* Alpaca */}
+            <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-yellow-400/10 rounded-lg flex items-center justify-center text-yellow-500 font-bold text-xs">AL</div>
+                <div>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Alpaca</p>
+                  <p className="text-xs text-gray-500">US stocks + ETFs</p>
+                </div>
+              </div>
+              <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                profile?.alpaca_connected
+                  ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                  : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-500'
+              }`}>
+                {profile?.alpaca_connected ? 'Connected' : 'Not connected'}
+              </span>
+            </div>
+
+            {/* Coinbase */}
+            <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-blue-400/10 rounded-lg flex items-center justify-center text-blue-500 font-bold text-xs">CB</div>
+                <div>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Coinbase</p>
+                  <p className="text-xs text-gray-500">Crypto (BTC, ETH, SOL + more)</p>
+                </div>
+              </div>
+              <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                profile?.coinbase_connected
+                  ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                  : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-500'
+              }`}>
+                {profile?.coinbase_connected ? 'Connected' : 'Not connected'}
+              </span>
+            </div>
+          </div>
+
+          {!isCommander && (
+            <p className="mt-4 text-xs text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
+              Live broker connections require Commander tier or above. You&apos;re currently paper trading.{' '}
+              <Link href="/enki#pricing" className="text-amber-500 hover:text-amber-400">Upgrade →</Link>
+            </p>
+          )}
+          {isCommander && (
+            <p className="mt-4 text-xs text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
+              Connect brokers in the Enki desktop app under <strong>Settings → Brokers</strong>.
+              Once connected, the guardian syncs status here automatically.
+            </p>
+          )}
+        </div>
+
+        {/* Fortress Guard summary */}
+        <div className="bg-black border border-gray-800 rounded-2xl p-6">
+          <h2 className="text-lg font-bold text-amber-400 mb-4">Fortress Guard — Always Active</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {[
+              ['$5 min', 'Minimum trade size'],
+              ['$2,000 max', 'Per-trade cap'],
+              ['3 trades/day', 'Daily trade limit'],
+              ['−8% stop-loss', 'Hard stop per position'],
+              ['25% max', 'Portfolio in one asset'],
+              ['6/10 confidence', 'Minimum to execute'],
+            ].map(([val, label]) => (
+              <div key={label} className="flex items-center gap-3">
+                <span className="text-amber-400 font-extrabold text-sm w-24 shrink-0">{val}</span>
+                <span className="text-gray-400 text-sm">{label}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-gray-600 mt-4">
+            These rules cannot be disabled. They exist to protect you — even in autonomous mode.
+          </p>
+        </div>
+
+        {/* Danger zone */}
+        <div className="bg-white dark:bg-gray-900 border border-red-200 dark:border-red-900/50 rounded-2xl p-6">
+          <h2 className="text-lg font-bold text-red-600 dark:text-red-400 mb-1">Danger Zone</h2>
+          <p className="text-sm text-gray-500 mb-4">Pause the guardian immediately. No trades will execute while dormant.</p>
+          <button
+            onClick={pauseGuardian}
+            disabled={saving || profile?.guardian_mode === 'dormant'}
+            className="px-5 py-2.5 border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-bold rounded-xl transition-colors"
+          >
+            {profile?.guardian_mode === 'dormant' ? 'Guardian is dormant' : 'Pause Guardian'}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  )
+}
