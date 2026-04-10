@@ -262,11 +262,11 @@ export default function Pricing() {
             Buffer charges $18/mo for 5 platforms. Hootsuite charges $99/mo. SocialMate gives you all 16 platforms, 12 AI tools, and a Link in Bio page — starting at $0.
           </p>
 
-          <div className="flex items-center justify-center gap-1 mt-8 bg-gray-100 rounded-2xl p-1 w-fit mx-auto">
+          <div className="flex items-center justify-center gap-1 mt-8 bg-gray-100 dark:bg-gray-800 rounded-2xl p-1 w-fit mx-auto">
             {(['monthly', 'annual'] as Interval[]).map(i => (
               <button key={i} onClick={() => setInterval(i)}
                 className={`px-5 py-2 rounded-xl text-sm font-bold transition-all ${
-                  interval === i ? 'bg-white text-black shadow-sm' : 'text-gray-500 hover:text-black'
+                  interval === i ? 'bg-white dark:bg-gray-700 text-black dark:text-white shadow-sm' : 'text-gray-500 hover:text-black dark:hover:text-white'
                 }`}>
                 {i === 'monthly' ? 'Monthly' : (
                   <span className="flex items-center gap-2">
@@ -323,9 +323,9 @@ export default function Pricing() {
                     {plan.features.map((f, i) => (
                       <li key={i} className="flex items-start gap-2">
                         <span className="text-green-500 mt-0.5 flex-shrink-0 font-bold">✓</span>
-                        <span className="text-xs text-gray-600">
+                        <span className="text-xs text-gray-600 dark:text-gray-400">
                           {f.label}
-                          {f.note && <span className="text-gray-400"> — {f.note}</span>}
+                          {f.note && <span className="text-gray-400 dark:text-gray-500"> — {f.note}</span>}
                         </span>
                       </li>
                     ))}
@@ -350,19 +350,19 @@ export default function Pricing() {
         </div>
 
         {/* WHITE LABEL ADD-ON */}
-        <div className="bg-white border border-gray-100 rounded-2xl p-6 mb-8">
+        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6 mb-8">
           <div className="mb-5">
             <div className="flex items-center gap-2 mb-1">
               <h3 className="text-base font-extrabold">White Label Add-on</h3>
-              <span className="text-xs font-bold px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full">Pro & Agency only</span>
+              <span className="text-xs font-bold px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-full">Pro & Agency only</span>
             </div>
             <p className="text-xs text-gray-500">Turn SocialMate into your own branded product. Agencies are charging $99–$299/mo for tools built on exactly this. Your clients never know we exist.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {WHITE_LABEL_TIERS.map(wl => (
-              <div key={wl.name} className={`border-2 rounded-2xl p-5 ${wl.highlight ? 'border-black' : 'border-gray-100'}`}>
+              <div key={wl.name} className={`border-2 rounded-2xl p-5 ${wl.highlight ? 'border-black dark:border-white' : 'border-gray-100 dark:border-gray-800'}`}>
                 {wl.highlight && (
-                  <span className="text-xs font-bold bg-black text-white px-2 py-0.5 rounded-full mb-3 inline-block">Best for agencies</span>
+                  <span className="text-xs font-bold bg-black dark:bg-white text-white dark:text-black px-2 py-0.5 rounded-full mb-3 inline-block">Best for agencies</span>
                 )}
                 <div className="flex items-start justify-between mb-4">
                   <div>
@@ -375,15 +375,15 @@ export default function Pricing() {
                     disabled={loading === wl.name}
                     className={`text-xs font-bold px-4 py-2 rounded-xl transition-all disabled:opacity-60 ${
                       wl.highlight
-                        ? 'bg-black text-white hover:opacity-80'
-                        : 'border border-gray-200 text-gray-700 hover:border-black'
+                        ? 'bg-black dark:bg-white text-white dark:text-black hover:opacity-80'
+                        : 'border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-black dark:hover:border-white'
                     }`}>
                     {loading === wl.name ? 'Loading...' : 'Add to plan →'}
                   </button>
                 </div>
                 <ul className="space-y-2">
                   {wl.features.map((f, i) => (
-                    <li key={i} className="flex items-center gap-2 text-xs text-gray-600">
+                    <li key={i} className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
                       <span className="text-green-500 font-bold flex-shrink-0">✓</span>{f}
                     </li>
                   ))}
@@ -394,7 +394,7 @@ export default function Pricing() {
         </div>
 
         {/* AI CREDIT COSTS */}
-        <div className="bg-white border border-gray-100 rounded-2xl p-6 mb-8">
+        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6 mb-8">
           <div className="flex items-start justify-between mb-5">
             <div>
               <h3 className="text-base font-extrabold mb-1">AI Credit Costs</h3>
@@ -403,27 +403,27 @@ export default function Pricing() {
               </p>
             </div>
             <Link href="/ai-features"
-              className="text-xs font-bold text-black hover:underline flex-shrink-0 ml-4">
+              className="text-xs font-bold text-black dark:text-white hover:underline flex-shrink-0 ml-4">
               See all tools →
             </Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
             {AI_CREDITS.map((item, i) => (
-              <div key={i} className="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2.5">
-                <span className="text-xs text-gray-700 font-semibold">
+              <div key={i} className="flex items-center justify-between bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2.5">
+                <span className="text-xs text-gray-700 dark:text-gray-300 font-semibold">
                   {item.feature}
                   {item.proOnly && (
-                    <span className="ml-1.5 text-xs font-bold text-purple-500 bg-purple-50 px-1.5 py-0.5 rounded-full">Pro+</span>
+                    <span className="ml-1.5 text-xs font-bold text-purple-500 bg-purple-50 dark:bg-purple-900/30 px-1.5 py-0.5 rounded-full">Pro+</span>
                   )}
                 </span>
-                <span className="text-xs font-extrabold text-gray-900 ml-3 flex-shrink-0">{item.cost}</span>
+                <span className="text-xs font-extrabold text-gray-900 dark:text-gray-100 ml-3 flex-shrink-0">{item.cost}</span>
               </div>
             ))}
           </div>
           <div className="mt-4 flex items-center justify-between">
             <p className="text-xs text-gray-400">Editing AI-generated content is always free — credits only charge on generation.</p>
             <Link href="/settings?tab=Plan"
-              className="text-xs font-bold text-black hover:underline flex-shrink-0">
+              className="text-xs font-bold text-black dark:text-white hover:underline flex-shrink-0">
               Buy credit packs →
             </Link>
           </div>
@@ -461,7 +461,7 @@ export default function Pricing() {
         </div>
 
         {/* FAQ */}
-        <div className="bg-white border border-gray-100 rounded-2xl p-6">
+        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
           <h3 className="text-base font-extrabold mb-6">Frequently asked questions</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {FAQ.map((item, i) => (
@@ -493,7 +493,7 @@ export default function Pricing() {
               Create free account →
             </Link>
             <Link href="/features"
-              className="text-gray-500 font-semibold hover:text-black transition-all text-sm">
+              className="text-gray-500 font-semibold hover:text-black dark:hover:text-white transition-all text-sm">
               See all features →
             </Link>
           </div>
