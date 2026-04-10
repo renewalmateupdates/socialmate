@@ -1,6 +1,9 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 
+const WAITLIST_HREF =
+  'mailto:socialmatehq@gmail.com?subject=Enki%20Early%20Access&body=I%20want%20early%20access%20to%20Enki!'
+
 const FEATURES = [
   {
     emoji: '🏛️',
@@ -70,9 +73,6 @@ const PRICING = [
       'Backtesting (90 days)',
       'No real money at risk',
     ],
-    cta: 'Try Free',
-    ctaHref: '#waitlist',
-    ctaStyle: 'border-2 border-emerald-500 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30',
     highlight: false,
   },
   {
@@ -92,9 +92,6 @@ const PRICING = [
       'Auto-compound mode',
       'Real-time signal dashboard',
     ],
-    cta: 'Start Trading',
-    ctaHref: '#waitlist',
-    ctaStyle: 'bg-blue-600 hover:bg-blue-700 text-white font-bold',
     highlight: false,
   },
   {
@@ -102,7 +99,7 @@ const PRICING = [
     price: '$39',
     period: '/month',
     description: 'Everything + Crypto (24/7). Aggressive compound mode. Multi-broker. Priority updates.',
-    badge: 'Most Powerful',
+    badge: 'Early Access',
     badgeStyle: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
     cardBg: 'bg-amber-50 dark:bg-amber-950/20',
     border: 'border-2 border-amber-400',
@@ -114,9 +111,6 @@ const PRICING = [
       'Multi-broker support',
       'Priority feature updates',
     ],
-    cta: 'Go Pro',
-    ctaHref: '#waitlist',
-    ctaStyle: 'bg-amber-400 hover:bg-amber-500 text-black font-bold',
     highlight: true,
   },
 ]
@@ -130,13 +124,18 @@ const STATS = [
 export default function EnkiPage() {
   return (
     <PublicLayout>
+      {/* ── DEV BANNER ── */}
+      <div className="w-full bg-amber-400 text-black text-sm font-bold text-center py-3 px-4">
+        🚧 Enki is in active development. Join the waitlist to get early access and founding member pricing.
+      </div>
+
       <div className="max-w-6xl mx-auto px-6 py-16">
 
         {/* ── HERO ── */}
         <section className="text-center mb-20">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold mb-6">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-            Now Available — Free Paper Trading
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-bold mb-6">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+            Coming Soon — Early Access Preview
           </span>
 
           <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50 mb-6 leading-tight">
@@ -154,10 +153,10 @@ export default function EnkiPage() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
             <a
-              href="#waitlist"
+              href={WAITLIST_HREF}
               className="bg-black dark:bg-white text-white dark:text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm w-full sm:w-auto text-center"
             >
-              Start Free — Paper Trade Now
+              Join the Waitlist
             </a>
             <a
               href="#how-it-works"
@@ -262,6 +261,10 @@ export default function EnkiPage() {
             </p>
           </div>
 
+          <p className="text-center text-sm font-semibold text-amber-700 dark:text-amber-400 mb-6">
+            Pricing locked in for early access members. Join the waitlist to be first.
+          </p>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {PRICING.map(plan => (
               <div
@@ -292,10 +295,10 @@ export default function EnkiPage() {
                     ))}
                   </ul>
                   <a
-                    href={plan.ctaHref}
-                    className={`w-full text-center text-sm font-bold py-3 rounded-xl transition-all ${plan.ctaStyle}`}
+                    href={WAITLIST_HREF}
+                    className="w-full text-center text-sm font-bold py-3 rounded-xl transition-all bg-black dark:bg-white text-white dark:text-black hover:opacity-80"
                   >
-                    {plan.cta}
+                    Join Waitlist →
                   </a>
                 </div>
               </div>
@@ -312,7 +315,7 @@ export default function EnkiPage() {
             Enki is in active development. Join the waitlist and be first to paper trade when the beta opens.
           </p>
           <a
-            href="mailto:hello@socialmate.studio?subject=Enki%20Early%20Access"
+            href={WAITLIST_HREF}
             className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-500 text-black font-bold px-8 py-3.5 rounded-2xl transition-all text-sm"
           >
             Join the Waitlist →
