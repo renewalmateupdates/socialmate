@@ -71,6 +71,30 @@ SocialMate compared to competitors:
 - vs Fedica: https://socialmate.studio/vs/fedica
 - vs Statusbrew: https://socialmate.studio/vs/statusbrew
 
+## Enki — Autonomous Treasury Guardian
+
+Enki is a companion product by the same team (Gilgamesh Enterprise LLC). It is a self-contained autonomous trading bot for stocks and crypto.
+
+- Landing page: https://socialmate.studio/enki
+- Public leaderboard: https://socialmate.studio/enki/leaderboard
+
+### What Enki does
+
+- Monitors 7 signal sources: congressional trade disclosures, Reddit/social sentiment, RSI, MACD, options flow, news feed, and sector momentum
+- Executes trades only when confidence hits 6/10 or higher
+- Paper trading is free — no real money required to start
+- Fortress Guard rules are always active (cannot be disabled): $5 minimum trade, $2,000 max per trade, 3 trades/day cap, −8% hard stop-loss, 25% portfolio cap per asset
+- Three tiers: Citizen (paper only, free), Commander ($15/mo, live stocks + crypto, approval mode), Emperor ($29/mo, full autonomy + Cloud Runner)
+- Privacy-first leaderboard: only % P&L is ever shown publicly, never dollar amounts
+
+### Enki pages
+
+- https://socialmate.studio/enki — Landing page and pricing
+- https://socialmate.studio/enki/leaderboard — Public leaderboard (top 50 architects by % return)
+- https://socialmate.studio/enki/dashboard — User dashboard (requires login)
+- https://socialmate.studio/enki/trades — Trade ledger (requires login)
+- https://socialmate.studio/enki/settings — Guardian settings (requires login)
+
 ## Blog
 
 SocialMate publishes guides, tips, and updates at https://socialmate.studio/blog (41 posts as of April 2026). Comparison hub covers 28 tools.

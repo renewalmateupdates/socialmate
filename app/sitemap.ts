@@ -92,6 +92,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/terms`,               lastModified: now, changeFrequency: 'yearly',  priority: 0.3 },
     { url: `${base}/enki`,               lastModified: now, changeFrequency: 'weekly',  priority: 0.9 },
     { url: `${base}/enki/leaderboard`,   lastModified: now, changeFrequency: 'daily',   priority: 0.7 },
+    { url: `${base}/enki/dashboard`,     lastModified: now, changeFrequency: 'weekly',  priority: 0.6 },
+    { url: `${base}/enki/trades`,        lastModified: now, changeFrequency: 'weekly',  priority: 0.5 },
+    { url: `${base}/enki/settings`,      lastModified: now, changeFrequency: 'monthly', priority: 0.4 },
   ]
 
   const comparisons: MetadataRoute.Sitemap = [
