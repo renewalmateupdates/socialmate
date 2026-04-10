@@ -28,7 +28,7 @@ export default async function StudioStaxPage() {
 
   const { data: listings } = await supabase
     .from('curated_listings')
-    .select('id, name, tagline, description, url, logo_url, category, tags, smgive_donated_cents, consecutive_featured_months, admin_featured, created_at')
+    .select('id, name, tagline, description, url, logo_url, category, smgive_donated_cents, consecutive_featured_months, admin_featured, created_at')
     .eq('status', 'approved')
 
   // Ranking formula:
