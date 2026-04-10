@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
+import EnkiPricingSection from './PricingSection'
 
 const WAITLIST_HREF =
   'mailto:socialmatehq@gmail.com?subject=Enki%20Early%20Access&body=I%20want%20early%20access%20to%20Enki!'
@@ -338,62 +339,7 @@ export default function EnkiPage() {
         </section>
 
         {/* ── PRICING ── */}
-        <section id="pricing" className="mb-20">
-          <div className="text-center mb-12">
-            <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-2">The Empire Path</p>
-            <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
-              Start free. Scale when ready.
-            </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl mx-auto mt-3">
-              Paper trade at $0 until you trust the guardian. Go live when you do.
-              Founding member pricing locked in for early access.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {PRICING.map(plan => (
-              <div
-                key={plan.name}
-                className={`bg-white dark:bg-gray-900 border-2 ${plan.accentColor} rounded-2xl overflow-hidden flex flex-col ${plan.highlight ? 'ring-2 ring-amber-400 ring-offset-2 dark:ring-offset-gray-950' : ''}`}
-              >
-                <div className="px-6 py-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-lg font-extrabold text-gray-900 dark:text-gray-100">{plan.name}</h3>
-                    <span className={`text-xs font-bold px-3 py-1 rounded-full ${plan.badgeStyle}`}>
-                      {plan.badge}
-                    </span>
-                  </div>
-                  <div className="flex items-end gap-1 mb-2">
-                    <span className="text-4xl font-extrabold text-gray-900 dark:text-gray-100">{plan.price}</span>
-                    <span className="text-sm text-gray-500 dark:text-gray-400 mb-1.5">{plan.period}</span>
-                  </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{plan.description}</p>
-                </div>
-
-                <div className="px-6 pb-6 flex-1 flex flex-col">
-                  <ul className="space-y-2.5 flex-1 mb-6">
-                    {plan.features.map((feat, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <span className="text-amber-500 mt-0.5 flex-shrink-0 font-bold text-xs">◆</span>
-                        <span className="text-xs text-gray-600 dark:text-gray-400">{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <a
-                    href={WAITLIST_HREF}
-                    className="w-full text-center text-sm font-bold py-3 rounded-xl transition-all bg-black dark:bg-white text-white dark:text-black hover:opacity-80"
-                  >
-                    Join Waitlist →
-                  </a>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-6">
-            Cloud Runner add-on ($7/mo) — 24/7 execution while your laptop is off. Available on Commander + Emperor.
-          </p>
-        </section>
+        <EnkiPricingSection />
 
         {/* ── WAITLIST CTA ── */}
         <section
@@ -418,18 +364,30 @@ export default function EnkiPage() {
         </section>
 
         {/* ── LEGAL DISCLAIMER ── */}
-        <section className="bg-gray-50 dark:bg-gray-900/50 border border-gray-100 dark:border-gray-800 rounded-2xl p-6 mb-16">
-          <p className="text-xs text-amber-600 dark:text-amber-500 font-bold text-center mb-2 uppercase tracking-widest">
-            ⚠ Important Disclosure
-          </p>
-          <p className="text-xs text-gray-400 dark:text-gray-500 leading-relaxed text-center max-w-3xl mx-auto">
-            Enki is a trading automation tool, not a financial advisor. Past backtest performance does not
-            guarantee future results. Trading in stocks, ETFs, and cryptocurrencies involves substantial risk,
-            including the possible loss of the entire principal amount invested. Enki's Fortress Guard reduces
-            risk exposure but cannot eliminate it. You are solely responsible for your investment decisions.
-            Always trade only what you can afford to lose. Gilgamesh Enterprise LLC does not provide
-            investment advice.
-          </p>
+        <section className="mb-16">
+          <div className="bg-red-50 dark:bg-red-950/30 border-2 border-red-300 dark:border-red-700 rounded-2xl p-8">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <span className="text-2xl">⚠️</span>
+              <p className="text-base font-extrabold text-red-700 dark:text-red-400 uppercase tracking-widest">
+                Important Risk Disclosure
+              </p>
+              <span className="text-2xl">⚠️</span>
+            </div>
+            <div className="max-w-3xl mx-auto space-y-3 text-sm text-red-800 dark:text-red-300 leading-relaxed">
+              <p>
+                <strong>Enki is a trading automation tool — not a financial advisor, broker, or investment service.</strong> Nothing on this page or within the Enki platform constitutes financial, investment, legal, or tax advice.
+              </p>
+              <p>
+                Trading in stocks, ETFs, and cryptocurrencies involves <strong>substantial risk of loss</strong>, including the possible loss of your entire principal. Past backtest or paper-trading performance does not guarantee future results. Markets are unpredictable and no algorithm can eliminate risk.
+              </p>
+              <p>
+                Enki&apos;s Fortress Guard and risk rules reduce exposure but <strong>cannot protect against all losses</strong>. You are solely responsible for your investment decisions. Only trade with money you can afford to lose entirely.
+              </p>
+              <p className="text-xs text-red-600 dark:text-red-400 font-semibold pt-2 border-t border-red-200 dark:border-red-800">
+                Gilgamesh Enterprise LLC does not provide investment advice. Use of Enki constitutes acceptance that you are acting as an independent investor making your own decisions. Consult a licensed financial professional before trading.
+              </p>
+            </div>
+          </div>
         </section>
 
         {/* ── BUILT BY ── */}
