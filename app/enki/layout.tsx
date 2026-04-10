@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Enki — Autonomous Trading Bot | Paper Trade Free',
+  title: 'Enki — Autonomous Treasury Guardian | Paper Trade Free',
   description:
-    'Enki scans congressional trades, Reddit sentiment, RSI, MACD, options flow and more. Trades stocks and crypto 24/7. Start paper trading free.',
+    'Enki is the cold elite autonomous guardian of your treasury. Fortress-grade downside protection, 7 signal sources, stocks + crypto 24/7. Start paper trading free as Citizen.',
 }
 
 export default function EnkiLayout({ children }: { children: React.ReactNode }) {
