@@ -23,7 +23,8 @@ function getSupabase() {
 export async function GET() {
   const supabase = getSupabase()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  // Return empty list (not 401) so polling never inflates the Vercel error rate
+  if (!user) return NextResponse.json({ notifications: [] })
 
   const { data, error } = await supabase
     .from('notifications')
@@ -40,7 +41,7 @@ export async function GET() {
 export async function PATCH(req: NextRequest) {
   const supabase = getSupabase()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) // PATCH requires auth
 
   const body = await req.json()
   const { id, markAllRead } = body
