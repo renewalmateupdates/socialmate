@@ -12,53 +12,55 @@ export async function GET(req: NextRequest) {
   const search = searchParams.get('search') || ''
   const plan   = searchParams.get('plan')   || ''
 
-  // Get auth users list (has email + created_at)
-  const { data: authData } = await db.auth.admin.listUsers({ perPage: 1000 })
+  // Primary source: auth.admin.listUsers — has email + created_at for everyone
+  const { data: authData, error: authErr } = await db.auth.admin.listUsers({ perPage: 1000 })
+  if (authErr) return NextResponse.json({ error: authErr.message }, { status: 500 })
+
   const authUsers = authData?.users ?? []
 
-  // Build email + created_at map keyed by user_id
-  const authMap: Record<string, { email: string; created_at: string }> = {}
-  for (const u of authUsers) {
-    authMap[u.id] = { email: u.email ?? '', created_at: u.created_at }
-  }
-
-  // Get user_settings for plan, display_name, is_admin
-  let query = db
+  // Secondary: user_settings for plan/display_name/is_admin
+  const { data: settings } = await db
     .from('user_settings')
     .select('user_id, plan, last_active, display_name, is_admin')
-    .order('user_id')
-    .limit(500)
+    .limit(2000)
 
-  if (plan) query = query.eq('plan', plan)
+  const settingsMap: Record<string, typeof settings extends (infer T)[] | null ? T : never> = {}
+  for (const s of settings ?? []) {
+    settingsMap[s.user_id] = s
+  }
 
-  const { data: settings, error } = await query
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
-  // Merge and apply search filter
-  let merged = (settings ?? []).map(s => ({
-    user_id:     s.user_id,
-    email:       authMap[s.user_id]?.email ?? '',
-    created_at:  authMap[s.user_id]?.created_at ?? '',
-    plan:        s.plan,
-    last_active: s.last_active,
-    display_name: s.display_name,
-    is_admin:    s.is_admin ?? false,
+  // Merge — auth is the source of truth
+  let merged = authUsers.map(u => ({
+    user_id:      u.id,
+    email:        u.email ?? '',
+    created_at:   u.created_at,
+    plan:         settingsMap[u.id]?.plan ?? 'free',
+    last_active:  settingsMap[u.id]?.last_active ?? null,
+    display_name: settingsMap[u.id]?.display_name ?? null,
+    is_admin:     settingsMap[u.id]?.is_admin ?? false,
   }))
 
+  // Apply filters
   if (search) {
     const lower = search.toLowerCase()
     merged = merged.filter(u => u.email.toLowerCase().includes(lower))
   }
+  if (plan) merged = merged.filter(u => u.plan === plan)
 
-  // Sort by created_at desc
+  // Sort newest first
   merged.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
   const userIds = merged.map(u => u.user_id)
 
-  // Connected accounts + post counts
+  // Connected accounts + post counts in parallel
   const [accountsRes, postsRes] = await Promise.allSettled([
-    db.from('connected_accounts').select('user_id, platform').in('user_id', userIds.length ? userIds : ['none']),
-    db.from('posts').select('user_id').in('user_id', userIds.length ? userIds : ['none']).eq('status', 'published'),
+    db.from('connected_accounts')
+      .select('user_id, platform')
+      .in('user_id', userIds.length ? userIds : ['none']),
+    db.from('posts')
+      .select('user_id')
+      .in('user_id', userIds.length ? userIds : ['none'])
+      .eq('status', 'published'),
   ])
 
   const accountMap: Record<string, string[]> = {}
