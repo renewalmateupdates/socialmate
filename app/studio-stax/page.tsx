@@ -13,6 +13,17 @@ const CATEGORIES = [
   { id: 'developer-tools',   label: 'Developer Tools'       },
 ]
 
+// Price labels for known Garrison listings — won't hit DB, just display
+const GARRISON_PRICE: Record<string, string> = {
+  'RenewalMate': 'Free forever',
+  'Enki':        'Free to start',
+}
+
+function getHostname(url: string) {
+  try { return new URL(url).hostname.replace('www.', '') }
+  catch { return url }
+}
+
 export const metadata = {
   title: 'Studio Stax — SocialMate',
   description: 'Founder-approved tools for creators, builders, and communities. Ranked by generosity, not budget.',
@@ -32,13 +43,15 @@ export default async function StudioStaxPage() {
     .eq('status', 'approved')
 
   // Ranking formula:
-  // 1. Admin featured (editor's picks) always first
-  // 2. Then by donation amount (primary signal)
-  // 3. Tie-break: age bonus — 5% boost per 30-day tenure bracket (loyalty reward)
+  // 1. Admin featured (Garrison) separated and shown first
+  // 2. Regular listings ranked by donation + age bonus
   const now = Date.now()
-  const ranked = (listings ?? []).slice().sort((a, b) => {
-    if (a.admin_featured && !b.admin_featured) return -1
-    if (!a.admin_featured && b.admin_featured) return 1
+  const allListings = listings ?? []
+
+  const garrison = allListings.filter(l => l.admin_featured)
+  const regular  = allListings.filter(l => !l.admin_featured)
+
+  const ranked = regular.slice().sort((a, b) => {
     const ageMonthsA = Math.floor((now - new Date(a.created_at).getTime()) / (1000 * 60 * 60 * 24 * 30))
     const ageMonthsB = Math.floor((now - new Date(b.created_at).getTime()) / (1000 * 60 * 60 * 24 * 30))
     const scoreA = (a.smgive_donated_cents ?? 0) * (1 + Math.min(ageMonthsA, 12) * 0.05)
@@ -50,7 +63,7 @@ export default async function StudioStaxPage() {
   for (const cat of CATEGORIES) {
     byCategory[cat.id] = ranked.filter(l => l.category === cat.id).slice(0, 5)
   }
-  const hasAny = Object.values(byCategory).some(arr => arr && arr.length > 0)
+  const hasRegular = Object.values(byCategory).some(arr => arr && arr.length > 0)
 
   return (
     <PublicLayout>
@@ -79,6 +92,73 @@ export default async function StudioStaxPage() {
           </div>
         </div>
 
+        {/* ── GILGAMESH'S GARRISON ── */}
+        {garrison.length > 0 && (
+          <section className="mb-16">
+            {/* Section header */}
+            <div className="flex items-center gap-3 mb-6">
+              <div className="flex items-center gap-2 bg-purple-600 dark:bg-purple-700 text-white px-4 py-1.5 rounded-full">
+                <span className="text-base">👑</span>
+                <span className="text-xs font-extrabold uppercase tracking-widest">Gilgamesh&apos;s Garrison</span>
+              </div>
+              <span className="text-xs text-gray-400 dark:text-gray-500">Built by the founder. Always here.</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {garrison.map(listing => (
+                <a
+                  key={listing.id}
+                  href={listing.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex flex-col bg-white dark:bg-gray-900 border-2 border-purple-300 dark:border-purple-700 ring-1 ring-purple-200 dark:ring-purple-800 rounded-2xl p-6 hover:shadow-xl hover:border-purple-400 dark:hover:border-purple-500 transition-all"
+                >
+                  {/* Top row */}
+                  <div className="flex items-start gap-4 mb-4">
+                    {listing.logo_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={listing.logo_url} alt={listing.name} className="w-12 h-12 rounded-xl object-cover shrink-0" />
+                    ) : (
+                      <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center text-purple-700 dark:text-purple-300 font-extrabold text-lg shrink-0">
+                        {listing.name.charAt(0)}
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                        <p className="font-extrabold text-base text-gray-900 dark:text-gray-100">{listing.name}</p>
+                        {/* Founder's Pick badge */}
+                        <span className="inline-flex items-center gap-1 text-[10px] font-extrabold bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-full border border-purple-200 dark:border-purple-700 uppercase tracking-wider">
+                          👑 Founder&apos;s Pick
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{listing.tagline}</p>
+                    </div>
+                    {/* Price */}
+                    {GARRISON_PRICE[listing.name] && (
+                      <span className="shrink-0 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 border border-emerald-200 dark:border-emerald-800 px-2.5 py-1 rounded-full">
+                        {GARRISON_PRICE[listing.name]}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2 mb-4 flex-1">
+                    {listing.description}
+                  </p>
+
+                  {/* URL */}
+                  <div className="flex items-center gap-1.5 text-xs text-purple-600 dark:text-purple-400 font-semibold group-hover:underline">
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                    {getHostname(listing.url)}
+                  </div>
+                </a>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* How ranking works */}
         <div className="bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6 mb-14 flex flex-col md:flex-row items-start md:items-center gap-6">
           <div className="flex-1">
@@ -96,7 +176,8 @@ export default async function StudioStaxPage() {
           </div>
         </div>
 
-        {!hasAny ? (
+        {/* Regular category listings */}
+        {!hasRegular ? (
           <div className="text-center py-24">
             <div className="text-6xl mb-6">🌱</div>
             <h2 className="text-2xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">First listings coming soon</h2>
@@ -142,13 +223,14 @@ export default async function StudioStaxPage() {
                           </div>
                         </div>
                         <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2 mb-3">{listing.description}</p>
-                        {listing.smgive_donated_cents > 0 && (
-                          <div className="flex items-center gap-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] text-gray-400 font-medium">{getHostname(listing.url)}</span>
+                          {listing.smgive_donated_cents > 0 && (
                             <span className="text-[10px] font-bold bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 px-2 py-0.5 rounded-full border border-green-200 dark:border-green-800">
-                              ❤️ Donated ${(listing.smgive_donated_cents / 100).toFixed(0)} to SM-Give
+                              ❤️ ${(listing.smgive_donated_cents / 100).toFixed(0)} to SM-Give
                             </span>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </a>
                     ))}
                   </div>
