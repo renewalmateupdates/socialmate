@@ -1,6 +1,11 @@
 import { Inngest } from 'inngest'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { Resend } from 'resend'
+import {
+  getRecentMembers,
+  sendChannelMessage,
+  assignRole,
+} from '@/lib/discord-bot'
 
 function getResend() { return new Resend(process.env.RESEND_API_KEY) }
 
@@ -475,5 +480,241 @@ export const evergreenRecycler = inngest.createFunction(
     })
 
     return result
+  }
+)
+
+// ─── Discord Welcome Message Poller — every 5 minutes ─────────────────────────
+// Polls each enabled discord_welcome_configs row for new members and sends
+// welcome messages + assigns auto-roles.
+export const discordWelcomePoller = inngest.createFunction(
+  { id: 'discord-welcome-poller', name: 'Discord Welcome Message Poller', retries: 2 },
+  { cron: '*/5 * * * *' },
+  async ({ step }) => {
+    // Fetch all enabled welcome configs
+    const configs = await step.run('fetch-welcome-configs', async () => {
+      const { data, error } = await getSupabaseAdmin()
+        .from('discord_welcome_configs')
+        .select('id, user_id, guild_id, channel_id, message, last_member_id')
+        .eq('enabled', true)
+      if (error) {
+        console.error('[DiscordPoller] Failed to fetch configs:', error.message)
+        return []
+      }
+      return data ?? []
+    })
+
+    if (!configs.length) {
+      console.log('[DiscordPoller] No enabled welcome configs found')
+      return { processed: 0 }
+    }
+
+    // Fetch role configs for all guilds in one query
+    const guildIds = Array.from(new Set(configs.map((c: any) => c.guild_id)))
+    const roleConfigs = await step.run('fetch-role-configs', async () => {
+      const { data } = await getSupabaseAdmin()
+        .from('discord_role_configs')
+        .select('guild_id, role_id, enabled')
+        .in('guild_id', guildIds)
+        .eq('enabled', true)
+      return data ?? []
+    })
+
+    // Build guild_id → role_id map for quick lookup
+    const roleMap: Record<string, string> = {}
+    for (const rc of roleConfigs) {
+      roleMap[rc.guild_id] = rc.role_id
+    }
+
+    let totalWelcomed = 0
+
+    for (let i = 0; i < configs.length; i++) {
+      const config = configs[i]
+
+      // 500ms delay between guilds to respect Discord rate limits (skip first)
+      if (i > 0) {
+        await step.sleep(`rate-limit-delay-${i}`, 500)
+      }
+
+      await step.run(`process-guild-${config.guild_id}-${config.id}`, async () => {
+        let members: Awaited<ReturnType<typeof getRecentMembers>>
+        try {
+          members = await getRecentMembers(
+            config.guild_id,
+            config.last_member_id ?? undefined,
+          )
+        } catch (err: any) {
+          console.error(`[DiscordPoller] getRecentMembers failed for guild ${config.guild_id}:`, err.message)
+          return
+        }
+
+        if (!members.length) return
+
+        // Sort ascending by user id (Discord snowflake ids are time-ordered)
+        members.sort((a, b) => (BigInt(a.user.id) < BigInt(b.user.id) ? -1 : 1))
+
+        const lastMemberId = members[members.length - 1].user.id
+
+        // First-run bootstrap: store cursor without sending welcomes to prevent floods
+        if (!config.last_member_id) {
+          console.log(`[DiscordPoller] First run for guild ${config.guild_id} — setting cursor to ${lastMemberId}, no messages sent`)
+          await getSupabaseAdmin()
+            .from('discord_welcome_configs')
+            .update({ last_member_id: lastMemberId, updated_at: new Date().toISOString() })
+            .eq('id', config.id)
+          return
+        }
+
+        // Process each new member
+        for (const member of members) {
+          const username = member.user.global_name || member.user.username
+          const welcomeText = config.message.replace(/\{\{username\}\}/g, username)
+
+          try {
+            await sendChannelMessage(config.channel_id, welcomeText)
+            totalWelcomed++
+          } catch (err: any) {
+            console.error(`[DiscordPoller] sendChannelMessage failed for ${member.user.id}:`, err.message)
+          }
+
+          // Assign auto-role if configured for this guild
+          const roleId = roleMap[config.guild_id]
+          if (roleId) {
+            try {
+              await assignRole(config.guild_id, member.user.id, roleId)
+            } catch (err: any) {
+              console.error(`[DiscordPoller] assignRole failed for ${member.user.id}:`, err.message)
+            }
+          }
+        }
+
+        // Advance the cursor
+        await getSupabaseAdmin()
+          .from('discord_welcome_configs')
+          .update({ last_member_id: lastMemberId, updated_at: new Date().toISOString() })
+          .eq('id', config.id)
+
+        console.log(`[DiscordPoller] Guild ${config.guild_id}: welcomed ${members.length} member(s), cursor → ${lastMemberId}`)
+      })
+    }
+
+    return { processed: configs.length, welcomed: totalWelcomed }
+  }
+)
+
+// ─── Send Notification — event-driven ─────────────────────────────────────────
+// Listens for 'notification/send' events and inserts a row into the
+// notifications table. Used by any background job that needs to notify a user.
+export const sendNotification = inngest.createFunction(
+  { id: 'send-notification', name: 'Send Notification', retries: 3 },
+  { event: 'notification/send' },
+  async ({ event, step }) => {
+    const { user_id, type, title, body, link } = event.data as {
+      user_id: string
+      type: string
+      title: string
+      body: string
+      link?: string
+    }
+
+    if (!user_id || !type || !body) {
+      throw new Error('notification/send: missing required fields (user_id, type, body)')
+    }
+
+    await step.run('insert-notification', async () => {
+      const { error } = await getSupabaseAdmin()
+        .from('notifications')
+        .insert({
+          user_id,
+          type,
+          // title is stored as the leading portion of message for display compat
+          message: title ? `${title}: ${body}` : body,
+          action_url: link ?? null,
+          read: false,
+        })
+      if (error) {
+        console.error('[sendNotification] Insert failed:', error.message)
+        throw new Error(`Failed to insert notification: ${error.message}`)
+      }
+    })
+
+    console.log(`[sendNotification] Inserted ${type} notification for user ${user_id}`)
+    return { user_id, type }
+  }
+)
+
+// ─── Credit Low Checker — daily at noon UTC ────────────────────────────────────
+// Finds users with fewer than 10 total credits and fires a credit_low
+// notification if they haven't received one in the last 7 days.
+export const creditLowChecker = inngest.createFunction(
+  { id: 'credit-low-checker', name: 'Credit Low Checker', retries: 2 },
+  { cron: '0 12 * * *' },
+  async ({ step }) => {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+
+    // Find users with combined credits < 10
+    const lowCreditUsers = await step.run('find-low-credit-users', async () => {
+      // Fetch all user_settings rows and filter in JS to avoid complex DB expressions
+      const { data, error } = await getSupabaseAdmin()
+        .from('user_settings')
+        .select('user_id, monthly_credits_remaining, ai_credits_remaining, earned_credits, paid_credits')
+
+      if (error) {
+        console.error('[CreditLowChecker] Failed to query user_settings:', error.message)
+        return []
+      }
+
+      return (data ?? []).filter((row: any) => {
+        const monthly = row.monthly_credits_remaining ?? row.ai_credits_remaining ?? 0
+        const earned  = row.earned_credits ?? 0
+        const paid    = row.paid_credits ?? 0
+        return (monthly + earned + paid) < 10
+      })
+    })
+
+    if (!lowCreditUsers.length) {
+      console.log('[CreditLowChecker] No users with low credits found')
+      return { notified: 0 }
+    }
+
+    const userIds = lowCreditUsers.map((u: any) => u.user_id)
+
+    // Find which users already got a credit_low notification in the last 7 days
+    const recentlyNotifiedIds = await step.run('find-recently-notified', async () => {
+      const { data } = await getSupabaseAdmin()
+        .from('notifications')
+        .select('user_id')
+        .in('user_id', userIds)
+        .eq('type', 'credit_low')
+        .gte('created_at', sevenDaysAgo)
+      return (data ?? []).map((n: any) => n.user_id as string)
+    })
+
+    const recentlyNotifiedSet = new Set<string>(recentlyNotifiedIds)
+
+    // Fire notification/send events for users who haven't been notified recently
+    const toNotify = lowCreditUsers.filter((u: any) => !recentlyNotifiedSet.has(u.user_id))
+
+    await step.run('send-credit-low-notifications', async () => {
+      for (const user of toNotify) {
+        const monthly = user.monthly_credits_remaining ?? user.ai_credits_remaining ?? 0
+        const earned  = user.earned_credits ?? 0
+        const paid    = user.paid_credits ?? 0
+        const total   = monthly + earned + paid
+
+        await inngest.send({
+          name: 'notification/send',
+          data: {
+            user_id: user.user_id,
+            type:    'credit_low',
+            title:   'Credits Running Low',
+            body:    `You have ${total} AI credit${total !== 1 ? 's' : ''} remaining. Top up to keep creating.`,
+            link:    '/settings?tab=Credits',
+          },
+        })
+      }
+    })
+
+    console.log(`[CreditLowChecker] Fired credit_low notifications for ${toNotify.length} user(s) (${lowCreditUsers.length - toNotify.length} skipped — notified recently)`)
+    return { notified: toNotify.length, skipped: lowCreditUsers.length - toNotify.length }
   }
 )
