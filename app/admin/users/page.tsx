@@ -12,6 +12,8 @@ interface AdminUser {
   is_admin: boolean | null
   connected_platforms: string[]
   posts_count: number
+  affiliate_status: string | null
+  is_stax: boolean
 }
 
 const PLAN_BADGE: Record<string, string> = {
@@ -116,6 +118,7 @@ export default function AdminUsersPage() {
                   <tr className="border-b border-theme bg-gray-50 dark:bg-gray-800/50">
                     <th className="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest">Email</th>
                     <th className="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest">Plan</th>
+                    <th className="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest">Roles</th>
                     <th className="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest">Posts</th>
                     <th className="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest">Platforms</th>
                     <th className="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest">Joined</th>
@@ -140,6 +143,27 @@ export default function AdminUsersPage() {
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${PLAN_BADGE[u.plan ?? 'free'] || PLAN_BADGE.free}`}>
                           {u.plan || 'free'}
                         </span>
+                      </td>
+                      <td className="px-5 py-3">
+                        <div className="flex flex-wrap gap-1">
+                          {u.affiliate_status && (
+                            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${
+                              u.affiliate_status === 'active'    ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
+                              u.affiliate_status === 'suspended' ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' :
+                                                                   'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
+                            }`}>
+                              {u.affiliate_status === 'active' ? '💰 Partner' : u.affiliate_status === 'pending' ? '⏳ Partner' : '⛔ Partner'}
+                            </span>
+                          )}
+                          {u.is_stax && (
+                            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 whitespace-nowrap">
+                              🏪 Stax
+                            </span>
+                          )}
+                          {!u.affiliate_status && !u.is_stax && (
+                            <span className="text-xs text-gray-400">—</span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-5 py-3 text-gray-600 dark:text-gray-400">{u.posts_count}</td>
                       <td className="px-5 py-3">
@@ -188,6 +212,25 @@ export default function AdminUsersPage() {
                   </span>
                 </Row>
                 <Row label="User ID"><code className="text-xs bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">{selected.user_id}</code></Row>
+                <Row label="Roles">
+                  <div className="flex flex-wrap gap-1">
+                    {selected.affiliate_status && (
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                        selected.affiliate_status === 'active'    ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
+                        selected.affiliate_status === 'suspended' ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' :
+                                                                    'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
+                      }`}>
+                        💰 Partner ({selected.affiliate_status})
+                      </span>
+                    )}
+                    {selected.is_stax && (
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
+                        🏪 Studio Stax
+                      </span>
+                    )}
+                    {!selected.affiliate_status && !selected.is_stax && <span className="text-gray-400">none</span>}
+                  </div>
+                </Row>
                 <Row label="Posts published">{selected.posts_count}</Row>
                 <Row label="Connected platforms">
                   {selected.connected_platforms.length === 0
