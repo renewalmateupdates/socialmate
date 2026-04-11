@@ -1,5 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { Suspense } from 'react'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 
@@ -56,7 +58,8 @@ function SkeletonCard() {
   )
 }
 
-export default function DiscordHubPage() {
+function DiscordHubInner() {
+  const searchParams = useSearchParams()
   const [loading, setLoading]               = useState(true)
   const [guildData, setGuildData]           = useState<GuildData | null>(null)
   const [error, setError]                   = useState<string | null>(null)
@@ -83,6 +86,15 @@ export default function DiscordHubPage() {
     setToast({ message, type })
     setTimeout(() => setToast(null), 3500)
   }
+
+  useEffect(() => {
+    const success = searchParams.get('success')
+    const err     = searchParams.get('error')
+    if (success === 'bot_connected') showToast('Discord bot connected! Your server is ready.', 'success')
+    if (err === 'bot_denied')        showToast('Bot connection cancelled.', 'error')
+    if (err === 'token_failed')      showToast('Connection failed — please try again.', 'error')
+    if (err === 'db_error')          showToast('Could not save connection — please try again.', 'error')
+  }, [searchParams])
 
   useEffect(() => {
     async function load() {
@@ -250,13 +262,13 @@ export default function DiscordHubPage() {
                   Your current Discord connection uses webhooks only. Reconnect with bot permissions to unlock welcome messages, role automation, and server stats.
                 </p>
                 <div className="flex flex-wrap gap-3">
-                  <Link
-                    href="/accounts"
+                  <a
+                    href="/api/accounts/discord/bot-connect"
                     className="inline-flex items-center gap-2 text-sm font-bold px-4 py-2.5 rounded-xl transition-all hover:opacity-80"
                     style={{ background: '#5865F2', color: '#fff' }}
                   >
-                    🔗 Connect Discord Bot
-                  </Link>
+                    🤖 Add SocialMate Bot to Server
+                  </a>
                   <p className="text-xs self-center" style={{ color: 'var(--text-faint)' }}>
                     You can still schedule posts to Discord channels using the Compose page.
                   </p>
@@ -490,5 +502,13 @@ export default function DiscordHubPage() {
 
       {toast && <Toast message={toast.message} type={toast.type} />}
     </div>
+  )
+}
+
+export default function DiscordHubPage() {
+  return (
+    <Suspense>
+      <DiscordHubInner />
+    </Suspense>
   )
 }
