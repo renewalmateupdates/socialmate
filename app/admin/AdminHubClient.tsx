@@ -11,7 +11,7 @@ interface HubStats {
 
 const NAV_CARDS = [
   { emoji: '👥', label: 'Users',          sub: 'Manage all accounts',           href: '/admin/users'          },
-  { emoji: '💰', label: 'Affiliates',     sub: 'Applications & payouts',        href: '/admin/affiliates'     },
+  { emoji: '💰', label: 'Partner Admin',   sub: 'Affiliates, payouts & invites', href: '/admin/partners'       },
   { emoji: '🏪', label: 'Studio Stax',    sub: 'Listings & approvals',          href: '/admin/studio-stax'    },
   { emoji: '👑', label: 'Invites & VIP',  sub: 'Invite partners · VIP codes',   href: '/admin/invites'        },
   { emoji: '💬', label: 'Feedback',       sub: 'Bug reports & suggestions',     href: '/admin/feedback'       },

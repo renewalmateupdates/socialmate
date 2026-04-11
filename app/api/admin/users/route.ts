@@ -52,8 +52,8 @@ export async function GET(req: NextRequest) {
 
   const userIds = merged.map(u => u.user_id)
 
-  // Connected accounts + post counts in parallel
-  const [accountsRes, postsRes] = await Promise.allSettled([
+  // Connected accounts, post counts, affiliate profiles, stax listings — all in parallel
+  const [accountsRes, postsRes, affiliateRes, staxRes] = await Promise.allSettled([
     db.from('connected_accounts')
       .select('user_id, platform')
       .in('user_id', userIds.length ? userIds : ['none']),
@@ -61,6 +61,12 @@ export async function GET(req: NextRequest) {
       .select('user_id')
       .in('user_id', userIds.length ? userIds : ['none'])
       .eq('status', 'published'),
+    db.from('affiliate_profiles')
+      .select('user_id, status')
+      .in('user_id', userIds.length ? userIds : ['none']),
+    db.from('curated_listings')
+      .select('user_id, status')
+      .in('user_id', userIds.length ? userIds : ['none']),
   ])
 
   const accountMap: Record<string, string[]> = {}
@@ -78,10 +84,28 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // affiliate: any row = they're in the program; capture status
+  const affiliateMap: Record<string, string> = {}
+  if (affiliateRes.status === 'fulfilled') {
+    for (const a of affiliateRes.value.data ?? []) {
+      affiliateMap[a.user_id] = a.status ?? 'active'
+    }
+  }
+
+  // stax: only count approved listings
+  const staxSet = new Set<string>()
+  if (staxRes.status === 'fulfilled') {
+    for (const s of staxRes.value.data ?? []) {
+      if (s.status === 'approved') staxSet.add(s.user_id)
+    }
+  }
+
   const enriched = merged.map(u => ({
     ...u,
     connected_platforms: accountMap[u.user_id] ?? [],
-    posts_count: postCountMap[u.user_id] ?? 0,
+    posts_count:         postCountMap[u.user_id] ?? 0,
+    affiliate_status:    affiliateMap[u.user_id] ?? null,
+    is_stax:             staxSet.has(u.user_id),
   }))
 
   return NextResponse.json({ users: enriched })
