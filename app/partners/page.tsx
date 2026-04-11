@@ -346,13 +346,81 @@ function PartnersLoginInner() {
             )}
           </div>
 
-          {/* Footer note */}
-          <p style={{ textAlign: 'center', marginTop: 24, fontSize: 12, color: '#4b5563', lineHeight: 1.6 }}>
-            Partner access is by invite only. If you were not invited,{' '}
-            <Link href="/partners/access-denied" style={{ color: gold, textDecoration: 'none' }}>
-              apply here
-            </Link>.
-          </p>
+          {/* How the program works */}
+          <div style={{ marginTop: 40, width: '100%' }}>
+
+            {/* Section header */}
+            <div style={{ textAlign: 'center', marginBottom: 24 }}>
+              <div style={{ height: 1, background: border, marginBottom: 24 }} />
+              <h2 style={{ fontSize: 18, fontWeight: 800, color: '#f1f1f1', margin: '0 0 8px' }}>How the partner program works</h2>
+              <p style={{ fontSize: 13, color: muted, margin: 0, lineHeight: 1.6 }}>
+                Earn recurring commissions by sharing SocialMate with your audience.
+              </p>
+            </div>
+
+            {/* Commission cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
+              {[
+                { emoji: '💰', title: '30% recurring', sub: 'On every subscription payment from your referrals' },
+                { emoji: '🚀', title: '40% at milestone', sub: 'Unlocked permanently when you hit 100 active referrals' },
+                { emoji: '🎟️', title: '10–15% on credits', sub: 'Flat commission on credit pack purchases' },
+                { emoji: '🔗', title: 'One link, all plans', sub: 'Your referral link works for Pro, Agency, and add-ons' },
+              ].map((item, i) => (
+                <div key={i} style={{ background: '#111', border: `1px solid ${border}`, borderRadius: 12, padding: '14px 16px' }}>
+                  <div style={{ fontSize: 20, marginBottom: 6 }}>{item.emoji}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#f1f1f1', marginBottom: 3 }}>{item.title}</div>
+                  <div style={{ fontSize: 11, color: muted, lineHeight: 1.5 }}>{item.sub}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* How to apply */}
+            <div style={{ background: '#111', border: `1px solid ${border}`, borderRadius: 14, padding: 20, marginBottom: 16 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#f1f1f1', marginBottom: 12 }}>📋 How to apply</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {[
+                  { step: '1', text: 'Be an active Pro or Agency subscriber — we want affiliates who genuinely use the product' },
+                  { step: '2', text: 'Submit an application with your content type, platforms, and how you plan to promote SocialMate' },
+                  { step: '3', text: 'We review manually and respond within 3 business days' },
+                  { step: '4', text: 'Once approved, your referral link goes live immediately from your partner dashboard' },
+                ].map(item => (
+                  <div key={item.step} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                    <div style={{
+                      width: 22, height: 22, borderRadius: '50%', flexShrink: 0,
+                      background: `rgba(245,158,11,0.15)`, border: `1px solid rgba(245,158,11,0.3)`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 11, fontWeight: 800, color: gold,
+                    }}>{item.step}</div>
+                    <span style={{ fontSize: 13, color: '#d1d5db', lineHeight: 1.6 }}>{item.text}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Invite bypass note */}
+              <div style={{
+                marginTop: 16, padding: '10px 14px', borderRadius: 10,
+                background: 'rgba(124,58,237,0.08)', border: `1px solid rgba(124,58,237,0.25)`,
+                display: 'flex', gap: 10, alignItems: 'flex-start',
+              }}>
+                <span style={{ fontSize: 16, flexShrink: 0 }}>👑</span>
+                <span style={{ fontSize: 12, color: '#c4b5fd', lineHeight: 1.6 }}>
+                  <strong style={{ color: '#a78bfa' }}>Invited by Joshua?</strong>{' '}
+                  Admin invitations bypass the paid plan requirement — just use the invite link you were sent to create your account and get started immediately.
+                </span>
+              </div>
+            </div>
+
+            <Link href="/partners/access-denied"
+              style={{
+                display: 'block', textAlign: 'center', padding: '12px 20px',
+                borderRadius: 10, border: `1px solid rgba(245,158,11,0.4)`,
+                background: 'rgba(245,158,11,0.06)',
+                color: gold, fontSize: 14, fontWeight: 700, textDecoration: 'none',
+                transition: 'all 0.15s',
+              }}>
+              Apply to the partner program →
+            </Link>
+          </div>
 
         </div>
       </main>
