@@ -1,9 +1,7 @@
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import EnkiPricingSection from './PricingSection'
-
-const WAITLIST_HREF =
-  'mailto:socialmatehq@gmail.com?subject=Enki%20Early%20Access&body=I%20want%20early%20access%20to%20Enki!'
+import WaitlistButton from './WaitlistButton'
 
 const FEATURES = [
   {
@@ -178,12 +176,12 @@ export default function EnkiPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
-            <a
-              href={WAITLIST_HREF}
+            <WaitlistButton
+              defaultTier="citizen"
               className="bg-black dark:bg-white text-white dark:text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm w-full sm:w-auto text-center"
             >
               Start Citizen — Free
-            </a>
+            </WaitlistButton>
             <a
               href="#how-it-works"
               className="border-2 border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-bold px-8 py-3.5 rounded-2xl hover:border-black dark:hover:border-white hover:text-black dark:hover:text-white transition-all text-sm w-full sm:w-auto text-center"
@@ -354,12 +352,12 @@ export default function EnkiPage() {
             Join the waitlist and be among the first Architects to run paper trading when the beta opens.
             Founding member pricing locked in — no price increases for early access members.
           </p>
-          <a
-            href={WAITLIST_HREF}
+          <WaitlistButton
+            defaultTier="citizen"
             className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-500 text-black font-bold px-8 py-3.5 rounded-2xl transition-all text-sm"
           >
             Start as Citizen — Free →
-          </a>
+          </WaitlistButton>
           <p className="text-xs text-gray-500 mt-4">No spam. No commitment. No credit card for Citizen.</p>
         </section>
 
