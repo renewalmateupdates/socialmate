@@ -29,6 +29,7 @@ export async function POST(req: NextRequest) {
           },
         },
       ],
+      allow_promotion_codes: true,
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/story?donated=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/story`,
     })

@@ -693,6 +693,41 @@ export default function PartnersDashboardPage() {
           </div>
         )}
 
+        {/* ── How these tools work ── */}
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(245,158,11,0.06), rgba(124,58,237,0.06))',
+          border: `1px solid rgba(245,158,11,0.18)`,
+          borderRadius: 16, padding: 20, marginBottom: 24,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+            <span style={{ fontSize: 14 }}>💡</span>
+            <span style={{ fontSize: 12, fontWeight: 800, color: gold, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+              Referral Link vs. Promo Codes — What's the difference?
+            </span>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <div style={{ background: '#0a0a0a', borderRadius: 12, padding: '14px 16px', border: `1px solid ${border}` }}>
+              <div style={{ fontSize: 13, fontWeight: 800, color: '#f1f1f1', marginBottom: 6 }}>🔗 Your Referral Link</div>
+              <p style={{ fontSize: 12, color: muted, lineHeight: 1.7, margin: 0 }}>
+                A tracking URL. When someone clicks it, signs up, and subscribes — you earn commission.
+                <br /><br />
+                <strong style={{ color: '#d1d5db' }}>One link covers all plans.</strong> You don't need a different link for monthly, 3-month, or annual. Whatever plan the customer picks at checkout, you earn {commission_label} of what they pay — automatically.
+              </p>
+            </div>
+            <div style={{ background: '#0a0a0a', borderRadius: 12, padding: '14px 16px', border: `1px solid ${border}` }}>
+              <div style={{ fontSize: 13, fontWeight: 800, color: '#f1f1f1', marginBottom: 6 }}>🎁 Your Promo Codes</div>
+              <p style={{ fontSize: 12, color: muted, lineHeight: 1.7, margin: 0 }}>
+                Discount codes your audience types at checkout. Each code offers a different discount duration — share whichever fits your audience best.
+                <br /><br />
+                <strong style={{ color: '#d1d5db' }}>You earn commission on the post-discount price.</strong> If they use a 20% off code, you get {commission_label} of what they actually paid.
+              </p>
+            </div>
+          </div>
+          <p style={{ margin: '12px 0 0', fontSize: 11, color: '#374151', textAlign: 'center' }}>
+            Use <strong style={{ color: '#6b7280' }}>the link</strong> for general sharing · Use <strong style={{ color: '#6b7280' }}>promo codes</strong> when you want to give your audience a discount
+          </p>
+        </div>
+
         {/* ── Referral link + SocialMate promo codes ── */}
         <div className="partner-2col">
 
