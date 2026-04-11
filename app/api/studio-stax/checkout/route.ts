@@ -104,6 +104,7 @@ export async function POST(req: NextRequest) {
         quantity: 1,
       }],
       customer_email: listing!.applicant_email,
+      allow_promotion_codes: true,
       success_url:    `${appUrl}/studio-stax/checkout/success?billing=annual`,
       cancel_url:     `${appUrl}/studio-stax/checkout?token=${token}`,
       metadata: {

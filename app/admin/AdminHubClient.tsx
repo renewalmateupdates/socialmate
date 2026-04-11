@@ -10,12 +10,13 @@ interface HubStats {
 }
 
 const NAV_CARDS = [
-  { emoji: '👥', label: 'Users',         sub: 'Manage all accounts',        href: '/admin/users'          },
-  { emoji: '💰', label: 'Affiliates',    sub: 'Applications & payouts',     href: '/admin/affiliates'     },
-  { emoji: '🏪', label: 'Studio Stax',   sub: 'Listings & approvals',       href: '/admin/studio-stax'    },
-  { emoji: '💬', label: 'Feedback',      sub: 'Bug reports & suggestions',  href: '/admin/feedback'       },
-  { emoji: '🚩', label: 'Feature Flags', sub: 'Enable / disable features',  href: '/admin/feature-flags'  },
-  { emoji: '📊', label: 'Platform Stats',sub: 'Posts by platform & trends', href: '/admin/platform-stats' },
+  { emoji: '👥', label: 'Users',          sub: 'Manage all accounts',           href: '/admin/users'          },
+  { emoji: '💰', label: 'Affiliates',     sub: 'Applications & payouts',        href: '/admin/affiliates'     },
+  { emoji: '🏪', label: 'Studio Stax',    sub: 'Listings & approvals',          href: '/admin/studio-stax'    },
+  { emoji: '👑', label: 'Invites & VIP',  sub: 'Invite partners · VIP codes',   href: '/admin/invites'        },
+  { emoji: '💬', label: 'Feedback',       sub: 'Bug reports & suggestions',     href: '/admin/feedback'       },
+  { emoji: '🚩', label: 'Feature Flags',  sub: 'Enable / disable features',     href: '/admin/feature-flags'  },
+  { emoji: '📊', label: 'Platform Stats', sub: 'Posts by platform & trends',    href: '/admin/platform-stats' },
 ]
 
 export default function AdminHubClient() {
