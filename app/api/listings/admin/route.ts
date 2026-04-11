@@ -1,32 +1,12 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
 import { Resend } from 'resend'
 import crypto from 'crypto'
-
-function getAuthedSupabase() {
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    { cookies: { getAll: async () => (await cookies()).getAll() } }
-  )
-}
+import { requireAdmin } from '@/lib/admin-auth'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 function getAdminSupabase() {
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
-}
-
-async function requireAdmin() {
-  const supabase = getAuthedSupabase()
-  const { data: { user } } = await supabase.auth.getUser()
-  const adminEmail = process.env.ADMIN_EMAIL
-  if (!user || !adminEmail || user.email !== adminEmail) return null
-  return user
+  return getSupabaseAdmin()
 }
 
 // GET — admin fetch all listings (all statuses)

@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
     couponId = coupon.id
 
     const promoCode = await stripe.promotionCodes.create({
-      coupon: coupon.id,
+      promotion: { type: 'coupon', coupon: coupon.id },
       code: upperCode,
       ...(max_redemptions ? { max_redemptions: Number(max_redemptions) } : {}),
       metadata: { created_by: admin.email || 'admin', type: 'vip' },

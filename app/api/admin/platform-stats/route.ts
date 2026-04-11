@@ -53,14 +53,14 @@ export async function GET() {
     .slice(0, 10)
     .map(e => e[0])
 
-  // Fetch emails for top users
-  const { data: topUserSettings } = await db
-    .from('user_settings')
-    .select('user_id, email')
-    .in('user_id', topUserIds.length ? topUserIds : ['none'])
-
+  // Fetch emails for top users from auth.users
   const emailMap: Record<string, string> = {}
-  for (const u of topUserSettings ?? []) { emailMap[u.user_id] = u.email }
+  if (topUserIds.length > 0) {
+    const { data: authData } = await db.auth.admin.listUsers({ perPage: 1000 })
+    for (const u of authData?.users ?? []) {
+      if (topUserIds.includes(u.id) && u.email) emailMap[u.id] = u.email
+    }
+  }
 
   const topUsers = topUserIds.map(uid => ({
     user_id: uid,

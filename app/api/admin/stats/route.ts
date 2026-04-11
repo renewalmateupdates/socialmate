@@ -23,10 +23,10 @@ export async function GET() {
     db.from('posts').select('id', { count: 'exact', head: true })
       .gte('created_at', todayStart.toISOString())
       .eq('status', 'published'),
-    db.from('affiliates').select('id', { count: 'exact', head: true })
+    db.from('affiliate_profiles').select('id', { count: 'exact', head: true })
       .eq('status', 'active'),
     db.from('curated_listings').select('id', { count: 'exact', head: true })
-      .eq('status', 'active'),
+      .eq('status', 'approved'),
   ])
 
   return NextResponse.json({
