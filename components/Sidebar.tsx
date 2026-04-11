@@ -91,6 +91,7 @@ const NAV_BASE = [
       { icon: '🔗', label: 'Accounts',     href: '/accounts'              },
       { icon: '📍', label: 'Destinations', href: '/accounts/destinations' },
       { icon: '👥', label: 'Team',         href: '/team'                  },
+      { icon: '🎮', label: 'Discord Hub',  href: '/discord'               },
       { icon: '♻️', label: 'Evergreen',    href: '/evergreen'             },
       { icon: '📡', label: 'RSS Import',   href: '/rss-import'            },
       { icon: '✅', label: 'Approvals',    href: '/approvals'             },
