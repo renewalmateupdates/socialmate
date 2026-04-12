@@ -642,6 +642,274 @@ export const sendNotification = inngest.createFunction(
   }
 )
 
+// ─── Onboarding Email Sequence — triggered on user/signup ─────────────────────
+// Sends 3 emails: Day 0 welcome, Day 3 AI tools showcase, Day 7 personal + upgrade nudge
+export const onboardingSequence = inngest.createFunction(
+  { id: 'onboarding-sequence', name: 'Onboarding Email Sequence', retries: 2 },
+  { event: 'user/signup' },
+  async ({ event, step }) => {
+    const { email, firstName } = event.data as { email: string; firstName?: string }
+    const name = firstName || 'there'
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
+
+    // ── Email 1 — Day 0: Welcome ───────────────────────────────────────────────
+    await step.run('send-welcome-email', async () => {
+      await getResend().emails.send({
+        from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
+        to: email,
+        subject: 'Welcome to SocialMate 👋',
+        html: `
+          <div style="background:#0a0a0a;min-height:100vh;padding:0;margin:0;">
+          <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:580px;margin:0 auto;padding:40px 24px;color:#ffffff;background:#0a0a0a;">
+
+            <!-- Logo -->
+            <div style="margin-bottom:32px;">
+              <span style="display:inline-flex;align-items:center;gap:8px;">
+                <span style="display:inline-block;width:28px;height:28px;background:#ffffff;border-radius:8px;text-align:center;line-height:28px;font-weight:900;font-size:14px;color:#000;">S</span>
+                <span style="font-weight:800;font-size:16px;color:#ffffff;letter-spacing:-0.5px;">SocialMate</span>
+              </span>
+            </div>
+
+            <!-- Headline -->
+            <h1 style="font-size:28px;font-weight:800;margin:0 0 12px;color:#ffffff;letter-spacing:-0.5px;line-height:1.2;">
+              Hey ${name}, you're in. 👋
+            </h1>
+            <p style="font-size:15px;color:#a1a1aa;line-height:1.7;margin:0 0 28px;">
+              SocialMate is live and ready to go. You've got everything you need to start scheduling, growing, and creating — right now.
+            </p>
+
+            <!-- Feature bullets -->
+            <div style="background:#111111;border:1px solid #222222;border-radius:14px;padding:24px;margin-bottom:28px;">
+              <p style="font-size:12px;font-weight:700;color:#71717a;text-transform:uppercase;letter-spacing:1px;margin:0 0 16px;">What's waiting for you</p>
+              <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;">
+                <span style="color:#7C3AED;font-weight:700;font-size:15px;flex-shrink:0;">✓</span>
+                <span style="font-size:14px;color:#d4d4d8;line-height:1.5;">Schedule posts to <strong style="color:#ffffff;">5 live platforms</strong> — Bluesky, Discord, Telegram, Mastodon, X/Twitter</span>
+              </div>
+              <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;">
+                <span style="color:#7C3AED;font-weight:700;font-size:15px;flex-shrink:0;">✓</span>
+                <span style="font-size:14px;color:#d4d4d8;line-height:1.5;"><strong style="color:#ffffff;">12 AI content tools</strong> — captions, hooks, threads, hashtags and more (50 free credits/month)</span>
+              </div>
+              <div style="display:flex;align-items:flex-start;gap:12px;">
+                <span style="color:#7C3AED;font-weight:700;font-size:15px;flex-shrink:0;">✓</span>
+                <span style="font-size:14px;color:#d4d4d8;line-height:1.5;"><strong style="color:#ffffff;">Link in Bio builder</strong> — free on every plan, forever</span>
+              </div>
+            </div>
+
+            <!-- CTA -->
+            <div style="margin-bottom:32px;">
+              <a href="${appUrl}/settings" style="display:inline-block;background:#7C3AED;color:#ffffff;text-decoration:none;font-weight:700;font-size:15px;padding:14px 28px;border-radius:12px;letter-spacing:-0.2px;">
+                Connect your first account →
+              </a>
+            </div>
+
+            <!-- Divider -->
+            <hr style="border:none;border-top:1px solid #222222;margin:28px 0;" />
+
+            <!-- Personal note -->
+            <p style="font-size:13px;color:#71717a;line-height:1.7;margin:0;">
+              <strong style="color:#a1a1aa;">P.S.</strong> I built SocialMate solo between deli shifts. If you ever have feedback, a feature request, or just want to say hi — reply to this email. I read every message.
+            </p>
+            <p style="font-size:13px;color:#71717a;margin:12px 0 0;">— Joshua, Founder of SocialMate</p>
+
+          </div>
+          </div>
+        `,
+      })
+    })
+
+    // ── Wait 3 days ────────────────────────────────────────────────────────────
+    await step.sleep('wait-3-days', '3d')
+
+    // ── Email 2 — Day 3: AI Tools Showcase ────────────────────────────────────
+    await step.run('send-day3-email', async () => {
+      await getResend().emails.send({
+        from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
+        to: email,
+        subject: 'Are you using SocialMate\'s AI tools yet?',
+        html: `
+          <div style="background:#0a0a0a;min-height:100vh;padding:0;margin:0;">
+          <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:580px;margin:0 auto;padding:40px 24px;color:#ffffff;background:#0a0a0a;">
+
+            <!-- Logo -->
+            <div style="margin-bottom:32px;">
+              <span style="display:inline-flex;align-items:center;gap:8px;">
+                <span style="display:inline-block;width:28px;height:28px;background:#ffffff;border-radius:8px;text-align:center;line-height:28px;font-weight:900;font-size:14px;color:#000;">S</span>
+                <span style="font-weight:800;font-size:16px;color:#ffffff;letter-spacing:-0.5px;">SocialMate</span>
+              </span>
+            </div>
+
+            <!-- Headline -->
+            <h1 style="font-size:26px;font-weight:800;margin:0 0 12px;color:#ffffff;letter-spacing:-0.5px;line-height:1.2;">
+              Hey ${name} — are you using the AI tools yet?
+            </h1>
+            <p style="font-size:15px;color:#a1a1aa;line-height:1.7;margin:0 0 8px;">
+              Most people connect their accounts but miss the AI tools entirely. They're the secret weapon.
+            </p>
+            <p style="font-size:15px;color:#a1a1aa;line-height:1.7;margin:0 0 28px;">
+              Here's what's in there:
+            </p>
+
+            <!-- AI tools list -->
+            <div style="background:#111111;border:1px solid #222222;border-radius:14px;padding:24px;margin-bottom:28px;">
+              <p style="font-size:12px;font-weight:700;color:#71717a;text-transform:uppercase;letter-spacing:1px;margin:0 0 16px;">AI Tools — available now</p>
+
+              <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;">
+                <span style="color:#7C3AED;font-weight:700;font-size:15px;flex-shrink:0;min-width:20px;">✦</span>
+                <div>
+                  <p style="font-size:14px;font-weight:700;color:#ffffff;margin:0 0 2px;">Caption Generator</p>
+                  <p style="font-size:12px;color:#71717a;margin:0;">Drop in a topic, get a ready-to-post caption in seconds.</p>
+                </div>
+              </div>
+
+              <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;">
+                <span style="color:#7C3AED;font-weight:700;font-size:15px;flex-shrink:0;min-width:20px;">✦</span>
+                <div>
+                  <p style="font-size:14px;font-weight:700;color:#ffffff;margin:0 0 2px;">Content Rewriter</p>
+                  <p style="font-size:12px;color:#71717a;margin:0;">Take any post and rewrite it for a different tone, platform, or audience.</p>
+                </div>
+              </div>
+
+              <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;">
+                <span style="color:#7C3AED;font-weight:700;font-size:15px;flex-shrink:0;min-width:20px;">✦</span>
+                <div>
+                  <p style="font-size:14px;font-weight:700;color:#ffffff;margin:0 0 2px;">Hook Writer</p>
+                  <p style="font-size:12px;color:#71717a;margin:0;">Generate scroll-stopping opening lines that grab attention.</p>
+                </div>
+              </div>
+
+              <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;">
+                <span style="color:#7C3AED;font-weight:700;font-size:15px;flex-shrink:0;min-width:20px;">✦</span>
+                <div>
+                  <p style="font-size:14px;font-weight:700;color:#ffffff;margin:0 0 2px;">Thread Builder</p>
+                  <p style="font-size:12px;color:#71717a;margin:0;">Turn a single idea into a full multi-part thread, formatted and ready to schedule.</p>
+                </div>
+              </div>
+
+              <div style="display:flex;align-items:flex-start;gap:12px;">
+                <span style="color:#7C3AED;font-weight:700;font-size:15px;flex-shrink:0;min-width:20px;">✦</span>
+                <div>
+                  <p style="font-size:14px;font-weight:700;color:#ffffff;margin:0 0 2px;">Hashtag Suggester</p>
+                  <p style="font-size:12px;color:#71717a;margin:0;">Get relevant hashtags based on your post content and target audience.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Credits note -->
+            <div style="background:#1a0a2e;border:1px solid #2d1b69;border-radius:12px;padding:16px 20px;margin-bottom:28px;">
+              <p style="font-size:13px;color:#c4b5fd;margin:0;line-height:1.6;">
+                Each tool costs <strong style="color:#ffffff;">1–5 credits</strong>. Free plan gives you <strong style="color:#ffffff;">50 credits/month</strong> — enough to create a solid week of content. On Pro ($5/mo) you get <strong style="color:#ffffff;">500 credits</strong>. Most users build 3–4 months of posts in one sitting.
+              </p>
+            </div>
+
+            <!-- CTA -->
+            <div style="margin-bottom:32px;">
+              <a href="${appUrl}/dashboard" style="display:inline-block;background:#7C3AED;color:#ffffff;text-decoration:none;font-weight:700;font-size:15px;padding:14px 28px;border-radius:12px;letter-spacing:-0.2px;">
+                Try an AI tool now →
+              </a>
+            </div>
+
+            <!-- Divider -->
+            <hr style="border:none;border-top:1px solid #222222;margin:28px 0;" />
+
+            <p style="font-size:13px;color:#71717a;line-height:1.7;margin:0;">— Joshua, Founder of SocialMate</p>
+            <p style="font-size:11px;color:#3f3f46;margin:12px 0 0;">You're receiving this because you signed up at socialmate.studio.</p>
+
+          </div>
+          </div>
+        `,
+      })
+    })
+
+    // ── Wait 4 more days (7 days total from signup) ────────────────────────────
+    await step.sleep('wait-4-more-days', '4d')
+
+    // ── Email 3 — Day 7: Personal note + soft upgrade nudge ───────────────────
+    await step.run('send-day7-email', async () => {
+      await getResend().emails.send({
+        from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
+        to: email,
+        subject: 'A week in — how\'s it going?',
+        html: `
+          <div style="background:#0a0a0a;min-height:100vh;padding:0;margin:0;">
+          <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:580px;margin:0 auto;padding:40px 24px;color:#ffffff;background:#0a0a0a;">
+
+            <!-- Logo -->
+            <div style="margin-bottom:32px;">
+              <span style="display:inline-flex;align-items:center;gap:8px;">
+                <span style="display:inline-block;width:28px;height:28px;background:#ffffff;border-radius:8px;text-align:center;line-height:28px;font-weight:900;font-size:14px;color:#000;">S</span>
+                <span style="font-weight:800;font-size:16px;color:#ffffff;letter-spacing:-0.5px;">SocialMate</span>
+              </span>
+            </div>
+
+            <!-- Headline -->
+            <h1 style="font-size:26px;font-weight:800;margin:0 0 12px;color:#ffffff;letter-spacing:-0.5px;line-height:1.2;">
+              Hey ${name} — a week in. How's it going?
+            </h1>
+
+            <!-- Personal story -->
+            <p style="font-size:15px;color:#a1a1aa;line-height:1.7;margin:0 0 16px;">
+              You've been with SocialMate for a week now. I wanted to check in personally.
+            </p>
+            <p style="font-size:15px;color:#a1a1aa;line-height:1.7;margin:0 0 16px;">
+              I built SocialMate because I believe powerful software shouldn't cost $99/month. The tools that help people grow online should be available to everyone — not just the ones who can afford the big platforms. That's the whole mission: <strong style="color:#ffffff;">power to the people. Build the door.</strong>
+            </p>
+            <p style="font-size:15px;color:#a1a1aa;line-height:1.7;margin:0 0 28px;">
+              If the free plan is working for you, that's genuinely great. Stay on it as long as you need. If you're hitting limits — here's what Pro unlocks:
+            </p>
+
+            <!-- Pro features -->
+            <div style="background:#111111;border:1px solid #222222;border-radius:14px;padding:24px;margin-bottom:28px;">
+              <p style="font-size:12px;font-weight:700;color:#71717a;text-transform:uppercase;letter-spacing:1px;margin:0 0 16px;">Pro Plan — $5/month</p>
+
+              <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;">
+                <span style="color:#7C3AED;font-weight:700;font-size:15px;flex-shrink:0;">✓</span>
+                <span style="font-size:14px;color:#d4d4d8;line-height:1.5;"><strong style="color:#ffffff;">500 AI credits/month</strong> — 10x the free plan</span>
+              </div>
+              <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;">
+                <span style="color:#7C3AED;font-weight:700;font-size:15px;flex-shrink:0;">✓</span>
+                <span style="font-size:14px;color:#d4d4d8;line-height:1.5;"><strong style="color:#ffffff;">5 team seats</strong> — bring your collaborators</span>
+              </div>
+              <div style="display:flex;align-items:flex-start;gap:12px;">
+                <span style="color:#7C3AED;font-weight:700;font-size:15px;flex-shrink:0;">✓</span>
+                <span style="font-size:14px;color:#d4d4d8;line-height:1.5;"><strong style="color:#ffffff;">200 X/Twitter posts/month</strong> instead of 50</span>
+              </div>
+            </div>
+
+            <!-- Price callout -->
+            <div style="background:#0f1a0f;border:1px solid #1a3a1a;border-radius:12px;padding:16px 20px;margin-bottom:28px;">
+              <p style="font-size:13px;color:#86efac;margin:0;line-height:1.6;">
+                Pro is <strong style="color:#ffffff;">$5/month</strong> — less than a coffee. What competitors charge $99/month for, we give you for $5.
+              </p>
+            </div>
+
+            <!-- CTA -->
+            <div style="margin-bottom:32px;">
+              <a href="${appUrl}/pricing" style="display:inline-block;background:#7C3AED;color:#ffffff;text-decoration:none;font-weight:700;font-size:15px;padding:14px 28px;border-radius:12px;letter-spacing:-0.2px;">
+                Upgrade to Pro →
+              </a>
+            </div>
+
+            <!-- Divider -->
+            <hr style="border:none;border-top:1px solid #222222;margin:28px 0;" />
+
+            <!-- Genuine close -->
+            <p style="font-size:14px;color:#a1a1aa;line-height:1.7;margin:0 0 8px;">
+              Either way, I'm glad you're here. Reply anytime — I read every email.
+            </p>
+            <p style="font-size:13px;color:#71717a;margin:0;">— Joshua, Founder of SocialMate</p>
+            <p style="font-size:11px;color:#3f3f46;margin:12px 0 0;">You're receiving this because you signed up at socialmate.studio.</p>
+
+          </div>
+          </div>
+        `,
+      })
+    })
+
+    console.log(`[OnboardingSequence] Completed 3-email sequence for ${email}`)
+    return { email, done: true }
+  }
+)
+
 // ─── Credit Low Checker — daily at noon UTC ────────────────────────────────────
 // Finds users with fewer than 10 total credits and fires a credit_low
 // notification if they haven't received one in the last 7 days.
