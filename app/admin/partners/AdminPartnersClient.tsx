@@ -4,6 +4,13 @@ import { useRouter } from 'next/navigation'
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
+interface AffiliateActivity {
+  affiliate_id: string
+  last_referral_at: string | null
+  total_conversions: number
+  active_conversions: number
+}
+
 interface AffiliateProfile {
   id: string
   email: string
@@ -25,6 +32,10 @@ interface AffiliateProfile {
   onboarding_completed: boolean
   notes: string | null
   created_at: string
+  // Activity fields merged in after fetch
+  last_referral_at?: string | null
+  total_conversions?: number
+  active_conversions?: number
 }
 
 interface PayoutRequest {
@@ -120,6 +131,16 @@ export default function AdminPartnersClient() {
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [selected, setSelected]         = useState<AffiliateProfile | null>(null)
 
+  // Warning email
+  const [warnLoading, setWarnLoading]   = useState(false)
+  const [warnResult, setWarnResult]     = useState<string | null>(null)
+
+  function openAffiliate(a: AffiliateProfile) {
+    setSelected(a)
+    setWarnResult(null)
+    setAllPromosResult(null)
+  }
+
   // Invite form
   const [inviteEmail, setInviteEmail]     = useState('')
   const [inviteLoading, setInviteLoading] = useState(false)
@@ -147,19 +168,35 @@ export default function AdminPartnersClient() {
   async function fetchAll() {
     setLoading(true)
     setAuthError(false)
-    const [a, p, s, f, l] = await Promise.all([
+    const [a, p, s, f, l, act] = await Promise.all([
       fetch('/api/partners/stats?admin=true').then(r => r.json()),
       fetch('/api/partners/payout?admin=true').then(r => r.json()),
       fetch('/api/partners/stats?admin=true&type=revenue').then(r => r.json()),
       fetch('/api/feedback').then(r => r.json()).catch(() => ({ feedback: [] })),
       fetch('/api/listings/admin').then(r => r.json()).catch(() => ({ listings: [] })),
+      fetch('/api/admin/affiliates/activity').then(r => r.json()).catch(() => ({ activity: [] })),
     ])
     if (a.forbidden || a.error) {
       setAuthError(true)
       setLoading(false)
       return
     }
-    setAffiliates(a.affiliates ?? [])
+
+    // Build a lookup map of activity by affiliate_id
+    const activityMap = new Map<string, AffiliateActivity>()
+    for (const row of (act.activity ?? []) as AffiliateActivity[]) {
+      activityMap.set(row.affiliate_id, row)
+    }
+
+    // Merge activity into each affiliate profile
+    const merged: AffiliateProfile[] = (a.affiliates ?? []).map((aff: AffiliateProfile) => {
+      const actData = activityMap.get(aff.id)
+      return actData
+        ? { ...aff, last_referral_at: actData.last_referral_at, total_conversions: actData.total_conversions, active_conversions: actData.active_conversions }
+        : { ...aff, last_referral_at: null, total_conversions: 0, active_conversions: 0 }
+    })
+
+    setAffiliates(merged)
     setPayouts(p.payouts ?? [])
     setStats(s.revenue ?? null)
     setFeedback(f.feedback ?? [])
@@ -286,6 +323,30 @@ export default function AdminPartnersClient() {
       setAllPromosResult(`Error: ${json.error}`)
     }
     setAllPromosLoading(false)
+    await fetchAll()
+  }
+
+  async function sendWarningEmail() {
+    if (!selected) return
+    setWarnLoading(true)
+    setWarnResult(null)
+    const res = await fetch('/api/admin/affiliates/warn', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        affiliate_id:    selected.id,
+        affiliate_email: selected.email,
+        affiliate_name:  selected.full_name,
+      }),
+    })
+    const json = await res.json()
+    if (res.ok) {
+      setWarnResult('Warning sent')
+    } else {
+      setWarnResult(`Error: ${json.error}`)
+    }
+    setWarnLoading(false)
+    // Refresh so the new note shows up if we later re-open modal
     await fetchAll()
   }
 
@@ -448,7 +509,7 @@ export default function AdminPartnersClient() {
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
                 <thead>
                   <tr style={{ borderBottom: `1px solid ${border}` }}>
-                    {['Affiliate', 'Status', 'Referrals', 'Lifetime', 'Available', 'W-9', 'Stripe', 'Actions'].map(h => (
+                    {['Affiliate', 'Status', 'Last Referral', 'Referrals', 'Active', 'Lifetime', 'Available', 'W-9', 'Stripe', 'Actions'].map(h => (
                       <th key={h} style={{ textAlign: 'left', padding: '14px 16px', fontSize: 11, color: muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                         {h}
                       </th>
@@ -463,7 +524,13 @@ export default function AdminPartnersClient() {
                         <div style={{ fontSize: 11, color: muted, marginTop: 1 }}>{a.email}</div>
                       </td>
                       <td style={{ padding: '14px 16px' }}><StatusBadge status={a.status} /></td>
-                      <td style={{ padding: '14px 16px', color: '#d1d5db' }}>{a.active_referral_count}</td>
+                      <td style={{ padding: '14px 16px' }}>
+                        {a.last_referral_at
+                          ? <span style={{ fontSize: 12, color: '#d1d5db' }}>{new Date(a.last_referral_at).toLocaleDateString()}</span>
+                          : <span style={{ fontSize: 12, color: gold, fontWeight: 700 }}>Never</span>}
+                      </td>
+                      <td style={{ padding: '14px 16px', color: '#d1d5db' }}>{a.total_conversions ?? 0}</td>
+                      <td style={{ padding: '14px 16px', color: '#22c55e', fontWeight: 700 }}>{a.active_conversions ?? 0}</td>
                       <td style={{ padding: '14px 16px', color: gold, fontWeight: 700 }}>{cents(a.lifetime_earnings_cents)}</td>
                       <td style={{ padding: '14px 16px', color: '#22c55e' }}>{cents(a.available_balance_cents)}</td>
                       <td style={{ padding: '14px 16px' }}>
@@ -480,7 +547,7 @@ export default function AdminPartnersClient() {
                       </td>
                       <td style={{ padding: '14px 16px' }}>
                         <button
-                          onClick={() => setSelected(a)}
+                          onClick={() => openAffiliate(a)}
                           style={{
                             padding: '5px 10px', borderRadius: 6, border: `1px solid ${border}`,
                             background: 'transparent', color: muted, fontSize: 11,
@@ -494,7 +561,7 @@ export default function AdminPartnersClient() {
                   ))}
                   {filtered.length === 0 && (
                     <tr>
-                      <td colSpan={8} style={{ padding: '32px', textAlign: 'center', color: muted, fontSize: 13 }}>No affiliates found</td>
+                      <td colSpan={10} style={{ padding: '32px', textAlign: 'center', color: muted, fontSize: 13 }}>No affiliates found</td>
                     </tr>
                   )}
                 </tbody>
@@ -845,6 +912,70 @@ export default function AdminPartnersClient() {
                     <div style={{ fontSize: 11, color: muted, marginTop: 2 }}>{s.label}</div>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* Activity summary */}
+            <div style={{ background: surface, borderRadius: 12, padding: 18, marginBottom: 20, border: `1px solid ${border}` }}>
+              <p style={{ fontSize: 11, color: muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', margin: '0 0 12px' }}>Referral Activity</p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+                {[
+                  {
+                    label: 'Last Referral',
+                    value: selected.last_referral_at
+                      ? new Date(selected.last_referral_at).toLocaleDateString()
+                      : 'Never',
+                    color: selected.last_referral_at ? '#f1f1f1' : gold,
+                  },
+                  { label: 'Total Referrals', value: String(selected.total_conversions ?? 0), color: '#f1f1f1' },
+                  { label: 'Active Paying',   value: String(selected.active_conversions ?? 0),  color: '#22c55e' },
+                ].map(s => (
+                  <div key={s.label} style={{ background: '#0a0a0a', borderRadius: 8, padding: '10px 12px', border: `1px solid ${border}` }}>
+                    <div style={{ fontSize: 14, fontWeight: 800, color: s.color }}>{s.value}</div>
+                    <div style={{ fontSize: 11, color: muted, marginTop: 2 }}>{s.label}</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Warning email button */}
+              <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <button
+                  onClick={sendWarningEmail}
+                  disabled={warnLoading}
+                  style={{
+                    width: '100%', padding: '9px', borderRadius: 8, border: `1px solid rgba(245,158,11,0.4)`,
+                    background: 'rgba(245,158,11,0.1)', color: gold,
+                    fontSize: 12, fontWeight: 700, cursor: warnLoading ? 'not-allowed' : 'pointer',
+                    opacity: warnLoading ? 0.6 : 1, fontFamily: 'inherit',
+                  }}
+                >
+                  {warnLoading ? 'Sending...' : warnResult === 'Warning sent' ? 'Warning sent ✓' : 'Send Warning Email'}
+                </button>
+                {warnResult && (
+                  <p style={{
+                    margin: 0, fontSize: 12, fontWeight: 600,
+                    color: warnResult === 'Warning sent' ? '#22c55e' : '#f87171',
+                  }}>
+                    {warnResult}
+                  </p>
+                )}
+                <button
+                  onClick={() => {
+                    if (!confirm(`Deactivate ${selected.full_name || selected.email}'s affiliate account? This will set their status to terminated.`)) return
+                    updateAffiliateStatus(selected.id, 'terminated')
+                  }}
+                  disabled={actionLoading || selected.status === 'terminated'}
+                  style={{
+                    width: '100%', padding: '9px', borderRadius: 8, border: 'none',
+                    background: 'rgba(239,68,68,0.12)', color: '#ef4444',
+                    fontSize: 12, fontWeight: 700,
+                    cursor: (actionLoading || selected.status === 'terminated') ? 'not-allowed' : 'pointer',
+                    opacity: (actionLoading || selected.status === 'terminated') ? 0.4 : 1,
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  {selected.status === 'terminated' ? 'Account Deactivated' : 'Deactivate Account'}
+                </button>
               </div>
             </div>
 
