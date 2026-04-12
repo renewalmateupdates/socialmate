@@ -5,6 +5,7 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { Resend } from 'resend'
+import { inngest } from '@/lib/inngest'
  
 function getResend() { return new Resend(process.env.RESEND_API_KEY) }
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
@@ -112,6 +113,15 @@ export async function GET(request: NextRequest) {
             .from('user_settings')
             .update({ welcome_email_sent: true })
             .eq('user_id', session.user.id)
+
+          // Fire onboarding email sequence via Inngest (Day 0 welcome, Day 3 AI tools, Day 7 upgrade nudge)
+          const firstName = (session.user.user_metadata?.full_name as string | undefined)?.split(' ')[0]
+            || (session.user.user_metadata?.name as string | undefined)?.split(' ')[0]
+            || undefined
+          inngest.send({
+            name: 'user/signup',
+            data: { email, firstName },
+          }).catch((err: unknown) => console.error('[auth/callback] Failed to send user/signup event:', err))
 
           await getResend().emails.send({
             from: 'SocialMate <hello@socialmate.studio>',

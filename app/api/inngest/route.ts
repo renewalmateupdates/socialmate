@@ -9,6 +9,7 @@ import {
   discordWelcomePoller,
   sendNotification,
   creditLowChecker,
+  onboardingSequence,
 } from '@/lib/inngest'
 
 export const { GET, POST, PUT } = serve({
@@ -21,5 +22,6 @@ export const { GET, POST, PUT } = serve({
     discordWelcomePoller,
     sendNotification,
     creditLowChecker,
+    onboardingSequence,
   ],
 })
