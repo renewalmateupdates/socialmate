@@ -137,6 +137,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/enki/settings`,      lastModified: now, changeFrequency: 'monthly', priority: 0.4 },
     { url: `${base}/gilgamesh`,          lastModified: now, changeFrequency: 'weekly',  priority: 0.8 },
     { url: `${base}/support`,            lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${base}/changelog`,          lastModified: now, changeFrequency: 'weekly',  priority: 0.6 },
   ]
 
   const comparisons: MetadataRoute.Sitemap = [
