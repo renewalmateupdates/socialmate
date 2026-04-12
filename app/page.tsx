@@ -92,22 +92,21 @@ const FEATURES = [
 const COMPARISON = [
   {
     label: 'What you get',
-    industry: 'Industry standard',
+    industry: 'Typical tools',
     socialmate: 'SocialMate',
     header: true,
   },
-  { label: 'Starting price',          industry: '$99/month',    socialmate: '$0 — free forever'   },
-  { label: 'Free plan',               industry: '❌ Removed',   socialmate: '✅ Genuinely free'    },
-  { label: 'Platforms',               industry: '8–10',         socialmate: '16 (growing)'        },
-  { label: 'AI writing tools',        industry: '1–2 basic',    socialmate: '12 tools included'   },
-  { label: 'Bulk scheduling',         industry: 'Paid add-on',  socialmate: '✅ Free'              },
-  { label: 'Link in bio',             industry: '❌',            socialmate: '✅ Free'              },
-  { label: 'Competitor tracking',     industry: 'Paid add-on',  socialmate: '✅ Free'              },
-  { label: 'Evergreen recycling',     industry: 'Paid add-on',  socialmate: '✅ Free'              },
-  { label: 'RSS import',              industry: '❌',            socialmate: '✅ Free'              },
-  { label: 'Team seats',              industry: 'Per seat fee', socialmate: '2 seats free'        },
-  { label: 'Client workspaces',       industry: 'Enterprise',   socialmate: 'Pro+: from $5/mo'    },
-  { label: 'White label',             industry: 'Enterprise',   socialmate: 'Available at $20/mo' },
+  { label: 'Starting price',          industry: '$25–$99/month',        socialmate: '$0 — free forever'   },
+  { label: 'Free plan',               industry: '❌ Removed or crippled', socialmate: '✅ Genuinely free'  },
+  { label: 'AI writing tools',        industry: '1–2 basic',            socialmate: '12 tools included'   },
+  { label: 'Bulk scheduling',         industry: 'Paid add-on',          socialmate: '✅ Free'              },
+  { label: 'Link in bio',             industry: 'Separate paid tool',   socialmate: '✅ Free on all plans' },
+  { label: 'Competitor tracking',     industry: 'Paid add-on',          socialmate: '✅ Free'              },
+  { label: 'Evergreen recycling',     industry: 'Paid add-on',          socialmate: '✅ Free'              },
+  { label: 'RSS import',              industry: '❌ Not included',       socialmate: '✅ Free'              },
+  { label: 'Team seats',              industry: 'Per seat fee',         socialmate: '2 seats free'        },
+  { label: 'Client workspaces',       industry: 'Enterprise only',      socialmate: 'From $5/mo'          },
+  { label: 'White label',             industry: 'Enterprise only',      socialmate: 'From $20/mo'         },
 ]
 
 const FOOTER_LINKS = [
@@ -172,9 +171,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
           <span className="text-gray-400 dark:text-gray-500">finally built for everyone.</span>
         </h1>
         <p className="text-gray-500 dark:text-gray-400 text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
-          The tools charging $99/month for basic scheduling have existed for years.
-          SocialMate was built for everyone who decided to stop paying for them —
-          12 AI tools, 5 live platforms (11 more coming), bulk scheduling, analytics, and a link in bio page, free to start.
+          Schedule across 5 platforms, write better content with 12 AI tools, and track what's actually working — all from one place.
+          Free to start. No $99/month trap.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
           <Link href="/signup"
@@ -418,7 +416,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
               {/* TABLE HEADER */}
               <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700 px-4 md:px-6 py-4">
                 <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Feature</span>
-                <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide text-center">Industry</span>
+                <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide text-center">Typical tools</span>
                 <span className="text-xs font-bold text-black dark:text-white uppercase tracking-wide text-center">SocialMate</span>
               </div>
 
