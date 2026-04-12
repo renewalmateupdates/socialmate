@@ -90,6 +90,27 @@ export default function AdminStudioStaxPage() {
     }
   }
 
+  async function handleFreeYear(id: string, notes?: string) {
+    setActionLoading(true)
+    try {
+      const res = await fetch('/api/listings/admin', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status: 'approved', free_year: true, admin_notes: notes || null }),
+      })
+      const json = await res.json()
+      if (json.success) {
+        showToast('Approved free for 1 year — email sent!')
+        setSelected(null)
+        await load()
+      } else {
+        showToast(json.error || 'Action failed', false)
+      }
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
   async function handleSendPaymentLink(id: string, notes?: string) {
     setActionLoading(true)
     try {
@@ -410,6 +431,12 @@ export default function AdminStudioStaxPage() {
                       disabled={actionLoading}
                       className="w-full bg-black dark:bg-white text-white dark:text-black text-sm font-semibold py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
                       {actionLoading ? 'Processing…' : '✓ Approve + Send payment link'}
+                    </button>
+                    <button
+                      onClick={() => handleFreeYear(selected.id, adminNotes)}
+                      disabled={actionLoading}
+                      className="w-full bg-emerald-600 text-white text-sm font-semibold py-2.5 rounded-xl hover:bg-emerald-700 transition-all disabled:opacity-60">
+                      {actionLoading ? 'Processing…' : '🎁 Approve Free (1yr)'}
                     </button>
                     <button
                       onClick={() => handleStatusChange(selected.id, 'rejected', adminNotes)}
