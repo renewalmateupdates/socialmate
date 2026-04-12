@@ -118,8 +118,9 @@ const FOOTER_LINKS = [
   { label: 'Affiliate',   href: '/affiliate'   },
   { label: 'Our Story',   href: '/story'       },
   { label: 'Blog',        href: '/blog'        },
-  { label: 'SM-Give',     href: '/give'        },
-  { label: 'Privacy',     href: '/privacy'     },
+  { label: 'SM-Give',           href: '/give'        },
+  { label: 'Gilgamesh\'s Guide', href: '/gilgamesh'  },
+  { label: 'Privacy',           href: '/privacy'     },
   { label: 'Terms',       href: '/terms'       },
 ]
 
