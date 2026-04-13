@@ -86,9 +86,20 @@ function FAQItem({ q, a }: { q: string; a: string }) {
   )
 }
 
+const supportFaqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: FAQS.map(f => ({
+    '@type': 'Question',
+    name: f.q,
+    acceptedAnswer: { '@type': 'Answer', text: f.a },
+  })),
+}
+
 export default function SupportPage() {
   return (
     <PublicLayout>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(supportFaqSchema) }} />
       <div className="min-h-screen" style={{ backgroundColor: '#0a0a0a' }}>
         <div className="max-w-3xl mx-auto px-6 py-20">
 
