@@ -1,68 +1,121 @@
 # SocialMate
 
-> Free social media scheduling platform with AI content tools, analytics, team collaboration, and a built-in charity initiative.
+> Free social media scheduling and Creator OS — schedule, create, and manage content across 5 live platforms with 12 built-in AI tools.
 
-SocialMate is a web-based social media management tool built for creators, small businesses, and agencies. It is free to start with no credit card required and no per-channel fees.
+SocialMate is a web-based social media management platform built for creators, streamers, small businesses, and agencies. Free to start. No credit card required. No per-channel fees.
 
-## What SocialMate does
+Live at: https://socialmate.studio
+Launched: March 26, 2026
+Company: Gilgamesh Enterprise LLC (Wyoming LLC)
+Founder: Joshua Bostic
+Contact: socialmate.updates@gmail.com
 
-- Schedule and publish posts to Bluesky, Discord, Telegram, and Mastodon (Instagram, TikTok, Reddit, Facebook, and Threads in review)
-- 12 AI-powered tools: caption generation, hashtag research, competitor tracking, content gap analysis, best-time suggestions, trend scanning, evergreen recycling, and more
-- Bulk scheduler — upload and schedule many posts at once
-- Link-in-bio page builder
-- Analytics dashboard with per-platform engagement tracking
-- Team collaboration and multi-client workspaces (agency tier)
-- RSS import for automated content sharing
+## What SocialMate Does
+
+- Schedule and publish posts to Bluesky, Discord, Telegram, Mastodon, and X/Twitter (5 platforms live)
+- Clips Studio: browse Twitch clips (OAuth) or YouTube videos (channel URL, no API key) and schedule them to all platforms in one click; search any public Twitch channel's top clips
+- 12 AI-powered tools: caption generation, hashtag research, post rewriter, viral hook generator, thread generator, content repurposer, post score, SM-Pulse, SM-Radar, content gap detector, AI content calendar (Pro+), AI image generation (Pro+)
+- Bulk scheduler — upload and schedule many posts at once with per-platform character limit enforcement
+- Link in Bio page builder — free on all plans, custom themes and button styles
+- Competitor tracking — track up to 3 competitor accounts on free plan
+- Evergreen recycling — mark posts as evergreen and they auto-requeue when schedule is empty
+- RSS/blog import — pull from any RSS or Atom feed and turn into scheduled posts
+- Team collaboration — multi-seat, role-based access, content approval workflows
+- Client workspaces — isolated workspaces per client (Agency plan)
+- Analytics — posting streaks, platform breakdown, best times, consistency scores
+- 29 sidebar color themes
+- Notification system — in-app notifications for publish success/failure
+- 3-email onboarding sequence (welcome, day 2 tip, day 5 check-in)
+
+## Platforms
+
+### Live Now
+- Bluesky
+- Discord
+- Telegram
+- Mastodon
+- X/Twitter (pay-per-use, $0.01/tweet, quota enforced by plan)
+
+### Coming Soon
+- Threads (Meta opened API 2024, no special approval required)
+- YouTube posting (YouTube Data API v3)
+- Reddit
+
+### Planned
+- LinkedIn (API application pending)
+- Pinterest (API application pending)
+- Instagram
+- Facebook
+- TikTok
 
 ## Pricing
 
-- Free: unlimited posts, 2 team seats, 75 AI credits/month, all core features
-- Pro: $5/month — more accounts, 500 AI credits/month, client workspaces
-- Agency: $20/month — unlimited workspaces, 2000 AI credits/month, white-label options
+- Free: $0/month — 50 AI credits/month, 2 team seats, 100 posts/month, 2-week scheduling window, link in bio, all core features
+- Pro: $5/month or $55/year — 500 AI credits/month, 5 seats, full scheduling window
+- Agency: $20/month or $209/year — 2,000 AI credits/month, 15 seats, 5 client workspaces
+- White Label Basic: +$20/month — custom logo, colors, branding
+- White Label Pro: +$40/month — custom domain + everything above
+- AI Credit Packs: $1.99 (100cr), $4.99 (300cr), $9.99 (750cr), $19.99 (2,000cr)
+
+## Affiliate Program
+
+- 30% recurring commission on all subscription payments
+- Milestone: 100+ active recurring referrals → 40% forever
+- 10% flat on Starter + Popular credit packs
+- 15% flat on Pro + Max credit packs
+- Affiliate page: https://socialmate.studio/affiliate
 
 ## Studio Stax
 
-A curated directory of social media tools and services. Founding listings at $100/year (first 100 spots), standard at $150/year. Listings rank by SM-Give charitable donations — the more a studio gives, the higher it appears.
+Curated directory of creator tools and resources at https://socialmate.studio/studio-stax. Listings are founder-approved and ranked by SM-Give donation amounts and listing age.
 
 ## SM-Give
 
-A built-in charity initiative. Studios listed in Studio Stax can donate through the platform to climb the directory rankings. Giving more = higher visibility.
+Built-in charitable initiative. 2% of all subscription revenue goes to charitable causes. Users can make voluntary in-app donations.
 
-## Company
+## Gilgamesh's Guide
 
-- Built by: Gilgamesh Enterprise LLC (Wyoming LLC)
-- Founder: Joshua Bostic
-- Contact: hello@socialmate.studio
-- Website: https://socialmate.studio
+Free guide for entrepreneurs, creators, and self-starters by founder Joshua Bostic. Waitlist: https://socialmate.studio/gilgamesh
+
+## Key Pages
+
+- Homepage: https://socialmate.studio
 - Pricing: https://socialmate.studio/pricing
+- Features: https://socialmate.studio/features
 - Blog: https://socialmate.studio/blog
 - Roadmap: https://socialmate.studio/roadmap
+- Changelog: https://socialmate.studio/changelog
+- Support/FAQ: https://socialmate.studio/support
+- Clips Studio: https://socialmate.studio/clips
+- Affiliate: https://socialmate.studio/affiliate
+- Studio Stax: https://socialmate.studio/studio-stax
+- SM-Give: https://socialmate.studio/give
+- Gilgamesh's Guide: https://socialmate.studio/gilgamesh
+- Our Story: https://socialmate.studio/story
+- Comparisons hub: https://socialmate.studio/vs
 
-## Comparisons
+## Comparisons (SocialMate vs Competitors)
 
-Full comparison hub: https://socialmate.studio/vs
-
-SocialMate compared to competitors:
 - vs Hootsuite: https://socialmate.studio/vs/hootsuite
 - vs Buffer: https://socialmate.studio/vs/buffer
 - vs Later: https://socialmate.studio/vs/later
+- vs Sprout Social: https://socialmate.studio/vs/sprout-social
 - vs Sendible: https://socialmate.studio/vs/sendible
+- vs SocialPilot: https://socialmate.studio/vs/socialpilot
 - vs Metricool: https://socialmate.studio/vs/metricool
 - vs Publer: https://socialmate.studio/vs/publer
 - vs Planable: https://socialmate.studio/vs/planable
-- vs Sprout Social: https://socialmate.studio/vs/sprout-social
-- vs SocialPilot: https://socialmate.studio/vs/socialpilot
 - vs Loomly: https://socialmate.studio/vs/loomly
 - vs CoSchedule: https://socialmate.studio/vs/coschedule
 - vs MeetEdgar: https://socialmate.studio/vs/meetedgar
+- vs SocialBee: https://socialmate.studio/vs/socialbee
 - vs Zoho Social: https://socialmate.studio/vs/zoho-social
+- vs Agorapulse: https://socialmate.studio/vs/agorapulse
 - vs Iconosquare: https://socialmate.studio/vs/iconosquare
 - vs Tailwind: https://socialmate.studio/vs/tailwind-social
 - vs Crowdfire: https://socialmate.studio/vs/crowdfire
 - vs Pallyy: https://socialmate.studio/vs/pallyy
-- vs Agorapulse: https://socialmate.studio/vs/agorapulse
 - vs Sprinklr: https://socialmate.studio/vs/sprinklr
-- vs SocialBee: https://socialmate.studio/vs/socialbee
 - vs ContentStudio: https://socialmate.studio/vs/contentstudio
 - vs Missinglettr: https://socialmate.studio/vs/missinglettr
 - vs Post Planner: https://socialmate.studio/vs/postplanner
@@ -70,41 +123,22 @@ SocialMate compared to competitors:
 - vs Nuelink: https://socialmate.studio/vs/nuelink
 - vs Fedica: https://socialmate.studio/vs/fedica
 - vs Statusbrew: https://socialmate.studio/vs/statusbrew
+- vs TweetDeck: https://socialmate.studio/vs/tweetdeck
+- vs eClincher: https://socialmate.studio/vs/eclincher
+- vs Oktopost: https://socialmate.studio/vs/oktopost
+- vs Napoleon Cat: https://socialmate.studio/vs/napoleon-cat
+- vs Hopper HQ: https://socialmate.studio/vs/hopper-hq
+- vs Sked Social: https://socialmate.studio/vs/sked-social
+- vs Onlypult: https://socialmate.studio/vs/onlypult
+- vs SmarterQueue: https://socialmate.studio/vs/smarterqueue
+- vs Hypefury: https://socialmate.studio/vs/hypefury
+- vs Typefully: https://socialmate.studio/vs/typefully
+- vs Postcron: https://socialmate.studio/vs/postcron
+- vs Socialrails: https://socialmate.studio/vs/socialrails
 
-## Enki — Autonomous Treasury Guardian
+## Enki — Autonomous Trading Bot
 
-Enki is a companion product by the same team (Gilgamesh Enterprise LLC). It is a self-contained autonomous trading bot for stocks and crypto.
+Companion product by Gilgamesh Enterprise LLC. Self-contained autonomous trading bot for stocks and crypto.
 
 - Landing page: https://socialmate.studio/enki
 - Public leaderboard: https://socialmate.studio/enki/leaderboard
-
-### What Enki does
-
-- Monitors 7 signal sources: congressional trade disclosures, Reddit/social sentiment, RSI, MACD, options flow, news feed, and sector momentum
-- Executes trades only when confidence hits 6/10 or higher
-- Paper trading is free — no real money required to start
-- Fortress Guard rules are always active (cannot be disabled): $5 minimum trade, $2,000 max per trade, 3 trades/day cap, −8% hard stop-loss, 25% portfolio cap per asset
-- Three tiers: Citizen (paper only, free), Commander ($15/mo, live stocks + crypto, approval mode), Emperor ($29/mo, full autonomy + Cloud Runner)
-- Privacy-first leaderboard: only % P&L is ever shown publicly, never dollar amounts
-
-### Enki pages
-
-- https://socialmate.studio/enki — Landing page and pricing
-- https://socialmate.studio/enki/leaderboard — Public leaderboard (top 50 architects by % return)
-- https://socialmate.studio/enki/dashboard — User dashboard (requires login)
-- https://socialmate.studio/enki/trades — Trade ledger (requires login)
-- https://socialmate.studio/enki/settings — Guardian settings (requires login)
-
-## Blog
-
-SocialMate publishes guides, tips, and updates at https://socialmate.studio/blog (41 posts as of April 2026). Comparison hub covers 28 tools.
-
-Selected articles:
-- How to Schedule Telegram Posts for Free: https://socialmate.studio/blog/how-to-schedule-telegram-posts-free
-- Bluesky vs Twitter/X in 2026: https://socialmate.studio/blog/bluesky-vs-twitter-where-to-post-2026
-- Best Free Hootsuite Alternative: https://socialmate.studio/blog/free-hootsuite-alternative-2026
-- Social Media Automation for Solo Creators: https://socialmate.studio/blog/social-media-automation-solo-creators
-- How to Grow a Discord Server: https://socialmate.studio/blog/how-to-grow-discord-server-2026
-- Mastodon vs Bluesky 2026: https://socialmate.studio/blog/mastodon-vs-bluesky-2026
-- Free AI Social Media Tools 2026: https://socialmate.studio/blog/ai-social-media-tools-free-2026
-- Discord Community Management: https://socialmate.studio/blog/discord-community-management-guide

@@ -15,7 +15,7 @@ export default function TermsOfService() {
         </div>
 
         <h1 className="text-4xl font-extrabold tracking-tight mb-2 text-gray-900 dark:text-gray-100">Terms of Service</h1>
-        <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">Last updated: April 1, 2026 · Gilgamesh Enterprise LLC</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">Last updated: April 13, 2026 · Gilgamesh Enterprise LLC</p>
         <p className="text-xs text-gray-400 dark:text-gray-500 mb-12">Please read these Terms carefully before using SocialMate. By accessing or using the Service, you agree to be bound by these Terms.</p>
 
         <div className="space-y-10 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
@@ -32,7 +32,8 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">2. Description of Service</h2>
             <p>SocialMate is a cloud-based social media scheduling, content management, and AI-powered content creation platform operated at <span className="font-semibold">socialmate.studio</span> and associated domains and applications. The Service enables users to compose, schedule, and publish content to third-party social media platforms; access AI-powered content generation and editing tools; manage client workspaces and team members; view scheduling calendars and post analytics; and purchase additional AI credits and white-label licenses.</p>
-            <p className="mt-2">The Service depends on third-party platform APIs (Instagram, Facebook, YouTube, LinkedIn, etc.). We do not control those platforms and cannot guarantee continued API availability. Service features may be added, modified, or removed at any time. We will make reasonable efforts to notify users of material changes.</p>
+            <p className="mt-2">The Service includes a Clips Studio feature that integrates with Twitch (via OAuth) and YouTube (via public RSS feed). The Twitch integration requires you to connect your Twitch account and grants SocialMate permission to read your channel's clips on your behalf. The YouTube integration requires only a public channel URL — no YouTube account connection or API credentials are required or stored. The Service also integrates with Twitch's app-level API to allow any user to search any public Twitch channel's clips without requiring account ownership of that channel.</p>
+            <p className="mt-2">The Service depends on third-party platform APIs (Bluesky, Discord, Telegram, Mastodon, X/Twitter, Twitch, YouTube, and others). We do not control those platforms and cannot guarantee continued API availability. Service features may be added, modified, or removed at any time. We will make reasonable efforts to notify users of material changes.</p>
           </section>
 
           {/* ── 3. Eligibility & Account ── */}

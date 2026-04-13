@@ -4342,6 +4342,70 @@ export async function generateMetadata(
   }
 }
 
+// Internal link map: phrase → path (case-insensitive match, first occurrence per paragraph)
+const INTERNAL_LINKS: [RegExp, string][] = [
+  [/\bSocialMate\b/i, '/'],
+  [/\bsocial media scheduler\b/i, '/'],
+  [/\bcreator OS\b/i, '/'],
+  [/\bBluesky\b/i, '/vs/buffer'],
+  [/\bTwitch clips?\b/i, '/clips'],
+  [/\bYouTube (clips?|videos?)\b/i, '/clips'],
+  [/\bClips Studio\b/i, '/clips'],
+  [/\baffiliate program\b/i, '/affiliate'],
+  [/\baffiliate commission\b/i, '/affiliate'],
+  [/\bStudio Stax\b/i, '/studio-stax'],
+  [/\bwhite label\b/i, '/pricing'],
+  [/\bbulk schedul/i, '/features'],
+  [/\bevergreen recycl/i, '/features'],
+  [/\bRSS import\b/i, '/features'],
+  [/\blink in bio\b/i, '/features'],
+  [/\bcompetitor tracking\b/i, '/features'],
+  [/\bAI (tools?|features?|credits?)\b/i, '/features'],
+  [/\bsocialmate\.studio\b/i, '/'],
+]
+
+function linkifyText(text: string): React.ReactNode {
+  let remaining = text
+  const parts: React.ReactNode[] = []
+  let linkKey = 0
+  const used = new Set<string>()
+
+  while (remaining.length > 0) {
+    let earliestIndex = -1
+    let earliestMatch: RegExpExecArray | null = null
+    let earliestPath = ''
+    let earliestPattern: RegExp | null = null
+
+    for (const [pattern, path] of INTERNAL_LINKS) {
+      if (used.has(path)) continue
+      const re = new RegExp(pattern.source, 'i')
+      const m = re.exec(remaining)
+      if (m && (earliestIndex === -1 || m.index < earliestIndex)) {
+        earliestIndex = m.index
+        earliestMatch = m
+        earliestPath = path
+        earliestPattern = pattern
+      }
+    }
+
+    if (!earliestMatch || earliestPattern === null) {
+      parts.push(remaining)
+      break
+    }
+
+    if (earliestIndex > 0) parts.push(remaining.slice(0, earliestIndex))
+    parts.push(
+      <a key={linkKey++} href={earliestPath} className="text-purple-600 dark:text-purple-400 hover:underline font-medium">
+        {earliestMatch[0]}
+      </a>
+    )
+    used.add(earliestPath)
+    remaining = remaining.slice(earliestIndex + earliestMatch[0].length)
+  }
+
+  return parts.length === 1 && typeof parts[0] === 'string' ? parts[0] : <>{parts}</>
+}
+
 function renderContent(content: string) {
   const lines = content.trim().split('\n')
   const elements: React.ReactNode[] = []
@@ -4366,13 +4430,13 @@ function renderContent(content: string) {
     } else if (trimmed.startsWith('- ')) {
       elements.push(
         <li key={key++} className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed ml-4 list-disc">
-          {trimmed.slice(2)}
+          {linkifyText(trimmed.slice(2))}
         </li>
       )
     } else {
       elements.push(
         <p key={key++} className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-          {trimmed}
+          {linkifyText(trimmed)}
         </p>
       )
     }

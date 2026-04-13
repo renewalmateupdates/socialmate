@@ -941,7 +941,7 @@ function ComposeInner() {
                       {mediaItems.map((item, idx) => (
                         <div key={idx} className="relative group w-20 h-20 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
                           {item.type === 'image' && item.preview ? (
-                            <img src={item.preview} className="w-full h-full object-cover" alt="" />
+                            <img src={item.preview} className="w-full h-full object-cover" alt="Media preview" />
                           ) : (
                             <span className="text-2xl">{item.type === 'video' ? '🎬' : '🖼️'}</span>
                           )}
