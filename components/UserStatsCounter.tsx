@@ -8,6 +8,7 @@ interface Stats {
   agency: number
   white_label: number
   total: number
+  posts_published: number
 }
 
 export default function UserStatsCounter() {
@@ -24,7 +25,12 @@ export default function UserStatsCounter() {
 
   return (
     <div className="flex flex-wrap items-center justify-center gap-3 text-sm">
-      <span className="text-gray-400 dark:text-gray-500 font-medium">Live users:</span>
+      {stats.posts_published > 0 && (
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-50 dark:bg-green-900/20 font-semibold text-green-700 dark:text-green-400">
+          <span className="w-2 h-2 rounded-full bg-green-500 inline-block animate-pulse" />
+          {stats.posts_published.toLocaleString()} posts published
+        </span>
+      )}
       <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 font-semibold text-gray-700 dark:text-gray-200">
         <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" />
         {stats.free.toLocaleString()} Free

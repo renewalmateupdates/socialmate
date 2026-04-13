@@ -7,6 +7,8 @@ const FOOTER_LINKS = [
   { label: 'Pricing',   href: '/pricing'   },
   { label: 'Roadmap',   href: '/roadmap'   },
   { label: 'Studio Stax', href: '/studio-stax' },
+  { label: 'For Streamers', href: '/for/streamers' },
+  { label: 'Clips Studio', href: '/clips'   },
   { label: 'Affiliate', href: '/affiliate' },
   { label: 'Referral',  href: '/referral'  },
   { label: 'Our Story', href: '/story'     },
