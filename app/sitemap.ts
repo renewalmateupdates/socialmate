@@ -169,6 +169,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/vs/nuelink`,        lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/vs/fedica`,         lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/vs/statusbrew`,     lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/tweetdeck`,      lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/eclincher`,      lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/oktopost`,       lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/napoleon-cat`,   lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/hopper-hq`,      lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/sked-social`,    lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/onlypult`,       lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/smarterqueue`,   lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/hypefury`,       lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/typefully`,      lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/postcron`,       lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
   ]
 
   const blogPosts: MetadataRoute.Sitemap = BLOG_SLUGS.map(slug => ({
