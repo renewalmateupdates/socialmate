@@ -4432,15 +4432,17 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
     '@type': 'Article',
     headline: post.title,
     description: post.excerpt || '',
+    image: 'https://socialmate.studio/og-image.png',
     author: {
       '@type': 'Person',
       name: (post as { author?: string }).author || 'SocialMate Team',
+      url: 'https://socialmate.studio',
     },
     publisher: {
       '@type': 'Organization',
       name: 'SocialMate',
       url: 'https://socialmate.studio',
-      logo: { '@type': 'ImageObject', url: 'https://socialmate.studio/icon.png' },
+      logo: { '@type': 'ImageObject', url: 'https://socialmate.studio/icon-512.png' },
     },
     mainEntityOfPage: {
       '@type': 'WebPage',
