@@ -1,7 +1,27 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import BlogClientList from '@/components/BlogClientList'
+
+export const metadata: Metadata = {
+  title: 'Blog — SocialMate',
+  description: 'Guides, tips, and insights on social media scheduling, content strategy, AI tools, and growing your audience across Bluesky, Discord, Mastodon, and more.',
+  openGraph: {
+    type:        'website',
+    title:       'SocialMate Blog — Social Media Guides & Tips',
+    description: 'Guides, tips, and insights on social media scheduling, content strategy, AI tools, and growing your audience across Bluesky, Discord, Mastodon, and more.',
+    url:         'https://socialmate.studio/blog',
+    images: [{ url: 'https://socialmate.studio/og-image.png', width: 1270, height: 760, alt: 'SocialMate Blog' }],
+  },
+  twitter: {
+    card:        'summary_large_image',
+    title:       'SocialMate Blog — Social Media Guides & Tips',
+    description: 'Guides, tips, and insights on social media scheduling, AI tools, and growing your audience.',
+    images:      ['https://socialmate.studio/og-image.png'],
+  },
+  alternates: { canonical: 'https://socialmate.studio/blog' },
+}
 
 async function getDbPosts() {
   try {

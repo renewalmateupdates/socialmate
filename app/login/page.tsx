@@ -268,7 +268,7 @@ function LoginInner() {
                   onChange={e => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   autoFocus
-                  className="w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-gray-400 transition-colors"
+                  className="w-full px-4 py-3 text-base border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-gray-400 transition-colors"
                 />
               </div>
 
@@ -288,7 +288,7 @@ function LoginInner() {
                       value={password}
                       onChange={e => setPassword(e.target.value)}
                       placeholder="Your password"
-                      className="w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-gray-400 transition-colors pr-12"
+                      className="w-full px-4 py-3 text-base border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-gray-400 transition-colors pr-12"
                     />
                     <button
                       type="button"

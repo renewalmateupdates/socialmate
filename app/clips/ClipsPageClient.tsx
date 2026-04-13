@@ -389,7 +389,7 @@ export default function ClipsPage() {
               onKeyDown={e => { if (e.key === 'Enter') searchPublicChannel() }}
               placeholder="Enter Twitch channel name (e.g. ninja)"
               className="flex-1 text-sm rounded-xl px-4 py-3 outline-none transition-all"
-              style={{ border: '1px solid var(--border-mid)', background: 'var(--surface-hover)', color: 'var(--text)' }}
+              style={{ border: '1px solid var(--border-mid)', background: 'var(--surface-hover)', color: 'var(--text)', fontSize: '16px' }}
             />
             <button
               onClick={searchPublicChannel}

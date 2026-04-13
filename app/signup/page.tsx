@@ -277,7 +277,7 @@ function SignupForm() {
                     onChange={e => setEmail(e.target.value)}
                     placeholder="you@example.com"
                     autoFocus
-                    className="w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-gray-400 transition-colors"
+                    className="w-full px-4 py-3 text-base border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-gray-400 transition-colors"
                   />
                 </div>
 
@@ -289,7 +289,7 @@ function SignupForm() {
                       value={password}
                       onChange={e => setPassword(e.target.value)}
                       placeholder="At least 6 characters"
-                      className="w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-gray-400 transition-colors pr-12"
+                      className="w-full px-4 py-3 text-base border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-gray-400 transition-colors pr-12"
                     />
                     <button
                       type="button"
@@ -320,7 +320,7 @@ function SignupForm() {
                     value={confirmPassword}
                     onChange={e => setConfirmPassword(e.target.value)}
                     placeholder="Same password again"
-                    className={`w-full px-4 py-3 text-sm border rounded-xl focus:outline-none transition-colors ${
+                    className={`w-full px-4 py-3 text-base border rounded-xl focus:outline-none transition-colors ${
                       confirmPassword && confirmPassword !== password
                         ? 'border-red-300 focus:border-red-400'
                         : confirmPassword && confirmPassword === password

@@ -15,7 +15,7 @@ export default function PrivacyPolicy() {
         </div>
 
         <h1 className="text-4xl font-extrabold tracking-tight mb-2 text-gray-900 dark:text-gray-100">Privacy Policy</h1>
-        <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">Last updated: April 1, 2026 · Gilgamesh Enterprise LLC</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">Last updated: April 13, 2026 · Gilgamesh Enterprise LLC</p>
         <p className="text-xs text-gray-400 dark:text-gray-500 mb-12">Your privacy matters to us. This policy explains what data we collect, why we collect it, and how we protect it.</p>
 
         <div className="space-y-10 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
@@ -45,6 +45,9 @@ export default function PrivacyPolicy() {
               <li>Newsletter opt-in preference (stored in Supabase user metadata)</li>
               <li>SM-Give donation history, if you choose to make in-app donations</li>
               <li>Affiliate program participation data, including referral activity and payout information</li>
+              <li>Twitch account data when you connect Twitch via OAuth: channel ID, channel name, and channel avatar. We store OAuth access and refresh tokens to fetch your clips on your behalf.</li>
+              <li>YouTube channel URL you provide when connecting a YouTube channel for clip browsing. We do not require or store a YouTube OAuth token — channel data is retrieved via public RSS feed.</li>
+              <li>Email address submitted on the Gilgamesh's Guide waitlist (/gilgamesh), used solely to notify you when the guide is available. This list is separate from your SocialMate account and may be unsubscribed from at any time.</li>
             </ul>
 
             <p className="font-semibold text-gray-900 dark:text-gray-100 mb-2">2.2 Information Collected Automatically</p>
@@ -64,6 +67,8 @@ export default function PrivacyPolicy() {
               <li>Public profile information from social platforms you connect (name, username, avatar, follower count)</li>
               <li>Post performance metrics from connected platform APIs</li>
               <li>Billing and subscription status information from Stripe</li>
+              <li>Twitch clip metadata (clip title, thumbnail URL, view count, duration, clip URL) fetched via the Twitch API using your connected OAuth token or via app-level credentials when you use the "Search Any Channel" feature to browse public channels</li>
+              <li>YouTube video metadata (video title, thumbnail URL, publish date, video URL) fetched via public RSS feed for the channel URL you provide. No YouTube user account data is accessed.</li>
             </ul>
           </section>
 
@@ -94,7 +99,10 @@ export default function PrivacyPolicy() {
               <li>To diagnose technical problems and improve the reliability of the Service</li>
               <li>To analyze aggregate usage patterns and improve the Service (using anonymized data)</li>
               <li>To comply with legal obligations, including responding to valid legal requests</li>
+              <li>To power the Clips Studio feature: fetching your Twitch clips via your connected OAuth token and your YouTube videos via public RSS, and pre-filling the post composer when you click "Schedule" on a clip or video</li>
+              <li>To send a 3-email onboarding sequence (welcome, day 2 tip, day 5 check-in) via Resend upon account creation. These are service-related communications and are sent regardless of marketing preferences.</li>
               <li>To send product update announcements and newsletters (only with your consent; unsubscribe at any time)</li>
+              <li>To notify Gilgamesh's Guide waitlist subscribers when the guide becomes available (separate opt-in, separate list)</li>
             </ul>
             <p className="mt-3 font-semibold text-gray-900 dark:text-gray-100">We do not sell your personal data to third parties. We do not use your content or prompts to train our own AI models.</p>
           </section>
@@ -110,7 +118,9 @@ export default function PrivacyPolicy() {
               <li><span className="font-semibold">Resend</span> — transactional email delivery (account, billing, team invites). <a href="https://resend.com/privacy" target="_blank" rel="noopener noreferrer" className="underline">resend.com/privacy</a></li>
               <li><span className="font-semibold">Vercel</span> — application hosting, CDN, and privacy-friendly analytics. <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer" className="underline">vercel.com/legal/privacy-policy</a></li>
               <li><span className="font-semibold">Inngest</span> — background job and scheduled task processing. <a href="https://inngest.com/privacy" target="_blank" rel="noopener noreferrer" className="underline">inngest.com/privacy</a></li>
-              <li><span className="font-semibold">Connected Social Platforms</span> — data is shared with platforms you explicitly authorize (Instagram, Facebook, YouTube, LinkedIn, Pinterest, Reddit, Bluesky, Discord, Mastodon, Telegram, and others). Each platform's own privacy policy governs their data use.</li>
+              <li><span className="font-semibold">Twitch</span> — when you connect Twitch, we use your OAuth token to fetch your clips via the Twitch API. The "Search Any Channel" feature uses app-level credentials (not your account) to access public clip data from any channel you search. <a href="https://www.twitch.tv/p/legal/privacy-policy/" target="_blank" rel="noopener noreferrer" className="underline">twitch.tv privacy policy</a></li>
+              <li><span className="font-semibold">YouTube (Google)</span> — when you connect a YouTube channel, we access that channel's public RSS feed using the URL you provide. No YouTube OAuth token is required or stored. <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline">google.com/policies/privacy</a></li>
+              <li><span className="font-semibold">Connected Social Platforms</span> — data is shared with platforms you explicitly authorize for post scheduling: Bluesky, Discord, Mastodon, Telegram, and X/Twitter (live). LinkedIn, YouTube posting, Reddit, Instagram, Facebook, Pinterest, and TikTok (planned). Each platform's own privacy policy governs their data use.</li>
             </ul>
             <p className="mt-3">We do not share your personal data with advertising networks, data brokers, or analytics companies beyond the privacy-friendly analytics described above. We may disclose your data if required by law, court order, or valid government request, or to protect the rights, property, or safety of Gilgamesh Enterprise LLC, our users, or the public.</p>
             <p className="mt-2">In the event of a business acquisition, merger, or sale of substantially all of our assets, your data may be transferred to the acquiring entity, subject to the same privacy protections. We will notify you via email or prominent in-app notice before such a transfer.</p>

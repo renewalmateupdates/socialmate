@@ -20,7 +20,6 @@ export default function robots(): MetadataRoute.Robots {
           '/billing',
           '/workspaces',
           '/accounts',
-          '/affiliate',
           '/notifications',
           '/media',
           '/bulk-scheduler',
