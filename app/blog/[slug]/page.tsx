@@ -4427,8 +4427,30 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
     .filter(([s]) => s !== slug)
     .slice(0, 3)
 
+  const articleSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: post.excerpt || '',
+    author: {
+      '@type': 'Person',
+      name: (post as { author?: string }).author || 'SocialMate Team',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'SocialMate',
+      url: 'https://socialmate.studio',
+      logo: { '@type': 'ImageObject', url: 'https://socialmate.studio/icon.png' },
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `https://socialmate.studio/blog/${slug}`,
+    },
+  }
+
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
       <nav className="border-b border-gray-100 dark:border-gray-800 px-8 py-4 flex items-center justify-between sticky top-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur z-40">
         <Link href="/" className="flex items-center gap-2">
           <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
