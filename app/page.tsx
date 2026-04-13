@@ -271,7 +271,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Platform support</p>
             <h2 className="text-3xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">5 live now, 11 coming soon.</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 max-w-lg mx-auto">
-              5 platforms live now. LinkedIn, YouTube, Pinterest, and Reddit arriving very soon. 7 more on the roadmap.
+              5 platforms live now. YouTube, Reddit, and Threads are next up. More on the roadmap.
             </p>
           </div>
           <div className="space-y-6">
@@ -310,6 +310,82 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CLIPS STUDIO */}
+      <section className="py-20 bg-gradient-to-br from-purple-950 via-gray-950 to-black text-white">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="text-center mb-14">
+            <div className="inline-flex items-center gap-2 bg-purple-900/60 border border-purple-700/50 text-purple-300 text-xs font-bold px-4 py-2 rounded-full mb-6">
+              🎬 Built for streamers &amp; content creators
+            </div>
+            <h2 className="text-3xl font-extrabold tracking-tight mb-4">
+              From clip to scheduled post.<br className="hidden sm:block" /> No extra tabs.
+            </h2>
+            <p className="text-gray-400 text-sm max-w-xl mx-auto leading-relaxed">
+              Browse your Twitch clips or YouTube videos directly inside SocialMate and
+              schedule them to 5 platforms in one click. No downloading. No app-switching.
+              No copy-pasting URLs into five different tabs.
+            </p>
+          </div>
+
+          {/* Three feature cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-purple-500/40 transition-all">
+              <div className="text-3xl mb-3">🟣</div>
+              <h3 className="font-bold text-base mb-2">Twitch Clips</h3>
+              <p className="text-sm text-gray-400 leading-relaxed">
+                Connect your Twitch account and your top clips appear in a thumbnail grid —
+                view counts, duration, everything. Hit Schedule and you&apos;re done.
+              </p>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-red-500/40 transition-all">
+              <div className="text-3xl mb-3">▶️</div>
+              <h3 className="font-bold text-base mb-2">YouTube Videos</h3>
+              <p className="text-sm text-gray-400 leading-relaxed">
+                Paste your channel URL — that&apos;s it. No API key, no approval process, no
+                developer account. Your latest public videos load instantly and are ready to schedule.
+              </p>
+            </div>
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-blue-500/40 transition-all">
+              <div className="text-3xl mb-3">🔍</div>
+              <h3 className="font-bold text-base mb-2">Search Any Channel</h3>
+              <p className="text-sm text-gray-400 leading-relaxed">
+                You don&apos;t even need to own the channel. Search any Twitch streamer&apos;s top clips
+                and schedule them directly — perfect for clippers and fan accounts.
+              </p>
+            </div>
+          </div>
+
+          {/* Workflow steps */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-12 text-center">
+            {[
+              { step: '1', label: 'Browse your clips' },
+              { step: '2', label: 'Pick one' },
+              { step: '3', label: 'Schedule to 5 platforms' },
+            ].map((item, i) => (
+              <div key={item.step} className="flex items-center gap-2 sm:gap-3">
+                <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5">
+                  <span className="text-xs font-bold text-purple-400">{item.step}</span>
+                  <span className="text-sm font-semibold text-white">{item.label}</span>
+                </div>
+                {i < 2 && (
+                  <span className="text-gray-600 text-lg hidden sm:block">→</span>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* CTA */}
+          <div className="text-center">
+            <Link
+              href="/signup"
+              className="inline-block bg-purple-600 hover:bg-purple-500 text-white font-bold px-8 py-3.5 rounded-2xl transition-all text-sm">
+              Try Clips Studio free →
+            </Link>
+            <p className="text-xs text-gray-600 mt-3">Free on all plans · Twitch OAuth · YouTube via channel URL</p>
           </div>
         </div>
       </section>
