@@ -1,7 +1,5 @@
 'use client'
 import { useState } from 'react'
-import Link from 'next/link'
-import PublicFooter from '@/components/PublicFooter'
 
 type RoadmapItem = {
   title:    string
@@ -36,14 +34,22 @@ const ROADMAP: RoadmapItem[] = [
   { title: 'SOC 2 compliance',           desc: 'Security certification for enterprise white label clients. Required for larger agency contracts.',                status: 'planned',      category: 'Platform'      },
 
   // ── SHIPPED ───────────────────────────────────────────────
+  { title: 'Landing pages in nav',       desc: 'Direct links to For Streamers, For Agencies, For Small Business, and Enki in the top nav — no dropdown, just visible links with a clean divider.', status: 'shipped', category: 'Design' },
+  { title: '4-column footer redesign',   desc: 'Organized footer with Product / Solutions / Company / Legal columns across all public pages (PublicLayout + PublicFooter).', status: 'shipped', category: 'Design' },
+  { title: 'For Streamers landing page', desc: 'SEO landing page targeting streamers — Twitch clip scheduling, platform grid, how-it-works section, pricing cards, and FAQ.', status: 'shipped', category: 'Growth' },
+  { title: 'For Agencies landing page',  desc: 'SEO landing page for agencies — competitor comparison table vs Sprout/Hootsuite/Sendible, white label callout, feature grid.', status: 'shipped', category: 'Growth' },
+  { title: 'For Small Business landing page', desc: 'SEO landing page targeting local businesses — persona pills, pain point comparison, pricing grid, and CTA.', status: 'shipped', category: 'Growth' },
+  { title: 'Referral page redesign',     desc: 'Auth-aware referral page: logged-in users see their live referral link, 3-stat dashboard, milestone progress bar, and payout history.', status: 'shipped', category: 'Growth' },
+  { title: 'Live user stats counter',    desc: 'Public-facing stats pill on the home page showing total users by plan and posts published — updates in real time from Supabase.', status: 'shipped', category: 'Growth' },
   { title: 'Onboarding email sequence',  desc: '3-email drip via Inngest + Resend: welcome on Day 0, AI tools showcase on Day 3, personal upgrade nudge from Joshua on Day 7.', status: 'shipped', category: 'Growth' },
   { title: 'Gilgamesh\'s Guide waitlist', desc: 'Landing page at /gilgamesh for Joshua\'s free entrepreneurship guide. Email waitlist with Supabase capture.', status: 'shipped', category: 'Platform' },
   { title: '/support page',              desc: 'Public FAQ with 10-question accordion, contact card, and quick links to pricing, features, partners, and blog.', status: 'shipped', category: 'Platform' },
   { title: '/changelog page',            desc: 'Public-facing release history in timeline layout with color-coded New/Improved/Fixed badges. Fully static, ships with every update.', status: 'shipped', category: 'Platform' },
   { title: 'Affiliate activity dashboard', desc: 'Admin view showing last referral date, total conversions, and active paying referrals per affiliate. Includes warning email system and deactivate button.', status: 'shipped', category: 'Growth' },
-  { title: 'Studio Stax free year approval', desc: 'Admin one-click "Approve Free (1yr)" grants a free annual listing, sets free_until in Supabase, and sends a congratulatory email to the lister.', status: 'shipped', category: 'Platform' },
+  { title: 'Studio Stax featured spots', desc: 'Admin one-click featured placement + age-weighted donation formula for organic ranking. Admin toggle UI in /admin/studio-stax.', status: 'shipped', category: 'Platform' },
   { title: 'Twitch clip scheduling',     desc: 'OAuth connect flow, clip browser with thumbnail grid, and one-click scheduling of Twitch clips directly to any platform.', status: 'shipped', category: 'Media' },
   { title: 'YouTube clip browser',       desc: 'RSS-based YouTube clip discovery — no API key required. Browse any channel\'s videos and schedule them in one click.', status: 'shipped', category: 'Media' },
+  { title: 'Public Twitch clip search',  desc: '"Search Any Channel" on /clips — browse any Twitch channel\'s clips without connecting an account. Quota-gated with progress bar.', status: 'shipped', category: 'Media' },
   { title: 'Discord Hub',               desc: 'Manage multiple Discord servers, view per-server analytics, and post to any server from the SocialMate dashboard.', status: 'shipped', category: 'Platforms' },
   { title: 'X (Twitter) publishing',    desc: 'X API v2 pay-per-use ($0.01/tweet) with monthly quotas (Free: 50, Pro: 200, Agency: 500). Per-workspace quota enforcement.', status: 'shipped', category: 'Platforms' },
   { title: 'Notifications system',       desc: 'Bell icon with unread badge in sidebar. Post published/failed alerts fired via Inngest and delivered in real time.', status: 'shipped', category: 'Platform' },
@@ -76,10 +82,10 @@ const ROADMAP: RoadmapItem[] = [
 ]
 
 const STATUS_CONFIG = {
-  'in-progress': { label: 'In Progress', color: 'bg-blue-100 text-blue-700',    dot: 'bg-blue-500'  },
+  'in-progress': { label: 'In Progress', color: 'bg-blue-100 text-blue-700',    dot: 'bg-blue-500'   },
   'coming-soon': { label: 'Coming Soon', color: 'bg-yellow-100 text-yellow-700', dot: 'bg-yellow-500' },
-  'planned':     { label: 'Planned',     color: 'bg-gray-100 text-gray-500',    dot: 'bg-gray-400'  },
-  'shipped':     { label: 'Shipped',     color: 'bg-green-100 text-green-700',  dot: 'bg-green-500' },
+  'planned':     { label: 'Planned',     color: 'bg-gray-100 text-gray-500',    dot: 'bg-gray-400'   },
+  'shipped':     { label: 'Shipped ✅',  color: 'bg-green-100 text-green-700',  dot: 'bg-green-500'  },
 }
 
 const ORDER: RoadmapItem['status'][] = ['in-progress', 'coming-soon', 'planned', 'shipped']
@@ -106,175 +112,127 @@ export default function RoadmapClient() {
       setFeedbackText('')
       setFeedbackEmail('')
     } catch {
-      // Silently fail
       setFeedbackSent(true)
     } finally {
       setSending(false)
     }
   }
 
-  const publicNav = (
-    <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
-      <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-black dark:bg-white rounded-lg flex items-center justify-center text-white dark:text-black text-sm font-bold">S</div>
-          <span className="font-bold text-base tracking-tight text-gray-900 dark:text-gray-100">SocialMate</span>
-        </Link>
-        <nav className="hidden md:flex items-center gap-1">
-          {[
-            { label: 'Features',    href: '/features'    },
-            { label: 'Pricing',     href: '/pricing'     },
-            { label: 'Studio Stax', href: '/studio-stax' },
-            { label: 'Roadmap',     href: '/roadmap'     },
-            { label: 'Blog',        href: '/blog'        },
-            { label: 'Our Story',   href: '/story'       },
-          ].map(l => (
-            <Link key={l.label} href={l.href}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                l.href === '/roadmap'
-                  ? 'bg-gray-900 dark:bg-white text-white dark:text-black'
-                  : 'text-gray-500 hover:text-black dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800'
-              }`}>
-              {l.label}
-            </Link>
-          ))}
-        </nav>
-        <div className="flex items-center gap-3">
-          <Link href="/give" className="text-sm font-semibold text-rose-400 hover:text-rose-300 transition-all hidden sm:block">❤️ Give</Link>
-          <Link href="/login"  className="text-sm font-semibold text-gray-500 hover:text-black dark:hover:text-white transition-all hidden sm:block">Sign in</Link>
-          <Link href="/signup" className="bg-black dark:bg-white text-white dark:text-black text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
-            Get started free →
-          </Link>
-        </div>
-      </div>
-    </header>
-  )
-
-  const roadmapContent = (
+  return (
     <div className="max-w-4xl mx-auto px-6 py-16">
 
-        {/* HERO */}
-        <div className="mb-14">
-          <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Public roadmap</p>
-          <h1 className="text-4xl font-extrabold tracking-tight mb-4 text-gray-900 dark:text-gray-100">What we're building</h1>
-          <p className="text-gray-500 dark:text-gray-400 text-sm max-w-2xl leading-relaxed mb-8">
-            SocialMate is built in public. This is what's in progress, what's coming next, what's planned,
-            and what's already shipped. Feature requests welcome at the bottom.
-          </p>
+      {/* HERO */}
+      <div className="mb-14">
+        <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Public roadmap</p>
+        <h1 className="text-4xl font-extrabold tracking-tight mb-4 text-gray-900 dark:text-gray-100">What we're building</h1>
+        <p className="text-gray-500 dark:text-gray-400 text-sm max-w-2xl leading-relaxed mb-8">
+          SocialMate is built in public. This is what's in progress, what's coming next, what's planned,
+          and what's already shipped. Feature requests welcome at the bottom.
+        </p>
 
-          {/* Beta milestone */}
-          <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 max-w-2xl">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Beta milestone — exit to v1.0</p>
-              <span className="text-xs font-bold text-gray-500 dark:text-gray-400">Goal: 500 users</span>
-            </div>
-            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
-              <div className="bg-black dark:bg-white h-2 rounded-full transition-all" style={{ width: '4%' }} />
-            </div>
-            <p className="text-xs text-gray-400 dark:text-gray-500 leading-relaxed">
-              When we hit 500 users, SocialMate exits beta — full v1.0 release, expanded platform support, and locked-in pricing for everyone who joined early.
-            </p>
+        {/* Beta milestone */}
+        <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 max-w-2xl">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Beta milestone — exit to v1.0</p>
+            <span className="text-xs font-bold text-gray-500 dark:text-gray-400">Goal: 500 users</span>
           </div>
+          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 mb-2">
+            <div className="bg-black dark:bg-white h-2 rounded-full transition-all" style={{ width: '4%' }} />
+          </div>
+          <p className="text-xs text-gray-400 dark:text-gray-500 leading-relaxed">
+            When we hit 500 users, SocialMate exits beta — full v1.0 release, expanded platform support, and locked-in pricing for everyone who joined early.
+          </p>
         </div>
+      </div>
 
-        {/* STATUS LEGEND */}
-        <div className="flex flex-wrap gap-3 mb-12">
-          {ORDER.map(s => {
-            const cfg = STATUS_CONFIG[s]
-            const count = ROADMAP.filter(i => i.status === s).length
-            return (
-              <div key={s} className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold ${cfg.color}`}>
-                <div className={`w-2 h-2 rounded-full ${cfg.dot}`} />
-                {cfg.label} ({count})
-              </div>
-            )
-          })}
-        </div>
-
-        {/* SECTIONS */}
-        {ORDER.map(status => {
-          const items = ROADMAP.filter(i => i.status === status)
-          const cfg   = STATUS_CONFIG[status]
+      {/* STATUS LEGEND */}
+      <div className="flex flex-wrap gap-3 mb-12">
+        {ORDER.map(s => {
+          const cfg = STATUS_CONFIG[s]
+          const count = ROADMAP.filter(i => i.status === s).length
           return (
-            <div key={status} className="mb-12">
-              <div className="flex items-center gap-3 mb-6">
-                <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${cfg.dot}`} />
-                <h2 className="text-lg font-extrabold tracking-tight text-gray-900 dark:text-gray-100">{cfg.label}</h2>
-                <span className="text-xs font-bold text-gray-400 dark:text-gray-500">{items.length} item{items.length !== 1 ? 's' : ''}</span>
-              </div>
-              <div className="space-y-3">
-                {items.map((item, i) => (
-                  <div key={i} className="flex items-start gap-4 p-4 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl hover:border-gray-200 dark:hover:border-gray-600 transition-all">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">{item.title}</p>
-                        <span className="text-xs font-bold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">{item.category}</span>
-                        {item.status === 'shipped' && <span className="text-xs">✅</span>}
-                      </div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+            <div key={s} className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold ${cfg.color}`}>
+              <div className={`w-2 h-2 rounded-full ${cfg.dot}`} />
+              {cfg.label} ({count})
             </div>
           )
         })}
-
-        {/* FEATURE REQUEST FORM */}
-        <div className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 mt-8">
-          <h2 className="text-lg font-extrabold tracking-tight mb-2 text-gray-900 dark:text-gray-100">Request a feature</h2>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-5 leading-relaxed">
-            Have an idea that's not on the roadmap? Tell us. We read every submission and it genuinely shapes what we build.
-          </p>
-          {feedbackSent ? (
-            <div className="text-center py-6">
-              <div className="text-3xl mb-3">🙏</div>
-              <p className="text-sm font-extrabold mb-1">Got it — thank you!</p>
-              <p className="text-xs text-gray-500">We read every request.</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <textarea
-                value={feedbackText}
-                onChange={e => setFeedbackText(e.target.value)}
-                placeholder="What should we build? Be specific — the more detail, the better."
-                rows={4}
-                className="w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 rounded-xl resize-none focus:outline-none focus:border-gray-400 dark:focus:border-gray-400"
-              />
-              <input
-                type="email"
-                value={feedbackEmail}
-                onChange={e => setFeedbackEmail(e.target.value)}
-                placeholder="Your email (optional — we'll update you when it ships)"
-                className="w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 rounded-xl focus:outline-none focus:border-gray-400 dark:focus:border-gray-400"
-              />
-              <button
-                onClick={submitRequest}
-                disabled={!feedbackText.trim() || sending}
-                className="bg-pink-500 text-white text-sm font-bold px-6 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
-                {sending ? 'Sending...' : 'Submit idea →'}
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* SM-Give strip */}
-        <div className="border-t border-gray-100 dark:border-gray-800 mt-16 pt-10 pb-4">
-          <div className="max-w-4xl mx-auto px-6 text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              ❤️ <span className="font-semibold text-gray-700 dark:text-gray-300">2% of every SocialMate subscription</span> goes to SM-Give — our charity initiative.{' '}
-              <a href="/give" className="text-amber-500 hover:text-amber-400 font-semibold transition-colors">Learn about SM-Give →</a>
-            </p>
-          </div>
-        </div>
       </div>
-  )
 
-  return (
-    <div className="min-h-screen bg-white dark:bg-gray-950">
-      {publicNav}
-      {roadmapContent}
-      <PublicFooter />
+      {/* SECTIONS */}
+      {ORDER.map(status => {
+        const items = ROADMAP.filter(i => i.status === status)
+        const cfg   = STATUS_CONFIG[status]
+        return (
+          <div key={status} className="mb-12">
+            <div className="flex items-center gap-3 mb-6">
+              <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${cfg.dot}`} />
+              <h2 className="text-lg font-extrabold tracking-tight text-gray-900 dark:text-gray-100">{cfg.label}</h2>
+              <span className="text-xs font-bold text-gray-400 dark:text-gray-500">{items.length} item{items.length !== 1 ? 's' : ''}</span>
+            </div>
+            <div className="space-y-3">
+              {items.map((item, i) => (
+                <div key={i} className="flex items-start gap-4 p-4 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl hover:border-gray-200 dark:hover:border-gray-600 transition-all">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">{item.title}</p>
+                      <span className="text-xs font-bold text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full">{item.category}</span>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      })}
+
+      {/* FEATURE REQUEST FORM */}
+      <div className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 mt-8">
+        <h2 className="text-lg font-extrabold tracking-tight mb-2 text-gray-900 dark:text-gray-100">Request a feature</h2>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mb-5 leading-relaxed">
+          Have an idea that's not on the roadmap? Tell us. We read every submission and it genuinely shapes what we build.
+        </p>
+        {feedbackSent ? (
+          <div className="text-center py-6">
+            <div className="text-3xl mb-3">🙏</div>
+            <p className="text-sm font-extrabold mb-1">Got it — thank you!</p>
+            <p className="text-xs text-gray-500">We read every request.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <textarea
+              value={feedbackText}
+              onChange={e => setFeedbackText(e.target.value)}
+              placeholder="What should we build? Be specific — the more detail, the better."
+              rows={4}
+              className="w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 rounded-xl resize-none focus:outline-none focus:border-gray-400 dark:focus:border-gray-400"
+            />
+            <input
+              type="email"
+              value={feedbackEmail}
+              onChange={e => setFeedbackEmail(e.target.value)}
+              placeholder="Your email (optional — we'll update you when it ships)"
+              className="w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 rounded-xl focus:outline-none focus:border-gray-400 dark:focus:border-gray-400"
+            />
+            <button
+              onClick={submitRequest}
+              disabled={!feedbackText.trim() || sending}
+              className="bg-pink-500 text-white text-sm font-bold px-6 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
+              {sending ? 'Sending...' : 'Submit idea →'}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* SM-Give strip */}
+      <div className="border-t border-gray-100 dark:border-gray-800 mt-16 pt-10 pb-4 text-center">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          ❤️ <span className="font-semibold text-gray-700 dark:text-gray-300">2% of every SocialMate subscription</span> goes to SM-Give — our charity initiative.{' '}
+          <a href="/give" className="text-amber-500 hover:text-amber-400 font-semibold transition-colors">Learn about SM-Give →</a>
+        </p>
+      </div>
+
     </div>
   )
 }
