@@ -109,24 +109,6 @@ const COMPARISON = [
   { label: 'White label',             industry: 'Enterprise only',      socialmate: 'From $20/mo'         },
 ]
 
-const FOOTER_LINKS = [
-  { label: 'Features',    href: '/features'    },
-  { label: 'Pricing',     href: '/pricing'     },
-  { label: 'Studio Stax', href: '/studio-stax' },
-  { label: 'Enki',        href: '/enki'        },
-  { label: 'Roadmap',     href: '/roadmap'     },
-  { label: 'Changelog',   href: '/changelog'   },
-  { label: 'For Streamers',      href: '/for/streamers'      },
-  { label: 'For Agencies',       href: '/for/agencies'       },
-  { label: 'For Small Business', href: '/for/small-business' },
-  { label: 'Affiliate',          href: '/affiliate'          },
-  { label: 'Our Story',          href: '/story'              },
-  { label: 'Blog',        href: '/blog'        },
-  { label: 'SM-Give',           href: '/give'        },
-  { label: 'Gilgamesh\'s Guide', href: '/gilgamesh'  },
-  { label: 'Privacy',           href: '/privacy'     },
-  { label: 'Terms',       href: '/terms'       },
-]
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ ref?: string }> }) {
   const params = await searchParams
@@ -747,22 +729,54 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-gray-800 bg-black dark:bg-gray-950 dark:border-gray-800">
-        <div className="max-w-6xl mx-auto px-6 py-8 flex items-center justify-between flex-wrap gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-white rounded-lg flex items-center justify-center text-black text-xs font-bold">S</div>
+      <footer className="border-t border-gray-800 bg-black dark:bg-gray-950">
+        <div className="max-w-6xl mx-auto px-6 pt-10 pb-6">
+
+          {/* Top: logo + tagline */}
+          <div className="flex items-center gap-2 mb-8">
+            <div className="w-7 h-7 bg-white rounded-lg flex items-center justify-center text-black text-xs font-bold">S</div>
             <span className="text-sm font-bold text-white">SocialMate</span>
-            <span className="text-xs text-gray-500 ml-2">by Gilgamesh Enterprise LLC</span>
+            <span className="text-xs text-gray-500 ml-1">by Gilgamesh Enterprise LLC</span>
           </div>
-          <nav className="flex items-center gap-5 flex-wrap">
-            {FOOTER_LINKS.map(link => (
-              <Link key={link.label} href={link.href}
-                className="text-xs text-gray-500 hover:text-white transition-all">
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-          <div className="flex items-center gap-4 flex-wrap">
+
+          {/* Columns */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-10">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-gray-600 mb-3">Product</p>
+              <ul className="space-y-2">
+                {[['Features','/features'],['Pricing','/pricing'],['Roadmap','/roadmap'],['Clips Studio','/clips']].map(([label,href])=>(
+                  <li key={href}><Link href={href} className="text-sm text-gray-400 hover:text-white transition-colors">{label}</Link></li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-gray-600 mb-3">Solutions</p>
+              <ul className="space-y-2">
+                {[['For Streamers','/for/streamers'],['For Agencies','/for/agencies'],['For Small Business','/for/small-business'],['Studio Stax','/studio-stax']].map(([label,href])=>(
+                  <li key={href}><Link href={href} className="text-sm text-gray-400 hover:text-white transition-colors">{label}</Link></li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-gray-600 mb-3">Company</p>
+              <ul className="space-y-2">
+                {[['Our Story','/story'],['Blog','/blog'],['Affiliate','/affiliate'],['Referral','/referral']].map(([label,href])=>(
+                  <li key={href}><Link href={href} className="text-sm text-gray-400 hover:text-white transition-colors">{label}</Link></li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-gray-600 mb-3">Legal</p>
+              <ul className="space-y-2">
+                <li><Link href="/privacy" className="text-sm text-gray-400 hover:text-white transition-colors">Privacy</Link></li>
+                <li><Link href="/terms" className="text-sm text-gray-400 hover:text-white transition-colors">Terms</Link></li>
+                <li><Link href="/give" className="text-sm text-rose-400 hover:text-rose-300 font-medium transition-colors">❤️ SM-Give</Link></li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom bar */}
+          <div className="flex items-center justify-between flex-wrap gap-4 pt-6 border-t border-gray-800">
             <a href="https://www.producthunt.com/posts/socialmate-2"
               target="_blank" rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#FF6154] hover:bg-[#e5564a] text-white text-xs font-semibold rounded-lg transition-colors">
@@ -771,8 +785,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
               </svg>
               Featured on Product Hunt
             </a>
-            <p className="text-xs text-gray-600">© 2026 SocialMate</p>
+            <p className="text-xs text-gray-600">© 2026 SocialMate · All rights reserved</p>
           </div>
+
         </div>
       </footer>
 
