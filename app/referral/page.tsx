@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
-import { createClient } from '@/lib/supabase-browser'
+import { supabase } from '@/lib/supabase'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
 
@@ -48,8 +48,6 @@ const FAQ = [
 ]
 
 export default function ReferralPage() {
-  const supabase = createClient()
-
   const [userId, setUserId]           = useState<string | null>(null)
   const [referralCode, setReferralCode] = useState<string | null>(null)
   const [copied, setCopied]           = useState(false)
