@@ -2,7 +2,10 @@ import PublicNav from './PublicNav'
 import PHLaunchBanner from './PHLaunchBanner'
 import Link from 'next/link'
 
-const FOOTER_COLUMNS = [
+type FooterLink = { label: string; href: string; rose?: boolean }
+type FooterColumn = { heading: string; links: FooterLink[] }
+
+const FOOTER_COLUMNS: FooterColumn[] = [
   {
     heading: 'Product',
     links: [
@@ -163,7 +166,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
                       <Link
                         href={link.href}
                         className={`text-sm transition-colors ${
-                          (link as { rose?: boolean }).rose
+                          link.rose
                             ? 'text-rose-400 hover:text-rose-300 font-medium'
                             : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
                         }`}
