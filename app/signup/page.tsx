@@ -28,6 +28,8 @@ function SignupForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
+  const redirectTo = searchParams.get('redirect') || ''
+
   useEffect(() => {
     const ref = searchParams.get('ref')
     if (ref) setRefCode(ref)
@@ -37,10 +39,13 @@ function SignupForm() {
     if (!ageConfirmed) { setError('Please confirm you are 13 or older to continue'); return }
     setGoogleLoading(true)
     setError('')
+    const callbackUrl = redirectTo
+      ? `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirectTo)}`
+      : `${window.location.origin}/auth/callback`
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: callbackUrl,
       },
     })
     if (error) {
@@ -78,7 +83,9 @@ function SignupForm() {
       email: email.trim(),
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: redirectTo
+          ? `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirectTo)}`
+          : `${window.location.origin}/auth/callback`,
         data: { referral_code: refCode || null, newsletter_opted_in: newsletterOptIn },
       },
     })
