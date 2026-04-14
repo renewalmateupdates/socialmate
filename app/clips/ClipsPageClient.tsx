@@ -112,7 +112,7 @@ export default function ClipsPage() {
     async function loadConnection() {
       setLoadingConn(true)
       const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { setLoadingConn(false); return }
+      if (!user) { router.replace('/login'); return }
 
       const { data } = await supabase
         .from('clip_connections')
