@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import PublicFooter from '@/components/PublicFooter'
 
 export const metadata = {
   title: 'Privacy Policy — SocialMate',
@@ -296,11 +297,8 @@ export default function PrivacyPolicy() {
 
         </div>
 
-        <div className="mt-16 pt-8 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between">
-          <p className="text-xs text-gray-400">© 2026 Gilgamesh Enterprise LLC. All rights reserved.</p>
-          <Link href="/terms" className="text-xs font-semibold text-black dark:text-gray-100 hover:underline">Terms of Service →</Link>
-        </div>
       </div>
     </div>
+    <PublicFooter />
   )
 }

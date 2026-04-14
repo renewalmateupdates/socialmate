@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Fedica (2026) — Full Comparison',
@@ -213,24 +214,8 @@ export default function VsFedicaPage() {
           <p className="text-gray-600 text-xs mt-3">No card required · Free forever</p>
         </div>
       </div>
-
       {/* FOOTER */}
-      <footer className="border-t border-gray-100 dark:border-gray-800 py-8">
-        <div className="max-w-5xl mx-auto px-6 flex items-center justify-between flex-wrap gap-4">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">S</div>
-            <span className="font-bold text-sm tracking-tight dark:text-gray-100">SocialMate</span>
-          </Link>
-          <div className="flex items-center gap-6 text-xs text-gray-400 dark:text-gray-500">
-            <Link href="/pricing" className="hover:text-black dark:hover:text-white transition-colors">Pricing</Link>
-            <Link href="/vs/buffer" className="hover:text-black dark:hover:text-white transition-colors">vs Buffer</Link>
-            <Link href="/vs/nuelink" className="hover:text-black dark:hover:text-white transition-colors">vs Nuelink</Link>
-            <Link href="/vs/iconosquare" className="hover:text-black dark:hover:text-white transition-colors">vs Iconosquare</Link>
-            <Link href="/vs/statusbrew" className="hover:text-black dark:hover:text-white transition-colors">vs Statusbrew</Link>
-            <Link href="/blog" className="hover:text-black dark:hover:text-white transition-colors">Blog</Link>
-          </div>
-        </div>
-      </footer>
+      <PublicFooter />
     </div>
   )
 }

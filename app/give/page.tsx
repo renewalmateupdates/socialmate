@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import PublicFooter from '@/components/PublicFooter'
 
 // Amber/warm design tokens
 const amber   = '#F59E0B'
@@ -319,15 +320,7 @@ export default function GivePage() {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer style={{
-        padding: '24px', borderTop: `1px solid ${border}`,
-        textAlign: 'center', marginTop: 'auto',
-      }}>
-        <p style={{ fontSize: 12, color: '#374151', margin: 0 }}>
-          © {new Date().getFullYear()} Gilgamesh Enterprise LLC · SocialMate · SM-Give Initiative
-        </p>
-      </footer>
+      <PublicFooter />
 
     </div>
   )
