@@ -9,13 +9,74 @@ const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
+type RiskPreset = 'conservative' | 'balanced' | 'aggressive'
+
 interface Profile {
   tier: 'citizen' | 'commander' | 'emperor'
   guardian_mode: 'approval' | 'autonomous' | 'dormant'
   alpaca_connected: boolean
   coinbase_connected: boolean
   cloud_runner: boolean
+  risk_preset: RiskPreset
 }
+
+const RISK_PRESETS: {
+  id: RiskPreset
+  emoji: string
+  label: string
+  description: string
+  confidence: string
+  positionSize: string
+  dailyKill: string
+  weeklyBreaker: string
+  trailingStop: string
+  borderSelected: string
+  bgSelected: string
+  textAccent: string
+}[] = [
+  {
+    id: 'conservative',
+    emoji: '🛡️',
+    label: 'Conservative',
+    description: 'Capital preservation first. Tight limits, high conviction only.',
+    confidence: '8 / 10',
+    positionSize: '2%',
+    dailyKill: '2%',
+    weeklyBreaker: '5%',
+    trailingStop: 'Tight',
+    borderSelected: 'border-blue-400',
+    bgSelected: 'bg-blue-50 dark:bg-blue-950/20',
+    textAccent: 'text-blue-500',
+  },
+  {
+    id: 'balanced',
+    emoji: '⚖️',
+    label: 'Balanced',
+    description: 'Steady growth with disciplined risk management. Recommended for most.',
+    confidence: '6 / 10',
+    positionSize: '5%',
+    dailyKill: '3%',
+    weeklyBreaker: '8%',
+    trailingStop: 'Medium',
+    borderSelected: 'border-amber-400',
+    bgSelected: 'bg-amber-50 dark:bg-amber-950/20',
+    textAccent: 'text-amber-400',
+  },
+  {
+    id: 'aggressive',
+    emoji: '🔥',
+    label: 'Aggressive',
+    description: 'Maximum upside. Larger positions, wider stops, lower confidence bar.',
+    confidence: '4 / 10',
+    positionSize: '10%',
+    dailyKill: '5%',
+    weeklyBreaker: '12%',
+    trailingStop: 'Loose',
+    borderSelected: 'border-red-400',
+    bgSelected: 'bg-red-50 dark:bg-red-950/20',
+    textAccent: 'text-red-400',
+  },
+]
 
 const TIER_LABEL: Record<string, string> = {
   citizen:   'Citizen',
@@ -57,12 +118,15 @@ const TIER_FEATURES: Record<string, string[]> = {
 
 export default function EnkiSettingsPage() {
   const router = useRouter()
-  const [loading, setLoading]     = useState(true)
-  const [saving, setSaving]       = useState(false)
-  const [authed, setAuthed]       = useState(false)
-  const [profile, setProfile]     = useState<Profile | null>(null)
-  const [mode, setMode]           = useState<'approval' | 'autonomous' | 'dormant'>('approval')
-  const [saved, setSaved]         = useState(false)
+  const [loading, setLoading]       = useState(true)
+  const [saving, setSaving]         = useState(false)
+  const [authed, setAuthed]         = useState(false)
+  const [profile, setProfile]       = useState<Profile | null>(null)
+  const [mode, setMode]             = useState<'approval' | 'autonomous' | 'dormant'>('approval')
+  const [saved, setSaved]           = useState(false)
+  const [riskPreset, setRiskPreset] = useState<RiskPreset>('balanced')
+  const [presetSaving, setPresetSaving] = useState(false)
+  const [presetSaved, setPresetSaved]   = useState(false)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -80,6 +144,7 @@ export default function EnkiSettingsPage() {
       if (json.profile) {
         setProfile(json.profile)
         setMode(json.profile.guardian_mode)
+        setRiskPreset(json.profile.risk_preset ?? 'balanced')
       }
     } catch (e) {
       console.error('Enki settings load error:', e)
@@ -104,6 +169,25 @@ export default function EnkiSettingsPage() {
       console.error('Save error:', e)
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function savePreset(preset: RiskPreset) {
+    setRiskPreset(preset)
+    setPresetSaving(true)
+    try {
+      await fetch('/api/enki/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ risk_preset: preset }),
+      })
+      setProfile(p => p ? { ...p, risk_preset: preset } : p)
+      setPresetSaved(true)
+      setTimeout(() => setPresetSaved(false), 2500)
+    } catch (e) {
+      console.error('Preset save error:', e)
+    } finally {
+      setPresetSaving(false)
     }
   }
 
@@ -189,6 +273,69 @@ export default function EnkiSettingsPage() {
               </Link>
             </div>
           )}
+        </div>
+
+        {/* Risk Profile */}
+        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">Risk Profile</h2>
+          <p className="text-sm text-gray-500 mb-5">
+            Choose how aggressively Enki trades. These thresholds apply when trades execute.
+            {presetSaving && <span className="ml-2 text-amber-400 text-xs">Saving…</span>}
+            {presetSaved && <span className="ml-2 text-green-500 text-xs font-medium">Saved</span>}
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {RISK_PRESETS.map(preset => {
+              const isSelected = riskPreset === preset.id
+              return (
+                <button
+                  key={preset.id}
+                  onClick={() => savePreset(preset.id)}
+                  disabled={presetSaving}
+                  className={`text-left p-4 rounded-xl border-2 transition-all focus:outline-none disabled:opacity-60 ${
+                    isSelected
+                      ? `${preset.borderSelected} ${preset.bgSelected}`
+                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-lg leading-none">{preset.emoji}</span>
+                    <span className={`text-sm font-bold ${isSelected ? preset.textAccent : 'text-gray-900 dark:text-gray-100'}`}>
+                      {preset.label}
+                    </span>
+                    {preset.id === 'balanced' && (
+                      <span className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 font-semibold px-1.5 py-0.5 rounded-full">
+                        Default
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-gray-500 mb-3">{preset.description}</p>
+                  <dl className="space-y-1">
+                    <div className="flex justify-between text-xs">
+                      <dt className="text-gray-400">Confidence</dt>
+                      <dd className={`font-semibold ${isSelected ? preset.textAccent : 'text-gray-700 dark:text-gray-300'}`}>{preset.confidence}</dd>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <dt className="text-gray-400">Position size</dt>
+                      <dd className={`font-semibold ${isSelected ? preset.textAccent : 'text-gray-700 dark:text-gray-300'}`}>{preset.positionSize}</dd>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <dt className="text-gray-400">Daily kill</dt>
+                      <dd className={`font-semibold ${isSelected ? preset.textAccent : 'text-gray-700 dark:text-gray-300'}`}>{preset.dailyKill}</dd>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <dt className="text-gray-400">Weekly breaker</dt>
+                      <dd className={`font-semibold ${isSelected ? preset.textAccent : 'text-gray-700 dark:text-gray-300'}`}>{preset.weeklyBreaker}</dd>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <dt className="text-gray-400">Trailing stop</dt>
+                      <dd className={`font-semibold ${isSelected ? preset.textAccent : 'text-gray-700 dark:text-gray-300'}`}>{preset.trailingStop}</dd>
+                    </div>
+                  </dl>
+                </button>
+              )
+            })}
+          </div>
         </div>
 
         {/* Guardian mode */}
