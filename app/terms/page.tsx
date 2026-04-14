@@ -308,7 +308,7 @@ export default function TermsOfService() {
         </div>
 
       </div>
+      <PublicFooter />
     </div>
-    <PublicFooter />
   )
 }
