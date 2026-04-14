@@ -7,7 +7,7 @@ import { WorkspaceProvider } from '@/contexts/WorkspaceContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { Analytics } from '@vercel/analytics/next'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
 
@@ -137,7 +137,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Pinterest domain verification */}
         <meta name="p:domain_verify" content="36117bcd9adbfb7d01695c4aa0266d3c" />
       </head>
-      <body className={inter.className}>
+      <body className={`${inter.variable} ${inter.className}`}>
         <ThemeProvider>
           <WorkspaceProvider>
             {children}
