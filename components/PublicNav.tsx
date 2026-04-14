@@ -16,6 +16,7 @@ const LANDING_LINKS = [
   { label: 'Agencies',    href: '/for/agencies'        },
   { label: 'Small Biz',   href: '/for/small-business'  },
   { label: 'Enki',        href: '/enki'                },
+  { label: "Gil's Guide", href: '/gilgamesh'           },
 ]
 
 export default function PublicNav() {
@@ -159,6 +160,7 @@ export default function PublicNav() {
                   { label: '🏢 For Agencies',        href: '/for/agencies'       },
                   { label: '🏪 For Small Business',  href: '/for/small-business' },
                   { label: '◆ Enki',                href: '/enki'               },
+                  { label: '📖 Gil\'s Guide',        href: '/gilgamesh'          },
                 ].map(link => (
                   <Link key={link.href} href={link.href}
                     onClick={() => setOpen(false)}
