@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
+import PublicLayout from '@/components/PublicLayout'
 import RoadmapClient from './RoadmapClient'
 
 export const metadata: Metadata = {
@@ -14,5 +14,9 @@ export const metadata: Metadata = {
 }
 
 export default function RoadmapPage() {
-  return <RoadmapClient />
+  return (
+    <PublicLayout>
+      <RoadmapClient />
+    </PublicLayout>
+  )
 }
