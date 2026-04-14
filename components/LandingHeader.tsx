@@ -16,6 +16,7 @@ const LANDING_LINKS = [
   { label: 'Agencies',   href: '/for/agencies'        },
   { label: 'Small Biz',  href: '/for/small-business'  },
   { label: 'Enki',       href: '/enki'                },
+  { label: "Gil's Guide", href: '/gilgamesh'          },
 ]
 
 export default function LandingHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
@@ -130,6 +131,7 @@ export default function LandingHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
               { label: '🏢 For Agencies',       href: '/for/agencies'       },
               { label: '🏪 For Small Business', href: '/for/small-business' },
               { label: '◆ Enki',               href: '/enki'               },
+              { label: "📖 Gil's Guide",        href: '/gilgamesh'          },
             ].map(link => (
               <Link key={link.href} href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
