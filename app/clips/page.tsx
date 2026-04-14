@@ -31,7 +31,7 @@ export default async function Page() {
     { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
   )
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
+  if (!user) redirect('/login?redirect=/clips')
 
   return (
     <Suspense fallback={
