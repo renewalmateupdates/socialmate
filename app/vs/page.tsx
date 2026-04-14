@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Other Social Media Tools (2026) — Full Comparisons',
