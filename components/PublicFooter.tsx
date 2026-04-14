@@ -1,6 +1,9 @@
 import Link from 'next/link'
 
-const FOOTER_COLUMNS = [
+type FooterLink = { label: string; href: string; rose?: boolean }
+type FooterColumn = { heading: string; links: FooterLink[] }
+
+const FOOTER_COLUMNS: FooterColumn[] = [
   {
     heading: 'Product',
     links: [
