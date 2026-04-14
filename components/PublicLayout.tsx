@@ -2,21 +2,42 @@ import PublicNav from './PublicNav'
 import PHLaunchBanner from './PHLaunchBanner'
 import Link from 'next/link'
 
-const FOOTER_LINKS = [
-  { label: 'Features',  href: '/features'  },
-  { label: 'Pricing',   href: '/pricing'   },
-  { label: 'Roadmap',   href: '/roadmap'   },
-  { label: 'Studio Stax', href: '/studio-stax' },
-  { label: 'For Streamers',     href: '/for/streamers'      },
-  { label: 'For Agencies',      href: '/for/agencies'       },
-  { label: 'For Small Business', href: '/for/small-business' },
-  { label: 'Clips Studio',      href: '/clips'              },
-  { label: 'Affiliate', href: '/affiliate' },
-  { label: 'Referral',  href: '/referral'  },
-  { label: 'Our Story', href: '/story'     },
-  { label: 'Blog',      href: '/blog'      },
-  { label: 'Privacy',   href: '/privacy'   },
-  { label: 'Terms',     href: '/terms'     },
+const FOOTER_COLUMNS = [
+  {
+    heading: 'Product',
+    links: [
+      { label: 'Features',     href: '/features' },
+      { label: 'Pricing',      href: '/pricing'  },
+      { label: 'Roadmap',      href: '/roadmap'  },
+      { label: 'Clips Studio', href: '/clips'    },
+    ],
+  },
+  {
+    heading: 'Solutions',
+    links: [
+      { label: 'For Streamers',     href: '/for/streamers'      },
+      { label: 'For Agencies',      href: '/for/agencies'       },
+      { label: 'For Small Business', href: '/for/small-business' },
+      { label: 'Studio Stax',       href: '/studio-stax'        },
+    ],
+  },
+  {
+    heading: 'Company',
+    links: [
+      { label: 'Our Story', href: '/story'     },
+      { label: 'Blog',      href: '/blog'      },
+      { label: 'Affiliate', href: '/affiliate' },
+      { label: 'Referral',  href: '/referral'  },
+    ],
+  },
+  {
+    heading: 'Legal',
+    links: [
+      { label: 'Privacy', href: '/privacy' },
+      { label: 'Terms',   href: '/terms'   },
+      { label: '❤️ SM-Give', href: '/give', rose: true },
+    ],
+  },
 ]
 
 const SOCIALS = [
@@ -129,18 +150,32 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
             </div>
           </div>
 
-          {/* Nav links */}
-          <nav className="flex items-center gap-x-5 gap-y-2 flex-wrap mb-8">
-            {FOOTER_LINKS.map(link => (
-              <Link key={link.label} href={link.href}
-                className="text-xs text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white transition-all">
-                {link.label}
-              </Link>
+          {/* Nav columns */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-10">
+            {FOOTER_COLUMNS.map(col => (
+              <div key={col.heading}>
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-3">
+                  {col.heading}
+                </p>
+                <ul className="space-y-2">
+                  {col.links.map(link => (
+                    <li key={link.label}>
+                      <Link
+                        href={link.href}
+                        className={`text-sm transition-colors ${
+                          (link as { rose?: boolean }).rose
+                            ? 'text-rose-400 hover:text-rose-300 font-medium'
+                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+                        }`}
+                      >
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
-            <Link href="/give" className="text-xs text-rose-400 hover:text-rose-300 font-semibold transition-all">
-              ❤️ SM-Give
-            </Link>
-          </nav>
+          </div>
 
           {/* Bottom row: badges + copyright */}
           <div className="flex items-center justify-between flex-wrap gap-4 pt-6 border-t border-gray-100 dark:border-gray-800">
