@@ -182,6 +182,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/support`,            lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${base}/changelog`,          lastModified: now, changeFrequency: 'weekly',  priority: 0.6 },
     { url: `${base}/clips`,              lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/create`,             lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/for/streamers`,      lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/for/agencies`,       lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/for/small-business`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
