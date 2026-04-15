@@ -222,6 +222,7 @@ export default function CalendarPage() {
 
           {/* Calendar grid */}
           <div className="bg-surface border border-theme rounded-2xl overflow-hidden mb-4">
+          <div className="overflow-x-auto"><div className="min-w-[320px]">
             <div className="grid grid-cols-7 border-b border-theme">
               {DAY_LABELS.map(day => (
                 <div key={day} className="py-2 text-center text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">
@@ -305,6 +306,8 @@ export default function CalendarPage() {
                 })}
               </div>
             )}
+          </div>{/* end min-w */}
+          </div>{/* end overflow-x-auto */}
           </div>
 
           {/* Empty state */}
