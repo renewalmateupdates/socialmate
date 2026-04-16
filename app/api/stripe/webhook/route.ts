@@ -33,6 +33,41 @@ const PRICE_TO_PLAN: Record<string, string> = {
   [STRIPE_AGENCY_ANNUAL_PRICE_ID]: 'agency',
 }
 
+// ── Enki price IDs ────────────────────────────────────────────────────────────
+const ENKI_COMMANDER_MONTHLY = 'price_1TMthL7OMwDowUuUndSIejcJ'
+const ENKI_COMMANDER_ANNUAL  = 'price_1TMthy7OMwDowUuURnoHc2Qq'
+const ENKI_EMPEROR_MONTHLY   = 'price_1TMtiN7OMwDowUuUU5rzK88L'
+const ENKI_EMPEROR_ANNUAL    = 'price_1TMtis7OMwDowUuUpQ2hZamc'
+const ENKI_CLOUD_RUNNER      = 'price_1TMtkc7OMwDowUuU8aepieuq'
+
+const ENKI_TIER_PRICES = new Set([
+  ENKI_COMMANDER_MONTHLY,
+  ENKI_COMMANDER_ANNUAL,
+  ENKI_EMPEROR_MONTHLY,
+  ENKI_EMPEROR_ANNUAL,
+])
+
+const ENKI_PRICE_TO_TIER: Record<string, string> = {
+  [ENKI_COMMANDER_MONTHLY]: 'commander',
+  [ENKI_COMMANDER_ANNUAL]:  'commander',
+  [ENKI_EMPEROR_MONTHLY]:   'emperor',
+  [ENKI_EMPEROR_ANNUAL]:    'emperor',
+}
+
+function resolveEnkiSubscription(subscription: Stripe.Subscription): {
+  tier: string | null
+  isCloudRunner: boolean
+} {
+  let tier: string | null = null
+  let isCloudRunner = false
+  for (const item of subscription.items.data) {
+    const pid = item.price.id
+    if (ENKI_TIER_PRICES.has(pid)) tier = ENKI_PRICE_TO_TIER[pid]
+    if (pid === ENKI_CLOUD_RUNNER)  isCloudRunner = true
+  }
+  return { tier, isCloudRunner }
+}
+
 const PLAN_CREDITS: Record<string, number> = {
   free:   50,
   pro:    500,
@@ -399,8 +434,11 @@ export async function POST(req: NextRequest) {
           Donate to SM-Give to climb the rankings (the more you give, the higher you appear in the directory).
         </p>
 
-        <a href="${listingUrl}" style="display:block;text-align:center;background:#111;color:#fff;font-weight:700;font-size:14px;padding:14px 24px;border-radius:12px;text-decoration:none;margin-bottom:24px;">
+        <a href="${listingUrl}" style="display:block;text-align:center;background:#111;color:#fff;font-weight:700;font-size:14px;padding:14px 24px;border-radius:12px;text-decoration:none;margin-bottom:12px;">
           View your listing in Studio Stax →
+        </a>
+        <a href="${appUrl}/studio-stax/portal" style="display:block;text-align:center;background:#f9fafb;color:#111;font-weight:700;font-size:14px;padding:14px 24px;border-radius:12px;text-decoration:none;border:1px solid #e5e7eb;margin-bottom:24px;">
+          Manage listing &amp; view analytics →
         </a>
 
         <div style="background:#f9fafb;border-radius:12px;padding:16px 20px;margin-bottom:24px;">
@@ -530,6 +568,41 @@ export async function POST(req: NextRequest) {
         console.warn('Credit pack affiliate commission failed (non-fatal):', err)
       }
 
+      return NextResponse.json({ received: true })
+    }
+
+    // ── Enki subscription ──
+    if (session.metadata?.enki === 'true') {
+      const { plan, user_id: enkiUserId } = session.metadata
+      if (enkiUserId && session.subscription) {
+        const subId      = session.subscription as string
+        const custId     = session.customer   as string
+        const isCloudRunner = plan === 'cloud_runner'
+
+        if (isCloudRunner) {
+          await supabase
+            .from('enki_profiles')
+            .update({
+              cloud_runner:         true,
+              cloud_runner_sub_id:  subId,
+              stripe_customer_id:   custId,
+              updated_at:           new Date().toISOString(),
+            })
+            .eq('user_id', enkiUserId)
+        } else {
+          const tier = plan === 'emperor' ? 'emperor' : 'commander'
+          await supabase
+            .from('enki_profiles')
+            .update({
+              tier,
+              stripe_customer_id:     custId,
+              stripe_subscription_id: subId,
+              updated_at:             new Date().toISOString(),
+            })
+            .eq('user_id', enkiUserId)
+        }
+        console.log(`[EnkiWebhook] ${plan} activated for user ${enkiUserId}`)
+      }
       return NextResponse.json({ received: true })
     }
 
@@ -675,9 +748,64 @@ const creditsToSet = alreadyOnPlan
     }
   }
 
+  // ── ENKI SUBSCRIPTION UPDATED ───────────────────────────────────────────────
+  if (event.type === 'customer.subscription.updated') {
+    const subscription = event.data.object as Stripe.Subscription
+    const { tier: enkiTier, isCloudRunner } = resolveEnkiSubscription(subscription)
+
+    if (enkiTier || isCloudRunner) {
+      if (subscription.status === 'active') {
+        if (enkiTier) {
+          await supabase
+            .from('enki_profiles')
+            .update({ tier: enkiTier, updated_at: new Date().toISOString() })
+            .eq('stripe_subscription_id', subscription.id)
+        }
+        if (isCloudRunner) {
+          await supabase
+            .from('enki_profiles')
+            .update({ cloud_runner: true, updated_at: new Date().toISOString() })
+            .eq('cloud_runner_sub_id', subscription.id)
+        }
+      } else if (['past_due', 'canceled', 'unpaid'].includes(subscription.status)) {
+        if (enkiTier) {
+          await supabase
+            .from('enki_profiles')
+            .update({ tier: 'citizen', stripe_subscription_id: null, updated_at: new Date().toISOString() })
+            .eq('stripe_subscription_id', subscription.id)
+        }
+        if (isCloudRunner) {
+          await supabase
+            .from('enki_profiles')
+            .update({ cloud_runner: false, cloud_runner_sub_id: null, updated_at: new Date().toISOString() })
+            .eq('cloud_runner_sub_id', subscription.id)
+        }
+      }
+      return NextResponse.json({ received: true })
+    }
+  }
+
   // ── SUBSCRIPTION DELETED ────────────────────────────────────────────────────
   if (event.type === 'customer.subscription.deleted') {
     const subscription = event.data.object as Stripe.Subscription
+
+    // Enki subscription cancelled — revert tier / cloud runner
+    const { tier: enkiTier, isCloudRunner } = resolveEnkiSubscription(subscription)
+    if (enkiTier) {
+      await supabase
+        .from('enki_profiles')
+        .update({ tier: 'citizen', stripe_subscription_id: null, updated_at: new Date().toISOString() })
+        .eq('stripe_subscription_id', subscription.id)
+      return NextResponse.json({ received: true })
+    }
+    if (isCloudRunner) {
+      await supabase
+        .from('enki_profiles')
+        .update({ cloud_runner: false, cloud_runner_sub_id: null, updated_at: new Date().toISOString() })
+        .eq('cloud_runner_sub_id', subscription.id)
+      return NextResponse.json({ received: true })
+    }
+
     const { isWhiteLabelOnly } = resolveSubscription(subscription)
 
     if (isWhiteLabelOnly) {
