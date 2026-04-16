@@ -1091,10 +1091,10 @@ export const enkiPaperTradingScan = inngest.createFunction(
           let confidence = 3 // neutral
           let side: 'buy' | 'sell' | 'neutral' = 'neutral'
 
-          if (changePct > 0.5) {
+          if (changePct > 0.04) {
             confidence = 7
             side = 'buy'
-          } else if (changePct < -0.5) {
+          } else if (changePct < -0.04) {
             confidence = 7
             side = 'sell'
           }

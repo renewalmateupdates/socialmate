@@ -188,6 +188,12 @@ export default function EnkiDashboardPage() {
               </>
             )}
             <Link
+              href="/enki/doctrines"
+              className="text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors"
+            >
+              Doctrines
+            </Link>
+            <Link
               href="/enki/leaderboard"
               className="text-xs font-bold text-gray-400 hover:text-amber-400 transition-colors"
             >

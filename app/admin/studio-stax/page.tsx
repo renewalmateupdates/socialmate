@@ -6,7 +6,9 @@ interface Listing {
   id: string
   name: string
   tagline: string | null
+  description: string | null
   url: string | null
+  logo_url: string | null
   category: string | null
   status: string
   applicant_name: string | null
@@ -46,6 +48,11 @@ export default function AdminStudioStaxPage() {
   const [selected, setSelected] = useState<Listing | null>(null)
   const [adminNotes, setAdminNotes] = useState('')
   const [editCategory, setEditCategory] = useState('')
+  const [editName, setEditName] = useState('')
+  const [editTagline, setEditTagline] = useState('')
+  const [editDescription, setEditDescription] = useState('')
+  const [editUrl, setEditUrl] = useState('')
+  const [editLogoUrl, setEditLogoUrl] = useState('')
   const [actionLoading, setActionLoading] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
@@ -94,6 +101,44 @@ export default function AdminStudioStaxPage() {
         await load()
       } else {
         showToast(json.error || 'Delete failed', false)
+      }
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  async function handleSaveListingFields(id: string) {
+    setActionLoading(true)
+    try {
+      const res = await fetch('/api/listings/admin', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id,
+          name: editName.trim() || undefined,
+          tagline: editTagline.trim() || null,
+          description: editDescription.trim() || null,
+          url: editUrl.trim() || null,
+          logo_url: editLogoUrl.trim() || null,
+          category: editCategory || null,
+          admin_notes: adminNotes || null,
+        }),
+      })
+      const json = await res.json()
+      if (json.success) {
+        showToast('Listing updated')
+        await load()
+        setSelected(prev => prev ? {
+          ...prev,
+          name: editName.trim() || prev.name,
+          tagline: editTagline.trim() || null,
+          description: editDescription.trim() || null,
+          url: editUrl.trim() || null,
+          logo_url: editLogoUrl.trim() || null,
+          category: editCategory || null,
+        } : prev)
+      } else {
+        showToast(json.error || 'Update failed', false)
       }
     } finally {
       setActionLoading(false)
@@ -321,7 +366,7 @@ export default function AdminStudioStaxPage() {
                   {filtered.map((listing, i) => (
                     <tr key={listing.id}
                       className={`hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors ${i < filtered.length - 1 ? 'border-b border-theme' : ''}`}>
-                      <td className="px-5 py-3 cursor-pointer" onClick={() => { setSelected(listing); setAdminNotes(listing.admin_notes || ''); setEditCategory(listing.category || ''); setConfirmDelete(false) }}>
+                      <td className="px-5 py-3 cursor-pointer" onClick={() => { setSelected(listing); setAdminNotes(listing.admin_notes || ''); setEditCategory(listing.category || ''); setEditName(listing.name || ''); setEditTagline(listing.tagline || ''); setEditDescription(listing.description || ''); setEditUrl(listing.url || ''); setEditLogoUrl(listing.logo_url || ''); setConfirmDelete(false) }}>
                         <div className="font-semibold text-gray-900 dark:text-gray-100">{listing.name}</div>
                         {listing.tagline && <div className="text-xs text-gray-400 mt-0.5 truncate max-w-[200px]">{listing.tagline}</div>}
                         {listing.applicant_email && <div className="text-xs text-gray-400">{listing.applicant_email}</div>}
@@ -357,7 +402,7 @@ export default function AdminStudioStaxPage() {
                         <div className="flex gap-2 flex-wrap">
                           {listing.status === 'pending' && (
                             <button
-                              onClick={() => { setSelected(listing); setAdminNotes(listing.admin_notes || ''); setEditCategory(listing.category || ''); setConfirmDelete(false) }}
+                              onClick={() => { setSelected(listing); setAdminNotes(listing.admin_notes || ''); setEditCategory(listing.category || ''); setEditName(listing.name || ''); setEditTagline(listing.tagline || ''); setEditDescription(listing.description || ''); setEditUrl(listing.url || ''); setEditLogoUrl(listing.logo_url || ''); setConfirmDelete(false) }}
                               className="text-xs bg-black dark:bg-white text-white dark:text-black px-3 py-1 rounded-lg font-semibold hover:opacity-80 transition-all">
                               Review
                             </button>
@@ -412,23 +457,82 @@ export default function AdminStudioStaxPage() {
               </div>
 
               <div className="space-y-4 text-sm">
-                {selected.tagline && <ListingRow label="Tagline">{selected.tagline}</ListingRow>}
-                {selected.url && (
-                  <ListingRow label="URL">
-                    <a href={selected.url} target="_blank" rel="noopener noreferrer"
-                      className="text-blue-600 dark:text-blue-400 hover:underline break-all">{selected.url}</a>
-                  </ListingRow>
+
+                {/* ── Editable listing fields ── */}
+                <div className="bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700 rounded-xl p-4 space-y-3">
+                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Listing Fields</p>
+
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Name</label>
+                    <input value={editName} onChange={e => setEditName(e.target.value)}
+                      className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-gray-400" />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Tagline</label>
+                    <input value={editTagline} onChange={e => setEditTagline(e.target.value)}
+                      placeholder="Short one-liner"
+                      className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:border-gray-400" />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Description</label>
+                    <textarea value={editDescription} onChange={e => setEditDescription(e.target.value)}
+                      placeholder="2–3 sentence description shown on the card"
+                      rows={3}
+                      className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:border-gray-400 resize-none" />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">URL</label>
+                    <input value={editUrl} onChange={e => setEditUrl(e.target.value)}
+                      placeholder="https://yourtool.com"
+                      className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:border-gray-400" />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Logo URL</label>
+                    <input value={editLogoUrl} onChange={e => setEditLogoUrl(e.target.value)}
+                      placeholder="https://yourtool.com/logo.png"
+                      className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:border-gray-400" />
+                  </div>
+
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 block">Category</label>
+                    <select value={editCategory} onChange={e => setEditCategory(e.target.value)}
+                      className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-gray-400">
+                      <option value="">— no category —</option>
+                      {CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+                    </select>
+                    {!editCategory && (
+                      <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">⚠ No category — listing won&apos;t appear on the public page.</p>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() => handleSaveListingFields(selected.id)}
+                    disabled={actionLoading}
+                    className="w-full bg-gray-900 dark:bg-white text-white dark:text-black text-xs font-bold py-2 rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
+                    {actionLoading ? 'Saving…' : 'Save listing fields'}
+                  </button>
+                </div>
+
+                {/* Applicant info — read-only */}
+                {(selected.applicant_name || selected.applicant_email) && (
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Applicant</p>
+                    {selected.applicant_name && <ListingRow label="Name">{selected.applicant_name}</ListingRow>}
+                    {selected.applicant_email && <ListingRow label="Email">{selected.applicant_email}</ListingRow>}
+                  </div>
                 )}
-                {selected.applicant_name && <ListingRow label="Applicant">{selected.applicant_name}</ListingRow>}
-                {selected.applicant_email && <ListingRow label="Email">{selected.applicant_email}</ListingRow>}
                 {selected.mission_statement && (
                   <ListingRow label="Mission">
-                    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3 leading-relaxed">{selected.mission_statement}</div>
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3 leading-relaxed text-xs">{selected.mission_statement}</div>
                   </ListingRow>
                 )}
                 {selected.why_apply && (
                   <ListingRow label="Why apply">
-                    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3 leading-relaxed">{selected.why_apply}</div>
+                    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3 leading-relaxed text-xs">{selected.why_apply}</div>
                   </ListingRow>
                 )}
                 <ListingRow label="SM-Give donated">
@@ -446,7 +550,7 @@ export default function AdminStudioStaxPage() {
                       : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
                   }`}>
                     <div>
-                      <p className="text-xs font-bold text-gray-700 dark:text-gray-300">⭐ Editor's Pick</p>
+                      <p className="text-xs font-bold text-gray-700 dark:text-gray-300">⭐ Editor&apos;s Pick</p>
                       <p className="text-xs text-gray-400 mt-0.5">Pinned listings always rank first ({featuredCount}/5 slots used)</p>
                     </div>
                     <button
@@ -461,29 +565,6 @@ export default function AdminStudioStaxPage() {
                     </button>
                   </div>
                 )}
-
-                {/* Category editor */}
-                <div>
-                  <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Category</div>
-                  <div className="flex gap-2">
-                    <select
-                      value={editCategory}
-                      onChange={e => setEditCategory(e.target.value)}
-                      className="flex-1 border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-gray-400">
-                      <option value="">— no category —</option>
-                      {CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
-                    </select>
-                    <button
-                      onClick={() => handleSaveCategory(selected.id, editCategory, adminNotes)}
-                      disabled={actionLoading || editCategory === (selected.category || '')}
-                      className="text-xs font-semibold px-3 py-2 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-black hover:opacity-80 transition-all disabled:opacity-40">
-                      Save
-                    </button>
-                  </div>
-                  {!selected.category && (
-                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">⚠ No category set — listing won&apos;t appear on the public page until one is assigned.</p>
-                  )}
-                </div>
 
                 {/* Admin notes */}
                 <div>

@@ -29,7 +29,7 @@ export async function PATCH(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
 
   const body = await req.json()
-  const { id, status, admin_notes, action, admin_featured, admin_featured_note, free_year } = body
+  const { id, status, admin_notes, action, admin_featured, admin_featured_note, free_year, name, tagline, description, url, logo_url } = body
   const db = getAdminSupabase()
 
   // ── Toggle admin featured ───────────────────────────────────────────────────
@@ -225,11 +225,20 @@ export async function PATCH(req: NextRequest) {
 
   // ── Standard status update ──────────────────────────────────────────────────
   const updatePayload: Record<string, unknown> = {
-    admin_notes: admin_notes || null,
+    admin_notes: admin_notes !== undefined ? (admin_notes || null) : undefined,
     updated_at: new Date().toISOString(),
   }
   if (status) updatePayload.status = status
   if (body.category !== undefined) updatePayload.category = body.category || null
+  if (name !== undefined) updatePayload.name = name || null
+  if (tagline !== undefined) updatePayload.tagline = tagline || null
+  if (description !== undefined) updatePayload.description = description || null
+  if (url !== undefined) updatePayload.url = url || null
+  if (logo_url !== undefined) updatePayload.logo_url = logo_url || null
+  // Remove undefined values so we don't null out untouched fields
+  for (const key of Object.keys(updatePayload)) {
+    if (updatePayload[key] === undefined) delete updatePayload[key]
+  }
 
   const { error } = await db
     .from('curated_listings')
