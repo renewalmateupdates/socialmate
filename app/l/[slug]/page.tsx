@@ -41,11 +41,12 @@ const SOCIAL_ICONS: Record<string, string> = {
   pinterest: '📌',
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
   const { data } = await getSupabase()
     .from('bio_pages')
     .select('name, bio')
-    .eq('slug', params.slug)
+    .eq('slug', slug)
     .single()
   if (!data) return { title: 'Not Found' }
   return {
@@ -73,11 +74,12 @@ interface PageData {
   socials: Record<string, string>
 }
 
-export default async function BioPage({ params }: { params: { slug: string } }) {
+export default async function BioPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params
   const { data: page } = await getSupabase()
     .from('bio_pages')
     .select('*')
-    .eq('slug', params.slug)
+    .eq('slug', slug)
     .single()
 
   if (!page) notFound()
@@ -178,7 +180,7 @@ export default async function BioPage({ params }: { params: { slug: string } }) 
             'p',
             { style: { color: theme.subtext, fontSize: '11px', marginTop: '40px', opacity: 0.6 } },
             'Made with ',
-            React.createElement('a', { href: 'https://socialmate-six.vercel.app', target: '_blank', rel: 'noopener noreferrer', style: { color: theme.subtext, fontWeight: '700' } }, 'SocialMate')
+            React.createElement('a', { href: 'https://socialmate.studio', target: '_blank', rel: 'noopener noreferrer', style: { color: theme.subtext, fontWeight: '700' } }, 'SocialMate')
           )
         : null
     )

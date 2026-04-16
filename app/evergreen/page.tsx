@@ -80,7 +80,7 @@ export default function EvergreenPage() {
             <p className="text-sm text-gray-400 dark:text-gray-500">Mark your best posts as evergreen and they'll automatically re-queue when your schedule is empty.</p>
           </div>
 
-          <div className="grid grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
             {[
               { label: 'Published posts',  value: posts.length,          icon: '📝' },
               { label: 'Evergreen posts',  value: evergreenPosts.length, icon: '♻️' },

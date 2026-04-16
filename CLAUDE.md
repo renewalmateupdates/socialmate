@@ -151,10 +151,13 @@ These have burned us before — always apply:
 
 ## Pending / In Progress
 
-- **Twitch env vars** still needed in Vercel: `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`, redirect: `https://socialmate.studio/api/clips/twitch/callback`
-- **Supabase migrations** to confirm ran: `usage_events`, `notifications`, `competitor_accounts`, `hashtag_collections`, `studio_stax_admin_featured` — check Supabase dashboard
 - Discord management tools (future — moderation, welcome messages, role automation)
 - Gilgamesh's Guide landing page (future — free PDF, business/creator/self-dev guide for entrepreneurs)
+
+## Confirmed Done (stop asking about these)
+
+- ✅ **Twitch env vars** — `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET` set in Vercel. Callback: `https://socialmate.studio/api/clips/twitch/callback`. DONE.
+- ✅ **Supabase migrations** — `usage_events`, `notifications`, `competitor_accounts`, `hashtag_collections`, `studio_stax_admin_featured` all confirmed ran.
 
 ---
 
