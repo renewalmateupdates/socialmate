@@ -1019,7 +1019,7 @@ export const enkiPaperTradingScan = inngest.createFunction(
         .from('enki_doctrines')
         .select('user_id, id, name, config')
         .in('user_id', userIds)
-        .eq('active', true)
+        .eq('is_active', true)
 
       if (docErr) {
         console.error('[EnkiScan] doctrines query error:', docErr.message)
@@ -1125,9 +1125,9 @@ export const enkiPaperTradingScan = inngest.createFunction(
           for (const rawSym of symbols) {
             const symbol = rawSym.toUpperCase()
             const signal = priceMap[symbol]
-            if (!signal) continue
+            if (!signal || signal.price == null || signal.confidence == null || signal.side == null) continue
 
-            const { price, confidence, side } = signal
+            const { price, confidence, side } = signal as { price: number; confidence: number; side: 'buy' | 'sell' | 'neutral' }
 
             // Only act on signals with confidence >= 6
             if (confidence < 6) continue

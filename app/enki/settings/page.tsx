@@ -16,8 +16,20 @@ interface Profile {
   guardian_mode: 'approval' | 'autonomous' | 'dormant'
   alpaca_connected: boolean
   coinbase_connected: boolean
+  alpaca_paper: boolean | null
   cloud_runner: boolean
   risk_preset: RiskPreset
+}
+
+interface AlpacaInfo {
+  buying_power: number
+  portfolio_value: number
+  currency: string
+  paper: boolean
+}
+
+interface CoinbaseInfo {
+  account_count: number | null
 }
 
 const RISK_PRESETS: {
@@ -128,6 +140,21 @@ export default function EnkiSettingsPage() {
   const [presetSaving, setPresetSaving] = useState(false)
   const [presetSaved, setPresetSaved]   = useState(false)
 
+  // Alpaca connect form state
+  const [alpacaKey,       setAlpacaKey]       = useState('')
+  const [alpacaSecret,    setAlpacaSecret]    = useState('')
+  const [alpacaPaper,     setAlpacaPaper]     = useState(true)
+  const [alpacaConnecting, setAlpacaConnecting] = useState(false)
+  const [alpacaError,     setAlpacaError]     = useState<string | null>(null)
+  const [alpacaInfo,      setAlpacaInfo]      = useState<AlpacaInfo | null>(null)
+
+  // Coinbase connect form state
+  const [cbKey,       setCbKey]       = useState('')
+  const [cbSecret,    setCbSecret]    = useState('')
+  const [cbConnecting, setCbConnecting] = useState(false)
+  const [cbError,     setCbError]     = useState<string | null>(null)
+  const [cbInfo,      setCbInfo]      = useState<CoinbaseInfo | null>(null)
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) { router.push('/login?next=/enki/settings'); return }
@@ -188,6 +215,84 @@ export default function EnkiSettingsPage() {
       console.error('Preset save error:', e)
     } finally {
       setPresetSaving(false)
+    }
+  }
+
+  async function connectAlpaca() {
+    setAlpacaError(null)
+    setAlpacaConnecting(true)
+    try {
+      const res = await fetch('/api/enki/brokers/alpaca', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ apiKey: alpacaKey, secretKey: alpacaSecret, paper: alpacaPaper }),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        setAlpacaError(json.error ?? 'Connection failed.')
+        return
+      }
+      setAlpacaInfo({ buying_power: json.buying_power, portfolio_value: json.portfolio_value, currency: json.currency, paper: json.paper })
+      setProfile(p => p ? { ...p, alpaca_connected: true, alpaca_paper: json.paper } : p)
+      setAlpacaKey('')
+      setAlpacaSecret('')
+    } catch {
+      setAlpacaError('Network error. Please try again.')
+    } finally {
+      setAlpacaConnecting(false)
+    }
+  }
+
+  async function disconnectAlpaca() {
+    if (!confirm('Disconnect Alpaca? The guardian will stop trading stocks.')) return
+    setAlpacaConnecting(true)
+    try {
+      await fetch('/api/enki/brokers/alpaca', { method: 'DELETE' })
+      setProfile(p => p ? { ...p, alpaca_connected: false, alpaca_paper: null } : p)
+      setAlpacaInfo(null)
+    } catch {
+      // silently ignore
+    } finally {
+      setAlpacaConnecting(false)
+    }
+  }
+
+  async function connectCoinbase() {
+    setCbError(null)
+    setCbConnecting(true)
+    try {
+      const res = await fetch('/api/enki/brokers/coinbase', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ apiKey: cbKey, secretKey: cbSecret }),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        setCbError(json.error ?? 'Connection failed.')
+        return
+      }
+      setCbInfo({ account_count: json.account_count })
+      setProfile(p => p ? { ...p, coinbase_connected: true } : p)
+      setCbKey('')
+      setCbSecret('')
+    } catch {
+      setCbError('Network error. Please try again.')
+    } finally {
+      setCbConnecting(false)
+    }
+  }
+
+  async function disconnectCoinbase() {
+    if (!confirm('Disconnect Coinbase? The guardian will stop trading crypto.')) return
+    setCbConnecting(true)
+    try {
+      await fetch('/api/enki/brokers/coinbase', { method: 'DELETE' })
+      setProfile(p => p ? { ...p, coinbase_connected: false } : p)
+      setCbInfo(null)
+    } catch {
+      // silently ignore
+    } finally {
+      setCbConnecting(false)
     }
   }
 
@@ -429,59 +534,219 @@ export default function EnkiSettingsPage() {
         <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
           <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">Broker Connections</h2>
           <p className="text-sm text-gray-500 mb-5">
-            Broker connections are managed by the Enki desktop app. Install the app, add your API keys there, and the guardian syncs automatically.
+            Connect your broker API keys to enable live trading. Keys are encrypted at rest and never stored in plain text.
           </p>
 
-          <div className="space-y-3">
-            {/* Alpaca */}
-            <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-gray-700">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-yellow-400/10 rounded-lg flex items-center justify-center text-yellow-500 font-bold text-xs">AL</div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Alpaca</p>
-                  <p className="text-xs text-gray-500">US stocks + ETFs</p>
+          <div className="space-y-5">
+            {/* ── Alpaca ── */}
+            <div className="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-800/50">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-yellow-400/10 rounded-lg flex items-center justify-center text-yellow-500 font-bold text-xs">AL</div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Alpaca</p>
+                    <p className="text-xs text-gray-500">US stocks + ETFs — Commander+</p>
+                  </div>
                 </div>
+                <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                  profile?.alpaca_connected
+                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                    : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-500'
+                }`}>
+                  {profile?.alpaca_connected ? (profile.alpaca_paper ? 'Connected · Paper' : 'Connected · Live') : 'Not connected'}
+                </span>
               </div>
-              <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
-                profile?.alpaca_connected
-                  ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                  : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-500'
-              }`}>
-                {profile?.alpaca_connected ? 'Connected' : 'Not connected'}
-              </span>
+
+              {!isCommander && (
+                <div className="px-4 py-3">
+                  <p className="text-xs text-gray-400">
+                    Requires Commander tier.{' '}
+                    <Link href="/enki#pricing" className="text-amber-500 hover:text-amber-400">Upgrade →</Link>
+                  </p>
+                </div>
+              )}
+
+              {isCommander && !profile?.alpaca_connected && (
+                <div className="p-4 space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 mb-1">API Key ID</label>
+                      <input
+                        type="password"
+                        value={alpacaKey}
+                        onChange={e => setAlpacaKey(e.target.value)}
+                        placeholder="PKTEST…"
+                        className="w-full text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:border-amber-400"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 mb-1">Secret Key</label>
+                      <input
+                        type="password"
+                        value={alpacaSecret}
+                        onChange={e => setAlpacaSecret(e.target.value)}
+                        placeholder="••••••••••••••••"
+                        className="w-full text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:border-amber-400"
+                      />
+                    </div>
+                  </div>
+
+                  <label className="flex items-center gap-2 cursor-pointer w-fit">
+                    <input
+                      type="checkbox"
+                      checked={alpacaPaper}
+                      onChange={e => setAlpacaPaper(e.target.checked)}
+                      className="accent-amber-400 w-4 h-4"
+                    />
+                    <span className="text-xs text-gray-600 dark:text-gray-400">
+                      Paper trading account <span className="text-gray-400">(uses paper-api.alpaca.markets)</span>
+                    </span>
+                  </label>
+
+                  {alpacaError && (
+                    <p className="text-xs text-red-500 bg-red-50 dark:bg-red-950/20 rounded-lg px-3 py-2">{alpacaError}</p>
+                  )}
+
+                  <button
+                    onClick={connectAlpaca}
+                    disabled={alpacaConnecting || !alpacaKey || !alpacaSecret}
+                    className="px-4 py-2 bg-amber-400 hover:bg-amber-300 disabled:opacity-50 disabled:cursor-not-allowed text-black text-sm font-bold rounded-lg transition-colors min-h-[44px]"
+                  >
+                    {alpacaConnecting ? 'Connecting…' : 'Connect Alpaca'}
+                  </button>
+
+                  <p className="text-xs text-gray-400">
+                    Get your API keys at{' '}
+                    <a href="https://alpaca.markets" target="_blank" rel="noopener noreferrer" className="text-amber-500 hover:text-amber-400">
+                      alpaca.markets
+                    </a>{' '}
+                    → My Account → API Keys.
+                  </p>
+                </div>
+              )}
+
+              {isCommander && profile?.alpaca_connected && (
+                <div className="p-4">
+                  {alpacaInfo && (
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                        <p className="text-xs text-gray-400 mb-0.5">Buying Power</p>
+                        <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                          ${alpacaInfo.buying_power.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
+                      </div>
+                      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+                        <p className="text-xs text-gray-400 mb-0.5">Portfolio Value</p>
+                        <p className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                          ${alpacaInfo.portfolio_value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  <button
+                    onClick={disconnectAlpaca}
+                    disabled={alpacaConnecting}
+                    className="text-xs font-bold text-red-500 hover:text-red-400 disabled:opacity-50 transition-colors min-h-[44px] px-1"
+                  >
+                    {alpacaConnecting ? 'Disconnecting…' : 'Disconnect Alpaca'}
+                  </button>
+                </div>
+              )}
             </div>
 
-            {/* Coinbase */}
-            <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 dark:border-gray-700">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-blue-400/10 rounded-lg flex items-center justify-center text-blue-500 font-bold text-xs">CB</div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Coinbase</p>
-                  <p className="text-xs text-gray-500">Crypto (BTC, ETH, SOL + more)</p>
+            {/* ── Coinbase ── */}
+            <div className="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-800/50">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-blue-400/10 rounded-lg flex items-center justify-center text-blue-500 font-bold text-xs">CB</div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Coinbase</p>
+                    <p className="text-xs text-gray-500">Crypto — Emperor only</p>
+                  </div>
                 </div>
+                <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                  profile?.coinbase_connected
+                    ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                    : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-500'
+                }`}>
+                  {profile?.coinbase_connected ? 'Connected' : 'Not connected'}
+                </span>
               </div>
-              <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
-                profile?.coinbase_connected
-                  ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                  : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-500'
-              }`}>
-                {profile?.coinbase_connected ? 'Connected' : 'Not connected'}
-              </span>
+
+              {!isEmperor && (
+                <div className="px-4 py-3">
+                  <p className="text-xs text-gray-400">
+                    Requires Emperor tier.{' '}
+                    <Link href="/enki#pricing" className="text-amber-500 hover:text-amber-400">Upgrade →</Link>
+                  </p>
+                </div>
+              )}
+
+              {isEmperor && !profile?.coinbase_connected && (
+                <div className="p-4 space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 mb-1">API Key</label>
+                      <input
+                        type="password"
+                        value={cbKey}
+                        onChange={e => setCbKey(e.target.value)}
+                        placeholder="organizations/…"
+                        className="w-full text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:border-amber-400"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 mb-1">Secret Key</label>
+                      <input
+                        type="password"
+                        value={cbSecret}
+                        onChange={e => setCbSecret(e.target.value)}
+                        placeholder="••••••••••••••••"
+                        className="w-full text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:border-amber-400"
+                      />
+                    </div>
+                  </div>
+
+                  {cbError && (
+                    <p className="text-xs text-red-500 bg-red-50 dark:bg-red-950/20 rounded-lg px-3 py-2">{cbError}</p>
+                  )}
+
+                  <button
+                    onClick={connectCoinbase}
+                    disabled={cbConnecting || !cbKey || !cbSecret}
+                    className="px-4 py-2 bg-amber-400 hover:bg-amber-300 disabled:opacity-50 disabled:cursor-not-allowed text-black text-sm font-bold rounded-lg transition-colors min-h-[44px]"
+                  >
+                    {cbConnecting ? 'Connecting…' : 'Connect Coinbase'}
+                  </button>
+
+                  <p className="text-xs text-gray-400">
+                    Get your API keys at{' '}
+                    <a href="https://advanced.coinbase.com" target="_blank" rel="noopener noreferrer" className="text-amber-500 hover:text-amber-400">
+                      advanced.coinbase.com
+                    </a>{' '}
+                    → Settings → API.
+                  </p>
+                </div>
+              )}
+
+              {isEmperor && profile?.coinbase_connected && (
+                <div className="p-4">
+                  {cbInfo?.account_count != null && (
+                    <p className="text-xs text-gray-400 mb-3">
+                      {cbInfo.account_count} wallet{cbInfo.account_count !== 1 ? 's' : ''} accessible
+                    </p>
+                  )}
+                  <button
+                    onClick={disconnectCoinbase}
+                    disabled={cbConnecting}
+                    className="text-xs font-bold text-red-500 hover:text-red-400 disabled:opacity-50 transition-colors min-h-[44px] px-1"
+                  >
+                    {cbConnecting ? 'Disconnecting…' : 'Disconnect Coinbase'}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
-
-          {!isCommander && (
-            <p className="mt-4 text-xs text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
-              Live broker connections require Commander tier or above. You&apos;re currently paper trading.{' '}
-              <Link href="/enki#pricing" className="text-amber-500 hover:text-amber-400">Upgrade →</Link>
-            </p>
-          )}
-          {isCommander && (
-            <p className="mt-4 text-xs text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-xl p-3">
-              Connect brokers in the Enki desktop app under <strong>Settings → Brokers</strong>.
-              Once connected, the guardian syncs status here automatically.
-            </p>
-          )}
         </div>
 
         {/* Fortress Guard summary */}

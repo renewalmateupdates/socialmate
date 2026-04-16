@@ -42,6 +42,13 @@ interface Snapshot {
   snapshot_date: string
 }
 
+interface PaperPosition {
+  symbol: string
+  qty: number
+  avgPrice: number
+  currentValue: number
+}
+
 const TIER_BADGE: Record<string, string> = {
   citizen:  'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
   commander:'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
@@ -77,6 +84,7 @@ export default function EnkiDashboardPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [trades, setTrades] = useState<Trade[]>([])
   const [snapshots, setSnapshots] = useState<Snapshot[]>([])
+  const [paperPositions, setPaperPositions] = useState<PaperPosition[]>([])
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -102,6 +110,31 @@ export default function EnkiDashboardPage() {
       if (profileJson.profile)   setProfile(profileJson.profile)
       if (tradesJson.trades)     setTrades(tradesJson.trades)
       if (snapshotsJson.snapshots) setSnapshots(snapshotsJson.snapshots)
+
+      // Derive paper positions from paper trades
+      if (tradesJson.trades) {
+        const allPaperTrades = tradesJson.trades.filter((t: Trade) => t.broker === 'paper' && t.status === 'filled')
+        const posMap: Record<string, { qty: number; cost: number }> = {}
+        for (const t of allPaperTrades) {
+          if (!posMap[t.symbol]) posMap[t.symbol] = { qty: 0, cost: 0 }
+          if (t.side === 'buy') {
+            posMap[t.symbol].qty  += t.qty
+            posMap[t.symbol].cost += t.qty * t.price
+          } else {
+            posMap[t.symbol].qty  -= t.qty
+            posMap[t.symbol].cost -= t.qty * t.price
+          }
+        }
+        const positions: PaperPosition[] = Object.entries(posMap)
+          .filter(([, pos]) => pos.qty > 0)
+          .map(([symbol, pos]) => ({
+            symbol,
+            qty: pos.qty,
+            avgPrice: pos.qty > 0 ? pos.cost / pos.qty : 0,
+            currentValue: pos.cost,
+          }))
+        setPaperPositions(positions)
+      }
     } catch (e) {
       console.error('Enki dashboard load error:', e)
     } finally {
@@ -181,11 +214,17 @@ export default function EnkiDashboardPage() {
         {/* ── No snapshot yet (new user) ── */}
         {snapshots.length === 0 && (
           <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 rounded-2xl p-6 mb-8">
-            <p className="text-sm font-bold text-amber-700 dark:text-amber-400 mb-1">Guardian Awaiting Connection</p>
+            <p className="text-sm font-bold text-amber-700 dark:text-amber-400 mb-1">Guardian Initializing</p>
             <p className="text-xs text-amber-600 dark:text-amber-500">
-              Connect your Alpaca account in the desktop app to start trading. Your treasury data will appear here once the first scan cycle runs.
-              {profile?.tier === 'citizen' && ' Paper trading is active — no real money required.'}
+              {profile?.tier === 'citizen'
+                ? 'Paper trading is active — no real money required. Your portfolio data will appear here once the first 15-minute scan cycle runs. Make sure you have an active doctrine in settings.'
+                : 'Connect your broker in Settings to start trading. Your treasury data will appear here once the first scan cycle runs.'}
             </p>
+            <div className="mt-3 flex gap-3">
+              <Link href="/enki/settings" className="text-xs font-bold text-amber-700 dark:text-amber-400 hover:underline">
+                Go to Settings →
+              </Link>
+            </div>
           </div>
         )}
 
@@ -238,13 +277,54 @@ export default function EnkiDashboardPage() {
               <div className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border ${profile.alpaca_connected ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400' : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400'}`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${profile.alpaca_connected ? 'bg-green-500' : 'bg-gray-400'}`} />
                 Alpaca — Stocks (Mon–Fri)
-                {!profile.alpaca_connected && <span className="ml-1 font-normal opacity-70">Not connected</span>}
+                {!profile.alpaca_connected && <span className="ml-1 font-normal opacity-70"><Link href="/enki/settings" className="hover:text-amber-400">Connect in Settings</Link></span>}
               </div>
               <div className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border ${profile.coinbase_connected ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400' : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400'}`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${profile.coinbase_connected ? 'bg-green-500' : 'bg-gray-400'}`} />
                 Coinbase — Crypto 24/7
-                {!profile.coinbase_connected && <span className="ml-1 font-normal opacity-70">{profile.tier === 'emperor' ? 'Not connected' : 'Emperor only'}</span>}
+                {!profile.coinbase_connected && (
+                  <span className="ml-1 font-normal opacity-70">
+                    {profile.tier === 'emperor'
+                      ? <Link href="/enki/settings" className="hover:text-amber-400">Connect in Settings</Link>
+                      : 'Emperor only'}
+                  </span>
+                )}
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Paper positions (Citizen tier) ── */}
+        {profile?.tier === 'citizen' && paperPositions.length > 0 && (
+          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden mb-8">
+            <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">Paper Positions</p>
+                <span className="text-[10px] font-bold bg-gray-100 dark:bg-gray-800 text-gray-500 px-1.5 py-0.5 rounded">SIMULATED</span>
+              </div>
+              <span className="text-xs text-gray-400">{paperPositions.length} open</span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-gray-100 dark:border-gray-800">
+                    <th className="px-4 py-3 text-left font-bold text-gray-400 uppercase tracking-wider">Symbol</th>
+                    <th className="px-4 py-3 text-right font-bold text-gray-400 uppercase tracking-wider">Qty</th>
+                    <th className="px-4 py-3 text-right font-bold text-gray-400 uppercase tracking-wider">Avg Price</th>
+                    <th className="px-4 py-3 text-right font-bold text-gray-400 uppercase tracking-wider">Cost Basis</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paperPositions.map(pos => (
+                    <tr key={pos.symbol} className="border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
+                      <td className="px-4 py-3 font-bold text-gray-900 dark:text-gray-100">{pos.symbol}</td>
+                      <td className="px-4 py-3 text-right text-gray-600 dark:text-gray-400">{pos.qty}</td>
+                      <td className="px-4 py-3 text-right text-gray-600 dark:text-gray-400">${pos.avgPrice.toFixed(2)}</td>
+                      <td className="px-4 py-3 text-right font-bold text-gray-900 dark:text-gray-100">${pos.currentValue.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
