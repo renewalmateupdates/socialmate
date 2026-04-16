@@ -69,6 +69,7 @@ export default function ClipsPage() {
   const [loadingConn, setLoadingConn] = useState(true)
   const [loadingClips, setLoadingClips] = useState(false)
   const [disconnecting, setDisconnecting] = useState(false)
+  const [twitchTokenExpired, setTwitchTokenExpired] = useState(false)
   const [toast, setToast]             = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
   // ── Public channel search state ────────────────────────────────────────────
@@ -130,10 +131,15 @@ export default function ClipsPage() {
   // Fetch clips once connected
   const fetchClips = useCallback(async () => {
     setLoadingClips(true)
+    setTwitchTokenExpired(false)
     try {
       const res = await fetch('/api/clips/twitch/list')
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
+        if (err.error === 'token_expired') {
+          setTwitchTokenExpired(true)
+          return
+        }
         showToast(err.error || 'Failed to fetch clips', 'error')
         return
       }
@@ -320,22 +326,39 @@ export default function ClipsPage() {
                   </button>
                 </div>
               </div>
+              {/* Expired token reconnect prompt */}
+              {twitchTokenExpired && (
+                <div className="mb-6 rounded-2xl p-6 text-center" style={{ background: 'var(--surface)', border: '1px solid var(--border-mid)' }}>
+                  <div className="text-3xl mb-3">🔑</div>
+                  <p className="text-sm font-extrabold mb-1" style={{ color: 'var(--text)' }}>Twitch connection expired</p>
+                  <p className="text-sm mb-5" style={{ color: 'var(--text-muted)' }}>
+                    Your Twitch connection has expired — reconnect to view your clips.
+                  </p>
+                  <a
+                    href="/api/clips/twitch/connect"
+                    className="inline-block px-6 py-3 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90"
+                    style={{ background: '#9146FF' }}>
+                    Reconnect Twitch
+                  </a>
+                </div>
+              )}
+
               {/* Clips grid */}
-              {loadingClips && clips.length === 0 ? (
+              {!twitchTokenExpired && loadingClips && clips.length === 0 ? (
                 <div className="flex items-center justify-center py-20">
                   <div className="text-sm" style={{ color: 'var(--text-faint)' }}>Loading clips…</div>
                 </div>
-              ) : clips.length === 0 ? (
+              ) : !twitchTokenExpired && clips.length === 0 ? (
                 <div className="text-center py-20">
                   <p className="text-4xl mb-3">🎬</p>
                   <p className="text-sm font-semibold" style={{ color: 'var(--text-muted)' }}>No clips found for this channel.</p>
                   <p className="text-xs mt-1" style={{ color: 'var(--text-faint)' }}>Create some clips on Twitch, then hit Refresh.</p>
                 </div>
-              ) : (
+              ) : !twitchTokenExpired ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {clips.map(clip => <ClipCard key={clip.id} clip={clip} />)}
                 </div>
-              )}
+              ) : null}
             </div>
           )}
         </div>
