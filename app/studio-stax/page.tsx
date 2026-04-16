@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import PublicLayout from '@/components/PublicLayout'
 import Link from 'next/link'
+import ListingViewTracker from './ListingViewTracker'
 
 const CATEGORIES = [
   { id: 'social-media',      label: 'Social Media Tools'   },
@@ -108,7 +109,7 @@ export default async function StudioStaxPage() {
               {garrison.map(listing => (
                 <a
                   key={listing.id}
-                  href={listing.url}
+                  href={`/api/studio-stax/click/${listing.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group flex flex-col bg-white dark:bg-gray-900 border-2 border-purple-300 dark:border-purple-700 ring-1 ring-purple-200 dark:ring-purple-800 rounded-2xl p-6 hover:shadow-xl hover:border-purple-400 dark:hover:border-purple-500 transition-all"
@@ -199,7 +200,7 @@ export default async function StudioStaxPage() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {items.map((listing, idx) => (
-                      <a key={listing.id} href={listing.url} target="_blank" rel="noopener noreferrer"
+                      <a key={listing.id} href={`/api/studio-stax/click/${listing.id}`} target="_blank" rel="noopener noreferrer"
                         className={`group block bg-white dark:bg-gray-900 border rounded-2xl p-5 hover:shadow-lg transition-all ${
                           idx === 0 ? 'border-amber-300 dark:border-amber-700 ring-1 ring-amber-200 dark:ring-amber-800' :
                           idx === 1 ? 'border-gray-200 dark:border-gray-700' :
@@ -251,6 +252,9 @@ export default async function StudioStaxPage() {
           </Link>
         </div>
       </div>
+
+      {/* Fire-and-forget view tracking for all listings on this page */}
+      <ListingViewTracker listingIds={allListings.map(l => l.id)} />
     </PublicLayout>
   )
 }

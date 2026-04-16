@@ -31,7 +31,14 @@ type Listing = {
   free_until: string | null
 }
 
-type Tab = 'listing' | 'rankings' | 'status'
+type Tab = 'listing' | 'rankings' | 'status' | 'analytics'
+
+type AnalyticsData = {
+  all_time:     { views: number; clicks: number }
+  last_30:      { views: number; clicks: number }
+  last_7:       { views: number; clicks: number }
+  daily_last_7: Array<{ date: string; views: number; clicks: number }>
+}
 
 export default function StudioStaxPortalPage() {
   const router = useRouter()
@@ -47,6 +54,11 @@ export default function StudioStaxPortalPage() {
   const [editSaving, setEditSaving] = useState(false)
   const [editError, setEditError] = useState('')
   const [editSuccess, setEditSuccess] = useState(false)
+
+  // Analytics state
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null)
+  const [analyticsLoading, setAnalyticsLoading] = useState(false)
+  const [analyticsError, setAnalyticsError] = useState('')
 
   useEffect(() => {
     const init = async () => {
@@ -80,6 +92,21 @@ export default function StudioStaxPortalPage() {
     }
     init()
   }, [router])
+
+  // Lazy-load analytics when the tab is first opened
+  useEffect(() => {
+    if (activeTab !== 'analytics' || analytics || analyticsLoading) return
+    setAnalyticsLoading(true)
+    setAnalyticsError('')
+    fetch('/api/studio-stax/analytics')
+      .then(r => r.json())
+      .then(data => {
+        if (data.error) setAnalyticsError(data.error)
+        else setAnalytics(data as AnalyticsData)
+      })
+      .catch(() => setAnalyticsError('Failed to load analytics.'))
+      .finally(() => setAnalyticsLoading(false))
+  }, [activeTab, analytics, analyticsLoading])
 
   const handleSaveEdit = async () => {
     if (!listing) return
@@ -166,9 +193,10 @@ export default function StudioStaxPortalPage() {
   }
 
   const tabs: { id: Tab; label: string }[] = [
-    { id: 'listing',  label: 'My Listing'          },
-    { id: 'rankings', label: 'Rankings & SM-Give'   },
-    { id: 'status',   label: 'Status & Renewal'     },
+    { id: 'listing',   label: 'My Listing'          },
+    { id: 'analytics', label: 'Analytics'            },
+    { id: 'rankings',  label: 'Rankings & SM-Give'   },
+    { id: 'status',    label: 'Status & Renewal'     },
   ]
 
   // Determine renewal date — from column or free_until
@@ -325,6 +353,115 @@ export default function StudioStaxPortalPage() {
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {/* ── Tab: Analytics ── */}
+        {activeTab === 'analytics' && (
+          <div className="space-y-5">
+            {analyticsLoading && (
+              <div className="flex items-center justify-center py-16">
+                <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-gray-900 dark:border-white" />
+              </div>
+            )}
+
+            {analyticsError && (
+              <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl px-4 py-3 text-sm text-red-700 dark:text-red-400">
+                {analyticsError}
+              </div>
+            )}
+
+            {analytics && (() => {
+              const ctr = (period: { views: number; clicks: number }) =>
+                period.views > 0 ? ((period.clicks / period.views) * 100).toFixed(1) : '—'
+
+              const maxVal = Math.max(
+                ...analytics.daily_last_7.map(d => d.views),
+                1
+              )
+
+              const fmtDate = (iso: string) => {
+                const d = new Date(iso + 'T00:00:00')
+                return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+              }
+
+              return (
+                <>
+                  {/* Stat cards — 3 periods */}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {([
+                      { label: 'Last 7 days',  data: analytics.last_7    },
+                      { label: 'Last 30 days', data: analytics.last_30   },
+                      { label: 'All time',     data: analytics.all_time  },
+                    ] as const).map(({ label, data }) => (
+                      <div key={label} className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-5">
+                        <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-4">{label}</p>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">Views</span>
+                            <span className="text-sm font-extrabold text-gray-900 dark:text-gray-100">{data.views.toLocaleString()}</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">Clicks</span>
+                            <span className="text-sm font-extrabold text-blue-600 dark:text-blue-400">{data.clicks.toLocaleString()}</span>
+                          </div>
+                          <div className="flex items-center justify-between border-t border-gray-100 dark:border-gray-800 pt-3">
+                            <span className="text-xs text-gray-500 dark:text-gray-400">CTR</span>
+                            <span className="text-sm font-extrabold text-amber-600 dark:text-amber-400">{ctr(data)}{ctr(data) !== '—' ? '%' : ''}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* 7-day bar chart */}
+                  <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
+                    <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-6">Last 7 days</p>
+
+                    {/* Legend */}
+                    <div className="flex items-center gap-5 mb-5">
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-3 h-3 rounded-sm bg-blue-200 dark:bg-blue-800" />
+                        <span className="text-xs text-gray-500 dark:text-gray-400">Views</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <div className="w-3 h-3 rounded-sm bg-amber-400" />
+                        <span className="text-xs text-gray-500 dark:text-gray-400">Clicks</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-end justify-between gap-2 h-28">
+                      {analytics.daily_last_7.map(day => (
+                        <div key={day.date} className="flex-1 flex flex-col items-center gap-1 h-full">
+                          {/* Bars */}
+                          <div className="flex-1 w-full flex items-end gap-0.5">
+                            <div
+                              className="flex-1 bg-blue-200 dark:bg-blue-800 rounded-t transition-all"
+                              style={{ height: `${Math.max((day.views / maxVal) * 100, day.views > 0 ? 4 : 0)}%` }}
+                              title={`${day.views} views`}
+                            />
+                            <div
+                              className="flex-1 bg-amber-400 dark:bg-amber-500 rounded-t transition-all"
+                              style={{ height: `${Math.max((day.clicks / maxVal) * 100, day.clicks > 0 ? 4 : 0)}%` }}
+                              title={`${day.clicks} clicks`}
+                            />
+                          </div>
+                          {/* Date label */}
+                          <span className="text-[10px] text-gray-400 dark:text-gray-500 whitespace-nowrap">
+                            {fmtDate(day.date)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Context note */}
+                  <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
+                    Views are counted each time your listing appears on the Studio Stax directory. Clicks are counted when someone visits your site.
+                  </p>
+                </>
+              )
+            })()}
           </div>
         )}
 
