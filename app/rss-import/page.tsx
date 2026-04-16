@@ -5,6 +5,22 @@ import { supabase } from '@/lib/supabase'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 
+const LS_KEY = 'sm_rss_imported_links'
+
+function getImportedLinks(): Set<string> {
+  if (typeof window === 'undefined') return new Set()
+  try {
+    const raw = localStorage.getItem(LS_KEY)
+    return raw ? new Set(JSON.parse(raw)) : new Set()
+  } catch { return new Set() }
+}
+
+function saveImportedLinks(links: Set<string>) {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify(Array.from(links)))
+  } catch {}
+}
+
 type RSSPost = {
   title: string
   link: string
@@ -23,12 +39,14 @@ export default function RSSImport() {
   const [importing, setImporting] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
+  const [importedLinks, setImportedLinks] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (!data.user) router.push('/login')
       else { setUserId(data.user.id); setLoading(false) }
     })
+    setImportedLinks(getImportedLinks())
   }, [router])
 
   const showToast = (msg: string) => {
@@ -75,7 +93,7 @@ export default function RSSImport() {
   const selectNone = () => setPosts(prev => prev.map(p => ({ ...p, selected: false })))
 
   const handleImport = async () => {
-    const selected = posts.filter(p => p.selected)
+    const selected = posts.filter(p => p.selected && !importedLinks.has(p.link))
     if (!selected.length || !userId) return
     setImporting(true)
 
@@ -89,12 +107,17 @@ export default function RSSImport() {
       })
     }
 
+    const newImported = new Set(importedLinks)
+    selected.forEach(p => newImported.add(p.link))
+    setImportedLinks(newImported)
+    saveImportedLinks(newImported)
+
     setImporting(false)
     showToast(`${selected.length} post${selected.length !== 1 ? 's' : ''} imported as drafts`)
     setPosts(prev => prev.map(p => p.selected ? { ...p, selected: false } : p))
   }
 
-  const selectedCount = posts.filter(p => p.selected).length
+  const selectedCount = posts.filter(p => p.selected && !importedLinks.has(p.link)).length
 
   if (loading) {
     return (
@@ -158,19 +181,30 @@ export default function RSSImport() {
               </div>
 
               <div className="space-y-3">
-                {posts.map((post, i) => (
-                  <button key={i} onClick={() => togglePost(i)}
+                {posts.map((post, i) => {
+                  const alreadyImported = post.link ? importedLinks.has(post.link) : false
+                  return (
+                  <button key={i} onClick={() => !alreadyImported && togglePost(i)}
                     className={`w-full text-left bg-surface border-2 rounded-2xl p-4 transition-all ${
-                      post.selected ? 'border-black' : 'border-theme hover:border-gray-300'
+                      alreadyImported
+                        ? 'border-gray-100 dark:border-gray-800 opacity-50 cursor-not-allowed'
+                        : post.selected ? 'border-black' : 'border-theme hover:border-gray-300'
                     }`}>
                     <div className="flex items-start gap-3">
                       <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 mt-0.5 border-2 transition-all ${
-                        post.selected ? 'bg-black border-black' : 'border-gray-300'
+                        alreadyImported ? 'bg-gray-200 border-gray-200 dark:bg-gray-700 dark:border-gray-700'
+                        : post.selected ? 'bg-black border-black' : 'border-gray-300'
                       }`}>
-                        {post.selected && <span className="text-white text-xs font-bold">✓</span>}
+                        {alreadyImported && <span className="text-gray-400 text-xs font-bold">✓</span>}
+                        {!alreadyImported && post.selected && <span className="text-white text-xs font-bold">✓</span>}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-1 truncate">{post.title}</p>
+                        <div className="flex items-center gap-2 flex-wrap mb-1">
+                          <p className="text-sm font-bold text-gray-900 dark:text-gray-100 truncate">{post.title}</p>
+                          {alreadyImported && (
+                            <span className="text-[10px] font-extrabold px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 rounded-full leading-none flex-shrink-0">Already imported</span>
+                          )}
+                        </div>
                         {post.description && (
                           <p className="text-xs text-gray-400 dark:text-gray-500 leading-relaxed line-clamp-2">{post.description}</p>
                         )}
@@ -183,7 +217,7 @@ export default function RSSImport() {
                           {post.link && (
                             <a href={post.link} target="_blank" rel="noopener noreferrer"
                               onClick={e => e.stopPropagation()}
-                              className="text-xs font-bold text-black hover:underline">
+                              className="text-xs font-bold text-black dark:text-white hover:underline">
                               View post →
                             </a>
                           )}
@@ -191,7 +225,8 @@ export default function RSSImport() {
                       </div>
                     </div>
                   </button>
-                ))}
+                  )
+                })}
               </div>
 
               <div className="mt-6 bg-black text-white rounded-2xl p-5 flex items-center justify-between">

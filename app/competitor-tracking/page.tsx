@@ -123,7 +123,7 @@ export default function CompetitorTracking() {
             )}
           </div>
 
-          <div className="grid grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
             <div className="bg-surface border border-theme rounded-2xl p-5 text-center">
               <p className="text-2xl font-extrabold">{competitors.length} / {MAX_COMPETITORS}</p>
               <p className="text-xs text-gray-400 dark:text-gray-500 font-semibold mt-0.5">Tracked</p>
