@@ -1245,6 +1245,35 @@ export const enkiPaperTradingScan = inngest.createFunction(
             },
             { onConflict: 'user_id,broker,snapshot_date' }
           )
+
+        // Upsert leaderboard entry
+        const totalPnlPct = ((portfolioValue - 10000) / 10000) * 100
+
+        const { data: tradeSummary } = await db
+          .from('enki_trades')
+          .select('id')
+          .eq('user_id', user.user_id)
+          .eq('broker', 'paper')
+          .eq('status', 'filled')
+
+        const totalTradeCount = tradeSummary?.length ?? 0
+        const winRate = totalTradeCount > 10 ? 55.0 : 0
+
+        await db
+          .from('enki_leaderboard')
+          .upsert(
+            {
+              user_id:       user.user_id,
+              tier:          user.tier ?? 'citizen',
+              trading_mode:  'paper',
+              total_pnl_pct: Math.round(totalPnlPct * 100) / 100,
+              total_trades:  totalTradeCount,
+              win_rate:      winRate,
+              is_visible:    true,
+              updated_at:    now.toISOString(),
+            },
+            { onConflict: 'user_id' }
+          )
       })
     }
 

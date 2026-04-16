@@ -108,6 +108,7 @@ function ComposeInner() {
   const { credits, setCredits, applyCredits, plan, activeWorkspace } = useWorkspace()
 
   const [loading, setLoading] = useState(true)
+  const [showPostingDisclaimer, setShowPostingDisclaimer] = useState(false)
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['discord'])
   const [content, setContent] = useState('')
   const [scheduleDate, setScheduleDate] = useState('')
@@ -127,6 +128,25 @@ function ComposeInner() {
   const [scoring, setScoring] = useState(false)
   const [scoreError, setScoreError] = useState('')
   const [showPreview, setShowPreview] = useState(false)
+
+  // Hashtag collections
+  type HashtagCollection = {
+    id: string
+    name: string
+    hashtags: string[]
+    workspace_id: string | null
+    created_at: string
+    updated_at: string
+  }
+  const [showHashtagPanel, setShowHashtagPanel] = useState(false)
+  const [hashtagCollections, setHashtagCollections] = useState<HashtagCollection[]>([])
+  const [hashtagsLoaded, setHashtagsLoaded] = useState(false)
+  const [newCollectionName, setNewCollectionName] = useState('')
+  const [newCollectionTags, setNewCollectionTags] = useState<string[]>([])
+  const [newTagInput, setNewTagInput] = useState('')
+  const [hashtagSaving, setHashtagSaving] = useState(false)
+  const [hashtagError, setHashtagError] = useState('')
+  const [showNewCollectionForm, setShowNewCollectionForm] = useState(false)
 
   // Media attachments
   type MediaItem = { file: File; preview: string; url?: string; type: 'image' | 'video'; uploading: boolean }
@@ -153,6 +173,13 @@ function ComposeInner() {
     plan === 'free'   ? '2 weeks' :
     plan === 'pro'    ? '1 month' :
     '3 months'
+
+  // Show posting disclaimer once per session
+  useEffect(() => {
+    if (!sessionStorage.getItem('sm_posting_disclaimer_dismissed')) {
+      setShowPostingDisclaimer(true)
+    }
+  }, [])
 
   // Reload data whenever active workspace changes
   useEffect(() => {
@@ -318,6 +345,96 @@ function ComposeInner() {
   const missingDestinations = selectedPlatforms
     .filter(p => DESTINATION_PLATFORMS.includes(p))
     .filter(p => !selectedDestinations[p] && (!destinations[p] || destinations[p].length === 0))
+
+  const dismissDisclaimer = () => {
+    sessionStorage.setItem('sm_posting_disclaimer_dismissed', '1')
+    setShowPostingDisclaimer(false)
+  }
+
+  const loadHashtagCollections = async () => {
+    if (hashtagsLoaded) return
+    try {
+      const res = await fetch('/api/hashtag-collections')
+      const data = await res.json()
+      if (res.ok) {
+        setHashtagCollections(data.collections)
+        setHashtagsLoaded(true)
+      }
+    } catch {
+      // silently fail — non-critical
+    }
+  }
+
+  const handleToggleHashtagPanel = () => {
+    if (!showHashtagPanel) loadHashtagCollections()
+    setShowHashtagPanel(p => !p)
+  }
+
+  const handleUseCollection = (col: HashtagCollection) => {
+    const tagString = col.hashtags.map(t => `#${t}`).join(' ')
+    setContent(prev => prev ? `${prev}\n\n${tagString}` : tagString)
+    showToast(`Added ${col.hashtags.length} hashtags from "${col.name}" ✓`)
+  }
+
+  const handleNewTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault()
+      const tag = newTagInput.trim().replace(/^#/, '').replace(/\s+/g, '')
+      if (tag && !newCollectionTags.includes(tag) && newCollectionTags.length < 30) {
+        setNewCollectionTags(prev => [...prev, tag])
+      }
+      setNewTagInput('')
+    }
+    if (e.key === 'Backspace' && !newTagInput && newCollectionTags.length > 0) {
+      setNewCollectionTags(prev => prev.slice(0, -1))
+    }
+  }
+
+  const removeNewTag = (tag: string) => {
+    setNewCollectionTags(prev => prev.filter(t => t !== tag))
+  }
+
+  const handleSaveCollection = async () => {
+    setHashtagError('')
+    if (!newCollectionName.trim()) { setHashtagError('Collection name is required'); return }
+    if (newCollectionTags.length === 0) { setHashtagError('Add at least one hashtag'); return }
+    setHashtagSaving(true)
+    try {
+      const res = await fetch('/api/hashtag-collections', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newCollectionName, hashtags: newCollectionTags }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setHashtagError(data.error || 'Failed to save'); return }
+      setHashtagCollections(prev => [data.collection, ...prev])
+      setNewCollectionName('')
+      setNewCollectionTags([])
+      setNewTagInput('')
+      setShowNewCollectionForm(false)
+      showToast(`Collection "${data.collection.name}" saved ✓`)
+    } catch {
+      setHashtagError('Network error. Please try again.')
+    } finally {
+      setHashtagSaving(false)
+    }
+  }
+
+  const handleDeleteCollection = async (id: string, name: string) => {
+    try {
+      const res = await fetch('/api/hashtag-collections', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+      if (res.ok) {
+        setHashtagCollections(prev => prev.filter(c => c.id !== id))
+        showToast(`"${name}" deleted`)
+      }
+    } catch {
+      showToast('Failed to delete collection', 'error')
+    }
+  }
 
   const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
     setToast({ message, type })
@@ -682,6 +799,19 @@ function ComposeInner() {
             </div>
           )}
 
+          {showPostingDisclaimer && (
+            <div className="mb-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl px-4 py-3 flex items-start gap-3">
+              <span className="text-amber-500 mt-0.5 shrink-0">⚠️</span>
+              <div className="flex-1">
+                <p className="text-xs font-bold text-amber-800 dark:text-amber-300">Heads up on automated posting</p>
+                <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5 leading-relaxed">
+                  Scheduled and bulk posting can trigger spam detection on some platforms — especially Mastodon, Bluesky, and X. Space out your posts, vary your content, and stay within each platform&apos;s rate limits. We&apos;re not responsible for account actions taken by third-party platforms.
+                </p>
+              </div>
+              <button onClick={dismissDisclaimer} className="text-amber-400 hover:text-amber-600 text-lg leading-none shrink-0">×</button>
+            </div>
+          )}
+
           {showPreview && (
             <div className="lg:hidden mb-4 bg-surface border border-theme rounded-2xl p-4">
               <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">Preview</p>
@@ -1006,6 +1136,120 @@ function ComposeInner() {
                     className="hidden"
                   />
                 </div>
+              </div>
+
+              {/* HASHTAG COLLECTIONS */}
+              <div className="bg-surface border border-theme rounded-2xl p-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide"># Collections</p>
+                  <button
+                    onClick={handleToggleHashtagPanel}
+                    className="text-xs font-bold px-3 py-2 min-h-[36px] border border-gray-200 dark:border-gray-700 rounded-lg hover:border-gray-400 transition-all">
+                    {showHashtagPanel ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+
+                {showHashtagPanel && (
+                  <div className="mt-3 space-y-3">
+                    {plan === 'free' && hashtagCollections.length >= 3 && (
+                      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl px-3 py-2 flex items-center justify-between gap-3">
+                        <p className="text-xs text-blue-700 dark:text-blue-300 font-semibold">Free plan: 3 collections max</p>
+                        <a href="/settings?tab=Plan" className="text-xs font-bold text-blue-800 dark:text-blue-300 hover:underline flex-shrink-0">Upgrade to Pro →</a>
+                      </div>
+                    )}
+
+                    {hashtagCollections.length === 0 && !showNewCollectionForm && (
+                      <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-4 text-center">
+                        <p className="text-xs text-gray-400 dark:text-gray-500">No collections yet. Save your favourite hashtag sets to reuse them quickly.</p>
+                      </div>
+                    )}
+
+                    {hashtagCollections.map(col => (
+                      <div key={col.id} className="bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl px-3 py-2.5">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <span className="text-xs font-bold text-gray-700 dark:text-gray-300">{col.name}</span>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleUseCollection(col)}
+                              className="text-xs font-bold px-2.5 py-1.5 min-h-[32px] bg-black text-white rounded-lg hover:opacity-80 transition-all">
+                              Use
+                            </button>
+                            <button
+                              onClick={() => handleDeleteCollection(col.id, col.name)}
+                              className="text-xs text-gray-400 hover:text-red-500 transition-colors w-6 h-6 flex items-center justify-center rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
+                              ×
+                            </button>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-1">
+                          {col.hashtags.map(tag => (
+                            <span key={tag} className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full">
+                              #{tag}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+
+                    {showNewCollectionForm ? (
+                      <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-3 space-y-2">
+                        <input
+                          type="text"
+                          value={newCollectionName}
+                          onChange={e => setNewCollectionName(e.target.value)}
+                          placeholder="Collection name (e.g. Tech Stack)"
+                          style={{ fontSize: '16px' }}
+                          className="w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-xs outline-none focus:border-gray-400 bg-white dark:bg-gray-900"
+                        />
+                        <div
+                          className="min-h-[44px] w-full border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 bg-white dark:bg-gray-900 flex flex-wrap gap-1 items-center cursor-text"
+                          onClick={() => document.getElementById('sm-new-tag-input')?.focus()}>
+                          {newCollectionTags.map(tag => (
+                            <span key={tag} className="flex items-center gap-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-0.5 rounded-full">
+                              #{tag}
+                              <button type="button" onClick={() => removeNewTag(tag)} className="text-gray-400 hover:text-red-500 transition-colors leading-none">×</button>
+                            </span>
+                          ))}
+                          <input
+                            id="sm-new-tag-input"
+                            type="text"
+                            value={newTagInput}
+                            onChange={e => setNewTagInput(e.target.value)}
+                            onKeyDown={handleNewTagKeyDown}
+                            placeholder={newCollectionTags.length === 0 ? 'Type a hashtag + Enter to add' : ''}
+                            style={{ fontSize: '16px' }}
+                            className="flex-1 min-w-[120px] outline-none bg-transparent text-xs text-gray-700 dark:text-gray-300 placeholder-gray-300 dark:placeholder-gray-600"
+                          />
+                        </div>
+                        <p className="text-xs text-gray-400 dark:text-gray-500">{newCollectionTags.length}/30 tags</p>
+                        {hashtagError && (
+                          <p className="text-xs text-red-500">{hashtagError}</p>
+                        )}
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={handleSaveCollection}
+                            disabled={hashtagSaving}
+                            className="text-xs font-bold px-3 py-2 min-h-[36px] bg-black text-white rounded-lg hover:opacity-80 transition-all disabled:opacity-40">
+                            {hashtagSaving ? 'Saving...' : 'Save Collection'}
+                          </button>
+                          <button
+                            onClick={() => { setShowNewCollectionForm(false); setNewCollectionName(''); setNewCollectionTags([]); setNewTagInput(''); setHashtagError('') }}
+                            className="text-xs text-gray-400 hover:text-gray-600 transition-colors font-semibold min-h-[36px] px-2">
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      (plan !== 'free' || hashtagCollections.length < 3) && (
+                        <button
+                          onClick={() => setShowNewCollectionForm(true)}
+                          className="w-full text-xs font-bold px-3 py-2.5 min-h-[44px] border border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-900 transition-all text-gray-500 dark:text-gray-400">
+                          + New Collection
+                        </button>
+                      )
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* AI TOOLS */}

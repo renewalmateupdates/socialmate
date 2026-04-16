@@ -32,6 +32,20 @@ interface Trade {
   created_at: string
 }
 
+interface PendingTrade {
+  id: string
+  doctrine_id: string | null
+  broker: string
+  symbol: string
+  side: 'buy' | 'sell'
+  qty: number
+  price: number
+  reason: string
+  confidence: number
+  status: string
+  created_at: string
+}
+
 interface Snapshot {
   broker: string
   portfolio_value: number
@@ -85,6 +99,8 @@ export default function EnkiDashboardPage() {
   const [trades, setTrades] = useState<Trade[]>([])
   const [snapshots, setSnapshots] = useState<Snapshot[]>([])
   const [paperPositions, setPaperPositions] = useState<PaperPosition[]>([])
+  const [pendingTrades, setPendingTrades] = useState<PendingTrade[]>([])
+  const [approvalState, setApprovalState] = useState<Record<string, 'approved' | 'rejected' | 'loading'>>({})
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -97,19 +113,22 @@ export default function EnkiDashboardPage() {
   async function loadAll() {
     setLoading(true)
     try {
-      const [profileRes, tradesRes, snapshotsRes] = await Promise.all([
+      const [profileRes, tradesRes, snapshotsRes, pendingRes] = await Promise.all([
         fetch('/api/enki/profile'),
         fetch('/api/enki/trades?limit=10'),
         fetch('/api/enki/snapshots'),
+        fetch('/api/enki/trades/pending'),
       ])
-      const [profileJson, tradesJson, snapshotsJson] = await Promise.all([
+      const [profileJson, tradesJson, snapshotsJson, pendingJson] = await Promise.all([
         profileRes.json(),
         tradesRes.json(),
         snapshotsRes.json(),
+        pendingRes.json(),
       ])
-      if (profileJson.profile)   setProfile(profileJson.profile)
-      if (tradesJson.trades)     setTrades(tradesJson.trades)
+      if (profileJson.profile)     setProfile(profileJson.profile)
+      if (tradesJson.trades)       setTrades(tradesJson.trades)
       if (snapshotsJson.snapshots) setSnapshots(snapshotsJson.snapshots)
+      if (pendingJson.trades)      setPendingTrades(pendingJson.trades)
 
       // Derive paper positions from paper trades
       if (tradesJson.trades) {
@@ -139,6 +158,32 @@ export default function EnkiDashboardPage() {
       console.error('Enki dashboard load error:', e)
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleApproval(id: string, action: 'approve' | 'reject') {
+    setApprovalState(prev => ({ ...prev, [id]: 'loading' }))
+    try {
+      const res = await fetch('/api/enki/trades/pending', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, action }),
+      })
+      const json = await res.json()
+      if (json.success) {
+        setApprovalState(prev => ({ ...prev, [id]: action === 'approve' ? 'approved' : 'rejected' }))
+        // Remove from list after brief delay so user sees the inline state
+        setTimeout(() => {
+          setPendingTrades(prev => prev.filter(t => t.id !== id))
+          setApprovalState(prev => { const next = { ...prev }; delete next[id]; return next })
+        }, 1200)
+      } else {
+        setApprovalState(prev => { const next = { ...prev }; delete next[id]; return next })
+        console.error('Approval error:', json.error)
+      }
+    } catch (e) {
+      setApprovalState(prev => { const next = { ...prev }; delete next[id]; return next })
+      console.error('Approval request failed:', e)
     }
   }
 
@@ -331,6 +376,69 @@ export default function EnkiDashboardPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {/* ── Pending Approvals (approval mode only) ── */}
+        {profile?.guardian_mode === 'approval' && pendingTrades.length > 0 && (
+          <div className="bg-white dark:bg-gray-900 border border-amber-200 dark:border-amber-800/50 rounded-2xl overflow-hidden mb-8">
+            <div className="px-6 py-4 border-b border-amber-100 dark:border-amber-800/40 flex items-center gap-3">
+              <span className="text-amber-500">⚡</span>
+              <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">Pending Approvals</p>
+              <span className="text-[11px] font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full">
+                {pendingTrades.length} pending
+              </span>
+            </div>
+            <div className="divide-y divide-gray-50 dark:divide-gray-800/50">
+              {pendingTrades.map((t) => {
+                const state = approvalState[t.id]
+                const isLoading = state === 'loading'
+                const isDone    = state === 'approved' || state === 'rejected'
+                return (
+                  <div key={t.id} className="px-6 py-4 flex items-center justify-between gap-4 flex-wrap">
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <span className="font-extrabold text-sm text-gray-900 dark:text-gray-100">{t.symbol}</span>
+                      <span className={`text-xs font-bold uppercase px-2 py-0.5 rounded ${t.side === 'buy' ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400' : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'}`}>
+                        {t.side}
+                      </span>
+                      <span className="text-xs text-gray-500">{t.qty} shares</span>
+                      <span className="text-xs font-bold text-gray-700 dark:text-gray-300">${t.price.toFixed(2)}</span>
+                      {t.confidence > 0 && (
+                        <span className="text-xs text-amber-500 font-bold">{t.confidence.toFixed(1)}/10</span>
+                      )}
+                      <span className="text-xs text-gray-400">
+                        {new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {isDone ? (
+                        <span className={`text-xs font-bold px-3 py-1.5 rounded-xl ${state === 'approved' ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400' : 'bg-red-50 dark:bg-red-900/20 text-red-500'}`}>
+                          {state === 'approved' ? '✓ Approved' : '✕ Rejected'}
+                        </span>
+                      ) : (
+                        <>
+                          <button
+                            disabled={isLoading}
+                            onClick={() => handleApproval(t.id, 'approve')}
+                            className="text-xs font-bold bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-xl transition-colors disabled:opacity-50"
+                          >
+                            {isLoading ? '…' : 'Approve ✓'}
+                          </button>
+                          <button
+                            disabled={isLoading}
+                            onClick={() => handleApproval(t.id, 'reject')}
+                            className="text-xs font-bold bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 px-3 py-1.5 rounded-xl transition-colors disabled:opacity-50"
+                          >
+                            Reject ✕
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           </div>
         )}
