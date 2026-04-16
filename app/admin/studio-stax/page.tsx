@@ -45,8 +45,21 @@ export default function AdminStudioStaxPage() {
   const [filter, setFilter] = useState<StatusFilter>('all')
   const [selected, setSelected] = useState<Listing | null>(null)
   const [adminNotes, setAdminNotes] = useState('')
+  const [editCategory, setEditCategory] = useState('')
   const [actionLoading, setActionLoading] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
+
+  const CATEGORIES = [
+    { id: 'social-media',     label: 'Social Media Tools'  },
+    { id: 'content-creation', label: 'Content Creation'    },
+    { id: 'ai-tools',         label: 'AI Tools'             },
+    { id: 'analytics',        label: 'Analytics & Growth'  },
+    { id: 'creator-economy',  label: 'Creator Economy'      },
+    { id: 'community',        label: 'Community Building'  },
+    { id: 'productivity',     label: 'Productivity'         },
+    { id: 'developer-tools',  label: 'Developer Tools'      },
+  ]
 
   function showToast(msg: string, ok = true) {
     setToast({ msg, ok })
@@ -68,6 +81,46 @@ export default function AdminStudioStaxPage() {
   }
 
   useEffect(() => { load() }, [])
+
+  async function handleDelete(id: string) {
+    setActionLoading(true)
+    try {
+      const res = await fetch(`/api/listings/admin?id=${id}`, { method: 'DELETE' })
+      const json = await res.json()
+      if (json.success) {
+        showToast('Listing deleted')
+        setSelected(null)
+        setConfirmDelete(false)
+        await load()
+      } else {
+        showToast(json.error || 'Delete failed', false)
+      }
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  async function handleSaveCategory(id: string, category: string, notes?: string) {
+    setActionLoading(true)
+    try {
+      const res = await fetch('/api/listings/admin', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, category, admin_notes: notes || null }),
+      })
+      const json = await res.json()
+      if (json.success) {
+        showToast('Category updated')
+        await load()
+        // refresh selected with updated value
+        setSelected(prev => prev ? { ...prev, category } : prev)
+      } else {
+        showToast(json.error || 'Update failed', false)
+      }
+    } finally {
+      setActionLoading(false)
+    }
+  }
 
   async function handleStatusChange(id: string, status: string, notes?: string) {
     setActionLoading(true)
@@ -268,7 +321,7 @@ export default function AdminStudioStaxPage() {
                   {filtered.map((listing, i) => (
                     <tr key={listing.id}
                       className={`hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors ${i < filtered.length - 1 ? 'border-b border-theme' : ''}`}>
-                      <td className="px-5 py-3 cursor-pointer" onClick={() => { setSelected(listing); setAdminNotes(listing.admin_notes || '') }}>
+                      <td className="px-5 py-3 cursor-pointer" onClick={() => { setSelected(listing); setAdminNotes(listing.admin_notes || ''); setEditCategory(listing.category || ''); setConfirmDelete(false) }}>
                         <div className="font-semibold text-gray-900 dark:text-gray-100">{listing.name}</div>
                         {listing.tagline && <div className="text-xs text-gray-400 mt-0.5 truncate max-w-[200px]">{listing.tagline}</div>}
                         {listing.applicant_email && <div className="text-xs text-gray-400">{listing.applicant_email}</div>}
@@ -304,7 +357,7 @@ export default function AdminStudioStaxPage() {
                         <div className="flex gap-2 flex-wrap">
                           {listing.status === 'pending' && (
                             <button
-                              onClick={() => { setSelected(listing); setAdminNotes(listing.admin_notes || '') }}
+                              onClick={() => { setSelected(listing); setAdminNotes(listing.admin_notes || ''); setEditCategory(listing.category || ''); setConfirmDelete(false) }}
                               className="text-xs bg-black dark:bg-white text-white dark:text-black px-3 py-1 rounded-lg font-semibold hover:opacity-80 transition-all">
                               Review
                             </button>
@@ -409,6 +462,29 @@ export default function AdminStudioStaxPage() {
                   </div>
                 )}
 
+                {/* Category editor */}
+                <div>
+                  <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Category</div>
+                  <div className="flex gap-2">
+                    <select
+                      value={editCategory}
+                      onChange={e => setEditCategory(e.target.value)}
+                      className="flex-1 border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-gray-400">
+                      <option value="">— no category —</option>
+                      {CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+                    </select>
+                    <button
+                      onClick={() => handleSaveCategory(selected.id, editCategory, adminNotes)}
+                      disabled={actionLoading || editCategory === (selected.category || '')}
+                      className="text-xs font-semibold px-3 py-2 rounded-xl bg-gray-900 dark:bg-white text-white dark:text-black hover:opacity-80 transition-all disabled:opacity-40">
+                      Save
+                    </button>
+                  </div>
+                  {!selected.category && (
+                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">⚠ No category set — listing won&apos;t appear on the public page until one is assigned.</p>
+                  )}
+                </div>
+
                 {/* Admin notes */}
                 <div>
                   <div className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">Admin notes</div>
@@ -471,6 +547,36 @@ export default function AdminStudioStaxPage() {
                     {actionLoading ? 'Saving…' : 'Save notes'}
                   </button>
                 )}
+
+                {/* Delete — always available */}
+                <div className="pt-3 border-t border-theme">
+                  {!confirmDelete ? (
+                    <button
+                      onClick={() => setConfirmDelete(true)}
+                      disabled={actionLoading}
+                      className="w-full text-xs font-semibold text-red-500 dark:text-red-400 py-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-all disabled:opacity-60">
+                      Delete listing
+                    </button>
+                  ) : (
+                    <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-3 space-y-2">
+                      <p className="text-xs font-bold text-red-700 dark:text-red-400 text-center">Permanently delete &quot;{selected.name}&quot;?</p>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setConfirmDelete(false)}
+                          disabled={actionLoading}
+                          className="flex-1 text-xs font-semibold py-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 transition-all">
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => handleDelete(selected.id)}
+                          disabled={actionLoading}
+                          className="flex-1 text-xs font-bold py-2 rounded-xl bg-red-600 text-white hover:bg-red-700 transition-all disabled:opacity-60">
+                          {actionLoading ? 'Deleting…' : 'Yes, delete'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
