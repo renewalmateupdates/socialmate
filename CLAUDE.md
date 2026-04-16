@@ -204,6 +204,11 @@ These have burned us before — always apply:
 | Donation $10 | price_1TFMIM7OMwDowUuUcmN2hPwT | $10.00 |
 | Donation $25 | price_1TFMIQ7OMwDowUuUfdZXeATH | $25.00 |
 | Donation $50 | price_1TFMIT7OMwDowUuUHgqWqtUZ | $50.00 |
+| Enki Commander Monthly | price_1TMthL7OMwDowUuUndSIejcJ | $15.00/mo |
+| Enki Commander Annual | price_1TMthy7OMwDowUuURnoHc2Qq | $120.00/yr |
+| Enki Emperor Monthly | price_1TMtiN7OMwDowUuUU5rzK88L | $29.00/mo |
+| Enki Emperor Annual | price_1TMtis7OMwDowUuUpQ2hZamc | $240.00/yr |
+| Enki Cloud Runner | price_1TMtkc7OMwDowUuU8aepieuq | $10.00/mo |
 
 ---
 

@@ -1,8 +1,6 @@
 'use client'
 import { useState } from 'react'
-
-const WAITLIST_HREF =
-  'mailto:socialmatehq@gmail.com?subject=Enki%20Early%20Access&body=I%20want%20early%20access%20to%20Enki!'
+import { useRouter } from 'next/navigation'
 
 const PRICING = [
   {
@@ -50,7 +48,7 @@ const PRICING = [
       { label: 'Conquest alerts (email + Telegram)' },
       { label: 'Strategy vault — pre-built doctrines' },
       { label: '30-day backtests' },
-      { label: 'Cloud Runner available (+$7/mo)' },
+      { label: 'Cloud Runner available (+$10/mo)' },
     ],
     cta: 'Join Waitlist — Commander',
     ctaStyle: 'bg-amber-400 hover:bg-amber-500 text-black',
@@ -76,7 +74,7 @@ const PRICING = [
       { label: 'Guild + doctrine marketplace' },
       { label: 'Elite empire badges' },
       { label: '90-day backtests' },
-      { label: 'Cloud Runner available (+$7/mo)' },
+      { label: 'Cloud Runner available (+$10/mo)' },
     ],
     cta: 'Join Waitlist — Emperor',
     ctaStyle: 'bg-purple-600 hover:bg-purple-700 text-white',
@@ -85,6 +83,25 @@ const PRICING = [
 
 export default function EnkiPricingSection() {
   const [annual, setAnnual] = useState(false)
+  const [loading, setLoading] = useState<string | null>(null)
+  const router = useRouter()
+
+  async function handleCheckout(plan: string) {
+    setLoading(plan)
+    try {
+      const billing = annual && plan !== 'cloud_runner' ? 'annual' : 'monthly'
+      const res = await fetch('/api/enki/checkout', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ plan, billing }),
+      })
+      if (res.status === 401) { router.push('/login?redirect=/enki%23pricing'); return }
+      const { url } = await res.json()
+      if (url) window.location.href = url
+    } finally {
+      setLoading(null)
+    }
+  }
 
   return (
     <section id="pricing" className="mb-20">
@@ -172,12 +189,22 @@ export default function EnkiPricingSection() {
                     </li>
                   ))}
                 </ul>
-                <a
-                  href={WAITLIST_HREF}
-                  className={`w-full text-center text-sm font-bold py-3 rounded-xl transition-all ${plan.ctaStyle}`}
-                >
-                  {plan.cta} →
-                </a>
+                {plan.monthlyPrice === 0 ? (
+                  <a
+                    href="/enki/dashboard"
+                    className={`w-full text-center text-sm font-bold py-3 rounded-xl transition-all block ${plan.ctaStyle}`}
+                  >
+                    {plan.cta} →
+                  </a>
+                ) : (
+                  <button
+                    onClick={() => handleCheckout(plan.name.toLowerCase())}
+                    disabled={loading === plan.name.toLowerCase()}
+                    className={`w-full text-center text-sm font-bold py-3 rounded-xl transition-all disabled:opacity-50 ${plan.ctaStyle}`}
+                  >
+                    {loading === plan.name.toLowerCase() ? 'Loading...' : `${plan.cta} →`}
+                  </button>
+                )}
               </div>
             </div>
           )
@@ -185,7 +212,7 @@ export default function EnkiPricingSection() {
       </div>
 
       <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-6">
-        Cloud Runner add-on ($7/mo) — 24/7 execution while your laptop is off. Available on Commander + Emperor.
+        Cloud Runner add-on ($10/mo) — 24/7 execution while your laptop is off. Available on Commander + Emperor.
       </p>
     </section>
   )
