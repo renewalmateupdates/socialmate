@@ -1053,7 +1053,25 @@ export const enkiPaperTradingScan = inngest.createFunction(
         if (profileMap[d.user_id]) profileMap[d.user_id].doctrines.push(d)
       }
 
-      return Object.values(profileMap).filter((u: any) => u.doctrines.length > 0)
+      const activeList = (Object.values(profileMap) as any[]).filter((u: any) => u.doctrines.length > 0)
+      if (!activeList.length) return []
+
+      // Fetch display names from SocialMate profiles table
+      const activeIds = activeList.map((u: any) => u.user_id)
+      const { data: smProfiles } = await db
+        .from('profiles')
+        .select('id, full_name')
+        .in('id', activeIds)
+
+      const displayNameMap: Record<string, string> = {}
+      for (const p of smProfiles ?? []) {
+        displayNameMap[p.id] = (p.full_name as string | null) || `Trader${(p.id as string).slice(0, 6)}`
+      }
+
+      return activeList.map((u: any) => ({
+        ...u,
+        displayName: displayNameMap[u.user_id] || `Trader${(u.user_id as string).slice(0, 6)}`,
+      }))
     })
 
     if (!activeUsers.length) {
@@ -1134,6 +1152,78 @@ export const enkiPaperTradingScan = inngest.createFunction(
         const db = getSupabaseAdmin()
         const now = new Date()
         const today = now.toISOString().slice(0, 10) // YYYY-MM-DD
+
+        // ── SL/TP Guardian: auto-close positions that hit stop-loss or take-profit ──
+        const { data: slTpTrades } = await db
+          .from('enki_trades')
+          .select('symbol, side, qty, price, doctrine_id, executed_at')
+          .eq('user_id', user.user_id)
+          .eq('broker', 'paper')
+          .eq('status', 'filled')
+          .order('executed_at', { ascending: true })
+
+        if (slTpTrades?.length) {
+          // Compute net open position + avg cost basis per symbol
+          const openPos: Record<string, { qty: number; totalCost: number; doctrine_id: string | null }> = {}
+          for (const t of slTpTrades) {
+            if (!openPos[t.symbol]) openPos[t.symbol] = { qty: 0, totalCost: 0, doctrine_id: null }
+            if (t.side === 'buy') {
+              openPos[t.symbol].qty       += t.qty
+              openPos[t.symbol].totalCost += t.qty * t.price
+            } else {
+              openPos[t.symbol].qty       -= t.qty
+              openPos[t.symbol].totalCost -= t.qty * t.price
+            }
+            if (t.doctrine_id) openPos[t.symbol].doctrine_id = t.doctrine_id
+          }
+
+          const utcHourSl = now.getUTCHours()
+          const utcMinSl  = now.getUTCMinutes()
+          const utcTimeSl = utcHourSl * 60 + utcMinSl
+          const dowSl     = now.getUTCDay()
+          const isOpenSl  = dowSl !== 0 && dowSl !== 6 && utcTimeSl >= 13 * 60 + 30 && utcTimeSl < 20 * 60
+
+          if (isOpenSl) {
+            for (const [sym, pos] of Object.entries(openPos)) {
+              if (pos.qty <= 0) continue
+              const signal = priceMap[sym]
+              if (!signal) continue
+
+              const avgCost    = pos.totalCost / pos.qty
+              const pnlPct     = ((signal.price - avgCost) / avgCost) * 100
+              const doctrine   = user.doctrines.find((d: any) => d.id === pos.doctrine_id) ?? user.doctrines[0]
+              const slPct      = doctrine?.config?.stop_loss_pct   ?? 8
+              const tpPct      = doctrine?.config?.take_profit_pct ?? 15
+              const hitSL      = pnlPct <= -slPct
+              const hitTP      = pnlPct >= tpPct
+              if (!hitSL && !hitTP) continue
+
+              const reason = hitSL
+                ? `Stop loss triggered: ${pnlPct.toFixed(2)}% (limit: -${slPct}%)`
+                : `Take profit triggered: +${pnlPct.toFixed(2)}% (target: +${tpPct}%)`
+
+              const { error: slTpErr } = await db.from('enki_trades').insert({
+                user_id:     user.user_id,
+                doctrine_id: doctrine?.id ?? null,
+                symbol:      sym,
+                side:        'sell',
+                qty:         pos.qty,
+                price:       signal.price,
+                total:       pos.qty * signal.price,
+                broker:      'paper',
+                paper:       true,
+                confidence:  9,
+                status:      'filled',
+                reason,
+                executed_at: now.toISOString(),
+              })
+              if (!slTpErr) {
+                totalTrades++
+                console.log(`[EnkiScan] ${hitSL ? 'SL' : 'TP'} closed: ${user.user_id} SELL ${pos.qty.toFixed(4)}x${sym} @$${signal.price} — ${reason}`)
+              }
+            }
+          }
+        }
 
         for (const doctrine of user.doctrines) {
           const symbols: string[] = doctrine.config?.symbols ?? ['SPY', 'QQQ']
@@ -1289,10 +1379,11 @@ export const enkiPaperTradingScan = inngest.createFunction(
         // Fetch all filled paper buys/sells to estimate portfolio value
         const { data: allTrades } = await db
           .from('enki_trades')
-          .select('symbol, side, qty, price')
+          .select('symbol, side, qty, price, executed_at')
           .eq('user_id', user.user_id)
           .eq('broker', 'paper')
           .eq('status', 'filled')
+          .order('executed_at', { ascending: true })
 
         if (!allTrades?.length) return
 
@@ -1352,30 +1443,76 @@ export const enkiPaperTradingScan = inngest.createFunction(
           )
 
         // Upsert leaderboard entry
-        const totalPnlPct = ((portfolioValue - 10000) / 10000) * 100
+        const totalPnlPct     = ((portfolioValue - 10000) / 10000) * 100
+        const totalTradeCount = allTrades?.length ?? 0
 
-        const { data: tradeSummary } = await db
-          .from('enki_trades')
-          .select('id')
-          .eq('user_id', user.user_id)
-          .eq('broker', 'paper')
-          .eq('status', 'filled')
+        // ── Real win rate via FIFO buy/sell matching ────────────────────────
+        const winResults: boolean[] = []
+        const buyQueues: Record<string, Array<{ qty: number; price: number }>> = {}
+        for (const t of allTrades ?? []) {
+          if (t.side === 'buy') {
+            if (!buyQueues[t.symbol]) buyQueues[t.symbol] = []
+            buyQueues[t.symbol].push({ qty: t.qty, price: t.price })
+          } else if (t.side === 'sell') {
+            const queue = buyQueues[t.symbol]
+            if (!queue?.length) continue
+            let remaining = t.qty
+            let costBasis = 0
+            while (remaining > 0 && queue.length > 0) {
+              const buy     = queue[0]
+              const matched = Math.min(remaining, buy.qty)
+              costBasis    += matched * buy.price
+              remaining    -= matched
+              buy.qty      -= matched
+              if (buy.qty <= 0) queue.shift()
+            }
+            winResults.push(t.qty * t.price - costBasis > 0)
+          }
+        }
+        const closedCount = winResults.length
+        const winRate     = closedCount > 0
+          ? Math.round((winResults.filter(Boolean).length / closedCount) * 10000) / 100
+          : 0
 
-        const totalTradeCount = tradeSummary?.length ?? 0
-        const winRate = totalTradeCount > 10 ? 55.0 : 0
+        // ── Streak tracking ─────────────────────────────────────────────────
+        let conquest_streak = 0
+        for (let k = winResults.length - 1; k >= 0; k--) {
+          if (!winResults[k]) break
+          conquest_streak++
+        }
+        let best_streak = 0, curStreak = 0
+        for (const w of winResults) {
+          curStreak = w ? curStreak + 1 : 0
+          if (curStreak > best_streak) best_streak = curStreak
+        }
+
+        // ── Doctrine rank ────────────────────────────────────────────────────
+        // Initiate → Trader → Conqueror → Warlord → Emperor → Mythic Architect
+        let doctrine_rank = 'Initiate'
+        if      (totalTradeCount >= 200 && winRate >= 65) doctrine_rank = 'Mythic Architect'
+        else if (totalTradeCount >= 100 && winRate >= 60) doctrine_rank = 'Emperor'
+        else if (totalTradeCount >= 50  && winRate >= 55) doctrine_rank = 'Warlord'
+        else if (totalTradeCount >= 25  && winRate >= 50) doctrine_rank = 'Conqueror'
+        else if (totalTradeCount >= 10)                   doctrine_rank = 'Trader'
+
+        const displayName = (user.displayName as string | undefined) || `Trader${(user.user_id as string).slice(0, 6)}`
 
         await db
           .from('enki_leaderboard')
           .upsert(
             {
-              user_id:       user.user_id,
-              tier:          user.tier ?? 'citizen',
-              trading_mode:  'paper',
-              total_pnl_pct: Math.round(totalPnlPct * 100) / 100,
-              total_trades:  totalTradeCount,
-              win_rate:      winRate,
-              is_visible:    true,
-              updated_at:    now.toISOString(),
+              user_id:         user.user_id,
+              display_name:    displayName,
+              tier:            user.tier ?? 'citizen',
+              trading_mode:    'paper',
+              total_pnl_pct:   Math.round(totalPnlPct * 100) / 100,
+              total_trades:    totalTradeCount,
+              win_rate:        winRate,
+              conquest_streak,
+              best_streak,
+              doctrine_rank,
+              is_visible:      true,
+              updated_at:      now.toISOString(),
             },
             { onConflict: 'user_id' }
           )
