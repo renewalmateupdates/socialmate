@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createBrowserClient } from '@supabase/ssr'
@@ -111,10 +111,27 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(hrs / 24)}d ago`
 }
 
-export default function EnkiDashboardPage() {
-  const router       = useRouter()
+function UpgradeBanner() {
   const searchParams = useSearchParams()
-  const justUpgraded = searchParams.get('upgrade') === 'success'
+  if (searchParams.get('upgrade') !== 'success') return null
+  return (
+    <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-300 dark:border-amber-700 rounded-2xl px-6 py-4 mb-6 flex items-center gap-4">
+      <span className="text-2xl">🎖️</span>
+      <div>
+        <p className="font-extrabold text-amber-800 dark:text-amber-300 text-sm">Welcome to the Empire.</p>
+        <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
+          Your tier has been activated. Create a doctrine to put the guardian to work.
+        </p>
+      </div>
+      <a href="/enki/doctrines" className="ml-auto shrink-0 bg-amber-400 hover:bg-amber-500 text-black font-bold text-xs px-4 py-2 rounded-xl transition-all">
+        Set Doctrine →
+      </a>
+    </div>
+  )
+}
+
+export default function EnkiDashboardPage() {
+  const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [authed, setAuthed] = useState(false)
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -418,20 +435,9 @@ export default function EnkiDashboardPage() {
         )}
 
         {/* ── Upgrade success banner ── */}
-        {justUpgraded && (
-          <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-300 dark:border-amber-700 rounded-2xl px-6 py-4 mb-6 flex items-center gap-4">
-            <span className="text-2xl">🎖️</span>
-            <div>
-              <p className="font-extrabold text-amber-800 dark:text-amber-300 text-sm">Welcome to the Empire.</p>
-              <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
-                Your tier has been activated. Create a doctrine to put the guardian to work.
-              </p>
-            </div>
-            <a href="/enki/doctrines" className="ml-auto shrink-0 bg-amber-400 hover:bg-amber-500 text-black font-bold text-xs px-4 py-2 rounded-xl transition-all">
-              Set Doctrine →
-            </a>
-          </div>
-        )}
+        <Suspense fallback={null}>
+          <UpgradeBanner />
+        </Suspense>
 
         {/* ── Tier upgrade nudge for Citizen ── */}
         {profile?.tier === 'citizen' && (
