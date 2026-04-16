@@ -224,11 +224,33 @@ export async function PATCH(req: NextRequest) {
   }
 
   // ── Standard status update ──────────────────────────────────────────────────
+  const updatePayload: Record<string, unknown> = {
+    admin_notes: admin_notes || null,
+    updated_at: new Date().toISOString(),
+  }
+  if (status) updatePayload.status = status
+  if (body.category !== undefined) updatePayload.category = body.category || null
+
   const { error } = await db
     .from('curated_listings')
-    .update({ status, admin_notes: admin_notes || null, updated_at: new Date().toISOString() })
+    .update(updatePayload)
     .eq('id', id)
 
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ success: true })
+}
+
+// DELETE — permanently remove a listing
+export async function DELETE(req: NextRequest) {
+  const user = await requireAdmin()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+
+  const { searchParams } = new URL(req.url)
+  const id = searchParams.get('id')
+  if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })
+
+  const db = getAdminSupabase()
+  const { error } = await db.from('curated_listings').delete().eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ success: true })
 }
