@@ -21,6 +21,13 @@ interface Profile {
   risk_preset: RiskPreset
 }
 
+interface Doctrine {
+  id: string
+  name: string
+  config: Record<string, unknown>
+  is_active: boolean
+}
+
 interface AlpacaInfo {
   buying_power: number
   portfolio_value: number
@@ -155,6 +162,13 @@ export default function EnkiSettingsPage() {
   const [cbError,     setCbError]     = useState<string | null>(null)
   const [cbInfo,      setCbInfo]      = useState<CoinbaseInfo | null>(null)
 
+  // Doctrine / Full Send state
+  const [doctrines,           setDoctrines]           = useState<Doctrine[]>([])
+  const [positionSizePct,     setPositionSizePct]     = useState(10)
+  const [positionSaving,      setPositionSaving]      = useState(false)
+  const [positionSaved,       setPositionSaved]       = useState(false)
+  const [activeDoctrineId,    setActiveDoctrineId]    = useState<string | null>(null)
+
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) { router.push('/login?next=/enki/settings'); return }
@@ -166,17 +180,74 @@ export default function EnkiSettingsPage() {
   async function loadProfile() {
     setLoading(true)
     try {
-      const res = await fetch('/api/enki/profile')
-      const json = await res.json()
-      if (json.profile) {
-        setProfile(json.profile)
-        setMode(json.profile.guardian_mode)
-        setRiskPreset(json.profile.risk_preset ?? 'balanced')
+      const [profileRes, doctrinesRes] = await Promise.all([
+        fetch('/api/enki/profile'),
+        fetch('/api/enki/doctrines'),
+      ])
+      const [profileJson, doctrinesJson] = await Promise.all([
+        profileRes.json(),
+        doctrinesRes.json(),
+      ])
+      if (profileJson.profile) {
+        setProfile(profileJson.profile)
+        setMode(profileJson.profile.guardian_mode)
+        setRiskPreset(profileJson.profile.risk_preset ?? 'balanced')
+      }
+      if (doctrinesJson.doctrines) {
+        setDoctrines(doctrinesJson.doctrines)
+        const active = doctrinesJson.doctrines.find((d: Doctrine) => d.is_active)
+        if (active) {
+          setActiveDoctrineId(active.id)
+          const pct = typeof active.config?.position_size_pct === 'number'
+            ? active.config.position_size_pct as number
+            : 10
+          setPositionSizePct(pct)
+        }
       }
     } catch (e) {
       console.error('Enki settings load error:', e)
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function savePositionSize() {
+    setPositionSaving(true)
+    try {
+      if (activeDoctrineId) {
+        // Update existing active doctrine's config
+        const existing = doctrines.find(d => d.id === activeDoctrineId)
+        const updatedConfig = { ...(existing?.config ?? {}), position_size_pct: positionSizePct }
+        await fetch('/api/enki/doctrines', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: activeDoctrineId, config: updatedConfig }),
+        })
+        setDoctrines(prev => prev.map(d =>
+          d.id === activeDoctrineId ? { ...d, config: updatedConfig } : d
+        ))
+      } else {
+        // Create a default doctrine if none exists
+        const res = await fetch('/api/enki/doctrines', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: 'Default Doctrine',
+            config: { symbols: ['SPY', 'QQQ'], position_size_pct: positionSizePct },
+          }),
+        })
+        const json = await res.json()
+        if (json.doctrine) {
+          setDoctrines([json.doctrine])
+          setActiveDoctrineId(json.doctrine.id)
+        }
+      }
+      setPositionSaved(true)
+      setTimeout(() => setPositionSaved(false), 2500)
+    } catch (e) {
+      console.error('Position size save error:', e)
+    } finally {
+      setPositionSaving(false)
     }
   }
 
@@ -440,6 +511,72 @@ export default function EnkiSettingsPage() {
                 </button>
               )
             })}
+          </div>
+        </div>
+
+        {/* Position Size / Full Send */}
+        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
+          <div className="flex items-center justify-between mb-1">
+            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Position Size per Trade</h2>
+            {positionSaved && <span className="text-green-500 text-xs font-medium">Saved</span>}
+          </div>
+          <p className="text-sm text-gray-500 mb-5">
+            How much of your portfolio Enki deploys per trade signal. Higher = more compounding power, higher risk.
+          </p>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-600 dark:text-gray-400">Size: <strong className="text-gray-900 dark:text-gray-100">{positionSizePct}%</strong></span>
+              {positionSizePct === 100 && (
+                <span className="text-xs font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full">
+                  ⚡ Full Send — uses entire portfolio per trade
+                </span>
+              )}
+            </div>
+            <input
+              type="range"
+              min={5}
+              max={100}
+              step={5}
+              value={positionSizePct}
+              onChange={e => setPositionSizePct(Number(e.target.value))}
+              className="w-full accent-amber-400 h-2 rounded-full"
+            />
+            <div className="flex justify-between text-xs text-gray-400">
+              <span>5% (conservative)</span>
+              <span>50% (aggressive)</span>
+              <span className="text-amber-500 font-bold">100% Full Send</span>
+            </div>
+
+            {positionSizePct >= 50 && positionSizePct < 100 && (
+              <div className="bg-orange-50 dark:bg-orange-950/20 border border-orange-200 dark:border-orange-800 rounded-xl px-4 py-3">
+                <p className="text-xs text-orange-700 dark:text-orange-400 font-medium">
+                  High position size. Make sure your doctrine symbols are well-diversified and Fortress Guard is active.
+                </p>
+              </div>
+            )}
+
+            {positionSizePct === 100 && (
+              <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-300 dark:border-amber-700 rounded-xl px-4 py-3">
+                <p className="text-xs text-amber-800 dark:text-amber-300 font-bold mb-0.5">Full Send Mode Active</p>
+                <p className="text-xs text-amber-700 dark:text-amber-400">
+                  Every trade signal deploys 100% of your portfolio value. Built for maximum compounding from small accounts ($5 → growth). Fortress Guard limits remain enforced.
+                </p>
+              </div>
+            )}
+
+            <div className="flex items-center gap-3 pt-1">
+              <button
+                onClick={savePositionSize}
+                disabled={positionSaving}
+                className="px-5 py-2.5 bg-amber-400 hover:bg-amber-300 disabled:opacity-50 disabled:cursor-not-allowed text-black text-sm font-bold rounded-xl transition-colors"
+              >
+                {positionSaving ? 'Saving…' : 'Save Position Size'}
+              </button>
+              {doctrines.length === 0 && (
+                <span className="text-xs text-gray-400">No active doctrine — saving will create one.</span>
+              )}
+            </div>
           </div>
         </div>
 

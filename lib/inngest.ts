@@ -1,11 +1,27 @@
 import { Inngest } from 'inngest'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { Resend } from 'resend'
+import { createDecipheriv } from 'crypto'
 import {
   getRecentMembers,
   sendChannelMessage,
   assignRole,
 } from '@/lib/discord-bot'
+
+// ── Enki AES-256-CBC decrypt helper ───────────────────────────────────────────
+// Mirrors the encrypt/decrypt in app/api/enki/brokers/alpaca/route.ts
+function enkiDecryptKey(encryptedText: string): string {
+  const hexKey = process.env.ENKI_ENCRYPTION_KEY
+  if (!hexKey || hexKey.length !== 64) {
+    throw new Error('ENKI_ENCRYPTION_KEY must be a 64-character hex string (32 bytes)')
+  }
+  const key = Buffer.from(hexKey, 'hex')
+  const [ivHex, encHex] = encryptedText.split(':')
+  const iv = Buffer.from(ivHex, 'hex')
+  const encrypted = Buffer.from(encHex, 'hex')
+  const decipher = createDecipheriv('aes-256-cbc', key, iv)
+  return Buffer.concat([decipher.update(encrypted), decipher.final()]).toString('utf8')
+}
 
 function getResend() { return new Resend(process.env.RESEND_API_KEY) }
 
@@ -995,15 +1011,15 @@ export const enkiPaperTradingScan = inngest.createFunction(
   { id: 'enki-paper-trading-scan', name: 'Enki Paper Trading Scan', retries: 1 },
   { cron: '*/15 * * * *' },
   async ({ step }) => {
-    // ── 1. Fetch active Citizen users with active doctrines ──────────────────
+    // ── 1. Fetch active Citizen + Commander users with active doctrines ────────
     const activeUsers = await step.run('fetch-active-citizen-users', async () => {
       const db = getSupabaseAdmin()
 
-      // Find citizen profiles not in dormant mode
+      // Find citizen + commander profiles not in dormant mode
       const { data: profiles, error: profErr } = await db
         .from('enki_profiles')
-        .select('user_id, guardian_mode, tier')
-        .eq('tier', 'citizen')
+        .select('user_id, guardian_mode, tier, alpaca_connected, alpaca_key_id, alpaca_secret, alpaca_paper')
+        .in('tier', ['citizen', 'commander', 'emperor'])
         .neq('guardian_mode', 'dormant')
 
       if (profErr) {
@@ -1145,10 +1161,98 @@ export const enkiPaperTradingScan = inngest.createFunction(
 
             if (!isMarketOpen) continue
 
-            // Paper trade: $100 worth, floor division
-            const qty = Math.floor(100 / price)
-            if (qty < 1) continue
+            // ── Dynamic position sizing (Full Send mode) ────────────────────
+            // Default: 10% of portfolio. Full Send (position_size_pct=100): use entire portfolio.
+            const positionSizePct: number = doctrine.config?.position_size_pct ?? 10
+            const startingCash = 10000
 
+            // Fetch the latest snapshot to get current portfolio value
+            const { data: latestSnap } = await db
+              .from('enki_snapshots')
+              .select('portfolio_value')
+              .eq('user_id', user.user_id)
+              .eq('broker', 'paper')
+              .order('snapshot_date', { ascending: false })
+              .limit(1)
+              .maybeSingle()
+
+            const currentPortfolioValue = latestSnap?.portfolio_value ?? startingCash
+            const tradeAmount = Math.max(10, (currentPortfolioValue * positionSizePct) / 100)
+            // Allow fractional shares for paper trading
+            const qty = tradeAmount / price
+            if (qty <= 0) continue
+
+            // ── Commander live trading via Alpaca ───────────────────────────
+            const isCommander = user.tier === 'commander' || user.tier === 'emperor'
+            const useAlpaca = isCommander && user.alpaca_connected && doctrine.config?.broker === 'alpaca'
+
+            if (useAlpaca) {
+              try {
+                const keyId = enkiDecryptKey(user.alpaca_key_id)
+                const secret = enkiDecryptKey(user.alpaca_secret)
+                const alpacaBase = user.alpaca_paper
+                  ? 'https://paper-api.alpaca.markets'
+                  : 'https://api.alpaca.markets'
+
+                // Use notional-based order — buy $tradeAmount worth, no qty math needed
+                const orderPayload: Record<string, string> = {
+                  symbol,
+                  notional: tradeAmount.toFixed(2),
+                  side,
+                  type: 'market',
+                  time_in_force: 'day',
+                }
+
+                const orderRes = await fetch(`${alpacaBase}/v2/orders`, {
+                  method: 'POST',
+                  headers: {
+                    'APCA-API-KEY-ID': keyId,
+                    'APCA-API-SECRET-KEY': secret,
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify(orderPayload),
+                })
+
+                if (orderRes.ok) {
+                  const orderData = await orderRes.json()
+                  const liveStatus = user.guardian_mode === 'autonomous' ? 'filled' : 'pending_approval'
+                  const { error: liveTradeErr } = await db
+                    .from('enki_trades')
+                    .insert({
+                      user_id:          user.user_id,
+                      doctrine_id:      doctrine.id,
+                      symbol,
+                      side,
+                      qty,
+                      price,
+                      total:            tradeAmount,
+                      broker:           'alpaca',
+                      paper:            !!user.alpaca_paper,
+                      confidence,
+                      status:           liveStatus,
+                      broker_order_id:  orderData.id ?? null,
+                      reason:           `Live Alpaca order: ${changePctLabel(signal)} | size ${positionSizePct}% of portfolio ($${tradeAmount.toFixed(2)})`,
+                      executed_at:      now.toISOString(),
+                    })
+                  if (liveTradeErr) {
+                    console.error(`[EnkiScan] Alpaca trade insert error for ${user.user_id}/${symbol}:`, liveTradeErr.message)
+                  } else {
+                    totalTrades++
+                    console.log(`[EnkiScan] Alpaca live order: ${user.user_id} ${side.toUpperCase()} $${tradeAmount.toFixed(2)} ${symbol} (order ${orderData.id})`)
+                  }
+                } else {
+                  const errBody = await orderRes.json().catch(() => ({}))
+                  console.error(`[EnkiScan] Alpaca order failed for ${user.user_id}/${symbol}: ${errBody.message ?? orderRes.status}`)
+                }
+              } catch (alpacaErr: unknown) {
+                const msg = alpacaErr instanceof Error ? alpacaErr.message : String(alpacaErr)
+                console.error(`[EnkiScan] Alpaca execution error for ${user.user_id}/${symbol}:`, msg)
+              }
+              // Skip paper trade when Alpaca execution was attempted
+              continue
+            }
+
+            // ── Paper trade (citizen tier or paper fallback) ────────────────
             const status = user.guardian_mode === 'autonomous'
               ? 'filled'
               : 'pending_approval'
@@ -1162,11 +1266,12 @@ export const enkiPaperTradingScan = inngest.createFunction(
                 side,
                 qty,
                 price,
+                total:       tradeAmount,
                 broker:      'paper',
                 paper:       true,
                 confidence,
                 status,
-                reason:      `Auto signal: ${changePctLabel(signal)}`,
+                reason:      `Auto signal: ${changePctLabel(signal)} | size ${positionSizePct}% of portfolio ($${tradeAmount.toFixed(2)})`,
                 executed_at: now.toISOString(),
               })
 
@@ -1176,7 +1281,7 @@ export const enkiPaperTradingScan = inngest.createFunction(
             }
 
             if (status === 'filled') totalTrades++
-            console.log(`[EnkiScan] Paper trade: ${user.user_id} ${side.toUpperCase()} ${qty}x${symbol} @$${price} (${status})`)
+            console.log(`[EnkiScan] Paper trade: ${user.user_id} ${side.toUpperCase()} ${qty.toFixed(4)}x${symbol} @$${price} ($${tradeAmount.toFixed(2)}, ${positionSizePct}% of portfolio, ${status})`)
           }
         }
 
