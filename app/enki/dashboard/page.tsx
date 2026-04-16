@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createBrowserClient } from '@supabase/ssr'
 
@@ -112,7 +112,9 @@ function timeAgo(dateStr: string): string {
 }
 
 export default function EnkiDashboardPage() {
-  const router = useRouter()
+  const router       = useRouter()
+  const searchParams = useSearchParams()
+  const justUpgraded = searchParams.get('upgrade') === 'success'
   const [loading, setLoading] = useState(true)
   const [authed, setAuthed] = useState(false)
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -412,6 +414,22 @@ export default function EnkiDashboardPage() {
                 Go to Settings →
               </Link>
             </div>
+          </div>
+        )}
+
+        {/* ── Upgrade success banner ── */}
+        {justUpgraded && (
+          <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-300 dark:border-amber-700 rounded-2xl px-6 py-4 mb-6 flex items-center gap-4">
+            <span className="text-2xl">🎖️</span>
+            <div>
+              <p className="font-extrabold text-amber-800 dark:text-amber-300 text-sm">Welcome to the Empire.</p>
+              <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
+                Your tier has been activated. Create a doctrine to put the guardian to work.
+              </p>
+            </div>
+            <a href="/enki/doctrines" className="ml-auto shrink-0 bg-amber-400 hover:bg-amber-500 text-black font-bold text-xs px-4 py-2 rounded-xl transition-all">
+              Set Doctrine →
+            </a>
           </div>
         )}
 

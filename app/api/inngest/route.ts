@@ -12,6 +12,7 @@ import {
   onboardingSequence,
   competitorPostFetcher,
   enkiPaperTradingScan,
+  enkiCloudRunnerScan,
 } from '@/lib/inngest'
 
 export const { GET, POST, PUT } = serve({
@@ -27,5 +28,6 @@ export const { GET, POST, PUT } = serve({
     onboardingSequence,
     competitorPostFetcher,
     enkiPaperTradingScan,
+    enkiCloudRunnerScan,
   ],
 })

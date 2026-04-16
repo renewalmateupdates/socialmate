@@ -580,26 +580,29 @@ export async function POST(req: NextRequest) {
         const isCloudRunner = plan === 'cloud_runner'
 
         if (isCloudRunner) {
+          // Upsert — handles users who paid before ever visiting the dashboard
           await supabase
             .from('enki_profiles')
-            .update({
+            .upsert({
+              user_id:              enkiUserId,
+              tier:                 'citizen', // will be overridden if they also have a tier sub
               cloud_runner:         true,
               cloud_runner_sub_id:  subId,
               stripe_customer_id:   custId,
               updated_at:           new Date().toISOString(),
-            })
-            .eq('user_id', enkiUserId)
+            }, { onConflict: 'user_id', ignoreDuplicates: false })
         } else {
           const tier = plan === 'emperor' ? 'emperor' : 'commander'
+          // Upsert — handles users who paid before ever visiting the dashboard
           await supabase
             .from('enki_profiles')
-            .update({
+            .upsert({
+              user_id:                enkiUserId,
               tier,
               stripe_customer_id:     custId,
               stripe_subscription_id: subId,
               updated_at:             new Date().toISOString(),
-            })
-            .eq('user_id', enkiUserId)
+            }, { onConflict: 'user_id', ignoreDuplicates: false })
         }
         console.log(`[EnkiWebhook] ${plan} activated for user ${enkiUserId}`)
       }
