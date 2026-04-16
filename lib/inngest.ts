@@ -1003,6 +1003,184 @@ export const creditLowChecker = inngest.createFunction(
   }
 )
 
+// ── ENKI TECHNICAL INDICATORS ──────────────────────────────────────────────
+
+function enkiCalcEMA(data: number[], period: number): number[] {
+  if (data.length === 0) return []
+  const k = 2 / (period + 1)
+  const ema: number[] = [data[0]]
+  for (let i = 1; i < data.length; i++) {
+    ema.push(data[i] * k + ema[i - 1] * (1 - k))
+  }
+  return ema
+}
+
+function enkiCalcRSI(closes: number[], period = 14): number {
+  if (closes.length < period + 1) return 50
+  let gains = 0, losses = 0
+  for (let i = closes.length - period; i < closes.length; i++) {
+    const delta = closes[i] - closes[i - 1]
+    if (delta > 0) gains += delta
+    else losses += Math.abs(delta)
+  }
+  const avgGain = gains / period
+  const avgLoss = losses / period
+  if (avgLoss === 0) return 100
+  const rs = avgGain / avgLoss
+  return 100 - 100 / (1 + rs)
+}
+
+function enkiCalcMACD(closes: number[]): { macd: number; signal: number; histogram: number } {
+  if (closes.length < 35) return { macd: 0, signal: 0, histogram: 0 }
+  const ema12 = enkiCalcEMA(closes, 12)
+  const ema26 = enkiCalcEMA(closes, 26)
+  const macdLine = ema12.map((v, i) => v - ema26[i])
+  const signalLine = enkiCalcEMA(macdLine.slice(-9), 9)
+  const lastMacd = macdLine[macdLine.length - 1]
+  const lastSignal = signalLine[signalLine.length - 1]
+  return { macd: lastMacd, signal: lastSignal, histogram: lastMacd - lastSignal }
+}
+
+function enkiCalcATR(highs: number[], lows: number[], closes: number[], period = 14): number {
+  if (highs.length < period + 1) return 0
+  const trs: number[] = []
+  for (let i = 1; i < highs.length; i++) {
+    trs.push(Math.max(
+      highs[i] - lows[i],
+      Math.abs(highs[i] - closes[i - 1]),
+      Math.abs(lows[i] - closes[i - 1])
+    ))
+  }
+  return trs.slice(-period).reduce((a, b) => a + b, 0) / period
+}
+
+function enkiCalcBB(closes: number[], period = 20, mult = 2): { upper: number; middle: number; lower: number } | null {
+  if (closes.length < period) return null
+  const slice = closes.slice(-period)
+  const mean = slice.reduce((a, b) => a + b, 0) / period
+  const variance = slice.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / period
+  const std = Math.sqrt(variance)
+  return { upper: mean + mult * std, middle: mean, lower: mean - mult * std }
+}
+
+interface EnkiBars {
+  currentPrice: number
+  prevClose: number
+  closes: number[]
+  highs: number[]
+  lows: number[]
+  volumes: number[]
+}
+
+interface EnkiSignal {
+  side: 'buy' | 'sell' | 'neutral'
+  confidence: number
+  reasons: string[]
+  rsi: number
+  atrSlPct: number | null
+  atrTpPct: number | null
+}
+
+async function enkiFetchBars(symbol: string, interval: string, range: string): Promise<EnkiBars | null> {
+  try {
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=${interval}&range=${range}`
+    const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } })
+    if (!res.ok) return null
+    const j = await res.json()
+    const result = j.chart?.result?.[0]
+    if (!result) return null
+    const q = result.indicators?.quote?.[0]
+    if (!q) return null
+    const closes  = (q.close  as (number | null)[]).filter((v): v is number => v != null)
+    const highs   = (q.high   as (number | null)[]).filter((v): v is number => v != null)
+    const lows    = (q.low    as (number | null)[]).filter((v): v is number => v != null)
+    const volumes = (q.volume as (number | null)[]).filter((v): v is number => v != null)
+    return {
+      currentPrice: result.meta.regularMarketPrice as number,
+      prevClose:    result.meta.chartPreviousClose as number,
+      closes, highs, lows, volumes,
+    }
+  } catch {
+    return null
+  }
+}
+
+function enkiGenerateSignal(bars: EnkiBars): EnkiSignal {
+  const { closes, highs, lows, volumes, currentPrice, prevClose } = bars
+  const reasons: string[] = []
+  let score = 0
+
+  // Fallback: simple momentum if not enough data for indicators
+  if (closes.length < 26) {
+    const changePct = ((currentPrice - prevClose) / prevClose) * 100
+    if (changePct > 0.04) return { side: 'buy', confidence: 6, reasons: ['momentum'], rsi: 50, atrSlPct: null, atrTpPct: null }
+    if (changePct < -0.04) return { side: 'sell', confidence: 6, reasons: ['momentum'], rsi: 50, atrSlPct: null, atrTpPct: null }
+    return { side: 'neutral', confidence: 3, reasons: [], rsi: 50, atrSlPct: null, atrTpPct: null }
+  }
+
+  // 1. RSI
+  const rsi = enkiCalcRSI(closes)
+  if (rsi < 30)      { score += 3; reasons.push(`RSI deeply oversold (${rsi.toFixed(1)})`) }
+  else if (rsi < 40) { score += 2; reasons.push(`RSI oversold (${rsi.toFixed(1)})`) }
+  else if (rsi < 45) { score += 1; reasons.push(`RSI bullish zone (${rsi.toFixed(1)})`) }
+  else if (rsi > 70) { score -= 3; reasons.push(`RSI deeply overbought (${rsi.toFixed(1)})`) }
+  else if (rsi > 60) { score -= 2; reasons.push(`RSI overbought (${rsi.toFixed(1)})`) }
+  else if (rsi > 55) { score -= 1; reasons.push(`RSI bearish zone (${rsi.toFixed(1)})`) }
+
+  // 2. MACD
+  const { macd, signal: macdSig, histogram } = enkiCalcMACD(closes)
+  if (macd > macdSig && histogram > 0)      { score += 2; reasons.push('MACD bullish crossover') }
+  else if (macd > macdSig)                  { score += 1; reasons.push('MACD bullish') }
+  else if (macd < macdSig && histogram < 0) { score -= 2; reasons.push('MACD bearish crossover') }
+  else if (macd < macdSig)                  { score -= 1; reasons.push('MACD bearish') }
+
+  // 3. EMA 9/21 crossover
+  const ema9  = enkiCalcEMA(closes, 9)
+  const ema21 = enkiCalcEMA(closes, 21)
+  const li = ema9.length - 1
+  if (li >= 1) {
+    if (ema9[li] > ema21[li] && ema9[li - 1] <= ema21[li - 1])      { score += 3; reasons.push('EMA 9/21 golden cross') }
+    else if (ema9[li] > ema21[li])                                    { score += 1; reasons.push('EMA 9 above 21 (uptrend)') }
+    else if (ema9[li] < ema21[li] && ema9[li - 1] >= ema21[li - 1]) { score -= 3; reasons.push('EMA 9/21 death cross') }
+    else if (ema9[li] < ema21[li])                                    { score -= 1; reasons.push('EMA 9 below 21 (downtrend)') }
+  }
+
+  // 4. Bollinger Bands
+  const bb = enkiCalcBB(closes)
+  if (bb) {
+    if (currentPrice <= bb.lower)      { score += 2; reasons.push('Price at/below BB lower band (oversold)') }
+    else if (currentPrice >= bb.upper) { score -= 2; reasons.push('Price at/above BB upper band (overbought)') }
+  }
+
+  // 5. Volume confirmation
+  if (volumes.length >= 10) {
+    const avgVol = volumes.slice(-10, -1).reduce((a, b) => a + b, 0) / 9
+    const lastVol = volumes[volumes.length - 1]
+    if (avgVol > 0 && lastVol > avgVol * 1.5) {
+      if (score > 0)      { score += 1; reasons.push('Volume spike confirms bull move') }
+      else if (score < 0) { score -= 1; reasons.push('Volume spike confirms bear move') }
+    }
+  }
+
+  // 6. Price momentum (tiebreaker weight)
+  const changePct = ((currentPrice - prevClose) / prevClose) * 100
+  if (changePct > 0.15)       { score += 1 }
+  else if (changePct < -0.15) { score -= 1 }
+
+  // ATR-based SL/TP
+  const atr = enkiCalcATR(highs, lows, closes)
+  const atrSlPct = atr > 0 && currentPrice > 0 ? +((atr * 1.5 / currentPrice) * 100).toFixed(2) : null
+  const atrTpPct = atr > 0 && currentPrice > 0 ? +((atr * 2.5 / currentPrice) * 100).toFixed(2) : null
+
+  const confidence = Math.min(9.5, 4 + Math.abs(score) * 0.7)
+
+  if (score >= 3)  return { side: 'buy',     confidence, reasons, rsi, atrSlPct, atrTpPct }
+  if (score <= -3) return { side: 'sell',    confidence, reasons, rsi, atrSlPct, atrTpPct }
+  return { side: 'neutral', confidence: 3, reasons, rsi, atrSlPct, atrTpPct }
+}
+
+// ── END ENKI TECHNICAL INDICATORS ──────────────────────────────────────────
+
 // ─── Enki Paper Trading Scan — every 15 minutes ────────────────────────────────
 // For each Citizen-tier user with active doctrines, runs a simplified signal
 // check (Yahoo Finance free endpoint, no API key), then executes paper trades
@@ -1095,48 +1273,21 @@ export const enkiPaperTradingScan = inngest.createFunction(
     const symbolList = Array.from(allSymbols)
 
     const priceMap = await step.run('fetch-prices', async () => {
-      const prices: Record<string, number> = {}
-      const signalMap: Record<string, { price: number; confidence: number; side: 'buy' | 'sell' | 'neutral' }> = {}
+      const signalMap: Record<string, { price: number; confidence: number; side: 'buy' | 'sell' | 'neutral'; reasons: string[]; rsi: number; atrSlPct: number | null; atrTpPct: number | null }> = {}
 
       for (const symbol of symbolList) {
         try {
-          // Yahoo Finance free chart endpoint — no API key needed
-          const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=15m&range=1d`
-          const res = await fetch(url, {
-            headers: { 'User-Agent': 'Mozilla/5.0' },
-          })
-          if (!res.ok) {
-            console.warn(`[EnkiScan] Yahoo fetch failed for ${symbol}: ${res.status}`)
+          // Yahoo Finance free chart endpoint — 5d range for indicator calculation
+          const bars = await enkiFetchBars(symbol, '15m', '5d')
+          if (!bars || !bars.currentPrice) {
+            console.warn(`[EnkiScan] Yahoo fetch failed or empty for ${symbol}`)
             continue
           }
-          const data = await res.json()
-          const meta = data?.chart?.result?.[0]?.meta
-          if (!meta) continue
-
-          const currentPrice: number = meta.regularMarketPrice ?? meta.chartPreviousClose
-          const prevClose: number    = meta.chartPreviousClose ?? currentPrice
-
-          if (!currentPrice) continue
-
-          prices[symbol] = currentPrice
-
-          // Simple signal: compare current price vs previous close
-          const changePct = ((currentPrice - prevClose) / prevClose) * 100
-
-          let confidence = 3 // neutral
-          let side: 'buy' | 'sell' | 'neutral' = 'neutral'
-
-          if (changePct > 0.04) {
-            confidence = 7
-            side = 'buy'
-          } else if (changePct < -0.04) {
-            confidence = 7
-            side = 'sell'
-          }
-
-          signalMap[symbol] = { price: currentPrice, confidence, side }
-        } catch (err: any) {
-          console.warn(`[EnkiScan] Price fetch error for ${symbol}:`, err.message)
+          const { currentPrice } = bars
+          const sig = enkiGenerateSignal(bars)
+          signalMap[symbol] = { price: currentPrice, confidence: sig.confidence, side: sig.side, reasons: sig.reasons, rsi: sig.rsi, atrSlPct: sig.atrSlPct, atrTpPct: sig.atrTpPct }
+        } catch (err: unknown) {
+          console.warn(`[EnkiScan] Price fetch error for ${symbol}:`, err instanceof Error ? err.message : String(err))
         }
       }
 
@@ -1153,6 +1304,24 @@ export const enkiPaperTradingScan = inngest.createFunction(
         const db = getSupabaseAdmin()
         const now = new Date()
         const today = now.toISOString().slice(0, 10) // YYYY-MM-DD
+
+        // ── Daily drawdown guard ─────────────────────────────────────────────
+        const doctrine0 = user.doctrines[0]
+        const maxDailyDrawdownPct = doctrine0?.config?.max_daily_drawdown_pct ?? 10
+        const { data: snapToday } = await db
+          .from('enki_snapshots')
+          .select('daily_pnl, portfolio_value')
+          .eq('user_id', user.user_id)
+          .eq('broker', 'paper')
+          .eq('snapshot_date', today)
+          .maybeSingle()
+        if (snapToday && snapToday.portfolio_value > 0) {
+          const drawdownPct = (snapToday.daily_pnl / snapToday.portfolio_value) * 100
+          if (drawdownPct <= -maxDailyDrawdownPct) {
+            console.log(`[EnkiScan] Daily drawdown limit hit (${drawdownPct.toFixed(2)}%) for ${user.user_id} — skipping all trades today`)
+            return
+          }
+        }
 
         // ── SL/TP Guardian: auto-close positions that hit stop-loss or take-profit ──
         const { data: slTpTrades } = await db
@@ -1193,8 +1362,12 @@ export const enkiPaperTradingScan = inngest.createFunction(
               const avgCost    = pos.totalCost / pos.qty
               const pnlPct     = ((signal.price - avgCost) / avgCost) * 100
               const doctrine   = user.doctrines.find((d: any) => d.id === pos.doctrine_id) ?? user.doctrines[0]
-              const slPct      = doctrine?.config?.stop_loss_pct   ?? 8
-              const tpPct      = doctrine?.config?.take_profit_pct ?? 15
+              const guardianBars = await enkiFetchBars(sym, '15m', '5d')
+              const guardianAtr  = guardianBars ? enkiCalcATR(guardianBars.highs, guardianBars.lows, guardianBars.closes) : 0
+              const atrSlPct     = guardianAtr > 0 && avgCost > 0 ? (guardianAtr * 1.5 / avgCost) * 100 : 8
+              const atrTpPct     = guardianAtr > 0 && avgCost > 0 ? (guardianAtr * 2.5 / avgCost) * 100 : 15
+              const slPct        = doctrine?.config?.stop_loss_pct   ?? atrSlPct
+              const tpPct        = doctrine?.config?.take_profit_pct ?? atrTpPct
               const hitSL      = pnlPct <= -slPct
               const hitTP      = pnlPct >= tpPct
               if (!hitSL && !hitTP) continue
@@ -1273,6 +1446,28 @@ export const enkiPaperTradingScan = inngest.createFunction(
             const qty = tradeAmount / price
             if (qty <= 0) continue
 
+            // ── Max positions guard ─────────────────────────────────────────
+            if (side === 'buy') {
+              const maxPositions = doctrine.config?.max_positions ?? 10
+              const { data: openTradesForCount } = await db
+                .from('enki_trades')
+                .select('symbol, side, qty')
+                .eq('user_id', user.user_id)
+                .eq('broker', 'paper')
+                .eq('status', 'filled')
+              // Count net-positive positions
+              const posQtys: Record<string, number> = {}
+              for (const t of openTradesForCount ?? []) {
+                if (!posQtys[t.symbol]) posQtys[t.symbol] = 0
+                posQtys[t.symbol] += t.side === 'buy' ? t.qty : -t.qty
+              }
+              const currentOpenCount = Object.values(posQtys).filter(q => q > 0).length
+              if (currentOpenCount >= maxPositions) {
+                console.log(`[EnkiScan] Max positions (${maxPositions}) reached for ${user.user_id} — skipping BUY ${symbol}`)
+                continue
+              }
+            }
+
             // ── Commander live trading via Alpaca ───────────────────────────
             const isCommander = user.tier === 'commander' || user.tier === 'emperor'
             const useAlpaca = isCommander && user.alpaca_connected && doctrine.config?.broker === 'alpaca'
@@ -1322,7 +1517,7 @@ export const enkiPaperTradingScan = inngest.createFunction(
                       confidence,
                       status:           liveStatus,
                       broker_order_id:  orderData.id ?? null,
-                      reason:           `Live Alpaca order: ${changePctLabel(signal)} | size ${positionSizePct}% of portfolio ($${tradeAmount.toFixed(2)})`,
+                      reason:           `Live Alpaca order: ${signal.reasons?.join(' + ') || changePctLabel(signal)} | size ${positionSizePct}% of portfolio ($${tradeAmount.toFixed(2)})`,
                       executed_at:      now.toISOString(),
                     })
                   if (liveTradeErr) {
@@ -1362,7 +1557,7 @@ export const enkiPaperTradingScan = inngest.createFunction(
                 paper:       true,
                 confidence,
                 status,
-                reason:      `Auto signal: ${changePctLabel(signal)} | size ${positionSizePct}% of portfolio ($${tradeAmount.toFixed(2)})`,
+                reason:      `Auto signal: ${signal.reasons?.join(' + ') || changePctLabel(signal)} | size ${positionSizePct}% of portfolio ($${tradeAmount.toFixed(2)})`,
                 executed_at: now.toISOString(),
               })
 
@@ -1605,24 +1800,14 @@ export const enkiCloudRunnerScan = inngest.createFunction(
 
     const symbolList = Array.from(allSymbols)
     const priceMap = await step.run('cr-fetch-prices', async () => {
-      const signalMap: Record<string, { price: number; confidence: number; side: 'buy' | 'sell' | 'neutral' }> = {}
+      const signalMap: Record<string, { price: number; confidence: number; side: 'buy' | 'sell' | 'neutral'; reasons: string[]; rsi: number; atrSlPct: number | null; atrTpPct: number | null }> = {}
       for (const symbol of symbolList) {
         try {
-          const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=5m&range=1d`
-          const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } })
-          if (!res.ok) continue
-          const data = await res.json()
-          const meta = data?.chart?.result?.[0]?.meta
-          if (!meta) continue
-          const currentPrice: number = meta.regularMarketPrice ?? meta.chartPreviousClose
-          const prevClose: number    = meta.chartPreviousClose ?? currentPrice
-          if (!currentPrice) continue
-          const changePct = ((currentPrice - prevClose) / prevClose) * 100
-          let confidence = 3
-          let side: 'buy' | 'sell' | 'neutral' = 'neutral'
-          if (changePct > 0.03) { confidence = 7; side = 'buy'  }
-          else if (changePct < -0.03) { confidence = 7; side = 'sell' }
-          signalMap[symbol] = { price: currentPrice, confidence, side }
+          // 5m interval, 2d range for Cloud Runner faster signals
+          const bars = await enkiFetchBars(symbol, '5m', '2d')
+          if (!bars || !bars.currentPrice) continue
+          const sig = enkiGenerateSignal(bars)
+          signalMap[symbol] = { price: bars.currentPrice, confidence: sig.confidence, side: sig.side, reasons: sig.reasons, rsi: sig.rsi, atrSlPct: sig.atrSlPct, atrTpPct: sig.atrTpPct }
         } catch { /* skip */ }
       }
       return signalMap
@@ -1674,7 +1859,7 @@ export const enkiCloudRunnerScan = inngest.createFunction(
               paper:       true,
               confidence:  signal.confidence,
               status,
-              reason:      `Cloud Runner 5m signal: ${changePctLabel(signal)} | size ${positionSizePct}% ($${tradeAmount.toFixed(2)})`,
+              reason:      `Cloud Runner 5m signal: ${signal.reasons?.join(' + ') || changePctLabel(signal)} | size ${positionSizePct}% ($${tradeAmount.toFixed(2)})`,
               executed_at: now.toISOString(),
             })
             if (!tradeErr && status === 'filled') totalTrades++
