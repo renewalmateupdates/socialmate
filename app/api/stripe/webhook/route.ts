@@ -399,8 +399,11 @@ export async function POST(req: NextRequest) {
           Donate to SM-Give to climb the rankings (the more you give, the higher you appear in the directory).
         </p>
 
-        <a href="${listingUrl}" style="display:block;text-align:center;background:#111;color:#fff;font-weight:700;font-size:14px;padding:14px 24px;border-radius:12px;text-decoration:none;margin-bottom:24px;">
+        <a href="${listingUrl}" style="display:block;text-align:center;background:#111;color:#fff;font-weight:700;font-size:14px;padding:14px 24px;border-radius:12px;text-decoration:none;margin-bottom:12px;">
           View your listing in Studio Stax →
+        </a>
+        <a href="${appUrl}/studio-stax/portal" style="display:block;text-align:center;background:#f9fafb;color:#111;font-weight:700;font-size:14px;padding:14px 24px;border-radius:12px;text-decoration:none;border:1px solid #e5e7eb;margin-bottom:24px;">
+          Manage listing &amp; view analytics →
         </a>
 
         <div style="background:#f9fafb;border-radius:12px;padding:16px 20px;margin-bottom:24px;">
