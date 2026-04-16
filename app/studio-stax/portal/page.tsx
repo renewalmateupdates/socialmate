@@ -18,34 +18,26 @@ const CATEGORIES: Record<string, string> = {
 
 type Listing = {
   id: string
-  user_id: string
-  studio_name: string
-  description: string
+  name: string
+  tagline: string | null
+  description: string | null
   category: string
-  website_url: string
+  url: string | null
   logo_url: string | null
-  status: 'active' | 'pending' | 'expired'
+  status: string
   renewal_date: string | null
-  sm_give_total: number
-  rank: number | null
+  smgive_donated_cents: number
+  plan_tier: string | null
+  free_until: string | null
 }
 
-type Donation = {
-  id: string
-  listing_id: string
-  user_id: string
-  amount: number
-  created_at: string
-}
-
-type Tab = 'listing' | 'rankings' | 'history' | 'status'
+type Tab = 'listing' | 'rankings' | 'status'
 
 export default function StudioStaxPortalPage() {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<Tab>('listing')
   const [loading, setLoading] = useState(true)
   const [listing, setListing] = useState<Listing | null>(null)
-  const [donations, setDonations] = useState<Donation[]>([])
   const [noListing, setNoListing] = useState(false)
 
   // Edit form state
@@ -62,11 +54,13 @@ export default function StudioStaxPortalPage() {
       if (!user) { router.push('/login'); return }
 
       try {
-        // Use maybeSingle so missing table or missing row both return null gracefully
+        // Match by applicant_email — curated_listings doesn't have user_id
         const { data: listingData } = await supabase
-          .from('studio_stax_listings')
-          .select('id, user_id, studio_name, description, category, website_url, logo_url, status, renewal_date, sm_give_total, rank')
-          .eq('user_id', user.id)
+          .from('curated_listings')
+          .select('id, name, tagline, description, category, url, logo_url, status, renewal_date, smgive_donated_cents, plan_tier, free_until')
+          .eq('applicant_email', user.email ?? '')
+          .order('created_at', { ascending: false })
+          .limit(1)
           .maybeSingle()
 
         if (!listingData) {
@@ -77,21 +71,8 @@ export default function StudioStaxPortalPage() {
 
         setListing(listingData as Listing)
         setEditDesc(listingData.description ?? '')
-        setEditUrl(listingData.website_url ?? '')
-
-        // Load donation history — table may not exist yet, so wrap gracefully
-        try {
-          const { data: donationData } = await supabase
-            .from('sm_give_donations')
-            .select('id, listing_id, user_id, amount, created_at')
-            .eq('listing_id', listingData.id)
-            .order('created_at', { ascending: false })
-          setDonations(Array.from(donationData ?? []) as Donation[])
-        } catch {
-          setDonations([])
-        }
+        setEditUrl(listingData.url ?? '')
       } catch {
-        // Table may not exist yet — treat as no listing found
         setNoListing(true)
       }
 
@@ -107,14 +88,14 @@ export default function StudioStaxPortalPage() {
     setEditSuccess(false)
     try {
       const { error } = await supabase
-        .from('studio_stax_listings')
-        .update({ description: editDesc, website_url: editUrl })
+        .from('curated_listings')
+        .update({ description: editDesc, url: editUrl })
         .eq('id', listing.id)
 
       if (error) {
         setEditError(error.message || 'Failed to save changes.')
       } else {
-        setListing(l => l ? { ...l, description: editDesc, website_url: editUrl } : l)
+        setListing(l => l ? { ...l, description: editDesc, url: editUrl } : l)
         setEditMode(false)
         setEditSuccess(true)
         setTimeout(() => setEditSuccess(false), 3000)
@@ -141,10 +122,10 @@ export default function StudioStaxPortalPage() {
         <div className="max-w-xl mx-auto px-6 py-24 text-center">
           <div className="text-6xl mb-6">🗂️</div>
           <h1 className="text-2xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">
-            No active listing found
+            No listing found
           </h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-8 leading-relaxed">
-            Your account doesn&apos;t have an active Studio Stax listing yet. Apply to get listed in our curated directory.
+            Your account doesn&apos;t have an active Studio Stax listing yet. Apply to get listed in our curated creator tools directory.
           </p>
           <Link
             href="/studio-stax/apply"
@@ -163,33 +144,35 @@ export default function StudioStaxPortalPage() {
 
   if (!listing) return null
 
-  // Rank progress bar: assume we need to compare with next rank's donation amount
-  // We show a simple bar based on the listing's sm_give_total relative to rank
-  const totalDonated = listing.sm_give_total ?? 0
-  const cumulativeTotal = donations.reduce((sum, d) => sum + (d.amount ?? 0), 0)
-  // For the progress bar: show progress toward next $100 milestone
-  const progressInterval = 100_00 // $100 in cents
+  const totalDonated = listing.smgive_donated_cents ?? 0
+  const progressInterval = 10_000 // $100 in cents
   const progressRemainder = totalDonated % progressInterval
   const progressPct = progressInterval > 0 ? Math.round((progressRemainder / progressInterval) * 100) : 0
   const nextMilestone = Math.ceil((totalDonated + 1) / progressInterval) * progressInterval
 
   const statusColors: Record<string, string> = {
-    active:  'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400',
-    pending: 'bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800 text-yellow-700 dark:text-yellow-400',
-    expired: 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400',
+    approved: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400',
+    active:   'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400',
+    pending:  'bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800 text-yellow-700 dark:text-yellow-400',
+    expired:  'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400',
+    rejected: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400',
   }
   const statusLabels: Record<string, string> = {
-    active:  'Active',
-    pending: 'Pending Review',
-    expired: 'Expired',
+    approved: 'Approved — Payment Pending',
+    active:   'Active',
+    pending:  'Pending Review',
+    expired:  'Expired',
+    rejected: 'Rejected',
   }
 
   const tabs: { id: Tab; label: string }[] = [
     { id: 'listing',  label: 'My Listing'          },
-    { id: 'rankings', label: 'Rankings & Visibility' },
-    { id: 'history',  label: 'SM-Give History'      },
-    { id: 'status',   label: 'Listing Status'        },
+    { id: 'rankings', label: 'Rankings & SM-Give'   },
+    { id: 'status',   label: 'Status & Renewal'     },
   ]
+
+  // Determine renewal date — from column or free_until
+  const renewalDate = listing.renewal_date ?? listing.free_until
 
   return (
     <PublicLayout>
@@ -210,10 +193,10 @@ export default function StudioStaxPortalPage() {
             </div>
             {listing.logo_url ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={listing.logo_url} alt={listing.studio_name} className="w-12 h-12 rounded-xl object-cover shrink-0 border border-gray-100 dark:border-gray-800" />
+              <img src={listing.logo_url} alt={listing.name} className="w-12 h-12 rounded-xl object-cover shrink-0 border border-gray-100 dark:border-gray-800" />
             ) : (
               <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-xl font-extrabold text-amber-600 shrink-0">
-                {listing.studio_name.charAt(0)}
+                {listing.name.charAt(0)}
               </div>
             )}
           </div>
@@ -249,8 +232,8 @@ export default function StudioStaxPortalPage() {
               <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Listing Details</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">Studio Name</p>
-                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{listing.studio_name}</p>
+                  <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">Tool Name</p>
+                  <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{listing.name}</p>
                   <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Admin-managed</p>
                 </div>
                 <div>
@@ -260,6 +243,12 @@ export default function StudioStaxPortalPage() {
                   </p>
                   <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Admin-managed</p>
                 </div>
+                {listing.tagline && (
+                  <div className="sm:col-span-2">
+                    <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">Tagline</p>
+                    <p className="text-sm text-gray-700 dark:text-gray-300">{listing.tagline}</p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -309,7 +298,7 @@ export default function StudioStaxPortalPage() {
                       {editSaving ? 'Saving...' : 'Save Changes'}
                     </button>
                     <button
-                      onClick={() => { setEditMode(false); setEditDesc(listing.description ?? ''); setEditUrl(listing.website_url ?? '') }}
+                      onClick={() => { setEditMode(false); setEditDesc(listing.description ?? ''); setEditUrl(listing.url ?? '') }}
                       className="text-sm font-bold text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors px-2">
                       Cancel
                     </button>
@@ -326,11 +315,11 @@ export default function StudioStaxPortalPage() {
                   <div>
                     <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">Website</p>
                     <a
-                      href={listing.website_url}
+                      href={listing.url ?? '#'}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-sm text-blue-600 dark:text-blue-400 hover:underline truncate block">
-                      {listing.website_url || '—'}
+                      {listing.url || '—'}
                     </a>
                   </div>
                 </div>
@@ -339,33 +328,31 @@ export default function StudioStaxPortalPage() {
           </div>
         )}
 
-        {/* ── Tab: Rankings & Visibility ── */}
+        {/* ── Tab: Rankings & SM-Give ── */}
         {activeTab === 'rankings' && (
           <div className="space-y-5">
             {/* Rank card */}
             <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
-              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-4">Your Ranking</p>
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-700 rounded-xl p-4 text-center">
-                  <p className="text-3xl font-extrabold text-amber-600 dark:text-amber-400">
-                    {listing.rank != null ? `#${listing.rank}` : '—'}
-                  </p>
-                  <p className="text-xs text-amber-700 dark:text-amber-500 font-semibold mt-1">
-                    {listing.rank != null ? `in ${CATEGORIES[listing.category] ?? 'your category'}` : 'Rank pending'}
-                  </p>
-                </div>
-                <div className="bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-700 rounded-xl p-4 text-center">
+              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-4">Your SM-Give Impact</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                <div className="bg-green-50 dark:bg-green-950/30 border border-green-100 dark:border-green-900 rounded-xl p-4 text-center">
                   <p className="text-3xl font-extrabold text-green-600 dark:text-green-400">
                     ${(totalDonated / 100).toFixed(0)}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold mt-1">Total donated to SM-Give</p>
+                  <p className="text-xs text-green-700 dark:text-green-500 font-semibold mt-1">Total donated to SM-Give</p>
+                </div>
+                <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900 rounded-xl p-4 text-center">
+                  <p className="text-3xl font-extrabold text-amber-600 dark:text-amber-400">
+                    {totalDonated === 0 ? '—' : `$${((nextMilestone - totalDonated) / 100).toFixed(0)}`}
+                  </p>
+                  <p className="text-xs text-amber-700 dark:text-amber-500 font-semibold mt-1">To next ranking milestone</p>
                 </div>
               </div>
 
               {/* Progress to next milestone */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs font-bold text-gray-700 dark:text-gray-300">Progress to next ranking milestone</p>
+                  <p className="text-xs font-bold text-gray-700 dark:text-gray-300">Progress to next milestone</p>
                   <span className="text-xs text-gray-400 dark:text-gray-500">
                     ${(progressRemainder / 100).toFixed(0)} / ${(progressInterval / 100).toFixed(0)}
                   </span>
@@ -377,9 +364,7 @@ export default function StudioStaxPortalPage() {
                   />
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Donate <span className="font-bold text-gray-900 dark:text-gray-100">
-                    ${((nextMilestone - totalDonated) / 100).toFixed(0)} more
-                  </span> to reach the next milestone and climb the rankings.
+                  Donate more to SM-Give to improve your ranking in the directory.
                 </p>
               </div>
             </div>
@@ -394,94 +379,37 @@ export default function StudioStaxPortalPage() {
               <Link
                 href="/sm-give"
                 className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold px-5 py-2.5 rounded-xl transition-all text-sm">
-                Donate more to climb →
+                Donate to SM-Give →
               </Link>
             </div>
           </div>
         )}
 
-        {/* ── Tab: SM-Give History ── */}
-        {activeTab === 'history' && (
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
-            <div className="flex items-center justify-between mb-5">
-              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Donation History</p>
-              <span className="text-xs font-bold text-green-600 dark:text-green-400">
-                Total: ${(cumulativeTotal / 100).toFixed(2)}
-              </span>
-            </div>
-
-            {donations.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-4xl mb-4">❤️</div>
-                <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-2">No donations yet</p>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mb-6">
-                  Start donating to SM-Give to climb the rankings and support creators.
-                </p>
-                <Link
-                  href="/sm-give"
-                  className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold px-5 py-2.5 rounded-xl transition-all text-sm">
-                  Make your first donation →
-                </Link>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-100 dark:border-gray-800">
-                      <th className="text-left text-xs font-bold text-gray-400 dark:text-gray-500 pb-3 pr-4">Date</th>
-                      <th className="text-right text-xs font-bold text-gray-400 dark:text-gray-500 pb-3 pr-4">Amount</th>
-                      <th className="text-right text-xs font-bold text-gray-400 dark:text-gray-500 pb-3">Cumulative</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {(() => {
-                      let runningTotal = 0
-                      return Array.from(donations).reverse().map((donation) => {
-                        runningTotal += donation.amount ?? 0
-                        const cumAtThisPoint = runningTotal
-                        return { donation, cumAtThisPoint }
-                      }).reverse().map(({ donation, cumAtThisPoint }) => (
-                        <tr key={donation.id} className="border-b border-gray-50 dark:border-gray-800/60 last:border-0">
-                          <td className="py-3 pr-4 text-gray-700 dark:text-gray-300">
-                            {new Date(donation.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                          </td>
-                          <td className="py-3 pr-4 text-right font-semibold text-green-600 dark:text-green-400">
-                            +${((donation.amount ?? 0) / 100).toFixed(2)}
-                          </td>
-                          <td className="py-3 text-right text-gray-500 dark:text-gray-400">
-                            ${(cumAtThisPoint / 100).toFixed(2)}
-                          </td>
-                        </tr>
-                      ))
-                    })()}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ── Tab: Listing Status ── */}
+        {/* ── Tab: Status & Renewal ── */}
         {activeTab === 'status' && (
           <div className="space-y-5">
             {/* Status card */}
             <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
               <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-4">Current Status</p>
               <div className={`inline-flex items-center gap-2 border rounded-xl px-4 py-2 text-sm font-bold mb-4 ${statusColors[listing.status] ?? statusColors.pending}`}>
-                {listing.status === 'active'  && '✅'}
-                {listing.status === 'pending' && '⏳'}
-                {listing.status === 'expired' && '❌'}
+                {listing.status === 'active'   && '✅'}
+                {listing.status === 'approved' && '⏳'}
+                {listing.status === 'pending'  && '⏳'}
+                {listing.status === 'expired'  && '❌'}
+                {listing.status === 'rejected' && '✕'}
                 {statusLabels[listing.status] ?? listing.status}
               </div>
 
-              {listing.renewal_date ? (
+              {renewalDate ? (
                 <div className="space-y-1">
-                  <p className="text-xs font-bold text-gray-500 dark:text-gray-400">Renewal Date</p>
+                  <p className="text-xs font-bold text-gray-500 dark:text-gray-400">
+                    {listing.free_until ? 'Free Until' : 'Renewal Date'}
+                  </p>
                   <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                    {new Date(listing.renewal_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                    {new Date(renewalDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                   </p>
                   {listing.status === 'active' && (() => {
-                    const daysLeft = Math.ceil((new Date(listing.renewal_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+                    const daysLeft = Math.ceil((new Date(renewalDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24))
                     return daysLeft <= 30 ? (
                       <p className="text-xs text-amber-600 dark:text-amber-400 font-semibold mt-1">
                         ⚠️ {daysLeft} day{daysLeft !== 1 ? 's' : ''} until renewal — renew soon to keep your ranking.
@@ -494,36 +422,61 @@ export default function StudioStaxPortalPage() {
                   })()}
                 </div>
               ) : (
-                <p className="text-xs text-gray-400 dark:text-gray-500">Renewal date not set yet.</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500">Renewal date will be set once your listing is active.</p>
+              )}
+
+              {listing.plan_tier && (
+                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+                  <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">Plan Tier</p>
+                  <span className={`inline-flex items-center text-xs font-bold px-3 py-1 rounded-full ${
+                    listing.plan_tier === 'founding'
+                      ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+                  }`}>
+                    {listing.plan_tier === 'founding' ? 'Founding member' : 'Standard'}
+                  </span>
+                </div>
               )}
             </div>
 
-            {/* Renew CTA */}
-            <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-6">
-              <p className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wide mb-2">Renew Your Listing</p>
-              <p className="text-sm text-amber-800 dark:text-amber-300 mb-4 leading-relaxed">
-                Keep your tool in front of thousands of creators. Renewing early locks in your current rank.
-              </p>
-              <div className="flex items-center gap-4 mb-4">
-                <div className="bg-white dark:bg-amber-950/40 border border-amber-200 dark:border-amber-700 rounded-xl px-5 py-3 text-center">
-                  <p className="text-2xl font-extrabold text-amber-600 dark:text-amber-400">$99</p>
-                  <p className="text-xs text-amber-700 dark:text-amber-500 font-semibold">/year</p>
+            {/* Renew CTA — only for active/expired */}
+            {(listing.status === 'active' || listing.status === 'expired') && (
+              <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-6">
+                <p className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wide mb-2">Renew Your Listing</p>
+                <p className="text-sm text-amber-800 dark:text-amber-300 mb-4 leading-relaxed">
+                  Keep your tool in front of thousands of creators. Renewing early locks in your current rank.
+                </p>
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="bg-white dark:bg-amber-950/40 border border-amber-200 dark:border-amber-700 rounded-xl px-5 py-3 text-center">
+                    <p className="text-2xl font-extrabold text-amber-600 dark:text-amber-400">$100</p>
+                    <p className="text-xs text-amber-700 dark:text-amber-500 font-semibold">/year</p>
+                  </div>
+                  <div className="text-xs text-amber-700 dark:text-amber-400 space-y-1">
+                    <p>✅ Stays in directory for 1 year</p>
+                    <p>✅ Keeps current ranking</p>
+                    <p>✅ SM-Give donations carry over</p>
+                  </div>
                 </div>
-                <div className="text-xs text-amber-700 dark:text-amber-400 space-y-1">
-                  <p>✅ Stays in directory for 1 year</p>
-                  <p>✅ Keeps current ranking</p>
-                  <p>✅ SM-Give donations carry over</p>
-                </div>
+                <Link
+                  href="/studio-stax/renew"
+                  className="inline-flex items-center gap-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all text-sm">
+                  Renew listing — $100/yr →
+                </Link>
+                <p className="text-xs text-amber-600 dark:text-amber-500 mt-3">
+                  No charge today — you&apos;ll be taken to a secure checkout page.
+                </p>
               </div>
-              <Link
-                href="/studio-stax/renew"
-                className="inline-flex items-center gap-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all text-sm">
-                Renew listing — $99/yr →
-              </Link>
-              <p className="text-xs text-amber-600 dark:text-amber-500 mt-3">
-                No charge today — you&apos;ll be taken to a secure checkout page.
-              </p>
-            </div>
+            )}
+
+            {/* Approved — waiting on payment */}
+            {listing.status === 'approved' && (
+              <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-5">
+                <p className="text-sm font-bold text-blue-800 dark:text-blue-300 mb-1">Approved — payment link coming</p>
+                <p className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
+                  Your application was approved! Joshua will send a payment link to your email shortly. Check your inbox (and spam folder).
+                </p>
+              </div>
+            )}
 
             {/* Pending info */}
             {listing.status === 'pending' && (
@@ -541,6 +494,16 @@ export default function StudioStaxPortalPage() {
                 <p className="text-sm font-bold text-red-800 dark:text-red-300 mb-1">Listing expired</p>
                 <p className="text-xs text-red-700 dark:text-red-400 leading-relaxed">
                   Your listing has been removed from the public directory. Renew now to get back in and retain your SM-Give history.
+                </p>
+              </div>
+            )}
+
+            {/* Rejected info */}
+            {listing.status === 'rejected' && (
+              <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5">
+                <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Application not approved</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
+                  Your application wasn&apos;t approved this time. You&apos;re welcome to apply again with a different tool, or reach out to Joshua if you have questions.
                 </p>
               </div>
             )}

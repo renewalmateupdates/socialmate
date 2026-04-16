@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     }
 
     const db = getAdminSupabase()
-    const { error } = await db.from('curated_listings').insert({
+    const { data: newListing, error } = await db.from('curated_listings').insert({
       applicant_name,
       applicant_email,
       name,
@@ -32,16 +32,41 @@ export async function POST(req: NextRequest) {
       mission_statement: mission_statement || null,
       why_apply: why_apply || null,
       status: 'pending',
-    })
+    }).select('id').single()
 
     if (error) {
       console.error('Listings insert error:', error)
       return NextResponse.json({ error: 'Failed to save application' }, { status: 500 })
     }
 
+    // ── In-app notification for admin ────────────────────────────────────────
+    // Look up Joshua's user_id by ADMIN_EMAIL so the bell icon shows the new application.
+    // This is fire-and-forget — we never fail the request if this doesn't work.
+    const adminEmail = process.env.ADMIN_EMAIL || 'socialmatehq@gmail.com'
+    ;(async () => {
+      try {
+        // auth.users is only accessible via service-role listUsers
+        const { data: { users } } = await db.auth.admin.listUsers({ perPage: 1000 })
+        const admin = users.find((u: { email?: string }) => u.email === adminEmail)
+
+        if (admin?.id) {
+          await db.from('notifications').insert({
+            user_id:    admin.id,
+            type:       'studio_stax_application',
+            title:      'New Studio Stax Application',
+            message:    `${name} (${applicant_name}) applied for a listing.`,
+            is_read:    false,
+            data:       JSON.stringify({ action_url: '/admin/studio-stax', listing_id: newListing?.id }),
+          })
+        }
+      } catch (notifErr) {
+        // Non-fatal — log and continue
+        console.error('[StaxApply] Failed to send admin notification:', notifErr)
+      }
+    })()
+
     // Notify Joshua via email — fire and forget
     const resend = new Resend(process.env.RESEND_API_KEY)
-    const adminEmail = process.env.ADMIN_EMAIL || 'socialmatehq@gmail.com'
     const missionExcerpt = mission_statement ? mission_statement.slice(0, 200) + (mission_statement.length > 200 ? '…' : '') : null
     const whyExcerpt = why_apply ? why_apply.slice(0, 200) + (why_apply.length > 200 ? '…' : '') : null
     resend.emails.send({

@@ -986,3 +986,518 @@ export const creditLowChecker = inngest.createFunction(
     return { notified: toNotify.length, skipped: lowCreditUsers.length - toNotify.length }
   }
 )
+
+// ─── Enki Paper Trading Scan — every 15 minutes ────────────────────────────────
+// For each Citizen-tier user with active doctrines, runs a simplified signal
+// check (Yahoo Finance free endpoint, no API key), then executes paper trades
+// at confidence >= 6 (autonomous) or queues pending_approval trades.
+export const enkiPaperTradingScan = inngest.createFunction(
+  { id: 'enki-paper-trading-scan', name: 'Enki Paper Trading Scan', retries: 1 },
+  { cron: '*/15 * * * *' },
+  async ({ step }) => {
+    // ── 1. Fetch active Citizen users with active doctrines ──────────────────
+    const activeUsers = await step.run('fetch-active-citizen-users', async () => {
+      const db = getSupabaseAdmin()
+
+      // Find citizen profiles not in dormant mode
+      const { data: profiles, error: profErr } = await db
+        .from('enki_profiles')
+        .select('user_id, guardian_mode, tier')
+        .eq('tier', 'citizen')
+        .neq('guardian_mode', 'dormant')
+
+      if (profErr) {
+        console.error('[EnkiScan] profiles query error:', profErr.message)
+        return []
+      }
+      if (!profiles?.length) return []
+
+      const userIds = profiles.map((p: any) => p.user_id)
+
+      // Find which of those users have at least one active doctrine
+      const { data: doctrines, error: docErr } = await db
+        .from('enki_doctrines')
+        .select('user_id, id, name, config')
+        .in('user_id', userIds)
+        .eq('is_active', true)
+
+      if (docErr) {
+        console.error('[EnkiScan] doctrines query error:', docErr.message)
+        return []
+      }
+      if (!doctrines?.length) {
+        console.log('[EnkiScan] No users with active doctrines — skipping scan')
+        return []
+      }
+
+      // Build per-user list: { profile, doctrines[] }
+      const profileMap: Record<string, any> = {}
+      for (const p of profiles) { profileMap[p.user_id] = { ...p, doctrines: [] } }
+      for (const d of doctrines) {
+        if (profileMap[d.user_id]) profileMap[d.user_id].doctrines.push(d)
+      }
+
+      return Object.values(profileMap).filter((u: any) => u.doctrines.length > 0)
+    })
+
+    if (!activeUsers.length) {
+      console.log('[EnkiScan] No active Citizen users with doctrines — scan complete')
+      return { scanned: 0, trades: 0 }
+    }
+
+    console.log(`[EnkiScan] Processing ${activeUsers.length} user(s)`)
+
+    // ── 2. Fetch prices for all unique symbols across all doctrines ───────────
+    // Collect symbols from all doctrines (default to SPY, QQQ if not set)
+    const allSymbols = new Set<string>()
+    for (const user of activeUsers) {
+      for (const doctrine of user.doctrines) {
+        const symbols: string[] = doctrine.config?.symbols ?? ['SPY', 'QQQ']
+        for (const s of symbols) allSymbols.add(s.toUpperCase())
+      }
+    }
+
+    const symbolList = Array.from(allSymbols)
+
+    const priceMap = await step.run('fetch-prices', async () => {
+      const prices: Record<string, number> = {}
+      const signalMap: Record<string, { price: number; confidence: number; side: 'buy' | 'sell' | 'neutral' }> = {}
+
+      for (const symbol of symbolList) {
+        try {
+          // Yahoo Finance free chart endpoint — no API key needed
+          const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=15m&range=1d`
+          const res = await fetch(url, {
+            headers: { 'User-Agent': 'Mozilla/5.0' },
+          })
+          if (!res.ok) {
+            console.warn(`[EnkiScan] Yahoo fetch failed for ${symbol}: ${res.status}`)
+            continue
+          }
+          const data = await res.json()
+          const meta = data?.chart?.result?.[0]?.meta
+          if (!meta) continue
+
+          const currentPrice: number = meta.regularMarketPrice ?? meta.chartPreviousClose
+          const prevClose: number    = meta.chartPreviousClose ?? currentPrice
+
+          if (!currentPrice) continue
+
+          prices[symbol] = currentPrice
+
+          // Simple signal: compare current price vs previous close
+          const changePct = ((currentPrice - prevClose) / prevClose) * 100
+
+          let confidence = 3 // neutral
+          let side: 'buy' | 'sell' | 'neutral' = 'neutral'
+
+          if (changePct > 0.5) {
+            confidence = 7
+            side = 'buy'
+          } else if (changePct < -0.5) {
+            confidence = 7
+            side = 'sell'
+          }
+
+          signalMap[symbol] = { price: currentPrice, confidence, side }
+        } catch (err: any) {
+          console.warn(`[EnkiScan] Price fetch error for ${symbol}:`, err.message)
+        }
+      }
+
+      return signalMap
+    })
+
+    // ── 3. Execute paper trades per user ─────────────────────────────────────
+    let totalTrades = 0
+
+    for (let i = 0; i < activeUsers.length; i++) {
+      const user = activeUsers[i]
+
+      await step.run(`scan-user-${user.user_id}-${i}`, async () => {
+        const db = getSupabaseAdmin()
+        const now = new Date()
+        const today = now.toISOString().slice(0, 10) // YYYY-MM-DD
+
+        for (const doctrine of user.doctrines) {
+          const symbols: string[] = doctrine.config?.symbols ?? ['SPY', 'QQQ']
+
+          for (const rawSym of symbols) {
+            const symbol = rawSym.toUpperCase()
+            const signal = priceMap[symbol]
+            if (!signal || signal.price == null || signal.confidence == null || signal.side == null) continue
+
+            const { price, confidence, side } = signal as { price: number; confidence: number; side: 'buy' | 'sell' | 'neutral' }
+
+            // Only act on signals with confidence >= 6
+            if (confidence < 6) continue
+            if (side === 'neutral') continue
+
+            // Fortress Guard: only between market hours (9:30–16:00 ET on weekdays)
+            // We do a UTC check: ET is UTC-4 (EDT) / UTC-5 (EST)
+            // Use 13:30–20:00 UTC as a safe approximation for market hours
+            const utcHour = now.getUTCHours()
+            const utcMin  = now.getUTCMinutes()
+            const utcTime = utcHour * 60 + utcMin
+            const dayOfWeek = now.getUTCDay() // 0=Sun, 6=Sat
+            const isWeekend = dayOfWeek === 0 || dayOfWeek === 6
+            const isMarketOpen = !isWeekend && utcTime >= 13 * 60 + 30 && utcTime < 20 * 60
+
+            if (!isMarketOpen) continue
+
+            // Paper trade: $100 worth, floor division
+            const qty = Math.floor(100 / price)
+            if (qty < 1) continue
+
+            const status = user.guardian_mode === 'autonomous'
+              ? 'filled'
+              : 'pending_approval'
+
+            const { error: tradeErr } = await db
+              .from('enki_trades')
+              .insert({
+                user_id:     user.user_id,
+                doctrine_id: doctrine.id,
+                symbol,
+                side,
+                qty,
+                price,
+                broker:      'paper',
+                paper:       true,
+                confidence,
+                status,
+                reason:      `Auto signal: ${changePctLabel(signal)}`,
+                executed_at: now.toISOString(),
+              })
+
+            if (tradeErr) {
+              console.error(`[EnkiScan] Trade insert error for ${user.user_id}/${symbol}:`, tradeErr.message)
+              continue
+            }
+
+            if (status === 'filled') totalTrades++
+            console.log(`[EnkiScan] Paper trade: ${user.user_id} ${side.toUpperCase()} ${qty}x${symbol} @$${price} (${status})`)
+          }
+        }
+
+        // ── 4. Update daily paper portfolio snapshot ─────────────────────────
+        // Fetch all filled paper buys/sells to estimate portfolio value
+        const { data: allTrades } = await db
+          .from('enki_trades')
+          .select('symbol, side, qty, price')
+          .eq('user_id', user.user_id)
+          .eq('broker', 'paper')
+          .eq('status', 'filled')
+
+        if (!allTrades?.length) return
+
+        // Net position per symbol
+        const positions: Record<string, { qty: number; cost: number }> = {}
+        for (const t of allTrades) {
+          if (!positions[t.symbol]) positions[t.symbol] = { qty: 0, cost: 0 }
+          if (t.side === 'buy') {
+            positions[t.symbol].qty  += t.qty
+            positions[t.symbol].cost += t.qty * t.price
+          } else {
+            positions[t.symbol].qty  -= t.qty
+            positions[t.symbol].cost -= t.qty * t.price
+          }
+        }
+
+        // Value open positions at current prices
+        let portfolioValue = 10000 // simulated starting cash
+        let openPositions = 0
+        for (const [sym, pos] of Object.entries(positions)) {
+          if (pos.qty <= 0) continue
+          openPositions++
+          const currentPx = priceMap[sym]?.price ?? pos.cost / Math.max(pos.qty, 1)
+          portfolioValue += pos.qty * currentPx - pos.cost
+        }
+
+        // Fetch yesterday's snapshot for daily P&L
+        const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+        const { data: prevSnap } = await db
+          .from('enki_snapshots')
+          .select('portfolio_value')
+          .eq('user_id', user.user_id)
+          .eq('broker', 'paper')
+          .eq('snapshot_date', yesterday)
+          .maybeSingle()
+
+        const prevValue = prevSnap?.portfolio_value ?? portfolioValue
+        const dailyPnl  = portfolioValue - prevValue
+
+        // Upsert today's snapshot
+        await db
+          .from('enki_snapshots')
+          .upsert(
+            {
+              user_id:         user.user_id,
+              broker:          'paper',
+              snapshot_date:   today,
+              portfolio_value: portfolioValue,
+              daily_pnl:       dailyPnl,
+              total_pnl:       portfolioValue - 10000,
+              open_positions:  openPositions,
+              cash:            10000,
+              equity:          portfolioValue,
+              updated_at:      now.toISOString(),
+            },
+            { onConflict: 'user_id,broker,snapshot_date' }
+          )
+      })
+    }
+
+    console.log(`[EnkiScan] Scan complete — ${activeUsers.length} user(s), ${totalTrades} paper trade(s) executed`)
+    return { scanned: activeUsers.length, trades: totalTrades }
+  }
+)
+
+// Helper: human-readable price movement label
+function changePctLabel(signal: { price: number; confidence: number; side: string }): string {
+  if (signal.side === 'buy')  return `bullish momentum (conf ${signal.confidence}/10)`
+  if (signal.side === 'sell') return `bearish momentum (conf ${signal.confidence}/10)`
+  return 'neutral'
+}
+
+// ─── Competitor Post Fetcher — daily at 7am UTC ────────────────────────────────
+// Fetches recent public posts for each tracked competitor account and stores
+// them in competitor_posts. Supports Bluesky, Mastodon, YouTube, Reddit.
+// Discord, Telegram, LinkedIn require auth/bots — skipped for now.
+export const competitorPostFetcher = inngest.createFunction(
+  { id: 'competitor-post-fetcher', name: 'Competitor Post Fetcher', retries: 2 },
+  { cron: '0 7 * * *' },
+  async ({ step }) => {
+    const db = getSupabaseAdmin()
+
+    // Fetch all competitor accounts across all users
+    const competitors = await step.run('fetch-competitor-accounts', async () => {
+      const { data, error } = await db
+        .from('competitor_accounts')
+        .select('id, user_id, platform, handle')
+      if (error) {
+        console.error('[CompetitorFetcher] Failed to fetch accounts:', error.message)
+        return []
+      }
+      return data ?? []
+    })
+
+    if (!competitors.length) {
+      console.log('[CompetitorFetcher] No competitor accounts found')
+      return { processed: 0 }
+    }
+
+    let processed = 0
+    let errors = 0
+
+    for (let i = 0; i < competitors.length; i++) {
+      const comp = competitors[i]
+
+      // 1-second delay between competitors to respect rate limits
+      if (i > 0) {
+        await step.sleep(`rate-limit-delay-${i}`, 1000)
+      }
+
+      await step.run(`fetch-posts-${comp.id}`, async () => {
+        try {
+          const posts = await fetchPublicPosts(comp.platform, comp.handle)
+
+          if (!posts.length) {
+            console.log(`[CompetitorFetcher] No posts for ${comp.platform}:${comp.handle}`)
+            return
+          }
+
+          // Upsert posts — use post_url as natural key to avoid duplicates
+          for (const post of posts) {
+            await db
+              .from('competitor_posts')
+              .upsert(
+                {
+                  competitor_id: comp.id,
+                  user_id: comp.user_id,
+                  platform: comp.platform,
+                  post_url: post.post_url,
+                  content: post.content,
+                  posted_at: post.posted_at,
+                  fetched_at: new Date().toISOString(),
+                  engagement: post.engagement,
+                },
+                { onConflict: 'competitor_id,post_url', ignoreDuplicates: false }
+              )
+          }
+
+          // Update last_checked_at on the competitor account
+          await db
+            .from('competitor_accounts')
+            .update({ last_checked_at: new Date().toISOString() })
+            .eq('id', comp.id)
+
+          processed++
+          console.log(`[CompetitorFetcher] Fetched ${posts.length} posts for ${comp.platform}:${comp.handle}`)
+        } catch (err: any) {
+          errors++
+          console.error(`[CompetitorFetcher] Error fetching ${comp.platform}:${comp.handle}:`, err.message)
+        }
+      })
+    }
+
+    return { processed, errors, total: competitors.length }
+  }
+)
+
+// ── Public post fetchers per platform ─────────────────────────────────────────
+
+interface FetchedPost {
+  post_url: string | null
+  content: string
+  posted_at: string | null
+  engagement: Record<string, number>
+}
+
+async function fetchPublicPosts(platform: string, handle: string): Promise<FetchedPost[]> {
+  const cleanHandle = handle.replace(/^@/, '').trim()
+
+  switch (platform) {
+    case 'bluesky':
+      return fetchBlueskyPosts(cleanHandle)
+    case 'mastodon':
+      return fetchMastodonPosts(cleanHandle)
+    case 'youtube':
+      return fetchYouTubePosts(cleanHandle)
+    case 'reddit':
+      return fetchRedditPosts(cleanHandle)
+    default:
+      // Discord, Telegram, LinkedIn — require auth, skip for now
+      return []
+  }
+}
+
+async function fetchBlueskyPosts(handle: string): Promise<FetchedPost[]> {
+  try {
+    const res = await fetch(
+      `https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?actor=${encodeURIComponent(handle)}&limit=10`,
+      { headers: { 'Accept': 'application/json' } }
+    )
+    if (!res.ok) return []
+    const data = await res.json()
+    const items: any[] = data.feed ?? []
+    return items.slice(0, 10).map((item: any) => {
+      const post = item.post
+      const rec  = post?.record
+      return {
+        post_url:   post?.uri ? `https://bsky.app/profile/${handle}/post/${post.uri.split('/').pop()}` : null,
+        content:    (rec?.text ?? '').slice(0, 500),
+        posted_at:  rec?.createdAt ?? null,
+        engagement: {
+          likes:   post?.likeCount   ?? 0,
+          reposts: post?.repostCount ?? 0,
+          replies: post?.replyCount  ?? 0,
+        },
+      }
+    })
+  } catch {
+    return []
+  }
+}
+
+async function fetchMastodonPosts(handle: string): Promise<FetchedPost[]> {
+  try {
+    // handle format: user@instance.social OR instance.social/user
+    let username = handle
+    let instance = 'mastodon.social' // default fallback
+
+    if (handle.includes('@')) {
+      const parts = handle.split('@')
+      username = parts[0]
+      instance = parts[1] || instance
+    }
+
+    // Look up account ID
+    const lookupRes = await fetch(
+      `https://${instance}/api/v1/accounts/lookup?acct=${encodeURIComponent(username)}`,
+      { headers: { 'Accept': 'application/json' } }
+    )
+    if (!lookupRes.ok) return []
+    const account = await lookupRes.json()
+    const accountId = account?.id
+    if (!accountId) return []
+
+    // Fetch statuses
+    const statusRes = await fetch(
+      `https://${instance}/api/v1/accounts/${accountId}/statuses?limit=10&exclude_replies=true`,
+      { headers: { 'Accept': 'application/json' } }
+    )
+    if (!statusRes.ok) return []
+    const statuses: any[] = await statusRes.json()
+
+    return statuses.slice(0, 10).map((s: any) => ({
+      post_url:   s.url ?? null,
+      content:    (s.content ?? '').replace(/<[^>]+>/g, '').slice(0, 500),
+      posted_at:  s.created_at ?? null,
+      engagement: {
+        likes:   s.favourites_count ?? 0,
+        reposts: s.reblogs_count    ?? 0,
+        replies: s.replies_count    ?? 0,
+      },
+    }))
+  } catch {
+    return []
+  }
+}
+
+async function fetchYouTubePosts(handle: string): Promise<FetchedPost[]> {
+  try {
+    // Try @handle RSS feed format
+    const feedUrl = handle.startsWith('UC')
+      ? `https://www.youtube.com/feeds/videos.xml?channel_id=${handle}`
+      : `https://www.youtube.com/feeds/videos.xml?user=${handle}`
+
+    const res = await fetch(feedUrl, { headers: { 'Accept': 'application/rss+xml, application/xml, text/xml' } })
+    if (!res.ok) return []
+    const xml = await res.text()
+
+    // Simple XML parse — extract entry elements
+    const entries = xml.match(/<entry>([\s\S]*?)<\/entry>/g) ?? []
+    return entries.slice(0, 10).map((entry: string) => {
+      const id      = (entry.match(/<yt:videoId>([^<]+)<\/yt:videoId>/) ?? [])[1] ?? ''
+      const title   = (entry.match(/<title>([^<]+)<\/title>/)            ?? [])[1] ?? ''
+      const date    = (entry.match(/<published>([^<]+)<\/published>/)    ?? [])[1] ?? null
+      const views   = parseInt((entry.match(/<media:statistics views="(\d+)"/) ?? [])[1] ?? '0', 10)
+      return {
+        post_url:   id ? `https://www.youtube.com/watch?v=${id}` : null,
+        content:    title.slice(0, 500),
+        posted_at:  date,
+        engagement: { views },
+      }
+    })
+  } catch {
+    return []
+  }
+}
+
+async function fetchRedditPosts(handle: string): Promise<FetchedPost[]> {
+  try {
+    const res = await fetch(
+      `https://www.reddit.com/user/${encodeURIComponent(handle)}/posts.json?limit=10`,
+      { headers: { 'User-Agent': 'SocialMate/1.0 (competitor-tracker; +https://socialmate.studio)' } }
+    )
+    if (!res.ok) return []
+    const data = await res.json()
+    const posts: any[] = data.data?.children ?? []
+
+    return posts.slice(0, 10).map((child: any) => {
+      const p = child.data
+      return {
+        post_url:   p.url ? `https://www.reddit.com${p.permalink}` : null,
+        content:    (p.selftext || p.title || '').slice(0, 500),
+        posted_at:  p.created_utc ? new Date(p.created_utc * 1000).toISOString() : null,
+        engagement: {
+          upvotes:  p.score         ?? 0,
+          comments: p.num_comments  ?? 0,
+        },
+      }
+    })
+  } catch {
+    return []
+  }
+}

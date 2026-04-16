@@ -263,6 +263,18 @@ export default function CreatePageClient() {
           </Link>
         </header>
 
+        {/* ── Coming Soon banner ── */}
+        <div className="px-5 py-3 flex items-center gap-3 border-b border-amber-500/20 bg-amber-500/5">
+          <span className="text-base flex-shrink-0">✦</span>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-bold text-amber-400">Creator Studio — Coming Soon</p>
+            <p className="text-xs text-amber-400/70 leading-relaxed">
+              Full video trimming, image editing, filter application, and one-click platform export are in active development.
+              Upload, preview, and check platform specs now — full editing ships very soon.
+            </p>
+          </div>
+        </div>
+
         {/* ── Main layout: editor area + right specs panel ── */}
         <div className="flex flex-1 overflow-hidden">
 
