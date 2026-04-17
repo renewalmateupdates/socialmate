@@ -289,6 +289,40 @@ export default function DashboardClient() {
   const totalPnl    = latestSnap?.total_pnl ?? 0
   const openPos     = latestSnap?.open_positions ?? 0
 
+  // ── Sharpe + Sortino + Max Drawdown from daily snapshots ──────────────
+  const riskMetrics = (() => {
+    const snaps = [...snapshots].sort((a, b) => a.snapshot_date.localeCompare(b.snapshot_date))
+    if (snaps.length < 2) return null
+    const RISK_FREE = 0.05 / 252 // ~5% annual risk-free, daily
+    const dailyReturns = snaps.slice(1).map((s, i) => {
+      const prev = snaps[i].portfolio_value
+      return prev > 0 ? (s.portfolio_value - prev) / prev : 0
+    })
+    const n    = dailyReturns.length
+    const mean = dailyReturns.reduce((s, r) => s + r, 0) / n
+    const excess = mean - RISK_FREE
+    // Sharpe: std over all returns
+    const variance = dailyReturns.reduce((s, r) => s + (r - mean) ** 2, 0) / n
+    const std = Math.sqrt(variance)
+    const sharpe = std > 0 ? (excess / std) * Math.sqrt(252) : null
+    // Sortino: std over downside returns only
+    const downsideReturns = dailyReturns.filter(r => r < RISK_FREE)
+    const dsVariance = downsideReturns.length > 0
+      ? downsideReturns.reduce((s, r) => s + (r - RISK_FREE) ** 2, 0) / downsideReturns.length
+      : 0
+    const dsStd   = Math.sqrt(dsVariance)
+    const sortino = dsStd > 0 ? (excess / dsStd) * Math.sqrt(252) : null
+    // Max drawdown: from peak portfolio value
+    let peak = snaps[0].portfolio_value, maxDD = 0
+    for (const s of snaps) {
+      if (s.portfolio_value > peak) peak = s.portfolio_value
+      const dd = (peak - s.portfolio_value) / peak
+      if (dd > maxDD) maxDD = dd
+    }
+    const lowConfidence = n < 30
+    return { sharpe, sortino, maxDD, n, lowConfidence }
+  })()
+
   const pnlColor = (n: number) => n >= 0 ? 'text-green-500' : 'text-red-500'
   const pnlSign  = (n: number) => n >= 0 ? '+' : ''
 
@@ -498,6 +532,43 @@ export default function DashboardClient() {
             sub={openPos === 0 ? 'Guardian watching' : `${openPos} active`}
           />
         </div>
+
+        {/* ── Risk Metrics (Sharpe / Sortino / Max Drawdown) ── */}
+        {riskMetrics && (
+          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-5 mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Risk Metrics</p>
+              {riskMetrics.lowConfidence && (
+                <span className="text-[10px] font-bold bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-800 px-2 py-0.5 rounded-full">
+                  Low confidence — {riskMetrics.n} trading days
+                </span>
+              )}
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Sharpe Ratio</p>
+                <p className={`text-xl font-extrabold ${riskMetrics.sharpe === null ? 'text-gray-400' : riskMetrics.sharpe >= 1 ? 'text-green-500' : riskMetrics.sharpe >= 0 ? 'text-amber-500' : 'text-red-500'}`}>
+                  {riskMetrics.sharpe === null ? '—' : riskMetrics.sharpe.toFixed(2)}
+                </p>
+                <p className="text-[10px] text-gray-400 mt-0.5">≥ 1.0 is strong</p>
+              </div>
+              <div>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Sortino Ratio</p>
+                <p className={`text-xl font-extrabold ${riskMetrics.sortino === null ? 'text-gray-400' : riskMetrics.sortino >= 1 ? 'text-green-500' : riskMetrics.sortino >= 0 ? 'text-amber-500' : 'text-red-500'}`}>
+                  {riskMetrics.sortino === null ? '—' : riskMetrics.sortino.toFixed(2)}
+                </p>
+                <p className="text-[10px] text-gray-400 mt-0.5">Downside risk adjusted</p>
+              </div>
+              <div>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Max Drawdown</p>
+                <p className={`text-xl font-extrabold ${riskMetrics.maxDD > 0.2 ? 'text-red-500' : riskMetrics.maxDD > 0.1 ? 'text-amber-500' : 'text-green-500'}`}>
+                  -{(riskMetrics.maxDD * 100).toFixed(1)}%
+                </p>
+                <p className="text-[10px] text-gray-400 mt-0.5">Peak-to-trough</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ── Broker status ── */}
         {profile && (

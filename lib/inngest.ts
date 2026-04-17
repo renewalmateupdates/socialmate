@@ -1079,6 +1079,53 @@ function enkiVolumeSpike(volumes: number[], period = 20): boolean {
 }
 
 /**
+ * ADX(14) via Wilder smoothing. Returns the ADX value or null if insufficient data.
+ * ADX < 20 = choppy/ranging, ADX > 35 = strong trend.
+ */
+function enkiCalcADX(highs: number[], lows: number[], closes: number[], period = 14): number | null {
+  if (highs.length < period * 2 + 1) return null
+  const trs: number[] = [], plusDM: number[] = [], minusDM: number[] = []
+  for (let i = 1; i < highs.length; i++) {
+    trs.push(Math.max(highs[i] - lows[i], Math.abs(highs[i] - closes[i-1]), Math.abs(lows[i] - closes[i-1])))
+    const up = highs[i] - highs[i-1], dn = lows[i-1] - lows[i]
+    plusDM.push(up > dn && up > 0 ? up : 0)
+    minusDM.push(dn > up && dn > 0 ? dn : 0)
+  }
+  let atrW  = trs.slice(0, period).reduce((a, b) => a + b, 0)
+  let plusW  = plusDM.slice(0, period).reduce((a, b) => a + b, 0)
+  let minusW = minusDM.slice(0, period).reduce((a, b) => a + b, 0)
+  const dxVals: number[] = []
+  for (let i = period; i < trs.length; i++) {
+    atrW   = atrW   - atrW  / period + trs[i]
+    plusW  = plusW  - plusW / period + plusDM[i]
+    minusW = minusW - minusW/ period + minusDM[i]
+    if (atrW === 0) continue
+    const diPlus = (plusW / atrW) * 100, diMinus = (minusW / atrW) * 100
+    const dxDenom = diPlus + diMinus
+    if (dxDenom === 0) continue
+    dxVals.push(Math.abs(diPlus - diMinus) / dxDenom * 100)
+  }
+  if (dxVals.length < period) return null
+  return dxVals.slice(-period).reduce((a, b) => a + b, 0) / period
+}
+
+/** Pearson correlation coefficient on two equal-length number arrays (daily returns). */
+function enkiCalcPearsonCorr(a: number[], b: number[]): number {
+  const n = Math.min(a.length, b.length)
+  if (n < 5) return 0
+  const as = a.slice(-n), bs = b.slice(-n)
+  const ma = as.reduce((s, v) => s + v, 0) / n
+  const mb = bs.reduce((s, v) => s + v, 0) / n
+  let num = 0, da = 0, db = 0
+  for (let i = 0; i < n; i++) {
+    const va = as[i] - ma, vb = bs[i] - mb
+    num += va * vb; da += va * va; db += vb * vb
+  }
+  const denom = Math.sqrt(da * db)
+  return denom === 0 ? 0 : num / denom
+}
+
+/**
  * Multi-indicator composite score from OHLCV bars.
  * Returns confidence 0-10, direction, triggered signal names, and ATR value.
  *
@@ -1088,7 +1135,7 @@ function enkiVolumeSpike(volumes: number[], period = 20): boolean {
  */
 function enkiScoreSignals(
   closes: number[], highs: number[], lows: number[], volumes: number[]
-): { confidence: number; side: 'buy' | 'sell' | 'neutral'; signals: string[]; atr: number | null } {
+): { confidence: number; side: 'buy' | 'sell' | 'neutral'; signals: string[]; atr: number | null; adx: number | null } {
   const price  = closes[closes.length - 1]
   const rsi    = enkiCalcRSI(closes)
   const macd   = enkiCalcMACD(closes)
@@ -1096,6 +1143,7 @@ function enkiScoreSignals(
   const ema21  = enkiCalcEMA(closes, 21)
   const bb     = enkiCalcBB(closes)
   const atr    = enkiCalcATR(highs, lows, closes)
+  const adx    = enkiCalcADX(highs, lows, closes)
   const volSpk = enkiVolumeSpike(volumes)
 
   let buyScore = 0, sellScore = 0
@@ -1133,6 +1181,22 @@ function enkiScoreSignals(
     else                       { sellScore += 1; sellSignals.push('Volume spike') }
   }
 
+  // ADX Regime Filter: discount trend signals in choppy markets, boost in strong trends
+  if (adx !== null) {
+    if (adx < 20) {
+      // Choppy/ranging — MACD and EMA signals are unreliable in sideways markets
+      const macdPts = buySignals.some(s => s.startsWith('MACD')) ? 2 : (sellSignals.some(s => s.startsWith('MACD')) ? 2 : 0)
+      const emaPts  = buySignals.some(s => s.startsWith('EMA'))  ? 1 : (sellSignals.some(s => s.startsWith('EMA'))  ? 1 : 0)
+      const discount = macdPts + emaPts
+      if (buyScore >= sellScore) { buyScore  = Math.max(0, buyScore  - discount); if (discount > 0) buySignals.push(`ADX ${adx.toFixed(1)} — ranging, trend signals discounted`) }
+      else                       { sellScore = Math.max(0, sellScore - discount); if (discount > 0) sellSignals.push(`ADX ${adx.toFixed(1)} — ranging, trend signals discounted`) }
+    } else if (adx > 35) {
+      // Strong trend — bonus to the leading side
+      if      (buyScore > sellScore)  { buyScore++;  buySignals.push(`ADX ${adx.toFixed(1)} — strong trend`) }
+      else if (sellScore > buyScore)  { sellScore++; sellSignals.push(`ADX ${adx.toFixed(1)} — strong trend`) }
+    }
+  }
+
   // Clear-winner rule: need ≥ 4 pts, and 2+ pt gap over the other direction
   let side: 'buy' | 'sell' | 'neutral' = 'neutral'
   let score = 0
@@ -1142,7 +1206,7 @@ function enkiScoreSignals(
   else if (sellScore >= 4 && sellScore - buyScore  >= 2) { side = 'sell'; score = sellScore; signals = sellSignals }
 
   const confidence = side === 'neutral' ? 0 : Math.min(10, Math.round((score / 9) * 10))
-  return { confidence, side, signals, atr }
+  return { confidence, side, signals, atr, adx }
 }
 
 // ─── Enki External Signal Fetchers — free APIs, no keys required ──────────────
@@ -1319,7 +1383,7 @@ export const enkiPaperTradingScan = inngest.createFunction(
 
     const priceMap = await step.run('fetch-prices', async () => {
       const signalMap: Record<string, {
-        price: number; confidence: number; side: 'buy' | 'sell' | 'neutral'; atr: number | null; signals: string[]
+        price: number; confidence: number; side: 'buy' | 'sell' | 'neutral'; atr: number | null; signals: string[]; closes20: number[]; adx: number | null
       }> = {}
 
       for (const symbol of symbolList) {
@@ -1375,8 +1439,12 @@ export const enkiPaperTradingScan = inngest.createFunction(
             signals = [...signals, `F&G extreme greed (${fg}) — reduced`]
           }
 
-          signalMap[symbol] = { price: currentPrice, confidence, side, signals, atr: scored.atr }
-          console.log(`[EnkiScan] ${symbol}: $${currentPrice.toFixed(2)} → ${side} conf=${confidence} [${signals.join(' | ')}]`)
+          // Daily returns for correlation guard (last 20 days)
+          const closes20 = closes.length >= 2
+            ? closes.slice(-21).map((c, i, arr) => i === 0 ? 0 : (c - arr[i-1]) / arr[i-1]).slice(1)
+            : []
+          signalMap[symbol] = { price: currentPrice, confidence, side, signals, atr: scored.atr, closes20, adx: scored.adx }
+          console.log(`[EnkiScan] ${symbol}: $${currentPrice.toFixed(2)} → ${side} conf=${confidence} ADX=${scored.adx?.toFixed(1) ?? 'n/a'} [${signals.join(' | ')}]`)
         } catch (err: any) {
           console.warn(`[EnkiScan] Price fetch error for ${symbol}:`, err.message)
         }
@@ -1399,7 +1467,7 @@ export const enkiPaperTradingScan = inngest.createFunction(
         // ── SL/TP Guardian: auto-close positions that hit stop-loss or take-profit ──
         const { data: slTpTrades } = await db
           .from('enki_trades')
-          .select('symbol, side, qty, price, doctrine_id, executed_at')
+          .select('symbol, side, qty, price, doctrine_id, executed_at, reason')
           .eq('user_id', user.user_id)
           .eq('broker', 'paper')
           .eq('status', 'filled')
@@ -1422,6 +1490,14 @@ export const enkiPaperTradingScan = inngest.createFunction(
             if (t.doctrine_id) openPos[t.symbol].doctrine_id = t.doctrine_id
           }
 
+          // Track which TP ladder rungs have already fired per symbol
+          const tp1Hit = new Set<string>()
+          const tp2Hit = new Set<string>()
+          for (const t of slTpTrades ?? []) {
+            if (t.side === 'sell' && (t.reason as string | null)?.includes('TP1 partial')) tp1Hit.add(t.symbol)
+            if (t.side === 'sell' && (t.reason as string | null)?.includes('TP2 partial')) tp2Hit.add(t.symbol)
+          }
+
           const utcHourSl = now.getUTCHours()
           const utcMinSl  = now.getUTCMinutes()
           const utcTimeSl = utcHourSl * 60 + utcMinSl
@@ -1438,29 +1514,53 @@ export const enkiPaperTradingScan = inngest.createFunction(
               const pnlPct   = ((signal.price - avgCost) / avgCost) * 100
               const doctrine = user.doctrines.find((d: any) => d.id === pos.doctrine_id) ?? user.doctrines[0]
 
-              // ATR-based dynamic SL/TP: 1.5×ATR for stop, 2.5×ATR for target
-              // Falls back to doctrine config when ATR is unavailable
+              // ATR-based dynamic SL/TP levels; falls back to doctrine config
               const atrVal   = priceMap[sym]?.atr
               const docSlPct = doctrine?.config?.stop_loss_pct   ?? 8
               const docTpPct = doctrine?.config?.take_profit_pct ?? 15
               const slPct    = atrVal ? Math.max(docSlPct, (1.5 * atrVal / avgCost) * 100) : docSlPct
               const tpPct    = atrVal ? Math.max(docTpPct, (2.5 * atrVal / avgCost) * 100) : docTpPct
-              const hitSL    = pnlPct <= -slPct
-              const hitTP    = pnlPct >= tpPct
-              if (!hitSL && !hitTP) continue
 
-              const reason = hitSL
-                ? `Stop loss triggered: ${pnlPct.toFixed(2)}% (limit: -${slPct.toFixed(2)}%${atrVal ? ' ATR-based' : ''})`
-                : `Take profit triggered: +${pnlPct.toFixed(2)}% (target: +${tpPct.toFixed(2)}%${atrVal ? ' ATR-based' : ''})`
+              const hitSL   = pnlPct <= -slPct
+              const alreadyTp1 = tp1Hit.has(sym)
+              const alreadyTp2 = tp2Hit.has(sym)
+              // TP Ladder thresholds: 40% of TP for TP1, 75% for TP2
+              const hitTp1  = !alreadyTp1 && pnlPct >= tpPct * 0.4
+              const hitTp2  = alreadyTp1 && !alreadyTp2 && pnlPct >= tpPct * 0.75
+
+              if (!hitSL && !hitTp1 && !hitTp2) continue
+
+              let sellQty = pos.qty
+              let reason  = ''
+
+              if (hitSL) {
+                reason = `Stop loss triggered: ${pnlPct.toFixed(2)}% (limit: -${slPct.toFixed(2)}%${atrVal ? ' ATR-based' : ''})`
+              } else if (hitTp1) {
+                // TP1: close 33%, tighten trailing stop to lock in gains
+                sellQty = Math.max(0.0001, pos.qty * 0.33)
+                reason  = `TP1 partial exit (33%): +${pnlPct.toFixed(2)}% ≥ +${(tpPct * 0.4).toFixed(2)}% target`
+                await db.from('enki_trailing_stops').upsert(
+                  { user_id: user.user_id, broker: 'paper', symbol: sym, highest_price: signal.price, stop_pct: 3, updated_at: now.toISOString() },
+                  { onConflict: 'user_id,broker,symbol' }
+                )
+              } else if (hitTp2) {
+                // TP2: close another 33% (~50% of remaining after TP1), tighten trail further
+                sellQty = Math.max(0.0001, pos.qty * 0.5)
+                reason  = `TP2 partial exit (33%): +${pnlPct.toFixed(2)}% ≥ +${(tpPct * 0.75).toFixed(2)}% target`
+                await db.from('enki_trailing_stops').upsert(
+                  { user_id: user.user_id, broker: 'paper', symbol: sym, highest_price: signal.price, stop_pct: 2, updated_at: now.toISOString() },
+                  { onConflict: 'user_id,broker,symbol' }
+                )
+              }
 
               const { error: slTpErr } = await db.from('enki_trades').insert({
                 user_id:     user.user_id,
                 doctrine_id: doctrine?.id ?? null,
                 symbol:      sym,
                 side:        'sell',
-                qty:         pos.qty,
+                qty:         sellQty,
                 price:       signal.price,
-                total:       pos.qty * signal.price,
+                total:       sellQty * signal.price,
                 broker:      'paper',
                 paper:       true,
                 confidence:  9,
@@ -1470,7 +1570,8 @@ export const enkiPaperTradingScan = inngest.createFunction(
               })
               if (!slTpErr) {
                 totalTrades++
-                console.log(`[EnkiScan] ${hitSL ? 'SL' : 'TP'} closed: ${user.user_id} SELL ${pos.qty.toFixed(4)}x${sym} @$${signal.price} — ${reason}`)
+                const tag = hitSL ? 'SL' : hitTp1 ? 'TP1' : 'TP2'
+                console.log(`[EnkiScan] ${tag}: ${user.user_id} SELL ${sellQty.toFixed(4)}x${sym} @$${signal.price} — ${reason}`)
               }
             }
           }
@@ -1560,6 +1661,43 @@ export const enkiPaperTradingScan = inngest.createFunction(
         // Open position count for max-positions enforcement (reuses hoisted openPos)
         const openPositionCount = Object.values(openPos).filter(p => p.qty > 0).length
 
+        // ── Half-Kelly Position Sizing from closed trade history ──────────────
+        // Kelly% = (W×(R+1)−1)/R, halved, capped 5–20%. Falls back to doctrine if <20 trades.
+        let kellyPct: number | null = null
+        {
+          const buyQs: Record<string, Array<{ qty: number; price: number }>> = {}
+          const results: Array<{ win: boolean; pct: number }> = []
+          for (const t of slTpTrades ?? []) {
+            if (t.side === 'buy') {
+              if (!buyQs[t.symbol]) buyQs[t.symbol] = []
+              buyQs[t.symbol].push({ qty: t.qty, price: t.price })
+            } else if (t.side === 'sell') {
+              const q = buyQs[t.symbol]
+              if (!q?.length) continue
+              let rem = t.qty, cost = 0
+              while (rem > 0 && q.length > 0) {
+                const b = q[0], m = Math.min(rem, b.qty)
+                cost += m * b.price; rem -= m; b.qty -= m
+                if (b.qty <= 0) q.shift()
+              }
+              if (cost > 0) results.push({ win: t.qty * t.price > cost, pct: (t.qty * t.price - cost) / cost })
+            }
+          }
+          if (results.length >= 20) {
+            const wins   = results.filter(r => r.win)
+            const losses = results.filter(r => !r.win)
+            const W      = wins.length / results.length
+            const avgWin  = wins.length   > 0 ? wins.reduce((s, r)   => s + r.pct, 0) / wins.length  : 0
+            const avgLoss = losses.length > 0 ? Math.abs(losses.reduce((s, r) => s + r.pct, 0) / losses.length) : 0
+            if (avgLoss > 0) {
+              const R = avgWin / avgLoss
+              const kelly = (W * (R + 1) - 1) / R
+              kellyPct = Math.max(5, Math.min(20, (kelly / 2) * 100))
+              console.log(`[EnkiScan] Kelly sizing for ${user.user_id}: W=${(W*100).toFixed(1)}% R=${R.toFixed(2)} → half-Kelly=${kellyPct.toFixed(1)}%`)
+            }
+          }
+        }
+
         for (const doctrine of user.doctrines) {
           const symbols: string[] = doctrine.config?.symbols ?? ['SPY', 'QQQ']
           const maxPositions: number = doctrine.config?.max_positions ?? 5
@@ -1598,9 +1736,30 @@ export const enkiPaperTradingScan = inngest.createFunction(
               continue
             }
 
-            // ── Dynamic position sizing (Full Send mode) ────────────────────
-            // Default: 10% of portfolio. Full Send (position_size_pct=100): use entire portfolio.
-            const positionSizePct: number = doctrine.config?.position_size_pct ?? 10
+            // ── Correlation Guard: skip if |corr| > 0.85 with any open position ──
+            // Prevents doubling down on nearly identical assets (e.g. SPY + QQQ)
+            if (side === 'buy' && !isExistingPosition) {
+              const newReturns = priceMap[symbol]?.closes20
+              if (newReturns && newReturns.length >= 5) {
+                let highCorr = false
+                for (const [openSym, openPosData] of Object.entries(openPos)) {
+                  if (openPosData.qty <= 0 || openSym === symbol) continue
+                  const openReturns = priceMap[openSym]?.closes20
+                  if (!openReturns || openReturns.length < 5) continue
+                  const corr = enkiCalcPearsonCorr(newReturns, openReturns)
+                  if (Math.abs(corr) > 0.85) {
+                    highCorr = true
+                    console.log(`[EnkiScan] Correlation guard: ${symbol} r=${corr.toFixed(2)} with ${openSym} — skipping`)
+                    break
+                  }
+                }
+                if (highCorr) continue
+              }
+            }
+
+            // ── Position sizing: Half-Kelly (from trade history) or doctrine config ──
+            // Kelly adapts to actual win rate / reward-risk ratio. Falls back when < 20 trades.
+            const positionSizePct: number = kellyPct ?? doctrine.config?.position_size_pct ?? 10
             const startingCash = 10000
 
             // Fetch the latest snapshot to get current portfolio value
@@ -1735,6 +1894,53 @@ export const enkiPaperTradingScan = inngest.createFunction(
 
             if (status === 'filled') totalTrades++
             console.log(`[EnkiScan] Paper trade: ${user.user_id} ${side.toUpperCase()} ${qty.toFixed(4)}x${symbol} @$${price} ($${tradeAmount.toFixed(2)}, ${positionSizePct}% of portfolio, ${status})`)
+
+            // ── DCA Safety Orders ───────────────────────────────────────────
+            // Average into a losing position if still bullish and not in a strong downtrend.
+            // Max 2 safety orders per position. Each is 50% of original position size.
+            if (isExistingPosition && openPos[symbol].qty > 0 && signal.side !== 'sell') {
+              const dcaPos     = openPos[symbol]
+              const dcaAvgCost = dcaPos.totalCost / dcaPos.qty
+              const dcaPnlPct  = ((price - dcaAvgCost) / dcaAvgCost) * 100
+              const dcaSlPct   = signal.atr
+                ? Math.max(doctrine.config?.stop_loss_pct ?? 8, (1.5 * signal.atr / dcaAvgCost) * 100)
+                : (doctrine.config?.stop_loss_pct ?? 8)
+              // DCA zone: between 30% and 70% of the way toward stop loss
+              const inDcaZone   = dcaPnlPct <= -(dcaSlPct * 0.3) && dcaPnlPct >= -(dcaSlPct * 0.7)
+              // Skip if ADX > 25 (strong downtrend — don't catch falling knife)
+              const adxVal      = priceMap[symbol]?.adx
+              const notDowntrend = adxVal === null || adxVal < 25
+              if (inDcaZone && notDowntrend) {
+                const dcaCount = (slTpTrades ?? []).filter((t: any) =>
+                  t.symbol === symbol && t.side === 'buy' && (t.reason as string | null)?.includes('DCA safety')
+                ).length
+                if (dcaCount < 2) {
+                  const dcaSizePct = (doctrine.config?.position_size_pct ?? 10) * 0.5
+                  const dcaAmount  = Math.max(5, (currentPortfolioValue * dcaSizePct) / 100)
+                  const dcaQty     = dcaAmount / price
+                  const dcaStatus  = user.guardian_mode === 'autonomous' ? 'filled' : 'pending_approval'
+                  const { error: dcaErr } = await db.from('enki_trades').insert({
+                    user_id:     user.user_id,
+                    doctrine_id: doctrine.id,
+                    symbol,
+                    side:        'buy',
+                    qty:         dcaQty,
+                    price,
+                    total:       dcaAmount,
+                    broker:      'paper',
+                    paper:       true,
+                    confidence:  signal.confidence,
+                    status:      dcaStatus,
+                    reason:      `DCA safety order #${dcaCount + 1}: ${dcaPnlPct.toFixed(2)}% drawdown, ADX=${adxVal?.toFixed(1) ?? 'n/a'}`,
+                    executed_at: now.toISOString(),
+                  })
+                  if (!dcaErr) {
+                    if (dcaStatus === 'filled') totalTrades++
+                    console.log(`[EnkiScan] DCA safety #${dcaCount + 1}: ${user.user_id} BUY $${dcaAmount.toFixed(2)} ${symbol} (pnl=${dcaPnlPct.toFixed(2)}%)`)
+                  }
+                }
+              }
+            }
           }
         }
 
@@ -1967,7 +2173,7 @@ export const enkiCloudRunnerScan = inngest.createFunction(
     const symbolList = Array.from(allSymbols)
     const priceMap = await step.run('cr-fetch-prices', async () => {
       const signalMap: Record<string, {
-        price: number; confidence: number; side: 'buy' | 'sell' | 'neutral'; atr: number | null; signals: string[]
+        price: number; confidence: number; side: 'buy' | 'sell' | 'neutral'; atr: number | null; signals: string[]; closes20: number[]; adx: number | null
       }> = {}
       for (const symbol of symbolList) {
         try {
@@ -1988,7 +2194,10 @@ export const enkiCloudRunnerScan = inngest.createFunction(
           const currentPrice = closes[closes.length - 1]
           if (!currentPrice) continue
           const scored = enkiScoreSignals(closes, highs, lows, volumes)
-          signalMap[symbol] = { price: currentPrice, ...scored }
+          const closes20 = closes.length >= 2
+            ? closes.slice(-21).map((c, i, arr) => i === 0 ? 0 : (c - arr[i-1]) / arr[i-1]).slice(1)
+            : []
+          signalMap[symbol] = { price: currentPrice, ...scored, closes20 }
         } catch { /* skip */ }
       }
       return signalMap
