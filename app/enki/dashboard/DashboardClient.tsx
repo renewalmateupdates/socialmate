@@ -180,25 +180,50 @@ export default function DashboardClient() {
   async function loadAll() {
     setLoading(true)
     try {
-      const [profileRes, tradesRes, snapshotsRes, pendingRes, notifRes] = await Promise.all([
+      const [profileRes, tradesRes, snapshotsRes, pendingRes, notifRes, doctrinesRes] = await Promise.all([
         fetch('/api/enki/profile'),
         fetch('/api/enki/trades?limit=10'),
         fetch('/api/enki/snapshots'),
         fetch('/api/enki/trades/pending'),
         fetch('/api/enki/notifications'),
+        fetch('/api/enki/doctrines'),
       ])
-      const [profileJson, tradesJson, snapshotsJson, pendingJson, notifJson] = await Promise.all([
+      const [profileJson, tradesJson, snapshotsJson, pendingJson, notifJson, doctrinesJson] = await Promise.all([
         profileRes.json(),
         tradesRes.json(),
         snapshotsRes.json(),
         pendingRes.json(),
         notifRes.json(),
+        doctrinesRes.json(),
       ])
       if (profileJson.profile)      setProfile(profileJson.profile)
       if (tradesJson.trades)        setTrades(tradesJson.trades)
       if (snapshotsJson.snapshots)  setSnapshots(snapshotsJson.snapshots)
       if (pendingJson.trades)       setPendingTrades(pendingJson.trades)
       if (notifJson.notifications)  setNotifications(notifJson.notifications)
+
+      // Auto-create a default doctrine for brand-new users so the guardian
+      // has something to work with on the very first scan cycle.
+      if (Array.isArray(doctrinesJson.doctrines) && doctrinesJson.doctrines.length === 0) {
+        await fetch('/api/enki/doctrines', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name:        'Balanced Doctrine',
+            description: 'Auto-created starter doctrine. Trades SPY, QQQ, and AAPL at 10% position size with balanced risk settings.',
+            is_active:   true,
+            config: {
+              symbols:                ['SPY', 'QQQ', 'AAPL'],
+              broker:                 'paper',
+              position_size_pct:      10,
+              stop_loss_pct:          5,
+              take_profit_pct:        12,
+              max_positions:          5,
+              max_daily_drawdown_pct: 3,
+            },
+          }),
+        })
+      }
 
       // Derive paper positions from paper trades
       if (tradesJson.trades) {
