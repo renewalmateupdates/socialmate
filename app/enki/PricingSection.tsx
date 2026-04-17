@@ -50,7 +50,7 @@ const PRICING = [
       { label: '30-day backtests' },
       { label: 'Cloud Runner available (+$10/mo)' },
     ],
-    cta: 'Join Waitlist — Commander',
+    cta: 'Go Commander — $15/mo',
     ctaStyle: 'bg-amber-400 hover:bg-amber-500 text-black',
   },
   {
@@ -76,7 +76,7 @@ const PRICING = [
       { label: '90-day backtests' },
       { label: 'Cloud Runner available (+$10/mo)' },
     ],
-    cta: 'Join Waitlist — Emperor',
+    cta: 'Go Emperor — $29/mo',
     ctaStyle: 'bg-purple-600 hover:bg-purple-700 text-white',
   },
 ]
@@ -202,7 +202,14 @@ export default function EnkiPricingSection() {
                     disabled={loading === plan.name.toLowerCase()}
                     className={`w-full text-center text-sm font-bold py-3 rounded-xl transition-all disabled:opacity-50 ${plan.ctaStyle}`}
                   >
-                    {loading === plan.name.toLowerCase() ? 'Loading...' : `${plan.cta} →`}
+                    {loading === plan.name.toLowerCase()
+                    ? 'Loading...'
+                    : plan.name === 'Commander'
+                      ? `Go Commander — ${annual ? '$10/mo (annual)' : '$15/mo'} →`
+                      : plan.name === 'Emperor'
+                        ? `Go Emperor — ${annual ? '$20/mo (annual)' : '$29/mo'} →`
+                        : `${plan.cta} →`
+                  }
                   </button>
                 )}
               </div>

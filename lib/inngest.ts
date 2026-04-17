@@ -1145,6 +1145,76 @@ function enkiScoreSignals(
   return { confidence, side, signals, atr }
 }
 
+// ─── Enki External Signal Fetchers — free APIs, no keys required ──────────────
+
+/** CNN Fear & Greed stock-market index. Returns 0–100 (25=extreme fear, 75=extreme greed). */
+async function enkiFetchFearGreed(): Promise<number | null> {
+  try {
+    const res = await fetch('https://production.dataviz.cnn.io/index/fearandgreed/graphdata', {
+      headers: { 'User-Agent': 'Mozilla/5.0' },
+    })
+    if (!res.ok) return null
+    const data = await res.json()
+    const score = data?.fear_and_greed?.score
+    return typeof score === 'number' ? Math.round(score) : null
+  } catch { return null }
+}
+
+/**
+ * House Stock Watcher free S3 JSON — congressional stock disclosures.
+ * Returns per-symbol map of whether a member bought/sold in the last 30 days.
+ */
+async function enkiFetchCongressTrades(
+  symbols: string[]
+): Promise<Record<string, { buy: boolean; sell: boolean; members: number }>> {
+  try {
+    const res = await fetch(
+      'https://house-stock-watcher-data.s3-us-west-2.amazonaws.com/data/all_transactions.json',
+      { headers: { 'User-Agent': 'Mozilla/5.0' } }
+    )
+    if (!res.ok) return {}
+    const txs: Array<{ ticker: string; transaction_date: string; type: string }> = await res.json()
+    const cutoff   = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+    const symSet   = new Set(symbols.map(s => s.toUpperCase()))
+    const out: Record<string, { buy: boolean; sell: boolean; members: number }> = {}
+    for (const tx of txs) {
+      const sym = tx.ticker?.toUpperCase().replace('$', '')
+      if (!sym || !symSet.has(sym)) continue
+      if (tx.transaction_date < cutoff) continue
+      if (!out[sym]) out[sym] = { buy: false, sell: false, members: 0 }
+      const t = tx.type?.toLowerCase() ?? ''
+      if (t.includes('purchase')) { out[sym].buy = true; out[sym].members++ }
+      if (t.includes('sale'))       out[sym].sell = true
+    }
+    return out
+  } catch { return {} }
+}
+
+/**
+ * ApeWisdom Reddit mention API — top mentioned stocks across WSB + r/stocks.
+ * Returns per-symbol rank (1 = most mentioned) and 24h mention count.
+ * Free, no API key.
+ */
+async function enkiFetchRedditMentions(
+  symbols: string[]
+): Promise<Record<string, { rank: number; mentions: number }>> {
+  try {
+    const res = await fetch('https://apewisdom.io/api/v1.0/filter/all-stocks/page/1', {
+      headers: { 'User-Agent': 'Mozilla/5.0' },
+    })
+    if (!res.ok) return {}
+    const data = await res.json()
+    const results: Array<{ ticker: string; rank: number; mentions: number }> = data?.results ?? []
+    const symSet = new Set(symbols.map(s => s.toUpperCase()))
+    const out: Record<string, { rank: number; mentions: number }> = {}
+    for (const item of results) {
+      const sym = item.ticker?.toUpperCase()
+      if (sym && symSet.has(sym)) out[sym] = { rank: item.rank, mentions: item.mentions }
+    }
+    return out
+  } catch { return {} }
+}
+
 // ─── Enki Paper Trading Scan — every 15 minutes ────────────────────────────────
 // For each Citizen-tier user with active doctrines, runs a multi-indicator signal
 // stack (RSI/MACD/EMA/BB/ATR/Volume from Yahoo Finance OHLCV bars), then executes
@@ -1236,6 +1306,17 @@ export const enkiPaperTradingScan = inngest.createFunction(
 
     const symbolList = Array.from(allSymbols)
 
+    // ── 2a. Fetch external market signals (once per scan cycle) ──────────────
+    const marketCtx = await step.run('fetch-market-context', async () => {
+      const [fearGreed, congress, reddit] = await Promise.all([
+        enkiFetchFearGreed(),
+        enkiFetchCongressTrades(symbolList),
+        enkiFetchRedditMentions(symbolList),
+      ])
+      console.log(`[EnkiScan] Market context: F&G=${fearGreed ?? 'n/a'}, congress signals=${Object.keys(congress).length}, reddit mentions=${Object.keys(reddit).length}`)
+      return { fearGreed, congress, reddit }
+    })
+
     const priceMap = await step.run('fetch-prices', async () => {
       const signalMap: Record<string, {
         price: number; confidence: number; side: 'buy' | 'sell' | 'neutral'; atr: number | null; signals: string[]
@@ -1265,8 +1346,37 @@ export const enkiPaperTradingScan = inngest.createFunction(
           if (!currentPrice) continue
 
           const scored = enkiScoreSignals(closes, highs, lows, volumes)
-          signalMap[symbol] = { price: currentPrice, ...scored }
-          console.log(`[EnkiScan] ${symbol}: $${currentPrice.toFixed(2)} → ${scored.side} conf=${scored.confidence} [${scored.signals.join(' | ')}]`)
+          let { confidence, side, signals } = scored
+
+          // ── Apply external signal modifiers ────────────────────────────────
+          // Congressional buy confirmation (+1 to buy confidence)
+          const cong = marketCtx.congress[symbol]
+          if (cong?.buy && side === 'buy') {
+            confidence = Math.min(10, confidence + 1)
+            signals = [...signals, `Congress buy (${cong.members} member${cong.members > 1 ? 's' : ''})`]
+          }
+
+          // Reddit/WSB trending in top 25 — bullish momentum confirmation (+1)
+          const reddit = marketCtx.reddit[symbol]
+          if (reddit && reddit.rank <= 25 && side === 'buy') {
+            confidence = Math.min(10, confidence + 1)
+            signals = [...signals, `WSB trending #${reddit.rank} (${reddit.mentions} mentions)`]
+          }
+
+          // Fear & Greed: extreme fear caps buy entries (market panic = bad time to buy)
+          const fg = marketCtx.fearGreed
+          if (fg !== null && fg <= 25 && side === 'buy') {
+            confidence = Math.min(confidence, 5) // below threshold — guardian waits
+            signals = [...signals, `F&G extreme fear (${fg}) — buy capped`]
+          }
+          // Extreme greed: slight headwind on buys (already overbought market)
+          if (fg !== null && fg >= 80 && side === 'buy') {
+            confidence = Math.max(0, confidence - 1)
+            signals = [...signals, `F&G extreme greed (${fg}) — reduced`]
+          }
+
+          signalMap[symbol] = { price: currentPrice, confidence, side, signals, atr: scored.atr }
+          console.log(`[EnkiScan] ${symbol}: $${currentPrice.toFixed(2)} → ${side} conf=${confidence} [${signals.join(' | ')}]`)
         } catch (err: any) {
           console.warn(`[EnkiScan] Price fetch error for ${symbol}:`, err.message)
         }
@@ -1366,6 +1476,57 @@ export const enkiPaperTradingScan = inngest.createFunction(
           }
         }
 
+        // ── Trailing Stop Guardian ────────────────────────────────────────────
+        // For each open position with a trailing stop record: advance the stop
+        // as price rises, close the position if price falls below stop.
+        const { data: trailingStops } = await db
+          .from('enki_trailing_stops')
+          .select('symbol, highest_price, stop_pct')
+          .eq('user_id', user.user_id)
+          .eq('broker', 'paper')
+
+        if (trailingStops?.length) {
+          const utcTsH = now.getUTCHours(), utcTsM = now.getUTCMinutes()
+          const utcTsT = utcTsH * 60 + utcTsM
+          const dowTs  = now.getUTCDay()
+          const mktTs  = dowTs !== 0 && dowTs !== 6 && utcTsT >= 14 * 60 && utcTsT < 19 * 60 + 45
+          if (mktTs) {
+            for (const ts of trailingStops) {
+              const signal = priceMap[ts.symbol]
+              if (!signal) continue
+              const curPx       = signal.price
+              const highestPx   = Number(ts.highest_price)
+              const stopPct     = Number(ts.stop_pct)
+              const stopPrice   = highestPx * (1 - stopPct / 100)
+
+              if (curPx > highestPx) {
+                // Price made new high — advance the trailing stop
+                await db.from('enki_trailing_stops').upsert(
+                  { user_id: user.user_id, broker: 'paper', symbol: ts.symbol, highest_price: curPx, stop_pct: stopPct, updated_at: now.toISOString() },
+                  { onConflict: 'user_id,broker,symbol' }
+                )
+              } else if (curPx <= stopPrice && openPos[ts.symbol]?.qty > 0) {
+                // Trailing stop hit — close position
+                const pos    = openPos[ts.symbol]
+                const reason = `Trailing stop hit: $${curPx.toFixed(2)} ≤ stop $${stopPrice.toFixed(2)} (${stopPct}% trail from $${highestPx.toFixed(2)})`
+                const doctrine = user.doctrines.find((d: any) => d.id === pos.doctrine_id) ?? user.doctrines[0]
+                const { error: tsErr } = await db.from('enki_trades').insert({
+                  user_id: user.user_id, doctrine_id: doctrine?.id ?? null,
+                  symbol: ts.symbol, side: 'sell', qty: pos.qty, price: curPx,
+                  total: pos.qty * curPx, broker: 'paper', paper: true,
+                  confidence: 9, status: 'filled', reason, executed_at: now.toISOString(),
+                })
+                if (!tsErr) {
+                  totalTrades++
+                  console.log(`[EnkiScan] Trailing stop closed: ${user.user_id} SELL ${pos.qty.toFixed(4)}x${ts.symbol} — ${reason}`)
+                  await db.from('enki_trailing_stops').delete()
+                    .eq('user_id', user.user_id).eq('broker', 'paper').eq('symbol', ts.symbol)
+                }
+              }
+            }
+          }
+        }
+
         // ── Daily drawdown guard: halt new trades if today's loss >= limit ──────
         const maxDdPct: number = user.doctrines[0]?.config?.max_daily_drawdown_pct ?? 3
         const { data: todaySnap } = await db
@@ -1382,6 +1543,19 @@ export const enkiPaperTradingScan = inngest.createFunction(
             return
           }
         }
+
+        // ── Re-entry cooldown: skip symbols stopped out in the last 2 hours ────
+        const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString()
+        const { data: recentStopOuts } = await db
+          .from('enki_trades')
+          .select('symbol')
+          .eq('user_id', user.user_id)
+          .eq('broker', 'paper')
+          .eq('side', 'sell')
+          .eq('status', 'filled')
+          .ilike('reason', '%stop%')
+          .gte('executed_at', twoHoursAgo)
+        const cooledSymbols = new Set((recentStopOuts ?? []).map((t: any) => t.symbol as string))
 
         // Open position count for max-positions enforcement (reuses hoisted openPos)
         const openPositionCount = Object.values(openPos).filter(p => p.qty > 0).length
@@ -1401,14 +1575,21 @@ export const enkiPaperTradingScan = inngest.createFunction(
             if (confidence < 6) continue
             if (side === 'neutral') continue
 
-            // Fortress Guard: only between market hours (9:30–16:00 ET on weekdays)
+            // Fortress Guard: skip first 30 min open (9:30–10:00 ET chop) and last 15 min
+            // (3:45–4:00 ET gap risk). Best window: 10:00 AM–3:45 PM ET = 14:00–19:45 UTC.
             const utcHour      = now.getUTCHours()
             const utcMin       = now.getUTCMinutes()
             const utcTime      = utcHour * 60 + utcMin
             const dayOfWeek    = now.getUTCDay()
-            const isMarketOpen = dayOfWeek !== 0 && dayOfWeek !== 6 && utcTime >= 13 * 60 + 30 && utcTime < 20 * 60
+            const isMarketOpen = dayOfWeek !== 0 && dayOfWeek !== 6 && utcTime >= 14 * 60 && utcTime < 19 * 60 + 45
 
             if (!isMarketOpen) continue
+
+            // Re-entry cooldown: don't re-enter a symbol that was stopped out < 2h ago
+            if (cooledSymbols.has(symbol)) {
+              console.log(`[EnkiScan] Re-entry cooldown: ${symbol} stopped out within 2h — skipping`)
+              continue
+            }
 
             // ── Max positions guard ─────────────────────────────────────────────
             const isExistingPosition = openPos[symbol] && openPos[symbol].qty > 0
@@ -1534,6 +1715,22 @@ export const enkiPaperTradingScan = inngest.createFunction(
             if (tradeErr) {
               console.error(`[EnkiScan] Trade insert error for ${user.user_id}/${symbol}:`, tradeErr.message)
               continue
+            }
+
+            // On a filled BUY: create/advance trailing stop record
+            if (side === 'buy' && status === 'filled') {
+              const trailPct = signal.atr
+                ? Math.max(2, Math.min(10, Math.round((signal.atr / price) * 200 * 10) / 10))
+                : (doctrine.config?.trailing_stop_pct ?? 5)
+              await db.from('enki_trailing_stops').upsert(
+                { user_id: user.user_id, broker: 'paper', symbol, highest_price: price, stop_pct: trailPct, updated_at: now.toISOString() },
+                { onConflict: 'user_id,broker,symbol' }
+              )
+            }
+            // On a filled SELL: remove trailing stop (position closed)
+            if (side === 'sell' && status === 'filled') {
+              await db.from('enki_trailing_stops').delete()
+                .eq('user_id', user.user_id).eq('broker', 'paper').eq('symbol', symbol)
             }
 
             if (status === 'filled') totalTrades++
