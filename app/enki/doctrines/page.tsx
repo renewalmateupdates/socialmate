@@ -192,7 +192,7 @@ export default function EnkiDoctrinesPage() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) { router.push('/login?next=/enki/doctrines'); return }
+      if (!user) { router.push('/login?redirect=/enki/doctrines'); return }
       setAuthed(true)
       loadAll()
     })

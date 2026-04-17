@@ -177,7 +177,7 @@ export default function EnkiSettingsPage() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) { router.push('/login?next=/enki/settings'); return }
+      if (!user) { router.push('/login?redirect=/enki/settings'); return }
       setAuthed(true)
       loadProfile()
     })

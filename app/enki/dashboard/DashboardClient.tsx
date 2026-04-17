@@ -134,7 +134,7 @@ export default function DashboardClient() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) { router.push('/login?next=/enki/dashboard'); return }
+      if (!user) { router.push('/login?redirect=/enki/dashboard'); return }
       setAuthed(true)
       loadAll()
     })

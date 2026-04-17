@@ -36,7 +36,7 @@ export default function EnkiTradesPage() {
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
-      if (!user) { router.push('/login?next=/enki/trades'); return }
+      if (!user) { router.push('/login?redirect=/enki/trades'); return }
       setAuthed(true)
       load('all')
     })
