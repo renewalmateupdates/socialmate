@@ -2732,13 +2732,13 @@ export const enkiTruthModeScan = inngest.createFunction(
 
         // Same-day entry guard: no re-entry for a symbol already traded today (prevents
         // duplicate data points that would corrupt the experiment's per-day sample).
-        const todayStart = new Date(now)
-        todayStart.setUTCHours(0, 0, 0, 0)
+        const todayEntryStart = new Date(now)
+        todayEntryStart.setUTCHours(0, 0, 0, 0)
         const { data: todayEntries } = await db
           .from('enki_truth_trades')
           .select('symbol')
           .eq('user_id', userId)
-          .gte('entry_time', todayStart.toISOString())
+          .gte('entry_time', todayEntryStart.toISOString())
         const todaySymbolSet = new Set((todayEntries ?? []).map((r: any) => r.symbol as string))
 
         for (const symbol of symbolsStep) {
