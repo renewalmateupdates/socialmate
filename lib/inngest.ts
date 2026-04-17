@@ -15,6 +15,12 @@ import {
   enkiAnalyzeSymbol, enkiMakeRiskDecision,
   type FusedSignal,
 } from '@/lib/enki/strategy-engine'
+import {
+  scoreTruthMomentum, scoreTruthMeanReversion, applyCongressionalBoost,
+  fetchTruthCongressData, computeTrailPct, computeTruthKelly,
+  truthCalcCorrelation,
+  type TruthSignal, type TruthStrategy,
+} from '@/lib/enki/truth-mode'
 
 // ── Enki AES-256-CBC decrypt helper ───────────────────────────────────────────
 // Mirrors the encrypt/decrypt in app/api/enki/brokers/alpaca/route.ts
@@ -2461,4 +2467,402 @@ async function fetchRedditPosts(handle: string): Promise<FetchedPost[]> {
   } catch {
     return []
   }
+}
+
+// ─── Enki Truth Mode Scan ─────────────────────────────────────────────────────
+// Parallel validation system. Runs alongside the main scan without interfering.
+// Long-only paper trades stored in enki_truth_trades.
+// Purpose: determine if momentum + mean_reversion strategies have real edge.
+// Rules: no new signals, no parameter changes, 50 trades minimum per strategy.
+
+export const enkiTruthModeScan = inngest.createFunction(
+  { id: 'enki-truth-mode-scan', name: 'Enki Truth Mode Scan', retries: 1 },
+  { cron: '*/15 * * * *' },
+  async ({ step }) => {
+    // ── 1. Fetch users with Truth Mode enabled ────────────────────────────────
+    const activeUsers = await step.run('truth-fetch-users', async () => {
+      const db = getSupabaseAdmin()
+      const { data, error } = await db
+        .from('enki_profiles')
+        .select('user_id, truth_mode_enabled')
+        .eq('truth_mode_enabled', true)
+        .neq('guardian_mode', 'dormant')
+      if (error || !data?.length) return []
+      return data.map((p: any) => p.user_id as string)
+    })
+
+    if (!activeUsers.length) return { scanned: 0, trades: 0 }
+
+    // ── 2. Collect unique symbols from open truth positions + watchlists ──────
+    const symbolsStep = await step.run('truth-collect-symbols', async () => {
+      const db = getSupabaseAdmin()
+
+      const { data: openRows } = await db
+        .from('enki_truth_trades')
+        .select('symbol')
+        .in('user_id', activeUsers)
+        .eq('is_open', true)
+
+      const symbolSet = new Set<string>((openRows ?? []).map((r: any) => r.symbol as string))
+
+      const { data: doctrines } = await db
+        .from('enki_doctrines')
+        .select('user_id, config')
+        .in('user_id', activeUsers)
+        .eq('is_active', true)
+
+      for (const d of doctrines ?? []) {
+        const syms: string[] = d.config?.symbols ?? ['SPY', 'QQQ']
+        for (const s of syms) symbolSet.add(s.toUpperCase())
+      }
+
+      return Array.from(symbolSet)
+    })
+
+    if (!symbolsStep.length) return { scanned: 0, trades: 0 }
+
+    // ── 3. Fetch OHLCV + compute truth signals ────────────────────────────────
+    const priceData = await step.run('truth-fetch-prices', async () => {
+      const result: Record<string, {
+        closes:       number[]
+        highs:        number[]
+        lows:         number[]
+        price:        number
+        atr:          number
+        dailyReturns: number[]
+        momentum:     ReturnType<typeof scoreTruthMomentum>
+        meanRev:      ReturnType<typeof scoreTruthMeanReversion>
+      }> = {}
+
+      for (const symbol of symbolsStep) {
+        try {
+          const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=3mo`
+          const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } })
+          if (!res.ok) continue
+          const json  = await res.json()
+          const r     = json?.chart?.result?.[0]
+          if (!r) continue
+          const quote   = r.indicators?.quote?.[0]
+          const closes  = (quote?.close  ?? []).filter((v: unknown) => v != null) as number[]
+          const highs   = (quote?.high   ?? []).filter((v: unknown) => v != null) as number[]
+          const lows    = (quote?.low    ?? []).filter((v: unknown) => v != null) as number[]
+          const volumes = (quote?.volume ?? []).filter((v: unknown) => v != null) as number[]
+          if (closes.length < 30) continue
+
+          const atrRaw = enkiCalcATR(highs, lows, closes)
+          if (!atrRaw) continue
+
+          const dailyReturns = closes.slice(-21).map((c: number, i: number, arr: number[]) =>
+            i === 0 ? 0 : (c - arr[i - 1]) / arr[i - 1]
+          ).slice(1)
+
+          result[symbol] = {
+            closes,
+            highs,
+            lows,
+            price:        closes[closes.length - 1],
+            atr:          atrRaw,
+            dailyReturns,
+            momentum:     scoreTruthMomentum(closes, highs, lows, volumes),
+            meanRev:      scoreTruthMeanReversion(closes, highs, lows),
+          }
+        } catch (err: any) {
+          console.warn(`[TruthScan] Price error ${symbol}:`, err.message)
+        }
+      }
+
+      return result
+    })
+
+    const congressData = await step.run('truth-fetch-congress', async () => {
+      return fetchTruthCongressData(symbolsStep)
+    })
+
+    // ── 4. Per-user processing ────────────────────────────────────────────────
+    let totalTrades = 0
+    const now = new Date()
+
+    for (let i = 0; i < activeUsers.length; i++) {
+      const userId = activeUsers[i]
+
+      await step.run(`truth-scan-user-${userId}-${i}`, async () => {
+        const db   = getSupabaseAdmin()
+        const utcT = now.getUTCHours() * 60 + now.getUTCMinutes()
+        const dow  = now.getUTCDay()
+        const marketOpen = dow !== 0 && dow !== 6 && utcT >= 13 * 60 + 30 && utcT < 20 * 60
+
+        // ── 4a. Process open positions ────────────────────────────────────────
+        const { data: openTrades } = await db
+          .from('enki_truth_trades')
+          .select('*')
+          .eq('user_id', userId)
+          .eq('is_open', true)
+
+        for (const pos of openTrades ?? []) {
+          const sym           = pos.symbol as string
+          const px            = priceData[sym]?.price
+          if (!px || !marketOpen) continue
+
+          const entryPrice        = Number(pos.entry_price)
+          const remainingQty      = Number(pos.remaining_qty)
+          const atrAtEntry        = Number(pos.atr_at_entry)
+          const highestPriceSeen  = Number(pos.highest_price_seen)
+          const tp1Hit            = Boolean(pos.tp1_hit)
+          const tp2Hit            = Boolean(pos.tp2_hit)
+          const newHighest        = Math.max(highestPriceSeen, px)
+
+          const trailPct      = computeTrailPct(atrAtEntry, entryPrice, tp1Hit, tp2Hit)
+          const trailStop     = newHighest * (1 - trailPct / 100)
+          const staticStop    = Number(pos.stop_price)
+          const effectiveStop = Math.max(staticStop, trailStop)
+
+          if (newHighest > highestPriceSeen) {
+            await db.from('enki_truth_trades')
+              .update({ highest_price_seen: newHighest, updated_at: new Date().toISOString() })
+              .eq('id', pos.id)
+          }
+
+          if (px <= effectiveStop) {
+            const pnlPct    = ((px - entryPrice) / entryPrice) * 100
+            const pnlDollar = (px - entryPrice) * remainingQty
+            const isTrail   = px > staticStop
+            await db.from('enki_truth_trades').update({
+              is_open:           false,
+              exit_price:        px,
+              exit_time:         new Date().toISOString(),
+              exit_reason:       isTrail ? 'trailing_stop' : 'stop_loss',
+              stop_loss_hit:     !isTrail,
+              trailing_stop_hit: isTrail,
+              pnl_dollar:        pnlDollar,
+              pnl_pct:           pnlPct,
+              win:               pnlPct > 0,
+              updated_at:        new Date().toISOString(),
+            }).eq('id', pos.id)
+            await updateTruthStats(db, userId, pos.strategy as TruthStrategy, pos.confidence, Boolean(pos.congressional_boost), pnlPct)
+            totalTrades++
+            console.log(`[TruthScan] ${isTrail ? 'TRAIL' : 'SL'}: ${userId} ${sym} @$${px.toFixed(2)} P&L=${pnlPct.toFixed(2)}%`)
+            continue
+          }
+
+          if (!tp1Hit && px >= Number(pos.tp1_price)) {
+            const sellQty = remainingQty * 0.33
+            await db.from('enki_truth_trades').update({
+              tp1_hit:            true,
+              tp1_exit_price:     px,
+              tp1_exit_time:      new Date().toISOString(),
+              remaining_qty:      remainingQty - sellQty,
+              highest_price_seen: newHighest,
+              updated_at:         new Date().toISOString(),
+            }).eq('id', pos.id)
+            totalTrades++
+            console.log(`[TruthScan] TP1: ${userId} ${sym} @$${px.toFixed(2)}`)
+            continue
+          }
+
+          if (tp1Hit && !tp2Hit && px >= Number(pos.tp2_price)) {
+            const sellQty = remainingQty * 0.5
+            await db.from('enki_truth_trades').update({
+              tp2_hit:            true,
+              tp2_exit_price:     px,
+              tp2_exit_time:      new Date().toISOString(),
+              remaining_qty:      remainingQty - sellQty,
+              highest_price_seen: newHighest,
+              updated_at:         new Date().toISOString(),
+            }).eq('id', pos.id)
+            totalTrades++
+            console.log(`[TruthScan] TP2: ${userId} ${sym} @$${px.toFixed(2)}`)
+          }
+        }
+
+        // ── 4b. New signal evaluation ─────────────────────────────────────────
+        if (!marketOpen) return
+
+        const { data: allOpen } = await db
+          .from('enki_truth_trades')
+          .select('symbol, entry_price, position_usd, pnl_pct')
+          .eq('user_id', userId)
+          .eq('is_open', true)
+
+        let openCountLocal = (allOpen ?? []).length
+        if (openCountLocal >= 5) return
+
+        const totalEquity    = 10_000
+        const unrealizedPnl  = (allOpen ?? []).reduce((s: number, p: any) => s + (Number(p.pnl_pct) / 100) * Number(p.position_usd), 0)
+        const portfolioValue = totalEquity + unrealizedPnl
+
+        const todayStart = new Date(now); todayStart.setUTCHours(0, 0, 0, 0)
+        const { data: todayClosed } = await db
+          .from('enki_truth_trades')
+          .select('pnl_dollar')
+          .eq('user_id', userId)
+          .eq('is_open', false)
+          .gte('exit_time', todayStart.toISOString())
+        const dailyPnl = (todayClosed ?? []).reduce((s: number, t: any) => s + Number(t.pnl_dollar ?? 0), 0)
+
+        if (dailyPnl / totalEquity <= -0.03) {
+          console.log(`[TruthScan] Daily 3% stop for ${userId}`)
+          return
+        }
+        if (portfolioValue / totalEquity - 1 <= -0.12) {
+          console.log(`[TruthScan] Portfolio 12% drawdown stop for ${userId}`)
+          return
+        }
+
+        const { data: closedTrades } = await db
+          .from('enki_truth_trades')
+          .select('win, pnl_pct')
+          .eq('user_id', userId)
+          .eq('is_open', false)
+          .limit(100)
+
+        const kellyPct = computeTruthKelly(
+          (closedTrades ?? []).map((t: any) => ({ win: Boolean(t.win), pnlPct: Number(t.pnl_pct ?? 0) }))
+        )
+
+        const openSymbols = Array.from(new Set((allOpen ?? []).map((p: any) => p.symbol as string)))
+
+        const cooldownCutoff = new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString()
+        const { data: recentClosed } = await db
+          .from('enki_truth_trades')
+          .select('symbol')
+          .eq('user_id', userId)
+          .eq('is_open', false)
+          .gte('exit_time', cooldownCutoff)
+        const cooldownSet = new Set((recentClosed ?? []).map((r: any) => r.symbol as string))
+
+        for (const symbol of symbolsStep) {
+          if (openCountLocal >= 5) break
+          if (cooldownSet.has(symbol)) continue
+
+          const data = priceData[symbol]
+          if (!data) continue
+          if ((allOpen ?? []).some((p: any) => p.symbol === symbol)) continue
+
+          // Correlation guard: Pearson > 0.85 with any open position
+          let tooCorrelated = false
+          for (const openSym of openSymbols) {
+            const openReturns = priceData[openSym]?.dailyReturns ?? []
+            if (openReturns.length < 10 || data.dailyReturns.length < 10) continue
+            const minLen = Math.min(openReturns.length, data.dailyReturns.length)
+            const corr = truthCalcCorrelation(openReturns.slice(-minLen), data.dailyReturns.slice(-minLen))
+            if (corr !== null && corr > 0.85) { tooCorrelated = true; break }
+          }
+          if (tooCorrelated) continue
+
+          // Collect valid signals (momentum first, then mean_reversion)
+          const candidates: Array<{ rawSig: TruthSignal; atr: number }> = []
+          if (data.momentum) candidates.push({ rawSig: data.momentum.signal, atr: data.momentum.atr })
+          if (data.meanRev)  candidates.push({ rawSig: data.meanRev.signal,  atr: data.meanRev.atr })
+
+          for (const { rawSig, atr } of candidates) {
+            const sig = applyCongressionalBoost(rawSig, congressData[symbol])
+
+            const positionSizePct = kellyPct / 100
+            const positionUsd     = portfolioValue * positionSizePct
+            const qty             = positionUsd / data.price
+
+            const { error: insertErr } = await db.from('enki_truth_trades').insert({
+              user_id:             userId,
+              symbol,
+              strategy:            sig.strategy,
+              confidence:          sig.confidence,
+              congressional_boost: sig.congressionalBoost,
+              adx_at_entry:        sig.adxAtEntry,
+              rsi_at_entry:        sig.rsiAtEntry,
+              atr_at_entry:        atr,
+              spy_price_at_entry:  priceData['SPY']?.price ?? null,
+              entry_price:         data.price,
+              entry_time:          new Date().toISOString(),
+              qty,
+              remaining_qty:       qty,
+              position_size_pct:   kellyPct,
+              position_usd:        positionUsd,
+              kelly_pct_used:      kellyPct,
+              stop_price:          sig.stopPrice,
+              highest_price_seen:  data.price,
+              tp1_price:           sig.tp1Price,
+              tp2_price:           sig.tp2Price,
+              is_open:             true,
+            })
+
+            if (!insertErr) {
+              openCountLocal++
+              totalTrades++
+              console.log(`[TruthScan] ENTRY: ${userId} ${sig.strategy.toUpperCase()} ${symbol} @$${data.price.toFixed(2)} conf=${sig.confidence} kelly=${kellyPct}%${sig.congressionalBoost ? ' [CONGRESS BOOST]' : ''}`)
+              break
+            }
+          }
+        }
+      })
+    }
+
+    return { scanned: activeUsers.length, trades: totalTrades }
+  }
+)
+
+// ── Truth Mode stat aggregator — called on every trade close ──────────────────
+async function updateTruthStats(
+  db:            ReturnType<typeof getSupabaseAdmin>,
+  userId:        string,
+  strategy:      TruthStrategy,
+  confidence:    string,
+  congressBoost: boolean,
+  pnlPct:        number,
+): Promise<void> {
+  const win = pnlPct > 0
+
+  const { data: existing } = await db
+    .from('enki_truth_strategy_stats')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('strategy', strategy)
+    .single()
+
+  const cur = existing ?? {
+    total_trades: 0, wins: 0, losses: 0,
+    gross_win_pct: 0, gross_loss_pct: 0,
+    high_conf_trades: 0, high_conf_wins: 0,
+    medium_conf_trades: 0, medium_conf_wins: 0,
+    congress_trades: 0, congress_wins: 0,
+    max_consecutive_losses: 0, current_consecutive_losses: 0,
+    total_pnl_pct: 0,
+  }
+
+  const newTotal    = Number(cur.total_trades) + 1
+  const newWins     = Number(cur.wins)   + (win ? 1 : 0)
+  const newLosses   = Number(cur.losses) + (win ? 0 : 1)
+  const newGrossWin  = win ? Number(cur.gross_win_pct)  + pnlPct : Number(cur.gross_win_pct)
+  const newGrossLoss = win ? Number(cur.gross_loss_pct) : Number(cur.gross_loss_pct) + pnlPct
+
+  const avgWin  = newWins   > 0 ? newGrossWin  / newWins   : 0
+  const avgLoss = newLosses > 0 ? newGrossLoss / newLosses : 0
+  const profitFactor = newLosses > 0 && newGrossLoss !== 0
+    ? Math.abs(newGrossWin) / Math.abs(newGrossLoss)
+    : null
+
+  const consecLosses = win ? 0 : Number(cur.current_consecutive_losses) + 1
+
+  await db.from('enki_truth_strategy_stats').upsert({
+    user_id:                    userId,
+    strategy,
+    total_trades:               newTotal,
+    wins:                       newWins,
+    losses:                     newLosses,
+    win_rate:                   newTotal > 0 ? newWins / newTotal : 0,
+    gross_win_pct:              newGrossWin,
+    gross_loss_pct:             newGrossLoss,
+    avg_win_pct:                avgWin,
+    avg_loss_pct:               avgLoss,
+    profit_factor:              profitFactor,
+    total_pnl_pct:              newGrossWin + newGrossLoss,
+    high_conf_trades:           confidence === 'HIGH'   ? Number(cur.high_conf_trades)   + 1 : Number(cur.high_conf_trades),
+    high_conf_wins:             confidence === 'HIGH'   && win ? Number(cur.high_conf_wins)   + 1 : Number(cur.high_conf_wins),
+    medium_conf_trades:         confidence === 'MEDIUM' ? Number(cur.medium_conf_trades) + 1 : Number(cur.medium_conf_trades),
+    medium_conf_wins:           confidence === 'MEDIUM' && win ? Number(cur.medium_conf_wins) + 1 : Number(cur.medium_conf_wins),
+    congress_trades:            congressBoost ? Number(cur.congress_trades) + 1 : Number(cur.congress_trades),
+    congress_wins:              congressBoost && win ? Number(cur.congress_wins) + 1 : Number(cur.congress_wins),
+    max_consecutive_losses:     Math.max(Number(cur.max_consecutive_losses), consecLosses),
+    current_consecutive_losses: consecLosses,
+    updated_at:                 new Date().toISOString(),
+  }, { onConflict: 'user_id,strategy' })
 }
