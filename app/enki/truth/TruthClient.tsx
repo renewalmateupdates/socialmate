@@ -63,12 +63,17 @@ interface EquityPoint {
   cumulative: number
 }
 
+interface SpyCurvePoint {
+  cumulative: number
+}
+
 interface TruthData {
   stats: StratStats[]
   open: OpenPos[]
   closed: ClosedTrade[]
   equityCurve: EquityPoint[]
   spyReturn3mo: number | null
+  spyCurve: SpyCurvePoint[]
   progress: { momentum: number; mean_reversion: number; target: number }
 }
 
@@ -88,20 +93,60 @@ function badge(label: string, color: string) {
 }
 
 function ProgressBar({ value, target }: { value: number; target: number }) {
-  const pct = Math.min(100, (value / target) * 100)
+  const fill = Math.min(100, (value / target) * 100)
   const done = value >= target
   return (
     <div className="mt-1">
       <div className="flex justify-between text-xs text-zinc-400 mb-1">
-        <span>{value} trades</span>
+        <span>{value} / {target} trades</span>
         <span>{done ? '✓ Sufficient sample' : `${target - value} more needed`}</span>
       </div>
       <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-all ${done ? 'bg-emerald-500' : 'bg-violet-500'}`}
-          style={{ width: `${pct}%` }}
+          style={{ width: `${fill}%` }}
         />
       </div>
+    </div>
+  )
+}
+
+// ─── Sanity warnings ──────────────────────────────────────────────────────────
+
+function SanityWarnings({ stats, totalClosed }: { stats: StratStats[]; totalClosed: number }) {
+  const warnings: string[] = []
+
+  if (totalClosed < 20) {
+    warnings.push('Not enough data yet — results are not statistically meaningful')
+  }
+
+  for (const s of stats) {
+    if (s.total_trades > 0 && s.total_trades < 15) {
+      const name = s.strategy === 'momentum' ? 'Momentum' : 'Mean Reversion'
+      warnings.push(`Low sample size for ${name} (${s.total_trades} trades)`)
+    }
+
+    // If HIGH and MEDIUM win rates are within 5pp of each other, confidence scoring isn't validated
+    if (s.high_conf_trades >= 5 && s.medium_conf_trades >= 5) {
+      const highWR   = s.high_conf_wins / s.high_conf_trades
+      const mediumWR = s.medium_conf_wins / s.medium_conf_trades
+      if (Math.abs(highWR - mediumWR) < 0.05) {
+        const name = s.strategy === 'momentum' ? 'Momentum' : 'Mean Reversion'
+        warnings.push(`${name}: Confidence scoring not yet validated — HIGH and MEDIUM win rates are similar`)
+      }
+    }
+  }
+
+  if (warnings.length === 0) return null
+
+  return (
+    <div className="space-y-2">
+      {warnings.map((w, i) => (
+        <div key={i} className="flex items-start gap-2 bg-amber-950/40 border border-amber-800/50 rounded-lg px-4 py-3 text-xs text-amber-300">
+          <span className="shrink-0 mt-0.5">⚠️</span>
+          <span>{w}</span>
+        </div>
+      ))}
     </div>
   )
 }
@@ -109,19 +154,22 @@ function ProgressBar({ value, target }: { value: number; target: number }) {
 // ─── Strategy card ────────────────────────────────────────────────────────────
 
 function StratCard({ s, progress }: { s: StratStats; progress: number }) {
-  const label    = s.strategy === 'momentum' ? 'Momentum' : 'Mean Reversion'
-  const hrWin    = s.high_conf_trades ? ((s.high_conf_wins / s.high_conf_trades) * 100).toFixed(1) : '—'
-  const mrWin    = s.medium_conf_trades ? ((s.medium_conf_wins / s.medium_conf_trades) * 100).toFixed(1) : '—'
-  const cgWin    = s.congress_trades ? ((s.congress_wins / s.congress_trades) * 100).toFixed(1) : '—'
-  const hasSample = s.total_trades >= 50
+  const label      = s.strategy === 'momentum' ? 'Momentum' : 'Mean Reversion'
+  const hrWin      = s.high_conf_trades ? ((s.high_conf_wins / s.high_conf_trades) * 100).toFixed(1) : '—'
+  const mrWin      = s.medium_conf_trades ? ((s.medium_conf_wins / s.medium_conf_trades) * 100).toFixed(1) : '—'
+  const cgWin      = s.congress_trades ? ((s.congress_wins / s.congress_trades) * 100).toFixed(1) : '—'
+  const hasSample  = s.total_trades >= 50
+  const lowSample  = s.total_trades > 0 && s.total_trades < 15
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+    <div className={`bg-zinc-900 border rounded-xl p-5 ${lowSample ? 'border-amber-800/60' : 'border-zinc-800'}`}>
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-base font-bold text-white">{label}</h3>
         {hasSample
           ? badge('Sample ready', 'bg-emerald-900/60 text-emerald-400')
-          : badge('Collecting data', 'bg-violet-900/60 text-violet-400')}
+          : lowSample
+            ? badge('Low sample', 'bg-amber-900/60 text-amber-400')
+            : badge('Collecting data', 'bg-violet-900/60 text-violet-400')}
       </div>
 
       <div className="grid grid-cols-3 gap-3 mb-4 text-center">
@@ -173,9 +221,9 @@ function StratCard({ s, progress }: { s: StratStats; progress: number }) {
   )
 }
 
-// ─── Equity curve (sparkline SVG) ─────────────────────────────────────────────
+// ─── Equity curve with SPY overlay ───────────────────────────────────────────
 
-function EquityCurve({ points }: { points: EquityPoint[] }) {
+function EquityCurve({ points, spyCurve }: { points: EquityPoint[]; spyCurve: SpyCurvePoint[] }) {
   if (points.length < 2) {
     return (
       <div className="flex items-center justify-center h-32 text-zinc-600 text-sm">
@@ -183,38 +231,94 @@ function EquityCurve({ points }: { points: EquityPoint[] }) {
       </div>
     )
   }
-  const vals   = points.map(p => p.cumulative)
-  const min    = Math.min(0, ...vals)
-  const max    = Math.max(0, ...vals)
-  const range  = max - min || 1
+
   const W = 500, H = 100
-  const pts = points.map((p, i) => {
-    const x = (i / (points.length - 1)) * W
-    const y = H - ((p.cumulative - min) / range) * H
-    return `${x},${y}`
-  }).join(' ')
-  const zeroY = H - ((0 - min) / range) * H
-  const positive = points[points.length - 1].cumulative >= 0
+
+  const enkiVals = points.map(p => p.cumulative)
+  const spyVals  = spyCurve.map(p => p.cumulative)
+  const allVals  = [...enkiVals, ...spyVals, 0]
+  const min      = Math.min(...allVals)
+  const max      = Math.max(...allVals)
+  const range    = max - min || 1
+
+  const toY = (v: number) => H - ((v - min) / range) * H
+  const zeroY = toY(0)
+
+  const enkiPts = points.map((p, i) => `${(i / (points.length - 1)) * W},${toY(p.cumulative)}`).join(' ')
+  const spyPts  = spyCurve.length >= 2
+    ? spyCurve.map((p, i) => `${(i / (spyCurve.length - 1)) * W},${toY(p.cumulative)}`).join(' ')
+    : null
+
+  const positive = enkiVals[enkiVals.length - 1] >= 0
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-32" preserveAspectRatio="none">
-      <line x1="0" y1={zeroY} x2={W} y2={zeroY} stroke="#3f3f46" strokeWidth="1" strokeDasharray="4 4" />
-      <polyline
-        points={pts}
-        fill="none"
-        stroke={positive ? '#34d399' : '#f87171'}
-        strokeWidth="2"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <div>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-32" preserveAspectRatio="none">
+        {/* Zero line */}
+        <line x1="0" y1={zeroY} x2={W} y2={zeroY} stroke="#3f3f46" strokeWidth="1" strokeDasharray="4 4" />
+        {/* SPY baseline */}
+        {spyPts && (
+          <polyline
+            points={spyPts}
+            fill="none"
+            stroke="#6366f1"
+            strokeWidth="1.5"
+            strokeLinejoin="round"
+            strokeDasharray="6 3"
+            opacity="0.6"
+          />
+        )}
+        {/* Enki equity curve */}
+        <polyline
+          points={enkiPts}
+          fill="none"
+          stroke={positive ? '#34d399' : '#f87171'}
+          strokeWidth="2"
+          strokeLinejoin="round"
+        />
+      </svg>
+      {spyPts && (
+        <div className="flex items-center gap-4 mt-2 text-xs text-zinc-500">
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block w-5 h-0.5 bg-emerald-400"></span>
+            Truth Mode
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block w-5 h-0.5 bg-indigo-400 opacity-60" style={{ background: 'repeating-linear-gradient(to right, #6366f1 0, #6366f1 4px, transparent 4px, transparent 7px)' }}></span>
+            SPY (buy &amp; hold)
+          </span>
+        </div>
+      )}
+    </div>
   )
+}
+
+// ─── CSV export ───────────────────────────────────────────────────────────────
+
+function exportCSV(closed: ClosedTrade[]) {
+  const headers = ['id', 'symbol', 'strategy', 'confidence', 'congressional_boost', 'entry_time', 'exit_time', 'exit_reason', 'pnl_pct', 'pnl_dollar', 'win', 'tp1_hit', 'tp2_hit', 'stop_loss_hit', 'trailing_stop_hit']
+  const rows = closed.map(t => [
+    t.id, t.symbol, t.strategy, t.confidence,
+    t.tp1_hit || t.tp2_hit || t.stop_loss_hit || t.trailing_stop_hit ? 'true' : 'false',
+    t.entry_time, t.exit_time ?? '', t.exit_reason ?? '',
+    t.pnl_pct ?? '', t.pnl_dollar ?? '', t.win ?? '',
+    t.tp1_hit, t.tp2_hit, t.stop_loss_hit, t.trailing_stop_hit,
+  ])
+  const csv = [headers, ...rows].map(r => r.join(',')).join('\n')
+  const blob = new Blob([csv], { type: 'text/csv' })
+  const url  = URL.createObjectURL(blob)
+  const a    = document.createElement('a')
+  a.href     = url
+  a.download = `enki-truth-trades-${new Date().toISOString().slice(0, 10)}.csv`
+  a.click()
+  URL.revokeObjectURL(url)
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function TruthClient() {
-  const [data, setData]     = useState<TruthData | null>(null)
-  const [error, setError]   = useState<string | null>(null)
+  const [data, setData]       = useState<TruthData | null>(null)
+  const [error, setError]     = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -237,24 +341,34 @@ export default function TruthClient() {
   )
   if (!data) return null
 
-  const { stats, open, closed, equityCurve, spyReturn3mo, progress } = data
+  const { stats, open, closed, equityCurve, spyReturn3mo, spyCurve, progress } = data
   const totalClosed = closed.length
   const totalCumPnl = equityCurve.length ? equityCurve[equityCurve.length - 1].cumulative : 0
   const beatsSpy    = spyReturn3mo != null && totalCumPnl > spyReturn3mo
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8 space-y-8">
+    <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
 
       {/* Header */}
-      <div>
-        <div className="flex items-center gap-3 mb-1">
-          <h1 className="text-2xl font-bold text-white">Truth Mode</h1>
-          {badge('Parallel Experiment', 'bg-violet-900/60 text-violet-300')}
+      <div className="flex items-start justify-between">
+        <div>
+          <div className="flex items-center gap-3 mb-1">
+            <h1 className="text-2xl font-bold text-white">Truth Mode</h1>
+            {badge('Parallel Experiment', 'bg-violet-900/60 text-violet-300')}
+          </div>
+          <p className="text-sm text-zinc-400 max-w-2xl">
+            Two strategies only. No fusion, no magic numbers. Goal: determine whether any real edge exists
+            before adding complexity. Conclusions require ≥50 trades per strategy.
+          </p>
         </div>
-        <p className="text-sm text-zinc-400 max-w-2xl">
-          Two strategies only. No fusion, no magic numbers. Goal: determine whether any real edge exists
-          before adding complexity. Conclusions require ≥50 trades per strategy.
-        </p>
+        {closed.length > 0 && (
+          <button
+            onClick={() => exportCSV(closed)}
+            className="shrink-0 ml-4 px-3 py-2 text-xs font-semibold text-zinc-300 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg transition-colors"
+          >
+            Export CSV
+          </button>
+        )}
       </div>
 
       {/* Rules reminder */}
@@ -264,6 +378,9 @@ export default function TruthClient() {
         <div>• No new signals added mid-experiment</div>
         <div>• Minimum 50 trades per strategy before drawing any conclusions</div>
       </div>
+
+      {/* Sanity warnings */}
+      <SanityWarnings stats={stats} totalClosed={totalClosed} />
 
       {/* Summary bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -289,17 +406,32 @@ export default function TruthClient() {
         </div>
       </div>
 
+      {/* Progress bars */}
+      <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+        <h2 className="text-sm font-semibold text-white mb-4">Experiment Progress</h2>
+        <div className="space-y-4">
+          <div>
+            <div className="text-xs text-zinc-400 mb-1">Momentum</div>
+            <ProgressBar value={progress.momentum} target={50} />
+          </div>
+          <div>
+            <div className="text-xs text-zinc-400 mb-1">Mean Reversion</div>
+            <ProgressBar value={progress.mean_reversion} target={50} />
+          </div>
+        </div>
+      </div>
+
       {/* Equity curve */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-white">Equity Curve</h2>
+          <h2 className="text-sm font-semibold text-white">Equity Curve vs SPY</h2>
           {spyReturn3mo != null && (
             <span className={`text-xs font-semibold ${beatsSpy ? 'text-emerald-400' : 'text-red-400'}`}>
               {beatsSpy ? '▲ Beating SPY' : '▼ Below SPY'}
             </span>
           )}
         </div>
-        <EquityCurve points={equityCurve} />
+        <EquityCurve points={equityCurve} spyCurve={spyCurve} />
       </div>
 
       {/* Per-strategy cards */}
@@ -372,12 +504,12 @@ export default function TruthClient() {
         </div>
       )}
 
-      {/* Recent closed trades */}
+      {/* Closed trades */}
       {closed.length > 0 && (
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-          <h2 className="text-sm font-semibold text-white mb-3">
-            Closed Trades ({closed.length})
-          </h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-white">Closed Trades ({closed.length})</h2>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-zinc-300">
               <thead>
@@ -419,6 +551,7 @@ export default function TruthClient() {
         </div>
       )}
 
+      {/* Empty state */}
       {closed.length === 0 && open.length === 0 && (
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-10 text-center text-zinc-500">
           <div className="text-4xl mb-3">🔬</div>

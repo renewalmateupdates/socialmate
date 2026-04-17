@@ -23,21 +23,20 @@ export async function GET() {
 
     supabase
       .from('enki_truth_trades')
-      .select('id,symbol,strategy,confidence,congressional_boost,entry_price,exit_price,exit_time,exit_reason,pnl_pct,pnl_dollar,win,entry_time,tp1_hit,tp2_hit,stop_loss_hit,trailing_stop_hit')
+      .select('id,symbol,strategy,confidence,congressional_boost,entry_price,exit_price,entry_time,exit_time,exit_reason,pnl_pct,pnl_dollar,win,tp1_hit,tp2_hit,stop_loss_hit,trailing_stop_hit')
       .eq('user_id', user.id)
       .eq('is_open', false)
       .order('exit_time', { ascending: true }),
 
-    // SPY baseline: fetch 3-month return from Yahoo Finance
     fetch(
       'https://query1.finance.yahoo.com/v8/finance/chart/SPY?range=3mo&interval=1d',
       { headers: { 'User-Agent': 'Mozilla/5.0' }, signal: AbortSignal.timeout(5000) }
     ).then(r => r.ok ? r.json() : null).catch(() => null),
   ])
 
-  const stats    = statsRes.data ?? []
-  const open     = openRes.data ?? []
-  const closed   = closedRes.data ?? []
+  const stats  = statsRes.data ?? []
+  const open   = openRes.data ?? []
+  const closed = closedRes.data ?? []
 
   // Equity curve: cumulative P&L sorted by exit_time
   let cumulative = 0
@@ -46,21 +45,40 @@ export async function GET() {
     return { date: t.exit_time, pnl_pct: t.pnl_pct ?? 0, cumulative }
   })
 
-  // SPY 3-month return
+  // SPY baseline processing
   let spyReturn3mo: number | null = null
+  let spyCurve: Array<{ cumulative: number }> = []
+
   try {
-    const closes = spyRes?.chart?.result?.[0]?.indicators?.quote?.[0]?.close as number[] | undefined
-    if (closes && closes.length >= 2) {
-      const first = closes.find((c: number) => c != null)
-      const last  = [...closes].reverse().find((c: number) => c != null)
-      if (first && last) spyReturn3mo = ((last - first) / first) * 100
+    const spyCloses: number[] = spyRes?.chart?.result?.[0]?.indicators?.quote?.[0]?.close ?? []
+    const spyDates: number[]  = spyRes?.chart?.result?.[0]?.timestamp ?? []
+    const validPairs = spyDates
+      .map((ts: number, i: number) => ({ date: new Date(ts * 1000).toISOString().slice(0, 10), close: spyCloses[i] }))
+      .filter(p => p.close != null)
+
+    if (validPairs.length >= 2) {
+      const first = validPairs[0].close
+      const last  = validPairs[validPairs.length - 1].close
+      spyReturn3mo = ((last - first) / first) * 100
+
+      // If there are closed trades, build a SPY curve sampled at the same number of points
+      // as the equity curve for visual overlay alignment.
+      if (equityCurve.length >= 2) {
+        const n = equityCurve.length
+        spyCurve = equityCurve.map((_, i) => {
+          // Sample SPY at proportional index
+          const spyIdx = Math.min(Math.round((i / (n - 1)) * (validPairs.length - 1)), validPairs.length - 1)
+          const spyPricePct = ((validPairs[spyIdx].close - first) / first) * 100
+          return { cumulative: spyPricePct }
+        })
+      }
     }
   } catch { /* ignore */ }
 
-  // Experiment progress: total closed trades per strategy (need 50 for conclusions)
+  // Experiment progress
   const progress = {
-    momentum:       (closed.filter(t => t.strategy === 'momentum').length),
-    mean_reversion: (closed.filter(t => t.strategy === 'mean_reversion').length),
+    momentum:       closed.filter(t => t.strategy === 'momentum').length,
+    mean_reversion: closed.filter(t => t.strategy === 'mean_reversion').length,
     target: 50,
   }
 
@@ -70,6 +88,7 @@ export async function GET() {
     closed,
     equityCurve,
     spyReturn3mo,
+    spyCurve,
     progress,
   })
 }
