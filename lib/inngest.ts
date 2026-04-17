@@ -2730,9 +2730,21 @@ export const enkiTruthModeScan = inngest.createFunction(
           .gte('exit_time', cooldownCutoff)
         const cooldownSet = new Set((recentClosed ?? []).map((r: any) => r.symbol as string))
 
+        // Same-day entry guard: no re-entry for a symbol already traded today (prevents
+        // duplicate data points that would corrupt the experiment's per-day sample).
+        const todayStart = new Date(now)
+        todayStart.setUTCHours(0, 0, 0, 0)
+        const { data: todayEntries } = await db
+          .from('enki_truth_trades')
+          .select('symbol')
+          .eq('user_id', userId)
+          .gte('entry_time', todayStart.toISOString())
+        const todaySymbolSet = new Set((todayEntries ?? []).map((r: any) => r.symbol as string))
+
         for (const symbol of symbolsStep) {
           if (openCountLocal >= 5) break
           if (cooldownSet.has(symbol)) continue
+          if (todaySymbolSet.has(symbol)) continue
 
           const data = priceData[symbol]
           if (!data) continue

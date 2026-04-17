@@ -19,6 +19,7 @@ interface Profile {
   alpaca_paper: boolean | null
   cloud_runner: boolean
   risk_preset: RiskPreset
+  truth_mode_enabled: boolean
 }
 
 interface Doctrine {
@@ -162,6 +163,11 @@ export default function EnkiSettingsPage() {
   const [cbError,     setCbError]     = useState<string | null>(null)
   const [cbInfo,      setCbInfo]      = useState<CoinbaseInfo | null>(null)
 
+  // Truth Mode
+  const [truthMode,        setTruthMode]        = useState(false)
+  const [truthSaving,      setTruthSaving]      = useState(false)
+  const [truthSaved,       setTruthSaved]       = useState(false)
+
   // Doctrine / Full Send state
   const [doctrines,           setDoctrines]           = useState<Doctrine[]>([])
   const [positionSizePct,     setPositionSizePct]     = useState(10)
@@ -192,6 +198,7 @@ export default function EnkiSettingsPage() {
         setProfile(profileJson.profile)
         setMode(profileJson.profile.guardian_mode)
         setRiskPreset(profileJson.profile.risk_preset ?? 'balanced')
+        setTruthMode(Boolean(profileJson.profile.truth_mode_enabled))
       }
       if (doctrinesJson.doctrines) {
         setDoctrines(doctrinesJson.doctrines)
@@ -248,6 +255,26 @@ export default function EnkiSettingsPage() {
       console.error('Position size save error:', e)
     } finally {
       setPositionSaving(false)
+    }
+  }
+
+  async function saveTruthMode(enabled: boolean) {
+    setTruthMode(enabled)
+    setTruthSaving(true)
+    try {
+      await fetch('/api/enki/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ truth_mode_enabled: enabled }),
+      })
+      setProfile(p => p ? { ...p, truth_mode_enabled: enabled } : p)
+      setTruthSaved(true)
+      setTimeout(() => setTruthSaved(false), 2500)
+    } catch (e) {
+      console.error('Truth mode save error:', e)
+      setTruthMode(!enabled) // revert optimistic update on error
+    } finally {
+      setTruthSaving(false)
     }
   }
 
@@ -454,6 +481,14 @@ export default function EnkiSettingsPage() {
         {/* Risk Profile */}
         <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
           <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">Risk Profile</h2>
+          {truthMode && (
+            <div className="flex items-center gap-2 bg-violet-50 dark:bg-violet-950/30 border border-violet-200 dark:border-violet-800 rounded-xl px-4 py-3 mb-4">
+              <span className="text-violet-500">🔒</span>
+              <p className="text-xs text-violet-700 dark:text-violet-300 font-medium">
+                Truth Mode is running — parameters locked to preserve data integrity
+              </p>
+            </div>
+          )}
           <p className="text-sm text-gray-500 mb-5">
             Choose how aggressively Enki trades. These thresholds apply when trades execute.
             {presetSaving && <span className="ml-2 text-amber-400 text-xs">Saving…</span>}
@@ -467,7 +502,7 @@ export default function EnkiSettingsPage() {
                 <button
                   key={preset.id}
                   onClick={() => savePreset(preset.id)}
-                  disabled={presetSaving}
+                  disabled={presetSaving || truthMode}
                   className={`text-left p-4 rounded-xl border-2 transition-all focus:outline-none disabled:opacity-60 ${
                     isSelected
                       ? `${preset.borderSelected} ${preset.bgSelected}`
@@ -520,6 +555,14 @@ export default function EnkiSettingsPage() {
             <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Position Size per Trade</h2>
             {positionSaved && <span className="text-green-500 text-xs font-medium">Saved</span>}
           </div>
+          {truthMode && (
+            <div className="flex items-center gap-2 bg-violet-50 dark:bg-violet-950/30 border border-violet-200 dark:border-violet-800 rounded-xl px-4 py-3 mb-4">
+              <span className="text-violet-500">🔒</span>
+              <p className="text-xs text-violet-700 dark:text-violet-300 font-medium">
+                Truth Mode is running — parameters locked to preserve data integrity
+              </p>
+            </div>
+          )}
           <p className="text-sm text-gray-500 mb-5">
             How much of your portfolio Enki deploys per trade signal. Higher = more compounding power, higher risk.
           </p>
@@ -568,7 +611,7 @@ export default function EnkiSettingsPage() {
             <div className="flex items-center gap-3 pt-1">
               <button
                 onClick={savePositionSize}
-                disabled={positionSaving}
+                disabled={positionSaving || truthMode}
                 className="px-5 py-2.5 bg-amber-400 hover:bg-amber-300 disabled:opacity-50 disabled:cursor-not-allowed text-black text-sm font-bold rounded-xl transition-colors"
               >
                 {positionSaving ? 'Saving…' : 'Save Position Size'}
@@ -907,6 +950,57 @@ export default function EnkiSettingsPage() {
           <p className="text-xs text-gray-600 mt-4">
             These rules cannot be disabled. They exist to protect you — even in autonomous mode.
           </p>
+        </div>
+
+        {/* Truth Mode */}
+        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
+          <div className="flex items-start justify-between mb-1">
+            <div>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Truth Mode <span className="text-xs font-normal text-gray-400 ml-1">(Experimental)</span></h2>
+              <p className="text-sm text-gray-500 mt-1 max-w-lg">
+                Runs a simplified trading system in parallel to validate real performance. Does not affect your main Enki strategy.
+              </p>
+            </div>
+            {/* Toggle */}
+            <button
+              onClick={() => saveTruthMode(!truthMode)}
+              disabled={truthSaving}
+              aria-pressed={truthMode}
+              className={`relative shrink-0 ml-4 mt-1 w-12 h-6 rounded-full transition-colors focus:outline-none disabled:opacity-50 ${
+                truthMode ? 'bg-violet-600' : 'bg-gray-300 dark:bg-gray-700'
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                  truthMode ? 'translate-x-6' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+
+          <div className="flex items-center gap-3 mt-4">
+            <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full ${
+              truthMode
+                ? 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400'
+                : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-500'
+            }`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${truthMode ? 'bg-violet-500' : 'bg-gray-400'}`} />
+              {truthMode ? 'ON' : 'OFF'}
+            </span>
+            {truthSaved && <span className="text-green-500 text-xs font-medium">Saved</span>}
+            {truthSaving && <span className="text-gray-400 text-xs">Saving…</span>}
+          </div>
+
+          {truthMode && (
+            <div className="mt-4 bg-violet-50 dark:bg-violet-950/20 border border-violet-200 dark:border-violet-800/50 rounded-xl px-4 py-3">
+              <p className="text-xs text-violet-700 dark:text-violet-300 font-semibold mb-1">Experiment is running</p>
+              <ul className="text-xs text-violet-600 dark:text-violet-400 space-y-0.5">
+                <li>• Strategy parameters are locked — do not change thresholds mid-experiment</li>
+                <li>• Trades are recorded in a separate system and do not affect your main portfolio</li>
+                <li>• View results at <a href="/enki/truth" className="underline hover:text-violet-200">/enki/truth</a></li>
+              </ul>
+            </div>
+          )}
         </div>
 
         {/* Danger zone */}

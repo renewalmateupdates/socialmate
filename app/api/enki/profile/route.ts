@@ -54,7 +54,7 @@ export async function PATCH(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json()
-  const allowed = ['guardian_mode', 'alpaca_connected', 'coinbase_connected', 'risk_preset']
+  const allowed = ['guardian_mode', 'alpaca_connected', 'coinbase_connected', 'risk_preset', 'truth_mode_enabled']
   const updates: Record<string, unknown> = { updated_at: new Date().toISOString() }
 
   for (const key of allowed) {
