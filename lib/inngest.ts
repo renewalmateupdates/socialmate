@@ -7,6 +7,14 @@ import {
   sendChannelMessage,
   assignRole,
 } from '@/lib/discord-bot'
+import {
+  enkiCalcEMA, enkiCalcRSI, enkiCalcMACD, enkiCalcBB,
+  enkiCalcATR, enkiCalcADX, enkiCalcPearsonCorr, enkiVolumeSpike,
+} from '@/lib/enki/indicators'
+import {
+  enkiAnalyzeSymbol, enkiMakeRiskDecision,
+  type FusedSignal,
+} from '@/lib/enki/strategy-engine'
 
 // ── Enki AES-256-CBC decrypt helper ───────────────────────────────────────────
 // Mirrors the encrypt/decrypt in app/api/enki/brokers/alpaca/route.ts
@@ -1005,125 +1013,9 @@ export const creditLowChecker = inngest.createFunction(
 
 // ─── Enki Signal Helpers — pure OHLCV calculations, no external libraries ──────
 
-function enkiCalcEMA(values: number[], period: number): number[] {
-  if (values.length < period) return []
-  const k = 2 / (period + 1)
-  const emas: number[] = []
-  let ema = values.slice(0, period).reduce((a, b) => a + b, 0) / period
-  emas.push(ema)
-  for (let i = period; i < values.length; i++) {
-    ema = values[i] * k + ema * (1 - k)
-    emas.push(ema)
-  }
-  return emas
-}
-
-function enkiCalcRSI(closes: number[], period = 14): number | null {
-  if (closes.length < period + 1) return null
-  const slice = closes.slice(-(period + 1))
-  let gains = 0, losses = 0
-  for (let i = 1; i < slice.length; i++) {
-    const diff = slice[i] - slice[i - 1]
-    if (diff > 0) gains += diff; else losses -= diff
-  }
-  const avgGain = gains / period
-  const avgLoss = losses / period
-  if (avgLoss === 0) return 100
-  return 100 - 100 / (1 + avgGain / avgLoss)
-}
-
-function enkiCalcMACD(closes: number[]): { macd: number; signal: number; hist: number } | null {
-  if (closes.length < 35) return null
-  const ema12 = enkiCalcEMA(closes, 12)
-  const ema26 = enkiCalcEMA(closes, 26)
-  if (!ema12.length || !ema26.length) return null
-  const minLen = Math.min(ema12.length, ema26.length)
-  const macdLine: number[] = []
-  for (let i = 0; i < minLen; i++) {
-    macdLine.push(ema12[ema12.length - minLen + i] - ema26[ema26.length - minLen + i])
-  }
-  if (macdLine.length < 9) return null
-  const signalLine = enkiCalcEMA(macdLine, 9)
-  if (!signalLine.length) return null
-  const macd = macdLine[macdLine.length - 1]
-  const sig  = signalLine[signalLine.length - 1]
-  return { macd, signal: sig, hist: macd - sig }
-}
-
-function enkiCalcBB(closes: number[], period = 20, mult = 2): { upper: number; lower: number; mid: number } | null {
-  if (closes.length < period) return null
-  const slice = closes.slice(-period)
-  const mid   = slice.reduce((a, b) => a + b, 0) / period
-  const std   = Math.sqrt(slice.reduce((s, v) => s + (v - mid) ** 2, 0) / period)
-  return { upper: mid + mult * std, lower: mid - mult * std, mid }
-}
-
-function enkiCalcATR(highs: number[], lows: number[], closes: number[], period = 14): number | null {
-  if (highs.length < period + 1) return null
-  const trs: number[] = []
-  for (let i = 1; i < highs.length; i++) {
-    trs.push(Math.max(
-      highs[i] - lows[i],
-      Math.abs(highs[i] - closes[i - 1]),
-      Math.abs(lows[i]  - closes[i - 1])
-    ))
-  }
-  if (trs.length < period) return null
-  return trs.slice(-period).reduce((a, b) => a + b, 0) / period
-}
-
-function enkiVolumeSpike(volumes: number[], period = 20): boolean {
-  if (volumes.length < period + 1) return false
-  const avg = volumes.slice(-period - 1, -1).reduce((a, b) => a + b, 0) / period
-  return avg > 0 && volumes[volumes.length - 1] > avg * 1.5
-}
-
-/**
- * ADX(14) via Wilder smoothing. Returns the ADX value or null if insufficient data.
- * ADX < 20 = choppy/ranging, ADX > 35 = strong trend.
- */
-function enkiCalcADX(highs: number[], lows: number[], closes: number[], period = 14): number | null {
-  if (highs.length < period * 2 + 1) return null
-  const trs: number[] = [], plusDM: number[] = [], minusDM: number[] = []
-  for (let i = 1; i < highs.length; i++) {
-    trs.push(Math.max(highs[i] - lows[i], Math.abs(highs[i] - closes[i-1]), Math.abs(lows[i] - closes[i-1])))
-    const up = highs[i] - highs[i-1], dn = lows[i-1] - lows[i]
-    plusDM.push(up > dn && up > 0 ? up : 0)
-    minusDM.push(dn > up && dn > 0 ? dn : 0)
-  }
-  let atrW  = trs.slice(0, period).reduce((a, b) => a + b, 0)
-  let plusW  = plusDM.slice(0, period).reduce((a, b) => a + b, 0)
-  let minusW = minusDM.slice(0, period).reduce((a, b) => a + b, 0)
-  const dxVals: number[] = []
-  for (let i = period; i < trs.length; i++) {
-    atrW   = atrW   - atrW  / period + trs[i]
-    plusW  = plusW  - plusW / period + plusDM[i]
-    minusW = minusW - minusW/ period + minusDM[i]
-    if (atrW === 0) continue
-    const diPlus = (plusW / atrW) * 100, diMinus = (minusW / atrW) * 100
-    const dxDenom = diPlus + diMinus
-    if (dxDenom === 0) continue
-    dxVals.push(Math.abs(diPlus - diMinus) / dxDenom * 100)
-  }
-  if (dxVals.length < period) return null
-  return dxVals.slice(-period).reduce((a, b) => a + b, 0) / period
-}
-
-/** Pearson correlation coefficient on two equal-length number arrays (daily returns). */
-function enkiCalcPearsonCorr(a: number[], b: number[]): number {
-  const n = Math.min(a.length, b.length)
-  if (n < 5) return 0
-  const as = a.slice(-n), bs = b.slice(-n)
-  const ma = as.reduce((s, v) => s + v, 0) / n
-  const mb = bs.reduce((s, v) => s + v, 0) / n
-  let num = 0, da = 0, db = 0
-  for (let i = 0; i < n; i++) {
-    const va = as[i] - ma, vb = bs[i] - mb
-    num += va * vb; da += va * va; db += vb * vb
-  }
-  const denom = Math.sqrt(da * db)
-  return denom === 0 ? 0 : num / denom
-}
+// ─── Indicator math imported from @/lib/enki/indicators ──────────────────────
+// enkiCalcEMA, enkiCalcRSI, enkiCalcMACD, enkiCalcBB, enkiCalcATR,
+// enkiCalcADX, enkiCalcPearsonCorr, enkiVolumeSpike
 
 /**
  * Multi-indicator composite score from OHLCV bars.
@@ -1383,7 +1275,7 @@ export const enkiPaperTradingScan = inngest.createFunction(
 
     const priceMap = await step.run('fetch-prices', async () => {
       const signalMap: Record<string, {
-        price: number; confidence: number; side: 'buy' | 'sell' | 'neutral'; atr: number | null; signals: string[]; closes20: number[]; adx: number | null
+        price: number; confidence: number; side: 'buy' | 'sell' | 'neutral'; atr: number | null; signals: string[]; closes20: number[]; adx: number | null; engineSignal?: FusedSignal
       }> = {}
 
       for (const symbol of symbolList) {
@@ -1443,8 +1335,37 @@ export const enkiPaperTradingScan = inngest.createFunction(
           const closes20 = closes.length >= 2
             ? closes.slice(-21).map((c, i, arr) => i === 0 ? 0 : (c - arr[i-1]) / arr[i-1]).slice(1)
             : []
-          signalMap[symbol] = { price: currentPrice, confidence, side, signals, atr: scored.atr, closes20, adx: scored.adx }
-          console.log(`[EnkiScan] ${symbol}: $${currentPrice.toFixed(2)} → ${side} conf=${confidence} ADX=${scored.adx?.toFixed(1) ?? 'n/a'} [${signals.join(' | ')}]`)
+
+          // ── Strategy Engine: multi-strategy fusion overlay ─────────────────
+          // Runs 4 isolated strategies (momentum, mean_reversion, sentiment, volatility)
+          // and fuses them into a single composite conviction score.
+          let engineSignal: FusedSignal | undefined
+          try {
+            engineSignal = enkiAnalyzeSymbol(symbol, closes, highs, lows, volumes, marketCtx)
+
+            if (engineSignal.side !== 'neutral' && engineSignal.enkiConfidence > 0) {
+              if (engineSignal.side === side || side === 'neutral') {
+                // Agreement or engine leads: blend upward, add strategy labels
+                const blended = Math.round((confidence + engineSignal.enkiConfidence) / 2)
+                confidence = Math.min(10, Math.max(confidence, blended))
+                side = engineSignal.side
+                // Prepend top engine signals (avoid duplicating legacy signals)
+                const newSigs = engineSignal.signals
+                  .filter(s => !signals.some(ls => ls.startsWith(s.slice(0, 8))))
+                  .slice(0, 3)
+                signals = [...newSigs, ...signals]
+              } else {
+                // Conflict: strategies disagree — be more conservative
+                confidence = Math.max(0, confidence - 2)
+                signals = [...signals, `Strategy conflict: engine=${engineSignal.side} (${engineSignal.confidence}/100)`]
+              }
+            }
+          } catch (engErr: any) {
+            console.warn(`[EnkiScan] Strategy engine error for ${symbol}:`, engErr.message)
+          }
+
+          signalMap[symbol] = { price: currentPrice, confidence, side, signals, atr: scored.atr, closes20, adx: scored.adx, engineSignal }
+          console.log(`[EnkiScan] ${symbol}: $${currentPrice.toFixed(2)} → ${side} conf=${confidence} engine=${engineSignal?.confidence ?? 'n/a'}/100 ADX=${scored.adx?.toFixed(1) ?? 'n/a'} [${signals.slice(0,3).join(' | ')}]`)
         } catch (err: any) {
           console.warn(`[EnkiScan] Price fetch error for ${symbol}:`, err.message)
         }
@@ -1698,6 +1619,14 @@ export const enkiPaperTradingScan = inngest.createFunction(
           }
         }
 
+        // Portfolio drawdown metrics — used by Risk Supervisor in symbol loop below
+        const portfolioTotalDdPct = todaySnap?.portfolio_value
+          ? ((todaySnap.portfolio_value - 10000) / 10000) * 100
+          : 0
+        const portfolioDailyDdPct = (todaySnap?.daily_pnl != null && todaySnap?.portfolio_value)
+          ? (todaySnap.daily_pnl / todaySnap.portfolio_value) * 100
+          : 0
+
         for (const doctrine of user.doctrines) {
           const symbols: string[] = doctrine.config?.symbols ?? ['SPY', 'QQQ']
           const maxPositions: number = doctrine.config?.max_positions ?? 5
@@ -1757,10 +1686,39 @@ export const enkiPaperTradingScan = inngest.createFunction(
               }
             }
 
-            // ── Position sizing: Half-Kelly (from trade history) or doctrine config ──
-            // Kelly adapts to actual win rate / reward-risk ratio. Falls back when < 20 trades.
-            const positionSizePct: number = kellyPct ?? doctrine.config?.position_size_pct ?? 10
+            // ── Risk Supervisor + Position Sizing ─────────────────────────────
+            // If the strategy engine fired, run the full decay/allocation/risk chain.
+            // Falls back to half-Kelly or doctrine config when engine has no signal.
             const startingCash = 10000
+            const riskPreset   = (user as any).risk_preset ?? 'balanced'
+            let positionSizePct: number = kellyPct ?? doctrine.config?.position_size_pct ?? 10
+
+            if (signal.engineSignal) {
+              try {
+                const riskDecision = enkiMakeRiskDecision(
+                  signal.engineSignal,
+                  kellyPct,
+                  doctrine.config?.position_size_pct ?? 10,
+                  [],  // strategyPerf: populated as enki_strategy_performance table fills
+                  {
+                    totalDrawdownPct:  portfolioTotalDdPct,
+                    dailyDrawdownPct:  portfolioDailyDdPct,
+                    openPositionCount,
+                    maxPositions,
+                  },
+                  riskPreset,
+                )
+                if (riskDecision.action === 'REJECT') {
+                  console.log(`[EnkiScan] Risk supervisor REJECTED ${symbol} for ${user.user_id}: ${riskDecision.reason}`)
+                  continue
+                }
+                positionSizePct = riskDecision.positionSizePct
+                console.log(`[EnkiScan] Risk supervisor ${riskDecision.action} ${symbol}: size=${positionSizePct}% conf=${riskDecision.finalConfidence}/10`)
+              } catch (riskErr: any) {
+                console.warn(`[EnkiScan] Risk supervisor error for ${symbol}:`, riskErr.message)
+                // Fall through to legacy sizing
+              }
+            }
 
             // Fetch the latest snapshot to get current portfolio value
             const { data: latestSnap } = await db
