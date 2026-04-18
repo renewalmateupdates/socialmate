@@ -34,6 +34,8 @@ const ROADMAP: RoadmapItem[] = [
   { title: 'SOC 2 compliance',           desc: 'Security certification for enterprise white label clients. Required for larger agency contracts.',                status: 'planned',      category: 'Platform'      },
 
   // ── SHIPPED ───────────────────────────────────────────────
+  { title: 'SM-Give Stripe webhook integration', desc: 'sm_give_allocations writes added to Stripe webhook: 2% of subscription checkouts recorded as subscription source, 100% of donation checkouts recorded as donation source. Non-fatal, won\'t break payment flow.', status: 'shipped', category: 'Platform' },
+  { title: 'Growth partner affiliate account', desc: 'First external growth partner onboarded manually — affiliate record created, user account provisioned, referral tracking linked. Trial commission rate: 10%.', status: 'shipped', category: 'Growth' },
   { title: 'Enki Truth Mode',             desc: 'Paper trading validation experiment for Enki. 50-trade minimum per strategy, equity curve vs SPY overlay, sanity warnings, CSV export, and parameter locks during experiment.', status: 'shipped', category: 'Enki' },
   { title: 'Coupon & partner attribution system', desc: 'Affiliate-linked discount codes with Stripe promo auto-creation, idempotency guards, no double-redemption, coupon input on pricing/onboarding/settings, and commission tracking in webhook.', status: 'shipped', category: 'Growth' },
   { title: '/affiliates public landing page', desc: 'Public partner program page with commission tiers (30%/40%), how-it-works, FAQ, and apply CTA linked to the partner portal.', status: 'shipped', category: 'Growth' },
