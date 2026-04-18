@@ -3,6 +3,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { isDisposableEmail } from '@/lib/disposable-email-domains'
 
 const PERKS = [
   '16 social platforms — all free',
@@ -75,6 +76,7 @@ function SignupForm() {
     if (!ageConfirmed) { setError('Please confirm you are 13 or older to continue'); return }
     if (!email.trim()) { setError('Enter your email'); return }
     if (!email.includes('@')) { setError('Enter a valid email'); return }
+    if (isDisposableEmail(email)) { setError('Disposable email addresses are not allowed. Please use a real email.'); return }
     if (!password) { setError('Choose a password'); return }
     if (password.length < 6) { setError('Password must be at least 6 characters'); return }
     if (password !== confirmPassword) { setError('Passwords do not match'); return }
