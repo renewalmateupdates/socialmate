@@ -379,6 +379,12 @@ export default function DashboardClient() {
             >
               Trade Ledger
             </Link>
+            <Link
+              href="/enki/truth"
+              className="text-xs font-bold text-gray-400 hover:text-amber-400 transition-colors"
+            >
+              Truth Mode
+            </Link>
 
             {/* ── Notification Bell ── */}
             <div className="relative" ref={notifRef}>

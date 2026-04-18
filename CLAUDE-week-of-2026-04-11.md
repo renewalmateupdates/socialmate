@@ -1,7 +1,6 @@
 # SocialMate — Claude Code Project Context
 
 > Drop this file in the root of the repo. Claude Code reads it automatically every session.
-> Previous week snapshot: `CLAUDE-week-of-2026-04-11.md`
 
 ---
 
@@ -49,16 +48,13 @@ These have burned us before — always apply:
 - **Route params must be Promise**: `{ params }: { params: Promise<{ id: string }> }` and `const { id } = await params`
 - **No spread on iterators**: Use `Array.from(set)` not `[...set]` — TypeScript downlevel compat issue
 - **Map.values() spread**: Use `Array.from(new Map(...).values())` not `[...new Map(...).values()]`
-- **Stripe SDK v20**: `PromotionCodeCreateParams` uses `promotion: { type: 'coupon', coupon: id }` not top-level `coupon: id`
-- **Supabase client in API routes**: Use inline `createServerClient` from `@supabase/ssr` with cookie handlers — `@/lib/supabase/server` does NOT exist in this codebase
-- **Login redirect param**: Login page reads `?redirect=` not `?next=` — always use `router.push('/login?redirect=/path')`
 
 ---
 
 ## Platforms
 
 **Live now:** Bluesky, Discord, Telegram, Mastodon, X/Twitter (pay-per-use, $0.01/tweet)
-**Coming soon:** LinkedIn (no API acquired yet), YouTube, Pinterest, Reddit
+**Coming soon:** LinkedIn, YouTube, Pinterest, Reddit
 **Roadmap:** Instagram, Facebook, TikTok, Threads, Tumblr, Pixelfed
 
 ---
@@ -78,7 +74,7 @@ These have burned us before — always apply:
 - White Label Pro: $40/mo (everything + custom domain)
 - Credit packs: $1.99 (100cr) / $4.99 (300cr) / $9.99 (750cr) / $19.99 (2,000cr)
 
-**Affiliate/Partner structure:**
+**Affiliate structure:**
 - 30% recurring on all subscription payments (Pro, Agency, promos, white label)
 - Milestone: 100+ active recurring payments → jumps to 40% forever
 - Flat 10% on Starter + Popular credit packs
@@ -99,12 +95,11 @@ These have burned us before — always apply:
 - **RLS on all tables** — users only access their own data.
 - **Feature flags table** in Supabase — admin-only write, for kill switches.
 - **Inngest cron `'0 6 * * *'`** — evergreen recycling runs daily.
-- **Enki Truth Mode scan** — Inngest cron `'*/15 * * * *'`, per-user isolation, Yahoo Finance OHLCV.
 - If a feature could have API costs, gate it like AI credits. Build for free-tier sustainability first.
 
 ---
 
-## What's Been Built (as of April 18, 2026)
+## What's Been Built (as of early April 2026)
 
 **Core:**
 - Post scheduling (Now + future via Inngest), drafts, queue, calendar, bulk scheduling
@@ -122,46 +117,15 @@ These have burned us before — always apply:
 - Twitch clips — OAuth connect/disconnect, clip browser, thumbnail grid, one-click schedule
 - YouTube clips — RSS-based (no API key needed), video grid
 
-**Coupon & Partner Attribution System (April 2026):**
-- `coupons` table: code, discount_type (percent/fixed/trial_extension), affiliate link, Stripe promo auto-creation
-- `coupon_redemptions` table: per-user idempotency guard, no double-dipping
-- `increment_coupon_redemptions` SQL function: atomic counter
-- `/api/admin/coupons` — GET/POST/PATCH (admin only, Stripe SDK v20 compatible)
-- `/api/coupons/validate` — public validation endpoint
-- `/api/stripe/checkout` — accepts `coupon_code`, applies discount or trial days
-- Stripe webhook extended: coupon `affiliate_id` in metadata → inserts `affiliate_conversions`, updates affiliate earnings
-- Coupon input on `/pricing`, onboarding step 2, and `/settings` plan tab
-- Admin UI at `/admin/coupons` — full table + create form with affiliate dropdown
-
-**Partner/Affiliate System:**
-- `/partners/dashboard` — referral link, promo codes, earnings, conversions, payouts, leaderboard, milestone badges
-- `/affiliates` — public-facing landing page: commission rates, how it works, FAQ, apply CTA
-- Footer "Affiliate" link updated to `/affiliates`
-
-**Enki — AI Trading Bot:**
-- Full system live: dashboard, doctrines, trades ledger, settings, leaderboard
-- Tiers: Citizen (paper), Commander ($15/mo), Emperor ($29/mo), Cloud Runner ($10/mo)
-- Quant engine: ADX filter, TP Ladder (TP1/TP2 partial exits), Kelly position sizing, Correlation Guard (Pearson > 0.85 blocks), DCA averaging, Sharpe/Sortino tracking
-- Trailing stops: ATR-based, tightens after TP hits
-- Session filter (9:30–16:00 EST), re-entry cooldown, daily 3% + portfolio 12% drawdown limits
-- Guardian mode (Fortress Guard) + approval mode
-- **Truth Mode (experiment, April 2026):**
-  - `enki_truth_trades` + `enki_truth_strategy_stats` tables with RLS
-  - `truth_mode_enabled` toggle in settings — locks Risk Profile + Position Size when ON
-  - 15-min Inngest scan: momentum + mean reversion signals, same-day dedup, correlation guard
-  - `/enki/truth` dashboard: sanity warnings, equity curve with SPY overlay, progress bars (target: 50 trades/strategy), per-strategy stats, CSV export
-  - "Truth Mode" link in Enki dashboard navbar
-  - Supabase migrations: `20260417000002_enki_truth_mode.sql`, `20260417000003_enki_truth_mode_enabled.sql`
-
 **Pages/Features:**
 - `/clips` — Twitch/YouTube tab switcher, connected/not-connected state, "Search Any Channel" with quota counter
 - `/admin/users` — searchable user table
 - `/admin/affiliates` — payout management
-- `/admin/coupons` — coupon create/manage UI (new)
 - `/admin/studio-stax` — listing approval/suspend
 - `/admin/feedback` — unified feedback inbox
 - `/admin/platform-stats` — per-platform success rates
 - Studio Stax lister portal
+- Affiliate dashboard with real commission rates
 - Link in Bio builder (free on all plans)
 - Competitor tracking (3 accounts on free)
 - Evergreen recycling
@@ -179,33 +143,34 @@ These have burned us before — always apply:
 
 ## Known Issues / Bugs (fix these when touched)
 
+*(All bulk scheduler + white label bugs from prior sessions have been fixed.)*
+
 - No open bugs currently tracked — add new ones here as discovered.
 
 ---
 
 ## Pending / In Progress
 
-- **Growth partner affiliate account** — waiting on partner's name + email to create via Supabase insert
-- **Discord management tools** (future — moderation, welcome messages, role automation)
-- **Gilgamesh's Guide landing page** (future — free PDF, business/creator/self-dev guide for entrepreneurs)
-- **LinkedIn integration** — API credentials not yet acquired
-- **Enki Truth Mode testing** — market opens Monday April 21; first real data expected then
+- Discord management tools (future — moderation, welcome messages, role automation)
+- Gilgamesh's Guide landing page (future — free PDF, business/creator/self-dev guide for entrepreneurs)
 
 ## Confirmed Done (stop asking about these)
 
 - ✅ **Twitch env vars** — `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET` set in Vercel. Callback: `https://socialmate.studio/api/clips/twitch/callback`. DONE.
-- ✅ **Supabase migrations** — `usage_events`, `notifications`, `competitor_accounts`, `hashtag_collections`, `studio_stax_admin_featured`, `enki_truth_trades`, `enki_truth_strategy_stats`, `coupons`, `coupon_redemptions` all confirmed ran.
-- ✅ **Login redirect** — all Enki pages use `?redirect=` not `?next=`. Fixed.
-- ✅ **Stripe SDK v20 promo code params** — `promotion: { type: 'coupon', coupon: id }` format confirmed and in use.
-- ✅ **enkiTruthModeScan** — registered in `app/api/inngest/route.ts`. Running every 15 min.
+- ✅ **Supabase migrations** — `usage_events`, `notifications`, `competitor_accounts`, `hashtag_collections`, `studio_stax_admin_featured` all confirmed ran.
 
 ---
 
-## Weekly Content System
+## Session 4 Completed (April 2026)
 
-Each Friday (or end of sprint), archive the current CLAUDE.md as `CLAUDE-week-of-YYYY-MM-DD.md`.
-Then diff the two files through Gemini/Claude to generate a week's worth of social posts based on what changed.
-The diff = the story. Ship it to every platform.
+- ✅ Bulk scheduler: X/Twitter added, per-platform char limits, day-of-week auto-fill, media upload, Discord no-account warning
+- ✅ `/clips` Vercel prerender fix — extracted `ClipsPageClient.tsx`, server `page.tsx` wraps in `<Suspense>`
+- ✅ White label pricing cards on `/pricing` — rewritten with ROI-focused copy + taglines
+- ✅ Studio Stax ranking — admin featured spots + age-weighted donation formula + admin toggle UI in `/admin/studio-stax`
+- ✅ Public Twitch clips — `/api/clips/twitch/public` (client_credentials, any channel, quota-gated) + "Search Any Channel" UI + quota progress bar on `/clips`
+- ✅ Supabase migrations: `competitor_accounts`, `hashtag_collections`, `usage_events`, `notifications`, `studio_stax_admin_featured`
+- ✅ Notification system — `/api/notifications` (GET/PATCH), `NotificationBell` component, wired into `Sidebar` header
+- ✅ Inngest: fire-and-forget `post_published` / `post_failed` notifications on publish success/failure
 
 ---
 
@@ -218,7 +183,6 @@ The diff = the story. Ship it to every platform.
 - **No hardcoded wrong numbers** — check actual Stripe price IDs in Appendix B before touching payment code
 - **Don't break what works** — UI/UX must flow cleanly. If unsure, ask before touching working flows
 - **Commit frequently** with descriptive messages
-- **Update CLAUDE.md** every time a significant feature ships
 
 ---
 
@@ -250,7 +214,7 @@ The diff = the story. Ship it to every platform.
 
 ## What NOT to Touch Without Asking
 
-- Stripe webhook handler — live payments depend on it. The coupon affiliate commission block (added April 2026) is the only intentional addition; don't touch the rest
+- Stripe webhook handler — it's verified and working, live payments depend on it
 - RLS policies — they're in place for security, don't remove or bypass
 - Inngest publish jobs — idempotency guards are critical, don't remove them
 - The three-pool credit system logic — complex, tested, working
