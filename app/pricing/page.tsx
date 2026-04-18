@@ -195,12 +195,61 @@ const FAQ = [
   },
 ]
 
+interface AppliedCoupon {
+  id: string
+  code: string
+  discount_type: string
+  discount_value: number
+}
+
 export default function Pricing() {
   const [interval, setInterval] = useState<Interval>('monthly')
   const [loading, setLoading]   = useState<string | null>(null)
   const router = useRouter()
 
+  const [couponInput, setCouponInput]       = useState('')
+  const [couponValidating, setCouponValidating] = useState(false)
+  const [couponApplied, setCouponApplied]   = useState<AppliedCoupon | null>(null)
+  const [couponError, setCouponError]       = useState<string | null>(null)
+
   const annual = interval === 'annual'
+
+  async function applyCoupon() {
+    if (!couponInput.trim()) return
+    setCouponValidating(true)
+    setCouponError(null)
+    setCouponApplied(null)
+    try {
+      const res = await fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: couponInput.trim() }),
+      })
+      const json = await res.json()
+      if (json.valid) {
+        setCouponApplied(json.coupon)
+      } else {
+        setCouponError(json.error || 'Invalid code')
+      }
+    } catch {
+      setCouponError('Could not validate code')
+    } finally {
+      setCouponValidating(false)
+    }
+  }
+
+  function removeCoupon() {
+    setCouponApplied(null)
+    setCouponInput('')
+    setCouponError(null)
+  }
+
+  function formatCouponDiscount(c: AppliedCoupon) {
+    if (c.discount_type === 'percent') return `${c.discount_value}% off`
+    if (c.discount_type === 'fixed') return `$${c.discount_value} off`
+    if (c.discount_type === 'trial_extension') return `+${c.discount_value} free trial days`
+    return ''
+  }
 
   const handleCheckout = async (priceId: string, planName: string) => {
     setLoading(planName)
@@ -209,7 +258,7 @@ export default function Pricing() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ priceId }),
+        body: JSON.stringify({ priceId, ...(couponApplied ? { coupon_code: couponApplied.code } : {}) }),
       })
       const data = await res.json()
       if (data.url) {
@@ -277,6 +326,40 @@ export default function Pricing() {
               </button>
             ))}
           </div>
+        </div>
+
+        {/* COUPON CODE */}
+        <div className="flex flex-col items-center mb-10">
+          {couponApplied ? (
+            <div className="flex items-center gap-3 px-4 py-2.5 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-xl">
+              <span className="text-green-700 dark:text-green-400 text-sm font-bold">
+                {couponApplied.code} — {formatCouponDiscount(couponApplied)} applied
+              </span>
+              <button onClick={removeCoupon} className="text-green-600 dark:text-green-500 hover:text-green-800 text-xs font-semibold">✕ Remove</button>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-2">
+              <div className="flex items-center gap-2">
+                <input
+                  value={couponInput}
+                  onChange={e => { setCouponInput(e.target.value.toUpperCase()); setCouponError(null) }}
+                  onKeyDown={e => e.key === 'Enter' && applyCoupon()}
+                  placeholder="Have a coupon code?"
+                  className="text-sm bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:border-violet-400 w-52"
+                />
+                <button
+                  onClick={applyCoupon}
+                  disabled={couponValidating || !couponInput.trim()}
+                  className="px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 text-gray-700 dark:text-gray-300 text-sm font-semibold rounded-xl transition-colors"
+                >
+                  {couponValidating ? '…' : 'Apply'}
+                </button>
+              </div>
+              {couponError && (
+                <p className="text-xs text-red-500">{couponError}</p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* PLAN CARDS */}
