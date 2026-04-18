@@ -56,6 +56,10 @@ function SettingsInner() {
 
   const [savedTab, setSavedTab]                   = useState<string | null>(null)
   const [checkoutLoading, setCheckoutLoading]     = useState(false)
+  const [couponInput, setCouponInput]     = useState('')
+  const [couponValidating, setCouponValidating] = useState(false)
+  const [couponApplied, setCouponApplied] = useState<{ id: string; code: string; discount_type: string; discount_value: number } | null>(null)
+  const [couponError, setCouponError]     = useState<string | null>(null)
   const [creditPackLoading, setCreditPackLoading] = useState<string | null>(null)
   const [notifications, setNotifications] = useState({
     post_published: true,
@@ -249,10 +253,21 @@ function SettingsInner() {
     setTimeout(() => setCopiedLink(false), 2000)
   }
 
+  async function applyCoupon() {
+    if (!couponInput.trim()) return
+    setCouponValidating(true); setCouponError(null); setCouponApplied(null)
+    try {
+      const res = await fetch('/api/coupons/validate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: couponInput.trim() }) })
+      const json = await res.json()
+      if (json.valid) { setCouponApplied(json.coupon) } else { setCouponError(json.error || 'Invalid code') }
+    } catch { setCouponError('Could not validate code') }
+    finally { setCouponValidating(false) }
+  }
+
   const handleCheckout = async (priceId: string) => {
     setCheckoutLoading(true)
     try {
-      const res  = await fetch('/api/stripe/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ priceId }) })
+      const res  = await fetch('/api/stripe/checkout', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ priceId, ...(couponApplied ? { coupon_code: couponApplied.code } : {}) }) })
       const data = await res.json()
       if (data.url) window.location.href = data.url
       if (data.error === 'Unauthorized') router.push('/login')
@@ -477,6 +492,32 @@ function SettingsInner() {
                     'bg-purple-100 text-purple-700'
                   }`}>{plan}</span>
                 </div>
+
+                {/* Coupon input */}
+                {(plan === 'free' || plan === 'pro') && (
+                  <div className="flex flex-col gap-1.5 mb-3">
+                    {couponApplied ? (
+                      <div className="flex items-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-xl text-xs">
+                        <span className="text-green-700 dark:text-green-400 font-bold flex-1">
+                          {couponApplied.code} — {couponApplied.discount_type === 'percent' ? `${couponApplied.discount_value}% off` : couponApplied.discount_type === 'fixed' ? `$${couponApplied.discount_value} off` : `+${couponApplied.discount_value} trial days`}
+                        </span>
+                        <button onClick={() => { setCouponApplied(null); setCouponInput('') }} className="text-green-600 font-bold">✕</button>
+                      </div>
+                    ) : (
+                      <div className="flex gap-2">
+                        <input value={couponInput} onChange={e => { setCouponInput(e.target.value.toUpperCase()); setCouponError(null) }}
+                          onKeyDown={e => e.key === 'Enter' && applyCoupon()}
+                          placeholder="Coupon code"
+                          className="flex-1 text-xs bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:border-violet-400" />
+                        <button onClick={applyCoupon} disabled={couponValidating || !couponInput.trim()}
+                          className="px-3 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 disabled:opacity-50 text-gray-700 dark:text-gray-300 text-xs font-semibold rounded-lg transition-colors">
+                          {couponValidating ? '…' : 'Apply'}
+                        </button>
+                      </div>
+                    )}
+                    {couponError && <p className="text-xs text-red-500">{couponError}</p>}
+                  </div>
+                )}
 
                 {plan === 'free' && (
                   <div className="space-y-3">

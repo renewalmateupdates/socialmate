@@ -693,6 +693,49 @@ const creditsToSet = alreadyOnPlan
     } catch (err) {
       console.warn('Promo code usage tracking failed (non-fatal):', err)
     }
+
+    // ── Coupon-based affiliate commission (coupons table with affiliate_id in metadata) ──
+    try {
+      const couponAffiliateId = session.metadata?.affiliate_id
+      const couponCode        = session.metadata?.coupon_code
+      if (couponAffiliateId && couponCode) {
+        const { data: affiliate } = await supabase
+          .from('affiliates')
+          .select('id, unpaid_earnings, total_earnings, active_referral_count, status')
+          .eq('id', couponAffiliateId)
+          .single()
+
+        if (affiliate && affiliate.status === 'active') {
+          const rate            = (affiliate.active_referral_count ?? 0) >= 100 ? 0.40 : 0.30
+          const amountCents     = session.amount_total ?? 0
+          const commissionCents = Math.floor(amountCents * rate)
+
+          if (commissionCents > 0) {
+            await supabase.from('affiliate_conversions').insert({
+              affiliate_id:      affiliate.id,
+              amount_cents:      amountCents,
+              commission_cents:  commissionCents,
+              status:            'holding',
+              converted_at:      new Date().toISOString(),
+              conversion_type:   'coupon_subscription',
+              stripe_session_id: session.id,
+            })
+
+            const newUnpaid = parseFloat(((affiliate.unpaid_earnings ?? 0) + commissionCents / 100).toFixed(2))
+            const newTotal  = parseFloat(((affiliate.total_earnings  ?? 0) + commissionCents / 100).toFixed(2))
+            const newActive = (affiliate.active_referral_count ?? 0) + 1
+            await supabase.from('affiliates').update({
+              unpaid_earnings:       newUnpaid,
+              total_earnings:        newTotal,
+              active_referral_count: newActive,
+              commission_rate:       newActive >= 100 ? 0.40 : 0.30,
+            }).eq('id', affiliate.id)
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('Coupon affiliate commission failed (non-fatal):', err)
+    }
   }
 
   // ── SUBSCRIPTION UPDATED ────────────────────────────────────────────────────
