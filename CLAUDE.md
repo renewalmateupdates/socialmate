@@ -104,7 +104,7 @@ These have burned us before — always apply:
 
 ---
 
-## What's Been Built (as of April 18, 2026)
+## What's Been Built (as of April 19, 2026)
 
 **Core:**
 - Post scheduling (Now + future via Inngest), drafts, queue, calendar, bulk scheduling
@@ -169,10 +169,23 @@ These have burned us before — always apply:
 - FeedbackButton component (floating bottom-left pill)
 - Mobile hamburger fixed (iPhone 14 notch, `env(safe-area-inset-top)`, 44×44px touch target)
 
+**Growth (April 19, 2026):**
+- Growth partner onboarded: Abdus Sohag — `affiliates` + `affiliate_profiles` records created, referral link `?ref=SOHAG` active. 1-week trial at 10% commission.
+- 140 content posts written (Apr 20–26) — saved to `content-posts-apr20-apr26.md`, ready to bulk schedule
+- SM-Give webhook: 2% of new subscription payments + 100% of donations recorded to `sm_give_allocations`
+- Sitemap updated: `/merch` + `/affiliates` added, stale `/affiliate` removed
+- Growth partner contract template: `contracts/growth-partner-agreement.html`
+
+**SM-Give & Merch (April 18–19, 2026):**
+- `/give` — SM-Give live fund tracker with pulsing counter, fetches `/api/give/stats`
+- `/merch` — landing page with Printify POD angle, SM-Give charity tie-in (75% of profit), email waitlist
+- `sm_give_allocations` table — tracks give amounts by source (subscription/donation/affiliate_unclaimed/merch)
+- `merch_waitlist` table — email capture for merch launch
+
 **SEO:**
 - 28+ `/vs/` comparison pages
 - 61+ blog posts
-- `sitemap.ts` updated
+- `sitemap.ts` updated (includes /merch, /affiliates, /enki/truth)
 - `public/llms.txt` updated
 
 ---
@@ -185,20 +198,26 @@ These have burned us before — always apply:
 
 ## Pending / In Progress
 
-- **Content post batch (ready to generate night of Apr 19 / morning of Apr 20):**
-  - 10 posts/day × 2 platforms (X + Bluesky) × 7 days = 140 posts total
-  - Schedule: 1 post/hour for 10-12 hrs starting ~8am Monday Apr 20
-  - Joshua unavailable 12:30pm–10:30pm — threads go in morning window only
-  - Voice: SocialMate brand (SocialMateHQ), Gilgamesh angle OK
-  - Mix: product updates, founder journey, social media tips, philosopher quotes
-  - No links in initial posts; threads for deeper dives
-  - X: 280 chars, 1-3 hashtags. Bluesky: 300 chars, more tag-friendly
-  - Delivery: CSV or draft list for copy-paste into bulk scheduler
-  - Start time, exact hashtag set, and thread posts TBD when generating
+- **Content post batch — READY TO SCHEDULE (Apr 20–26):**
+  - 140 posts written and saved to `content-posts-apr20-apr26.md` in repo root
+  - 10 slots/day × 2 platforms (X + Bluesky) × 7 days
+  - Schedule: 1 post/hour, 8am–5pm ET starting Monday Apr 20
+  - Copy-paste into bulk scheduler — file is organized by day + time slot
+  - Joshua unavailable 12:30pm–10:30pm Apr 20 — all posts are pre-scheduled so delivery unaffected
+
+- **Merch Printify integration** — waiting on Joshua's Printify store URL to update /merch Shop Now button
+
+- **Supabase email confirmation** — not yet verified; check Authentication → Email in Supabase dashboard to confirm "Confirm email" is enabled
+
+- **SM-Give renewal tracking gap** — webhook currently records 2% on new subscription checkouts only. Renewal payments (`invoice.payment_succeeded`) are not yet handled. Low priority but worth closing eventually.
+
+- **Growth partner trial (Abdus Sohag)** — 1-week trial active as of Apr 19. Referral link: `?ref=SOHAG`. Review results end of week; if strong, set up contract + renegotiate to standard affiliate rates.
+
+- **Enki Truth Mode testing** — market opens Monday Apr 21; first real signal data expected then. 50-trade minimum per strategy before results are valid.
+
 - **Discord management tools** (future — moderation, welcome messages, role automation)
 - **Gilgamesh's Guide landing page** (future — free PDF, business/creator/self-dev guide for entrepreneurs)
 - **LinkedIn integration** — API credentials not yet acquired
-- **Enki Truth Mode testing** — market opens Monday April 21; first real data expected then
 
 ## Confirmed Done (stop asking about these)
 

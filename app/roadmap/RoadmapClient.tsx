@@ -34,6 +34,8 @@ const ROADMAP: RoadmapItem[] = [
   { title: 'SOC 2 compliance',           desc: 'Security certification for enterprise white label clients. Required for larger agency contracts.',                status: 'planned',      category: 'Platform'      },
 
   // ── SHIPPED ───────────────────────────────────────────────
+  { title: 'Weekly content batch system', desc: 'Archive CLAUDE.md weekly as a diff doc, generate 140 posts/week (10/day × 2 platforms × 7 days) from the delta. First batch Apr 20–26 written and saved to content-posts-apr20-apr26.md.', status: 'shipped', category: 'Growth' },
+  { title: 'Growth partner program launch', desc: 'First external growth partner (Abdus Sohag) onboarded with full tracking: affiliates + affiliate_profiles records, referral link (?ref=SOHAG), 10% trial commission, partner dashboard access.', status: 'shipped', category: 'Growth' },
   { title: 'SM-Give Stripe webhook integration', desc: 'sm_give_allocations writes added to Stripe webhook: 2% of subscription checkouts recorded as subscription source, 100% of donation checkouts recorded as donation source. Non-fatal, won\'t break payment flow.', status: 'shipped', category: 'Platform' },
   { title: 'Growth partner affiliate account', desc: 'First external growth partner onboarded manually — affiliate record created, user account provisioned, referral tracking linked. Trial commission rate: 10%.', status: 'shipped', category: 'Growth' },
   { title: 'Enki Truth Mode',             desc: 'Paper trading validation experiment for Enki. 50-trade minimum per strategy, equity curve vs SPY overlay, sanity warnings, CSV export, and parameter locks during experiment.', status: 'shipped', category: 'Enki' },
