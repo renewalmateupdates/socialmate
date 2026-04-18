@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
+import GiveLiveCounter from './GiveLiveCounter'
 
 // Amber/warm design tokens
 const amber   = '#F59E0B'
@@ -91,6 +92,8 @@ export default function GivePage() {
           <span style={{ fontSize: 14 }}>❤️</span>
           <span style={{ color: amber, fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>SocialMate Gives Back</span>
         </div>
+
+        <GiveLiveCounter />
 
         <h1 style={{
           fontSize: 'clamp(36px, 6vw, 56px)', fontWeight: 900, color: '#f1f1f1',
