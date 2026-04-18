@@ -185,8 +185,6 @@ These have burned us before — always apply:
 
 ## Pending / In Progress
 
-- **Growth partner affiliate account** — waiting on partner's name + email to create via Supabase insert
-
 - **Content post batch (ready to generate night of Apr 19 / morning of Apr 20):**
   - 10 posts/day × 2 platforms (X + Bluesky) × 7 days = 140 posts total
   - Schedule: 1 post/hour for 10-12 hrs starting ~8am Monday Apr 20
@@ -209,6 +207,9 @@ These have burned us before — always apply:
 - ✅ **Login redirect** — all Enki pages use `?redirect=` not `?next=`. Fixed.
 - ✅ **Stripe SDK v20 promo code params** — `promotion: { type: 'coupon', coupon: id }` format confirmed and in use.
 - ✅ **enkiTruthModeScan** — registered in `app/api/inngest/route.ts`. Running every 15 min.
+- ✅ **Growth partner affiliate account** — Abdus Sohag (thez1shann@gmail.com) created in Supabase Auth + linked in `affiliates` table. UUID: `1ac0b2ca-fc44-4a87-8781-67f9b81d4fbe`. Commission rate: 10% (trial). Temp password: SocialMate2026!
+- ✅ **SM-Give webhook integration** — `sm_give_allocations` writes added to Stripe webhook: 2% of subscription checkouts, 100% of donation checkouts. Both non-fatal. PR #148 merged.
+- ✅ **Supabase migrations (Apr 18)** — `sm_give_allocations`, `merch_waitlist` confirmed ran.
 
 ---
 
