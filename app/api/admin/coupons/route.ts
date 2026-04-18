@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
       stripeCouponId = coupon.id
 
       const promoParams: Stripe.PromotionCodeCreateParams = {
-        coupon: coupon.id,
+        promotion: { type: 'coupon', coupon: coupon.id },
         code: upperCode,
         ...(max_redemptions ? { max_redemptions: Number(max_redemptions) } : {}),
         metadata: { affiliate_id: affiliate_id ?? '', type: 'partner' },
