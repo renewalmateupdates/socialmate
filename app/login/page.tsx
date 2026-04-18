@@ -3,6 +3,7 @@ import { useState, Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { isDisposableEmail } from '@/lib/disposable-email-domains'
 
 function LoginInner() {
   const [email, setEmail] = useState('')
@@ -45,6 +46,7 @@ function LoginInner() {
     setError('')
 
     if (mode === 'magic') {
+      if (isDisposableEmail(email)) { setError('Disposable email addresses are not allowed.'); setLoading(false); return }
       const { error } = await supabase.auth.signInWithOtp({ email: email.trim() })
       if (error) { setError(error.message); setLoading(false); return }
       setMagicSent(true)

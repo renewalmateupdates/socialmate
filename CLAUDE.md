@@ -186,6 +186,17 @@ These have burned us before — always apply:
 ## Pending / In Progress
 
 - **Growth partner affiliate account** — waiting on partner's name + email to create via Supabase insert
+
+- **Content post batch (ready to generate night of Apr 19 / morning of Apr 20):**
+  - 10 posts/day × 2 platforms (X + Bluesky) × 7 days = 140 posts total
+  - Schedule: 1 post/hour for 10-12 hrs starting ~8am Monday Apr 20
+  - Joshua unavailable 12:30pm–10:30pm — threads go in morning window only
+  - Voice: SocialMate brand (SocialMateHQ), Gilgamesh angle OK
+  - Mix: product updates, founder journey, social media tips, philosopher quotes
+  - No links in initial posts; threads for deeper dives
+  - X: 280 chars, 1-3 hashtags. Bluesky: 300 chars, more tag-friendly
+  - Delivery: CSV or draft list for copy-paste into bulk scheduler
+  - Start time, exact hashtag set, and thread posts TBD when generating
 - **Discord management tools** (future — moderation, welcome messages, role automation)
 - **Gilgamesh's Guide landing page** (future — free PDF, business/creator/self-dev guide for entrepreneurs)
 - **LinkedIn integration** — API credentials not yet acquired
