@@ -193,6 +193,10 @@ function OnboardingInner() {
   const [hasFinished, setHasFinished] = useState(false)
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null)
   const [toast, setToast] = useState<{ message: string; type: 'error' | 'info' } | null>(null)
+  const [couponInput, setCouponInput]     = useState('')
+  const [couponValidating, setCouponValidating] = useState(false)
+  const [couponApplied, setCouponApplied] = useState<{ id: string; code: string; discount_type: string; discount_value: number } | null>(null)
+  const [couponError, setCouponError]     = useState<string | null>(null)
 
   // 2FA state
   const [mfaStep, setMfaStep] = useState<'idle' | 'enroll'>('idle')
@@ -253,6 +257,22 @@ function OnboardingInner() {
     })
   }
 
+  async function applyCoupon() {
+    if (!couponInput.trim()) return
+    setCouponValidating(true); setCouponError(null); setCouponApplied(null)
+    try {
+      const res = await fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: couponInput.trim() }),
+      })
+      const json = await res.json()
+      if (json.valid) { setCouponApplied(json.coupon) }
+      else { setCouponError(json.error || 'Invalid code') }
+    } catch { setCouponError('Could not validate code') }
+    finally { setCouponValidating(false) }
+  }
+
   const handlePlanCheckout = async (plan: 'pro' | 'agency') => {
     const priceId = plan === 'pro' ? STRIPE_PRO_PRICE_ID : STRIPE_AGENCY_PRICE_ID
     setCheckoutLoading(plan)
@@ -260,7 +280,7 @@ function OnboardingInner() {
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId, fromOnboarding: true }),
+        body: JSON.stringify({ priceId, fromOnboarding: true, ...(couponApplied ? { coupon_code: couponApplied.code } : {}) }),
       })
       const data = await res.json()
       if (data.url) window.location.href = data.url
@@ -489,6 +509,33 @@ function OnboardingInner() {
                 <div className="text-5xl mb-3">📦</div>
                 <h2 className="text-2xl font-extrabold tracking-tight mb-1">Choose your plan</h2>
                 <p className="text-gray-400 dark:text-gray-500 text-sm">Start free or go straight to Pro or Agency — no pressure, upgrade anytime.</p>
+              </div>
+
+              {/* Coupon code */}
+              <div className="flex flex-col items-center gap-2 mb-2">
+                {couponApplied ? (
+                  <div className="flex items-center gap-3 px-4 py-2 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-xl text-sm">
+                    <span className="text-green-700 dark:text-green-400 font-bold">
+                      {couponApplied.code} — {couponApplied.discount_type === 'percent' ? `${couponApplied.discount_value}% off` : couponApplied.discount_type === 'fixed' ? `$${couponApplied.discount_value} off` : `+${couponApplied.discount_value} trial days`} applied
+                    </span>
+                    <button onClick={() => { setCouponApplied(null); setCouponInput('') }} className="text-green-600 text-xs font-semibold">✕</button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <input
+                      value={couponInput}
+                      onChange={e => { setCouponInput(e.target.value.toUpperCase()); setCouponError(null) }}
+                      onKeyDown={e => e.key === 'Enter' && applyCoupon()}
+                      placeholder="Have a coupon code?"
+                      className="text-sm bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:border-violet-400 w-48"
+                    />
+                    <button onClick={applyCoupon} disabled={couponValidating || !couponInput.trim()}
+                      className="px-3 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 text-gray-700 dark:text-gray-300 text-sm font-semibold rounded-xl transition-colors">
+                      {couponValidating ? '…' : 'Apply'}
+                    </button>
+                  </div>
+                )}
+                {couponError && <p className="text-xs text-red-500">{couponError}</p>}
               </div>
 
               {(['free', 'pro', 'agency'] as const).map(p => {
