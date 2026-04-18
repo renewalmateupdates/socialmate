@@ -1032,9 +1032,20 @@ function OnboardingInner() {
                 </Link>
               </div>
 
+              {/* Primary activation CTA */}
+              <Link
+                href="/compose"
+                className="flex items-center justify-center gap-2 w-full py-4 mb-4 bg-violet-600 hover:bg-violet-700 text-white text-sm font-extrabold rounded-2xl transition-all"
+              >
+                {firstPost.trim() ? '📬 Schedule Your Draft Now →' : '✏️ Write & Schedule Your First Post →'}
+              </Link>
+              {firstPost.trim() && (
+                <p className="text-xs text-center text-gray-400 mb-4 -mt-2">Your draft from step 7 is waiting in the compose screen</p>
+              )}
+
               <div className="space-y-3 mb-8 text-left">
                 {[
-                  { icon: '✏️', title: 'Compose a post',        desc: 'Write, schedule, and use AI tools',           href: '/compose',          cta: 'Start writing'   },
+                  { icon: '🤖', title: 'Explore AI Features',   desc: `${planConfig.aiTools.length >= 12 ? planConfig.aiTools.length : 12} AI tools — captions, hooks, scoring & more`, href: '/ai-features', cta: 'Explore tools'   },
                   { icon: '🤖', title: 'Explore AI Features',   desc: `${planConfig.aiTools.length >= 12 ? planConfig.aiTools.length : 12} AI tools — captions, hooks, scoring & more`, href: '/ai-features', cta: 'Explore tools'   },
                   { icon: '📆', title: 'Bulk Scheduler & Calendar', desc: 'Plan a week at once — switch to Calendar view for a visual overview', href: '/bulk-scheduler',   cta: 'Open scheduler'  },
                   { icon: '🔗', title: 'Set up Link in Bio',    desc: 'Your free bio page — no Linktree needed',      href: '/link-in-bio',      cta: 'Build page'      },

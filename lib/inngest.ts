@@ -747,8 +747,73 @@ export const onboardingSequence = inngest.createFunction(
       })
     })
 
-    // ── Wait 3 days ────────────────────────────────────────────────────────────
-    await step.sleep('wait-3-days', '3d')
+    // ── Wait 20 hours then check for activation ───────────────────────────────
+    await step.sleep('wait-day1-check', '20h')
+
+    // ── Day 1: First Post Nudge (only if no posts yet) ─────────────────────────
+    await step.run('send-day1-nudge', async () => {
+      const db = getSupabaseAdmin()
+      // Check if user has published or scheduled anything yet
+      const { data: profile } = await db
+        .from('profiles')
+        .select('user_id')
+        .eq('email', email)
+        .single()
+      if (!profile?.user_id) return
+
+      const { count } = await db
+        .from('posts')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', profile.user_id)
+        .in('status', ['scheduled', 'published'])
+
+      if ((count ?? 0) > 0) return // already activated — skip nudge
+
+      // Send in-app notification
+      await db.from('notifications').insert({
+        user_id: profile.user_id,
+        type:    'activation',
+        title:   'Your first post is waiting',
+        body:    "You set up your account — now let's get something scheduled. It takes less than a minute.",
+        href:    '/compose',
+      })
+
+      // Send email nudge
+      await getResend().emails.send({
+        from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
+        to: email,
+        subject: 'One post. That\'s all it takes.',
+        html: `
+          <div style="background:#0a0a0a;min-height:100vh;padding:0;margin:0;">
+          <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:580px;margin:0 auto;padding:40px 24px;color:#ffffff;background:#0a0a0a;">
+            <div style="margin-bottom:32px;">
+              <span style="display:inline-flex;align-items:center;gap:8px;">
+                <span style="display:inline-block;width:28px;height:28px;background:#ffffff;border-radius:8px;text-align:center;line-height:28px;font-weight:900;font-size:14px;color:#000;">S</span>
+                <span style="font-weight:800;font-size:16px;color:#ffffff;">SocialMate</span>
+              </span>
+            </div>
+            <h1 style="font-size:26px;font-weight:800;margin:0 0 16px;color:#ffffff;letter-spacing:-0.5px;">
+              Hey ${name} — your first post is one click away.
+            </h1>
+            <p style="font-size:15px;color:#a1a1aa;line-height:1.6;margin:0 0 24px;">
+              You set up your SocialMate account yesterday. Nice work.<br><br>
+              Now the most important step: schedule your first post. It doesn't have to be perfect. It just has to be out there.
+            </p>
+            <a href="${appUrl}/compose" style="display:inline-block;background:#7c3aed;color:#ffffff;font-size:14px;font-weight:700;padding:14px 28px;border-radius:12px;text-decoration:none;margin-bottom:32px;">
+              Write My First Post →
+            </a>
+            <p style="font-size:13px;color:#52525b;line-height:1.6;margin:0;">
+              Takes less than a minute. Use the AI caption tool if you need a starting point — it's free on every plan.
+            </p>
+            <p style="font-size:13px;color:#71717a;margin:24px 0 0;">— Joshua, Founder of SocialMate</p>
+          </div>
+          </div>
+        `,
+      })
+    })
+
+    // ── Wait remaining ~2 days to hit Day 3 total ─────────────────────────────
+    await step.sleep('wait-3-days', '52h')
 
     // ── Email 2 — Day 3: AI Tools Showcase ────────────────────────────────────
     await step.run('send-day3-email', async () => {
