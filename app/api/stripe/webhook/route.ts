@@ -619,6 +619,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true })
     }
 
+    // ── Donation (one-time give payment) ──
+    if (type === 'donation') {
+      const grossCents = session.amount_total ?? 0
+      if (grossCents > 0) {
+        try {
+          await supabase.from('sm_give_allocations').insert({
+            source:            'donation',
+            gross_cents:       grossCents,
+            give_cents:        grossCents, // 100% of donations go to SM-Give
+            stripe_session_id: session.id,
+            user_id:           userId ?? null,
+          })
+        } catch (err) {
+          console.warn('SM-Give donation allocation failed (non-fatal):', err)
+        }
+      }
+      return NextResponse.json({ received: true })
+    }
+
     // ── Base plan subscription via checkout ──
     if (!session.subscription) return NextResponse.json({ received: true })
 
@@ -657,6 +676,22 @@ const creditsToSet = alreadyOnPlan
       ai_credits_total:           PLAN_CREDITS[plan] ?? 100,
       ai_credits_reset_at:        new Date().toISOString(),
     }, { onConflict: 'user_id' })
+
+    // SM-Give: record 2% of subscription payment
+    try {
+      const grossCents = session.amount_total ?? 0
+      if (grossCents > 0) {
+        await supabase.from('sm_give_allocations').insert({
+          source:            'subscription',
+          gross_cents:       grossCents,
+          give_cents:        Math.floor(grossCents * 0.02),
+          stripe_session_id: session.id,
+          user_id:           userId ?? null,
+        })
+      }
+    } catch (err) {
+      console.warn('SM-Give subscription allocation failed (non-fatal):', err)
+    }
 
     if (userId) {
       await processReferralCredits(supabase, userId, plan, true)
