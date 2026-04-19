@@ -25,11 +25,12 @@ const FOOTER_COLUMNS: FooterColumn[] = [
   {
     heading: 'Company',
     links: [
-      { label: 'Our Story',   href: '/story'     },
-      { label: 'Blog',        href: '/blog'      },
-      { label: 'Affiliate',   href: '/affiliate' },
-      { label: 'Referral',    href: '/referral'  },
-      { label: "Gil's Guide", href: '/gilgamesh' },
+      { label: 'Our Story',   href: '/story'      },
+      { label: 'Blog',        href: '/blog'       },
+      { label: 'Merch',       href: '/merch'      },
+      { label: 'Affiliates',  href: '/affiliates' },
+      { label: 'Referral',    href: '/referral'   },
+      { label: "Gil's Guide", href: '/gilgamesh'  },
     ],
   },
   {
