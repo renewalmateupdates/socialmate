@@ -6,7 +6,9 @@ export async function GET() {
     return NextResponse.json({ error: 'PRINTIFY_API_KEY env var is not set' }, { status: 500 })
   }
 
-  const headers = { Authorization: `Bearer ${key}` }
+  const trimmed = key.trim()
+  const keyInfo = { length: trimmed.length, first10: trimmed.slice(0, 10), last4: trimmed.slice(-4), hasWhitespace: key !== trimmed }
+  const headers = { Authorization: `Bearer ${trimmed}` }
 
   try {
     // Step 1: get real shop list
@@ -16,7 +18,7 @@ export async function GET() {
     try { shops = JSON.parse(shopsText) } catch { shops = shopsText }
 
     if (!shopsRes.ok) {
-      return NextResponse.json({ step: 'shops', status: shopsRes.status, ok: false, body: shops })
+      return NextResponse.json({ step: 'shops', status: shopsRes.status, ok: false, body: shops, keyInfo })
     }
 
     const shopList = shops as Array<{ id: number; title: string }>
