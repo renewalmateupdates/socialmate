@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 
-const SHOP_ID = '1'
+const SHOP_ID = process.env.PRINTIFY_SHOP_ID || '27238436'
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
 
 export async function POST(req: NextRequest) {

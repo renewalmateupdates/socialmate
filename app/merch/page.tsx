@@ -17,7 +17,8 @@ const HOW_IT_WORKS = [
 
 async function getProducts() {
   try {
-    const res = await fetch('https://api.printify.com/v1/shops/1/products.json', {
+    const shopId = process.env.PRINTIFY_SHOP_ID || '27238436'
+    const res = await fetch(`https://api.printify.com/v1/shops/${shopId}/products.json`, {
       headers: { Authorization: `Bearer ${process.env.PRINTIFY_API_KEY}` },
       next: { revalidate: 3600 },
     })
