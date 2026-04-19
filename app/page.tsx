@@ -760,7 +760,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-gray-600 mb-3">Company</p>
               <ul className="space-y-2">
-                {[['Our Story','/story'],['Blog','/blog'],['Affiliate','/affiliate'],['Referral','/referral']].map(([label,href])=>(
+                {[['Our Story','/story'],['Blog','/blog'],['Merch','/merch'],['Affiliates','/affiliates'],['Referral','/referral']].map(([label,href])=>(
                   <li key={href}><Link href={href} className="text-sm text-gray-400 hover:text-white transition-colors">{label}</Link></li>
                 ))}
               </ul>

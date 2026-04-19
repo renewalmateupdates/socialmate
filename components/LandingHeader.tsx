@@ -67,6 +67,9 @@ export default function LandingHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
 
         {/* Right side */}
         <div className="hidden lg:flex items-center gap-3 flex-shrink-0">
+          <Link href="/merch" className="text-sm font-semibold text-purple-400 hover:text-purple-300 transition-all">
+            👕 Merch
+          </Link>
           <Link href="/give" className="text-sm font-semibold text-rose-400 hover:text-rose-300 transition-all">
             ❤️ Give
           </Link>
@@ -142,6 +145,10 @@ export default function LandingHeader({ isLoggedIn }: { isLoggedIn: boolean }) {
           </div>
 
           <div className="pt-2 border-t border-gray-100 dark:border-gray-800 mt-1">
+            <Link href="/merch" onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/20 transition-all">
+              👕 Merch
+            </Link>
             <Link href="/give" onClick={() => setMobileMenuOpen(false)}
               className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all">
               ❤️ SM-Give
