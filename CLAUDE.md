@@ -207,7 +207,6 @@ These have burned us before — always apply:
 
 - **Merch Printify integration** — waiting on Joshua's Printify store URL to update /merch Shop Now button
 
-- **Supabase email confirmation** — not yet verified; check Authentication → Email in Supabase dashboard to confirm "Confirm email" is enabled
 
 - **SM-Give renewal tracking gap** — webhook currently records 2% on new subscription checkouts only. Renewal payments (`invoice.payment_succeeded`) are not yet handled. Low priority but worth closing eventually.
 
@@ -229,6 +228,7 @@ These have burned us before — always apply:
 - ✅ **Growth partner affiliate account** — Abdus Sohag (thez1shann@gmail.com) created in Supabase Auth + linked in `affiliates` table. UUID: `1ac0b2ca-fc44-4a87-8781-67f9b81d4fbe`. Commission rate: 10% (trial). Temp password: SocialMate2026!
 - ✅ **SM-Give webhook integration** — `sm_give_allocations` writes added to Stripe webhook: 2% of subscription checkouts, 100% of donation checkouts. Both non-fatal. PR #148 merged.
 - ✅ **Supabase migrations (Apr 18)** — `sm_give_allocations`, `merch_waitlist` confirmed ran.
+- ✅ **Supabase email confirmation** — "Confirm email" toggle is ON (verified Apr 19). Users must confirm before first sign-in.
 
 ---
 
