@@ -10,10 +10,17 @@ interface Variant {
   is_enabled: boolean
 }
 
+interface ProductImage {
+  src: string
+  variant_ids?: number[]
+  position?: string
+  is_default?: boolean
+}
+
 interface Product {
   id: string
   title: string
-  images: { src: string; variant_ids?: number[] }[]
+  images: ProductImage[]
   variants: Variant[]
 }
 
@@ -27,7 +34,16 @@ export function MerchProductCard({ product }: { product: Product }) {
   const [loading, setLoading] = useState(false)
 
   const selectedVariant = enabledVariants.find(v => v.id === selectedVariantId) ?? enabledVariants[0]
-  const heroImage = product.images[0]?.src ?? ''
+
+  const heroImage = (() => {
+    if (!selectedVariant) return product.images[0]?.src ?? ''
+    const frontImages = product.images.filter(i => i.position === 'front' || i.is_default)
+    const match = frontImages.find(i => i.variant_ids?.includes(selectedVariant.id))
+      ?? product.images.find(i => i.variant_ids?.includes(selectedVariant.id))
+      ?? product.images[0]
+    return match?.src ?? ''
+  })()
+
   const priceDisplay = selectedVariant ? `$${(selectedVariant.price / 100).toFixed(2)}` : '$--'
 
   async function handleBuy() {
