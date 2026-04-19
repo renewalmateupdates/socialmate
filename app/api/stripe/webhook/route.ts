@@ -631,8 +631,9 @@ export async function POST(req: NextRequest) {
           const firstName = nameParts[0] || 'Customer'
           const lastName  = nameParts.slice(1).join(' ') || ''
 
+          const shopId = printify_shop_id || process.env.PRINTIFY_SHOP_ID || '27238436'
           const orderRes = await fetch(
-            `https://api.printify.com/v1/shops/${printify_shop_id || '1'}/orders.json`,
+            `https://api.printify.com/v1/shops/${shopId}/orders.json`,
             {
               method: 'POST',
               headers: {
@@ -673,14 +674,14 @@ export async function POST(req: NextRequest) {
           console.error('[MerchWebhook] Printify order error:', err)
         }
 
-        // SM-Give: 75% of profit (approx 30% of gross after production costs)
+        // SM-Give: 75% of gross merch revenue
         try {
           const grossCents = session.amount_total ?? 0
           if (grossCents > 0) {
             await supabase.from('sm_give_allocations').insert({
               source:            'merch',
               gross_cents:       grossCents,
-              give_cents:        Math.floor(grossCents * 0.30),
+              give_cents:        Math.floor(grossCents * 0.75),
               stripe_session_id: session.id,
               user_id:           userId ?? null,
             })
