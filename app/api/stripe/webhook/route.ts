@@ -619,6 +619,80 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true })
     }
 
+    // ── Merch order — auto-fulfill via Printify ──
+    if (type === 'merch') {
+      const { product_id, variant_id, printify_shop_id } = session.metadata || {}
+      const shipping = (session as any).shipping_details
+      const email    = (session as any).customer_details?.email || ''
+
+      if (product_id && variant_id && shipping?.address) {
+        try {
+          const nameParts = (shipping.name || 'Customer').split(' ')
+          const firstName = nameParts[0] || 'Customer'
+          const lastName  = nameParts.slice(1).join(' ') || ''
+
+          const orderRes = await fetch(
+            `https://api.printify.com/v1/shops/${printify_shop_id || '1'}/orders.json`,
+            {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${process.env.PRINTIFY_API_KEY}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                external_id:               session.id,
+                line_items: [{
+                  product_id,
+                  variant_id: Number(variant_id),
+                  quantity:   1,
+                }],
+                shipping_method:            1,
+                send_shipping_notification: true,
+                address_to: {
+                  first_name: firstName,
+                  last_name:  lastName,
+                  email,
+                  country:    shipping.address.country   || 'US',
+                  region:     shipping.address.state     || '',
+                  address1:   shipping.address.line1     || '',
+                  address2:   shipping.address.line2     || '',
+                  city:       shipping.address.city      || '',
+                  zip:        shipping.address.postal_code || '',
+                },
+              }),
+            }
+          )
+
+          if (!orderRes.ok) {
+            const errText = await orderRes.text()
+            console.error('[MerchWebhook] Printify order failed:', errText)
+          } else {
+            console.log('[MerchWebhook] Printify order created for session:', session.id)
+          }
+        } catch (err) {
+          console.error('[MerchWebhook] Printify order error:', err)
+        }
+
+        // SM-Give: 75% of profit (approx 30% of gross after production costs)
+        try {
+          const grossCents = session.amount_total ?? 0
+          if (grossCents > 0) {
+            await supabase.from('sm_give_allocations').insert({
+              source:            'merch',
+              gross_cents:       grossCents,
+              give_cents:        Math.floor(grossCents * 0.30),
+              stripe_session_id: session.id,
+              user_id:           userId ?? null,
+            })
+          }
+        } catch (err) {
+          console.warn('SM-Give merch allocation failed (non-fatal):', err)
+        }
+      }
+
+      return NextResponse.json({ received: true })
+    }
+
     // ── Donation (one-time give payment) ──
     if (type === 'donation') {
       const grossCents = session.amount_total ?? 0
