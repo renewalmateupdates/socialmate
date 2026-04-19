@@ -311,7 +311,7 @@ export default function GivePage() {
             }}>
               Get Started Free →
             </Link>
-            <Link href="/affiliate" style={{
+            <Link href="/affiliates" style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               padding: '12px 28px', borderRadius: 12,
               background: surface, border: `1px solid ${border}`,
