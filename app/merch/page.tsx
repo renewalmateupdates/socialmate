@@ -84,7 +84,7 @@ export default async function MerchPage({ searchParams }: { searchParams: Promis
         }}>
           <span style={{ fontSize: 14 }}>👕</span>
           <span style={{ color: amber, fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-            Creator Merch · Powered by Purpose
+            Store Open · Creator Merch · Powered by Purpose
           </span>
         </div>
 
@@ -96,8 +96,8 @@ export default async function MerchPage({ searchParams }: { searchParams: Promis
         </h1>
 
         <p style={{ fontSize: 18, color: '#9ca3af', lineHeight: 1.75, margin: '0 auto 36px', maxWidth: 580 }}>
-          Power to the people — on every item. 75% of the profit goes to school supplies, baby essentials,
-          and homeless care packages. Merch that means something.
+          Power to the people — on every item. Shirts are live and shipping now. 75% of the profit goes to
+          school supplies, baby essentials, and homeless care packages. Merch that means something.
         </p>
 
         <div style={{ display: 'flex', justifyContent: 'center', gap: 14, flexWrap: 'wrap' }}>
@@ -214,7 +214,7 @@ export default async function MerchPage({ searchParams }: { searchParams: Promis
             Get notified on new drops
           </h2>
           <p style={{ fontSize: 15, color: muted, margin: '0 auto 28px', maxWidth: 440, lineHeight: 1.7 }}>
-            Hoodies, mugs, and creator edition merch are coming. Drop your email to be first.
+            More drops incoming — hoodies, mugs, and creator edition. Drop your email to be first in line.
           </p>
           <MerchWaitlistForm />
         </div>
