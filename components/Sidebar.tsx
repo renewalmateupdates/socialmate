@@ -171,6 +171,7 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   const [sectionOrder, setSectionOrder]         = useState<string[]>(NAV_BASE.map(g => g.section))
   const [statsVisible, setStatsVisible]         = useState(true)
   const [scheduledCount, setScheduledCount]     = useState(0)
+  const [xQuota, setXQuota]                     = useState<{ used: number; limit: number } | null>(null)
   const pathname = usePathname()
   const router   = useRouter()
 
@@ -258,6 +259,14 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
     return () => { supabase.removeChannel(channel) }
   }, [])
 
+  // X/Twitter monthly quota
+  useEffect(() => {
+    fetch('/api/accounts/twitter/quota')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d && typeof d.used === 'number') setXQuota({ used: d.used, limit: d.limit }) })
+      .catch(() => {})
+  }, [])
+
   const handleSignOut = async () => {
     await supabase.auth.signOut()
     router.push('/')
@@ -315,6 +324,14 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
   // Credit bar color — red/yellow/accent based on monthly remaining
   const creditBarColor = monthlyCredits < 10 ? '#f87171' : monthlyCredits < 20 ? '#facc15' : 'var(--accent, #22c55e)'
   const seatsBar      = seatsTotal > 0 ? Math.min(100, (seatsUsed / seatsTotal) * 100) : 0
+
+  const xBar = xQuota ? Math.min(100, (xQuota.used / xQuota.limit) * 100) : 0
+  const xBarColor = xQuota && xQuota.used >= xQuota.limit ? '#f87171' : xQuota && xQuota.used / xQuota.limit > 0.8 ? '#facc15' : 'var(--accent, #22c55e)'
+  const xResetLabel = (() => {
+    const d = new Date()
+    d.setMonth(d.getMonth() + 1, 1)
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  })()
 
   const ADMIN_EMAIL   = 'socialmatehq@gmail.com'
   const isAdminUser   = user?.email === ADMIN_EMAIL
@@ -583,6 +600,23 @@ function SidebarContent({ onNavClick }: { onNavClick?: () => void }) {
                 {loading ? 'Loading...' : `${seatsTotal - seatsUsed} seat${seatsTotal - seatsUsed !== 1 ? 's' : ''} left`}
               </p>
             </div>
+
+            {xQuota !== null && (
+              <div className="rounded-xl p-3" style={{ background: 'var(--sidebar-active)' }}>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs font-semibold" style={{ color: 'var(--sidebar-muted)' }}>𝕏 Posts this month</span>
+                  <span className="text-xs font-bold" style={{ color: xQuota.used >= xQuota.limit ? '#f87171' : 'var(--sidebar-fg)' }}>
+                    {xQuota.used} / {xQuota.limit}
+                  </span>
+                </div>
+                <div className="w-full rounded-full h-1.5 mb-1.5" style={{ background: 'var(--sidebar-border)' }}>
+                  <div className="h-1.5 rounded-full transition-all" style={{ width: `${xBar}%`, background: xBarColor }} />
+                </div>
+                <p className="text-xs" style={{ color: 'var(--sidebar-faint)' }}>
+                  {xQuota.used >= xQuota.limit ? '⚠ Limit reached · ' : ''}Resets {xResetLabel}
+                </p>
+              </div>
+            )}
           </>
         )}
 
