@@ -42,5 +42,10 @@ export async function GET() {
       slotsTotal:      FOUNDING_SLOT_LIMIT,
     },
     currentTier: foundingFull ? 'standard' : 'founding',
+    // Convenience top-level fields for counter displays
+    foundingLimit:           FOUNDING_SLOT_LIMIT,
+    foundingSpotsUsed:       slotsFilled,
+    foundingSpotsRemaining:  slotsRemaining,
+    isFull:                  foundingFull,
   })
 }
