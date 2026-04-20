@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ message: 'No stuck posts found', rescued: 0 })
   }
 
-  const results: { postId: string; status: string; error?: string }[] = []
+  const results: { postId: string; status: string; error?: string; detail?: string }[] = []
 
   for (const post of stuckPosts) {
     try {
@@ -44,19 +44,32 @@ export async function POST(req: NextRequest) {
         body: JSON.stringify({ postId: post.id, fromInngest: true }),
       })
       const data = await res.json()
-      results.push({ postId: post.id, status: res.ok ? 'published' : 'failed', error: data.error })
+      if (res.ok) {
+        results.push({ postId: post.id, status: 'published' })
+      } else {
+        // Publish route failed — force status to 'failed' via admin so it never stays 'scheduled'
+        await getSupabaseAdmin()
+          .from('posts')
+          .update({ status: 'failed' })
+          .eq('id', post.id)
+          .eq('status', 'scheduled')
+        results.push({ postId: post.id, status: 'force-failed', error: data.error, detail: data.detail })
+      }
     } catch (err) {
-      results.push({ postId: post.id, status: 'error', error: String(err) })
+      await getSupabaseAdmin().from('posts').update({ status: 'failed' }).eq('id', post.id).eq('status', 'scheduled')
+      results.push({ postId: post.id, status: 'force-failed', error: String(err) })
     }
   }
 
-  const succeeded = results.filter(r => r.status === 'published').length
-  const failed = results.filter(r => r.status !== 'published').length
+  const published   = results.filter(r => r.status === 'published').length
+  const forceFailed = results.filter(r => r.status === 'force-failed').length
+  const errored     = results.filter(r => r.status === 'error').length
 
   return NextResponse.json({
     total: stuckPosts.length,
-    rescued: succeeded,
-    failed,
+    published,
+    force_failed: forceFailed,
+    errored,
     results,
   })
 }
