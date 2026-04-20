@@ -11,15 +11,14 @@ type RoadmapItem = {
 const ROADMAP: RoadmapItem[] = [
   // ── IN PROGRESS ──────────────────────────────────────────
   { title: 'Media Library',              desc: 'Upload, compress, and reuse images and videos across posts. Client-side compression to 1920px and 2MB max.',     status: 'in-progress',  category: 'Media'         },
-  { title: 'Blog auto-generation',       desc: 'Gemini writes a blog feature for each Studio Stax lister once past the refund window. Lister gets notified by email when it\'s live.', status: 'in-progress', category: 'Platform' },
+  { title: 'Creator Studio video editor', desc: 'Full in-browser video editor — trim, filter, captions, audio, and one-click platform export at exact spec dimensions. Active development.', status: 'in-progress', category: 'Media' },
 
   // ── COMING SOON ───────────────────────────────────────────
   { title: 'Streak notifications',       desc: 'Automated streak tracking with at-risk alerts — get notified when your posting streak is about to break.',        status: 'coming-soon',  category: 'Analytics'     },
   { title: 'LinkedIn publishing',        desc: 'Full UGC Posts API integration. Requires LinkedIn developer app approval (r/w_member_social).',                 status: 'coming-soon',  category: 'Platforms'     },
   { title: 'YouTube Community Posts',    desc: 'Post to YouTube Community tab (requires 500+ subscribers). OAuth token management complete.',                    status: 'coming-soon',  category: 'Platforms'     },
   { title: 'Pinterest publishing',       desc: 'Pin creation via Pinterest v5 API with board selection. OAuth complete.',                                        status: 'coming-soon',  category: 'Platforms'     },
-  { title: 'Social Inbox',              desc: 'Fetch Bluesky/Mastodon mentions and replies. Unified inbox with read/unread state and filters.',                 status: 'coming-soon',  category: 'Engagement'    },
-  { title: 'Content Approval workflows', desc: 'Team members submit posts for review. Owner approves (schedules) or rejects (sends back with note).',           status: 'coming-soon',  category: 'Teams'         },
+  { title: 'Blog auto-generation',       desc: 'Gemini writes a blog feature post for each Studio Stax lister once past the refund window. Lister gets notified by email when it\'s live.', status: 'coming-soon', category: 'Platform' },
   { title: 'Discord management tools',   desc: 'Moderation commands, welcome messages, role automation, and server analytics directly from SocialMate.',         status: 'coming-soon',  category: 'Platforms'     },
 
   // ── PLANNED ───────────────────────────────────────────────
@@ -34,7 +33,10 @@ const ROADMAP: RoadmapItem[] = [
   { title: 'SOC 2 compliance',           desc: 'Security certification for enterprise white label clients. Required for larger agency contracts.',                status: 'planned',      category: 'Platform'      },
 
   // ── SHIPPED ───────────────────────────────────────────────
-  { title: 'Weekly content batch system', desc: 'Archive CLAUDE.md weekly as a diff doc, generate 140 posts/week (10/day × 2 platforms × 7 days) from the delta. First batch Apr 20–26 written and saved to content-posts-apr20-apr26.md.', status: 'shipped', category: 'Growth' },
+  { title: 'X/Twitter quota visibility',  desc: 'Monthly post usage and reset date shown in the sidebar stats section for all plan tiers. Bar turns yellow >80%, red at cap.', status: 'shipped', category: 'Platform' },
+  { title: 'Content Approval workflows', desc: 'Team members submit posts for review. Owner approves (schedules) or rejects with a note. Live at /approvals.', status: 'shipped', category: 'Teams' },
+  { title: 'Merch store — Printify POD', desc: 'Live merch store at /merch powered by Printify global print-on-demand. Variant image switching, Stripe checkout, auto-fulfillment via webhook. 75% of gross profit → SM-Give.', status: 'shipped', category: 'Platform' },
+  { title: 'Weekly content batch system', desc: 'Archive CLAUDE.md weekly as a diff doc, generate 140 posts/week (10/day × 2 platforms × 7 days) from the delta. First batch Apr 20–26 written and saved.', status: 'shipped', category: 'Growth' },
   { title: 'Growth partner program launch', desc: 'First external growth partner (Abdus Sohag) onboarded with full tracking: affiliates + affiliate_profiles records, referral link (?ref=SOHAG), 10% trial commission, partner dashboard access.', status: 'shipped', category: 'Growth' },
   { title: 'SM-Give Stripe webhook integration', desc: 'sm_give_allocations writes added to Stripe webhook: 2% of subscription checkouts recorded as subscription source, 100% of donation checkouts recorded as donation source. Non-fatal, won\'t break payment flow.', status: 'shipped', category: 'Platform' },
   { title: 'Growth partner affiliate account', desc: 'First external growth partner onboarded manually — affiliate record created, user account provisioned, referral tracking linked. Trial commission rate: 10%.', status: 'shipped', category: 'Growth' },
@@ -42,7 +44,6 @@ const ROADMAP: RoadmapItem[] = [
   { title: 'Coupon & partner attribution system', desc: 'Affiliate-linked discount codes with Stripe promo auto-creation, idempotency guards, no double-redemption, coupon input on pricing/onboarding/settings, and commission tracking in webhook.', status: 'shipped', category: 'Growth' },
   { title: '/affiliates public landing page', desc: 'Public partner program page with commission tiers (30%/40%), how-it-works, FAQ, and apply CTA linked to the partner portal.', status: 'shipped', category: 'Growth' },
   { title: 'SM-Give live fund tracker',   desc: 'Pulsing live counter on /give showing real-time dollars allocated to SM-Give by source (subscriptions, donations, affiliate unclaimed, merch).', status: 'shipped', category: 'Platform' },
-  { title: '/merch landing page',         desc: 'Merch storefront landing page with SM-Give charity angle, custom handle/logo concept, product teasers, and email waitlist. Powered by Printify (global fulfillment).', status: 'shipped', category: 'Platform' },
   { title: 'Disposable email blocker',    desc: 'Blocks 150+ known throwaway email domains at signup and on the magic-link path, preventing free-tier credit farming via temp email re-registration.', status: 'shipped', category: 'Platform' },
   { title: 'Onboarding activation push',  desc: 'Step 8 hero CTA ("Schedule Your First Post") + Day-1 Inngest nudge (20h after signup) that checks for zero posts and sends in-app notification + email if unactivated.', status: 'shipped', category: 'Growth' },
   { title: '/admin/coupons',              desc: 'Admin UI to create and manage affiliate coupon codes. Supports percent, fixed, and trial-extension types. Stripe promo codes auto-created for percent/fixed.', status: 'shipped', category: 'Platform' },
