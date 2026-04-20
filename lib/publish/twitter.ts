@@ -90,22 +90,36 @@ export async function publishToTwitter(
     throw new Error('No X account connected. Go to Accounts to connect your X account.')
   }
 
-  // ─── Per-workspace X quota enforcement ────────────────────────────────────
-  // Free tier API cap: 1,500 tweets/month for the entire app.
-  // We enforce conservative per-workspace monthly limits to protect shared quota.
-  //   Free workspace  → 50 tweets / calendar month
-  //   Pro workspace   → 200 tweets / calendar month
-  //   Agency          → 500 tweets / calendar month
-  //
-  // Quota is tracked by counting published posts with platform='twitter' this month.
+  // ─── Admin bypass ─────────────────────────────────────────────────────────
+  const { data: authUser } = await getSupabaseAdmin().auth.admin.getUserById(userId)
+  const ADMIN_EMAIL = 'socialmatehq@gmail.com'
+  if (authUser?.user?.email === ADMIN_EMAIL) {
+    // Admin account has no X quota restrictions
+  } else {
+  // ─── Per-workspace X quota enforcement ──────────────────────────────────
+  // Free tier API cap: 1,500 tweets/month per app (write).
+  // Per-workspace monthly limits:
+  //   Free   → 50   · Pro → 200   · Agency → 500
   const TWITTER_QUOTA: Record<string, number> = { free: 50, pro: 200, agency: 500 }
 
-  // Fetch workspace plan
-  const { data: wsData } = await getSupabaseAdmin()
-    .from('workspaces')
-    .select('plan')
-    .eq('id', workspaceId ?? '')
-    .maybeSingle()
+  // Fetch workspace plan — use owner_id fallback when workspaceId is null (personal workspace)
+  let wsData: { plan: string | null } | null = null
+  if (workspaceId) {
+    const { data } = await getSupabaseAdmin()
+      .from('workspaces')
+      .select('plan')
+      .eq('id', workspaceId)
+      .maybeSingle()
+    wsData = data
+  } else {
+    const { data } = await getSupabaseAdmin()
+      .from('workspaces')
+      .select('plan')
+      .eq('owner_id', userId)
+      .eq('is_personal', true)
+      .maybeSingle()
+    wsData = data
+  }
   const plan = (wsData?.plan as string | null) ?? 'free'
   const monthlyLimit = TWITTER_QUOTA[plan] ?? TWITTER_QUOTA.free
 
@@ -134,6 +148,7 @@ export async function publishToTwitter(
       `Upgrade your plan for a higher limit, or wait until next month.`
     )
   }
+  } // end quota enforcement (skipped for admin)
   // ──────────────────────────────────────────────────────────────────────────
 
   // Enforce character limit (unicode-safe)

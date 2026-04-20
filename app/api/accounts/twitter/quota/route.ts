@@ -30,11 +30,15 @@ export async function GET() {
     .from('workspaces')
     .select('plan')
     .eq('owner_id', user.id)
+    .eq('is_personal', true)
     .maybeSingle()
 
   const plan = ws?.plan ?? 'free'
   const limits: Record<string, number> = { free: 50, pro: 200, agency: 500 }
-  const limit = limits[plan] ?? 50
+
+  // Admin has no quota cap — return a high ceiling so UI shows unlimited
+  const ADMIN_EMAIL = 'socialmatehq@gmail.com'
+  const limit = user.email === ADMIN_EMAIL ? 999999 : (limits[plan] ?? 50)
 
   return NextResponse.json({ used: count ?? 0, limit, plan })
 }
