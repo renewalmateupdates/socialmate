@@ -713,6 +713,54 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true })
     }
 
+    // ── X Booster — one-time post top-up pack ──
+    if (type === 'twitter_booster' && userId) {
+      try {
+        const tierAmounts: Record<string, number> = { spark: 50, boost: 120, surge: 250, storm: 500 }
+        const tier   = session.metadata?.tier ?? ''
+        const amount = tierAmounts[tier] ?? parseInt(session.metadata?.amount ?? '0', 10)
+
+        if (amount > 0) {
+          // Idempotency: use payment_intent ID
+          const paymentIntentId = session.payment_intent as string
+          if (paymentIntentId) {
+            const { data: existing } = await supabase
+              .from('processed_events')
+              .select('id')
+              .eq('event_id', paymentIntentId)
+              .maybeSingle()
+
+            if (existing) {
+              console.log('[XBooster] Already processed:', paymentIntentId)
+              return NextResponse.json({ received: true })
+            }
+
+            await supabase
+              .from('processed_events')
+              .insert({ event_id: paymentIntentId, type: 'twitter_booster', user_id: userId })
+              .select()
+          }
+
+          const { data: settings } = await supabase
+            .from('user_settings')
+            .select('twitter_booster_balance')
+            .eq('user_id', userId)
+            .maybeSingle()
+
+          const current = settings?.twitter_booster_balance ?? 0
+          await supabase
+            .from('user_settings')
+            .update({ twitter_booster_balance: current + amount })
+            .eq('user_id', userId)
+
+          console.log(`[XBooster] Added ${amount} posts to user ${userId} (${tier})`)
+        }
+      } catch (err) {
+        console.error('[XBooster] Webhook handler failed (non-fatal):', err)
+      }
+      return NextResponse.json({ received: true })
+    }
+
     // ── Base plan subscription via checkout ──
     if (!session.subscription) return NextResponse.json({ received: true })
 
