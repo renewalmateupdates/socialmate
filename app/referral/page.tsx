@@ -133,7 +133,7 @@ export default function ReferralPage() {
             <p className="text-xs text-gray-500 leading-relaxed">
               For creators and marketers. Earn 30–40% recurring cash commissions on every referral. Application-based.
             </p>
-            <Link href="/affiliate" className="mt-3 inline-block text-xs font-bold text-black dark:text-white underline hover:no-underline">
+            <Link href="/affiliates" className="mt-3 inline-block text-xs font-bold text-black dark:text-white underline hover:no-underline">
               Learn more &amp; apply →
             </Link>
           </div>

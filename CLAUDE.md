@@ -104,7 +104,7 @@ These have burned us before — always apply:
 
 ---
 
-## What's Been Built (as of April 19, 2026)
+## What's Been Built (as of April 19, 2026 — end of day)
 
 **Core:**
 - Post scheduling (Now + future via Inngest), drafts, queue, calendar, bulk scheduling
@@ -178,9 +178,14 @@ These have burned us before — always apply:
 
 **SM-Give & Merch (April 18–19, 2026):**
 - `/give` — SM-Give live fund tracker with pulsing counter, fetches `/api/give/stats`
-- `/merch` — landing page with Printify POD angle, SM-Give charity tie-in (75% of profit), email waitlist
+- `/merch` — fully live with Printify POD integration. First shirt showing. Stripe checkout confirmed working.
+- SM-Give merch allocation: **75% of gross** revenue from every merch order → `sm_give_allocations`
 - `sm_give_allocations` table — tracks give amounts by source (subscription/donation/affiliate_unclaimed/merch)
 - `merch_waitlist` table — email capture for merch launch
+- Printify real shop ID: `27238436` (was hardcoded as `1` everywhere — now reads `PRINTIFY_SHOP_ID` env var)
+- `PRINTIFY_SHOP_ID=27238436` set in Vercel env vars
+- Variant image switching: `MerchProductCard` matches selected variant ID against Printify's `variant_ids` array on each image to show correct color mockup
+- Webhook auto-fulfills merch orders via Printify Orders API on `checkout.session.completed` with `metadata.type === 'merch'`
 
 **SEO:**
 - 28+ `/vs/` comparison pages
@@ -194,6 +199,12 @@ These have burned us before — always apply:
 
 - No open bugs currently tracked — add new ones here as discovered.
 
+## Audit Findings (April 19, 2026) — resolved
+
+- ✅ Broken `/affiliate` links in `/give` and `/referral` — now correctly point to `/affiliates` (PR #160)
+- ✅ Exposed debug route `/api/merch/debug` — deleted (was leaking PRINTIFY_API_KEY metadata to public) (PR #160)
+- ✅ Missing try/catch in `/api/feature-requests` POST — added (PR #160)
+
 ---
 
 ## Pending / In Progress
@@ -205,7 +216,6 @@ These have burned us before — always apply:
   - Copy-paste into bulk scheduler — file is organized by day + time slot
   - Joshua unavailable 12:30pm–10:30pm Apr 20 — all posts are pre-scheduled so delivery unaffected
 
-- **Merch Printify integration** — waiting on Joshua's Printify store URL to update /merch Shop Now button
 
 
 - **SM-Give renewal tracking gap** — webhook currently records 2% on new subscription checkouts only. Renewal payments (`invoice.payment_succeeded`) are not yet handled. Low priority but worth closing eventually.
@@ -229,6 +239,11 @@ These have burned us before — always apply:
 - ✅ **SM-Give webhook integration** — `sm_give_allocations` writes added to Stripe webhook: 2% of subscription checkouts, 100% of donation checkouts. Both non-fatal. PR #148 merged.
 - ✅ **Supabase migrations (Apr 18)** — `sm_give_allocations`, `merch_waitlist` confirmed ran.
 - ✅ **Supabase email confirmation** — "Confirm email" toggle is ON (verified Apr 19). Users must confirm before first sign-in.
+- ✅ **Merch Printify shop ID** — Real shop ID `27238436` found via debug endpoint. `PRINTIFY_SHOP_ID` env var added to Vercel. Fixed in `merch/page.tsx`, `merch/checkout/route.ts`, and `stripe/webhook/route.ts`. PR #157 merged.
+- ✅ **Merch variant image** — `MerchProductCard` now updates image when user selects a different color/size. PR #158 merged.
+- ✅ **SM-Give merch allocation** — Corrected from 30% to 75% of gross in webhook handler. PR #159 merged.
+- ✅ **Content posts rewrite** — All 140 posts rewritten to ≤280 chars including hashtags. Organized by day + platform. `content-posts-apr20-apr26.md` ready to bulk schedule. PR #155 merged.
+- ✅ **Audit fixes (Apr 19)** — Broken `/affiliate` links fixed, debug route deleted, feature-requests error handling added. PR #160 open.
 
 ---
 
@@ -249,6 +264,8 @@ The diff = the story. Ship it to every platform.
 - **No hardcoded wrong numbers** — check actual Stripe price IDs in Appendix B before touching payment code
 - **Don't break what works** — UI/UX must flow cleanly. If unsure, ask before touching working flows
 - **Commit frequently** with descriptive messages
+- **One branch + one PR per fix** — never accumulate changes from multiple fixes onto one branch
+- **Always open a PR after pushing** — push + PR is one step, always provide the direct PR link
 - **Update CLAUDE.md** every time a significant feature ships
 
 ---
