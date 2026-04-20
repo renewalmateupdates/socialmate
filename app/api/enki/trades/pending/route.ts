@@ -20,10 +20,20 @@ function getSupabase() {
 }
 
 // GET — fetch pending_approval trades for current user
+// Also auto-cancels any pending trades older than 24 hours before returning.
 export async function GET(_req: NextRequest) {
   const supabase = getSupabase()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ trades: [] })
+
+  // Auto-expire stale pending trades (> 24 hours old)
+  const expiryCutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+  await supabase
+    .from('enki_trades')
+    .update({ status: 'cancelled', reason: 'expired — signal too old' })
+    .eq('user_id', user.id)
+    .eq('status', 'pending_approval')
+    .lt('created_at', expiryCutoff)
 
   const { data, error } = await supabase
     .from('enki_trades')
