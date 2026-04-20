@@ -21,6 +21,17 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'April 19, 2026',
+    version: 'Quant Engine + Merch + Approvals',
+    changes: [
+      { type: 'New',      text: 'Enki Quant Engine — ADX filter, TP Ladder (TP1/TP2 partial exits), Kelly position sizing, Correlation Guard, DCA averaging, Sharpe/Sortino tracking, ATR trailing stops. Live for Commander/Emperor tiers.' },
+      { type: 'New',      text: 'Merch Store live at /merch — real products via Printify print-on-demand, Stripe checkout, auto-fulfillment, variant image switching.' },
+      { type: 'New',      text: 'Content Approval Workflows — team members can submit posts for owner review at /approvals.' },
+      { type: 'New',      text: 'X/Twitter Quota Widget — monthly post count, limit, and reset date visible in sidebar stats for all plans. Bar turns yellow at 80%, red at cap.' },
+      { type: 'Improved', text: 'SM-Give merch allocation — every merch order now routes 75% of gross revenue to SM-Give.' },
+    ],
+  },
+  {
     date: 'April 12, 2026',
     version: 'The Foundation',
     changes: [
