@@ -72,6 +72,7 @@ function DashboardInner() {
   const [welcomeDismissed, setWelcomeDismissed] = useState(true) // default true to avoid flash
   const [xBannerDismissed, setXBannerDismissed] = useState(true) // default true to avoid flash
   const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>([])
+  const [xBoosterBalance, setXBoosterBalance] = useState<number>(0)
   const { plan, credits, activeWorkspace, monthlyCredits, earnedCredits, paidCredits } = useWorkspace()
 
   useEffect(() => {
@@ -191,6 +192,17 @@ function DashboardInner() {
       // Show X banner if X not connected and not dismissed
       const xDismissed = localStorage.getItem('sm-x-banner-dismissed')
       if (!xDismissed && !platforms.includes('twitter')) setXBannerDismissed(false)
+
+      // Fetch X Booster balance
+      try {
+        const quotaRes = await fetch('/api/accounts/twitter/quota')
+        if (quotaRes.ok) {
+          const quotaData = await quotaRes.json()
+          setXBoosterBalance(quotaData.boosterBalance ?? 0)
+        }
+      } catch {
+        // Non-fatal — booster balance defaults to 0
+      }
     }
     init()
 
@@ -487,6 +499,39 @@ function DashboardInner() {
                 </div>
               </div>
             </div>
+
+            {/* X Booster card — only shown when X/Twitter is connected or balance > 0 */}
+            {(connectedPlatforms.includes('twitter') || xBoosterBalance > 0) && (
+              <div className={`col-span-2 rounded-2xl px-4 py-3 border flex items-center justify-between ${
+                xBoosterBalance > 0
+                  ? 'bg-green-50 border-green-200 dark:bg-green-950/30 dark:border-green-800'
+                  : 'bg-gray-50 border-gray-200 dark:bg-gray-800/50 dark:border-gray-700'
+              }`}>
+                <div>
+                  <p className={`text-xs font-extrabold ${
+                    xBoosterBalance > 0 ? 'text-green-700 dark:text-green-400' : 'text-gray-600 dark:text-gray-400'
+                  }`}>
+                    ⚡ X Booster Posts
+                  </p>
+                  <p className={`text-2xl font-extrabold mt-0.5 ${
+                    xBoosterBalance > 0 ? 'text-green-700 dark:text-green-300' : 'text-gray-400 dark:text-gray-500'
+                  }`}>
+                    {xBoosterBalance.toLocaleString()}
+                  </p>
+                  <p className={`text-xs mt-0.5 ${
+                    xBoosterBalance > 0 ? 'text-green-600 dark:text-green-500' : 'text-gray-400 dark:text-gray-500'
+                  }`}>
+                    {xBoosterBalance > 0 ? 'extra posts available' : '0 remaining'}
+                  </p>
+                </div>
+                {xBoosterBalance === 0 && (
+                  <Link href="/settings?tab=plan#x-booster"
+                    className="text-xs font-bold px-3 py-1.5 bg-black text-white dark:bg-gray-700 dark:text-white rounded-xl hover:opacity-80 transition-all flex-shrink-0">
+                    Get more →
+                  </Link>
+                )}
+              </div>
+            )}
 
             {/* Stat cards */}
             {[

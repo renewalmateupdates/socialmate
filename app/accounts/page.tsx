@@ -91,37 +91,44 @@ function PlatformCard({
   }
 
   return (
-    <div className={`flex items-center gap-3 p-4 bg-surface border rounded-2xl transition-all ${
+    <div className={`flex flex-col gap-2 p-4 bg-surface border rounded-2xl transition-all ${
       atLimit ? 'border-theme opacity-60' : 'border-theme hover:border-gray-300'
     }`}>
-      <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-xl flex-shrink-0">
-        {meta.icon}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <p className="text-sm font-semibold">{meta.label}</p>
-          {isConnected && (
-            <span className="text-xs font-semibold px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
-              Connected
-            </span>
-          )}
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-xl flex-shrink-0">
+          {meta.icon}
         </div>
-        <p className="text-xs text-gray-400">
-          {platformCount > 0 ? `${platformCount}/${accountsPerPlatform} connected` : 'Not connected'}
-        </p>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="text-sm font-semibold">{meta.label}</p>
+            {isConnected && (
+              <span className="text-xs font-semibold px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
+                Connected
+              </span>
+            )}
+          </div>
+          <p className="text-xs text-gray-400">
+            {platformCount > 0 ? `${platformCount}/${accountsPerPlatform} connected` : 'Not connected'}
+          </p>
+        </div>
+        {atLimit ? (
+          <Link href="/pricing"
+            className="text-xs font-semibold px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-xl hover:bg-gray-200 transition-all flex-shrink-0">
+            Upgrade
+          </Link>
+        ) : (
+          <button
+            onClick={() => onConnect(platform)}
+            disabled={isConnecting}
+            className="text-xs font-semibold px-3 py-2.5 min-h-[44px] bg-black text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex-shrink-0">
+            {isConnecting ? 'Connecting...' : isConnected ? '+ Add' : 'Connect'}
+          </button>
+        )}
       </div>
-      {atLimit ? (
-        <Link href="/pricing"
-          className="text-xs font-semibold px-3 py-1.5 bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-xl hover:bg-gray-200 transition-all flex-shrink-0">
-          Upgrade
-        </Link>
-      ) : (
-        <button
-          onClick={() => onConnect(platform)}
-          disabled={isConnecting}
-          className="text-xs font-semibold px-3 py-2.5 min-h-[44px] bg-black text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex-shrink-0">
-          {isConnecting ? 'Connecting...' : isConnected ? '+ Add' : 'Connect'}
-        </button>
+      {platform === 'twitter' && !atLimit && (
+        <p className="text-xs text-gray-400 leading-relaxed pl-1">
+          Connecting your X account registers it globally. Disconnecting starts a 45-day reconnection pause. This protects against abuse.
+        </p>
       )}
     </div>
   )
@@ -194,6 +201,12 @@ function AccountsInner() {
     if (error === 'twitter_token_failed')          showToast('Failed to connect X — please try again', 'error')
     if (error === 'twitter_user_failed')           showToast('Failed to fetch X profile — please try again', 'error')
     if (error === 'twitter_db_error')              showToast('X connected but failed to save — please try again', 'error')
+    if (error === 'twitter_already_connected')     showToast('This X account is already connected to another SocialMate account', 'error')
+    if (error === 'twitter_in_cooldown') {
+      const until = searchParams.get('until')
+      const date  = until ? new Date(until).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'a future date'
+      showToast(`This X account is in a 45-day reconnection pause until ${date}`, 'error')
+    }
     if (error === 'linkedin_invalid_state')        showToast('Security check failed — please try again', 'error')
     if (error === 'linkedin_token_failed')         showToast('Failed to connect LinkedIn — please try again', 'error')
     if (error === 'linkedin_db_error')             showToast('Something went wrong saving your account', 'error')
@@ -239,7 +252,23 @@ function AccountsInner() {
 
   const handleDisconnect = async (id: string, platform: string) => {
     setDisconnecting(id)
-    await supabase.from('connected_accounts').delete().eq('id', id)
+
+    if (platform === 'twitter') {
+      // Use the API route so the jail registry is updated
+      const res = await fetch('/api/accounts/twitter/disconnect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accountId: id }),
+      })
+      if (!res.ok) {
+        showToast('Failed to disconnect X account — please try again', 'error')
+        setDisconnecting(null)
+        return
+      }
+    } else {
+      await supabase.from('connected_accounts').delete().eq('id', id)
+    }
+
     setAccounts(prev => prev.filter(a => a.id !== id))
     setConfirmDisconnect(null)
     setDisconnecting(null)
@@ -439,7 +468,9 @@ function AccountsInner() {
                       {isConfirming && (
                         <div className="mt-3 pt-3 border-t border-white/60 flex flex-col sm:flex-row items-start sm:items-center gap-2">
                           <p className="text-xs text-red-600 font-semibold flex-1">
-                            Disconnect @{account.account_name} from {meta.label}? This cannot be undone.
+                            {account.platform === 'twitter'
+                              ? `Disconnecting @${account.account_name} will lock this X account from reconnecting for 45 days. Are you sure?`
+                              : `Disconnect @${account.account_name} from ${meta.label}? This cannot be undone.`}
                           </p>
                           <div className="flex items-center gap-2 flex-shrink-0">
                             <button onClick={() => handleDisconnect(account.id, account.platform)}

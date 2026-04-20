@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -85,6 +86,35 @@ export async function GET(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.redirect(`${appUrl}/login`)
 
+  // --- Platform Account Jail: check if this Twitter account is locked/in use elsewhere ---
+  const { data: registryRecord } = await getSupabaseAdmin()
+    .from('platform_account_registry')
+    .select('id, status, connected_to_user, cooling_until')
+    .eq('platform', 'twitter')
+    .eq('platform_account_id', platform_user_id)
+    .maybeSingle()
+
+  if (registryRecord) {
+    // Account is actively connected to a different SocialMate user
+    if (registryRecord.status === 'active' && registryRecord.connected_to_user !== user.id) {
+      cookieStore.delete('twitter_oauth_state')
+      cookieStore.delete('twitter_code_verifier')
+      return NextResponse.redirect(`${appUrl}/accounts?error=twitter_already_connected`)
+    }
+
+    // Account is in the 45-day cooling period
+    if (registryRecord.status === 'cooling' && registryRecord.cooling_until) {
+      const coolingUntil = new Date(registryRecord.cooling_until)
+      if (coolingUntil > new Date()) {
+        cookieStore.delete('twitter_oauth_state')
+        cookieStore.delete('twitter_code_verifier')
+        const until = coolingUntil.toISOString()
+        return NextResponse.redirect(`${appUrl}/accounts?error=twitter_in_cooldown&until=${encodeURIComponent(until)}`)
+      }
+    }
+  }
+  // ---------------------------------------------------------------------------------------
+
   // Upsert connected account
   const { data: existing } = await supabase
     .from('connected_accounts')
@@ -119,6 +149,22 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${appUrl}/accounts?error=twitter_db_error`)
     }
   }
+
+  // Register account in jail registry (upsert — marks it as active, owned by this user)
+  await getSupabaseAdmin()
+    .from('platform_account_registry')
+    .upsert(
+      {
+        platform: 'twitter',
+        platform_account_id: platform_user_id,
+        connected_to_user: user.id,
+        status: 'active',
+        disconnected_at: null,
+        cooling_until: null,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'platform,platform_account_id' }
+    )
 
   // Clean up cookies
   cookieStore.delete('twitter_oauth_state')

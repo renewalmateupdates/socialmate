@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 export async function POST(request: NextRequest) {
   const cookieStore = await cookies()
@@ -26,6 +27,27 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}))
   const accountId = body?.accountId
 
+  // Fetch platform_user_id BEFORE deleting so we can update the jail registry
+  let platformUserId: string | null = null
+  if (accountId) {
+    const { data: accountRow } = await supabase
+      .from('connected_accounts')
+      .select('platform_user_id')
+      .eq('id', accountId)
+      .eq('user_id', user.id)
+      .eq('platform', 'twitter')
+      .maybeSingle()
+    platformUserId = accountRow?.platform_user_id ?? null
+  } else {
+    const { data: accountRow } = await supabase
+      .from('connected_accounts')
+      .select('platform_user_id')
+      .eq('user_id', user.id)
+      .eq('platform', 'twitter')
+      .maybeSingle()
+    platformUserId = accountRow?.platform_user_id ?? null
+  }
+
   let query = supabase
     .from('connected_accounts')
     .delete()
@@ -36,6 +58,23 @@ export async function POST(request: NextRequest) {
 
   const { error } = await query
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // Put the Twitter account into the 45-day cooling jail
+  if (platformUserId) {
+    const now = new Date()
+    const coolingUntil = new Date(now.getTime() + 45 * 24 * 60 * 60 * 1000)
+    await getSupabaseAdmin()
+      .from('platform_account_registry')
+      .update({
+        status: 'cooling',
+        connected_to_user: null,
+        disconnected_at: now.toISOString(),
+        cooling_until: coolingUntil.toISOString(),
+        updated_at: now.toISOString(),
+      })
+      .eq('platform', 'twitter')
+      .eq('platform_account_id', platformUserId)
+  }
 
   return NextResponse.json({ ok: true })
 }
