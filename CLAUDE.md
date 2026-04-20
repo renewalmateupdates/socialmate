@@ -197,32 +197,55 @@ These have burned us before — always apply:
 
 ## Known Issues / Bugs (fix these when touched)
 
-- No open bugs currently tracked — add new ones here as discovered.
+- **X quota restructure needed** — see Pending section below. Free tier limit needs to drop to 5/month. New X Booster add-on being considered.
+- **Partial post UX** — when a post publishes to some platforms but not others, the calendar shows "Partial" with no explanation. Users should see "Bluesky ✓ · X blocked (quota)" or similar. Not built yet.
 
-## Audit Findings (April 19, 2026) — resolved
+## Audit Findings (April 19–20, 2026) — resolved
 
 - ✅ Broken `/affiliate` links in `/give` and `/referral` — now correctly point to `/affiliates` (PR #160)
-- ✅ Exposed debug route `/api/merch/debug` — deleted (was leaking PRINTIFY_API_KEY metadata to public) (PR #160)
+- ✅ Exposed debug route `/api/merch/debug` — deleted (PR #160)
 - ✅ Missing try/catch in `/api/feature-requests` POST — added (PR #160)
+- ✅ `posts_status_check` DB constraint missing `failed` and `partial` values — migration added (PR #173). **Must run SQL in Supabase if not auto-applied:** `ALTER TABLE posts DROP CONSTRAINT IF EXISTS posts_status_check; ALTER TABLE posts ADD CONSTRAINT posts_status_check CHECK (status IN ('draft', 'scheduled', 'published', 'failed', 'partial', 'pending_approval'));`
+- ✅ Twitter quota plan lookup bug — personal workspace defaulted to 'free' plan (50 limit) because `workspaceId=null` caused empty DB lookup. Fixed to query by `owner_id + is_personal=true` (PR #175)
+- ✅ Admin email (`socialmatehq@gmail.com`) now bypasses X quota entirely (PR #175)
+
+---
+
+## Admin Tools (built Apr 20, 2026)
+
+- `GET /api/admin/rescue-scheduled` — shows count of posts stuck in 'scheduled' past their scheduled_at
+- `POST /api/admin/rescue-scheduled` — force-publishes all stuck posts via `fromInngest:true`, force-fails any that still error so they don't stay stuck forever
+- `GET /api/admin/post-diagnostics` — shows today's partial/failed posts with per-platform success/fail breakdown from `platform_post_ids`
+
+Run rescue in browser console (must be logged in as socialmatehq@gmail.com):
+```js
+fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>console.log(JSON.stringify(d,null,2)))
+```
 
 ---
 
 ## Pending / In Progress
 
-- **Content post batch — READY TO SCHEDULE (Apr 20–26):**
-  - 140 posts written and saved to `content-posts-apr20-apr26.md` in repo root
-  - 10 slots/day × 2 platforms (X + Bluesky) × 7 days
-  - Schedule: 1 post/hour, 8am–5pm ET starting Monday Apr 20
-  - Copy-paste into bulk scheduler — file is organized by day + time slot
-  - Joshua unavailable 12:30pm–10:30pm Apr 20 — all posts are pre-scheduled so delivery unaffected
+- **X quota restructure — NEXT SESSION PRIORITY:**
+  - Current limits (free: 50, pro: 200, agency: 500) need adjustment for sustainability
+  - X API cost: $0.01/tweet. At 1000 free users × 50 tweets = $500/month with zero revenue = unsustainable
+  - **Proposed new limits:** Free: 5/month · Pro: 150/month · Agency: 400/month
+  - **Proposed new add-on:** "X Booster" $2.99/month → 150 extra X posts. Costs ~$1.50 in API fees, nets $1.49
+  - Alternative: fold X posts into credit system (1 X post = N credits) — reuses existing infra
+  - Decision needed before implementing. Joshua to decide which model next session.
+  - Files to change: `lib/publish/twitter.ts` (TWITTER_QUOTA map) + `app/api/accounts/twitter/quota/route.ts` (limits map) + Stripe for new add-on product if going that route
 
+- **Content posts (Apr 20–26)** — bulk-scheduled, running daily 8am–5pm ET on X + Bluesky. Inngest now confirmed working. Posts going out as "Partial" because of the quota bug (now fixed in PR #175). May need to manually retry missed morning slots.
 
+- **Inngest env vars** — confirmed needed: `INNGEST_EVENT_KEY` + `INNGEST_SIGNING_KEY` in Vercel. Posts were not publishing until these were set. Verify they're still set after any Vercel config changes.
 
-- **SM-Give renewal tracking gap** — webhook currently records 2% on new subscription checkouts only. Renewal payments (`invoice.payment_succeeded`) are not yet handled. Low priority but worth closing eventually.
+- **Partial post UX** — show per-platform result in calendar/queue UI. "Bluesky ✓ · X ✗ (quota)" style. Not built yet.
 
-- **Growth partner trial (Abdus Sohag)** — 1-week trial active as of Apr 19. Referral link: `?ref=SOHAG`. Review results end of week; if strong, set up contract + renegotiate to standard affiliate rates.
+- **SM-Give renewal tracking** — `invoice.payment_succeeded` now handled (PR #164). Confirmed done.
 
-- **Enki Truth Mode testing** — market opens Monday Apr 21; first real signal data expected then. 50-trade minimum per strategy before results are valid.
+- **Growth partner trial (Abdus Sohag)** — 1-week trial active as of Apr 19. Referral link: `?ref=SOHAG`. Review end of week; if strong, set up contract + renegotiate to standard affiliate rates.
+
+- **Enki Truth Mode testing** — market opens Apr 21; first real signal data expected then. 50-trade minimum per strategy before results are valid.
 
 - **Discord management tools** (future — moderation, welcome messages, role automation)
 - **Gilgamesh's Guide landing page** (future — free PDF, business/creator/self-dev guide for entrepreneurs)
@@ -236,6 +259,7 @@ These have burned us before — always apply:
 - ✅ **Stripe SDK v20 promo code params** — `promotion: { type: 'coupon', coupon: id }` format confirmed and in use.
 - ✅ **enkiTruthModeScan** — registered in `app/api/inngest/route.ts`. Running every 15 min.
 - ✅ **Growth partner affiliate account** — Abdus Sohag (thez1shann@gmail.com) created in Supabase Auth + linked in `affiliates` table. UUID: `1ac0b2ca-fc44-4a87-8781-67f9b81d4fbe`. Commission rate: 10% (trial). Temp password: SocialMate2026!
+- ✅ **SM-Give renewal tracking** — `invoice.payment_succeeded` now records 2% to `sm_give_allocations` with source `subscription_renewal`. Only fires on `billing_reason = subscription_cycle`. PR #164.
 - ✅ **SM-Give webhook integration** — `sm_give_allocations` writes added to Stripe webhook: 2% of subscription checkouts, 100% of donation checkouts. Both non-fatal. PR #148 merged.
 - ✅ **Supabase migrations (Apr 18)** — `sm_give_allocations`, `merch_waitlist` confirmed ran.
 - ✅ **Supabase email confirmation** — "Confirm email" toggle is ON (verified Apr 19). Users must confirm before first sign-in.
