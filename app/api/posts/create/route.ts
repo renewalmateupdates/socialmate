@@ -188,9 +188,10 @@ export async function POST(request: NextRequest) {
       }
 
       try {
-        await inngest.send({ name: 'post/scheduled', data: { postId: post.id, scheduledAt } })
+        const inngestResult = await inngest.send({ name: 'post/scheduled', data: { postId: post.id, scheduledAt } })
+        console.log('[INNGEST] post/scheduled sent for', post.id, 'at', scheduledAt, inngestResult)
       } catch (inngestErr) {
-        console.error('Inngest send error (non-fatal):', inngestErr)
+        console.error('[INNGEST] FAILED to send post/scheduled for post', post.id, '— post is saved but will NOT auto-publish:', inngestErr)
       }
 
       return NextResponse.json({ success: true, postId: post.id, status: 'scheduled' })
