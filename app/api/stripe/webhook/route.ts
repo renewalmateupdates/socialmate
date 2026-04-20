@@ -1002,7 +1002,7 @@ const creditsToSet = alreadyOnPlan
   if (event.type === 'invoice.payment_succeeded') {
     const invoice = event.data.object as Stripe.Invoice
     // Only track renewals (billing_reason = 'subscription_cycle'), not initial checkout
-    if ((invoice as any).billing_reason === 'subscription_cycle' && invoice.subscription) {
+    if ((invoice as any).billing_reason === 'subscription_cycle' && (invoice as any).subscription) {
       try {
         const amountPaidCents = invoice.amount_paid ?? 0
         if (amountPaidCents > 0) {
