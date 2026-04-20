@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
       const res = await fetch(`${APP_URL}/api/posts/publish`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ postId: post.id }),
+        body: JSON.stringify({ postId: post.id, fromInngest: true }),
       })
       const data = await res.json()
       results.push({ postId: post.id, status: res.ok ? 'published' : 'failed', error: data.error })
