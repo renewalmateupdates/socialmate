@@ -45,7 +45,7 @@ const FEATURES = [
   {
     icon: '📅',
     title: 'Smart Scheduling',
-    desc: 'Schedule across 5 live platforms today, with 11 more on the way. Bulk upload, automated queues, and platform-specific character limit enforcement built in.',
+    desc: 'Schedule across 5 social platforms today, with Twitch and YouTube clips support built in. Bulk upload, automated queues, and platform-specific character limit enforcement included.',
   },
   {
     icon: '🤖',
@@ -151,14 +151,14 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
       <section className="max-w-4xl mx-auto px-6 pt-24 pb-20 text-center">
         <HeroLaunchBadge />
         <div className="inline-flex items-center gap-2 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 text-xs font-bold px-4 py-2 rounded-full mb-8">
-          🌱 Free forever · No credit card required · 5 live platforms · 12 AI tools
+          🌱 Free forever · No credit card required · 5 social platforms · Twitch &amp; YouTube clips · 12 AI tools
         </div>
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight text-gray-900 dark:text-gray-100">
           Social media management,{' '}
           <span className="text-gray-400 dark:text-gray-500">finally built for everyone.</span>
         </h1>
         <p className="text-gray-500 dark:text-gray-400 text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
-          Schedule across 5 platforms, write better content with 12 AI tools, and track what's actually working — all from one place.
+          Schedule across 5 social platforms, browse and schedule Twitch clips and YouTube videos, write better content with 12 AI tools, and track what's actually working — all from one place.
           Free to start. No $99/month trap.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
@@ -192,7 +192,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         {/* STATS */}
         <div className="grid grid-cols-3 gap-4 sm:gap-6 mt-12 sm:mt-16 max-w-2xl mx-auto">
           {[
-            { value: '5',   label: 'platforms live'    },
+            { value: '5',   label: 'social platforms live' },
             { value: '12',  label: 'AI tools included' },
             { value: '$0',  label: 'To get started'    },
           ].map(stat => (
@@ -254,9 +254,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-10">
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Platform support</p>
-            <h2 className="text-3xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">5 live now, 11 coming soon.</h2>
+            <h2 className="text-3xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">5 social platforms live. Twitch &amp; YouTube clips built in.</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 max-w-lg mx-auto">
-              5 platforms live now. YouTube, Reddit, and Threads are next up. More on the roadmap.
+              Bluesky, Discord, Telegram, Mastodon, and X/Twitter live now. Twitch clips and YouTube videos schedulable directly inside SocialMate. LinkedIn, Reddit, and more on the roadmap.
             </p>
           </div>
           <div className="space-y-6">
