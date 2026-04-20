@@ -184,9 +184,26 @@ export default function CreatePageClient() {
   const [imageUrl, setImageUrl] = useState<string | null>(null)
   const [videoDragOver, setVideoDragOver] = useState(false)
   const [imageDragOver, setImageDragOver] = useState(false)
+  const [filterEmail, setFilterEmail] = useState('')
+  const [filterNotifyState, setFilterNotifyState] = useState<'idle' | 'loading' | 'done'>('idle')
 
   const videoInputRef = useRef<HTMLInputElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
+
+  async function handleFilterNotify() {
+    if (!filterEmail.trim() || filterNotifyState !== 'idle') return
+    setFilterNotifyState('loading')
+    try {
+      await fetch('/api/feature-requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: 'Creator Studio filters — notify me', email: filterEmail.trim() }),
+      })
+    } catch {
+      // non-fatal
+    }
+    setFilterNotifyState('done')
+  }
 
   const spec = PLATFORM_SPECS.find(p => p.id === selectedPlatform) ?? PLATFORM_SPECS[0]
 
@@ -571,7 +588,27 @@ export default function CreatePageClient() {
                   </span>
                 ))}
               </div>
-              <p className="text-xs text-gray-600 mt-2">Coming soon to both editors</p>
+              {filterNotifyState === 'done' ? (
+                <p className="text-xs text-green-400 font-semibold mt-2">You&apos;re on the list!</p>
+              ) : (
+                <div className="flex items-center gap-1.5 mt-2">
+                  <input
+                    type="email"
+                    value={filterEmail}
+                    onChange={e => setFilterEmail(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') handleFilterNotify() }}
+                    placeholder="your@email.com"
+                    className="flex-1 min-w-0 px-2 py-1 rounded-lg bg-gray-900 border border-gray-700 text-xs text-gray-200 placeholder-gray-600 focus:outline-none focus:border-amber-500/60"
+                  />
+                  <button
+                    onClick={handleFilterNotify}
+                    disabled={filterNotifyState === 'loading'}
+                    className="px-2.5 py-1 rounded-lg bg-amber-500 text-gray-950 text-xs font-bold hover:opacity-90 transition-opacity disabled:opacity-60 whitespace-nowrap"
+                  >
+                    {filterNotifyState === 'loading' ? '...' : 'Notify me'}
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Quick tip */}

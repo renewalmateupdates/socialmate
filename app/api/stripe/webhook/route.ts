@@ -998,5 +998,27 @@ const creditsToSet = alreadyOnPlan
     }
   }
 
+  // ── INVOICE PAID (subscription renewal) ────────────────────────────────────
+  if (event.type === 'invoice.payment_succeeded') {
+    const invoice = event.data.object as Stripe.Invoice
+    // Only track renewals (billing_reason = 'subscription_cycle'), not initial checkout
+    if ((invoice as any).billing_reason === 'subscription_cycle' && invoice.subscription) {
+      try {
+        const amountPaidCents = invoice.amount_paid ?? 0
+        if (amountPaidCents > 0) {
+          await supabase.from('sm_give_allocations').insert({
+            source:            'subscription_renewal',
+            gross_cents:       amountPaidCents,
+            give_cents:        Math.floor(amountPaidCents * 0.02),
+            stripe_session_id: invoice.id,
+            user_id:           null,
+          })
+        }
+      } catch (err) {
+        console.warn('SM-Give renewal allocation failed (non-fatal):', err)
+      }
+    }
+  }
+
   return NextResponse.json({ received: true })
 }
