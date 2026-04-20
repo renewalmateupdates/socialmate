@@ -206,8 +206,10 @@ These have burned us before — always apply:
 - ✅ Exposed debug route `/api/merch/debug` — deleted (PR #160)
 - ✅ Missing try/catch in `/api/feature-requests` POST — added (PR #160)
 - ✅ `posts_status_check` DB constraint missing `failed` and `partial` values — migration added (PR #173). **Must run SQL in Supabase if not auto-applied:** `ALTER TABLE posts DROP CONSTRAINT IF EXISTS posts_status_check; ALTER TABLE posts ADD CONSTRAINT posts_status_check CHECK (status IN ('draft', 'scheduled', 'published', 'failed', 'partial', 'pending_approval'));`
-- ✅ Twitter quota plan lookup bug — personal workspace defaulted to 'free' plan (50 limit) because `workspaceId=null` caused empty DB lookup. Fixed to query by `owner_id + is_personal=true` (PR #175)
-- ✅ Admin email (`socialmatehq@gmail.com`) now bypasses X quota entirely (PR #175)
+- ✅ Twitter quota plan lookup bug — personal workspace defaulted to 'free' plan (50 limit) because `workspaceId=null` caused empty DB lookup. Fixed to query by `owner_id + is_personal=true` (PR #176)
+- ✅ Admin email (`socialmatehq@gmail.com`) now bypasses X quota entirely — sidebar shows 999,999 ceiling (PR #176)
+- ✅ 3 Apr 20 partial posts (Bluesky ✓, X ✗) — rescued via `POST /api/admin/rescue-partial`, all 3 now published to X (Apr 20, 10:38am)
+- ✅ `posts_status_check` constraint SQL confirmed applied in Supabase — failed/partial statuses now save correctly
 
 ---
 
@@ -216,10 +218,16 @@ These have burned us before — always apply:
 - `GET /api/admin/rescue-scheduled` — shows count of posts stuck in 'scheduled' past their scheduled_at
 - `POST /api/admin/rescue-scheduled` — force-publishes all stuck posts via `fromInngest:true`, force-fails any that still error so they don't stay stuck forever
 - `GET /api/admin/post-diagnostics` — shows today's partial/failed posts with per-platform success/fail breakdown from `platform_post_ids`
+- `GET /api/admin/rescue-partial` — shows this month's partial posts with per-platform succeeded/failed breakdown
+- `POST /api/admin/rescue-partial` — re-publishes ONLY the failed platforms on partial posts (e.g. X failed while Bluesky succeeded). Merges new successes into `platform_post_ids`, promotes to 'published' when all platforms succeed.
 
 Run rescue in browser console (must be logged in as socialmatehq@gmail.com):
 ```js
+// Rescue stuck scheduled posts
 fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>console.log(JSON.stringify(d,null,2)))
+
+// Rescue partial posts (re-try only failed platforms)
+fetch('/api/admin/rescue-partial', {method:'POST', headers:{'Content-Type':'application/json'}, body:'{}'}).then(r=>r.json()).then(d=>console.log(JSON.stringify(d,null,2)))
 ```
 
 ---
@@ -235,7 +243,7 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
   - Decision needed before implementing. Joshua to decide which model next session.
   - Files to change: `lib/publish/twitter.ts` (TWITTER_QUOTA map) + `app/api/accounts/twitter/quota/route.ts` (limits map) + Stripe for new add-on product if going that route
 
-- **Content posts (Apr 20–26)** — bulk-scheduled, running daily 8am–5pm ET on X + Bluesky. Inngest now confirmed working. Posts going out as "Partial" because of the quota bug (now fixed in PR #175). May need to manually retry missed morning slots.
+- **Content posts (Apr 20–26)** — bulk-scheduled, running daily 8am–5pm ET on X + Bluesky. Inngest confirmed working. The 3 Apr 20 posts that went partial (Bluesky ✓, X ✗ due to quota bug) were rescued Apr 20 via `rescue-partial` — all 3 now fully published. Quota bug fixed in PR #176. Remaining posts (Apr 21–26) should publish cleanly.
 
 - **Inngest env vars** — confirmed needed: `INNGEST_EVENT_KEY` + `INNGEST_SIGNING_KEY` in Vercel. Posts were not publishing until these were set. Verify they're still set after any Vercel config changes.
 
