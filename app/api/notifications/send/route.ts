@@ -15,9 +15,12 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 const webpush = require('web-push')
 
 export async function POST(request: NextRequest) {
-  // Protect this endpoint — only callable server-side with the internal secret
+  // Protect this endpoint — callable with either the internal secret or the Inngest CRON_SECRET
   const secret = request.headers.get('x-internal-secret')
-  if (!secret || secret !== process.env.INTERNAL_SECRET) {
+  const internalKey = request.headers.get('x-internal-key')
+  const validSecret = (secret && secret === process.env.INTERNAL_SECRET)
+  const validInternalKey = (internalKey && internalKey === process.env.CRON_SECRET)
+  if (!validSecret && !validInternalKey) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
