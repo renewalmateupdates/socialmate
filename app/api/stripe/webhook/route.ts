@@ -594,13 +594,13 @@ export async function POST(req: NextRequest) {
 
       const { data: settings } = await supabase
         .from('user_settings')
-        .select('x_booster_credits')
+        .select('twitter_booster_balance')
         .eq('user_id', userId)
         .single()
-      const current = settings?.x_booster_credits ?? 0
+      const current = settings?.twitter_booster_balance ?? 0
       await supabase
         .from('user_settings')
-        .update({ x_booster_credits: current + postsToAdd })
+        .update({ twitter_booster_balance: current + postsToAdd })
         .eq('user_id', userId)
 
       console.log(`[XBooster] +${postsToAdd} posts added for user ${userId}`)
