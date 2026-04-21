@@ -125,6 +125,35 @@ export default function CalendarPage() {
   const [posts,        setPosts]        = useState<Post[]>([])
   const [loading,      setLoading]      = useState(true)
   const [selectedDay,  setSelectedDay]  = useState<string | null>(null)
+  const [retrying,     setRetrying]     = useState<string | null>(null)
+  const [retryToast,   setRetryToast]   = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+
+  const handleRetry = async (postId: string) => {
+    setRetrying(postId)
+    try {
+      const res = await fetch(`/api/posts/${postId}/retry`, { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok) {
+        setRetryToast({ message: data.error || 'Retry failed', type: 'error' })
+      } else {
+        setRetryToast({ message: data.status === 'published' ? 'All platforms published!' : 'Partially retried — check results', type: 'success' })
+        // Refresh posts to reflect new status
+        const updated = await supabase
+          .from('posts')
+          .select('id, content, platforms, scheduled_at, status, created_at, platform_post_ids')
+          .eq('id', postId)
+          .single()
+        if (updated.data) {
+          setPosts(prev => prev.map(p => p.id === postId ? (updated.data as Post) : p))
+        }
+      }
+    } catch {
+      setRetryToast({ message: 'Network error — try again', type: 'error' })
+    } finally {
+      setRetrying(null)
+      setTimeout(() => setRetryToast(null), 4000)
+    }
+  }
 
   const fetchPosts = useCallback(async () => {
     setLoading(true)
@@ -434,17 +463,26 @@ export default function CalendarPage() {
                           <span className={`text-xs font-bold px-2.5 py-1 rounded-full capitalize ${STATUS_BADGE[post.status] ?? STATUS_BADGE.draft}`}>
                             {post.status === 'partial' ? 'Partial' : post.status}
                           </span>
-                          <Link
-                            href={post.status === 'draft' || post.status === 'failed' ? `/compose?id=${post.id}` : '/drafts'}
-                            className={`text-xs font-semibold transition-colors ${
-                              post.status === 'failed'
-                                ? 'text-red-500 hover:text-red-700 dark:hover:text-red-300'
-                                : post.status === 'partial'
-                                  ? 'text-amber-500 hover:text-amber-700 dark:hover:text-amber-300'
+                          {post.status === 'partial' ? (
+                            <button
+                              onClick={() => handleRetry(post.id)}
+                              disabled={retrying === post.id}
+                              className="text-xs font-semibold text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-200 transition-colors flex items-center gap-1 disabled:opacity-50">
+                              {retrying === post.id
+                                ? <><div className="w-3 h-3 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />Retrying...</>
+                                : 'Retry failed →'}
+                            </button>
+                          ) : (
+                            <Link
+                              href={post.status === 'draft' || post.status === 'failed' ? `/compose?id=${post.id}` : '/drafts'}
+                              className={`text-xs font-semibold transition-colors ${
+                                post.status === 'failed'
+                                  ? 'text-red-500 hover:text-red-700 dark:hover:text-red-300'
                                   : 'text-blue-500 hover:text-blue-700 dark:hover:text-blue-300'
-                            }`}>
-                            {post.status === 'draft' ? 'Edit →' : post.status === 'failed' ? 'Retry →' : post.status === 'partial' ? 'View details →' : 'View in Queue →'}
-                          </Link>
+                              }`}>
+                              {post.status === 'draft' ? 'Edit →' : post.status === 'failed' ? 'Retry →' : 'View in Queue →'}
+                            </Link>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -475,6 +513,14 @@ export default function CalendarPage() {
 
         </div>
       </div>
+
+      {retryToast && (
+        <div className={`fixed bottom-6 right-6 z-50 text-white text-xs font-bold px-4 py-3 rounded-xl shadow-lg ${
+          retryToast.type === 'error' ? 'bg-red-500' : 'bg-black'
+        }`}>
+          {retryToast.message}
+        </div>
+      )}
     </div>
   )
 }
