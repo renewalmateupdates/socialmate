@@ -4,7 +4,6 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { stripe } from '@/lib/stripe'
 
-// X Booster tiers — one-time purchase packs
 const BOOSTER_TIERS: Record<string, { amount: number; priceEnvVar: string }> = {
   spark:  { amount: 50,  priceEnvVar: 'TWITTER_BOOSTER_SPARK_PRICE_ID'  },
   boost:  { amount: 120, priceEnvVar: 'TWITTER_BOOSTER_BOOST_PRICE_ID'  },
@@ -52,8 +51,8 @@ export async function POST(req: NextRequest) {
     const session = await stripe.checkout.sessions.create({
       mode:        'payment',
       line_items:  [{ price: priceId, quantity: 1 }],
-      success_url: `${appUrl}/dashboard?credits=added`,
-      cancel_url:  `${appUrl}/settings?tab=plan`,
+      success_url: `${appUrl}/settings?tab=Plan&booster=purchased#x-booster`,
+      cancel_url:  `${appUrl}/settings?tab=Plan#x-booster`,
       metadata: {
         type:    'twitter_booster',
         tier,

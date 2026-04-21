@@ -161,6 +161,10 @@ function ComposeInner() {
   const [rateLimitedUntil, setRateLimitedUntil] = useState<number | null>(null)
   const [rateLimitCountdown, setRateLimitCountdown] = useState(0)
 
+  // X / Twitter quota state
+  type TwitterQuota = { used: number; limit: number; boosterBalance: number }
+  const [twitterQuota, setTwitterQuota] = useState<TwitterQuota | null>(null)
+
   const planConfig = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
   const maxScheduleDate = (() => {
     const d = new Date()
@@ -324,6 +328,15 @@ function ComposeInner() {
       loadTemplate()
     }
   }, [searchParams])
+
+  // Fetch X quota whenever twitter enters the selected platforms list
+  useEffect(() => {
+    if (!selectedPlatforms.includes('twitter')) return
+    fetch('/api/accounts/twitter/quota')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d) setTwitterQuota({ used: d.used, limit: d.limit, boosterBalance: d.boosterBalance ?? 0 }) })
+      .catch(() => {/* non-critical */})
+  }, [selectedPlatforms.includes('twitter')]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const livePlatforms = PLATFORMS.filter(p => p.live)
   const soonPlatforms = PLATFORMS.filter(p => !p.live)
@@ -913,6 +926,36 @@ function ComposeInner() {
                   <p className="text-xs font-semibold text-amber-700">Select at least one platform to compose a post.</p>
                 </div>
               )}
+
+              {/* X / TWITTER QUOTA WARNINGS */}
+              {selectedPlatforms.includes('twitter') && twitterQuota && (() => {
+                const { used, limit, boosterBalance } = twitterQuota
+                if (used >= limit && boosterBalance === 0) {
+                  return (
+                    <div className="text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 px-3 py-2.5 rounded-lg flex items-center gap-2 border border-red-200 dark:border-red-800">
+                      <span>🚫</span>
+                      <span className="flex-1">X quota reached ({used}/{limit}) — <Link href="/settings?tab=Plan#x-booster" className="underline font-semibold">Buy X Booster →</Link></span>
+                    </div>
+                  )
+                }
+                if (used >= limit && boosterBalance > 0) {
+                  return (
+                    <div className="text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 px-3 py-2.5 rounded-lg flex items-center gap-2 border border-amber-200 dark:border-amber-800">
+                      <span>⚡</span>
+                      <span>Monthly quota reached — using booster balance ({boosterBalance} post{boosterBalance !== 1 ? 's' : ''} remaining)</span>
+                    </div>
+                  )
+                }
+                if (used >= Math.floor(limit * 0.8)) {
+                  return (
+                    <div className="text-xs text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20 px-3 py-2.5 rounded-lg flex items-center gap-2 border border-yellow-200 dark:border-yellow-800">
+                      <span>⚠️</span>
+                      <span>X quota at {used}/{limit} — running low</span>
+                    </div>
+                  )
+                }
+                return null
+              })()}
 
               {/* UNCONNECTED PLATFORM WARNINGS */}
               {selectedPlatforms

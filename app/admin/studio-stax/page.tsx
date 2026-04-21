@@ -25,6 +25,8 @@ interface Listing {
   plan_tier: string | null
   renewal_date: string | null
   rank: number | null
+  is_nsfw: boolean
+  nsfw_reason: string | null
 }
 
 const STATUS_BADGE: Record<string, string> = {
@@ -53,6 +55,8 @@ export default function AdminStudioStaxPage() {
   const [editDescription, setEditDescription] = useState('')
   const [editUrl, setEditUrl] = useState('')
   const [editLogoUrl, setEditLogoUrl] = useState('')
+  const [editIsNsfw, setEditIsNsfw] = useState(false)
+  const [editNsfwReason, setEditNsfwReason] = useState('')
   const [actionLoading, setActionLoading] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
@@ -122,6 +126,8 @@ export default function AdminStudioStaxPage() {
           logo_url: editLogoUrl.trim() || null,
           category: editCategory || null,
           admin_notes: adminNotes || null,
+          is_nsfw: editIsNsfw,
+          nsfw_reason: editNsfwReason.trim() || null,
         }),
       })
       const json = await res.json()
@@ -366,8 +372,13 @@ export default function AdminStudioStaxPage() {
                   {filtered.map((listing, i) => (
                     <tr key={listing.id}
                       className={`hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors ${i < filtered.length - 1 ? 'border-b border-theme' : ''}`}>
-                      <td className="px-5 py-3 cursor-pointer" onClick={() => { setSelected(listing); setAdminNotes(listing.admin_notes || ''); setEditCategory(listing.category || ''); setEditName(listing.name || ''); setEditTagline(listing.tagline || ''); setEditDescription(listing.description || ''); setEditUrl(listing.url || ''); setEditLogoUrl(listing.logo_url || ''); setConfirmDelete(false) }}>
-                        <div className="font-semibold text-gray-900 dark:text-gray-100">{listing.name}</div>
+                      <td className="px-5 py-3 cursor-pointer" onClick={() => { setSelected(listing); setAdminNotes(listing.admin_notes || ''); setEditCategory(listing.category || ''); setEditName(listing.name || ''); setEditTagline(listing.tagline || ''); setEditDescription(listing.description || ''); setEditUrl(listing.url || ''); setEditLogoUrl(listing.logo_url || ''); setEditIsNsfw(listing.is_nsfw || false); setEditNsfwReason(listing.nsfw_reason || ''); setConfirmDelete(false) }}>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-gray-900 dark:text-gray-100">{listing.name}</span>
+                          {listing.is_nsfw && (
+                            <span className="text-[10px] font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 px-1.5 py-0.5 rounded-full">18+</span>
+                          )}
+                        </div>
                         {listing.tagline && <div className="text-xs text-gray-400 mt-0.5 truncate max-w-[200px]">{listing.tagline}</div>}
                         {listing.applicant_email && <div className="text-xs text-gray-400">{listing.applicant_email}</div>}
                       </td>
@@ -402,7 +413,7 @@ export default function AdminStudioStaxPage() {
                         <div className="flex gap-2 flex-wrap">
                           {listing.status === 'pending' && (
                             <button
-                              onClick={() => { setSelected(listing); setAdminNotes(listing.admin_notes || ''); setEditCategory(listing.category || ''); setEditName(listing.name || ''); setEditTagline(listing.tagline || ''); setEditDescription(listing.description || ''); setEditUrl(listing.url || ''); setEditLogoUrl(listing.logo_url || ''); setConfirmDelete(false) }}
+                              onClick={() => { setSelected(listing); setAdminNotes(listing.admin_notes || ''); setEditCategory(listing.category || ''); setEditName(listing.name || ''); setEditTagline(listing.tagline || ''); setEditDescription(listing.description || ''); setEditUrl(listing.url || ''); setEditLogoUrl(listing.logo_url || ''); setEditIsNsfw(listing.is_nsfw || false); setEditNsfwReason(listing.nsfw_reason || ''); setConfirmDelete(false) }}
                               className="text-xs bg-black dark:bg-white text-white dark:text-black px-3 py-1 rounded-lg font-semibold hover:opacity-80 transition-all">
                               Review
                             </button>
@@ -506,6 +517,36 @@ export default function AdminStudioStaxPage() {
                     </select>
                     {!editCategory && (
                       <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">⚠ No category — listing won&apos;t appear on the public page.</p>
+                    )}
+                  </div>
+
+                  {/* NSFW toggle */}
+                  <div className={`rounded-xl border p-3 space-y-2 ${editIsNsfw ? 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800' : 'bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700'}`}>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-bold text-gray-700 dark:text-gray-300">🔞 NSFW / Adult Content</p>
+                        <p className="text-xs text-gray-400 mt-0.5">Blurs logo and description on public listing cards</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setEditIsNsfw(v => !v)}
+                        className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${editIsNsfw ? 'bg-red-500' : 'bg-gray-300 dark:bg-gray-600'}`}
+                        role="switch"
+                        aria-checked={editIsNsfw}
+                      >
+                        <span className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${editIsNsfw ? 'translate-x-4' : 'translate-x-0'}`} />
+                      </button>
+                    </div>
+                    {editIsNsfw && (
+                      <div>
+                        <label className="text-xs font-semibold text-red-600 dark:text-red-400 mb-1 block">Reason (internal, optional)</label>
+                        <input
+                          value={editNsfwReason}
+                          onChange={e => setEditNsfwReason(e.target.value)}
+                          placeholder="e.g. adult content platform"
+                          className="w-full border border-red-200 dark:border-red-800 dark:bg-gray-900 dark:text-gray-100 rounded-xl px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:border-red-400"
+                        />
+                      </div>
                     )}
                   </div>
 
