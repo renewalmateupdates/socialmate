@@ -543,6 +543,57 @@ export default function Pricing() {
           <p className="text-xs text-gray-500 mt-4 text-center">Purchase credit packs from Settings → Plan after signing up</p>
         </div>
 
+        {/* X BOOSTER PACKS */}
+        <div className="bg-gray-950 text-white rounded-2xl p-6 mb-8 border border-gray-800">
+          <div className="flex items-start justify-between mb-1">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-lg">𝕏</span>
+                <h3 className="text-base font-extrabold">X / Twitter Post Boosters</h3>
+              </div>
+              <p className="text-xs text-gray-400 max-w-xl leading-relaxed">
+                Need more X posts? Buy a one-time booster pack. Stacks on your plan quota. Never expires. No subscription required.
+              </p>
+            </div>
+            <span className="text-xs font-bold bg-gray-800 text-gray-300 px-2 py-0.5 rounded-full flex-shrink-0 ml-4">One-time</span>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-5">
+            {[
+              { label: 'Spark',  icon: '⚡', posts: 50,  price: '$1.99'  },
+              { label: 'Boost',  icon: '🔥', posts: 120, price: '$4.99', badge: 'Popular' },
+              { label: 'Surge',  icon: '💥', posts: 250, price: '$9.99'  },
+              { label: 'Storm',  icon: '🌪️', posts: 500, price: '$19.99', badge: 'Best value' },
+            ].map(pack => (
+              <div key={pack.label} className={`bg-white/5 hover:bg-white/10 transition-colors rounded-xl p-4 flex flex-col items-center text-center relative ${pack.badge === 'Popular' ? 'ring-2 ring-white/60' : ''} ${pack.badge === 'Best value' ? 'ring-2 ring-amber-400' : ''}`}>
+                {pack.badge && (
+                  <span className={`absolute -top-2.5 left-1/2 -translate-x-1/2 text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap ${pack.badge === 'Best value' ? 'bg-amber-400 text-black' : 'bg-white text-black'}`}>
+                    {pack.badge}
+                  </span>
+                )}
+                <span className="text-2xl mb-2">{pack.icon}</span>
+                <p className="text-sm font-extrabold mb-0.5">{pack.label}</p>
+                <p className="text-xs text-gray-400 mb-3">{pack.posts} extra X posts</p>
+                <p className="text-xl font-extrabold mb-3">{pack.price}</p>
+                <Link
+                  href="/settings?tab=plan#x-booster"
+                  className="w-full text-center text-xs font-bold py-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors text-white">
+                  Get {pack.label} →
+                </Link>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <p className="text-xs text-gray-500">
+              Packs stack, roll over month-to-month, and never expire.
+            </p>
+            <p className="text-xs text-gray-600">
+              X posts cost $0.01 each via the Twitter API. Boosters let you pre-purchase in bulk — saving you ~75% vs. paying per-post at API cost.
+            </p>
+          </div>
+        </div>
+
         {/* FAQ */}
         <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
           <h3 className="text-base font-extrabold mb-6">Frequently asked questions</h3>
