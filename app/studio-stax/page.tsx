@@ -40,8 +40,19 @@ export default async function StudioStaxPage() {
 
   const { data: listings } = await supabase
     .from('curated_listings')
-    .select('id, name, tagline, description, url, logo_url, category, smgive_donated_cents, consecutive_featured_months, admin_featured, created_at')
+    .select('id, name, tagline, description, url, logo_url, category, smgive_donated_cents, consecutive_featured_months, admin_featured, created_at, is_nsfw')
     .eq('status', 'approved')
+
+  // Founding spots counter
+  const { count: foundingSpotsUsed } = await supabase
+    .from('studio_stax_slots')
+    .select('*', { count: 'exact', head: true })
+    .eq('status', 'active')
+    .gt('expires_at', new Date().toISOString())
+  const FOUNDING_LIMIT = 100
+  const spotsUsed = foundingSpotsUsed ?? 0
+  const spotsRemaining = Math.max(0, FOUNDING_LIMIT - spotsUsed)
+  const foundingFull = spotsUsed >= FOUNDING_LIMIT
 
   // Ranking formula:
   // 1. Admin featured (Garrison) separated and shown first
@@ -80,12 +91,28 @@ export default async function StudioStaxPage() {
           <p className="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
             Founder-approved tools that share our belief: technology should empower creators, not exploit them. Ranked by generosity to SM-Give — not by who paid the most.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
+          {/* Founding spots counter */}
+          {!foundingFull ? (
+            <div className="inline-flex items-center gap-2 bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-700 rounded-full px-5 py-2 mt-6 text-sm font-bold text-amber-700 dark:text-amber-400">
+              🔥 {spotsRemaining} of {FOUNDING_LIMIT} Founding Spots Remaining
+              <span className="font-normal text-amber-600 dark:text-amber-500">— $100/yr (then $150/yr)</span>
+            </div>
+          ) : (
+            <div className="inline-flex items-center gap-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full px-5 py-2 mt-6 text-sm font-semibold text-gray-600 dark:text-gray-400">
+              🏅 {spotsUsed} Founding Members
+            </div>
+          )}
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6">
             <Link href="/studio-stax/apply"
               className="inline-flex items-center gap-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all text-sm">
               Apply for a Listing →
             </Link>
-            <span className="text-xs text-gray-400 dark:text-gray-500">$100/year founder price · first 100 spots · goes to $150 after</span>
+            {!foundingFull ? (
+              <span className="text-xs text-gray-400 dark:text-gray-500">$100/year founder price · first 100 spots · goes to $150 after</span>
+            ) : (
+              <span className="text-xs text-gray-400 dark:text-gray-500">Standard listing $150/yr</span>
+            )}
             <Link href="/studio-stax/portal"
               className="text-xs font-semibold text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
               Lister Portal →
@@ -112,13 +139,21 @@ export default async function StudioStaxPage() {
                   href={`/api/studio-stax/click/${listing.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex flex-col bg-white dark:bg-gray-900 border-2 border-purple-300 dark:border-purple-700 ring-1 ring-purple-200 dark:ring-purple-800 rounded-2xl p-6 hover:shadow-xl hover:border-purple-400 dark:hover:border-purple-500 transition-all"
+                  className="group relative flex flex-col bg-white dark:bg-gray-900 border-2 border-purple-300 dark:border-purple-700 ring-1 ring-purple-200 dark:ring-purple-800 rounded-2xl p-6 hover:shadow-xl hover:border-purple-400 dark:hover:border-purple-500 transition-all overflow-hidden"
                 >
+                  {/* NSFW badge */}
+                  {listing.is_nsfw && (
+                    <span className="absolute top-3 right-3 z-10 text-[10px] font-extrabold bg-red-600 text-white px-2 py-0.5 rounded-full select-none">18+</span>
+                  )}
                   {/* Top row */}
                   <div className="flex items-start gap-4 mb-4">
                     {listing.logo_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={listing.logo_url} alt={listing.name} className="w-12 h-12 rounded-xl object-cover shrink-0" />
+                      <img
+                        src={listing.logo_url}
+                        alt={listing.name}
+                        className={`w-12 h-12 rounded-xl object-cover shrink-0 transition-all duration-300 ${listing.is_nsfw ? 'blur-md group-hover:blur-none' : ''}`}
+                      />
                     ) : (
                       <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center text-purple-700 dark:text-purple-300 font-extrabold text-lg shrink-0">
                         {listing.name.charAt(0)}
@@ -143,9 +178,16 @@ export default async function StudioStaxPage() {
                   </div>
 
                   {/* Description */}
-                  <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2 mb-4 flex-1">
-                    {listing.description}
-                  </p>
+                  {listing.is_nsfw ? (
+                    <div className="mb-4 flex-1">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2 blur-sm group-hover:blur-none transition-all duration-300 select-none group-hover:select-auto">{listing.description}</p>
+                      <p className="text-[10px] text-red-500 dark:text-red-400 mt-1 group-hover:hidden">This listing contains adult content — hover to reveal</p>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2 mb-4 flex-1">
+                      {listing.description}
+                    </p>
+                  )}
 
                   {/* URL */}
                   <div className="flex items-center gap-1.5 text-xs text-purple-600 dark:text-purple-400 font-semibold group-hover:underline">
@@ -201,15 +243,23 @@ export default async function StudioStaxPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {items.map((listing, idx) => (
                       <a key={listing.id} href={`/api/studio-stax/click/${listing.id}`} target="_blank" rel="noopener noreferrer"
-                        className={`group block bg-white dark:bg-gray-900 border rounded-2xl p-5 hover:shadow-lg transition-all ${
+                        className={`group relative block bg-white dark:bg-gray-900 border rounded-2xl p-5 hover:shadow-lg transition-all overflow-hidden ${
                           idx === 0 ? 'border-amber-300 dark:border-amber-700 ring-1 ring-amber-200 dark:ring-amber-800' :
                           idx === 1 ? 'border-gray-200 dark:border-gray-700' :
                           'border-gray-100 dark:border-gray-800'
                         }`}>
+                        {/* NSFW badge */}
+                        {listing.is_nsfw && (
+                          <span className="absolute top-3 right-3 z-10 text-[10px] font-extrabold bg-red-600 text-white px-2 py-0.5 rounded-full select-none">18+</span>
+                        )}
                         <div className="flex items-start gap-3 mb-3">
                           {listing.logo_url ? (
                             // eslint-disable-next-line @next/next/no-img-element
-                            <img src={listing.logo_url} alt={listing.name} className="w-10 h-10 rounded-xl object-cover shrink-0" />
+                            <img
+                              src={listing.logo_url}
+                              alt={listing.name}
+                              className={`w-10 h-10 rounded-xl object-cover shrink-0 transition-all duration-300 ${listing.is_nsfw ? 'blur-md group-hover:blur-none' : ''}`}
+                            />
                           ) : (
                             <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-lg shrink-0">
                               {listing.name.charAt(0)}
@@ -223,7 +273,14 @@ export default async function StudioStaxPage() {
                             <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-0.5">{listing.tagline}</p>
                           </div>
                         </div>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2 mb-3">{listing.description}</p>
+                        {listing.is_nsfw ? (
+                          <div className="mb-3">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2 blur-sm group-hover:blur-none transition-all duration-300 select-none group-hover:select-auto">{listing.description}</p>
+                            <p className="text-[10px] text-red-500 dark:text-red-400 mt-1 group-hover:hidden">This listing contains adult content — hover to reveal</p>
+                          </div>
+                        ) : (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2 mb-3">{listing.description}</p>
+                        )}
                         <div className="flex items-center justify-between">
                           <span className="text-[10px] text-gray-400 font-medium">{getHostname(listing.url)}</span>
                           {listing.smgive_donated_cents > 0 && (
