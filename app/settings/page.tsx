@@ -29,6 +29,13 @@ const CREDIT_PACKS = [
   { label: 'Max Pack', credits: 2000, price: '$19.99', priceId: 'price_1TFMID7OMwDowUuU2sQgbIx9', popular: false },
 ]
 
+const X_BOOSTER_PACKS = [
+  { tier: 'spark', label: 'Spark',  posts: 50,  price: '$1.99',  popular: false },
+  { tier: 'boost', label: 'Boost',  posts: 120, price: '$4.99',  popular: true  },
+  { tier: 'surge', label: 'Surge',  posts: 250, price: '$9.99',  popular: false },
+  { tier: 'storm', label: 'Storm',  posts: 500, price: '$19.99', popular: false },
+]
+
 const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
 
 function SettingsInner() {
@@ -114,6 +121,10 @@ function SettingsInner() {
   const [wlActivated, setWlActivated]           = useState(false)
 
   const [creditPref, setCreditPref] = useState<'monthly_first' | 'bank_first'>('monthly_first')
+
+  // X Booster state
+  const [boosterBalance, setBoosterBalance]       = useState<number | null>(null)
+  const [boosterLoading, setBoosterLoading]       = useState<string | null>(null)
 
   // Appearance — sidebar stats visibility
   const [sidebarStatsVisible, setSidebarStatsVisible] = useState(true)
@@ -208,6 +219,34 @@ function SettingsInner() {
     }
     loadReferrals()
   }, [activeTab, userId])
+
+  // Fetch X Booster balance when Plan tab is active
+  useEffect(() => {
+    if (activeTab !== 'Plan') return
+    fetch('/api/accounts/twitter/quota')
+      .then(r => r.json())
+      .then(d => setBoosterBalance(d.boosterBalance ?? 0))
+      .catch(() => setBoosterBalance(0))
+  }, [activeTab])
+
+  // X Booster purchase success toast
+  useEffect(() => {
+    if (searchParams.get('booster') === 'purchased') {
+      setSavedTab('booster_purchased')
+      setTimeout(() => setSavedTab(null), 4000)
+    }
+  }, [searchParams])
+
+  const handleBoosterPurchase = async (tier: string) => {
+    setBoosterLoading(tier)
+    try {
+      const res  = await fetch('/api/accounts/twitter/booster', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ tier }) })
+      const data = await res.json()
+      if (data.url) window.location.href = data.url
+      if (data.error === 'Unauthorized') router.push('/login?redirect=/settings?tab=Plan')
+    } catch { console.error('Booster checkout failed') }
+    finally { setBoosterLoading(null) }
+  }
 
   const referralLink = referralCode ? `${appUrl}/?ref=${referralCode}` : ''
   const nextTier     = REFERRAL_TIERS.find(t => referralStats.payingReferrals < t.paying)
@@ -610,6 +649,57 @@ function SettingsInner() {
                       </div>
                     ))}
                   </div>
+                </div>
+              </div>
+
+              {/* X BOOSTER PACKS */}
+              <div id="x-booster" className="bg-surface border border-theme rounded-2xl p-6 scroll-mt-4">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-lg">𝕏</span>
+                  <h2 className="text-base font-extrabold">X Booster Packs</h2>
+                </div>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
+                  Extra X posts that stack on top of your monthly quota and never expire.
+                </p>
+
+                {/* Booster balance */}
+                <div className="flex items-center gap-2 mb-5 px-4 py-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl">
+                  <span className="text-amber-600 dark:text-amber-400 text-sm">⚡</span>
+                  <span className="text-xs text-gray-700 dark:text-gray-300">
+                    Current X Booster Balance:{' '}
+                    <strong className="text-amber-700 dark:text-amber-400">
+                      {boosterBalance === null ? '…' : `${boosterBalance} posts remaining`}
+                    </strong>
+                  </span>
+                </div>
+
+                {savedTab === 'booster_purchased' && (
+                  <div className="mb-4 px-4 py-2.5 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-xl text-xs text-green-700 dark:text-green-400 font-semibold">
+                    ✓ X Booster credits added to your account!
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 gap-3">
+                  {X_BOOSTER_PACKS.map(pack => (
+                    <div key={pack.tier} className={`relative border rounded-xl p-4 ${pack.popular ? 'border-amber-400 dark:border-amber-600' : 'border-gray-200 dark:border-gray-700'}`}>
+                      {pack.popular && (
+                        <span className="absolute -top-2 left-3 text-xs font-bold bg-amber-500 text-white px-2 py-0.5 rounded-full">Popular</span>
+                      )}
+                      <p className="text-sm font-extrabold mb-0.5">{pack.label}</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">{pack.posts} extra X posts</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">One-time · stacks on your quota · never expires</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-extrabold">{pack.price}</span>
+                        <button
+                          onClick={() => handleBoosterPurchase(pack.tier)}
+                          disabled={boosterLoading === pack.tier}
+                          className="text-xs font-bold px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-all disabled:opacity-60"
+                        >
+                          {boosterLoading === pack.tier ? '...' : 'Buy'}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
 
