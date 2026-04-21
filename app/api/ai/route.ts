@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 const CREDIT_COSTS: Record<string, number> = {
   caption:     5,
@@ -263,9 +264,36 @@ export async function POST(req: NextRequest) {
       trendingContext = await fetchTrendingData(content)
     }
 
+    // Fetch brand voice for prompt injection
+    let brandVoicePrefix = ''
+    try {
+      const adminDb = getSupabaseAdmin()
+      const { data: bvData } = await adminDb
+        .from('user_settings')
+        .select('brand_voice')
+        .eq('user_id', user.id)
+        .maybeSingle()
+      const bv = bvData?.brand_voice
+      if (bv && bv.voiceName) {
+        brandVoicePrefix = `=== BRAND VOICE INSTRUCTIONS ===
+Voice name: ${bv.voiceName}
+Tone: ${bv.tone || ''}
+Writing style: ${bv.writingStyle || ''}
+Vocabulary rules: ${bv.vocabulary || ''}
+Always include: ${bv.alwaysInclude || ''}
+Never include: ${bv.neverInclude || ''}
+Example of this voice: ${bv.examplePost || ''}
+Apply these guidelines to all content you generate.
+=================================
+
+`
+      }
+    } catch { /* non-fatal — proceed without brand voice */ }
+
     const genAI  = new GoogleGenerativeAI(apiKey)
     const model  = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
-    const prompt = buildPrompt(tool, content, platform || 'general', trendingContext)
+    const basePrompt = buildPrompt(tool, content, platform || 'general', trendingContext)
+    const prompt = brandVoicePrefix ? `${brandVoicePrefix}${basePrompt}` : basePrompt
 
     let text: string
     try {

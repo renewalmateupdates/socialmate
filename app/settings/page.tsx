@@ -10,7 +10,7 @@ import { usePushNotifications } from '@/hooks/usePushNotifications'
 const STRIPE_PRO_PRICE_ID    = 'price_1T9S2v7OMwDowUuULHznqUD5'
 const STRIPE_AGENCY_PRICE_ID = 'price_1TFMHp7OMwDowUuUgeLAeJNY'
 
-const ALL_TABS    = ['Profile', 'Plan', 'Referrals', 'Notifications', 'Security', 'White Label', 'Appearance']
+const ALL_TABS    = ['Profile', 'Plan', 'Referrals', 'Notifications', 'Security', 'White Label', 'Appearance', 'Brand Voice']
 const FREE_TABS   = ['Profile', 'Plan', 'Notifications', 'Security', 'Appearance']
 
 // Every 5 paying referrals = +100 bonus credits (stacking, no cap)
@@ -126,6 +126,17 @@ function SettingsInner() {
   const [boosterBalance, setBoosterBalance]       = useState<number | null>(null)
   const [boosterLoading, setBoosterLoading]       = useState<string | null>(null)
 
+  // Brand Voice state
+  const [bvLoading, setBvLoading]             = useState(false)
+  const [bvSaved, setBvSaved]                 = useState(false)
+  const [voiceName, setVoiceName]             = useState('')
+  const [bvTone, setBvTone]                   = useState('Professional')
+  const [bvWritingStyle, setBvWritingStyle]   = useState('Short & punchy')
+  const [bvVocabulary, setBvVocabulary]       = useState('')
+  const [bvAlwaysInclude, setBvAlwaysInclude] = useState('')
+  const [bvNeverInclude, setBvNeverInclude]   = useState('')
+  const [bvExamplePost, setBvExamplePost]     = useState('')
+
   // Appearance — sidebar stats visibility
   const [sidebarStatsVisible, setSidebarStatsVisible] = useState(true)
   useEffect(() => {
@@ -236,6 +247,25 @@ function SettingsInner() {
       setTimeout(() => setSavedTab(null), 4000)
     }
   }, [searchParams])
+
+  // Load Brand Voice when tab becomes active
+  useEffect(() => {
+    if (activeTab !== 'Brand Voice') return
+    fetch('/api/user/brand-voice')
+      .then(r => r.json())
+      .then(d => {
+        const bv = d.brand_voice
+        if (!bv) return
+        if (bv.voiceName)      setVoiceName(bv.voiceName)
+        if (bv.tone)           setBvTone(bv.tone)
+        if (bv.writingStyle)   setBvWritingStyle(bv.writingStyle)
+        if (bv.vocabulary)     setBvVocabulary(bv.vocabulary)
+        if (bv.alwaysInclude)  setBvAlwaysInclude(bv.alwaysInclude)
+        if (bv.neverInclude)   setBvNeverInclude(bv.neverInclude)
+        if (bv.examplePost)    setBvExamplePost(bv.examplePost)
+      })
+      .catch(() => {})
+  }, [activeTab])
 
   const handleBoosterPurchase = async (tier: string) => {
     setBoosterLoading(tier)
@@ -1298,6 +1328,157 @@ function SettingsInner() {
                         onError={e => (e.currentTarget.style.display = 'none')} />
                     </div>
                   )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── BRAND VOICE ── */}
+          {activeTab === 'Brand Voice' && (
+            <div className="space-y-4">
+              <div className="bg-surface border border-theme rounded-2xl p-6">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-lg">🎙️</span>
+                  <h2 className="text-base font-extrabold">AI Brand Voice</h2>
+                </div>
+                <p className="text-xs text-[#9ca3af] mb-6 leading-relaxed">
+                  Define how your brand sounds. Every AI-generated caption, hook, thread, and rewrite will follow these guidelines automatically.
+                </p>
+
+                <div className="space-y-5">
+                  {/* Voice Name */}
+                  <div>
+                    <label className="text-xs font-bold text-[#9ca3af] block mb-1.5">Voice Name</label>
+                    <input
+                      value={voiceName}
+                      onChange={e => setVoiceName(e.target.value)}
+                      placeholder='e.g. "Bold & Direct" or "Warm Expert"'
+                      className="w-full bg-[#111111] border border-[#1f1f1f] rounded-xl px-4 py-2.5 text-sm text-gray-100 outline-none focus:border-[#F59E0B] transition-all placeholder-[#9ca3af]"
+                    />
+                    <p className="text-xs text-[#9ca3af] mt-1">A short name to remind you what this voice sounds like.</p>
+                  </div>
+
+                  {/* Tone */}
+                  <div>
+                    <label className="text-xs font-bold text-[#9ca3af] block mb-1.5">Tone</label>
+                    <select
+                      value={bvTone}
+                      onChange={e => setBvTone(e.target.value)}
+                      className="w-full bg-[#111111] border border-[#1f1f1f] rounded-xl px-4 py-2.5 text-sm text-gray-100 outline-none focus:border-[#F59E0B] transition-all appearance-none">
+                      {['Professional', 'Casual', 'Witty', 'Bold', 'Inspirational', 'Conversational', 'Educational'].map(t => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Writing Style */}
+                  <div>
+                    <label className="text-xs font-bold text-[#9ca3af] block mb-1.5">Writing Style</label>
+                    <select
+                      value={bvWritingStyle}
+                      onChange={e => setBvWritingStyle(e.target.value)}
+                      className="w-full bg-[#111111] border border-[#1f1f1f] rounded-xl px-4 py-2.5 text-sm text-gray-100 outline-none focus:border-[#F59E0B] transition-all appearance-none">
+                      {['Short & punchy', 'Long-form storytelling', 'List-heavy', 'Question-driven', 'Narrative'].map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Vocabulary */}
+                  <div>
+                    <label className="text-xs font-bold text-[#9ca3af] block mb-1.5">Vocabulary Rules</label>
+                    <textarea
+                      rows={3}
+                      value={bvVocabulary}
+                      onChange={e => setBvVocabulary(e.target.value)}
+                      placeholder={`e.g. "Never say 'leverage', use 'use'. Avoid corporate jargon. Prefer plain language."`}
+                      className="w-full bg-[#111111] border border-[#1f1f1f] rounded-xl px-4 py-2.5 text-sm text-gray-100 outline-none focus:border-[#F59E0B] transition-all resize-none placeholder-[#9ca3af]"
+                    />
+                  </div>
+
+                  {/* Always Include */}
+                  <div>
+                    <label className="text-xs font-bold text-[#9ca3af] block mb-1.5">Always Include</label>
+                    <textarea
+                      rows={3}
+                      value={bvAlwaysInclude}
+                      onChange={e => setBvAlwaysInclude(e.target.value)}
+                      placeholder={`e.g. "End every post with a question. Always include a CTA."`}
+                      className="w-full bg-[#111111] border border-[#1f1f1f] rounded-xl px-4 py-2.5 text-sm text-gray-100 outline-none focus:border-[#F59E0B] transition-all resize-none placeholder-[#9ca3af]"
+                    />
+                  </div>
+
+                  {/* Never Include */}
+                  <div>
+                    <label className="text-xs font-bold text-[#9ca3af] block mb-1.5">Never Include</label>
+                    <textarea
+                      rows={3}
+                      value={bvNeverInclude}
+                      onChange={e => setBvNeverInclude(e.target.value)}
+                      placeholder={`e.g. "No emojis. No more than 2 hashtags. Never use exclamation points."`}
+                      className="w-full bg-[#111111] border border-[#1f1f1f] rounded-xl px-4 py-2.5 text-sm text-gray-100 outline-none focus:border-[#F59E0B] transition-all resize-none placeholder-[#9ca3af]"
+                    />
+                  </div>
+
+                  {/* Example Post */}
+                  <div>
+                    <label className="text-xs font-bold text-[#9ca3af] block mb-1.5">Example Post</label>
+                    <textarea
+                      rows={4}
+                      value={bvExamplePost}
+                      onChange={e => setBvExamplePost(e.target.value)}
+                      placeholder="Paste a real post that perfectly captures your voice. The AI will use this as a reference."
+                      className="w-full bg-[#111111] border border-[#1f1f1f] rounded-xl px-4 py-2.5 text-sm text-gray-100 outline-none focus:border-[#F59E0B] transition-all resize-none placeholder-[#9ca3af]"
+                    />
+                  </div>
+
+                  {/* Save button */}
+                  <div className="flex items-center gap-3 pt-1">
+                    <button
+                      onClick={async () => {
+                        setBvLoading(true)
+                        setBvSaved(false)
+                        try {
+                          await fetch('/api/user/brand-voice', {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ voiceName, tone: bvTone, writingStyle: bvWritingStyle, vocabulary: bvVocabulary, alwaysInclude: bvAlwaysInclude, neverInclude: bvNeverInclude, examplePost: bvExamplePost }),
+                          })
+                          setBvSaved(true)
+                          setTimeout(() => setBvSaved(false), 3000)
+                        } catch {}
+                        finally { setBvLoading(false) }
+                      }}
+                      disabled={bvLoading}
+                      className="min-h-[44px] px-5 py-2.5 rounded-xl text-xs font-bold transition-all bg-[#F59E0B] hover:bg-[#D97706] text-black disabled:opacity-50 flex items-center gap-2">
+                      {bvLoading && <div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin" />}
+                      {bvLoading ? 'Saving...' : 'Save Brand Voice'}
+                    </button>
+                    {bvSaved && (
+                      <span className="text-xs font-bold text-green-400">Saved ✓</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Preview card */}
+              {voiceName && (
+                <div className="bg-[#0a0a0a] border border-[#1f1f1f] rounded-2xl p-5">
+                  <p className="text-xs font-bold text-[#9ca3af] uppercase tracking-wide mb-3">Active Voice Preview</p>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-sm">🎙️</span>
+                    <span className="text-sm font-extrabold text-[#F59E0B]">{voiceName}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="bg-[#111111] border border-[#1f1f1f] rounded-xl px-3 py-2">
+                      <p className="text-[#9ca3af] mb-0.5">Tone</p>
+                      <p className="font-semibold text-gray-200">{bvTone}</p>
+                    </div>
+                    <div className="bg-[#111111] border border-[#1f1f1f] rounded-xl px-3 py-2">
+                      <p className="text-[#9ca3af] mb-0.5">Style</p>
+                      <p className="font-semibold text-gray-200">{bvWritingStyle}</p>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
