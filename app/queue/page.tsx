@@ -234,6 +234,7 @@ function QueueInner() {
   const [cancelling, setCancelling]     = useState<string | null>(null)
   const [confirmCancel, setConfirmCancel] = useState<string | null>(null)
   const [toast, setToast]               = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+  const [retrying, setRetrying]         = useState<string | null>(null)
   const router      = useRouter()
   const searchParams = useSearchParams()
   const targetDate  = searchParams.get('date')
@@ -248,6 +249,37 @@ function QueueInner() {
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type })
     setTimeout(() => setToast(null), 3000)
+  }
+
+  const handleRetry = async (postId: string) => {
+    setRetrying(postId)
+    try {
+      const res = await fetch(`/api/posts/${postId}/retry`, { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok) {
+        showToast(data.error || 'Retry failed', 'error')
+      } else {
+        showToast(data.status === 'published' ? 'All platforms published!' : 'Partially retried — check results', 'success')
+        // Remove from partial list if fully published, otherwise update
+        if (data.status === 'published') {
+          setPartialPosts(prev => prev.filter(p => p.id !== postId))
+        } else {
+          // Re-fetch updated post to show refreshed breakdown
+          const { data: updated } = await supabase
+            .from('posts')
+            .select('id, content, platforms, scheduled_at, published_at, status, platform_post_ids, created_at')
+            .eq('id', postId)
+            .single()
+          if (updated) {
+            setPartialPosts(prev => prev.map(p => p.id === postId ? updated : p))
+          }
+        }
+      }
+    } catch {
+      showToast('Network error — try again', 'error')
+    } finally {
+      setRetrying(null)
+    }
   }
 
   const handleDragEnd = async (event: DragEndEvent, dateKey: string) => {
@@ -475,10 +507,20 @@ function QueueInner() {
                             ? new Date(post.scheduled_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                             : ''}
                       </span>
-                      <Link href="/drafts"
-                        className="text-[10px] font-bold text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200 transition-colors">
-                        View →
-                      </Link>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => handleRetry(post.id)}
+                          disabled={retrying === post.id}
+                          className="text-[10px] font-bold text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200 transition-colors flex items-center gap-1 disabled:opacity-50 min-h-[32px]">
+                          {retrying === post.id
+                            ? <><div className="w-2.5 h-2.5 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />Retrying...</>
+                            : 'Retry failed →'}
+                        </button>
+                        <Link href="/drafts"
+                          className="text-[10px] font-bold text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                          View →
+                        </Link>
+                      </div>
                     </div>
                   </div>
                 ))}
