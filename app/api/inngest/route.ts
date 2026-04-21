@@ -14,6 +14,7 @@ import {
   enkiPaperTradingScan,
   enkiCloudRunnerScan,
   enkiTruthModeScan,
+  studioStaxRenewalEmails,
 } from '@/lib/inngest'
 
 export const { GET, POST, PUT } = serve({
@@ -31,5 +32,6 @@ export const { GET, POST, PUT } = serve({
     enkiPaperTradingScan,
     enkiCloudRunnerScan,
     enkiTruthModeScan,
+    studioStaxRenewalEmails,
   ],
 })
