@@ -39,6 +39,24 @@ function enkiDecryptKey(encryptedText: string): string {
 
 function getResend() { return new Resend(process.env.RESEND_API_KEY) }
 
+// ── Push notification helper ───────────────────────────────────────────────────
+// Fire-and-forget: sends a browser push notification to a user via the
+// /api/notifications/send route. Non-fatal — never throws.
+// Generate VAPID keys with: npx web-push generate-vapid-keys
+async function sendPushNotification(userId: string, title: string, body: string, url: string, tag: string) {
+  try {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
+    await fetch(`${appUrl}/api/notifications/send`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-internal-key': process.env.CRON_SECRET || '',
+      },
+      body: JSON.stringify({ user_id: userId, title, body, url, tag }),
+    })
+  } catch { /* non-fatal — push is best-effort */ }
+}
+
 export const inngest = new Inngest({ id: 'socialmate' })
 
 export const publishScheduledPost = inngest.createFunction(
@@ -186,6 +204,14 @@ export const publishScheduledPost = inngest.createFunction(
             action_url: '/queue',
           })
           .then(({ error }) => { if (error) console.warn('[notifications] insert failed:', error.message) })
+        // Browser push notification — non-fatal, best-effort
+        sendPushNotification(
+          innerPostCheck.user_id,
+          '✅ Post published',
+          'Your post has been published successfully.',
+          '/queue',
+          'post-published',
+        )
       }
 
       return data
@@ -1923,6 +1949,14 @@ export const enkiPaperTradingScan = inngest.createFunction(
 
             if (status === 'filled') totalTrades++
             console.log(`[EnkiScan] Paper trade: ${user.user_id} ${side.toUpperCase()} ${qty.toFixed(4)}x${symbol} @$${price} ($${tradeAmount.toFixed(2)}, ${positionSizePct}% of portfolio, ${status})`)
+            // Browser push notification — non-fatal
+            sendPushNotification(
+              user.user_id,
+              '📈 Enki: New trade signal',
+              `${symbol} — ${side.toUpperCase()} (paper)`,
+              '/enki/dashboard',
+              'enki-trade',
+            )
 
             // ── DCA Safety Orders ───────────────────────────────────────────
             // Average into a losing position if still bullish and not in a strong downtrend.
@@ -2281,7 +2315,17 @@ export const enkiCloudRunnerScan = inngest.createFunction(
               reason:      `Cloud Runner: ${enkiSignalLabel(signal)} | ${positionSizePct}% portfolio ($${tradeAmount.toFixed(2)})`,
               executed_at: now.toISOString(),
             })
-            if (!tradeErr && status === 'filled') totalTrades++
+            if (!tradeErr && status === 'filled') {
+              totalTrades++
+              // Browser push notification — non-fatal
+              sendPushNotification(
+                user.user_id,
+                '📈 Enki: New trade signal',
+                `${symbol} — ${signal.side.toUpperCase()} (Cloud Runner)`,
+                '/enki/dashboard',
+                'enki-trade',
+              )
+            }
           }
         }
       })
