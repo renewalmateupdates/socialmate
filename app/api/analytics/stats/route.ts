@@ -26,16 +26,33 @@ export async function GET() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  // Fetch all posts for this user
-  const { data: posts, error } = await supabase
+  // Try to fetch with bluesky_stats column first, fall back without it
+  let posts: any[] | null = null
+  let hasBlueskyStats = true
+
+  const { data: postsWithStats, error: statsError } = await supabase
     .from('posts')
-    .select('id, content, platforms, status, created_at, scheduled_at, published_at')
+    .select('id, content, platforms, status, created_at, scheduled_at, published_at, bluesky_stats, platform_post_ids')
     .eq('user_id', user.id)
     .order('published_at', { ascending: false })
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (statsError && statsError.message?.includes('bluesky_stats')) {
+    hasBlueskyStats = false
+    const { data: postsNoStats, error } = await supabase
+      .from('posts')
+      .select('id, content, platforms, status, created_at, scheduled_at, published_at, platform_post_ids')
+      .eq('user_id', user.id)
+      .order('published_at', { ascending: false })
 
-  const allPosts = posts ?? []
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    posts = postsNoStats ?? []
+  } else if (statsError) {
+    return NextResponse.json({ error: statsError.message }, { status: 500 })
+  } else {
+    posts = postsWithStats ?? []
+  }
+
+  const allPosts = posts
 
   // ── Overview counts ─────────────────────────────────────────────────────────
   const total_published = allPosts.filter(p => p.status === 'published').length
@@ -102,17 +119,18 @@ export async function GET() {
     count: hourMap[i],
   }))
 
-  // ── Recent posts (last 20 published) ────────────────────────────────────────
-  const recent_posts = publishedPosts.slice(0, 20).map(p => ({
+  // ── Recent posts (last 10 published) ─────────────────────────────────────────
+  const recent_posts = publishedPosts.slice(0, 10).map(p => ({
     id:              p.id,
+    content:         p.content ?? '',
     content_preview: (p.content ?? '').slice(0, 80),
     platforms:       Array.isArray(p.platforms) ? p.platforms : [],
     published_at:    p.published_at ?? p.created_at,
     status:          p.status,
+    bluesky_stats:   hasBlueskyStats ? (p.bluesky_stats ?? null) : null,
   }))
 
   // ── Streaks ──────────────────────────────────────────────────────────────────
-  // Collect unique calendar days with at least 1 published post
   const publishedDaySet = new Set<string>()
   for (const post of publishedPosts) {
     const d = new Date(post.published_at ?? post.created_at)
@@ -155,6 +173,28 @@ export async function GET() {
 
   const avg_posts_per_week = Math.round((recentEight / 8) * 10) / 10
 
+  // ── Last 30 days ─────────────────────────────────────────────────────────────
+  const last30 = Array.from({ length: 30 }, (_, i) => {
+    const d = new Date()
+    d.setDate(d.getDate() - (29 - i))
+    return d.toISOString().slice(0, 10)
+  })
+
+  const countsByDate = publishedPosts.reduce((acc, p) => {
+    const date = (p.published_at ?? p.created_at).slice(0, 10)
+    acc[date] = (acc[date] ?? 0) + 1
+    return acc
+  }, {} as Record<string, number>)
+
+  const last_30_days = last30.map(date => ({ date, count: countsByDate[date] ?? 0 }))
+
+  // ── Period totals ─────────────────────────────────────────────────────────────
+  const period_totals = {
+    total_all_time: total_published,
+    this_month:     published_this_month,
+    last_month:     published_last_month,
+  }
+
   return NextResponse.json({
     total_published,
     total_scheduled,
@@ -169,5 +209,7 @@ export async function GET() {
     current_streak,
     longest_streak,
     avg_posts_per_week,
+    last_30_days,
+    period_totals,
   })
 }
