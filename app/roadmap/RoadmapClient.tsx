@@ -19,7 +19,9 @@ const ROADMAP: RoadmapItem[] = [
   { title: 'YouTube Community Posts',    desc: 'Post to YouTube Community tab (requires 500+ subscribers). OAuth token management complete.',                    status: 'coming-soon',  category: 'Platforms'     },
   { title: 'Pinterest publishing',       desc: 'Pin creation via Pinterest v5 API with board selection. OAuth complete.',                                        status: 'coming-soon',  category: 'Platforms'     },
   { title: 'Blog auto-generation',       desc: 'Gemini writes a blog feature post for each Studio Stax lister once past the refund window. Lister gets notified by email when it\'s live.', status: 'coming-soon', category: 'Platform' },
-  { title: 'Discord management tools',   desc: 'Moderation commands, welcome messages, role automation, and server analytics directly from SocialMate.',         status: 'coming-soon',  category: 'Platforms'     },
+  { title: 'Creator Monetization Hub',   desc: 'Fan subscriptions, tip jars, and paywalled content for creators — all handled through SocialMate with Stripe.',  status: 'coming-soon',  category: 'Monetization'  },
+  { title: 'Content DNA',                desc: 'Cross-platform performance fingerprinting — tells you exactly which formats, lengths, and topics win for your audience.', status: 'coming-soon', category: 'Analytics' },
+  { title: 'Unified inbox',              desc: 'Reply to comments, DMs, and mentions across all connected platforms from one inbox inside SocialMate.',          status: 'coming-soon',  category: 'Engagement'    },
 
   // ── PLANNED ───────────────────────────────────────────────
   { title: 'Instagram publishing',       desc: 'Instagram Graph API integration. Requires Facebook Business account and Meta app review.',                       status: 'planned',      category: 'Platforms'     },
@@ -33,6 +35,20 @@ const ROADMAP: RoadmapItem[] = [
   { title: 'SOC 2 compliance',           desc: 'Security certification for enterprise white label clients. Required for larger agency contracts.',                status: 'planned',      category: 'Platform'      },
 
   // ── SHIPPED ───────────────────────────────────────────────
+  { title: 'AI Brand Voice',             desc: 'Define your tone, style, vocabulary rules, and example posts. Every AI tool automatically writes in your voice. Pro+ feature.', status: 'shipped', category: 'AI' },
+  { title: 'Content Repurposing',        desc: 'Turn any post into a thread, email newsletter, caption, long-form article, hook, or LinkedIn post with one click. 1 credit.', status: 'shipped', category: 'AI' },
+  { title: 'Smart Queue — Auto-schedule', desc: 'Auto-schedule all drafts at optimal times per platform (Bluesky 9am, Discord 5pm, etc). Pro+ feature. Best-time picker also available in Compose.', status: 'shipped', category: 'Scheduling' },
+  { title: 'X-style Analytics Dashboard', desc: '30-day area chart, platform breakdown bars, best-times heatmap, Bluesky engagement sync (likes/reposts/replies), and post history table.', status: 'shipped', category: 'Analytics' },
+  { title: 'Browser Push Notifications', desc: 'Real-time browser alerts for Enki trade signals, post published, and X quota warnings. Service worker + VAPID. Enable in Settings → Notifications.', status: 'shipped', category: 'Platform' },
+  { title: 'Studio Stax renewal emails', desc: '30/14/7-day Inngest email drip via Resend for expiring listings. Timestamped idempotency guards. 20% renewal discount code STAX20.', status: 'shipped', category: 'Platform' },
+  { title: 'Gilgamesh\'s Guide',         desc: 'Free creator/entrepreneur guide at /gils-guide. Email capture via Resend, donation section linked to SM-Give. Three pillars: Build, Create, Become.', status: 'shipped', category: 'Platform' },
+  { title: 'Partial post retry',         desc: 'Posts that partially fail (some platforms succeed, others don\'t) now show a Retry button that re-attempts only the failed platforms.', status: 'shipped', category: 'Platform' },
+  { title: 'X Booster packs',            desc: 'One-time purchase packs that stack on top of monthly X quota and roll over forever: Spark 50/$1.99, Boost 120/$4.99, Surge 250/$9.99, Storm 500/$19.99.', status: 'shipped', category: 'Platform' },
+  { title: 'Platform account jail',      desc: '45-day global cooldown when you disconnect a Twitter/X account — prevents quota gaming by cycling accounts. Admin override available.', status: 'shipped', category: 'Platform' },
+  { title: 'Enki Truth Mode',            desc: 'Paper trading validation experiment with Start/Stop control, equity curve vs SPY overlay, sanity warnings, per-strategy stats, and CSV export.', status: 'shipped', category: 'Enki' },
+  { title: 'Enki citizen onboarding',    desc: '3-step onboarding flow for new Citizen (paper trading) users explaining Guardian, Truth Mode, and how to go live.', status: 'shipped', category: 'Enki' },
+  { title: 'Studio Stax per-lister pages', desc: 'Individual detail pages at /studio-stax/[slug] with NSFW blur-reveal, click tracking, Garrison badge, and SEO metadata.', status: 'shipped', category: 'Platform' },
+  { title: 'Discord management hub',     desc: 'Word filter, server automations API, and Manage Server quick-link — all from the SocialMate dashboard.',             status: 'shipped',      category: 'Platforms'     },
   { title: 'X/Twitter quota visibility',  desc: 'Monthly post usage and reset date shown in the sidebar stats section for all plan tiers. Bar turns yellow >80%, red at cap.', status: 'shipped', category: 'Platform' },
   { title: 'Content Approval workflows', desc: 'Team members submit posts for review. Owner approves (schedules) or rejects with a note. Live at /approvals.', status: 'shipped', category: 'Teams' },
   { title: 'Merch store — Printify POD', desc: 'Live merch store at /merch powered by Printify global print-on-demand. Variant image switching, Stripe checkout, auto-fulfillment via webhook. 75% of gross profit → SM-Give.', status: 'shipped', category: 'Platform' },
