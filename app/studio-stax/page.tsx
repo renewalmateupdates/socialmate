@@ -20,6 +20,15 @@ const GARRISON_PRICE: Record<string, string> = {
   'Enki':        'Free to start',
 }
 
+function nameToSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .trim()
+}
+
 function getHostname(url: string) {
   try { return new URL(url).hostname.replace('www.', '') }
   catch { return url }
@@ -107,11 +116,9 @@ export default async function StudioStaxPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {garrison.map(listing => (
-                <a
+                <Link
                   key={listing.id}
-                  href={`/api/studio-stax/click/${listing.id}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href={`/studio-stax/${nameToSlug(listing.name)}`}
                   className="group flex flex-col bg-white dark:bg-gray-900 border-2 border-purple-300 dark:border-purple-700 ring-1 ring-purple-200 dark:ring-purple-800 rounded-2xl p-6 hover:shadow-xl hover:border-purple-400 dark:hover:border-purple-500 transition-all"
                 >
                   {/* Top row */}
@@ -154,7 +161,7 @@ export default async function StudioStaxPage() {
                     </svg>
                     {getHostname(listing.url)}
                   </div>
-                </a>
+                </Link>
               ))}
             </div>
           </section>
@@ -200,7 +207,7 @@ export default async function StudioStaxPage() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {items.map((listing, idx) => (
-                      <a key={listing.id} href={`/api/studio-stax/click/${listing.id}`} target="_blank" rel="noopener noreferrer"
+                      <Link key={listing.id} href={`/studio-stax/${nameToSlug(listing.name)}`}
                         className={`group block bg-white dark:bg-gray-900 border rounded-2xl p-5 hover:shadow-lg transition-all ${
                           idx === 0 ? 'border-amber-300 dark:border-amber-700 ring-1 ring-amber-200 dark:ring-amber-800' :
                           idx === 1 ? 'border-gray-200 dark:border-gray-700' :
@@ -232,7 +239,7 @@ export default async function StudioStaxPage() {
                             </span>
                           )}
                         </div>
-                      </a>
+                      </Link>
                     ))}
                   </div>
                 </section>

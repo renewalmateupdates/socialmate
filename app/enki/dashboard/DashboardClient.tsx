@@ -4,6 +4,13 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createBrowserClient } from '@supabase/ssr'
 
+// Returns how many minutes until the next 15-min scan boundary
+function minutesToNextScan(): number {
+  const now = new Date()
+  const mins = now.getMinutes()
+  return 15 - (mins % 15)
+}
+
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -54,6 +61,13 @@ interface Snapshot {
   cash: number
   open_positions: number
   snapshot_date: string
+}
+
+interface Doctrine {
+  id: string
+  name: string
+  is_active: boolean
+  config: { symbols?: string[] }
 }
 
 interface PaperPosition {
@@ -120,6 +134,7 @@ export default function DashboardClient() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [trades, setTrades] = useState<Trade[]>([])
   const [snapshots, setSnapshots] = useState<Snapshot[]>([])
+  const [doctrines, setDoctrines] = useState<Doctrine[]>([])
   const [paperPositions, setPaperPositions] = useState<PaperPosition[]>([])
   const [pendingTrades, setPendingTrades] = useState<PendingTrade[]>([])
   const [approvalState, setApprovalState] = useState<Record<string, 'approved' | 'rejected' | 'loading'>>({})
@@ -202,6 +217,7 @@ export default function DashboardClient() {
       if (snapshotsJson.snapshots)  setSnapshots(snapshotsJson.snapshots)
       if (pendingJson.trades)       setPendingTrades(pendingJson.trades)
       if (notifJson.notifications)  setNotifications(notifJson.notifications)
+      if (Array.isArray(doctrinesJson.doctrines)) setDoctrines(doctrinesJson.doctrines)
 
       // Auto-create a default doctrine for brand-new users so the guardian
       // has something to work with on the very first scan cycle.
@@ -487,14 +503,110 @@ export default function DashboardClient() {
 
       <div className="max-w-6xl mx-auto px-6 py-8">
 
-        {/* ── No snapshot yet (new user) ── */}
-        {snapshots.length === 0 && (
+        {/* ── Citizen onboarding flow (no trades, no snapshots) ── */}
+        {profile?.tier === 'citizen' && trades.length === 0 && snapshots.length === 0 && (() => {
+          const hasActiveDoctrine = doctrines.some(d => d.is_active)
+          const activeDoctrine    = doctrines.find(d => d.is_active)
+          const minsToScan        = minutesToNextScan()
+
+          if (!hasActiveDoctrine) {
+            // Step 1: No active doctrine — guide them to arm one
+            return (
+              <div className="bg-gradient-to-br from-amber-950/30 to-gray-900 border border-amber-700/50 rounded-2xl p-7 mb-8">
+                {/* Step indicators */}
+                <div className="flex items-center gap-2 mb-6">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-6 h-6 rounded-full bg-amber-400 text-black text-[11px] font-extrabold flex items-center justify-center shrink-0">1</span>
+                    <span className="text-xs font-bold text-amber-400">Arm a Doctrine</span>
+                  </div>
+                  <span className="text-gray-600 text-xs">→</span>
+                  <div className="flex items-center gap-1.5 opacity-40">
+                    <span className="w-6 h-6 rounded-full bg-gray-700 text-gray-400 text-[11px] font-extrabold flex items-center justify-center shrink-0">2</span>
+                    <span className="text-xs font-bold text-gray-400">Wait for First Scan</span>
+                  </div>
+                  <span className="text-gray-600 text-xs">→</span>
+                  <div className="flex items-center gap-1.5 opacity-40">
+                    <span className="w-6 h-6 rounded-full bg-gray-700 text-gray-400 text-[11px] font-extrabold flex items-center justify-center shrink-0">3</span>
+                    <span className="text-xs font-bold text-gray-400">Watch Trades Appear</span>
+                  </div>
+                </div>
+
+                <h2 className="text-xl font-extrabold text-white mb-2">Welcome to Enki.</h2>
+                <p className="text-sm text-gray-300 mb-1">Here&apos;s how to start paper trading in 2 minutes.</p>
+                <p className="text-xs text-gray-400 leading-relaxed mb-6">
+                  Doctrines are your trading strategies. A Balanced Doctrine has already been created for you — trading SPY, QQQ, and AAPL at 10% position size. Just activate it and the guardian starts watching.
+                </p>
+
+                <Link
+                  href="/enki/doctrines"
+                  className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-500 text-black font-extrabold text-sm px-6 py-3 rounded-xl transition-colors"
+                >
+                  Go to Doctrines and arm one →
+                </Link>
+              </div>
+            )
+          }
+
+          // Step 2: Doctrine is active, waiting for first scan
+          const symbols: string[] = Array.isArray(activeDoctrine?.config?.symbols) ? activeDoctrine!.config.symbols : []
+          return (
+            <div className="bg-gradient-to-br from-green-950/20 to-gray-900 border border-green-700/40 rounded-2xl p-7 mb-8">
+              {/* Step indicators */}
+              <div className="flex items-center gap-2 mb-6">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-6 h-6 rounded-full bg-green-500 text-white text-[11px] font-extrabold flex items-center justify-center shrink-0">✓</span>
+                  <span className="text-xs font-bold text-green-400">Doctrine Armed</span>
+                </div>
+                <span className="text-gray-600 text-xs">→</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-6 h-6 rounded-full bg-amber-400 text-black text-[11px] font-extrabold flex items-center justify-center shrink-0">2</span>
+                  <span className="text-xs font-bold text-amber-400">Wait for First Scan</span>
+                </div>
+                <span className="text-gray-600 text-xs">→</span>
+                <div className="flex items-center gap-1.5 opacity-40">
+                  <span className="w-6 h-6 rounded-full bg-gray-700 text-gray-400 text-[11px] font-extrabold flex items-center justify-center shrink-0">3</span>
+                  <span className="text-xs font-bold text-gray-400">Watch Trades Appear</span>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 mb-3">
+                <span className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.6)]" />
+                <p className="text-sm font-extrabold text-green-400">Doctrine armed — Guardian is watching</p>
+              </div>
+              <p className="text-xs text-gray-300 leading-relaxed mb-4">
+                Enki scans the market every 15 minutes during market hours (Mon–Fri 9:30 AM–4:00 PM ET). Your first trade will appear here after the next scan finds a qualifying signal.
+              </p>
+
+              <div className="flex flex-wrap gap-4 items-center">
+                {/* Active doctrine info */}
+                <div className="bg-gray-800/60 rounded-xl px-4 py-3 flex items-start gap-3">
+                  <div>
+                    <p className="text-xs font-bold text-gray-300 mb-1">{activeDoctrine?.name}</p>
+                    {symbols.length > 0 && (
+                      <div className="flex gap-1.5 flex-wrap">
+                        {symbols.map(s => (
+                          <span key={s} className="text-[10px] font-extrabold bg-gray-700 text-gray-300 px-1.5 py-0.5 rounded">{s}</span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                {/* Next scan countdown */}
+                <div className="bg-amber-900/20 border border-amber-700/30 rounded-xl px-4 py-3">
+                  <p className="text-[10px] font-bold text-amber-500 uppercase tracking-wider mb-0.5">Next Scan</p>
+                  <p className="text-sm font-extrabold text-amber-400">~{minsToScan} min{minsToScan !== 1 ? 's' : ''}</p>
+                </div>
+              </div>
+            </div>
+          )
+        })()}
+
+        {/* ── No snapshot yet — non-citizen fallback ── */}
+        {profile?.tier !== 'citizen' && snapshots.length === 0 && (
           <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 rounded-2xl p-6 mb-8">
             <p className="text-sm font-bold text-amber-700 dark:text-amber-400 mb-1">Guardian Initializing</p>
             <p className="text-xs text-amber-600 dark:text-amber-500">
-              {profile?.tier === 'citizen'
-                ? 'Paper trading is active — no real money required. Your portfolio data will appear here once the first 15-minute scan cycle runs. Make sure you have an active doctrine in settings.'
-                : 'Connect your broker in Settings to start trading. Your treasury data will appear here once the first scan cycle runs.'}
+              Connect your broker in Settings to start trading. Your treasury data will appear here once the first scan cycle runs.
             </p>
             <div className="mt-3 flex gap-3">
               <Link href="/enki/settings" className="text-xs font-bold text-amber-700 dark:text-amber-400 hover:underline">
