@@ -1,7 +1,7 @@
 'use client'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
@@ -63,14 +63,16 @@ function timeAgo(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-type FilterType = 'all' | 'draft' | 'scheduled' | 'published'
+type FilterType = 'all' | 'draft' | 'scheduled' | 'published' | 'partial'
 
-export default function Drafts() {
+function DraftsInner() {
   const [posts, setPosts] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [deleting, setDeleting] = useState<string | null>(null)
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null)
-  const [filter, setFilter] = useState<FilterType>('all')
+  const searchParams = useSearchParams()
+  const initialFilter = (searchParams.get('filter') as FilterType | null) ?? 'all'
+  const [filter, setFilter] = useState<FilterType>(initialFilter)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   // Inline edit state: maps post.id -> EditState
   const [editMap, setEditMap] = useState<Record<string, EditState>>({})
@@ -248,6 +250,7 @@ export default function Drafts() {
 
   const filtered = filter === 'all'       ? posts :
                    filter === 'published' ? posts.filter(d => ['published', 'partial'].includes(effectiveStatus(d))) :
+                   filter === 'partial'   ? posts.filter(d => effectiveStatus(d) === 'partial') :
                    posts.filter(d => effectiveStatus(d) === filter)
 
   const statusConfig: Record<string, { label: string; bg: string; text: string; icon: string }> = {
@@ -311,14 +314,20 @@ export default function Drafts() {
           {/* FILTER TABS */}
           <div className="flex items-center gap-1 bg-surface border border-theme rounded-2xl p-1 mb-6 w-fit flex-wrap">
             {[
-              { id: 'all',       label: `All (${posts.length})`         },
-              { id: 'draft',     label: `Drafts (${draftCount})`        },
-              { id: 'scheduled', label: `Scheduled (${scheduledCount})` },
-              { id: 'published', label: `Published (${publishedCount})` },
+              { id: 'all',       label: `All (${posts.length})`                                                },
+              { id: 'draft',     label: `Drafts (${draftCount})`                                               },
+              { id: 'scheduled', label: `Scheduled (${scheduledCount})`                                        },
+              { id: 'published', label: `Published (${publishedCount})`                                        },
+              ...(posts.some(d => effectiveStatus(d) === 'partial')
+                ? [{ id: 'partial', label: `Partial (${posts.filter(d => effectiveStatus(d) === 'partial').length})` }]
+                : []
+              ),
             ].map(tab => (
               <button key={tab.id} onClick={() => setFilter(tab.id as FilterType)}
                 className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
-                  filter === tab.id ? 'bg-black text-white' : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
+                  filter === tab.id
+                    ? tab.id === 'partial' ? 'bg-amber-500 text-white' : 'bg-black text-white'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
                 }`}>
                 {tab.label}
               </button>
@@ -402,6 +411,30 @@ export default function Drafts() {
                               <span className="text-xs text-gray-300 dark:text-gray-600">No platforms selected</span>
                             )}
                           </div>
+
+                          {/* Per-platform breakdown for partial posts */}
+                          {resolvedStatus === 'partial' && (post.platforms || []).length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-1.5" aria-label="Per-platform publish result">
+                              {(post.platforms as string[]).map((p: string) => {
+                                const postIds: Record<string, string> = post.platform_post_ids ?? {}
+                                const succeeded = !!postIds[p]
+                                return (
+                                  <span
+                                    key={p}
+                                    title={succeeded ? `${PLATFORM_NAMES[p] ?? p} published` : `${PLATFORM_NAMES[p] ?? p} failed`}
+                                    className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                                      succeeded
+                                        ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                        : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                    }`}>
+                                    <span>{PLATFORM_ICONS[p] ?? '📱'}</span>
+                                    <span className="hidden sm:inline">{PLATFORM_NAMES[p] ?? p}</span>
+                                    <span>{succeeded ? '✓' : '✗'}</span>
+                                  </span>
+                                )
+                              })}
+                            </div>
+                          )}
 
                           {/* Engagement metrics for published posts */}
                           {isPublished && post.analytics && (() => {
@@ -595,5 +628,17 @@ export default function Drafts() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function Drafts() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-dvh bg-theme flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
+      </div>
+    }>
+      <DraftsInner />
+    </Suspense>
   )
 }
