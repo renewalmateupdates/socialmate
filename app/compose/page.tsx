@@ -129,6 +129,23 @@ function ComposeInner() {
   const [scoreError, setScoreError] = useState('')
   const [showPreview, setShowPreview] = useState(false)
 
+  // Repurpose panel state
+  const REPURPOSE_FORMATS = [
+    { id: 'thread'        as const, label: 'Thread'    },
+    { id: 'email'         as const, label: 'Email'     },
+    { id: 'caption'       as const, label: 'Caption'   },
+    { id: 'long_form'     as const, label: 'Long-Form' },
+    { id: 'short_hook'    as const, label: 'Hook'      },
+    { id: 'linkedin_post' as const, label: 'LinkedIn'  },
+  ]
+  type RepurposeFormat = 'thread' | 'email' | 'caption' | 'long_form' | 'short_hook' | 'linkedin_post'
+  const [showRepurposePanel, setShowRepurposePanel] = useState(false)
+  const [repurposeFormat, setRepurposeFormat]       = useState<RepurposeFormat>('thread')
+  const [repurposeResult, setRepurposeResult]       = useState('')
+  const [repurposeLoading, setRepurposeLoading]     = useState(false)
+  const [repurposeError, setRepurposeError]         = useState('')
+  const [repurposeCopied, setRepurposeCopied]       = useState(false)
+
   // Hashtag collections
   type HashtagCollection = {
     id: string
@@ -165,6 +182,9 @@ function ComposeInner() {
   type TwitterQuota = { used: number; limit: number; boosterBalance: number }
   const [twitterQuota, setTwitterQuota] = useState<TwitterQuota | null>(null)
 
+  // Brand Voice badge
+  const [brandVoiceName, setBrandVoiceName] = useState<string | null>(null)
+
   const planConfig = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
   const maxScheduleDate = (() => {
     const d = new Date()
@@ -183,6 +203,17 @@ function ComposeInner() {
     if (!sessionStorage.getItem('sm_posting_disclaimer_dismissed')) {
       setShowPostingDisclaimer(true)
     }
+  }, [])
+
+  // Fetch brand voice for badge
+  useEffect(() => {
+    fetch('/api/user/brand-voice')
+      .then(r => r.json())
+      .then(d => {
+        const bv = d.brand_voice
+        if (bv?.voiceName) setBrandVoiceName(bv.voiceName)
+      })
+      .catch(() => {})
   }, [])
 
   // Reload data whenever active workspace changes
@@ -592,6 +623,52 @@ function ComposeInner() {
       setScoreError('Network error. Please try again.')
     }
     setScoring(false)
+  }
+
+  const handleRepurpose = async () => {
+    setRepurposeError('')
+    setRepurposeResult('')
+    if (!content.trim()) { setRepurposeError('Write or paste content in the composer first.'); return }
+    if (credits < 1) { setRepurposeError('Not enough credits. You need 1 credit.'); return }
+    setRepurposeLoading(true)
+    try {
+      const res = await fetch('/api/ai/repurpose', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content, format: repurposeFormat }),
+      })
+      const data = await res.json()
+      if (!res.ok || data.error) {
+        if (data.error === 'rate_limited') {
+          handleRateLimit()
+          setRepurposeError(data.message || "You're going too fast — wait 30 seconds and try again.")
+        } else {
+          setRepurposeError(data.error || 'Something went wrong. Please try again.')
+        }
+        return
+      }
+      setRepurposeResult(data.result)
+      if (typeof data.monthlyRemaining === 'number') {
+        applyCredits(data.monthlyRemaining, data.earnedRemaining ?? 0, data.paidRemaining ?? 0)
+      } else if (typeof data.creditsRemaining === 'number') {
+        setCredits(data.creditsRemaining)
+      } else {
+        setCredits(credits - 1)
+      }
+      showToast('Repurposed — 1 credit used', 'info')
+    } catch {
+      setRepurposeError('Network error. Please try again.')
+    } finally {
+      setRepurposeLoading(false)
+    }
+  }
+
+  const handleRepurposeCopy = () => {
+    if (!repurposeResult) return
+    navigator.clipboard.writeText(repurposeResult).then(() => {
+      setRepurposeCopied(true)
+      setTimeout(() => setRepurposeCopied(false), 2000)
+    })
   }
 
   const handleInsertResult = () => {
@@ -1295,6 +1372,25 @@ function ComposeInner() {
                 )}
               </div>
 
+              {/* BRAND VOICE BADGE */}
+              <div className="flex items-center gap-2 px-1 mb-1">
+                {brandVoiceName ? (
+                  <>
+                    <span className="inline-flex items-center gap-1.5 bg-[#0a0a0a] border border-[#F59E0B]/40 text-[#F59E0B] text-xs font-bold px-3 py-1.5 rounded-full min-h-[32px]">
+                      🎙️ {brandVoiceName}
+                    </span>
+                    <Link href="/settings?tab=Brand+Voice" className="text-xs text-[#9ca3af] hover:text-[#F59E0B] transition-colors underline underline-offset-2 min-h-[32px] flex items-center">
+                      Edit
+                    </Link>
+                  </>
+                ) : (
+                  <Link href="/settings?tab=Brand+Voice" className="text-xs text-[#9ca3af] hover:text-[#F59E0B] transition-colors min-h-[44px] flex items-center gap-1">
+                    <span>🎙️</span>
+                    <span>No brand voice — <span className="underline underline-offset-2">add one</span></span>
+                  </Link>
+                )}
+              </div>
+
               {/* AI TOOLS */}
               <div className="bg-surface border border-theme rounded-2xl p-4">
                 <div className="flex items-center justify-between mb-3">
@@ -1323,7 +1419,90 @@ function ComposeInner() {
                       <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{tool.credits} cr</p>
                     </button>
                   ))}
+                  <button
+                    onClick={() => { setShowRepurposePanel(p => !p); setRepurposeResult(''); setRepurposeError('') }}
+                    title="Repurpose current content into a different format"
+                    className={`p-3 rounded-xl border text-center transition-all ${
+                      showRepurposePanel ? 'bg-amber-400 text-black border-amber-400'
+                      : 'bg-white dark:bg-gray-900 border-gray-200 hover:border-amber-400 text-gray-700 dark:text-gray-300'
+                    }`}>
+                    <div className="text-lg mb-1">🔄</div>
+                    <p className="text-xs font-bold">Repurpose</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">1 cr</p>
+                  </button>
                 </div>
+
+                {/* REPURPOSE INLINE PANEL */}
+                {showRepurposePanel && (
+                  <div className="mb-4 border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20 rounded-xl p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-xs font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wide">🔄 Repurpose Content</p>
+                      <button
+                        onClick={() => { setShowRepurposePanel(false); setRepurposeResult(''); setRepurposeError('') }}
+                        className="text-amber-500 hover:text-amber-700 dark:hover:text-amber-300 transition-colors w-6 h-6 flex items-center justify-center rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 text-base font-bold">
+                        ×
+                      </button>
+                    </div>
+
+                    <p className="text-xs text-amber-700 dark:text-amber-400 mb-3">
+                      Uses your current compose content. Pick a format:
+                    </p>
+
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {REPURPOSE_FORMATS.map(f => (
+                        <button
+                          key={f.id}
+                          onClick={() => setRepurposeFormat(f.id)}
+                          className={`text-xs font-bold px-3 py-1.5 rounded-full border transition-all ${
+                            repurposeFormat === f.id
+                              ? 'bg-amber-400 text-black border-amber-400'
+                              : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-amber-400'
+                          }`}>
+                          {f.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={handleRepurpose}
+                      disabled={repurposeLoading || !content.trim() || !!rateLimitedUntil}
+                      className="w-full bg-amber-400 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-black text-xs font-bold py-2.5 min-h-[44px] rounded-xl transition-all flex items-center justify-center gap-2">
+                      {repurposeLoading ? (
+                        <><div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin" />Repurposing...</>
+                      ) : 'Repurpose → (1 credit)'}
+                    </button>
+
+                    {repurposeError && (
+                      <div className="mt-2 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2">
+                        <p className="text-xs text-red-600 dark:text-red-400">{repurposeError}</p>
+                      </div>
+                    )}
+
+                    {repurposeResult && !repurposeLoading && (
+                      <div className="mt-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+                        <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-2">Result</p>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap mb-3">{repurposeResult}</p>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button
+                            onClick={() => { setContent(repurposeResult); setRepurposeResult(''); setShowRepurposePanel(false); showToast('Content replaced ✓') }}
+                            className="text-xs font-bold px-3 py-2.5 min-h-[44px] bg-black text-white rounded-lg hover:opacity-80 transition-all">
+                            Replace
+                          </button>
+                          <button
+                            onClick={handleRepurposeCopy}
+                            className="text-xs font-bold px-3 py-2.5 min-h-[44px] border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg hover:border-gray-500 transition-all">
+                            {repurposeCopied ? 'Copied ✓' : 'Copy'}
+                          </button>
+                          <button
+                            onClick={() => setRepurposeResult('')}
+                            className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-all ml-auto min-h-[44px] px-2">
+                            Dismiss
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {aiError && (
                   <div className="bg-red-50 border border-red-100 rounded-xl p-3 mb-3">
