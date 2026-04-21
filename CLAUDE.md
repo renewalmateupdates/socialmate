@@ -105,7 +105,7 @@ These have burned us before — always apply:
 
 ---
 
-## What's Been Built (as of April 20, 2026 — end of day)
+## What's Been Built (as of April 21, 2026 — end of day)
 
 **Core:**
 - Post scheduling (Now + future via Inngest), drafts, queue, calendar, bulk scheduling
@@ -207,11 +207,21 @@ These have burned us before — always apply:
 - 24-hour auto-expiry on pending trades — stale approvals auto-decline so queue never jams
 - Leaderboard nav fixed: Enki leaderboard now shows the Enki sidebar nav instead of the public SocialMate nav
 
+**April 21, 2026:**
+- Admin platform jail UI at `/admin/platform-jail` — review/manage Twitter accounts in cooldown
+- X Booster purchase UI in Settings plan tab with booster balance display
+- X Booster quota warning in compose — shown when user is near/at X quota
+- Partial post retry button in calendar/queue — lets users retry failed platforms on a partial post
+- Partial post UX: per-platform breakdown shown in calendar, queue, and drafts (e.g. "Bluesky ✓ · X ✗ (quota)")
+- Enki citizen onboarding flow (3-step) — guides new Citizen tier users through paper trading setup
+- Enki Truth Mode: explicit Start/Stop controls on `/enki/truth` dashboard
+- Studio Stax: per-lister detail page at `/studio-stax/[slug]`
+- Studio Stax: criteria checklist on apply page so applicants know what's required
+- Pricing page: X Boosters section + Studio Stax "Get Listed" section
+
 ---
 
 ## Known Issues / Bugs (fix these when touched)
-
-- **Partial post UX** — when a post publishes to some platforms but not others, the calendar shows "Partial" with no explanation. Users should see "Bluesky ✓ · X blocked (quota)" or similar. Not built yet.
 
 ## Audit Findings (April 19–20, 2026) — resolved
 
@@ -243,17 +253,23 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 - **Inngest env vars** — confirmed needed: `INNGEST_EVENT_KEY` + `INNGEST_SIGNING_KEY` in Vercel. Posts were not publishing until these were set. Verify they're still set after any Vercel config changes.
 
-- **Partial post UX** — show per-platform result in calendar/queue UI. "Bluesky ✓ · X ✗ (quota)" style. Not built yet.
-
 - **SM-Give renewal tracking** — `invoice.payment_succeeded` now handled (PR #164). Confirmed done.
 
 - **Growth partner trial (Abdus Sohag)** — 1-week trial active as of Apr 19. Referral link: `?ref=SOHAG`. Review end of week; if strong, set up contract + renegotiate to standard affiliate rates.
 
 - **Enki Truth Mode testing** — market opens Apr 21; first real signal data expected then. 50-trade minimum per strategy before results are valid.
 
-- **Discord management tools** (future — moderation, welcome messages, role automation)
-- **Gilgamesh's Guide landing page** (future — free PDF, business/creator/self-dev guide for entrepreneurs)
+- **Discord management tools** — in progress (moderation, welcome messages, role automation)
+- **Gilgamesh's Guide landing page** — donation-supported free PDF, in progress (business/creator/self-dev guide for entrepreneurs)
 - **LinkedIn integration** — API credentials not yet acquired
+
+**Planned (roadmap):**
+- **AI Brand Voice** — trains on user's content style, auto-tunes AI output to match their voice
+- **Creator monetization hub** — unified merch/affiliate/link-in-bio/donations dashboard in one place
+- **Content repurposing** — one-click tweet→LinkedIn→blog pipeline
+- **Unified analytics dashboard** — cross-platform performance in one view
+- **Smart queue** — AI picks optimal post times based on audience engagement patterns
+- **Collab network** — creator-to-creator cross-promo marketplace
 
 ## Confirmed Done (stop asking about these)
 
@@ -276,6 +292,13 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - ✅ **Platform account jail (Apr 20)** — `platform_account_registry` table tracks Twitter accounts with 45-day global cooldown on disconnect. Anti-abuse: disconnecting and reconnecting to reset quota is blocked.
 - ✅ **Enki Guardian toggle on dashboard (Apr 20)** — Fortress Guard toggle now on the dashboard page directly. Pending approvals banner + 24-hr auto-expiry on stale trades.
 - ✅ **Enki leaderboard nav fix (Apr 20)** — Leaderboard now renders Enki nav, not public SocialMate nav.
+- ✅ **Partial post UX (Apr 21)** — Per-platform breakdown shown in calendar/queue/drafts. Retry button for failed platforms. Done.
+- ✅ **Admin platform jail UI (Apr 21)** — `/admin/platform-jail` lists Twitter accounts in 45-day cooldown. Done.
+- ✅ **X Booster Settings UI (Apr 21)** — Purchase UI + balance display on Settings plan tab. Quota warning in compose. Done.
+- ✅ **Enki citizen onboarding (Apr 21)** — 3-step onboarding flow for new Citizen tier users. Done.
+- ✅ **Enki Truth Mode Start/Stop (Apr 21)** — Explicit Start/Stop controls on `/enki/truth`. Done.
+- ✅ **Studio Stax detail page (Apr 21)** — Per-lister page at `/studio-stax/[slug]`. Criteria checklist on apply page. Done.
+- ✅ **Pricing page Studio Stax section (Apr 21)** — "Get Listed" section with Founding Member + Standard cards. Done.
 
 ---
 

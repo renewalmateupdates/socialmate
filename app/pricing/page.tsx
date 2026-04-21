@@ -594,6 +594,80 @@ export default function Pricing() {
           </div>
         </div>
 
+        {/* STUDIO STAX */}
+        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6 mb-8">
+          <div className="mb-5">
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="text-base font-extrabold">Studio Stax — Get Listed</h3>
+              <span className="text-xs font-bold px-2 py-0.5 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 rounded-full">Directory</span>
+            </div>
+            <p className="text-xs text-gray-500 max-w-xl leading-relaxed">
+              Get your tool, product, or service in front of SocialMate&apos;s creator audience. Annual directory listing with analytics, SM-Give badge, and a dedicated listing page.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+            {/* Founding Member */}
+            <div className="border-2 border-indigo-400 dark:border-indigo-500 rounded-2xl p-5 bg-indigo-50 dark:bg-indigo-950/20 relative">
+              <span className="absolute -top-3 left-5 text-xs font-bold bg-indigo-500 text-white px-3 py-0.5 rounded-full">First 100 spots only</span>
+              <div className="flex items-start justify-between mb-4 mt-2">
+                <div>
+                  <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">Founding Member</p>
+                  <p className="text-2xl font-extrabold mt-0.5 text-gray-900 dark:text-gray-100">$100<span className="text-sm font-semibold text-gray-500">/yr</span></p>
+                  <p className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold mt-1">Locked in forever at this rate</p>
+                </div>
+              </div>
+              <ul className="space-y-2">
+                {[
+                  'Directory listing with dedicated page',
+                  'Analytics dashboard — views & clicks',
+                  'SM-Give badge on your listing',
+                  'Featured consideration (editorial picks)',
+                  'Founding Member badge — permanent',
+                ].map((f, i) => (
+                  <li key={i} className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+                    <span className="text-green-500 font-bold flex-shrink-0">✓</span>{f}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Standard */}
+            <div className="border-2 border-gray-200 dark:border-gray-700 rounded-2xl p-5">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">Standard</p>
+                  <p className="text-2xl font-extrabold mt-0.5 text-gray-900 dark:text-gray-100">$150<span className="text-sm font-semibold text-gray-500">/yr</span></p>
+                  <p className="text-xs text-gray-500 mt-1">Open enrollment</p>
+                </div>
+              </div>
+              <ul className="space-y-2">
+                {[
+                  'Directory listing with dedicated page',
+                  'Analytics dashboard — views & clicks',
+                  'SM-Give badge on your listing',
+                  'Featured consideration (editorial picks)',
+                ].map((f, i) => (
+                  <li key={i} className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
+                    <span className="text-green-500 font-bold flex-shrink-0">✓</span>{f}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <p className="text-xs text-gray-400 leading-relaxed">
+              Applications are reviewed. Approval is not guaranteed. NSFW content allowed with disclosure.
+            </p>
+            <Link
+              href="/studio-stax/apply"
+              className="flex-shrink-0 text-sm font-bold px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white transition-colors text-center">
+              Apply to be listed →
+            </Link>
+          </div>
+        </div>
+
         {/* FAQ */}
         <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
           <h3 className="text-base font-extrabold mb-6">Frequently asked questions</h3>

@@ -443,6 +443,17 @@ function AccountsInner() {
                         )}
                       </div>
 
+                      {account.platform === 'discord' && !isConfirming && (
+                        <div className="mt-3 pt-3 border-t border-indigo-100 dark:border-indigo-900/30">
+                          <Link
+                            href="/discord"
+                            className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 bg-indigo-600 text-white rounded-xl hover:opacity-80 transition-all"
+                          >
+                            🎮 Manage Server →
+                          </Link>
+                        </div>
+                      )}
+
                       {account.platform === 'twitter' && twitterQuota && !isConfirming && (
                         <div className="mt-3 pt-3 border-t border-sky-100">
                           {(() => {
