@@ -33,6 +33,34 @@ const PLATFORM_NAMES: Record<string, string> = {
   threads: 'Threads', snapchat: 'Snapchat', lemon8: 'Lemon8', bereal: 'BeReal',
 }
 
+/** Per-platform success/fail chips for partial posts */
+function PartialBreakdown({ post }: { post: any }) {
+  const postIds: Record<string, string> = post.platform_post_ids ?? {}
+  const platforms: string[] = post.platforms ?? []
+  if (platforms.length === 0) return null
+  return (
+    <div className="mt-2 flex flex-wrap gap-1.5" aria-label="Per-platform publish result">
+      {platforms.map(p => {
+        const succeeded = !!postIds[p]
+        return (
+          <span
+            key={p}
+            title={succeeded ? `${PLATFORM_NAMES[p] ?? p} published` : `${PLATFORM_NAMES[p] ?? p} failed`}
+            className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+              succeeded
+                ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+            }`}>
+            <span>{PLATFORM_ICONS[p] ?? '📱'}</span>
+            <span className="hidden sm:inline">{PLATFORM_NAMES[p] ?? p}</span>
+            <span>{succeeded ? '✓' : '✗'}</span>
+          </span>
+        )
+      })}
+    </div>
+  )
+}
+
 function groupByDate(posts: any[]) {
   const groups: Record<string, any[]> = {}
   posts.forEach(post => {
@@ -201,6 +229,7 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
 
 function QueueInner() {
   const [posts, setPosts]               = useState<any[]>([])
+  const [partialPosts, setPartialPosts] = useState<any[]>([])
   const [loading, setLoading]           = useState(true)
   const [cancelling, setCancelling]     = useState<string | null>(null)
   const [confirmCancel, setConfirmCancel] = useState<string | null>(null)
@@ -284,8 +313,25 @@ function QueueInner() {
       }
 
       const { data } = await queueQuery
-
       setPosts(data || [])
+
+      // Also fetch recent partial posts (last 30 days) so user can see what partially failed
+      const thirtyDaysAgo = new Date()
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+      let partialQuery = supabase
+        .from('posts')
+        .select('id, content, platforms, scheduled_at, published_at, status, platform_post_ids, created_at')
+        .eq('user_id', user.id)
+        .eq('status', 'partial')
+        .gte('created_at', thirtyDaysAgo.toISOString())
+        .order('published_at', { ascending: false })
+        .limit(10)
+      if (!activeWorkspace.is_personal) {
+        partialQuery = partialQuery.eq('workspace_id', activeWorkspace.id)
+      }
+      const { data: partialData } = await partialQuery
+      setPartialPosts(partialData || [])
+
       setLoading(false)
     }
     load()
@@ -397,6 +443,46 @@ function QueueInner() {
                   })}
                 </span>
               </p>
+            </div>
+          )}
+
+          {/* Partial posts — recent posts that partially failed */}
+          {!loading && partialPosts.length > 0 && (
+            <div className="mb-6 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-amber-500 text-base">⚠️</span>
+                <p className="text-xs font-extrabold text-amber-800 dark:text-amber-300 uppercase tracking-widest">
+                  Partial publishes ({partialPosts.length})
+                </p>
+                <div className="flex-1 h-px bg-amber-200 dark:bg-amber-800" />
+                <Link href="/drafts?filter=partial"
+                  className="text-[10px] font-bold text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200 transition-colors">
+                  View all →
+                </Link>
+              </div>
+              <div className="space-y-3">
+                {partialPosts.map(post => (
+                  <div key={post.id} className="bg-white dark:bg-gray-900/60 border border-amber-100 dark:border-amber-900 rounded-xl p-3">
+                    <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">
+                      {post.content || <span className="italic text-gray-300 dark:text-gray-600">No content</span>}
+                    </p>
+                    <PartialBreakdown post={post} />
+                    <div className="flex items-center justify-between mt-2">
+                      <span className="text-[10px] text-gray-400 dark:text-gray-500">
+                        {post.published_at
+                          ? new Date(post.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                          : post.scheduled_at
+                            ? new Date(post.scheduled_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                            : ''}
+                      </span>
+                      <Link href="/drafts"
+                        className="text-[10px] font-bold text-amber-600 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-200 transition-colors">
+                        View →
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
