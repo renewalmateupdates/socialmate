@@ -848,62 +848,32 @@ function SettingsInner() {
             </div>
           )}
 
-          {/* ── NOTIFICATIONS ── */}
-          {activeTab === 'Notifications' && (
-            <div className="bg-surface border border-theme rounded-2xl p-6">
-              <h2 className="text-base font-extrabold mb-1">Notification Preferences</h2>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">Each toggle saves immediately. Changes take effect on the next event.</p>
-              <div className="space-y-4">
-                {([
-                  { key: 'post_published' as const, label: 'Email me when a post publishes successfully', desc: 'Get notified every time a scheduled post goes live' },
-                  { key: 'post_failed'    as const, label: 'Email me when a post fails to publish',      desc: 'Get notified so you can retry or reschedule'       },
-                  { key: 'credits_low'    as const, label: 'Email me when I have fewer than 10 credits', desc: 'Avoid running out of AI credits unexpectedly'       },
-                  { key: 'team_joined'    as const, label: 'Email me when a team member joins',          desc: 'Know when someone accepts your workspace invite'   },
-                  { key: 'weekly_digest'  as const, label: 'Send me a weekly digest of my activity',     desc: 'Every Monday: posts published, credits used, stats' },
-                ] as { key: keyof typeof notifications; label: string; desc: string }[]).map(item => (
-                  <div key={item.key} className="flex items-center justify-between py-3 border-b border-gray-50 dark:border-gray-800 last:border-0">
-                    <div className="flex-1 min-w-0 pr-4">
-                      <p className="text-sm font-bold">{item.label}</p>
-                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{item.desc}</p>
-                      {notifSaving === item.key && (
-                        <p className="text-xs text-gray-400 mt-1">Saving...</p>
-                      )}
-                      {notifSaved === item.key && notifSaving !== item.key && (
-                        <p className="text-xs text-green-500 mt-1">Saved ✓</p>
-                      )}
-                    </div>
-                    <button
-                      role="switch"
-                      aria-checked={notifications[item.key]}
-                      onClick={() => handleNotifToggle(item.key)}
-                      disabled={notifSaving === item.key}
-                      className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 disabled:opacity-60 ${notifications[item.key] ? 'bg-pink-500' : 'bg-gray-200 dark:bg-gray-700'}`}>
-                      <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${notifications[item.key] ? 'translate-x-5' : 'translate-x-0.5'}`} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* ── PUSH NOTIFICATIONS ── */}
+          {/* ── BROWSER PUSH NOTIFICATIONS ── */}
           {activeTab === 'Notifications' && !pushSupported && (
             <div className="bg-surface border border-theme rounded-2xl p-6">
-              <h2 className="text-base font-extrabold mb-1">Push Notifications</h2>
-              <p className="text-xs text-gray-400 dark:text-gray-500">Push notifications are not supported in this browser. Try a modern browser like Chrome or Firefox on desktop.</p>
+              <div className="flex items-center justify-between mb-1">
+                <h2 className="text-base font-extrabold">Browser Push Notifications</h2>
+                <span className="text-xs font-bold px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500">Not supported</span>
+              </div>
+              <p className="text-xs text-gray-400 dark:text-gray-500">Not supported in this browser. Try a modern browser like Chrome or Firefox on desktop.</p>
             </div>
           )}
           {activeTab === 'Notifications' && pushSupported && (
             <div className="bg-surface border border-theme rounded-2xl p-6">
-              <h2 className="text-base font-extrabold mb-1">Push Notifications</h2>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">Get notified when posts publish and when your streak is at risk</p>
+              <div className="flex items-center justify-between mb-1">
+                <h2 className="text-base font-extrabold">Browser Push Notifications</h2>
+                <span className={`text-xs font-bold px-3 py-1 rounded-full ${pushSubscribed ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'}`}>
+                  {pushSubscribed ? 'Active' : 'Off'}
+                </span>
+              </div>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">Get notified when Enki makes a trade, your posts publish, or your X quota is running low.</p>
               {pushPermission === 'denied' ? (
                 <p className="text-xs text-gray-400 dark:text-gray-500">Notifications blocked in browser settings. Enable them in your browser to use push notifications.</p>
               ) : (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-bold">{pushSubscribed ? 'Push notifications are on' : 'Push notifications are off'}</p>
+                      <p className="text-sm font-bold">Enable real-time browser alerts</p>
                       <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                         {pushSubscribed ? 'You will receive browser push notifications from SocialMate' : 'Turn on to receive browser push notifications'}
                       </p>
@@ -936,6 +906,44 @@ function SettingsInner() {
                   )}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* ── EMAIL NOTIFICATION PREFERENCES ── */}
+          {activeTab === 'Notifications' && (
+            <div className="bg-surface border border-theme rounded-2xl p-6">
+              <h2 className="text-base font-extrabold mb-1">Email Notification Preferences</h2>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">Each toggle saves immediately. Changes take effect on the next event.</p>
+              <div className="space-y-4">
+                {([
+                  { key: 'post_published' as const, label: 'Email me when a post publishes successfully', desc: 'Get notified every time a scheduled post goes live' },
+                  { key: 'post_failed'    as const, label: 'Email me when a post fails to publish',      desc: 'Get notified so you can retry or reschedule'       },
+                  { key: 'credits_low'    as const, label: 'Email me when I have fewer than 10 credits', desc: 'Avoid running out of AI credits unexpectedly'       },
+                  { key: 'team_joined'    as const, label: 'Email me when a team member joins',          desc: 'Know when someone accepts your workspace invite'   },
+                  { key: 'weekly_digest'  as const, label: 'Send me a weekly digest of my activity',     desc: 'Every Monday: posts published, credits used, stats' },
+                ] as { key: keyof typeof notifications; label: string; desc: string }[]).map(item => (
+                  <div key={item.key} className="flex items-center justify-between py-3 border-b border-gray-50 dark:border-gray-800 last:border-0">
+                    <div className="flex-1 min-w-0 pr-4">
+                      <p className="text-sm font-bold">{item.label}</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{item.desc}</p>
+                      {notifSaving === item.key && (
+                        <p className="text-xs text-gray-400 mt-1">Saving...</p>
+                      )}
+                      {notifSaved === item.key && notifSaving !== item.key && (
+                        <p className="text-xs text-green-500 mt-1">Saved ✓</p>
+                      )}
+                    </div>
+                    <button
+                      role="switch"
+                      aria-checked={notifications[item.key]}
+                      onClick={() => handleNotifToggle(item.key)}
+                      disabled={notifSaving === item.key}
+                      className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 disabled:opacity-60 ${notifications[item.key] ? 'bg-pink-500' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                      <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${notifications[item.key] ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
