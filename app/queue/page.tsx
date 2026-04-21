@@ -239,7 +239,13 @@ function QueueInner() {
   const searchParams = useSearchParams()
   const targetDate  = searchParams.get('date')
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({})
-  const { activeWorkspace } = useWorkspace()
+  const { activeWorkspace, plan } = useWorkspace()
+
+  // Auto-schedule state
+  const [draftCount, setDraftCount]               = useState<number | null>(null)
+  const [autoScheduling, setAutoScheduling]       = useState(false)
+  const [autoScheduleResult, setAutoScheduleResult] = useState<{ scheduled: number; days: number } | null>(null)
+  const [showUpgradeCard, setShowUpgradeCard]     = useState(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
@@ -364,6 +370,18 @@ function QueueInner() {
       const { data: partialData } = await partialQuery
       setPartialPosts(partialData || [])
 
+      // Fetch draft count for auto-schedule button
+      let draftQuery = supabase
+        .from('posts')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('status', 'draft')
+      if (!activeWorkspace.is_personal) {
+        draftQuery = draftQuery.eq('workspace_id', activeWorkspace.id)
+      }
+      const { count } = await draftQuery
+      setDraftCount(count ?? 0)
+
       setLoading(false)
     }
     load()
@@ -410,6 +428,52 @@ function QueueInner() {
     setCancelling(null)
   }
 
+  const handleAutoSchedule = async () => {
+    if (plan === 'free') { setShowUpgradeCard(true); return }
+    setAutoScheduling(true)
+    setAutoScheduleResult(null)
+    try {
+      const res  = await fetch('/api/posts/auto-schedule', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
+      const data = await res.json()
+      if (!res.ok) {
+        if (data.error === 'upgrade_required') { setShowUpgradeCard(true); return }
+        showToast(data.error || 'Auto-schedule failed', 'error')
+        return
+      }
+      if (data.scheduled === 0) {
+        showToast('No drafts to schedule', 'error')
+        return
+      }
+      // Compute how many distinct days were scheduled
+      const days = new Set(
+        (data.posts as Array<{ id: string; scheduled_at: string }>)
+          .map(p => new Date(p.scheduled_at).toDateString())
+      ).size
+      setAutoScheduleResult({ scheduled: data.scheduled, days })
+      setDraftCount(0)
+      // Reload queue to show newly scheduled posts
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        let q = supabase
+          .from('posts')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('status', 'scheduled')
+          .gte('scheduled_at', new Date().toISOString())
+          .order('scheduled_at', { ascending: true })
+        if (activeWorkspace && !activeWorkspace.is_personal) {
+          q = q.eq('workspace_id', activeWorkspace.id)
+        }
+        const { data: refreshed } = await q
+        if (refreshed) setPosts(refreshed)
+      }
+    } catch {
+      showToast('Network error — try again', 'error')
+    } finally {
+      setAutoScheduling(false)
+    }
+  }
+
   const grouped  = groupByDate(posts)
   const dateKeys = Object.keys(grouped).sort((a, b) => {
     if (a === 'Unscheduled') return 1
@@ -436,12 +500,30 @@ function QueueInner() {
                 )}
               </p>
             </div>
-            <div className="flex items-center gap-2 self-start sm:self-auto">
+            <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
               {targetDate && (
                 <Link href="/queue"
                   className="text-xs font-bold px-3 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
                   ← All days
                 </Link>
+              )}
+              {/* Auto-schedule button — Pro/Agency only */}
+              {plan === 'free' ? (
+                <button
+                  onClick={() => setShowUpgradeCard(v => !v)}
+                  className="flex items-center gap-1.5 text-xs font-bold px-3 py-2.5 border border-[#1f1f1f] text-[#9ca3af] rounded-xl hover:border-[#F59E0B] hover:text-[#F59E0B] transition-all">
+                  🔒 Auto-schedule Drafts
+                </button>
+              ) : (
+                <button
+                  onClick={handleAutoSchedule}
+                  disabled={autoScheduling || draftCount === 0}
+                  title={draftCount === 0 ? 'No drafts to schedule' : `Auto-schedule ${draftCount} draft${draftCount !== 1 ? 's' : ''}`}
+                  className="flex items-center gap-1.5 text-xs font-bold px-3 py-2.5 rounded-xl border border-[#F59E0B] text-[#F59E0B] bg-[#F59E0B]/10 hover:bg-[#F59E0B]/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                  {autoScheduling
+                    ? <><div className="w-3 h-3 border-2 border-[#F59E0B]/40 border-t-[#F59E0B] rounded-full animate-spin" />Scheduling...</>
+                    : <>⚡ Auto-schedule Drafts{draftCount !== null && draftCount > 0 ? ` (${draftCount})` : ''}</>}
+                </button>
               )}
               <Link href="/compose"
                 className="bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all">
@@ -449,6 +531,48 @@ function QueueInner() {
               </Link>
             </div>
           </div>
+
+          {/* Auto-schedule success banner */}
+          {autoScheduleResult && (
+            <div className="mb-4 bg-[#111111] border border-[#F59E0B]/40 rounded-2xl px-5 py-3 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <span className="text-lg">⚡</span>
+                <p className="text-xs font-semibold text-[#F59E0B]">
+                  <span className="font-extrabold">Scheduled {autoScheduleResult.scheduled} post{autoScheduleResult.scheduled !== 1 ? 's' : ''}</span>
+                  {' '}across the next {autoScheduleResult.days} day{autoScheduleResult.days !== 1 ? 's' : ''} at optimal times
+                </p>
+              </div>
+              <button
+                onClick={() => setAutoScheduleResult(null)}
+                className="text-[#9ca3af] hover:text-white transition-colors text-sm font-bold w-6 h-6 flex items-center justify-center flex-shrink-0">
+                ×
+              </button>
+            </div>
+          )}
+
+          {/* Free plan upgrade card for auto-schedule */}
+          {showUpgradeCard && (
+            <div className="mb-4 bg-[#111111] border border-[#1f1f1f] rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-3">
+                <span className="text-xl mt-0.5">⚡</span>
+                <div>
+                  <p className="text-sm font-extrabold text-white mb-0.5">Auto-scheduling is a Pro feature</p>
+                  <p className="text-xs text-[#9ca3af]">Let SocialMate fill your queue automatically — Pro fills 14 days, Agency fills 30 days at peak engagement times. Upgrade for $5/mo.</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0 self-start sm:self-auto">
+                <Link href="/pricing"
+                  className="text-xs font-bold px-4 py-2.5 bg-[#F59E0B] text-black rounded-xl hover:opacity-90 transition-all whitespace-nowrap">
+                  Upgrade to Pro →
+                </Link>
+                <button
+                  onClick={() => setShowUpgradeCard(false)}
+                  className="text-[#9ca3af] hover:text-white transition-colors text-sm font-bold w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/5">
+                  ×
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* X / Twitter callout banner */}
           <Link href="/compose?platform=twitter"

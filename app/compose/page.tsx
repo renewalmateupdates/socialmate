@@ -128,6 +128,7 @@ function ComposeInner() {
   const [scoring, setScoring] = useState(false)
   const [scoreError, setScoreError] = useState('')
   const [showPreview, setShowPreview] = useState(false)
+  const [bestTimeLabel, setBestTimeLabel] = useState<string | null>(null)
 
   // Repurpose panel state
   const REPURPOSE_FORMATS = [
@@ -493,6 +494,7 @@ function ComposeInner() {
 
   const handleDateChange = (val: string) => {
     setScheduleError('')
+    setBestTimeLabel(null)
     if (val && val > maxScheduleDate) {
       setScheduleError(
         `Your ${plan} plan can only schedule up to ${scheduleHorizonLabel} in advance. Upgrade to schedule further out.`
@@ -685,6 +687,41 @@ function ComposeInner() {
     setAiResult('')
     setActiveAiTool(null)
     showToast('Post replaced ✓')
+  }
+
+  // Best-time picker — sets schedule to tomorrow at optimal ET hour for selected platforms
+  const BEST_HOUR_ET: Record<string, number> = {
+    bluesky: 9, discord: 17, telegram: 8, mastodon: 10, twitter: 9,
+  }
+  const handleUseBestTime = () => {
+    const platforms = selectedPlatforms.filter(p => p !== 'discord' && p !== 'telegram')
+    const primaryPlatform = platforms[0] || selectedPlatforms[0] || 'bluesky'
+    const etHour = BEST_HOUR_ET[primaryPlatform] ?? 9
+
+    // Build tomorrow in local time
+    const tomorrow = new Date()
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    const yyyy = tomorrow.getFullYear()
+    const mm   = String(tomorrow.getMonth() + 1).padStart(2, '0')
+    const dd   = String(tomorrow.getDate()).padStart(2, '0')
+    const dateStr = `${yyyy}-${mm}-${dd}`
+
+    // ET hour → local time. Detect UTC offset of device, shift from ET (UTC-4).
+    const etOffsetMs  = 4 * 60 * 60 * 1000 // EDT = UTC-4
+    const utcMs       = Date.UTC(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), etHour) + etOffsetMs
+    const localDate   = new Date(utcMs)
+    const localHour   = String(localDate.getHours()).padStart(2, '0')
+    const localMinute = String(localDate.getMinutes()).padStart(2, '0')
+    const timeStr     = `${localHour}:${localMinute}`
+
+    handleDateChange(dateStr)
+    setScheduleTime(timeStr)
+
+    // Format a friendly label
+    const dayName = tomorrow.toLocaleDateString('en-US', { weekday: 'long' })
+    const displayTime = localDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
+    const platformName = PLATFORMS.find(p => p.id === primaryPlatform)?.name ?? primaryPlatform
+    setBestTimeLabel(`Set to ${dayName} at ${displayTime} — best time for ${platformName}`)
   }
 
   const handlePublish = async () => {
@@ -1632,6 +1669,18 @@ function ComposeInner() {
                     onChange={e => setScheduleTime(e.target.value)}
                     style={{ fontSize: '16px' }}
                     className="flex-1 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 outline-none focus:border-black dark:bg-gray-900 transition-all" />
+                </div>
+                {/* Best time picker */}
+                <div className="mt-3 flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleUseBestTime}
+                    className="flex items-center gap-1.5 text-xs font-semibold text-[#F59E0B] hover:text-amber-400 transition-colors">
+                    ✨ Use best time
+                  </button>
+                  {bestTimeLabel && (
+                    <span className="text-xs text-gray-400 dark:text-gray-500">{bestTimeLabel}</span>
+                  )}
                 </div>
                 {scheduleError && (
                   <div className="mt-2 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 flex items-center justify-between gap-3">
