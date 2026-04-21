@@ -26,7 +26,7 @@ const PILLARS = [
     label: 'Become',
     icon: '🔥',
     heading: 'Do the unglamorous daily work.',
-    desc: 'Mindset, habits, and the invisible reps that compound into something real. What nobody tells you about building alone — and how to keep going when nobody's watching.',
+    desc: "Mindset, habits, and the invisible reps that compound into something real. What nobody tells you about building alone — and how to keep going when nobody's watching.",
   },
 ]
 
