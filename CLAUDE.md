@@ -85,7 +85,8 @@ These have burned us before — always apply:
 - Flat 15% on Pro + Max credit packs
 
 **X/Twitter quota enforcement:**
-- Free: 50 tweets/month | Pro: 200/month | Agency: 500/month
+- Free: 28 tweets/month | Pro: 150/month | Agency: 400/month
+- X Booster add-on (one-time purchase, stacks, rolls over): Spark 50/$1.99 · Boost 120/$4.99 · Surge 250/$9.99 · Storm 500/$19.99
 - Tracked by counting published posts with `platforms @> ['twitter']` this calendar month
 
 ---
@@ -104,7 +105,7 @@ These have burned us before — always apply:
 
 ---
 
-## What's Been Built (as of April 19, 2026 — end of day)
+## What's Been Built (as of April 20, 2026 — end of day)
 
 **Core:**
 - Post scheduling (Now + future via Inngest), drafts, queue, calendar, bulk scheduling
@@ -193,11 +194,23 @@ These have burned us before — always apply:
 - `sitemap.ts` updated (includes /merch, /affiliates, /enki/truth)
 - `public/llms.txt` updated
 
+**X Booster & Quota Restructure (April 20, 2026):**
+- X quota updated: Free 28/mo · Pro 150/mo · Agency 400/mo (down from 50/200/500)
+- X Booster one-time add-on tiers: Spark (50 posts/$1.99) · Boost (120/$4.99) · Surge (250/$9.99) · Storm (500/$19.99)
+- Booster credits stack and roll over month-to-month (never expire)
+- `platform_account_registry` table tracks connected/disconnected Twitter accounts with 45-day global cooldown on disconnect (anti-abuse jail)
+- Stripe price IDs live for all 4 Booster tiers (see price table below)
+
+**Enki UX Fixes (April 20, 2026):**
+- Guardian (Fortress Guard) toggle now lives directly on the Enki dashboard — no settings page required
+- Pending approvals banner on Enki dashboard shows count + quick-approve link when approval mode is ON
+- 24-hour auto-expiry on pending trades — stale approvals auto-decline so queue never jams
+- Leaderboard nav fixed: Enki leaderboard now shows the Enki sidebar nav instead of the public SocialMate nav
+
 ---
 
 ## Known Issues / Bugs (fix these when touched)
 
-- **X quota restructure needed** — see Pending section below. Free tier limit needs to drop to 5/month. New X Booster add-on being considered.
 - **Partial post UX** — when a post publishes to some platforms but not others, the calendar shows "Partial" with no explanation. Users should see "Bluesky ✓ · X blocked (quota)" or similar. Not built yet.
 
 ## Audit Findings (April 19–20, 2026) — resolved
@@ -225,15 +238,6 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 ---
 
 ## Pending / In Progress
-
-- **X quota restructure — NEXT SESSION PRIORITY:**
-  - Current limits (free: 50, pro: 200, agency: 500) need adjustment for sustainability
-  - X API cost: $0.01/tweet. At 1000 free users × 50 tweets = $500/month with zero revenue = unsustainable
-  - **Proposed new limits:** Free: 5/month · Pro: 150/month · Agency: 400/month
-  - **Proposed new add-on:** "X Booster" $2.99/month → 150 extra X posts. Costs ~$1.50 in API fees, nets $1.49
-  - Alternative: fold X posts into credit system (1 X post = N credits) — reuses existing infra
-  - Decision needed before implementing. Joshua to decide which model next session.
-  - Files to change: `lib/publish/twitter.ts` (TWITTER_QUOTA map) + `app/api/accounts/twitter/quota/route.ts` (limits map) + Stripe for new add-on product if going that route
 
 - **Content posts (Apr 20–26)** — bulk-scheduled, running daily 8am–5pm ET on X + Bluesky. Inngest now confirmed working. Posts going out as "Partial" because of the quota bug (now fixed in PR #175). May need to manually retry missed morning slots.
 
@@ -268,6 +272,10 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - ✅ **SM-Give merch allocation** — Corrected from 30% to 75% of gross in webhook handler. PR #159 merged.
 - ✅ **Content posts rewrite** — All 140 posts rewritten to ≤280 chars including hashtags. Organized by day + platform. `content-posts-apr20-apr26.md` ready to bulk schedule. PR #155 merged.
 - ✅ **Audit fixes (Apr 19)** — Broken `/affiliate` links fixed, debug route deleted, feature-requests error handling added. PR #160 open.
+- ✅ **X quota restructure (Apr 20)** — New limits: Free 28 · Pro 150 · Agency 400. X Booster one-time add-on tiers live in Stripe (Spark/Boost/Surge/Storm). Booster credits stack and roll over.
+- ✅ **Platform account jail (Apr 20)** — `platform_account_registry` table tracks Twitter accounts with 45-day global cooldown on disconnect. Anti-abuse: disconnecting and reconnecting to reset quota is blocked.
+- ✅ **Enki Guardian toggle on dashboard (Apr 20)** — Fortress Guard toggle now on the dashboard page directly. Pending approvals banner + 24-hr auto-expiry on stale trades.
+- ✅ **Enki leaderboard nav fix (Apr 20)** — Leaderboard now renders Enki nav, not public SocialMate nav.
 
 ---
 
@@ -317,6 +325,10 @@ The diff = the story. Ship it to every platform.
 | Enki Emperor Monthly | price_1TMtiN7OMwDowUuUU5rzK88L | $29.00/mo |
 | Enki Emperor Annual | price_1TMtis7OMwDowUuUpQ2hZamc | $240.00/yr |
 | Enki Cloud Runner | price_1TMtkc7OMwDowUuU8aepieuq | $10.00/mo |
+| X Booster Spark (50 posts) | price_1TOK9u7OMwDowUuUlgZPUwLZ | $1.99 |
+| X Booster Boost (120 posts) | price_1TOKAH7OMwDowUuUn6pcSTQd | $4.99 |
+| X Booster Surge (250 posts) | price_1TOKBv7OMwDowUuUsykwyuUa | $9.99 |
+| X Booster Storm (500 posts) | price_1TOKCg7OMwDowUuU2PEzonf6 | $19.99 |
 
 ---
 

@@ -99,8 +99,8 @@ export async function publishToTwitter(
   // ─── Per-workspace X quota enforcement ──────────────────────────────────
   // Free tier API cap: 1,500 tweets/month per app (write).
   // Per-workspace monthly limits:
-  //   Free   → 50   · Pro → 200   · Agency → 500
-  const TWITTER_QUOTA: Record<string, number> = { free: 50, pro: 200, agency: 500 }
+  //   Free   → 28   · Pro → 150   · Agency → 400
+  const TWITTER_QUOTA: Record<string, number> = { free: 28, pro: 150, agency: 400 }
 
   // Fetch workspace plan — use owner_id fallback when workspaceId is null (personal workspace)
   let wsData: { plan: string | null } | null = null
@@ -143,10 +143,27 @@ export async function publishToTwitter(
   const { count: tweetCount } = await tweetCountQuery
 
   if ((tweetCount ?? 0) >= monthlyLimit) {
-    throw new Error(
-      `You've reached your X posting limit for this month (${monthlyLimit} tweets). ` +
-      `Upgrade your plan for a higher limit, or wait until next month.`
-    )
+    // Base quota exhausted — check X Booster balance before blocking
+    const { data: userSettings } = await getSupabaseAdmin()
+      .from('user_settings')
+      .select('twitter_booster_balance')
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    const boosterBalance = userSettings?.twitter_booster_balance ?? 0
+    if (boosterBalance > 0) {
+      // Consume one booster post
+      await getSupabaseAdmin()
+        .from('user_settings')
+        .update({ twitter_booster_balance: boosterBalance - 1 })
+        .eq('user_id', userId)
+      // Allow the tweet to proceed
+    } else {
+      throw new Error(
+        `You've reached your X posting limit for this month (${monthlyLimit} tweets). ` +
+        `Upgrade your plan, purchase an X Booster pack, or wait until next month.`
+      )
+    }
   }
   } // end quota enforcement (skipped for admin)
   // ──────────────────────────────────────────────────────────────────────────

@@ -29,7 +29,7 @@ export async function PATCH(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
 
   const body = await req.json()
-  const { id, status, admin_notes, action, admin_featured, admin_featured_note, free_year, name, tagline, description, url, logo_url } = body
+  const { id, status, admin_notes, action, admin_featured, admin_featured_note, free_year, name, tagline, description, url, logo_url, is_nsfw, nsfw_reason } = body
   const db = getAdminSupabase()
 
   // ── Toggle admin featured ───────────────────────────────────────────────────
@@ -235,6 +235,8 @@ export async function PATCH(req: NextRequest) {
   if (description !== undefined) updatePayload.description = description || null
   if (url !== undefined) updatePayload.url = url || null
   if (logo_url !== undefined) updatePayload.logo_url = logo_url || null
+  if (is_nsfw !== undefined) updatePayload.is_nsfw = Boolean(is_nsfw)
+  if (nsfw_reason !== undefined) updatePayload.nsfw_reason = nsfw_reason || null
   // Remove undefined values so we don't null out untouched fields
   for (const key of Object.keys(updatePayload)) {
     if (updatePayload[key] === undefined) delete updatePayload[key]

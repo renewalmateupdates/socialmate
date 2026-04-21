@@ -1,6 +1,5 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import PublicLayout from '@/components/PublicLayout'
 
 export const metadata: Metadata = {
   title: 'Enki Leaderboard — Top Architects by Treasury Growth',
@@ -61,7 +60,37 @@ export default async function EnkiLeaderboardPage() {
   const entries = await getLeaderboard()
 
   return (
-    <PublicLayout>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+      {/* ── Enki Nav Header ── */}
+      <div className="bg-black dark:bg-gray-950 border-b border-gray-800 px-6 py-4">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-amber-400 rounded-lg flex items-center justify-center text-black font-extrabold text-sm">E</div>
+            <div>
+              <p className="text-sm font-extrabold text-white leading-none">Enki</p>
+              <p className="text-xs text-gray-500 mt-0.5">Treasury Guardian</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Link href="/enki/doctrines" className="text-xs font-bold text-gray-400 hover:text-amber-400 transition-colors">
+              Doctrines
+            </Link>
+            <Link href="/enki/leaderboard" className="text-xs font-bold text-amber-400">
+              Leaderboard
+            </Link>
+            <Link href="/enki/trades" className="text-xs font-bold text-gray-400 hover:text-amber-400 transition-colors">
+              Trade Ledger
+            </Link>
+            <Link href="/enki/truth" className="text-xs font-bold text-gray-400 hover:text-amber-400 transition-colors">
+              Truth Mode
+            </Link>
+            <Link href="/enki/dashboard" className="text-xs font-bold text-gray-400 hover:text-white transition-colors">
+              ← Back
+            </Link>
+          </div>
+        </div>
+      </div>
+
       <div className="max-w-4xl mx-auto px-6 py-16">
 
         {/* ── Header ── */}
@@ -195,6 +224,6 @@ export default async function EnkiLeaderboardPage() {
         </div>
 
       </div>
-    </PublicLayout>
+    </div>
   )
 }

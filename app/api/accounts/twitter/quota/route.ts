@@ -40,11 +40,11 @@ export async function GET() {
     .maybeSingle()
 
   const plan = ws?.plan ?? 'free'
-  const limits: Record<string, number> = { free: 50, pro: 200, agency: 500 }
+  const limits: Record<string, number> = { free: 28, pro: 150, agency: 400 }
 
   // Admin has no quota cap — return a high ceiling so UI shows unlimited
   const ADMIN_EMAIL = 'socialmatehq@gmail.com'
-  const limit = user.email === ADMIN_EMAIL ? 999999 : (limits[plan] ?? 50)
+  const limit = user.email === ADMIN_EMAIL ? 999999 : (limits[plan] ?? 28)
   const boosterBalance = userSettings?.twitter_booster_balance ?? 0
 
   return NextResponse.json({ used: count ?? 0, limit, plan, boosterBalance })

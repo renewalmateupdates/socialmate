@@ -123,6 +123,7 @@ export default function DashboardClient() {
   const [paperPositions, setPaperPositions] = useState<PaperPosition[]>([])
   const [pendingTrades, setPendingTrades] = useState<PendingTrade[]>([])
   const [approvalState, setApprovalState] = useState<Record<string, 'approved' | 'rejected' | 'loading'>>({})
+  const [guardianToggling, setGuardianToggling] = useState(false)
 
   // Notification bell state
   const [notifications, setNotifications]         = useState<EnkiNotification[]>([])
@@ -279,6 +280,27 @@ export default function DashboardClient() {
     } catch (e) {
       setApprovalState(prev => { const next = { ...prev }; delete next[id]; return next })
       console.error('Approval request failed:', e)
+    }
+  }
+
+  async function toggleGuardian() {
+    if (!profile || guardianToggling) return
+    const nextMode = profile.guardian_mode === 'dormant' ? 'approval' : 'dormant'
+    setGuardianToggling(true)
+    try {
+      const res = await fetch('/api/enki/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guardian_mode: nextMode }),
+      })
+      const json = await res.json()
+      if (json.success) {
+        setProfile(prev => prev ? { ...prev, guardian_mode: nextMode } : prev)
+      }
+    } catch (e) {
+      console.error('Guardian toggle error:', e)
+    } finally {
+      setGuardianToggling(false)
     }
   }
 
@@ -510,6 +532,60 @@ export default function DashboardClient() {
               className="text-xs font-bold bg-amber-400 hover:bg-amber-500 text-black px-4 py-2 rounded-xl whitespace-nowrap transition-colors"
             >
               Upgrade →
+            </Link>
+          </div>
+        )}
+
+        {/* ── Guardian status row ── */}
+        {profile && (
+          <div className="flex items-center justify-between bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl px-5 py-3 mb-6 gap-3 flex-wrap">
+            <div className="flex items-center gap-2.5">
+              <span
+                className={`w-2.5 h-2.5 rounded-full shrink-0 ${profile.guardian_mode !== 'dormant' ? 'bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.6)]' : 'bg-gray-400'}`}
+              />
+              <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                Guardian:{' '}
+                {profile.guardian_mode === 'dormant'
+                  ? <span className="text-gray-400 font-semibold">PAUSED</span>
+                  : profile.guardian_mode === 'autonomous'
+                  ? <span className="text-green-500">ACTIVE</span>
+                  : <span className="text-green-500">ACTIVE</span>
+                }
+              </span>
+              {profile.guardian_mode !== 'dormant' && (
+                <span className="text-xs text-gray-400 font-medium">
+                  — {profile.guardian_mode === 'autonomous' ? 'Autonomous' : 'Approval Mode'}
+                </span>
+              )}
+            </div>
+            <button
+              onClick={toggleGuardian}
+              disabled={guardianToggling}
+              className={`text-xs font-bold px-4 py-1.5 rounded-xl border transition-colors disabled:opacity-50 ${
+                profile.guardian_mode !== 'dormant'
+                  ? 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                  : 'bg-green-600 border-green-700 text-white hover:bg-green-700'
+              }`}
+            >
+              {guardianToggling ? '…' : profile.guardian_mode !== 'dormant' ? 'Pause' : 'Resume'}
+            </button>
+          </div>
+        )}
+
+        {/* ── Pending approvals amber banner ── */}
+        {pendingTrades.length > 0 && (
+          <div className="flex items-center justify-between bg-amber-50 dark:bg-amber-950/20 border border-amber-300 dark:border-amber-700 rounded-2xl px-5 py-3.5 mb-6 gap-3">
+            <div className="flex items-center gap-2.5">
+              <span className="text-amber-500 text-base leading-none">⚡</span>
+              <p className="text-sm font-bold text-amber-800 dark:text-amber-300">
+                {pendingTrades.length} trade{pendingTrades.length === 1 ? '' : 's'} waiting for your approval
+              </p>
+            </div>
+            <Link
+              href="/enki/trades?tab=pending"
+              className="text-xs font-bold text-amber-700 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 whitespace-nowrap transition-colors"
+            >
+              Review →
             </Link>
           </div>
         )}

@@ -15,9 +15,12 @@ const CATEGORIES = [
 ]
 
 interface PricingInfo {
-  annual: { price: number; foundingPrice: number; standardPrice: number; foundingFull: boolean; slotsFilled: number; slotsRemaining: number; slotsTotal: number }
-  quarterly: { price: number; targetQuarter: string; isMidQuarter: boolean; startsAt: string; endsAt: string }
-  currentQuarter: string
+  annual: { price: number; founderPrice: number; standardPrice: number; foundingFull: boolean; slotsFilled: number; slotsRemaining: number; slotsTotal: number; renewalFounding: number; renewalStandard: number }
+  currentTier: 'founding' | 'standard'
+  foundingLimit: number
+  foundingSpotsUsed: number
+  foundingSpotsRemaining: number
+  isFull: boolean
 }
 
 export default function StudioStaxApplyPage() {
@@ -107,8 +110,83 @@ export default function StudioStaxApplyPage() {
             Founder-reviewed · 48hr response
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100 mb-2">Apply for Studio Stax</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-5">
             Founder-approved only. No corporations, no VC-backed giants — just tools built by people who actually give a damn.
+          </p>
+          {/* Founding spots counter */}
+          {pricing && (
+            pricing.annual.foundingFull ? (
+              <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm text-gray-600 dark:text-gray-400 font-semibold">
+                Founding spots full — Standard listing <span className="text-gray-900 dark:text-gray-100">$150/yr</span>
+              </div>
+            ) : (
+              <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-700 rounded-2xl px-5 py-4">
+                <p className="text-base font-extrabold text-amber-700 dark:text-amber-400">
+                  🔥 {pricing.annual.slotsRemaining} of {pricing.annual.slotsTotal} Founding Spots Remaining
+                  <span className="ml-2 text-sm font-semibold text-amber-600 dark:text-amber-500">— $100/yr (then $150/yr)</span>
+                </p>
+                <p className="text-xs text-amber-600 dark:text-amber-500 mt-1">
+                  Lock in the founder price before all 100 spots are gone. Early renewal: $80/yr.
+                </p>
+              </div>
+            )
+          )}
+        </div>
+
+        {/* Criteria checklist */}
+        <div className="mb-10 space-y-4">
+          <h2 className="text-lg font-extrabold tracking-tight text-gray-900 dark:text-gray-100">What we look for</h2>
+
+          {/* Required */}
+          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-5">
+            <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">Required</p>
+            <ul className="space-y-2.5">
+              {[
+                'Established audience or following (social media, newsletter, community — any platform)',
+                'Real product, service, or content with genuine value',
+                'Positive reviews or social proof (testimonials, ratings, community feedback)',
+                'Active and maintained — not an abandoned project',
+              ].map(item => (
+                <li key={item} className="flex items-start gap-2.5 text-sm text-gray-700 dark:text-gray-300">
+                  <span className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
+                    <svg className="w-3 h-3 text-amber-600 dark:text-amber-400" viewBox="0 0 12 12" fill="none">
+                      <path d="M2 6l3 3 5-5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Good to have */}
+          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-5">
+            <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">Good to have</p>
+            <ul className="space-y-2.5">
+              {[
+                'SM-Give aligned — mission-driven, community-focused, gives back',
+                'Creator or small-business owned (not a major corporation)',
+              ].map(item => (
+                <li key={item} className="flex items-start gap-2.5 text-sm text-gray-700 dark:text-gray-300">
+                  <span className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center">
+                    <span className="w-2 h-2 rounded-full border-2 border-gray-400 dark:border-gray-500" />
+                  </span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* NSFW callout */}
+          <div className="bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 rounded-2xl p-5">
+            <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">Adult / NSFW content</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+              Adult or NSFW content is allowed but <strong className="text-gray-800 dark:text-gray-200">must be disclosed in your application</strong>. NSFW listings are blurred in the public directory and labeled 18+. Undisclosed NSFW content will result in immediate removal.
+            </p>
+          </div>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+            If you check most of these boxes, we&apos;d love to have you. Applications are reviewed by the SocialMate team — approval is not guaranteed.
           </p>
         </div>
 

@@ -11,8 +11,9 @@ interface Post {
   content: string
   platforms: string[]
   scheduled_at: string | null
-  status: 'scheduled' | 'published' | 'draft' | 'failed'
+  status: 'scheduled' | 'published' | 'draft' | 'failed' | 'partial'
   created_at: string
+  platform_post_ids?: Record<string, string> | null
 }
 
 const PLATFORM_ICONS: Record<string, string> = {
@@ -27,6 +28,7 @@ const STATUS_DOT: Record<string, string> = {
   published: 'bg-green-400',
   draft:     'bg-gray-300 dark:bg-gray-500',
   failed:    'bg-red-400',
+  partial:   'bg-amber-400',
 }
 
 const STATUS_BADGE: Record<string, string> = {
@@ -34,6 +36,41 @@ const STATUS_BADGE: Record<string, string> = {
   published: 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-300',
   draft:     'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
   failed:    'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300',
+  partial:   'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+}
+
+const PLATFORM_NAMES: Record<string, string> = {
+  discord: 'Discord', bluesky: 'Bluesky', telegram: 'Telegram', mastodon: 'Mastodon',
+  linkedin: 'LinkedIn', youtube: 'YouTube', pinterest: 'Pinterest', reddit: 'Reddit',
+  instagram: 'Instagram', twitter: 'X', tiktok: 'TikTok', facebook: 'Facebook',
+  threads: 'Threads', snapchat: 'Snapchat', lemon8: 'Lemon8', bereal: 'BeReal',
+}
+
+/** Render a per-platform success/fail breakdown for partial posts */
+function PlatformBreakdown({ post }: { post: Post }) {
+  if (post.status !== 'partial') return null
+  const postIds = post.platform_post_ids ?? {}
+  return (
+    <div className="mt-2 flex flex-wrap gap-1.5" aria-label="Per-platform publish result">
+      {(post.platforms ?? []).map(p => {
+        const succeeded = !!postIds[p]
+        return (
+          <span
+            key={p}
+            title={succeeded ? `${PLATFORM_NAMES[p] ?? p} published` : `${PLATFORM_NAMES[p] ?? p} failed`}
+            className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+              succeeded
+                ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+            }`}>
+            <span>{PLATFORM_ICONS[p] ?? '📄'}</span>
+            <span className="hidden sm:inline">{PLATFORM_NAMES[p] ?? p}</span>
+            <span>{succeeded ? '✓' : '✗'}</span>
+          </span>
+        )
+      })}
+    </div>
+  )
 }
 
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -97,7 +134,7 @@ export default function CalendarPage() {
     const end   = new Date(currentYear, currentMonth + 2, 0, 23, 59, 59).toISOString()
     let query = supabase
       .from('posts')
-      .select('id, content, platforms, scheduled_at, status, created_at')
+      .select('id, content, platforms, scheduled_at, status, created_at, platform_post_ids')
       .eq('user_id', user.id)
       .gte('created_at', start)
       .lte('created_at', end)
@@ -204,6 +241,9 @@ export default function CalendarPage() {
                   </span>
                   <span className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-full bg-green-400 inline-block" />Published
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" />Partial
                   </span>
                   <span className="flex items-center gap-1.5">
                     <span className="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-500 inline-block" />Draft
@@ -386,19 +426,24 @@ export default function CalendarPage() {
                               🕐 {formatTime(post.scheduled_at || post.created_at)}
                             </p>
                           )}
+                          {post.status === 'partial' && (
+                            <PlatformBreakdown post={post} />
+                          )}
                         </div>
                         <div className="flex flex-col items-end gap-2 flex-shrink-0">
                           <span className={`text-xs font-bold px-2.5 py-1 rounded-full capitalize ${STATUS_BADGE[post.status] ?? STATUS_BADGE.draft}`}>
-                            {post.status}
+                            {post.status === 'partial' ? 'Partial' : post.status}
                           </span>
                           <Link
-                            href={post.status === 'draft' || post.status === 'failed' ? `/compose?id=${post.id}` : '/queue'}
+                            href={post.status === 'draft' || post.status === 'failed' ? `/compose?id=${post.id}` : '/drafts'}
                             className={`text-xs font-semibold transition-colors ${
                               post.status === 'failed'
                                 ? 'text-red-500 hover:text-red-700 dark:hover:text-red-300'
-                                : 'text-blue-500 hover:text-blue-700 dark:hover:text-blue-300'
+                                : post.status === 'partial'
+                                  ? 'text-amber-500 hover:text-amber-700 dark:hover:text-amber-300'
+                                  : 'text-blue-500 hover:text-blue-700 dark:hover:text-blue-300'
                             }`}>
-                            {post.status === 'draft' ? 'Edit →' : post.status === 'failed' ? 'Retry →' : 'View in Queue →'}
+                            {post.status === 'draft' ? 'Edit →' : post.status === 'failed' ? 'Retry →' : post.status === 'partial' ? 'View details →' : 'View in Queue →'}
                           </Link>
                         </div>
                       </div>
@@ -416,6 +461,9 @@ export default function CalendarPage() {
             </span>
             <span className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-green-400 inline-block" />Published
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" />Partial
             </span>
             <span className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-500 inline-block" />Draft
