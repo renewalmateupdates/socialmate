@@ -571,6 +571,42 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true })
     }
 
+    // ── X Booster pack — one-time payment ──
+    if (type === 'x_booster' && userId) {
+      const postsToAdd = parseInt(session.metadata?.booster_posts ?? '0', 10)
+      if (!postsToAdd) return NextResponse.json({ received: true })
+
+      const paymentIntentId = session.payment_intent as string
+      if (paymentIntentId) {
+        const { data: existing } = await supabase
+          .from('processed_events')
+          .select('id')
+          .eq('event_id', paymentIntentId)
+          .maybeSingle()
+        if (existing) {
+          console.log('X Booster already processed:', paymentIntentId)
+          return NextResponse.json({ received: true })
+        }
+        await supabase
+          .from('processed_events')
+          .insert({ event_id: paymentIntentId, type: 'x_booster', user_id: userId })
+      }
+
+      const { data: settings } = await supabase
+        .from('user_settings')
+        .select('twitter_booster_balance')
+        .eq('user_id', userId)
+        .single()
+      const current = settings?.twitter_booster_balance ?? 0
+      await supabase
+        .from('user_settings')
+        .update({ twitter_booster_balance: current + postsToAdd })
+        .eq('user_id', userId)
+
+      console.log(`[XBooster] +${postsToAdd} posts added for user ${userId}`)
+      return NextResponse.json({ received: true })
+    }
+
     // ── Enki subscription ──
     if (session.metadata?.enki === 'true') {
       const { plan, user_id: enkiUserId } = session.metadata

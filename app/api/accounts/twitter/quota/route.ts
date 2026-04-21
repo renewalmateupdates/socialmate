@@ -33,19 +33,18 @@ export async function GET() {
     .eq('is_personal', true)
     .maybeSingle()
 
+  const { data: userSettings } = await getSupabaseAdmin()
+    .from('user_settings')
+    .select('twitter_booster_balance')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
   const plan = ws?.plan ?? 'free'
   const limits: Record<string, number> = { free: 28, pro: 150, agency: 400 }
 
   // Admin has no quota cap — return a high ceiling so UI shows unlimited
   const ADMIN_EMAIL = 'socialmatehq@gmail.com'
   const limit = user.email === ADMIN_EMAIL ? 999999 : (limits[plan] ?? 28)
-
-  // Fetch X Booster balance
-  const { data: userSettings } = await getSupabaseAdmin()
-    .from('user_settings')
-    .select('twitter_booster_balance')
-    .eq('user_id', user.id)
-    .maybeSingle()
   const boosterBalance = userSettings?.twitter_booster_balance ?? 0
 
   return NextResponse.json({ used: count ?? 0, limit, plan, boosterBalance })
