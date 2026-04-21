@@ -1001,6 +1001,13 @@ export default function EnkiSettingsPage() {
               </ul>
             </div>
           )}
+
+          <p className="text-xs text-gray-400 mt-3">
+            Start, stop, and monitor your experiment from the{' '}
+            <Link href="/enki/truth" className="text-violet-400 hover:text-violet-300 underline">
+              Truth dashboard →
+            </Link>
+          </p>
         </div>
 
         {/* Danger zone */}

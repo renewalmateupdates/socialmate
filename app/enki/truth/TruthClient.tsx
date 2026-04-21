@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
+import Link from 'next/link'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -314,20 +315,174 @@ function exportCSV(closed: ClosedTrade[]) {
   URL.revokeObjectURL(url)
 }
 
+// ─── Truth Mode OFF hero ──────────────────────────────────────────────────────
+
+function TruthModeOffHero({ onStart, starting }: { onStart: () => void; starting: boolean }) {
+  return (
+    <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
+      {/* Page header */}
+      <div className="flex items-center gap-3 mb-2">
+        <h1 className="text-2xl font-bold text-white">Truth Mode</h1>
+        {badge('Parallel Experiment', 'bg-violet-900/60 text-violet-300')}
+      </div>
+
+      {/* Hero CTA */}
+      <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-8 sm:p-10 text-center space-y-6">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-zinc-800 border border-zinc-700 text-3xl mx-auto">
+          🔬
+        </div>
+
+        <div>
+          <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">Truth Mode is not running</h2>
+          <p className="text-sm text-zinc-400 max-w-xl mx-auto leading-relaxed">
+            Truth Mode runs a simplified two-strategy trading system in parallel to validate real performance.
+            Results are recorded separately and do not affect your main portfolio.
+            Parameters lock once started to preserve data integrity.
+          </p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 text-xs text-zinc-500">
+          <span className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-violet-500 shrink-0" />
+            Momentum strategy
+          </span>
+          <span className="hidden sm:block text-zinc-700">·</span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-violet-500 shrink-0" />
+            Mean Reversion strategy
+          </span>
+          <span className="hidden sm:block text-zinc-700">·</span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+            50 trades minimum for valid results
+          </span>
+        </div>
+
+        <button
+          onClick={onStart}
+          disabled={starting}
+          className="inline-flex items-center gap-2 px-8 py-3.5 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl transition-colors min-h-[44px]"
+        >
+          {starting ? (
+            <>
+              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              Starting…
+            </>
+          ) : (
+            'Start Truth Mode'
+          )}
+        </button>
+
+        <p className="text-xs text-zinc-600 max-w-sm mx-auto">
+          The scan runs every 15 minutes. Your Risk Profile and Position Size settings will be locked while Truth Mode is active.
+        </p>
+      </div>
+
+      {/* Rules reminder */}
+      <div className="bg-amber-950/40 border border-amber-800/50 rounded-lg px-4 py-3 text-xs text-amber-300 space-y-1">
+        <div className="font-bold text-amber-200 mb-1">NON-NEGOTIABLE EXPERIMENT RULES</div>
+        <div>• No parameter changes while data is collecting — if you change anything, reset the dataset</div>
+        <div>• No new signals added mid-experiment</div>
+        <div>• Minimum 50 trades per strategy before drawing any conclusions</div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Truth Mode ON status bar ─────────────────────────────────────────────────
+
+function TruthModeRunningBar({ onStop, stopping }: { onStop: () => void; stopping: boolean }) {
+  return (
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-emerald-950/40 border border-emerald-800/50 rounded-xl px-4 py-3">
+      <div className="flex items-center gap-3">
+        {/* Pulsing green dot */}
+        <span className="relative flex h-3 w-3 shrink-0">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+          <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500" />
+        </span>
+        <span className="text-sm font-semibold text-emerald-300">
+          Truth Mode Running
+        </span>
+        <span className="text-xs text-emerald-600 hidden sm:inline">— scanning every 15 minutes</span>
+      </div>
+      <button
+        onClick={onStop}
+        disabled={stopping}
+        className="shrink-0 px-4 py-2 text-xs font-semibold text-zinc-300 border border-zinc-600 hover:border-zinc-500 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors min-h-[44px]"
+      >
+        {stopping ? 'Stopping…' : 'Stop Truth Mode'}
+      </button>
+    </div>
+  )
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function TruthClient() {
-  const [data, setData]       = useState<TruthData | null>(null)
-  const [error, setError]     = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [data, setData]             = useState<TruthData | null>(null)
+  const [error, setError]           = useState<string | null>(null)
+  const [loading, setLoading]       = useState(true)
+  const [truthEnabled, setTruthEnabled] = useState<boolean | null>(null)
+  const [toggling, setToggling]     = useState(false)
+
+  const loadAll = useCallback(async () => {
+    try {
+      const [truthRes, profileRes] = await Promise.all([
+        fetch('/api/enki/truth'),
+        fetch('/api/enki/profile'),
+      ])
+      if (!truthRes.ok) throw new Error(truthRes.statusText)
+      const [truthJson, profileJson] = await Promise.all([
+        truthRes.json(),
+        profileRes.json(),
+      ])
+      setData(truthJson)
+      setTruthEnabled(Boolean(profileJson.profile?.truth_mode_enabled))
+    } catch (e) {
+      setError(String(e))
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
-    fetch('/api/enki/truth')
-      .then(r => r.ok ? r.json() : Promise.reject(r.statusText))
-      .then(setData)
-      .catch(e => setError(String(e)))
-      .finally(() => setLoading(false))
-  }, [])
+    loadAll()
+  }, [loadAll])
+
+  async function handleStart() {
+    setToggling(true)
+    try {
+      await fetch('/api/enki/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ truth_mode_enabled: true }),
+      })
+      setTruthEnabled(true)
+    } catch (e) {
+      console.error('Truth mode start error:', e)
+    } finally {
+      setToggling(false)
+    }
+  }
+
+  async function handleStop() {
+    if (!confirm('Stopping Truth Mode will reset your experiment. All recorded trades will be cleared and you will start fresh next time. Are you sure?')) {
+      return
+    }
+    setToggling(true)
+    try {
+      await fetch('/api/enki/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ truth_mode_enabled: false }),
+      })
+      setTruthEnabled(false)
+    } catch (e) {
+      console.error('Truth mode stop error:', e)
+    } finally {
+      setToggling(false)
+    }
+  }
 
   if (loading) return (
     <div className="flex items-center justify-center min-h-[60vh] text-zinc-500 text-sm">
@@ -339,6 +494,12 @@ export default function TruthClient() {
       {error}
     </div>
   )
+
+  // Show OFF hero when truth mode is disabled
+  if (truthEnabled === false) {
+    return <TruthModeOffHero onStart={handleStart} starting={toggling} />
+  }
+
   if (!data) return null
 
   const { stats, open, closed, equityCurve, spyReturn3mo, spyCurve, progress } = data
@@ -370,6 +531,9 @@ export default function TruthClient() {
           </button>
         )}
       </div>
+
+      {/* Running status bar with Stop button */}
+      <TruthModeRunningBar onStop={handleStop} stopping={toggling} />
 
       {/* Rules reminder */}
       <div className="bg-amber-950/40 border border-amber-800/50 rounded-lg px-4 py-3 text-xs text-amber-300 space-y-1">
@@ -551,12 +715,12 @@ export default function TruthClient() {
         </div>
       )}
 
-      {/* Empty state */}
+      {/* Empty state — running but no trades yet */}
       {closed.length === 0 && open.length === 0 && (
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-10 text-center text-zinc-500">
           <div className="text-4xl mb-3">🔬</div>
-          <div className="text-sm font-semibold text-zinc-400 mb-1">Experiment not started</div>
-          <div className="text-xs">Enable Truth Mode in your Enki settings to begin collecting data.</div>
+          <div className="text-sm font-semibold text-zinc-400 mb-1">Waiting for first signals</div>
+          <div className="text-xs">Truth Mode is running. The scanner checks for signals every 15 minutes during market hours.</div>
         </div>
       )}
     </div>
