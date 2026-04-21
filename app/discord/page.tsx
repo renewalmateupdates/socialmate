@@ -34,6 +34,17 @@ interface RoleConfig {
   enabled: boolean
 }
 
+interface WordFilterAutomation {
+  id: string
+  guild_id: string
+  automation_type: 'word_filter'
+  config: {
+    words: string[]
+    timeout_duration: number // seconds
+  }
+  is_active: boolean
+}
+
 function Toast({ message, type }: { message: string; type: 'success' | 'error' }) {
   return (
     <div
@@ -79,6 +90,14 @@ function DiscordHubInner() {
   const [selectedRole, setSelectedRole]     = useState('')
   const [roleSaving, setRoleSaving]         = useState(false)
 
+  // Word filter state
+  const [filterOpen, setFilterOpen]         = useState(false)
+  const [filterEnabled, setFilterEnabled]   = useState(false)
+  const [filterWords, setFilterWords]       = useState('')
+  const [filterTimeout, setFilterTimeout]   = useState(60)
+  const [filterAutomation, setFilterAutomation] = useState<WordFilterAutomation | null>(null)
+  const [filterSaving, setFilterSaving]     = useState(false)
+
   // Toast
   const [toast, setToast]                   = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
@@ -99,15 +118,17 @@ function DiscordHubInner() {
   useEffect(() => {
     async function load() {
       try {
-        const [guildRes, welcomeRes, roleRes] = await Promise.all([
+        const [guildRes, welcomeRes, roleRes, automationsRes] = await Promise.all([
           fetch('/api/discord/guild'),
           fetch('/api/discord/welcome'),
           fetch('/api/discord/roles'),
+          fetch('/api/discord/automations'),
         ])
 
-        const guildJson   = await guildRes.json()
-        const welcomeJson = await welcomeRes.json()
-        const roleJson    = await roleRes.json()
+        const guildJson       = await guildRes.json()
+        const welcomeJson     = await welcomeRes.json()
+        const roleJson        = await roleRes.json()
+        const automationsJson = await automationsRes.json()
 
         setGuildData(guildJson)
 
@@ -124,6 +145,18 @@ function DiscordHubInner() {
           setRoleConfig(cfg)
           setRoleEnabled(cfg.enabled)
           setSelectedRole(cfg.role_id)
+        }
+
+        if (automationsJson.automations) {
+          const wf = automationsJson.automations.find(
+            (a: WordFilterAutomation) => a.automation_type === 'word_filter'
+          )
+          if (wf) {
+            setFilterAutomation(wf)
+            setFilterEnabled(wf.is_active)
+            setFilterWords((wf.config.words ?? []).join(', '))
+            setFilterTimeout(wf.config.timeout_duration ?? 60)
+          }
         }
       } catch (err: any) {
         setError('Failed to load Discord data. Please try again.')
@@ -190,6 +223,35 @@ function DiscordHubInner() {
       showToast(err.message ?? 'Failed to save', 'error')
     } finally {
       setRoleSaving(false)
+    }
+  }
+
+  async function saveFilter() {
+    if (!guildData?.guild_id) return
+    setFilterSaving(true)
+    try {
+      const words = filterWords
+        .split(',')
+        .map(w => w.trim().toLowerCase())
+        .filter(Boolean)
+      const res = await fetch('/api/discord/automations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          guild_id:         guildData.guild_id,
+          automation_type:  'word_filter',
+          config:           { words, timeout_duration: filterTimeout },
+          is_active:        filterEnabled,
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error ?? 'Save failed')
+      setFilterAutomation(json.automation)
+      showToast('Word filter saved!')
+    } catch (err: any) {
+      showToast(err.message ?? 'Failed to save', 'error')
+    } finally {
+      setFilterSaving(false)
     }
   }
 
@@ -474,6 +536,99 @@ function DiscordHubInner() {
                   >
                     {roleSaving ? 'Saving...' : 'Save Role Config'}
                   </button>
+                </div>
+              )}
+            </div>
+
+            {/* Word Filter card */}
+            <div className="rounded-2xl overflow-hidden" style={{ background: 'var(--surface)', border: '1px solid var(--border-mid)' }}>
+              <button
+                onClick={() => setFilterOpen(p => !p)}
+                className="w-full flex items-center justify-between px-5 py-4 transition-all hover:opacity-80 text-left"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-xl">🚫</span>
+                  <div>
+                    <p className="font-bold text-sm">Word Filter</p>
+                    <p className="text-xs" style={{ color: 'var(--text-faint)' }}>
+                      {filterAutomation
+                        ? filterAutomation.is_active
+                          ? `Active — ${(filterAutomation.config.words ?? []).length} word${(filterAutomation.config.words ?? []).length !== 1 ? 's' : ''} blocked, ${filterAutomation.config.timeout_duration}s timeout`
+                          : 'Disabled'
+                        : 'Not configured'}
+                    </p>
+                  </div>
+                </div>
+                <span className="text-xs" style={{ color: 'var(--text-faint)' }}>{filterOpen ? '▾' : '▸'}</span>
+              </button>
+
+              {filterOpen && (
+                <div className="px-5 pb-5 space-y-4" style={{ borderTop: '1px solid var(--border-mid)' }}>
+                  <div className="pt-4 flex items-center justify-between">
+                    <p className="text-sm font-semibold">Enable word filter</p>
+                    <button
+                      onClick={() => setFilterEnabled(p => !p)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        filterEnabled ? 'bg-green-500' : 'bg-gray-400'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          filterEnabled ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-muted)' }}>
+                      Blocked words <span style={{ color: 'var(--text-faint)' }}>— comma separated</span>
+                    </label>
+                    <textarea
+                      value={filterWords}
+                      onChange={e => setFilterWords(e.target.value)}
+                      rows={3}
+                      className="w-full rounded-xl px-3 py-2.5 text-sm font-medium transition-all focus:outline-none resize-none"
+                      style={{ background: 'var(--bg)', border: '1px solid var(--border-mid)', color: 'var(--fg)' }}
+                      placeholder="spam, badword, scam"
+                    />
+                    <p className="text-xs mt-1" style={{ color: 'var(--text-faint)' }}>
+                      Messages containing these words will be auto-deleted and the member will be timed out.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold mb-1.5" style={{ color: 'var(--text-muted)' }}>
+                      Auto-timeout duration (seconds)
+                    </label>
+                    <input
+                      type="number"
+                      value={filterTimeout}
+                      onChange={e => setFilterTimeout(Math.max(0, parseInt(e.target.value) || 0))}
+                      min={0}
+                      max={2419200}
+                      className="w-full rounded-xl px-3 py-2.5 text-sm font-medium transition-all focus:outline-none"
+                      style={{ background: 'var(--bg)', border: '1px solid var(--border-mid)', color: 'var(--fg)' }}
+                      placeholder="60"
+                    />
+                    <p className="text-xs mt-1" style={{ color: 'var(--text-faint)' }}>
+                      Set to 0 to delete the message without timing out the member. Max: 2,419,200 (28 days).
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={saveFilter}
+                      disabled={filterSaving}
+                      className="text-sm font-bold px-5 py-2.5 rounded-xl transition-all hover:opacity-80 disabled:opacity-50"
+                      style={{ background: '#5865F2', color: '#fff' }}
+                    >
+                      {filterSaving ? 'Saving...' : 'Save Filter Config'}
+                    </button>
+                    <p className="text-xs" style={{ color: 'var(--text-faint)' }}>
+                      Requires DISCORD_BOT_TOKEN + MANAGE_MESSAGES permission.
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
