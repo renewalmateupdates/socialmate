@@ -1419,7 +1419,90 @@ function ComposeInner() {
                       <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{tool.credits} cr</p>
                     </button>
                   ))}
+                  <button
+                    onClick={() => { setShowRepurposePanel(p => !p); setRepurposeResult(''); setRepurposeError('') }}
+                    title="Repurpose current content into a different format"
+                    className={`p-3 rounded-xl border text-center transition-all ${
+                      showRepurposePanel ? 'bg-amber-400 text-black border-amber-400'
+                      : 'bg-white dark:bg-gray-900 border-gray-200 hover:border-amber-400 text-gray-700 dark:text-gray-300'
+                    }`}>
+                    <div className="text-lg mb-1">🔄</div>
+                    <p className="text-xs font-bold">Repurpose</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">1 cr</p>
+                  </button>
                 </div>
+
+                {/* REPURPOSE INLINE PANEL */}
+                {showRepurposePanel && (
+                  <div className="mb-4 border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20 rounded-xl p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-xs font-bold text-amber-800 dark:text-amber-300 uppercase tracking-wide">🔄 Repurpose Content</p>
+                      <button
+                        onClick={() => { setShowRepurposePanel(false); setRepurposeResult(''); setRepurposeError('') }}
+                        className="text-amber-500 hover:text-amber-700 dark:hover:text-amber-300 transition-colors w-6 h-6 flex items-center justify-center rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30 text-base font-bold">
+                        ×
+                      </button>
+                    </div>
+
+                    <p className="text-xs text-amber-700 dark:text-amber-400 mb-3">
+                      Uses your current compose content. Pick a format:
+                    </p>
+
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {REPURPOSE_FORMATS.map(f => (
+                        <button
+                          key={f.id}
+                          onClick={() => setRepurposeFormat(f.id)}
+                          className={`text-xs font-bold px-3 py-1.5 rounded-full border transition-all ${
+                            repurposeFormat === f.id
+                              ? 'bg-amber-400 text-black border-amber-400'
+                              : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-amber-400'
+                          }`}>
+                          {f.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    <button
+                      onClick={handleRepurpose}
+                      disabled={repurposeLoading || !content.trim() || !!rateLimitedUntil}
+                      className="w-full bg-amber-400 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-black text-xs font-bold py-2.5 min-h-[44px] rounded-xl transition-all flex items-center justify-center gap-2">
+                      {repurposeLoading ? (
+                        <><div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin" />Repurposing...</>
+                      ) : 'Repurpose → (1 credit)'}
+                    </button>
+
+                    {repurposeError && (
+                      <div className="mt-2 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2">
+                        <p className="text-xs text-red-600 dark:text-red-400">{repurposeError}</p>
+                      </div>
+                    )}
+
+                    {repurposeResult && !repurposeLoading && (
+                      <div className="mt-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+                        <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-2">Result</p>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap mb-3">{repurposeResult}</p>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button
+                            onClick={() => { setContent(repurposeResult); setRepurposeResult(''); setShowRepurposePanel(false); showToast('Content replaced ✓') }}
+                            className="text-xs font-bold px-3 py-2.5 min-h-[44px] bg-black text-white rounded-lg hover:opacity-80 transition-all">
+                            Replace
+                          </button>
+                          <button
+                            onClick={handleRepurposeCopy}
+                            className="text-xs font-bold px-3 py-2.5 min-h-[44px] border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg hover:border-gray-500 transition-all">
+                            {repurposeCopied ? 'Copied ✓' : 'Copy'}
+                          </button>
+                          <button
+                            onClick={() => setRepurposeResult('')}
+                            className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-all ml-auto min-h-[44px] px-2">
+                            Dismiss
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {aiError && (
                   <div className="bg-red-50 border border-red-100 rounded-xl p-3 mb-3">

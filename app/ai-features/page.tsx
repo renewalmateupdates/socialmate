@@ -6,6 +6,142 @@ import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 
+const REPURPOSE_FORMATS = [
+  { id: 'thread',        label: 'Thread'    },
+  { id: 'email',         label: 'Email'     },
+  { id: 'caption',       label: 'Caption'   },
+  { id: 'long_form',     label: 'Long-Form' },
+  { id: 'short_hook',    label: 'Hook'      },
+  { id: 'linkedin_post', label: 'LinkedIn'  },
+] as const
+
+type RepurposeFormat = typeof REPURPOSE_FORMATS[number]['id']
+
+function RepurposeCard({ credits, setCredits, applyCredits }: {
+  credits: number
+  setCredits: (n: number) => void
+  applyCredits: (monthly: number, earned: number, paid: number) => void
+}) {
+  const [content, setContent]   = useState('')
+  const [format, setFormat]     = useState<RepurposeFormat>('thread')
+  const [result, setResult]     = useState('')
+  const [loading, setLoading]   = useState(false)
+  const [error, setError]       = useState('')
+  const [copied, setCopied]     = useState(false)
+
+  const handleRepurpose = async () => {
+    setError('')
+    setResult('')
+    if (!content.trim()) { setError('Paste your content first.'); return }
+    if (credits < 1) { setError('Not enough credits. You need 1 credit.'); return }
+    setLoading(true)
+    try {
+      const res = await fetch('/api/ai/repurpose', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content, format }),
+      })
+      const data = await res.json()
+      if (!res.ok || data.error) {
+        if (data.error === 'rate_limited') {
+          setError(data.message || "You're going too fast — wait 30 seconds and try again.")
+        } else {
+          setError(data.error || 'Something went wrong. Please try again.')
+        }
+        return
+      }
+      setResult(data.result)
+      if (typeof data.monthlyRemaining === 'number') {
+        applyCredits(data.monthlyRemaining, data.earnedRemaining ?? 0, data.paidRemaining ?? 0)
+      } else if (typeof data.creditsRemaining === 'number') {
+        setCredits(data.creditsRemaining)
+      } else {
+        setCredits(credits - 1)
+      }
+    } catch {
+      setError('Network error. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleCopy = () => {
+    if (!result) return
+    navigator.clipboard.writeText(result).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+
+  return (
+    <div className="bg-surface border border-theme rounded-2xl p-5">
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">🔄</span>
+          <div>
+            <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">Content Repurpose</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Transform any content into a new format instantly</p>
+          </div>
+        </div>
+        <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-black text-white flex-shrink-0">1 credit</span>
+      </div>
+
+      <textarea
+        value={content}
+        onChange={e => setContent(e.target.value)}
+        placeholder="Paste your post here..."
+        rows={4}
+        style={{ fontSize: '16px' }}
+        className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 outline-none focus:border-amber-400 dark:focus:border-amber-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 placeholder-gray-300 dark:placeholder-gray-600 resize-none transition-colors mb-3"
+      />
+
+      <div className="flex flex-wrap gap-2 mb-4">
+        {REPURPOSE_FORMATS.map(f => (
+          <button
+            key={f.id}
+            onClick={() => setFormat(f.id)}
+            className={`text-xs font-bold px-3 py-2 rounded-full border transition-all ${
+              format === f.id
+                ? 'bg-amber-400 text-black border-amber-400'
+                : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-amber-400 dark:hover:border-amber-500'
+            }`}>
+            {f.label}
+          </button>
+        ))}
+      </div>
+
+      <button
+        onClick={handleRepurpose}
+        disabled={loading || !content.trim()}
+        className="w-full bg-amber-400 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-black text-sm font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-2">
+        {loading ? (
+          <><div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />Repurposing...</>
+        ) : 'Repurpose →'}
+      </button>
+
+      {error && (
+        <div className="mt-3 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2">
+          <p className="text-xs text-red-600 dark:text-red-400">{error}</p>
+        </div>
+      )}
+
+      {result && !loading && (
+        <div className="mt-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Result</p>
+            <button
+              onClick={handleCopy}
+              className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-lg hover:opacity-80 transition-all flex-shrink-0">
+              {copied ? 'Copied ✓' : 'Copy'}
+            </button>
+          </div>
+          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{result}</p>
+        </div>
+      )}
+    </div>
+  )
+}
+
 const AI_TOOLS = [
   {
     emoji: '✍️',
@@ -278,7 +414,7 @@ function Section({ title, tools, plan }: { title: string; tools: any[]; plan: st
 
 export default function AIFeaturesPage() {
   const router = useRouter()
-  const { credits, creditsTotal, plan } = useWorkspace()
+  const { credits, setCredits, applyCredits, creditsTotal, plan } = useWorkspace()
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -341,6 +477,11 @@ export default function AIFeaturesPage() {
               Credits keep SocialMate sustainable so we can stay free. Free plan includes 50 credits/month — enough to generate
               ~15 captions, ~25 hashtag sets, or run ~5 SM-Pulse scans. Unused credits roll into your bank (up to 75 max).
             </p>
+          </div>
+
+          <div className="mb-10">
+            <h2 className="text-base font-extrabold text-gray-900 dark:text-gray-100 mb-4">🔄 Content Repurpose</h2>
+            <RepurposeCard credits={credits} setCredits={setCredits} applyCredits={applyCredits} />
           </div>
 
           <Section title="🤖 AI Tools" tools={AI_TOOLS} plan={plan} />
