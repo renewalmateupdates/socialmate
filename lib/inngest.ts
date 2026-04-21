@@ -2987,3 +2987,250 @@ async function updateTruthStats(
     updated_at:                 new Date().toISOString(),
   }, { onConflict: 'user_id,strategy' })
 }
+
+// ─── Studio Stax — renewal email drip — 9 AM UTC daily ───────────────────────
+// Sends 30/14/7-day renewal reminders to Studio Stax listing holders.
+// Uses *_sent_at timestamp columns for idempotency (safe to re-run any day).
+// Renewal link = token-authenticated /studio-stax/renew page (existing flow).
+
+export const studioStaxRenewalEmails = inngest.createFunction(
+  { id: 'studio-stax-renewal-emails', name: 'Studio Stax Renewal Emails', retries: 2 },
+  { cron: '0 9 * * *' },
+  async ({ step }) => {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
+
+    // ── 1. Fetch active slots with expires_at set ─────────────────────────────
+    const slots = await step.run('fetch-active-slots', async () => {
+      const { data, error } = await getSupabaseAdmin()
+        .from('studio_stax_slots')
+        .select('id, buyer_name, buyer_email, listing_id, amount_paid_cents, expires_at, renewal_email_30_sent_at, renewal_email_14_sent_at, renewal_email_7_sent_at, renewal_token, renewal_token_expires')
+        .eq('status', 'active')
+        .not('expires_at', 'is', null)
+        .gt('expires_at', new Date().toISOString())
+      if (error) {
+        console.error('[StaxRenewalEmails] DB error:', error.message)
+        return []
+      }
+      return data ?? []
+    })
+
+    if (!slots.length) {
+      console.log('[StaxRenewalEmails] No active slots found')
+      return { sent: 0, skipped: 0 }
+    }
+
+    // ── 2. Bulk-fetch listing names ───────────────────────────────────────────
+    const listingNameMap: Record<string, string> = await step.run('fetch-listing-names', async () => {
+      const ids = Array.from(new Set(slots.map((s: any) => s.listing_id).filter(Boolean))) as string[]
+      if (!ids.length) return {}
+      const { data } = await getSupabaseAdmin()
+        .from('curated_listings')
+        .select('id, name')
+        .in('id', ids)
+      const map: Record<string, string> = {}
+      for (const r of data ?? []) map[r.id] = r.name
+      return map
+    })
+
+    // ── 3. Send renewal emails ────────────────────────────────────────────────
+    let sent = 0
+    let skipped = 0
+
+    await step.run('send-renewal-emails', async () => {
+      const { randomUUID } = await import('crypto')
+      const resend = getResend()
+      const now = new Date()
+
+      for (const slot of slots) {
+        const daysLeft = Math.floor((new Date(slot.expires_at).getTime() - now.getTime()) / 86400000)
+
+        // Determine which bucket this slot is in and whether we've already sent
+        const needs30 = daysLeft <= 30 && daysLeft > 14 && !slot.renewal_email_30_sent_at
+        const needs14 = daysLeft <= 14 && daysLeft > 7  && !slot.renewal_email_14_sent_at
+        const needs7  = daysLeft <= 7  && daysLeft >= 0  && !slot.renewal_email_7_sent_at
+
+        if (!needs30 && !needs14 && !needs7) {
+          skipped++
+          continue
+        }
+
+        const email     = slot.buyer_email
+        const name      = slot.buyer_name || 'there'
+        const toolName  = listingNameMap[slot.listing_id] || 'your listing'
+        const renewDate = new Date(slot.expires_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+        const tierLabel = (slot.amount_paid_cents ?? 10000) <= 10000 ? 'founding' : 'standard'
+        const renewalDollars = Math.round((slot.amount_paid_cents ?? 10000) * 0.80 / 100)
+
+        // Ensure a valid renewal token exists (create/refresh if needed)
+        let token = slot.renewal_token
+        const tokenExpired = slot.renewal_token_expires && new Date(slot.renewal_token_expires) < now
+        if (!token || tokenExpired) {
+          token = randomUUID()
+          try {
+            await getSupabaseAdmin()
+              .from('studio_stax_slots')
+              .update({
+                renewal_token:         token,
+                renewal_token_expires: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+              })
+              .eq('id', slot.id)
+          } catch (err) {
+            console.error(`[StaxRenewalEmails] Token update failed for slot ${slot.id}:`, err)
+          }
+        }
+        const renewalLink = `${appUrl}/studio-stax/renew?token=${token}`
+
+        // Build subject + HTML based on bucket
+        let subject: string
+        let html: string
+
+        if (needs30) {
+          subject = `Your Studio Stax listing renews in 30 days`
+          html = staxEmailHtml({
+            name, toolName, renewDate, daysLeft, renewalLink, renewalDollars,
+            tierLabel, urgency: 'low',
+          })
+        } else if (needs14) {
+          subject = `14 days left on your Studio Stax listing`
+          html = staxEmailHtml({
+            name, toolName, renewDate, daysLeft, renewalLink, renewalDollars,
+            tierLabel, urgency: 'medium',
+          })
+        } else {
+          subject = `\u26a0\ufe0f Your Studio Stax listing expires in 7 days`
+          html = staxEmailHtml({
+            name, toolName, renewDate, daysLeft, renewalLink, renewalDollars,
+            tierLabel, urgency: 'high',
+          })
+        }
+
+        try {
+          await resend.emails.send({
+            from:    'SocialMate <noreply@socialmate.studio>',
+            to:      email,
+            subject,
+            html,
+          })
+          const sentAt = now.toISOString()
+          const field  = needs30 ? 'renewal_email_30_sent_at' : needs14 ? 'renewal_email_14_sent_at' : 'renewal_email_7_sent_at'
+          await getSupabaseAdmin()
+            .from('studio_stax_slots')
+            .update({ [field]: sentAt })
+            .eq('id', slot.id)
+          sent++
+        } catch (err) {
+          console.error(`[StaxRenewalEmails] Resend failed for ${email}:`, err)
+          // Non-fatal — keep going
+        }
+      }
+    })
+
+    console.log(`[StaxRenewalEmails] Done — sent: ${sent}, skipped: ${skipped}`)
+    return { sent, skipped }
+  }
+)
+
+// ── Studio Stax email HTML builder ───────────────────────────────────────────
+function staxEmailHtml(opts: {
+  name: string
+  toolName: string
+  renewDate: string
+  daysLeft: number
+  renewalLink: string
+  renewalDollars: number
+  tierLabel: string
+  urgency: 'low' | 'medium' | 'high'
+}): string {
+  const { name, toolName, renewDate, daysLeft, renewalLink, renewalDollars, tierLabel, urgency } = opts
+  const isFounding = tierLabel === 'founding'
+  const urgencyColor = urgency === 'high' ? '#ef4444' : urgency === 'medium' ? '#f59e0b' : '#3b82f6'
+  const urgencyBg    = urgency === 'high' ? '#fef2f2' : urgency === 'medium' ? '#fffbeb' : '#eff6ff'
+  const urgencyText  = urgency === 'high'
+    ? `Only ${daysLeft} day${daysLeft !== 1 ? 's' : ''} left — your listing expires soon.`
+    : urgency === 'medium'
+    ? `${daysLeft} days left — renew early to lock in your rate.`
+    : `${daysLeft} days until renewal — plan ahead.`
+
+  const savingsNote = isFounding
+    ? `you save $20 off the $100/yr founding rate`
+    : `you save $30 off the $150/yr standard rate`
+
+  return `<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <div style="max-width:560px;margin:0 auto;padding:32px 16px;">
+    <div style="background:#111;border-radius:16px;overflow:hidden;border:1px solid #222;">
+
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,#F59E0B,#7C3AED);padding:24px 32px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:32px;height:32px;background:rgba(255,255,255,0.2);border-radius:8px;text-align:center;line-height:32px;font-weight:800;font-size:14px;color:#fff;">S</div>
+          <span style="font-size:16px;font-weight:800;color:#fff;letter-spacing:-0.02em;">SocialMate</span>
+          <span style="font-size:10px;color:rgba(255,255,255,0.7);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-left:4px;">Studio Stax</span>
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div style="padding:32px;">
+
+        <!-- Urgency badge -->
+        <div style="background:${urgencyBg};border:1px solid ${urgencyColor}40;border-radius:12px;padding:14px 18px;margin-bottom:24px;border-left:4px solid ${urgencyColor};">
+          <p style="margin:0;font-size:13px;font-weight:700;color:${urgencyColor};">${urgencyText}</p>
+        </div>
+
+        <p style="margin:0 0 12px;font-size:14px;color:#d1d5db;">Hi ${name},</p>
+        <p style="margin:0 0 16px;font-size:14px;color:#9ca3af;line-height:1.7;">
+          Your Studio Stax listing <strong style="color:#f1f1f1;">"${toolName}"</strong> is set to renew on
+          <strong style="color:#F59E0B;">${renewDate}</strong>.
+          Renew now and keep your spot at <strong style="color:#f1f1f1;">$${renewalDollars}/year</strong> (${savingsNote}).
+        </p>
+
+        <!-- What you keep -->
+        <div style="background:#0a0a0a;border:1px solid #222;border-radius:12px;padding:16px 20px;margin-bottom:24px;">
+          <p style="margin:0 0 10px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#6b7280;">What you keep on renewal</p>
+          <ul style="margin:0;padding-left:16px;font-size:13px;color:#9ca3af;line-height:1.9;">
+            <li>Your listing stays live in the SM-Give ranked directory</li>
+            <li>${isFounding ? 'Founding member rate locked in for life' : 'Standard tier status maintained'}</li>
+            <li>All SM-Give donation credit and ranking preserved</li>
+            ${isFounding ? '<li style="color:#F59E0B;">If you let it lapse, your founding spot opens to others</li>' : ''}
+          </ul>
+        </div>
+
+        <!-- CTA -->
+        <div style="margin:24px 0;">
+          <a href="${renewalLink}"
+            style="background:#F59E0B;color:#000;padding:14px 28px;border-radius:10px;text-decoration:none;font-weight:700;font-size:14px;display:inline-block;">
+            Renew Now — $${renewalDollars}/year →
+          </a>
+        </div>
+
+        <hr style="border:none;border-top:1px solid #222;margin:24px 0;" />
+
+        <!-- RenewalMate teaser -->
+        <div style="margin-bottom:16px;">
+          <p style="font-size:13px;color:#9ca3af;line-height:1.7;margin:0 0 8px;">
+            We're also building <strong style="color:#f1f1f1;">RenewalMate</strong> — a dedicated tool for tracking all your
+            subscriptions and renewals so nothing sneaks up on you.
+            SocialMate members get early access free. Stay tuned.
+          </p>
+          <a href="https://renewalmate.com" style="font-size:12px;font-weight:700;color:#F59E0B;text-decoration:none;">renewalmate.com →</a>
+        </div>
+
+        <p style="margin:0;font-size:13px;color:#6b7280;line-height:1.7;">
+          — Joshua &amp; the SocialMate team<br/>
+          <a href="mailto:hello@socialmate.studio" style="color:#6b7280;text-decoration:none;font-size:12px;">hello@socialmate.studio</a>
+        </p>
+      </div>
+
+      <!-- Footer -->
+      <div style="border-top:1px solid #222;padding:16px 32px;text-align:center;">
+        <p style="font-size:11px;color:#374151;margin:0;">
+          &copy; ${new Date().getFullYear()} Gilgamesh Enterprise LLC &middot; SocialMate &middot;
+          <a href="mailto:hello@socialmate.studio" style="color:#4b5563;text-decoration:none;">hello@socialmate.studio</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`
+}
