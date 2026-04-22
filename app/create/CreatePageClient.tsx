@@ -1,6 +1,7 @@
 'use client'
 import { useState, useRef, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 
 // ── Platform specs ────────────────────────────────────────────────────────────
@@ -133,7 +134,6 @@ const PLATFORM_SPECS: PlatformSpec[] = [
 // ── Filters ───────────────────────────────────────────────────────────────────
 
 const FILTERS: Record<string, string> = {
-  'None':          '',
   'Amber':         'sepia(0.4) saturate(1.3) brightness(1.05)',
   'Light Blue':    'hue-rotate(190deg) saturate(0.9) brightness(1.1)',
   'B&W':           'grayscale(1)',
@@ -141,6 +141,24 @@ const FILTERS: Record<string, string> = {
   'Warm':          'sepia(0.2) saturate(1.4) hue-rotate(-10deg)',
   'Cool':          'hue-rotate(20deg) saturate(0.85) brightness(1.05)',
   'Cinematic':     'contrast(1.15) saturate(0.85) brightness(0.95) sepia(0.1)',
+}
+
+const FILTER_NAMES = ['None', ...Object.keys(FILTERS)]
+
+// ── Platform export dimensions ────────────────────────────────────────────────
+
+function getPlatformDimensions(platformId: string): { width: number; height: number } {
+  const dims: Record<string, { width: number; height: number }> = {
+    'youtube':         { width: 1920, height: 1080 },
+    'instagram-reels': { width: 1080, height: 1920 },
+    'twitter':         { width: 1280, height: 720 },
+    'bluesky':         { width: 1280, height: 720 },
+    'twitch':          { width: 1920, height: 1080 },
+    'kick':            { width: 1920, height: 1080 },
+    'facebook':        { width: 1280, height: 720 },
+    'tiktok':          { width: 1080, height: 1920 },
+  }
+  return dims[platformId] ?? { width: 1280, height: 720 }
 }
 
 // ── Image templates ───────────────────────────────────────────────────────────
@@ -154,34 +172,24 @@ const IMAGE_TEMPLATES = [
   { name: 'Pinterest Pin',     dims: '1000 × 1500' },
 ]
 
+// ── Caption colors ────────────────────────────────────────────────────────────
+
+const CAPTION_COLORS = ['#ffffff', '#000000', '#facc15', '#ef4444']
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function formatTime(s: number) {
+function formatTime(s: number): string {
   const m = Math.floor(s / 60)
   const sec = Math.floor(s % 60)
   return `${m}:${sec.toString().padStart(2, '0')}`
 }
 
-function formatBytes(bytes: number) {
+function formatBytes(bytes: number): string {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-function getPlatformDimensions(platformId: string) {
-  const map: Record<string, { width: number; height: number }> = {
-    'youtube':         { width: 1920, height: 1080 },
-    'instagram-reels': { width: 1080, height: 1920 },
-    'twitter':         { width: 1280, height: 720 },
-    'bluesky':         { width: 1280, height: 720 },
-    'twitch':          { width: 1920, height: 1080 },
-    'kick':            { width: 1920, height: 1080 },
-    'facebook':        { width: 1280, height: 720 },
-    'tiktok':          { width: 1080, height: 1920 },
-  }
-  return map[platformId] ?? { width: 1280, height: 720 }
-}
-
-// ── Tooltip helper ────────────────────────────────────────────────────────────
+// ── Sub-components ────────────────────────────────────────────────────────────
 
 function ComingSoonBtn({ icon, label }: { icon: string; label: string }) {
   return (
@@ -200,8 +208,6 @@ function ComingSoonBtn({ icon, label }: { icon: string; label: string }) {
   )
 }
 
-// ── SpecRow ───────────────────────────────────────────────────────────────────
-
 function SpecRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-start justify-between gap-2 py-2.5 border-b border-gray-800/60">
@@ -214,123 +220,318 @@ function SpecRow({ label, value }: { label: string; value: string }) {
 // ── Main component ─────────────────────────────────────────────────────────────
 
 export default function CreatePageClient() {
-  // Tab / platform
+  const router = useRouter()
+
+  // Tab state
   const [activeTab, setActiveTab] = useState<'video' | 'image'>('video')
   const [selectedPlatform, setSelectedPlatform] = useState<string>('tiktok')
 
-  // Video state
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const canvasRef = useRef<HTMLCanvasElement>(null)
+  // File state
   const [videoFile, setVideoFile] = useState<File | null>(null)
-  const [videoUrl, setVideoUrl] = useState<string>('')
-  const [duration, setDuration] = useState(0)
+  const [videoUrl, setVideoUrl] = useState<string | null>(null)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
+  const [videoDragOver, setVideoDragOver] = useState(false)
+  const [imageDragOver, setImageDragOver] = useState(false)
+
+  // Video editor state
+  const [videoDuration, setVideoDuration] = useState(0)
   const [currentTime, setCurrentTime] = useState(0)
+  const [isPlaying, setIsPlaying] = useState(false)
   const [trimStart, setTrimStart] = useState(0)
   const [trimEnd, setTrimEnd] = useState(0)
-  const [playing, setPlaying] = useState(false)
-  const [activeFilter, setActiveFilter] = useState('None')
-  const [editorTab, setEditorTab] = useState<'filters' | 'captions' | 'audio' | 'quality'>('filters')
+
+  // Filter state
+  const [activeFilter, setActiveFilter] = useState<string>('None')
+
+  // Caption state
   const [captionText, setCaptionText] = useState('')
-  const [captionSize, setCaptionSize] = useState(32)
+  const [captionFontSize, setCaptionFontSize] = useState(28)
   const [captionPosition, setCaptionPosition] = useState<'top' | 'center' | 'bottom'>('bottom')
   const [captionColor, setCaptionColor] = useState('#ffffff')
   const [captionBg, setCaptionBg] = useState(true)
+
+  // Audio state
   const [volume, setVolume] = useState(100)
   const [muted, setMuted] = useState(false)
+
+  // Tool panel tab
+  const [toolTab, setToolTab] = useState<'filters' | 'captions' | 'audio' | 'export'>('filters')
+
+  // Export state
   const [exporting, setExporting] = useState(false)
-  const [videoDragOver, setVideoDragOver] = useState(false)
-  const videoInputRef = useRef<HTMLInputElement>(null)
+  const [exportError, setExportError] = useState<string | null>(null)
 
-  // Image state
-  const [imageFile, setImageFile] = useState<File | null>(null)
-  const [imageUrl, setImageUrl] = useState<string | null>(null)
-  const [imageDragOver, setImageDragOver] = useState(false)
-  const imageInputRef = useRef<HTMLInputElement>(null)
-
-  // Right panel notify
+  // Notify state
   const [filterEmail, setFilterEmail] = useState('')
   const [filterNotifyState, setFilterNotifyState] = useState<'idle' | 'loading' | 'done'>('idle')
 
-  // ── Derived ──────────────────────────────────────────────────────────────────
+  // Refs
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const videoInputRef = useRef<HTMLInputElement>(null)
+  const imageInputRef = useRef<HTMLInputElement>(null)
+  const animFrameRef = useRef<number | null>(null)
+
   const spec = PLATFORM_SPECS.find(p => p.id === selectedPlatform) ?? PLATFORM_SPECS[0]
-  const visiblePlatforms = PLATFORM_SPECS.filter(p =>
-    activeTab === 'video' ? p.type !== 'image' : p.type !== 'video'
-  )
 
-  // ── Effects ───────────────────────────────────────────────────────────────────
-
-  // Sync volume/mute to video element
+  // Apply volume/mute to video element
   useEffect(() => {
-    if (!videoRef.current) return
-    videoRef.current.volume = muted ? 0 : volume / 100
+    const v = videoRef.current
+    if (!v) return
+    v.volume = volume / 100
+    v.muted = muted
   }, [volume, muted])
 
-  // Timeupdate — keep currentTime in sync + enforce trim end
+  // Track playback time
   const handleTimeUpdate = useCallback(() => {
     const v = videoRef.current
     if (!v) return
     setCurrentTime(v.currentTime)
-    if (v.currentTime >= trimEnd) {
+    // Stop at trim end
+    if (v.currentTime >= trimEnd && trimEnd > 0) {
       v.pause()
-      v.currentTime = trimStart
-      setPlaying(false)
+      setIsPlaying(false)
     }
-  }, [trimEnd, trimStart])
+  }, [trimEnd])
 
-  // ── Handlers ─────────────────────────────────────────────────────────────────
+  const handleVideoLoaded = useCallback(() => {
+    const v = videoRef.current
+    if (!v) return
+    const dur = v.duration
+    setVideoDuration(dur)
+    setTrimStart(0)
+    setTrimEnd(dur)
+    setCurrentTime(0)
+  }, [])
 
   function handleVideoFile(file: File) {
+    if (videoUrl) URL.revokeObjectURL(videoUrl)
+    setVideoFile(file)
     const url = URL.createObjectURL(file)
     setVideoUrl(url)
-    setVideoFile(file)
-    setTrimStart(0)
-    setTrimEnd(0)
-    setDuration(0)
-    setCurrentTime(0)
-    setPlaying(false)
     setActiveFilter('None')
     setCaptionText('')
+    setTrimStart(0)
+    setTrimEnd(0)
+    setCurrentTime(0)
+    setIsPlaying(false)
   }
 
   function handleImageFile(file: File) {
+    if (imageUrl) URL.revokeObjectURL(imageUrl)
     setImageFile(file)
     setImageUrl(URL.createObjectURL(file))
-  }
-
-  function handleVideoMetadata() {
-    const v = videoRef.current
-    if (!v) return
-    setDuration(v.duration)
-    setTrimEnd(v.duration)
   }
 
   function togglePlay() {
     const v = videoRef.current
     if (!v) return
-    if (playing) {
-      v.pause()
-      setPlaying(false)
-    } else {
+    if (v.paused) {
+      // If at or past trimEnd, rewind to trimStart first
       if (v.currentTime >= trimEnd) v.currentTime = trimStart
       v.play()
-      setPlaying(true)
+      setIsPlaying(true)
+    } else {
+      v.pause()
+      setIsPlaying(false)
     }
   }
 
-  function handleProgressClick(e: React.MouseEvent<HTMLDivElement>) {
-    const v = videoRef.current
-    if (!v || !duration) return
-    const rect = e.currentTarget.getBoundingClientRect()
-    const pct = (e.clientX - rect.left) / rect.width
-    const t = trimStart + pct * (trimEnd - trimStart)
-    v.currentTime = Math.max(trimStart, Math.min(trimEnd, t))
+  function handleTrimStartChange(val: number) {
+    const newStart = Math.min(val, trimEnd - 0.5)
+    setTrimStart(newStart)
+    if (videoRef.current && videoRef.current.currentTime < newStart) {
+      videoRef.current.currentTime = newStart
+    }
   }
 
-  function switchTab(tab: 'video' | 'image') {
-    setActiveTab(tab)
-    const first = PLATFORM_SPECS.find(p => tab === 'video' ? p.type !== 'image' : p.type !== 'video')
-    if (first && first.id !== selectedPlatform) setSelectedPlatform(first.id)
+  function handleTrimEndChange(val: number) {
+    const newEnd = Math.max(val, trimStart + 0.5)
+    setTrimEnd(newEnd)
+    if (videoRef.current && videoRef.current.currentTime > newEnd) {
+      videoRef.current.currentTime = newEnd
+    }
   }
+
+  // Computed CSS filter string
+  const cssFilter = activeFilter !== 'None' ? FILTERS[activeFilter] ?? '' : ''
+
+  // Caption vertical position style
+  function captionPositionStyle(): React.CSSProperties {
+    switch (captionPosition) {
+      case 'top': return { top: '8%', bottom: 'auto', transform: 'translateX(-50%)' }
+      case 'center': return { top: '50%', bottom: 'auto', transform: 'translate(-50%, -50%)' }
+      case 'bottom': return { bottom: '8%', top: 'auto', transform: 'translateX(-50%)' }
+    }
+  }
+
+  // ── Thumbnail capture ────────────────────────────────────────────────────────
+
+  function captureThumbnail() {
+    const v = videoRef.current
+    if (!v) return
+    const canvas = document.createElement('canvas')
+    canvas.width = v.videoWidth
+    canvas.height = v.videoHeight
+    const ctx = canvas.getContext('2d')!
+    ctx.drawImage(v, 0, 0)
+    canvas.toBlob(blob => {
+      if (!blob) return
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = 'thumbnail.png'
+      a.click()
+      setTimeout(() => URL.revokeObjectURL(url), 5000)
+    }, 'image/png')
+  }
+
+  // ── Export video ─────────────────────────────────────────────────────────────
+
+  async function exportVideo() {
+    const v = videoRef.current
+    const canvas = canvasRef.current
+    if (!v || !canvas) return
+
+    // Check MediaRecorder support
+    if (typeof MediaRecorder === 'undefined') {
+      setExportError('Export requires a modern browser (Chrome/Edge recommended)')
+      return
+    }
+
+    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
+      ? 'video/webm;codecs=vp9'
+      : MediaRecorder.isTypeSupported('video/webm')
+      ? 'video/webm'
+      : null
+
+    if (!mimeType) {
+      setExportError('Export requires a modern browser (Chrome/Edge recommended)')
+      return
+    }
+
+    setExporting(true)
+    setExportError(null)
+
+    const { width, height } = getPlatformDimensions(selectedPlatform)
+    canvas.width = width
+    canvas.height = height
+    const ctx = canvas.getContext('2d')!
+
+    // Apply CSS filter via canvas filter if supported
+    if (cssFilter) {
+      ctx.filter = cssFilter
+    }
+
+    let stream: MediaStream
+    try {
+      stream = canvas.captureStream(30)
+    } catch {
+      setExportError('Canvas stream not supported in this browser.')
+      setExporting(false)
+      return
+    }
+
+    // Add original audio track if present
+    try {
+      const audioCtx = new AudioContext()
+      const dest = audioCtx.createMediaStreamDestination()
+      const src = audioCtx.createMediaElementSource(v)
+      const gainNode = audioCtx.createGain()
+      gainNode.gain.value = muted ? 0 : volume / 100
+      src.connect(gainNode)
+      gainNode.connect(dest)
+      gainNode.connect(audioCtx.destination)
+      dest.stream.getAudioTracks().forEach(t => stream.addTrack(t))
+    } catch {
+      // Audio capture failed — proceed with video only (non-fatal)
+    }
+
+    const chunks: Blob[] = []
+    const recorder = new MediaRecorder(stream, { mimeType })
+    recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data) }
+    recorder.onstop = () => {
+      const blob = new Blob(chunks, { type: 'video/webm' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `socialmate-export-${selectedPlatform}.webm`
+      a.click()
+      setTimeout(() => URL.revokeObjectURL(url), 10000)
+      setExporting(false)
+    }
+
+    v.currentTime = trimStart
+    await new Promise<void>(resolve => {
+      const onSeeked = () => { v.removeEventListener('seeked', onSeeked); resolve() }
+      v.addEventListener('seeked', onSeeked)
+    })
+
+    recorder.start()
+    v.play()
+    setIsPlaying(true)
+
+    function drawFrame() {
+      if (!v || !canvas) return
+      if (v.currentTime >= trimEnd) {
+        recorder.stop()
+        v.pause()
+        setIsPlaying(false)
+        if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current)
+        return
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      if (cssFilter) ctx.filter = cssFilter
+      ctx.drawImage(v, 0, 0, canvas.width, canvas.height)
+      ctx.filter = 'none'
+
+      // Draw caption overlay
+      if (captionText.trim()) {
+        const scaledFontSize = Math.round(captionFontSize * (canvas.height / 400))
+        ctx.font = `bold ${scaledFontSize}px Arial, sans-serif`
+        ctx.textAlign = 'center'
+        const textWidth = ctx.measureText(captionText).width
+        const x = canvas.width / 2
+        let y: number
+        if (captionPosition === 'top') y = canvas.height * 0.12
+        else if (captionPosition === 'center') y = canvas.height / 2
+        else y = canvas.height * 0.88
+
+        if (captionBg) {
+          const pad = scaledFontSize * 0.4
+          ctx.fillStyle = 'rgba(0,0,0,0.55)'
+          ctx.beginPath()
+          const rx = x - textWidth / 2 - pad
+          const ry = y - scaledFontSize - pad / 2
+          const rw = textWidth + pad * 2
+          const rh = scaledFontSize + pad
+          const radius = rh / 2
+          ctx.moveTo(rx + radius, ry)
+          ctx.lineTo(rx + rw - radius, ry)
+          ctx.arcTo(rx + rw, ry, rx + rw, ry + radius, radius)
+          ctx.lineTo(rx + rw, ry + rh - radius)
+          ctx.arcTo(rx + rw, ry + rh, rx + rw - radius, ry + rh, radius)
+          ctx.lineTo(rx + radius, ry + rh)
+          ctx.arcTo(rx, ry + rh, rx, ry + rh - radius, radius)
+          ctx.lineTo(rx, ry + radius)
+          ctx.arcTo(rx, ry, rx + radius, ry, radius)
+          ctx.closePath()
+          ctx.fill()
+        }
+
+        ctx.fillStyle = captionColor
+        ctx.fillText(captionText, x, y)
+      }
+
+      animFrameRef.current = requestAnimationFrame(drawFrame)
+    }
+
+    animFrameRef.current = requestAnimationFrame(drawFrame)
+  }
+
+  // ── Notify me ────────────────────────────────────────────────────────────────
 
   async function handleFilterNotify() {
     if (!filterEmail.trim() || filterNotifyState !== 'idle') return
@@ -347,158 +548,38 @@ export default function CreatePageClient() {
     setFilterNotifyState('done')
   }
 
-  // ── Thumbnail capture ─────────────────────────────────────────────────────────
+  // ── Platform tab switching ────────────────────────────────────────────────────
 
-  function captureThumbnail() {
-    const v = videoRef.current
-    if (!v) return
-    const canvas = document.createElement('canvas')
-    canvas.width = v.videoWidth
-    canvas.height = v.videoHeight
-    canvas.getContext('2d')!.drawImage(v, 0, 0)
-    canvas.toBlob(blob => {
-      if (!blob) return
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = 'thumbnail.png'
-      a.click()
-      URL.revokeObjectURL(url)
-    }, 'image/png')
+  const visiblePlatforms = PLATFORM_SPECS.filter(p =>
+    activeTab === 'video' ? p.type !== 'image' : p.type !== 'video'
+  )
+
+  function switchTab(tab: 'video' | 'image') {
+    setActiveTab(tab)
+    const first = PLATFORM_SPECS.find(p => tab === 'video' ? p.type !== 'image' : p.type !== 'video')
+    if (first && first.id !== selectedPlatform) setSelectedPlatform(first.id)
   }
 
-  // ── Export ────────────────────────────────────────────────────────────────────
+  // ── Timeline progress % ────────────────────────────────────────────────────
 
-  async function exportVideo() {
-    const v = videoRef.current
-    const canvas = canvasRef.current
-    if (!v || !canvas) return
-    if (typeof window === 'undefined' || !window.MediaRecorder) {
-      alert('Export requires Chrome or Edge')
-      return
-    }
-    setExporting(true)
+  const progressPct = videoDuration > 0 ? (currentTime / videoDuration) * 100 : 0
+  const trimStartPct = videoDuration > 0 ? (trimStart / videoDuration) * 100 : 0
+  const trimEndPct = videoDuration > 0 ? (trimEnd / videoDuration) * 100 : 100
 
-    const ctx = canvas.getContext('2d')!
-    const { width, height } = getPlatformDimensions(selectedPlatform)
-    canvas.width = width
-    canvas.height = height
-
-    const stream = canvas.captureStream(30)
-    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
-      ? 'video/webm;codecs=vp9'
-      : 'video/webm'
-    const recorder = new MediaRecorder(stream, { mimeType })
-    const chunks: Blob[] = []
-
-    recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data) }
-    recorder.onstop = () => {
-      const blob = new Blob(chunks, { type: 'video/webm' })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `socialmate-${selectedPlatform}.webm`
-      a.click()
-      URL.revokeObjectURL(url)
-      setExporting(false)
-    }
-
-    v.currentTime = trimStart
-    await new Promise<void>(resolve => v.addEventListener('seeked', () => resolve(), { once: true }))
-
-    recorder.start(100)
-    v.volume = muted ? 0 : volume / 100
-    v.play()
-
-    function drawFrame() {
-      if (!v || v.currentTime >= trimEnd) {
-        recorder.stop()
-        if (v) v.pause()
-        setPlaying(false)
-        return
-      }
-      ctx.filter = FILTERS[activeFilter] || 'none'
-      ctx.drawImage(v as CanvasImageSource, 0, 0, canvas!.width, canvas!.height)
-      ctx.filter = 'none'
-
-      if (captionText) {
-        const scaledSize = captionSize * (canvas!.height / 400)
-        const y =
-          captionPosition === 'top'    ? canvas!.height * 0.1
-          : captionPosition === 'center' ? canvas!.height * 0.5
-          : canvas!.height * 0.88
-
-        ctx.font = `bold ${scaledSize}px sans-serif`
-        ctx.textAlign = 'center'
-
-        if (captionBg) {
-          const metrics = ctx.measureText(captionText)
-          const pad = 12
-          ctx.fillStyle = 'rgba(0,0,0,0.6)'
-          ctx.fillRect(
-            canvas!.width / 2 - metrics.width / 2 - pad,
-            y - scaledSize - pad,
-            metrics.width + pad * 2,
-            scaledSize * 1.4 + pad * 2
-          )
-        }
-        ctx.fillStyle = captionColor
-        ctx.fillText(captionText, canvas!.width / 2, y)
-      }
-      requestAnimationFrame(drawFrame)
-    }
-    requestAnimationFrame(drawFrame)
-  }
-
-  // ── Caption overlay styles ────────────────────────────────────────────────────
-
-  function captionStyle(): React.CSSProperties {
-    const base: React.CSSProperties = {
-      position: 'absolute',
-      left: '50%',
-      color: captionColor,
-      fontSize: `${captionSize}px`,
-      fontWeight: 'bold',
-      textShadow: '0 2px 4px rgba(0,0,0,0.8)',
-      background: captionBg ? 'rgba(0,0,0,0.6)' : 'transparent',
-      padding: captionBg ? '4px 12px' : '0',
-      borderRadius: 6,
-      maxWidth: '90%',
-      textAlign: 'center',
-      pointerEvents: 'none',
-      transform: '',
-      whiteSpace: 'pre-wrap',
-    }
-    if (captionPosition === 'top') {
-      base.top = '16px'
-      base.transform = 'translateX(-50%)'
-    } else if (captionPosition === 'center') {
-      base.top = '50%'
-      base.transform = 'translateX(-50%) translateY(-50%)'
-    } else {
-      base.bottom = '16px'
-      base.transform = 'translateX(-50%)'
-    }
-    return base
-  }
-
-  // ── Progress bar percentage ───────────────────────────────────────────────────
-  const progressPct =
-    duration > 0 && trimEnd > trimStart
-      ? ((currentTime - trimStart) / (trimEnd - trimStart)) * 100
-      : 0
-
-  // ── Render ────────────────────────────────────────────────────────────────────
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <div className="flex min-h-screen bg-gray-950">
       <Sidebar />
 
+      {/* Hidden canvas for export */}
+      <canvas ref={canvasRef} style={{ display: 'none' }} />
+
       <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
 
-        {/* ── Sticky header ── */}
+        {/* Header */}
         <header className="sticky top-0 z-20 flex items-center justify-between px-5 py-3 border-b border-gray-800 bg-gray-950/95 backdrop-blur-md">
-          <div className="flex items-center gap-4 flex-wrap">
+          <div className="flex items-center gap-4">
             <h1 className="text-lg font-extrabold tracking-tight text-white flex items-center gap-2">
               <span className="text-amber-400 text-xl">✦</span>
               Creator Studio
@@ -507,9 +588,7 @@ export default function CreatePageClient() {
               <button
                 onClick={() => switchTab('video')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                  activeTab === 'video'
-                    ? 'bg-amber-500 text-gray-950'
-                    : 'text-gray-400 hover:text-gray-200'
+                  activeTab === 'video' ? 'bg-amber-500 text-gray-950' : 'text-gray-400 hover:text-gray-200'
                 }`}
               >
                 📹 Video Editor
@@ -517,32 +596,26 @@ export default function CreatePageClient() {
               <button
                 onClick={() => switchTab('image')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                  activeTab === 'image'
-                    ? 'bg-amber-500 text-gray-950'
-                    : 'text-gray-400 hover:text-gray-200'
+                  activeTab === 'image' ? 'bg-amber-500 text-gray-950' : 'text-gray-400 hover:text-gray-200'
                 }`}
               >
                 🖼️ Image Editor
               </button>
             </div>
           </div>
-
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-200 transition-colors"
-          >
+          <Link href="/dashboard" className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-200 transition-colors">
             ← Back to Dashboard
           </Link>
         </header>
 
-        {/* ── Main layout ── */}
+        {/* Main layout */}
         <div className="flex flex-1 overflow-hidden">
 
-          {/* ── Center: platform picker + editor ── */}
-          <div className="flex-1 flex flex-col overflow-y-auto">
+          {/* Left / center */}
+          <div className="flex-1 flex flex-col gap-0 overflow-y-auto">
 
             {/* Platform picker */}
-            <div className="px-5 py-4 border-b border-gray-800/60 bg-gray-950 flex-shrink-0">
+            <div className="px-5 py-4 border-b border-gray-800/60 bg-gray-950">
               <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">Editing for:</p>
               <div className="flex flex-wrap gap-2">
                 {visiblePlatforms.map(p => (
@@ -570,8 +643,8 @@ export default function CreatePageClient() {
 
               {activeTab === 'video' ? (
                 <>
+                  {/* ── Upload / Preview ── */}
                   {!videoFile ? (
-                    /* ── Upload area ── */
                     <div
                       onDragOver={e => { e.preventDefault(); setVideoDragOver(true) }}
                       onDragLeave={() => setVideoDragOver(false)}
@@ -601,23 +674,18 @@ export default function CreatePageClient() {
                         type="file"
                         accept=".mp4,.mov,.webm,.avi,video/*"
                         className="hidden"
-                        onChange={e => {
-                          const f = e.target.files?.[0]
-                          if (f) handleVideoFile(f)
-                        }}
+                        onChange={e => { const f = e.target.files?.[0]; if (f) handleVideoFile(f) }}
                       />
                     </div>
                   ) : (
-                    /* ── Video editor ── */
-                    <div className="flex flex-col gap-4">
-
+                    <div className="flex flex-col gap-3">
                       {/* File info bar */}
                       <div className="flex items-center justify-between px-4 py-2.5 rounded-xl bg-gray-900 border border-gray-800 text-sm">
                         <span className="text-gray-300 font-medium truncate max-w-xs">{videoFile.name}</span>
                         <div className="flex items-center gap-3">
                           <span className="text-gray-500">{formatBytes(videoFile.size)}</span>
                           <button
-                            onClick={() => { setVideoFile(null); setVideoUrl(''); setPlaying(false) }}
+                            onClick={() => { setVideoFile(null); if (videoUrl) { URL.revokeObjectURL(videoUrl); setVideoUrl(null) } }}
                             className="text-gray-600 hover:text-red-400 transition-colors text-xs"
                           >
                             ✕ Remove
@@ -625,308 +693,370 @@ export default function CreatePageClient() {
                         </div>
                       </div>
 
-                      {/* Video preview + caption overlay */}
+                      {/* Video preview with caption overlay */}
                       <div className="relative rounded-2xl overflow-hidden bg-black border border-gray-800 flex items-center justify-center min-h-64">
                         {videoUrl && (
                           <video
                             ref={videoRef}
                             src={videoUrl}
                             className="max-w-full max-h-96 w-auto"
-                            style={{ filter: FILTERS[activeFilter] || 'none' }}
-                            onLoadedMetadata={handleVideoMetadata}
+                            style={{
+                              aspectRatio: spec.ratio.replace(':', '/'),
+                              filter: cssFilter || undefined,
+                            }}
+                            onLoadedMetadata={handleVideoLoaded}
                             onTimeUpdate={handleTimeUpdate}
-                            onEnded={() => setPlaying(false)}
+                            onPlay={() => setIsPlaying(true)}
+                            onPause={() => setIsPlaying(false)}
+                            onEnded={() => setIsPlaying(false)}
                           />
                         )}
+
+                        {/* Caption overlay */}
                         {captionText && (
-                          <div style={captionStyle()}>
+                          <div
+                            className="absolute left-1/2 pointer-events-none px-4 py-1.5 max-w-[90%] text-center leading-snug"
+                            style={{
+                              ...captionPositionStyle(),
+                              fontSize: `${captionFontSize}px`,
+                              color: captionColor,
+                              fontWeight: 700,
+                              fontFamily: 'Arial, sans-serif',
+                              textShadow: captionBg ? 'none' : '0 1px 4px rgba(0,0,0,0.8)',
+                              background: captionBg ? 'rgba(0,0,0,0.55)' : 'transparent',
+                              borderRadius: '999px',
+                              display: 'inline-block',
+                            }}
+                          >
                             {captionText}
                           </div>
                         )}
                       </div>
 
                       {/* Playback controls */}
-                      <div className="flex flex-col gap-2 px-1">
-                        {/* Progress bar */}
-                        <div
-                          className="relative h-2 bg-gray-800 rounded-full cursor-pointer overflow-hidden"
-                          onClick={handleProgressClick}
+                      <div className="flex items-center gap-3 px-1">
+                        <button
+                          onClick={togglePlay}
+                          className="flex items-center justify-center w-9 h-9 rounded-full bg-amber-500 text-gray-950 text-base font-bold hover:opacity-90 transition-opacity flex-shrink-0"
+                          title={isPlaying ? 'Pause' : 'Play'}
                         >
+                          {isPlaying ? '⏸' : '▶'}
+                        </button>
+                        <span className="text-xs font-mono text-gray-400 flex-shrink-0 w-20 text-center">
+                          {formatTime(currentTime)} / {formatTime(videoDuration)}
+                        </span>
+                        {/* Progress bar showing trimmed region */}
+                        <div className="relative flex-1 h-2 bg-gray-800 rounded-full overflow-hidden cursor-pointer"
+                          onClick={e => {
+                            const rect = (e.currentTarget as HTMLDivElement).getBoundingClientRect()
+                            const ratio = (e.clientX - rect.left) / rect.width
+                            const t = ratio * videoDuration
+                            if (videoRef.current) videoRef.current.currentTime = t
+                          }}
+                        >
+                          {/* Trim region highlight */}
                           <div
-                            className="absolute left-0 top-0 h-full bg-amber-500 rounded-full transition-none"
-                            style={{ width: `${Math.max(0, Math.min(100, progressPct))}%` }}
+                            className="absolute h-full bg-amber-500/30 rounded-full"
+                            style={{ left: `${trimStartPct}%`, width: `${trimEndPct - trimStartPct}%` }}
                           />
-                        </div>
-
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <button
-                              onClick={togglePlay}
-                              disabled={!duration}
-                              className="flex items-center justify-center w-9 h-9 rounded-full bg-amber-500 text-gray-950 font-bold hover:opacity-90 transition-opacity disabled:opacity-40 text-sm"
-                            >
-                              {playing ? '⏸' : '▶'}
-                            </button>
-                            <span className="text-xs font-mono text-gray-400">
-                              {formatTime(currentTime)} / {formatTime(trimEnd - trimStart)} (trim)
-                            </span>
-                          </div>
-                          <span className="text-xs font-mono text-gray-600">
-                            total {formatTime(duration)}
-                          </span>
+                          {/* Playhead */}
+                          <div
+                            className="absolute h-full w-0.5 bg-amber-400 rounded-full"
+                            style={{ left: `${progressPct}%` }}
+                          />
                         </div>
                       </div>
 
                       {/* Trim controls */}
-                      <div className="flex flex-col gap-3 px-1 p-4 rounded-xl bg-gray-900 border border-gray-800">
-                        <p className="text-xs font-bold uppercase tracking-widest text-gray-500">Trim Region</p>
+                      <div className="rounded-xl border border-gray-800 bg-gray-900 p-4 flex flex-col gap-3">
+                        <p className="text-xs font-bold uppercase tracking-widest text-gray-500">Trim</p>
                         <div className="flex flex-col gap-2">
                           <div className="flex items-center gap-3">
-                            <label className="text-xs text-gray-400 w-20 flex-shrink-0">
-                              Start: <span className="text-amber-400 font-mono">{formatTime(trimStart)}</span>
-                            </label>
+                            <label className="text-xs text-gray-400 w-20 flex-shrink-0">Start: <span className="font-mono text-amber-400">{formatTime(trimStart)}</span></label>
                             <input
                               type="range"
                               min={0}
-                              max={duration || 1}
+                              max={videoDuration}
                               step={0.1}
                               value={trimStart}
-                              onChange={e => {
-                                const v = Math.min(+e.target.value, trimEnd - 0.5)
-                                setTrimStart(v)
-                                if (videoRef.current) videoRef.current.currentTime = v
-                              }}
+                              onChange={e => handleTrimStartChange(parseFloat(e.target.value))}
                               className="flex-1 accent-amber-500"
                             />
                           </div>
                           <div className="flex items-center gap-3">
-                            <label className="text-xs text-gray-400 w-20 flex-shrink-0">
-                              End: <span className="text-amber-400 font-mono">{formatTime(trimEnd)}</span>
-                            </label>
+                            <label className="text-xs text-gray-400 w-20 flex-shrink-0">End: <span className="font-mono text-amber-400">{formatTime(trimEnd)}</span></label>
                             <input
                               type="range"
                               min={0}
-                              max={duration || 1}
+                              max={videoDuration}
                               step={0.1}
                               value={trimEnd}
-                              onChange={e => {
-                                const v = Math.max(+e.target.value, trimStart + 0.5)
-                                setTrimEnd(v)
-                                if (videoRef.current) videoRef.current.currentTime = v
-                              }}
+                              onChange={e => handleTrimEndChange(parseFloat(e.target.value))}
                               className="flex-1 accent-amber-500"
                             />
                           </div>
+                          <div className="flex justify-between text-xs text-gray-600 px-0.5">
+                            <span>Clip length: <span className="font-mono text-gray-400">{formatTime(Math.max(0, trimEnd - trimStart))}</span></span>
+                            <button
+                              className="text-gray-600 hover:text-gray-400 underline underline-offset-2 transition-colors"
+                              onClick={() => { setTrimStart(0); setTrimEnd(videoDuration) }}
+                            >
+                              Reset
+                            </button>
+                          </div>
                         </div>
-                        <p className="text-xs text-gray-600">
-                          Clip length: <span className="text-gray-400 font-mono">{formatTime(trimEnd - trimStart)}</span>
-                        </p>
                       </div>
 
-                      {/* Editor tabs — hidden on mobile (sm and below), visible md+ */}
-                      <div className="hidden md:block">
-                        {/* Tab switcher */}
-                        <div className="flex gap-1 bg-gray-900 border border-gray-800 rounded-xl p-1 w-fit mb-4">
-                          {(['filters', 'captions', 'audio', 'quality'] as const).map(t => (
+                      {/* Tool panel tabs */}
+                      <div className="rounded-2xl border border-gray-800 bg-gray-900 overflow-hidden">
+                        <div className="flex border-b border-gray-800">
+                          {(['filters', 'captions', 'audio', 'export'] as const).map(t => (
                             <button
                               key={t}
-                              onClick={() => setEditorTab(t)}
-                              className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all ${
-                                editorTab === t
-                                  ? 'bg-amber-500 text-gray-950'
-                                  : 'text-gray-400 hover:text-gray-200'
+                              onClick={() => setToolTab(t)}
+                              className={`flex-1 py-2.5 text-xs font-bold uppercase tracking-wider transition-all ${
+                                toolTab === t
+                                  ? 'text-amber-400 bg-amber-500/5 border-b-2 border-amber-500'
+                                  : 'text-gray-500 hover:text-gray-300'
                               }`}
                             >
-                              {t === 'filters' ? '🎨 Filters'
-                                : t === 'captions' ? '💬 Captions'
-                                : t === 'audio' ? '🔊 Audio'
-                                : '📊 Quality'}
+                              {t === 'filters' && '🎨 '}
+                              {t === 'captions' && '💬 '}
+                              {t === 'audio' && '🔊 '}
+                              {t === 'export' && '📦 '}
+                              {t.charAt(0).toUpperCase() + t.slice(1)}
                             </button>
                           ))}
                         </div>
 
-                        {/* Filters panel */}
-                        {editorTab === 'filters' && (
-                          <div className="p-4 rounded-xl bg-gray-900 border border-gray-800">
-                            <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">Video Filters</p>
-                            <div className="grid grid-cols-4 gap-2">
-                              {Object.keys(FILTERS).map(f => (
-                                <button
-                                  key={f}
-                                  onClick={() => setActiveFilter(f)}
-                                  className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${
-                                    activeFilter === f
-                                      ? 'border-amber-500 bg-amber-500/10 text-amber-400'
-                                      : 'border-gray-700 bg-gray-800 text-gray-400 hover:border-gray-600 hover:text-gray-200'
-                                  }`}
-                                >
-                                  {f}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Captions panel */}
-                        {editorTab === 'captions' && (
-                          <div className="p-4 rounded-xl bg-gray-900 border border-gray-800 flex flex-col gap-4">
-                            <p className="text-xs font-bold uppercase tracking-widest text-gray-500">Caption Overlay</p>
-
-                            <div className="flex flex-col gap-1">
-                              <label className="text-xs text-gray-400">Caption text</label>
-                              <input
-                                type="text"
-                                value={captionText}
-                                onChange={e => setCaptionText(e.target.value)}
-                                placeholder="Enter caption…"
-                                className="px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-amber-500/60"
-                              />
-                            </div>
-
-                            <div className="flex flex-col gap-1">
-                              <label className="text-xs text-gray-400">
-                                Font size: <span className="text-amber-400 font-mono">{captionSize}px</span>
-                              </label>
-                              <input
-                                type="range" min={12} max={72} step={1}
-                                value={captionSize}
-                                onChange={e => setCaptionSize(+e.target.value)}
-                                className="accent-amber-500"
-                              />
-                            </div>
-
-                            <div className="flex flex-col gap-1">
-                              <label className="text-xs text-gray-400">Position</label>
-                              <div className="flex gap-2">
-                                {(['top', 'center', 'bottom'] as const).map(pos => (
+                        <div className="p-4">
+                          {/* ── Filters ── */}
+                          {toolTab === 'filters' && (
+                            <div className="flex flex-col gap-3">
+                              <p className="text-xs text-gray-500">Select a filter to apply to your video preview and export.</p>
+                              <div className="flex flex-wrap gap-2">
+                                {FILTER_NAMES.map(f => (
                                   <button
-                                    key={pos}
-                                    onClick={() => setCaptionPosition(pos)}
-                                    className={`flex-1 py-1.5 rounded-lg text-xs font-semibold border capitalize transition-all ${
-                                      captionPosition === pos
-                                        ? 'border-amber-500 bg-amber-500/10 text-amber-400'
-                                        : 'border-gray-700 bg-gray-800 text-gray-400 hover:border-gray-600'
+                                    key={f}
+                                    onClick={() => setActiveFilter(f)}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                                      activeFilter === f
+                                        ? 'border-amber-500 bg-amber-500/10 text-amber-400 ring-1 ring-amber-500'
+                                        : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600'
                                     }`}
                                   >
-                                    {pos}
+                                    {f}
                                   </button>
                                 ))}
                               </div>
+                              {activeFilter !== 'None' && (
+                                <p className="text-xs text-amber-400/70">
+                                  Active: <span className="font-mono text-amber-400">{activeFilter}</span>
+                                  {' — '}applied via CSS filter on preview + baked into export.
+                                </p>
+                              )}
                             </div>
+                          )}
 
-                            <div className="flex flex-col gap-1">
-                              <label className="text-xs text-gray-400">Color</label>
-                              <div className="flex gap-2">
-                                {['#ffffff', '#000000', '#ffff00', '#ff4444'].map(c => (
-                                  <button
-                                    key={c}
-                                    onClick={() => setCaptionColor(c)}
-                                    style={{ background: c }}
-                                    className={`w-8 h-8 rounded-lg border-2 transition-all ${
-                                      captionColor === c ? 'border-amber-500 scale-110' : 'border-gray-700'
-                                    }`}
-                                  />
-                                ))}
+                          {/* ── Captions ── */}
+                          {toolTab === 'captions' && (
+                            <div className="flex flex-col gap-4">
+                              <div className="flex flex-col gap-1.5">
+                                <label className="text-xs font-semibold text-gray-400">Caption text</label>
+                                <input
+                                  type="text"
+                                  value={captionText}
+                                  onChange={e => setCaptionText(e.target.value)}
+                                  placeholder="Type your caption..."
+                                  className="w-full px-3 py-2 rounded-lg bg-gray-800 border border-gray-700 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-amber-500/60"
+                                />
+                              </div>
+
+                              <div className="flex flex-col gap-1.5">
+                                <label className="text-xs font-semibold text-gray-400">
+                                  Font size: <span className="font-mono text-amber-400">{captionFontSize}px</span>
+                                </label>
+                                <input
+                                  type="range"
+                                  min={12}
+                                  max={72}
+                                  value={captionFontSize}
+                                  onChange={e => setCaptionFontSize(parseInt(e.target.value))}
+                                  className="accent-amber-500"
+                                />
+                                <div className="flex justify-between text-xs text-gray-600"><span>12px</span><span>72px</span></div>
+                              </div>
+
+                              <div className="flex flex-col gap-1.5">
+                                <label className="text-xs font-semibold text-gray-400">Position</label>
+                                <div className="flex gap-2">
+                                  {(['top', 'center', 'bottom'] as const).map(pos => (
+                                    <button
+                                      key={pos}
+                                      onClick={() => setCaptionPosition(pos)}
+                                      className={`flex-1 py-2 rounded-lg text-xs font-semibold border transition-all ${
+                                        captionPosition === pos
+                                          ? 'border-amber-500 bg-amber-500/10 text-amber-400'
+                                          : 'border-gray-700 bg-gray-800 text-gray-400 hover:border-gray-600'
+                                      }`}
+                                    >
+                                      {pos.charAt(0).toUpperCase() + pos.slice(1)}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+
+                              <div className="flex flex-col gap-1.5">
+                                <label className="text-xs font-semibold text-gray-400">Text color</label>
+                                <div className="flex gap-2">
+                                  {CAPTION_COLORS.map(c => (
+                                    <button
+                                      key={c}
+                                      onClick={() => setCaptionColor(c)}
+                                      title={c}
+                                      className={`w-8 h-8 rounded-full border-2 transition-all ${
+                                        captionColor === c ? 'border-amber-500 scale-110' : 'border-gray-700'
+                                      }`}
+                                      style={{ background: c }}
+                                    />
+                                  ))}
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-3">
+                                <label className="text-xs font-semibold text-gray-400">Background</label>
+                                <button
+                                  onClick={() => setCaptionBg(!captionBg)}
+                                  className={`relative w-10 h-5 rounded-full transition-colors ${captionBg ? 'bg-amber-500' : 'bg-gray-700'}`}
+                                >
+                                  <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${captionBg ? 'left-5' : 'left-0.5'}`} />
+                                </button>
+                                <span className="text-xs text-gray-500">{captionBg ? 'Semi-black pill' : 'Transparent'}</span>
                               </div>
                             </div>
+                          )}
 
-                            <label className="flex items-center gap-2 cursor-pointer select-none">
-                              <div
-                                onClick={() => setCaptionBg(!captionBg)}
-                                className={`relative w-10 h-5 rounded-full transition-colors ${captionBg ? 'bg-amber-500' : 'bg-gray-700'}`}
+                          {/* ── Audio ── */}
+                          {toolTab === 'audio' && (
+                            <div className="flex flex-col gap-4">
+                              <div className="flex flex-col gap-1.5">
+                                <label className="text-xs font-semibold text-gray-400">
+                                  Volume: <span className="font-mono text-amber-400">{muted ? '0%' : `${volume}%`}</span>
+                                </label>
+                                <input
+                                  type="range"
+                                  min={0}
+                                  max={100}
+                                  value={volume}
+                                  onChange={e => { setVolume(parseInt(e.target.value)); setMuted(false) }}
+                                  disabled={muted}
+                                  className="accent-amber-500 disabled:opacity-50"
+                                />
+                              </div>
+                              <button
+                                onClick={() => setMuted(!muted)}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-sm font-semibold transition-all self-start ${
+                                  muted
+                                    ? 'border-red-500/60 bg-red-500/10 text-red-400 hover:bg-red-500/20'
+                                    : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600'
+                                }`}
                               >
-                                <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-all ${captionBg ? 'left-5' : 'left-0.5'}`} />
+                                {muted ? '🔇 Muted — click to unmute' : '🔊 Mute'}
+                              </button>
+
+                              <div className="flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-800 bg-gray-800/50 opacity-60">
+                                <span className="text-base">🎵</span>
+                                <div>
+                                  <p className="text-xs font-semibold text-gray-400">Background music</p>
+                                  <p className="text-xs text-gray-600">Coming soon — add royalty-free music to your clips</p>
+                                </div>
                               </div>
-                              <span className="text-xs text-gray-400">Background</span>
-                            </label>
-                          </div>
-                        )}
-
-                        {/* Audio panel */}
-                        {editorTab === 'audio' && (
-                          <div className="p-4 rounded-xl bg-gray-900 border border-gray-800 flex flex-col gap-4">
-                            <p className="text-xs font-bold uppercase tracking-widest text-gray-500">Audio Controls</p>
-
-                            <div className="flex flex-col gap-1">
-                              <label className="text-xs text-gray-400">
-                                Volume: <span className="text-amber-400 font-mono">{muted ? 'Muted' : `${volume}%`}</span>
-                              </label>
-                              <input
-                                type="range" min={0} max={100} step={1}
-                                value={volume}
-                                onChange={e => {
-                                  setVolume(+e.target.value)
-                                  setMuted(false)
-                                }}
-                                disabled={muted}
-                                className="accent-amber-500 disabled:opacity-40"
-                              />
                             </div>
+                          )}
 
-                            <button
-                              onClick={() => setMuted(m => !m)}
-                              className={`px-4 py-2 rounded-xl text-sm font-semibold border transition-all w-fit ${
-                                muted
-                                  ? 'border-red-500/60 bg-red-500/10 text-red-400'
-                                  : 'border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600'
-                              }`}
-                            >
-                              {muted ? '🔇 Unmute' : '🔊 Mute'}
-                            </button>
-
-                            <div className="flex items-center gap-3 p-3 rounded-xl border border-gray-700/50 bg-gray-800/50">
-                              <span className="text-lg">🎵</span>
+                          {/* ── Export ── */}
+                          {toolTab === 'export' && (
+                            <div className="flex flex-col gap-4">
                               <div>
-                                <p className="text-xs font-semibold text-gray-300">Background Music</p>
-                                <p className="text-xs text-gray-500">Coming soon — add a backing track</p>
+                                <p className="text-xs font-semibold text-gray-400 mb-2">Export for: <span className="text-amber-400">{spec.name}</span></p>
+                                <p className="text-xs text-gray-600">
+                                  Target: <span className="font-mono text-gray-400">{getPlatformDimensions(selectedPlatform).width} × {getPlatformDimensions(selectedPlatform).height}</span>
+                                  {' '}· Format: <span className="font-mono text-gray-400">WebM (VP9)</span>
+                                </p>
                               </div>
-                            </div>
-                          </div>
-                        )}
 
-                        {/* Quality panel */}
-                        {editorTab === 'quality' && (
-                          <div className="p-4 rounded-xl bg-gray-900 border border-gray-800 flex flex-col gap-3">
-                            <p className="text-xs font-bold uppercase tracking-widest text-gray-500">Export Quality</p>
-                            <div className="flex flex-col gap-2">
-                              <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-800 border border-amber-500/40">
-                                <span className="text-sm font-semibold text-amber-400">WebM (vp9)</span>
-                                <span className="text-xs text-gray-400">Best browser compat</span>
+                              <div className="flex flex-col gap-2 text-xs text-gray-500">
+                                <div className="flex items-center gap-2">
+                                  <span className={activeFilter !== 'None' ? 'text-amber-400' : 'text-gray-600'}>✦</span>
+                                  <span>Filter: <span className="font-mono text-gray-300">{activeFilter}</span></span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className={captionText ? 'text-amber-400' : 'text-gray-600'}>✦</span>
+                                  <span>Caption: <span className="font-mono text-gray-300">{captionText || 'none'}</span></span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-amber-400">✦</span>
+                                  <span>Trim: <span className="font-mono text-gray-300">{formatTime(trimStart)} → {formatTime(trimEnd)}</span></span>
+                                </div>
                               </div>
-                              <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-800/50 border border-gray-700/50 opacity-50">
-                                <span className="text-sm font-semibold text-gray-400">MP4 (h264)</span>
-                                <span className="text-xs text-gray-500">Coming soon</span>
-                              </div>
+
+                              {exportError && (
+                                <div className="px-3 py-2 rounded-lg border border-red-500/40 bg-red-500/10 text-xs text-red-400">
+                                  {exportError}
+                                </div>
+                              )}
+
+                              <button
+                                onClick={exportVideo}
+                                disabled={exporting}
+                                className="px-5 py-2.5 rounded-xl bg-amber-500 text-gray-950 font-bold text-sm hover:opacity-90 transition-all disabled:opacity-60 flex items-center gap-2"
+                              >
+                                {exporting ? (
+                                  <>
+                                    <span className="inline-block w-3 h-3 border-2 border-gray-950/30 border-t-gray-950 rounded-full animate-spin" />
+                                    Exporting…
+                                  </>
+                                ) : (
+                                  '📦 Export for ' + spec.name
+                                )}
+                              </button>
+                              <p className="text-xs text-gray-600">
+                                Export renders the trimmed clip with filters baked in. Chrome/Edge recommended.
+                              </p>
                             </div>
-                            <p className="text-xs text-gray-600 mt-1">
-                              Export dimensions: <span className="text-gray-400 font-mono">{getPlatformDimensions(selectedPlatform).width} × {getPlatformDimensions(selectedPlatform).height}</span>
-                            </p>
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </div>
 
-                      {/* Mobile: simplified filter row */}
-                      <div className="flex md:hidden gap-2 overflow-x-auto pb-1">
-                        {Object.keys(FILTERS).map(f => (
-                          <button
-                            key={f}
-                            onClick={() => setActiveFilter(f)}
-                            className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
-                              activeFilter === f
-                                ? 'border-amber-500 bg-amber-500/10 text-amber-400'
-                                : 'border-gray-700 bg-gray-800 text-gray-400'
-                            }`}
-                          >
-                            {f}
-                          </button>
-                        ))}
+                      {/* Bottom action bar */}
+                      <div className="flex items-center gap-3 pt-2 border-t border-gray-800 flex-wrap">
+                        <button
+                          onClick={() => router.push('/compose')}
+                          className="px-5 py-2.5 rounded-xl bg-amber-500 text-gray-950 font-bold text-sm hover:opacity-90 transition-all"
+                        >
+                          Schedule this video →
+                        </button>
+                        <button
+                          onClick={captureThumbnail}
+                          disabled={!videoRef.current || videoDuration === 0}
+                          className="px-5 py-2.5 rounded-xl border border-gray-700 text-gray-300 font-semibold text-sm hover:border-amber-500/40 hover:text-amber-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                          title="Capture current frame as PNG thumbnail"
+                        >
+                          📷 Capture Thumbnail
+                        </button>
+                        <button
+                          onClick={exportVideo}
+                          disabled={exporting}
+                          className="px-5 py-2.5 rounded-xl border border-gray-700 text-gray-300 font-semibold text-sm hover:border-gray-600 hover:text-gray-100 transition-all disabled:opacity-60"
+                        >
+                          {exporting ? 'Exporting…' : '⬇ Download Export'}
+                        </button>
                       </div>
-
                     </div>
                   )}
                 </>
               ) : (
-                /* ── Image editor tab ── */
+                /* ── Image tab (unchanged) ── */
                 <>
                   {!imageFile ? (
                     <div className="flex flex-col gap-4">
@@ -959,10 +1089,7 @@ export default function CreatePageClient() {
                           type="file"
                           accept=".jpg,.jpeg,.png,.gif,.webp,image/*"
                           className="hidden"
-                          onChange={e => {
-                            const f = e.target.files?.[0]
-                            if (f) handleImageFile(f)
-                          }}
+                          onChange={e => { const f = e.target.files?.[0]; if (f) handleImageFile(f) }}
                         />
                       </div>
 
@@ -995,27 +1122,23 @@ export default function CreatePageClient() {
                         <div className="flex items-center gap-3">
                           <span className="text-gray-500">{formatBytes(imageFile.size)}</span>
                           <button
-                            onClick={() => { setImageFile(null); setImageUrl(null) }}
+                            onClick={() => { setImageFile(null); if (imageUrl) { URL.revokeObjectURL(imageUrl); setImageUrl(null) } }}
                             className="text-gray-600 hover:text-red-400 transition-colors text-xs"
                           >
                             ✕ Remove
                           </button>
                         </div>
                       </div>
-
                       <div className="relative rounded-2xl overflow-hidden bg-gray-900 border border-gray-800 flex items-center justify-center min-h-64 p-4">
                         {imageUrl && (
                           // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={imageUrl}
-                            alt="Preview"
-                            className="max-w-full max-h-96 w-auto rounded-xl object-contain"
-                          />
+                          <img src={imageUrl} alt="Preview" className="max-w-full max-h-96 w-auto rounded-xl object-contain" />
                         )}
                       </div>
                     </div>
                   )}
 
+                  {/* Image toolbar */}
                   <div className="flex flex-wrap gap-2">
                     <ComingSoonBtn icon="✂️" label="Crop" />
                     <ComingSoonBtn icon="🎨" label="Filter" />
@@ -1026,34 +1149,23 @@ export default function CreatePageClient() {
                   </div>
 
                   <div className="flex items-center gap-3 pt-2 border-t border-gray-800">
-                    <button
-                      className="px-5 py-2.5 rounded-xl bg-amber-500 text-gray-950 font-bold text-sm hover:opacity-90 transition-all disabled:opacity-40"
-                      disabled={!imageFile}
-                    >
+                    <button className="px-5 py-2.5 rounded-xl bg-amber-500 text-gray-950 font-bold text-sm hover:opacity-90 transition-all" disabled={!imageFile}>
                       Save to Drafts
                     </button>
-                    <button
-                      className="px-5 py-2.5 rounded-xl border border-gray-700 text-gray-300 font-semibold text-sm hover:border-gray-600 hover:text-gray-100 transition-all disabled:opacity-40"
-                      disabled={!imageFile}
-                    >
+                    <button className="px-5 py-2.5 rounded-xl border border-gray-700 text-gray-300 font-semibold text-sm hover:border-gray-600 hover:text-gray-100 transition-all" disabled={!imageFile}>
                       Download
                     </button>
-                    {!imageFile && (
-                      <span className="text-xs text-gray-600">Upload an image or pick a template to export</span>
-                    )}
+                    {!imageFile && <span className="text-xs text-gray-600">Upload an image or pick a template to export</span>}
                   </div>
                 </>
               )}
             </div>
           </div>
 
-          {/* ── Right: platform specs + export actions ── */}
-          <aside className="hidden lg:flex flex-col w-72 border-l border-gray-800 bg-gray-950 p-5 gap-5 overflow-y-auto flex-shrink-0">
-
-            {/* Platform Specs */}
+          {/* Right panel */}
+          <aside className="hidden lg:flex flex-col w-72 border-l border-gray-800 bg-gray-950 p-5 gap-5 overflow-y-auto">
             <div>
               <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4">Platform Specs</p>
-
               <div className="flex items-center gap-3 mb-5">
                 <span className="text-3xl">{spec.icon}</span>
                 <div>
@@ -1061,7 +1173,6 @@ export default function CreatePageClient() {
                   <p className="text-xs text-amber-400 font-mono">{spec.ratioLabel}</p>
                 </div>
               </div>
-
               <div className="flex flex-col gap-3">
                 <SpecRow label="Aspect Ratio" value={spec.ratio} />
                 <SpecRow label="Max Duration" value={spec.maxDuration} />
@@ -1070,94 +1181,94 @@ export default function CreatePageClient() {
               </div>
             </div>
 
-            {/* Actions (video only) */}
-            {activeTab === 'video' && (
-              <div className="flex flex-col gap-3">
-                <p className="text-xs font-bold uppercase tracking-widest text-gray-500">Actions</p>
-
-                <button
-                  onClick={captureThumbnail}
-                  disabled={!videoFile}
-                  className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-gray-700 bg-gray-900 text-sm font-semibold text-gray-300 hover:border-amber-500/40 hover:text-gray-100 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  📸 Capture Thumbnail
-                </button>
-
+            {/* Export + actions */}
+            {activeTab === 'video' && videoFile && (
+              <div className="flex flex-col gap-2">
+                <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-1">Quick Actions</p>
                 <button
                   onClick={exportVideo}
-                  disabled={!videoFile || exporting}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 text-gray-950 text-sm font-bold hover:opacity-90 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                  disabled={exporting}
+                  className="w-full px-4 py-2.5 rounded-xl bg-amber-500 text-gray-950 font-bold text-sm hover:opacity-90 transition-all disabled:opacity-60 flex items-center justify-center gap-2"
                 >
                   {exporting ? (
                     <>
-                      <span className="inline-block w-4 h-4 border-2 border-gray-950/30 border-t-gray-950 rounded-full animate-spin" />
+                      <span className="inline-block w-3 h-3 border-2 border-gray-950/30 border-t-gray-950 rounded-full animate-spin" />
                       Exporting…
                     </>
-                  ) : (
-                    <>⚡ Export for {spec.name}</>
-                  )}
+                  ) : '📦 Export for ' + spec.name}
                 </button>
-
-                <Link
-                  href="/compose"
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-700 bg-gray-900 text-sm font-semibold text-gray-300 hover:border-amber-500/40 hover:text-amber-400 transition-all text-center"
+                <button
+                  onClick={captureThumbnail}
+                  disabled={!videoRef.current || videoDuration === 0}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-700 text-gray-300 font-semibold text-sm hover:border-amber-500/40 hover:text-amber-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  📅 Schedule this →
-                </Link>
-              </div>
-            )}
-
-            {/* Notify form (when no video or image tab) */}
-            {activeTab === 'image' && (
-              <div>
-                <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">Filters</p>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {['Amber', 'Light Blue', 'B&W', 'Dark Contrast', 'Warm', 'Cool', 'Cinematic'].map(f => (
-                    <span
-                      key={f}
-                      className="px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-900 border border-gray-800 text-gray-400"
-                    >
-                      {f}
-                    </span>
-                  ))}
-                </div>
-                {filterNotifyState === 'done' ? (
-                  <p className="text-xs text-green-400 font-semibold mt-2">You&apos;re on the list!</p>
-                ) : (
-                  <div className="flex items-center gap-1.5 mt-2">
-                    <input
-                      type="email"
-                      value={filterEmail}
-                      onChange={e => setFilterEmail(e.target.value)}
-                      onKeyDown={e => { if (e.key === 'Enter') handleFilterNotify() }}
-                      placeholder="your@email.com"
-                      className="flex-1 min-w-0 px-2 py-1 rounded-lg bg-gray-900 border border-gray-700 text-xs text-gray-200 placeholder-gray-600 focus:outline-none focus:border-amber-500/60"
-                    />
-                    <button
-                      onClick={handleFilterNotify}
-                      disabled={filterNotifyState === 'loading'}
-                      className="px-2.5 py-1 rounded-lg bg-amber-500 text-gray-950 text-xs font-bold hover:opacity-90 transition-opacity disabled:opacity-60 whitespace-nowrap"
-                    >
-                      {filterNotifyState === 'loading' ? '...' : 'Notify me'}
-                    </button>
-                  </div>
+                  📷 Capture Thumbnail
+                </button>
+                <button
+                  onClick={() => router.push('/compose')}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-700 text-gray-300 font-semibold text-sm hover:border-gray-600 hover:text-gray-100 transition-all"
+                >
+                  📅 Schedule this video →
+                </button>
+                {exportError && (
+                  <p className="text-xs text-red-400 mt-1">{exportError}</p>
                 )}
               </div>
             )}
 
-            {/* Quick tip */}
+            {/* Filter chips */}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">Filters</p>
+              <div className="flex flex-wrap gap-2">
+                {FILTER_NAMES.map(f => (
+                  <button
+                    key={f}
+                    onClick={() => activeTab === 'video' && videoFile && setActiveFilter(f)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-all ${
+                      activeFilter === f && activeTab === 'video' && videoFile
+                        ? 'border-amber-500 bg-amber-500/10 text-amber-400'
+                        : 'bg-gray-900 border-gray-800 text-gray-400 hover:border-gray-700'
+                    }`}
+                  >
+                    {f}
+                  </button>
+                ))}
+              </div>
+
+              {filterNotifyState === 'done' ? (
+                <p className="text-xs text-green-400 font-semibold mt-2">You&apos;re on the list!</p>
+              ) : (
+                <div className="flex items-center gap-1.5 mt-2">
+                  <input
+                    type="email"
+                    value={filterEmail}
+                    onChange={e => setFilterEmail(e.target.value)}
+                    onKeyDown={e => { if (e.key === 'Enter') handleFilterNotify() }}
+                    placeholder="your@email.com"
+                    className="flex-1 min-w-0 px-2 py-1 rounded-lg bg-gray-900 border border-gray-700 text-xs text-gray-200 placeholder-gray-600 focus:outline-none focus:border-amber-500/60"
+                  />
+                  <button
+                    onClick={handleFilterNotify}
+                    disabled={filterNotifyState === 'loading'}
+                    className="px-2.5 py-1 rounded-lg bg-amber-500 text-gray-950 text-xs font-bold hover:opacity-90 transition-opacity disabled:opacity-60 whitespace-nowrap"
+                  >
+                    {filterNotifyState === 'loading' ? '...' : 'Notify me'}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Pro tip */}
             <div className="mt-auto p-4 rounded-xl border border-amber-500/20 bg-amber-500/5">
               <p className="text-xs font-bold text-amber-400 mb-1">✦ Pro tip</p>
               <p className="text-xs text-gray-400 leading-relaxed">
-                Select your platform first — the editor will export at the exact recommended resolution for that platform.
+                Select your platform first — the editor will auto-size your export to the exact recommended dimensions.
+                Use <strong className="text-gray-300">Capture Thumbnail</strong> to grab any frame as a PNG for your upload thumbnail.
               </p>
             </div>
           </aside>
         </div>
       </div>
-
-      {/* Hidden canvas for export */}
-      <canvas ref={canvasRef} className="hidden" />
     </div>
   )
 }

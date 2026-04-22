@@ -33,7 +33,7 @@ function RepurposeCard({ credits, setCredits, applyCredits }: {
     setError('')
     setResult('')
     if (!content.trim()) { setError('Paste your content first.'); return }
-    if (credits < 1) { setError('Not enough credits. You need 1 credit.'); return }
+    if (credits < 5) { setError('Not enough credits. You need 5 credits.'); return }
     setLoading(true)
     try {
       const res = await fetch('/api/ai/repurpose', {
@@ -56,7 +56,7 @@ function RepurposeCard({ credits, setCredits, applyCredits }: {
       } else if (typeof data.creditsRemaining === 'number') {
         setCredits(data.creditsRemaining)
       } else {
-        setCredits(credits - 1)
+        setCredits(credits - 5)
       }
     } catch {
       setError('Network error. Please try again.')
@@ -83,7 +83,7 @@ function RepurposeCard({ credits, setCredits, applyCredits }: {
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Transform any content into a new format instantly</p>
           </div>
         </div>
-        <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-black text-white flex-shrink-0">1 credit</span>
+        <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-black text-white flex-shrink-0">5 credits</span>
       </div>
 
       <textarea
@@ -196,7 +196,7 @@ const AI_TOOLS = [
   {
     emoji: '♻️',
     label: 'Content Repurposer',
-    credits: '10 credits',
+    credits: '5 credits',
     what: 'Paste a blog post, transcript, or long caption and get platform-ready content out the other side.',
     how: 'AI extracts key ideas from long-form content and reshapes them into short-form posts for each platform.',
     href: '/compose',

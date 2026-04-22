@@ -7,23 +7,24 @@ import Sidebar from '@/components/Sidebar'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 
 function SkeletonBox({ className }: { className?: string }) {
-  return <div className={`bg-gray-100 rounded-xl animate-pulse ${className}`} />
+  return <div className={`bg-gray-100 dark:bg-gray-700 rounded-xl animate-pulse ${className}`} />
 }
 
 type TeamMember = {
   id: string
   email: string
-  role: 'owner' | 'admin' | 'editor' | 'viewer'
+  role: 'owner' | 'admin' | 'editor' | 'viewer' | 'client'
   status: 'active' | 'pending'
   joined_at: string
   avatar_url?: string
 }
 
 const ROLE_META: Record<string, { label: string; color: string; description: string }> = {
-  owner:  { label: 'Owner',  color: 'bg-black text-white',                              description: 'Full access to everything'     },
-  admin:  { label: 'Admin',  color: 'bg-gray-800 text-white',                           description: 'Can manage team and settings'  },
-  editor: { label: 'Editor', color: 'bg-blue-50 text-blue-700 border border-blue-200', description: 'Can create and schedule posts' },
-  viewer: { label: 'Viewer', color: 'bg-gray-100 text-gray-600',                        description: 'Can view posts and analytics'  },
+  owner:  { label: 'Owner',  color: 'bg-black text-white dark:bg-white dark:text-black',                                              description: 'Full access to everything'                             },
+  admin:  { label: 'Admin',  color: 'bg-gray-800 text-white dark:bg-gray-200 dark:text-gray-900',                                     description: 'Can manage team and settings'                          },
+  editor: { label: 'Editor', color: 'bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-700', description: 'Can create and schedule posts' },
+  viewer: { label: 'Viewer', color: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300',                                  description: 'Can view posts and analytics'                          },
+  client: { label: 'Client', color: 'bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-900/40 dark:text-purple-300 dark:border-purple-700', description: 'Limited access to assigned workspace only' },
 }
 
 export default function Team() {
@@ -31,7 +32,7 @@ export default function Team() {
   const [members, setMembers]       = useState<TeamMember[]>([])
   const [loading, setLoading]       = useState(true)
   const [inviteEmail, setInviteEmail] = useState('')
-  const [inviteRole, setInviteRole] = useState<'admin' | 'editor' | 'viewer'>('editor')
+  const [inviteRole, setInviteRole] = useState<'admin' | 'editor' | 'viewer' | 'client'>('editor')
   const [inviting, setInviting]     = useState(false)
   const [toast, setToast]           = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const [editingId, setEditingId]   = useState<string | null>(null)
@@ -199,8 +200,8 @@ export default function Team() {
 
               {/* MEMBER LIST */}
               <div className="bg-surface border border-theme rounded-2xl overflow-hidden">
-                <div className="px-5 py-4 border-b border-gray-100">
-                  <h2 className="text-sm font-bold tracking-tight">Team Members</h2>
+                <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+                  <h2 className="text-sm font-bold tracking-tight text-gray-900 dark:text-white">Team Members</h2>
                 </div>
 
                 {loading ? (
@@ -227,17 +228,17 @@ export default function Team() {
 
                       return (
                         <div key={member.id}
-                          className={`px-4 md:px-5 py-4 ${i !== allMembers.length - 1 ? 'border-b border-gray-100' : ''} hover:bg-gray-50 dark:hover:bg-gray-800 transition-all`}>
+                          className={`px-4 md:px-5 py-4 ${i !== allMembers.length - 1 ? 'border-b border-gray-100 dark:border-gray-700' : ''} hover:bg-gray-50 dark:hover:bg-gray-800 transition-all`}>
 
                           <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-sm font-bold flex-shrink-0 overflow-hidden">
+                            <div className="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-sm font-bold text-gray-700 dark:text-gray-200 flex-shrink-0 overflow-hidden">
                               {member.avatar_url
                                 ? <img src={member.avatar_url} alt={member.email} className="w-full h-full object-cover" />
                                 : initials}
                             </div>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <p className="text-sm font-semibold truncate">{member.email}</p>
+                                <p className="text-sm font-semibold truncate text-gray-900 dark:text-white">{member.email}</p>
                                 {member.status === 'pending' && (
                                   <span className="text-xs font-semibold px-2 py-0.5 bg-yellow-50 text-yellow-600 border border-yellow-200 rounded-full flex-shrink-0">
                                     Pending
@@ -258,11 +259,11 @@ export default function Team() {
                             {!isOwner && !isEditing && !isConfirming && (
                               <div className="flex items-center gap-1.5 flex-shrink-0">
                                 <button onClick={() => { setEditingId(member.id); setEditingRole(member.role) }}
-                                  className="text-xs font-semibold px-2.5 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                                  className="text-xs font-semibold px-2.5 py-1.5 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:border-gray-400 dark:hover:border-gray-400 transition-all">
                                   Edit
                                 </button>
                                 <button onClick={() => setConfirmRemove(member.id)}
-                                  className="text-xs font-semibold px-2.5 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all">
+                                  className="text-xs font-semibold px-2.5 py-1.5 border border-red-200 dark:border-red-800 text-red-400 dark:text-red-400 rounded-xl hover:border-red-400 transition-all">
                                   Remove
                                 </button>
                               </div>
@@ -270,21 +271,22 @@ export default function Team() {
                           </div>
 
                           {isEditing && (
-                            <div className="mt-3 pt-3 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center gap-2">
+                            <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center gap-2">
                               <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 flex-shrink-0">Change role for {member.email}:</p>
                               <div className="flex items-center gap-2 flex-wrap">
                                 <select value={editingRole} onChange={e => setEditingRole(e.target.value)}
-                                  className="text-xs border border-gray-200 rounded-xl px-3 py-1.5 focus:outline-none focus:border-gray-400 bg-white font-semibold">
+                                  className="text-xs border border-gray-200 dark:border-gray-600 rounded-xl px-3 py-1.5 focus:outline-none focus:border-gray-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-semibold">
                                   <option value="admin">Admin</option>
                                   <option value="editor">Editor</option>
                                   <option value="viewer">Viewer</option>
+                                  <option value="client">Client</option>
                                 </select>
                                 <button onClick={() => handleRoleChange(member.id, editingRole)}
-                                  className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all">
+                                  className="text-xs font-bold px-3 py-1.5 bg-black dark:bg-white text-white dark:text-black rounded-xl hover:opacity-80 transition-all">
                                   Save
                                 </button>
                                 <button onClick={() => setEditingId(null)}
-                                  className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                                  className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all">
                                   Cancel
                                 </button>
                               </div>
@@ -292,7 +294,7 @@ export default function Team() {
                           )}
 
                           {isConfirming && (
-                            <div className="mt-3 pt-3 border-t border-gray-100 flex flex-col sm:flex-row sm:items-center gap-2">
+                            <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center gap-2">
                               <p className="text-xs text-red-600 font-semibold flex-1">
                                 Remove {member.email} from your team?
                               </p>
@@ -304,7 +306,7 @@ export default function Team() {
                                     : 'Yes, remove'}
                                 </button>
                                 <button onClick={() => setConfirmRemove(null)}
-                                  className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all">
+                                  className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all">
                                   Cancel
                                 </button>
                               </div>
@@ -323,7 +325,7 @@ export default function Team() {
 
               {/* INVITE FORM */}
               <div className="bg-surface border border-theme rounded-2xl p-5">
-                <h2 className="text-sm font-bold tracking-tight mb-4">Invite Member</h2>
+                <h2 className="text-sm font-bold tracking-tight mb-4 text-gray-900 dark:text-white">Invite Member</h2>
                 {atLimit ? (
                   <div className="text-center py-4">
                     <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
@@ -343,15 +345,16 @@ export default function Team() {
                       <input type="email" placeholder="colleague@company.com"
                         value={inviteEmail} onChange={e => setInviteEmail(e.target.value)}
                         onKeyDown={e => e.key === 'Enter' && handleInvite()}
-                        className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400" />
+                        className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-gray-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500" />
                     </div>
                     <div>
                       <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1">Role</label>
                       <select value={inviteRole} onChange={e => setInviteRole(e.target.value as any)}
-                        className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-gray-400 bg-white">
+                        className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-gray-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
                         <option value="admin">Admin</option>
                         <option value="editor">Editor</option>
                         <option value="viewer">Viewer</option>
+                        <option value="client">Client</option>
                       </select>
                       <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{ROLE_META[inviteRole]?.description}</p>
                     </div>
@@ -368,7 +371,7 @@ export default function Team() {
 
               {/* ROLE PERMISSIONS */}
               <div className="bg-surface border border-theme rounded-2xl p-5">
-                <h2 className="text-sm font-bold tracking-tight mb-4">Role Permissions</h2>
+                <h2 className="text-sm font-bold tracking-tight mb-4 text-gray-900 dark:text-white">Role Permissions</h2>
                 <div className="space-y-3">
                   {Object.entries(ROLE_META).map(([role, meta]) => (
                     <div key={role} className="flex items-start gap-3">

@@ -36,7 +36,7 @@ const AI_TOOLS = [
   { id: 'rewrite',   label: 'Rewrite',   emoji: '🔁',  credits: 5,  desc: 'Rewrite your post to be punchier'       },
   { id: 'hook',      label: 'Hook',      emoji: '🎣',  credits: 5,  desc: 'Generate 3 viral opening hooks'         },
   { id: 'thread',    label: 'Thread',    emoji: '🧵',  credits: 10, desc: 'Turn your idea into a full thread'      },
-  { id: 'repurpose', label: 'Repurpose', emoji: '♻️',  credits: 10, desc: 'Reshape long content for this platform' },
+  { id: 'repurpose', label: 'Repurpose', emoji: '♻️',  credits: 5,  desc: 'Reshape long content for this platform' },
 ]
 
 const SCORE_CREDIT_COST = 5
@@ -681,7 +681,7 @@ function ComposeInner() {
     setRepurposeError('')
     setRepurposeResult('')
     if (!content.trim()) { setRepurposeError('Write or paste content in the composer first.'); return }
-    if (credits < 1) { setRepurposeError('Not enough credits. You need 1 credit.'); return }
+    if (credits < 5) { setRepurposeError('Not enough credits. You need 5 credits.'); return }
     setRepurposeLoading(true)
     try {
       const res = await fetch('/api/ai/repurpose', {
@@ -705,9 +705,9 @@ function ComposeInner() {
       } else if (typeof data.creditsRemaining === 'number') {
         setCredits(data.creditsRemaining)
       } else {
-        setCredits(credits - 1)
+        setCredits(credits - 5)
       }
-      showToast('Repurposed — 1 credit used', 'info')
+      showToast('Repurposed — 5 credits used', 'info')
     } catch {
       setRepurposeError('Network error. Please try again.')
     } finally {
@@ -1525,7 +1525,7 @@ function ComposeInner() {
                     }`}>
                     <div className="text-lg mb-1">🔄</div>
                     <p className="text-xs font-bold">Repurpose</p>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">1 cr</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">5 cr</p>
                   </button>
                 </div>
 
@@ -1566,7 +1566,7 @@ function ComposeInner() {
                       className="w-full bg-amber-400 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-black text-xs font-bold py-2.5 min-h-[44px] rounded-xl transition-all flex items-center justify-center gap-2">
                       {repurposeLoading ? (
                         <><div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin" />Repurposing...</>
-                      ) : 'Repurpose → (1 credit)'}
+                      ) : 'Repurpose → (5 credits)'}
                     </button>
 
                     {repurposeError && (
