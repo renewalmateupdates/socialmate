@@ -42,6 +42,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Email and role are required' }, { status: 400 })
   }
 
+  const VALID_ROLES = ['admin', 'editor', 'viewer', 'client']
+  if (!VALID_ROLES.includes(role)) {
+    return NextResponse.json({ error: 'Invalid role' }, { status: 400 })
+  }
+
   // Server-side seat limit check
   const { data: settings } = await getSupabaseAdmin()
     .from('user_settings')
