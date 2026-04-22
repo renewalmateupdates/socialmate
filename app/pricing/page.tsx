@@ -527,9 +527,9 @@ export default function Pricing() {
               { label: 'Pro Pack', credits: '750 cr',   price: '$9.99'  },
               { label: 'Max Pack', credits: '2,000 cr', price: '$19.99', bestValue: true },
             ].map((pack: any) => (
-              <div key={pack.label} className={`bg-white/10 rounded-xl p-4 text-center relative ${pack.badge ? 'ring-2 ring-white' : ''} ${pack.bestValue ? 'ring-2 ring-amber-400' : ''}`}>
+              <div key={pack.label} className={`bg-white/10 rounded-xl p-4 text-center relative ${pack.badge ? 'ring-2 ring-amber-500' : ''} ${pack.bestValue ? 'ring-2 ring-amber-400' : ''}`}>
                 {pack.badge && (
-                  <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-xs font-bold bg-white text-black px-2 py-0.5 rounded-full">Popular</span>
+                  <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-xs font-bold bg-amber-500 text-white px-2 py-0.5 rounded-full">Popular</span>
                 )}
                 {pack.bestValue && (
                   <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-xs font-bold bg-amber-400 text-black px-2 py-0.5 rounded-full">Best value</span>
@@ -565,9 +565,9 @@ export default function Pricing() {
               { label: 'Surge',  icon: '💥', posts: 250, price: '$9.99'  },
               { label: 'Storm',  icon: '🌪️', posts: 500, price: '$19.99', badge: 'Best value' },
             ].map(pack => (
-              <div key={pack.label} className={`bg-white/5 hover:bg-white/10 transition-colors rounded-xl p-4 flex flex-col items-center text-center relative ${pack.badge === 'Popular' ? 'ring-2 ring-white/60' : ''} ${pack.badge === 'Best value' ? 'ring-2 ring-amber-400' : ''}`}>
+              <div key={pack.label} className={`bg-white/5 hover:bg-white/10 transition-colors rounded-xl p-4 flex flex-col items-center text-center relative ${pack.badge === 'Popular' ? 'ring-2 ring-amber-500' : ''} ${pack.badge === 'Best value' ? 'ring-2 ring-amber-400' : ''}`}>
                 {pack.badge && (
-                  <span className={`absolute -top-2.5 left-1/2 -translate-x-1/2 text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap ${pack.badge === 'Best value' ? 'bg-amber-400 text-black' : 'bg-white text-black'}`}>
+                  <span className={`absolute -top-2.5 left-1/2 -translate-x-1/2 text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap ${pack.badge === 'Best value' ? 'bg-amber-400 text-black' : 'bg-amber-500 text-white'}`}>
                     {pack.badge}
                   </span>
                 )}
