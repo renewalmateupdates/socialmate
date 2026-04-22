@@ -30,6 +30,29 @@ const PILLARS = [
   },
 ]
 
+const VIBE_CODING_POINTS = [
+  {
+    icon: '🤖',
+    title: 'AI doesn\'t replace you. It amplifies you.',
+    body: "Vibe coding — building with AI as your co-pilot — is the great equalizer. A solo founder with no CS degree can now ship what used to take a team of ten. The tool doesn't matter. The vision does. If you don't have a vision, no amount of AI will save you. If you do, nothing can stop you.",
+  },
+  {
+    icon: '🧱',
+    title: 'Build the thing, then understand it.',
+    body: "Old school: learn first, build second. New school: build first, learn why it works second. When you vibe code, you move fast, see results, and reverse-engineer the logic. Confusion is temporary. Shipping is permanent. Every line of code you didn't write is a line you can still read.",
+  },
+  {
+    icon: '💡',
+    title: 'The skill is knowing what to ask.',
+    body: "The bottleneck isn't code anymore. It's clarity. Can you describe the problem precisely? Can you break a system into steps? Can you look at output and say \"that's wrong, because...\"? That's the skill. That's what separates builders who ship from people who prompt and pray.",
+  },
+  {
+    icon: '🚪',
+    title: 'The door is already open.',
+    body: "People gatekept software for decades with: \"you need a CS degree,\" \"you need funding,\" \"you need a technical co-founder.\" None of that is true anymore. The door is open. The only question is whether you'll walk through it or stand outside wondering if you're allowed.",
+  },
+]
+
 export default function GilsGuidePage() {
   const [name, setName]       = useState('')
   const [email, setEmail]     = useState('')
@@ -233,6 +256,59 @@ export default function GilsGuidePage() {
           </div>
         </section>
 
+        {/* ── VIBE CODING / AI CHAPTER PREVIEW ────────────────────────────── */}
+        <section style={{ borderTop: `1px solid ${border}`, padding: '72px 24px' }}>
+          <div style={{ maxWidth: 900, margin: '0 auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14, justifyContent: 'center' }}>
+              <span style={{
+                fontSize: 11, fontWeight: 700, color: gold,
+                background: 'rgba(245,158,11,0.1)', border: `1px solid rgba(245,158,11,0.3)`,
+                padding: '4px 12px', borderRadius: 999, letterSpacing: '0.1em', textTransform: 'uppercase',
+              }}>Chapter Preview</span>
+            </div>
+            <h2 style={{ fontSize: 'clamp(26px, 5vw, 38px)', fontWeight: 900, textAlign: 'center', marginBottom: 12, letterSpacing: '-0.02em' }}>
+              The AI Advantage: Building with No Permission
+            </h2>
+            <p style={{ fontSize: 16, color: muted, textAlign: 'center', maxWidth: 580, margin: '0 auto 52px', lineHeight: 1.7 }}>
+              I built SocialMate working a deli job — no team, no funding, no CS degree. Here's what I actually learned about building with AI.
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
+              {VIBE_CODING_POINTS.map(p => (
+                <div key={p.title} style={{
+                  background: surface, border: `1px solid ${border}`,
+                  borderRadius: 20, padding: '28px 26px',
+                  position: 'relative', overflow: 'hidden',
+                }}>
+                  <div style={{
+                    position: 'absolute', bottom: 0, left: 0, right: 0, height: 2,
+                    background: `linear-gradient(90deg, ${gold}, transparent)`,
+                    opacity: 0.3,
+                  }} />
+                  <div style={{ fontSize: 28, marginBottom: 14 }}>{p.icon}</div>
+                  <h3 style={{ fontSize: 16, fontWeight: 800, marginBottom: 10, lineHeight: 1.4, color: '#f9fafb' }}>
+                    {p.title}
+                  </h3>
+                  <p style={{ fontSize: 14, color: muted, lineHeight: 1.8, margin: 0 }}>
+                    {p.body}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <div style={{ textAlign: 'center', marginTop: 40 }}>
+              <p style={{ fontSize: 14, color: '#6b7280', marginBottom: 20 }}>
+                This is one chapter. The full guide covers building, creating, and becoming — from zero.
+              </p>
+              <a href="#download" style={{
+                background: 'rgba(245,158,11,0.1)', border: `1px solid rgba(245,158,11,0.4)`,
+                color: gold, fontWeight: 700, padding: '12px 26px',
+                borderRadius: 14, fontSize: 14, textDecoration: 'none', display: 'inline-block',
+              }}>
+                Get the full guide free →
+              </a>
+            </div>
+          </div>
+        </section>
+
         {/* ── DOWNLOAD SECTION ─────────────────────────────────────────────── */}
         <section id="download" style={{ borderTop: `1px solid ${border}`, padding: '72px 24px' }}>
           <div style={{ maxWidth: 560, margin: '0 auto', textAlign: 'center' }}>
@@ -305,45 +381,74 @@ export default function GilsGuidePage() {
           </div>
         </section>
 
-        {/* ── DONATION SECTION ─────────────────────────────────────────────── */}
+        {/* ── SUPPORT THE FOUNDER ──────────────────────────────────────────── */}
         <section id="donate" style={{ borderTop: `1px solid ${border}`, padding: '72px 24px' }}>
-          <div style={{ maxWidth: 560, margin: '0 auto', textAlign: 'center' }}>
-            <div style={{ fontSize: 40, marginBottom: 16 }}>❤️</div>
-            <p style={{ fontSize: 11, fontWeight: 700, color: muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 14 }}>
-              Pay it forward
-            </p>
-            <h2 style={{ fontSize: 'clamp(24px, 5vw, 34px)', fontWeight: 900, marginBottom: 16, letterSpacing: '-0.02em' }}>
-              If this guide helps you, give back.
-            </h2>
-            <p style={{ fontSize: 15, color: '#d1d5db', lineHeight: 1.75, marginBottom: 12 }}>
-              The guide is free and always will be. But if it unlocks something for you —
-              a business, a direction, a mindset shift — consider donating.
-            </p>
-            <p style={{ fontSize: 15, color: muted, lineHeight: 1.75, marginBottom: 36 }}>
-              <strong style={{ color: gold }}>100% of donations go to SM-Give</strong> — our community fund for creators in need.
-              You're not just supporting a guide. You're opening the door for the next person.
-            </p>
-
-            <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Link href="/give" style={{
-                background: 'rgba(244,63,94,0.12)', border: '1px solid rgba(244,63,94,0.4)',
-                color: '#fb7185', fontWeight: 700, padding: '13px 26px',
-                borderRadius: 14, fontSize: 15, textDecoration: 'none', display: 'inline-block',
-              }}>
-                ❤️ Donate via SM-Give →
-              </Link>
-              <Link href="/pricing" style={{
-                border: `1px solid ${border}`, color: muted,
-                fontWeight: 600, padding: '13px 26px',
-                borderRadius: 14, fontSize: 15, textDecoration: 'none', display: 'inline-block',
-              }}>
-                Try SocialMate Free →
-              </Link>
+          <div style={{ maxWidth: 680, margin: '0 auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: 48 }}>
+              <div style={{ fontSize: 40, marginBottom: 16 }}>☕</div>
+              <p style={{ fontSize: 11, fontWeight: 700, color: muted, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 14 }}>
+                Support the work
+              </p>
+              <h2 style={{ fontSize: 'clamp(24px, 5vw, 34px)', fontWeight: 900, marginBottom: 16, letterSpacing: '-0.02em' }}>
+                This guide is free.<br />Your support keeps it that way.
+              </h2>
+              <p style={{ fontSize: 15, color: '#d1d5db', lineHeight: 1.8, maxWidth: 500, margin: '0 auto 16px' }}>
+                I wrote this between deli shifts. No publisher. No team. No budget.
+                Just a belief that the knowledge wealthy families pass down at the dinner table
+                shouldn't cost $997.
+              </p>
+              <p style={{ fontSize: 15, color: muted, lineHeight: 1.8, maxWidth: 500, margin: '0 auto' }}>
+                If something in here clicked — a sentence, a chapter, a shift in how you see your situation —
+                consider leaving a tip. It goes directly toward keeping this free and funding more content.
+              </p>
             </div>
 
-            <p style={{ fontSize: 13, color: '#6b7280', marginTop: 24, lineHeight: 1.6 }}>
-              SM-Give is SocialMate's initiative to give back as we grow.<br />
-              Every donation goes toward creators and entrepreneurs in need.
+            {/* Two support options */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
+              {/* Support Joshua directly via SocialMate */}
+              <div style={{
+                background: 'rgba(245,158,11,0.04)', border: `1px solid rgba(245,158,11,0.2)`,
+                borderRadius: 20, padding: '32px 28px', textAlign: 'center',
+              }}>
+                <div style={{ fontSize: 32, marginBottom: 12 }}>👑</div>
+                <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 8 }}>Support Joshua</h3>
+                <p style={{ fontSize: 14, color: muted, lineHeight: 1.7, marginBottom: 24 }}>
+                  The fastest way to support this work is to use SocialMate.
+                  Every Pro or Agency subscriber directly funds more guides, more features, and more free resources.
+                </p>
+                <Link href="/pricing" style={{
+                  background: gold, color: '#000', fontWeight: 800,
+                  padding: '12px 24px', borderRadius: 12, fontSize: 14,
+                  textDecoration: 'none', display: 'inline-block',
+                }}>
+                  Try SocialMate Free →
+                </Link>
+              </div>
+
+              {/* SM-Give donation */}
+              <div style={{
+                background: 'rgba(244,63,94,0.04)', border: '1px solid rgba(244,63,94,0.2)',
+                borderRadius: 20, padding: '32px 28px', textAlign: 'center',
+              }}>
+                <div style={{ fontSize: 32, marginBottom: 12 }}>❤️</div>
+                <h3 style={{ fontSize: 18, fontWeight: 800, marginBottom: 8 }}>Pay It Forward</h3>
+                <p style={{ fontSize: 14, color: muted, lineHeight: 1.7, marginBottom: 24 }}>
+                  100% of donations go to SM-Give — our community fund for creators who need a leg up.
+                  You're not just supporting a guide. You're opening the door for the next person.
+                </p>
+                <Link href="/give" style={{
+                  background: 'rgba(244,63,94,0.15)', border: '1px solid rgba(244,63,94,0.4)',
+                  color: '#fb7185', fontWeight: 800,
+                  padding: '12px 24px', borderRadius: 12, fontSize: 14,
+                  textDecoration: 'none', display: 'inline-block',
+                }}>
+                  Donate via SM-Give →
+                </Link>
+              </div>
+            </div>
+
+            <p style={{ fontSize: 13, color: '#4b5563', textAlign: 'center', marginTop: 32, lineHeight: 1.6 }}>
+              No pressure. The guide is yours. If you got value and want to give back — that means everything.
             </p>
           </div>
         </section>
