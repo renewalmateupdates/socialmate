@@ -76,6 +76,7 @@ const NAV_BASE = [
   {
     section: 'Grow',
     items: [
+      { icon: '⚡', label: 'SOMA',         href: '/soma'                },
       { icon: '🤖', label: 'AI Features',  href: '/ai-features'         },
       { icon: '🔥', label: 'SM-Pulse',     href: '/sm-pulse'            },
       { icon: '📡', label: 'SM-Radar',     href: '/sm-radar'            },
@@ -182,6 +183,7 @@ function SidebarContent({
   const [statsVisible, setStatsVisible]         = useState(true)
   const [scheduledCount, setScheduledCount]     = useState(0)
   const [xQuota, setXQuota]                     = useState<{ used: number; limit: number } | null>(null)
+  const [somaCredits, setSomaCredits]           = useState<{ monthly: number; remaining: number } | null>(null)
   const pathname = usePathname()
   const router   = useRouter()
 
@@ -299,6 +301,18 @@ function SidebarContent({
     fetch('/api/accounts/twitter/quota')
       .then(r => r.ok ? r.json() : null)
       .then(d => { if (d && typeof d.used === 'number') setXQuota({ used: d.used, limit: d.limit }) })
+      .catch(() => {})
+  }, [])
+
+  // SOMA credits — only shown if user has a monthly allocation
+  useEffect(() => {
+    fetch('/api/soma/credits')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d && typeof d.monthly === 'number' && d.monthly > 0) {
+          setSomaCredits({ monthly: d.monthly, remaining: d.remaining })
+        }
+      })
       .catch(() => {})
   }, [])
 
