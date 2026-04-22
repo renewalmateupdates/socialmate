@@ -207,7 +207,7 @@ These have burned us before — always apply:
 - 24-hour auto-expiry on pending trades — stale approvals auto-decline so queue never jams
 - Leaderboard nav fixed: Enki leaderboard now shows the Enki sidebar nav instead of the public SocialMate nav
 
-**April 21, 2026:**
+**April 21, 2026 — Morning:**
 - Admin platform jail UI at `/admin/platform-jail` — review/manage Twitter accounts in cooldown
 - X Booster purchase UI in Settings plan tab with booster balance display
 - X Booster quota warning in compose — shown when user is near/at X quota
@@ -218,6 +218,18 @@ These have burned us before — always apply:
 - Studio Stax: per-lister detail page at `/studio-stax/[slug]`
 - Studio Stax: criteria checklist on apply page so applicants know what's required
 - Pricing page: X Boosters section + Studio Stax "Get Listed" section
+- Gilgamesh's Guide: `/gils-guide` landing page, email capture → `gils_guide_subscribers` table, Resend delivery, donation section
+- Discord management hub: word filter, automations API, Manage Server link
+- Abdus Sohag: `affiliate_profiles` row created + `affiliates.status = 'active'`, workspace upgraded to Pro
+
+**April 21, 2026 — Evening (PR #190):**
+- **AI Brand Voice** — `user_settings.brand_voice` JSONB column; Settings → Brand Voice tab (Pro+); tone/style/vocabulary/example fields; Gemini prompt injection via `=== BRAND VOICE INSTRUCTIONS ===` block; Compose badge showing active voice
+- **Content Repurposing** — `/api/ai/repurpose` (6 formats: thread/email/caption/long_form/short_hook/linkedin_post, 1 credit each); new card in `/ai-features`; inline panel in Compose with Replace/Copy
+- **Smart Queue** — `/api/posts/auto-schedule` (Pro+ only; fills 14-day/30-day window at platform-optimal ET hours; 1-hour collision avoidance); `⚡ Auto-schedule Drafts` button in Queue (free users see upgrade prompt); `✨ Use best time` link in Compose datetime picker
+- **X-style Analytics Dashboard** — full rewrite of `/analytics`; SVG area chart (no libraries); platform breakdown bars; Bluesky engagement sync via `/api/analytics/bluesky-sync` (public ATP API); best-times heatmap; `bluesky_stats` JSONB column on `posts` table
+- **Browser Push Notifications** — `push_subscriptions` table; `/public/sw.js` service worker; VAPID subscribe/unsubscribe/send API routes; `usePushNotifications` hook; Settings → Notifications toggle; Inngest triggers for post published + Enki trade signals. **Needs Vercel env vars:** `NEXT_PUBLIC_VAPID_PUBLIC_KEY` + `VAPID_PRIVATE_KEY` (generate with `npx web-push generate-vapid-keys`)
+- **Studio Stax Renewal Emails** — `studioStaxRenewalEmails` Inngest cron (`0 9 * * *`); 30/14/7-day Resend drip to `studio_stax_slots`; timestamped idempotency (`renewal_email_*_sent_at`); STAX20 discount code; RenewalMate teaser in 30-day email
+- **Roadmap page updated** — new shipped items added, Creator Monetization Hub + Content DNA + Unified Inbox added to coming-soon
 
 ---
 
@@ -249,27 +261,37 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 ## Pending / In Progress
 
-- **Content posts (Apr 20–26)** — bulk-scheduled, running daily 8am–5pm ET on X + Bluesky. Inngest now confirmed working. Posts going out as "Partial" because of the quota bug (now fixed in PR #175). May need to manually retry missed morning slots.
+- **Content posts (Apr 20–26)** — bulk-scheduled, running daily 8am–5pm ET on X + Bluesky. May need to manually retry any missed morning slots.
 
-- **Inngest env vars** — confirmed needed: `INNGEST_EVENT_KEY` + `INNGEST_SIGNING_KEY` in Vercel. Posts were not publishing until these were set. Verify they're still set after any Vercel config changes.
+- **Inngest env vars** — confirmed needed: `INNGEST_EVENT_KEY` + `INNGEST_SIGNING_KEY` in Vercel. Verify they're still set after any Vercel config changes.
 
-- **SM-Give renewal tracking** — `invoice.payment_succeeded` now handled (PR #164). Confirmed done.
+- **Push notification VAPID keys** — need to generate and add to Vercel: run `npx web-push generate-vapid-keys` then set `NEXT_PUBLIC_VAPID_PUBLIC_KEY` + `VAPID_PRIVATE_KEY`. Push notifications won't send until these are set.
 
-- **Growth partner trial (Abdus Sohag)** — 1-week trial active as of Apr 19. Referral link: `?ref=SOHAG`. Review end of week; if strong, set up contract + renegotiate to standard affiliate rates.
+- **Studio Stax renewal SQL** — run in Supabase if migration doesn't auto-apply:
+  ```sql
+  ALTER TABLE studio_stax_slots
+    ADD COLUMN IF NOT EXISTS renewal_email_30_sent_at timestamptz DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS renewal_email_14_sent_at timestamptz DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS renewal_email_7_sent_at  timestamptz DEFAULT NULL,
+    ADD COLUMN IF NOT EXISTS renewal_token text UNIQUE,
+    ADD COLUMN IF NOT EXISTS renewal_token_expires timestamptz;
+  ```
 
-- **Enki Truth Mode testing** — market opens Apr 21; first real signal data expected then. 50-trade minimum per strategy before results are valid.
+- **Analytics Bluesky stats SQL** — run in Supabase: `ALTER TABLE posts ADD COLUMN IF NOT EXISTS bluesky_stats JSONB DEFAULT NULL;`
 
-- **Discord management tools** — in progress (moderation, welcome messages, role automation)
-- **Gilgamesh's Guide landing page** — donation-supported free PDF, in progress (business/creator/self-dev guide for entrepreneurs)
+- **Brand Voice SQL** — run in Supabase: `ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS brand_voice JSONB DEFAULT NULL;`
+
+- **Growth partner trial (Abdus Sohag)** — 1-week trial active as of Apr 19. Referral link: `?ref=SOHAG`. Review end of week; renegotiate to standard 30% if performance warrants.
+
+- **Enki Truth Mode testing** — market now open (Apr 21). 50-trade minimum per strategy before results are statistically valid.
+
 - **LinkedIn integration** — API credentials not yet acquired
 
-**Planned (roadmap):**
-- **AI Brand Voice** — trains on user's content style, auto-tunes AI output to match their voice
-- **Creator monetization hub** — unified merch/affiliate/link-in-bio/donations dashboard in one place
-- **Content repurposing** — one-click tweet→LinkedIn→blog pipeline
-- **Unified analytics dashboard** — cross-platform performance in one view
-- **Smart queue** — AI picks optimal post times based on audience engagement patterns
-- **Collab network** — creator-to-creator cross-promo marketplace
+**Roadmap (next up):**
+- **Creator Monetization Hub** — fan subscriptions, tip jars, paywalled content
+- **Content DNA** — cross-platform performance fingerprinting
+- **Unified inbox** — reply to comments/DMs across all platforms from one view
+- **LinkedIn publishing** — pending API credentials
 
 ## Confirmed Done (stop asking about these)
 
@@ -299,6 +321,15 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - ✅ **Enki Truth Mode Start/Stop (Apr 21)** — Explicit Start/Stop controls on `/enki/truth`. Done.
 - ✅ **Studio Stax detail page (Apr 21)** — Per-lister page at `/studio-stax/[slug]`. Criteria checklist on apply page. Done.
 - ✅ **Pricing page Studio Stax section (Apr 21)** — "Get Listed" section with Founding Member + Standard cards. Done.
+- ✅ **Gilgamesh's Guide (Apr 21)** — `/gils-guide` landing page live. Email capture → `gils_guide_subscribers`. Resend delivery. Done.
+- ✅ **Discord management hub (Apr 21)** — Word filter + automations API + Manage Server link live. Done.
+- ✅ **Abdus partner access (Apr 21)** — `affiliate_profiles` row created, `affiliates.status = 'active'`, workspace upgraded to Pro. Dashboard accessible.
+- ✅ **AI Brand Voice (Apr 21)** — Settings tab (Pro+), Gemini injection, Compose badge. Migration: `brand_voice` JSONB on `user_settings`. Done.
+- ✅ **Content Repurposing (Apr 21)** — `/api/ai/repurpose`, ai-features card, Compose inline panel. 6 formats, 1 credit. Done.
+- ✅ **Smart Queue / Auto-schedule (Apr 21)** — Pro+ only. Queue page button + Compose best-time picker. Done.
+- ✅ **Analytics overhaul (Apr 21)** — X-style dark dashboard. SVG area chart, heatmap, Bluesky engagement sync. Done.
+- ✅ **Push notifications (Apr 21)** — Service worker, VAPID routes, Settings toggle, Inngest triggers. Needs VAPID env vars in Vercel.
+- ✅ **Studio Stax renewal emails (Apr 21)** — Inngest cron 9am daily, 30/14/7-day Resend drip, STAX20 code. Needs SQL migration run.
 
 ---
 
