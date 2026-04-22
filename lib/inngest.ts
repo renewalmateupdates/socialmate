@@ -3234,3 +3234,78 @@ function staxEmailHtml(opts: {
 </body>
 </html>`
 }
+
+// ── SOMA Credits Monthly Reset ─────────────────────────────────────────────────
+// Runs on the 1st of every month at midnight UTC.
+// Resets soma_credits_used = 0 and recalculates soma_credits_monthly based on
+// current workspace plan (handles mid-month plan changes correctly).
+export const resetSomaCredits = inngest.createFunction(
+  { id: 'reset-soma-credits' },
+  { cron: '0 0 1 * *' },
+  async ({ step }) => {
+    const result = await step.run('reset-soma-credits', async () => {
+      const admin = getSupabaseAdmin()
+
+      // Fetch all workspaces with their plan
+      const { data: workspaces, error } = await admin
+        .from('workspaces')
+        .select('id, plan')
+
+      if (error) {
+        console.error('[ResetSomaCredits] Failed to fetch workspaces:', error.message)
+        return { reset: 0, error: error.message }
+      }
+
+      if (!workspaces?.length) return { reset: 0 }
+
+      // Map plan → monthly SOMA credit allowance
+      function planToSomaCredits(plan: string | null): number {
+        if (!plan) return 0
+        if (plan === 'pro' || plan === 'pro_annual')       return 1000
+        if (plan === 'agency' || plan === 'agency_annual') return 5000
+        return 0
+      }
+
+      const now = new Date().toISOString()
+      let resetCount = 0
+
+      // Process in batches of 100 to stay within Supabase limits
+      const batchSize = 100
+      for (let i = 0; i < workspaces.length; i += batchSize) {
+        const batch = workspaces.slice(i, i + batchSize)
+        const ids   = batch.map(w => w.id)
+
+        // Build per-workspace soma_credits_monthly updates
+        // Group by credit amount to minimise DB round trips
+        const buckets: Record<number, string[]> = {}
+        for (const w of batch) {
+          const credits = planToSomaCredits(w.plan)
+          if (!buckets[credits]) buckets[credits] = []
+          buckets[credits].push(w.id)
+        }
+
+        for (const [credits, wIds] of Object.entries(buckets)) {
+          const { error: updateError } = await admin
+            .from('workspaces')
+            .update({
+              soma_credits_used:     0,
+              soma_credits_monthly:  Number(credits),
+              soma_credits_reset_at: now,
+            })
+            .in('id', wIds)
+
+          if (updateError) {
+            console.error('[ResetSomaCredits] Batch update error:', updateError.message)
+          } else {
+            resetCount += wIds.length
+          }
+        }
+      }
+
+      console.log(`[ResetSomaCredits] Reset ${resetCount} workspaces`)
+      return { reset: resetCount }
+    })
+
+    return result
+  }
+)
