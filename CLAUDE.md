@@ -222,6 +222,30 @@ These have burned us before — always apply:
 - Discord management hub: word filter, automations API, Manage Server link
 - Abdus Sohag: `affiliate_profiles` row created + `affiliates.status = 'active'`, workspace upgraded to Pro
 
+**April 22, 2026 — Morning (PRs #195–#201):**
+- **Repurpose cost** — bumped from 1 → 5 credits across route, AI features page, compose UI
+- **Booster "Popular" badge dark mode** — fixed black badge/border invisible in dark mode; now amber across pricing, settings, onboarding
+- **Team dark mode** — fixed all text/input/select/badge contrast across team page for dark mode
+- **Client role** — new purple "Client" role added (Owner/Admin/Editor/Viewer/Client); "limited workspace access" permissions; validated in invite API
+- **Dashboard plan card** — now shows connected platforms with ✓/dim indicators + seat roster (initials bubbles)
+- **Dashboard drag & drop** — 4 stat cards (Scheduled/Drafts/Published/This Week) are now drag-and-drop reorderable; order persists to localStorage; 6-dot grip handle on hover
+- **10 new compose templates** — Milestone Announcement, Hot Take, Storytime, Value Drop, Question/Poll, Behind the Numbers, Day in My Life, Lesson Learned, Appreciation Post, Promotion/Offer (total 15)
+- **Best Times heatmap fix** — fixed cell sizing, dark mode empty cell visibility, alignment with labels
+- **Analytics platform transparency** — "Platform Analytics Status" card shows per-platform data availability (Bluesky ✅, Mastodon ✅, Discord ⚠️, Telegram ⚠️, X 🔒, LinkedIn 🔒); Bluesky sync button; chart labels clarified
+- **Inngest concurrency fix** — `publishScheduledPost` concurrency lowered from 10 → 5 (free plan limit); was silently failing since March 17
+- **Collapsible sidebar** — desktop hamburger toggle (w-14 collapsed / w-56 expanded), persists via localStorage, icon-only mode with tooltips
+- **Enki sidebar nav** — Enki leaderboard now shows Enki nav, not public nav; auto-refresh on dashboard
+- **Social inbox** — unified `/inbox` for Bluesky, Mastodon, Telegram, Discord; X tab shows "coming soon"
+- **Creator Studio video editor** — `/create`: trim, 8 CSS filters, caption overlay, export via MediaRecorder+canvas, thumbnail capture, platform dimensions
+
+**April 22, 2026 — Evening:**
+- **Dashboard crash fix** — `WorkspaceContext` crashed for `pro_annual`/`agency_annual` users because `PLAN_CONFIG['pro_annual']` = undefined. Fixed with `normalizePlan()` helper.
+- **SOMA foundation** (PR #202) — `soma_identity_profiles`, `soma_weekly_ingestion`, `soma_credit_ledger` tables; SOMA columns on workspaces; `resetSomaCredits` Inngest cron (`0 0 1 * *`); identity interview onboarding at `/soma/onboarding` (5-step dark UI); credit API at `/api/soma/credits`; identity API at `/api/soma/identity`
+- **SOMA dashboard** (PR #203) — `/soma` mission control: credits card, identity status, content queue (approve/edit/skip), mode toggle (Safe/Autopilot); `/soma/upgrade` gate for free users; `/api/soma/mode` PATCH; SOMA nav link in sidebar
+- **SOMA weekly generation** (PR #204) — `/api/soma/ingest` (form + file upload), `/api/soma/ingest/upload`, `/api/soma/generate` (7-day content generation via Gemini); `/soma/weekly` page
+- **Gilgamesh's Guide update** — Added "The AI Advantage: Building with No Permission" chapter preview (4 vibe-coding points); redesigned donation section into two-card layout ("Support Joshua" + "Pay It Forward")
+- **lib/soma-costs.ts** — `SOMA_COSTS`: generate_post=5, generate_daily=12, generate_week=75, ingest_weekly=25, identity_update=15, autopilot_run=50
+
 **April 21, 2026 — Evening (PR #190):**
 - **AI Brand Voice** — `user_settings.brand_voice` JSONB column; Settings → Brand Voice tab (Pro+); tone/style/vocabulary/example fields; Gemini prompt injection via `=== BRAND VOICE INSTRUCTIONS ===` block; Compose badge showing active voice
 - **Content Repurposing** — `/api/ai/repurpose` (6 formats: thread/email/caption/long_form/short_hook/linkedin_post, 1 credit each); new card in `/ai-features`; inline panel in Compose with Replace/Copy
@@ -281,6 +305,12 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 - **Brand Voice SQL** — run in Supabase: `ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS brand_voice JSONB DEFAULT NULL;`
 
+- **SOMA SQL** — run in Supabase after merging PR #202 (see April 22 section above for full SQL block). Also add `resetSomaCredits` to Inngest after merge — resync dashboard.
+
+- **SOMA Autopilot Stripe price** — create `$10/mo` recurring price in Stripe → set as `SOMA_AUTOPILOT_PRICE_ID` env var in Vercel.
+
+- **Resync Inngest** after merging SOMA PRs — new `reset-soma-credits` cron (`0 0 1 * *`) added. Go to Inngest Dashboard → Apps → Resync.
+
 - **Growth partner trial (Abdus Sohag)** — 1-week trial active as of Apr 19. Referral link: `?ref=SOHAG`. Review end of week; renegotiate to standard 30% if performance warrants.
 
 - **Enki Truth Mode testing** — market now open (Apr 21). 50-trade minimum per strategy before results are statistically valid.
@@ -290,7 +320,7 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 **Roadmap (next up):**
 - **Creator Monetization Hub** — fan subscriptions, tip jars, paywalled content
 - **Content DNA** — cross-platform performance fingerprinting
-- **Unified inbox** — reply to comments/DMs across all platforms from one view
+- **Unified inbox replies** — reply to comments/DMs (read-only inbox done; write/reply not yet built)
 - **LinkedIn publishing** — pending API credentials
 
 ## Confirmed Done (stop asking about these)
