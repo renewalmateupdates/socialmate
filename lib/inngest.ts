@@ -65,7 +65,7 @@ export const publishScheduledPost = inngest.createFunction(
     // Retry up to 3 times with exponential backoff before giving up
     retries: 3,
     // Prevent multiple simultaneous runs for the same post
-    concurrency: { limit: 10 },
+    concurrency: { limit: 5 },
   },
   { event: 'post/scheduled' },
   async ({ event, step }) => {
