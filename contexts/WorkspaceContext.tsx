@@ -4,6 +4,13 @@ import { supabase } from '@/lib/supabase'
 
 export type Plan = 'free' | 'pro' | 'agency'
 
+function normalizePlan(raw: string | null | undefined): Plan {
+  if (raw === 'pro_annual')    return 'pro'
+  if (raw === 'agency_annual') return 'agency'
+  if (raw === 'pro' || raw === 'agency') return raw
+  return 'free'
+}
+
 export const PLATFORMS_TOTAL = 16
 
 export const PLAN_CONFIG: Record<Plan, {
@@ -173,7 +180,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         .single()
 
       if (settings) {
-        const p = (settings.plan as Plan) || 'free'
+        const p = normalizePlan(settings.plan)
         setPlan(p)
         const monthly = settings.monthly_credits_remaining ?? settings.ai_credits_remaining ?? PLAN_CONFIG[p].credits
         const earned  = settings.earned_credits ?? 0
@@ -243,7 +250,7 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
       .eq('user_id', userId)
       .single()
     if (settings) {
-      const p = (settings.plan as Plan) || 'free'
+      const p = normalizePlan(settings.plan)
       setPlan(p)
       const monthly = settings.monthly_credits_remaining ?? settings.ai_credits_remaining ?? PLAN_CONFIG[p].credits
       const earned  = settings.earned_credits ?? 0
