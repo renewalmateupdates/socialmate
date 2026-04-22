@@ -663,9 +663,9 @@ function SettingsInner() {
                   <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">One-time purchase — credits added instantly to your balance.</p>
                   <div className="grid grid-cols-2 gap-3">
                     {CREDIT_PACKS.map(pack => (
-                      <div key={pack.priceId} className={`relative border rounded-xl p-4 ${pack.popular ? 'border-black' : 'border-gray-200'}`}>
+                      <div key={pack.priceId} className={`relative border rounded-xl p-4 ${pack.popular ? 'border-amber-400 dark:border-amber-500' : 'border-gray-200 dark:border-gray-700'}`}>
                         {pack.popular && (
-                          <span className="absolute -top-2 left-3 text-xs font-bold bg-black text-white px-2 py-0.5 rounded-full">Popular</span>
+                          <span className="absolute -top-2 left-3 text-xs font-bold bg-amber-500 text-white px-2 py-0.5 rounded-full">Popular</span>
                         )}
                         <p className="text-sm font-extrabold mb-0.5">{pack.label}</p>
                         <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">{pack.credits.toLocaleString()} credits</p>
