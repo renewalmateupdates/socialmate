@@ -1509,7 +1509,10 @@ function SettingsInner() {
                     onClick={() => {
                       const next = !sidebarStatsVisible
                       setSidebarStatsVisible(next)
-                      try { localStorage.setItem('sidebar_stats_visible', String(next)) } catch {}
+                      try {
+                        localStorage.setItem('sidebar_stats_visible', String(next))
+                        window.dispatchEvent(new CustomEvent('sidebar-stats-toggle'))
+                      } catch {}
                     }}
                     className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 ${sidebarStatsVisible ? 'bg-pink-500' : 'bg-gray-200 dark:bg-gray-700'}`}>
                     <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${sidebarStatsVisible ? 'translate-x-5' : 'translate-x-0.5'}`} />

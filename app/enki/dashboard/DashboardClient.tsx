@@ -11,6 +11,16 @@ function minutesToNextScan(): number {
   return 15 - (mins % 15)
 }
 
+function isMarketHours(): boolean {
+  const now = new Date()
+  const et = new Date(now.toLocaleString('en-US', { timeZone: 'America/New_York' }))
+  const day = et.getDay()
+  const h = et.getHours(), m = et.getMinutes()
+  if (day === 0 || day === 6) return false
+  const mins = h * 60 + m
+  return mins >= 570 && mins <= 960 // 9:30am–4:00pm ET
+}
+
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -139,6 +149,7 @@ export default function DashboardClient() {
   const [pendingTrades, setPendingTrades] = useState<PendingTrade[]>([])
   const [approvalState, setApprovalState] = useState<Record<string, 'approved' | 'rejected' | 'loading'>>({})
   const [guardianToggling, setGuardianToggling] = useState(false)
+  const [marketOpen, setMarketOpen] = useState(false)
 
   // Notification bell state
   const [notifications, setNotifications]         = useState<EnkiNotification[]>([])
@@ -154,6 +165,17 @@ export default function DashboardClient() {
       setAuthed(true)
       loadAll()
     })
+  }, [])
+
+  // Auto-refresh every 5 minutes during market hours
+  useEffect(() => {
+    setMarketOpen(isMarketHours())
+    const interval = setInterval(() => {
+      const open = isMarketHours()
+      setMarketOpen(open)
+      if (open) loadAll()
+    }, 5 * 60 * 1000)
+    return () => clearInterval(interval)
   }, [])
 
   // Close notification panel when clicking outside
@@ -490,6 +512,12 @@ export default function DashboardClient() {
                 </div>
               )}
             </div>
+
+            {/* Market hours status indicator */}
+            <span className={`hidden sm:flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full ${marketOpen ? 'bg-green-900/30 text-green-400' : 'bg-gray-800 text-gray-500'}`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${marketOpen ? 'bg-green-400 shadow-[0_0_4px_rgba(74,222,128,0.7)]' : 'bg-gray-500'}`} />
+              {marketOpen ? 'Live' : 'Market closed'}
+            </span>
 
             <Link
               href="/enki"
