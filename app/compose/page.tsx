@@ -67,6 +67,56 @@ const STARTER_TEMPLATES = [
     platforms: ['bluesky', 'mastodon'],
     content: `This week in [your niche] 📰\n\n→ [Thing 1 that happened or that you learned]\n→ [Thing 2]\n→ [Thing 3]\n\nMy take: [One sentence opinion or insight]\n\nFollowing along? Subscribe so you don't miss next week's. 🔔`,
   },
+  {
+    id: 'starter-6',
+    platforms: ['bluesky', 'mastodon'],
+    content: `We just hit [milestone]! 🎉\n\nWhen we started, [where you began]. Today, [where you are].\n\nThis wouldn't have happened without [your audience/team/community]. Thank you.\n\nThe next goal: [next milestone]. We're just getting started. 🚀 #milestone #growth`,
+  },
+  {
+    id: 'starter-7',
+    platforms: ['bluesky', 'mastodon'],
+    content: `Unpopular opinion: [your hot take].\n\nHere's why I actually believe this:\n\n[reason 1].\n[reason 2].\n[reason 3].\n\nChange my mind 👇`,
+  },
+  {
+    id: 'starter-8',
+    platforms: ['bluesky', 'discord'],
+    content: `Story time 🧵\n\n[Setup the story — what was happening].\n\nThen [the turning point].\n\nWhat I learned: [the lesson].\n\nIf you're going through [similar situation], just know [encouragement].\n\nDrop a ❤️ if this resonated.`,
+  },
+  {
+    id: 'starter-9',
+    platforms: ['bluesky', 'mastodon'],
+    content: `[Number] things I wish I knew about [topic] before I started:\n\n1. [tip]\n2. [tip]\n3. [tip]\n4. [tip]\n5. [tip]\n\nSave this. Your future self will thank you. 🔖`,
+  },
+  {
+    id: 'starter-10',
+    platforms: ['bluesky', 'mastodon'],
+    content: `Quick question for my community 👇\n\n[Ask your question here]\n\nA) [Option 1]\nB) [Option 2]\nC) [Option 3]\nD) [Option 4]\n\nReply with your answer! I'll share results tomorrow.`,
+  },
+  {
+    id: 'starter-11',
+    platforms: ['bluesky', 'mastodon'],
+    content: `Real numbers, no filter:\n\n[Metric 1]: [number]\n[Metric 2]: [number]\n[Metric 3]: [number]\n\n[What this means / what you're working toward].\n\nTransparency matters. 📊`,
+  },
+  {
+    id: 'starter-12',
+    platforms: ['discord', 'telegram'],
+    content: `What my [day/morning/week] actually looks like:\n\n[Time]: [activity]\n[Time]: [activity]\n[Time]: [activity]\n[Time]: [activity]\n\nNo highlight reel — just the real thing.\n\nWhat does yours look like? 👇`,
+  },
+  {
+    id: 'starter-13',
+    platforms: ['bluesky', 'mastodon'],
+    content: `I made a mistake so you don't have to.\n\n[What happened].\n\nWhat I thought would happen: [expectation].\nWhat actually happened: [reality].\n\nThe lesson: [takeaway].\n\nAlways [advice]. 💡`,
+  },
+  {
+    id: 'starter-14',
+    platforms: ['bluesky', 'discord'],
+    content: `Grateful post incoming 🙏\n\nTo everyone who [action your audience took]: thank you.\n\nWhen I [vulnerable moment or struggle], you showed up.\n\nThis community is [what it means to you].\n\nYou're the reason I keep going. ❤️`,
+  },
+  {
+    id: 'starter-15',
+    platforms: ['bluesky', 'mastodon'],
+    content: `For the next [timeframe], [your offer/product] is [discount/deal].\n\nHere's what you get:\n✅ [benefit 1]\n✅ [benefit 2]\n✅ [benefit 3]\n\nNormal price: [price]. Your price: [discounted price].\n\nLink in bio. Grab it before [deadline]. 🔥`,
+  },
 ]
 
 type PublishResult = {
@@ -1150,11 +1200,21 @@ function ComposeInner() {
                   <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">Starter Templates</p>
                   <div className="flex flex-wrap gap-2">
                     {[
-                      { id: 'starter-1', label: '🚀 Product Launch'     },
-                      { id: 'starter-2', label: '💡 Tips & Tricks'      },
-                      { id: 'starter-3', label: '🤔 Engagement Hook'    },
-                      { id: 'starter-4', label: '👀 Behind the Scenes'  },
-                      { id: 'starter-5', label: '📰 Weekly Roundup'     },
+                      { id: 'starter-1',  label: '🚀 Product Launch'        },
+                      { id: 'starter-2',  label: '💡 Tips & Tricks'          },
+                      { id: 'starter-3',  label: '🤔 Engagement Hook'        },
+                      { id: 'starter-4',  label: '👀 Behind the Scenes'      },
+                      { id: 'starter-5',  label: '📰 Weekly Roundup'         },
+                      { id: 'starter-6',  label: '🎉 Milestone Announcement' },
+                      { id: 'starter-7',  label: '🔥 Hot Take'               },
+                      { id: 'starter-8',  label: '🧵 Storytime'              },
+                      { id: 'starter-9',  label: '🔖 Value Drop'             },
+                      { id: 'starter-10', label: '📊 Question / Poll'        },
+                      { id: 'starter-11', label: '📈 Behind the Numbers'     },
+                      { id: 'starter-12', label: '🗓️ Day in My Life'        },
+                      { id: 'starter-13', label: '💡 Lesson Learned'         },
+                      { id: 'starter-14', label: '🙏 Appreciation Post'      },
+                      { id: 'starter-15', label: '💰 Promotion / Offer'      },
                     ].map(t => (
                       <Link key={t.id} href={`?starterTemplate=${t.id}`}
                         className="text-xs font-semibold px-3 py-2.5 min-h-[44px] inline-flex items-center bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-gray-400 hover:bg-white dark:hover:bg-gray-700 transition-all">

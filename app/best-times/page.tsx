@@ -70,12 +70,12 @@ export default function BestTimes() {
 
   const getCellColor = (day: number, hour: number) => {
     const val = heatmap[`${day}-${hour}`] || 0
-    if (val === 0) return 'bg-gray-100'
+    if (val === 0) return 'bg-gray-200 dark:bg-gray-700/60'
     const intensity = val / maxVal
-    if (intensity < 0.25) return 'bg-black/20'
-    if (intensity < 0.5)  return 'bg-black/40'
-    if (intensity < 0.75) return 'bg-black/70'
-    return 'bg-black'
+    if (intensity < 0.25) return 'bg-black/25 dark:bg-white/20'
+    if (intensity < 0.5)  return 'bg-black/45 dark:bg-white/40'
+    if (intensity < 0.75) return 'bg-black/70 dark:bg-white/65'
+    return 'bg-black dark:bg-white'
   }
 
   const PlatformCard = ({ p }: { p: typeof PLATFORM_AVERAGES[0] }) => (
@@ -127,7 +127,13 @@ export default function BestTimes() {
               </div>
               <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
                 <span>Less</span>
-                {['bg-gray-100', 'bg-black/20', 'bg-black/40', 'bg-black/70', 'bg-black'].map((c, i) => (
+                {[
+                  'bg-gray-200 dark:bg-gray-700/60',
+                  'bg-black/25 dark:bg-white/20',
+                  'bg-black/45 dark:bg-white/40',
+                  'bg-black/70 dark:bg-white/65',
+                  'bg-black dark:bg-white',
+                ].map((c, i) => (
                   <div key={i} className={`w-3 h-3 rounded-sm ${c}`} />
                 ))}
                 <span>More</span>
@@ -150,22 +156,23 @@ export default function BestTimes() {
             ) : (
               // Heatmap — full scroll container so labels and grid move together
               <div className="overflow-x-auto">
-                <div className="min-w-[600px]">
-                  {/* Hour labels */}
-                  <div className="flex mb-1 ml-10">
+                <div style={{ minWidth: 660 }}>
+                  {/* Hour labels — fixed 24px per cell to match grid */}
+                  <div className="flex mb-1" style={{ marginLeft: 40 }}>
                     {HOURS.map((h, i) => (
-                      <div key={i} className="flex-1 text-center">
-                        {i % 3 === 0 && <span className="text-xs text-gray-400 dark:text-gray-500">{h}</span>}
+                      <div key={i} style={{ width: 24, flexShrink: 0 }} className="text-center">
+                        {i % 3 === 0 && <span className="text-[10px] text-gray-400 dark:text-gray-500 leading-none">{h}</span>}
                       </div>
                     ))}
                   </div>
                   {/* Day rows */}
                   {DAYS.map((day, dayIdx) => (
                     <div key={day} className="flex items-center mb-1">
-                      <span className="text-xs text-gray-400 dark:text-gray-500 w-10 flex-shrink-0">{day}</span>
+                      <span className="text-[10px] text-gray-400 dark:text-gray-500 flex-shrink-0 text-right pr-2" style={{ width: 40 }}>{day}</span>
                       {HOURS.map((_, hourIdx) => (
                         <div key={hourIdx}
-                          className={`flex-1 h-6 rounded-sm mr-0.5 transition-all ${getCellColor(dayIdx, hourIdx)}`}
+                          style={{ width: 22, height: 16, flexShrink: 0, marginRight: 2 }}
+                          className={`rounded-sm transition-all ${getCellColor(dayIdx, hourIdx)}`}
                           title={`${day} ${HOURS[hourIdx]}: ${heatmap[`${dayIdx}-${hourIdx}`] || 0} posts`}
                         />
                       ))}
