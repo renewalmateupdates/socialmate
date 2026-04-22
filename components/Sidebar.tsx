@@ -80,7 +80,7 @@ const NAV_BASE = [
       { icon: '📡', label: 'SM-Radar',     href: '/sm-radar'               },
       { icon: '🕳️', label: 'Content Gaps', href: '/content-gap'            },
       { icon: '🔭', label: 'Competitors',  href: '/competitor-tracking'    },
-      { icon: '📬', label: 'Social Inbox', href: '/social-inbox'           },
+      { icon: '📬', label: 'Inbox',        href: '/inbox'                  },
       { icon: '🎁', label: 'Referrals',    href: '/affiliate'  },
       { icon: '🤝', label: 'Partners',     href: '/partners'   },
       { icon: '🗺️', label: 'Roadmap',      href: '/roadmap'                },
