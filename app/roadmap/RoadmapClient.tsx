@@ -11,7 +11,6 @@ type RoadmapItem = {
 const ROADMAP: RoadmapItem[] = [
   // ── IN PROGRESS ──────────────────────────────────────────
   { title: 'Media Library',              desc: 'Upload, compress, and reuse images and videos across posts. Client-side compression to 1920px and 2MB max.',     status: 'in-progress',  category: 'Media'         },
-  { title: 'Creator Studio video editor', desc: 'Full in-browser video editor — trim, filter, captions, audio, and one-click platform export at exact spec dimensions. Active development.', status: 'in-progress', category: 'Media' },
 
   // ── COMING SOON ───────────────────────────────────────────
   { title: 'Streak notifications',       desc: 'Automated streak tracking with at-risk alerts — get notified when your posting streak is about to break.',        status: 'coming-soon',  category: 'Analytics'     },
@@ -35,6 +34,11 @@ const ROADMAP: RoadmapItem[] = [
   { title: 'SOC 2 compliance',           desc: 'Security certification for enterprise white label clients. Required for larger agency contracts.',                status: 'planned',      category: 'Platform'      },
 
   // ── SHIPPED ───────────────────────────────────────────────
+  { title: 'SOMA — Self-Optimizing Media Agent', desc: 'AI agent that learns your voice, ingests your weekly context, and generates a full week of posts automatically. Separate credit pool (Pro: 1,000/mo, Agency: 5,000/mo). Safe Mode + Autopilot toggle. Approve/edit/skip queue.', status: 'shipped', category: 'AI' },
+  { title: 'Creator Studio video editor', desc: 'Full in-browser video editor — trim (range sliders), 8 CSS filters, caption overlay (size/position/color/bg), volume control, MediaRecorder export at platform-native dimensions, thumbnail capture. At /create.', status: 'shipped', category: 'Media' },
+  { title: 'Social Inbox (read)',         desc: 'Unified read-only inbox at /inbox pulling Bluesky notifications, Mastodon mentions/boosts/favourites, Telegram updates, and Discord. Read state via localStorage. X tab shows coming-soon.', status: 'shipped', category: 'Engagement' },
+  { title: 'Collapsible sidebar',         desc: 'Desktop sidebar collapses to icon-only mode (w-14) via hamburger toggle. State persists to localStorage. Tooltips on hover in collapsed mode.', status: 'shipped', category: 'Platform' },
+  { title: 'Dashboard card reorder',      desc: 'The 4 stat cards (Scheduled, Drafts, Published, This Week) are drag-and-drop reorderable. Order persists to localStorage via @dnd-kit.', status: 'shipped', category: 'Platform' },
   { title: 'AI Brand Voice',             desc: 'Define your tone, style, vocabulary rules, and example posts. Every AI tool automatically writes in your voice. Pro+ feature.', status: 'shipped', category: 'AI' },
   { title: 'Content Repurposing',        desc: 'Turn any post into a thread, email newsletter, caption, long-form article, hook, or LinkedIn post with one click. 1 credit.', status: 'shipped', category: 'AI' },
   { title: 'Smart Queue — Auto-schedule', desc: 'Auto-schedule all drafts at optimal times per platform (Bluesky 9am, Discord 5pm, etc). Pro+ feature. Best-time picker also available in Compose.', status: 'shipped', category: 'Scheduling' },
