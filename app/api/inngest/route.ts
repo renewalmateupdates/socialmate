@@ -15,6 +15,7 @@ import {
   enkiCloudRunnerScan,
   enkiTruthModeScan,
   studioStaxRenewalEmails,
+  resetSomaCredits,
 } from '@/lib/inngest'
 
 export const { GET, POST, PUT } = serve({
@@ -33,5 +34,6 @@ export const { GET, POST, PUT } = serve({
     enkiCloudRunnerScan,
     enkiTruthModeScan,
     studioStaxRenewalEmails,
+    resetSomaCredits,
   ],
 })
