@@ -7,11 +7,79 @@ import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import DashboardTour from '@/components/DashboardTour'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  horizontalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 const PLATFORM_ICONS: Record<string, string> = {
   discord: '💬', bluesky: '🦋', telegram: '✈️', mastodon: '🐘',
   linkedin: '💼', youtube: '▶️', pinterest: '📌', reddit: '🤖',
   instagram: '📸', tiktok: '🎵', twitter: '🐦', facebook: '📘',
+}
+
+// Platforms shown on the plan card (live platforms only)
+const PLAN_CARD_PLATFORMS = ['bluesky', 'discord', 'telegram', 'mastodon', 'twitter'] as const
+
+const LS_CARD_ORDER_KEY = 'dashboard_card_order'
+const DEFAULT_CARD_ORDER = ['scheduled', 'drafts', 'published', 'this-week']
+
+type StatCardDef = {
+  id: string
+  label: string
+  icon: string
+  color: string
+  value: number
+}
+
+function SortableStatCard({ card }: { card: StatCardDef }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: card.id })
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 50 : undefined,
+  }
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="bg-surface border border-theme rounded-2xl p-3 flex flex-col justify-between relative group select-none"
+    >
+      {/* Drag handle — 6-dot grip, visible on hover */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="absolute top-2 right-2 opacity-0 group-hover:opacity-40 hover:!opacity-70 cursor-grab active:cursor-grabbing transition-opacity p-1 touch-none"
+        aria-label="Drag to reorder"
+      >
+        <svg width="10" height="14" viewBox="0 0 10 14" fill="currentColor" className="text-gray-500">
+          <circle cx="2.5" cy="2.5" r="1.5" />
+          <circle cx="7.5" cy="2.5" r="1.5" />
+          <circle cx="2.5" cy="7" r="1.5" />
+          <circle cx="7.5" cy="7" r="1.5" />
+          <circle cx="2.5" cy="11.5" r="1.5" />
+          <circle cx="7.5" cy="11.5" r="1.5" />
+        </svg>
+      </div>
+      <div className="flex items-center justify-between mb-1">
+        <span className="text-xs text-gray-400 dark:text-gray-500">{card.label}</span>
+        <span className="text-sm">{card.icon}</span>
+      </div>
+      <span className={`text-2xl font-extrabold ${card.color}`}>{card.value}</span>
+    </div>
+  )
 }
 
 type Post = {
@@ -73,6 +141,10 @@ function DashboardInner() {
   const [xBannerDismissed, setXBannerDismissed] = useState(true) // default true to avoid flash
   const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>([])
   const [xBoosterBalance, setXBoosterBalance] = useState<number>(0)
+  // Plan card — seat roster
+  const [seatMembers, setSeatMembers] = useState<{ email: string; role: string }[]>([])
+  // Drag-and-drop card order
+  const [cardOrder, setCardOrder] = useState<string[]>(DEFAULT_CARD_ORDER)
   const { plan, credits, activeWorkspace, monthlyCredits, earnedCredits, paidCredits } = useWorkspace()
 
   useEffect(() => {
@@ -177,17 +249,39 @@ function DashboardInner() {
       setProfile(profile)
       setLoading(false)
 
+      // Restore card order from localStorage
+      try {
+        const saved = localStorage.getItem(LS_CARD_ORDER_KEY)
+        if (saved) {
+          const parsed: string[] = JSON.parse(saved)
+          // Validate — must contain all 4 default IDs
+          if (Array.isArray(parsed) && DEFAULT_CARD_ORDER.every(id => parsed.includes(id))) {
+            setCardOrder(parsed)
+          }
+        }
+      } catch {
+        // ignore parse errors — use default
+      }
+
       // Show welcome banner for brand-new users who haven't dismissed it
       const dismissed = localStorage.getItem('sm-welcome-dismissed')
       if (!dismissed) setWelcomeDismissed(false)
 
-      // Load connected platforms for X banner
+      // Load connected platforms for X banner AND plan card platform icons
       const { data: accounts } = await supabase
         .from('connected_accounts')
         .select('platform')
         .eq('user_id', user.id)
       const platforms = (accounts || []).map((a: { platform: string }) => a.platform)
       setConnectedPlatforms(platforms)
+
+      // Load seat roster for plan card
+      const { data: teamData } = await supabase
+        .from('team_members')
+        .select('email, role')
+        .eq('owner_id', user.id)
+        .order('joined_at', { ascending: true })
+      setSeatMembers(teamData || [])
 
       // Show X banner if X not connected and not dismissed
       const xDismissed = localStorage.getItem('sm-x-banner-dismissed')
@@ -254,6 +348,31 @@ function DashboardInner() {
     const d = new Date(todayMidnight); d.setDate(todayMidnight.getDate() - i)
     trailDays.push(allPosts.some(p => { const pd = new Date(p.created_at); pd.setHours(0,0,0,0); return pd.getTime() === d.getTime() }))
   }
+
+  // DnD sensors — PointerSensor handles both mouse and touch (long-press on mobile)
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  )
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over || active.id === over.id) return
+    const oldIndex = cardOrder.indexOf(active.id as string)
+    const newIndex = cardOrder.indexOf(over.id as string)
+    const newOrder = arrayMove(cardOrder, oldIndex, newIndex)
+    setCardOrder(newOrder)
+    try { localStorage.setItem(LS_CARD_ORDER_KEY, JSON.stringify(newOrder)) } catch { /* ignore */ }
+  }
+
+  // Plan card — seat info
+  const planSeatLimit   = planConfig?.seats ?? 2
+  // +1 for the owner themselves
+  const totalSeatsUsed  = 1 + seatMembers.length
+  // All members including owner (for avatar row)
+  const planCardMembers = [
+    ...(user ? [{ email: user.email ?? '', role: 'owner' }] : []),
+    ...seatMembers,
+  ]
 
   // Credits display — monthly bar shows monthly pool usage
   const monthlyLimit = planConfig?.credits ?? 50
@@ -409,12 +528,13 @@ function DashboardInner() {
           <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
 
             {/* Plan card */}
-            <div className={`col-span-2 rounded-2xl px-4 py-3 border flex items-center justify-between ${
+            <div className={`col-span-2 rounded-2xl px-4 py-3 border ${
               plan === 'free'   ? 'bg-gray-50 border-gray-200'   :
               plan === 'pro'    ? 'bg-blue-50 border-blue-100'   :
               'bg-purple-50 border-purple-100'
             }`}>
-              <div>
+              {/* Top row: plan name + upgrade button */}
+              <div className="flex items-center justify-between mb-2.5">
                 <p className={`text-xs font-extrabold ${
                   plan === 'agency' ? 'text-purple-700' : plan === 'pro' ? 'text-blue-700' : 'text-gray-700'
                 }`}>
@@ -422,16 +542,67 @@ function DashboardInner() {
                   {plan === 'pro'  && '⚡ Pro Plan'}
                   {plan === 'agency' && '🏢 Agency Plan'}
                 </p>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                  {planConfig?.accountsPerPlatform} acct/platform · {planConfig?.seats} seats
-                </p>
+                {plan === 'free' && (
+                  <Link href="/settings?tab=Plan" id="tour-upgrade"
+                    className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all flex-shrink-0">
+                    Upgrade
+                  </Link>
+                )}
               </div>
-              {plan === 'free' && (
-                <Link href="/settings?tab=Plan" id="tour-upgrade"
-                  className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all flex-shrink-0">
-                  Upgrade
+
+              {/* Connected platforms row */}
+              <div className="flex items-center gap-2 mb-2.5">
+                {PLAN_CARD_PLATFORMS.map(platform => {
+                  const isConnected = connectedPlatforms.includes(platform)
+                  return (
+                    <span
+                      key={platform}
+                      title={isConnected ? `${platform} connected` : `${platform} not connected`}
+                      className={`relative text-base transition-opacity ${isConnected ? 'opacity-100' : 'opacity-25'}`}
+                    >
+                      {PLATFORM_ICONS[platform]}
+                      {isConnected && (
+                        <span className="absolute -bottom-0.5 -right-0.5 text-[8px] leading-none text-green-600 font-black">✓</span>
+                      )}
+                    </span>
+                  )
+                })}
+                <Link href="/accounts" className={`text-xs ml-auto ${
+                  plan === 'agency' ? 'text-purple-500 hover:text-purple-700' :
+                  plan === 'pro'    ? 'text-blue-500 hover:text-blue-700'     :
+                  'text-gray-400 hover:text-gray-600'
+                } transition-colors`}>
+                  Manage →
                 </Link>
-              )}
+              </div>
+
+              {/* Seat roster */}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {/* Avatar bubbles — max 5 shown */}
+                {planCardMembers.slice(0, 5).map((m, i) => {
+                  const initials = (m.email?.[0] ?? '?').toUpperCase()
+                  const colors = ['bg-black text-white', 'bg-blue-600 text-white', 'bg-purple-600 text-white', 'bg-green-600 text-white', 'bg-orange-500 text-white']
+                  return (
+                    <span
+                      key={i}
+                      title={m.role === 'owner' ? `${m.email} (owner)` : `${m.email} (${m.role})`}
+                      className={`w-5 h-5 rounded-full text-[9px] font-extrabold flex items-center justify-center flex-shrink-0 ${colors[i % colors.length]}`}
+                    >
+                      {initials}
+                    </span>
+                  )
+                })}
+                {planCardMembers.length > 5 && (
+                  <span className="text-xs text-gray-400">+{planCardMembers.length - 5}</span>
+                )}
+                <span className={`text-xs ml-auto font-semibold ${
+                  plan === 'agency' ? 'text-purple-500' : plan === 'pro' ? 'text-blue-500' : 'text-gray-500'
+                }`}>
+                  {totalSeatsUsed === 1
+                    ? '1 seat (just you)'
+                    : `${totalSeatsUsed} / ${planSeatLimit} seats`}
+                </span>
+              </div>
             </div>
 
             {/* Credits card */}
@@ -533,21 +704,24 @@ function DashboardInner() {
               </div>
             )}
 
-            {/* Stat cards */}
-            {[
-              { label: 'Scheduled', value: stats.scheduled,  icon: '📅', color: 'text-blue-600'   },
-              { label: 'Drafts',    value: stats.drafts,     icon: '📁', color: 'text-yellow-600' },
-              { label: 'Published', value: stats.published,  icon: '✅', color: 'text-green-600'  },
-              { label: 'This Week', value: stats.thisWeek,   icon: '✏️', color: 'text-purple-600' },
-            ].map(s => (
-              <div key={s.label} className="bg-surface border border-theme rounded-2xl p-3 flex flex-col justify-between">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs text-gray-400 dark:text-gray-500">{s.label}</span>
-                  <span className="text-sm">{s.icon}</span>
-                </div>
-                <span className={`text-2xl font-extrabold ${s.color}`}>{s.value}</span>
-              </div>
-            ))}
+            {/* Stat cards — drag-and-drop reorderable */}
+            {(() => {
+              const cardDefs: Record<string, StatCardDef> = {
+                'scheduled':  { id: 'scheduled',  label: 'Scheduled', value: stats.scheduled,  icon: '📅', color: 'text-blue-600'   },
+                'drafts':     { id: 'drafts',      label: 'Drafts',    value: stats.drafts,     icon: '📁', color: 'text-yellow-600' },
+                'published':  { id: 'published',   label: 'Published', value: stats.published,  icon: '✅', color: 'text-green-600'  },
+                'this-week':  { id: 'this-week',   label: 'This Week', value: stats.thisWeek,   icon: '✏️', color: 'text-purple-600' },
+              }
+              return (
+                <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                  <SortableContext items={cardOrder} strategy={horizontalListSortingStrategy}>
+                    {cardOrder.map(id => (
+                      <SortableStatCard key={id} card={cardDefs[id]} />
+                    ))}
+                  </SortableContext>
+                </DndContext>
+              )
+            })()}
 
           </div>
 
