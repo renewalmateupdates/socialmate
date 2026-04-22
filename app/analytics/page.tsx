@@ -529,10 +529,98 @@ export default function Analytics() {
               )}
             </div>
 
+            {/* ── Platform Analytics Status ───────────────────────────────────── */}
+            <div style={{ ...sectionStyle, marginBottom: 20 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
+                <div>
+                  <p style={{ ...sectionHead, margin: 0 }}>Platform Analytics Status</p>
+                  <p style={{ fontSize: 11, color: T.textDim, marginTop: 2 }}>What engagement data we can pull per platform</p>
+                </div>
+                <button
+                  onClick={syncBluesky}
+                  disabled={syncState === 'syncing'}
+                  style={{
+                    padding: '6px 14px',
+                    borderRadius: 8,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: syncState === 'syncing' ? 'default' : 'pointer',
+                    border: `1px solid ${T.border}`,
+                    background: T.surface2,
+                    color: syncState === 'done' ? T.green : T.muted,
+                    transition: 'all 0.15s',
+                    opacity: syncState === 'syncing' ? 0.6 : 1,
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {syncState === 'idle' ? '🦋 Sync Bluesky engagement'
+                    : syncState === 'syncing' ? 'Syncing...'
+                    : `✓ Synced ${syncCount} posts`}
+                </button>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {[
+                  {
+                    icon: '🦋', name: 'Bluesky',
+                    badge: '✅ Available', badgeColor: '#16a34a', badgeBg: 'rgba(22,163,74,0.12)',
+                    desc: 'Likes, reposts, and replies — pulled live via AT Protocol public API.',
+                  },
+                  {
+                    icon: '🐘', name: 'Mastodon',
+                    badge: '✅ Available', badgeColor: '#16a34a', badgeBg: 'rgba(22,163,74,0.12)',
+                    desc: 'Favourites and reblogs available via Mastodon API. Integration in progress.',
+                  },
+                  {
+                    icon: '💬', name: 'Discord',
+                    badge: '⚠️ Limited', badgeColor: '#d97706', badgeBg: 'rgba(217,119,6,0.12)',
+                    desc: 'Message delivery confirmed. Discord does not expose engagement metrics via API.',
+                  },
+                  {
+                    icon: '✈️', name: 'Telegram',
+                    badge: '⚠️ Limited', badgeColor: '#d97706', badgeBg: 'rgba(217,119,6,0.12)',
+                    desc: 'Message delivery confirmed. View counts available for channels only — not groups or DMs.',
+                  },
+                  {
+                    icon: '🐦', name: 'X / Twitter',
+                    badge: '🔒 Blocked', badgeColor: '#6b7280', badgeBg: 'rgba(107,114,128,0.12)',
+                    desc: 'Impressions require Twitter API v2 Basic ($100+/mo). We\'ve built the integration — pending API tier upgrade.',
+                  },
+                  {
+                    icon: '💼', name: 'LinkedIn',
+                    badge: '🔒 Blocked', badgeColor: '#6b7280', badgeBg: 'rgba(107,114,128,0.12)',
+                    desc: 'Impression data requires LinkedIn Partner Program approval. Coming when LinkedIn integration launches.',
+                  },
+                ].map(row => (
+                  <div key={row.name} style={{
+                    display: 'flex', alignItems: 'flex-start', gap: 12,
+                    background: T.surface2, border: `1px solid ${T.border}`,
+                    borderRadius: 8, padding: '10px 14px',
+                  }}>
+                    <span style={{ fontSize: 20, flexShrink: 0, marginTop: 1 }}>{row.icon}</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 2 }}>
+                        <span style={{ fontSize: 13, fontWeight: 700, color: T.text }}>{row.name}</span>
+                        <span style={{
+                          fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 12,
+                          color: row.badgeColor, background: row.badgeBg, border: `1px solid ${row.badgeColor}33`,
+                        }}>
+                          {row.badge}
+                        </span>
+                      </div>
+                      <p style={{ fontSize: 12, color: T.textDim, margin: 0, lineHeight: 1.5 }}>{row.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             {/* ── 30-day area chart ────────────────────────────────────────────── */}
             <div style={{ ...sectionStyle, marginBottom: 20 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <p style={{ ...sectionHead, margin: 0 }}>Publishing Activity</p>
+                <div>
+                  <p style={{ ...sectionHead, margin: 0 }}>SocialMate Post Activity</p>
+                  <p style={{ fontSize: 11, color: T.textDim, marginTop: 2 }}>From your SocialMate scheduling data</p>
+                </div>
                 <span style={{ fontSize: 11, color: T.textDim }}>
                   {range === '7d' ? 'Last 7 days' : range === '30d' ? 'Last 30 days' : 'All time (30-day window)'}
                 </span>
@@ -548,7 +636,10 @@ export default function Analytics() {
 
             {/* ── Platform breakdown ──────────────────────────────────────────── */}
             <div style={{ ...sectionStyle, marginBottom: 20 }}>
-              <p style={sectionHead}>Platform Breakdown</p>
+              <div style={{ marginBottom: 16 }}>
+                <p style={{ ...sectionHead, margin: 0 }}>Platform Breakdown</p>
+                <p style={{ fontSize: 11, color: T.textDim, marginTop: 2 }}>Posts published per platform — from your SocialMate scheduling data</p>
+              </div>
               {loading ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {Array.from({ length: 3 }, (_, i) => <Skeleton key={i} h={20} />)}
@@ -590,7 +681,10 @@ export default function Analytics() {
             {!loading && bskyPosts.length > 0 && (
               <div style={{ ...sectionStyle, marginBottom: 20 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                  <p style={{ ...sectionHead, margin: 0 }}>🦋 Bluesky Engagement</p>
+                  <div>
+                    <p style={{ ...sectionHead, margin: 0 }}>🦋 Bluesky Engagement</p>
+                    <p style={{ fontSize: 11, color: T.textDim, marginTop: 2 }}>Platform Engagement — pulled live from AT Protocol API</p>
+                  </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     {lastSynced && (
                       <span style={{ fontSize: 11, color: T.textDim }}>
