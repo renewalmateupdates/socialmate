@@ -231,6 +231,12 @@ These have burned us before — always apply:
 - **Studio Stax Renewal Emails** — `studioStaxRenewalEmails` Inngest cron (`0 9 * * *`); 30/14/7-day Resend drip to `studio_stax_slots`; timestamped idempotency (`renewal_email_*_sent_at`); STAX20 discount code; RenewalMate teaser in 30-day email
 - **Roadmap page updated** — new shipped items added, Creator Monetization Hub + Content DNA + Unified Inbox added to coming-soon
 
+**April 22, 2026:**
+- **PublicNav redesign** — "Audiences ▾" dropdown (Streamers, Agencies, Small Biz); "Resources ▾" dropdown (Blog, Gil's Guide); SOMA added as standalone nav item alongside Studio Stax + Enki; mobile drawer updated with collapsible Audiences/Resources sections + Products section
+- **SOMA Autopilot checkout** — `AutopilotModal` now calls `/api/stripe/checkout` with `price_1TP8rU7OMwDowUuUYLBNAVux`; replaced settings redirect with real Stripe subscription checkout
+- **Studio Stax price IDs** — Founding (`price_1TP8wi7OMwDowUuUNQW7ER95`) + Standard (`price_1TP8xG7OMwDowUuUO05Vh1Kq`) added to checkout metadata; constants defined in checkout route for future subscription migration
+- **WorkspaceContext annual-plan crash fix** — `normalizePlan()` added to map `pro_annual`/`agency_annual` before `PLAN_CONFIG` lookup; prevents crash for annual subscribers
+
 ---
 
 ## Known Issues / Bugs (fix these when touched)
@@ -330,6 +336,10 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - ✅ **Analytics overhaul (Apr 21)** — X-style dark dashboard. SVG area chart, heatmap, Bluesky engagement sync. Done.
 - ✅ **Push notifications (Apr 21)** — Service worker, VAPID routes, Settings toggle, Inngest triggers. Needs VAPID env vars in Vercel.
 - ✅ **Studio Stax renewal emails (Apr 21)** — Inngest cron 9am daily, 30/14/7-day Resend drip, STAX20 code. Needs SQL migration run.
+- ✅ **PublicNav dropdowns (Apr 22)** — Audiences ▾ + Resources ▾ dropdowns, SOMA standalone. Done.
+- ✅ **SOMA Autopilot Stripe checkout (Apr 22)** — Real Stripe subscription checkout wired. price_1TP8rU7OMwDowUuUYLBNAVux. Done.
+- ✅ **Studio Stax Stripe price IDs (Apr 22)** — Constants + metadata added to checkout route. Founding: price_1TP8wi7OMwDowUuUNQW7ER95 / Standard: price_1TP8xG7OMwDowUuUO05Vh1Kq. Done.
+- ✅ **Annual plan crash fix (Apr 22)** — normalizePlan() in WorkspaceContext. Done.
 
 ---
 
@@ -383,6 +393,9 @@ The diff = the story. Ship it to every platform.
 | X Booster Boost (120 posts) | price_1TOKAH7OMwDowUuUn6pcSTQd | $4.99 |
 | X Booster Surge (250 posts) | price_1TOKBv7OMwDowUuUsykwyuUa | $9.99 |
 | X Booster Storm (500 posts) | price_1TOKCg7OMwDowUuU2PEzonf6 | $19.99 |
+| SOMA Autopilot | price_1TP8rU7OMwDowUuUYLBNAVux | $10.00/mo |
+| Studio Stax Founding Member | price_1TP8wi7OMwDowUuUNQW7ER95 | $100.00/yr recurring |
+| Studio Stax Standard | price_1TP8xG7OMwDowUuUO05Vh1Kq | $150.00/yr recurring |
 
 ---
 
