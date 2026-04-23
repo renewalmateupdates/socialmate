@@ -4,6 +4,10 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import Stripe from 'stripe'
 import { ANNUAL_FOUNDER_CENTS, ANNUAL_STANDARD_CENTS, FOUNDING_SLOT_LIMIT } from '@/app/api/studio-stax/pricing/route'
 
+// Stripe recurring price IDs (for reference / future subscription migration)
+const STRIPE_PRICE_FOUNDING = 'price_1TP8wi7OMwDowUuUNQW7ER95'  // $100/yr recurring
+const STRIPE_PRICE_STANDARD = 'price_1TP8xG7OMwDowUuUO05Vh1Kq'  // $150/yr recurring
+
 function getStripe() {
   return new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-02-25.clover' })
 }
@@ -113,6 +117,7 @@ export async function POST(req: NextRequest) {
         billing_type:   'annual',
         tier,
         amount_cents:   String(unitAmount),
+        stripe_price_id: tier === 'founding' ? STRIPE_PRICE_FOUNDING : STRIPE_PRICE_STANDARD,
         // slot_quarter stores cycle year for DB compat (schema requires non-null)
         slot_quarter:   String(now.getUTCFullYear()),
         slot_start:     now.toISOString(),
