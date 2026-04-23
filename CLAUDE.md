@@ -261,6 +261,12 @@ These have burned us before — always apply:
 - **Studio Stax price IDs** — Founding (`price_1TP8wi7OMwDowUuUNQW7ER95`) + Standard (`price_1TP8xG7OMwDowUuUO05Vh1Kq`) added to checkout metadata; constants defined in checkout route for future subscription migration
 - **WorkspaceContext annual-plan crash fix** — `normalizePlan()` added to map `pro_annual`/`agency_annual` before `PLAN_CONFIG` lookup; prevents crash for annual subscribers
 
+**April 23, 2026:**
+- **Dashboard crash fix (React #310)** — `useSensors`/`useSensor` from `@dnd-kit` were declared after `if (loading) return` early return in `DashboardInner`. Moved declarations before early return. Dashboard fully stable.
+- **TikTok Developer App submitted** — App name: SocialMatehq. Content Posting API (Direct Post enabled) + Login Kit. Scopes: `user.info.basic`, `video.publish`, `video.upload`. Redirect URI: `https://socialmate.studio/api/tiktok/callback`. Status: **In review** (2–4 week queue). Sandbox environment auto-created (SocialMatehq2) — ignore until Production is approved.
+- **LinkedIn Company Page** — setup started at linkedin.com/company/setup/new. Must complete + publish before applying for LinkedIn API.
+- **LinkedIn posts drafted** — two long-form SEO/AEO posts written: Post 1 (Apr 23 tonight): TikTok API submission story. Post 2 (Apr 24 morning): bootstrapped builder narrative + feature roundup.
+
 ---
 
 ## Known Issues / Bugs (fix these when touched)
@@ -321,7 +327,7 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 - **Enki Truth Mode testing** — market now open (Apr 21). 50-trade minimum per strategy before results are statistically valid.
 
-- **LinkedIn integration** — API credentials not yet acquired
+- **LinkedIn integration** — API credentials not yet acquired. Requires: (1) LinkedIn Company Page published, (2) developer app at linkedin.com/developers, (3) apply for Marketing Developer Platform. Company Page setup started Apr 23.
 
 **Roadmap (next up):**
 - **Creator Monetization Hub** — fan subscriptions, tip jars, paywalled content
@@ -370,6 +376,8 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - ✅ **SOMA Autopilot Stripe checkout (Apr 22)** — Real Stripe subscription checkout wired. price_1TP8rU7OMwDowUuUYLBNAVux. Done.
 - ✅ **Studio Stax Stripe price IDs (Apr 22)** — Constants + metadata added to checkout route. Founding: price_1TP8wi7OMwDowUuUNQW7ER95 / Standard: price_1TP8xG7OMwDowUuUO05Vh1Kq. Done.
 - ✅ **Annual plan crash fix (Apr 22)** — normalizePlan() in WorkspaceContext. Done.
+- ✅ **Dashboard React #310 crash fix (Apr 23)** — dnd-kit hooks moved before early return in DashboardInner. Dashboard fully stable.
+- ✅ **TikTok API submitted (Apr 23)** — SocialMatehq app submitted for review. Content Posting API + Direct Post + Login Kit. Status: In review.
 - ✅ **Dashboard React #310 fix (Apr 22)** — useSensors/useSensor (dnd-kit) declared after early return, violating Rules of Hooks. Moved before `if (loading) return`. Pushed directly to main. Done.
 - ✅ **TikTok Developer App setup (Apr 22)** — App: SocialMatehq. Content Posting API added, Direct Post ON, scopes: video.publish + video.upload, socialmate.studio domain verified, TIKTOK_CLIENT_KEY + TIKTOK_CLIENT_SECRET in Vercel. Pending: record demo video (Win+G) + submit for review.
 
