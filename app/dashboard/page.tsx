@@ -147,6 +147,11 @@ function DashboardInner() {
   const [cardOrder, setCardOrder] = useState<string[]>(DEFAULT_CARD_ORDER)
   const { plan, credits, activeWorkspace, monthlyCredits, earnedCredits, paidCredits } = useWorkspace()
 
+  // DnD sensors — must be declared before any early returns (Rules of Hooks)
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  )
+
   useEffect(() => {
     if (searchParams.get('credits') === 'added') setShowCreditModal(true)
   }, [searchParams])
@@ -348,11 +353,6 @@ function DashboardInner() {
     const d = new Date(todayMidnight); d.setDate(todayMidnight.getDate() - i)
     trailDays.push(allPosts.some(p => { const pd = new Date(p.created_at); pd.setHours(0,0,0,0); return pd.getTime() === d.getTime() }))
   }
-
-  // DnD sensors — PointerSensor handles both mouse and touch (long-press on mobile)
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
-  )
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
