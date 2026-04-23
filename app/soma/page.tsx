@@ -72,7 +72,30 @@ function PlatformBadge({ platform }: { platform: string }) {
 
 // ── Autopilot Upgrade Modal ───────────────────────────────────────────────────
 
+const SOMA_AUTOPILOT_PRICE_ID = 'price_1TP8rU7OMwDowUuUYLBNAVux'
+
 function AutopilotModal({ onClose }: { onClose: () => void }) {
+  const [loading, setLoading] = useState(false)
+  const [err, setErr] = useState('')
+
+  const handleUpgrade = async () => {
+    setLoading(true)
+    setErr('')
+    try {
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId: SOMA_AUTOPILOT_PRICE_ID }),
+      })
+      const data = await res.json()
+      if (!res.ok || !data.url) { setErr(data.error || 'Could not start checkout.'); setLoading(false); return }
+      window.location.href = data.url
+    } catch {
+      setErr('Network error. Please try again.')
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
       <div className="w-full max-w-md rounded-2xl border border-amber-500/30 bg-gray-900 shadow-2xl overflow-hidden">
@@ -100,14 +123,16 @@ function AutopilotModal({ onClose }: { onClose: () => void }) {
 
           <p className="text-center text-amber-400 font-bold text-lg mb-5">$10/month add-on</p>
 
+          {err && <p className="text-xs text-red-400 text-center mb-3">{err}</p>}
+
           <div className="flex flex-col gap-3">
-            {/* TODO: SOMA_AUTOPILOT_PRICE_ID env var — set Stripe price ID when created */}
-            <Link
-              href="/settings?tab=plan"
-              className="block w-full text-center bg-gradient-to-r from-amber-500 to-yellow-400 text-gray-900 font-extrabold text-sm px-6 py-3 rounded-xl hover:opacity-90 transition-all shadow-lg shadow-amber-500/20"
+            <button
+              onClick={handleUpgrade}
+              disabled={loading}
+              className="block w-full text-center bg-gradient-to-r from-amber-500 to-yellow-400 text-gray-900 font-extrabold text-sm px-6 py-3 rounded-xl hover:opacity-90 transition-all shadow-lg shadow-amber-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Upgrade to Autopilot →
-            </Link>
+              {loading ? 'Redirecting…' : 'Upgrade to Autopilot →'}
+            </button>
             <button
               onClick={onClose}
               className="w-full text-center text-sm text-gray-400 hover:text-gray-200 transition-colors py-2"
