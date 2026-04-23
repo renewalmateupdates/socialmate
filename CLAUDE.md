@@ -370,6 +370,8 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - ✅ **SOMA Autopilot Stripe checkout (Apr 22)** — Real Stripe subscription checkout wired. price_1TP8rU7OMwDowUuUYLBNAVux. Done.
 - ✅ **Studio Stax Stripe price IDs (Apr 22)** — Constants + metadata added to checkout route. Founding: price_1TP8wi7OMwDowUuUNQW7ER95 / Standard: price_1TP8xG7OMwDowUuUO05Vh1Kq. Done.
 - ✅ **Annual plan crash fix (Apr 22)** — normalizePlan() in WorkspaceContext. Done.
+- ✅ **Dashboard React #310 fix (Apr 22)** — useSensors/useSensor (dnd-kit) declared after early return, violating Rules of Hooks. Moved before `if (loading) return`. Pushed directly to main. Done.
+- ✅ **TikTok Developer App setup (Apr 22)** — App: SocialMatehq. Content Posting API added, Direct Post ON, scopes: video.publish + video.upload, socialmate.studio domain verified, TIKTOK_CLIENT_KEY + TIKTOK_CLIENT_SECRET in Vercel. Pending: record demo video (Win+G) + submit for review.
 
 ---
 
