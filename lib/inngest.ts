@@ -3409,56 +3409,77 @@ function somaParseGeminiJson(text: string): any {
   )
 }
 
+const SOMA_PLATFORM_INSTRUCTIONS: Record<string, string> = {
+  twitter:   'Twitter/X: ≤280 chars. Punchy, direct, hook in first line. Max 2 hashtags.',
+  bluesky:   'Bluesky: ≤300 chars. Conversational, authentic. Community-friendly.',
+  linkedin:  'LinkedIn: 3-6 sentences. Professional but human. Start with hook, end with question or takeaway.',
+  mastodon:  'Mastodon: ≤500 chars. Community-native, no corporate tone.',
+  instagram: 'Instagram: Caption style. 3-5 sentences + 5-8 relevant hashtags on new line.',
+  discord:   'Discord: Casual announcement style. Can use **bold** for emphasis. Concise.',
+}
+
 export const somaAutopilotRun = inngest.createFunction(
   { id: 'soma-autopilot-run', name: 'SOMA Autopilot Run', retries: 1 },
   { cron: '0 12 * * 1' }, // Every Monday at noon UTC (~8 AM ET)
   async ({ step }) => {
-    const AUTOPILOT_COST = SOMA_COSTS.autopilot_run // 50 credits
+    const GENERATE_COST = SOMA_COSTS.generate_week // 75 credits
     const now = new Date()
-    const weekLabel = `Week of ${now.toISOString().slice(0, 10)}`
-    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
+    const weekLabel = `Auto — Week of ${now.toISOString().slice(0, 10)}`
     const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())).toISOString()
 
-    const eligibleWorkspaces = await step.run('find-autopilot-workspaces', async () => {
-      const { data, error } = await getSupabaseAdmin()
-        .from('workspaces')
-        .select('id, owner_id, soma_credits_monthly, soma_credits_used, soma_credits_purchased')
-        .eq('soma_mode', 'autopilot')
-        .eq('soma_autopilot_enabled', true)
+    // Find all autopilot/full_send projects whose workspaces have enough credits
+    const eligibleProjects = await step.run('find-autopilot-projects', async () => {
+      const admin = getSupabaseAdmin()
+
+      const { data: projects, error } = await admin
+        .from('soma_projects')
+        .select(`
+          id, workspace_id, user_id, name, platforms, posts_per_day, content_window_days, mode, runs_this_month,
+          workspaces!inner(id, owner_id, soma_credits_monthly, soma_credits_used, soma_credits_purchased, soma_autopilot_enabled)
+        `)
+        .in('mode', ['autopilot', 'full_send'])
 
       if (error) {
-        console.error('[SomaAutopilot] Failed to query workspaces:', error.message)
+        console.error('[SomaAutopilot] Failed to query projects:', error.message)
         return []
       }
 
-      return (data ?? []).filter(w => {
-        const remaining = Math.max(0, (w.soma_credits_monthly ?? 0) - (w.soma_credits_used ?? 0)) + (w.soma_credits_purchased ?? 0)
-        return remaining >= AUTOPILOT_COST
+      return (projects ?? []).filter((p: any) => {
+        const ws = p.workspaces
+        if (!ws?.soma_autopilot_enabled) return false
+        const remaining = Math.max(0, (ws.soma_credits_monthly ?? 0) - (ws.soma_credits_used ?? 0)) + (ws.soma_credits_purchased ?? 0)
+        // Run cap check
+        const runCap = p.mode === 'full_send' ? 12 : 8
+        if ((p.runs_this_month ?? 0) >= runCap) return false
+        return remaining >= GENERATE_COST
       })
     })
 
-    if (!eligibleWorkspaces.length) {
-      console.log('[SomaAutopilot] No eligible autopilot workspaces')
+    if (!eligibleProjects.length) {
+      console.log('[SomaAutopilot] No eligible autopilot projects')
       return { processed: 0 }
     }
 
-    const workspaceIds = eligibleWorkspaces.map(w => w.id)
-
-    const alreadyRanIds = await step.run('check-already-ran', async () => {
+    // Skip projects that already ran today (idempotency)
+    const projectIds = eligibleProjects.map((p: any) => p.id)
+    const alreadyRanProjectIds = await step.run('check-already-ran', async () => {
       const { data } = await getSupabaseAdmin()
         .from('soma_weekly_ingestion')
-        .select('workspace_id')
-        .in('workspace_id', workspaceIds)
+        .select('metadata')
         .gte('created_at', todayStart)
-      return (data ?? []).map(r => r.workspace_id as string)
+      // ingestion records store project_id in metadata when auto-generated
+      const ran = (data ?? [])
+        .map((r: any) => r.metadata?.project_id)
+        .filter(Boolean)
+      return ran as string[]
     })
 
-    const alreadyRanSet = new Set<string>(alreadyRanIds)
-    const toProcess = eligibleWorkspaces.filter(w => !alreadyRanSet.has(w.id))
+    const alreadyRanSet = new Set<string>(alreadyRanProjectIds)
+    const toProcess = eligibleProjects.filter((p: any) => !alreadyRanSet.has(p.id))
 
     if (!toProcess.length) {
-      console.log('[SomaAutopilot] All autopilot workspaces already ran today')
-      return { processed: 0, skipped: eligibleWorkspaces.length }
+      console.log('[SomaAutopilot] All eligible projects already ran today')
+      return { processed: 0, skipped: eligibleProjects.length }
     }
 
     const apiKey = process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY
@@ -3470,36 +3491,51 @@ export const somaAutopilotRun = inngest.createFunction(
     let processed = 0
     let failed = 0
 
-    for (const workspace of toProcess) {
+    for (const project of toProcess) {
       try {
-        await step.run(`autopilot-${workspace.id}`, async () => {
+        await step.run(`autopilot-project-${project.id}`, async () => {
           const admin = getSupabaseAdmin()
           const genAI = new GoogleGenerativeAI(apiKey)
           const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+          const ws = (project as any).workspaces
 
-          // Collect last 7 days of published posts as context
-          const { data: recentPosts } = await admin
-            .from('posts')
-            .select('content, published_at')
-            .eq('workspace_id', workspace.id)
-            .in('status', ['published', 'partial'])
-            .gte('published_at', sevenDaysAgo)
-            .order('published_at', { ascending: false })
-            .limit(30)
+          const platforms = (project.platforms as string[]) ?? ['bluesky']
+          const windowDays = project.content_window_days ?? 7
+          const postsPerDay = project.posts_per_day ?? 2
 
-          const postLines = (recentPosts ?? [])
-            .map(p => `- ${(p.content ?? '').slice(0, 200)}`)
-            .join('\n')
+          // Fetch latest master doc for this project as context
+          const { data: docs } = await admin
+            .from('soma_master_docs')
+            .select('id, version, content')
+            .eq('project_id', project.id)
+            .order('version', { ascending: false })
+            .limit(2)
 
-          const rawInput = recentPosts?.length
-            ? `Published posts from last 7 days (auto-collected):\n${postLines}\n\nGenerate next week's content continuing these themes and voice.`
-            : 'No posts published last week. Generate fresh motivational content for a creator building their online presence.'
+          const currentDoc = docs?.[0] ?? null
+          const prevDoc = docs?.[1] ?? null
+
+          let rawInput: string
+          if (currentDoc) {
+            rawInput = currentDoc.content
+          } else {
+            // No master doc — fall back to recent posts
+            const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
+            const { data: recentPosts } = await admin
+              .from('posts')
+              .select('content')
+              .eq('workspace_id', project.workspace_id)
+              .in('status', ['published', 'partial'])
+              .gte('published_at', sevenDaysAgo)
+              .limit(20)
+            const lines = (recentPosts ?? []).map(p => `- ${(p.content ?? '').slice(0, 200)}`).join('\n')
+            rawInput = lines || 'No prior content. Generate fresh content for a creator building their online presence.'
+          }
 
           // Fetch voice profile
           const { data: profile } = await admin
             .from('soma_identity_profiles')
             .select('tone_profile, writing_style_rules, behavioral_traits, voice_examples')
-            .eq('workspace_id', workspace.id)
+            .eq('workspace_id', project.workspace_id)
             .maybeSingle()
 
           const identityContext = profile
@@ -3510,59 +3546,77 @@ Personality: ${JSON.stringify(profile.behavioral_traits)}
 Example posts: ${Array.isArray(profile.voice_examples) ? (profile.voice_examples as string[]).join(' | ') : 'none'}`
             : 'No voice profile — use authentic, direct tone.'
 
-          // Ingest: extract themes from last week's posts
-          const ingestResult = await model.generateContent(
-            `Analyze this weekly content summary and return ONLY valid JSON (no markdown):
-{"key_themes":["theme1"],"wins":["win1"],"challenges":["challenge1"],"directional_shifts":["shift1"],"content_angles":["angle1","angle2","angle3","angle4","angle5"],"emotional_tone":"grinding"}
+          // Ingest: extract insights (diff if we have prev doc)
+          const ingestPrompt = prevDoc
+            ? `Compare these two weekly master docs. Extract what is NEW or CHANGED. Return ONLY valid JSON (no markdown):
+{"key_themes":["theme1"],"wins":["win1"],"challenges":["challenge1"],"directional_shifts":["shift1"],"content_angles":["angle1","angle2","angle3","angle4","angle5"],"emotional_tone":"grinding","diff_summary":"One sentence: what changed most."}
+PREVIOUS: ${prevDoc.content.slice(0, 3000)}
+CURRENT: ${rawInput.slice(0, 3000)}
+emotional_tone must be: high, reflective, grinding, or celebratory`
+            : `Analyze this weekly master doc. Return ONLY valid JSON (no markdown):
+{"key_themes":["theme1"],"wins":["win1"],"challenges":["challenge1"],"directional_shifts":["shift1"],"content_angles":["angle1","angle2","angle3","angle4","angle5"],"emotional_tone":"grinding","diff_summary":"First week baseline."}
+MASTER DOC: ${rawInput.slice(0, 4000)}
+emotional_tone must be: high, reflective, grinding, or celebratory`
 
-WEEKLY CONTENT:
-${rawInput}
-
-emotional_tone must be one of: high, reflective, grinding, celebratory`
-          )
+          const ingestResult = await model.generateContent(ingestPrompt)
           const extracted_insights = somaParseGeminiJson(ingestResult.response.text())
 
           // Insert ingestion record
           const { data: ingestion, error: ingestionErr } = await admin
             .from('soma_weekly_ingestion')
             .insert({
-              workspace_id: workspace.id,
-              user_id: workspace.owner_id,
+              workspace_id: project.workspace_id,
+              user_id: project.user_id,
               week_label: weekLabel,
               raw_input: rawInput,
               extracted_insights,
               generated_posts_count: 0,
+              metadata: { project_id: project.id, auto: true },
             })
             .select('id')
             .single()
 
           if (ingestionErr || !ingestion) throw new Error(`Ingestion insert failed: ${ingestionErr?.message}`)
 
-          // Generate 21 posts
-          const genResult = await model.generateContent(
-            `${identityContext}
+          // Generate platform-native posts
+          const platformInstructions = platforms
+            .map(p => SOMA_PLATFORM_INSTRUCTIONS[p] ?? `${p}: Keep it natural and platform-appropriate.`)
+            .join('\n')
+          const totalPosts = postsPerDay * windowDays
+
+          const genPrompt = `${identityContext}
 
 THIS WEEK'S INSIGHTS:
 Key themes: ${extracted_insights.key_themes?.join(', ')}
 Wins: ${extracted_insights.wins?.join(', ')}
 Challenges: ${extracted_insights.challenges?.join(', ')}
+What changed: ${extracted_insights.diff_summary ?? 'New content week'}
 Content angles: ${extracted_insights.content_angles?.join(' | ')}
 Emotional tone: ${extracted_insights.emotional_tone}
 
-Generate 21 social media posts for a 7-day calendar (3 per day).
+PLATFORM-SPECIFIC FORMATTING RULES:
+${platformInstructions}
+
+Generate ${totalPosts} posts spread across ${windowDays} days, ${postsPerDay} per day.
+Assign each post to exactly one platform from: ${platforms.join(', ')}
+Distribute platforms roughly evenly.
+
 Return ONLY valid JSON:
-{"posts":[{"day":1,"slot":"morning","content":"post text","platform_hint":"any","content_type":"mindset"}]}
+{"posts":[{"day":1,"slot":"morning","platform":"bluesky","content":"post text","content_type":"mindset"}]}
 
 Rules:
-- day 1-7, slot: morning/afternoon/evening (7 each)
+- day 1 to ${windowDays}, slot: morning/afternoon/evening
 - morning: mindset/vision, afternoon: progress/updates, evening: reflection/lesson
 - NEVER use: "In today's world", "Let's dive in", "game-changer", "synergy", "leverage"
-- Under 280 characters, sound human`
-          )
+- Format each post correctly for its platform
+- Sound human, not AI-generated`
+
+          const genResult = await model.generateContent(genPrompt)
           const { posts: generatedPosts = [] } = somaParseGeminiJson(genResult.response.text())
 
-          // Insert drafts
+          // Insert posts
           let postsCreated = 0
+          const postStatus = project.mode === 'full_send' ? 'scheduled' : 'scheduled' // both auto modes schedule
           for (const post of generatedPosts as any[]) {
             const base = new Date()
             base.setDate(base.getDate() + (post.day - 1))
@@ -3570,40 +3624,46 @@ Rules:
             base.setHours(hours, 0, 0, 0)
 
             const { error: postErr } = await admin.from('posts').insert({
-              user_id: workspace.owner_id,
-              workspace_id: workspace.id,
+              user_id: project.user_id,
+              workspace_id: project.workspace_id,
               content: post.content,
-              platforms: ['bluesky'],
-              status: 'draft',
+              platforms: [post.platform ?? platforms[0]],
+              status: postStatus,
               scheduled_at: base.toISOString(),
-              metadata: { source: 'soma_autopilot', ingestion_id: ingestion.id, day: post.day, slot: post.slot, content_type: post.content_type },
+              metadata: { source: 'soma_autopilot', project_id: project.id, ingestion_id: ingestion.id, day: post.day, slot: post.slot, content_type: post.content_type },
             })
             if (!postErr) postsCreated++
           }
 
           await admin.from('soma_weekly_ingestion').update({ generated_posts_count: postsCreated }).eq('id', ingestion.id)
 
-          // Deduct autopilot_run credits
-          const monthly = workspace.soma_credits_monthly ?? 0
-          const used = workspace.soma_credits_used ?? 0
-          const purchased = workspace.soma_credits_purchased ?? 0
+          // Update project runs
+          await admin.from('soma_projects')
+            .update({ runs_this_month: (project.runs_this_month ?? 0) + 1, last_generated_at: now.toISOString() })
+            .eq('id', project.id)
+
+          // Deduct credits
+          const monthly = ws.soma_credits_monthly ?? 0
+          const used = ws.soma_credits_used ?? 0
+          const purchased = ws.soma_credits_purchased ?? 0
           const monthlyAvailable = Math.max(0, monthly - used)
-          const newUsed = monthlyAvailable >= AUTOPILOT_COST ? used + AUTOPILOT_COST : monthly
-          const newPurchased = monthlyAvailable >= AUTOPILOT_COST ? purchased : purchased - (AUTOPILOT_COST - monthlyAvailable)
+          const newUsed = monthlyAvailable >= GENERATE_COST ? used + GENERATE_COST : monthly
+          const newPurchased = monthlyAvailable >= GENERATE_COST ? purchased : purchased - (GENERATE_COST - monthlyAvailable)
           const balanceAfter = Math.max(0, monthly - newUsed) + newPurchased
 
-          await admin.from('workspaces').update({ soma_credits_used: newUsed, soma_credits_purchased: newPurchased }).eq('id', workspace.id)
-          await admin.from('soma_credit_ledger').insert({ workspace_id: workspace.id, user_id: workspace.owner_id, action_type: 'autopilot_run', credits_used: AUTOPILOT_COST, balance_after: balanceAfter })
+          await admin.from('workspaces').update({ soma_credits_used: newUsed, soma_credits_purchased: newPurchased }).eq('id', project.workspace_id)
+          await admin.from('soma_credit_ledger').insert({ workspace_id: project.workspace_id, user_id: project.user_id, action_type: 'autopilot_run', credits_used: GENERATE_COST, balance_after: balanceAfter })
 
           // Notify user
-          await inngest.send({ name: 'notification/send', data: { user_id: workspace.owner_id, type: 'soma_autopilot', title: 'Your week is ready', body: `SOMA generated ${postsCreated} draft posts. Review them in your queue.`, link: '/soma' } })
-          await sendPushNotification(workspace.owner_id, 'Your week is ready!', `SOMA generated ${postsCreated} posts. Review in your queue.`, '/soma', 'soma_autopilot')
+          const ownerId = ws.owner_id ?? project.user_id
+          await inngest.send({ name: 'notification/send', data: { user_id: ownerId, type: 'soma_autopilot', title: `"${project.name}" week is ready`, body: `SOMA generated ${postsCreated} posts. Review them in your queue.`, link: `/soma/projects/${project.id}` } })
+          await sendPushNotification(ownerId, `"${project.name}" week is ready!`, `SOMA generated ${postsCreated} posts. Review in your queue.`, `/soma/projects/${project.id}`, 'soma_autopilot')
 
-          console.log(`[SomaAutopilot] workspace ${workspace.id}: ${postsCreated} posts`)
+          console.log(`[SomaAutopilot] project ${project.id} (${project.name}): ${postsCreated} posts`)
         })
         processed++
       } catch (err: any) {
-        console.error(`[SomaAutopilot] workspace ${workspace.id} failed:`, err?.message)
+        console.error(`[SomaAutopilot] project ${project.id} failed:`, err?.message)
         failed++
       }
     }
