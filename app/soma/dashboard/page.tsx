@@ -81,76 +81,115 @@ function PlatformBadge({ platform }: { platform: string }) {
   )
 }
 
-// ── Autopilot Upgrade Modal ───────────────────────────────────────────────────
+// ── Upgrade Modal ─────────────────────────────────────────────────────────────
 
-const SOMA_AUTOPILOT_PRICE_ID = 'price_1TP8rU7OMwDowUuUYLBNAVux'
+const SOMA_AUTOPILOT_PRICE_ID  = 'price_1TP8rU7OMwDowUuUYLBNAVux'
+const SOMA_FULL_SEND_PRICE_ID  = 'price_1TPlGE7OMwDowUuUWS0QUnLw'
+
+const TIERS = [
+  {
+    id:       'autopilot',
+    priceId:  SOMA_AUTOPILOT_PRICE_ID,
+    icon:     '⚡',
+    name:     'Autopilot',
+    price:    '$10/mo',
+    color:    'border-violet-500/50 bg-violet-900/20',
+    badge:    'text-violet-300',
+    btn:      'from-violet-500 to-violet-400',
+    features: [
+      'Posts auto-schedule — no review required per post',
+      'You get a notification batch to approve or skip',
+      '8 generation runs/month',
+      'Up to 5 posts/day, 14-day windows',
+    ],
+  },
+  {
+    id:       'full_send',
+    priceId:  SOMA_FULL_SEND_PRICE_ID,
+    icon:     '🚀',
+    name:     'Full Send',
+    price:    '$20/mo',
+    color:    'border-amber-500/50 bg-amber-900/20',
+    badge:    'text-amber-300',
+    btn:      'from-amber-500 to-yellow-400',
+    features: [
+      'Fully autonomous — posts go live with zero review',
+      'Maximum 12 generation runs/month',
+      'Up to 10 posts/day, 14-day windows',
+      'Priority Gemini processing',
+    ],
+  },
+]
 
 function AutopilotModal({ onClose }: { onClose: () => void }) {
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState<string | null>(null)
   const [err, setErr] = useState('')
 
-  const handleUpgrade = async () => {
-    setLoading(true)
+  const handleUpgrade = async (priceId: string, tierId: string) => {
+    setLoading(tierId)
     setErr('')
     try {
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId: SOMA_AUTOPILOT_PRICE_ID }),
+        body: JSON.stringify({ priceId }),
       })
       const data = await res.json()
-      if (!res.ok || !data.url) { setErr(data.error || 'Could not start checkout.'); setLoading(false); return }
+      if (!res.ok || !data.url) { setErr(data.error || 'Could not start checkout.'); setLoading(null); return }
       window.location.href = data.url
     } catch {
       setErr('Network error. Please try again.')
-      setLoading(false)
+      setLoading(null)
     }
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl border border-amber-500/30 bg-gray-900 shadow-2xl overflow-hidden">
-        <div className="h-1 w-full bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600" />
+      <div className="w-full max-w-lg rounded-2xl border border-gray-700 bg-gray-900 shadow-2xl overflow-hidden">
+        <div className="h-1 w-full bg-gradient-to-r from-violet-500 via-amber-400 to-amber-500" />
         <div className="p-6 sm:p-8">
           <div className="text-center mb-6">
-            <span className="text-4xl">🔥</span>
-            <h2 className="text-xl font-extrabold text-white mt-2 mb-1">SOMA Autopilot</h2>
-            <p className="text-gray-400 text-sm">Unlock fully automated content scheduling.</p>
+            <h2 className="text-xl font-extrabold text-white mb-1">Unlock SOMA Automation</h2>
+            <p className="text-gray-400 text-sm">Choose how autonomous you want SOMA to be.</p>
           </div>
 
-          <ul className="space-y-2.5 mb-6">
-            {[
-              'Auto-schedules generated posts',
-              'Continuously optimizes based on performance',
-              'Runs ingestion + generation weekly',
-              'Priority Gemini processing',
-            ].map(f => (
-              <li key={f} className="flex items-center gap-2.5 text-sm text-gray-300">
-                <span className="text-green-400 flex-shrink-0">✅</span>
-                {f}
-              </li>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+            {TIERS.map(tier => (
+              <div key={tier.id} className={`rounded-xl border p-4 flex flex-col ${tier.color}`}>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-2xl">{tier.icon}</span>
+                  <div>
+                    <p className={`text-sm font-extrabold ${tier.badge}`}>{tier.name}</p>
+                    <p className="text-xs text-gray-400">{tier.price}</p>
+                  </div>
+                </div>
+                <ul className="space-y-1.5 mb-4 flex-1">
+                  {tier.features.map(f => (
+                    <li key={f} className="flex items-start gap-1.5 text-xs text-gray-300">
+                      <span className="text-green-400 mt-0.5 flex-shrink-0">✓</span>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  onClick={() => handleUpgrade(tier.priceId, tier.id)}
+                  disabled={loading !== null}
+                  className={`w-full bg-gradient-to-r ${tier.btn} text-gray-900 font-extrabold text-xs px-4 py-2.5 rounded-lg hover:opacity-90 transition-all disabled:opacity-60 disabled:cursor-not-allowed`}
+                >
+                  {loading === tier.id ? 'Redirecting…' : `Get ${tier.name} →`}
+                </button>
+              </div>
             ))}
-          </ul>
-
-          <p className="text-center text-amber-400 font-bold text-lg mb-5">$10/month add-on</p>
+          </div>
 
           {err && <p className="text-xs text-red-400 text-center mb-3">{err}</p>}
 
-          <div className="flex flex-col gap-3">
-            <button
-              onClick={handleUpgrade}
-              disabled={loading}
-              className="block w-full text-center bg-gradient-to-r from-amber-500 to-yellow-400 text-gray-900 font-extrabold text-sm px-6 py-3 rounded-xl hover:opacity-90 transition-all shadow-lg shadow-amber-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Redirecting…' : 'Upgrade to Autopilot →'}
-            </button>
-            <button
-              onClick={onClose}
-              className="w-full text-center text-sm text-gray-400 hover:text-gray-200 transition-colors py-2"
-            >
-              Stay on Safe Mode
-            </button>
-          </div>
+          <p className="text-center text-xs text-gray-600 mb-3">
+            Safe Mode (free) stays available. You can downgrade anytime from Settings.
+          </p>
+          <button onClick={onClose} className="w-full text-center text-sm text-gray-500 hover:text-gray-300 transition-colors py-1">
+            Stay on Safe Mode
+          </button>
         </div>
       </div>
     </div>
