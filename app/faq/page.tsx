@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Metadata } from 'next'
 import PublicNav from '@/components/PublicNav'
-import Footer from '@/components/Footer'
+import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'FAQ — SocialMate',
@@ -205,7 +205,7 @@ export default function FaqPage() {
 
       </main>
 
-      <Footer />
+      <PublicFooter />
     </div>
   )
 }
