@@ -95,12 +95,14 @@ const MODES = [
 ]
 
 const PLATFORMS = [
-  { name: 'Twitter / X',  format: 'Punchy ≤280 chars' },
-  { name: 'Bluesky',      format: 'Conversational ≤300 chars' },
-  { name: 'LinkedIn',     format: 'Professional long-form' },
-  { name: 'Mastodon',     format: 'Community-native tone' },
-  { name: 'Instagram',    format: 'Caption + hashtags' },
-  { name: 'Discord',      format: 'Server announcement style' },
+  { name: 'Twitter / X',  format: 'Punchy ≤280 chars. Max 2 hashtags.',      live: true  },
+  { name: 'Bluesky',      format: 'Conversational ≤300 chars.',               live: true  },
+  { name: 'Mastodon',     format: 'Community-native tone. ≤500 chars.',       live: true  },
+  { name: 'Discord',      format: 'Server announcement style.',                live: true  },
+  { name: 'Telegram',     format: 'Clean, direct copy.',                      live: true  },
+  { name: 'LinkedIn',     format: 'Professional long-form. 3-6 sentences.',   live: false },
+  { name: 'Instagram',    format: 'Caption + 5-8 hashtags.',                  live: false },
+  { name: 'TikTok',       format: 'Short punchy caption for video.',          live: false },
 ]
 
 const FAQS = [
@@ -118,7 +120,7 @@ const FAQS = [
   },
   {
     q: 'What does "platform-native" mean?',
-    a: 'The same core message gets reformatted per platform. Twitter gets punchy ≤280 chars. LinkedIn gets professional long-form. Instagram gets captions with hashtags. One generation, native output everywhere.',
+    a: 'The same core message gets reformatted per platform. Twitter gets punchy ≤280 chars. Bluesky gets conversational copy. Mastodon gets community-native tone. Discord gets announcement style. For platforms coming soon (LinkedIn, Instagram, TikTok), SOMA generates the content anyway — you can copy and post manually, or it auto-queues once that platform connects.',
   },
   {
     q: 'Will SOMA spam my followers?',
@@ -274,15 +276,22 @@ export default function SomaLandingPage() {
                 for each platform — so it sounds right everywhere.
               </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
               {PLATFORMS.map((p) => (
                 <div key={p.name} className="px-6 py-5 border-b border-r border-gray-800">
-                  <p className="text-sm font-bold text-violet-400 mb-1 flex items-center gap-2">
-                    <span>◆</span> {p.name}
+                  <p className={`text-sm font-bold mb-1 flex items-center gap-2 ${p.live ? 'text-violet-400' : 'text-gray-600'}`}>
+                    <span>{p.live ? '◆' : '○'}</span> {p.name}
+                    {!p.live && <span className="text-[10px] font-semibold bg-gray-800 text-gray-500 px-1.5 py-0.5 rounded">soon</span>}
                   </p>
                   <p className="text-xs text-gray-500">{p.format}</p>
                 </div>
               ))}
+            </div>
+            <div className="px-8 py-4 border-t border-gray-800 bg-gray-900/40">
+              <p className="text-xs text-gray-500">
+                <span className="text-violet-400 font-semibold">◆ Live now</span> — SOMA generates and schedules automatically to your connected accounts.{' '}
+                <span className="text-gray-400 font-semibold">○ Coming soon</span> — SOMA generates the content anyway. Copy and post manually, or it queues automatically once the platform connects.
+              </p>
             </div>
           </div>
         </section>

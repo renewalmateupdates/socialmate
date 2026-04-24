@@ -105,7 +105,7 @@ These have burned us before — always apply:
 
 ---
 
-## What's Been Built (as of April 21, 2026 — end of day)
+## What's Been Built (as of April 24, 2026 — end of day)
 
 **Core:**
 - Post scheduling (Now + future via Inngest), drafts, queue, calendar, bulk scheduling
@@ -267,6 +267,17 @@ These have burned us before — always apply:
 - **LinkedIn Company Page** — setup started at linkedin.com/company/setup/new. Must complete + publish before applying for LinkedIn API.
 - **LinkedIn posts drafted** — two long-form SEO/AEO posts written: Post 1 (Apr 23 tonight): TikTok API submission story. Post 2 (Apr 24 morning): bootstrapped builder narrative + feature roundup.
 
+**April 24, 2026:**
+- **Streak notifications** (Inngest cron `0 22 * * *`) — alerts users with 3+ day streaks who haven't posted today. Idempotent via notifications table. Push + in-app notification.
+- **SOMA autopilot Inngest cron** (`0 12 * * 1`) — Monday weekly run. Rewrote to iterate `soma_projects` (not workspaces): uses per-project platforms, posts/day, window, run caps. Diffs master docs when available. Notifications link to specific project page.
+- **SOMA Phase 2** (PR #208) — Named projects system: `/soma/projects/new`, `/soma/projects/[id]` (doc upload, diff results, generate button, doc history, delete modal), all project CRUD APIs, ingest API (Gemini diff analysis, saves versioned master docs, 25 credits), generate API (platform-native single-call generation, run caps, 75 credits). SQL: `soma_projects` + `soma_master_docs` tables with RLS applied.
+- **FAQ page** — `/faq` with 6 sections: General, SOMA, Enki, Studio Stax, Billing, Privacy. Added to Resources dropdown in PublicNav and sitemap.
+- **Home page nav unified** — `LandingHeader` replaced with `PublicNav` on `/` — now matches all other public pages.
+- **Footer** — SOMA + Enki added to Product column in `PublicFooter`.
+- **SOMA landing page platforms** — corrected to show live (Twitter, Bluesky, Mastodon, Discord, Telegram) vs coming soon (LinkedIn, Instagram, TikTok). Coming-soon platforms still generate content for manual posting, auto-queues when platform connects.
+- **LinkedIn posts** — SOMA-focused long-form post written for LinkedIn distribution.
+- **Inngest version** — pinned to `3.54.0` (security-patched 3.x, compatible with 3-arg `createFunction` API used throughout codebase).
+
 ---
 
 ## Known Issues / Bugs (fix these when touched)
@@ -297,11 +308,17 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 ## Pending / In Progress
 
+- **Merge PR #208 + PR #209** — SOMA Phase 2 + autopilot/FAQ. Both ready. Merge when Vercel goes green on #209.
+
+- **Resync Inngest** after merging PRs #208/#209 — `streak-notifications` and `soma-autopilot-run` must register. Go to Inngest Dashboard → Apps → Resync.
+
+- **Abdus Sohag trial review** — trial ends April 26. Decide: keep at 10%, bump to standard 30%, or cut. Referral link: `?ref=SOHAG`.
+
 - **Content posts (Apr 20–26)** — bulk-scheduled, running daily 8am–5pm ET on X + Bluesky. May need to manually retry any missed morning slots.
 
 - **Inngest env vars** — confirmed needed: `INNGEST_EVENT_KEY` + `INNGEST_SIGNING_KEY` in Vercel. Verify they're still set after any Vercel config changes.
 
-- **Push notification VAPID keys** — need to generate and add to Vercel: run `npx web-push generate-vapid-keys` then set `NEXT_PUBLIC_VAPID_PUBLIC_KEY` + `VAPID_PRIVATE_KEY`. Push notifications won't send until these are set.
+- **Push notification VAPID keys** — CONFIRMED SET in Vercel. Push notifications are live.
 
 - **Studio Stax renewal SQL** — run in Supabase if migration doesn't auto-apply:
   ```sql
@@ -317,19 +334,20 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 - **Brand Voice SQL** — run in Supabase: `ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS brand_voice JSONB DEFAULT NULL;`
 
-- **SOMA SQL** — run in Supabase after merging PR #202 (see April 22 section above for full SQL block). Also add `resetSomaCredits` to Inngest after merge — resync dashboard.
+- **SOMA SQL** — `soma_projects` + `soma_master_docs` tables confirmed applied. `soma_identity_profiles`, `soma_weekly_ingestion`, `soma_credit_ledger` tables + SOMA columns on workspaces confirmed applied (PR #202).
 
-- **SOMA Autopilot Stripe price** — create `$10/mo` recurring price in Stripe → set as `SOMA_AUTOPILOT_PRICE_ID` env var in Vercel.
-
-- **Resync Inngest** after merging SOMA PRs — new `reset-soma-credits` cron (`0 0 1 * *`) added. Go to Inngest Dashboard → Apps → Resync.
-
-- **Growth partner trial (Abdus Sohag)** — 1-week trial active as of Apr 19. Referral link: `?ref=SOHAG`. Review end of week; renegotiate to standard 30% if performance warrants.
+- **SOMA Autopilot Stripe price** — `price_1TP8rU7OMwDowUuUYLBNAVux` already live ($10/mo). Wired in AutopilotModal.
 
 - **Enki Truth Mode testing** — market now open (Apr 21). 50-trade minimum per strategy before results are statistically valid.
 
-- **LinkedIn integration** — API credentials not yet acquired. Requires: (1) LinkedIn Company Page published, (2) developer app at linkedin.com/developers, (3) apply for Marketing Developer Platform. Company Page setup started Apr 23.
+- **LinkedIn integration** — API credentials not yet acquired. Requires: (1) LinkedIn Company Page published, (2) developer app at linkedin.com/developers, (3) apply for Marketing Developer Platform. Company Page setup started Apr 23. On hold until Joshua has time.
+
+- **TikTok API review** — submitted Apr 23. Check TikTok developer portal daily. 2–4 week review window. No action needed until approved.
 
 **Roadmap (next up):**
+- **Media Library** — listed as "in progress" on roadmap, needs building
+- **SOMA email notifications** — Resend emails when autopilot runs, posts ready to review
+- **SOMA Full Send tier** — Stripe price ($20/mo), UI enforcement
 - **Creator Monetization Hub** — fan subscriptions, tip jars, paywalled content
 - **Content DNA** — cross-platform performance fingerprinting
 - **Unified inbox replies** — reply to comments/DMs (read-only inbox done; write/reply not yet built)
