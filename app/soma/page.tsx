@@ -30,64 +30,69 @@ const MODES = [
   {
     name: 'Safe Mode',
     icon: '🟢',
-    included: 'Included with Pro',
     price: '$0',
     priceSub: 'Included with Pro plan',
-    color: 'border-emerald-500/40 bg-emerald-950/20',
-    labelColor: 'text-emerald-400',
-    ctaStyle: 'border-2 border-emerald-500 text-emerald-400 hover:bg-emerald-950/40',
+    badge: 'Included Free',
+    cardBg: 'bg-emerald-50 dark:bg-emerald-950/20',
+    border: 'border-2 border-emerald-400',
+    headerText: 'text-gray-900 dark:text-white',
+    subText: 'text-gray-500 dark:text-gray-400',
+    badgeStyle: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300',
+    ctaStyle: 'border-2 border-emerald-500 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30',
     ctaLabel: 'Open Dashboard',
     ctaHref: '/soma/dashboard',
-    disabled: false,
     desc: 'SOMA generates your content queue. You review and approve each post before anything goes live. Full control, zero risk.',
     features: [
       '7-day content window',
-      '2 platforms',
       'Up to 2 posts/day',
       '4 generation runs/month',
+      'All connected platforms',
       'Approve before posting',
     ],
   },
   {
     name: 'Autopilot',
     icon: '⚡',
-    included: '$10/month',
     price: '$10',
     priceSub: '/month add-on',
-    color: 'border-violet-500/40 bg-violet-950/20 ring-2 ring-violet-500/30 ring-offset-2 ring-offset-gray-950',
-    labelColor: 'text-violet-400',
     badge: 'Most Popular',
-    ctaStyle: 'bg-violet-600 hover:bg-violet-700 text-white',
+    cardBg: 'bg-amber-50 dark:bg-amber-950/20',
+    border: 'border-2 border-amber-400',
+    headerText: 'text-gray-900 dark:text-white',
+    subText: 'text-gray-500 dark:text-gray-400',
+    badgeStyle: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300',
+    ctaStyle: 'bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold',
     ctaLabel: 'Upgrade to Autopilot',
     ctaHref: '/soma/dashboard',
-    disabled: false,
     desc: 'SOMA generates and auto-schedules. You get a notification to review but posts go live on schedule. Hands-off content marketing.',
     features: [
       '14-day content window',
-      'All connected platforms',
       'Up to 5 posts/day',
       '8 generation runs/month',
+      'All connected platforms',
       'Auto-schedules with notification',
     ],
   },
   {
     name: 'Full Send',
     icon: '🚀',
-    included: '$20/month',
     price: '$20',
     priceSub: '/month add-on',
-    color: 'border-amber-500/40 bg-amber-950/20',
-    labelColor: 'text-amber-400',
-    ctaStyle: 'bg-amber-500 hover:bg-amber-400 text-black',
+    badge: 'Full Autonomous',
+    cardBg: 'bg-purple-50 dark:bg-purple-950/20',
+    border: 'border-2 border-purple-500',
+    headerText: 'text-gray-900 dark:text-white',
+    subText: 'text-gray-500 dark:text-gray-400',
+    badgeStyle: 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300',
+    ctaStyle: 'bg-purple-600 hover:bg-purple-700 text-white font-extrabold',
     ctaLabel: 'Upgrade to Full Send',
     ctaHref: '/soma/dashboard',
-    disabled: false,
     desc: 'Maximum frequency. Drop your master doc, SOMA handles everything. Platform-native posts, optimized times, zero friction.',
     features: [
       '14-day content window',
-      'All connected platforms',
       'Up to 10 posts/day',
       '12 generation runs/month',
+      'All connected platforms',
       'Fully autonomous — no approval needed',
     ],
   },
@@ -238,27 +243,26 @@ export default function SomaLandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {MODES.map(mode => (
-              <div key={mode.name} className={`rounded-2xl border p-6 flex flex-col ${mode.color}`}>
+              <div key={mode.name} className={`rounded-2xl p-6 flex flex-col ${mode.cardBg} ${mode.border}`}>
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-2">
                     <span className="text-xl">{mode.icon}</span>
-                    <h3 className={`text-sm font-extrabold ${mode.labelColor}`}>{mode.name}</h3>
+                    <h3 className={`text-sm font-extrabold ${mode.headerText}`}>{mode.name}</h3>
                   </div>
                   {mode.badge && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10 text-gray-300 border border-white/10">
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${mode.badgeStyle}`}>
                       {mode.badge}
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-gray-400 leading-relaxed mb-4 flex-1">{mode.desc}</p>
-                <ul className="space-y-2 mb-5">
+                <p className={`text-xs leading-relaxed mb-4 flex-1 ${mode.subText}`}>{mode.desc}</p>
+                <ul className="space-y-2">
                   {mode.features.map(f => (
-                    <li key={f} className="flex items-center gap-2 text-xs text-gray-300">
-                      <span className={`flex-shrink-0 font-bold ${mode.labelColor}`}>◆</span> {f}
+                    <li key={f} className={`flex items-center gap-2 text-xs ${mode.subText}`}>
+                      <span className="flex-shrink-0 text-emerald-500 font-bold">✓</span> {f}
                     </li>
                   ))}
                 </ul>
-                <p className={`text-sm font-extrabold ${mode.labelColor}`}>{mode.included}</p>
               </div>
             ))}
           </div>
@@ -332,32 +336,33 @@ export default function SomaLandingPage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {MODES.map(mode => (
-              <div key={`pricing-${mode.name}`} className={`rounded-2xl border p-6 flex flex-col ${mode.color}`}>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xl">{mode.icon}</span>
-                  <h3 className={`text-lg font-extrabold ${mode.labelColor}`}>{mode.name}</h3>
+              <div key={`pricing-${mode.name}`} className={`rounded-2xl p-6 flex flex-col ${mode.cardBg} ${mode.border}`}>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">{mode.icon}</span>
+                    <h3 className={`text-base font-extrabold ${mode.headerText}`}>{mode.name}</h3>
+                  </div>
+                  {mode.badge && (
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${mode.badgeStyle}`}>
+                      {mode.badge}
+                    </span>
+                  )}
                 </div>
                 <div className="flex items-end gap-1 mb-1">
-                  <span className={`text-4xl font-extrabold ${mode.labelColor}`}>{mode.price}</span>
-                  {mode.price !== '$0' && <span className="text-xs text-gray-400 mb-1.5">/mo</span>}
+                  <span className={`text-4xl font-extrabold ${mode.headerText}`}>{mode.price}</span>
+                  {mode.price !== '$0' && <span className={`text-xs mb-1.5 ${mode.subText}`}>/mo</span>}
                 </div>
-                <p className="text-xs text-gray-400 mb-5">{mode.priceSub}</p>
+                <p className={`text-xs mb-5 ${mode.subText}`}>{mode.priceSub}</p>
                 <ul className="space-y-2.5 flex-1 mb-6">
                   {mode.features.map(f => (
-                    <li key={f} className="flex items-center gap-2 text-xs text-gray-300">
-                      <span className={`flex-shrink-0 font-bold ${mode.labelColor}`}>◆</span> {f}
+                    <li key={f} className={`flex items-center gap-2 text-xs ${mode.subText}`}>
+                      <span className="flex-shrink-0 text-emerald-500 font-bold">✓</span> {f}
                     </li>
                   ))}
                 </ul>
-                {mode.disabled ? (
-                  <button disabled className={`w-full text-center text-sm font-bold py-3 rounded-xl transition-all ${mode.ctaStyle}`}>
-                    {mode.ctaLabel}
-                  </button>
-                ) : (
-                  <Link href={mode.ctaHref} className={`w-full text-center text-sm font-bold py-3 rounded-xl transition-all block ${mode.ctaStyle}`}>
-                    {mode.ctaLabel} →
-                  </Link>
-                )}
+                <Link href={mode.ctaHref} className={`w-full text-center text-sm font-bold py-3 rounded-xl transition-all block ${mode.ctaStyle}`}>
+                  {mode.ctaLabel} →
+                </Link>
               </div>
             ))}
           </div>

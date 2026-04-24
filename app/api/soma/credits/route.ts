@@ -60,6 +60,7 @@ export async function GET() {
       used,
       purchased,
       remaining,
+      plan,
       mode:              workspace.soma_mode ?? 'safe',
       autopilot_enabled: workspace.soma_autopilot_enabled ?? false,
     })
