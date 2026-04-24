@@ -23,6 +23,7 @@ interface SomaCredits {
   used: number
   purchased: number
   remaining: number
+  plan: string
   autopilot_enabled: boolean
   mode: 'safe' | 'autopilot'
 }
@@ -229,8 +230,9 @@ export default function SomaDashboardPage() {
         setCredits(c)
         setCurrentMode(c.mode)
 
-        // Redirect free users (no soma credits)
-        if (c.monthly === 0) {
+        // Redirect free plan users — Pro/Agency always get through (credits auto-provision)
+        const normalizedPlan = c.plan?.replace('_annual', '') ?? 'free'
+        if (normalizedPlan === 'free') {
           router.push('/soma/upgrade')
           return
         }
