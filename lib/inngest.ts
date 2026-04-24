@@ -3309,3 +3309,94 @@ export const resetSomaCredits = inngest.createFunction(
     return result
   }
 )
+
+export const streakNotifications = inngest.createFunction(
+  { id: 'streak-notifications', name: 'Streak Notifications', retries: 2 },
+  { cron: '0 22 * * *' }, // 6 PM ET (approx)
+  async ({ step }) => {
+    const nowUtc = new Date()
+    const todayUtc = new Date(Date.UTC(nowUtc.getUTCFullYear(), nowUtc.getUTCMonth(), nowUtc.getUTCDate()))
+    const thirtyDaysAgo = new Date(todayUtc.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
+
+    const atRiskUsers = await step.run('find-streak-at-risk-users', async () => {
+      const { data: posts, error } = await getSupabaseAdmin()
+        .from('posts')
+        .select('user_id, published_at')
+        .gte('published_at', thirtyDaysAgo)
+        .in('status', ['published', 'partial'])
+        .not('published_at', 'is', null)
+
+      if (error) {
+        console.error('[StreakNotifications] Failed to query posts:', error.message)
+        return []
+      }
+      if (!posts?.length) return []
+
+      function dayKey(iso: string) {
+        const d = new Date(iso)
+        return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}-${String(d.getUTCDate()).padStart(2, '0')}`
+      }
+
+      const todayKey = dayKey(todayUtc.toISOString())
+
+      const userDays = new Map<string, Set<string>>()
+      for (const post of posts) {
+        if (!userDays.has(post.user_id)) userDays.set(post.user_id, new Set())
+        userDays.get(post.user_id)!.add(dayKey(post.published_at))
+      }
+
+      const atRisk: Array<{ user_id: string; streak: number }> = []
+
+      for (const [userId, days] of Array.from(userDays.entries())) {
+        if (days.has(todayKey)) continue // already posted today, no alert needed
+
+        let streak = 0
+        const cursor = new Date(todayUtc)
+        cursor.setUTCDate(cursor.getUTCDate() - 1)
+        while (streak < 30) {
+          if (!days.has(dayKey(cursor.toISOString()))) break
+          streak++
+          cursor.setUTCDate(cursor.getUTCDate() - 1)
+        }
+
+        if (streak >= 3) atRisk.push({ user_id: userId, streak })
+      }
+
+      return atRisk
+    })
+
+    if (!atRiskUsers.length) {
+      console.log('[StreakNotifications] No at-risk streaks')
+      return { notified: 0 }
+    }
+
+    const userIds = atRiskUsers.map(u => u.user_id)
+
+    const recentlyNotifiedIds = await step.run('find-recently-notified', async () => {
+      const { data } = await getSupabaseAdmin()
+        .from('notifications')
+        .select('user_id')
+        .in('user_id', userIds)
+        .eq('type', 'streak_at_risk')
+        .gte('created_at', todayUtc.toISOString())
+      return (data ?? []).map((n: any) => n.user_id as string)
+    })
+
+    const notifiedSet = new Set<string>(recentlyNotifiedIds)
+    const toNotify = atRiskUsers.filter(u => !notifiedSet.has(u.user_id))
+
+    await step.run('send-streak-notifications', async () => {
+      for (const user of toNotify) {
+        const body = `You're on a ${user.streak}-day posting streak! Post something today to keep it going.`
+        await inngest.send({
+          name: 'notification/send',
+          data: { user_id: user.user_id, type: 'streak_at_risk', title: 'Your streak is at risk!', body, link: '/create' },
+        })
+        await sendPushNotification(user.user_id, 'Streak at risk!', body, '/create', 'streak_at_risk')
+      }
+    })
+
+    console.log(`[StreakNotifications] Notified ${toNotify.length} (skipped ${atRiskUsers.length - toNotify.length})`)
+    return { notified: toNotify.length, skipped: atRiskUsers.length - toNotify.length }
+  }
+)
