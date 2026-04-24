@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import ReferralBanner from '@/app/components/ReferralBanner'
-import LandingHeader from '@/components/LandingHeader'
+import PublicNav from '@/components/PublicNav'
 import UserStatsCounter from '@/components/UserStatsCounter'
 import PHLaunchBanner from '@/components/PHLaunchBanner'
 import HeroLaunchBadge from '@/components/HeroLaunchBadge'
@@ -145,7 +145,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
       <PHLaunchBanner />
 
       {/* NAV */}
-      <LandingHeader isLoggedIn={isLoggedIn} />
+      <PublicNav />
 
       {/* HERO */}
       <section className="max-w-4xl mx-auto px-6 pt-24 pb-20 text-center">

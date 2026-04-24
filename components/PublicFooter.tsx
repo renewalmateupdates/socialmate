@@ -11,6 +11,8 @@ const FOOTER_COLUMNS: FooterColumn[] = [
       { label: 'Pricing',      href: '/pricing'  },
       { label: 'Roadmap',      href: '/roadmap'  },
       { label: 'Clips Studio', href: '/clips'    },
+      { label: 'SOMA',         href: '/soma'     },
+      { label: 'Enki',         href: '/enki'     },
     ],
   },
   {
