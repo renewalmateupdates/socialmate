@@ -172,7 +172,7 @@ export default function SomaWeeklyPage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
             <Link
-              href="/soma"
+              href="/soma/dashboard"
               className="px-5 py-3 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-semibold text-sm transition-colors"
             >
               Review in SOMA Queue →
@@ -473,7 +473,7 @@ export default function SomaWeeklyPage() {
 
         {/* Back link */}
         <div className="text-center">
-          <Link href="/soma" className="text-zinc-600 hover:text-zinc-400 text-xs transition-colors">
+          <Link href="/soma/dashboard" className="text-zinc-600 hover:text-zinc-400 text-xs transition-colors">
             ← Back to SOMA
           </Link>
         </div>
