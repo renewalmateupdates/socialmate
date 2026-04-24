@@ -17,6 +17,7 @@ import {
   studioStaxRenewalEmails,
   resetSomaCredits,
   streakNotifications,
+  somaAutopilotRun,
 } from '@/lib/inngest'
 
 export const { GET, POST, PUT } = serve({
@@ -37,5 +38,6 @@ export const { GET, POST, PUT } = serve({
     studioStaxRenewalEmails,
     resetSomaCredits,
     streakNotifications,
+    somaAutopilotRun,
   ],
 })

@@ -1,616 +1,430 @@
-'use client'
-import { useEffect, useState, useCallback } from 'react'
-import { supabase } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Sidebar from '@/components/Sidebar'
+import PublicLayout from '@/components/PublicLayout'
 
-// ── Types ────────────────────────────────────────────────────────────────────
+const STATS = [
+  { value: '3',    label: 'Posting Modes' },
+  { value: '6+',   label: 'Platforms' },
+  { value: '21',   label: 'Posts / Week' },
+  { value: '$0',   label: 'Setup Cost' },
+]
 
-interface SomaCredits {
-  monthly: number
-  used: number
-  purchased: number
-  remaining: number
-  autopilot_enabled: boolean
-  mode: 'safe' | 'autopilot'
-}
+const STEPS = [
+  {
+    number: '01',
+    title: 'Upload Your Master Doc',
+    desc: 'Paste text, upload a .txt/.md file, or link a public URL (Notion, Google Doc). SOMA saves it and compares it against last week\'s version automatically.',
+  },
+  {
+    number: '02',
+    title: 'SOMA Reads the Diff',
+    desc: 'Gemini extracts what changed — wins, themes, directional shifts, content angles. The delta between this week and last week is the story.',
+  },
+  {
+    number: '03',
+    title: 'Content Goes Live',
+    desc: 'Platform-native posts are generated and scheduled. You approve in Safe Mode, auto-post with Autopilot, or set-and-forget with Full Send.',
+  },
+]
 
-interface IdentityProfile {
-  id: string
-  interview_completed: boolean
-  updated_at: string
-}
+const MODES = [
+  {
+    name: 'Safe Mode',
+    icon: '🟢',
+    included: 'Included with Pro',
+    price: '$0',
+    priceSub: 'Included with Pro plan',
+    color: 'border-emerald-500/40 bg-emerald-950/20',
+    labelColor: 'text-emerald-400',
+    ctaStyle: 'border-2 border-emerald-500 text-emerald-400 hover:bg-emerald-950/40',
+    ctaLabel: 'Open Dashboard',
+    ctaHref: '/soma/dashboard',
+    disabled: false,
+    desc: 'SOMA generates your content queue. You review and approve each post before anything goes live. Full control, zero risk.',
+    features: [
+      '7-day content window',
+      '2 platforms',
+      'Up to 2 posts/day',
+      '4 generation runs/month',
+      'Approve before posting',
+    ],
+  },
+  {
+    name: 'Autopilot',
+    icon: '⚡',
+    included: '$10/month',
+    price: '$10',
+    priceSub: '/month add-on',
+    color: 'border-violet-500/40 bg-violet-950/20 ring-2 ring-violet-500/30 ring-offset-2 ring-offset-gray-950',
+    labelColor: 'text-violet-400',
+    badge: 'Most Popular',
+    ctaStyle: 'bg-violet-600 hover:bg-violet-700 text-white',
+    ctaLabel: 'Upgrade to Autopilot',
+    ctaHref: '/soma/dashboard',
+    disabled: false,
+    desc: 'SOMA generates and auto-schedules. You get a notification to review but posts go live on schedule. Hands-off content marketing.',
+    features: [
+      '14-day content window',
+      'All connected platforms',
+      'Up to 5 posts/day',
+      '8 generation runs/month',
+      'Auto-schedules with notification',
+    ],
+  },
+  {
+    name: 'Full Send',
+    icon: '🚀',
+    included: '$20/month',
+    price: '$20',
+    priceSub: '/month add-on',
+    color: 'border-amber-500/40 bg-amber-950/20',
+    labelColor: 'text-amber-400',
+    badge: 'Coming Soon',
+    ctaStyle: 'bg-gray-800 text-gray-500 cursor-not-allowed',
+    ctaLabel: 'Coming Soon',
+    ctaHref: '#',
+    disabled: true,
+    desc: 'Maximum frequency. Drop your master doc, SOMA handles everything. Platform-native posts, optimized times, zero friction.',
+    features: [
+      '14-day content window',
+      'All connected platforms',
+      'Up to 10 posts/day',
+      '12 generation runs/month',
+      'Fully autonomous — no approval needed',
+    ],
+  },
+]
 
-interface WeeklyIngestion {
-  id: string
-  week_label: string
-  key_themes: string[]
-  post_count: number
-  created_at: string
-}
+const PLATFORMS = [
+  { name: 'Twitter / X',  format: 'Punchy ≤280 chars' },
+  { name: 'Bluesky',      format: 'Conversational ≤300 chars' },
+  { name: 'LinkedIn',     format: 'Professional long-form' },
+  { name: 'Mastodon',     format: 'Community-native tone' },
+  { name: 'Instagram',    format: 'Caption + hashtags' },
+  { name: 'Discord',      format: 'Server announcement style' },
+]
 
-interface DraftPost {
-  id: string
-  content: string
-  platforms: string[]
-  scheduled_at: string | null
-  metadata: Record<string, string> | null
-}
+const FAQS = [
+  {
+    q: 'What is a master doc?',
+    a: 'It\'s your weekly source of truth — a running doc where you capture what happened, what shipped, what changed. Think of it like a changelog for your life or business.',
+  },
+  {
+    q: 'How does the diff work?',
+    a: 'SOMA saves each week\'s master doc. When you submit a new one, Gemini compares it to the previous version and extracts what\'s new — wins, themes, shifts. That delta becomes the content.',
+  },
+  {
+    q: 'Can I use SOMA for multiple clients or projects?',
+    a: 'Yes. SOMA Projects let you create named projects, each with their own master doc history, platform settings, and voice profile. Agencies can manage multiple clients from one workspace.',
+  },
+  {
+    q: 'What does "platform-native" mean?',
+    a: 'The same core message gets reformatted per platform. Twitter gets punchy ≤280 chars. LinkedIn gets professional long-form. Instagram gets captions with hashtags. One generation, native output everywhere.',
+  },
+  {
+    q: 'Will SOMA spam my followers?',
+    a: 'No. Every tier has hard daily and monthly caps — Full Send maxes at 10 posts/day. SOMA is built around sustainable posting, not volume blasting. We\'ll also warn you if you approach platform-recommended limits.',
+  },
+  {
+    q: 'What if I don\'t post anything in a week?',
+    a: 'SOMA still generates content — it uses your voice profile and last known themes to keep the calendar consistent. You can always review and skip anything that doesn\'t fit.',
+  },
+]
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
-
-function timeSlotIcon(scheduledAt: string | null): string {
-  if (!scheduledAt) return '📋'
-  const h = new Date(scheduledAt).getHours()
-  if (h < 12) return '🌅'
-  if (h < 17) return '☀️'
-  return '🌙'
-}
-
-function dayLabel(scheduledAt: string | null): string {
-  if (!scheduledAt) return 'Unscheduled'
-  return new Date(scheduledAt).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
-}
-
-const PLATFORM_COLORS: Record<string, string> = {
-  twitter:  'bg-sky-900/60 text-sky-300 border-sky-700/40',
-  bluesky:  'bg-blue-900/60 text-blue-300 border-blue-700/40',
-  mastodon: 'bg-purple-900/60 text-purple-300 border-purple-700/40',
-  discord:  'bg-indigo-900/60 text-indigo-300 border-indigo-700/40',
-  telegram: 'bg-cyan-900/60 text-cyan-300 border-cyan-700/40',
-}
-
-function PlatformBadge({ platform }: { platform: string }) {
-  const cls = PLATFORM_COLORS[platform.toLowerCase()] ?? 'bg-gray-800 text-gray-300 border-gray-700/40'
+export default function SomaLandingPage() {
   return (
-    <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded border ${cls}`}>
-      {platform}
-    </span>
-  )
-}
+    <PublicLayout>
+      <div className="max-w-6xl mx-auto px-6 py-16">
 
-// ── Autopilot Upgrade Modal ───────────────────────────────────────────────────
+        {/* ── HERO ── */}
+        <section className="text-center mb-20">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 text-xs font-bold mb-6 uppercase tracking-widest">
+            <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
+            AI Marketing Agent
+          </span>
 
-const SOMA_AUTOPILOT_PRICE_ID = 'price_1TP8rU7OMwDowUuUYLBNAVux'
+          <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50 mb-6 leading-tight">
+            Your life has a changelog.<br className="hidden sm:block" />{' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-fuchsia-500">
+              SOMA ships it.
+            </span>
+          </h1>
 
-function AutopilotModal({ onClose }: { onClose: () => void }) {
-  const [loading, setLoading] = useState(false)
-  const [err, setErr] = useState('')
+          <p className="text-base sm:text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed mb-10">
+            SOMA watches what changed week over week in your master doc and turns the delta into a
+            platform-native content calendar. No brainstorming. No blank page. Just your story, told everywhere.
+          </p>
 
-  const handleUpgrade = async () => {
-    setLoading(true)
-    setErr('')
-    try {
-      const res = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId: SOMA_AUTOPILOT_PRICE_ID }),
-      })
-      const data = await res.json()
-      if (!res.ok || !data.url) { setErr(data.error || 'Could not start checkout.'); setLoading(false); return }
-      window.location.href = data.url
-    } catch {
-      setErr('Network error. Please try again.')
-      setLoading(false)
-    }
-  }
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="w-full max-w-md rounded-2xl border border-amber-500/30 bg-gray-900 shadow-2xl overflow-hidden">
-        <div className="h-1 w-full bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600" />
-        <div className="p-6 sm:p-8">
-          <div className="text-center mb-6">
-            <span className="text-4xl">🔥</span>
-            <h2 className="text-xl font-extrabold text-white mt-2 mb-1">SOMA Autopilot</h2>
-            <p className="text-gray-400 text-sm">Unlock fully automated content scheduling.</p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
+            <Link
+              href="/soma/dashboard"
+              className="bg-violet-600 hover:bg-violet-700 text-white font-bold px-8 py-3.5 rounded-2xl transition-all text-sm w-full sm:w-auto text-center"
+            >
+              Open SOMA Dashboard
+            </Link>
+            <a
+              href="#how-it-works"
+              className="border-2 border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-bold px-8 py-3.5 rounded-2xl hover:border-violet-500 hover:text-violet-600 dark:hover:border-violet-500 dark:hover:text-violet-400 transition-all text-sm w-full sm:w-auto text-center"
+            >
+              See How It Works
+            </a>
           </div>
 
-          <ul className="space-y-2.5 mb-6">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-gray-400 dark:text-gray-500 font-medium">
             {[
-              'Auto-schedules generated posts',
-              'Continuously optimizes based on performance',
-              'Runs ingestion + generation weekly',
-              'Priority Gemini processing',
-            ].map(f => (
-              <li key={f} className="flex items-center gap-2.5 text-sm text-gray-300">
-                <span className="text-green-400 flex-shrink-0">✅</span>
-                {f}
-              </li>
+              'Platform-native post generation',
+              'Weekly master doc diffing',
+              'Safe / Autopilot / Full Send modes',
+              'Built by Gilgamesh Enterprise LLC',
+            ].map(item => (
+              <span key={item} className="flex items-center gap-1.5">
+                <span className="text-violet-500">◆</span> {item}
+              </span>
             ))}
-          </ul>
-
-          <p className="text-center text-amber-400 font-bold text-lg mb-5">$10/month add-on</p>
-
-          {err && <p className="text-xs text-red-400 text-center mb-3">{err}</p>}
-
-          <div className="flex flex-col gap-3">
-            <button
-              onClick={handleUpgrade}
-              disabled={loading}
-              className="block w-full text-center bg-gradient-to-r from-amber-500 to-yellow-400 text-gray-900 font-extrabold text-sm px-6 py-3 rounded-xl hover:opacity-90 transition-all shadow-lg shadow-amber-500/20 disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Redirecting…' : 'Upgrade to Autopilot →'}
-            </button>
-            <button
-              onClick={onClose}
-              className="w-full text-center text-sm text-gray-400 hover:text-gray-200 transition-colors py-2"
-            >
-              Stay on Safe Mode
-            </button>
           </div>
-        </div>
-      </div>
-    </div>
-  )
-}
+        </section>
 
-// ── Main Dashboard ────────────────────────────────────────────────────────────
+        {/* ── STATS BAR ── */}
+        <section className="bg-black dark:bg-gray-950 border border-gray-800 rounded-2xl p-6 mb-20">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:divide-x divide-white/10">
+            {STATS.map((stat, i) => (
+              <div key={i} className="text-center py-2">
+                <p className="text-3xl font-extrabold text-violet-400 mb-1">{stat.value}</p>
+                <p className="text-xs text-gray-400 font-semibold uppercase tracking-widest">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </section>
 
-export default function SomaDashboardPage() {
-  const router = useRouter()
-
-  const [loading, setLoading]                 = useState(true)
-  const [credits, setCredits]                 = useState<SomaCredits | null>(null)
-  const [identity, setIdentity]               = useState<IdentityProfile | null>(null)
-  const [identityChecked, setIdentityChecked] = useState(false)
-  const [ingestion, setIngestion]             = useState<WeeklyIngestion | null>(null)
-  const [drafts, setDrafts]                   = useState<DraftPost[]>([])
-  const [currentMode, setCurrentMode]         = useState<'safe' | 'autopilot'>('safe')
-  const [showAutopilotModal, setShowAutopilotModal] = useState(false)
-  const [approvingAll, setApprovingAll]       = useState(false)
-  const [actionLoading, setActionLoading]     = useState<Record<string, boolean>>({})
-
-  // ── Data loading ────────────────────────────────────────────────────────────
-
-  const loadData = useCallback(async () => {
-    setLoading(true)
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/login?redirect=/soma'); return }
-
-      // Fetch credits + mode
-      const creditsRes = await fetch('/api/soma/credits')
-      if (creditsRes.ok) {
-        const c = await creditsRes.json() as SomaCredits
-        setCredits(c)
-        setCurrentMode(c.mode)
-
-        // Redirect free users (no soma credits)
-        if (c.monthly === 0) {
-          router.push('/soma/upgrade')
-          return
-        }
-      }
-
-      // Identity profile
-      const { data: profile } = await supabase
-        .from('soma_identity_profiles')
-        .select('id, interview_completed, updated_at')
-        .eq('user_id', user.id)
-        .maybeSingle()
-
-      setIdentity(profile)
-      setIdentityChecked(true)
-
-      // Latest ingestion
-      const { data: ing } = await supabase
-        .from('soma_weekly_ingestion')
-        .select('id, week_label, key_themes, post_count, created_at')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle()
-
-      setIngestion(ing)
-
-      // SOMA-generated drafts
-      const { data: posts } = await supabase
-        .from('posts')
-        .select('id, content, platforms, scheduled_at, metadata')
-        .eq('user_id', user.id)
-        .eq('status', 'draft')
-        .order('scheduled_at', { ascending: true, nullsFirst: false })
-
-      const somaPosts = (posts ?? []).filter(
-        (p: any) => p.metadata?.source === 'soma'
-      )
-      setDrafts(somaPosts)
-
-    } catch (err) {
-      console.error('SOMA dashboard load error:', err)
-    } finally {
-      setLoading(false)
-    }
-  }, [router])
-
-  useEffect(() => { loadData() }, [loadData])
-
-  // ── Mode toggle ─────────────────────────────────────────────────────────────
-
-  const handleModeToggle = async (mode: 'safe' | 'autopilot') => {
-    if (mode === currentMode) return
-
-    if (mode === 'autopilot' && !credits?.autopilot_enabled) {
-      setShowAutopilotModal(true)
-      return
-    }
-
-    const res = await fetch('/api/soma/mode', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mode }),
-    })
-    if (res.ok) setCurrentMode(mode)
-  }
-
-  // ── Post actions ─────────────────────────────────────────────────────────────
-
-  const approvePost = async (id: string) => {
-    setActionLoading(p => ({ ...p, [id]: true }))
-    await supabase.from('posts').update({ status: 'scheduled' }).eq('id', id)
-    setDrafts(p => p.filter(d => d.id !== id))
-    setActionLoading(p => ({ ...p, [id]: false }))
-  }
-
-  const skipPost = async (id: string) => {
-    setActionLoading(p => ({ ...p, [id]: true }))
-    await supabase
-      .from('posts')
-      .update({ status: 'failed', metadata: { source: 'soma', skip_reason: 'User skipped from SOMA queue' } })
-      .eq('id', id)
-    setDrafts(p => p.filter(d => d.id !== id))
-    setActionLoading(p => ({ ...p, [id]: false }))
-  }
-
-  const approveAll = async () => {
-    if (drafts.length === 0) return
-    setApprovingAll(true)
-    const ids = drafts.map(d => d.id)
-    await supabase.from('posts').update({ status: 'scheduled' }).in('id', ids)
-    setDrafts([])
-    setApprovingAll(false)
-  }
-
-  // ── Render ──────────────────────────────────────────────────────────────────
-
-  const creditsBar = credits && credits.monthly > 0
-    ? Math.min(100, ((credits.monthly - credits.used) / credits.monthly) * 100)
-    : 0
-  const creditsBarColor = creditsBar < 15 ? '#f87171' : creditsBar < 30 ? '#facc15' : '#f59e0b'
-
-  return (
-    <div className="flex min-h-screen bg-gray-950">
-      <Sidebar />
-
-      {showAutopilotModal && <AutopilotModal onClose={() => setShowAutopilotModal(false)} />}
-
-      <main className="flex-1 md:ml-56 p-4 sm:p-6 lg:p-8 space-y-6">
-
-        {/* ── HEADER ─────────────────────────────────────────────────── */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight flex items-center gap-2">
-              <span className="text-amber-400">⚡</span>
-              <span className="text-white">SOMA</span>
-            </h1>
-            <p className="text-gray-400 text-sm mt-0.5">Self-Optimizing Media Agent</p>
+        {/* ── HOW IT WORKS ── */}
+        <section id="how-it-works" className="mb-20">
+          <div className="text-center mb-12">
+            <p className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">The Process</p>
+            <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
+              How SOMA Works
+            </h2>
           </div>
 
-          {/* Mode toggle */}
-          <div className="flex items-center gap-1 p-1 rounded-xl bg-gray-900 border border-gray-800 self-start sm:self-auto">
-            <button
-              onClick={() => handleModeToggle('safe')}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-                currentMode === 'safe'
-                  ? 'bg-green-900/70 text-green-300 border border-green-700/50 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-300'
-              }`}
-            >
-              <span>🟢</span> Safe Mode
-            </button>
-            <button
-              onClick={() => handleModeToggle('autopilot')}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-                currentMode === 'autopilot'
-                  ? 'bg-amber-900/70 text-amber-300 border border-amber-700/50 shadow-sm'
-                  : 'text-gray-500 hover:text-gray-300'
-              }`}
-            >
-              <span>🔥</span> Autopilot
-              {!credits?.autopilot_enabled && (
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-800/60 text-amber-400 border border-amber-700/40 ml-0.5">
-                  $10/mo
-                </span>
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* ── TOP CARDS ROW ──────────────────────────────────────────── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-          {/* Credits Card */}
-          <div className="rounded-2xl border border-amber-500/20 bg-gray-900 p-5">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-xs font-bold uppercase tracking-widest text-amber-400/80">SOMA Credits</h2>
-              <Link
-                href="/settings?tab=plan"
-                className="text-xs text-amber-400 hover:text-amber-300 font-semibold transition-colors"
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {STEPS.map((step, i) => (
+              <div
+                key={i}
+                className="relative bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6"
               >
-                + Add Credits
-              </Link>
-            </div>
-
-            {loading ? (
-              <div className="h-8 bg-gray-800 rounded animate-pulse" />
-            ) : (
-              <>
-                <div className="flex items-baseline gap-1.5 mb-2">
-                  <span className="text-3xl font-extrabold text-white">
-                    {credits?.remaining ?? 0}
-                  </span>
-                  <span className="text-gray-500 text-sm font-medium">
-                    / {credits?.monthly ?? 0} monthly
-                  </span>
+                <div className="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center mb-4">
+                  <span className="text-xs font-extrabold text-white">{step.number}</span>
                 </div>
+                <h3 className="text-sm font-extrabold text-gray-900 dark:text-gray-100 mb-2">{step.title}</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{step.desc}</p>
+                {i < STEPS.length - 1 && (
+                  <div className="hidden md:block absolute top-1/2 -right-3 w-6 h-px bg-gray-200 dark:bg-gray-700" />
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
 
-                <div className="w-full h-2 rounded-full bg-gray-800 mb-2">
-                  <div
-                    className="h-2 rounded-full transition-all"
-                    style={{ width: `${creditsBar}%`, background: creditsBarColor }}
-                  />
-                </div>
+        {/* ── THREE MODES ── */}
+        <section id="modes" className="mb-20">
+          <div className="text-center mb-12">
+            <p className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">Control Levels</p>
+            <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
+              You choose how much SOMA does
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl mx-auto mt-3">
+              Start with Safe Mode on your Pro plan. Upgrade when you trust the agent.
+            </p>
+          </div>
 
-                <div className="flex items-center justify-between text-xs text-gray-500">
-                  <span>{Math.round(creditsBar)}% remaining</span>
-                  {(credits?.purchased ?? 0) > 0 && (
-                    <span className="text-amber-400/80">+{credits!.purchased} purchased</span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {MODES.map(mode => (
+              <div key={mode.name} className={`rounded-2xl border p-6 flex flex-col ${mode.color}`}>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">{mode.icon}</span>
+                    <h3 className={`text-sm font-extrabold ${mode.labelColor}`}>{mode.name}</h3>
+                  </div>
+                  {mode.badge && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10 text-gray-300 border border-white/10">
+                      {mode.badge}
+                    </span>
                   )}
                 </div>
-              </>
-            )}
-          </div>
-
-          {/* Identity Card */}
-          <div className="rounded-2xl border border-amber-500/20 bg-gray-900 p-5">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-amber-400/80 mb-3">Identity Status</h2>
-
-            {!identityChecked || loading ? (
-              <div className="h-8 bg-gray-800 rounded animate-pulse" />
-            ) : !identity || !identity.interview_completed ? (
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="w-2 h-2 rounded-full bg-yellow-400 flex-shrink-0" />
-                  <p className="text-sm font-semibold text-yellow-300">⚠️ Voice profile not set up</p>
-                </div>
-                <p className="text-xs text-gray-400 mb-3 leading-relaxed">
-                  SOMA needs to learn your voice before it can generate content that sounds like you.
-                </p>
-                <Link
-                  href="/soma/onboarding"
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors"
-                >
-                  Setup now →
-                </Link>
+                <p className="text-xs text-gray-400 leading-relaxed mb-4 flex-1">{mode.desc}</p>
+                <ul className="space-y-2 mb-5">
+                  {mode.features.map(f => (
+                    <li key={f} className="flex items-center gap-2 text-xs text-gray-300">
+                      <span className={`flex-shrink-0 font-bold ${mode.labelColor}`}>◆</span> {f}
+                    </li>
+                  ))}
+                </ul>
+                <p className={`text-sm font-extrabold ${mode.labelColor}`}>{mode.included}</p>
               </div>
-            ) : (
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="w-2 h-2 rounded-full bg-green-400 flex-shrink-0" />
-                  <p className="text-sm font-semibold text-green-300">✅ Voice profile active</p>
-                </div>
-                <p className="text-xs text-gray-500 mb-3">
-                  Last updated{' '}
-                  {new Date(identity.updated_at).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                  })}
-                </p>
-                <Link
-                  href="/soma/onboarding"
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors"
-                >
-                  Edit profile →
-                </Link>
-              </div>
-            )}
+            ))}
           </div>
-        </div>
+        </section>
 
-        {/* ── WEEKLY INGESTION CARD ──────────────────────────────────── */}
-        <div className="rounded-2xl border border-amber-500/20 bg-gray-900 p-5">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-amber-400/80">📋 This Week's Ingestion</h2>
-            <Link
-              href="/soma/weekly"
-              className="text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors"
-            >
-              + New Ingestion →
+        {/* ── PLATFORM NATIVE ── */}
+        <section id="platforms" className="mb-20">
+          <div className="bg-black dark:bg-gray-950 border border-gray-800 rounded-2xl overflow-hidden">
+            <div className="px-8 py-8 border-b border-gray-800">
+              <p className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">Platform-Native Output</p>
+              <h2 className="text-2xl font-extrabold text-white mb-2">One story. Every format.</h2>
+              <p className="text-sm text-gray-400 max-w-xl">
+                SOMA doesn&apos;t copy-paste the same post everywhere. It reformats your message natively
+                for each platform — so it sounds right everywhere.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
+              {PLATFORMS.map((p) => (
+                <div key={p.name} className="px-6 py-5 border-b border-r border-gray-800">
+                  <p className="text-sm font-bold text-violet-400 mb-1 flex items-center gap-2">
+                    <span>◆</span> {p.name}
+                  </p>
+                  <p className="text-xs text-gray-500">{p.format}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── PROJECTS (AGENCY) ── */}
+        <section id="projects" className="mb-20">
+          <div className="text-center mb-12">
+            <p className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">For Agencies</p>
+            <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
+              One workspace. Multiple clients.
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl mx-auto mt-3">
+              SOMA Projects let you run separate master doc pipelines per client — each with their own
+              voice profile, platform settings, and content history.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {[
+              { icon: '📁', title: 'Named Projects', desc: 'Create a project per client or brand. Each has its own master doc history, voice profile, and platform selections.' },
+              { icon: '🔄', title: 'Automatic Diffing', desc: 'SOMA auto-compares each new doc against the previous version. Drop in an update and the diff becomes the content.' },
+              { icon: '🎯', title: 'Per-Project Settings', desc: 'Different clients post on different platforms at different frequencies. SOMA respects each project\'s settings independently.' },
+            ].map(f => (
+              <div key={f.title} className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
+                <p className="text-2xl mb-3">{f.icon}</p>
+                <h3 className="text-sm font-extrabold text-gray-900 dark:text-gray-100 mb-2">{f.title}</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── PRICING ── */}
+        <section id="pricing" className="mb-20">
+          <div className="text-center mb-10">
+            <p className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">Pricing</p>
+            <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
+              Start free with Pro. Scale when ready.
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {MODES.map(mode => (
+              <div key={`pricing-${mode.name}`} className={`rounded-2xl border p-6 flex flex-col ${mode.color}`}>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xl">{mode.icon}</span>
+                  <h3 className={`text-lg font-extrabold ${mode.labelColor}`}>{mode.name}</h3>
+                </div>
+                <div className="flex items-end gap-1 mb-1">
+                  <span className={`text-4xl font-extrabold ${mode.labelColor}`}>{mode.price}</span>
+                  {mode.price !== '$0' && <span className="text-xs text-gray-400 mb-1.5">/mo</span>}
+                </div>
+                <p className="text-xs text-gray-400 mb-5">{mode.priceSub}</p>
+                <ul className="space-y-2.5 flex-1 mb-6">
+                  {mode.features.map(f => (
+                    <li key={f} className="flex items-center gap-2 text-xs text-gray-300">
+                      <span className={`flex-shrink-0 font-bold ${mode.labelColor}`}>◆</span> {f}
+                    </li>
+                  ))}
+                </ul>
+                {mode.disabled ? (
+                  <button disabled className={`w-full text-center text-sm font-bold py-3 rounded-xl transition-all ${mode.ctaStyle}`}>
+                    {mode.ctaLabel}
+                  </button>
+                ) : (
+                  <Link href={mode.ctaHref} className={`w-full text-center text-sm font-bold py-3 rounded-xl transition-all block ${mode.ctaStyle}`}>
+                    {mode.ctaLabel} →
+                  </Link>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── FAQ ── */}
+        <section id="faq" className="mb-20">
+          <div className="text-center mb-10">
+            <p className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">FAQ</p>
+            <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
+              Questions answered.
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {FAQS.map(faq => (
+              <div key={faq.q} className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
+                <h3 className="text-sm font-extrabold text-gray-900 dark:text-gray-100 mb-2">{faq.q}</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{faq.a}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ── RESPONSIBLE USE DISCLAIMER ── */}
+        <section className="mb-20">
+          <div className="bg-amber-50 dark:bg-amber-950/30 border-2 border-amber-300 dark:border-amber-700 rounded-2xl p-8">
+            <div className="text-center mb-4">
+              <p className="text-base font-extrabold text-amber-700 dark:text-amber-400 uppercase tracking-widest">
+                Responsible Posting Policy
+              </p>
+            </div>
+            <div className="max-w-3xl mx-auto space-y-3 text-sm text-amber-800 dark:text-amber-300 leading-relaxed">
+              <p>
+                <strong>SOMA is an automation tool — you are responsible for your content.</strong> Automated posting
+                must comply with each platform&apos;s Terms of Service. Do not use SOMA to spam, harass, mislead,
+                or post at volumes that could trigger platform rate limits or account restrictions.
+              </p>
+              <p>
+                SOMA&apos;s daily and monthly caps are designed to keep your accounts healthy. Exceeding
+                platform-recommended posting frequency — even within SOMA&apos;s limits — is at your own risk.
+                SocialMate and Gilgamesh Enterprise LLC are not liable for account suspensions or restrictions
+                resulting from your posting behavior.
+              </p>
+              <p className="text-xs text-amber-600 dark:text-amber-400 font-semibold pt-2 border-t border-amber-200 dark:border-amber-800">
+                By enabling Autopilot or Full Send mode, you acknowledge that posts will go live automatically
+                on your behalf and that you accept full responsibility for their content and timing.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* ── BUILT BY ── */}
+        <section className="border-t border-gray-100 dark:border-gray-800 pt-12 text-center">
+          <div className="w-12 h-12 bg-violet-600 rounded-xl flex items-center justify-center text-white text-lg font-extrabold mx-auto mb-4">
+            J
+          </div>
+          <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100 mb-1">
+            Built by Joshua Bostic — Gilgamesh Enterprise LLC
+          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 max-w-lg mx-auto mb-5 leading-relaxed">
+            Solo founder. Bootstrapped. Building tools that give people the same marketing power that
+            agencies charge thousands for — at prices that don&apos;t gatekeep.
+          </p>
+          <div className="flex items-center justify-center gap-4">
+            <Link href="/pricing" className="text-xs font-bold text-violet-500 hover:text-violet-400 transition-colors">
+              SocialMate Plans →
+            </Link>
+            <span className="text-gray-300 dark:text-gray-700">|</span>
+            <Link href="/enki" className="text-xs font-bold text-violet-500 hover:text-violet-400 transition-colors">
+              Enki Trading Agent →
             </Link>
           </div>
+        </section>
 
-          {loading ? (
-            <div className="h-10 bg-gray-800 rounded animate-pulse" />
-          ) : !ingestion ? (
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div>
-                <p className="text-sm text-gray-400">No ingestion this week yet.</p>
-                <p className="text-xs text-gray-500 mt-0.5">Run an ingestion to give SOMA fresh material to work with.</p>
-              </div>
-              <Link
-                href="/soma/weekly"
-                className="inline-flex items-center gap-1.5 text-xs font-bold px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 transition-all whitespace-nowrap"
-              >
-                Start this week →
-              </Link>
-            </div>
-          ) : (
-            <div>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-                <div>
-                  <p className="text-sm font-semibold text-white">{ingestion.week_label}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">
-                    {ingestion.post_count ?? 0} posts generated
-                  </p>
-                </div>
-                <Link
-                  href="/soma/weekly"
-                  className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 transition-all whitespace-nowrap self-start sm:self-auto"
-                >
-                  New ingestion →
-                </Link>
-              </div>
-
-              {/* Key themes pills */}
-              {ingestion.key_themes && ingestion.key_themes.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {ingestion.key_themes.slice(0, 6).map((theme: string) => (
-                    <span
-                      key={theme}
-                      className="text-[11px] font-medium px-2.5 py-1 rounded-full bg-amber-900/30 border border-amber-800/40 text-amber-300/80"
-                    >
-                      {theme}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* ── CONTENT QUEUE ─────────────────────────────────────────── */}
-        <div className="rounded-2xl border border-amber-500/20 bg-gray-900 p-5">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h2 className="text-xs font-bold uppercase tracking-widest text-amber-400/80">Content Queue</h2>
-              <p className="text-xs text-gray-500 mt-0.5">SOMA-generated drafts awaiting your approval</p>
-            </div>
-            {drafts.length > 0 && (
-              <button
-                onClick={approveAll}
-                disabled={approvingAll}
-                className="text-xs font-bold px-4 py-2 rounded-xl bg-green-900/50 border border-green-700/40 text-green-300 hover:bg-green-900/70 transition-all disabled:opacity-60"
-              >
-                {approvingAll ? 'Approving…' : `Approve All (${drafts.length})`}
-              </button>
-            )}
-          </div>
-
-          {loading ? (
-            <div className="space-y-3">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="h-20 bg-gray-800 rounded-xl animate-pulse" />
-              ))}
-            </div>
-          ) : drafts.length === 0 ? (
-            <div className="text-center py-10">
-              <span className="text-3xl mb-3 block">✅</span>
-              <p className="text-sm font-semibold text-gray-300">Queue is clear</p>
-              <p className="text-xs text-gray-500 mt-1">Run a weekly ingestion to generate new content.</p>
-              <Link
-                href="/soma/weekly"
-                className="inline-flex items-center gap-1.5 mt-4 text-xs font-bold px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 transition-all"
-              >
-                Run ingestion →
-              </Link>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {drafts.map(post => (
-                <div
-                  key={post.id}
-                  className="rounded-xl border border-gray-800 bg-gray-950/60 p-4 hover:border-amber-500/20 transition-all"
-                >
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                    {/* Content preview */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-base flex-shrink-0">{timeSlotIcon(post.scheduled_at)}</span>
-                        <span className="text-xs font-semibold text-gray-400">{dayLabel(post.scheduled_at)}</span>
-                        <div className="flex gap-1 flex-wrap">
-                          {(post.platforms ?? []).map((p: string) => (
-                            <PlatformBadge key={p} platform={p} />
-                          ))}
-                        </div>
-                      </div>
-                      <p className="text-sm text-gray-300 leading-relaxed line-clamp-2">
-                        {post.content?.slice(0, 140)}{(post.content?.length ?? 0) > 140 ? '…' : ''}
-                      </p>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-2 flex-shrink-0 self-start sm:self-center">
-                      <button
-                        onClick={() => approvePost(post.id)}
-                        disabled={!!actionLoading[post.id]}
-                        className="text-xs font-bold px-3 py-1.5 rounded-lg bg-green-900/50 border border-green-700/40 text-green-300 hover:bg-green-900/70 transition-all disabled:opacity-60 whitespace-nowrap"
-                      >
-                        {actionLoading[post.id] ? '…' : 'Approve'}
-                      </button>
-                      <Link
-                        href={`/compose?edit=${post.id}`}
-                        className="text-xs font-bold px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-gray-300 hover:bg-gray-700 transition-all whitespace-nowrap"
-                      >
-                        Edit
-                      </Link>
-                      <button
-                        onClick={() => skipPost(post.id)}
-                        disabled={!!actionLoading[post.id]}
-                        className="text-xs font-bold px-3 py-1.5 rounded-lg bg-red-900/30 border border-red-800/40 text-red-400 hover:bg-red-900/50 transition-all disabled:opacity-60 whitespace-nowrap"
-                      >
-                        Skip
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* ── QUICK ACTIONS ─────────────────────────────────────────── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <Link
-            href="/soma/onboarding"
-            className="flex items-center gap-3 rounded-xl border border-gray-800 bg-gray-900 hover:border-amber-500/30 hover:bg-gray-900/80 transition-all p-4 group"
-          >
-            <span className="text-xl">🧠</span>
-            <div>
-              <p className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">Setup Voice Profile</p>
-              <p className="text-[11px] text-gray-500 mt-0.5">Teach SOMA how you speak</p>
-            </div>
-            <span className="ml-auto text-gray-600 group-hover:text-amber-400 transition-colors text-sm">→</span>
-          </Link>
-
-          <Link
-            href="/soma/weekly"
-            className="flex items-center gap-3 rounded-xl border border-gray-800 bg-gray-900 hover:border-amber-500/30 hover:bg-gray-900/80 transition-all p-4 group"
-          >
-            <span className="text-xl">📋</span>
-            <div>
-              <p className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">This Week's Ingestion</p>
-              <p className="text-[11px] text-gray-500 mt-0.5">Feed SOMA fresh content ideas</p>
-            </div>
-            <span className="ml-auto text-gray-600 group-hover:text-amber-400 transition-colors text-sm">→</span>
-          </Link>
-
-          <Link
-            href="/drafts"
-            className="flex items-center gap-3 rounded-xl border border-gray-800 bg-gray-900 hover:border-amber-500/30 hover:bg-gray-900/80 transition-all p-4 group"
-          >
-            <span className="text-xl">📂</span>
-            <div>
-              <p className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">View All Drafts</p>
-              <p className="text-[11px] text-gray-500 mt-0.5">Everything in draft status</p>
-            </div>
-            <span className="ml-auto text-gray-600 group-hover:text-amber-400 transition-colors text-sm">→</span>
-          </Link>
-        </div>
-
-      </main>
-    </div>
+      </div>
+    </PublicLayout>
   )
 }
