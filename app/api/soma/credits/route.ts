@@ -31,7 +31,7 @@ export async function GET() {
 
     const { data: workspace, error } = await supabase
       .from('workspaces')
-      .select('soma_credits_monthly, soma_credits_used, soma_credits_purchased, soma_mode, soma_autopilot_enabled')
+      .select('id, plan, soma_credits_monthly, soma_credits_used, soma_credits_purchased, soma_mode, soma_autopilot_enabled')
       .eq('owner_id', user.id)
       .eq('is_personal', true)
       .single()
@@ -40,7 +40,17 @@ export async function GET() {
       return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
     }
 
-    const monthly   = workspace.soma_credits_monthly ?? 0
+    // Auto-provision SOMA credits if Pro/Agency workspace has never had them set
+    const SOMA_MONTHLY: Record<string, number> = { pro: 500, pro_annual: 500, agency: 2000, agency_annual: 2000 }
+    let monthly = workspace.soma_credits_monthly ?? 0
+    const plan = workspace.plan ?? 'free'
+
+    if (monthly === 0 && SOMA_MONTHLY[plan]) {
+      const admin = getSupabaseAdmin()
+      monthly = SOMA_MONTHLY[plan]
+      await admin.from('workspaces').update({ soma_credits_monthly: monthly }).eq('id', workspace.id)
+    }
+
     const used      = workspace.soma_credits_used ?? 0
     const purchased = workspace.soma_credits_purchased ?? 0
     const remaining = Math.max(0, monthly - used) + purchased
@@ -50,7 +60,7 @@ export async function GET() {
       used,
       purchased,
       remaining,
-      mode:             workspace.soma_mode ?? 'safe',
+      mode:              workspace.soma_mode ?? 'safe',
       autopilot_enabled: workspace.soma_autopilot_enabled ?? false,
     })
   } catch (err) {
