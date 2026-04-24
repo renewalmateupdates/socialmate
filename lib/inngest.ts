@@ -2,6 +2,8 @@ import { Inngest } from 'inngest'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { Resend } from 'resend'
 import { createDecipheriv } from 'crypto'
+import { GoogleGenerativeAI } from '@google/generative-ai'
+import { SOMA_COSTS } from '@/lib/soma-costs'
 import {
   getRecentMembers,
   sendChannelMessage,
@@ -3398,5 +3400,215 @@ export const streakNotifications = inngest.createFunction(
 
     console.log(`[StreakNotifications] Notified ${toNotify.length} (skipped ${atRiskUsers.length - toNotify.length})`)
     return { notified: toNotify.length, skipped: atRiskUsers.length - toNotify.length }
+  }
+)
+
+function somaParseGeminiJson(text: string): any {
+  return JSON.parse(
+    text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim()
+  )
+}
+
+export const somaAutopilotRun = inngest.createFunction(
+  { id: 'soma-autopilot-run', name: 'SOMA Autopilot Run', retries: 1 },
+  { cron: '0 12 * * 1' }, // Every Monday at noon UTC (~8 AM ET)
+  async ({ step }) => {
+    const AUTOPILOT_COST = SOMA_COSTS.autopilot_run // 50 credits
+    const now = new Date()
+    const weekLabel = `Week of ${now.toISOString().slice(0, 10)}`
+    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
+    const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())).toISOString()
+
+    const eligibleWorkspaces = await step.run('find-autopilot-workspaces', async () => {
+      const { data, error } = await getSupabaseAdmin()
+        .from('workspaces')
+        .select('id, owner_id, soma_credits_monthly, soma_credits_used, soma_credits_purchased')
+        .eq('soma_mode', 'autopilot')
+        .eq('soma_autopilot_enabled', true)
+
+      if (error) {
+        console.error('[SomaAutopilot] Failed to query workspaces:', error.message)
+        return []
+      }
+
+      return (data ?? []).filter(w => {
+        const remaining = Math.max(0, (w.soma_credits_monthly ?? 0) - (w.soma_credits_used ?? 0)) + (w.soma_credits_purchased ?? 0)
+        return remaining >= AUTOPILOT_COST
+      })
+    })
+
+    if (!eligibleWorkspaces.length) {
+      console.log('[SomaAutopilot] No eligible autopilot workspaces')
+      return { processed: 0 }
+    }
+
+    const workspaceIds = eligibleWorkspaces.map(w => w.id)
+
+    const alreadyRanIds = await step.run('check-already-ran', async () => {
+      const { data } = await getSupabaseAdmin()
+        .from('soma_weekly_ingestion')
+        .select('workspace_id')
+        .in('workspace_id', workspaceIds)
+        .gte('created_at', todayStart)
+      return (data ?? []).map(r => r.workspace_id as string)
+    })
+
+    const alreadyRanSet = new Set<string>(alreadyRanIds)
+    const toProcess = eligibleWorkspaces.filter(w => !alreadyRanSet.has(w.id))
+
+    if (!toProcess.length) {
+      console.log('[SomaAutopilot] All autopilot workspaces already ran today')
+      return { processed: 0, skipped: eligibleWorkspaces.length }
+    }
+
+    const apiKey = process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY
+    if (!apiKey) {
+      console.error('[SomaAutopilot] Missing Gemini API key')
+      return { processed: 0, error: 'missing_api_key' }
+    }
+
+    let processed = 0
+    let failed = 0
+
+    for (const workspace of toProcess) {
+      try {
+        await step.run(`autopilot-${workspace.id}`, async () => {
+          const admin = getSupabaseAdmin()
+          const genAI = new GoogleGenerativeAI(apiKey)
+          const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+
+          // Collect last 7 days of published posts as context
+          const { data: recentPosts } = await admin
+            .from('posts')
+            .select('content, published_at')
+            .eq('workspace_id', workspace.id)
+            .in('status', ['published', 'partial'])
+            .gte('published_at', sevenDaysAgo)
+            .order('published_at', { ascending: false })
+            .limit(30)
+
+          const postLines = (recentPosts ?? [])
+            .map(p => `- ${(p.content ?? '').slice(0, 200)}`)
+            .join('\n')
+
+          const rawInput = recentPosts?.length
+            ? `Published posts from last 7 days (auto-collected):\n${postLines}\n\nGenerate next week's content continuing these themes and voice.`
+            : 'No posts published last week. Generate fresh motivational content for a creator building their online presence.'
+
+          // Fetch voice profile
+          const { data: profile } = await admin
+            .from('soma_identity_profiles')
+            .select('tone_profile, writing_style_rules, behavioral_traits, voice_examples')
+            .eq('workspace_id', workspace.id)
+            .maybeSingle()
+
+          const identityContext = profile
+            ? `CREATOR VOICE PROFILE:
+Tone: ${JSON.stringify(profile.tone_profile)}
+Style: ${JSON.stringify(profile.writing_style_rules)}
+Personality: ${JSON.stringify(profile.behavioral_traits)}
+Example posts: ${Array.isArray(profile.voice_examples) ? (profile.voice_examples as string[]).join(' | ') : 'none'}`
+            : 'No voice profile — use authentic, direct tone.'
+
+          // Ingest: extract themes from last week's posts
+          const ingestResult = await model.generateContent(
+            `Analyze this weekly content summary and return ONLY valid JSON (no markdown):
+{"key_themes":["theme1"],"wins":["win1"],"challenges":["challenge1"],"directional_shifts":["shift1"],"content_angles":["angle1","angle2","angle3","angle4","angle5"],"emotional_tone":"grinding"}
+
+WEEKLY CONTENT:
+${rawInput}
+
+emotional_tone must be one of: high, reflective, grinding, celebratory`
+          )
+          const extracted_insights = somaParseGeminiJson(ingestResult.response.text())
+
+          // Insert ingestion record
+          const { data: ingestion, error: ingestionErr } = await admin
+            .from('soma_weekly_ingestion')
+            .insert({
+              workspace_id: workspace.id,
+              user_id: workspace.owner_id,
+              week_label: weekLabel,
+              raw_input: rawInput,
+              extracted_insights,
+              generated_posts_count: 0,
+            })
+            .select('id')
+            .single()
+
+          if (ingestionErr || !ingestion) throw new Error(`Ingestion insert failed: ${ingestionErr?.message}`)
+
+          // Generate 21 posts
+          const genResult = await model.generateContent(
+            `${identityContext}
+
+THIS WEEK'S INSIGHTS:
+Key themes: ${extracted_insights.key_themes?.join(', ')}
+Wins: ${extracted_insights.wins?.join(', ')}
+Challenges: ${extracted_insights.challenges?.join(', ')}
+Content angles: ${extracted_insights.content_angles?.join(' | ')}
+Emotional tone: ${extracted_insights.emotional_tone}
+
+Generate 21 social media posts for a 7-day calendar (3 per day).
+Return ONLY valid JSON:
+{"posts":[{"day":1,"slot":"morning","content":"post text","platform_hint":"any","content_type":"mindset"}]}
+
+Rules:
+- day 1-7, slot: morning/afternoon/evening (7 each)
+- morning: mindset/vision, afternoon: progress/updates, evening: reflection/lesson
+- NEVER use: "In today's world", "Let's dive in", "game-changer", "synergy", "leverage"
+- Under 280 characters, sound human`
+          )
+          const { posts: generatedPosts = [] } = somaParseGeminiJson(genResult.response.text())
+
+          // Insert drafts
+          let postsCreated = 0
+          for (const post of generatedPosts as any[]) {
+            const base = new Date()
+            base.setDate(base.getDate() + (post.day - 1))
+            const hours = post.slot === 'morning' ? 9 : post.slot === 'afternoon' ? 14 : 19
+            base.setHours(hours, 0, 0, 0)
+
+            const { error: postErr } = await admin.from('posts').insert({
+              user_id: workspace.owner_id,
+              workspace_id: workspace.id,
+              content: post.content,
+              platforms: ['bluesky'],
+              status: 'draft',
+              scheduled_at: base.toISOString(),
+              metadata: { source: 'soma_autopilot', ingestion_id: ingestion.id, day: post.day, slot: post.slot, content_type: post.content_type },
+            })
+            if (!postErr) postsCreated++
+          }
+
+          await admin.from('soma_weekly_ingestion').update({ generated_posts_count: postsCreated }).eq('id', ingestion.id)
+
+          // Deduct autopilot_run credits
+          const monthly = workspace.soma_credits_monthly ?? 0
+          const used = workspace.soma_credits_used ?? 0
+          const purchased = workspace.soma_credits_purchased ?? 0
+          const monthlyAvailable = Math.max(0, monthly - used)
+          const newUsed = monthlyAvailable >= AUTOPILOT_COST ? used + AUTOPILOT_COST : monthly
+          const newPurchased = monthlyAvailable >= AUTOPILOT_COST ? purchased : purchased - (AUTOPILOT_COST - monthlyAvailable)
+          const balanceAfter = Math.max(0, monthly - newUsed) + newPurchased
+
+          await admin.from('workspaces').update({ soma_credits_used: newUsed, soma_credits_purchased: newPurchased }).eq('id', workspace.id)
+          await admin.from('soma_credit_ledger').insert({ workspace_id: workspace.id, user_id: workspace.owner_id, action_type: 'autopilot_run', credits_used: AUTOPILOT_COST, balance_after: balanceAfter })
+
+          // Notify user
+          await inngest.send({ name: 'notification/send', data: { user_id: workspace.owner_id, type: 'soma_autopilot', title: 'Your week is ready', body: `SOMA generated ${postsCreated} draft posts. Review them in your queue.`, link: '/soma' } })
+          await sendPushNotification(workspace.owner_id, 'Your week is ready!', `SOMA generated ${postsCreated} posts. Review in your queue.`, '/soma', 'soma_autopilot')
+
+          console.log(`[SomaAutopilot] workspace ${workspace.id}: ${postsCreated} posts`)
+        })
+        processed++
+      } catch (err: any) {
+        console.error(`[SomaAutopilot] workspace ${workspace.id} failed:`, err?.message)
+        failed++
+      }
+    }
+
+    console.log(`[SomaAutopilot] processed: ${processed}, failed: ${failed}, skipped: ${alreadyRanSet.size}`)
+    return { processed, failed, skipped: alreadyRanSet.size }
   }
 )
