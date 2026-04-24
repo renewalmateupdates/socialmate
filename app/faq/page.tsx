@@ -59,7 +59,7 @@ const sections = [
       },
       {
         q: 'What does SOMA cost?',
-        a: 'SOMA is an add-on for Pro and Agency users. The Autopilot/Full Send upgrade is $10/month. Each generation run costs 75 SOMA credits. Weekly ingestion costs 25 credits. Pro users receive 500 credits/month. Agency users receive 2,000/month. Credit packs are available starting at $1.99.',
+        a: 'SOMA is an add-on for Pro and Agency users. Safe Mode is included free. Autopilot is $10/month — posts auto-schedule, you get a notification batch to review. Full Send is $20/month — fully autonomous, zero review. Each generation run costs 75 SOMA credits. Weekly ingestion costs 25 credits. Pro users receive 500 credits/month, Agency 2,000/month. Credit packs start at $1.99.',
       },
       {
         q: 'Can I use SOMA for multiple clients?',
