@@ -7,6 +7,17 @@ import Sidebar from '@/components/Sidebar'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
+interface SomaProject {
+  id: string
+  name: string
+  platforms: string[]
+  mode: 'safe' | 'autopilot' | 'full_send'
+  posts_per_day: number
+  content_window_days: number
+  runs_this_month: number
+  last_generated_at: string | null
+}
+
 interface SomaCredits {
   monthly: number
   used: number
@@ -161,6 +172,8 @@ export default function SomaDashboardPage() {
   const [showAutopilotModal, setShowAutopilotModal] = useState(false)
   const [approvingAll, setApprovingAll]       = useState(false)
   const [actionLoading, setActionLoading]     = useState<Record<string, boolean>>({})
+  const [projects, setProjects]               = useState<SomaProject[]>([])
+  const [projectLimit, setProjectLimit]       = useState(1)
 
   // ── Data loading ────────────────────────────────────────────────────────────
 
@@ -204,6 +217,14 @@ export default function SomaDashboardPage() {
         .maybeSingle()
 
       setIngestion(ing)
+
+      // Projects
+      const projectsRes = await fetch('/api/soma/projects')
+      if (projectsRes.ok) {
+        const pd = await projectsRes.json()
+        setProjects(pd.projects ?? [])
+        setProjectLimit(pd.limit ?? 1)
+      }
 
       // SOMA-generated drafts
       const { data: posts } = await supabase
@@ -567,6 +588,72 @@ export default function SomaDashboardPage() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+
+        {/* ── PROJECTS ──────────────────────────────────────────────── */}
+        <div className="rounded-2xl border border-amber-500/20 bg-gray-900 p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-xs font-bold uppercase tracking-widest text-amber-400/80">SOMA Projects</h2>
+              <p className="text-xs text-gray-500 mt-0.5">Named pipelines — each with their own master doc and settings</p>
+            </div>
+            {projects.length < projectLimit && (
+              <Link
+                href="/soma/projects/new"
+                className="text-xs font-bold px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 transition-all whitespace-nowrap"
+              >
+                + New Project
+              </Link>
+            )}
+          </div>
+
+          {loading ? (
+            <div className="space-y-2">
+              {[1, 2].map(i => <div key={i} className="h-14 bg-gray-800 rounded-xl animate-pulse" />)}
+            </div>
+          ) : projects.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-sm font-semibold text-gray-300 mb-1">No projects yet</p>
+              <p className="text-xs text-gray-500 mb-4">Create a project to start your master doc pipeline.</p>
+              <Link
+                href="/soma/projects/new"
+                className="inline-flex items-center gap-1.5 text-xs font-bold px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 transition-all"
+              >
+                Create your first project →
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {projects.map(p => (
+                <Link
+                  key={p.id}
+                  href={`/soma/projects/${p.id}`}
+                  className="flex items-center justify-between rounded-xl border border-gray-800 bg-gray-950/60 p-4 hover:border-amber-500/30 transition-all group"
+                >
+                  <div>
+                    <p className="text-sm font-bold text-white group-hover:text-amber-300 transition-colors">{p.name}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {p.platforms.join(' · ')} · {p.posts_per_day}/day · {p.content_window_days}-day window · <span className="capitalize">{p.mode.replace('_', ' ')}</span>
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3 flex-shrink-0">
+                    {p.last_generated_at && (
+                      <span className="text-[10px] text-gray-500">
+                        Generated {new Date(p.last_generated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </span>
+                    )}
+                    <span className="text-gray-600 group-hover:text-amber-400 transition-colors text-sm">→</span>
+                  </div>
+                </Link>
+              ))}
+              {projects.length >= projectLimit && (
+                <p className="text-xs text-gray-500 text-center pt-2">
+                  {projectLimit} project limit on your plan.{' '}
+                  <Link href="/pricing" className="text-amber-400 hover:text-amber-300">Upgrade for more →</Link>
+                </p>
+              )}
             </div>
           )}
         </div>
