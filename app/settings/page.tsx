@@ -622,7 +622,7 @@ function SettingsInner() {
                     <div>
                       <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Manage billing, invoices, and cancellation below.</p>
                       <button onClick={handlePortal} disabled={checkoutLoading}
-                        className="text-xs font-bold text-black border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all disabled:opacity-60">
+                        className="text-xs font-bold text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all disabled:opacity-60">
                         {checkoutLoading ? 'Loading...' : 'Manage Subscription →'}
                       </button>
                     </div>
@@ -633,7 +633,7 @@ function SettingsInner() {
                   <div>
                     <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Manage billing, invoices, and cancellation below.</p>
                     <button onClick={handlePortal} disabled={checkoutLoading}
-                      className="text-xs font-bold text-black border border-gray-200 px-4 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all disabled:opacity-60">
+                      className="text-xs font-bold text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all disabled:opacity-60">
                       {checkoutLoading ? 'Loading...' : 'Manage Subscription →'}
                     </button>
                   </div>
