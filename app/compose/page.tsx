@@ -178,6 +178,7 @@ function ComposeInner() {
   const [scoring, setScoring] = useState(false)
   const [scoreError, setScoreError] = useState('')
   const [showPreview, setShowPreview] = useState(false)
+  const [showPlatformPreview, setShowPlatformPreview] = useState(false)
   const [bestTimeLabel, setBestTimeLabel] = useState<string | null>(null)
 
   // Repurpose panel state
@@ -2108,6 +2109,13 @@ function ComposeInner() {
                       className="px-5 py-3 border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
                       {saving ? 'Saving...' : currentDraftId ? 'Update Draft' : 'Save Draft'}
                     </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowPlatformPreview(true)}
+                      disabled={!content.trim() && threadParts.every(p => !p.trim())}
+                      className="px-5 py-3 border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-indigo-400 hover:text-indigo-600 dark:hover:border-indigo-500 dark:hover:text-indigo-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5">
+                      👁 Preview
+                    </button>
                   </div>
                 )}
               </div>
@@ -2207,6 +2215,270 @@ function ComposeInner() {
           'bg-black'
         }`}>
           {toast.message}
+        </div>
+      )}
+
+      {/* PLATFORM PREVIEW MODAL */}
+      {showPlatformPreview && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+          onClick={() => setShowPlatformPreview(false)}>
+          <div
+            className="bg-white dark:bg-gray-950 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col"
+            onClick={e => e.stopPropagation()}>
+            {/* Modal header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex-shrink-0">
+              <div>
+                <h2 className="text-sm font-extrabold text-gray-900 dark:text-gray-100">Platform Preview</h2>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">How your post will look on each selected platform</p>
+              </div>
+              <button
+                onClick={() => setShowPlatformPreview(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors text-lg font-bold">
+                ×
+              </button>
+            </div>
+
+            {/* Modal body — scrollable */}
+            <div className="overflow-y-auto flex-1 p-5 space-y-4">
+              {selectedPlatforms.length === 0 ? (
+                <p className="text-xs text-gray-400 text-center py-6">Select at least one platform to see a preview.</p>
+              ) : (
+                (() => {
+                  const previewText = threadMode
+                    ? (threadParts[0] || '')
+                    : content
+                  const threadCount = threadMode ? threadParts.filter(p => p.trim()).length : 0
+
+                  return selectedPlatforms.map(platformId => {
+                    const platform = PLATFORMS.find(p => p.id === platformId)
+                    if (!platform) return null
+
+                    if (platformId === 'bluesky') {
+                      return (
+                        <div key={platformId} className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-full bg-sky-400 flex items-center justify-center flex-shrink-0">
+                              <span className="text-white text-sm font-extrabold">B</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-bold text-gray-900 dark:text-gray-100">Your Name</span>
+                                <span className="text-xs text-gray-400">@yourhandle.bsky.social</span>
+                                {threadCount > 1 && (
+                                  <span className="ml-auto text-xs font-bold text-sky-500 bg-sky-50 dark:bg-sky-900/30 px-2 py-0.5 rounded-full">1/{threadCount}</span>
+                                )}
+                              </div>
+                              <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap break-words">
+                                {previewText || <span className="text-gray-300 dark:text-gray-600 italic">Nothing written yet...</span>}
+                              </p>
+                              <div className="flex items-center gap-5 mt-3 pt-3 border-t border-gray-50 dark:border-gray-800">
+                                <span className="flex items-center gap-1 text-xs text-gray-400">💬 <span>0</span></span>
+                                <span className="flex items-center gap-1 text-xs text-gray-400">🔁 <span>0</span></span>
+                                <span className="flex items-center gap-1 text-xs text-gray-400">❤️ <span>0</span></span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="mt-2 flex items-center gap-1.5">
+                            <span className="text-sky-400 text-base">🦋</span>
+                            <span className="text-xs font-bold text-sky-400">Bluesky</span>
+                            <span className={`ml-auto text-xs font-semibold ${previewText.length > platform.limit ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
+                              {previewText.length}/{platform.limit}
+                            </span>
+                          </div>
+                        </div>
+                      )
+                    }
+
+                    if (platformId === 'mastodon') {
+                      const used = previewText.length
+                      const limit = platform.limit
+                      const pct = Math.min(100, Math.round(used / limit * 100))
+                      return (
+                        <div key={platformId} className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center flex-shrink-0">
+                              <span className="text-white text-lg">🐘</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-bold text-gray-900 dark:text-gray-100">Your Name</span>
+                                <span className="text-xs text-gray-400">@you@mastodon.social</span>
+                                {threadCount > 1 && (
+                                  <span className="ml-auto text-xs font-bold text-purple-500 bg-purple-50 dark:bg-purple-900/30 px-2 py-0.5 rounded-full">1/{threadCount}</span>
+                                )}
+                              </div>
+                              <p className="text-sm text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap break-words">
+                                {previewText || <span className="text-gray-300 dark:text-gray-600 italic">Nothing written yet...</span>}
+                              </p>
+                              {/* Character bar */}
+                              <div className="mt-3 flex items-center gap-2">
+                                <div className="flex-1 bg-gray-100 dark:bg-gray-800 rounded-full h-1.5">
+                                  <div
+                                    className={`h-1.5 rounded-full transition-all ${used > limit ? 'bg-red-500' : pct > 90 ? 'bg-amber-400' : 'bg-purple-500'}`}
+                                    style={{ width: `${Math.min(100, pct)}%` }}
+                                  />
+                                </div>
+                                <span className={`text-xs font-semibold flex-shrink-0 ${used > limit ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
+                                  {used}/{limit}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-5 mt-2 pt-2 border-t border-gray-50 dark:border-gray-800">
+                                <span className="text-xs text-gray-400">↩ Reply</span>
+                                <span className="text-xs text-gray-400">🔁 Boost</span>
+                                <span className="text-xs text-gray-400">⭐ Fav</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="mt-2 flex items-center gap-1.5">
+                            <span className="text-purple-500 text-base">🐘</span>
+                            <span className="text-xs font-bold text-purple-500">Mastodon</span>
+                          </div>
+                        </div>
+                      )
+                    }
+
+                    if (platformId === 'twitter') {
+                      const truncated = previewText.length > 280
+                      const display = truncated ? previewText.slice(0, 280) : previewText
+                      return (
+                        <div key={platformId} className="rounded-2xl border border-gray-700 bg-gray-950 p-4">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center flex-shrink-0">
+                              <span className="text-white text-sm font-extrabold">X</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-bold text-white">Your Name</span>
+                                <span className="text-xs text-gray-500">@yourhandle</span>
+                                {threadCount > 1 && (
+                                  <span className="ml-auto text-xs font-bold text-blue-400 bg-blue-900/30 px-2 py-0.5 rounded-full">1/{threadCount}</span>
+                                )}
+                              </div>
+                              <p className="text-sm text-gray-200 leading-relaxed whitespace-pre-wrap break-words">
+                                {display || <span className="text-gray-600 italic">Nothing written yet...</span>}
+                                {truncated && <span className="text-blue-400 ml-1">... (truncated at 280)</span>}
+                              </p>
+                              {truncated && (
+                                <p className="text-xs text-red-400 mt-1.5 font-semibold">
+                                  ⚠️ {previewText.length - 280} characters over X&apos;s 280 limit
+                                </p>
+                              )}
+                              <div className="flex items-center gap-5 mt-3 pt-3 border-t border-gray-800">
+                                <span className="flex items-center gap-1 text-xs text-gray-500">💬 <span>0</span></span>
+                                <span className="flex items-center gap-1 text-xs text-gray-500">🔁 <span>0</span></span>
+                                <span className="flex items-center gap-1 text-xs text-gray-500">❤️ <span>0</span></span>
+                                <span className="flex items-center gap-1 text-xs text-gray-500">📊 <span>0</span></span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="mt-2 flex items-center gap-1.5">
+                            <span className="text-white text-sm font-extrabold">𝕏</span>
+                            <span className="text-xs font-bold text-gray-400">X / Twitter</span>
+                            <span className={`ml-auto text-xs font-semibold ${previewText.length > 280 ? 'text-red-400' : 'text-gray-600'}`}>
+                              {previewText.length}/280
+                            </span>
+                          </div>
+                        </div>
+                      )
+                    }
+
+                    if (platformId === 'discord') {
+                      return (
+                        <div key={platformId} className="rounded-2xl border border-gray-700 bg-[#313338] p-4">
+                          <div className="flex items-start gap-3">
+                            <div className="w-10 h-10 rounded-full bg-indigo-500 flex items-center justify-center flex-shrink-0">
+                              <span className="text-white text-sm font-extrabold">D</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-bold text-indigo-300">Your Name</span>
+                                <span className="text-xs text-gray-500 bg-gray-700 px-1.5 py-0.5 rounded text-[10px] font-bold">BOT</span>
+                                <span className="text-xs text-gray-500">Today at {new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}</span>
+                              </div>
+                              <p className="text-sm text-gray-100 leading-relaxed whitespace-pre-wrap break-words">
+                                {previewText || <span className="text-gray-500 italic">Nothing written yet...</span>}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="mt-2 flex items-center gap-1.5">
+                            <span className="text-indigo-400 text-base">💬</span>
+                            <span className="text-xs font-bold text-indigo-400">Discord</span>
+                            <span className={`ml-auto text-xs font-semibold ${previewText.length > platform.limit ? 'text-red-400' : 'text-gray-500'}`}>
+                              {previewText.length}/{platform.limit.toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+                      )
+                    }
+
+                    if (platformId === 'telegram') {
+                      return (
+                        <div key={platformId} className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
+                          <div className="flex justify-end">
+                            <div className="max-w-[85%] bg-[#2AABEE] rounded-2xl rounded-br-sm px-4 py-3 shadow-sm">
+                              <p className="text-sm text-white leading-relaxed whitespace-pre-wrap break-words">
+                                {previewText || <span className="text-white/60 italic">Nothing written yet...</span>}
+                              </p>
+                              <p className="text-[11px] text-white/70 text-right mt-1">
+                                {new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })} ✓✓
+                              </p>
+                            </div>
+                          </div>
+                          <div className="mt-2 flex items-center gap-1.5">
+                            <span className="text-[#2AABEE] text-base">✈️</span>
+                            <span className="text-xs font-bold text-[#2AABEE]">Telegram</span>
+                            <span className={`ml-auto text-xs font-semibold ${previewText.length > platform.limit ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
+                              {previewText.length}/{platform.limit.toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+                      )
+                    }
+
+                    // Generic fallback for any other live platform
+                    return (
+                      <div key={platformId} className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-4">
+                        <div className="flex items-center gap-2 mb-3">
+                          <span className="text-xl">{platform.icon}</span>
+                          <span className="text-sm font-bold text-gray-800 dark:text-gray-200">{platform.name}</span>
+                          {threadCount > 1 && (
+                            <span className="ml-auto text-xs font-bold text-gray-500 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full">1/{threadCount}</span>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap break-words">
+                          {previewText || <span className="text-gray-300 dark:text-gray-600 italic">Nothing written yet...</span>}
+                        </p>
+                        <div className="mt-3 flex items-center justify-end">
+                          <span className={`text-xs font-semibold ${previewText.length > platform.limit ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
+                            {previewText.length}/{platform.limit.toLocaleString()}
+                          </span>
+                        </div>
+                      </div>
+                    )
+                  })
+                })()
+              )}
+
+              {threadMode && threadParts.filter(p => p.trim()).length > 1 && (
+                <div className="text-center py-2">
+                  <p className="text-xs text-gray-400 dark:text-gray-500">
+                    Showing part 1 of {threadParts.filter(p => p.trim()).length} — remaining parts post 30s apart
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Modal footer */}
+            <div className="px-5 py-3 border-t border-gray-100 dark:border-gray-800 flex-shrink-0 flex justify-end">
+              <button
+                onClick={() => setShowPlatformPreview(false)}
+                className="px-5 py-2.5 bg-black dark:bg-white text-white dark:text-black text-xs font-bold rounded-xl hover:opacity-80 transition-all">
+                Done
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

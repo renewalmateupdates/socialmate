@@ -105,7 +105,7 @@ These have burned us before — always apply:
 
 ---
 
-## What's Been Built (as of April 25, 2026 — end of day)
+## What's Been Built (as of April 26, 2026 — end of day)
 
 **Core:**
 - Post scheduling (Now + future via Inngest), drafts, queue, calendar, bulk scheduling
@@ -287,6 +287,25 @@ These have burned us before — always apply:
 - **Media library bucket fix** (PR #215) — Upload route corrected from `'post-media'` → `'media'` bucket. `media_items` table SQL confirmed applied. `media` bucket confirmed exists (public, 50MB).
 - **Admin workspace SQL** — `socialmatehq@gmail.com` workspace set to `plan='agency'`, `soma_credits_monthly=2000`, `soma_autopilot_enabled=true` directly in Supabase (SQL only, not in code — paying customers still see upgrade modal).
 
+**April 26, 2026:**
+- **Content DNA** (PR #216) — `/analytics/dna` engagement fingerprint dashboard. Best day/time/length/format charts, top 5 posts, platform breakdown. "Sync Bluesky" and "Sync Mastodon" buttons. Requires ≥10 posts with engagement data.
+- **Mastodon engagement sync** (PR #216) — `POST /api/analytics/mastodon-sync` pulls favourites/reblogs/replies from each connected Mastodon instance into `mastodon_stats` JSONB column.
+- **Creator Monetize landing** (PR #216) — `/monetize` landing page with Tip Jar / Fan Subscriptions / Paywalled Posts preview + waitlist capture → `monetize_waitlist` table. Added to PublicNav + PublicFooter.
+- **Admin God Mode overview** (PR #216) — `/admin/overview` server component: total users, new signups 7d, pro/agency counts, SOMA activity, churn signals (paid users 30d+ with no post in 14d), recent signups, quick links.
+- **Inbox replies** (PR #217) — `POST /api/inbox/reply` handles Bluesky (full CID chain) and Mastodon (`in_reply_to_id`). Inline reply composer on mention/reply items in `/inbox`. Char counter, spinner, "✓ Replied" on success.
+- **Compose thread builder** (PR #217) — 🧵 Thread toggle in compose. Numbered part cards with individual char counters, auto-split by platform limit, add/remove parts, submits as sequential posts 30s apart.
+- **Compose save-as-template** (PR #217) — "Save as template" inline section in compose. Title + category, inserts to `post_templates`, auto-collapses on success.
+- **SOMA onboarding skip/resume** (PR #218) — Skip button per step, "Save & continue later" saves to localStorage + partial identity POST. Resumes from saved step on return.
+- **Compose per-platform preview** (PR #218) — 👁 Preview button opens modal with native-style mock cards for each selected platform (Bluesky, Mastodon, X, Discord, Telegram). Thread mode shows `1/N` indicator.
+- **Enki paper trading bug fix** — Removed non-existent `total` column from `enki_trades` inserts (lines 1922 + 1994 in `lib/inngest.ts`). **This was a critical bug — ALL paper trades were silently failing since launch.** Now fixed.
+- **SQL run in Supabase (Apr 26):**
+  ```sql
+  ALTER TABLE posts ADD COLUMN IF NOT EXISTS mastodon_stats JSONB DEFAULT NULL;
+  CREATE TABLE IF NOT EXISTS monetize_waitlist (id uuid default gen_random_uuid() primary key, email text unique not null, created_at timestamptz default now());
+  ALTER TABLE monetize_waitlist ENABLE ROW LEVEL SECURITY;
+  CREATE POLICY "Anyone can join waitlist" ON monetize_waitlist FOR INSERT WITH CHECK (true);
+  ```
+
 ---
 
 ## Known Issues / Bugs (fix these when touched)
@@ -317,11 +336,9 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 ## Pending / In Progress
 
-- **Abdus Sohag trial review** — trial ends April 26 (tomorrow). Decide: keep at 10%, bump to standard 30%, or cut. Referral link: `?ref=SOHAG`.
+- **Abdus Sohag trial review** — trial ended April 26. Decide: keep at 10%, bump to standard 30%, or cut. Referral link: `?ref=SOHAG`.
 
 - **Test SOMA end-to-end** — voice profile → create project → paste master doc → ingest → generate. Not yet tested by Joshua.
-
-- **SOMA autopilot cron email** — `somaAutopilotRun` Inngest cron (Mondays) doesn't send email yet. The manual generate route does. Needs same Resend email block added to `lib/inngest.ts`.
 
 - **Push notification VAPID keys** — CONFIRMED SET in Vercel. Push notifications are live.
 
@@ -331,12 +348,12 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 - **TikTok API review** — submitted Apr 23. Support ticket `ad7714530aa61ad4` open re: app name. Check portal periodically. No action needed until approved.
 
+- **Inngest resync** — after any deploy touching `lib/inngest.ts`, resync functions in Inngest dashboard.
+
 **Roadmap (next up):**
-- **SOMA autopilot cron email** — add Resend notification to Monday Inngest cron (no external deps needed)
-- **Roadmap page** — flip Media Library from "in-progress" to "shipped"
-- **Creator Monetization Hub** — fan subscriptions, tip jars, paywalled content (Stripe Connect required)
-- **Content DNA** — cross-platform performance fingerprinting (uses existing analytics data, no new API)
-- **Unified inbox replies** — reply to comments/DMs (read-only done; write/reply not built)
+- **Creator Monetization Hub** — fan subscriptions, tip jars, paywalled content (Stripe Connect required). Landing page live.
+- **Compose per-platform preview** — live preview of how post looks on each platform (PR #218)
+- **SOMA onboarding skip/resume** — skip steps + save progress (PR #218)
 - **LinkedIn publishing** — pending API credentials
 
 ## Confirmed Done (stop asking about these)
@@ -388,6 +405,15 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - ✅ **SOMA email notifications (Apr 25)** — Generate route sends Resend email on every run. Done (PR #214).
 - ✅ **Media Library (Apr 25)** — `/media` page live, `media_items` table confirmed applied, `media` bucket confirmed public. Bucket name fix merged (PR #215).
 - ✅ **Roadmap updated (Apr 25)** — SOMA credit counts fixed, FAQ shipped, media library shipped. Done (PR #214).
+- ✅ **Content DNA (Apr 26)** — `/analytics/dna` engagement fingerprint dashboard + Mastodon sync + DNA API. PR #216 merged.
+- ✅ **Admin God Mode (Apr 26)** — `/admin/overview` server component with users/revenue/SOMA/churn signals. PR #216 merged.
+- ✅ **Creator Monetize landing (Apr 26)** — `/monetize` landing + waitlist table. PR #216 merged.
+- ✅ **Inbox replies (Apr 26)** — Bluesky + Mastodon inline reply from `/inbox`. PR #217 merged.
+- ✅ **Compose thread builder + save-as-template (Apr 26)** — PR #217 merged.
+- ✅ **SOMA onboarding skip/resume (Apr 26)** — PR #218 merged.
+- ✅ **Compose per-platform preview (Apr 26)** — PR #218 merged.
+- ✅ **Enki paper trading fix (Apr 26)** — Removed `total` column from `enki_trades` inserts (was silently failing since launch). Fixed in current PR.
+- ✅ **SOMA autopilot cron email (Apr 26)** — Confirmed live in `somaAutopilotRun` at line 3675 of `lib/inngest.ts`. Sends Resend email after every Monday cron run.
 - ✅ **TikTok Developer App setup (Apr 22)** — App: SocialMatehq. Content Posting API added, Direct Post ON, scopes: video.publish + video.upload, socialmate.studio domain verified, TIKTOK_CLIENT_KEY + TIKTOK_CLIENT_SECRET in Vercel. Pending: record demo video (Win+G) + submit for review.
 
 ---
