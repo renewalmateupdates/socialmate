@@ -118,6 +118,7 @@ export default function PublicNav() {
           <Link href="/studio-stax" className={flatLinkCls('/studio-stax')}>Studio Stax</Link>
           <Link href="/soma"        className={flatLinkCls('/soma')}>SOMA</Link>
           <Link href="/enki"        className={flatLinkCls('/enki')}>Enki</Link>
+          <Link href="/monetize"    className={flatLinkCls('/monetize')}>Monetize</Link>
 
           <span className="w-px h-4 bg-gray-200 dark:bg-gray-700 mx-1.5" />
 
@@ -246,6 +247,7 @@ export default function PublicNav() {
                   { label: '🗂️ Studio Stax', href: '/studio-stax' },
                   { label: '⚡ SOMA',         href: '/soma'        },
                   { label: '◆ Enki',          href: '/enki'        },
+                  { label: '💜 Monetize',     href: '/monetize'    },
                 ].map(link => (
                   <Link key={link.href} href={link.href}
                     onClick={() => setOpen(false)}
