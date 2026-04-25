@@ -223,97 +223,268 @@ export const publishScheduledPost = inngest.createFunction(
   }
 )
 
-// Weekly email digest — runs every Monday at 9am UTC
+// Weekly email digest — runs every Sunday at 8am UTC
 export const weeklyDigest = inngest.createFunction(
-  { id: 'weekly-digest', retries: 2 },
-  { cron: '0 9 * * 1' },
+  { id: 'weekly-digest', name: 'Weekly Digest Email', retries: 2 },
+  { cron: '0 8 * * 0' },
   async ({ step }) => {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
-    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+    const now = new Date()
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+    const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+    const weekAgoIso = weekAgo.toISOString()
+    const nowIso = now.toISOString()
+    const nextWeekIso = nextWeek.toISOString()
 
-    // Get all users who published at least 1 post in the last 7 days
-    const { data: recentPosts } = await step.run('fetch-active-users', async () => {
-      return getSupabaseAdmin()
+    // Format week range for subject/header: "Apr 18 – Apr 25"
+    const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    const weekRange = `${fmt(weekAgo)} – ${fmt(now)}`
+
+    // Step 1: fetch all users who have posted in the last 7 days
+    const activeData = await step.run('fetch-active-users', async () => {
+      const supabase = getSupabaseAdmin()
+
+      // Published posts this week — includes content for top post preview
+      const { data: weekPosts } = await supabase
         .from('posts')
-        .select('user_id, platforms, published_at')
-        .gte('published_at', weekAgo)
+        .select('id, user_id, content, platforms, published_at, bluesky_stats, scheduled_at, status')
+        .gte('published_at', weekAgoIso)
         .in('status', ['published', 'partial'])
         .order('published_at', { ascending: false })
+
+      if (!weekPosts || weekPosts.length === 0) return { weekPosts: [], scheduledPosts: [], settingsRows: [], allUserIds: [] }
+
+      const userIdSet = new Set<string>(weekPosts.map((p: any) => p.user_id))
+      const allUserIds = Array.from(userIdSet)
+
+      // Scheduled posts in next 7 days — for "coming up" count
+      const { data: scheduledPosts } = await supabase
+        .from('posts')
+        .select('user_id, scheduled_at')
+        .in('user_id', allUserIds)
+        .eq('status', 'scheduled')
+        .gte('scheduled_at', nowIso)
+        .lte('scheduled_at', nextWeekIso)
+
+      // user_settings for opt-out check
+      const { data: settingsRows } = await supabase
+        .from('user_settings')
+        .select('user_id, notification_prefs')
+        .in('user_id', allUserIds)
+
+      return { weekPosts, scheduledPosts: scheduledPosts ?? [], settingsRows: settingsRows ?? [], allUserIds }
     })
 
-    if (!recentPosts || recentPosts.length === 0) {
+    const { weekPosts, scheduledPosts, settingsRows, allUserIds } = activeData as {
+      weekPosts: any[]
+      scheduledPosts: any[]
+      settingsRows: any[]
+      allUserIds: string[]
+    }
+
+    if (!weekPosts || weekPosts.length === 0) {
       console.log('[Weekly Digest] No active users this week')
       return { sent: 0 }
     }
 
-    // Group posts by user
-    const userPostMap: Record<string, any[]> = {}
-    for (const post of recentPosts) {
-      if (!userPostMap[post.user_id]) userPostMap[post.user_id] = []
-      userPostMap[post.user_id].push(post)
+    // Step 2: fetch user emails via Auth admin
+    const emailMap = await step.run('fetch-user-emails', async () => {
+      const usersRes = await getSupabaseAdmin().auth.admin.listUsers({ perPage: 1000 })
+      const users = usersRes.data?.users ?? []
+      const map: Record<string, string> = {}
+      for (const u of users) { if (u.email) map[u.id] = u.email }
+      return map
+    })
+
+    // Step 3: compute per-user stats and send in batches of 50
+    let sent = 0
+    const BATCH_SIZE = 50
+    const batches: string[][] = []
+    for (let i = 0; i < allUserIds.length; i += BATCH_SIZE) {
+      batches.push(allUserIds.slice(i, i + BATCH_SIZE))
     }
 
-    const userIds = Object.keys(userPostMap)
-    let sent = 0
+    // Build lookup structures outside the step
+    const scheduledByUser: Record<string, number> = {}
+    for (const sp of scheduledPosts) {
+      scheduledByUser[sp.user_id] = (scheduledByUser[sp.user_id] ?? 0) + 1
+    }
 
-    await step.run('send-digests', async () => {
-      // Fetch user emails in batch
-      const { data: settings } = await getSupabaseAdmin()
-        .from('user_settings')
-        .select('user_id, notification_prefs')
-        .in('user_id', userIds)
+    const settingsMap: Record<string, any> = {}
+    for (const row of settingsRows) {
+      settingsMap[row.user_id] = row.notification_prefs ?? {}
+    }
 
-      const usersRes = await getSupabaseAdmin().auth.admin.listUsers()
-      const users = usersRes.data?.users ?? []
-      const emailMap: Record<string, string> = {}
-      for (const u of users) { if (u.email) emailMap[u.id] = u.email }
+    // Group week posts by user
+    const postsByUser: Record<string, any[]> = {}
+    for (const post of weekPosts) {
+      if (!postsByUser[post.user_id]) postsByUser[post.user_id] = []
+      postsByUser[post.user_id].push(post)
+    }
 
-      for (const userId of userIds) {
-        const email = emailMap[userId]
-        if (!email) continue
+    for (let batchIdx = 0; batchIdx < batches.length; batchIdx++) {
+      const batchResult = await step.run(`send-batch-${batchIdx}`, async () => {
+        const supabase = getSupabaseAdmin()
+        const resend = getResend()
+        const batch = batches[batchIdx]
+        let batchSent = 0
 
-        // Check if user has opted out of weekly digest (key: weekly_digest, default: true)
-        const userSettings = settings?.find(s => s.user_id === userId)
-        const prefs = userSettings?.notification_prefs || {}
-        if (prefs.weekly_digest === false) continue
+        for (const userId of batch) {
+          try {
+            const email = (emailMap as Record<string, string>)[userId]
+            if (!email) continue
 
-        const posts = userPostMap[userId]
-        const postCount = posts.length
-        const platformSet = new Set<string>(posts.flatMap((p: any) => p.platforms || []))
-        const platforms = Array.from(platformSet)
+            // Respect opt-out — default is opted IN
+            const prefs = settingsMap[userId] ?? {}
+            if (prefs.weekly_digest === false) continue
 
-        await getResend().emails.send({
-          from: 'SocialMate <hello@socialmate.studio>',
-          to: email,
-          subject: `📊 Your week on SocialMate — ${postCount} post${postCount !== 1 ? 's' : ''} published`,
-          html: `
-            <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 32px; color: #111;">
-              <div style="font-size: 22px; font-weight: 800; margin-bottom: 4px;">SocialMate</div>
-              <p style="color: #888; font-size: 12px; margin: 0 0 24px;">Weekly digest · ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
-              <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 16px;">Your week in review 📊</h2>
-              <div style="background: #f9f9f9; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-                <div style="font-size: 32px; font-weight: 800; color: #111;">${postCount}</div>
-                <div style="font-size: 13px; color: #555;">post${postCount !== 1 ? 's' : ''} published this week</div>
-                ${platforms.length > 0 ? `<div style="font-size: 12px; color: #888; margin-top: 8px;">on ${platforms.join(', ')}</div>` : ''}
-              </div>
-              <p style="font-size: 14px; color: #555; line-height: 1.6;">
-                Keep up the momentum. Consistent posting is the #1 driver of social media growth.
-              </p>
-              <a href="${appUrl}/dashboard" style="display: inline-block; margin-top: 20px; background: #000; color: #fff; text-decoration: none; font-weight: 700; font-size: 14px; padding: 12px 24px; border-radius: 10px;">
-                View Dashboard →
-              </a>
-              <hr style="border: none; border-top: 1px solid #eee; margin: 28px 0;" />
-              <p style="color: #bbb; font-size: 11px;">
-                You're receiving this because you published posts this week.
-                <a href="${appUrl}/settings?tab=Notifications" style="color: #bbb;">Manage preferences</a>
-              </p>
-            </div>
-          `,
-        })
-        sent++
-      }
-      return { sent }
-    })
+            const userPosts = postsByUser[userId] ?? []
+            const postsThisWeek = userPosts.length
+            if (postsThisWeek === 0) continue
+
+            const scheduledCount = scheduledByUser[userId] ?? 0
+
+            // Top platform: most posts this week
+            const platformCounts: Record<string, number> = {}
+            for (const p of userPosts) {
+              for (const plat of (p.platforms ?? [])) {
+                platformCounts[plat] = (platformCounts[plat] ?? 0) + 1
+              }
+            }
+            const topPlatform = Object.entries(platformCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
+
+            // Streak: count consecutive days with at least one post ending today (UTC)
+            const postedDays = new Set<string>()
+            for (const p of userPosts) {
+              if (p.published_at) {
+                postedDays.add(p.published_at.slice(0, 10))
+              }
+            }
+            // Also look back up to 30 days for older posts to extend streak
+            const { data: olderPosts } = await supabase
+              .from('posts')
+              .select('published_at')
+              .eq('user_id', userId)
+              .in('status', ['published', 'partial'])
+              .gte('published_at', new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString())
+              .lt('published_at', weekAgoIso)
+            for (const op of (olderPosts ?? [])) {
+              if (op.published_at) postedDays.add(op.published_at.slice(0, 10))
+            }
+            let currentStreak = 0
+            const todayUtc = now.toISOString().slice(0, 10)
+            let checkDay = new Date(todayUtc)
+            while (postedDays.has(checkDay.toISOString().slice(0, 10))) {
+              currentStreak++
+              checkDay = new Date(checkDay.getTime() - 24 * 60 * 60 * 1000)
+            }
+
+            // Top post: highest engagement (bluesky_stats likes+reposts+replies), fallback to most recent
+            let topPost: any = null
+            let topEngagement = -1
+            for (const p of userPosts) {
+              const bs = p.bluesky_stats
+              const eng = bs ? ((bs.likes ?? 0) + (bs.reposts ?? 0) + (bs.replies ?? 0)) : 0
+              if (eng > topEngagement) {
+                topEngagement = eng
+                topPost = p
+              }
+            }
+            if (!topPost) topPost = userPosts[0]
+            const topPostPreview = topPost?.content
+              ? topPost.content.slice(0, 120) + (topPost.content.length > 120 ? '…' : '')
+              : null
+
+            // Subject
+            const subject = `📊 Your SocialMate week — ${postsThisWeek} post${postsThisWeek !== 1 ? 's' : ''}${currentStreak >= 3 ? `, ${currentStreak} day streak` : ''}`
+
+            // Dark email HTML
+            const html = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your SocialMate week</title></head>
+<body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <div style="max-width:560px;margin:0 auto;padding:32px 24px;">
+
+    <!-- Header -->
+    <div style="margin-bottom:28px;">
+      <div style="font-size:20px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">SocialMate</div>
+      <div style="font-size:12px;color:#666;margin-top:4px;">Weekly digest · ${weekRange}</div>
+    </div>
+
+    <!-- Title -->
+    <h1 style="font-size:24px;font-weight:800;color:#ffffff;margin:0 0 8px;">Your week in review</h1>
+    <p style="font-size:14px;color:#888;margin:0 0 28px;">Here's what you shipped this week.</p>
+
+    <!-- Big stats row -->
+    <div style="display:flex;gap:12px;margin-bottom:24px;">
+      <div style="flex:1;background:#141414;border:1px solid #222;border-radius:12px;padding:20px;">
+        <div style="font-size:36px;font-weight:800;color:#22c55e;line-height:1;">${postsThisWeek}</div>
+        <div style="font-size:12px;color:#888;margin-top:6px;">post${postsThisWeek !== 1 ? 's' : ''} this week</div>
+      </div>
+      ${currentStreak > 0 ? `
+      <div style="flex:1;background:#141414;border:1px solid #222;border-radius:12px;padding:20px;">
+        <div style="font-size:36px;font-weight:800;color:#f59e0b;line-height:1;">${currentStreak}</div>
+        <div style="font-size:12px;color:#888;margin-top:6px;">day streak 🔥</div>
+      </div>` : ''}
+    </div>
+
+    ${topPlatform ? `
+    <!-- Top platform -->
+    <div style="background:#141414;border:1px solid #222;border-radius:12px;padding:16px 20px;margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Top platform</div>
+      <div style="font-size:16px;font-weight:700;color:#ffffff;text-transform:capitalize;">${topPlatform}</div>
+    </div>` : ''}
+
+    ${topPostPreview ? `
+    <!-- Top post preview -->
+    <div style="background:#141414;border:1px solid #222;border-radius:12px;padding:16px 20px;margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Top post</div>
+      <div style="font-size:14px;color:#ccc;line-height:1.5;font-style:italic;">"${topPostPreview}"</div>
+      ${topEngagement > 0 ? `<div style="font-size:12px;color:#555;margin-top:8px;">${topEngagement} engagement</div>` : ''}
+    </div>` : ''}
+
+    ${scheduledCount > 0 ? `
+    <!-- Scheduled next week -->
+    <div style="background:#141414;border:1px solid #222;border-radius:12px;padding:16px 20px;margin-bottom:24px;">
+      <div style="font-size:11px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Coming up</div>
+      <div style="font-size:16px;font-weight:700;color:#ffffff;">${scheduledCount} post${scheduledCount !== 1 ? 's' : ''} scheduled for next week</div>
+    </div>` : `<div style="margin-bottom:24px;"></div>`}
+
+    <!-- CTA -->
+    <a href="${appUrl}/analytics" style="display:inline-block;background:#22c55e;color:#000000;text-decoration:none;font-weight:700;font-size:14px;padding:14px 28px;border-radius:10px;margin-bottom:32px;">
+      View your analytics →
+    </a>
+
+    <!-- Divider -->
+    <hr style="border:none;border-top:1px solid #222;margin:0 0 20px;" />
+
+    <!-- Footer -->
+    <p style="font-size:11px;color:#444;line-height:1.6;margin:0;">
+      You're receiving this because you published posts on SocialMate this week.<br>
+      <a href="${appUrl}/settings?tab=Notifications" style="color:#555;">Unsubscribe from weekly digest</a>
+    </p>
+  </div>
+</body>
+</html>`
+
+            await resend.emails.send({
+              from: 'SocialMate <hello@socialmate.studio>',
+              to: email,
+              subject,
+              html,
+            })
+            batchSent++
+          } catch (err) {
+            // Never let one user's failure stop the rest
+            console.error(`[Weekly Digest] Failed to send to user ${userId}:`, err)
+          }
+        }
+
+        return batchSent
+      })
+
+      sent += batchResult as number
+    }
 
     console.log(`[Weekly Digest] Sent ${sent} emails`)
     return { sent }
