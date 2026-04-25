@@ -2507,6 +2507,101 @@ export const enkiCloudRunnerScan = inngest.createFunction(
   }
 )
 
+// ─── Competitor Alerts — every 4 hours ────────────────────────────────────────
+// Checks competitor_posts for new posts fetched since last_checked_at on each
+// competitor_account. Sends an in-app notification + browser push to the owner
+// when new competitor activity is detected. Uses already-stored posts — no
+// external API calls. Updates last_checked_at after alerting.
+export const competitorAlerts = inngest.createFunction(
+  { id: 'competitor-alerts', name: 'Competitor Post Alerts' },
+  { cron: '0 */4 * * *' },
+  async ({ step }) => {
+    const db = getSupabaseAdmin()
+
+    // Fetch all competitor accounts that have been checked at least once
+    const competitors = await step.run('fetch-competitors', async () => {
+      const { data, error } = await db
+        .from('competitor_accounts')
+        .select('id, user_id, platform, handle, last_checked_at')
+      if (error) {
+        console.error('[CompetitorAlerts] Failed to fetch accounts:', error.message)
+        return []
+      }
+      return data ?? []
+    })
+
+    if (!competitors.length) return { alerted: 0, checked: 0 }
+
+    let alerted = 0
+    let checked = 0
+
+    for (const comp of competitors) {
+      await step.run(`check-competitor-${comp.id}`, async () => {
+        try {
+          // Find posts fetched after this competitor was last checked
+          // If never checked, alert on any posts fetched in the last 4 hours
+          const sinceTs = comp.last_checked_at
+            ? comp.last_checked_at
+            : new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()
+
+          const { data: newPosts, error: postsError } = await db
+            .from('competitor_posts')
+            .select('id, posted_at, content, post_url')
+            .eq('competitor_id', comp.id)
+            .gt('fetched_at', sinceTs)
+            .order('posted_at', { ascending: false })
+            .limit(5)
+
+          if (postsError) {
+            console.error(`[CompetitorAlerts] Posts query failed for ${comp.handle}:`, postsError.message)
+            return
+          }
+
+          const now = new Date().toISOString()
+
+          if (newPosts && newPosts.length > 0) {
+            const displayHandle = comp.handle.startsWith('@') ? comp.handle : `@${comp.handle}`
+            const platformLabel = comp.platform.charAt(0).toUpperCase() + comp.platform.slice(1)
+            const title = `👀 New post from ${displayHandle}`
+            const body = `${displayHandle} just posted on ${platformLabel}`
+            const url = '/competitor-tracking'
+
+            // In-app notification (fire-and-forget)
+            db.from('notifications')
+              .insert({
+                user_id:    comp.user_id,
+                type:       'competitor_post',
+                message:    `${displayHandle} just posted on ${platformLabel}. Check their latest content.`,
+                action_url: url,
+              })
+              .then(({ error: insertErr }) => {
+                if (insertErr) console.warn('[CompetitorAlerts] notifications insert failed:', insertErr.message)
+              })
+
+            // Browser push (best-effort)
+            await sendPushNotification(comp.user_id, title, body, url, 'competitor_post')
+
+            alerted++
+            console.log(`[CompetitorAlerts] Alerted user ${comp.user_id} — ${comp.platform}:${comp.handle} (${newPosts.length} new post(s))`)
+          }
+
+          // Always update last_checked_at so the window advances
+          await db
+            .from('competitor_accounts')
+            .update({ last_checked_at: now })
+            .eq('id', comp.id)
+
+          checked++
+        } catch (err: any) {
+          console.error(`[CompetitorAlerts] Error checking ${comp.platform}:${comp.handle}:`, err.message)
+        }
+      })
+    }
+
+    return { alerted, checked, total: competitors.length }
+  }
+)
+
 // ─── Competitor Post Fetcher — daily at 7am UTC ────────────────────────────────
 // Fetches recent public posts for each tracked competitor account and stores
 // them in competitor_posts. Supports Bluesky, Mastodon, YouTube, Reddit.
