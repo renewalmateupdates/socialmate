@@ -105,7 +105,7 @@ These have burned us before — always apply:
 
 ---
 
-## What's Been Built (as of April 24, 2026 — end of day)
+## What's Been Built (as of April 25, 2026 — end of day)
 
 **Core:**
 - Post scheduling (Now + future via Inngest), drafts, queue, calendar, bulk scheduling
@@ -278,6 +278,15 @@ These have burned us before — always apply:
 - **LinkedIn posts** — SOMA-focused long-form post written for LinkedIn distribution.
 - **Inngest version** — pinned to `3.54.0` (security-patched 3.x, compatible with 3-arg `createFunction` API used throughout codebase).
 
+**April 25, 2026:**
+- **SOMA upgrade gate fix** (PR #213) — Dashboard gate changed from `c.monthly === 0` to `plan !== 'free'`. Pro/Agency users always reach dashboard; credits auto-provision on first load. Credits API now returns `plan` field.
+- **SOMA landing pricing cards redesign** (PR #213) — Cards now match SocialMate main pricing page: light bg + colored border per tier (emerald/amber/purple), ✓ bullets, consistent field names.
+- **SOMA Full Send mode toggle** (PR #214) — Dashboard now shows all 3 mode buttons (🟢 Safe / ⚡ Autopilot / 🚀 Full Send). Types extended to include `'full_send'` throughout. Full Send shows upgrade modal if not purchased.
+- **SOMA email notifications** (PR #214) — Generate route sends Resend email after every run: Safe mode = "queue ready to review", Autopilot/Full Send = "posts scheduled". Non-fatal try/catch.
+- **Roadmap updated** (PR #214) — SOMA credit counts corrected (500/2000), FAQ added as shipped, SOMA description updated with Projects/Full Send.
+- **Media library bucket fix** (PR #215) — Upload route corrected from `'post-media'` → `'media'` bucket. `media_items` table SQL confirmed applied. `media` bucket confirmed exists (public, 50MB).
+- **Admin workspace SQL** — `socialmatehq@gmail.com` workspace set to `plan='agency'`, `soma_credits_monthly=2000`, `soma_autopilot_enabled=true` directly in Supabase (SQL only, not in code — paying customers still see upgrade modal).
+
 ---
 
 ## Known Issues / Bugs (fix these when touched)
@@ -308,49 +317,26 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 ## Pending / In Progress
 
-- **Merge PR #208 + PR #209** — SOMA Phase 2 + autopilot/FAQ. Both ready. Merge when Vercel goes green on #209.
+- **Abdus Sohag trial review** — trial ends April 26 (tomorrow). Decide: keep at 10%, bump to standard 30%, or cut. Referral link: `?ref=SOHAG`.
 
-- **Resync Inngest** after merging PRs #208/#209 — `streak-notifications` and `soma-autopilot-run` must register. Go to Inngest Dashboard → Apps → Resync.
+- **Test SOMA end-to-end** — voice profile → create project → paste master doc → ingest → generate. Not yet tested by Joshua.
 
-- **Abdus Sohag trial review** — trial ends April 26. Decide: keep at 10%, bump to standard 30%, or cut. Referral link: `?ref=SOHAG`.
-
-- **Content posts (Apr 20–26)** — bulk-scheduled, running daily 8am–5pm ET on X + Bluesky. May need to manually retry any missed morning slots.
-
-- **Inngest env vars** — confirmed needed: `INNGEST_EVENT_KEY` + `INNGEST_SIGNING_KEY` in Vercel. Verify they're still set after any Vercel config changes.
+- **SOMA autopilot cron email** — `somaAutopilotRun` Inngest cron (Mondays) doesn't send email yet. The manual generate route does. Needs same Resend email block added to `lib/inngest.ts`.
 
 - **Push notification VAPID keys** — CONFIRMED SET in Vercel. Push notifications are live.
 
-- **Studio Stax renewal SQL** — run in Supabase if migration doesn't auto-apply:
-  ```sql
-  ALTER TABLE studio_stax_slots
-    ADD COLUMN IF NOT EXISTS renewal_email_30_sent_at timestamptz DEFAULT NULL,
-    ADD COLUMN IF NOT EXISTS renewal_email_14_sent_at timestamptz DEFAULT NULL,
-    ADD COLUMN IF NOT EXISTS renewal_email_7_sent_at  timestamptz DEFAULT NULL,
-    ADD COLUMN IF NOT EXISTS renewal_token text UNIQUE,
-    ADD COLUMN IF NOT EXISTS renewal_token_expires timestamptz;
-  ```
+- **Enki Truth Mode testing** — 50-trade minimum per strategy before results are statistically valid.
 
-- **Analytics Bluesky stats SQL** — run in Supabase: `ALTER TABLE posts ADD COLUMN IF NOT EXISTS bluesky_stats JSONB DEFAULT NULL;`
+- **LinkedIn integration** — API credentials not yet acquired. Requires: (1) LinkedIn Company Page published, (2) developer app at linkedin.com/developers, (3) apply for Marketing Developer Platform. On hold until Joshua has time.
 
-- **Brand Voice SQL** — run in Supabase: `ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS brand_voice JSONB DEFAULT NULL;`
-
-- **SOMA SQL** — `soma_projects` + `soma_master_docs` tables confirmed applied. `soma_identity_profiles`, `soma_weekly_ingestion`, `soma_credit_ledger` tables + SOMA columns on workspaces confirmed applied (PR #202).
-
-- **SOMA Autopilot Stripe price** — `price_1TP8rU7OMwDowUuUYLBNAVux` already live ($10/mo). Wired in AutopilotModal.
-
-- **Enki Truth Mode testing** — market now open (Apr 21). 50-trade minimum per strategy before results are statistically valid.
-
-- **LinkedIn integration** — API credentials not yet acquired. Requires: (1) LinkedIn Company Page published, (2) developer app at linkedin.com/developers, (3) apply for Marketing Developer Platform. Company Page setup started Apr 23. On hold until Joshua has time.
-
-- **TikTok API review** — submitted Apr 23. Check TikTok developer portal daily. 2–4 week review window. No action needed until approved.
+- **TikTok API review** — submitted Apr 23. Support ticket `ad7714530aa61ad4` open re: app name. Check portal periodically. No action needed until approved.
 
 **Roadmap (next up):**
-- **Media Library** — listed as "in progress" on roadmap, needs building
-- **SOMA email notifications** — Resend emails when autopilot runs, posts ready to review
-- **SOMA Full Send tier** — Stripe price ($20/mo), UI enforcement
-- **Creator Monetization Hub** — fan subscriptions, tip jars, paywalled content
-- **Content DNA** — cross-platform performance fingerprinting
-- **Unified inbox replies** — reply to comments/DMs (read-only inbox done; write/reply not yet built)
+- **SOMA autopilot cron email** — add Resend notification to Monday Inngest cron (no external deps needed)
+- **Roadmap page** — flip Media Library from "in-progress" to "shipped"
+- **Creator Monetization Hub** — fan subscriptions, tip jars, paywalled content (Stripe Connect required)
+- **Content DNA** — cross-platform performance fingerprinting (uses existing analytics data, no new API)
+- **Unified inbox replies** — reply to comments/DMs (read-only done; write/reply not built)
 - **LinkedIn publishing** — pending API credentials
 
 ## Confirmed Done (stop asking about these)
@@ -397,6 +383,11 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - ✅ **Dashboard React #310 crash fix (Apr 23)** — dnd-kit hooks moved before early return in DashboardInner. Dashboard fully stable.
 - ✅ **TikTok API submitted (Apr 23)** — SocialMatehq app submitted for review. Content Posting API + Direct Post + Login Kit. Status: In review.
 - ✅ **Dashboard React #310 fix (Apr 22)** — useSensors/useSensor (dnd-kit) declared after early return, violating Rules of Hooks. Moved before `if (loading) return`. Pushed directly to main. Done.
+- ✅ **SOMA upgrade gate (Apr 25)** — Gate now checks `plan !== 'free'` instead of `c.monthly === 0`. Admin workspace manually set to agency via SQL. Done (PR #213).
+- ✅ **SOMA Full Send toggle (Apr 25)** — All 3 mode buttons live in dashboard. Full Send type added throughout. Done (PR #214).
+- ✅ **SOMA email notifications (Apr 25)** — Generate route sends Resend email on every run. Done (PR #214).
+- ✅ **Media Library (Apr 25)** — `/media` page live, `media_items` table confirmed applied, `media` bucket confirmed public. Bucket name fix merged (PR #215).
+- ✅ **Roadmap updated (Apr 25)** — SOMA credit counts fixed, FAQ shipped, media library shipped. Done (PR #214).
 - ✅ **TikTok Developer App setup (Apr 22)** — App: SocialMatehq. Content Posting API added, Direct Post ON, scopes: video.publish + video.upload, socialmate.studio domain verified, TIKTOK_CLIENT_KEY + TIKTOK_CLIENT_SECRET in Vercel. Pending: record demo video (Win+G) + submit for review.
 
 ---
