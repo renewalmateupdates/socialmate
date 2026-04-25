@@ -16,6 +16,14 @@ export type InboxItem = {
   post_url?: string
   timestamp: string
   read: boolean
+  // Bluesky threading refs (for reply)
+  parent_uri?: string
+  parent_cid?: string
+  root_uri?: string
+  root_cid?: string
+  // Mastodon reply refs
+  in_reply_to_id?: string
+  instance?: string
 }
 
 // ── Bluesky ──────────────────────────────────────────────────────────────────
@@ -63,20 +71,32 @@ async function fetchBluesky(account: {
 
   return (notifications || [])
     .filter((n: any) => TYPE_MAP[n.reason])
-    .map((n: any): InboxItem => ({
-      id:          `bsky-${n.uri || n.cid}`,
-      platform:    'bluesky',
-      type:        TYPE_MAP[n.reason],
-      from_name:   n.author?.displayName || n.author?.handle || 'Unknown',
-      from_handle: n.author?.handle ? `@${n.author.handle}` : 'unknown',
-      from_avatar: n.author?.avatar,
-      content:     n.record?.text || '',
-      post_url:    n.uri && n.author?.handle
-        ? `https://bsky.app/profile/${n.author.handle}/post/${n.uri.split('/').pop()}`
-        : undefined,
-      timestamp:   n.indexedAt,
-      read:        !!n.isRead,
-    }))
+    .map((n: any): InboxItem => {
+      // n.uri is the notification subject (the post that triggered it).
+      // n.record.reply contains parent/root refs when the notification IS a reply.
+      const parentRef = n.record?.reply?.parent
+      const rootRef   = n.record?.reply?.root
+
+      return {
+        id:          `bsky-${n.uri || n.cid}`,
+        platform:    'bluesky',
+        type:        TYPE_MAP[n.reason],
+        from_name:   n.author?.displayName || n.author?.handle || 'Unknown',
+        from_handle: n.author?.handle ? `@${n.author.handle}` : 'unknown',
+        from_avatar: n.author?.avatar,
+        content:     n.record?.text || '',
+        post_url:    n.uri && n.author?.handle
+          ? `https://bsky.app/profile/${n.author.handle}/post/${n.uri.split('/').pop()}`
+          : undefined,
+        timestamp:   n.indexedAt,
+        read:        !!n.isRead,
+        // Threading refs so the client can send a properly-threaded reply
+        parent_uri:  n.uri,
+        parent_cid:  n.cid,
+        root_uri:    rootRef?.uri   || n.uri,
+        root_cid:    rootRef?.cid   || n.cid,
+      }
+    })
 }
 
 // ── Mastodon ─────────────────────────────────────────────────────────────────
@@ -97,6 +117,8 @@ async function fetchMastodon(account: {
   if (!instanceUrl) instanceUrl = 'https://mastodon.social'
 
   const base = instanceUrl.replace(/\/$/, '')
+  // Derive just the host for use as the `instance` field (no trailing slash, no protocol)
+  const instanceHost = instanceUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')
 
   const params = new URLSearchParams({ limit: '50' })
   ;['mention', 'reblog', 'favourite', 'follow'].forEach(t => params.append('types[]', t))
@@ -119,16 +141,19 @@ async function fetchMastodon(account: {
   return notifications
     .filter((n: any) => TYPE_MAP[n.type])
     .map((n: any): InboxItem => ({
-      id:          `masto-${n.id}`,
-      platform:    'mastodon',
-      type:        TYPE_MAP[n.type],
-      from_name:   n.account?.display_name || n.account?.acct || 'Unknown',
-      from_handle: n.account?.acct ? `@${n.account.acct}` : 'unknown',
-      from_avatar: n.account?.avatar,
-      content:     n.status?.content ? n.status.content.replace(/<[^>]*>/g, '') : '',
-      post_url:    n.status?.url,
-      timestamp:   n.created_at,
-      read:        false, // Mastodon v1 API doesn't expose per-notification read state
+      id:             `masto-${n.id}`,
+      platform:       'mastodon',
+      type:           TYPE_MAP[n.type],
+      from_name:      n.account?.display_name || n.account?.acct || 'Unknown',
+      from_handle:    n.account?.acct ? `@${n.account.acct}` : 'unknown',
+      from_avatar:    n.account?.avatar,
+      content:        n.status?.content ? n.status.content.replace(/<[^>]*>/g, '') : '',
+      post_url:       n.status?.url,
+      timestamp:      n.created_at,
+      read:           false, // Mastodon v1 API doesn't expose per-notification read state
+      // Reply refs
+      in_reply_to_id: n.status?.id,
+      instance:       instanceHost,
     }))
 }
 

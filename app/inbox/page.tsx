@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Sidebar from '@/components/Sidebar'
@@ -339,21 +339,101 @@ export default function InboxPage() {
 }
 
 // ── InboxItemCard ─────────────────────────────────────────────────────────────
+const REPLY_MAX = 300
+
+function canReply(item: InboxItem) {
+  return (
+    (item.type === 'mention' || item.type === 'reply') &&
+    (item.platform === 'bluesky' || item.platform === 'mastodon')
+  )
+}
+
 function InboxItemCard({ item, onRead }: { item: InboxItem; onRead: (id: string) => void }) {
   const platformMeta = PLATFORM_META[item.platform]
   const typeMeta     = TYPE_META[item.type] ?? TYPE_META.message
 
-  function handleClick() {
+  const [replyOpen, setReplyOpen]   = useState(false)
+  const [replyText, setReplyText]   = useState('')
+  const [sending, setSending]       = useState(false)
+  const [sent, setSent]             = useState(false)
+  const [replyError, setReplyError] = useState<string | null>(null)
+  const textareaRef                 = useRef<HTMLTextAreaElement>(null)
+
+  function handleCardClick(e: React.MouseEvent | React.KeyboardEvent) {
+    // Don't navigate if a reply-UI element was clicked
+    const target = e.target as HTMLElement
+    if (target.closest('[data-reply-zone]')) return
     onRead(item.id)
     if (item.post_url) window.open(item.post_url, '_blank', 'noopener,noreferrer')
   }
 
+  function openReply(e: React.MouseEvent) {
+    e.stopPropagation()
+    onRead(item.id)
+    setReplyOpen(true)
+    setReplyText('')
+    setSent(false)
+    setReplyError(null)
+    setTimeout(() => textareaRef.current?.focus(), 60)
+  }
+
+  function cancelReply(e: React.MouseEvent) {
+    e.stopPropagation()
+    setReplyOpen(false)
+    setReplyText('')
+    setReplyError(null)
+  }
+
+  async function sendReply(e: React.MouseEvent) {
+    e.stopPropagation()
+    const text = replyText.trim()
+    if (!text || sending) return
+    setSending(true)
+    setReplyError(null)
+
+    try {
+      const body: Record<string, unknown> = {
+        platform: item.platform,
+        reply_text: text,
+      }
+      if (item.platform === 'bluesky') {
+        body.parent_uri = item.parent_uri
+        body.parent_cid = item.parent_cid
+        body.root_uri   = item.root_uri
+        body.root_cid   = item.root_cid
+      } else {
+        body.in_reply_to_id = item.in_reply_to_id
+        body.instance       = item.instance
+      }
+
+      const res = await fetch('/api/inbox/reply', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      })
+
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Reply failed')
+
+      setSent(true)
+      setReplyText('')
+    } catch (err) {
+      setReplyError(err instanceof Error ? err.message : 'Reply failed. Please try again.')
+    } finally {
+      setSending(false)
+    }
+  }
+
+  const replyable = canReply(item)
+  const charsLeft = REPLY_MAX - replyText.length
+
   return (
     <div
-      onClick={handleClick}
+      onClick={handleCardClick}
       role="button"
       tabIndex={0}
-      onKeyDown={e => e.key === 'Enter' && handleClick()}
+      onKeyDown={e => e.key === 'Enter' && handleCardClick(e)}
       className={`bg-surface border rounded-2xl p-4 cursor-pointer transition-all hover:border-gray-300 dark:hover:border-gray-600 active:scale-[0.99] ${
         !item.read ? 'border-black dark:border-white' : 'border-theme'
       }`}>
@@ -407,7 +487,7 @@ function InboxItemCard({ item, onRead }: { item: InboxItem; onRead: (id: string)
             </p>
           ) : null}
 
-          {/* Row 3: platform label */}
+          {/* Row 3: platform label + reply button */}
           <div className="flex items-center gap-1 mt-1.5">
             <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${platformMeta?.color ?? ''}`}>
               {platformMeta?.icon} {platformMeta?.label}
@@ -415,7 +495,60 @@ function InboxItemCard({ item, onRead }: { item: InboxItem; onRead: (id: string)
             {item.post_url && (
               <span className="text-xs text-gray-400 dark:text-gray-500">↗</span>
             )}
+            {replyable && !replyOpen && !sent && (
+              <button
+                data-reply-zone="true"
+                onClick={openReply}
+                className="ml-auto text-xs font-semibold text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white transition-colors flex items-center gap-1 px-2 py-0.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                ↩ Reply
+              </button>
+            )}
+            {sent && (
+              <span className="ml-auto text-xs font-semibold text-green-600 dark:text-green-400 flex items-center gap-1">
+                ✓ Replied
+              </span>
+            )}
           </div>
+
+          {/* Reply composer */}
+          {replyOpen && !sent && (
+            <div
+              data-reply-zone="true"
+              onClick={e => e.stopPropagation()}
+              onKeyDown={e => e.stopPropagation()}
+              className="mt-3 flex flex-col gap-2">
+              <textarea
+                ref={textareaRef}
+                rows={3}
+                maxLength={REPLY_MAX}
+                value={replyText}
+                onChange={e => setReplyText(e.target.value)}
+                placeholder={`Reply to ${item.from_handle}…`}
+                className="w-full text-sm bg-gray-50 dark:bg-gray-800/60 border border-theme rounded-xl px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white placeholder:text-gray-400 dark:placeholder:text-gray-600"
+              />
+              {replyError && (
+                <p className="text-xs text-red-500 dark:text-red-400">{replyError}</p>
+              )}
+              <div className="flex items-center gap-2">
+                <span className={`text-xs flex-1 ${charsLeft < 20 ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
+                  {charsLeft} chars left
+                </span>
+                <button
+                  onClick={cancelReply}
+                  className="text-xs font-semibold text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                  Cancel
+                </button>
+                <button
+                  onClick={sendReply}
+                  disabled={!replyText.trim() || sending || charsLeft < 0}
+                  className="text-xs font-bold bg-black dark:bg-white text-white dark:text-black px-4 py-1.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 flex items-center gap-1.5">
+                  {sending
+                    ? <><div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />Sending</>
+                    : 'Send'}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
