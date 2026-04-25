@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
+import UpgradeNudge from '@/components/UpgradeNudge'
 
 const PLATFORMS = [
   { id: 'discord',   name: 'Discord',   icon: '💬', limit: 2000,  live: true  },
@@ -1185,6 +1186,20 @@ function ComposeInner() {
                   })}
                 </div>
               )}
+            </div>
+          )}
+
+          {/* CREDIT NUDGE — free plan users with ≤10 credits */}
+          {!loading && plan === 'free' && credits <= 10 && (
+            <div className="mb-4">
+              <UpgradeNudge
+                variant="banner"
+                title="Running low on credits"
+                description={`${credits} credit${credits !== 1 ? 's' : ''} left this month`}
+                cta="Get Pro — $5/mo"
+                href="/pricing"
+                dismissKey="nudge_compose_credits"
+              />
             </div>
           )}
 

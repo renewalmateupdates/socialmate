@@ -7,6 +7,7 @@ import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 import ThemeToggle from '@/components/ThemeToggle'
 import ComposeShortcut from '@/components/ComposeShortcut'
 import NotificationBell from '@/components/NotificationBell'
+import UpgradeNudge from '@/components/UpgradeNudge'
 import {
   DndContext,
   closestCenter,
@@ -710,6 +711,26 @@ function SidebarContent({
                   )}
                 </div>
               </div>
+
+              {/* Credit nudge — only for free plan users */}
+              {!loading && plan === 'free' && credits <= 0 && (
+                <UpgradeNudge
+                  variant="inline"
+                  title="Out of credits"
+                  description="Upgrade to Pro for 500/mo"
+                  cta="Upgrade →"
+                  href="/pricing"
+                  dismissKey="nudge_credits_empty"
+                />
+              )}
+              {!loading && plan === 'free' && credits > 0 && credits <= 10 && (
+                <div className="rounded-xl border border-yellow-500/30 bg-yellow-950/10 px-3 py-2 flex items-center justify-between gap-2">
+                  <p className="text-xs text-yellow-400/80 font-semibold">Low credits — {credits} remaining</p>
+                  <Link href="/pricing" className="text-xs font-bold text-yellow-400 hover:text-yellow-300 transition-colors whitespace-nowrap flex-shrink-0">
+                    Upgrade →
+                  </Link>
+                </div>
+              )}
 
               <div className="rounded-xl p-3" style={{ background: 'var(--sidebar-active)' }}>
                 <div className="flex items-center justify-between mb-1.5">
