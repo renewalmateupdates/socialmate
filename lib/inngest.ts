@@ -3659,6 +3659,38 @@ Rules:
           await inngest.send({ name: 'notification/send', data: { user_id: ownerId, type: 'soma_autopilot', title: `"${project.name}" week is ready`, body: `SOMA generated ${postsCreated} posts. Review them in your queue.`, link: `/soma/projects/${project.id}` } })
           await sendPushNotification(ownerId, `"${project.name}" week is ready!`, `SOMA generated ${postsCreated} posts. Review in your queue.`, `/soma/projects/${project.id}`, 'soma_autopilot')
 
+          // Email notification
+          try {
+            const { data: ownerData } = await admin.auth.admin.getUserById(ownerId)
+            const ownerEmail = ownerData?.user?.email
+            if (ownerEmail && process.env.RESEND_API_KEY) {
+              const modeLabel = project.mode === 'full_send' ? 'Full Send' : 'Autopilot'
+              const previewPosts = (generatedPosts as any[]).slice(0, 2)
+              const postCards = previewPosts.map((p: any) => `
+                <div style="background:#1a1a1a;border:1px solid #333;border-radius:10px;padding:14px;margin-bottom:10px;">
+                  <div style="font-size:10px;color:#888;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">${p.platform ?? ''} · Day ${p.day}</div>
+                  <div style="font-size:13px;color:#e5e5e5;line-height:1.5;">${(p.content ?? '').slice(0, 120)}${(p.content ?? '').length > 120 ? '…' : ''}</div>
+                </div>`).join('')
+              const extraCount = postsCreated - previewPosts.length
+              await getResend().emails.send({
+                from: 'SOMA <soma@socialmate.studio>',
+                to: ownerEmail,
+                subject: `⚡ SOMA scheduled ${postsCreated} posts for "${project.name}"`,
+                html: `<div style="background:#0f0f0f;font-family:sans-serif;padding:32px;max-width:520px;margin:0 auto;border-radius:16px;">
+                  <p style="color:#f59e0b;font-size:18px;font-weight:900;margin:0 0 4px;">⚡ SOMA</p>
+                  <p style="color:#e5e5e5;font-size:16px;font-weight:700;margin:0 0 16px;">${modeLabel} ran — ${postsCreated} posts scheduled</p>
+                  <p style="color:#888;font-size:13px;margin:0 0 20px;">Project: <strong style="color:#e5e5e5;">${project.name}</strong> · Week of ${weekLabel.replace('Auto — Week of ', '')}</p>
+                  ${postCards}
+                  ${extraCount > 0 ? `<p style="color:#666;font-size:12px;margin:8px 0 20px;">+ ${extraCount} more post${extraCount !== 1 ? 's' : ''} in your schedule</p>` : ''}
+                  <a href="https://socialmate.studio/soma/projects/${project.id}" style="display:inline-block;background:#f59e0b;color:#000;font-weight:900;font-size:13px;padding:12px 24px;border-radius:10px;text-decoration:none;margin-top:8px;">View Schedule →</a>
+                  <p style="color:#444;font-size:11px;margin-top:24px;">SocialMate by Gilgamesh Enterprise LLC · You're receiving this because SOMA Autopilot is active.</p>
+                </div>`,
+              })
+            }
+          } catch (emailErr) {
+            console.error('[SomaAutopilot] Email send failed:', emailErr)
+          }
+
           console.log(`[SomaAutopilot] project ${project.id} (${project.name}): ${postsCreated} posts`)
         })
         processed++

@@ -10,6 +10,7 @@ interface HubStats {
 }
 
 const NAV_CARDS = [
+  { emoji: '🛸', label: 'God Mode Overview', sub: 'Full metrics — users, revenue, churn', href: '/admin/overview'      },
   { emoji: '👥', label: 'Users',          sub: 'Manage all accounts',           href: '/admin/users'          },
   { emoji: '💰', label: 'Partner Admin',   sub: 'Affiliates, payouts & invites', href: '/admin/partners'       },
   { emoji: '🏪', label: 'Studio Stax',    sub: 'Listings & approvals',          href: '/admin/studio-stax'    },
