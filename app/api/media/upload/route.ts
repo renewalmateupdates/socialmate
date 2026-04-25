@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
 
   const admin = getSupabaseAdmin()
   const { data, error } = await admin.storage
-    .from('post-media')
+    .from('media')
     .upload(path, buffer, {
       contentType: file.type,
       upsert:      false,
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Upload failed', detail: error.message }, { status: 500 })
   }
 
-  const { data: urlData } = admin.storage.from('post-media').getPublicUrl(data.path)
+  const { data: urlData } = admin.storage.from('media').getPublicUrl(data.path)
 
   return NextResponse.json({
     url:  urlData.publicUrl,
