@@ -236,6 +236,18 @@ function ComposeInner() {
   // Brand Voice badge
   const [brandVoiceName, setBrandVoiceName] = useState<string | null>(null)
 
+  // Thread builder
+  const [threadMode, setThreadMode] = useState(false)
+  const [threadParts, setThreadParts] = useState<string[]>([''])
+
+  // Save as template
+  const TEMPLATE_CATEGORIES = ['Promotional', 'Educational', 'Engagement', 'Announcement', 'Personal', 'Question', 'Poll', 'Thread', 'Other']
+  const [showSaveTemplate, setShowSaveTemplate] = useState(false)
+  const [templateTitle, setTemplateTitle] = useState('')
+  const [templateCategory, setTemplateCategory] = useState('Other')
+  const [savingTemplate, setSavingTemplate] = useState(false)
+  const [templateSaveMsg, setTemplateSaveMsg] = useState<{ text: string; ok: boolean } | null>(null)
+
   const planConfig = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
   const maxScheduleDate = (() => {
     const d = new Date()
@@ -739,6 +751,162 @@ function ComposeInner() {
     showToast('Post replaced ✓')
   }
 
+  // Thread builder helpers
+  const mostRestrictiveLimit = (() => {
+    if (selectedPlatforms.length === 0) return 280
+    const limits = selectedPlatforms.map(id => PLATFORMS.find(p => p.id === id)?.limit ?? Infinity)
+    return Math.min(...limits)
+  })()
+
+  const handleToggleThreadMode = () => {
+    if (!threadMode) {
+      setThreadParts(content ? [content] : [''])
+      setThreadMode(true)
+    } else {
+      setContent(threadParts.filter(p => p.trim()).join('\n\n'))
+      setThreadMode(false)
+    }
+  }
+
+  const handleAutoSplit = () => {
+    const limit = mostRestrictiveLimit
+    const text = content.trim()
+    if (!text) return
+    const parts: string[] = []
+    let remaining = text
+    while (remaining.length > 0) {
+      if (remaining.length <= limit) {
+        parts.push(remaining)
+        break
+      }
+      let cutAt = limit
+      const spaceIdx = remaining.lastIndexOf(' ', limit)
+      if (spaceIdx > 0) cutAt = spaceIdx
+      parts.push(remaining.slice(0, cutAt).trimEnd())
+      remaining = remaining.slice(cutAt).trimStart()
+    }
+    setThreadParts(parts.length > 0 ? parts : [''])
+    setThreadMode(true)
+  }
+
+  const handleThreadPartChange = (idx: number, val: string) => {
+    setThreadParts(prev => {
+      const next = Array.from(prev)
+      next[idx] = val
+      return next
+    })
+  }
+
+  const handleAddThreadPart = () => {
+    setThreadParts(prev => Array.from(prev).concat(['']))
+  }
+
+  const handleRemoveThreadPart = (idx: number) => {
+    setThreadParts(prev => {
+      if (prev.length <= 1) return prev
+      return Array.from(prev).filter((_, i) => i !== idx)
+    })
+  }
+
+  const handlePublishThread = async () => {
+    const parts = threadParts.filter(p => p.trim())
+    if (parts.length === 0 || selectedPlatforms.length === 0 || !!scheduleError || mediaStillUploading) return
+    setPublishing(true)
+    setPublishResults(null)
+    try {
+      let baseMs: number
+      if (scheduleDate) {
+        const time = scheduleTime || '09:00'
+        baseMs = new Date(`${scheduleDate}T${time}`).getTime()
+      } else {
+        baseMs = Date.now() + 5000
+      }
+      const allResults: PublishResult[] = []
+      for (let i = 0; i < parts.length; i++) {
+        const scheduledAt = new Date(baseMs + i * 30_000).toISOString()
+        const res = await fetch('/api/posts/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content: parts[i],
+            platforms: selectedPlatforms,
+            scheduledAt,
+            destinations: selectedDestinations,
+            workspaceId: activeWorkspace?.id,
+            selectedAccountIds,
+            mediaUrls: i === 0 && uploadedMediaUrls.length > 0 ? uploadedMediaUrls : undefined,
+          }),
+        })
+        const data = await res.json()
+        if (!res.ok) {
+          allResults.push({ platform: 'thread', success: false, error: data.error || 'Failed' })
+        } else {
+          allResults.push({ platform: 'thread', success: true, postId: `part-${i + 1}` })
+        }
+      }
+      const anyFailed = allResults.some(r => !r.success)
+      if (anyFailed) {
+        showToast('Some thread parts failed — check results below', 'error')
+        setPublishResults(allResults)
+      } else {
+        showToast(`Thread of ${parts.length} parts scheduled ✓`)
+        setThreadParts([''])
+        setContent('')
+        setThreadMode(false)
+        setScheduleDate('')
+        setScheduleTime('')
+        setCurrentDraftId(null)
+        setScoreResult(null)
+        clearMedia()
+      }
+    } catch {
+      showToast('Network error. Please try again.', 'error')
+    } finally {
+      setPublishing(false)
+    }
+  }
+
+  const handleSaveTemplate = async () => {
+    if (!templateTitle.trim()) {
+      setTemplateSaveMsg({ text: 'Title is required', ok: false })
+      return
+    }
+    const currentContent = threadMode ? threadParts.filter(p => p.trim()).join('\n\n') : content
+    if (!currentContent.trim()) {
+      setTemplateSaveMsg({ text: 'Write some content first', ok: false })
+      return
+    }
+    setSavingTemplate(true)
+    setTemplateSaveMsg(null)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { setTemplateSaveMsg({ text: 'Not signed in', ok: false }); return }
+      const { error } = await supabase.from('post_templates').insert({
+        user_id: user.id,
+        workspace_id: activeWorkspace?.is_personal ? null : (activeWorkspace?.id ?? null),
+        title: templateTitle.trim(),
+        content: currentContent,
+        category: templateCategory,
+        platforms: selectedPlatforms,
+      })
+      if (error) {
+        setTemplateSaveMsg({ text: error.message || 'Save failed', ok: false })
+        return
+      }
+      setTemplateSaveMsg({ text: 'Template saved!', ok: true })
+      setTemplateTitle('')
+      setTemplateCategory('Other')
+      setTimeout(() => {
+        setShowSaveTemplate(false)
+        setTemplateSaveMsg(null)
+      }, 2500)
+    } catch {
+      setTemplateSaveMsg({ text: 'Network error. Please try again.', ok: false })
+    } finally {
+      setSavingTemplate(false)
+    }
+  }
+
   // Best-time picker — sets schedule to tomorrow at optimal ET hour for selected platforms
   const BEST_HOUR_ET: Record<string, number> = {
     bluesky: 9, discord: 17, telegram: 8, mastodon: 10, twitter: 9,
@@ -1225,48 +1393,124 @@ function ComposeInner() {
                 </div>
               )}
 
-              {/* TEXT AREA */}
+              {/* TEXT AREA / THREAD BUILDER */}
               <div className="bg-surface border border-theme rounded-2xl p-4">
-                <textarea
-                  value={content}
-                  onChange={e => { setContent(e.target.value); setScoreResult(null) }}
-                  placeholder="What do you want to post? Write your content here, or use an AI tool to generate it..."
-                  rows={5}
-                  className="w-full outline-none resize-none text-gray-800 dark:text-gray-200 placeholder-gray-300 dark:placeholder-gray-600 min-h-[120px] sm:min-h-[200px]"
-                  style={{ fontSize: '16px' }}
-                />
-                <div className="flex items-center justify-between pt-3 border-t border-gray-50 dark:border-gray-800 mt-2 gap-2 flex-wrap">
-                  {selectedPlatforms.length === 0 ? (
-                    <span className="text-xs text-gray-300 dark:text-gray-600">Select a platform to see character limit</span>
-                  ) : (
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {selectedPlatforms.map(id => {
-                        const p = PLATFORMS.find(pl => pl.id === id)
-                        if (!p) return null
-                        const over    = charCount > p.limit
-                        const nearPct = charCount / p.limit
-                        const color   = over         ? 'text-red-500'
-                                      : nearPct > 0.9 ? 'text-amber-500'
-                                      : 'text-gray-400 dark:text-gray-500'
-                        const bg      = over         ? 'bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg px-2 py-0.5'
-                                      : nearPct > 0.9 ? 'bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg px-2 py-0.5'
-                                      : ''
-                        return (
-                          <span key={id} className={`text-xs font-semibold flex items-center gap-1 ${color} ${bg}`}>
-                            <span className="text-sm leading-none">{p.icon}</span>
-                            <span>{charCount.toLocaleString()}<span className="font-normal opacity-60">/{p.limit.toLocaleString()}</span>{over && ' ⚠️'}</span>
-                          </span>
-                        )
-                      })}
-                    </div>
+
+                {/* Thread toolbar */}
+                <div className="flex items-center gap-2 mb-3 flex-wrap">
+                  <button
+                    type="button"
+                    onClick={handleToggleThreadMode}
+                    className={`flex items-center gap-1.5 text-xs font-bold px-3 py-2 min-h-[36px] rounded-xl border transition-all ${
+                      threadMode
+                        ? 'bg-indigo-600 text-white border-indigo-600'
+                        : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-indigo-400 hover:text-indigo-600'
+                    }`}>
+                    🧵 Thread {threadMode ? 'ON' : 'OFF'}
+                  </button>
+                  {!threadMode && content.trim() && (
+                    <button
+                      type="button"
+                      onClick={handleAutoSplit}
+                      className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 min-h-[36px] border border-gray-200 dark:border-gray-700 rounded-xl hover:border-indigo-400 hover:text-indigo-600 transition-all text-gray-500 dark:text-gray-400">
+                      ✂️ Auto-split
+                    </button>
                   )}
-                  <span className="text-xs text-gray-400 dark:text-gray-500 ml-auto flex-shrink-0">
-                    {selectedPlatforms.length} platform{selectedPlatforms.length !== 1 ? 's' : ''}
-                  </span>
+                  {threadMode && (
+                    <span className="text-xs text-gray-400 dark:text-gray-500">
+                      {threadParts.length} part{threadParts.length !== 1 ? 's' : ''} · limit {mostRestrictiveLimit} chars each
+                    </span>
+                  )}
                 </div>
 
+                {threadMode ? (
+                  <div className="space-y-3">
+                    {threadParts.map((part, idx) => {
+                      const len = part.length
+                      const over = len > mostRestrictiveLimit
+                      const nearPct = len / mostRestrictiveLimit
+                      const countColor = over ? 'text-red-500' : nearPct > 0.9 ? 'text-amber-500' : 'text-gray-400 dark:text-gray-500'
+                      return (
+                        <div key={idx} className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                          <div className="flex items-center justify-between px-3 py-1.5 bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800">
+                            <span className="text-xs font-bold text-gray-500 dark:text-gray-400">Part {idx + 1}</span>
+                            <div className="flex items-center gap-2">
+                              <span className={`text-xs font-semibold ${countColor}`}>
+                                {len}/{mostRestrictiveLimit}{over && ' ⚠️'}
+                              </span>
+                              {threadParts.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveThreadPart(idx)}
+                                  className="text-xs text-gray-400 hover:text-red-500 transition-colors w-5 h-5 flex items-center justify-center rounded font-bold">
+                                  ×
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                          <textarea
+                            value={part}
+                            onChange={e => handleThreadPartChange(idx, e.target.value)}
+                            placeholder={`Part ${idx + 1} of your thread...`}
+                            rows={3}
+                            className="w-full outline-none resize-none text-gray-800 dark:text-gray-200 placeholder-gray-300 dark:placeholder-gray-600 p-3 bg-white dark:bg-gray-900"
+                            style={{ fontSize: '16px' }}
+                          />
+                        </div>
+                      )
+                    })}
+                    <button
+                      type="button"
+                      onClick={handleAddThreadPart}
+                      className="w-full text-xs font-bold px-3 py-2.5 min-h-[44px] border border-dashed border-indigo-300 dark:border-indigo-700 rounded-xl hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-950/20 transition-all text-indigo-500 dark:text-indigo-400">
+                      + Add part
+                    </button>
+                  </div>
+                ) : (
+                  <textarea
+                    value={content}
+                    onChange={e => { setContent(e.target.value); setScoreResult(null) }}
+                    placeholder="What do you want to post? Write your content here, or use an AI tool to generate it..."
+                    rows={5}
+                    className="w-full outline-none resize-none text-gray-800 dark:text-gray-200 placeholder-gray-300 dark:placeholder-gray-600 min-h-[120px] sm:min-h-[200px]"
+                    style={{ fontSize: '16px' }}
+                  />
+                )}
+
+                {!threadMode && (
+                  <div className="flex items-center justify-between pt-3 border-t border-gray-50 dark:border-gray-800 mt-2 gap-2 flex-wrap">
+                    {selectedPlatforms.length === 0 ? (
+                      <span className="text-xs text-gray-300 dark:text-gray-600">Select a platform to see character limit</span>
+                    ) : (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {selectedPlatforms.map(id => {
+                          const p = PLATFORMS.find(pl => pl.id === id)
+                          if (!p) return null
+                          const over    = charCount > p.limit
+                          const nearPct = charCount / p.limit
+                          const color   = over         ? 'text-red-500'
+                                        : nearPct > 0.9 ? 'text-amber-500'
+                                        : 'text-gray-400 dark:text-gray-500'
+                          const bg      = over         ? 'bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-lg px-2 py-0.5'
+                                        : nearPct > 0.9 ? 'bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg px-2 py-0.5'
+                                        : ''
+                          return (
+                            <span key={id} className={`text-xs font-semibold flex items-center gap-1 ${color} ${bg}`}>
+                              <span className="text-sm leading-none">{p.icon}</span>
+                              <span>{charCount.toLocaleString()}<span className="font-normal opacity-60">/{p.limit.toLocaleString()}</span>{over && ' ⚠️'}</span>
+                            </span>
+                          )
+                        })}
+                      </div>
+                    )}
+                    <span className="text-xs text-gray-400 dark:text-gray-500 ml-auto flex-shrink-0">
+                      {selectedPlatforms.length} platform{selectedPlatforms.length !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                )}
+
                 {/* BULK SCHEDULER PROMPT — shown when over char limit */}
-                {charOver && (
+                {!threadMode && charOver && (
                   <div className="mt-2 flex items-start gap-2 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2.5">
                     <span className="text-red-500 text-sm mt-0.5">⚠️</span>
                     <div className="flex-1 min-w-0">
@@ -1773,31 +2017,99 @@ function ComposeInner() {
                 </div>
               )}
 
+              {/* SAVE AS TEMPLATE */}
+              <div className="bg-surface border border-theme rounded-2xl p-4">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Save as Template</p>
+                  <button
+                    type="button"
+                    onClick={() => { setShowSaveTemplate(p => !p); setTemplateSaveMsg(null) }}
+                    className="text-xs font-bold px-3 py-2 min-h-[36px] border border-gray-200 dark:border-gray-700 rounded-lg hover:border-gray-400 transition-all">
+                    {showSaveTemplate ? 'Cancel' : '+ Save Template'}
+                  </button>
+                </div>
+
+                {showSaveTemplate && (
+                  <div className="mt-3 space-y-2">
+                    <input
+                      type="text"
+                      value={templateTitle}
+                      onChange={e => setTemplateTitle(e.target.value)}
+                      placeholder="Template title (e.g. Weekly Roundup)"
+                      style={{ fontSize: '16px' }}
+                      className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 outline-none focus:border-gray-400 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200"
+                    />
+                    <select
+                      value={templateCategory}
+                      onChange={e => setTemplateCategory(e.target.value)}
+                      style={{ fontSize: '16px' }}
+                      className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 outline-none focus:border-gray-400 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200">
+                      {TEMPLATE_CATEGORIES.map(c => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={handleSaveTemplate}
+                      disabled={savingTemplate}
+                      className="w-full bg-black text-white text-xs font-bold py-2.5 min-h-[44px] rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                      {savingTemplate ? 'Saving...' : 'Save Template'}
+                    </button>
+                    {templateSaveMsg && (
+                      <p className={`text-xs font-semibold text-center ${templateSaveMsg.ok ? 'text-green-600' : 'text-red-500'}`}>
+                        {templateSaveMsg.text}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+
               {/* ACTIONS — sticky on mobile so keyboard doesn't push buttons off screen */}
               <div className="sticky bottom-0 bg-theme border-t border-theme-md pt-3 pb-4 -mx-1 px-1 lg:static lg:border-t-0 lg:bg-transparent lg:pt-0 lg:pb-0 lg:mx-0 lg:px-0"
                 style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={handlePublish}
-                    disabled={
-                      publishing ||
-                      !content.trim() ||
-                      charOver ||
-                      selectedPlatforms.length === 0 ||
-                      !!scheduleError ||
-                      missingDestinations.length > 0 ||
-                      mediaStillUploading
-                    }
-                    className="flex-1 bg-black text-white text-sm font-bold py-3 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-                    {publishing
-                      ? (scheduleDate ? 'Scheduling...' : 'Publishing...')
-                      : (scheduleDate ? 'Schedule Post' : 'Post Now')}
-                  </button>
-                  <button onClick={handleSaveDraft} disabled={saving || !content.trim()}
-                    className="px-5 py-3 border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
-                    {saving ? 'Saving...' : currentDraftId ? 'Update Draft' : 'Save Draft'}
-                  </button>
-                </div>
+                {threadMode ? (
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={handlePublishThread}
+                      disabled={
+                        publishing ||
+                        threadParts.every(p => !p.trim()) ||
+                        threadParts.some(p => p.length > mostRestrictiveLimit) ||
+                        selectedPlatforms.length === 0 ||
+                        !!scheduleError ||
+                        missingDestinations.length > 0 ||
+                        mediaStillUploading
+                      }
+                      className="flex-1 bg-indigo-600 text-white text-sm font-bold py-3 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                      {publishing
+                        ? 'Scheduling thread...'
+                        : `Schedule Thread (${threadParts.filter(p => p.trim()).length} part${threadParts.filter(p => p.trim()).length !== 1 ? 's' : ''})`}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={handlePublish}
+                      disabled={
+                        publishing ||
+                        !content.trim() ||
+                        charOver ||
+                        selectedPlatforms.length === 0 ||
+                        !!scheduleError ||
+                        missingDestinations.length > 0 ||
+                        mediaStillUploading
+                      }
+                      className="flex-1 bg-black text-white text-sm font-bold py-3 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                      {publishing
+                        ? (scheduleDate ? 'Scheduling...' : 'Publishing...')
+                        : (scheduleDate ? 'Schedule Post' : 'Post Now')}
+                    </button>
+                    <button onClick={handleSaveDraft} disabled={saving || !content.trim()}
+                      className="px-5 py-3 border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
+                      {saving ? 'Saving...' : currentDraftId ? 'Update Draft' : 'Save Draft'}
+                    </button>
+                  </div>
+                )}
               </div>
 
             </div>
