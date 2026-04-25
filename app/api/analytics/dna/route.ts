@@ -51,9 +51,8 @@ function avg(nums: number[]): number {
 
 function detectFormat(content: string): string {
   const trimmed = content.trim()
-  // Check for emoji at start (any non-ASCII high codepoint sequence)
-  if (/^\p{Emoji}/u.test(trimmed)) return 'emoji'
-  if (/^\d+[.)]/u.test(trimmed)) return 'numbered'
+  if (trimmed.charCodeAt(0) > 127) return 'emoji'
+  if (/^\d+[.)]/.test(trimmed)) return 'numbered'
   if (trimmed.startsWith('"') || trimmed.startsWith('\u201C')) return 'quote'
   if (trimmed.endsWith('?') || trimmed.includes('?')) return 'question'
   return 'statement'
