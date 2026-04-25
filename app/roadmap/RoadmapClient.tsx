@@ -10,7 +10,7 @@ type RoadmapItem = {
 
 const ROADMAP: RoadmapItem[] = [
   // ── IN PROGRESS ──────────────────────────────────────────
-  { title: 'Media Library',              desc: 'Upload, compress, and reuse images and videos across posts. Client-side compression to 1920px and 2MB max.',     status: 'in-progress',  category: 'Media'         },
+  { title: 'Media Library',              desc: 'Upload, compress, and reuse images and videos across posts. Grid view, filter by type, copy URL, delete. Storage limits per plan.',     status: 'shipped',  category: 'Media'         },
 
   // ── COMING SOON ───────────────────────────────────────────
   { title: 'Streak notifications',       desc: 'Automated streak tracking with at-risk alerts — get notified when your posting streak is about to break.',        status: 'shipped',  category: 'Analytics'     },
