@@ -25,7 +25,7 @@ interface SomaCredits {
   remaining: number
   plan: string
   autopilot_enabled: boolean
-  mode: 'safe' | 'autopilot'
+  mode: 'safe' | 'autopilot' | 'full_send'
 }
 
 interface IdentityProfile {
@@ -208,7 +208,7 @@ export default function SomaDashboardPage() {
   const [identityChecked, setIdentityChecked] = useState(false)
   const [ingestion, setIngestion]             = useState<WeeklyIngestion | null>(null)
   const [drafts, setDrafts]                   = useState<DraftPost[]>([])
-  const [currentMode, setCurrentMode]         = useState<'safe' | 'autopilot'>('safe')
+  const [currentMode, setCurrentMode]         = useState<'safe' | 'autopilot' | 'full_send'>('safe')
   const [showAutopilotModal, setShowAutopilotModal] = useState(false)
   const [approvingAll, setApprovingAll]       = useState(false)
   const [actionLoading, setActionLoading]     = useState<Record<string, boolean>>({})
@@ -291,10 +291,17 @@ export default function SomaDashboardPage() {
 
   // ── Mode toggle ─────────────────────────────────────────────────────────────
 
-  const handleModeToggle = async (mode: 'safe' | 'autopilot') => {
+  const handleModeToggle = async (mode: 'safe' | 'autopilot' | 'full_send') => {
     if (mode === currentMode) return
 
+    // Autopilot requires purchase
     if (mode === 'autopilot' && !credits?.autopilot_enabled) {
+      setShowAutopilotModal(true)
+      return
+    }
+
+    // Full Send requires purchase — only available if already on full_send mode
+    if (mode === 'full_send' && credits?.mode !== 'full_send') {
       setShowAutopilotModal(true)
       return
     }
@@ -364,26 +371,41 @@ export default function SomaDashboardPage() {
           <div className="flex items-center gap-1 p-1 rounded-xl bg-gray-900 border border-gray-800 self-start sm:self-auto">
             <button
               onClick={() => handleModeToggle('safe')}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-bold transition-all ${
                 currentMode === 'safe'
                   ? 'bg-green-900/70 text-green-300 border border-green-700/50 shadow-sm'
                   : 'text-gray-500 hover:text-gray-300'
               }`}
             >
-              <span>🟢</span> Safe Mode
+              <span>🟢</span> Safe
             </button>
             <button
               onClick={() => handleModeToggle('autopilot')}
-              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-bold transition-all ${
                 currentMode === 'autopilot'
                   ? 'bg-amber-900/70 text-amber-300 border border-amber-700/50 shadow-sm'
                   : 'text-gray-500 hover:text-gray-300'
               }`}
             >
-              <span>🔥</span> Autopilot
+              <span>⚡</span> Autopilot
               {!credits?.autopilot_enabled && (
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-800/60 text-amber-400 border border-amber-700/40 ml-0.5">
-                  $10/mo
+                <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-amber-800/60 text-amber-400 border border-amber-700/40 ml-0.5">
+                  $10
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => handleModeToggle('full_send')}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-bold transition-all ${
+                currentMode === 'full_send'
+                  ? 'bg-purple-900/70 text-purple-300 border border-purple-700/50 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-300'
+              }`}
+            >
+              <span>🚀</span> Full Send
+              {credits?.mode !== 'full_send' && (
+                <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-purple-800/60 text-purple-400 border border-purple-700/40 ml-0.5">
+                  $20
                 </span>
               )}
             </button>

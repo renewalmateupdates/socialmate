@@ -5,6 +5,7 @@ import { createServerClient } from '@supabase/ssr'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { SOMA_COSTS } from '@/lib/soma-costs'
+import { Resend } from 'resend'
 
 const GENERATE_COST = SOMA_COSTS.generate_week // 75
 
@@ -238,6 +239,108 @@ Rules:
 
     await admin.from('workspaces').update({ soma_credits_used: newUsed, soma_credits_purchased: newPurchased }).eq('id', workspace.id)
     await admin.from('soma_credit_ledger').insert({ workspace_id: workspace.id, user_id: user.id, action_type: 'generate_week', credits_used: GENERATE_COST, balance_after: balanceAfter })
+
+    // Send email notification — non-fatal
+    if (user.email && process.env.RESEND_API_KEY) {
+      try {
+        const resend = new Resend(process.env.RESEND_API_KEY)
+        const isAutomated = project.mode === 'autopilot' || project.mode === 'full_send'
+        const subjectLine = isAutomated
+          ? `SOMA has scheduled ${postsCreated} posts for you`
+          : `Your SOMA content queue is ready to review`
+        const subhead = isAutomated
+          ? `SOMA has auto-scheduled ${postsCreated} posts for <strong>${ingestion.title ?? 'your project'}</strong>.`
+          : `SOMA generated ${postsCreated} posts for <strong>${ingestion.title ?? 'your project'}</strong> and added them to your draft queue.`
+        const ctaLabel = isAutomated ? 'View Schedule →' : 'Review Queue →'
+        const ctaNote = isAutomated
+          ? 'Posts are scheduled and will publish automatically.'
+          : 'Posts are saved as drafts — review and approve before they go live.'
+
+        // Build preview cards for first 2 posts
+        const previewPosts = generatedPosts.slice(0, 2)
+        const previewCardsHtml = previewPosts.map((p: any) => {
+          const preview = (p.content ?? '').slice(0, 120) + ((p.content ?? '').length > 120 ? '…' : '')
+          const platformLabel = (p.platform ?? '').charAt(0).toUpperCase() + (p.platform ?? '').slice(1)
+          return `
+            <div style="background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:16px;margin-bottom:12px;">
+              <div style="margin-bottom:8px;">
+                <span style="background:#333;color:#d1d5db;font-size:11px;padding:2px 8px;border-radius:4px;font-family:monospace;">${platformLabel}</span>
+              </div>
+              <p style="margin:0;color:#e5e7eb;font-size:14px;line-height:1.5;">${preview}</p>
+            </div>`
+        }).join('')
+
+        const html = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>${subjectLine}</title></head>
+<body style="margin:0;padding:0;background:#0f0f0f;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#0f0f0f;padding:40px 16px;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+
+        <!-- Header -->
+        <tr>
+          <td style="padding-bottom:32px;">
+            <p style="margin:0;font-size:22px;font-weight:700;color:#f59e0b;letter-spacing:-0.5px;">⚡ SOMA</p>
+          </td>
+        </tr>
+
+        <!-- Subhead -->
+        <tr>
+          <td style="padding-bottom:24px;">
+            <h1 style="margin:0 0 8px 0;font-size:24px;font-weight:700;color:#ffffff;line-height:1.3;">${isAutomated ? 'Posts scheduled.' : 'Your queue is ready.'}</h1>
+            <p style="margin:0;font-size:15px;color:#9ca3af;line-height:1.6;">${subhead}</p>
+          </td>
+        </tr>
+
+        <!-- Preview cards -->
+        <tr>
+          <td style="padding-bottom:8px;">
+            <p style="margin:0 0 12px 0;font-size:12px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.8px;">Post Preview</p>
+            ${previewCardsHtml}
+            ${postsCreated > 2 ? `<p style="margin:8px 0 0 0;font-size:13px;color:#6b7280;">+ ${postsCreated - 2} more post${postsCreated - 2 === 1 ? '' : 's'} in your queue</p>` : ''}
+          </td>
+        </tr>
+
+        <!-- CTA -->
+        <tr>
+          <td style="padding:32px 0 24px 0;">
+            <p style="margin:0 0 16px 0;font-size:13px;color:#6b7280;">${ctaNote}</p>
+            <a href="https://socialmate.studio/soma/dashboard"
+               style="display:inline-block;background:#f59e0b;color:#000000;font-weight:700;font-size:15px;padding:14px 28px;border-radius:8px;text-decoration:none;">
+              ${ctaLabel}
+            </a>
+          </td>
+        </tr>
+
+        <!-- Divider -->
+        <tr>
+          <td style="border-top:1px solid #1f1f1f;padding-top:24px;">
+            <p style="margin:0;font-size:12px;color:#4b5563;line-height:1.6;">
+              SocialMate by Gilgamesh Enterprise LLC<br>
+              You're receiving this because SOMA generated content for your workspace.<br>
+              To stop these emails, turn off SOMA notifications in your
+              <a href="https://socialmate.studio/settings" style="color:#6b7280;text-decoration:underline;">Settings</a>.
+            </p>
+          </td>
+        </tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`
+
+        await resend.emails.send({
+          from: 'SOMA <soma@socialmate.studio>',
+          to: user.email,
+          subject: subjectLine,
+          html,
+        })
+      } catch (emailErr) {
+        console.error('[SOMA Generate] Email notification failed (non-fatal):', emailErr)
+      }
+    }
 
     return NextResponse.json({ success: true, posts_created: postsCreated, post_ids: postIds, mode: project.mode })
   } catch (err) {
