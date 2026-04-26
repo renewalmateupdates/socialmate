@@ -32,6 +32,9 @@ const ROADMAP: RoadmapItem[] = [
   { title: 'SOC 2 compliance',           desc: 'Security certification for enterprise white label clients. Required for larger agency contracts.',                status: 'planned',      category: 'Platform'      },
 
   // ── SHIPPED ───────────────────────────────────────────────
+  { title: 'Recurring posts',        desc: 'Repeat toggle in compose — Daily/Weekly/Bi-weekly/Monthly with optional end date. Auto-reschedules next post after publish via Inngest. 🔁 badge in queue.', status: 'shipped', category: 'Scheduling' },
+  { title: 'Post as image',          desc: 'Export any post as a branded 1200×630 PNG card. Canvas API, no dependencies. Available in compose action bar and queue cards.', status: 'shipped', category: 'Tools' },
+  { title: 'Hashtag suggestions',    desc: 'Gemini-powered hashtag panel in compose — 12 platform-optimized suggestions as clickable chips. 1 credit. Dedicated AI route.', status: 'shipped', category: 'AI' },
   { title: 'Referral landing page',   desc: 'Personalized /refer/[code] page — affiliate name, benefits, pricing, CTA to signup. Sets ref_code cookie (7-day fallback).', status: 'shipped', category: 'Growth' },
   { title: 'Weekly digest email',     desc: 'Sunday 8am Inngest cron — posts this week, current streak, scheduled count, top post preview. Sent via Resend to all users who have posted.', status: 'shipped', category: 'Engagement' },
   { title: 'Enki trade history',      desc: '/enki/trades — full paper trade log with FIFO P&L, win rate, summary bar, All/Open/Closed tabs, pagination. Monday weekly P&L email via Resend.', status: 'shipped', category: 'Enki' },
