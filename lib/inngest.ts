@@ -4216,3 +4216,190 @@ export const enkiWeeklySummary = inngest.createFunction(
     return { sent }
   }
 )
+
+// ── Post Performance Alerts ────────────────────────────────────────────────────
+// Runs every 6 hours. For each user with recently-synced engagement stats,
+// computes whether any post in the last 7 days is "taking off" (≥50 total
+// engagements OR ≥2× the user's 30-day average). Sends a push + in-app
+// notification once per qualifying post (deduped via notifications table).
+export const postPerformanceAlerts = inngest.createFunction(
+  { id: 'post-performance-alerts', name: 'Post Performance Alerts', retries: 2 },
+  { cron: '0 */6 * * *' },
+  async ({ step }) => {
+    const admin = getSupabaseAdmin()
+
+    // ── 1. Fetch recent posts with engagement data ─────────────────────────
+    const sevenDaysAgo  = new Date(Date.now() - 7  * 24 * 60 * 60 * 1000).toISOString()
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+
+    const recentPosts = await step.run('fetch-recent-posts-with-stats', async () => {
+      const { data, error } = await admin
+        .from('posts')
+        .select('id, user_id, content, bluesky_stats, mastodon_stats')
+        .eq('status', 'published')
+        .gte('published_at', sevenDaysAgo)
+        .or('bluesky_stats.not.is.null,mastodon_stats.not.is.null')
+
+      if (error) {
+        console.error('[PostPerformanceAlerts] fetch recent posts error:', error.message)
+        return []
+      }
+      return data ?? []
+    })
+
+    if (!recentPosts.length) {
+      console.log('[PostPerformanceAlerts] No recent posts with stats')
+      return { alerted: 0 }
+    }
+
+    // ── 2. Collect unique user IDs from the recent set ────────────────────
+    const userIdSet = new Set<string>()
+    for (const p of recentPosts) userIdSet.add(p.user_id)
+    const userIds = Array.from(userIdSet)
+
+    // ── 3. Fetch 30-day baseline stats for average computation ─────────────
+    const baselinePosts = await step.run('fetch-baseline-posts', async () => {
+      const { data, error } = await admin
+        .from('posts')
+        .select('user_id, bluesky_stats, mastodon_stats')
+        .eq('status', 'published')
+        .gte('published_at', thirtyDaysAgo)
+        .in('user_id', userIds)
+        .or('bluesky_stats.not.is.null,mastodon_stats.not.is.null')
+
+      if (error) {
+        console.error('[PostPerformanceAlerts] fetch baseline error:', error.message)
+        return []
+      }
+      return data ?? []
+    })
+
+    // ── 4. Fetch already-sent post_performance notifications ──────────────
+    const recentPostIds = recentPosts.map((p: any) => p.id as string)
+    const alreadyAlerted = await step.run('fetch-already-alerted', async () => {
+      const { data } = await admin
+        .from('notifications')
+        .select('action_url')
+        .in('user_id', userIds)
+        .eq('type', 'post_performance')
+
+      // action_url is '/analytics' — we store post id in message for dedup instead
+      // We actually embed post id in message; fetch all and parse
+      return (data ?? []).map((n: any) => n.action_url as string)
+    })
+
+    // ── 5. Fetch notification_prefs for all affected users ────────────────
+    const userPrefs = await step.run('fetch-user-prefs', async () => {
+      const { data } = await admin
+        .from('user_settings')
+        .select('user_id, notification_prefs')
+        .in('user_id', userIds)
+
+      const map = new Map<string, any>()
+      for (const row of data ?? []) map.set(row.user_id, row.notification_prefs ?? {})
+      return map
+    })
+
+    // ── 6. Fetch already-sent dedup set (use message field containing post id) ──
+    const alertedPostIds = await step.run('fetch-alerted-post-ids', async () => {
+      const { data } = await admin
+        .from('notifications')
+        .select('message')
+        .in('user_id', userIds)
+        .eq('type', 'post_performance')
+
+      // We encode post id as last token: "... [postId]"
+      const ids = new Set<string>()
+      for (const n of data ?? []) {
+        const match = (n.message as string).match(/\[([a-f0-9-]{36})\]$/)
+        if (match) ids.add(match[1])
+      }
+      return ids
+    })
+
+    // ── 7. Compute per-user average engagement ────────────────────────────
+    function totalEngagement(post: any): number {
+      let total = 0
+      if (post.bluesky_stats) {
+        total += (post.bluesky_stats.likes    ?? 0)
+             +   (post.bluesky_stats.reposts  ?? 0)
+             +   (post.bluesky_stats.replies  ?? 0)
+      }
+      if (post.mastodon_stats) {
+        total += (post.mastodon_stats.favourites_count ?? 0)
+             +   (post.mastodon_stats.reblogs_count    ?? 0)
+             +   (post.mastodon_stats.replies_count    ?? 0)
+      }
+      return total
+    }
+
+    const userAvgEngagement = new Map<string, number>()
+    const userBaselineGroups = new Map<string, any[]>()
+    for (const p of baselinePosts) {
+      if (!userBaselineGroups.has(p.user_id)) userBaselineGroups.set(p.user_id, [])
+      userBaselineGroups.get(p.user_id)!.push(p)
+    }
+    for (const [uid, posts] of Array.from(userBaselineGroups.entries())) {
+      const engagements = posts.map(totalEngagement)
+      const avg = engagements.length > 0
+        ? engagements.reduce((a, b) => a + b, 0) / engagements.length
+        : 0
+      userAvgEngagement.set(uid, avg)
+    }
+
+    // ── 8. Evaluate and alert ─────────────────────────────────────────────
+    let alerted = 0
+
+    await step.run('evaluate-and-alert', async () => {
+      for (const post of recentPosts) {
+        try {
+          // Check user pref
+          const prefs = userPrefs.get(post.user_id) ?? {}
+          if (prefs.performance_alerts === false) continue
+
+          // Skip already alerted posts
+          if (alertedPostIds.has(post.id)) continue
+
+          const engagement = totalEngagement(post)
+          if (engagement === 0) continue
+
+          const userAvg = userAvgEngagement.get(post.user_id) ?? 0
+          const meetsThreshold = engagement >= 50 || (userAvg > 0 && engagement >= userAvg * 2)
+          if (!meetsThreshold) continue
+
+          // Truncate content to 60 chars
+          const snippet = (post.content as string ?? '').slice(0, 60)
+          const title   = '🔥 Your post is taking off!'
+          const body    = `${snippet}${(post.content as string ?? '').length > 60 ? '…' : ''} — ${engagement} engagements`
+          // Embed post id in message for future dedup
+          const message = `${body} [${post.id}]`
+
+          // In-app notification
+          await admin
+            .from('notifications')
+            .insert({
+              user_id:    post.user_id,
+              type:       'post_performance',
+              title,
+              message,
+              action_url: '/analytics',
+            })
+            .then(({ error }: { error: any }) => {
+              if (error) console.warn('[PostPerformanceAlerts] notifications insert failed:', error.message)
+            })
+
+          // Push notification (best-effort)
+          await sendPushNotification(post.user_id, title, body, '/analytics', 'post_performance')
+
+          alerted++
+          console.log(`[PostPerformanceAlerts] Alerted user ${post.user_id} — post ${post.id} (${engagement} engagements, avg ${userAvg.toFixed(1)})`)
+        } catch (err: any) {
+          console.error(`[PostPerformanceAlerts] user ${post.user_id} post ${post.id} failed:`, err?.message)
+        }
+      }
+    })
+
+    console.log(`[PostPerformanceAlerts] alerted: ${alerted}`)
+    return { alerted }
+  }
+)
