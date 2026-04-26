@@ -72,6 +72,7 @@ const NAV_BASE = [
     items: [
       { icon: '📊', label: 'Analytics',  href: '/analytics'  },
       { icon: '🔍', label: 'Best Times', href: '/best-times' },
+      { icon: '🧪', label: 'A/B Tests',  href: '/ab-tests'   },
     ],
   },
   {
@@ -183,6 +184,7 @@ function SidebarContent({
   const [sectionOrder, setSectionOrder]         = useState<string[]>(NAV_BASE.map(g => g.section))
   const [statsVisible, setStatsVisible]         = useState(true)
   const [scheduledCount, setScheduledCount]     = useState(0)
+  const [pendingApprovalCount, setPendingApprovalCount] = useState(0)
   const [xQuota, setXQuota]                     = useState<{ used: number; limit: number } | null>(null)
   const [somaCredits, setSomaCredits]           = useState<{ monthly: number; remaining: number } | null>(null)
   const pathname = usePathname()
@@ -314,6 +316,14 @@ function SidebarContent({
           setSomaCredits({ monthly: d.monthly, remaining: d.remaining })
         }
       })
+      .catch(() => {})
+  }, [])
+
+  // Pending approval count badge for Approvals nav link
+  useEffect(() => {
+    fetch('/api/posts/pending-approvals')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d && typeof d.count === 'number') setPendingApprovalCount(d.count) })
       .catch(() => {})
   }, [])
 
@@ -634,6 +644,11 @@ function SidebarContent({
                           {item.href === '/queue' && scheduledCount > 0 && (
                             <span className="text-xs font-bold px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400">
                               {scheduledCount}
+                            </span>
+                          )}
+                          {item.href === '/approvals' && pendingApprovalCount > 0 && (
+                            <span className="text-xs font-bold px-1.5 py-0.5 rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400">
+                              {pendingApprovalCount}
                             </span>
                           )}
                         </Link>

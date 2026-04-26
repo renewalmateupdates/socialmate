@@ -70,11 +70,12 @@ function SettingsInner() {
   const [couponError, setCouponError]     = useState<string | null>(null)
   const [creditPackLoading, setCreditPackLoading] = useState<string | null>(null)
   const [notifications, setNotifications] = useState({
-    post_published: true,
-    post_failed:    true,
-    credits_low:    true,
-    team_joined:    true,
-    weekly_digest:  true,
+    post_published:    true,
+    post_failed:       true,
+    credits_low:       true,
+    team_joined:       true,
+    weekly_digest:     true,
+    performance_alerts: true,
   })
   const [notifSaving, setNotifSaving]     = useState<string | null>(null)
   const [notifSaved, setNotifSaved]       = useState<string | null>(null)
@@ -181,11 +182,12 @@ function SettingsInner() {
         }
         if (settings.notification_prefs) {
           setNotifications(prev => ({
-            post_published: settings.notification_prefs.post_published ?? prev.post_published,
-            post_failed:    settings.notification_prefs.post_failed    ?? prev.post_failed,
-            credits_low:    settings.notification_prefs.credits_low    ?? prev.credits_low,
-            team_joined:    settings.notification_prefs.team_joined    ?? prev.team_joined,
-            weekly_digest:  settings.notification_prefs.weekly_digest  ?? prev.weekly_digest,
+            post_published:    settings.notification_prefs.post_published    ?? prev.post_published,
+            post_failed:       settings.notification_prefs.post_failed       ?? prev.post_failed,
+            credits_low:       settings.notification_prefs.credits_low       ?? prev.credits_low,
+            team_joined:       settings.notification_prefs.team_joined       ?? prev.team_joined,
+            weekly_digest:     settings.notification_prefs.weekly_digest     ?? prev.weekly_digest,
+            performance_alerts: settings.notification_prefs.performance_alerts ?? prev.performance_alerts,
           }))
         }
       }
@@ -963,7 +965,8 @@ function SettingsInner() {
                   { key: 'post_failed'    as const, label: 'Email me when a post fails to publish',      desc: 'Get notified so you can retry or reschedule'       },
                   { key: 'credits_low'    as const, label: 'Email me when I have fewer than 10 credits', desc: 'Avoid running out of AI credits unexpectedly'       },
                   { key: 'team_joined'    as const, label: 'Email me when a team member joins',          desc: 'Know when someone accepts your workspace invite'   },
-                  { key: 'weekly_digest'  as const, label: 'Send me a weekly digest of my activity',     desc: 'Every Monday: posts published, credits used, stats' },
+                  { key: 'weekly_digest'      as const, label: 'Send me a weekly digest of my activity',          desc: 'Every Monday: posts published, credits used, stats'             },
+                  { key: 'performance_alerts' as const, label: 'Alert me when a post is taking off',              desc: 'Notify me when a post reaches 50+ engagements or 2× my average' },
                 ] as { key: keyof typeof notifications; label: string; desc: string }[]).map(item => (
                   <div key={item.key} className="flex items-center justify-between py-3 border-b border-gray-50 dark:border-gray-800 last:border-0">
                     <div className="flex-1 min-w-0 pr-4">

@@ -20,6 +20,7 @@ import {
   resetSomaCredits,
   streakNotifications,
   somaAutopilotRun,
+  postPerformanceAlerts,
 } from '@/lib/inngest'
 
 export const { GET, POST, PUT } = serve({
@@ -43,5 +44,6 @@ export const { GET, POST, PUT } = serve({
     resetSomaCredits,
     streakNotifications,
     somaAutopilotRun,
+    postPerformanceAlerts,
   ],
 })

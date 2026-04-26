@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { notFound } from 'next/navigation'
 import React from 'react'
+import BioLinkButton from './BioLinkButton'
 
 function getSupabase() {
   return createClient(
@@ -150,29 +151,26 @@ export default async function BioPage({ params }: { params: Promise<{ slug: stri
         'div',
         { style: { width: '100%', display: 'flex', flexDirection: 'column' as const, gap: '12px' } },
         ...activeLinks.map((link) =>
-          React.createElement(
-            'a',
-            {
-              key: link.id,
-              href: link.url,
-              target: '_blank',
-              rel: 'noopener noreferrer',
-              style: {
-                display: 'block',
-                width: '100%',
-                padding: '14px 24px',
-                backgroundColor: theme.btn,
-                color: btnTextColor,
-                textAlign: 'center' as const,
-                textDecoration: 'none',
-                fontWeight: '700',
-                fontSize: '14px',
-                borderRadius: btnRadius,
-                boxSizing: 'border-box' as const,
-              }
+          React.createElement(BioLinkButton, {
+            key: link.id,
+            linkId: link.id,
+            userId: p.user_id,
+            href: link.url,
+            title: link.title,
+            style: {
+              display: 'block',
+              width: '100%',
+              padding: '14px 24px',
+              backgroundColor: theme.btn,
+              color: btnTextColor,
+              textAlign: 'center' as const,
+              textDecoration: 'none',
+              fontWeight: '700',
+              fontSize: '14px',
+              borderRadius: btnRadius,
+              boxSizing: 'border-box' as const,
             },
-            link.title
-          )
+          })
         )
       ),
       !isPaid

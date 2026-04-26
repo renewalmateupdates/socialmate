@@ -33,17 +33,27 @@ export async function POST(request: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const body = await request.json()
-    const { content, platforms, postId, workspaceId } = body
+    const { content, platforms, postId, workspaceId, status: requestedStatus, scheduledAt } = body
+
+    // Only allow 'draft' or 'pending_approval' as valid statuses via this route
+    const allowedStatuses = ['draft', 'pending_approval']
+    const insertStatus = allowedStatuses.includes(requestedStatus) ? requestedStatus : 'draft'
 
     if (!content?.trim()) return NextResponse.json({ error: 'Content is required' }, { status: 400 })
 
     if (postId) {
+      const updateData: Record<string, unknown> = { content, platforms, updated_at: new Date().toISOString() }
+      if (insertStatus === 'pending_approval') {
+        updateData.status = 'pending_approval'
+        updateData.approval_status = 'pending'
+        if (scheduledAt) updateData.scheduled_at = scheduledAt
+      }
       const { error } = await supabase
         .from('posts')
-        .update({ content, platforms, updated_at: new Date().toISOString() })
+        .update(updateData)
         .eq('id', postId)
         .eq('user_id', user.id)
-        .eq('status', 'draft')
+        .in('status', ['draft', 'pending_approval'])
       if (error) {
         console.error('Draft update error:', error)
         return NextResponse.json({ error: 'Failed to update draft', detail: error.message }, { status: 500 })
@@ -123,15 +133,21 @@ export async function POST(request: NextRequest) {
       }, { status: 403 })
     }
 
+    const insertPayload: Record<string, unknown> = {
+      user_id:         user.id,
+      workspace_id:    resolvedWorkspaceId,
+      content,
+      platforms:       platforms || [],
+      status:          insertStatus,
+    }
+    if (insertStatus === 'pending_approval') {
+      insertPayload.approval_status = 'pending'
+      if (scheduledAt) insertPayload.scheduled_at = scheduledAt
+    }
+
     const { data: post, error } = await supabase
       .from('posts')
-      .insert({
-        user_id:      user.id,
-        workspace_id: resolvedWorkspaceId,
-        content,
-        platforms:    platforms || [],
-        status:       'draft',
-      })
+      .insert(insertPayload)
       .select()
       .single()
 
