@@ -14,6 +14,7 @@ import {
   useSortable, arrayMove,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import PostImageExporter from '@/components/PostImageExporter'
 
 function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse ${className}`} />
@@ -151,6 +152,13 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
                 <span className="hidden sm:inline">{PLATFORM_NAMES[p] || p}</span>
               </span>
             ))}
+            {post.is_recurring && (
+              <span
+                title={`Repeats ${post.recurrence_rule ?? 'on a schedule'}${post.recurrence_end_date ? ` until ${new Date(post.recurrence_end_date).toLocaleDateString()}` : ' forever'}`}
+                className="flex items-center gap-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded-full">
+                🔁 <span className="hidden sm:inline capitalize">{post.recurrence_rule ?? 'Recurring'}</span>
+              </span>
+            )}
           </div>
 
           {post.analytics && (() => {
@@ -198,6 +206,12 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
               className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
               Edit
             </Link>
+            <PostImageExporter
+              content={post.content ?? ''}
+              platform={(post.platforms ?? [])[0]}
+              buttonLabel="📸"
+              buttonClassName="text-xs font-bold px-2.5 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-amber-400 hover:text-amber-600 dark:hover:border-amber-500 dark:hover:text-amber-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            />
             <button onClick={() => setConfirmCancel(post.id)}
               className="text-xs font-bold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all">
               Unschedule

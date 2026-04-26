@@ -6,6 +6,7 @@ import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 import UpgradeNudge from '@/components/UpgradeNudge'
+import PostImageExporter from '@/components/PostImageExporter'
 
 const PLATFORMS = [
   { id: 'discord',   name: 'Discord',   icon: '💬', limit: 2000,  live: true  },
@@ -33,7 +34,6 @@ const DESTINATION_PLATFORMS = ['discord', 'telegram']
 
 const AI_TOOLS = [
   { id: 'caption',   label: 'Caption',   emoji: '✍️',  credits: 5,  desc: 'Generate a caption from your topic'     },
-  { id: 'hashtags',  label: 'Hashtags',  emoji: '#️⃣', credits: 5,  desc: 'Generate relevant hashtags'             },
   { id: 'rewrite',   label: 'Rewrite',   emoji: '🔁',  credits: 5,  desc: 'Rewrite your post to be punchier'       },
   { id: 'hook',      label: 'Hook',      emoji: '🎣',  credits: 5,  desc: 'Generate 3 viral opening hooks'         },
   { id: 'thread',    label: 'Thread',    emoji: '🧵',  credits: 10, desc: 'Turn your idea into a full thread'      },
@@ -171,6 +171,10 @@ function ComposeInner() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null)
   const [templateBanner, setTemplateBanner] = useState<string | null>(null)
   const [scheduleError, setScheduleError] = useState('')
+  // Recurring post state
+  const [isRecurring, setIsRecurring] = useState(false)
+  const [recurrenceRule, setRecurrenceRule] = useState<'daily' | 'weekly' | 'biweekly' | 'monthly'>('weekly')
+  const [recurrenceEndDate, setRecurrenceEndDate] = useState('')
   const [publishing, setPublishing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(null)
@@ -198,6 +202,13 @@ function ComposeInner() {
   const [repurposeLoading, setRepurposeLoading]     = useState(false)
   const [repurposeError, setRepurposeError]         = useState('')
   const [repurposeCopied, setRepurposeCopied]       = useState(false)
+
+  // AI Hashtag suggestions
+  const [showHashtagSuggestPanel, setShowHashtagSuggestPanel] = useState(false)
+  const [suggestedHashtags, setSuggestedHashtags]             = useState<string[]>([])
+  const [hashtagSuggestLoading, setHashtagSuggestLoading]     = useState(false)
+  const [hashtagSuggestError, setHashtagSuggestError]         = useState('')
+  const [hashtagsCopied, setHashtagsCopied]                   = useState(false)
 
   // Hashtag collections
   type HashtagCollection = {
@@ -737,6 +748,63 @@ function ComposeInner() {
     })
   }
 
+  const handleHashtagSuggest = async () => {
+    setHashtagSuggestError('')
+    setSuggestedHashtags([])
+    if (!content.trim()) {
+      setHashtagSuggestError('Write something first — the AI needs your content to suggest hashtags.')
+      return
+    }
+    if (credits < 1) {
+      setHashtagSuggestError('Not enough credits. This tool costs 1 credit.')
+      return
+    }
+    setHashtagSuggestLoading(true)
+    try {
+      const res = await fetch('/api/ai/hashtags', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content, platforms: selectedPlatforms }),
+      })
+      const data = await res.json()
+      if (!res.ok || data.error) {
+        if (data.error === 'rate_limited') {
+          handleRateLimit()
+          setHashtagSuggestError(data.message || "You're going too fast — wait 30 seconds and try again.")
+        } else {
+          setHashtagSuggestError(data.error || 'Something went wrong. Please try again.')
+        }
+        return
+      }
+      setSuggestedHashtags(Array.isArray(data.hashtags) ? data.hashtags : [])
+      if (typeof data.monthlyRemaining === 'number') {
+        applyCredits(data.monthlyRemaining, data.earnedRemaining ?? 0, data.paidRemaining ?? 0)
+      } else if (typeof data.creditsRemaining === 'number') {
+        setCredits(data.creditsRemaining)
+      } else {
+        setCredits(credits - 1)
+      }
+      showToast('Hashtags generated — 1 credit used', 'info')
+    } catch {
+      setHashtagSuggestError('Network error. Please try again.')
+    } finally {
+      setHashtagSuggestLoading(false)
+    }
+  }
+
+  const handleAppendHashtag = (tag: string) => {
+    if (content.includes(tag)) return
+    setContent(prev => prev ? `${prev} ${tag}` : tag)
+  }
+
+  const handleCopyAllHashtags = () => {
+    if (!suggestedHashtags.length) return
+    navigator.clipboard.writeText(suggestedHashtags.join(' ')).then(() => {
+      setHashtagsCopied(true)
+      setTimeout(() => setHashtagsCopied(false), 2000)
+    })
+  }
+
   const handleInsertResult = () => {
     if (!aiResult) return
     setContent(prev => prev ? `${prev}\n\n${aiResult}` : aiResult)
@@ -967,6 +1035,9 @@ function ComposeInner() {
           workspaceId: activeWorkspace?.id,
           selectedAccountIds,
           mediaUrls: uploadedMediaUrls.length > 0 ? uploadedMediaUrls : undefined,
+          isRecurring: scheduledAt ? isRecurring : false,
+          recurrenceRule: scheduledAt && isRecurring ? recurrenceRule : undefined,
+          recurrenceEndDate: scheduledAt && isRecurring && recurrenceEndDate ? recurrenceEndDate : undefined,
         }),
       })
 
@@ -978,6 +1049,9 @@ function ComposeInner() {
         setContent('')
         setScheduleDate('')
         setScheduleTime('')
+        setIsRecurring(false)
+        setRecurrenceRule('weekly')
+        setRecurrenceEndDate('')
         setCurrentDraftId(null)
         setScoreResult(null)
         clearMedia()
@@ -1787,6 +1861,17 @@ function ComposeInner() {
                     <p className="text-xs font-bold">Repurpose</p>
                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">5 cr</p>
                   </button>
+                  <button
+                    onClick={() => { setShowHashtagSuggestPanel(p => !p); setSuggestedHashtags([]); setHashtagSuggestError('') }}
+                    title="AI-powered hashtag suggestions optimized for your selected platforms"
+                    className={`p-3 rounded-xl border text-center transition-all ${
+                      showHashtagSuggestPanel ? 'bg-blue-500 text-white border-blue-500'
+                      : 'bg-white dark:bg-gray-900 border-gray-200 hover:border-blue-400 text-gray-700 dark:text-gray-300'
+                    }`}>
+                    <div className="text-lg mb-1">#️⃣</div>
+                    <p className="text-xs font-bold">Hashtags</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">1 cr</p>
+                  </button>
                 </div>
 
                 {/* REPURPOSE INLINE PANEL */}
@@ -1855,6 +1940,67 @@ function ComposeInner() {
                             className="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-all ml-auto min-h-[44px] px-2">
                             Dismiss
                           </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* HASHTAG SUGGEST INLINE PANEL */}
+                {showHashtagSuggestPanel && (
+                  <div className="mb-4 border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/20 rounded-xl p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-xs font-bold text-blue-800 dark:text-blue-300 uppercase tracking-wide">#️⃣ Hashtag Suggestions</p>
+                      <button
+                        onClick={() => { setShowHashtagSuggestPanel(false); setSuggestedHashtags([]); setHashtagSuggestError('') }}
+                        className="text-blue-500 hover:text-blue-700 dark:hover:text-blue-300 transition-colors w-6 h-6 flex items-center justify-center rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 text-base font-bold">
+                        ×
+                      </button>
+                    </div>
+
+                    <p className="text-xs text-blue-700 dark:text-blue-400 mb-3">
+                      AI picks 12 hashtags optimized for your selected platforms — 1 credit per run.
+                    </p>
+
+                    <button
+                      onClick={handleHashtagSuggest}
+                      disabled={hashtagSuggestLoading || !content.trim() || credits < 1 || !!rateLimitedUntil}
+                      className="w-full bg-blue-500 hover:bg-blue-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold py-2.5 min-h-[44px] rounded-xl transition-all flex items-center justify-center gap-2">
+                      {hashtagSuggestLoading ? (
+                        <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Generating hashtags...</>
+                      ) : 'Suggest Hashtags → (1 credit)'}
+                    </button>
+
+                    {hashtagSuggestError && (
+                      <div className="mt-2 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2">
+                        <p className="text-xs text-red-600 dark:text-red-400">{hashtagSuggestError}</p>
+                      </div>
+                    )}
+
+                    {suggestedHashtags.length > 0 && !hashtagSuggestLoading && (
+                      <div className="mt-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Click to add · {suggestedHashtags.length} suggestions</p>
+                          <button
+                            onClick={handleCopyAllHashtags}
+                            className="text-xs font-bold px-3 py-1.5 min-h-[36px] border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg hover:border-gray-500 transition-all">
+                            {hashtagsCopied ? 'Copied ✓' : 'Copy all'}
+                          </button>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {suggestedHashtags.map(tag => (
+                            <button
+                              key={tag}
+                              onClick={() => handleAppendHashtag(tag)}
+                              title={content.includes(tag) ? 'Already in post' : `Add ${tag} to post`}
+                              className={`text-xs font-medium px-3 py-1 rounded-full border transition-all cursor-pointer ${
+                                content.includes(tag)
+                                  ? 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 cursor-default'
+                                  : 'bg-gray-800 hover:bg-gray-700 border border-gray-700 text-blue-400'
+                              }`}>
+                              {tag}
+                            </button>
+                          ))}
                         </div>
                       </div>
                     )}
@@ -2002,6 +2148,65 @@ function ComposeInner() {
                     <span className="text-xs text-gray-400 dark:text-gray-500">{bestTimeLabel}</span>
                   )}
                 </div>
+
+                {/* Repeat toggle — only shown when a future date is selected */}
+                {scheduleDate && (
+                  <div className="mt-3">
+                    <button
+                      type="button"
+                      onClick={() => setIsRecurring(p => !p)}
+                      className={`flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-xl border transition-all ${
+                        isRecurring
+                          ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-400'
+                          : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-400'
+                      }`}>
+                      <span>🔁</span>
+                      <span>Repeat</span>
+                      {isRecurring && <span className="text-[10px] font-bold uppercase tracking-wide bg-indigo-100 dark:bg-indigo-800 px-1.5 py-0.5 rounded-full">ON</span>}
+                    </button>
+
+                    {isRecurring && (
+                      <div className="mt-2 space-y-2 pl-1">
+                        <div className="flex items-center gap-2">
+                          <label className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">Repeat every</label>
+                          <select
+                            value={recurrenceRule}
+                            onChange={e => setRecurrenceRule(e.target.value as 'daily' | 'weekly' | 'biweekly' | 'monthly')}
+                            style={{ fontSize: '16px' }}
+                            className="flex-1 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 outline-none focus:border-indigo-400 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs">
+                            <option value="daily">Day</option>
+                            <option value="weekly">Week</option>
+                            <option value="biweekly">2 Weeks</option>
+                            <option value="monthly">Month</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <label className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">End repeat</label>
+                          <input
+                            type="date"
+                            value={recurrenceEndDate}
+                            min={scheduleDate}
+                            onChange={e => setRecurrenceEndDate(e.target.value)}
+                            style={{ fontSize: '16px' }}
+                            placeholder="Never"
+                            className="flex-1 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 outline-none focus:border-indigo-400 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs" />
+                          {recurrenceEndDate && (
+                            <button
+                              type="button"
+                              onClick={() => setRecurrenceEndDate('')}
+                              className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                              ✕
+                            </button>
+                          )}
+                        </div>
+                        {!recurrenceEndDate && (
+                          <p className="text-[10px] text-gray-400 dark:text-gray-500 pl-0.5">Repeats forever until you unschedule it.</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {scheduleError && (
                   <div className="mt-2 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 flex items-center justify-between gap-3">
                     <p className="text-xs text-amber-700">{scheduleError}</p>
@@ -2131,6 +2336,12 @@ function ComposeInner() {
                       className="px-5 py-3 border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-indigo-400 hover:text-indigo-600 dark:hover:border-indigo-500 dark:hover:text-indigo-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5">
                       👁 Preview
                     </button>
+                    {content.trim().length > 0 && (
+                      <PostImageExporter
+                        content={content}
+                        platform={selectedPlatforms[0]}
+                      />
+                    )}
                   </div>
                 )}
               </div>

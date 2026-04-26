@@ -1,4 +1,5 @@
 'use client'
+import { Suspense } from 'react'
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -113,7 +114,7 @@ function formatDate(dateStr: string) {
     d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
 }
 
-export default function EnkiTradesPage() {
+function EnkiTradesInner() {
   const router       = useRouter()
   const searchParams = useSearchParams()
 
@@ -448,4 +449,8 @@ export default function EnkiTradesPage() {
       </div>
     </div>
   )
+}
+
+export default function EnkiTradesPage() {
+  return <Suspense fallback={<div className="min-h-screen bg-black" />}><EnkiTradesInner /></Suspense>
 }
