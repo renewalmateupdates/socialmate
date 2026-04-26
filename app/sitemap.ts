@@ -178,7 +178,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/enki`,               lastModified: now, changeFrequency: 'weekly',  priority: 0.9 },
     { url: `${base}/enki/leaderboard`,   lastModified: now, changeFrequency: 'daily',   priority: 0.7 },
     { url: `${base}/enki/dashboard`,     lastModified: now, changeFrequency: 'weekly',  priority: 0.6 },
-    { url: `${base}/enki/trades`,        lastModified: now, changeFrequency: 'weekly',  priority: 0.5 },
+    { url: `${base}/enki/trades`,        lastModified: now, changeFrequency: 'weekly',  priority: 0.6 },
     { url: `${base}/enki/settings`,      lastModified: now, changeFrequency: 'monthly', priority: 0.4 },
     { url: `${base}/gilgamesh`,          lastModified: now, changeFrequency: 'weekly',  priority: 0.8 },
     { url: `${base}/support`,            lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
@@ -189,6 +189,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/for/agencies`,       lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/for/small-business`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/referral`,           lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${base}/refer`,              lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${base}/analytics/dna`,      lastModified: now, changeFrequency: 'weekly',  priority: 0.6 },
+    { url: `${base}/monetize`,           lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
   ]
 
   const comparisons: MetadataRoute.Sitemap = [
