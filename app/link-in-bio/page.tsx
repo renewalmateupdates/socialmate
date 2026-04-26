@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
@@ -93,7 +93,10 @@ export default function LinkInBio() {
   const [btnStyle, setBtnStyle] = useState('rounded')
   const [links, setLinks] = useState<BioLink[]>([{ id: makeId(), title: '', url: '', active: true, type: 'custom' }])
   const [socials, setSocials] = useState<Record<string, string>>({})
-  const [activeTab, setActiveTab] = useState<'links' | 'design' | 'socials' | 'domain'>('links')
+  const [activeTab, setActiveTab] = useState<'links' | 'design' | 'socials' | 'domain' | 'analytics'>('links')
+  const [analyticsData, setAnalyticsData] = useState<{ total_clicks: number; by_link: Record<string, number> } | null>(null)
+  const [analyticsLoading, setAnalyticsLoading] = useState(false)
+  const [showQr, setShowQr] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const [copied, setCopied] = useState(false)
 
@@ -105,6 +108,19 @@ export default function LinkInBio() {
   const router = useRouter()
   const { plan } = useWorkspace()
   const canUseCustomDomain = plan === 'pro' || plan === 'agency' || customDomainUnlocked
+
+  const loadAnalytics = useCallback(async () => {
+    setAnalyticsLoading(true)
+    try {
+      const res = await fetch('/api/bio/analytics')
+      if (res.ok) {
+        const d = await res.json()
+        setAnalyticsData(d)
+      }
+    } finally {
+      setAnalyticsLoading(false)
+    }
+  }, [])
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type })
@@ -439,12 +455,16 @@ export default function LinkInBio() {
               {/* TABS */}
               <div className="flex items-center gap-1 bg-surface border border-theme rounded-2xl p-1 overflow-x-auto">
                 {[
-                  { id: 'links',   label: '🔗 Links'   },
-                  { id: 'socials', label: '📱 Socials'  },
-                  { id: 'design',  label: '🎨 Design'   },
-                  { id: 'domain',  label: canUseCustomDomain ? '🌐 Domain' : '🔒 Domain' },
+                  { id: 'links',     label: '🔗 Links'     },
+                  { id: 'socials',   label: '📱 Socials'    },
+                  { id: 'design',    label: '🎨 Design'     },
+                  { id: 'domain',    label: canUseCustomDomain ? '🌐 Domain' : '🔒 Domain' },
+                  { id: 'analytics', label: '📊 Analytics'  },
                 ].map(tab => (
-                  <button key={tab.id} onClick={() => setActiveTab(tab.id as any)}
+                  <button key={tab.id} onClick={() => {
+                    setActiveTab(tab.id as any)
+                    if (tab.id === 'analytics') loadAnalytics()
+                  }}
                     className={`flex-1 py-2 rounded-xl text-xs font-semibold transition-all whitespace-nowrap ${
                       activeTab === tab.id ? 'bg-black text-white' : 'text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white'
                     }`}>
@@ -599,6 +619,126 @@ export default function LinkInBio() {
                         </div>
                       )}
                     </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ANALYTICS TAB */}
+              {activeTab === 'analytics' && (
+                <div className="space-y-4">
+                  {/* QR Code section */}
+                  <div className="bg-surface border border-theme rounded-2xl p-5">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">QR Code</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Share your QR code anywhere to grow your audience</p>
+                      </div>
+                      {slug && (
+                        <button
+                          onClick={() => setShowQr(p => !p)}
+                          className="text-xs font-bold px-4 py-2 bg-black text-white rounded-xl hover:opacity-80 transition-all">
+                          {showQr ? 'Hide QR' : 'Show QR'}
+                        </button>
+                      )}
+                    </div>
+                    {!slug && (
+                      <p className="text-xs text-gray-400 dark:text-gray-500">Save your bio page first to generate a QR code.</p>
+                    )}
+                    {slug && showQr && (
+                      <div className="flex flex-col items-center gap-4 pt-2">
+                        <div className="bg-white p-3 rounded-2xl shadow-sm border border-gray-100">
+                          <img
+                            src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`https://socialmate.studio/l/${slug}`)}`}
+                            alt="QR code for your bio page"
+                            width={200}
+                            height={200}
+                            className="block"
+                          />
+                        </div>
+                        <div className="text-center space-y-1">
+                          <p className="text-xs font-mono text-gray-500 dark:text-gray-400">socialmate.studio/l/{slug}</p>
+                          <a
+                            href={`https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(`https://socialmate.studio/l/${slug}`)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-block text-xs font-bold px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
+                            ⬇ Download QR Code
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Click Analytics */}
+                  <div className="bg-surface border border-theme rounded-2xl p-5">
+                    <div className="flex items-center justify-between mb-4">
+                      <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Click Analytics</p>
+                      <button
+                        onClick={loadAnalytics}
+                        disabled={analyticsLoading}
+                        className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
+                        {analyticsLoading ? 'Loading...' : '↻ Refresh'}
+                      </button>
+                    </div>
+
+                    {analyticsLoading && !analyticsData && (
+                      <div className="flex justify-center py-8">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-400" />
+                      </div>
+                    )}
+
+                    {!analyticsLoading && !analyticsData && (
+                      <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-6">
+                        No analytics yet. Click "Refresh" to load your stats.
+                      </p>
+                    )}
+
+                    {analyticsData && (
+                      <div className="space-y-4">
+                        {/* Total */}
+                        <div className="bg-black rounded-xl p-4 text-center">
+                          <p className="text-3xl font-extrabold text-white">{analyticsData.total_clicks.toLocaleString()}</p>
+                          <p className="text-xs text-gray-400 mt-1">Total clicks (all time)</p>
+                        </div>
+
+                        {/* Per link bars (last 30 days) */}
+                        {links.filter(l => l.title.trim() && l.url.trim()).length > 0 && (
+                          <div>
+                            <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">Clicks per link (last 30 days)</p>
+                            <div className="space-y-2.5">
+                              {(() => {
+                                const activeSaved = links.filter(l => l.title.trim() && l.url.trim())
+                                const maxClicks = Math.max(1, ...activeSaved.map(l => analyticsData.by_link[l.id] ?? 0))
+                                return activeSaved.map(l => {
+                                  const count = analyticsData.by_link[l.id] ?? 0
+                                  const pct = Math.round((count / maxClicks) * 100)
+                                  return (
+                                    <div key={l.id}>
+                                      <div className="flex items-center justify-between mb-1">
+                                        <span className="text-xs font-semibold truncate max-w-[70%]">{l.title}</span>
+                                        <span className="text-xs font-bold text-gray-500 dark:text-gray-400">{count}</span>
+                                      </div>
+                                      <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2">
+                                        <div
+                                          className="h-2 rounded-full bg-black dark:bg-white transition-all"
+                                          style={{ width: `${pct}%` }}
+                                        />
+                                      </div>
+                                    </div>
+                                  )
+                                })
+                              })()}
+                            </div>
+                          </div>
+                        )}
+
+                        {links.filter(l => l.title.trim() && l.url.trim()).length === 0 && (
+                          <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
+                            Add and save links to see per-link analytics.
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
