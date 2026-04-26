@@ -159,6 +159,7 @@ function ComposeInner() {
   const { credits, setCredits, applyCredits, plan, activeWorkspace } = useWorkspace()
 
   const [loading, setLoading] = useState(true)
+  const [userRole, setUserRole] = useState<'owner' | 'admin' | 'editor' | 'viewer' | 'client' | null>(null)
   const [showPostingDisclaimer, setShowPostingDisclaimer] = useState(false)
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['discord'])
   const [content, setContent] = useState('')
@@ -249,6 +250,12 @@ function ComposeInner() {
   // Brand Voice badge
   const [brandVoiceName, setBrandVoiceName] = useState<string | null>(null)
 
+  // A/B test
+  const [abMode, setAbMode] = useState(false)
+  const [contentB, setContentB] = useState('')
+  const [abDelay, setAbDelay] = useState(2) // hours between A and B
+  const [abPublishing, setAbPublishing] = useState(false)
+
   // Thread builder
   const [threadMode, setThreadMode] = useState(false)
   const [threadParts, setThreadParts] = useState<string[]>([''])
@@ -299,6 +306,12 @@ function ComposeInner() {
 
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) { router.push('/login'); return }
+
+      // Determine this user's role in the active workspace (editor/client must submit for approval)
+      fetch('/api/team/my-role')
+        .then(r => r.ok ? r.json() : null)
+        .then(d => { if (d?.role) setUserRole(d.role as typeof userRole) })
+        .catch(() => {})
 
       // Load destinations scoped to this workspace
       const destQuery = supabase
@@ -1012,6 +1025,77 @@ function ComposeInner() {
     setBestTimeLabel(`Set to ${dayName} at ${displayTime} — best time for ${platformName}`)
   }
 
+  const handlePublishAB = async () => {
+    if (!content.trim() || !contentB.trim() || charOver || selectedPlatforms.length === 0 || !!scheduleError || mediaStillUploading) return
+    setAbPublishing(true)
+    setPublishResults(null)
+    try {
+      // Version A always needs a scheduled time (use selected date or tomorrow)
+      const time = scheduleTime || '09:00'
+      const baseDate = scheduleDate || (() => {
+        const d = new Date(); d.setDate(d.getDate() + 1)
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+      })()
+      const scheduledAtA = new Date(`${baseDate}T${time}`).toISOString()
+      const scheduledAtB = new Date(new Date(`${baseDate}T${time}`).getTime() + abDelay * 60 * 60 * 1000).toISOString()
+      const abTestId = crypto.randomUUID()
+
+      const [resA, resB] = await Promise.all([
+        fetch('/api/posts/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content,
+            platforms: selectedPlatforms,
+            scheduledAt: scheduledAtA,
+            destinations: selectedDestinations,
+            workspaceId: activeWorkspace?.id,
+            selectedAccountIds,
+            mediaUrls: uploadedMediaUrls.length > 0 ? uploadedMediaUrls : undefined,
+            ab_test_id: abTestId,
+            ab_variant: 'a',
+          }),
+        }),
+        fetch('/api/posts/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            content: contentB,
+            platforms: selectedPlatforms,
+            scheduledAt: scheduledAtB,
+            destinations: selectedDestinations,
+            workspaceId: activeWorkspace?.id,
+            selectedAccountIds,
+            ab_test_id: abTestId,
+            ab_variant: 'b',
+          }),
+        }),
+      ])
+
+      const dataA = await resA.json()
+      const dataB = await resB.json()
+
+      if (!resA.ok || !resB.ok) {
+        showToast((dataA.error || dataB.error || 'Failed to schedule A/B test'), 'error')
+        return
+      }
+
+      showToast('A/B test scheduled! Both variants queued. ✓')
+      setContent('')
+      setContentB('')
+      setAbMode(false)
+      setScheduleDate('')
+      setScheduleTime('')
+      setCurrentDraftId(null)
+      setScoreResult(null)
+      clearMedia()
+    } catch {
+      showToast('Network error. Please try again.', 'error')
+    } finally {
+      setAbPublishing(false)
+    }
+  }
+
   const handlePublish = async () => {
     if (!content.trim() || charOver || selectedPlatforms.length === 0 || !!scheduleError || mediaStillUploading) return
     setPublishing(true)
@@ -1069,6 +1153,46 @@ function ComposeInner() {
           clearMedia()
         }
       }
+    } catch {
+      showToast('Network error. Please try again.', 'error')
+    } finally {
+      setPublishing(false)
+    }
+  }
+
+  const handleSubmitForApproval = async () => {
+    if (!content.trim() || charOver || selectedPlatforms.length === 0 || !!scheduleError || mediaStillUploading) return
+    setPublishing(true)
+    try {
+      let scheduledAt: string | undefined
+      if (scheduleDate) {
+        const time = scheduleTime || '09:00'
+        scheduledAt = new Date(`${scheduleDate}T${time}`).toISOString()
+      }
+
+      // Save as pending_approval draft
+      const res = await fetch('/api/posts/draft', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content,
+          platforms: selectedPlatforms,
+          postId: currentDraftId || undefined,
+          workspaceId: activeWorkspace?.id,
+          status: 'pending_approval',
+          scheduledAt,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) { showToast(data.error || 'Failed to submit for approval', 'error'); return }
+
+      showToast('Submitted for review ✓')
+      setContent('')
+      setScheduleDate('')
+      setScheduleTime('')
+      setCurrentDraftId(null)
+      setScoreResult(null)
+      clearMedia()
     } catch {
       showToast('Network error. Please try again.', 'error')
     } finally {
@@ -1486,12 +1610,13 @@ function ComposeInner() {
               {/* TEXT AREA / THREAD BUILDER */}
               <div className="bg-surface border border-theme rounded-2xl p-4">
 
-                {/* Thread toolbar */}
+                {/* Thread + A/B toolbar */}
                 <div className="flex items-center gap-2 mb-3 flex-wrap">
                   <button
                     type="button"
                     onClick={handleToggleThreadMode}
-                    className={`flex items-center gap-1.5 text-xs font-bold px-3 py-2 min-h-[36px] rounded-xl border transition-all ${
+                    disabled={abMode}
+                    className={`flex items-center gap-1.5 text-xs font-bold px-3 py-2 min-h-[36px] rounded-xl border transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
                       threadMode
                         ? 'bg-indigo-600 text-white border-indigo-600'
                         : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-indigo-400 hover:text-indigo-600'
@@ -1502,7 +1627,8 @@ function ComposeInner() {
                     <button
                       type="button"
                       onClick={handleAutoSplit}
-                      className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 min-h-[36px] border border-gray-200 dark:border-gray-700 rounded-xl hover:border-indigo-400 hover:text-indigo-600 transition-all text-gray-500 dark:text-gray-400">
+                      disabled={abMode}
+                      className="flex items-center gap-1.5 text-xs font-semibold px-3 py-2 min-h-[36px] border border-gray-200 dark:border-gray-700 rounded-xl hover:border-indigo-400 hover:text-indigo-600 transition-all text-gray-500 dark:text-gray-400 disabled:opacity-40 disabled:cursor-not-allowed">
                       ✂️ Auto-split
                     </button>
                   )}
@@ -1510,6 +1636,29 @@ function ComposeInner() {
                     <span className="text-xs text-gray-400 dark:text-gray-500">
                       {threadParts.length} part{threadParts.length !== 1 ? 's' : ''} · limit {mostRestrictiveLimit} chars each
                     </span>
+                  )}
+
+                  {/* A/B Test toggle — Pro+ only */}
+                  {!threadMode && (
+                    plan === 'free' ? (
+                      <button
+                        type="button"
+                        onClick={() => showToast('A/B testing is a Pro feature — upgrade to unlock', 'info')}
+                        className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 min-h-[36px] rounded-xl border border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 hover:border-amber-400 hover:text-amber-600 transition-all">
+                        ⚡ A/B Test <span className="text-[10px] bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 px-1.5 py-0.5 rounded-full font-bold ml-0.5">Pro</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => { setAbMode(p => !p); if (abMode) setContentB('') }}
+                        className={`flex items-center gap-1.5 text-xs font-bold px-3 py-2 min-h-[36px] rounded-xl border transition-all ${
+                          abMode
+                            ? 'bg-violet-600 text-white border-violet-600'
+                            : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-violet-400 hover:text-violet-600'
+                        }`}>
+                        ⚡ A/B Test {abMode ? 'ON' : 'OFF'}
+                      </button>
+                    )
                   )}
                 </div>
 
@@ -1557,14 +1706,70 @@ function ComposeInner() {
                     </button>
                   </div>
                 ) : (
-                  <textarea
-                    value={content}
-                    onChange={e => { setContent(e.target.value); setScoreResult(null) }}
-                    placeholder="What do you want to post? Write your content here, or use an AI tool to generate it..."
-                    rows={5}
-                    className="w-full outline-none resize-none text-gray-800 dark:text-gray-200 placeholder-gray-300 dark:placeholder-gray-600 min-h-[120px] sm:min-h-[200px]"
-                    style={{ fontSize: '16px' }}
-                  />
+                  <div className="space-y-4">
+                    {/* Version A label (only in A/B mode) */}
+                    {abMode && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-extrabold uppercase tracking-widest text-gray-400 dark:text-gray-500">Version A</span>
+                        <span className="text-xs text-gray-400 dark:text-gray-500">· publishes first</span>
+                      </div>
+                    )}
+                    <textarea
+                      value={content}
+                      onChange={e => { setContent(e.target.value); setScoreResult(null) }}
+                      placeholder="What do you want to post? Write your content here, or use an AI tool to generate it..."
+                      rows={abMode ? 4 : 5}
+                      className="w-full outline-none resize-none text-gray-800 dark:text-gray-200 placeholder-gray-300 dark:placeholder-gray-600 min-h-[120px] sm:min-h-[160px]"
+                      style={{ fontSize: '16px' }}
+                    />
+
+                    {/* Version B — only shown in A/B mode */}
+                    {abMode && (
+                      <div className="border border-violet-200 dark:border-violet-800 rounded-xl overflow-hidden">
+                        <div className="flex items-center justify-between px-3 py-2 bg-violet-50 dark:bg-violet-950/20 border-b border-violet-200 dark:border-violet-800">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-extrabold uppercase tracking-widest text-violet-700 dark:text-violet-400">Version B</span>
+                            <span className="text-xs text-violet-500 dark:text-violet-400">· alternative variant</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-violet-500 dark:text-violet-400 font-semibold">Delay:</span>
+                            {([2, 4, 6, 12] as const).map(h => (
+                              <button
+                                key={h}
+                                type="button"
+                                onClick={() => setAbDelay(h)}
+                                className={`text-xs font-bold px-2 py-0.5 rounded-full border transition-all ${
+                                  abDelay === h
+                                    ? 'bg-violet-600 text-white border-violet-600'
+                                    : 'border-violet-300 dark:border-violet-700 text-violet-600 dark:text-violet-400 hover:border-violet-500'
+                                }`}>
+                                {h}h
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <textarea
+                          value={contentB}
+                          onChange={e => setContentB(e.target.value)}
+                          placeholder="Write the alternative version of your post here..."
+                          rows={4}
+                          className="w-full outline-none resize-none text-gray-800 dark:text-gray-200 placeholder-gray-300 dark:placeholder-gray-600 p-3 bg-white dark:bg-gray-900 min-h-[120px]"
+                          style={{ fontSize: '16px' }}
+                        />
+                        <div className="flex items-center justify-between px-3 py-1.5 bg-violet-50/50 dark:bg-violet-950/10 border-t border-violet-100 dark:border-violet-900">
+                          <span className="text-xs text-violet-500 dark:text-violet-400">
+                            {contentB.length} chars
+                            {overLimitPlatforms.length > 0 && contentB.length > overLimitPlatforms[0].limit && (
+                              <span className="text-red-500 ml-1">⚠️ over {overLimitPlatforms[0].name} limit</span>
+                            )}
+                          </span>
+                          <span className="text-xs text-violet-400 dark:text-violet-500">
+                            Posts {abDelay}h after Version A
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 {!threadMode && (
@@ -2307,28 +2512,77 @@ function ComposeInner() {
                         : `Schedule Thread (${threadParts.filter(p => p.trim()).length} part${threadParts.filter(p => p.trim()).length !== 1 ? 's' : ''})`}
                     </button>
                   </div>
-                ) : (
+                ) : abMode ? (
                   <div className="flex items-center gap-3">
                     <button
-                      onClick={handlePublish}
+                      onClick={handlePublishAB}
                       disabled={
-                        publishing ||
+                        abPublishing ||
                         !content.trim() ||
+                        !contentB.trim() ||
                         charOver ||
                         selectedPlatforms.length === 0 ||
                         !!scheduleError ||
                         missingDestinations.length > 0 ||
                         mediaStillUploading
                       }
-                      className="flex-1 bg-black text-white text-sm font-bold py-3 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
-                      {publishing
-                        ? (scheduleDate ? 'Scheduling...' : 'Publishing...')
-                        : (scheduleDate ? 'Schedule Post' : 'Post Now')}
+                      className="flex-1 bg-violet-600 text-white text-sm font-bold py-3 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                      {abPublishing ? 'Scheduling A/B test...' : 'Schedule A/B Test'}
                     </button>
-                    <button onClick={handleSaveDraft} disabled={saving || !content.trim()}
-                      className="px-5 py-3 border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
-                      {saving ? 'Saving...' : currentDraftId ? 'Update Draft' : 'Save Draft'}
+                    <button
+                      type="button"
+                      onClick={() => { setAbMode(false); setContentB('') }}
+                      className="px-5 py-3 border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-500 dark:text-gray-400 rounded-xl hover:border-gray-400 transition-all">
+                      Cancel
                     </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    {(userRole === 'editor' || userRole === 'client') ? (
+                      <>
+                        <button
+                          onClick={handleSubmitForApproval}
+                          disabled={
+                            publishing ||
+                            !content.trim() ||
+                            charOver ||
+                            selectedPlatforms.length === 0 ||
+                            !!scheduleError ||
+                            missingDestinations.length > 0 ||
+                            mediaStillUploading
+                          }
+                          className="flex-1 bg-blue-600 text-white text-sm font-bold py-3 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                          {publishing ? 'Submitting...' : 'Submit for approval'}
+                        </button>
+                        <button onClick={handleSaveDraft} disabled={saving || !content.trim()}
+                          className="px-5 py-3 border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
+                          {saving ? 'Saving...' : currentDraftId ? 'Update Draft' : 'Save Draft'}
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={handlePublish}
+                          disabled={
+                            publishing ||
+                            !content.trim() ||
+                            charOver ||
+                            selectedPlatforms.length === 0 ||
+                            !!scheduleError ||
+                            missingDestinations.length > 0 ||
+                            mediaStillUploading
+                          }
+                          className="flex-1 bg-black text-white text-sm font-bold py-3 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+                          {publishing
+                            ? (scheduleDate ? 'Scheduling...' : 'Publishing...')
+                            : (scheduleDate ? 'Schedule Post' : 'Post Now')}
+                        </button>
+                        <button onClick={handleSaveDraft} disabled={saving || !content.trim()}
+                          className="px-5 py-3 border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
+                          {saving ? 'Saving...' : currentDraftId ? 'Update Draft' : 'Save Draft'}
+                        </button>
+                      </>
+                    )}
                     <button
                       type="button"
                       onClick={() => setShowPlatformPreview(true)}
