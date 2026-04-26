@@ -4295,8 +4295,8 @@ export const postPerformanceAlerts = inngest.createFunction(
         .select('user_id, notification_prefs')
         .in('user_id', userIds)
 
-      const map = new Map<string, any>()
-      for (const row of data ?? []) map.set(row.user_id, row.notification_prefs ?? {})
+      const map: Record<string, any> = {}
+      for (const row of data ?? []) map[row.user_id] = row.notification_prefs ?? {}
       return map
     })
 
@@ -4309,10 +4309,10 @@ export const postPerformanceAlerts = inngest.createFunction(
         .eq('type', 'post_performance')
 
       // We encode post id as last token: "... [postId]"
-      const ids = new Set<string>()
+      const ids: string[] = []
       for (const n of data ?? []) {
         const match = (n.message as string).match(/\[([a-f0-9-]{36})\]$/)
-        if (match) ids.add(match[1])
+        if (match) ids.push(match[1])
       }
       return ids
     })
@@ -4354,11 +4354,11 @@ export const postPerformanceAlerts = inngest.createFunction(
       for (const post of recentPosts) {
         try {
           // Check user pref
-          const prefs = userPrefs.get(post.user_id) ?? {}
+          const prefs = userPrefs[post.user_id] ?? {}
           if (prefs.performance_alerts === false) continue
 
           // Skip already alerted posts
-          if (alertedPostIds.has(post.id)) continue
+          if (alertedPostIds.includes(post.id)) continue
 
           const engagement = totalEngagement(post)
           if (engagement === 0) continue
