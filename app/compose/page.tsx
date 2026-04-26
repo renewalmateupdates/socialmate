@@ -6,6 +6,7 @@ import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 import UpgradeNudge from '@/components/UpgradeNudge'
+import PostImageExporter from '@/components/PostImageExporter'
 
 const PLATFORMS = [
   { id: 'discord',   name: 'Discord',   icon: '💬', limit: 2000,  live: true  },
@@ -171,6 +172,10 @@ function ComposeInner() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null)
   const [templateBanner, setTemplateBanner] = useState<string | null>(null)
   const [scheduleError, setScheduleError] = useState('')
+  // Recurring post state
+  const [isRecurring, setIsRecurring] = useState(false)
+  const [recurrenceRule, setRecurrenceRule] = useState<'daily' | 'weekly' | 'biweekly' | 'monthly'>('weekly')
+  const [recurrenceEndDate, setRecurrenceEndDate] = useState('')
   const [publishing, setPublishing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(null)
@@ -198,6 +203,13 @@ function ComposeInner() {
   const [repurposeLoading, setRepurposeLoading]     = useState(false)
   const [repurposeError, setRepurposeError]         = useState('')
   const [repurposeCopied, setRepurposeCopied]       = useState(false)
+
+  // AI Hashtag suggestions
+  const [showHashtagSuggestPanel, setShowHashtagSuggestPanel] = useState(false)
+  const [suggestedHashtags, setSuggestedHashtags]             = useState<string[]>([])
+  const [hashtagSuggestLoading, setHashtagSuggestLoading]     = useState(false)
+  const [hashtagSuggestError, setHashtagSuggestError]         = useState('')
+  const [hashtagsCopied, setHashtagsCopied]                   = useState(false)
 
   // Hashtag collections
   type HashtagCollection = {
@@ -2131,6 +2143,12 @@ function ComposeInner() {
                       className="px-5 py-3 border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-indigo-400 hover:text-indigo-600 dark:hover:border-indigo-500 dark:hover:text-indigo-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5">
                       👁 Preview
                     </button>
+                    {content.trim().length > 0 && (
+                      <PostImageExporter
+                        content={content}
+                        platform={selectedPlatforms[0]}
+                      />
+                    )}
                   </div>
                 )}
               </div>
