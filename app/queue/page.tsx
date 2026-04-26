@@ -152,6 +152,13 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
                 <span className="hidden sm:inline">{PLATFORM_NAMES[p] || p}</span>
               </span>
             ))}
+            {post.is_recurring && (
+              <span
+                title={`Repeats ${post.recurrence_rule ?? 'on a schedule'}${post.recurrence_end_date ? ` until ${new Date(post.recurrence_end_date).toLocaleDateString()}` : ' forever'}`}
+                className="flex items-center gap-1 text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded-full">
+                🔁 <span className="hidden sm:inline capitalize">{post.recurrence_rule ?? 'Recurring'}</span>
+              </span>
+            )}
           </div>
 
           {post.analytics && (() => {

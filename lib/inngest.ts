@@ -61,6 +61,35 @@ async function sendPushNotification(userId: string, title: string, body: string,
 
 export const inngest = new Inngest({ id: 'socialmate' })
 
+// ── Recurring posts helper ──────────────────────────────────────────────────
+// Computes the next scheduled_at date given a recurrence rule.
+function computeNextOccurrence(date: Date, rule: string): Date {
+  const next = new Date(date)
+  switch (rule) {
+    case 'daily':
+      next.setDate(next.getDate() + 1)
+      break
+    case 'weekly':
+      next.setDate(next.getDate() + 7)
+      break
+    case 'biweekly':
+      next.setDate(next.getDate() + 14)
+      break
+    case 'monthly':
+      // Advance by one month; if the day overflows (e.g. Jan 31 → Mar 3)
+      // pull back to the last day of the target month.
+      const targetMonth = next.getMonth() + 1
+      next.setMonth(targetMonth)
+      if (next.getMonth() !== targetMonth % 12) {
+        next.setDate(0) // last day of the intended month
+      }
+      break
+    default:
+      next.setDate(next.getDate() + 7)
+  }
+  return next
+}
+
 export const publishScheduledPost = inngest.createFunction(
   {
     id:      'publish-scheduled-post',
@@ -102,7 +131,7 @@ export const publishScheduledPost = inngest.createFunction(
       // transient error, this guard prevents the post from being sent twice.
       const { data: innerPostCheck } = await getSupabaseAdmin()
         .from('posts')
-        .select('user_id, status, published_at, platform_post_ids, platforms')
+        .select('user_id, workspace_id, status, published_at, platform_post_ids, platforms, content, media_urls, destinations, scheduled_at, is_recurring, recurrence_rule, recurrence_end_date, recurrence_parent_id')
         .eq('id', postId)
         .single()
 
@@ -191,6 +220,64 @@ export const publishScheduledPost = inngest.createFunction(
         status:    data.status,
         platforms: data.results?.map((r: any) => `${r.platform}:${r.success ? 'ok' : 'fail'}`),
       })
+
+      // ── Recurring post: schedule next occurrence ──────────────────────────
+      // Only reschedule if the post was actually published (not partial/failed),
+      // and has a valid recurrence rule and scheduled_at to compute from.
+      if (
+        innerPostCheck?.is_recurring &&
+        innerPostCheck?.recurrence_rule &&
+        innerPostCheck?.scheduled_at &&
+        (data.status === 'published' || data.status === 'partial')
+      ) {
+        try {
+          const nextAt = computeNextOccurrence(
+            new Date(innerPostCheck.scheduled_at),
+            innerPostCheck.recurrence_rule,
+          )
+          const endDate = innerPostCheck.recurrence_end_date
+            ? new Date(innerPostCheck.recurrence_end_date)
+            : null
+
+          if (!endDate || nextAt <= endDate) {
+            const nextAtIso = nextAt.toISOString()
+            const { data: clonedPost, error: cloneErr } = await getSupabaseAdmin()
+              .from('posts')
+              .insert({
+                user_id:              innerPostCheck.user_id,
+                workspace_id:         innerPostCheck.workspace_id,
+                content:              innerPostCheck.content,
+                platforms:            innerPostCheck.platforms,
+                destinations:         innerPostCheck.destinations ?? {},
+                media_urls:           innerPostCheck.media_urls ?? null,
+                status:               'scheduled',
+                scheduled_at:         nextAtIso,
+                is_recurring:         true,
+                recurrence_rule:      innerPostCheck.recurrence_rule,
+                recurrence_end_date:  innerPostCheck.recurrence_end_date ?? null,
+                recurrence_parent_id: innerPostCheck.recurrence_parent_id ?? postId,
+              })
+              .select('id')
+              .single()
+
+            if (cloneErr) {
+              console.error(`[RECURRING] Failed to clone post ${postId}:`, cloneErr.message)
+            } else if (clonedPost) {
+              console.log(`[RECURRING] Cloned post ${postId} → ${clonedPost.id} at ${nextAtIso}`)
+              // Trigger Inngest to sleep-and-publish the cloned post
+              await inngest.send({
+                name: 'post/scheduled',
+                data: { postId: clonedPost.id, scheduledAt: nextAtIso },
+              }).catch(err => console.error('[RECURRING] Failed to send post/scheduled for clone:', err))
+            }
+          } else {
+            console.log(`[RECURRING] Post ${postId} recurrence ended — next occurrence ${nextAt.toISOString()} is past end date ${endDate.toISOString()}`)
+          }
+        } catch (recurErr) {
+          console.error('[RECURRING] Error scheduling next occurrence:', recurErr)
+          // Non-fatal: the published post is already done, don't fail the step
+        }
+      }
 
       // Fire-and-forget success notification
       if (innerPostCheck?.user_id) {

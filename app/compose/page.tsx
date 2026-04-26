@@ -34,7 +34,6 @@ const DESTINATION_PLATFORMS = ['discord', 'telegram']
 
 const AI_TOOLS = [
   { id: 'caption',   label: 'Caption',   emoji: '✍️',  credits: 5,  desc: 'Generate a caption from your topic'     },
-  { id: 'hashtags',  label: 'Hashtags',  emoji: '#️⃣', credits: 5,  desc: 'Generate relevant hashtags'             },
   { id: 'rewrite',   label: 'Rewrite',   emoji: '🔁',  credits: 5,  desc: 'Rewrite your post to be punchier'       },
   { id: 'hook',      label: 'Hook',      emoji: '🎣',  credits: 5,  desc: 'Generate 3 viral opening hooks'         },
   { id: 'thread',    label: 'Thread',    emoji: '🧵',  credits: 10, desc: 'Turn your idea into a full thread'      },
@@ -979,6 +978,9 @@ function ComposeInner() {
           workspaceId: activeWorkspace?.id,
           selectedAccountIds,
           mediaUrls: uploadedMediaUrls.length > 0 ? uploadedMediaUrls : undefined,
+          isRecurring: scheduledAt ? isRecurring : false,
+          recurrenceRule: scheduledAt && isRecurring ? recurrenceRule : undefined,
+          recurrenceEndDate: scheduledAt && isRecurring && recurrenceEndDate ? recurrenceEndDate : undefined,
         }),
       })
 
@@ -990,6 +992,9 @@ function ComposeInner() {
         setContent('')
         setScheduleDate('')
         setScheduleTime('')
+        setIsRecurring(false)
+        setRecurrenceRule('weekly')
+        setRecurrenceEndDate('')
         setCurrentDraftId(null)
         setScoreResult(null)
         clearMedia()
@@ -2014,6 +2019,65 @@ function ComposeInner() {
                     <span className="text-xs text-gray-400 dark:text-gray-500">{bestTimeLabel}</span>
                   )}
                 </div>
+
+                {/* Repeat toggle — only shown when a future date is selected */}
+                {scheduleDate && (
+                  <div className="mt-3">
+                    <button
+                      type="button"
+                      onClick={() => setIsRecurring(p => !p)}
+                      className={`flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-xl border transition-all ${
+                        isRecurring
+                          ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-300 dark:border-indigo-700 text-indigo-700 dark:text-indigo-400'
+                          : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-400'
+                      }`}>
+                      <span>🔁</span>
+                      <span>Repeat</span>
+                      {isRecurring && <span className="text-[10px] font-bold uppercase tracking-wide bg-indigo-100 dark:bg-indigo-800 px-1.5 py-0.5 rounded-full">ON</span>}
+                    </button>
+
+                    {isRecurring && (
+                      <div className="mt-2 space-y-2 pl-1">
+                        <div className="flex items-center gap-2">
+                          <label className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">Repeat every</label>
+                          <select
+                            value={recurrenceRule}
+                            onChange={e => setRecurrenceRule(e.target.value as 'daily' | 'weekly' | 'biweekly' | 'monthly')}
+                            style={{ fontSize: '16px' }}
+                            className="flex-1 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 outline-none focus:border-indigo-400 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs">
+                            <option value="daily">Day</option>
+                            <option value="weekly">Week</option>
+                            <option value="biweekly">2 Weeks</option>
+                            <option value="monthly">Month</option>
+                          </select>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <label className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">End repeat</label>
+                          <input
+                            type="date"
+                            value={recurrenceEndDate}
+                            min={scheduleDate}
+                            onChange={e => setRecurrenceEndDate(e.target.value)}
+                            style={{ fontSize: '16px' }}
+                            placeholder="Never"
+                            className="flex-1 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 outline-none focus:border-indigo-400 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 text-xs" />
+                          {recurrenceEndDate && (
+                            <button
+                              type="button"
+                              onClick={() => setRecurrenceEndDate('')}
+                              className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                              ✕
+                            </button>
+                          )}
+                        </div>
+                        {!recurrenceEndDate && (
+                          <p className="text-[10px] text-gray-400 dark:text-gray-500 pl-0.5">Repeats forever until you unschedule it.</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {scheduleError && (
                   <div className="mt-2 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 flex items-center justify-between gap-3">
                     <p className="text-xs text-amber-700">{scheduleError}</p>
