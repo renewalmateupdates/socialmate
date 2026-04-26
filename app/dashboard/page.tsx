@@ -139,6 +139,7 @@ function DashboardInner() {
   const [creditSource, setCreditSource] = useState<'monthly_first' | 'earned_first' | 'paid_first'>('monthly_first')
   const [welcomeDismissed, setWelcomeDismissed] = useState(true) // default true to avoid flash
   const [xBannerDismissed, setXBannerDismissed] = useState(true) // default true to avoid flash
+  const [pendingApprovalCount, setPendingApprovalCount] = useState(0)
   const [connectedPlatforms, setConnectedPlatforms] = useState<string[]>([])
   const [xBoosterBalance, setXBoosterBalance] = useState<number>(0)
   // Plan card — seat roster
@@ -302,6 +303,17 @@ function DashboardInner() {
       } catch {
         // Non-fatal — booster balance defaults to 0
       }
+
+      // Pending approval count banner — only for workspace owners (pro/agency)
+      try {
+        const approvalRes = await fetch('/api/posts/pending-approvals')
+        if (approvalRes.ok) {
+          const approvalData = await approvalRes.json()
+          setPendingApprovalCount(approvalData.count ?? 0)
+        }
+      } catch {
+        // Non-fatal
+      }
     }
     init()
 
@@ -446,6 +458,18 @@ function DashboardInner() {
                 </div>
               </div>
             </div>
+          )}
+
+          {/* PENDING APPROVALS BANNER — show to workspace owners when team posts await review */}
+          {pendingApprovalCount > 0 && (plan === 'pro' || plan === 'agency') && (
+            <Link href="/approvals"
+              className="flex items-center gap-3 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-900/40 rounded-2xl px-5 py-3.5 mb-4 hover:opacity-80 transition-all">
+              <span className="text-xl flex-shrink-0">✅</span>
+              <p className="text-sm font-semibold text-yellow-800 dark:text-yellow-300 flex-1">
+                {pendingApprovalCount} post{pendingApprovalCount !== 1 ? 's' : ''} waiting for your approval —{' '}
+                <span className="underline font-bold">review now →</span>
+              </p>
+            </Link>
           )}
 
           {/* X/TWITTER BANNER — show if X not connected and not dismissed */}
