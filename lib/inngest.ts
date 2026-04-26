@@ -223,97 +223,268 @@ export const publishScheduledPost = inngest.createFunction(
   }
 )
 
-// Weekly email digest — runs every Monday at 9am UTC
+// Weekly email digest — runs every Sunday at 8am UTC
 export const weeklyDigest = inngest.createFunction(
-  { id: 'weekly-digest', retries: 2 },
-  { cron: '0 9 * * 1' },
+  { id: 'weekly-digest', name: 'Weekly Digest Email', retries: 2 },
+  { cron: '0 8 * * 0' },
   async ({ step }) => {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
-    const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+    const now = new Date()
+    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+    const nextWeek = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000)
+    const weekAgoIso = weekAgo.toISOString()
+    const nowIso = now.toISOString()
+    const nextWeekIso = nextWeek.toISOString()
 
-    // Get all users who published at least 1 post in the last 7 days
-    const { data: recentPosts } = await step.run('fetch-active-users', async () => {
-      return getSupabaseAdmin()
+    // Format week range for subject/header: "Apr 18 – Apr 25"
+    const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    const weekRange = `${fmt(weekAgo)} – ${fmt(now)}`
+
+    // Step 1: fetch all users who have posted in the last 7 days
+    const activeData = await step.run('fetch-active-users', async () => {
+      const supabase = getSupabaseAdmin()
+
+      // Published posts this week — includes content for top post preview
+      const { data: weekPosts } = await supabase
         .from('posts')
-        .select('user_id, platforms, published_at')
-        .gte('published_at', weekAgo)
+        .select('id, user_id, content, platforms, published_at, bluesky_stats, scheduled_at, status')
+        .gte('published_at', weekAgoIso)
         .in('status', ['published', 'partial'])
         .order('published_at', { ascending: false })
+
+      if (!weekPosts || weekPosts.length === 0) return { weekPosts: [], scheduledPosts: [], settingsRows: [], allUserIds: [] }
+
+      const userIdSet = new Set<string>(weekPosts.map((p: any) => p.user_id))
+      const allUserIds = Array.from(userIdSet)
+
+      // Scheduled posts in next 7 days — for "coming up" count
+      const { data: scheduledPosts } = await supabase
+        .from('posts')
+        .select('user_id, scheduled_at')
+        .in('user_id', allUserIds)
+        .eq('status', 'scheduled')
+        .gte('scheduled_at', nowIso)
+        .lte('scheduled_at', nextWeekIso)
+
+      // user_settings for opt-out check
+      const { data: settingsRows } = await supabase
+        .from('user_settings')
+        .select('user_id, notification_prefs')
+        .in('user_id', allUserIds)
+
+      return { weekPosts, scheduledPosts: scheduledPosts ?? [], settingsRows: settingsRows ?? [], allUserIds }
     })
 
-    if (!recentPosts || recentPosts.length === 0) {
+    const { weekPosts, scheduledPosts, settingsRows, allUserIds } = activeData as {
+      weekPosts: any[]
+      scheduledPosts: any[]
+      settingsRows: any[]
+      allUserIds: string[]
+    }
+
+    if (!weekPosts || weekPosts.length === 0) {
       console.log('[Weekly Digest] No active users this week')
       return { sent: 0 }
     }
 
-    // Group posts by user
-    const userPostMap: Record<string, any[]> = {}
-    for (const post of recentPosts) {
-      if (!userPostMap[post.user_id]) userPostMap[post.user_id] = []
-      userPostMap[post.user_id].push(post)
+    // Step 2: fetch user emails via Auth admin
+    const emailMap = await step.run('fetch-user-emails', async () => {
+      const usersRes = await getSupabaseAdmin().auth.admin.listUsers({ perPage: 1000 })
+      const users = usersRes.data?.users ?? []
+      const map: Record<string, string> = {}
+      for (const u of users) { if (u.email) map[u.id] = u.email }
+      return map
+    })
+
+    // Step 3: compute per-user stats and send in batches of 50
+    let sent = 0
+    const BATCH_SIZE = 50
+    const batches: string[][] = []
+    for (let i = 0; i < allUserIds.length; i += BATCH_SIZE) {
+      batches.push(allUserIds.slice(i, i + BATCH_SIZE))
     }
 
-    const userIds = Object.keys(userPostMap)
-    let sent = 0
+    // Build lookup structures outside the step
+    const scheduledByUser: Record<string, number> = {}
+    for (const sp of scheduledPosts) {
+      scheduledByUser[sp.user_id] = (scheduledByUser[sp.user_id] ?? 0) + 1
+    }
 
-    await step.run('send-digests', async () => {
-      // Fetch user emails in batch
-      const { data: settings } = await getSupabaseAdmin()
-        .from('user_settings')
-        .select('user_id, notification_prefs')
-        .in('user_id', userIds)
+    const settingsMap: Record<string, any> = {}
+    for (const row of settingsRows) {
+      settingsMap[row.user_id] = row.notification_prefs ?? {}
+    }
 
-      const usersRes = await getSupabaseAdmin().auth.admin.listUsers()
-      const users = usersRes.data?.users ?? []
-      const emailMap: Record<string, string> = {}
-      for (const u of users) { if (u.email) emailMap[u.id] = u.email }
+    // Group week posts by user
+    const postsByUser: Record<string, any[]> = {}
+    for (const post of weekPosts) {
+      if (!postsByUser[post.user_id]) postsByUser[post.user_id] = []
+      postsByUser[post.user_id].push(post)
+    }
 
-      for (const userId of userIds) {
-        const email = emailMap[userId]
-        if (!email) continue
+    for (let batchIdx = 0; batchIdx < batches.length; batchIdx++) {
+      const batchResult = await step.run(`send-batch-${batchIdx}`, async () => {
+        const supabase = getSupabaseAdmin()
+        const resend = getResend()
+        const batch = batches[batchIdx]
+        let batchSent = 0
 
-        // Check if user has opted out of weekly digest (key: weekly_digest, default: true)
-        const userSettings = settings?.find(s => s.user_id === userId)
-        const prefs = userSettings?.notification_prefs || {}
-        if (prefs.weekly_digest === false) continue
+        for (const userId of batch) {
+          try {
+            const email = (emailMap as Record<string, string>)[userId]
+            if (!email) continue
 
-        const posts = userPostMap[userId]
-        const postCount = posts.length
-        const platformSet = new Set<string>(posts.flatMap((p: any) => p.platforms || []))
-        const platforms = Array.from(platformSet)
+            // Respect opt-out — default is opted IN
+            const prefs = settingsMap[userId] ?? {}
+            if (prefs.weekly_digest === false) continue
 
-        await getResend().emails.send({
-          from: 'SocialMate <hello@socialmate.studio>',
-          to: email,
-          subject: `📊 Your week on SocialMate — ${postCount} post${postCount !== 1 ? 's' : ''} published`,
-          html: `
-            <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 32px; color: #111;">
-              <div style="font-size: 22px; font-weight: 800; margin-bottom: 4px;">SocialMate</div>
-              <p style="color: #888; font-size: 12px; margin: 0 0 24px;">Weekly digest · ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
-              <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 16px;">Your week in review 📊</h2>
-              <div style="background: #f9f9f9; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
-                <div style="font-size: 32px; font-weight: 800; color: #111;">${postCount}</div>
-                <div style="font-size: 13px; color: #555;">post${postCount !== 1 ? 's' : ''} published this week</div>
-                ${platforms.length > 0 ? `<div style="font-size: 12px; color: #888; margin-top: 8px;">on ${platforms.join(', ')}</div>` : ''}
-              </div>
-              <p style="font-size: 14px; color: #555; line-height: 1.6;">
-                Keep up the momentum. Consistent posting is the #1 driver of social media growth.
-              </p>
-              <a href="${appUrl}/dashboard" style="display: inline-block; margin-top: 20px; background: #000; color: #fff; text-decoration: none; font-weight: 700; font-size: 14px; padding: 12px 24px; border-radius: 10px;">
-                View Dashboard →
-              </a>
-              <hr style="border: none; border-top: 1px solid #eee; margin: 28px 0;" />
-              <p style="color: #bbb; font-size: 11px;">
-                You're receiving this because you published posts this week.
-                <a href="${appUrl}/settings?tab=Notifications" style="color: #bbb;">Manage preferences</a>
-              </p>
-            </div>
-          `,
-        })
-        sent++
-      }
-      return { sent }
-    })
+            const userPosts = postsByUser[userId] ?? []
+            const postsThisWeek = userPosts.length
+            if (postsThisWeek === 0) continue
+
+            const scheduledCount = scheduledByUser[userId] ?? 0
+
+            // Top platform: most posts this week
+            const platformCounts: Record<string, number> = {}
+            for (const p of userPosts) {
+              for (const plat of (p.platforms ?? [])) {
+                platformCounts[plat] = (platformCounts[plat] ?? 0) + 1
+              }
+            }
+            const topPlatform = Object.entries(platformCounts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
+
+            // Streak: count consecutive days with at least one post ending today (UTC)
+            const postedDays = new Set<string>()
+            for (const p of userPosts) {
+              if (p.published_at) {
+                postedDays.add(p.published_at.slice(0, 10))
+              }
+            }
+            // Also look back up to 30 days for older posts to extend streak
+            const { data: olderPosts } = await supabase
+              .from('posts')
+              .select('published_at')
+              .eq('user_id', userId)
+              .in('status', ['published', 'partial'])
+              .gte('published_at', new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString())
+              .lt('published_at', weekAgoIso)
+            for (const op of (olderPosts ?? [])) {
+              if (op.published_at) postedDays.add(op.published_at.slice(0, 10))
+            }
+            let currentStreak = 0
+            const todayUtc = now.toISOString().slice(0, 10)
+            let checkDay = new Date(todayUtc)
+            while (postedDays.has(checkDay.toISOString().slice(0, 10))) {
+              currentStreak++
+              checkDay = new Date(checkDay.getTime() - 24 * 60 * 60 * 1000)
+            }
+
+            // Top post: highest engagement (bluesky_stats likes+reposts+replies), fallback to most recent
+            let topPost: any = null
+            let topEngagement = -1
+            for (const p of userPosts) {
+              const bs = p.bluesky_stats
+              const eng = bs ? ((bs.likes ?? 0) + (bs.reposts ?? 0) + (bs.replies ?? 0)) : 0
+              if (eng > topEngagement) {
+                topEngagement = eng
+                topPost = p
+              }
+            }
+            if (!topPost) topPost = userPosts[0]
+            const topPostPreview = topPost?.content
+              ? topPost.content.slice(0, 120) + (topPost.content.length > 120 ? '…' : '')
+              : null
+
+            // Subject
+            const subject = `📊 Your SocialMate week — ${postsThisWeek} post${postsThisWeek !== 1 ? 's' : ''}${currentStreak >= 3 ? `, ${currentStreak} day streak` : ''}`
+
+            // Dark email HTML
+            const html = `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your SocialMate week</title></head>
+<body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <div style="max-width:560px;margin:0 auto;padding:32px 24px;">
+
+    <!-- Header -->
+    <div style="margin-bottom:28px;">
+      <div style="font-size:20px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">SocialMate</div>
+      <div style="font-size:12px;color:#666;margin-top:4px;">Weekly digest · ${weekRange}</div>
+    </div>
+
+    <!-- Title -->
+    <h1 style="font-size:24px;font-weight:800;color:#ffffff;margin:0 0 8px;">Your week in review</h1>
+    <p style="font-size:14px;color:#888;margin:0 0 28px;">Here's what you shipped this week.</p>
+
+    <!-- Big stats row -->
+    <div style="display:flex;gap:12px;margin-bottom:24px;">
+      <div style="flex:1;background:#141414;border:1px solid #222;border-radius:12px;padding:20px;">
+        <div style="font-size:36px;font-weight:800;color:#22c55e;line-height:1;">${postsThisWeek}</div>
+        <div style="font-size:12px;color:#888;margin-top:6px;">post${postsThisWeek !== 1 ? 's' : ''} this week</div>
+      </div>
+      ${currentStreak > 0 ? `
+      <div style="flex:1;background:#141414;border:1px solid #222;border-radius:12px;padding:20px;">
+        <div style="font-size:36px;font-weight:800;color:#f59e0b;line-height:1;">${currentStreak}</div>
+        <div style="font-size:12px;color:#888;margin-top:6px;">day streak 🔥</div>
+      </div>` : ''}
+    </div>
+
+    ${topPlatform ? `
+    <!-- Top platform -->
+    <div style="background:#141414;border:1px solid #222;border-radius:12px;padding:16px 20px;margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Top platform</div>
+      <div style="font-size:16px;font-weight:700;color:#ffffff;text-transform:capitalize;">${topPlatform}</div>
+    </div>` : ''}
+
+    ${topPostPreview ? `
+    <!-- Top post preview -->
+    <div style="background:#141414;border:1px solid #222;border-radius:12px;padding:16px 20px;margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Top post</div>
+      <div style="font-size:14px;color:#ccc;line-height:1.5;font-style:italic;">"${topPostPreview}"</div>
+      ${topEngagement > 0 ? `<div style="font-size:12px;color:#555;margin-top:8px;">${topEngagement} engagement</div>` : ''}
+    </div>` : ''}
+
+    ${scheduledCount > 0 ? `
+    <!-- Scheduled next week -->
+    <div style="background:#141414;border:1px solid #222;border-radius:12px;padding:16px 20px;margin-bottom:24px;">
+      <div style="font-size:11px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px;">Coming up</div>
+      <div style="font-size:16px;font-weight:700;color:#ffffff;">${scheduledCount} post${scheduledCount !== 1 ? 's' : ''} scheduled for next week</div>
+    </div>` : `<div style="margin-bottom:24px;"></div>`}
+
+    <!-- CTA -->
+    <a href="${appUrl}/analytics" style="display:inline-block;background:#22c55e;color:#000000;text-decoration:none;font-weight:700;font-size:14px;padding:14px 28px;border-radius:10px;margin-bottom:32px;">
+      View your analytics →
+    </a>
+
+    <!-- Divider -->
+    <hr style="border:none;border-top:1px solid #222;margin:0 0 20px;" />
+
+    <!-- Footer -->
+    <p style="font-size:11px;color:#444;line-height:1.6;margin:0;">
+      You're receiving this because you published posts on SocialMate this week.<br>
+      <a href="${appUrl}/settings?tab=Notifications" style="color:#555;">Unsubscribe from weekly digest</a>
+    </p>
+  </div>
+</body>
+</html>`
+
+            await resend.emails.send({
+              from: 'SocialMate <hello@socialmate.studio>',
+              to: email,
+              subject,
+              html,
+            })
+            batchSent++
+          } catch (err) {
+            // Never let one user's failure stop the rest
+            console.error(`[Weekly Digest] Failed to send to user ${userId}:`, err)
+          }
+        }
+
+        return batchSent
+      })
+
+      sent += batchResult as number
+    }
 
     console.log(`[Weekly Digest] Sent ${sent} emails`)
     return { sent }
@@ -2336,6 +2507,101 @@ export const enkiCloudRunnerScan = inngest.createFunction(
   }
 )
 
+// ─── Competitor Alerts — every 4 hours ────────────────────────────────────────
+// Checks competitor_posts for new posts fetched since last_checked_at on each
+// competitor_account. Sends an in-app notification + browser push to the owner
+// when new competitor activity is detected. Uses already-stored posts — no
+// external API calls. Updates last_checked_at after alerting.
+export const competitorAlerts = inngest.createFunction(
+  { id: 'competitor-alerts', name: 'Competitor Post Alerts' },
+  { cron: '0 */4 * * *' },
+  async ({ step }) => {
+    const db = getSupabaseAdmin()
+
+    // Fetch all competitor accounts that have been checked at least once
+    const competitors = await step.run('fetch-competitors', async () => {
+      const { data, error } = await db
+        .from('competitor_accounts')
+        .select('id, user_id, platform, handle, last_checked_at')
+      if (error) {
+        console.error('[CompetitorAlerts] Failed to fetch accounts:', error.message)
+        return []
+      }
+      return data ?? []
+    })
+
+    if (!competitors.length) return { alerted: 0, checked: 0 }
+
+    let alerted = 0
+    let checked = 0
+
+    for (const comp of competitors) {
+      await step.run(`check-competitor-${comp.id}`, async () => {
+        try {
+          // Find posts fetched after this competitor was last checked
+          // If never checked, alert on any posts fetched in the last 4 hours
+          const sinceTs = comp.last_checked_at
+            ? comp.last_checked_at
+            : new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()
+
+          const { data: newPosts, error: postsError } = await db
+            .from('competitor_posts')
+            .select('id, posted_at, content, post_url')
+            .eq('competitor_id', comp.id)
+            .gt('fetched_at', sinceTs)
+            .order('posted_at', { ascending: false })
+            .limit(5)
+
+          if (postsError) {
+            console.error(`[CompetitorAlerts] Posts query failed for ${comp.handle}:`, postsError.message)
+            return
+          }
+
+          const now = new Date().toISOString()
+
+          if (newPosts && newPosts.length > 0) {
+            const displayHandle = comp.handle.startsWith('@') ? comp.handle : `@${comp.handle}`
+            const platformLabel = comp.platform.charAt(0).toUpperCase() + comp.platform.slice(1)
+            const title = `👀 New post from ${displayHandle}`
+            const body = `${displayHandle} just posted on ${platformLabel}`
+            const url = '/competitor-tracking'
+
+            // In-app notification (fire-and-forget)
+            db.from('notifications')
+              .insert({
+                user_id:    comp.user_id,
+                type:       'competitor_post',
+                message:    `${displayHandle} just posted on ${platformLabel}. Check their latest content.`,
+                action_url: url,
+              })
+              .then(({ error: insertErr }) => {
+                if (insertErr) console.warn('[CompetitorAlerts] notifications insert failed:', insertErr.message)
+              })
+
+            // Browser push (best-effort)
+            await sendPushNotification(comp.user_id, title, body, url, 'competitor_post')
+
+            alerted++
+            console.log(`[CompetitorAlerts] Alerted user ${comp.user_id} — ${comp.platform}:${comp.handle} (${newPosts.length} new post(s))`)
+          }
+
+          // Always update last_checked_at so the window advances
+          await db
+            .from('competitor_accounts')
+            .update({ last_checked_at: now })
+            .eq('id', comp.id)
+
+          checked++
+        } catch (err: any) {
+          console.error(`[CompetitorAlerts] Error checking ${comp.platform}:${comp.handle}:`, err.message)
+        }
+      })
+    }
+
+    return { alerted, checked, total: competitors.length }
+  }
+)
+
 // ─── Competitor Post Fetcher — daily at 7am UTC ────────────────────────────────
 // Fetches recent public posts for each tracked competitor account and stores
 // them in competitor_posts. Supports Bluesky, Mastodon, YouTube, Reddit.
@@ -3700,5 +3966,166 @@ Rules:
 
     console.log(`[SomaAutopilot] processed: ${processed}, failed: ${failed}, skipped: ${alreadyRanSet.size}`)
     return { processed, failed, skipped: alreadyRanSet.size }
+  }
+)
+
+// ─── Enki Weekly P&L Summary Email ───────────────────────────────────────────
+// Every Monday at 9am UTC — sends a summary email to each user who had at
+// least one trade in the past 7 days.
+export const enkiWeeklySummary = inngest.createFunction(
+  { id: 'enki-weekly-summary', name: 'Enki Weekly P&L Summary', retries: 1 },
+  { cron: '0 9 * * 1' }, // Monday 9am UTC
+  async ({ step }) => {
+    const admin = getSupabaseAdmin()
+
+    // Get all users with enki_profiles
+    const { data: profiles } = await admin
+      .from('enki_profiles')
+      .select('user_id')
+
+    if (!profiles || profiles.length === 0) return { sent: 0 }
+
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+    let sent = 0
+
+    for (const profile of profiles) {
+      try {
+        await step.run(`enki-weekly-summary-${profile.user_id}`, async () => {
+          // Fetch all trades in the last 7 days for this user
+          const { data: weekTrades } = await admin
+            .from('enki_trades')
+            .select('id, symbol, side, qty, price, status, created_at')
+            .eq('user_id', profile.user_id)
+            .gte('created_at', sevenDaysAgo)
+            .order('created_at', { ascending: true })
+
+          if (!weekTrades || weekTrades.length === 0) return // skip users with no activity
+
+          // Closed trades = filled or executed
+          const closedTrades = weekTrades.filter((t: any) =>
+            t.status === 'filled' || t.status === 'executed'
+          )
+
+          // Count open positions (pending / pending_approval)
+          const openPositions = weekTrades.filter((t: any) =>
+            t.status === 'pending' || t.status === 'pending_approval'
+          ).length
+
+          // Compute P&L from buy/sell pairs (FIFO)
+          const buyQueues: Record<string, Array<{ qty: number; price: number }>> = {}
+          const sellPnl: Array<{ symbol: string; pnl_dollar: number; pnl_pct: number }> = []
+
+          for (const t of closedTrades as any[]) {
+            if (t.side === 'buy') {
+              if (!buyQueues[t.symbol]) buyQueues[t.symbol] = []
+              buyQueues[t.symbol].push({ qty: Number(t.qty), price: Number(t.price) })
+            } else if (t.side === 'sell') {
+              const queue = buyQueues[t.symbol]
+              if (!queue || queue.length === 0) continue
+              let remainingQty = Number(t.qty)
+              let totalCost = 0
+              let matchedQty = 0
+              while (remainingQty > 0 && queue.length > 0) {
+                const buy = queue[0]
+                const take = Math.min(remainingQty, buy.qty)
+                totalCost += take * buy.price
+                matchedQty += take
+                remainingQty -= take
+                buy.qty -= take
+                if (buy.qty <= 0) queue.shift()
+              }
+              if (matchedQty > 0) {
+                const revenue = matchedQty * Number(t.price)
+                const pnl_dollar = revenue - totalCost
+                const pnl_pct = totalCost > 0 ? (pnl_dollar / totalCost) * 100 : 0
+                sellPnl.push({ symbol: t.symbol, pnl_dollar, pnl_pct })
+              }
+            }
+          }
+
+          const tradeCount  = weekTrades.length
+          const wins        = sellPnl.filter(p => p.pnl_dollar > 0)
+          const losses      = sellPnl.filter(p => p.pnl_dollar <= 0)
+          const winRate     = sellPnl.length > 0 ? Math.round((wins.length / sellPnl.length) * 100) : null
+          const totalPnl    = sellPnl.reduce((sum, p) => sum + p.pnl_dollar, 0)
+          const avgPnlPct   = sellPnl.length > 0
+            ? sellPnl.reduce((sum, p) => sum + p.pnl_pct, 0) / sellPnl.length
+            : null
+
+          // Best trade by pnl_pct
+          const bestTrade = sellPnl.length > 0
+            ? sellPnl.reduce((best, p) => p.pnl_pct > best.pnl_pct ? p : best, sellPnl[0])
+            : null
+
+          // Subject line
+          const avgPnlStr = avgPnlPct !== null
+            ? `${avgPnlPct >= 0 ? '+' : ''}${avgPnlPct.toFixed(1)}%`
+            : 'active'
+          const subject = `\u26a1 Enki week: ${tradeCount} trade${tradeCount !== 1 ? 's' : ''}, ${avgPnlStr} avg`
+
+          // Fetch user email
+          const { data: userData } = await admin.auth.admin.getUserById(profile.user_id)
+          const email = userData?.user?.email
+          if (!email || !process.env.RESEND_API_KEY) return
+
+          // Stats rows HTML
+          const statsRows = [
+            ['Trades This Week', String(tradeCount)],
+            ['Win Rate', winRate !== null ? `${winRate}% (${wins.length}W / ${losses.length}L)` : 'N/A'],
+            ['Total P&L', sellPnl.length > 0 ? `${totalPnl >= 0 ? '+' : ''}$${Math.abs(totalPnl).toFixed(2)}` : 'N/A'],
+            ['Open Positions', String(openPositions)],
+          ].map(([label, value]) => `
+            <tr>
+              <td style="padding:10px 14px;color:#999;font-size:12px;border-bottom:1px solid #1f1f1f;">${label}</td>
+              <td style="padding:10px 14px;color:#f5f5f5;font-size:13px;font-weight:700;text-align:right;border-bottom:1px solid #1f1f1f;">${value}</td>
+            </tr>`).join('')
+
+          const bestTradeHtml = bestTrade ? `
+            <div style="background:#1a1200;border:1px solid #3d2f00;border-radius:10px;padding:14px 18px;margin:20px 0;">
+              <p style="color:#f59e0b;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 6px;">Best Trade This Week</p>
+              <p style="color:#fff;font-size:18px;font-weight:900;margin:0;">${bestTrade.symbol}
+                <span style="color:${bestTrade.pnl_pct >= 0 ? '#4ade80' : '#f87171'};font-size:16px;margin-left:10px;">
+                  ${bestTrade.pnl_pct >= 0 ? '+' : ''}${bestTrade.pnl_pct.toFixed(2)}%
+                </span>
+              </p>
+            </div>` : ''
+
+          await getResend().emails.send({
+            from: 'Enki <enki@socialmate.studio>',
+            to: email,
+            subject,
+            html: `<div style="background:#0a0a0a;font-family:sans-serif;padding:32px;max-width:520px;margin:0 auto;border-radius:16px;">
+              <div style="margin-bottom:24px;">
+                <p style="color:#f59e0b;font-size:16px;font-weight:900;margin:0 0 2px;">\u26a1 Enki</p>
+                <p style="color:#555;font-size:11px;margin:0;">Treasury Guardian \u00b7 Weekly Briefing</p>
+              </div>
+              <p style="color:#e5e5e5;font-size:22px;font-weight:900;margin:0 0 6px;">
+                ${tradeCount} trade${tradeCount !== 1 ? 's' : ''} executed
+              </p>
+              <p style="color:#666;font-size:13px;margin:0 0 24px;">
+                Past 7 days \u00b7 ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+              </p>
+              <table style="width:100%;border-collapse:collapse;background:#111;border-radius:10px;overflow:hidden;border:1px solid #1f1f1f;">
+                ${statsRows}
+              </table>
+              ${bestTradeHtml}
+              <a href="https://socialmate.studio/enki/trades" style="display:inline-block;background:#f59e0b;color:#000;font-weight:900;font-size:13px;padding:13px 28px;border-radius:10px;text-decoration:none;margin-top:8px;">
+                View Full Trade History \u2192
+              </a>
+              <p style="color:#333;font-size:11px;margin-top:28px;line-height:1.6;">
+                SocialMate by Gilgamesh Enterprise LLC \u00b7 Paper trading results are simulated and not financial advice.
+              </p>
+            </div>`,
+          })
+
+          sent++
+        })
+      } catch (err: any) {
+        console.error(`[EnkiWeeklySummary] user ${profile.user_id} failed:`, err?.message)
+      }
+    }
+
+    console.log(`[EnkiWeeklySummary] sent: ${sent}`)
+    return { sent }
   }
 )

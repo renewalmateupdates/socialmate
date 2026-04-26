@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { usePushNotifications } from '@/hooks/usePushNotifications'
+import UpgradeNudge from '@/components/UpgradeNudge'
 
 const STRIPE_PRO_PRICE_ID    = 'price_1T9S2v7OMwDowUuULHznqUD5'
 const STRIPE_AGENCY_PRICE_ID = 'price_1TFMHp7OMwDowUuUgeLAeJNY'
@@ -549,6 +550,18 @@ function SettingsInner() {
           {/* ── PLAN ── */}
           {activeTab === 'Plan' && (
             <div className="space-y-4">
+
+              {/* Free-plan nudge — always visible, not dismissible */}
+              {plan === 'free' && (
+                <UpgradeNudge
+                  variant="banner"
+                  title="You're on the Free plan"
+                  description="50 credits · 28 tweets · 2 seats. Pro unlocks 500 credits, 150 tweets, and 5 seats."
+                  cta="Upgrade to Pro — $5/mo"
+                  href="/pricing"
+                />
+              )}
+
               <div className="bg-surface border border-theme rounded-2xl p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div>

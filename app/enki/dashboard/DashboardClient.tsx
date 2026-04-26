@@ -437,7 +437,7 @@ export default function DashboardClient() {
               href="/enki/trades"
               className="text-xs font-bold text-gray-400 hover:text-amber-400 transition-colors"
             >
-              Trade Ledger
+              Trade History
             </Link>
             <Link
               href="/enki/truth"
