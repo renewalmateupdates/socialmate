@@ -287,6 +287,12 @@ These have burned us before — always apply:
 - **Media library bucket fix** (PR #215) — Upload route corrected from `'post-media'` → `'media'` bucket. `media_items` table SQL confirmed applied. `media` bucket confirmed exists (public, 50MB).
 - **Admin workspace SQL** — `socialmatehq@gmail.com` workspace set to `plan='agency'`, `soma_credits_monthly=2000`, `soma_autopilot_enabled=true` directly in Supabase (SQL only, not in code — paying customers still see upgrade modal).
 
+**April 26, 2026 — Late Night (PR #220):**
+- **Recurring posts** — 🔁 Repeat toggle in compose (Daily/Weekly/Bi-weekly/Monthly + optional end date). Auto-reschedules next occurrence after publish via Inngest `computeNextOccurrence`. Queue shows 🔁 badge with rule label. SQL: 4 new columns on posts table.
+- **Post as image** — 📸 Canvas PNG export (1200×630, no npm deps) in compose action bar + queue cards. Branded SocialMate card with amber header, word-wrapped content, platform badge.
+- **Hashtag suggestions** — #️⃣ Gemini-powered panel in compose. 12 hashtags as clickable chips (append to content, no dupes), Copy all button. 1 credit. Dedicated `/api/ai/hashtags` route.
+- **Roadmap + sitemap updated** — New shipped items, /refer + /analytics/dna + /monetize added to sitemap.
+
 **April 26, 2026 — Evening (PR #219):**
 - **Referral landing page** — `/refer/[code]` server component. Looks up affiliate by referral_code, shows personalized "invited by" landing with benefits + pricing + CTA to `/signup?ref=[code]`. Sets `ref_code` cookie (7-day) via client component fallback.
 - **Weekly digest email** — `weeklyDigest` Inngest cron (`0 8 * * 0`, Sunday 8am UTC). Posts this week, streak, scheduled count, top post preview. Dark amber Resend email → `/analytics`. Skips users with no posts.
@@ -358,14 +364,16 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **Inngest resync** — after any deploy touching `lib/inngest.ts`, resync functions in Inngest dashboard.
 
 **Roadmap (next up):**
-- **Recurring posts** — repeat toggle in compose, auto-reschedule after publish via Inngest
-- **Post as image** — canvas PNG export from compose and queue cards
-- **Hashtag suggestions** — Gemini-powered in-compose hashtag panel (1 credit)
+- **Link in Bio analytics + QR code** — click tracking, per-link stats, QR download
+- **Post performance alerts** — push notification when post hits unusual engagement
+- **Team approval workflow** — editors submit, owners approve before scheduling
+- **A/B post variant testing** — two versions, staggered publish, engagement comparison
 - **Creator Monetization Hub** — full build (Stripe Connect required)
 - **LinkedIn publishing** — pending API credentials
 
 ## Confirmed Done (stop asking about these)
 
+- ✅ **PR #220 batch (Apr 26 late night)** — Recurring posts, post-as-image, hashtag suggestions, roadmap+sitemap update. Merged.
 - ✅ **PR #219 batch (Apr 26 evening)** — Referral landing /refer/[code], weekly digest email, Enki trade history + weekly P&L email, upgrade nudges, competitor alerts. Merged.
 - ✅ **Twitch env vars** — `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET` set in Vercel. Callback: `https://socialmate.studio/api/clips/twitch/callback`. DONE.
 - ✅ **Supabase migrations** — `usage_events`, `notifications`, `competitor_accounts`, `hashtag_collections`, `studio_stax_admin_featured`, `enki_truth_trades`, `enki_truth_strategy_stats`, `coupons`, `coupon_redemptions` all confirmed ran.
