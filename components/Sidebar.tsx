@@ -63,6 +63,7 @@ const NAV_BASE = [
       { icon: '#️⃣', label: 'Hashtags',       href: '/hashtags'       },
       { icon: '🖼️', label: 'Media Library',  href: '/media'          },
       { icon: '🔗', label: 'Link in Bio',    href: '/link-in-bio'    },
+      { icon: '✂️', label: 'Link Shortener', href: '/links'           },
       { icon: '🎬', label: 'Clips',          href: '/clips'          },
       { icon: '✦',  label: 'Creator Studio', href: '/create'         },
     ],

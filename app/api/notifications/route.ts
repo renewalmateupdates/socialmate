@@ -19,7 +19,7 @@ function getSupabase() {
   )
 }
 
-// GET — fetch last 20 notifications for the current user
+// GET — fetch last 50 notifications for the current user
 export async function GET() {
   const supabase = getSupabase()
   const { data: { user } } = await supabase.auth.getUser()
@@ -31,7 +31,7 @@ export async function GET() {
     .select('id, type, title, message, data, is_read, created_at')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
-    .limit(20)
+    .limit(50)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
@@ -55,9 +55,9 @@ export async function PATCH(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) // PATCH requires auth
 
   const body = await req.json()
-  const { id, markAllRead } = body
+  const { id, all, markAllRead } = body
 
-  if (markAllRead) {
+  if (all || markAllRead) {
     const { error } = await supabase
       .from('notifications')
       .update({ is_read: true })
