@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const body = await req.json()
-    const { name, description, platforms, posts_per_day, content_window_days, mode, auto_collect_enabled, auto_collect_url } = body as {
+    const { name, description, platforms, posts_per_day, content_window_days, mode, auto_collect_enabled, auto_collect_url, platform_schedule } = body as {
       name: string
       description?: string
       platforms: string[]
@@ -84,6 +84,7 @@ export async function POST(req: NextRequest) {
       mode: 'safe' | 'autopilot' | 'full_send'
       auto_collect_enabled?: boolean
       auto_collect_url?: string
+      platform_schedule?: Record<string, { posts_per_day: number; days: number[] }>
     }
 
     if (!name?.trim()) return NextResponse.json({ error: 'name is required' }, { status: 400 })
@@ -119,8 +120,23 @@ export async function POST(req: NextRequest) {
 
     // Cap posts_per_day to tier max
     const maxPostsPerDay = mode === 'full_send' ? 10 : mode === 'autopilot' ? 5 : 2
-    const cappedPostsPerDay = Math.min(posts_per_day ?? 2, maxPostsPerDay)
     const cappedWindow = mode === 'safe' ? Math.min(content_window_days ?? 7, 7) : Math.min(content_window_days ?? 14, 14)
+
+    // Build capped platform_schedule; derive global posts_per_day from max across platforms
+    let cappedSchedule: Record<string, { posts_per_day: number; days: number[] }> | null = null
+    let globalPostsPerDay = Math.min(posts_per_day ?? 2, maxPostsPerDay)
+
+    if (platform_schedule && Object.keys(platform_schedule).length > 0) {
+      cappedSchedule = {}
+      let maxAcrossPlatforms = 0
+      for (const [platform, cfg] of Object.entries(platform_schedule)) {
+        const capped = Math.min(Math.max(cfg.posts_per_day ?? 1, 1), maxPostsPerDay)
+        const days = Array.isArray(cfg.days) && cfg.days.length > 0 ? cfg.days : [0,1,2,3,4,5,6]
+        cappedSchedule[platform] = { posts_per_day: capped, days }
+        if (capped > maxAcrossPlatforms) maxAcrossPlatforms = capped
+      }
+      globalPostsPerDay = maxAcrossPlatforms
+    }
 
     const { data: project, error } = await admin
       .from('soma_projects')
@@ -130,14 +146,15 @@ export async function POST(req: NextRequest) {
         name:                 name.trim(),
         description:          description?.trim() ?? null,
         platforms,
-        posts_per_day:        cappedPostsPerDay,
+        posts_per_day:        globalPostsPerDay,
         content_window_days:  cappedWindow,
         mode,
         auto_collect_enabled: auto_collect_enabled ?? false,
         auto_collect_url:     auto_collect_url?.trim() ?? null,
+        platform_schedule:    cappedSchedule,
         runs_this_month:      0,
       })
-      .select('id, name, platforms, mode, posts_per_day, content_window_days')
+      .select('id, name, platforms, mode, posts_per_day, content_window_days, platform_schedule')
       .single()
 
     if (error) throw new Error(error.message)
