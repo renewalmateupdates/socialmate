@@ -1,31 +1,49 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 
-const AVAILABLE_PLATFORMS = [
-  { id: 'bluesky',  label: 'Bluesky' },
-  { id: 'twitter',  label: 'Twitter / X' },
-  { id: 'linkedin', label: 'LinkedIn' },
-  { id: 'mastodon', label: 'Mastodon' },
-  { id: 'instagram',label: 'Instagram' },
-  { id: 'discord',  label: 'Discord' },
+const ALL_PLATFORMS = [
+  { id: 'bluesky',   label: 'Bluesky' },
+  { id: 'twitter',   label: 'Twitter / X' },
+  { id: 'mastodon',  label: 'Mastodon' },
+  { id: 'discord',   label: 'Discord' },
+  { id: 'telegram',  label: 'Telegram' },
+  { id: 'linkedin',  label: 'LinkedIn' },
+  { id: 'instagram', label: 'Instagram' },
 ]
 
 export default function NewSomaProjectPage() {
   const router = useRouter()
-  const [saving, setSaving] = useState(false)
-  const [error, setError]   = useState('')
+  const [saving, setSaving]                     = useState(false)
+  const [error, setError]                       = useState('')
+  const [connectedPlatforms, setConnectedPlatforms] = useState<string[] | null>(null)
 
   const [name, setName]               = useState('')
   const [description, setDescription] = useState('')
-  const [platforms, setPlatforms]     = useState<string[]>(['bluesky'])
+  const [platforms, setPlatforms]     = useState<string[]>([])
   const [postsPerDay, setPostsPerDay] = useState(2)
   const [windowDays, setWindowDays]   = useState(7)
   const [mode, setMode]               = useState<'safe' | 'autopilot' | 'full_send'>('safe')
   const [autoCollect, setAutoCollect] = useState(false)
   const [autoUrl, setAutoUrl]         = useState('')
+
+  useEffect(() => {
+    fetch('/api/accounts/connected')
+      .then(r => r.json())
+      .then(d => {
+        const connected: string[] = d.platforms ?? []
+        setConnectedPlatforms(connected)
+        // Pre-select all connected platforms
+        setPlatforms(connected)
+      })
+      .catch(() => setConnectedPlatforms([]))
+  }, [])
+
+  const availablePlatforms = ALL_PLATFORMS.filter(p =>
+    connectedPlatforms === null || connectedPlatforms.includes(p.id)
+  )
 
   function togglePlatform(id: string) {
     setPlatforms(prev =>
@@ -121,22 +139,38 @@ export default function NewSomaProjectPage() {
             <div className="rounded-2xl border border-amber-500/20 bg-gray-900 p-6">
               <h2 className="text-xs font-bold uppercase tracking-widest text-amber-400/80 mb-4">Platforms</h2>
               <p className="text-xs text-gray-500 mb-4">SOMA will generate platform-native posts for each one you select.</p>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {AVAILABLE_PLATFORMS.map(p => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => togglePlatform(p.id)}
-                    className={`px-4 py-2.5 rounded-xl text-xs font-bold border transition-all text-left ${
-                      platforms.includes(p.id)
-                        ? 'bg-amber-500/15 border-amber-500/50 text-amber-300'
-                        : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500'
-                    }`}
-                  >
-                    {platforms.includes(p.id) ? '◆ ' : '○ '}{p.label}
-                  </button>
-                ))}
-              </div>
+
+              {connectedPlatforms === null ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {[1,2,3].map(i => (
+                    <div key={i} className="h-10 rounded-xl bg-gray-800 animate-pulse" />
+                  ))}
+                </div>
+              ) : availablePlatforms.length === 0 ? (
+                <div className="rounded-xl bg-gray-800/60 border border-gray-700 px-4 py-5 text-center">
+                  <p className="text-sm text-gray-400 mb-2">No platforms connected yet.</p>
+                  <Link href="/settings?tab=accounts" className="text-xs text-amber-400 hover:text-amber-300 font-semibold">
+                    Connect a platform in Settings →
+                  </Link>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {availablePlatforms.map(p => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => togglePlatform(p.id)}
+                      className={`px-4 py-2.5 rounded-xl text-xs font-bold border transition-all text-left ${
+                        platforms.includes(p.id)
+                          ? 'bg-amber-500/15 border-amber-500/50 text-amber-300'
+                          : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-500'
+                      }`}
+                    >
+                      {platforms.includes(p.id) ? '◆ ' : '○ '}{p.label}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Mode + Schedule */}
