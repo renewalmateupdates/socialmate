@@ -316,8 +316,8 @@ export default function SomaDashboardPage() {
       return
     }
 
-    // Full Send requires purchase — only available if already on full_send mode
-    if (mode === 'full_send' && credits?.mode !== 'full_send') {
+    // Full Send requires autopilot add-on (same gate as Autopilot)
+    if (mode === 'full_send' && !credits?.autopilot_enabled) {
       setShowAutopilotModal(true)
       return
     }
