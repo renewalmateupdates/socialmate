@@ -31,7 +31,7 @@ interface SomaCredits {
 interface IdentityProfile {
   id: string
   interview_completed: boolean
-  updated_at: string
+  last_updated: string
 }
 
 interface WeeklyIngestion {
@@ -241,26 +241,20 @@ export default function SomaDashboardPage() {
         }
       }
 
-      // Identity profile
-      const { data: profile } = await supabase
-        .from('soma_identity_profiles')
-        .select('id, interview_completed, updated_at')
-        .eq('user_id', user.id)
-        .maybeSingle()
-
-      setIdentity(profile)
+      // Identity profile — use server API route (cookie-based auth, reliable in SSR)
+      const identityRes = await fetch('/api/soma/identity')
+      if (identityRes.ok) {
+        const identityData = await identityRes.json()
+        setIdentity(identityData.profile ?? null)
+      }
       setIdentityChecked(true)
 
       // Latest ingestion
-      const { data: ing } = await supabase
-        .from('soma_weekly_ingestion')
-        .select('id, week_label, key_themes, post_count, created_at')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .maybeSingle()
-
-      setIngestion(ing)
+      const ingRes = await fetch('/api/soma/ingestion/latest')
+      if (ingRes.ok) {
+        const ingData = await ingRes.json()
+        setIngestion(ingData.ingestion ?? null)
+      }
 
       // Projects
       const projectsRes = await fetch('/api/soma/projects')
@@ -544,7 +538,7 @@ export default function SomaDashboardPage() {
                 </div>
                 <p className="text-xs text-gray-500 mb-3">
                   Last updated{' '}
-                  {new Date(identity.updated_at).toLocaleDateString('en-US', {
+                  {new Date(identity.last_updated).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
                     year: 'numeric',
