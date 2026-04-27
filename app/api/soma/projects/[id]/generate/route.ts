@@ -205,17 +205,12 @@ Rules:
           platforms:    [platform],
           status:       project.mode === 'safe' ? 'draft' : 'scheduled',
           scheduled_at: scheduledAt(post.day - 1, post.slot),
-          metadata: {
-            source:       'soma_project',
-            project_id:   projectId,
-            ingestion_id,
-            day:          post.day,
-            slot:         post.slot,
-            content_type: post.content_type,
-          },
+          destinations: {},
         })
         .select('id')
         .single()
+
+      if (postErr) console.error('[SOMA Generate] post insert error:', postErr.message)
 
       if (!postErr && inserted) postIds.push(inserted.id)
     }

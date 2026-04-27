@@ -69,6 +69,7 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
   const [ingestError, setIngestError]   = useState('')
 
   const [generating, setGenerating]         = useState(false)
+  const [generateStage, setGenerateStage]   = useState('')
   const [generateResult, setGenerateResult] = useState<any>(null)
   const [generateError, setGenerateError]   = useState('')
 
@@ -84,6 +85,13 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
       const data = await res.json()
       setProject(data.project)
       setDocs(data.docs ?? [])
+
+      // Restore latest ingestion so diff result survives page reloads
+      const ingRes = await fetch(`/api/soma/projects/${projectId}/latest-ingestion`)
+      if (ingRes.ok) {
+        const ingData = await ingRes.json()
+        if (ingData.ingestion) setIngestResult(ingData.ingestion)
+      }
     } finally {
       setLoading(false)
     }
@@ -136,8 +144,22 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
   async function handleGenerate() {
     if (!ingestResult?.ingestion_id) { setGenerateError('Run an ingest first.'); return }
     setGenerating(true)
+    setGenerateStage('Crafting platform-native posts…')
     setGenerateError('')
     setGenerateResult(null)
+
+    // Animate through stages so the user knows it's working
+    const stages = [
+      'Reading your diff…',
+      'Crafting platform-native posts…',
+      'Formatting for each platform…',
+      'Scheduling posts…',
+    ]
+    let stageIdx = 0
+    const stageTimer = setInterval(() => {
+      stageIdx = Math.min(stageIdx + 1, stages.length - 1)
+      setGenerateStage(stages[stageIdx])
+    }, 4000)
 
     try {
       const res = await fetch(`/api/soma/projects/${projectId}/generate`, {
@@ -145,6 +167,7 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ingestion_id: ingestResult.ingestion_id }),
       })
+      clearInterval(stageTimer)
       const data = await res.json()
       if (!res.ok) {
         if (data.error === 'insufficient_soma_credits') setGenerateError('Not enough SOMA credits.')
@@ -155,9 +178,11 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
       setGenerateResult(data)
       await load()
     } catch {
+      clearInterval(stageTimer)
       setGenerateError('Network error. Please try again.')
     } finally {
       setGenerating(false)
+      setGenerateStage('')
     }
   }
 
@@ -447,6 +472,17 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
                         Go back to the left panel and paste your most recent master doc. SOMA will diff the two, extract what changed, and then you can generate posts.
                       </p>
                     </div>
+                  ) : generating ? (
+                    <div className="rounded-xl border border-violet-500/30 bg-violet-950/20 p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-2 h-2 rounded-full bg-violet-400 animate-pulse flex-shrink-0" />
+                        <p className="text-xs font-semibold text-violet-300">{generateStage}</p>
+                      </div>
+                      <div className="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                        <div className="h-full rounded-full bg-gradient-to-r from-violet-600 to-purple-400" style={{ width: '100%', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
+                      </div>
+                      <p className="text-[11px] text-gray-600 mt-2">Usually takes 15–30 seconds. Hang tight.</p>
+                    </div>
                   ) : (
                     <>
                       <p className="text-xs text-gray-400 mb-3">
@@ -468,13 +504,23 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
                             {project.mode === 'safe' ? 'Review in SOMA queue →' : 'View in queue →'}
                           </Link>
                         </div>
+                      ) : generating ? (
+                        <div className="rounded-xl border border-violet-500/30 bg-violet-950/20 p-4">
+                          <div className="flex items-center gap-2 mb-3">
+                            <div className="w-2 h-2 rounded-full bg-violet-400 animate-pulse flex-shrink-0" />
+                            <p className="text-xs font-semibold text-violet-300">{generateStage}</p>
+                          </div>
+                          <div className="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                            <div className="h-full rounded-full bg-gradient-to-r from-violet-600 to-purple-400" style={{ width: '100%', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
+                          </div>
+                          <p className="text-[11px] text-gray-600 mt-2">Usually takes 15–30 seconds. Hang tight.</p>
+                        </div>
                       ) : (
                         <button
                           onClick={handleGenerate}
-                          disabled={generating}
-                          className="w-full bg-violet-600 hover:bg-violet-500 disabled:opacity-60 text-white font-extrabold py-3 rounded-xl text-sm transition-all"
+                          className="w-full bg-violet-600 hover:bg-violet-500 text-white font-extrabold py-3 rounded-xl text-sm transition-all"
                         >
-                          {generating ? 'Generating platform-native posts…' : 'Generate Posts →'}
+                          Generate Posts →
                         </button>
                       )}
                     </>
