@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 const PLAN_POST_LIMITS: Record<string, number> = {
   free:   100,
@@ -58,6 +59,38 @@ export async function POST(request: NextRequest) {
         console.error('Draft update error:', error)
         return NextResponse.json({ error: 'Failed to update draft', detail: error.message }, { status: 500 })
       }
+
+      // Notify workspace owner when submitting an existing post for approval (non-fatal)
+      if (insertStatus === 'pending_approval') {
+        try {
+          const admin = getSupabaseAdmin()
+          const { data: postRow } = await admin
+            .from('posts')
+            .select('workspace_id')
+            .eq('id', postId)
+            .single()
+          if (postRow?.workspace_id) {
+            const { data: ws } = await admin
+              .from('workspaces')
+              .select('owner_id')
+              .eq('id', postRow.workspace_id)
+              .single()
+            if (ws?.owner_id && ws.owner_id !== user.id) {
+              await admin.from('notifications').insert({
+                user_id: ws.owner_id,
+                type:    'approval_requested',
+                title:   'Post pending approval',
+                message: 'A team member submitted a post for your review.',
+                data:    { post_id: postId, workspace_id: postRow.workspace_id },
+                is_read: false,
+              })
+            }
+          }
+        } catch (e) {
+          console.warn('[draft] approval notification failed (non-fatal):', e)
+        }
+      }
+
       return NextResponse.json({ success: true, postId })
     }
 
@@ -154,6 +187,30 @@ export async function POST(request: NextRequest) {
     if (error || !post) {
       console.error('Draft insert error:', { message: error?.message, code: error?.code, details: error?.details })
       return NextResponse.json({ error: 'Failed to save draft', detail: error?.message }, { status: 500 })
+    }
+
+    // Notify workspace owner when a post is submitted for approval (non-fatal)
+    if (insertStatus === 'pending_approval' && resolvedWorkspaceId) {
+      try {
+        const admin = getSupabaseAdmin()
+        const { data: ws } = await admin
+          .from('workspaces')
+          .select('owner_id')
+          .eq('id', resolvedWorkspaceId)
+          .single()
+        if (ws?.owner_id && ws.owner_id !== user.id) {
+          await admin.from('notifications').insert({
+            user_id: ws.owner_id,
+            type:    'approval_requested',
+            title:   'Post pending approval',
+            message: `A team member submitted a post for your review.`,
+            data:    { post_id: post.id, workspace_id: resolvedWorkspaceId },
+            is_read: false,
+          })
+        }
+      } catch (e) {
+        console.warn('[draft] approval notification failed (non-fatal):', e)
+      }
     }
 
     return NextResponse.json({ success: true, postId: post.id })

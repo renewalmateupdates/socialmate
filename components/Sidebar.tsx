@@ -73,6 +73,8 @@ const NAV_BASE = [
     items: [
       { icon: '📊', label: 'Analytics',  href: '/analytics'  },
       { icon: '🔍', label: 'Best Times', href: '/best-times' },
+      { icon: '🧬', label: 'Content DNA', href: '/analytics/dna' },
+      { icon: '🔥', label: 'Streak',     href: '/streak'     },
       { icon: '🧪', label: 'A/B Tests',  href: '/ab-tests'   },
     ],
   },
@@ -97,6 +99,7 @@ const NAV_BASE = [
       { icon: '🔗', label: 'Accounts',     href: '/accounts'              },
       { icon: '📍', label: 'Destinations', href: '/accounts/destinations' },
       { icon: '👥', label: 'Team',         href: '/team'                  },
+      { icon: '📋', label: 'Activity',     href: '/activity'              },
       { icon: '🎮', label: 'Discord Hub',  href: '/discord'               },
       { icon: '♻️', label: 'Evergreen',    href: '/evergreen'             },
       { icon: '📡', label: 'RSS Import',   href: '/rss-import'            },
@@ -186,6 +189,7 @@ function SidebarContent({
   const [statsVisible, setStatsVisible]         = useState(true)
   const [scheduledCount, setScheduledCount]     = useState(0)
   const [pendingApprovalCount, setPendingApprovalCount] = useState(0)
+  const [unreadNotifs, setUnreadNotifs]         = useState(0)
   const [xQuota, setXQuota]                     = useState<{ used: number; limit: number } | null>(null)
   const [somaCredits, setSomaCredits]           = useState<{ monthly: number; remaining: number } | null>(null)
   const pathname = usePathname()
@@ -327,6 +331,19 @@ function SidebarContent({
       .then(d => { if (d && typeof d.count === 'number') setPendingApprovalCount(d.count) })
       .catch(() => {})
   }, [])
+
+  // Unread notification badge — poll every 60s, refresh on nav to /notifications
+  useEffect(() => {
+    const load = () => {
+      fetch('/api/notifications/count')
+        .then(r => r.ok ? r.json() : null)
+        .then(d => { if (d && typeof d.unread === 'number') setUnreadNotifs(d.unread) })
+        .catch(() => {})
+    }
+    load()
+    const id = setInterval(load, 60_000)
+    return () => clearInterval(id)
+  }, [pathname])
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -650,6 +667,11 @@ function SidebarContent({
                           {item.href === '/approvals' && pendingApprovalCount > 0 && (
                             <span className="text-xs font-bold px-1.5 py-0.5 rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-400">
                               {pendingApprovalCount}
+                            </span>
+                          )}
+                          {item.href === '/notifications' && unreadNotifs > 0 && (
+                            <span className="text-xs font-bold px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400">
+                              {unreadNotifs > 99 ? '99+' : unreadNotifs}
                             </span>
                           )}
                         </Link>
