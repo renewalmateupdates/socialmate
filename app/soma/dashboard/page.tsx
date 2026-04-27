@@ -31,7 +31,7 @@ interface SomaCredits {
 interface IdentityProfile {
   id: string
   interview_completed: boolean
-  updated_at: string
+  last_updated: string
 }
 
 interface WeeklyIngestion {
@@ -244,7 +244,7 @@ export default function SomaDashboardPage() {
       // Identity profile
       const { data: profile } = await supabase
         .from('soma_identity_profiles')
-        .select('id, interview_completed, updated_at')
+        .select('id, interview_completed, last_updated')
         .eq('user_id', user.id)
         .maybeSingle()
 
@@ -544,7 +544,7 @@ export default function SomaDashboardPage() {
                 </div>
                 <p className="text-xs text-gray-500 mb-3">
                   Last updated{' '}
-                  {new Date(identity.updated_at).toLocaleDateString('en-US', {
+                  {new Date(identity.last_updated).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
                     year: 'numeric',
