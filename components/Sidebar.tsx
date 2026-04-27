@@ -60,6 +60,7 @@ const NAV_BASE = [
       { icon: '⏳', label: 'Queue',          href: '/queue'          },
       { icon: '📂', label: 'Drafts',         href: '/drafts'         },
       { icon: '📝', label: 'Templates',      href: '/templates'      },
+      { icon: '🕐', label: 'Schedules',      href: '/schedule-templates' },
       { icon: '#️⃣', label: 'Hashtags',       href: '/hashtags'       },
       { icon: '🖼️', label: 'Media Library',  href: '/media'          },
       { icon: '🔗', label: 'Link in Bio',    href: '/link-in-bio'    },
