@@ -18,7 +18,7 @@ Mission: Power to the people. Tear down gatekeeping walls. Build the door.
 
 A multi-platform social media scheduler and AI-powered Creator OS.
 Live at: **socialmate.studio**
-Launched: March 26, 2026. 100% bootstrapped. $0.27 infra cost at launch.
+Soft launched: March 26, 2026. Official Product Hunt launch: April 1, 2026. 100% bootstrapped.
 GitHub: github.com/renewalmateupdates/socialmate
 
 **The pitch:** What competitors charge $99/month for, we give for $5 — or free.
