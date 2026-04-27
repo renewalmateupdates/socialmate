@@ -212,6 +212,9 @@ export default function SomaDashboardPage() {
   const [showAutopilotModal, setShowAutopilotModal] = useState(false)
   const [approvingAll, setApprovingAll]       = useState(false)
   const [actionLoading, setActionLoading]     = useState<Record<string, boolean>>({})
+  const [ledger, setLedger]                   = useState<{ id: string; action_type: string; credits_used: number; balance_after: number; created_at: string }[]>([])
+  const [showLedger, setShowLedger]           = useState(false)
+  const [ledgerLoading, setLedgerLoading]     = useState(false)
   const [projects, setProjects]               = useState<SomaProject[]>([])
   const [projectLimit, setProjectLimit]       = useState(1)
 
@@ -288,6 +291,25 @@ export default function SomaDashboardPage() {
   }, [router])
 
   useEffect(() => { loadData() }, [loadData])
+
+  const loadLedger = async () => {
+    if (ledgerLoading) return
+    setLedgerLoading(true)
+    try {
+      const res = await fetch('/api/soma/credit-history')
+      if (res.ok) {
+        const d = await res.json()
+        setLedger(d.entries ?? [])
+      }
+    } finally {
+      setLedgerLoading(false)
+    }
+  }
+
+  const toggleLedger = () => {
+    if (!showLedger && ledger.length === 0) loadLedger()
+    setShowLedger(p => !p)
+  }
 
   // ── Mode toggle ─────────────────────────────────────────────────────────────
 
@@ -453,6 +475,41 @@ export default function SomaDashboardPage() {
                     <span className="text-amber-400/80">+{credits!.purchased} purchased</span>
                   )}
                 </div>
+
+                {/* Credit history toggle */}
+                <button
+                  onClick={toggleLedger}
+                  className="mt-3 text-xs text-amber-400/60 hover:text-amber-400 transition-colors font-medium"
+                >
+                  {showLedger ? '▲ Hide history' : '▼ View credit history'}
+                </button>
+
+                {showLedger && (
+                  <div className="mt-3 border-t border-gray-800 pt-3 space-y-2">
+                    {ledgerLoading && (
+                      <div className="text-xs text-gray-500 py-2 text-center">Loading…</div>
+                    )}
+                    {!ledgerLoading && ledger.length === 0 && (
+                      <div className="text-xs text-gray-500 py-2 text-center">No credit activity yet.</div>
+                    )}
+                    {!ledgerLoading && ledger.map(entry => (
+                      <div key={entry.id} className="flex items-center justify-between text-xs">
+                        <div>
+                          <span className="font-semibold text-gray-300 capitalize">
+                            {entry.action_type.replace(/_/g, ' ')}
+                          </span>
+                          <span className="text-gray-600 ml-2">
+                            {new Date(entry.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <span className="text-red-400 font-bold">−{entry.credits_used}</span>
+                          <span className="text-gray-600">{entry.balance_after} left</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </>
             )}
           </div>
