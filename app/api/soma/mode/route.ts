@@ -5,9 +5,10 @@ import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 // PATCH /api/soma/mode
-// body: { mode: 'safe' | 'autopilot' }
+// body: { mode: 'safe' | 'autopilot' | 'full_send' }
 // Updates workspaces.soma_mode
 // Returns 403 if mode='autopilot' and soma_autopilot_enabled=false
+// Returns 403 if mode='full_send' and soma_full_send_enabled=false
 export async function PATCH(req: NextRequest) {
   const cookieStore = await cookies()
   const supabase = createServerClient(
@@ -23,24 +24,29 @@ export async function PATCH(req: NextRequest) {
   try { body = await req.json() } catch {}
 
   const { mode } = body
-  if (mode !== 'safe' && mode !== 'autopilot') {
-    return NextResponse.json({ error: 'Invalid mode. Must be "safe" or "autopilot".' }, { status: 400 })
+  if (mode !== 'safe' && mode !== 'autopilot' && mode !== 'full_send') {
+    return NextResponse.json({ error: 'Invalid mode. Must be "safe", "autopilot", or "full_send".' }, { status: 400 })
   }
 
   const admin = getSupabaseAdmin()
 
-  // Check if autopilot is enabled for this user's workspace
-  if (mode === 'autopilot') {
+  if (mode === 'autopilot' || mode === 'full_send') {
     const { data: ws } = await admin
       .from('workspaces')
-      .select('soma_autopilot_enabled')
+      .select('soma_autopilot_enabled, soma_full_send_enabled')
       .eq('owner_id', user.id)
       .eq('is_personal', true)
       .maybeSingle()
 
-    if (!ws?.soma_autopilot_enabled) {
+    if (mode === 'autopilot' && !ws?.soma_autopilot_enabled) {
       return NextResponse.json(
         { error: 'Autopilot not enabled. Upgrade required.', upgrade_required: true },
+        { status: 403 }
+      )
+    }
+    if (mode === 'full_send' && !ws?.soma_full_send_enabled) {
+      return NextResponse.json(
+        { error: 'Full Send not enabled. Upgrade required.', upgrade_required: true },
         { status: 403 }
       )
     }

@@ -31,7 +31,7 @@ export async function GET() {
 
     const { data: workspace, error } = await supabase
       .from('workspaces')
-      .select('id, plan, soma_credits_monthly, soma_credits_used, soma_credits_purchased, soma_mode, soma_autopilot_enabled')
+      .select('id, plan, soma_credits_monthly, soma_credits_used, soma_credits_purchased, soma_mode, soma_autopilot_enabled, soma_full_send_enabled')
       .eq('owner_id', user.id)
       .eq('is_personal', true)
       .single()
@@ -61,8 +61,9 @@ export async function GET() {
       purchased,
       remaining,
       plan,
-      mode:              workspace.soma_mode ?? 'safe',
-      autopilot_enabled: workspace.soma_autopilot_enabled ?? false,
+      mode:               workspace.soma_mode ?? 'safe',
+      autopilot_enabled:  workspace.soma_autopilot_enabled ?? false,
+      full_send_enabled:  workspace.soma_full_send_enabled ?? false,
     })
   } catch (err) {
     console.error('[SOMA Credits GET]', err)

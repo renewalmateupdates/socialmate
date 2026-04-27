@@ -25,6 +25,7 @@ interface SomaCredits {
   remaining: number
   plan: string
   autopilot_enabled: boolean
+  full_send_enabled: boolean
   mode: 'safe' | 'autopilot' | 'full_send'
 }
 
@@ -122,7 +123,15 @@ const TIERS = [
   },
 ]
 
-function AutopilotModal({ onClose }: { onClose: () => void }) {
+function AutopilotModal({
+  onClose,
+  autopilotEnabled,
+  fullSendEnabled,
+}: {
+  onClose: () => void
+  autopilotEnabled: boolean
+  fullSendEnabled: boolean
+}) {
   const [loading, setLoading] = useState<string | null>(null)
   const [err, setErr] = useState('')
 
@@ -144,18 +153,43 @@ function AutopilotModal({ onClose }: { onClose: () => void }) {
     }
   }
 
+  const tierOwned = (tierId: string) =>
+    (tierId === 'autopilot' && autopilotEnabled) ||
+    (tierId === 'full_send' && fullSendEnabled)
+
+  const visibleTiers = TIERS.filter(t => !tierOwned(t.id))
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
       <div className="w-full max-w-lg rounded-2xl border border-gray-700 bg-gray-900 shadow-2xl overflow-hidden">
         <div className="h-1 w-full bg-gradient-to-r from-violet-500 via-amber-400 to-amber-500" />
         <div className="p-6 sm:p-8">
           <div className="text-center mb-6">
-            <h2 className="text-xl font-extrabold text-white mb-1">Unlock SOMA Automation</h2>
-            <p className="text-gray-400 text-sm">Choose how autonomous you want SOMA to be.</p>
+            <h2 className="text-xl font-extrabold text-white mb-1">
+              {autopilotEnabled ? 'Upgrade to Full Send' : 'Unlock SOMA Automation'}
+            </h2>
+            <p className="text-gray-400 text-sm">
+              {autopilotEnabled
+                ? 'You have Autopilot. Go fully autonomous with Full Send.'
+                : 'Choose how autonomous you want SOMA to be.'}
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
-            {TIERS.map(tier => (
+          {autopilotEnabled && (
+            <div className="flex items-center gap-3 rounded-xl border border-violet-700/40 bg-violet-900/20 p-3 mb-4">
+              <span className="text-lg">⚡</span>
+              <div className="flex-1">
+                <p className="text-sm font-extrabold text-violet-300">Autopilot</p>
+                <p className="text-xs text-gray-400">Already active on your account</p>
+              </div>
+              <span className="text-xs font-bold text-green-400 bg-green-900/40 border border-green-700/40 px-2 py-1 rounded-full">
+                ✓ Active
+              </span>
+            </div>
+          )}
+
+          <div className={`grid gap-4 mb-5 ${visibleTiers.length === 1 ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2'}`}>
+            {visibleTiers.map(tier => (
               <div key={tier.id} className={`rounded-xl border p-4 flex flex-col ${tier.color}`}>
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-2xl">{tier.icon}</span>
@@ -189,7 +223,7 @@ function AutopilotModal({ onClose }: { onClose: () => void }) {
             Safe Mode (free) stays available. You can downgrade anytime from Settings.
           </p>
           <button onClick={onClose} className="w-full text-center text-sm text-gray-500 hover:text-gray-300 transition-colors py-1">
-            Stay on Safe Mode
+            {autopilotEnabled ? 'Stay on Autopilot' : 'Stay on Safe Mode'}
           </button>
         </div>
       </div>
@@ -316,8 +350,8 @@ export default function SomaDashboardPage() {
       return
     }
 
-    // Full Send requires purchase — only available if already on full_send mode
-    if (mode === 'full_send' && credits?.mode !== 'full_send') {
+    // Full Send requires its own upgrade
+    if (mode === 'full_send' && !credits?.full_send_enabled) {
       setShowAutopilotModal(true)
       return
     }
@@ -369,7 +403,13 @@ export default function SomaDashboardPage() {
     <div className="flex min-h-screen bg-gray-950">
       <Sidebar />
 
-      {showAutopilotModal && <AutopilotModal onClose={() => setShowAutopilotModal(false)} />}
+      {showAutopilotModal && (
+        <AutopilotModal
+          onClose={() => setShowAutopilotModal(false)}
+          autopilotEnabled={credits?.autopilot_enabled ?? false}
+          fullSendEnabled={credits?.full_send_enabled ?? false}
+        />
+      )}
 
       <main className="flex-1 md:ml-56 p-4 sm:p-6 lg:p-8 space-y-6">
 
@@ -419,7 +459,7 @@ export default function SomaDashboardPage() {
               }`}
             >
               <span>🚀</span> Full Send
-              {credits?.mode !== 'full_send' && (
+              {!credits?.full_send_enabled && (
                 <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-purple-800/60 text-purple-400 border border-purple-700/40 ml-0.5">
                   $20
                 </span>
