@@ -439,33 +439,45 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
                 </div>
 
                 <div className="mt-5 pt-4 border-t border-violet-500/20">
-                  <p className="text-xs text-gray-400 mb-3">
-                    {project.mode === 'safe'
-                      ? `Posts will be saved as drafts across ${project.platforms.join(', ')} for your review.`
-                      : `Posts will auto-schedule across ${project.platforms.join(', ')} for ${project.content_window_days} days.`}
-                  </p>
-
-                  {generateError && (
-                    <div className="mb-3 text-xs text-red-400 bg-red-950/30 border border-red-800/40 rounded-lg px-3 py-2">{generateError}</div>
-                  )}
-
-                  {generateResult ? (
-                    <div className="rounded-xl bg-emerald-950/30 border border-emerald-700/40 px-4 py-3 text-center">
-                      <p className="text-sm font-bold text-emerald-400">
-                        {generateResult.posts_created} posts {project.mode === 'safe' ? 'drafted' : 'scheduled'}
+                  {!ingestResult.is_diff ? (
+                    /* Baseline captured — don't generate yet, prompt for current doc */
+                    <div className="rounded-xl bg-amber-950/20 border border-amber-700/30 px-4 py-3">
+                      <p className="text-xs font-bold text-amber-400 mb-1">Baseline saved. Now paste your current doc.</p>
+                      <p className="text-xs text-gray-400 leading-relaxed">
+                        Go back to the left panel and paste your most recent master doc. SOMA will diff the two, extract what changed, and then you can generate posts.
                       </p>
-                      <Link href={project.mode === 'safe' ? '/soma/dashboard' : '/queue'} className="text-xs text-emerald-300 hover:text-emerald-200 underline mt-1 block">
-                        {project.mode === 'safe' ? 'Review in SOMA queue →' : 'View in queue →'}
-                      </Link>
                     </div>
                   ) : (
-                    <button
-                      onClick={handleGenerate}
-                      disabled={generating}
-                      className="w-full bg-violet-600 hover:bg-violet-500 disabled:opacity-60 text-white font-extrabold py-3 rounded-xl text-sm transition-all"
-                    >
-                      {generating ? 'Generating platform-native posts…' : 'Generate Posts →'}
-                    </button>
+                    <>
+                      <p className="text-xs text-gray-400 mb-3">
+                        {project.mode === 'safe'
+                          ? `Posts will be saved as drafts across ${project.platforms.join(', ')} for your review.`
+                          : `Posts will auto-schedule across ${project.platforms.join(', ')} for ${project.content_window_days} days.`}
+                      </p>
+
+                      {generateError && (
+                        <div className="mb-3 text-xs text-red-400 bg-red-950/30 border border-red-800/40 rounded-lg px-3 py-2">{generateError}</div>
+                      )}
+
+                      {generateResult ? (
+                        <div className="rounded-xl bg-emerald-950/30 border border-emerald-700/40 px-4 py-3 text-center">
+                          <p className="text-sm font-bold text-emerald-400">
+                            {generateResult.posts_created} posts {project.mode === 'safe' ? 'drafted' : 'scheduled'}
+                          </p>
+                          <Link href={project.mode === 'safe' ? '/soma/dashboard' : '/queue'} className="text-xs text-emerald-300 hover:text-emerald-200 underline mt-1 block">
+                            {project.mode === 'safe' ? 'Review in SOMA queue →' : 'View in queue →'}
+                          </Link>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={handleGenerate}
+                          disabled={generating}
+                          className="w-full bg-violet-600 hover:bg-violet-500 disabled:opacity-60 text-white font-extrabold py-3 rounded-xl text-sm transition-all"
+                        >
+                          {generating ? 'Generating platform-native posts…' : 'Generate Posts →'}
+                        </button>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
