@@ -18,7 +18,7 @@ Mission: Power to the people. Tear down gatekeeping walls. Build the door.
 
 A multi-platform social media scheduler and AI-powered Creator OS.
 Live at: **socialmate.studio**
-Launched: March 26, 2026. 100% bootstrapped. $0.27 infra cost at launch.
+Soft launched: March 26, 2026. Official Product Hunt launch: April 1, 2026. 100% bootstrapped.
 GitHub: github.com/renewalmateupdates/socialmate
 
 **The pitch:** What competitors charge $99/month for, we give for $5 — or free.
@@ -287,6 +287,21 @@ These have burned us before — always apply:
 - **Media library bucket fix** (PR #215) — Upload route corrected from `'post-media'` → `'media'` bucket. `media_items` table SQL confirmed applied. `media` bucket confirmed exists (public, 50MB).
 - **Admin workspace SQL** — `socialmatehq@gmail.com` workspace set to `plan='agency'`, `soma_credits_monthly=2000`, `soma_autopilot_enabled=true` directly in Supabase (SQL only, not in code — paying customers still see upgrade modal).
 
+**April 26–27, 2026 (PRs #221–#224):**
+- **Link in Bio click analytics + QR code** (PR #221) — per-link click tracking with `bio_link_clicks` table; QR code displayed in analytics tab using qrserver.com; Download QR button
+- **Post performance alerts** (PR #221) — `postPerformanceAlerts` Inngest cron (`0 */6 * * *`); fires push + in-app notification when a post gets unusual engagement (2× avg); Settings toggle for opt-in
+- **Team approval workflow** (PR #221) — Editor/Client roles submit posts as `pending_approval`; Owner sees pending count badge on Approvals nav; approve/reject with reason; approved posts auto-schedule
+- **A/B post variant testing** (PR #221) — Pro+; two variants created simultaneously, published 24h apart; engagement comparison after publish; winner declared automatically
+- **Inngest Map/Set fix** (PR #222) — replaced spread on `Map.values()` / `Set` iterators with `Array.from()` in `step.run` returns — fixes TypeScript build error
+- **Link Shortener** (PR #223) — `/links` page; create/copy/delete short links at `socialmate.studio/go/[slug]`; click counter; `/go/[slug]` redirect route; SQL: `short_links` table with RLS
+- **Notification count endpoint** (PR #223) — `GET /api/notifications/count` returns `{unread: N}` (0 not 401 for logged-out)
+- **Workspace activity feed** (PR #223) — `GET /api/workspace/activity` last 50 events; SQL: `workspace_activity` table with RLS
+- **Schedule templates API** (PR #223) — `GET/POST /api/schedule-templates`; SQL: `schedule_templates` table with RLS
+- **Unread notification badge** (PR #224) — 🔔 sidebar bell polls `/api/notifications/count` every 60s; red badge capped at 99+; refreshes on pathname change
+- **Workspace activity page** (PR #224) — `/activity` page: last 50 events with actor, icon, relative timestamps; sidebar nav item under Manage
+- **Posting streak heatmap** (PR #224) — `/streak` page: GitHub-style 365-day contribution graph, hover tooltips, today indicator, legend; stats: current streak / longest / total posts / active days; motivational footer; `/api/streak` route
+- **Approval submission notifications** (PR #224) — owners get instant in-app notification when Editor/Client submits a post for approval (both new inserts and existing draft updates); non-fatal
+
 **April 26, 2026 — Late Night (PR #220):**
 - **Recurring posts** — 🔁 Repeat toggle in compose (Daily/Weekly/Bi-weekly/Monthly + optional end date). Auto-reschedules next occurrence after publish via Inngest `computeNextOccurrence`. Queue shows 🔁 badge with rule label. SQL: 4 new columns on posts table.
 - **Post as image** — 📸 Canvas PNG export (1200×630, no npm deps) in compose action bar + queue cards. Branded SocialMate card with amber header, word-wrapped content, platform badge.
@@ -364,14 +379,17 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **Inngest resync** — after any deploy touching `lib/inngest.ts`, resync functions in Inngest dashboard.
 
 **Roadmap (next up):**
-- **Link in Bio analytics + QR code** — click tracking, per-link stats, QR download
-- **Post performance alerts** — push notification when post hits unusual engagement
-- **Team approval workflow** — editors submit, owners approve before scheduling
-- **A/B post variant testing** — two versions, staggered publish, engagement comparison
-- **Creator Monetization Hub** — full build (Stripe Connect required)
+- **Creator Monetization Hub** — full build (Stripe Connect required; tip jar, fan subscriptions, paywalled posts)
 - **LinkedIn publishing** — pending API credentials
+- **Schedule templates UI** — `/api/schedule-templates` exists but no UI yet
+- **Workspace activity logging** — `workspace_activity` table exists but nothing writes to it yet; wire in post publish, approval, member actions
 
 ## Confirmed Done (stop asking about these)
+
+- ✅ **PR #221 batch** — Bio click analytics, post performance alerts, team approval workflow, A/B variant testing. Merged.
+- ✅ **PR #222** — Inngest Map/Set spread fix (TypeScript build error). Merged.
+- ✅ **PR #223 batch** — Link shortener (/links + /go/[slug]), notification count endpoint, workspace activity API, schedule templates API. SQL: short_links + schedule_templates + workspace_activity. Merged.
+- ✅ **PR #224 batch** — Unread notification badge in sidebar, /activity page, /streak heatmap, approval submission notifications. Merged.
 
 - ✅ **PR #220 batch (Apr 26 late night)** — Recurring posts, post-as-image, hashtag suggestions, roadmap+sitemap update. Merged.
 - ✅ **PR #219 batch (Apr 26 evening)** — Referral landing /refer/[code], weekly digest email, Enki trade history + weekly P&L email, upgrade nudges, competitor alerts. Merged.

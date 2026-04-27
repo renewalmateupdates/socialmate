@@ -202,7 +202,7 @@ export default function SomaOnboardingPage() {
 
     setSaveSuccess(true)
     // Brief confirmation, then redirect
-    setTimeout(() => router.push('/soma'), 1200)
+    setTimeout(() => router.push('/soma/dashboard'), 1200)
   }
 
   // ── Submit ───────────────────────────────────────────────────────────────────
@@ -245,7 +245,7 @@ export default function SomaOnboardingPage() {
       }
 
       clearSavedProgress()
-      router.push('/soma')
+      router.push('/soma/dashboard')
     } catch {
       setError('Network error — please try again.')
     } finally {
