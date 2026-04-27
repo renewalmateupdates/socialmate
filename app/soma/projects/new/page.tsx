@@ -409,12 +409,12 @@ export default function NewSomaProjectPage() {
                     Content window — <span className="text-amber-400">{windowDays} days</span>
                   </label>
                   <div className="flex gap-2">
-                    {[7, 14].map(d => (
+                    {[7, 14, 30].map(d => (
                       <button
                         key={d}
                         type="button"
                         onClick={() => setWindowDays(d)}
-                        disabled={d === 14 && mode === 'safe'}
+                        disabled={(d === 14 || d === 30) && mode === 'safe'}
                         className={`px-4 py-2 rounded-xl text-xs font-bold border transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
                           windowDays === d
                             ? 'bg-amber-500/15 border-amber-500/50 text-amber-300'
@@ -425,7 +425,7 @@ export default function NewSomaProjectPage() {
                       </button>
                     ))}
                   </div>
-                  {mode === 'safe' && <p className="text-xs text-gray-600 mt-1">14-day window requires Autopilot or Full Send.</p>}
+                  {mode === 'safe' && <p className="text-xs text-gray-600 mt-1">14 and 30-day windows require Autopilot or Full Send.</p>}
                 </div>
               </div>
             )}
