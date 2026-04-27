@@ -38,11 +38,20 @@ async function getUser() {
   return user
 }
 
-function scheduledAt(dayOffset: number, slot: string): string {
+// Spread N posts evenly across an 8am–10pm window (UTC).
+// slotIndex is 0-based position of this post within the day's posts.
+function scheduledAt(dayOffset: number, slotIndex: number, totalPerDay: number): string {
   const base = new Date()
-  base.setDate(base.getDate() + dayOffset)
-  const hours = slot === 'morning' ? 9 : slot === 'afternoon' ? 14 : 19
-  base.setHours(hours, 0, 0, 0)
+  base.setUTCDate(base.getUTCDate() + dayOffset)
+  const startHour = 8   // 8am UTC
+  const endHour   = 22  // 10pm UTC
+  const range     = endHour - startHour
+  // Even spacing — if 1 post, put it at noon; if 8, spread across the full window
+  const gap        = totalPerDay > 1 ? range / (totalPerDay - 1) : range / 2
+  const hourOffset = totalPerDay > 1 ? slotIndex * gap : range / 2
+  const totalMins  = Math.round(hourOffset * 60)
+  base.setUTCHours(startHour, 0, 0, 0)
+  base.setUTCMinutes(base.getUTCMinutes() + totalMins)
   return base.toISOString()
 }
 
@@ -138,7 +147,6 @@ Example posts: ${Array.isArray(profile.voice_examples) ? (profile.voice_examples
     // Generate posts for all platforms in one Gemini call
     // Total posts = postsPerDay * windowDays, distributed across platforms
     const totalPosts = postsPerDay * windowDays
-    const slots = ['morning', 'afternoon', 'evening']
 
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
@@ -158,14 +166,14 @@ ${platformInstructions}
 
 Generate ${totalPosts} posts spread across ${windowDays} days, ${postsPerDay} per day.
 Assign each post to exactly one platform from this list: ${platforms.join(', ')}
-Distribute platforms roughly evenly across all posts.
+Distribute platforms roughly evenly. Each day must have exactly ${postsPerDay} posts numbered slot_index 0 through ${postsPerDay - 1}.
 
 Return ONLY valid JSON:
 {
   "posts": [
     {
       "day": 1,
-      "slot": "morning",
+      "slot_index": 0,
       "platform": "bluesky",
       "content": "the post content formatted for that platform",
       "content_type": "mindset"
@@ -174,8 +182,8 @@ Return ONLY valid JSON:
 }
 
 Rules:
-- day 1 to ${windowDays}, slot: morning/afternoon/evening
-- morning: mindset/vision, afternoon: progress/updates, evening: reflection/lesson
+- day 1 to ${windowDays}, slot_index 0 to ${postsPerDay - 1} (${postsPerDay} posts per day)
+- Vary content_type across the day: mindset, progress, insight, story, value, question, win, lesson
 - NEVER use: "In today's world", "Let's dive in", "game-changer", "synergy", "leverage"
 - Format each post correctly for its platform (see rules above)
 - Make content specific to THIS week's actual themes, not generic
@@ -196,6 +204,7 @@ Rules:
     const postIds: string[] = []
     for (const post of generatedPosts) {
       const platform = post.platform ?? platforms[0]
+      const slotIndex = typeof post.slot_index === 'number' ? post.slot_index : 0
       const { data: inserted, error: postErr } = await admin
         .from('posts')
         .insert({
@@ -204,7 +213,7 @@ Rules:
           content:      post.content,
           platforms:    [platform],
           status:       project.mode === 'safe' ? 'draft' : 'scheduled',
-          scheduled_at: scheduledAt(post.day - 1, post.slot),
+          scheduled_at: scheduledAt(post.day - 1, slotIndex, postsPerDay),
           destinations: {},
         })
         .select('id')
