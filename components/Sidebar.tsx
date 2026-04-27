@@ -73,6 +73,8 @@ const NAV_BASE = [
     items: [
       { icon: '📊', label: 'Analytics',  href: '/analytics'  },
       { icon: '🔍', label: 'Best Times', href: '/best-times' },
+      { icon: '🧬', label: 'Content DNA', href: '/analytics/dna' },
+      { icon: '🔥', label: 'Streak',     href: '/streak'     },
       { icon: '🧪', label: 'A/B Tests',  href: '/ab-tests'   },
     ],
   },
