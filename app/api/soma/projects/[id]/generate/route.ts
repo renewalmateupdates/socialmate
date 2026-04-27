@@ -43,15 +43,16 @@ async function getUser() {
 
 // Evenly space N posts across an 8am–10pm UTC window.
 // slotIndex is 0-based (0 = first post of the day, N-1 = last).
-function scheduledAt(dayOffset: number, slotIndex: number, postsPerDay: number): string {
-  const base = new Date()
+// startDate (YYYY-MM-DD) overrides today as the base date.
+function scheduledAt(dayOffset: number, slotIndex: number, postsPerDay: number, startDate?: string): string {
+  const base = startDate ? new Date(`${startDate}T12:00:00Z`) : new Date()
   base.setUTCDate(base.getUTCDate() + dayOffset)
   const startHour = 8   // 8am UTC
   const endHour   = 22  // 10pm UTC
   const range     = endHour - startHour // 14 hours
   const gapMins   = postsPerDay > 1
     ? Math.round((range * 60) / (postsPerDay - 1))
-    : range * 30 // single post → noon
+    : range * 30 // single post → 3pm UTC
   const totalMins = postsPerDay > 1
     ? slotIndex * gapMins
     : range * 30
@@ -60,13 +61,14 @@ function scheduledAt(dayOffset: number, slotIndex: number, postsPerDay: number):
   return base.toISOString()
 }
 
-// Returns day offsets (0..windowDays-1) that fall on active days of week for this platform
-function getActiveDayOffsets(windowDays: number, activeDows: number[]): number[] {
+// Returns day offsets (0..windowDays-1) that fall on active days of week for this platform.
+// startDate (YYYY-MM-DD) overrides today as the base date.
+function getActiveDayOffsets(windowDays: number, activeDows: number[], startDate?: string): number[] {
   const offsets: number[] = []
-  const today = new Date()
+  const base = startDate ? new Date(`${startDate}T12:00:00Z`) : new Date()
   for (let d = 0; d < windowDays; d++) {
-    const date = new Date(today)
-    date.setUTCDate(today.getUTCDate() + d)
+    const date = new Date(base)
+    date.setUTCDate(base.getUTCDate() + d)
     if (activeDows.includes(date.getUTCDay())) offsets.push(d)
   }
   return offsets
@@ -79,7 +81,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     const { id: projectId } = await params
 
-    const { ingestion_id } = await req.json() as { ingestion_id: string }
+    const { ingestion_id, start_date } = await req.json() as { ingestion_id: string; start_date?: string }
     if (!ingestion_id) return NextResponse.json({ error: 'ingestion_id is required' }, { status: 400 })
 
     const admin = getSupabaseAdmin()
@@ -168,7 +170,7 @@ Emotional tone: ${insights.emotional_tone ?? 'motivated'}`
       const cfg        = schedule[platform] ?? { posts_per_day: globalPpd, days: [0,1,2,3,4,5,6] }
       const ppd        = Math.min(Math.max(cfg.posts_per_day ?? 1, 1), maxPpd)
       const activeDows = Array.isArray(cfg.days) && cfg.days.length > 0 ? cfg.days : [0,1,2,3,4,5,6]
-      const dayOffsets = getActiveDayOffsets(windowDays, activeDows)
+      const dayOffsets = getActiveDayOffsets(windowDays, activeDows, start_date)
 
       if (dayOffsets.length === 0 || ppd === 0) continue
 
@@ -235,7 +237,7 @@ Rules:
             content:      post.content,
             platforms:    [platform],
             status:       project.mode === 'safe' ? 'draft' : 'scheduled',
-            scheduled_at: scheduledAt(dayOff, slotIdx, ppd),
+            scheduled_at: scheduledAt(dayOff, slotIdx, ppd, start_date),
             destinations: {},
           })
           .select('id')
