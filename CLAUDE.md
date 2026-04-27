@@ -287,6 +287,13 @@ These have burned us before — always apply:
 - **Media library bucket fix** (PR #215) — Upload route corrected from `'post-media'` → `'media'` bucket. `media_items` table SQL confirmed applied. `media` bucket confirmed exists (public, 50MB).
 - **Admin workspace SQL** — `socialmatehq@gmail.com` workspace set to `plan='agency'`, `soma_credits_monthly=2000`, `soma_autopilot_enabled=true` directly in Supabase (SQL only, not in code — paying customers still see upgrade modal).
 
+**April 27, 2026 (PRs #227–#229):**
+- **SOMA Full Send modal fix** (PR #227) — `AutopilotModal` now takes `autopilotEnabled` + `fullSendEnabled` props; already-purchased tiers show "Already Active ✓" instead of a buy button; "Stay on Autopilot" cancel text when Autopilot is active. Added `soma_full_send_enabled` BOOLEAN column to `workspaces`. Credits API + mode API updated. Migration: `20260426000003_soma_full_send_enabled.sql`. Full Send `$20` badge correctly hidden when `full_send_enabled=true`. Mode API now accepts `'full_send'` mode.
+- **SOMA connected-platform filter** (PR #228) — New project form fetches `/api/accounts/connected` on mount; only shows platforms the user has actually connected; pre-selects all; skeleton loader + empty state with Settings link. New API route: `GET /api/accounts/connected`.
+- **SOMA per-platform schedule** (PR #229) — Each platform gets its own schedule row: posts/day picker (1–N, capped by mode tier) + day presets (Every day / Mon–Fri / Weekends / Custom) + S M T W T F S custom picker. Live summary per platform. Migration: `soma_projects.platform_schedule JSONB`. Projects API accepts + caps `platform_schedule`, derives global `posts_per_day` as max across platforms.
+- **Blog batch** — 27 new posts added to STATIC_POSTS covering SOMA, Enki, team approval workflows, link shortener, posting streaks, content DNA, brand voice AI, smart queue, recurring posts, A/B testing, link in bio, competitor tracking, per-platform scheduling, Studio Stax, and the bootstrapped founder story.
+- **Roadmap updated** — SOMA per-platform schedule + connected-platform filter added as shipped; schedule templates UI + workspace activity logging added as in-progress.
+
 **April 26–27, 2026 (PRs #221–#224):**
 - **Link in Bio click analytics + QR code** (PR #221) — per-link click tracking with `bio_link_clicks` table; QR code displayed in analytics tab using qrserver.com; Download QR button
 - **Post performance alerts** (PR #221) — `postPerformanceAlerts` Inngest cron (`0 */6 * * *`); fires push + in-app notification when a post gets unusual engagement (2× avg); Settings toggle for opt-in
@@ -386,6 +393,9 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 ## Confirmed Done (stop asking about these)
 
+- ✅ **PR #229** — SOMA per-platform schedule (posts/day + day picker per platform). Migration: soma_projects.platform_schedule. Merged.
+- ✅ **PR #228** — SOMA new project only shows connected platforms (GET /api/accounts/connected). Merged.
+- ✅ **PR #227** — SOMA Full Send modal fix + soma_full_send_enabled column. Modal hides purchased tiers. Merged.
 - ✅ **PR #221 batch** — Bio click analytics, post performance alerts, team approval workflow, A/B variant testing. Merged.
 - ✅ **PR #222** — Inngest Map/Set spread fix (TypeScript build error). Merged.
 - ✅ **PR #223 batch** — Link shortener (/links + /go/[slug]), notification count endpoint, workspace activity API, schedule templates API. SQL: short_links + schedule_templates + workspace_activity. Merged.

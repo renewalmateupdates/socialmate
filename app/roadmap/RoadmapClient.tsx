@@ -10,6 +10,10 @@ type RoadmapItem = {
 
 const ROADMAP: RoadmapItem[] = [
   // ── IN PROGRESS ──────────────────────────────────────────
+  { title: 'SOMA per-platform schedule', desc: 'Set different posts/day counts and day-of-week schedules per platform when creating a SOMA project. Bluesky 2x weekdays, X 1x weekends — all configured independently.', status: 'shipped', category: 'AI' },
+  { title: 'SOMA connected-platform filter', desc: 'New SOMA project form only shows platforms you\'ve actually connected. Pre-selects all. Empty state links to Settings if nothing is connected.', status: 'shipped', category: 'AI' },
+  { title: 'Schedule templates UI',      desc: 'UI for the schedule_templates API — save reusable posting schedules and apply them to new projects with one click.',                   status: 'in-progress', category: 'Scheduling' },
+  { title: 'Workspace activity logging', desc: 'Wire workspace_activity table to capture post publish, approval decisions, and member actions. /activity page already built.', status: 'in-progress', category: 'Teams' },
   { title: 'Media Library',              desc: 'Upload, compress, and reuse images and videos across posts. Grid view, filter by type, copy URL, delete. Storage limits per plan.',     status: 'shipped',  category: 'Media'         },
 
   // ── COMING SOON ───────────────────────────────────────────
