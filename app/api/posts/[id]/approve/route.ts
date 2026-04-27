@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { inngest } from '@/lib/inngest'
+import { logActivity } from '@/lib/workspace-activity'
 
 function getSupabase() {
   return createServerClient(
@@ -105,6 +106,16 @@ export async function PATCH(
       console.error('[approve] Failed to insert notification:', err)
     }
   }
+
+  // Log to workspace activity feed
+  await logActivity({
+    workspace_id: post.workspace_id,
+    user_id:      user.id,
+    action:       'post.approved',
+    entity_type:  'post',
+    entity_id:    post.id,
+    metadata:     { platforms: post.platforms, new_status: newStatus },
+  })
 
   return NextResponse.json({ success: true, status: newStatus })
 }

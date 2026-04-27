@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { logActivity } from '@/lib/workspace-activity'
 import { Resend } from 'resend'
 function getResend() { return new Resend(process.env.RESEND_API_KEY!) }
 import crypto from 'crypto'
@@ -100,6 +101,26 @@ export async function POST(request: NextRequest) {
     console.error('Team member insert error:', insertError)
     return NextResponse.json({ error: 'Failed to add team member' }, { status: 500 })
   }
+
+  // Log to workspace activity (non-fatal, resolve personal workspace id)
+  getSupabaseAdmin()
+    .from('workspaces')
+    .select('id')
+    .eq('owner_id', user.id)
+    .eq('is_personal', true)
+    .maybeSingle()
+    .then(({ data: ws }) => {
+      if (ws?.id) {
+        logActivity({
+          workspace_id: ws.id,
+          user_id:      user.id,
+          action:       'member.invited',
+          entity_type:  'team_member',
+          entity_id:    member.id,
+          metadata:     { email: email.trim(), role },
+        })
+      }
+    }).catch(() => {})
 
   // Generate secure invite token
   const token     = crypto.randomBytes(32).toString('hex')

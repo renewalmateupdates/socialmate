@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { logActivity } from '@/lib/workspace-activity'
 
 function getSupabase() {
   return createServerClient(
@@ -102,6 +103,15 @@ export async function PATCH(
       console.error('[reject] Failed to insert notification:', err)
     }
   }
+
+  await logActivity({
+    workspace_id: post.workspace_id,
+    user_id:      user.id,
+    action:       'post.rejected',
+    entity_type:  'post',
+    entity_id:    post.id,
+    metadata:     { reason: reason ?? null },
+  })
 
   return NextResponse.json({ success: true })
 }
