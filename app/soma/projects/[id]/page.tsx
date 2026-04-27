@@ -72,6 +72,7 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
   const [generateStage, setGenerateStage]   = useState('')
   const [generateResult, setGenerateResult] = useState<any>(null)
   const [generateError, setGenerateError]   = useState('')
+  const [startDate, setStartDate]           = useState(() => new Date().toISOString().split('T')[0])
 
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting]           = useState(false)
@@ -165,7 +166,7 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
       const res = await fetch(`/api/soma/projects/${projectId}/generate`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ingestion_id: ingestResult.ingestion_id }),
+        body: JSON.stringify({ ingestion_id: ingestResult.ingestion_id, start_date: startDate }),
       })
       clearInterval(stageTimer)
       const data = await res.json()
@@ -490,6 +491,23 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
                           ? `Posts will be saved as drafts across ${project.platforms.join(', ')} for your review.`
                           : `Posts will auto-schedule across ${project.platforms.join(', ')} for ${project.content_window_days} days.`}
                       </p>
+
+                      {/* Start date picker */}
+                      <div className="mb-4 rounded-xl bg-gray-900/80 border border-gray-700 px-4 py-3">
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">
+                          Schedule starts
+                        </label>
+                        <input
+                          type="date"
+                          value={startDate}
+                          min={new Date().toISOString().split('T')[0]}
+                          onChange={e => setStartDate(e.target.value)}
+                          className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-violet-500/50"
+                        />
+                        <p className="text-[10px] text-gray-600 mt-1.5">
+                          Posts will be spread across {project.content_window_days} days starting this date.
+                        </p>
+                      </div>
 
                       {generateError && (
                         <div className="mb-3 text-xs text-red-400 bg-red-950/30 border border-red-800/40 rounded-lg px-3 py-2">{generateError}</div>
