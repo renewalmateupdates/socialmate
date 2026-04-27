@@ -103,15 +103,16 @@ export async function POST(request: NextRequest) {
   }
 
   // Log to workspace activity (non-fatal, resolve personal workspace id)
-  getSupabaseAdmin()
-    .from('workspaces')
-    .select('id')
-    .eq('owner_id', user.id)
-    .eq('is_personal', true)
-    .maybeSingle()
-    .then(({ data: ws }) => {
+  void (async () => {
+    try {
+      const { data: ws } = await getSupabaseAdmin()
+        .from('workspaces')
+        .select('id')
+        .eq('owner_id', user.id)
+        .eq('is_personal', true)
+        .maybeSingle()
       if (ws?.id) {
-        logActivity({
+        await logActivity({
           workspace_id: ws.id,
           user_id:      user.id,
           action:       'member.invited',
@@ -120,7 +121,8 @@ export async function POST(request: NextRequest) {
           metadata:     { email: email.trim(), role },
         })
       }
-    }).catch(() => {})
+    } catch {}
+  })()
 
   // Generate secure invite token
   const token     = crypto.randomBytes(32).toString('hex')
