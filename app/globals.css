@@ -495,3 +495,7 @@ body {
 .bg-sidebar      { background-color: var(--sidebar-bg); }
 .bg-accent       { background-color: var(--accent); }
 .text-accent-fg  { color: var(--accent-fg); }
+@keyframes shimmer {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
