@@ -4,6 +4,8 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 
+interface PlatformSchedule { posts_per_day: number; days: number[] }
+
 interface Project {
   id: string
   name: string
@@ -16,6 +18,7 @@ interface Project {
   auto_collect_url: string | null
   runs_this_month: number
   last_generated_at: string | null
+  platform_schedule: Record<string, PlatformSchedule> | null
 }
 
 interface MasterDoc {
@@ -35,6 +38,20 @@ const MODE_COLORS = {
 
 const RUN_CAPS = { safe: 4, autopilot: 8, full_send: 12 }
 
+const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+
+const PLATFORM_ICONS: Record<string, string> = {
+  twitter: '𝕏', bluesky: '🦋', mastodon: '🐘', telegram: '✈️',
+  discord: '🎮', linkedin: '💼', instagram: '📸', tiktok: '🎵',
+}
+
+const HOW_IT_WORKS = [
+  { step: '1', title: 'Write your master doc', body: 'Drop in everything that happened this week — features shipped, insights gained, wins, lessons, news. No format required.' },
+  { step: '2', title: 'Submit & analyze', body: 'SOMA reads your doc, extracts key themes, wins, and content angles. On week 2+, it diffs against last week to find what\'s new.' },
+  { step: '3', title: 'Generate posts', body: 'SOMA creates platform-native content for each connected platform — tuned to character limits, tone, and your posting schedule.' },
+  { step: '4', title: 'Review or autopilot', body: 'Safe mode saves drafts for your review. Autopilot & Full Send schedule posts automatically — no action needed.' },
+]
+
 export default function SomaProjectPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: projectId } = use(params)
   const router = useRouter()
@@ -43,7 +60,6 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
   const [project, setProject]           = useState<Project | null>(null)
   const [docs, setDocs]                 = useState<MasterDoc[]>([])
 
-  // Doc upload state
   const [inputMethod, setInputMethod]   = useState<'text' | 'file' | 'url'>('text')
   const [docContent, setDocContent]     = useState('')
   const [docUrl, setDocUrl]             = useState('')
@@ -52,12 +68,10 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
   const [ingestResult, setIngestResult] = useState<any>(null)
   const [ingestError, setIngestError]   = useState('')
 
-  // Generate state
-  const [generating, setGenerating]     = useState(false)
+  const [generating, setGenerating]         = useState(false)
   const [generateResult, setGenerateResult] = useState<any>(null)
   const [generateError, setGenerateError]   = useState('')
 
-  // Delete
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting]           = useState(false)
 
@@ -111,7 +125,7 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
         return
       }
       setIngestResult(data)
-      await load() // refresh doc list
+      await load()
     } catch {
       setIngestError('Network error. Please try again.')
     } finally {
@@ -173,6 +187,8 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
   const modeColors = MODE_COLORS[project.mode]
   const runCap     = RUN_CAPS[project.mode]
   const latestDoc  = docs[0] ?? null
+  const isFirstDoc = !latestDoc
+  const schedule   = project.platform_schedule
 
   return (
     <div className="flex min-h-screen bg-gray-950">
@@ -205,17 +221,48 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
 
         {/* ── PROJECT STATS ── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            { label: 'Platforms',    value: project.platforms.join(', ') },
-            { label: 'Posts / day',  value: String(project.posts_per_day) },
-            { label: 'Window',       value: `${project.content_window_days} days` },
-            { label: 'Runs this month', value: `${project.runs_this_month} / ${runCap}` },
-          ].map(s => (
-            <div key={s.label} className="rounded-xl border border-gray-800 bg-gray-900 px-4 py-3">
-              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">{s.label}</p>
-              <p className="text-sm font-bold text-white truncate">{s.value}</p>
+          {/* Platforms */}
+          <div className="rounded-xl border border-gray-800 bg-gray-900 px-4 py-3 col-span-2 sm:col-span-1">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Platforms</p>
+            <div className="flex flex-wrap gap-1">
+              {project.platforms.map(p => (
+                <span key={p} className="text-xs font-semibold text-white flex items-center gap-1">
+                  <span>{PLATFORM_ICONS[p] ?? '📱'}</span>
+                  <span className="capitalize">{p}</span>
+                </span>
+              )).reduce((acc: React.ReactNode[], el, i) => i === 0 ? [el] : [...acc, <span key={`sep-${i}`} className="text-gray-600">·</span>, el], [])}
             </div>
-          ))}
+          </div>
+
+          {/* Per-platform schedule */}
+          <div className="rounded-xl border border-gray-800 bg-gray-900 px-4 py-3">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Schedule</p>
+            {schedule && Object.keys(schedule).length > 0 ? (
+              <div className="space-y-1">
+                {Object.entries(schedule).map(([pid, cfg]) => (
+                  <div key={pid} className="flex items-center justify-between text-[11px]">
+                    <span className="text-gray-400 capitalize">{pid}</span>
+                    <span className="text-white font-bold">{cfg.posts_per_day}/day</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm font-bold text-white">{project.posts_per_day}/day</p>
+            )}
+          </div>
+
+          {/* Content window */}
+          <div className="rounded-xl border border-gray-800 bg-gray-900 px-4 py-3">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Window</p>
+            <p className="text-sm font-bold text-white">{project.content_window_days} days</p>
+          </div>
+
+          {/* Runs */}
+          <div className="rounded-xl border border-gray-800 bg-gray-900 px-4 py-3">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1">Runs this month</p>
+            <p className="text-sm font-bold text-white">{project.runs_this_month} / {runCap}</p>
+            <p className="text-[10px] text-gray-600 mt-0.5">resets monthly</p>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -223,16 +270,23 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
           {/* ── LEFT: DOC UPLOAD ── */}
           <div className="space-y-4">
             <div className="rounded-2xl border border-amber-500/20 bg-gray-900 p-5">
-              <h2 className="text-xs font-bold uppercase tracking-widest text-amber-400/80 mb-1">Upload Master Doc</h2>
-              {latestDoc && (
-                <p className="text-xs text-gray-500 mb-4">
-                  Latest: v{latestDoc.version} — {new Date(latestDoc.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}.
-                  SOMA will diff against this.
-                </p>
-              )}
-              {!latestDoc && (
-                <p className="text-xs text-gray-500 mb-4">First upload — SOMA will use this as the baseline.</p>
-              )}
+
+              {/* Header with context */}
+              <div className="mb-4">
+                <h2 className="text-xs font-bold uppercase tracking-widest text-amber-400/80">
+                  {isFirstDoc ? 'Set Your Baseline' : 'Upload This Week\'s Doc'}
+                </h2>
+                {isFirstDoc ? (
+                  <p className="text-xs text-gray-400 mt-1.5 leading-relaxed">
+                    Drop in your current master doc — everything about your brand, what you've shipped, your story so far. This becomes SOMA's baseline. Next week, paste the updated version and SOMA will diff it to find what's new.
+                  </p>
+                ) : (
+                  <p className="text-xs text-gray-500 mt-1.5">
+                    v{latestDoc!.version} uploaded {new Date(latestDoc!.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}.
+                    {' '}SOMA will diff your new doc against this to extract what changed.
+                  </p>
+                )}
+              </div>
 
               {/* Input method tabs */}
               <div className="flex gap-1 p-1 bg-gray-800 rounded-xl mb-4">
@@ -241,7 +295,7 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
                     key={m}
                     type="button"
                     onClick={() => setInputMethod(m)}
-                    className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all capitalize ${
+                    className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
                       inputMethod === m ? 'bg-gray-700 text-white' : 'text-gray-500 hover:text-gray-300'
                     }`}
                   >
@@ -254,20 +308,21 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
                 <textarea
                   value={docContent}
                   onChange={e => setDocContent(e.target.value)}
-                  placeholder="Paste your weekly master doc here — what happened this week, what shipped, what changed…"
+                  placeholder={isFirstDoc
+                    ? 'Paste your master doc — who you are, what you do, what you\'ve shipped, key wins, your story. No specific format needed.'
+                    : 'Paste this week\'s update — what shipped, what changed, lessons learned, wins, news…'
+                  }
                   rows={10}
                   className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/50 resize-none"
                 />
               )}
 
               {inputMethod === 'file' && (
-                <div>
-                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-700 rounded-xl cursor-pointer hover:border-amber-500/50 transition-all">
-                    <p className="text-xs text-gray-400 mb-1">{filename || 'Click to upload .txt or .md file'}</p>
-                    {docContent && <p className="text-[10px] text-emerald-400">{docContent.length.toLocaleString()} chars loaded</p>}
-                    <input type="file" accept=".txt,.md" onChange={handleFileUpload} className="hidden" />
-                  </label>
-                </div>
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-gray-700 rounded-xl cursor-pointer hover:border-amber-500/50 transition-all">
+                  <p className="text-xs text-gray-400 mb-1">{filename || 'Click to upload .txt or .md file'}</p>
+                  {docContent && <p className="text-[10px] text-emerald-400">{docContent.length.toLocaleString()} chars loaded</p>}
+                  <input type="file" accept=".txt,.md" onChange={handleFileUpload} className="hidden" />
+                </label>
               )}
 
               {inputMethod === 'url' && (
@@ -292,7 +347,7 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
                 disabled={ingesting}
                 className="mt-4 w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-60 text-black font-extrabold py-3 rounded-xl text-sm transition-all"
               >
-                {ingesting ? 'Analyzing diff…' : latestDoc ? 'Submit & Diff Against Previous' : 'Submit Baseline Doc'}
+                {ingesting ? 'Analyzing…' : isFirstDoc ? 'Submit Baseline Doc' : 'Submit & Diff Against Previous'}
               </button>
             </div>
 
@@ -310,16 +365,49 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
                 </div>
               </div>
             )}
+
+            {/* Per-platform day schedule preview */}
+            {schedule && Object.keys(schedule).length > 0 && (
+              <div className="rounded-2xl border border-gray-800 bg-gray-900 p-5">
+                <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">Posting Schedule</h2>
+                <div className="space-y-3">
+                  {Object.entries(schedule).map(([pid, cfg]) => (
+                    <div key={pid}>
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-xs font-semibold text-gray-300 capitalize flex items-center gap-1.5">
+                          <span>{PLATFORM_ICONS[pid] ?? '📱'}</span>{pid}
+                        </span>
+                        <span className="text-[11px] text-amber-400 font-bold">{cfg.posts_per_day}/day</span>
+                      </div>
+                      <div className="flex gap-1">
+                        {DAY_LABELS.map((d, i) => (
+                          <div
+                            key={i}
+                            className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                              cfg.days.includes(i)
+                                ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
+                                : 'bg-gray-800 text-gray-600'
+                            }`}
+                          >
+                            {d}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* ── RIGHT: INSIGHTS + GENERATE ── */}
+          {/* ── RIGHT: INSIGHTS + GUIDE ── */}
           <div className="space-y-4">
 
             {/* Ingest result */}
             {ingestResult && (
               <div className="rounded-2xl border border-violet-500/30 bg-violet-950/20 p-5">
                 <h2 className="text-xs font-bold uppercase tracking-widest text-violet-400 mb-3">
-                  {ingestResult.is_diff ? 'Diff Analysis' : 'Baseline Analysis'}
+                  {ingestResult.is_diff ? 'Diff Analysis' : 'Baseline Captured'}
                 </h2>
 
                 {ingestResult.extracted_insights?.diff_summary && (
@@ -330,10 +418,10 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
 
                 <div className="space-y-3">
                   {[
-                    { label: 'Key Themes',    items: ingestResult.extracted_insights?.key_themes },
-                    { label: 'Wins',          items: ingestResult.extracted_insights?.wins },
-                    { label: 'Challenges',    items: ingestResult.extracted_insights?.challenges },
-                    { label: 'Content Angles',items: ingestResult.extracted_insights?.content_angles },
+                    { label: 'Key Themes',     items: ingestResult.extracted_insights?.key_themes },
+                    { label: 'Wins',           items: ingestResult.extracted_insights?.wins },
+                    { label: 'Challenges',     items: ingestResult.extracted_insights?.challenges },
+                    { label: 'Content Angles', items: ingestResult.extracted_insights?.content_angles },
                   ].map(row => (
                     row.items?.length > 0 && (
                       <div key={row.label}>
@@ -352,10 +440,9 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
 
                 <div className="mt-5 pt-4 border-t border-violet-500/20">
                   <p className="text-xs text-gray-400 mb-3">
-                    Ready to generate <strong className="text-white">{project.posts_per_day * project.content_window_days} posts</strong> across{' '}
-                    <strong className="text-white">{project.platforms.join(', ')}</strong> for{' '}
-                    <strong className="text-white">{project.content_window_days} days</strong>.
-                    {project.mode === 'safe' ? ' Posts will be saved as drafts for your review.' : ' Posts will be auto-scheduled.'}
+                    {project.mode === 'safe'
+                      ? `Posts will be saved as drafts across ${project.platforms.join(', ')} for your review.`
+                      : `Posts will auto-schedule across ${project.platforms.join(', ')} for ${project.content_window_days} days.`}
                   </p>
 
                   {generateError && (
@@ -377,27 +464,46 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
                       disabled={generating}
                       className="w-full bg-violet-600 hover:bg-violet-500 disabled:opacity-60 text-white font-extrabold py-3 rounded-xl text-sm transition-all"
                     >
-                      {generating ? 'Generating platform-native posts…' : `Generate ${project.posts_per_day * project.content_window_days} Posts →`}
+                      {generating ? 'Generating platform-native posts…' : 'Generate Posts →'}
                     </button>
                   )}
                 </div>
               </div>
             )}
 
+            {/* How it works — shown before first ingest */}
             {!ingestResult && (
-              <div className="rounded-2xl border border-gray-800 bg-gray-900 p-8 text-center">
-                <p className="text-3xl mb-3">📋</p>
-                <p className="text-sm font-semibold text-gray-300 mb-1">Submit your master doc first</p>
-                <p className="text-xs text-gray-500">SOMA will analyze what changed and prepare your content calendar.</p>
+              <div className="rounded-2xl border border-gray-800 bg-gray-900 p-5">
+                <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4">How SOMA works</h2>
+                <div className="space-y-4">
+                  {HOW_IT_WORKS.map(({ step, title, body }) => (
+                    <div key={step} className="flex gap-3">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-[11px] font-extrabold text-amber-400">
+                        {step}
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-gray-200 mb-0.5">{title}</p>
+                        <p className="text-xs text-gray-500 leading-relaxed">{body}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 pt-4 border-t border-gray-800">
+                  <p className="text-[11px] text-gray-600">
+                    {isFirstDoc
+                      ? '← Start by pasting your master doc on the left.'
+                      : `← Paste this week's update. SOMA will diff it against v${latestDoc!.version}.`}
+                  </p>
+                </div>
               </div>
             )}
 
-            {/* Responsible use note */}
-            <div className="rounded-xl border border-amber-700/30 bg-amber-950/20 px-4 py-3">
-              <p className="text-xs text-amber-300/80 leading-relaxed">
-                <strong>Posting responsibly:</strong> SOMA respects platform rate limits. Posts generated here count against your daily cap ({project.posts_per_day}/day).
-                You are responsible for reviewing generated content. Automated posts go live on your behalf —
-                SocialMate is not liable for platform restrictions resulting from your posting behavior.
+            {/* Responsible use — simplified, no per-platform number confusion */}
+            <div className="rounded-xl border border-gray-800 bg-gray-900/60 px-4 py-3">
+              <p className="text-[11px] text-gray-500 leading-relaxed">
+                <strong className="text-gray-400">Heads up:</strong> Posts go live on your behalf in Autopilot and Full Send mode.
+                You're responsible for the content — SocialMate isn't liable for platform restrictions from your posting activity.
+                {project.mode === 'safe' && ' In Safe mode, nothing publishes without your approval.'}
               </p>
             </div>
 
