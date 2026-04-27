@@ -120,7 +120,7 @@ export async function POST(req: NextRequest) {
 
     // Cap posts_per_day to tier max
     const maxPostsPerDay = mode === 'full_send' ? 10 : mode === 'autopilot' ? 5 : 2
-    const cappedWindow = mode === 'safe' ? Math.min(content_window_days ?? 7, 7) : Math.min(content_window_days ?? 14, 14)
+    const cappedWindow = mode === 'safe' ? Math.min(content_window_days ?? 7, 7) : Math.min(content_window_days ?? 14, 30)
 
     // Build capped platform_schedule; derive global posts_per_day from max across platforms
     let cappedSchedule: Record<string, { posts_per_day: number; days: number[] }> | null = null
