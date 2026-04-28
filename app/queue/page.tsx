@@ -583,13 +583,6 @@ function QueueInner() {
                     <span className="ml-2 text-purple-500 font-semibold">· {activeWorkspace.client_name || activeWorkspace.name}</span>
                   )}
                 </p>
-                {!loading && posts.length > 0 && (
-                  <button
-                    onClick={selectedIds.size === posts.length ? clearSelection : selectAll}
-                    className="text-xs font-semibold text-gray-400 hover:text-amber-500 transition-colors">
-                    {selectedIds.size === posts.length ? 'Deselect all' : 'Select all'}
-                  </button>
-                )}
               </div>
             </div>
             <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
@@ -776,6 +769,30 @@ function QueueInner() {
             </div>
           ) : (
             <div className="space-y-8">
+              {/* Master select-all row */}
+              <div className="flex items-center gap-3 px-1 -mb-4">
+                <button
+                  onClick={() => selectedIds.size === posts.length ? clearSelection() : selectAll()}
+                  className="flex items-center gap-2.5 group"
+                  aria-label="Select all posts">
+                  <span
+                    className="w-4 h-4 rounded border-2 flex items-center justify-center transition-all flex-shrink-0"
+                    style={{
+                      borderColor: selectedIds.size > 0 ? '#f59e0b' : '#6b7280',
+                      backgroundColor: selectedIds.size === posts.length ? '#f59e0b' : selectedIds.size > 0 ? 'rgba(245,158,11,0.2)' : 'transparent'
+                    }}>
+                    {selectedIds.size === posts.length
+                      ? <svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 3l2 2 4-4" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      : selectedIds.size > 0
+                        ? <span className="w-2 h-0.5 bg-amber-500 rounded" />
+                        : null}
+                  </span>
+                  <span className="text-xs font-semibold text-gray-400 group-hover:text-amber-500 transition-colors">
+                    {selectedIds.size === posts.length ? 'Deselect all' : selectedIds.size > 0 ? `${selectedIds.size} selected` : 'Select all'}
+                  </span>
+                </button>
+              </div>
+
               {dateKeys.map(dateKey => {
                 const isHighlighted = targetDateString === dateKey
                 return (
