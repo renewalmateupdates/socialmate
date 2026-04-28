@@ -847,7 +847,7 @@ function QueueInner() {
 
       {/* Bulk action bar */}
       {selectedIds.size > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl bg-gray-900 border border-gray-700 shadow-2xl">
+        <div className="fixed left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl bg-gray-900 border border-gray-700 shadow-2xl" style={{ bottom: 'max(1.5rem, env(safe-area-inset-bottom, 1.5rem))' }}>
           <span className="text-sm font-bold text-white">{selectedIds.size} selected</span>
           <div className="w-px h-4 bg-gray-600" />
           <button
@@ -871,9 +871,9 @@ function QueueInner() {
       )}
 
       {toast && (
-        <div className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${
+        <div className={`fixed right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${
           toast.type === 'success' ? 'bg-black text-white' : 'bg-red-500 text-white'
-        }`}>
+        }`} style={{ bottom: 'max(1.5rem, env(safe-area-inset-bottom, 1.5rem))' }}>
           {toast.type === 'success' ? '✅' : '❌'} {toast.message}
         </div>
       )}

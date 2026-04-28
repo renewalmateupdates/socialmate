@@ -309,6 +309,16 @@ These have burned us before — always apply:
 - **Posting streak heatmap** (PR #224) — `/streak` page: GitHub-style 365-day contribution graph, hover tooltips, today indicator, legend; stats: current streak / longest / total posts / active days; motivational footer; `/api/streak` route
 - **Approval submission notifications** (PR #224) — owners get instant in-app notification when Editor/Client submits a post for approval (both new inserts and existing draft updates); non-fatal
 
+**April 28, 2026:**
+- **60 blog posts added** — SQL INSERT into `blog_posts` table. Categories: SocialMate (18), SOMA (15), Enki (10), Studio Stax (10), RenewalMate (4), Founder Story (3). All live at `/blog/[slug]` immediately, no deploy needed.
+- **SOMA chunked generation fix** — Gemini large-batch failure root cause: >14 posts in one call → truncated JSON → silent skip. Fix: `CHUNK_SIZE = 14`, loop generates each chunk separately. All platforms now generate correctly.
+- **SOMA ingestion project_id fix** — `soma_weekly_ingestion` was missing `project_id` and `is_diff` columns. SQL migration applied. Generate button now appears after page reload. SQL: `ALTER TABLE soma_weekly_ingestion ADD COLUMN IF NOT EXISTS project_id UUID REFERENCES soma_projects(id) ON DELETE CASCADE; ALTER TABLE soma_weekly_ingestion ADD COLUMN IF NOT EXISTS is_diff BOOLEAN DEFAULT FALSE;`
+- **SOMA post times fixed** — `startHour` changed from 8 UTC (4am EDT) → 13 UTC (9am EDT). Posts now schedule 9am–7pm Eastern.
+- **Queue bulk select** — Gmail-style checkboxes on every post card. Master "Select all" toggle. Per-day "Select day" checkboxes. Sticky bottom action bar: "Move to drafts" | "Delete" | dismiss. Amber highlight on selected cards.
+- **Queue mobile safe-area fix** — Bulk action bar and toast now use `env(safe-area-inset-bottom)` so they don't overlap iPhone home indicator.
+- **App Store strategy decided** — PWA first (manifest + sw, 1-day build), then Google Play via Capacitor wrapper. Don't wait for LinkedIn/TikTok/Meta APIs. Apple App Store deferred 3-6 months.
+- **Toast safe-area audit** — 25+ pages use `fixed bottom-6 right-6` for toasts. Right-corner toasts don't overlap home indicator (centered). Long-term fix: shared `<Toast>` component with safe-area built in.
+
 **April 26, 2026 — Late Night (PR #220):**
 - **Recurring posts** — 🔁 Repeat toggle in compose (Daily/Weekly/Bi-weekly/Monthly + optional end date). Auto-reschedules next occurrence after publish via Inngest `computeNextOccurrence`. Queue shows 🔁 badge with rule label. SQL: 4 new columns on posts table.
 - **Post as image** — 📸 Canvas PNG export (1200×630, no npm deps) in compose action bar + queue cards. Branded SocialMate card with amber header, word-wrapped content, platform badge.
@@ -373,7 +383,7 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 - **Abdus Sohag trial review** — trial ended April 26. Decide: keep at 10%, bump to standard 30%, or cut. Referral link: `?ref=SOHAG`.
 
-- **Test SOMA end-to-end** — voice profile → create project → paste master doc → ingest → generate. Not yet tested by Joshua.
+- **Test SOMA end-to-end** — voice profile → create project → paste master doc → ingest → generate. Joshua confirmed SOMA is generating posts. Monitor whether scheduled posts actually publish (Inngest cron). Check other platforms beyond Telegram work for new users.
 
 - **Push notification VAPID keys** — CONFIRMED SET in Vercel. Push notifications are live.
 
@@ -386,10 +396,13 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **Inngest resync** — after any deploy touching `lib/inngest.ts`, resync functions in Inngest dashboard.
 
 **Roadmap (next up):**
+- **PWA / Google Play Store** — Add `manifest.json` + service worker for PWA (1-day). Then Capacitor wrapper for Play Store submission. Don't wait for API integrations.
+- **Shared Toast component** — 25+ pages use `fixed bottom-6 right-6` for toasts without safe-area. Create a shared `<Toast>` component with `env(safe-area-inset-bottom)` built in and swap all usages.
 - **Creator Monetization Hub** — full build (Stripe Connect required; tip jar, fan subscriptions, paywalled posts)
 - **LinkedIn publishing** — pending API credentials
 - **Schedule templates UI** — `/api/schedule-templates` exists but no UI yet
 - **Workspace activity logging** — `workspace_activity` table exists but nothing writes to it yet; wire in post publish, approval, member actions
+- **SOMA credit packs** — no way for users to buy more SOMA credits in-app; add credit pack purchase to SOMA dashboard
 
 ## Confirmed Done (stop asking about these)
 
