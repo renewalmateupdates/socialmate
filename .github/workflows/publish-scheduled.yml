@@ -1,0 +1,17 @@
+name: Publish Scheduled Posts
+
+on:
+  schedule:
+    # Every 5 minutes (GitHub's minimum interval)
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # allow manual trigger
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger publish-scheduled cron
+        run: |
+          curl -s -X GET \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            https://socialmate.studio/api/cron/publish-scheduled
