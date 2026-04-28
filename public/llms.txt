@@ -1,6 +1,6 @@
 # SocialMate
 
-> Free social media scheduling and Creator OS — schedule, create, and manage content across 5 live platforms with 12 built-in AI tools.
+> Free social media scheduling and Creator OS — schedule, create, and manage content across 5 live platforms with 20+ built-in AI tools, an autonomous AI content system (SOMA), and an autonomous trading bot (Enki).
 
 SocialMate is a web-based social media management platform built for creators, streamers, small businesses, and agencies. Free to start. No credit card required. No per-channel fees.
 
@@ -13,19 +13,145 @@ Contact: socialmate.updates@gmail.com
 ## What SocialMate Does
 
 - Schedule and publish posts to Bluesky, Discord, Telegram, Mastodon, and X/Twitter (5 platforms live)
-- Clips Studio: browse Twitch clips (OAuth) or YouTube videos (channel URL, no API key) and schedule them to all platforms in one click; search any public Twitch channel's top clips
-- 12 AI-powered tools: caption generation, hashtag research, post rewriter, viral hook generator, thread generator, content repurposer, post score, SM-Pulse, SM-Radar, content gap detector, AI content calendar (Pro+), AI image generation (Pro+)
+- Compose with thread builder, per-platform preview, save-as-template, and post-as-image (PNG export)
+- Clips Studio: browse Twitch clips (OAuth) or YouTube videos (channel URL, no API key) and schedule them to all platforms in one click
+- 20+ AI-powered tools: caption generation, hashtag suggestions, post rewriter, viral hook generator, thread generator, content repurposer (6 formats), post scorer, SM-Pulse, SM-Radar, content gap detector, AI content calendar, AI image generation, brand voice injection
+- Smart Queue: auto-schedule drafts into 14-day/30-day windows at platform-optimal times (Pro+)
+- Recurring posts: repeat posts daily/weekly/bi-weekly/monthly with optional end dates
 - Bulk scheduler — upload and schedule many posts at once with per-platform character limit enforcement
-- Link in Bio page builder — free on all plans, custom themes and button styles
-- Competitor tracking — track up to 3 competitor accounts on free plan
+- Link in Bio page builder — free on all plans, click analytics, QR code
+- Competitor tracking — track up to 3 competitor accounts on free plan, with engagement alerts
 - Evergreen recycling — mark posts as evergreen and they auto-requeue when schedule is empty
 - RSS/blog import — pull from any RSS or Atom feed and turn into scheduled posts
-- Team collaboration — multi-seat, role-based access, content approval workflows
+- Team collaboration — multi-seat, role-based access (Owner/Admin/Editor/Viewer/Client), content approval workflows
 - Client workspaces — isolated workspaces per client (Agency plan)
-- Analytics — posting streaks, platform breakdown, best times, consistency scores
+- Social inbox — unified Bluesky, Mastodon, Telegram, Discord mentions/replies with inline reply
+- Creator Studio video editor — trim, CSS filters, caption overlay, export via MediaRecorder
+- Link shortener — create short links at socialmate.studio/go/[slug] with click counter
+- Media library — upload and reuse images/videos across posts
+- A/B post variant testing — publish two versions 24h apart, auto-declare winner (Pro+)
+- Analytics — X-style SVG dashboard, posting streaks (GitHub-style 365-day heatmap), Content DNA (engagement fingerprint), best times heatmap, platform breakdown, per-post performance alerts
+- Workspace activity feed — full audit log of every team action
+- Posting streak tracker — current streak, longest streak, contribution graph
+- Schedule templates — save and reuse posting-time presets
+- Browser push notifications — get notified on publish, Enki signals, streak alerts, team approvals
 - 29 sidebar color themes
-- Notification system — in-app notifications for publish success/failure
-- 3-email onboarding sequence (welcome, day 2 tip, day 5 check-in)
+- Collapsible sidebar with icon-only mode
+- 5-step onboarding tour
+- 3-email onboarding drip (welcome, day 2 tip, day 5 check-in)
+- Weekly digest email every Sunday (posts, streak, top post preview)
+
+## SOMA — Autonomous AI Content System
+
+SOMA is SocialMate's autonomous content generation layer. It learns your brand voice, ingests your source material, and generates a full week of platform-native posts on your schedule.
+
+Landing page: https://socialmate.studio/soma
+
+### How SOMA Works
+1. Identity Interview — 5-step onboarding to capture brand voice, tone, audience, and style
+2. Create a Project — define target platforms, posting frequency, and per-platform schedule
+3. Ingest Source Material — paste or upload docs; SOMA performs Gemini-powered diff analysis against your master doc, storing versioned history
+4. Generate — SOMA generates a full week of platform-native posts in one call; posts go into your approval queue
+5. Review & Approve — review queue in Safe mode, or let Autopilot/Full Send schedule automatically
+
+### SOMA Modes
+- Safe Mode (free) — generates content for manual review; you approve each post
+- Autopilot ($10/month) — automatically schedules approved content; runs weekly on Monday
+- Full Send ($20/month) — maximum posting cadence; bypasses approval queue
+
+### SOMA Credit Costs (uses SocialMate AI credits)
+- Ingest document: 25 credits
+- Generate full week: 75 credits
+- Update voice profile: 15 credits
+- Single post generation: 5 credits
+- Full weekly run total: ~100 credits
+
+### SOMA Projects
+- Named projects per client or brand
+- Per-platform schedule: posts/day + day picker (Every day / Mon–Fri / Weekends / Custom) per platform
+- Doc history with versioned diffs
+- Run caps to prevent over-posting
+- Only shows platforms you have connected
+
+### SOMA Pages
+- Dashboard: https://socialmate.studio/soma
+- New project: https://socialmate.studio/soma/projects/new
+- Project detail: https://socialmate.studio/soma/projects/[id]
+- Weekly view: https://socialmate.studio/soma/weekly
+- Upgrade: https://socialmate.studio/soma/upgrade
+
+## Enki — Autonomous Trading Bot
+
+Companion product by Gilgamesh Enterprise LLC. Self-contained autonomous trading bot for US stocks.
+
+Landing page: https://socialmate.studio/enki
+Public leaderboard: https://socialmate.studio/enki/leaderboard
+
+### Enki Tiers
+- Citizen: free paper trading (simulated trades)
+- Commander: $15/month — live signal alerts, full quant engine
+- Emperor: $29/month — highest position sizing, priority signals
+- Cloud Runner: $10/month — cloud-based automated execution
+
+### Enki Features
+- Quant engine: ADX filter, TP Ladder (TP1/TP2 partial exits), Kelly position sizing
+- Correlation Guard (Pearson > 0.85 blocks correlated positions)
+- DCA averaging, Sharpe/Sortino tracking
+- Trailing stops: ATR-based, tightens after TP hits
+- Session filter (9:30–16:00 EST), re-entry cooldown
+- Daily 3% + portfolio 12% drawdown limits
+- Guardian mode (Fortress Guard) — requires approval before any trade
+- Truth Mode — 15-min live scan for momentum + mean reversion signals using Yahoo Finance OHLCV; equity curve with SPY overlay; per-strategy stats (target: 50 trades per strategy for statistical validity)
+- Trade history with FIFO P&L calculation, win rate, 25/page pagination
+- Weekly P&L summary email every Monday
+
+### Enki Pages
+- Dashboard: https://socialmate.studio/enki
+- Doctrines: https://socialmate.studio/enki/doctrines
+- Truth Mode: https://socialmate.studio/enki/truth
+- Trade history: https://socialmate.studio/enki/trades
+- Settings: https://socialmate.studio/enki/settings
+- Leaderboard: https://socialmate.studio/enki/leaderboard
+
+## Studio Stax
+
+Curated directory of creator tools and resources. Founder-approved listings ranked by SM-Give donation amounts and listing age. Lister portal for submitting your own tool.
+
+- Directory: https://socialmate.studio/studio-stax
+- Apply to list: https://socialmate.studio/studio-stax/apply
+- Pricing: Founding Member $100/yr · Standard $150/yr
+
+## SM-Give
+
+Built-in charitable initiative. 2% of all subscription revenue and 75% of merch revenue go to charitable causes (homeless, single parents, underprivileged schools). Users can make voluntary in-app donations.
+
+- SM-Give tracker: https://socialmate.studio/give
+
+## Merch
+
+SocialMate branded merchandise via Printify print-on-demand. 75% of gross merch revenue goes to SM-Give.
+
+- Merch store: https://socialmate.studio/merch
+
+## Gilgamesh's Guide
+
+Free guide for entrepreneurs, creators, and self-starters by founder Joshua Bostic. Covers vibe-coding, AI tools, building without permission, and the bootstrapped founder mindset.
+
+- Landing page: https://socialmate.studio/gils-guide
+
+## Referral & Affiliate Program
+
+- 30% recurring commission on all subscription payments
+- Milestone: 100+ active recurring referrals → 40% forever
+- 10% flat on Starter + Popular credit packs
+- 15% flat on Pro + Max credit packs
+- Affiliate dashboard: https://socialmate.studio/partners/dashboard
+- Affiliate landing: https://socialmate.studio/affiliates
+- Referral landing: https://socialmate.studio/refer/[code]
+
+## Creator Monetization Hub
+
+Coming soon: tip jar, fan subscriptions, paywalled posts. Waitlist at https://socialmate.studio/monetize
 
 ## Platforms
 
@@ -34,65 +160,57 @@ Contact: socialmate.updates@gmail.com
 - Discord
 - Telegram
 - Mastodon
-- X/Twitter (pay-per-use, $0.01/tweet, quota enforced by plan)
+- X/Twitter (pay-per-use, $0.01/tweet, quota enforced by plan: Free 28/mo · Pro 150/mo · Agency 400/mo)
 
 ### Coming Soon
-- Threads (Meta opened API 2024, no special approval required)
-- YouTube posting (YouTube Data API v3)
-- Reddit
-
-### Planned
+- TikTok (API submitted for review April 2026)
 - LinkedIn (API application pending)
-- Pinterest (API application pending)
+- YouTube posting
 - Instagram
 - Facebook
-- TikTok
+- Threads
+- Reddit
+- Pinterest
 
 ## Pricing
 
-- Free: $0/month — 50 AI credits/month, 2 team seats, 100 posts/month, 2-week scheduling window, link in bio, all core features
-- Pro: $5/month or $55/year — 500 AI credits/month, 5 seats, full scheduling window
+- Free: $0/month — 50 AI credits/month, 2 team seats, link in bio, all core features
+- Pro: $5/month or $55/year — 500 AI credits/month, 5 seats, Smart Queue, Brand Voice, A/B testing
 - Agency: $20/month or $209/year — 2,000 AI credits/month, 15 seats, 5 client workspaces
 - White Label Basic: +$20/month — custom logo, colors, branding
 - White Label Pro: +$40/month — custom domain + everything above
 - AI Credit Packs: $1.99 (100cr), $4.99 (300cr), $9.99 (750cr), $19.99 (2,000cr)
-
-## Affiliate Program
-
-- 30% recurring commission on all subscription payments
-- Milestone: 100+ active recurring referrals → 40% forever
-- 10% flat on Starter + Popular credit packs
-- 15% flat on Pro + Max credit packs
-- Affiliate page: https://socialmate.studio/affiliate
-
-## Studio Stax
-
-Curated directory of creator tools and resources at https://socialmate.studio/studio-stax. Listings are founder-approved and ranked by SM-Give donation amounts and listing age.
-
-## SM-Give
-
-Built-in charitable initiative. 2% of all subscription revenue goes to charitable causes. Users can make voluntary in-app donations.
-
-## Gilgamesh's Guide
-
-Free guide for entrepreneurs, creators, and self-starters by founder Joshua Bostic. Waitlist: https://socialmate.studio/gilgamesh
+- X Booster add-ons (one-time, roll over): Spark 50 posts/$1.99 · Boost 120/$4.99 · Surge 250/$9.99 · Storm 500/$19.99
+- SOMA Autopilot: $10/month
+- SOMA Full Send: $20/month
 
 ## Key Pages
 
 - Homepage: https://socialmate.studio
 - Pricing: https://socialmate.studio/pricing
 - Features: https://socialmate.studio/features
-- Blog: https://socialmate.studio/blog
+- Blog: https://socialmate.studio/blog (61+ posts)
 - Roadmap: https://socialmate.studio/roadmap
-- Changelog: https://socialmate.studio/changelog
-- Support/FAQ: https://socialmate.studio/support
+- FAQ: https://socialmate.studio/faq
+- Support: https://socialmate.studio/support
 - Clips Studio: https://socialmate.studio/clips
-- Affiliate: https://socialmate.studio/affiliate
+- Affiliates: https://socialmate.studio/affiliates
+- Partners Dashboard: https://socialmate.studio/partners/dashboard
 - Studio Stax: https://socialmate.studio/studio-stax
 - SM-Give: https://socialmate.studio/give
-- Gilgamesh's Guide: https://socialmate.studio/gilgamesh
+- Merch: https://socialmate.studio/merch
+- Gilgamesh's Guide: https://socialmate.studio/gils-guide
+- Creator Monetize: https://socialmate.studio/monetize
 - Our Story: https://socialmate.studio/story
 - Comparisons hub: https://socialmate.studio/vs
+- Streak heatmap: https://socialmate.studio/streak
+- Link shortener: https://socialmate.studio/links
+- Media library: https://socialmate.studio/media
+- Social inbox: https://socialmate.studio/inbox
+- Workspace activity: https://socialmate.studio/activity
+- Creator Studio: https://socialmate.studio/create
+- SOMA: https://socialmate.studio/soma
+- Enki: https://socialmate.studio/enki
 
 ## Comparisons (SocialMate vs Competitors)
 
@@ -135,10 +253,3 @@ Free guide for entrepreneurs, creators, and self-starters by founder Joshua Bost
 - vs Typefully: https://socialmate.studio/vs/typefully
 - vs Postcron: https://socialmate.studio/vs/postcron
 - vs Socialrails: https://socialmate.studio/vs/socialrails
-
-## Enki — Autonomous Trading Bot
-
-Companion product by Gilgamesh Enterprise LLC. Self-contained autonomous trading bot for stocks and crypto.
-
-- Landing page: https://socialmate.studio/enki
-- Public leaderboard: https://socialmate.studio/enki/leaderboard

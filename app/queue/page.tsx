@@ -263,6 +263,7 @@ function QueueInner() {
   const [retrying, setRetrying]         = useState<string | null>(null)
   const [selectedIds, setSelectedIds]   = useState<Set<string>>(new Set())
   const [bulkWorking, setBulkWorking]   = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const router      = useRouter()
   const searchParams = useSearchParams()
   const targetDate  = searchParams.get('date')
@@ -494,8 +495,13 @@ function QueueInner() {
     setBulkWorking(false)
   }
 
-  const handleBulkDelete = async () => {
+  const handleBulkDelete = () => {
     if (!selectedIds.size) return
+    setShowDeleteConfirm(true)
+  }
+
+  const confirmBulkDelete = async () => {
+    setShowDeleteConfirm(false)
     setBulkWorking(true)
     const ids = Array.from(selectedIds)
     const { error } = await supabase
@@ -584,11 +590,37 @@ function QueueInner() {
                   )}
                 </p>
                 {!loading && posts.length > 0 && (
-                  <button
-                    onClick={selectedIds.size === posts.length ? clearSelection : selectAll}
-                    className="text-xs font-semibold text-gray-400 hover:text-amber-500 transition-colors">
-                    {selectedIds.size === posts.length ? 'Deselect all' : 'Select all'}
-                  </button>
+                  selectedIds.size > 0 ? (
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs font-bold text-amber-500">{selectedIds.size} selected</span>
+                      <span className="text-gray-300 dark:text-gray-600">·</span>
+                      <button
+                        onClick={handleBulkUnschedule}
+                        disabled={bulkWorking}
+                        className="text-xs font-semibold text-gray-500 hover:text-blue-500 transition-colors disabled:opacity-40">
+                        {bulkWorking ? 'Working…' : 'Move to drafts'}
+                      </button>
+                      <span className="text-gray-300 dark:text-gray-600">·</span>
+                      <button
+                        onClick={handleBulkDelete}
+                        disabled={bulkWorking}
+                        className="text-xs font-semibold text-red-400 hover:text-red-600 transition-colors disabled:opacity-40">
+                        Delete
+                      </button>
+                      <span className="text-gray-300 dark:text-gray-600">·</span>
+                      <button
+                        onClick={clearSelection}
+                        className="text-xs font-semibold text-gray-400 hover:text-gray-600 transition-colors">
+                        Clear
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={selectAll}
+                      className="text-xs font-semibold text-gray-400 hover:text-amber-500 transition-colors">
+                      Select all
+                    </button>
+                  )
                 )}
               </div>
             </div>
@@ -875,28 +907,29 @@ function QueueInner() {
         </div>
       </div>
 
-      {/* Bulk action bar */}
-      {selectedIds.size > 0 && (
-        <div className="fixed left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl bg-gray-900 border border-gray-700 shadow-2xl" style={{ bottom: 'max(1.5rem, env(safe-area-inset-bottom, 1.5rem))' }}>
-          <span className="text-sm font-bold text-white">{selectedIds.size} selected</span>
-          <div className="w-px h-4 bg-gray-600" />
-          <button
-            onClick={handleBulkUnschedule}
-            disabled={bulkWorking}
-            className="text-xs font-bold px-4 py-2 rounded-xl border border-gray-600 text-gray-300 hover:border-amber-500 hover:text-amber-400 transition-all disabled:opacity-50">
-            {bulkWorking ? 'Working…' : 'Move to drafts'}
-          </button>
-          <button
-            onClick={handleBulkDelete}
-            disabled={bulkWorking}
-            className="text-xs font-bold px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white transition-all disabled:opacity-50">
-            {bulkWorking ? 'Working…' : 'Delete'}
-          </button>
-          <button
-            onClick={clearSelection}
-            className="text-gray-500 hover:text-white transition-colors text-sm font-bold w-6 h-6 flex items-center justify-center">
-            ×
-          </button>
+      {/* Delete confirmation modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 max-w-sm w-full shadow-2xl">
+            <h3 className="text-base font-extrabold text-gray-900 dark:text-white mb-2">
+              Delete {selectedIds.size} post{selectedIds.size !== 1 ? 's' : ''}?
+            </h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+              This can't be undone. Scheduled posts will be permanently removed.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 text-sm font-bold py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-gray-400 transition-all">
+                Cancel
+              </button>
+              <button
+                onClick={confirmBulkDelete}
+                className="flex-1 text-sm font-bold py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white transition-all">
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

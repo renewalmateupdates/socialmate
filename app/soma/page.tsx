@@ -368,6 +368,55 @@ export default function SomaLandingPage() {
           </div>
         </section>
 
+        {/* ── CREDIT COSTS ── */}
+        <section id="credits" className="mb-20">
+          <div className="text-center mb-10">
+            <p className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">Transparent Pricing</p>
+            <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
+              What does each action cost?
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl mx-auto mt-3">
+              SOMA uses your SocialMate AI credits. Credits reset monthly on Pro and Agency plans — or buy one-time packs anytime.
+            </p>
+          </div>
+
+          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
+            <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-gray-100 dark:divide-gray-800">
+              {[
+                { action: 'Ingest master doc', credits: 25, desc: 'AI reads your doc, extracts themes, diffs against last week', icon: '📥' },
+                { action: 'Generate full week', credits: 75, desc: 'Platform-native posts for all connected platforms, 7–14 days', icon: '⚡' },
+                { action: 'Update voice profile', credits: 15, desc: 'Refresh SOMA\'s understanding of your tone and style', icon: '🎙️' },
+                { action: 'Generate single post', credits: 5, desc: 'One-off post generation outside the weekly cycle', icon: '✍️' },
+              ].map(item => (
+                <div key={item.action} className="p-6 flex items-start gap-4">
+                  <span className="text-2xl flex-shrink-0">{item.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <p className="text-sm font-extrabold text-gray-900 dark:text-white">{item.action}</p>
+                      <span className="flex-shrink-0 text-sm font-extrabold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/40 px-2.5 py-0.5 rounded-full">
+                        {item.credits} cr
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-800">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  <span className="font-semibold text-gray-700 dark:text-gray-300">Full weekly run = 100 credits.</span>
+                  {' '}Pro plan (500 cr/mo) covers 5 full runs with 100 left over for other AI tools.
+                </div>
+                <div className="flex items-center gap-4 text-xs font-semibold flex-shrink-0">
+                  <span className="text-gray-500">Credit packs from <span className="text-violet-600 dark:text-violet-400">$1.99</span></span>
+                  <a href="/pricing" className="text-violet-600 dark:text-violet-400 hover:underline">See all plans →</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* ── FAQ ── */}
         <section id="faq" className="mb-20">
           <div className="text-center mb-10">
