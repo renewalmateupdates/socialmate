@@ -55,5 +55,6 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({ published, failed, total: duePosts.length })
+  console.log(`[cron/publish-scheduled] ${new Date().toISOString()} — published: ${published}, failed: ${failed}, total: ${duePosts.length}`)
+  return NextResponse.json({ published, failed, total: duePosts.length, ran_at: now })
 }
