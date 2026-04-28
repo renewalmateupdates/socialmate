@@ -784,6 +784,36 @@ function QueueInner() {
                     ref={el => { sectionRefs.current[dateKey] = el }}
                     className={`scroll-mt-8 rounded-2xl transition-all ${isHighlighted ? 'ring-2 ring-blue-300 ring-offset-2' : ''}`}>
                     <div className="flex items-center gap-3 mb-3 px-1">
+                      {/* Per-day checkbox — master select-all on first day */}
+                      {dateKey === dateKeys[0] ? (
+                        <button
+                          onClick={() => selectedIds.size === posts.length ? clearSelection() : selectAll()}
+                          className="flex-shrink-0 w-4 h-4 rounded border-2 flex items-center justify-center transition-all"
+                          style={{
+                            borderColor: selectedIds.size > 0 ? '#f59e0b' : '#9ca3af',
+                            backgroundColor: selectedIds.size === posts.length ? '#f59e0b' : selectedIds.size > 0 ? 'rgba(245,158,11,0.15)' : 'transparent',
+                          }}
+                          title={selectedIds.size === posts.length ? 'Deselect all' : 'Select all'}>
+                          {selectedIds.size === posts.length
+                            ? <svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 3l2 2 4-4" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                            : selectedIds.size > 0
+                              ? <span className="w-2 h-0.5 bg-amber-500 rounded" />
+                              : null}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => selectDay(dateKey)}
+                          className="flex-shrink-0 w-4 h-4 rounded border-2 flex items-center justify-center transition-all"
+                          style={{
+                            borderColor: grouped[dateKey].every((p: any) => selectedIds.has(p.id)) ? '#f59e0b' : '#9ca3af',
+                            backgroundColor: grouped[dateKey].every((p: any) => selectedIds.has(p.id)) ? '#f59e0b' : 'transparent',
+                          }}
+                          title={grouped[dateKey].every((p: any) => selectedIds.has(p.id)) ? 'Deselect day' : 'Select day'}>
+                          {grouped[dateKey].every((p: any) => selectedIds.has(p.id)) && (
+                            <svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 3l2 2 4-4" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          )}
+                        </button>
+                      )}
                       <p className={`text-xs font-extrabold uppercase tracking-widest ${isHighlighted ? 'text-blue-600' : 'text-gray-900 dark:text-gray-100'}`}>
                         {formatDateLabel(dateKey)}
                         {isHighlighted && <span className="ml-2 text-blue-400 normal-case tracking-normal font-semibold">← from calendar</span>}
