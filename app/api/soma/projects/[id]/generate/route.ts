@@ -163,7 +163,9 @@ What changed: ${insights.diff_summary ?? 'New content week'}
 Content angles: ${insights.content_angles?.join(' | ') ?? 'none'}
 Emotional tone: ${insights.emotional_tone ?? 'motivated'}`
 
-    // Generate posts platform by platform so each gets its own post count + scheduling
+    // Generate posts platform by platform so each gets its own post count + scheduling.
+    // Gemini reliably handles ~14 posts per call — chunk larger batches to avoid truncated JSON.
+    const CHUNK_SIZE = 14
     const allPostIds: string[] = []
 
     for (const platform of platforms) {
@@ -174,18 +176,33 @@ Emotional tone: ${insights.emotional_tone ?? 'motivated'}`
 
       if (dayOffsets.length === 0 || ppd === 0) continue
 
-      const totalForPlatform = ppd * dayOffsets.length
-      const instruction      = PLATFORM_INSTRUCTIONS[platform] ?? `${platform}: Keep it natural and platform-appropriate.`
+      const instruction = PLATFORM_INSTRUCTIONS[platform] ?? `${platform}: Keep it natural and platform-appropriate.`
 
-      const prompt = `${identityContext}
+      // Build the full list of (dayOffset, slotIndex) slots we need to fill
+      type Slot = { dayOffset: number; dayIdx: number; slotIdx: number }
+      const allSlots: Slot[] = []
+      dayOffsets.forEach((dayOffset, dayIdx) => {
+        for (let slotIdx = 0; slotIdx < ppd; slotIdx++) {
+          allSlots.push({ dayOffset, dayIdx, slotIdx })
+        }
+      })
+
+      // Split into chunks so each Gemini call is manageable
+      const chunks: Slot[][] = []
+      for (let i = 0; i < allSlots.length; i += CHUNK_SIZE) {
+        chunks.push(allSlots.slice(i, i + CHUNK_SIZE))
+      }
+
+      for (const chunk of chunks) {
+        const chunkDays  = chunk.length
+        const prompt = `${identityContext}
 
 ${insightBlock}
 
 PLATFORM: ${platform.toUpperCase()}
 FORMAT RULES: ${instruction}
 
-Generate exactly ${totalForPlatform} posts for ${platform}.
-${dayOffsets.length} active days × ${ppd} posts per day = ${totalForPlatform} posts total.
+Generate exactly ${chunkDays} posts for ${platform}.
 
 Return ONLY valid JSON:
 {
@@ -199,52 +216,52 @@ Return ONLY valid JSON:
   ]
 }
 
+Required slots (day_index, slot_index) — generate one post for EACH:
+${chunk.map((s, i) => `${i}: day_index=${s.dayIdx} slot_index=${s.slotIdx}`).join('\n')}
+
 Rules:
-- day_index: 0 to ${dayOffsets.length - 1} (maps to actual calendar days)
-- slot_index: 0 to ${ppd - 1} (position within the day, evenly spaced 8am–10pm UTC)
-- Each (day_index, slot_index) combination must be unique
 - content_type: vary across ${CONTENT_TYPES.join(', ')}
 - NEVER use: "In today's world", "Let's dive in", "game-changer", "synergy", "leverage"
 - Make content specific to THIS week's actual themes — not generic
 - Sound human, not AI-generated
 - Respect the character limit for ${platform}`
 
-      let platformPosts: any[]
-      try {
-        const result  = await model.generateContent(prompt)
-        const parsed  = parseGeminiJson(result.response.text())
-        platformPosts = parsed.posts ?? []
-        if (!platformPosts.length) {
-          console.error(`[SOMA Generate] Empty posts for ${platform}`)
+        let chunkPosts: any[]
+        try {
+          const result  = await model.generateContent(prompt)
+          const parsed  = parseGeminiJson(result.response.text())
+          chunkPosts    = parsed.posts ?? []
+          if (!chunkPosts.length) {
+            console.error(`[SOMA Generate] Empty chunk for ${platform} (${chunkDays} slots)`)
+            continue
+          }
+        } catch (aiErr: any) {
+          console.error(`[SOMA Generate] Gemini error for ${platform} chunk:`, aiErr?.message)
           continue
         }
-      } catch (aiErr: any) {
-        console.error(`[SOMA Generate] Gemini error for ${platform}:`, aiErr?.message)
-        continue
-      }
 
-      // Insert posts for this platform
-      for (const post of platformPosts) {
-        const dayIdx  = typeof post.day_index === 'number' ? post.day_index : 0
-        const slotIdx = typeof post.slot_index === 'number' ? post.slot_index : 0
-        const dayOff  = dayOffsets[Math.min(dayIdx, dayOffsets.length - 1)] ?? 0
+        // Map each returned post back to its slot for accurate scheduling
+        for (let i = 0; i < chunkPosts.length; i++) {
+          const post = chunkPosts[i]
+          const slot = chunk[i] ?? chunk[chunk.length - 1]
 
-        const { data: inserted, error: postErr } = await admin
-          .from('posts')
-          .insert({
-            user_id:      user.id,
-            workspace_id: project.workspace_id,
-            content:      post.content,
-            platforms:    [platform],
-            status:       project.mode === 'safe' ? 'draft' : 'scheduled',
-            scheduled_at: scheduledAt(dayOff, slotIdx, ppd, start_date),
-            destinations: {},
-          })
-          .select('id')
-          .single()
+          const { data: inserted, error: postErr } = await admin
+            .from('posts')
+            .insert({
+              user_id:      user.id,
+              workspace_id: project.workspace_id,
+              content:      post.content,
+              platforms:    [platform],
+              status:       project.mode === 'safe' ? 'draft' : 'scheduled',
+              scheduled_at: scheduledAt(slot.dayOffset, slot.slotIdx, ppd, start_date),
+              destinations: {},
+            })
+            .select('id')
+            .single()
 
-        if (postErr) console.error(`[SOMA Generate] insert error (${platform}):`, postErr.message)
-        else if (inserted) allPostIds.push(inserted.id)
+          if (postErr) console.error(`[SOMA Generate] insert error (${platform}):`, postErr.message)
+          else if (inserted) allPostIds.push(inserted.id)
+        }
       }
     }
 
