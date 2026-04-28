@@ -41,14 +41,14 @@ async function getUser() {
   return user
 }
 
-// Evenly space N posts across an 8am–10pm UTC window.
+// Evenly space N posts across a 1pm–11pm UTC window (9am–7pm EDT / 6am–4pm PDT).
 // slotIndex is 0-based (0 = first post of the day, N-1 = last).
 // startDate (YYYY-MM-DD) overrides today as the base date.
 function scheduledAt(dayOffset: number, slotIndex: number, postsPerDay: number, startDate?: string): string {
   const base = startDate ? new Date(`${startDate}T12:00:00Z`) : new Date()
   base.setUTCDate(base.getUTCDate() + dayOffset)
-  const startHour = 8   // 8am UTC
-  const endHour   = 22  // 10pm UTC
+  const startHour = 13  // 1pm UTC = 9am EDT / 6am PDT
+  const endHour   = 23  // 11pm UTC = 7pm EDT / 4pm PDT
   const range     = endHour - startHour // 14 hours
   const gapMins   = postsPerDay > 1
     ? Math.round((range * 60) / (postsPerDay - 1))
@@ -167,6 +167,8 @@ Emotional tone: ${insights.emotional_tone ?? 'motivated'}`
     // Gemini reliably handles ~14 posts per call — chunk larger batches to avoid truncated JSON.
     const CHUNK_SIZE = 14
     const allPostIds: string[] = []
+    const platformErrors: Record<string, string> = {}
+    const platformCounts: Record<string, number> = {}
 
     for (const platform of platforms) {
       const cfg        = schedule[platform] ?? { posts_per_day: globalPpd, days: [0,1,2,3,4,5,6] }
@@ -232,11 +234,15 @@ Rules:
           const parsed  = parseGeminiJson(result.response.text())
           chunkPosts    = parsed.posts ?? []
           if (!chunkPosts.length) {
-            console.error(`[SOMA Generate] Empty chunk for ${platform} (${chunkDays} slots)`)
+            const msg = `Empty response for chunk of ${chunkDays} slots`
+            console.error(`[SOMA Generate] ${platform}: ${msg}`)
+            platformErrors[platform] = msg
             continue
           }
         } catch (aiErr: any) {
-          console.error(`[SOMA Generate] Gemini error for ${platform} chunk:`, aiErr?.message)
+          const msg = aiErr?.message ?? 'Unknown Gemini error'
+          console.error(`[SOMA Generate] ${platform} chunk error:`, msg)
+          platformErrors[platform] = msg
           continue
         }
 
@@ -260,7 +266,10 @@ Rules:
             .single()
 
           if (postErr) console.error(`[SOMA Generate] insert error (${platform}):`, postErr.message)
-          else if (inserted) allPostIds.push(inserted.id)
+          else if (inserted) {
+            allPostIds.push(inserted.id)
+            platformCounts[platform] = (platformCounts[platform] ?? 0) + 1
+          }
         }
       }
     }
@@ -319,7 +328,14 @@ Rules:
       }
     }
 
-    return NextResponse.json({ success: true, posts_created: postsCreated, post_ids: allPostIds, mode: project.mode })
+    return NextResponse.json({
+      success: true,
+      posts_created: postsCreated,
+      post_ids: allPostIds,
+      mode: project.mode,
+      platform_counts: platformCounts,
+      platform_errors: Object.keys(platformErrors).length > 0 ? platformErrors : undefined,
+    })
   } catch (err) {
     console.error('[SOMA Project Generate POST]', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

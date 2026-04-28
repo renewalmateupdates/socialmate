@@ -518,11 +518,27 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
                       )}
 
                       {generateResult ? (
-                        <div className="rounded-xl bg-emerald-950/30 border border-emerald-700/40 px-4 py-3 text-center">
-                          <p className="text-sm font-bold text-emerald-400">
+                        <div className="rounded-xl bg-emerald-950/30 border border-emerald-700/40 px-4 py-3">
+                          <p className="text-sm font-bold text-emerald-400 text-center mb-2">
                             {generateResult.posts_created} posts {project.mode === 'safe' ? 'drafted' : 'scheduled'}
                           </p>
-                          <Link href={project.mode === 'safe' ? '/soma/dashboard' : '/queue'} className="text-xs text-emerald-300 hover:text-emerald-200 underline mt-1 block">
+                          {generateResult.platform_counts && (
+                            <div className="space-y-1 mb-3">
+                              {Object.entries(generateResult.platform_counts as Record<string,number>).map(([p, n]) => (
+                                <div key={p} className="flex justify-between text-xs">
+                                  <span className="text-gray-400 capitalize">{PLATFORM_ICONS[p] ?? '📱'} {p}</span>
+                                  <span className="text-emerald-400 font-bold">{n} posts ✓</span>
+                                </div>
+                              ))}
+                              {generateResult.platform_errors && Object.entries(generateResult.platform_errors as Record<string,string>).map(([p, err]) => (
+                                <div key={p} className="flex justify-between text-xs">
+                                  <span className="text-gray-400 capitalize">{PLATFORM_ICONS[p] ?? '📱'} {p}</span>
+                                  <span className="text-red-400 font-bold">failed — {err.slice(0, 40)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          <Link href={project.mode === 'safe' ? '/soma/dashboard' : '/queue'} className="text-xs text-emerald-300 hover:text-emerald-200 underline block text-center">
                             {project.mode === 'safe' ? 'Review in SOMA queue →' : 'View in queue →'}
                           </Link>
                         </div>

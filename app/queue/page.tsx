@@ -90,7 +90,7 @@ function dateParamToDateString(param: string): string | null {
   return d.toDateString()
 }
 
-function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel, cancelling, handleCancel, onEvergreenToggle }: {
+function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel, cancelling, handleCancel, onEvergreenToggle, isSelected, onToggleSelect }: {
   post: any
   isHighlighted: boolean
   confirmCancel: string | null
@@ -98,6 +98,8 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
   cancelling: string | null
   handleCancel: (id: string) => void
   onEvergreenToggle: (id: string, current: boolean) => void
+  isSelected: boolean
+  onToggleSelect: (id: string) => void
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: post.id })
@@ -117,10 +119,20 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
     <div ref={setNodeRef} style={style}
       className={`bg-surface border rounded-2xl p-4 md:p-5 transition-all ${
         isDragging    ? 'shadow-xl border-gray-300'  :
+        isSelected    ? 'border-amber-400/60 dark:border-amber-500/60 bg-amber-50/30 dark:bg-amber-950/10' :
         isHighlighted ? 'border-blue-100 hover:border-blue-300' :
         'border-theme hover:border-gray-300'
       }`}>
       <div className="flex items-start gap-3">
+
+        {/* Checkbox */}
+        <button
+          onClick={() => onToggleSelect(post.id)}
+          className="flex-shrink-0 mt-1 w-4 h-4 rounded border-2 flex items-center justify-center transition-all cursor-pointer select-none"
+          style={{ borderColor: isSelected ? '#f59e0b' : '#9ca3af', backgroundColor: isSelected ? '#f59e0b' : 'transparent' }}
+          aria-label={isSelected ? 'Deselect post' : 'Select post'}>
+          {isSelected && <svg width="8" height="6" viewBox="0 0 8 6" fill="none"><path d="M1 3l2 2 4-4" stroke="black" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+        </button>
 
         {/* Drag handle */}
         <button
@@ -249,6 +261,8 @@ function QueueInner() {
   const [confirmCancel, setConfirmCancel] = useState<string | null>(null)
   const [toast, setToast]               = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const [retrying, setRetrying]         = useState<string | null>(null)
+  const [selectedIds, setSelectedIds]   = useState<Set<string>>(new Set())
+  const [bulkWorking, setBulkWorking]   = useState(false)
   const router      = useRouter()
   const searchParams = useSearchParams()
   const targetDate  = searchParams.get('date')
@@ -442,6 +456,61 @@ function QueueInner() {
     setCancelling(null)
   }
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
+
+  const selectAll = () => setSelectedIds(new Set(posts.map(p => p.id)))
+  const clearSelection = () => setSelectedIds(new Set())
+
+  const selectDay = (dateKey: string) => {
+    const dayIds = (grouped[dateKey] ?? []).map((p: any) => p.id)
+    const allSelected = dayIds.every((id: string) => selectedIds.has(id))
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      dayIds.forEach((id: string) => allSelected ? next.delete(id) : next.add(id))
+      return next
+    })
+  }
+
+  const handleBulkUnschedule = async () => {
+    if (!selectedIds.size) return
+    setBulkWorking(true)
+    const ids = Array.from(selectedIds)
+    const { error } = await supabase
+      .from('posts')
+      .update({ status: 'draft', scheduled_at: null })
+      .in('id', ids)
+    if (error) { showToast('Failed to unschedule some posts', 'error') }
+    else {
+      setPosts(prev => prev.filter(p => !selectedIds.has(p.id)))
+      setSelectedIds(new Set())
+      showToast(`${ids.length} post${ids.length !== 1 ? 's' : ''} moved to drafts`, 'success')
+    }
+    setBulkWorking(false)
+  }
+
+  const handleBulkDelete = async () => {
+    if (!selectedIds.size) return
+    setBulkWorking(true)
+    const ids = Array.from(selectedIds)
+    const { error } = await supabase
+      .from('posts')
+      .delete()
+      .in('id', ids)
+    if (error) { showToast('Failed to delete some posts', 'error') }
+    else {
+      setPosts(prev => prev.filter(p => !selectedIds.has(p.id)))
+      setSelectedIds(new Set())
+      showToast(`${ids.length} post${ids.length !== 1 ? 's' : ''} deleted`, 'success')
+    }
+    setBulkWorking(false)
+  }
+
   const handleAutoSchedule = async () => {
     if (plan === 'free') { setShowUpgradeCard(true); return }
     setAutoScheduling(true)
@@ -507,12 +576,21 @@ function QueueInner() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">Upcoming Queue</h1>
-              <p className="text-sm text-gray-400 mt-0.5">
-                {loading ? 'Loading...' : `${posts.length} post${posts.length !== 1 ? 's' : ''} scheduled${daysWithPosts > 0 ? ` across ${daysWithPosts} day${daysWithPosts !== 1 ? 's' : ''}` : ''}`}
-                {activeWorkspace && !activeWorkspace.is_personal && (
-                  <span className="ml-2 text-purple-500 font-semibold">· {activeWorkspace.client_name || activeWorkspace.name}</span>
+              <div className="flex items-center gap-3 mt-0.5">
+                <p className="text-sm text-gray-400">
+                  {loading ? 'Loading...' : `${posts.length} post${posts.length !== 1 ? 's' : ''} scheduled${daysWithPosts > 0 ? ` across ${daysWithPosts} day${daysWithPosts !== 1 ? 's' : ''}` : ''}`}
+                  {activeWorkspace && !activeWorkspace.is_personal && (
+                    <span className="ml-2 text-purple-500 font-semibold">· {activeWorkspace.client_name || activeWorkspace.name}</span>
+                  )}
+                </p>
+                {!loading && posts.length > 0 && (
+                  <button
+                    onClick={selectedIds.size === posts.length ? clearSelection : selectAll}
+                    className="text-xs font-semibold text-gray-400 hover:text-amber-500 transition-colors">
+                    {selectedIds.size === posts.length ? 'Deselect all' : 'Select all'}
+                  </button>
                 )}
-              </p>
+              </div>
             </div>
             <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
               {targetDate && (
@@ -711,6 +789,11 @@ function QueueInner() {
                         {isHighlighted && <span className="ml-2 text-blue-400 normal-case tracking-normal font-semibold">← from calendar</span>}
                       </p>
                       <div className="flex-1 h-px bg-gray-100 dark:bg-gray-800" />
+                      <button
+                        onClick={() => selectDay(dateKey)}
+                        className="text-[11px] font-semibold text-gray-400 hover:text-amber-500 transition-colors">
+                        {grouped[dateKey].every((p: any) => selectedIds.has(p.id)) ? 'Deselect day' : 'Select day'}
+                      </button>
                       <span className="text-xs text-gray-400 dark:text-gray-500">
                         {grouped[dateKey].length} post{grouped[dateKey].length !== 1 ? 's' : ''}
                       </span>
@@ -733,6 +816,8 @@ function QueueInner() {
                               cancelling={cancelling}
                               handleCancel={handleCancel}
                               onEvergreenToggle={handleEvergreenToggle}
+                              isSelected={selectedIds.has(post.id)}
+                              onToggleSelect={toggleSelect}
                             />
                           ))}
                         </div>
@@ -759,6 +844,31 @@ function QueueInner() {
 
         </div>
       </div>
+
+      {/* Bulk action bar */}
+      {selectedIds.size > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-5 py-3 rounded-2xl bg-gray-900 border border-gray-700 shadow-2xl">
+          <span className="text-sm font-bold text-white">{selectedIds.size} selected</span>
+          <div className="w-px h-4 bg-gray-600" />
+          <button
+            onClick={handleBulkUnschedule}
+            disabled={bulkWorking}
+            className="text-xs font-bold px-4 py-2 rounded-xl border border-gray-600 text-gray-300 hover:border-amber-500 hover:text-amber-400 transition-all disabled:opacity-50">
+            {bulkWorking ? 'Working…' : 'Move to drafts'}
+          </button>
+          <button
+            onClick={handleBulkDelete}
+            disabled={bulkWorking}
+            className="text-xs font-bold px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white transition-all disabled:opacity-50">
+            {bulkWorking ? 'Working…' : 'Delete'}
+          </button>
+          <button
+            onClick={clearSelection}
+            className="text-gray-500 hover:text-white transition-colors text-sm font-bold w-6 h-6 flex items-center justify-center">
+            ×
+          </button>
+        </div>
+      )}
 
       {toast && (
         <div className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${
