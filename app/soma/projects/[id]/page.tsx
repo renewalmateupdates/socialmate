@@ -134,6 +134,10 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
         return
       }
       setIngestResult(data)
+      // Clear the input so the panel is ready for the next doc (or clearly shows it was saved)
+      setDocContent('')
+      setDocUrl('')
+      setFilename('')
       await load()
     } catch {
       setIngestError('Network error. Please try again.')
