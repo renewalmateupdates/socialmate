@@ -389,8 +389,8 @@ function ComposeInner() {
       }
       setConnectedPlatforms(platformsSet)
 
-      // Load draft if editing
-      const draftId = searchParams.get('draft')
+      // Load draft/post if editing (?draft=id or ?id=id from calendar retry)
+      const draftId = searchParams.get('draft') || searchParams.get('id')
       if (draftId) {
         const { data: draft } = await supabase
           .from('posts')
@@ -402,7 +402,10 @@ function ComposeInner() {
           setContent(draft.content || '')
           if (draft.platforms?.length > 0) setSelectedPlatforms(draft.platforms)
           setCurrentDraftId(draftId)
-          setTemplateBanner('Editing draft — make your changes and save or publish.')
+          const isFailed = draft.status === 'failed'
+          setTemplateBanner(isFailed
+            ? 'Retrying failed post — edit if needed, then publish.'
+            : 'Editing draft — make your changes and save or publish.')
         }
       }
 
@@ -413,7 +416,7 @@ function ComposeInner() {
   useEffect(() => {
     const templateId        = searchParams.get('template')
     const starterTemplateId = searchParams.get('starterTemplate')
-    const draftId           = searchParams.get('draft')
+    const draftId           = searchParams.get('draft') || searchParams.get('id')
 
     if (draftId) return
 
@@ -1577,7 +1580,7 @@ function ComposeInner() {
               )}
 
               {/* STARTER TEMPLATES QUICK STRIP — only shown when textarea is empty */}
-              {!content && !searchParams.get('draft') && !searchParams.get('starterTemplate') && !searchParams.get('template') && (
+              {!content && !searchParams.get('draft') && !searchParams.get('id') && !searchParams.get('starterTemplate') && !searchParams.get('template') && (
                 <div className="bg-surface border border-theme rounded-2xl p-4">
                   <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">Starter Templates</p>
                   <div className="flex flex-wrap gap-2">
