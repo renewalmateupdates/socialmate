@@ -160,11 +160,13 @@ Rules: Be specific. emotional_tone must be: high, reflective, grinding, or celeb
     const { data: ingestion, error: ingErr } = await admin
       .from('soma_weekly_ingestion')
       .insert({
+        project_id:       projectId,
         workspace_id:     project.workspace_id,
         user_id:          user.id,
         week_label:       `v${nextVersion} — ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`,
         raw_input:        content.trim(),
         extracted_insights,
+        is_diff:          !!prevDoc,
         generated_posts_count: 0,
       })
       .select('id')
