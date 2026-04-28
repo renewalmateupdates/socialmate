@@ -103,24 +103,25 @@ export async function POST(request: NextRequest) {
   }
 
   // Log to workspace activity (non-fatal, resolve personal workspace id)
-  getSupabaseAdmin()
-    .from('workspaces')
-    .select('id')
-    .eq('owner_id', user.id)
-    .eq('is_personal', true)
-    .maybeSingle()
-    .then(({ data: ws }) => {
-      if (ws?.id) {
-        logActivity({
-          workspace_id: ws.id,
-          user_id:      user.id,
-          action:       'member.invited',
-          entity_type:  'team_member',
-          entity_id:    member.id,
-          metadata:     { email: email.trim(), role },
-        })
-      }
-    }).catch(() => {})
+  Promise.resolve(
+    getSupabaseAdmin()
+      .from('workspaces')
+      .select('id')
+      .eq('owner_id', user.id)
+      .eq('is_personal', true)
+      .maybeSingle()
+  ).then(({ data: ws }) => {
+    if (ws?.id) {
+      logActivity({
+        workspace_id: ws.id,
+        user_id:      user.id,
+        action:       'member.invited',
+        entity_type:  'team_member',
+        entity_id:    member.id,
+        metadata:     { email: email.trim(), role },
+      })
+    }
+  }).catch(() => {})
 
   // Generate secure invite token
   const token     = crypto.randomBytes(32).toString('hex')
