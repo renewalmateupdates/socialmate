@@ -29,7 +29,7 @@ type Draft = {
 }
 
 export default function EmailOutreachPage() {
-  const { workspaceId, credits } = useWorkspace()
+  const { activeWorkspaceId: workspaceId, credits } = useWorkspace()
 
   const [targetName,    setTargetName]    = useState('')
   const [goal,          setGoal]          = useState('brand_deal')
@@ -96,7 +96,7 @@ export default function EmailOutreachPage() {
     setTimeout(() => setCopied(null), 2000)
   }
 
-  const remaining = credits?.remaining ?? 0
+  const remaining = credits ?? 0
 
   return (
     <div className="min-h-screen bg-background p-6 md:p-10 max-w-3xl mx-auto">

@@ -25,7 +25,7 @@ const PLATFORM_ICONS: Record<string, string> = {
 }
 
 export default function GrowthScoutPage() {
-  const { workspaceId, plan } = useWorkspace()
+  const { activeWorkspaceId: workspaceId, plan } = useWorkspace()
   const [data,    setData]    = useState<ScoutData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error,   setError]   = useState('')
