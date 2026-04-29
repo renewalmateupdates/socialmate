@@ -2434,7 +2434,7 @@ function ComposeInner() {
                       }`}>
                         <span className="text-lg">{PLATFORMS.find(p => p.id === result.platform)?.icon || '📱'}</span>
                         <div className="flex-1">
-                          <p className="text-xs font-bold">{PLATFORMS.find(p => p.id === result.platform)?.name || result.platform}</p>
+                          <p className="text-xs font-bold text-gray-900">{PLATFORMS.find(p => p.id === result.platform)?.name || result.platform}</p>
                           {result.error && <p className="text-xs text-red-500 mt-0.5">{result.error}</p>}
                         </div>
                         <span className={`text-xs font-bold flex-shrink-0 ${result.success ? 'text-green-600' : 'text-red-500'}`}>
