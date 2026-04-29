@@ -4,9 +4,16 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
 
+// Auth: either Vercel cron secret OR the internal deploy token
+function isAuthorized(req: NextRequest): boolean {
+  const auth = req.headers.get('authorization')
+  if (auth === `Bearer ${process.env.CRON_SECRET}`) return true
+  if (auth === `Bearer ${process.env.INTERNAL_CRON_TOKEN}`) return true
+  return false
+}
+
 export async function GET(req: NextRequest) {
-  const authHeader = req.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!isAuthorized(req)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -55,6 +62,6 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  console.log(`[cron/publish-scheduled] ${new Date().toISOString()} — published: ${published}, failed: ${failed}, total: ${duePosts.length}`)
+  console.log(`[cron/publish-scheduled] ${now} — published: ${published}, failed: ${failed}, total: ${duePosts.length}`)
   return NextResponse.json({ published, failed, total: duePosts.length, ran_at: now })
 }
