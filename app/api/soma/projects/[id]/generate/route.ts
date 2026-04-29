@@ -5,6 +5,7 @@ import { createServerClient } from '@supabase/ssr'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { SOMA_COSTS } from '@/lib/soma-costs'
+import { inngest } from '@/lib/inngest'
 import { Resend } from 'resend'
 
 const GENERATE_COST = SOMA_COSTS.generate_week // 75
@@ -269,6 +270,11 @@ Rules:
           else if (inserted) {
             allPostIds.push(inserted.id)
             platformCounts[platform] = (platformCounts[platform] ?? 0) + 1
+            // Fire Inngest event so post publishes at exact scheduled time
+            if (project.mode !== 'safe') {
+              const scheduledAtIso = scheduledAt(slot.dayOffset, slot.slotIdx, ppd, start_date)
+              inngest.send({ name: 'post/scheduled', data: { postId: inserted.id, scheduledAt: scheduledAtIso } }).catch(() => {})
+            }
           }
         }
       }
