@@ -607,6 +607,45 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true })
     }
 
+    // ── SOMA credit pack — one-time payment ──
+    if (type === 'soma_credits' && userId) {
+      const creditsToAdd  = parseInt(session.metadata?.credits ?? '0', 10)
+      const workspaceId   = session.metadata?.workspace_id
+      if (!creditsToAdd) return NextResponse.json({ received: true })
+
+      const paymentIntentId = session.payment_intent as string
+      if (paymentIntentId) {
+        const { data: existing } = await supabase
+          .from('processed_events')
+          .select('id')
+          .eq('event_id', paymentIntentId)
+          .maybeSingle()
+        if (existing) {
+          console.log('SOMA credits already processed:', paymentIntentId)
+          return NextResponse.json({ received: true })
+        }
+        await supabase
+          .from('processed_events')
+          .insert({ event_id: paymentIntentId, type: 'soma_credits', user_id: userId })
+      }
+
+      if (workspaceId) {
+        const { data: ws } = await supabase
+          .from('workspaces')
+          .select('soma_credits_purchased')
+          .eq('id', workspaceId)
+          .single()
+        const current = ws?.soma_credits_purchased ?? 0
+        await supabase
+          .from('workspaces')
+          .update({ soma_credits_purchased: current + creditsToAdd })
+          .eq('id', workspaceId)
+        console.log(`[SOMA Credits] +${creditsToAdd} added to workspace ${workspaceId}`)
+      }
+
+      return NextResponse.json({ received: true })
+    }
+
     // ── Enki subscription ──
     if (session.metadata?.enki === 'true') {
       const { plan, user_id: enkiUserId } = session.metadata

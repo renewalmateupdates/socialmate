@@ -4,6 +4,8 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
+import SomaCreditPacks from '@/components/SomaCreditPacks'
+import { useWorkspace } from '@/contexts/WorkspaceContext'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -235,6 +237,7 @@ function AutopilotModal({
 
 export default function SomaDashboardPage() {
   const router = useRouter()
+  const { activeWorkspaceId } = useWorkspace()
 
   const [loading, setLoading]                 = useState(true)
   const [credits, setCredits]                 = useState<SomaCredits | null>(null)
@@ -546,6 +549,11 @@ export default function SomaDashboardPage() {
                 )}
               </>
             )}
+          </div>
+
+          {/* SOMA Credit Packs */}
+          <div className="rounded-2xl border border-amber-500/20 bg-gray-900 p-5">
+            <SomaCreditPacks workspaceId={activeWorkspaceId} />
           </div>
 
           {/* Identity Card */}

@@ -6,6 +6,7 @@ import FeedbackWidget from '@/components/FeedbackWidget'
 import { WorkspaceProvider } from '@/contexts/WorkspaceContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { Analytics } from '@vercel/analytics/next'
+import InstallPrompt from '@/components/InstallPrompt'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
@@ -145,6 +146,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </ThemeProvider>
         <FeedbackWidget />
         <CookieBanner />
+        <InstallPrompt />
         <Analytics />
       </body>
     </html>

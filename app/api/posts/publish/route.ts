@@ -6,6 +6,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { publishToAll } from '@/lib/publish'
 import { inngest } from '@/lib/inngest'
 import { Resend } from 'resend'
+import { logActivity } from '@/lib/workspace-activity'
 
 let _resend: Resend | null = null
 function getResend() {
@@ -173,6 +174,17 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    if (!allFailed && post.workspace_id) {
+      logActivity({
+        workspace_id: post.workspace_id,
+        user_id:      userId,
+        action:       'post_published',
+        entity_type:  'post',
+        entity_id:    postId,
+        metadata:     { platforms: post.platforms, status: allFailed ? 'failed' : someFailed ? 'partial' : 'published' },
+      })
+    }
+
     return NextResponse.json({
       success: !allFailed,
       results,
@@ -324,6 +336,17 @@ export async function POST(request: NextRequest) {
       } catch (emailErr) {
         console.error('[PUBLISH] post published email failed (non-fatal):', emailErr)
       }
+    }
+
+    if (!allFailed && post.workspace_id) {
+      logActivity({
+        workspace_id: post.workspace_id,
+        user_id:      userId,
+        action:       'post_published',
+        entity_type:  'post',
+        entity_id:    postId,
+        metadata:     { platforms: post.platforms, status: finalStatus },
+      })
     }
 
     return NextResponse.json({
