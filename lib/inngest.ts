@@ -3974,7 +3974,7 @@ Rules:
             const hours = post.slot === 'morning' ? 9 : post.slot === 'afternoon' ? 14 : 19
             base.setHours(hours, 0, 0, 0)
 
-            const { error: postErr } = await admin.from('posts').insert({
+            const { data: insertedPost, error: postErr } = await admin.from('posts').insert({
               user_id: project.user_id,
               workspace_id: project.workspace_id,
               content: post.content,
@@ -3982,8 +3982,11 @@ Rules:
               status: postStatus,
               scheduled_at: base.toISOString(),
               metadata: { source: 'soma_autopilot', project_id: project.id, ingestion_id: ingestion.id, day: post.day, slot: post.slot, content_type: post.content_type },
-            })
-            if (!postErr) postsCreated++
+            }).select('id').single()
+            if (!postErr && insertedPost) {
+              postsCreated++
+              inngest.send({ name: 'post/scheduled', data: { postId: insertedPost.id, scheduledAt: base.toISOString() } }).catch(() => {})
+            }
           }
 
           await admin.from('soma_weekly_ingestion').update({ generated_posts_count: postsCreated }).eq('id', ingestion.id)
