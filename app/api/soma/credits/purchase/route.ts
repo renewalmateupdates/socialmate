@@ -13,12 +13,11 @@ function getStripe() {
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
 
-// SOMA credit pack price IDs — create these in Stripe dashboard
-// Products: one-time payments that add soma_credits_purchased
+// SOMA credit pack price IDs (Stripe live one-time products, created April 30 2026)
 export const SOMA_CREDIT_PACKS = [
-  { id: 'soma_75',  credits: 75,  price_id: process.env.STRIPE_SOMA_CREDITS_75  || '', label: 'Single Run',   amount: '$4.99'  },
-  { id: 'soma_225', credits: 225, price_id: process.env.STRIPE_SOMA_CREDITS_225 || '', label: 'Triple Pack',  amount: '$12.99' },
-  { id: 'soma_500', credits: 500, price_id: process.env.STRIPE_SOMA_CREDITS_500 || '', label: 'Power Pack',   amount: '$24.99' },
+  { id: 'soma_75',  credits: 75,  price_id: 'price_1TRx227OMwDowUuU8IRlxaRh', label: 'Starter',  amount: '$4.99'  },
+  { id: 'soma_225', credits: 225, price_id: 'price_1TRx2U7OMwDowUuU5ZqeMu6a', label: 'Growth',   amount: '$12.99' },
+  { id: 'soma_500', credits: 500, price_id: 'price_1TRx2w7OMwDowUuU4t8lMMwe', label: 'Pro',       amount: '$24.99' },
 ]
 
 export async function POST(req: NextRequest) {

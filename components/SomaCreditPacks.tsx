@@ -4,7 +4,7 @@ import { useState } from 'react'
 const PACKS = [
   {
     id:       'soma_75',
-    label:    'Single Run',
+    label:    'Starter',
     credits:  75,
     amount:   '$4.99',
     desc:     '1 full week of content generation',
@@ -12,7 +12,7 @@ const PACKS = [
   },
   {
     id:       'soma_225',
-    label:    'Triple Pack',
+    label:    'Growth',
     credits:  225,
     amount:   '$12.99',
     desc:     '3 generation runs — best value',
@@ -20,7 +20,7 @@ const PACKS = [
   },
   {
     id:       'soma_500',
-    label:    'Power Pack',
+    label:    'Pro',
     credits:  500,
     amount:   '$24.99',
     desc:     '6+ runs — for power users',
@@ -45,8 +45,6 @@ export default function SomaCreditPacks({ workspaceId }: { workspaceId: string |
     setLoading(null)
     if (data.url) {
       window.location.href = data.url
-    } else if (data.error === 'Pack not yet configured') {
-      setError('Credit packs coming soon — check back shortly.')
     } else {
       setError(data.error || 'Something went wrong.')
     }
