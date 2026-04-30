@@ -5,7 +5,11 @@ import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2025-01-27.acacia' })
+let _stripe: Stripe | null = null
+function getStripe() {
+  if (!_stripe) _stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-02-25.clover' })
+  return _stripe
+}
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
 
@@ -33,7 +37,7 @@ export async function POST(req: NextRequest) {
     if (!pack) return NextResponse.json({ error: 'Invalid pack' }, { status: 400 })
     if (!pack.price_id) return NextResponse.json({ error: 'Pack not yet configured' }, { status: 503 })
 
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripe().checkout.sessions.create({
       mode: 'payment',
       payment_method_types: ['card'],
       line_items: [{ price: pack.price_id, quantity: 1 }],

@@ -22,6 +22,7 @@ import {
   somaAutopilotRun,
   postPerformanceAlerts,
 } from '@/lib/inngest'
+import { newsletterAgent, clientReportAgent } from '@/lib/inngest-agents'
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
@@ -45,5 +46,7 @@ export const { GET, POST, PUT } = serve({
     streakNotifications,
     somaAutopilotRun,
     postPerformanceAlerts,
+    newsletterAgent,
+    clientReportAgent,
   ],
 })
