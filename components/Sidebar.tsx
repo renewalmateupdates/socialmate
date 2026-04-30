@@ -83,6 +83,7 @@ const NAV_BASE = [
     section: 'Grow',
     items: [
       { icon: '🤖', label: 'Agents',        href: '/agents'              },
+      { icon: '💸', label: 'Creator Hub',  href: '/monetize/hub'        },
       { icon: '⚡', label: 'SOMA',         href: '/soma/dashboard'      },
       { icon: '✨', label: 'AI Features',  href: '/ai-features'         },
       { icon: '🔥', label: 'SM-Pulse',     href: '/sm-pulse'            },

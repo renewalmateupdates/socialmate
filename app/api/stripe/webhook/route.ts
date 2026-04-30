@@ -788,6 +788,51 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true })
     }
 
+    // ── Creator tip — mark as paid ──
+    if (type === 'creator_tip') {
+      const tipId = session.metadata?.tip_id
+      if (tipId) {
+        try {
+          await supabase
+            .from('creator_tips')
+            .update({
+              status: 'paid',
+              stripe_checkout_session_id: session.id,
+              stripe_payment_intent_id: session.payment_intent as string | null,
+            })
+            .eq('id', tipId)
+        } catch (err) {
+          console.warn('Creator tip update failed (non-fatal):', err)
+        }
+      }
+      return NextResponse.json({ received: true })
+    }
+
+    // ── Creator subscription — record new fan subscriber ──
+    if (type === 'creator_subscription') {
+      const { creator_monetization_id, workspace_id } = session.metadata || {}
+      if (creator_monetization_id && workspace_id) {
+        try {
+          const customerDetails = (session as any).customer_details
+          const subscription = session.subscription as string | null
+          await supabase
+            .from('creator_fan_subscriptions')
+            .upsert({
+              workspace_id,
+              creator_monetization_id,
+              subscriber_email: customerDetails?.email || '',
+              subscriber_name:  customerDetails?.name  || null,
+              stripe_subscription_id: subscription,
+              stripe_customer_id:     session.customer as string | null,
+              status: 'active',
+            }, { onConflict: 'stripe_subscription_id' })
+        } catch (err) {
+          console.warn('Creator fan subscription record failed (non-fatal):', err)
+        }
+      }
+      return NextResponse.json({ received: true })
+    }
+
     // ── X Booster — one-time post top-up pack ──
     if (type === 'twitter_booster' && userId) {
       try {
