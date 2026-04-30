@@ -92,12 +92,12 @@ const AGENTS = [
     icon: '✍️',
     name: 'Caption Agent',
     tagline: 'Auto-draft posts from any topic',
-    description: 'Give it a topic or RSS feed — it watches, drafts posts for review, and queues them when you approve.',
-    cost: '5 credits / draft',
-    costType: 'credits',
+    description: 'Point it at any RSS feed — news, blogs, YouTube channels — and it drafts platform-ready posts every day. You review, approve, publish.',
+    cost: 'Free — Agency',
+    costType: 'free',
     tier: 'agency',
     href: '/agents/caption-agent',
-    live: false,
+    live: true,
   },
 ]
 
