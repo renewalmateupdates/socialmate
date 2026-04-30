@@ -402,7 +402,7 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 - **Inngest resync (CRITICAL after Apr 29 PRs merge)** — 6 new agent functions need registering in the Inngest dashboard: `newsletter-agent`, `client-report-agent`, `repurpose-agent`, `caption-agent`, `trend-scout-agent`, `inbox-agent`.
 
-- **SOMA credit pack Stripe products** — `SomaCreditPacks` component + `/api/soma/credits/purchase` route are built and deployed. Still need: create 3 Stripe one-time products in Stripe dashboard and set env vars in Vercel: `STRIPE_SOMA_CREDITS_75`, `STRIPE_SOMA_CREDITS_225`, `STRIPE_SOMA_CREDITS_500`. Prices: $4.99/75cr, $12.99/225cr, $24.99/500cr.
+- ~~SOMA credit pack Stripe products~~ ✅ DONE — see Confirmed Done section.
 
 - **Test SOMA end-to-end** — voice profile → create project → paste master doc → ingest → generate. Joshua confirmed SOMA is generating posts. Monitor whether scheduled posts actually publish (Inngest cron).
 
@@ -419,15 +419,17 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **LinkedIn publishing** — pending API credentials
 - **Schedule templates UI** — ✅ Built (PR #256) — `/schedules` page with full CRUD
 - **Workspace activity logging** — ✅ Wired into post publish (PR #256). Approval + member events still unwired.
-- **SOMA credit packs** — ✅ UI + API built (PR #256). Need Stripe products + env vars set (see above).
+- **SOMA credit packs** — ✅ Fully live. Stripe products created Apr 30. Price IDs hardcoded (PR #262).
 
 ## Confirmed Done (stop asking about these)
 
+- ✅ **SOMA Credit Packs fully live (Apr 30, PR #263)** — Stripe products created (Starter $4.99/75cr, Growth $12.99/225cr, Pro $24.99/500cr). Price IDs hardcoded. Labels updated. Webhook wired from PR #256.
+- ✅ **Capacitor Android wrapper + Link in Bio monetize blocks (Apr 30, PR #262)** — `capacitor.config.json`, Capacitor deps, `GOOGLE_PLAY_SETUP.md`, Link in Bio tip/subscribe quick-add, Creator Hub share section (QR + copy links).
 - ✅ **Toast safe-area fix (Apr 30, PR #261)** — `components/Toast.tsx` created. All 35 pages fixed. Zero remaining `fixed bottom-6 right-6` occurrences.
 - ✅ **Creator Monetization Hub (Apr 30, PR #261)** — Tip jar + fan subscriptions live. Stripe Connect Express. `/monetize/hub` dashboard. `/creator/[handle]` public page. Webhook handlers for tip/sub/cancel. SQL: 3 tables applied.
 - ✅ **Agents Hub complete (Apr 29)** — All 8 agents live: Email Outreach, Growth Scout, Newsletter, Client Report, Repurpose, Caption, Trend Scout, Inbox Agent. PRs #255–260 all merged. SQL for all 8 tables applied.
 - ✅ **Schedule Templates UI (PR #256)** — `/schedules` page built. Full CRUD.
-- ✅ **SOMA Credit Packs UI+API (PR #256)** — Component + checkout route built. Needs Stripe products created.
+- ✅ **SOMA Credit Packs UI+API (PR #256)** — Component + checkout route built. Stripe products created Apr 30.
 - ✅ **Workspace activity logging (PR #256)** — Wired into post publish route.
 - ✅ **PWA Install Prompt (PR #256)** — `InstallPrompt` component added to layout.
 
@@ -555,6 +557,9 @@ The diff = the story. Ship it to every platform.
 | SOMA Full Send | price_1TPlGE7OMwDowUuUWS0QUnLw | $20.00/mo |
 | Studio Stax Founding Member | price_1TP8wi7OMwDowUuUNQW7ER95 | $100.00/yr recurring |
 | Studio Stax Standard | price_1TP8xG7OMwDowUuUO05Vh1Kq | $150.00/yr recurring |
+| SOMA Credits Starter (75cr) | price_1TRx227OMwDowUuU8IRlxaRh | $4.99 one-time |
+| SOMA Credits Growth (225cr) | price_1TRx2U7OMwDowUuU5ZqeMu6a | $12.99 one-time |
+| SOMA Credits Pro (500cr) | price_1TRx2w7OMwDowUuU4t8lMMwe | $24.99 one-time |
 
 ---
 
