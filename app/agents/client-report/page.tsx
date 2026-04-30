@@ -58,7 +58,7 @@ export default function ClientReportPage() {
     }
   }
 
-  const isAgency = plan === 'agency' || plan === 'agency_annual'
+  const isAgency = plan === 'agency'
 
   if (!isAgency) {
     return (
