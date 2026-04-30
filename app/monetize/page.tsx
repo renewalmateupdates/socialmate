@@ -91,7 +91,7 @@ export default function MonetizeLandingPage() {
             >
               Open Creator Hub →
             </a>
-            <
+            <a
               href="#how-it-works"
               className="border-2 border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-bold px-8 py-3.5 rounded-2xl hover:border-purple-500 hover:text-purple-600 dark:hover:border-purple-500 dark:hover:text-purple-400 transition-all text-sm w-full sm:w-auto text-center"
             >
