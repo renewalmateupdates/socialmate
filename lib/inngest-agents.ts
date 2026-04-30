@@ -7,6 +7,14 @@ function getResend() { return new Resend(process.env.RESEND_API_KEY) }
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
 
+const REPURPOSE_PROMPTS: Record<string, string> = {
+  thread:        'Turn this into an engaging 5-7 part thread. Start with a hook. Number each part (1/, 2/, etc.). Keep each part under 280 characters.',
+  caption:       'Rewrite as a punchy social media caption under 150 chars with 3-5 relevant hashtags.',
+  linkedin_post: 'Rewrite as a professional LinkedIn post. Conversational but polished. 150-250 words.',
+  email:         "Turn this into a newsletter email section. Add a suggested subject line at the top prefixed with 'Subject:'",
+  short_hook:    'Distill into a single attention-grabbing hook under 140 characters.',
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Newsletter Agent — every Sunday 9am UTC
 // Takes each workspace's published posts from the past week, generates a
@@ -243,5 +251,123 @@ export const clientReportAgent = inngest.createFunction(
 
     console.log(`[ClientReportAgent] sent: ${sent}`)
     return { sent }
+  }
+)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Repurpose Agent — every Wednesday 9am UTC (Pro+)
+// Picks each workspace's best recent post and generates configured formats
+// as draft posts in the queue. Free, no credits charged per run.
+// ─────────────────────────────────────────────────────────────────────────────
+export const repurposeAgent = inngest.createFunction(
+  { id: 'repurpose-agent', name: 'Repurpose Agent', retries: 2 },
+  { cron: '0 9 * * 3' },
+  async ({ step }) => {
+    const admin  = getSupabaseAdmin()
+    const now    = new Date()
+    const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000)
+
+    const settings = await step.run('fetch-enabled-settings', async () => {
+      const { data } = await admin
+        .from('repurpose_settings')
+        .select('*')
+        .eq('enabled', true)
+      return data ?? []
+    })
+
+    if (!settings.length) return { processed: 0 }
+
+    let processed = 0
+
+    for (const cfg of settings as any[]) {
+      try {
+        await step.run(`repurpose-${cfg.workspace_id}`, async () => {
+          // Verify Pro+ plan
+          const { data: ws } = await admin
+            .from('workspaces')
+            .select('plan')
+            .eq('id', cfg.workspace_id)
+            .single()
+
+          if (!ws || ws.plan === 'free') return
+
+          // Pick the most recent published post from the last 2 weeks
+          const { data: posts } = await admin
+            .from('posts')
+            .select('id, content, platforms')
+            .eq('workspace_id', cfg.workspace_id)
+            .eq('status', 'published')
+            .gte('published_at', twoWeeksAgo.toISOString())
+            .order('published_at', { ascending: false })
+            .limit(1)
+
+          if (!posts || posts.length === 0) return
+
+          const sourcePost = posts[0]
+          if (!sourcePost.content || sourcePost.content.trim().length < 20) return
+
+          const apiKey = process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY
+          if (!apiKey) return
+
+          const genAI = new GoogleGenerativeAI(apiKey)
+          const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+
+          const formats: string[] = Array.isArray(cfg.formats) ? cfg.formats : ['thread', 'caption']
+
+          for (const format of formats) {
+            const instruction = REPURPOSE_PROMPTS[format]
+            if (!instruction) continue
+
+            try {
+              const prompt = `You are a content repurposing expert. ${instruction} Return only the repurposed content, nothing else.\n\nOriginal post:\n${sourcePost.content}`
+              const result = await model.generateContent(prompt)
+              const text   = result.response.text().trim()
+              if (!text) continue
+
+              const label: Record<string, string> = {
+                thread: 'Thread', caption: 'Caption', linkedin_post: 'LinkedIn Post',
+                email: 'Email Snippet', short_hook: 'Short Hook',
+              }
+
+              const draftContent = `[Repurposed as ${label[format] ?? format}]\n\n${text}`
+
+              await admin.from('posts').insert({
+                workspace_id: cfg.workspace_id,
+                user_id:      cfg.user_id,
+                content:      draftContent,
+                platforms:    [],
+                status:       cfg.mode === 'auto' ? 'scheduled' : 'draft',
+                scheduled_at: cfg.mode === 'auto' ? new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString() : null,
+              })
+            } catch (fmtErr: any) {
+              console.error(`[RepurposeAgent] format ${format} workspace ${cfg.workspace_id}:`, fmtErr?.message)
+            }
+          }
+
+          await admin.from('repurpose_settings')
+            .update({ last_ran_at: now.toISOString() })
+            .eq('workspace_id', cfg.workspace_id)
+
+          // Notify owner that new drafts are ready
+          if (cfg.mode === 'draft') {
+            await admin.from('notifications').insert({
+              user_id:    cfg.user_id,
+              type:       'repurpose_ready',
+              title:      '♻️ Repurposed drafts ready',
+              body:       `${formats.length} new draft${formats.length > 1 ? 's' : ''} generated from your best post this week.`,
+              action_url: '/drafts',
+              read:       false,
+            }).catch(() => {})
+          }
+
+          processed++
+        })
+      } catch (err: any) {
+        console.error(`[RepurposeAgent] workspace ${cfg.workspace_id}:`, err?.message)
+      }
+    }
+
+    console.log(`[RepurposeAgent] processed: ${processed}`)
+    return { processed }
   }
 )
