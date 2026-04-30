@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json()
   const {
     workspace_id,
-    page_handle, page_title, page_bio, avatar_url,
+    page_handle, page_title, page_bio, avatar_url, header_color,
     tip_enabled, tip_min, tip_max,
     subscription_enabled, subscription_price, subscription_name, subscription_description,
   } = body
@@ -75,6 +75,7 @@ export async function POST(req: NextRequest) {
       page_title: page_title || null,
       page_bio: page_bio || null,
       avatar_url: avatar_url || null,
+      header_color: header_color || '#F59E0B',
       tip_enabled: tip_enabled ?? false,
       tip_min: tip_min ?? 100,
       tip_max: tip_max ?? 10000,

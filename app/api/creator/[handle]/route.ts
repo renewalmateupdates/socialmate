@@ -7,7 +7,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ hand
 
   const { data: creator } = await supabase
     .from('creator_monetization')
-    .select('page_handle, page_title, page_bio, avatar_url, tip_enabled, tip_min, tip_max, subscription_enabled, subscription_price, subscription_name, subscription_description')
+    .select('page_handle, page_title, page_bio, avatar_url, header_color, tip_enabled, tip_min, tip_max, subscription_enabled, subscription_price, subscription_name, subscription_description')
     .eq('page_handle', handle)
     .eq('stripe_onboarding_complete', true)
     .single()

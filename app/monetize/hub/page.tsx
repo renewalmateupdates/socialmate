@@ -11,6 +11,7 @@ type Settings = {
   page_handle:               string | null
   page_title:                string | null
   page_bio:                  string | null
+  header_color:              string
   tip_enabled:               boolean
   tip_min:                   number
   tip_max:                   number
@@ -19,6 +20,17 @@ type Settings = {
   subscription_name:         string
   subscription_description:  string
 }
+
+const HEADER_COLORS = [
+  { hex: '#F59E0B', label: 'Amber'   },
+  { hex: '#6366f1', label: 'Indigo'  },
+  { hex: '#10b981', label: 'Emerald' },
+  { hex: '#f43f5e', label: 'Rose'    },
+  { hex: '#0ea5e9', label: 'Sky'     },
+  { hex: '#a855f7', label: 'Purple'  },
+  { hex: '#111827', label: 'Dark'    },
+  { hex: '#ffffff', label: 'White'   },
+]
 
 type Earnings = {
   tips:               { amount: number; supporter_name: string; message: string | null; created_at: string }[]
@@ -44,6 +56,7 @@ const DEFAULT: Settings = {
   page_handle: '',
   page_title: '',
   page_bio: '',
+  header_color: '#F59E0B',
   tip_enabled: false,
   tip_min: 100,
   tip_max: 10000,
@@ -321,6 +334,26 @@ function MonetizeHubInner() {
                 className="w-full bg-background border border-theme rounded-xl px-4 py-2 text-sm text-primary focus:outline-none focus:border-amber-400 resize-none"
               />
             </div>
+            <div>
+              <label className="block text-xs text-secondary mb-2">Header color</label>
+              <div className="flex flex-wrap gap-2">
+                {HEADER_COLORS.map(c => (
+                  <button
+                    key={c.hex}
+                    title={c.label}
+                    onClick={() => setSettings(s => ({ ...s, header_color: c.hex }))}
+                    className="w-7 h-7 rounded-full border-2 transition-all"
+                    style={{
+                      background: c.hex,
+                      borderColor: settings.header_color === c.hex ? '#F59E0B' : 'transparent',
+                      outline: settings.header_color === c.hex ? '2px solid #F59E0B' : 'none',
+                      outlineOffset: 2,
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+
             {settings.page_handle && (
               <a
                 href={`/creator/${settings.page_handle}`}
