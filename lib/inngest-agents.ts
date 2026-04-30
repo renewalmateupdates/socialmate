@@ -373,3 +373,198 @@ export const repurposeAgent = inngest.createFunction(
     return { processed }
   }
 )
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Caption Agent — every day at 11am UTC (Agency only)
+// Checks configured RSS feeds for new items, generates social post drafts via
+// Gemini, drops them into the workspace queue. Free, no per-draft credits.
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface RSSItem {
+  guid:        string
+  title:       string
+  link:        string
+  description: string
+  pubDate:     string
+}
+
+function parseRSSFeed(xml: string): RSSItem[] {
+  const items: RSSItem[] = []
+
+  // Support both RSS 2.0 <item> and Atom <entry>
+  const itemPattern = xml.includes('<item>') || xml.includes('<item ')
+    ? /<item[^>]*>([\s\S]*?)<\/item>/g
+    : /<entry[^>]*>([\s\S]*?)<\/entry>/g
+
+  let m: RegExpExecArray | null
+  while ((m = itemPattern.exec(xml)) !== null) {
+    const block = m[1]
+
+    const get = (tag: string, fallback = '') => {
+      const r = new RegExp(`<${tag}[^>]*>(?:<!\\[CDATA\\[)?([\\s\\S]*?)(?:\\]\\]>)?<\\/${tag}>`, 'i')
+      const match = block.match(r)
+      return match ? match[1].trim() : fallback
+    }
+
+    // <link> can be text content or href attribute (Atom)
+    let link = get('link')
+    if (!link) {
+      const linkHref = block.match(/<link[^>]+href="([^"]+)"/)
+      if (linkHref) link = linkHref[1]
+    }
+
+    const guid = get('guid') || get('id') || link
+    const title = get('title')
+    const description = get('description') || get('summary') || get('content')
+    const pubDate = get('pubDate') || get('published') || get('updated') || ''
+
+    if (!title && !description) continue
+    items.push({ guid, title, link, description: description.replace(/<[^>]+>/g, '').slice(0, 500), pubDate })
+  }
+
+  return items
+}
+
+export const captionAgent = inngest.createFunction(
+  { id: 'caption-agent', name: 'Caption Agent', retries: 2 },
+  { cron: '0 11 * * *' },
+  async ({ step }) => {
+    const admin = getSupabaseAdmin()
+    const now   = new Date()
+    const since = new Date(now.getTime() - 25 * 60 * 60 * 1000) // last 25h with overlap buffer
+
+    const settings = await step.run('fetch-enabled-settings', async () => {
+      const { data } = await admin
+        .from('caption_agent_settings')
+        .select('*')
+        .eq('enabled', true)
+      return data ?? []
+    })
+
+    if (!settings.length) return { processed: 0, drafted: 0 }
+
+    let processed = 0
+    let drafted   = 0
+
+    for (const cfg of settings as any[]) {
+      try {
+        await step.run(`caption-${cfg.workspace_id}`, async () => {
+          // Verify Agency plan
+          const { data: ws } = await admin
+            .from('workspaces')
+            .select('plan')
+            .eq('id', cfg.workspace_id)
+            .single()
+
+          if (!ws || !['agency', 'agency_annual'].includes(ws.plan ?? '')) return
+
+          const feeds: Array<{ url: string; label: string }> = Array.isArray(cfg.feed_urls) ? cfg.feed_urls : []
+          if (!feeds.length) return
+
+          const apiKey = process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY
+          if (!apiKey) return
+
+          const genAI = new GoogleGenerativeAI(apiKey)
+          const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+
+          const maxDrafts = cfg.max_per_day ?? 3
+          const platforms: string[] = Array.isArray(cfg.platforms) ? cfg.platforms : []
+          const toneHint  = cfg.tone_hint ? ` Write in this tone: ${cfg.tone_hint}.` : ''
+          let draftsThisRun = 0
+
+          for (const feed of feeds) {
+            if (draftsThisRun >= maxDrafts) break
+
+            try {
+              const res = await fetch(feed.url, {
+                headers: { 'User-Agent': 'SocialMate/1.0 RSS Bot (+https://socialmate.studio)' },
+                signal: AbortSignal.timeout(10000),
+              })
+              if (!res.ok) continue
+              const xml = await res.text()
+              const items = parseRSSFeed(xml)
+
+              // Filter to only items published since last run (or last 25h)
+              const cutoff = cfg.last_ran_at ? new Date(cfg.last_ran_at) : since
+              const newItems = items.filter(item => {
+                if (!item.pubDate) return true // include if no date
+                const d = new Date(item.pubDate)
+                return !isNaN(d.getTime()) && d > cutoff
+              })
+
+              for (const item of newItems.slice(0, maxDrafts - draftsThisRun)) {
+                if (draftsThisRun >= maxDrafts) break
+
+                const context = [item.title, item.description].filter(Boolean).join('\n\n')
+                if (!context.trim()) continue
+
+                const prompt = `You are a social media content writer. Write a short, engaging social media post based on the following article.${toneHint}
+
+Rules:
+- Under 280 characters
+- Engaging opener — no "Check out this article" or "I just read"
+- Add 2-3 relevant hashtags at the end
+- Sound human, not like a bot
+- Include the link at the end: ${item.link || ''}
+
+Article:
+Title: ${item.title}
+${item.description}
+
+Return ONLY the post text, nothing else.`
+
+                try {
+                  const result = await model.generateContent(prompt)
+                  const text   = result.response.text().trim()
+                  if (!text) continue
+
+                  await admin.from('posts').insert({
+                    workspace_id: cfg.workspace_id,
+                    user_id:      cfg.user_id,
+                    content:      text,
+                    platforms:    platforms,
+                    status:       cfg.mode === 'auto' ? 'scheduled' : 'draft',
+                    scheduled_at: cfg.mode === 'auto'
+                      ? new Date(now.getTime() + (draftsThisRun + 1) * 2 * 60 * 60 * 1000).toISOString()
+                      : null,
+                  })
+
+                  draftsThisRun++
+                  drafted++
+                } catch (genErr: any) {
+                  console.error(`[CaptionAgent] Gemini error workspace ${cfg.workspace_id}:`, genErr?.message)
+                }
+              }
+            } catch (feedErr: any) {
+              console.error(`[CaptionAgent] feed fetch error ${feed.url}:`, feedErr?.message)
+            }
+          }
+
+          await admin.from('caption_agent_settings')
+            .update({ last_ran_at: now.toISOString() })
+            .eq('workspace_id', cfg.workspace_id)
+
+          if (draftsThisRun > 0 && cfg.mode === 'draft') {
+            try {
+              await admin.from('notifications').insert({
+                user_id:    cfg.user_id,
+                type:       'caption_drafts_ready',
+                title:      '✍️ Caption drafts ready',
+                body:       `${draftsThisRun} new post draft${draftsThisRun > 1 ? 's' : ''} generated from your RSS feeds.`,
+                action_url: '/drafts',
+                read:       false,
+              })
+            } catch {}
+          }
+
+          processed++
+        })
+      } catch (err: any) {
+        console.error(`[CaptionAgent] workspace ${cfg.workspace_id}:`, err?.message)
+      }
+    }
+
+    console.log(`[CaptionAgent] processed: ${processed}, drafted: ${drafted}`)
+    return { processed, drafted }
+  }
+)
