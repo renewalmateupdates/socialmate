@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-function makeClient() {
-  const cookieStore = cookies()
+async function makeClient() {
+  const cookieStore = await cookies()
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -12,7 +12,7 @@ function makeClient() {
 }
 
 export async function GET(req: NextRequest) {
-  const supabase = makeClient()
+  const supabase = await makeClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -29,7 +29,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const supabase = makeClient()
+  const supabase = await makeClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -53,12 +53,10 @@ export async function POST(req: NextRequest) {
 
   if (!workspace_id) return NextResponse.json({ error: 'workspace_id required' }, { status: 400 })
 
-  // Validate handle: lowercase alphanumeric + hyphens, 3–30 chars
   if (page_handle) {
     if (!/^[a-z0-9-]{3,30}$/.test(page_handle)) {
       return NextResponse.json({ error: 'Handle must be 3–30 lowercase letters, numbers, or hyphens.' }, { status: 400 })
     }
-    // Check uniqueness (excluding this workspace)
     const { data: existing } = await supabase
       .from('creator_monetization')
       .select('workspace_id')
