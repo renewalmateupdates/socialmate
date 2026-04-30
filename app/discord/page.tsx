@@ -48,7 +48,7 @@ interface WordFilterAutomation {
 function Toast({ message, type }: { message: string; type: 'success' | 'error' }) {
   return (
     <div
-      className={`fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl text-sm font-semibold shadow-lg transition-all ${
+      style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className={`fixed right-6 z-50 px-4 py-3 rounded-xl text-sm font-semibold shadow-lg transition-all ${
         type === 'success'
           ? 'bg-green-500 text-white'
           : 'bg-red-500 text-white'

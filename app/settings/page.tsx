@@ -1543,7 +1543,7 @@ function SettingsInner() {
 
       {/* TOASTS */}
       {savedTab === 'credits_purchased' && (
-        <div className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg bg-black text-white">
+        <div style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className="fixed right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg bg-black text-white">
           ✅ Credits added to your account!
         </div>
       )}

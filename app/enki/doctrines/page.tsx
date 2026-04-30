@@ -813,7 +813,7 @@ export default function EnkiDoctrinesPage() {
       )}
 
       {/* ── Toast stack ── */}
-      <div className="fixed bottom-6 right-6 z-[60] flex flex-col gap-2 pointer-events-none">
+      <div style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className="fixed right-6 z-[60] flex flex-col gap-2 pointer-events-none">
         {toasts.map((t) => (
           <div
             key={t.id}

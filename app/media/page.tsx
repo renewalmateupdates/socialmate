@@ -322,7 +322,7 @@ export default function MediaLibrary() {
       </div>
 
       {toast && (
-        <div className={`fixed bottom-6 right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${
+        <div style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className={`fixed right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${
           toast.type === 'success' ? 'bg-black text-white' : 'bg-red-500 text-white'
         }`}>
           {toast.type === 'success' ? '✅' : '❌'} {toast.message}
