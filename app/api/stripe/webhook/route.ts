@@ -833,6 +833,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true })
     }
 
+    // ── Creator post one-time unlock ──
+    if (type === 'creator_post_unlock') {
+      const { post_id, unlock_id } = session.metadata || {}
+      if (unlock_id) {
+        try {
+          await supabase
+            .from('creator_post_unlocks')
+            .update({
+              status: 'paid',
+              stripe_session_id: session.id,
+              buyer_email: (session as any).customer_details?.email || null,
+              paid_at: new Date().toISOString(),
+            })
+            .eq('id', unlock_id)
+        } catch (err) {
+          console.warn('Creator post unlock update failed (non-fatal):', err)
+        }
+      }
+      return NextResponse.json({ received: true })
+    }
+
     // ── X Booster — one-time post top-up pack ──
     if (type === 'twitter_booster' && userId) {
       try {
