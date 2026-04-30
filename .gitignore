@@ -41,3 +41,11 @@ yarn-error.log*
 next-env.d.ts
 
 *.code-workspace
+
+# Capacitor / Android
+*.jks
+*.keystore
+android/.gradle
+android/app/release
+android/build
+android/local.properties
