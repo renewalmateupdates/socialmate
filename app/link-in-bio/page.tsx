@@ -42,18 +42,20 @@ const SOCIAL_PLATFORMS = [
 ]
 
 const LINK_TYPES = [
-  { id: 'custom',    label: 'Custom Link', icon: '🔗' },
-  { id: 'youtube',   label: 'YouTube',     icon: '▶️' },
-  { id: 'instagram', label: 'Instagram',   icon: '📸' },
-  { id: 'twitter',   label: 'X / Twitter', icon: '𝕏'  },
-  { id: 'bluesky',   label: 'Bluesky',     icon: '🦋' },
-  { id: 'mastodon',  label: 'Mastodon',    icon: '🐘' },
-  { id: 'discord',   label: 'Discord',     icon: '💬' },
-  { id: 'telegram',  label: 'Telegram',    icon: '✈️' },
-  { id: 'tiktok',    label: 'TikTok',      icon: '🎵' },
-  { id: 'linkedin',  label: 'LinkedIn',    icon: '💼' },
-  { id: 'email',     label: 'Email',       icon: '📧' },
-  { id: 'website',   label: 'Website',     icon: '🌐' },
+  { id: 'custom',    label: 'Custom Link',    icon: '🔗' },
+  { id: 'tip',       label: 'Tip Jar',        icon: '💸' },
+  { id: 'subscribe', label: 'Fan Subscribe',  icon: '🔁' },
+  { id: 'youtube',   label: 'YouTube',        icon: '▶️' },
+  { id: 'instagram', label: 'Instagram',      icon: '📸' },
+  { id: 'twitter',   label: 'X / Twitter',    icon: '𝕏'  },
+  { id: 'bluesky',   label: 'Bluesky',        icon: '🦋' },
+  { id: 'mastodon',  label: 'Mastodon',       icon: '🐘' },
+  { id: 'discord',   label: 'Discord',        icon: '💬' },
+  { id: 'telegram',  label: 'Telegram',       icon: '✈️' },
+  { id: 'tiktok',    label: 'TikTok',         icon: '🎵' },
+  { id: 'linkedin',  label: 'LinkedIn',       icon: '💼' },
+  { id: 'email',     label: 'Email',          icon: '📧' },
+  { id: 'website',   label: 'Website',        icon: '🌐' },
 ]
 
 const PUBLIC_BASE = 'socialmate.studio/l'
@@ -99,6 +101,7 @@ export default function LinkInBio() {
   const [showQr, setShowQr] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const [copied, setCopied] = useState(false)
+  const [creatorHandle, setCreatorHandle] = useState<string | null>(null)
 
   const [customDomainUnlocked, setCustomDomainUnlocked] = useState(false)
   const [customDomain, setCustomDomain] = useState('')
@@ -155,6 +158,19 @@ export default function LinkInBio() {
       const { data: settings } = await supabase
         .from('user_settings').select('custom_domain_unlocked').eq('user_id', authUser.id).single()
       if (settings) setCustomDomainUnlocked(settings.custom_domain_unlocked || false)
+
+      // Fetch creator handle for tip/subscribe quick-add
+      try {
+        const { data: ws } = await supabase
+          .from('workspaces').select('id').eq('owner_id', authUser.id).eq('is_personal', true).single()
+        if (ws) {
+          const cmRes = await fetch(`/api/monetize/settings?workspace_id=${ws.id}`)
+          if (cmRes.ok) {
+            const cmData = await cmRes.json()
+            if (cmData?.settings?.page_handle) setCreatorHandle(cmData.settings.page_handle)
+          }
+        }
+      } catch { /* non-fatal */ }
 
       const { data: referrals } = await supabase
         .from('referral_conversions').select('status').eq('affiliate_user_id', authUser.id)
@@ -547,6 +563,34 @@ export default function LinkInBio() {
                     className="w-full py-2.5 border-2 border-dashed border-gray-200 dark:border-gray-600 rounded-2xl text-xs font-bold text-gray-400 dark:text-gray-500 hover:border-gray-400 hover:text-black dark:hover:text-white transition-all">
                     + Add Link
                   </button>
+
+                  {/* Monetize quick-add */}
+                  <div className="pt-1">
+                    <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-2">💸 Monetize</p>
+                    {creatorHandle ? (
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          onClick={() => setLinks(prev => [...prev, { id: makeId(), title: 'Send a Tip 💸', url: `https://socialmate.studio/creator/${creatorHandle}`, active: true, type: 'tip' }])}
+                          className="py-2 border-2 border-dashed border-amber-300 dark:border-amber-700 rounded-xl text-xs font-bold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all"
+                        >
+                          + Tip Jar
+                        </button>
+                        <button
+                          onClick={() => setLinks(prev => [...prev, { id: makeId(), title: 'Become a Fan 🔁', url: `https://socialmate.studio/creator/${creatorHandle}`, active: true, type: 'subscribe' }])}
+                          className="py-2 border-2 border-dashed border-emerald-300 dark:border-emerald-700 rounded-xl text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all"
+                        >
+                          + Fan Subscribe
+                        </button>
+                      </div>
+                    ) : (
+                      <a
+                        href="/monetize/hub"
+                        className="block w-full py-2 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl text-xs text-gray-400 dark:text-gray-500 text-center hover:border-amber-400 hover:text-amber-500 transition-all"
+                      >
+                        Set up Creator Hub to add tip + subscribe buttons →
+                      </a>
+                    )}
+                  </div>
                 </div>
               )}
 

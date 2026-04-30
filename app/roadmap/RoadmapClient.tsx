@@ -24,7 +24,8 @@ const ROADMAP: RoadmapItem[] = [
   { title: 'YouTube Community Posts',    desc: 'Post to YouTube Community tab (requires 500+ subscribers). OAuth token management complete.',                    status: 'coming-soon',  category: 'Platforms'     },
   { title: 'Pinterest publishing',       desc: 'Pin creation via Pinterest v5 API with board selection. OAuth complete.',                                        status: 'coming-soon',  category: 'Platforms'     },
   { title: 'Blog auto-generation',       desc: 'Gemini writes a blog feature post for each Studio Stax lister once past the refund window. Lister gets notified by email when it\'s live.', status: 'coming-soon', category: 'Platform' },
-  { title: 'Creator Monetization Hub',   desc: 'Fan subscriptions, tip jars, and paywalled content for creators — landing page live at /monetize with waitlist capture.',  status: 'in-progress',  category: 'Monetization'  },
+  { title: 'Creator Monetization Hub',   desc: 'Tip jars, fan subscriptions, and paywalled content powered by Stripe Connect. 0% platform cut. Live at /monetize/hub (Pro+).',  status: 'shipped',  category: 'Monetization'  },
+  { title: 'Google Play Store app',     desc: 'Capacitor WebView wrapper for Android. Config + setup guide committed. Pending icon assets and Play Console submission.',               status: 'in-progress',  category: 'Mobile'        },
 
   // ── PLANNED ───────────────────────────────────────────────
   { title: 'Instagram publishing',       desc: 'Instagram Graph API integration. Requires Facebook Business account and Meta app review.',                       status: 'planned',      category: 'Platforms'     },
@@ -34,7 +35,7 @@ const ROADMAP: RoadmapItem[] = [
   { title: 'Reddit',                     desc: 'Reddit API integration for posting to subreddits. Respects rate limits and flair requirements.',                 status: 'planned',      category: 'Platforms'     },
   { title: 'Browser extension',          desc: 'Save content from any webpage directly to SocialMate drafts or queue with one click.',                           status: 'planned',      category: 'Tools'         },
   { title: 'Post analytics per platform', desc: 'Platform-specific engagement data (impressions, clicks, follows) returned from each platform API.',             status: 'planned',      category: 'Analytics'     },
-  { title: 'Native iOS & Android apps',  desc: 'Full mobile apps for iOS and Android. Schedule, compose, and manage posts on the go.',                           status: 'planned',      category: 'Mobile'        },
+  { title: 'Native iOS app',             desc: 'Full iOS app. Planned after Google Play launch establishes baseline. Requires Apple Developer Program ($99/yr).',    status: 'planned',      category: 'Mobile'        },
   { title: 'SOC 2 compliance',           desc: 'Security certification for enterprise white label clients. Required for larger agency contracts.',                status: 'planned',      category: 'Platform'      },
 
   // ── SHIPPED ───────────────────────────────────────────────

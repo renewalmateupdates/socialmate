@@ -3,8 +3,8 @@ import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import Stripe from 'stripe'
 
-function makeClient() {
-  const cookieStore = cookies()
+async function makeClient() {
+  const cookieStore = await cookies()
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -13,7 +13,7 @@ function makeClient() {
 }
 
 export async function GET(req: NextRequest) {
-  const supabase = makeClient()
+  const supabase = await makeClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -30,10 +30,10 @@ export async function GET(req: NextRequest) {
   const plan = (ws?.plan ?? 'free').replace('_annual', '')
   if (plan === 'free') return NextResponse.json({ error: 'Pro plan required' }, { status: 403 })
 
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2025-01-27.acacia' })
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-02-25.clover' })
 
   // Get or create Stripe Connect Express account
-  let { data: settings } = await supabase
+  const { data: settings } = await supabase
     .from('creator_monetization')
     .select('stripe_account_id')
     .eq('workspace_id', workspaceId)

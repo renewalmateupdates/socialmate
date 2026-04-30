@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -42,7 +42,7 @@ const DEFAULT: Settings = {
   subscription_description: 'Support my work and get access to exclusive content.',
 }
 
-export default function MonetizeHubPage() {
+function MonetizeHubInner() {
   const { activeWorkspaceId: workspaceId, plan } = useWorkspace()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -81,6 +81,14 @@ export default function MonetizeHubPage() {
     setToastType(type)
     setTimeout(() => setToast(''), 4000)
   }
+
+  function copyToClipboard(text: string, label: string) {
+    navigator.clipboard.writeText(text).then(() => showToast(`${label} copied!`, 'success'))
+  }
+
+  const creatorUrl = settings.page_handle
+    ? `https://socialmate.studio/creator/${settings.page_handle}`
+    : null
 
   async function save() {
     if (!workspaceId) return
@@ -159,6 +167,54 @@ export default function MonetizeHubPage() {
               )}
             </div>
           </div>
+
+          {/* Share your page */}
+          {settings.stripe_onboarding_complete && creatorUrl && (
+            <div className="bg-surface border border-theme rounded-2xl p-5">
+              <p className="text-xs font-bold uppercase tracking-wide text-secondary mb-3">Share Your Page</p>
+              <div className="flex items-center gap-2 bg-background border border-theme rounded-xl px-3 py-2 mb-3">
+                <span className="text-xs text-secondary truncate flex-1">{creatorUrl}</span>
+                <button
+                  onClick={() => copyToClipboard(creatorUrl, 'Creator page link')}
+                  className="text-xs font-bold text-amber-500 hover:text-amber-400 shrink-0"
+                >
+                  Copy
+                </button>
+                <a href={creatorUrl} target="_blank" rel="noopener noreferrer"
+                  className="text-xs font-bold text-secondary hover:text-primary shrink-0">
+                  Open →
+                </a>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {settings.tip_enabled && (
+                  <button
+                    onClick={() => copyToClipboard(creatorUrl, 'Tip jar link')}
+                    className="py-2 rounded-xl border border-theme bg-background text-xs font-bold text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all"
+                  >
+                    💸 Copy Tip Link
+                  </button>
+                )}
+                {settings.subscription_enabled && (
+                  <button
+                    onClick={() => copyToClipboard(creatorUrl, 'Subscribe link')}
+                    className="py-2 rounded-xl border border-theme bg-background text-xs font-bold text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all"
+                  >
+                    🔁 Copy Sub Link
+                  </button>
+                )}
+                <a
+                  href={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(creatorUrl)}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="py-2 rounded-xl border border-theme bg-background text-xs font-bold text-secondary hover:text-primary hover:border-amber-400/50 transition-all text-center"
+                >
+                  📱 QR Code
+                </a>
+              </div>
+              <p className="text-xs text-secondary mt-2">
+                Add to your <a href="/link-in-bio" className="text-amber-500 hover:underline">Link in Bio →</a>
+              </p>
+            </div>
+          )}
 
           {/* Earnings summary */}
           {settings.stripe_onboarding_complete && earnings && (
@@ -357,5 +413,13 @@ export default function MonetizeHubPage() {
 
       <Toast message={toast} type={toastType} />
     </div>
+  )
+}
+
+export default function MonetizeHubPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><p className="text-secondary text-sm">Loading…</p></div>}>
+      <MonetizeHubInner />
+    </Suspense>
   )
 }

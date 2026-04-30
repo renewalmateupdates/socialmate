@@ -1130,6 +1130,19 @@ const creditsToSet = alreadyOnPlan
       return NextResponse.json({ received: true })
     }
 
+    // ── Creator fan subscription cancelled ──
+    if (subscription.metadata?.type === 'creator_subscription') {
+      try {
+        await supabase
+          .from('creator_fan_subscriptions')
+          .update({ status: 'cancelled', cancelled_at: new Date().toISOString() })
+          .eq('stripe_subscription_id', subscription.id)
+      } catch (err) {
+        console.warn('Creator fan sub cancellation update failed (non-fatal):', err)
+      }
+      return NextResponse.json({ received: true })
+    }
+
     const { isWhiteLabelOnly } = resolveSubscription(subscription)
 
     if (isWhiteLabelOnly) {

@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
@@ -19,7 +19,7 @@ type CreatorProfile = {
 
 const TIP_PRESETS = [100, 300, 500, 1000] // cents
 
-export default function CreatorPage() {
+function CreatorPageInner() {
   const { handle } = useParams<{ handle: string }>()
   const searchParams = useSearchParams()
 
@@ -249,5 +249,13 @@ export default function CreatorPage() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function CreatorPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><p className="text-secondary text-sm">Loading…</p></div>}>
+      <CreatorPageInner />
+    </Suspense>
   )
 }

@@ -1,21 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import Stripe from 'stripe'
-
-function makeClient() {
-  const cookieStore = cookies()
-  return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
-    { cookies: { getAll: () => cookieStore.getAll(), setAll: (a) => a.forEach(({ name, value, options }) => cookieStore.set(name, value, options)) } }
-  )
-}
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ handle: string }> }) {
   const { handle } = await params
 
-  const supabase = makeClient()
+  const supabase = getSupabaseAdmin()
 
   const { data: creator } = await supabase
     .from('creator_monetization')
@@ -31,7 +21,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ han
   }
 
   const origin = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2025-01-27.acacia' })
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2026-02-25.clover' })
 
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
