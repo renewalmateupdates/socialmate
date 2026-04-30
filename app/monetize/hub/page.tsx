@@ -27,6 +27,17 @@ type Earnings = {
   active_subscribers: number
 }
 
+type PaywalledPost = {
+  id:                 string
+  title:              string
+  preview:            string
+  content:            string
+  unlock_price_cents: number | null
+  created_at:         string
+}
+
+const BLANK_POST = { title: '', preview: '', content: '', unlock_price: '' }
+
 const DEFAULT: Settings = {
   stripe_account_id: null,
   stripe_onboarding_complete: false,
@@ -55,14 +66,23 @@ function MonetizeHubInner() {
   const [toastType, setToastType] = useState<'success' | 'error' | 'info'>('info')
   const [error,     setError]     = useState('')
 
+  // paywalled posts
+  const [posts,       setPosts]       = useState<PaywalledPost[]>([])
+  const [showNewPost, setShowNewPost] = useState(false)
+  const [newPost,     setNewPost]     = useState(BLANK_POST)
+  const [savingPost,  setSavingPost]  = useState(false)
+  const [deletingId,  setDeletingId]  = useState<string | null>(null)
+
   useEffect(() => {
     if (!workspaceId) return
     Promise.all([
       fetch(`/api/monetize/settings?workspace_id=${workspaceId}`).then(r => r.ok ? r.json() : null),
       fetch(`/api/monetize/earnings?workspace_id=${workspaceId}`).then(r => r.ok ? r.json() : null),
-    ]).then(([sd, ed]) => {
+      fetch(`/api/monetize/paywalled-posts?workspace_id=${workspaceId}`).then(r => r.ok ? r.json() : null),
+    ]).then(([sd, ed, pd]) => {
       if (sd?.settings) setSettings(s => ({ ...s, ...sd.settings }))
       if (ed) setEarnings(ed)
+      if (pd?.posts) setPosts(pd.posts)
     }).finally(() => setLoading(false))
   }, [workspaceId])
 
@@ -110,6 +130,43 @@ function MonetizeHubInner() {
   function connectStripe() {
     if (!workspaceId) return
     router.push(`/api/monetize/connect?workspace_id=${workspaceId}`)
+  }
+
+  async function createPost() {
+    if (!workspaceId || !newPost.title.trim() || !newPost.preview.trim() || !newPost.content.trim()) return
+    setSavingPost(true)
+    const res = await fetch('/api/monetize/paywalled-posts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        workspace_id:       workspaceId,
+        title:              newPost.title.trim(),
+        preview:            newPost.preview.trim(),
+        content:            newPost.content.trim(),
+        unlock_price_cents: newPost.unlock_price ? Math.round(parseFloat(newPost.unlock_price) * 100) : null,
+      }),
+    })
+    setSavingPost(false)
+    if (res.ok) {
+      const d = await res.json()
+      setPosts(prev => [d.post, ...prev])
+      setNewPost(BLANK_POST)
+      setShowNewPost(false)
+      showToast('Post created!', 'success')
+    } else {
+      const d = await res.json()
+      showToast(d.error || 'Failed to create post.', 'error')
+    }
+  }
+
+  async function deletePost(id: string) {
+    setDeletingId(id)
+    const res = await fetch(`/api/monetize/paywalled-posts?id=${id}`, { method: 'DELETE' })
+    setDeletingId(null)
+    if (res.ok) {
+      setPosts(prev => prev.filter(p => p.id !== id))
+      showToast('Post deleted.', 'info')
+    }
   }
 
   const isPro = plan !== 'free'
@@ -373,6 +430,109 @@ function MonetizeHubInner() {
           >
             {saving ? 'Saving…' : 'Save Settings'}
           </button>
+
+          {/* Paywalled posts */}
+          {settings.stripe_onboarding_complete && (
+            <div className="bg-surface border border-theme rounded-2xl p-5 space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-bold text-primary">🔒 Exclusive Posts</p>
+                  <p className="text-xs text-secondary mt-0.5">Paywalled content for fans and one-time buyers</p>
+                </div>
+                <button
+                  onClick={() => setShowNewPost(v => !v)}
+                  className="text-xs font-black text-amber-500 hover:text-amber-400 border border-amber-400/40 rounded-lg px-3 py-1.5"
+                >
+                  {showNewPost ? 'Cancel' : '+ New Post'}
+                </button>
+              </div>
+
+              {showNewPost && (
+                <div className="space-y-3 pt-3 border-t border-theme">
+                  <div>
+                    <label className="block text-xs text-secondary mb-1">Title</label>
+                    <input
+                      value={newPost.title}
+                      onChange={e => setNewPost(p => ({ ...p, title: e.target.value }))}
+                      placeholder="My exclusive update"
+                      className="w-full bg-background border border-theme rounded-xl px-4 py-2 text-sm text-primary focus:outline-none focus:border-amber-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-secondary mb-1">Preview (shown to everyone)</label>
+                    <textarea
+                      value={newPost.preview}
+                      onChange={e => setNewPost(p => ({ ...p, preview: e.target.value }))}
+                      placeholder="A short teaser your audience can see before unlocking..."
+                      rows={2}
+                      className="w-full bg-background border border-theme rounded-xl px-4 py-2 text-sm text-primary focus:outline-none focus:border-amber-400 resize-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-secondary mb-1">Full content (fans only)</label>
+                    <textarea
+                      value={newPost.content}
+                      onChange={e => setNewPost(p => ({ ...p, content: e.target.value }))}
+                      placeholder="The full post your fans will see after unlocking..."
+                      rows={5}
+                      className="w-full bg-background border border-theme rounded-xl px-4 py-2 text-sm text-primary focus:outline-none focus:border-amber-400 resize-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-secondary mb-1">One-time unlock price (optional — leave blank for sub-only)</label>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-secondary">$</span>
+                      <input
+                        type="number"
+                        min={1}
+                        step={0.01}
+                        value={newPost.unlock_price}
+                        onChange={e => setNewPost(p => ({ ...p, unlock_price: e.target.value }))}
+                        placeholder="e.g. 2.99"
+                        className="flex-1 bg-background border border-theme rounded-xl px-4 py-2 text-sm text-primary focus:outline-none focus:border-amber-400"
+                      />
+                    </div>
+                    <p className="text-xs text-secondary mt-1">If set, non-subscribers can also pay once to unlock this post.</p>
+                  </div>
+                  <button
+                    onClick={createPost}
+                    disabled={savingPost || !newPost.title.trim() || !newPost.preview.trim() || !newPost.content.trim()}
+                    className="w-full bg-amber-400 hover:bg-amber-300 disabled:opacity-50 text-black font-black py-2 rounded-xl text-sm transition-all"
+                  >
+                    {savingPost ? 'Creating…' : 'Create Post'}
+                  </button>
+                </div>
+              )}
+
+              {posts.length > 0 ? (
+                <div className="space-y-2 pt-2 border-t border-theme">
+                  {posts.map(post => (
+                    <div key={post.id} className="flex items-start justify-between gap-3 bg-background border border-theme rounded-xl p-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-primary truncate">{post.title}</p>
+                        <p className="text-xs text-secondary truncate">{post.preview}</p>
+                        <div className="flex gap-2 mt-1">
+                          {post.unlock_price_cents && (
+                            <span className="text-xs text-amber-600 font-bold">${post.unlock_price_cents / 100} one-time</span>
+                          )}
+                          <span className="text-xs text-emerald-600 font-bold">fans</span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => deletePost(post.id)}
+                        disabled={deletingId === post.id}
+                        className="text-xs text-red-400 hover:text-red-300 shrink-0 disabled:opacity-50"
+                      >
+                        {deletingId === post.id ? '...' : 'Delete'}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : !showNewPost && (
+                <p className="text-xs text-secondary text-center py-4">No exclusive posts yet. Create your first one above.</p>
+              )}
+            </div>
+          )}
 
           {/* Recent tips */}
           {earnings && earnings.tips.length > 0 && (
