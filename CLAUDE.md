@@ -351,6 +351,19 @@ These have burned us before — always apply:
   CREATE POLICY "Anyone can join waitlist" ON monetize_waitlist FOR INSERT WITH CHECK (true);
   ```
 
+**April 29, 2026 (PRs #255–#260):**
+- **Agents Hub** (PR #255) — `/agents` hub page with Live Now / Coming Soon sections. Launched with Email Outreach Agent (5 credits/email, Gemini-powered subject+body, draft history) and Growth Scout (free Pro+, reads competitor_posts + own posts, cadence chart, top competitor posts, insights).
+- **Phase 2 roadmap features** (PR #256) — Schedule Templates UI at `/schedules` (full CRUD, day/time slot picker); SOMA Credit Packs component + `/api/soma/credits/purchase` Stripe checkout (3 pack sizes, lazy Stripe init); Workspace activity logging wired into `/api/posts/publish`; PWA Install Prompt (`components/InstallPrompt.tsx`, `beforeinstallprompt`, 7-day dismiss).
+- **Newsletter Agent** (PR #257) — Sunday 9am UTC cron. Draft mode: generates newsletter from week's posts via Gemini, emails owner to review. Auto mode: sends to full subscriber list via Resend. Settings at `/agents/newsletter`. Tables: `newsletter_settings`, `newsletter_sends`.
+- **Client Report Agent** (PR #257) — Monday 9am UTC cron. Agency-only. Generates HTML email report (posts published, scheduled ahead, active platforms) sent to owner + CC list. Settings at `/agents/client-report`. Table: `client_report_settings`.
+- **Repurpose Agent** (PR #258) — Wednesday 9am UTC cron. Pro+. Picks best recent post, repurposes to selected formats (Thread/Caption/LinkedIn/Email/Short Hook) via Gemini, creates drafts. No per-run credits. Settings at `/agents/repurpose`. Table: `repurpose_settings`.
+- **Caption Agent** (PR #259) — Daily 11am UTC cron. Agency-only. Watches configured RSS feeds, finds new articles since last run, generates social post drafts via Gemini (custom `parseRSSFeed()` regex parser, no npm deps). Max-per-day cap, tone guidance, draft/auto mode. Settings at `/agents/caption-agent`. Table: `caption_agent_settings`.
+- **Trend Scout** (PR #260) — Daily 7am UTC cron. Pro+. Analyzes competitor posts from last 48h + user's own recent posts via Gemini. Returns 5 trending content angles (topic/why_now/angle/sample_caption). Each has a "Draft Post" button that pre-fills Compose. Falls back to evergreen angles if no competitor data. Table: `trend_scout_settings` + `trend_scout_results`.
+- **Inbox Agent** (PR #260) — Every 2h cron. Pro+. Refreshes Bluesky tokens from `connected_accounts`, fetches unread mentions, generates suggested replies via Gemini with tone guidance. Stores in `inbox_reply_drafts` with full Bluesky threading metadata (parent_uri/cid, root_uri/cid). Settings page at `/agents/inbox-agent` shows pending drafts with Send/Edit/Dismiss controls that call existing `/api/inbox/reply`. Tables: `inbox_agent_settings`, `inbox_reply_drafts`.
+- **All 8 agents now live** — agents hub has zero coming-soon slots. Roadmap page updated.
+- **SQL run after each PR** — all 8 new DB tables confirmed applied.
+- **Inngest functions to resync after PRs #257–260 merge**: `newsletter-agent`, `client-report-agent`, `repurpose-agent`, `caption-agent`, `trend-scout-agent`, `inbox-agent`
+
 ---
 
 ## Known Issues / Bugs (fix these when touched)
@@ -383,7 +396,11 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 - **Abdus Sohag trial review** — trial ended April 26. Decide: keep at 10%, bump to standard 30%, or cut. Referral link: `?ref=SOHAG`.
 
-- **Test SOMA end-to-end** — voice profile → create project → paste master doc → ingest → generate. Joshua confirmed SOMA is generating posts. Monitor whether scheduled posts actually publish (Inngest cron). Check other platforms beyond Telegram work for new users.
+- **Inngest resync (CRITICAL after Apr 29 PRs merge)** — 6 new agent functions need registering in the Inngest dashboard: `newsletter-agent`, `client-report-agent`, `repurpose-agent`, `caption-agent`, `trend-scout-agent`, `inbox-agent`.
+
+- **SOMA credit pack Stripe products** — `SomaCreditPacks` component + `/api/soma/credits/purchase` route are built and deployed. Still need: create 3 Stripe one-time products in Stripe dashboard and set env vars in Vercel: `STRIPE_SOMA_CREDITS_75`, `STRIPE_SOMA_CREDITS_225`, `STRIPE_SOMA_CREDITS_500`. Prices: $4.99/75cr, $12.99/225cr, $24.99/500cr.
+
+- **Test SOMA end-to-end** — voice profile → create project → paste master doc → ingest → generate. Joshua confirmed SOMA is generating posts. Monitor whether scheduled posts actually publish (Inngest cron).
 
 - **Push notification VAPID keys** — CONFIRMED SET in Vercel. Push notifications are live.
 
@@ -393,18 +410,22 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 - **TikTok API review** — submitted Apr 23. Support ticket `ad7714530aa61ad4` open re: app name. Check portal periodically. No action needed until approved.
 
-- **Inngest resync** — after any deploy touching `lib/inngest.ts`, resync functions in Inngest dashboard.
-
 **Roadmap (next up):**
-- **PWA / Google Play Store** — Add `manifest.json` + service worker for PWA (1-day). Then Capacitor wrapper for Play Store submission. Don't wait for API integrations.
+- **PWA / Google Play Store** — `manifest.json` + service worker already added (PR #256). Next: Capacitor wrapper for Play Store submission.
 - **Shared Toast component** — 25+ pages use `fixed bottom-6 right-6` for toasts without safe-area. Create a shared `<Toast>` component with `env(safe-area-inset-bottom)` built in and swap all usages.
 - **Creator Monetization Hub** — full build (Stripe Connect required; tip jar, fan subscriptions, paywalled posts)
 - **LinkedIn publishing** — pending API credentials
-- **Schedule templates UI** — `/api/schedule-templates` exists but no UI yet
-- **Workspace activity logging** — `workspace_activity` table exists but nothing writes to it yet; wire in post publish, approval, member actions
-- **SOMA credit packs** — no way for users to buy more SOMA credits in-app; add credit pack purchase to SOMA dashboard
+- **Schedule templates UI** — ✅ Built (PR #256) — `/schedules` page with full CRUD
+- **Workspace activity logging** — ✅ Wired into post publish (PR #256). Approval + member events still unwired.
+- **SOMA credit packs** — ✅ UI + API built (PR #256). Need Stripe products + env vars set (see above).
 
 ## Confirmed Done (stop asking about these)
+
+- ✅ **Agents Hub complete (Apr 29)** — All 8 agents live: Email Outreach, Growth Scout, Newsletter, Client Report, Repurpose, Caption, Trend Scout, Inbox Agent. PRs #255–260 all merged. SQL for all 8 tables applied.
+- ✅ **Schedule Templates UI (PR #256)** — `/schedules` page built. Full CRUD.
+- ✅ **SOMA Credit Packs UI+API (PR #256)** — Component + checkout route built. Needs Stripe products created.
+- ✅ **Workspace activity logging (PR #256)** — Wired into post publish route.
+- ✅ **PWA Install Prompt (PR #256)** — `InstallPrompt` component added to layout.
 
 - ✅ **PR #229** — SOMA per-platform schedule (posts/day + day picker per platform). Migration: soma_projects.platform_schedule. Merged.
 - ✅ **PR #228** — SOMA new project only shows connected platforms (GET /api/accounts/connected). Merged.

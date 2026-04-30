@@ -154,7 +154,7 @@ export default function FeedbackWidget() {
       {/* Floating trigger button — bottom right */}
       <button
         onClick={() => setOpen(o => !o)}
-        className="fixed bottom-6 right-6 z-50 w-12 h-12 bg-pink-500 hover:bg-pink-600 text-white rounded-full shadow-lg transition-all flex items-center justify-center text-lg font-bold"
+        style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className="fixed right-6 z-50 w-12 h-12 bg-pink-500 hover:bg-pink-600 text-white rounded-full shadow-lg transition-all flex items-center justify-center text-lg font-bold"
         title="Send feedback">
         {open ? '×' : '💬'}
       </button>

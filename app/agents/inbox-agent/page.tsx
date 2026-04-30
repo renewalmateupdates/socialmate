@@ -265,7 +265,7 @@ export default function InboxAgentPage() {
       )}
 
       {toast && (
-        <div className="fixed bottom-6 right-6 bg-gray-900 text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-xl">{toast}</div>
+        <div style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className="fixed right-6 bg-gray-900 text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-xl">{toast}</div>
       )}
     </div>
   )

@@ -515,7 +515,7 @@ export default function CalendarPage() {
       </div>
 
       {retryToast && (
-        <div className={`fixed bottom-6 right-6 z-50 text-white text-xs font-bold px-4 py-3 rounded-xl shadow-lg ${
+        <div style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className={`fixed right-6 z-50 text-white text-xs font-bold px-4 py-3 rounded-xl shadow-lg ${
           retryToast.type === 'error' ? 'bg-red-500' : 'bg-black'
         }`}>
           {retryToast.message}

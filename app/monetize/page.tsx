@@ -67,9 +67,9 @@ export default function MonetizeLandingPage() {
 
         {/* ── HERO ── */}
         <section className="text-center mb-20">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs font-bold mb-6 uppercase tracking-widest">
-            <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
-            Coming Soon
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold mb-6 uppercase tracking-widest">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            Now Live — Pro+
           </span>
 
           <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50 mb-6 leading-tight">
@@ -86,12 +86,12 @@ export default function MonetizeLandingPage() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
             <a
-              href="#waitlist"
+              href="/monetize/hub"
               className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-8 py-3.5 rounded-2xl transition-all text-sm w-full sm:w-auto text-center"
             >
-              Get early access →
+              Open Creator Hub →
             </a>
-            <a
+            <
               href="#how-it-works"
               className="border-2 border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-bold px-8 py-3.5 rounded-2xl hover:border-purple-500 hover:text-purple-600 dark:hover:border-purple-500 dark:hover:text-purple-400 transition-all text-sm w-full sm:w-auto text-center"
             >

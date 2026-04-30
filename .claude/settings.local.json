@@ -21,7 +21,8 @@
       "Bash(while read:*)",
       "Bash(do sed:*)",
       "Bash(grep -n \"supabase\\\\.\" app/l/[slug]/page.tsx)",
-      "Bash(grep -n \"supabase\" app/l/[slug]/page.tsx)"
+      "Bash(grep -n \"supabase\" app/l/[slug]/page.tsx)",
+      "Bash(git add *)"
     ]
   }
 }
