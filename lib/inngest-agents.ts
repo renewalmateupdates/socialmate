@@ -350,14 +350,16 @@ export const repurposeAgent = inngest.createFunction(
 
           // Notify owner that new drafts are ready
           if (cfg.mode === 'draft') {
-            await admin.from('notifications').insert({
-              user_id:    cfg.user_id,
-              type:       'repurpose_ready',
-              title:      '♻️ Repurposed drafts ready',
-              body:       `${formats.length} new draft${formats.length > 1 ? 's' : ''} generated from your best post this week.`,
-              action_url: '/drafts',
-              read:       false,
-            }).catch(() => {})
+            try {
+              await admin.from('notifications').insert({
+                user_id:    cfg.user_id,
+                type:       'repurpose_ready',
+                title:      '♻️ Repurposed drafts ready',
+                body:       `${formats.length} new draft${formats.length > 1 ? 's' : ''} generated from your best post this week.`,
+                action_url: '/drafts',
+                read:       false,
+              })
+            } catch {}
           }
 
           processed++
