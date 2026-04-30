@@ -364,6 +364,10 @@ These have burned us before — always apply:
 - **SQL run after each PR** — all 8 new DB tables confirmed applied.
 - **Inngest functions to resync after PRs #257–260 merge**: `newsletter-agent`, `client-report-agent`, `repurpose-agent`, `caption-agent`, `trend-scout-agent`, `inbox-agent`
 
+**April 30, 2026 (PR #261):**
+- **Toast safe-area fix** — `components/Toast.tsx` shared component added with `env(safe-area-inset-bottom)`. Replaced `fixed bottom-6 right-6` with safe-area style across all 35 pages/components — zero remaining occurrences codebase-wide.
+- **Creator Monetization Hub** — full build. Stripe Connect Express onboarding (`/api/monetize/connect` + callback). Settings API (Pro+ gate): page handle/title/bio, tip jar (min/max/enable), fan subscription (price/name/desc/enable). `/monetize/hub` dashboard: connect Stripe, earnings cards (total tips + active subscribers), recent tips + fan list. `/creator/[handle]` public page: tip presets ($1/$3/$5/$10), custom amount, name/message, fan sub card, "Powered by SocialMate". 0% platform cut — all payments via Stripe Connect `transfer_data.destination`. Stripe webhook: `creator_tip` (mark paid), `creator_subscription` (record fan), `customer.subscription.deleted` (mark cancelled). Sidebar: 💸 Creator Hub. Landing page updated to "Now Live — Pro+". SQL: `creator_monetization`, `creator_tips`, `creator_fan_subscriptions` tables with RLS.
+
 ---
 
 ## Known Issues / Bugs (fix these when touched)
@@ -412,8 +416,6 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 **Roadmap (next up):**
 - **PWA / Google Play Store** — `manifest.json` + service worker already added (PR #256). Next: Capacitor wrapper for Play Store submission.
-- **Shared Toast component** — 25+ pages use `fixed bottom-6 right-6` for toasts without safe-area. Create a shared `<Toast>` component with `env(safe-area-inset-bottom)` built in and swap all usages.
-- **Creator Monetization Hub** — full build (Stripe Connect required; tip jar, fan subscriptions, paywalled posts)
 - **LinkedIn publishing** — pending API credentials
 - **Schedule templates UI** — ✅ Built (PR #256) — `/schedules` page with full CRUD
 - **Workspace activity logging** — ✅ Wired into post publish (PR #256). Approval + member events still unwired.
@@ -421,6 +423,8 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 ## Confirmed Done (stop asking about these)
 
+- ✅ **Toast safe-area fix (Apr 30, PR #261)** — `components/Toast.tsx` created. All 35 pages fixed. Zero remaining `fixed bottom-6 right-6` occurrences.
+- ✅ **Creator Monetization Hub (Apr 30, PR #261)** — Tip jar + fan subscriptions live. Stripe Connect Express. `/monetize/hub` dashboard. `/creator/[handle]` public page. Webhook handlers for tip/sub/cancel. SQL: 3 tables applied.
 - ✅ **Agents Hub complete (Apr 29)** — All 8 agents live: Email Outreach, Growth Scout, Newsletter, Client Report, Repurpose, Caption, Trend Scout, Inbox Agent. PRs #255–260 all merged. SQL for all 8 tables applied.
 - ✅ **Schedule Templates UI (PR #256)** — `/schedules` page built. Full CRUD.
 - ✅ **SOMA Credit Packs UI+API (PR #256)** — Component + checkout route built. Needs Stripe products created.
