@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -42,7 +42,7 @@ const DEFAULT: Settings = {
   subscription_description: 'Support my work and get access to exclusive content.',
 }
 
-export default function MonetizeHubPage() {
+function MonetizeHubInner() {
   const { activeWorkspaceId: workspaceId, plan } = useWorkspace()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -357,5 +357,13 @@ export default function MonetizeHubPage() {
 
       <Toast message={toast} type={toastType} />
     </div>
+  )
+}
+
+export default function MonetizeHubPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><p className="text-secondary text-sm">Loading…</p></div>}>
+      <MonetizeHubInner />
+    </Suspense>
   )
 }
