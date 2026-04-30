@@ -12,12 +12,14 @@ const ROADMAP: RoadmapItem[] = [
   // ── IN PROGRESS ──────────────────────────────────────────
   { title: 'SOMA per-platform schedule', desc: 'Set different posts/day counts and day-of-week schedules per platform when creating a SOMA project. Bluesky 2x weekdays, X 1x weekends — all configured independently.', status: 'shipped', category: 'AI' },
   { title: 'SOMA connected-platform filter', desc: 'New SOMA project form only shows platforms you\'ve actually connected. Pre-selects all. Empty state links to Settings if nothing is connected.', status: 'shipped', category: 'AI' },
+  { title: 'Agents Hub — 8 autonomous agents', desc: 'Full Agents hub at /agents with 8 live autonomous workers: Email Outreach, Growth Scout, Newsletter, Client Report, Repurpose, Caption, Trend Scout, and Inbox Agent. Each runs on its own schedule, no manual intervention needed.', status: 'shipped', category: 'AI' },
   { title: 'Schedule templates UI',      desc: 'UI for the schedule_templates API — save reusable posting schedules and apply them to new projects with one click.',                   status: 'in-progress', category: 'Scheduling' },
   { title: 'Workspace activity logging', desc: 'Wire workspace_activity table to capture post publish, approval decisions, and member actions. /activity page already built.', status: 'in-progress', category: 'Teams' },
   { title: 'Media Library',              desc: 'Upload, compress, and reuse images and videos across posts. Grid view, filter by type, copy URL, delete. Storage limits per plan.',     status: 'shipped',  category: 'Media'         },
 
   // ── COMING SOON ───────────────────────────────────────────
   { title: 'Streak notifications',       desc: 'Automated streak tracking with at-risk alerts — get notified when your posting streak is about to break.',        status: 'shipped',  category: 'Analytics'     },
+  { title: 'SOMA credit packs',          desc: 'Buy more SOMA credits in-app without upgrading your plan. Three pack sizes: 75cr/$4.99, 225cr/$12.99, 500cr/$24.99. Stripe products need creating.', status: 'in-progress', category: 'AI' },
   { title: 'LinkedIn publishing',        desc: 'Full UGC Posts API integration. Requires LinkedIn developer app approval (r/w_member_social).',                 status: 'coming-soon',  category: 'Platforms'     },
   { title: 'YouTube Community Posts',    desc: 'Post to YouTube Community tab (requires 500+ subscribers). OAuth token management complete.',                    status: 'coming-soon',  category: 'Platforms'     },
   { title: 'Pinterest publishing',       desc: 'Pin creation via Pinterest v5 API with board selection. OAuth complete.',                                        status: 'coming-soon',  category: 'Platforms'     },

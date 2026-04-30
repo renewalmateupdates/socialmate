@@ -568,3 +568,315 @@ Return ONLY the post text, nothing else.`
     return { processed, drafted }
   }
 )
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Trend Scout Agent — every day at 7am UTC (Pro+)
+// Analyzes competitor posts from the last 48h via Gemini and surfaces
+// 5 trending content angles with a ready-to-use draft for each.
+// ─────────────────────────────────────────────────────────────────────────────
+export const trendScoutAgent = inngest.createFunction(
+  { id: 'trend-scout-agent', name: 'Trend Scout Agent', retries: 2 },
+  { cron: '0 7 * * *' },
+  async ({ step }) => {
+    const admin = getSupabaseAdmin()
+    const now   = new Date()
+    const since48h = new Date(now.getTime() - 48 * 60 * 60 * 1000)
+
+    const settings = await step.run('fetch-enabled-settings', async () => {
+      const { data } = await admin
+        .from('trend_scout_settings')
+        .select('*')
+        .eq('enabled', true)
+      return data ?? []
+    })
+
+    if (!settings.length) return { processed: 0 }
+
+    let processed = 0
+
+    for (const cfg of settings as any[]) {
+      try {
+        await step.run(`trend-scout-${cfg.workspace_id}`, async () => {
+          const { data: ws } = await admin
+            .from('workspaces')
+            .select('plan')
+            .eq('id', cfg.workspace_id)
+            .single()
+
+          if (!ws || ws.plan === 'free') return
+
+          const apiKey = process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY
+          if (!apiKey) return
+
+          // Fetch competitor accounts + recent posts
+          const { data: competitors } = await admin
+            .from('competitor_accounts')
+            .select('id, username, platform')
+            .eq('workspace_id', cfg.workspace_id)
+
+          const competitorIds = (competitors ?? []).map((c: any) => c.id)
+          let postBlock = ''
+
+          if (competitorIds.length > 0) {
+            const { data: posts } = await admin
+              .from('competitor_posts')
+              .select('content, platform, engagement_score')
+              .in('competitor_id', competitorIds)
+              .gte('posted_at', since48h.toISOString())
+              .order('engagement_score', { ascending: false })
+              .limit(30)
+
+            postBlock = (posts ?? [])
+              .map((p: any) => `[${p.platform}] ${p.content?.slice(0, 200)}`)
+              .join('\n')
+          }
+
+          // Also pull the user's own recent posts for context
+          const { data: myPosts } = await admin
+            .from('posts')
+            .select('content, platforms')
+            .eq('workspace_id', cfg.workspace_id)
+            .eq('status', 'published')
+            .order('published_at', { ascending: false })
+            .limit(10)
+
+          const myBlock = (myPosts ?? [])
+            .map((p: any) => `[${(p.platforms ?? []).join('/')}] ${p.content?.slice(0, 150)}`)
+            .join('\n')
+
+          const prompt = `You are a social media trend analyst. Based on the content below, identify 5 distinct trending content angles a creator should post about today.
+
+${postBlock ? `COMPETITOR POSTS (last 48h):\n${postBlock}\n\n` : ''}${myBlock ? `CREATOR'S RECENT POSTS:\n${myBlock}\n\n` : ''}
+
+For each trend, return:
+- topic: the specific subject or theme (max 6 words)
+- why_now: brief reason it's relevant today (max 15 words)
+- angle: the unique spin this creator should take (max 20 words)
+- sample_caption: a ready-to-post caption under 280 chars with 2-3 hashtags
+
+${postBlock ? '' : 'No competitor data yet — generate evergreen creator/business content angles instead.\n\n'}
+
+Return ONLY valid JSON array:
+[{"topic":"...","why_now":"...","angle":"...","sample_caption":"..."}]`
+
+          const genAI = new GoogleGenerativeAI(apiKey)
+          const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+
+          const result = await model.generateContent(prompt)
+          const text   = result.response.text().replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim()
+
+          let trends: any[] = []
+          try { trends = JSON.parse(text) } catch { return }
+          if (!Array.isArray(trends) || trends.length === 0) return
+
+          await admin.from('trend_scout_results').insert({
+            workspace_id: cfg.workspace_id,
+            user_id:      cfg.user_id,
+            trends,
+          })
+
+          await admin.from('trend_scout_settings')
+            .update({ last_ran_at: now.toISOString() })
+            .eq('workspace_id', cfg.workspace_id)
+
+          try {
+            await admin.from('notifications').insert({
+              user_id:    cfg.user_id,
+              type:       'trend_scout_ready',
+              title:      '📈 Today\'s trends are in',
+              body:       `${trends.length} content angles identified for today. Post while they\'re hot.`,
+              action_url: '/agents/trend-scout',
+              read:       false,
+            })
+          } catch {}
+
+          processed++
+        })
+      } catch (err: any) {
+        console.error(`[TrendScoutAgent] workspace ${cfg.workspace_id}:`, err?.message)
+      }
+    }
+
+    console.log(`[TrendScoutAgent] processed: ${processed}`)
+    return { processed }
+  }
+)
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Inbox Agent — every 2 hours (Pro+)
+// Fetches unread Bluesky mentions for each enabled workspace, drafts smart
+// replies via Gemini, stores them in inbox_reply_drafts for user review.
+// ─────────────────────────────────────────────────────────────────────────────
+export const inboxAgent = inngest.createFunction(
+  { id: 'inbox-agent', name: 'Inbox Agent', retries: 1 },
+  { cron: '0 */2 * * *' },
+  async ({ step }) => {
+    const admin = getSupabaseAdmin()
+    const now   = new Date()
+
+    const settings = await step.run('fetch-enabled-settings', async () => {
+      const { data } = await admin
+        .from('inbox_agent_settings')
+        .select('*')
+        .eq('enabled', true)
+      return data ?? []
+    })
+
+    if (!settings.length) return { processed: 0, drafted: 0 }
+
+    let processed = 0
+    let drafted   = 0
+
+    for (const cfg of settings as any[]) {
+      try {
+        await step.run(`inbox-agent-${cfg.workspace_id}`, async () => {
+          const { data: ws } = await admin
+            .from('workspaces')
+            .select('plan')
+            .eq('id', cfg.workspace_id)
+            .single()
+
+          if (!ws || ws.plan === 'free') return
+
+          const apiKey = process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY
+          if (!apiKey) return
+
+          // Get Bluesky connected account for this user
+          const { data: account } = await admin
+            .from('connected_accounts')
+            .select('access_token, refresh_token, platform_user_id')
+            .eq('user_id', cfg.user_id)
+            .eq('platform', 'bluesky')
+            .maybeSingle()
+
+          if (!account) return
+
+          // Refresh token
+          let accessJwt = account.access_token
+          try {
+            const refreshRes = await fetch('https://bsky.social/xrpc/com.atproto.server.refreshSession', {
+              method: 'POST',
+              headers: { Authorization: `Bearer ${account.refresh_token}` },
+            })
+            if (refreshRes.ok) {
+              const session = await refreshRes.json()
+              accessJwt = session.accessJwt
+              await admin
+                .from('connected_accounts')
+                .update({ access_token: session.accessJwt, refresh_token: session.refreshJwt })
+                .eq('user_id', cfg.user_id)
+                .eq('platform', 'bluesky')
+            }
+          } catch {}
+
+          // Fetch notifications
+          const notifRes = await fetch(
+            'https://bsky.social/xrpc/app.bsky.notification.listNotifications?limit=20',
+            { headers: { Authorization: `Bearer ${accessJwt}` } }
+          )
+          if (!notifRes.ok) return
+
+          const { notifications } = await notifRes.json()
+          const mentions = (notifications ?? []).filter(
+            (n: any) => ['mention', 'reply'].includes(n.reason) && !n.isRead
+          )
+
+          if (!mentions.length) return
+
+          const genAI = new GoogleGenerativeAI(apiKey)
+          const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+          const toneHint = cfg.tone_hint ? ` Tone: ${cfg.tone_hint}.` : ''
+
+          for (const n of mentions.slice(0, 5)) {
+            const mentionId   = n.uri
+            const mentionText = n.record?.text ?? ''
+            const author      = n.author?.handle ? `@${n.author.handle}` : 'someone'
+            const postUrl     = n.uri
+              ? `https://bsky.app/profile/${n.author?.handle}/post/${n.uri.split('/').pop()}`
+              : null
+
+            // Skip if already drafted
+            const { data: existing } = await admin
+              .from('inbox_reply_drafts')
+              .select('id')
+              .eq('workspace_id', cfg.workspace_id)
+              .eq('platform', 'bluesky')
+              .eq('mention_id', mentionId)
+              .maybeSingle()
+
+            if (existing) continue
+            if (!mentionText.trim()) continue
+
+            try {
+              const prompt = `Write a short, genuine reply to this social media mention.${toneHint}
+
+From: ${author}
+Message: "${mentionText}"
+
+Rules:
+- Under 250 characters
+- Natural and human — not corporate
+- Don't start with "Great question!" or "Thanks for reaching out"
+- If it's a question, answer it. If it's a comment, engage with it.
+
+Return ONLY the reply text, nothing else.`
+
+              const result = await model.generateContent(prompt)
+              const reply  = result.response.text().trim()
+              if (!reply) continue
+
+              // Build reply metadata for Bluesky threading
+              const replyMeta: Record<string, string> = {
+                parent_uri: n.uri,
+                parent_cid: n.cid,
+                root_uri:   n.record?.reply?.root?.uri ?? n.uri,
+                root_cid:   n.record?.reply?.root?.cid ?? n.cid,
+              }
+
+              await admin.from('inbox_reply_drafts').insert({
+                workspace_id:    cfg.workspace_id,
+                user_id:         cfg.user_id,
+                platform:        'bluesky',
+                mention_id:      mentionId,
+                mention_text:    mentionText.slice(0, 500),
+                mention_author:  author,
+                mention_url:     postUrl,
+                suggested_reply: reply,
+                reply_metadata:  replyMeta,
+                status:          'pending',
+              })
+
+              drafted++
+            } catch (genErr: any) {
+              console.error(`[InboxAgent] Gemini error:`, genErr?.message)
+            }
+          }
+
+          await admin.from('inbox_agent_settings')
+            .update({ last_ran_at: now.toISOString() })
+            .eq('workspace_id', cfg.workspace_id)
+
+          if (drafted > 0) {
+            try {
+              await admin.from('notifications').insert({
+                user_id:    cfg.user_id,
+                type:       'inbox_replies_ready',
+                title:      '💬 Reply drafts ready',
+                body:       `${drafted} reply suggestion${drafted > 1 ? 's' : ''} waiting for your review.`,
+                action_url: '/agents/inbox-agent',
+                read:       false,
+              })
+            } catch {}
+          }
+
+          processed++
+        })
+      } catch (err: any) {
+        console.error(`[InboxAgent] workspace ${cfg.workspace_id}:`, err?.message)
+      }
+    }
+
+    console.log(`[InboxAgent] processed: ${processed}, drafted: ${drafted}`)
+    return { processed, drafted }
+  }
+)
