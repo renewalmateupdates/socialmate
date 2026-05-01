@@ -4415,7 +4415,7 @@ export const publishScheduledTiktokPosts = inngest.createFunction(
   { cron: '*/5 * * * *' },
   async ({ step }) => {
     const due = await step.run('fetch-due-tiktok-posts', async () => {
-      const { data } = await adminSupabase
+      const { data } = await getSupabaseAdmin()
         .from('tiktok_posts')
         .select('id, user_id, video_url, post_caption, sound_id, sound_name, privacy_level, disable_duet, disable_comment, disable_stitch')
         .eq('status', 'scheduled')
@@ -4432,7 +4432,7 @@ export const publishScheduledTiktokPosts = inngest.createFunction(
         const clientSecret = process.env.TIKTOK_SANDBOX_CLIENT_SECRET || process.env.TIKTOK_CLIENT_SECRET!
 
         // Get + refresh token
-        const { data: account } = await adminSupabase
+        const { data: account } = await getSupabaseAdmin()
           .from('connected_accounts')
           .select('id, access_token, refresh_token, expires_at, platform_user_id')
           .eq('user_id', post.user_id)
@@ -4440,7 +4440,7 @@ export const publishScheduledTiktokPosts = inngest.createFunction(
           .maybeSingle()
 
         if (!account) {
-          await adminSupabase
+          await getSupabaseAdmin()
             .from('tiktok_posts')
             .update({ status: 'failed', error_message: 'TikTok account disconnected' })
             .eq('id', post.id)
@@ -4461,14 +4461,14 @@ export const publishScheduledTiktokPosts = inngest.createFunction(
             const rd = await refreshRes.json()
             token = rd.access_token
             const expires_at = rd.expires_in ? new Date(Date.now() + rd.expires_in * 1000).toISOString() : null
-            await adminSupabase
+            await getSupabaseAdmin()
               .from('connected_accounts')
               .update({ access_token: token, refresh_token: rd.refresh_token, expires_at })
               .eq('id', account.id)
           }
         }
 
-        await adminSupabase.from('tiktok_posts').update({ status: 'publishing' }).eq('id', post.id)
+        await getSupabaseAdmin().from('tiktok_posts').update({ status: 'publishing' }).eq('id', post.id)
 
         const postBody: Record<string, unknown> = {
           post_info: {
@@ -4499,7 +4499,7 @@ export const publishScheduledTiktokPosts = inngest.createFunction(
 
         if (!tikRes.ok) {
           const errMsg = tikData?.error?.message || `TikTok API error ${tikRes.status}`
-          await adminSupabase
+          await getSupabaseAdmin()
             .from('tiktok_posts')
             .update({ status: 'failed', error_message: errMsg })
             .eq('id', post.id)
@@ -4509,17 +4509,31 @@ export const publishScheduledTiktokPosts = inngest.createFunction(
         const publishId    = tikData?.data?.publish_id
         const tiktokPostId = tikData?.data?.publicaly_available_post_id?.[0] || publishId
 
-        await adminSupabase
+        await getSupabaseAdmin()
           .from('tiktok_posts')
           .update({ status: 'published', tiktok_post_id: tiktokPostId, tiktok_account_open_id: account.platform_user_id })
           .eq('id', post.id)
 
-        // Increment monthly quota
-        await adminSupabase.rpc('increment', { table: 'workspaces', column: 'tiktok_videos_this_month', row_id: post.user_id }).catch(() => {})
+        // Increment monthly quota (best-effort)
+        try {
+          const { data: ws } = await getSupabaseAdmin()
+            .from('workspaces')
+            .select('tiktok_videos_this_month')
+            .eq('owner_id', post.user_id)
+            .eq('is_personal', true)
+            .maybeSingle()
+          if (ws) {
+            await getSupabaseAdmin()
+              .from('workspaces')
+              .update({ tiktok_videos_this_month: (ws.tiktok_videos_this_month ?? 0) + 1 })
+              .eq('owner_id', post.user_id)
+              .eq('is_personal', true)
+          }
+        } catch { /* non-fatal */ }
 
         published++
       }).catch(async (err: { message?: string }) => {
-        await adminSupabase
+        await getSupabaseAdmin()
           .from('tiktok_posts')
           .update({ status: 'failed', error_message: err?.message || 'Unknown error' })
           .eq('id', post.id)
