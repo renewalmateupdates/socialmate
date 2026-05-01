@@ -105,7 +105,7 @@ These have burned us before — always apply:
 
 ---
 
-## What's Been Built (as of April 26, 2026 — end of day)
+## What's Been Built (as of May 1, 2026)
 
 **Core:**
 - Post scheduling (Now + future via Inngest), drafts, queue, calendar, bulk scheduling
@@ -396,33 +396,55 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 ---
 
+## May 1, 2026 (PRs #266–#267)
+
+- **Workspace activity logging — member events (PR #266)** — `DELETE /api/team/[id]` server route created (was client-side direct Supabase delete). `member.removed` logged on removal. `member.joined` logged in `accept/route.ts` when invite accepted. All logActivity calls non-fatal.
+- **TikTok Studio (PR #267)** — Full Option B build in sandbox mode.
+  - `GET /api/tiktok/auth` — OAuth initiation (sandbox creds first, falls back to production)
+  - `GET /api/tiktok/callback` — Token exchange + upsert `connected_accounts`
+  - `POST /api/tiktok/disconnect` — Remove TikTok connection
+  - `GET /api/tiktok/creator-info` — Creator info + auto token refresh
+  - `GET /api/tiktok/sounds?q=` — Commercial Music Library search (graceful fallback in sandbox)
+  - `POST /api/tiktok/post` — Quota check → `tiktok_posts` record → publish via `PULL_FROM_URL`
+  - `/tiktok/studio` — 9:16 phone-frame preview, trim, 8 filters, text overlay, sound picker, AI hashtags (5 cr), caption (2200 chars), privacy, Post Now or Schedule
+  - `publishScheduledTiktokPosts` Inngest cron (every 5 min) — token refresh + PULL_FROM_URL publish
+  - Sidebar: 🎵 TikTok Studio in Create section
+  - SQL: `tiktok_posts` table + `workspaces.tiktok_videos_this_month/tiktok_booster_credits/tiktok_quota_reset_at`
+- **TikTok quota model** — Free: 5/mo · Pro: 50/mo · Agency: 150/mo. Video posts are FREE (quota-gated, not credit-gated). AI features within studio cost standard credits.
+- **TikTok Video Booster packs (named, Stripe TBD)** — Loop (20/$1.99) · Duet (60/$4.99) · Stitch (150/$9.99) · FYP (400/$19.99). Stripe products to create when Production API is approved.
+- **AI credit cost fixes** — `hashtags/route.ts` was charging 1 cr (should be 5). `repurpose/route.ts` was charging 5 cr (should be 10). Both corrected to match pricing page.
+- **Pricing page** — TikTok AI Caption (5 cr) + TikTok AI Hashtags (5 cr) added to AI Credit Costs table.
+
+---
+
 ## Pending / In Progress
 
-- **Abdus Sohag trial review** — trial ended April 26. Decide: keep at 10%, bump to standard 30%, or cut. Referral link: `?ref=SOHAG`.
+- **TikTok sandbox testing** — PR #267 merged. Run SQL migration. Set `TIKTOK_SANDBOX_CLIENT_KEY` + `TIKTOK_SANDBOX_CLIENT_SECRET` in Vercel. Navigate to `/tiktok/studio`, connect TikTok via sandbox OAuth, test video upload + post. Resync Inngest after deploy (`publish-scheduled-tiktok-posts` is new).
 
-- **Inngest resync (CRITICAL after Apr 29 PRs merge)** — 6 new agent functions need registering in the Inngest dashboard: `newsletter-agent`, `client-report-agent`, `repurpose-agent`, `caption-agent`, `trend-scout-agent`, `inbox-agent`.
+- **TikTok Production API** — submitted Apr 23. Support ticket `ad7714530aa61ad4`. Check portal. Once approved: swap sandbox env vars for production, create Stripe products for Loop/Duet/Stitch/FYP booster packs.
 
-- ~~SOMA credit pack Stripe products~~ ✅ DONE — see Confirmed Done section.
+- **Inngest resync (CRITICAL)** — After PR #267 merges, `publish-scheduled-tiktok-posts` needs registering. Also still pending from Apr 29: `newsletter-agent`, `client-report-agent`, `repurpose-agent`, `caption-agent`, `trend-scout-agent`, `inbox-agent`.
 
-- **Test SOMA end-to-end** — voice profile → create project → paste master doc → ingest → generate. Joshua confirmed SOMA is generating posts. Monitor whether scheduled posts actually publish (Inngest cron).
-
-- **Push notification VAPID keys** — CONFIRMED SET in Vercel. Push notifications are live.
+- **Test SOMA end-to-end** — Joshua confirmed SOMA is generating posts. Monitor whether scheduled posts actually publish (Inngest cron).
 
 - **Enki Truth Mode testing** — 50-trade minimum per strategy before results are statistically valid.
 
-- **LinkedIn integration** — API credentials not yet acquired. Requires: (1) LinkedIn Company Page published, (2) developer app at linkedin.com/developers, (3) apply for Marketing Developer Platform. On hold until Joshua has time.
+- **LinkedIn integration** — On hold until API credentials acquired. Requires: LinkedIn Company Page published → developer app → Marketing Developer Platform application.
 
-- **TikTok API review** — submitted Apr 23. Support ticket `ad7714530aa61ad4` open re: app name. Check portal periodically. No action needed until approved.
+- **PWA / Google Play Store** — Capacitor wrapper landed (PR #262). Next: build APK locally + Play Console submission.
 
 **Roadmap (next up):**
-- **PWA / Google Play Store** — `manifest.json` + service worker already added (PR #256). Next: Capacitor wrapper for Play Store submission.
+- **TikTok Studio testing** — end-to-end sandbox flow
+- **TikTok Production approval** — unlock Loop/Duet/Stitch/FYP booster packs + Stripe products
+- **Instagram Studio** — same concept as TikTok Studio (image + Reels), defer until Meta API acquired
 - **LinkedIn publishing** — pending API credentials
-- **Schedule templates UI** — ✅ Built (PR #256) — `/schedules` page with full CRUD
-- **Workspace activity logging** — ✅ Wired into post publish (PR #256). Approval + member events still unwired.
-- **SOMA credit packs** — ✅ Fully live. Stripe products created Apr 30. Price IDs hardcoded (PR #262).
+- **Creator OS vision** — video/image editing → scheduling/marketing → AI agents → product selling (Shopify/Etsy/eBay integration)
 
 ## Confirmed Done (stop asking about these)
 
+- ✅ **Workspace activity logging — member events (May 1, PR #266)** — member.removed + member.joined wired. Team removal moved to server-side API route.
+- ✅ **TikTok Studio (May 1, PR #267)** — Full studio live in sandbox. OAuth, 9:16 editor, trim/filters/text overlay, sound picker, AI hashtags, post/schedule, Inngest cron. SQL migration applied. Resync Inngest after deploy.
+- ✅ **AI credit cost alignment (May 1)** — hashtags fixed 1→5, repurpose fixed 5→10. Pricing page updated with TikTok AI tools.
 - ✅ **SOMA Credit Packs fully live (Apr 30, PR #263)** — Stripe products created (Starter $4.99/75cr, Growth $12.99/225cr, Pro $24.99/500cr). Price IDs hardcoded. Labels updated. Webhook wired from PR #256.
 - ✅ **Capacitor Android wrapper + Link in Bio monetize blocks (Apr 30, PR #262)** — `capacitor.config.json`, Capacitor deps, `GOOGLE_PLAY_SETUP.md`, Link in Bio tip/subscribe quick-add, Creator Hub share section (QR + copy links).
 - ✅ **Toast safe-area fix (Apr 30, PR #261)** — `components/Toast.tsx` created. All 35 pages fixed. Zero remaining `fixed bottom-6 right-6` occurrences.
