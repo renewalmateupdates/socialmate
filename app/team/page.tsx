@@ -124,7 +124,13 @@ export default function Team() {
 
   const handleRemove = async (id: string, email: string) => {
     setRemoving(id)
-    await supabase.from('team_members').delete().eq('id', id)
+    const res = await fetch(`/api/team/${id}`, { method: 'DELETE' })
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}))
+      showToast(data.error || 'Failed to remove member', 'error')
+      setRemoving(null)
+      return
+    }
     setMembers(prev => prev.filter(m => m.id !== id))
     setConfirmRemove(null)
     setRemoving(null)
