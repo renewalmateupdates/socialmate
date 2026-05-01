@@ -21,6 +21,7 @@ import {
   streakNotifications,
   somaAutopilotRun,
   postPerformanceAlerts,
+  publishScheduledTiktokPosts,
 } from '@/lib/inngest'
 import { newsletterAgent, clientReportAgent, repurposeAgent, captionAgent, trendScoutAgent, inboxAgent } from '@/lib/inngest-agents'
 
@@ -52,5 +53,6 @@ export const { GET, POST, PUT } = serve({
     captionAgent,
     trendScoutAgent,
     inboxAgent,
+    publishScheduledTiktokPosts,
   ],
 })
