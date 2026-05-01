@@ -4406,3 +4406,126 @@ export const postPerformanceAlerts = inngest.createFunction(
     return { alerted }
   }
 )
+
+// ── TikTok Scheduled Post Publisher ──────────────────────────────────────────
+// Runs every 5 minutes, picks up tiktok_posts due for publishing
+
+export const publishScheduledTiktokPosts = inngest.createFunction(
+  { id: 'publish-scheduled-tiktok-posts', concurrency: { limit: 3 } },
+  { cron: '*/5 * * * *' },
+  async ({ step }) => {
+    const due = await step.run('fetch-due-tiktok-posts', async () => {
+      const { data } = await adminSupabase
+        .from('tiktok_posts')
+        .select('id, user_id, video_url, post_caption, sound_id, sound_name, privacy_level, disable_duet, disable_comment, disable_stitch')
+        .eq('status', 'scheduled')
+        .lte('scheduled_at', new Date().toISOString())
+        .limit(20)
+      return data ?? []
+    })
+
+    let published = 0
+
+    for (const post of due) {
+      await step.run(`publish-tiktok-${post.id}`, async () => {
+        const clientKey    = process.env.TIKTOK_SANDBOX_CLIENT_KEY || process.env.TIKTOK_CLIENT_KEY!
+        const clientSecret = process.env.TIKTOK_SANDBOX_CLIENT_SECRET || process.env.TIKTOK_CLIENT_SECRET!
+
+        // Get + refresh token
+        const { data: account } = await adminSupabase
+          .from('connected_accounts')
+          .select('id, access_token, refresh_token, expires_at, platform_user_id')
+          .eq('user_id', post.user_id)
+          .eq('platform', 'tiktok')
+          .maybeSingle()
+
+        if (!account) {
+          await adminSupabase
+            .from('tiktok_posts')
+            .update({ status: 'failed', error_message: 'TikTok account disconnected' })
+            .eq('id', post.id)
+          return
+        }
+
+        let token = account.access_token
+        if (account.expires_at && new Date(account.expires_at).getTime() - Date.now() < 5 * 60_000 && account.refresh_token) {
+          const refreshRes = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+              client_key: clientKey, client_secret: clientSecret,
+              grant_type: 'refresh_token', refresh_token: account.refresh_token,
+            }),
+          })
+          if (refreshRes.ok) {
+            const rd = await refreshRes.json()
+            token = rd.access_token
+            const expires_at = rd.expires_in ? new Date(Date.now() + rd.expires_in * 1000).toISOString() : null
+            await adminSupabase
+              .from('connected_accounts')
+              .update({ access_token: token, refresh_token: rd.refresh_token, expires_at })
+              .eq('id', account.id)
+          }
+        }
+
+        await adminSupabase.from('tiktok_posts').update({ status: 'publishing' }).eq('id', post.id)
+
+        const postBody: Record<string, unknown> = {
+          post_info: {
+            title:                    post.post_caption,
+            privacy_level:            post.privacy_level,
+            disable_duet:             post.disable_duet,
+            disable_comment:          post.disable_comment,
+            disable_stitch:           post.disable_stitch,
+            video_cover_timestamp_ms: 0,
+          },
+          source_info: {
+            source:    'PULL_FROM_URL',
+            video_url: post.video_url,
+          },
+        }
+
+        if (post.sound_id && post.sound_id !== 'original') {
+          (postBody.post_info as Record<string, unknown>).music_id = post.sound_id
+        }
+
+        const tikRes  = await fetch('https://open.tiktokapis.com/v2/post/publish/video/init/', {
+          method:  'POST',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json; charset=UTF-8' },
+          body:    JSON.stringify(postBody),
+        })
+
+        const tikData = await tikRes.json().catch(() => ({}))
+
+        if (!tikRes.ok) {
+          const errMsg = tikData?.error?.message || `TikTok API error ${tikRes.status}`
+          await adminSupabase
+            .from('tiktok_posts')
+            .update({ status: 'failed', error_message: errMsg })
+            .eq('id', post.id)
+          return
+        }
+
+        const publishId    = tikData?.data?.publish_id
+        const tiktokPostId = tikData?.data?.publicaly_available_post_id?.[0] || publishId
+
+        await adminSupabase
+          .from('tiktok_posts')
+          .update({ status: 'published', tiktok_post_id: tiktokPostId, tiktok_account_open_id: account.platform_user_id })
+          .eq('id', post.id)
+
+        // Increment monthly quota
+        await adminSupabase.rpc('increment', { table: 'workspaces', column: 'tiktok_videos_this_month', row_id: post.user_id }).catch(() => {})
+
+        published++
+      }).catch(async (err: { message?: string }) => {
+        await adminSupabase
+          .from('tiktok_posts')
+          .update({ status: 'failed', error_message: err?.message || 'Unknown error' })
+          .eq('id', post.id)
+      })
+    }
+
+    return { published, total: due.length }
+  }
+)

@@ -67,6 +67,7 @@ const NAV_BASE = [
       { icon: '✂️', label: 'Link Shortener', href: '/links'           },
       { icon: '🎬', label: 'Clips',          href: '/clips'          },
       { icon: '✦',  label: 'Creator Studio', href: '/create'         },
+      { icon: '🎵', label: 'TikTok Studio',  href: '/tiktok/studio'  },
     ],
   },
   {
