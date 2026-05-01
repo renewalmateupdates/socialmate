@@ -13,13 +13,13 @@ const ROADMAP: RoadmapItem[] = [
   { title: 'SOMA per-platform schedule', desc: 'Set different posts/day counts and day-of-week schedules per platform when creating a SOMA project. Bluesky 2x weekdays, X 1x weekends — all configured independently.', status: 'shipped', category: 'AI' },
   { title: 'SOMA connected-platform filter', desc: 'New SOMA project form only shows platforms you\'ve actually connected. Pre-selects all. Empty state links to Settings if nothing is connected.', status: 'shipped', category: 'AI' },
   { title: 'Agents Hub — 8 autonomous agents', desc: 'Full Agents hub at /agents with 8 live autonomous workers: Email Outreach, Growth Scout, Newsletter, Client Report, Repurpose, Caption, Trend Scout, and Inbox Agent. Each runs on its own schedule, no manual intervention needed.', status: 'shipped', category: 'AI' },
-  { title: 'Schedule templates UI',      desc: 'UI for the schedule_templates API — save reusable posting schedules and apply them to new projects with one click.',                   status: 'in-progress', category: 'Scheduling' },
-  { title: 'Workspace activity logging', desc: 'Wire workspace_activity table to capture post publish, approval decisions, and member actions. /activity page already built.', status: 'in-progress', category: 'Teams' },
+  { title: 'Schedule templates UI',      desc: 'UI for the schedule_templates API — save reusable posting schedules and apply them to new projects with one click. Full CRUD at /schedules.', status: 'shipped', category: 'Scheduling' },
+  { title: 'Workspace activity logging', desc: 'workspace_activity table wired to post publish route. /activity page shows last 50 events with actor, icon, and relative timestamps.', status: 'shipped', category: 'Teams' },
   { title: 'Media Library',              desc: 'Upload, compress, and reuse images and videos across posts. Grid view, filter by type, copy URL, delete. Storage limits per plan.',     status: 'shipped',  category: 'Media'         },
 
   // ── COMING SOON ───────────────────────────────────────────
   { title: 'Streak notifications',       desc: 'Automated streak tracking with at-risk alerts — get notified when your posting streak is about to break.',        status: 'shipped',  category: 'Analytics'     },
-  { title: 'SOMA credit packs',          desc: 'Buy more SOMA credits in-app without upgrading your plan. Three pack sizes: 75cr/$4.99, 225cr/$12.99, 500cr/$24.99. Stripe products need creating.', status: 'in-progress', category: 'AI' },
+  { title: 'SOMA credit packs',          desc: 'Buy more SOMA credits in-app without upgrading your plan. Three pack sizes: 75cr/$4.99, 225cr/$12.99, 500cr/$24.99. Stripe products live.', status: 'shipped', category: 'AI' },
   { title: 'LinkedIn publishing',        desc: 'Full UGC Posts API integration. Requires LinkedIn developer app approval (r/w_member_social).',                 status: 'coming-soon',  category: 'Platforms'     },
   { title: 'YouTube Community Posts',    desc: 'Post to YouTube Community tab (requires 500+ subscribers). OAuth token management complete.',                    status: 'coming-soon',  category: 'Platforms'     },
   { title: 'Pinterest publishing',       desc: 'Pin creation via Pinterest v5 API with board selection. OAuth complete.',                                        status: 'coming-soon',  category: 'Platforms'     },
@@ -29,7 +29,7 @@ const ROADMAP: RoadmapItem[] = [
 
   // ── PLANNED ───────────────────────────────────────────────
   { title: 'Instagram publishing',       desc: 'Instagram Graph API integration. Requires Facebook Business account and Meta app review.',                       status: 'planned',      category: 'Platforms'     },
-  { title: 'TikTok publishing',          desc: 'TikTok Content Posting API. Requires TikTok developer app approval.',                                            status: 'planned',      category: 'Platforms'     },
+  { title: 'TikTok publishing',          desc: 'TikTok Studio live at /tiktok/studio — upload, trim, filter, caption, and schedule videos. Connect button live on /accounts. API approval resubmitted May 2026.', status: 'coming-soon', category: 'Platforms' },
   { title: 'Facebook Pages',             desc: 'Facebook Graph API for posting to Business Pages. Requires Meta app review.',                                    status: 'planned',      category: 'Platforms'     },
   { title: 'Threads',                    desc: 'Threads API integration once the API becomes publicly available.',                                                status: 'planned',      category: 'Platforms'     },
   { title: 'Reddit',                     desc: 'Reddit API integration for posting to subreddits. Respects rate limits and flair requirements.',                 status: 'planned',      category: 'Platforms'     },
@@ -100,7 +100,7 @@ const ROADMAP: RoadmapItem[] = [
   { title: 'YouTube clip browser',       desc: 'RSS-based YouTube clip discovery — no API key required. Browse any channel\'s videos and schedule them in one click.', status: 'shipped', category: 'Media' },
   { title: 'Public Twitch clip search',  desc: '"Search Any Channel" on /clips — browse any Twitch channel\'s clips without connecting an account. Quota-gated with progress bar.', status: 'shipped', category: 'Media' },
   { title: 'Discord Hub',               desc: 'Manage multiple Discord servers, view per-server analytics, and post to any server from the SocialMate dashboard.', status: 'shipped', category: 'Platforms' },
-  { title: 'X (Twitter) publishing',    desc: 'X API v2 pay-per-use ($0.01/tweet) with monthly quotas (Free: 50, Pro: 200, Agency: 500). Per-workspace quota enforcement.', status: 'shipped', category: 'Platforms' },
+  { title: 'X (Twitter) publishing',    desc: 'X API v2 pay-per-use ($0.01/tweet) with monthly quotas (Free: 5, Pro: 150, Agency: 400). X Booster packs available for more posts. Per-workspace quota enforcement.', status: 'shipped', category: 'Platforms' },
   { title: 'Notifications system',       desc: 'Bell icon with unread badge in sidebar. Post published/failed alerts fired via Inngest and delivered in real time.', status: 'shipped', category: 'Platform' },
   { title: 'Competitor tracking',        desc: 'Track up to 3 competitor accounts on Bluesky/Mastodon on the free plan. Inngest fetches and surfaces their content every 6 hours.', status: 'shipped', category: 'Intelligence' },
   { title: 'Evergreen recycling engine', desc: 'Mark posts as evergreen. Inngest daily cron auto-queues them when your schedule runs dry so you never go silent.', status: 'shipped', category: 'Scheduling' },

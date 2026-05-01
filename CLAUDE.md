@@ -57,9 +57,9 @@ These have burned us before — always apply:
 
 ## Platforms
 
-**Live now:** Bluesky, Discord, Telegram, Mastodon, X/Twitter (pay-per-use, $0.01/tweet)
+**Live now:** Bluesky, Discord, Telegram, Mastodon, X/Twitter (pay-per-use, $0.01/tweet), TikTok (sandbox/beta — Production API approval pending)
 **Coming soon:** LinkedIn (no API acquired yet), YouTube, Pinterest, Reddit
-**Roadmap:** Instagram, Facebook, TikTok, Threads, Tumblr, Pixelfed
+**Roadmap:** Instagram, Facebook, Threads, Tumblr, Pixelfed
 
 ---
 
@@ -85,7 +85,7 @@ These have burned us before — always apply:
 - Flat 15% on Pro + Max credit packs
 
 **X/Twitter quota enforcement:**
-- Free: 28 tweets/month | Pro: 150/month | Agency: 400/month
+- Free: 5 tweets/month | Pro: 150/month | Agency: 400/month (reduced May 1, 2026 — free users get a taste, booster packs monetize heavier use)
 - X Booster add-on (one-time purchase, stacks, rolls over): Spark 50/$1.99 · Boost 120/$4.99 · Surge 250/$9.99 · Storm 500/$19.99
 - Tracked by counting published posts with `platforms @> ['twitter']` this calendar month
 
@@ -396,11 +396,19 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 ---
 
+**May 1, 2026 (PR #270):**
+- **TikTok live on /accounts** — TikTok moved from Coming Soon → Live Integrations. Connect button hits `/api/tiktok/auth`, OAuth flow works via sandbox credentials. Lands on `/tiktok/studio` after auth.
+- **X free quota: 28 → 5 tweets/month** — Free users get 5 tweets/month to taste X. Compose already shows "Buy X Booster →" nudge when exhausted. Booster packs monetize heavier free-tier X usage.
+- **TikTok API confirmed free** — No per-post charges from TikTok. Indirect costs only: Supabase storage + egress (~$1-2/100 active users/month). Legitimate competitive edge — most competitors charge $18+/mo for TikTok scheduling.
+- **Abdus Sohag cut** — `affiliates.status = 'inactive'`, workspace downgraded to free. SQL run directly in Supabase.
+
+---
+
 ## Pending / In Progress
 
-- **Abdus Sohag trial review** — trial ended April 26. Decide: keep at 10%, bump to standard 30%, or cut. Referral link: `?ref=SOHAG`.
+- **TikTok demo video** — Record OAuth connect flow + video post via sandbox for TikTok API resubmission. `socialmatehq` TikTok account already added as sandbox target user. Go to `/accounts` → Connect TikTok → authorize → record in Loom → upload to TikTok portal → submit. Also verify domain in portal before submitting.
 
-- **Inngest resync (CRITICAL after Apr 29 PRs merge)** — 6 new agent functions need registering in the Inngest dashboard: `newsletter-agent`, `client-report-agent`, `repurpose-agent`, `caption-agent`, `trend-scout-agent`, `inbox-agent`.
+- ~~Inngest resync~~ ✅ DONE — all 26 functions confirmed synced May 1, 2026.
 
 - ~~SOMA credit pack Stripe products~~ ✅ DONE — see Confirmed Done section.
 
