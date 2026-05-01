@@ -85,9 +85,16 @@ These have burned us before — always apply:
 - Flat 15% on Pro + Max credit packs
 
 **X/Twitter quota enforcement:**
-- Free: 5 tweets/month | Pro: 150/month | Agency: 400/month (reduced May 1, 2026 — free users get a taste, booster packs monetize heavier use)
+- Free: 0 tweets/month (Pro+ required — X charges $0.01/tweet, so free users are gated at compose via upgrade prompt) | Pro: 150/month | Agency: 400/month
 - X Booster add-on (one-time purchase, stacks, rolls over): Spark 50/$1.99 · Boost 120/$4.99 · Surge 250/$9.99 · Storm 500/$19.99
 - Tracked by counting published posts with `platforms @> ['twitter']` this calendar month
+
+**TikTok quota (free API — no per-post charge):**
+- Free: 20 videos/month | Pro: 60/month | Agency: 200/month
+- Uses PULL_FROM_URL — TikTok pulls video from Supabase storage. Cost: only egress (~$0.09/GB)
+- Production API approval pending (submitted May 2026). Connect button live on /accounts. TikTok Studio live at /tiktok/studio.
+
+**Platform philosophy:** Open social (Bluesky, Mastodon, Discord, Telegram, TikTok) = free. Gatekept social (X/Twitter charges $0.01/tweet) = Pro+ required.
 
 ---
 
