@@ -4,7 +4,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 
-const CREDIT_COST = 1
+const CREDIT_COST = 5
 
 export async function POST(req: NextRequest) {
   try {

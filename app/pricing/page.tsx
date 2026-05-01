@@ -135,6 +135,8 @@ const AI_CREDITS = [
   { feature: 'Content Gap Detector',    cost: '10 credits', proOnly: false },
   { feature: 'AI Content Calendar',     cost: '25 credits', proOnly: true  },
   { feature: 'AI Image Generation',     cost: '25 credits', proOnly: true  },
+  { feature: 'TikTok AI Caption',       cost: '5 credits',  proOnly: false },
+  { feature: 'TikTok AI Hashtags',      cost: '5 credits',  proOnly: false },
 ]
 
 const WHITE_LABEL_TIERS = [

@@ -895,7 +895,7 @@ export default function TikTokStudioClient() {
                     disabled={!postCaption || aiHashtagLoading}
                     className="text-xs text-[#ff0050] disabled:opacity-40 hover:underline font-semibold"
                   >
-                    {aiHashtagLoading ? 'Thinking…' : '✦ AI Suggest (1 cr)'}
+                    {aiHashtagLoading ? 'Thinking…' : '✦ AI Suggest (5 cr)'}
                   </button>
                 </div>
                 <div className="flex gap-2 mb-2">
