@@ -42,7 +42,7 @@ const PLATFORM_META: Record<string, {
   reddit:    { icon: '🤖', color: 'bg-orange-50 border-orange-200', label: 'Reddit',      status: 'coming_soon', statusNote: 'Code complete — awaiting approval' },
   instagram: { icon: '📸', color: 'bg-pink-50 border-pink-200',     label: 'Instagram',   status: 'coming_soon', statusNote: 'Awaiting API approval'             },
   facebook:  { icon: '📘', color: 'bg-blue-50 border-blue-200',     label: 'Facebook',    status: 'coming_soon', statusNote: 'Awaiting API approval'             },
-  tiktok:    { icon: '🎵', color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700',     label: 'TikTok',      status: 'coming_soon', statusNote: 'Awaiting API approval'             },
+  tiktok:    { icon: '🎵', color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700',     label: 'TikTok',      status: 'live'                                                          },
   threads:   { icon: '🧵', color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700',     label: 'Threads',     status: 'coming_soon', statusNote: 'Awaiting API approval'             },
   twitter:   { icon: '🐦', color: 'bg-sky-50 border-sky-200',       label: 'X / Twitter', status: 'live'                                       },
   snapchat:  { icon: '👻', color: 'bg-yellow-50 border-yellow-200', label: 'Snapchat',    status: 'planned',     statusNote: 'Planned integration'              },
@@ -289,6 +289,7 @@ function AccountsInner() {
     if (platform === 'linkedin')  { window.open('/api/accounts/linkedin/connect', '_blank');  return }
     if (platform === 'youtube')   { window.open('/api/accounts/youtube/connect', '_blank');   return }
     if (platform === 'twitter')   { window.open('/api/accounts/twitter/connect', '_blank');   return }
+    if (platform === 'tiktok')   { window.location.href = '/api/tiktok/auth';                 return }
     setConnectingPlatform(platform)
     showToast(`${PLATFORM_META[platform]?.label || platform} integration coming soon!`, 'success')
     setTimeout(() => setConnectingPlatform(null), 2000)
@@ -345,7 +346,7 @@ function AccountsInner() {
                 plan === 'agency' ? 'text-purple-700' :
                 plan === 'pro'    ? 'text-blue-700'   : 'text-gray-700 dark:text-gray-300'
               }`}>
-                {plan === 'free'   && '🔓 Free plan — 1 account per platform across 4 live integrations'}
+                {plan === 'free'   && '🔓 Free plan — 1 account per platform across all live integrations'}
                 {plan === 'pro'    && '⚡ Pro plan — up to 5 accounts per platform'}
                 {plan === 'agency' && '🏢 Agency plan — up to 10 accounts per platform, client workspaces included'}
               </p>
@@ -581,7 +582,7 @@ function AccountsInner() {
                 <p className="text-sm font-bold mb-1">More platforms are on the way</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
                   LinkedIn, YouTube, Pinterest, and Reddit are code-complete and awaiting platform approval — launching very soon.
-                  Instagram, TikTok, Facebook, and Threads are in developer review.
+                  Instagram, Facebook, and Threads are in developer review.
                   We'll notify you on your dashboard the moment each one goes live.
                 </p>
               </div>
