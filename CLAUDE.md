@@ -57,9 +57,9 @@ These have burned us before — always apply:
 
 ## Platforms
 
-**Live now:** Bluesky, Discord, Telegram, Mastodon, X/Twitter (pay-per-use, $0.01/tweet)
+**Live now:** Bluesky, Discord, Telegram, Mastodon, X/Twitter (pay-per-use, $0.01/tweet), TikTok (sandbox; production pending API approval)
 **Coming soon:** LinkedIn (no API acquired yet), YouTube, Pinterest, Reddit
-**Roadmap:** Instagram, Facebook, TikTok, Threads, Tumblr, Pixelfed
+**Roadmap:** Instagram, Facebook, Threads, Tumblr, Pixelfed
 
 ---
 
@@ -105,7 +105,7 @@ These have burned us before — always apply:
 
 ---
 
-## What's Been Built (as of April 26, 2026 — end of day)
+## What's Been Built (as of May 1, 2026 — end of day)
 
 **Core:**
 - Post scheduling (Now + future via Inngest), drafts, queue, calendar, bulk scheduling
@@ -248,7 +248,7 @@ These have burned us before — always apply:
 
 **April 21, 2026 — Evening (PR #190):**
 - **AI Brand Voice** — `user_settings.brand_voice` JSONB column; Settings → Brand Voice tab (Pro+); tone/style/vocabulary/example fields; Gemini prompt injection via `=== BRAND VOICE INSTRUCTIONS ===` block; Compose badge showing active voice
-- **Content Repurposing** — `/api/ai/repurpose` (6 formats: thread/email/caption/long_form/short_hook/linkedin_post, 1 credit each); new card in `/ai-features`; inline panel in Compose with Replace/Copy
+- **Content Repurposing** — `/api/ai/repurpose` (6 formats: thread/email/caption/long_form/short_hook/linkedin_post, 10 credits each); new card in `/ai-features`; inline panel in Compose with Replace/Copy
 - **Smart Queue** — `/api/posts/auto-schedule` (Pro+ only; fills 14-day/30-day window at platform-optimal ET hours; 1-hour collision avoidance); `⚡ Auto-schedule Drafts` button in Queue (free users see upgrade prompt); `✨ Use best time` link in Compose datetime picker
 - **X-style Analytics Dashboard** — full rewrite of `/analytics`; SVG area chart (no libraries); platform breakdown bars; Bluesky engagement sync via `/api/analytics/bluesky-sync` (public ATP API); best-times heatmap; `bluesky_stats` JSONB column on `posts` table
 - **Browser Push Notifications** — `push_subscriptions` table; `/public/sw.js` service worker; VAPID subscribe/unsubscribe/send API routes; `usePushNotifications` hook; Settings → Notifications toggle; Inngest triggers for post published + Enki trade signals. **Needs Vercel env vars:** `NEXT_PUBLIC_VAPID_PUBLIC_KEY` + `VAPID_PRIVATE_KEY` (generate with `npx web-push generate-vapid-keys`)
@@ -322,7 +322,7 @@ These have burned us before — always apply:
 **April 26, 2026 — Late Night (PR #220):**
 - **Recurring posts** — 🔁 Repeat toggle in compose (Daily/Weekly/Bi-weekly/Monthly + optional end date). Auto-reschedules next occurrence after publish via Inngest `computeNextOccurrence`. Queue shows 🔁 badge with rule label. SQL: 4 new columns on posts table.
 - **Post as image** — 📸 Canvas PNG export (1200×630, no npm deps) in compose action bar + queue cards. Branded SocialMate card with amber header, word-wrapped content, platform badge.
-- **Hashtag suggestions** — #️⃣ Gemini-powered panel in compose. 12 hashtags as clickable chips (append to content, no dupes), Copy all button. 1 credit. Dedicated `/api/ai/hashtags` route.
+- **Hashtag suggestions** — #️⃣ Gemini-powered panel in compose. 12 hashtags as clickable chips (append to content, no dupes), Copy all button. 5 credits. Dedicated `/api/ai/hashtags` route.
 - **Roadmap + sitemap updated** — New shipped items, /refer + /analytics/dna + /monetize added to sitemap.
 
 **April 26, 2026 — Evening (PR #219):**
@@ -368,6 +368,24 @@ These have burned us before — always apply:
 - **Toast safe-area fix** — `components/Toast.tsx` shared component added with `env(safe-area-inset-bottom)`. Replaced `fixed bottom-6 right-6` with safe-area style across all 35 pages/components — zero remaining occurrences codebase-wide.
 - **Creator Monetization Hub** — full build. Stripe Connect Express onboarding (`/api/monetize/connect` + callback). Settings API (Pro+ gate): page handle/title/bio, tip jar (min/max/enable), fan subscription (price/name/desc/enable). `/monetize/hub` dashboard: connect Stripe, earnings cards (total tips + active subscribers), recent tips + fan list. `/creator/[handle]` public page: tip presets ($1/$3/$5/$10), custom amount, name/message, fan sub card, "Powered by SocialMate". 0% platform cut — all payments via Stripe Connect `transfer_data.destination`. Stripe webhook: `creator_tip` (mark paid), `creator_subscription` (record fan), `customer.subscription.deleted` (mark cancelled). Sidebar: 💸 Creator Hub. Landing page updated to "Now Live — Pro+". SQL: `creator_monetization`, `creator_tips`, `creator_fan_subscriptions` tables with RLS.
 
+**May 1, 2026 (PRs #265–#268):**
+- **May 1 batch** (PR #265) — Changelog page with 7 entries (Apr 20–May 1: X Boosters, all 8 agents, SOMA updates, Creator Monetize Hub, paywalled posts); DNA dashboard disclaimer ("Requires 10+ posts with engagement data"); Creator Hub header color picker (Pro+, persists to `creator_monetization.header_color`); paywall LIB block (Link in Bio tip/subscribe quick-add blocks). SQL: `20260501000001_creator_header_color.sql`.
+- **Workspace activity logging — member events** (PR #266) — Team member removal moved from client-side Supabase delete to server-side `DELETE /api/team/[id]` route with ownership verification + `member.removed` activity log. Accept invite route (`/api/team/accept`) now logs `member.joined` with email + role in metadata. Both non-fatal.
+- **TikTok Studio** (PR #267) — Full TikTok integration:
+  - OAuth Login Kit: `GET /api/tiktok/auth` (state cookie → TikTok authorize) + `GET /api/tiktok/callback` (code exchange, upsert `connected_accounts`, redirect to `/tiktok/studio?connected=1`)
+  - `POST /api/tiktok/disconnect` — removes connected account
+  - `GET /api/tiktok/creator-info` — auto-refreshes token if <5 min remaining, fetches creator_info non-fatally
+  - `GET /api/tiktok/sounds` — tries TikTok Research API, falls back to curated list (Research API requires production approval)
+  - `POST /api/tiktok/post` — quota check (Free 5/mo · Pro 50/mo · Agency 150/mo) + booster credits, PULL_FROM_URL posting, scheduled or immediate, creates `tiktok_posts` record
+  - `/tiktok/studio` — full video editor: upload mp4/mov (500MB max, 10min max), 9:16 canvas preview, trim, 8 CSS filters, caption overlay, MediaRecorder export, upload to Supabase, post/schedule. Right panel: caption (2200 chars), AI hashtags (5 cr), sound badge, privacy (Public/Friends/Private), Duet/Stitch/Comments toggles, schedule toggle.
+  - `publishScheduledTiktokPosts` Inngest cron (`*/5 * * * *`) — picks up due `tiktok_posts`, refreshes tokens, posts via PULL_FROM_URL, increments monthly quota. **Resynced in Inngest dashboard ✅**
+  - Sandbox credential pattern: `TIKTOK_SANDBOX_CLIENT_KEY || TIKTOK_CLIENT_KEY` — sandbox overrides prod automatically
+  - TikTok Video Booster Packs named: **Loop** (20/$1.99) · **Duet** (60/$4.99) · **Stitch** (150/$9.99) · **FYP** (400/$19.99) — Stripe products NOT yet created (waiting on production API approval)
+  - SQL: `tiktok_posts` table with RLS; `tiktok_videos_this_month`, `tiktok_booster_credits`, `tiktok_quota_reset_at` columns on `workspaces`. Confirmed applied.
+  - Sidebar: 🎵 TikTok Studio nav entry added
+- **TikTok adminSupabase hotfix** (PR #268) — PR #267 was merged before the fix commit landed, leaving `adminSupabase` (undefined variable) on main. Hotfix replaced all 9 occurrences with `getSupabaseAdmin()` and fixed invalid `.rpc('increment')` call with proper select+update pattern.
+- **AI credit cost corrections** — `hashtags` route: 1 → 5 credits. `repurpose` route: 5 → 10 credits. Now matches `/api/ai/route.ts` and pricing page.
+
 ---
 
 ## Known Issues / Bugs (fix these when touched)
@@ -398,13 +416,11 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 ## Pending / In Progress
 
-- **Abdus Sohag trial review** — trial ended April 26. Decide: keep at 10%, bump to standard 30%, or cut. Referral link: `?ref=SOHAG`.
+- **Abdus Sohag trial review** — trial ended April 26. No communication since. Decide: keep at 10%, bump to standard 30%, or cut. Referral link: `?ref=SOHAG`.
 
-- **Inngest resync (CRITICAL after Apr 29 PRs merge)** — 6 new agent functions need registering in the Inngest dashboard: `newsletter-agent`, `client-report-agent`, `repurpose-agent`, `caption-agent`, `trend-scout-agent`, `inbox-agent`.
+- **Test TikTok Studio end-to-end** — go to `/tiktok/studio`, connect sandbox account (`sbawzwr6pdb24tk03g`), upload a clip, post to sandbox target user. First real E2E test since it's live.
 
-- ~~SOMA credit pack Stripe products~~ ✅ DONE — see Confirmed Done section.
-
-- **Test SOMA end-to-end** — voice profile → create project → paste master doc → ingest → generate. Joshua confirmed SOMA is generating posts. Monitor whether scheduled posts actually publish (Inngest cron).
+- **Test SOMA end-to-end** — Joshua confirmed SOMA is generating posts. Monitor whether scheduled posts actually publish (Inngest cron).
 
 - **Push notification VAPID keys** — CONFIRMED SET in Vercel. Push notifications are live.
 
@@ -412,17 +428,24 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 - **LinkedIn integration** — API credentials not yet acquired. Requires: (1) LinkedIn Company Page published, (2) developer app at linkedin.com/developers, (3) apply for Marketing Developer Platform. On hold until Joshua has time.
 
-- **TikTok API review** — submitted Apr 23. Support ticket `ad7714530aa61ad4` open re: app name. Check portal periodically. No action needed until approved.
+- **TikTok API review** — submitted Apr 23. Support ticket `ad7714530aa61ad4` open re: app name. Check portal periodically. No action needed until approved. Once approved: swap sandbox env vars for production, create Stripe products for Loop/Duet/Stitch/FYP booster packs.
+
+- **TikTok `TIKTOK_CLIENT_KEY` in Vercel** — current value has wrong prefix (set before production keys arrived). Not urgent — sandbox overrides. Fix when production API is approved.
 
 **Roadmap (next up):**
-- **PWA / Google Play Store** — `manifest.json` + service worker already added (PR #256). Next: Capacitor wrapper for Play Store submission.
+- **Google Play Store** — Capacitor wrapper in (PR #262). Next: `npx cap build android`, APK signing, Play Console submission.
 - **LinkedIn publishing** — pending API credentials
-- **Schedule templates UI** — ✅ Built (PR #256) — `/schedules` page with full CRUD
-- **Workspace activity logging** — ✅ Wired into post publish (PR #256). Approval + member events still unwired.
+- **TikTok Video Booster packs UI** — Loop/Duet/Stitch/FYP purchase UI in Settings (like X Booster). Stripe products pending production API approval.
+- **Workspace activity logging gaps** — approval workflow events (post approved/rejected) + team invite sent still unwired. Member removal + join are done (PR #266).
 - **SOMA credit packs** — ✅ Fully live. Stripe products created Apr 30. Price IDs hardcoded (PR #262).
 
 ## Confirmed Done (stop asking about these)
 
+- ✅ **TikTok Studio fully live (May 1, PRs #267+#268)** — OAuth, video editor (trim/filters/caption/export), PULL_FROM_URL posting, scheduled publish via Inngest cron. Sandbox credentials set. `publishScheduledTiktokPosts` resynced in Inngest. SQL applied.
+- ✅ **Workspace activity logging — member events (May 1, PR #266)** — `member.removed` (server-side DELETE route) + `member.joined` (accept route). Done.
+- ✅ **May 1 batch (PR #265)** — Changelog, DNA disclaimer, creator color picker, paywall LIB block. Merge conflicts resolved + merged.
+- ✅ **AI credit costs corrected (May 1)** — hashtags 1→5 cr, repurpose 5→10 cr. Now consistent across all routes and pricing page.
+- ✅ **Inngest resync (May 1)** — `publish-scheduled-tiktok-posts` registered. All prior agents (`newsletter-agent`, `client-report-agent`, etc.) confirmed registered.
 - ✅ **SOMA Credit Packs fully live (Apr 30, PR #263)** — Stripe products created (Starter $4.99/75cr, Growth $12.99/225cr, Pro $24.99/500cr). Price IDs hardcoded. Labels updated. Webhook wired from PR #256.
 - ✅ **Capacitor Android wrapper + Link in Bio monetize blocks (Apr 30, PR #262)** — `capacitor.config.json`, Capacitor deps, `GOOGLE_PLAY_SETUP.md`, Link in Bio tip/subscribe quick-add, Creator Hub share section (QR + copy links).
 - ✅ **Toast safe-area fix (Apr 30, PR #261)** — `components/Toast.tsx` created. All 35 pages fixed. Zero remaining `fixed bottom-6 right-6` occurrences.
