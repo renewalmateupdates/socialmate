@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { logActivity } from '@/lib/workspace-activity'
 import { Resend } from 'resend'
 
 let _resend: Resend | null = null
@@ -94,6 +95,27 @@ export async function POST(request: NextRequest) {
     .from('invite_tokens')
     .update({ used_at: new Date().toISOString() })
     .eq('token', token)
+
+  // Log member.joined activity (non-fatal)
+  Promise.resolve(
+    adminSupabase
+      .from('workspaces')
+      .select('id')
+      .eq('owner_id', invite.owner_id)
+      .eq('is_personal', true)
+      .maybeSingle()
+  ).then(({ data: ws }) => {
+    if (ws?.id && userId) {
+      logActivity({
+        workspace_id: ws.id,
+        user_id:      userId,
+        actor_email:  invite.email,
+        action:       'member.joined',
+        entity_type:  'team_member',
+        metadata:     { role: invite.role },
+      })
+    }
+  }).catch(() => {})
 
   // Send team joined email to workspace owner
   try {
