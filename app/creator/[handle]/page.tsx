@@ -8,6 +8,7 @@ type CreatorProfile = {
   page_title:               string | null
   page_bio:                 string | null
   avatar_url:               string | null
+  header_color:             string
   tip_enabled:              boolean
   tip_min:                  number
   tip_max:                  number
@@ -247,7 +248,7 @@ function CreatorPageInner() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-amber-400 px-6 py-10 text-center">
+      <div className="px-6 py-10 text-center" style={{ backgroundColor: creator.header_color || '#F59E0B' }}>
         <div className="w-16 h-16 rounded-full bg-black/20 flex items-center justify-center text-3xl mx-auto mb-3">
           {creator.avatar_url ? (
             <img src={creator.avatar_url} alt={creator.page_title || handle} className="w-16 h-16 rounded-full object-cover" />
@@ -255,13 +256,13 @@ function CreatorPageInner() {
             <span>👤</span>
           )}
         </div>
-        <h1 className="text-2xl font-black text-black">{creator.page_title || handle}</h1>
+        <h1 className="text-2xl font-black" style={{ color: creator.header_color === '#ffffff' ? '#111827' : '#fff' }}>{creator.page_title || handle}</h1>
         {creator.page_bio && (
-          <p className="text-black/70 text-sm mt-2 max-w-sm mx-auto">{creator.page_bio}</p>
+          <p className="text-sm mt-2 max-w-sm mx-auto" style={{ color: creator.header_color === '#ffffff' ? '#374151' : 'rgba(255,255,255,0.75)' }}>{creator.page_bio}</p>
         )}
-        <p className="text-black/50 text-xs mt-2">@{handle}</p>
+        <p className="text-xs mt-2" style={{ color: creator.header_color === '#ffffff' ? '#6b7280' : 'rgba(255,255,255,0.5)' }}>@{handle}</p>
         {isFan && (
-          <span className="inline-block mt-2 bg-black/20 text-black text-xs font-bold px-3 py-1 rounded-full">
+          <span className="inline-block mt-2 text-xs font-bold px-3 py-1 rounded-full" style={{ background: 'rgba(0,0,0,0.2)', color: creator.header_color === '#ffffff' ? '#111827' : '#fff' }}>
             Fan subscriber
           </span>
         )}

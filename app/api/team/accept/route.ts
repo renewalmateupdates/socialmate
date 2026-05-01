@@ -96,26 +96,25 @@ export async function POST(request: NextRequest) {
     .update({ used_at: new Date().toISOString() })
     .eq('token', token)
 
-  // Log member.joined activity (non-fatal)
-  Promise.resolve(
-    adminSupabase
+  // Log member.joined to workspace activity (non-fatal)
+  try {
+    const { data: ws } = await adminSupabase
       .from('workspaces')
       .select('id')
       .eq('owner_id', invite.owner_id)
       .eq('is_personal', true)
       .maybeSingle()
-  ).then(({ data: ws }) => {
     if (ws?.id && userId) {
-      logActivity({
+      await logActivity({
         workspace_id: ws.id,
         user_id:      userId,
         actor_email:  invite.email,
         action:       'member.joined',
         entity_type:  'team_member',
-        metadata:     { role: invite.role },
+        metadata:     { email: invite.email, role: invite.role },
       })
     }
-  }).catch(() => {})
+  } catch {}
 
   // Send team joined email to workspace owner
   try {

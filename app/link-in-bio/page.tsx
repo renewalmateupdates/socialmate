@@ -45,6 +45,7 @@ const LINK_TYPES = [
   { id: 'custom',    label: 'Custom Link',    icon: '🔗' },
   { id: 'tip',       label: 'Tip Jar',        icon: '💸' },
   { id: 'subscribe', label: 'Fan Subscribe',  icon: '🔁' },
+  { id: 'paywall',   label: 'Paywalled Post', icon: '🔒' },
   { id: 'youtube',   label: 'YouTube',        icon: '▶️' },
   { id: 'instagram', label: 'Instagram',      icon: '📸' },
   { id: 'twitter',   label: 'X / Twitter',    icon: '𝕏'  },
@@ -102,6 +103,7 @@ export default function LinkInBio() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const [copied, setCopied] = useState(false)
   const [creatorHandle, setCreatorHandle] = useState<string | null>(null)
+  const [paywalledPosts, setPaywalledPosts] = useState<{ id: string; title: string }[]>([])
 
   const [customDomainUnlocked, setCustomDomainUnlocked] = useState(false)
   const [customDomain, setCustomDomain] = useState('')
@@ -159,7 +161,7 @@ export default function LinkInBio() {
         .from('user_settings').select('custom_domain_unlocked').eq('user_id', authUser.id).single()
       if (settings) setCustomDomainUnlocked(settings.custom_domain_unlocked || false)
 
-      // Fetch creator handle for tip/subscribe quick-add
+      // Fetch creator handle for tip/subscribe/paywall quick-add
       try {
         const { data: ws } = await supabase
           .from('workspaces').select('id').eq('owner_id', authUser.id).eq('is_personal', true).single()
@@ -167,7 +169,18 @@ export default function LinkInBio() {
           const cmRes = await fetch(`/api/monetize/settings?workspace_id=${ws.id}`)
           if (cmRes.ok) {
             const cmData = await cmRes.json()
-            if (cmData?.settings?.page_handle) setCreatorHandle(cmData.settings.page_handle)
+            const handle = cmData?.settings?.page_handle
+            if (handle) {
+              setCreatorHandle(handle)
+              // Also fetch paywalled posts for quick-add
+              const postsRes = await fetch(`/api/monetize/paywalled-posts?workspace_id=${ws.id}`)
+              if (postsRes.ok) {
+                const postsData = await postsRes.json()
+                if (Array.isArray(postsData.posts)) {
+                  setPaywalledPosts(postsData.posts.map((p: any) => ({ id: p.id, title: p.title })))
+                }
+              }
+            }
           }
         }
       } catch { /* non-fatal */ }
@@ -568,19 +581,52 @@ export default function LinkInBio() {
                   <div className="pt-1">
                     <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-2">💸 Monetize</p>
                     {creatorHandle ? (
-                      <div className="grid grid-cols-2 gap-2">
-                        <button
-                          onClick={() => setLinks(prev => [...prev, { id: makeId(), title: 'Send a Tip 💸', url: `https://socialmate.studio/creator/${creatorHandle}`, active: true, type: 'tip' }])}
-                          className="py-2 border-2 border-dashed border-amber-300 dark:border-amber-700 rounded-xl text-xs font-bold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all"
-                        >
-                          + Tip Jar
-                        </button>
-                        <button
-                          onClick={() => setLinks(prev => [...prev, { id: makeId(), title: 'Become a Fan 🔁', url: `https://socialmate.studio/creator/${creatorHandle}`, active: true, type: 'subscribe' }])}
-                          className="py-2 border-2 border-dashed border-emerald-300 dark:border-emerald-700 rounded-xl text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all"
-                        >
-                          + Fan Subscribe
-                        </button>
+                      <div className="space-y-2">
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            onClick={() => setLinks(prev => [...prev, { id: makeId(), title: 'Send a Tip 💸', url: `https://socialmate.studio/creator/${creatorHandle}`, active: true, type: 'tip' }])}
+                            className="py-2 border-2 border-dashed border-amber-300 dark:border-amber-700 rounded-xl text-xs font-bold text-amber-600 dark:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all"
+                          >
+                            + Tip Jar
+                          </button>
+                          <button
+                            onClick={() => setLinks(prev => [...prev, { id: makeId(), title: 'Become a Fan 🔁', url: `https://socialmate.studio/creator/${creatorHandle}`, active: true, type: 'subscribe' }])}
+                            className="py-2 border-2 border-dashed border-emerald-300 dark:border-emerald-700 rounded-xl text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all"
+                          >
+                            + Fan Subscribe
+                          </button>
+                        </div>
+                        {/* Paywalled posts quick-add */}
+                        {paywalledPosts.length > 0 && (
+                          <div>
+                            <p className="text-[10px] font-semibold text-gray-400 dark:text-gray-500 mb-1.5">🔒 Exclusive Posts</p>
+                            <div className="space-y-1.5">
+                              {paywalledPosts.map(post => (
+                                <button
+                                  key={post.id}
+                                  onClick={() => setLinks(prev => [...prev, {
+                                    id: makeId(),
+                                    title: `🔒 ${post.title}`,
+                                    url: `https://socialmate.studio/creator/${creatorHandle}#post-${post.id}`,
+                                    active: true,
+                                    type: 'paywall',
+                                  }])}
+                                  className="w-full py-2 px-3 border-2 border-dashed border-purple-300 dark:border-purple-700 rounded-xl text-xs font-bold text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all text-left truncate"
+                                >
+                                  + {post.title}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {paywalledPosts.length === 0 && (
+                          <a
+                            href="/monetize/hub"
+                            className="block w-full py-2 border-2 border-dashed border-purple-200 dark:border-purple-800 rounded-xl text-xs text-purple-400 dark:text-purple-500 text-center hover:border-purple-400 hover:text-purple-600 transition-all"
+                          >
+                            🔒 Add exclusive posts in Creator Hub →
+                          </a>
+                        )}
                       </div>
                     ) : (
                       <a

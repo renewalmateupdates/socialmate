@@ -229,6 +229,22 @@ export default function ContentDNAPage() {
             </p>
           </div>
 
+          {/* Transparency disclaimer */}
+          <div style={{
+            background: 'rgba(245,158,11,0.06)',
+            border: `1px solid rgba(245,158,11,0.2)`,
+            borderRadius: 10,
+            padding: '12px 16px',
+            marginBottom: 24,
+            fontSize: 13,
+            color: T.muted,
+            lineHeight: 1.6,
+          }}>
+            <span style={{ color: T.gold, fontWeight: 700 }}>How this works —</span>{' '}
+            Content DNA is built entirely from your own post history stored in SocialMate. Engagement data (likes, reposts, replies) is pulled directly from Bluesky and Mastodon using their public APIs when you hit Sync. No third-party data providers, no scrapers. X/Twitter and Discord engagement are not currently available via their APIs.
+            Best day, time, and length scores are averages across your posts grouped by those attributes — the higher the bar, the more engagement those posts averaged. Requires at least 10 posts with engagement data to unlock.
+          </div>
+
           {/* Sync bar */}
           <div style={{
             display: 'flex',
