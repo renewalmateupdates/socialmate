@@ -40,7 +40,7 @@ export async function GET() {
     .maybeSingle()
 
   const plan = ws?.plan ?? 'free'
-  const limits: Record<string, number> = { free: 28, pro: 150, agency: 400 }
+  const limits: Record<string, number> = { free: 0, pro: 150, agency: 400 }
 
   // Admin has no quota cap — return a high ceiling so UI shows unlimited
   const ADMIN_EMAIL = 'socialmatehq@gmail.com'

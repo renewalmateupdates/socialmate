@@ -5,11 +5,11 @@ import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 const PLAN_TIKTOK_QUOTA: Record<string, number> = {
-  free:           5,
-  pro:            50,
-  pro_annual:     50,
-  agency:         150,
-  agency_annual:  150,
+  free:           20,
+  pro:            60,
+  pro_annual:     60,
+  agency:         200,
+  agency_annual:  200,
 }
 
 async function getValidAccessToken(userId: string): Promise<{ token: string; openId: string } | null> {

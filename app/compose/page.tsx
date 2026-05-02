@@ -1411,16 +1411,28 @@ function ComposeInner() {
               <div className="bg-surface border border-theme rounded-2xl p-4">
                 <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">Platforms</p>
                 <div className="flex flex-wrap gap-2">
-                  {livePlatforms.map(p => (
-                    <button key={p.id} onClick={() => togglePlatform(p.id)}
-                      className={`flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] rounded-xl text-xs font-bold transition-all border ${
-                        selectedPlatforms.includes(p.id)
-                          ? 'bg-black text-white border-black'
-                          : 'bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-400'
-                      }`}>
-                      <span>{p.icon}</span>{p.name}
-                    </button>
-                  ))}
+                  {livePlatforms.map(p => {
+                    if (p.id === 'twitter' && plan === 'free') {
+                      return (
+                        <Link key={p.id} href="/pricing"
+                          title="X/Twitter requires Pro — $5/month or grab an X Booster pack"
+                          className="flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] rounded-xl text-xs font-bold border border-dashed border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 hover:border-amber-300 hover:text-amber-500 transition-all">
+                          <span>{p.icon}</span>{p.name}
+                          <span className="text-[10px] font-extrabold text-amber-500 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded-full ml-0.5">Pro</span>
+                        </Link>
+                      )
+                    }
+                    return (
+                      <button key={p.id} onClick={() => togglePlatform(p.id)}
+                        className={`flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] rounded-xl text-xs font-bold transition-all border ${
+                          selectedPlatforms.includes(p.id)
+                            ? 'bg-black text-white border-black'
+                            : 'bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:border-gray-400'
+                        }`}>
+                        <span>{p.icon}</span>{p.name}
+                      </button>
+                    )
+                  })}
                 </div>
                 {/* Multi-account selectors — shown when a selected platform has 2+ accounts */}
                 {selectedPlatforms.some(pid => (connectedAccounts[pid]?.length ?? 0) > 1) && (

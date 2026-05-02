@@ -18,7 +18,7 @@ const sections = [
       },
       {
         q: 'What platforms does SocialMate support?',
-        a: 'Live today: Bluesky, Mastodon, Discord, Telegram, and X/Twitter (pay-per-use at $0.01/tweet). Coming soon: TikTok (API submitted, in review), LinkedIn (API pending), Instagram, Pinterest, Reddit, Threads, YouTube, Tumblr.',
+        a: 'Live today: Bluesky, Mastodon, Discord, Telegram (all free), and X/Twitter (Pro+ plan — X charges us $0.01/tweet, so we gate it to Pro). TikTok Studio is live for uploading and editing; posting is pending Production API approval. Clip support: Twitch and YouTube. Coming soon: LinkedIn, Instagram, Threads, Pinterest, Reddit, Tumblr.',
       },
       {
         q: 'Is there a free plan?',
@@ -102,6 +102,31 @@ const sections = [
       {
         q: 'How do I get listed?',
         a: 'Apply at /studio-stax/apply. We\'ll review your submission against our criteria checklist and approve or request changes. Founding Member pricing ($100/yr) is available while spots last. Standard listing is $150/yr after.',
+      },
+    ],
+  },
+  {
+    title: 'Platforms & Pricing',
+    faqs: [
+      {
+        q: 'Why does X/Twitter cost extra?',
+        a: 'X charges us $0.01 per tweet on their API. That\'s their fee — not ours. To cover the cost, X posting is available on Pro and Agency plans only. Free users see an upgrade prompt when they try to select X in the composer. If you\'re on Pro, you get 150 tweets/month. Agency gets 400/month. Need more? X Booster packs let you add extra posts without upgrading (Spark: 50 posts/$1.99, up to Storm: 500/$19.99).',
+      },
+      {
+        q: 'Why is TikTok free (or so cheap)?',
+        a: 'TikTok\'s Content Posting API is free for developers — no per-post charges. We only pay for storage bandwidth (pennies per GB). That means we can offer generous free limits: 20 videos/month on Free, 60 on Pro, 200 on Agency. No catch. Our philosophy is simple: open APIs with no per-post cost → free for users. Gated APIs that charge per post → we pass the cost through.',
+      },
+      {
+        q: 'When will TikTok be fully live?',
+        a: 'TikTok Studio is live now at /tiktok/studio — you can upload, trim, add filters and captions, and schedule videos. The connect button is live on /accounts. The hold-up is TikTok\'s developer app review process, which takes 2–4 weeks. We\'ve submitted for Production API approval and are waiting. Once approved, TikTok posting goes fully live for all plans. Sandbox testing is available in the meantime.',
+      },
+      {
+        q: 'What\'s the platform philosophy?',
+        a: 'Open social is free. Gatekept social costs extra. Platforms like Bluesky, Mastodon, Discord, and Telegram have open APIs with no per-post charges — so we pass that freedom straight to users. Platforms like X/Twitter charge developers per post — so we charge accordingly. TikTok is free. LinkedIn will be free once we get API access. We\'re not adding platform paywalls arbitrarily. Every gate has a real cost behind it.',
+      },
+      {
+        q: 'Which platforms are live today?',
+        a: 'Live now: Bluesky, Mastodon, Discord, Telegram (all free), and X/Twitter (Pro+ plan). TikTok Studio is live for upload/editing; posting pending Production API approval. Clip support: Twitch (OAuth connect + clip scheduler) and YouTube (RSS-based, no API key needed). Coming soon: LinkedIn, Instagram, Threads, Pinterest, Reddit, Tumblr.',
       },
     ],
   },
