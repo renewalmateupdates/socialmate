@@ -125,6 +125,26 @@ export default function TikTokStudioClient() {
   const canvasRef   = useRef<HTMLCanvasElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const animRef     = useRef<number | null>(null)
+  // AudioContext refs — createMediaElementSource can only be called once per element
+  const audioCtxRef = useRef<AudioContext | null>(null)
+  const audioSrcRef = useRef<MediaElementAudioSourceNode | null>(null)
+
+  // Reset audio nodes when video file changes so createMediaElementSource isn't called twice
+  useEffect(() => {
+    audioSrcRef.current = null
+    if (audioCtxRef.current) {
+      audioCtxRef.current.close().catch(() => {})
+      audioCtxRef.current = null
+    }
+  }, [videoFile])
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      audioSrcRef.current = null
+      audioCtxRef.current?.close().catch(() => {})
+    }
+  }, [])
 
   // ── Load creator info on mount ──────────────────────────────────────────────
 
@@ -325,12 +345,19 @@ export default function TikTokStudioClient() {
       const canvas = canvasRef.current!
       const stream = canvas.captureStream(30)
 
-      // Add original audio (trimmed)
-      const audioCtx = new AudioContext()
-      const src      = audioCtx.createMediaElementSource(videoRef.current!)
-      const dest     = audioCtx.createMediaStreamDestination()
-      src.connect(dest)
-      src.connect(audioCtx.destination)
+      // Add original audio — reuse AudioContext/source node across retries
+      // (createMediaElementSource throws if called twice on same element)
+      if (!audioCtxRef.current) {
+        audioCtxRef.current = new AudioContext()
+      }
+      if (!audioSrcRef.current && videoRef.current) {
+        audioSrcRef.current = audioCtxRef.current.createMediaElementSource(videoRef.current)
+      }
+      const dest = audioCtxRef.current.createMediaStreamDestination()
+      if (audioSrcRef.current) {
+        audioSrcRef.current.connect(dest)
+        audioSrcRef.current.connect(audioCtxRef.current.destination)
+      }
       const audioTrack = dest.stream.getAudioTracks()[0]
       if (audioTrack) stream.addTrack(audioTrack)
 
@@ -362,22 +389,23 @@ export default function TikTokStudioClient() {
         requestAnimationFrame(driveCanvas)
       })
 
-      await audioCtx.close()
-
       const exportedBlob = new Blob(chunks, { type: 'video/webm' })
       setExporting(false)
       setUploading(true)
 
-      // Step 2: Upload to Supabase storage
-      const filename    = `tiktok/${Date.now()}_${Math.random().toString(36).slice(2)}.webm`
-      const uploadRes   = await fetch(`/api/media/upload?path=${encodeURIComponent(filename)}`, {
+      // Step 2: Upload to Supabase storage via FormData (route expects multipart)
+      const uploadForm = new FormData()
+      uploadForm.append('file', new File([exportedBlob], `tiktok_${Date.now()}.webm`, { type: 'video/webm' }))
+      const uploadRes = await fetch('/api/media/upload', {
         method: 'POST',
-        body:   exportedBlob,
-        headers: { 'Content-Type': 'video/webm' },
+        body:   uploadForm,
       })
 
-      if (!uploadRes.ok) throw new Error('Upload to storage failed')
-      const { url: uploadedUrl } = await uploadRes.json()
+      if (!uploadRes.ok) {
+        const errData = await uploadRes.json().catch(() => ({}))
+        throw new Error(errData.error || 'Upload to storage failed')
+      }
+      const { url: uploadedUrl, path: storagePath } = await uploadRes.json()
 
       setUploading(false)
       setPosting(true)
@@ -388,7 +416,7 @@ export default function TikTokStudioClient() {
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({
           video_url:             uploadedUrl,
-          video_storage_path:    filename,
+          video_storage_path:    storagePath,
           video_size_bytes:      exportedBlob.size,
           video_duration_seconds: trimEnd - trimStart,
           post_caption:          postCaption,
