@@ -9,8 +9,8 @@ const MAX_FILE_BYTES   = 500 * 1024 * 1024  // 500 MB
 const MAX_DURATION_S   = 600                 // 10 minutes
 const MIN_DURATION_S   = 3
 const ACCEPTED_FORMATS = ['video/mp4', 'video/quicktime']
-const CANVAS_W         = 1080
-const CANVAS_H         = 1920
+const CANVAS_W         = 720
+const CANVAS_H         = 1280
 
 const FILTERS: Record<string, string> = {
   'None':          '',
@@ -362,7 +362,10 @@ export default function TikTokStudioClient() {
       if (audioTrack) stream.addTrack(audioTrack)
 
       const chunks: Blob[] = []
-      const recorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9' })
+      const recorder = new MediaRecorder(stream, {
+        mimeType: 'video/webm;codecs=vp9',
+        videoBitsPerSecond: 2_500_000, // 2.5 Mbps — keeps file size manageable
+      })
       recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data) }
 
       await new Promise<void>((resolve, reject) => {
@@ -393,19 +396,18 @@ export default function TikTokStudioClient() {
       setExporting(false)
       setUploading(true)
 
-      // Step 2: Upload to Supabase storage via FormData (route expects multipart)
-      const uploadForm = new FormData()
-      uploadForm.append('file', new File([exportedBlob], `tiktok_${Date.now()}.webm`, { type: 'video/webm' }))
-      const uploadRes = await fetch('/api/media/upload', {
-        method: 'POST',
-        body:   uploadForm,
-      })
+      // Step 2: Get a signed Supabase upload URL (avoids Vercel 4.5MB body limit)
+      const urlRes = await fetch('/api/tiktok/upload-url')
+      if (!urlRes.ok) throw new Error('Failed to prepare upload')
+      const { signedUrl, path: storagePath, publicUrl: uploadedUrl } = await urlRes.json()
 
-      if (!uploadRes.ok) {
-        const errData = await uploadRes.json().catch(() => ({}))
-        throw new Error(errData.error || 'Upload to storage failed')
-      }
-      const { url: uploadedUrl, path: storagePath } = await uploadRes.json()
+      // Upload directly from browser to Supabase — no Vercel serverless in the path
+      const putRes = await fetch(signedUrl, {
+        method:  'PUT',
+        body:    exportedBlob,
+        headers: { 'Content-Type': 'video/webm' },
+      })
+      if (!putRes.ok) throw new Error('Upload to storage failed')
 
       setUploading(false)
       setPosting(true)
@@ -1050,14 +1052,16 @@ export default function TikTokStudioClient() {
                 disabled={!videoUrl || isWorking || (scheduleMode === 'schedule' && !scheduledAt)}
                 className="w-full bg-[#ff0050] text-white font-extrabold py-3.5 rounded-2xl hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-sm flex items-center justify-center gap-2"
               >
-                {exporting ? '🎬 Exporting…'
+                {exporting ? '🎬 Exporting… (video will play through)'
                   : uploading ? '☁️ Uploading…'
                   : posting  ? '🚀 Publishing…'
                   : scheduleMode === 'schedule' ? '📅 Schedule Video'
                   : '🚀 Post to TikTok'}
               </button>
               <p className="text-xs text-gray-600 text-center">
-                Video will be exported, uploaded, and published via TikTok's Content Posting API.
+                {exporting
+                  ? 'Playing through to capture frames — this is normal, please wait.'
+                  : 'Video will be exported, uploaded, and published via TikTok\'s Content Posting API.'}
               </p>
             </div>
           </div>
