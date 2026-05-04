@@ -396,49 +396,72 @@ export default function TikTokStudioClient() {
       setExporting(false)
       setUploading(true)
 
-      // Step 2: Get a signed Supabase upload URL (avoids Vercel 4.5MB body limit)
-      const urlRes = await fetch('/api/tiktok/upload-url')
-      if (!urlRes.ok) throw new Error('Failed to prepare upload')
-      const { signedUrl, path: storagePath, publicUrl: uploadedUrl } = await urlRes.json()
+      // Step 2: Initialize FILE_UPLOAD with TikTok — returns upload_url + publish_id
+      // No domain verification needed; browser uploads blob directly to TikTok's URL
+      const initRes = await fetch('/api/tiktok/init-upload', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({
+          video_size:      exportedBlob.size,
+          post_caption:    postCaption,
+          hashtags,
+          privacy_level:   privacyLevel,
+          disable_duet:    disableDuet,
+          disable_comment: disableComment,
+          disable_stitch:  disableStitch,
+          sound_id:        selectedSound?.id || null,
+        }),
+      })
+      const initData = await initRes.json()
+      if (!initRes.ok) throw new Error(initData.error || 'Failed to initialize TikTok upload')
+      const { upload_url, publish_id, open_id, full_caption } = initData
 
-      // Upload directly from browser to Supabase — no Vercel serverless in the path
-      const putRes = await fetch(signedUrl, {
+      // Step 3: PUT blob directly to TikTok's upload URL (single-chunk upload)
+      const end = exportedBlob.size - 1
+      const tikPutRes = await fetch(upload_url, {
         method:  'PUT',
         body:    exportedBlob,
-        headers: { 'Content-Type': 'video/webm' },
+        headers: {
+          'Content-Type':   'video/webm',
+          'Content-Range':  `bytes 0-${end}/${exportedBlob.size}`,
+          'Content-Length': String(exportedBlob.size),
+        },
       })
-      if (!putRes.ok) throw new Error('Upload to storage failed')
+      if (!tikPutRes.ok) {
+        const errText = await tikPutRes.text().catch(() => '')
+        throw new Error(`TikTok upload failed (${tikPutRes.status})${errText ? ': ' + errText.slice(0, 200) : ''}`)
+      }
 
       setUploading(false)
       setPosting(true)
 
-      // Step 3: Publish or schedule via TikTok API
-      const postRes = await fetch('/api/tiktok/post', {
+      // Step 4: Record the post in our DB + decrement quota
+      const confirmRes = await fetch('/api/tiktok/confirm-upload', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({
-          video_url:             uploadedUrl,
-          video_storage_path:    storagePath,
-          video_size_bytes:      exportedBlob.size,
+          publish_id,
+          open_id,
+          full_caption,
+          video_size_bytes:       exportedBlob.size,
           video_duration_seconds: trimEnd - trimStart,
-          post_caption:          postCaption,
+          post_caption:           postCaption,
           hashtags,
-          caption_overlay:       captionOverlay,
-          caption_position:      captionPosition,
-          caption_color:         captionColor,
-          active_filter:         activeFilter,
-          sound_id:              selectedSound?.id || null,
-          sound_name:            selectedSound?.name || null,
-          privacy_level:         privacyLevel,
-          disable_duet:          disableDuet,
-          disable_comment:       disableComment,
-          disable_stitch:        disableStitch,
-          scheduled_at:          scheduleMode === 'schedule' && scheduledAt ? scheduledAt : null,
+          caption_overlay:        captionOverlay,
+          caption_position:       captionPosition,
+          caption_color:          captionColor,
+          active_filter:          activeFilter,
+          sound_id:               selectedSound?.id || null,
+          sound_name:             selectedSound?.name || null,
+          privacy_level:          privacyLevel,
+          disable_duet:           disableDuet,
+          disable_comment:        disableComment,
+          disable_stitch:         disableStitch,
+          scheduled_at:           scheduleMode === 'schedule' && scheduledAt ? scheduledAt : null,
         }),
       })
-
-      const postData = await postRes.json()
-      if (!postRes.ok) throw new Error(postData.error || 'Failed to publish')
+      const confirmData = await confirmRes.json()
+      if (!confirmRes.ok) throw new Error(confirmData.error || 'Failed to save post record')
 
       setPostSuccess(true)
     } catch (err: unknown) {
