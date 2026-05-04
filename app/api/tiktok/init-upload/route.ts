@@ -118,9 +118,10 @@ export async function POST(request: NextRequest) {
   const initData = await initRes.json().catch(() => ({}))
 
   if (!initRes.ok) {
-    const errMsg = initData?.error?.message || `TikTok init error ${initRes.status}`
-    console.error('[tiktok/init-upload]', errMsg, initData)
-    return NextResponse.json({ error: errMsg }, { status: 502 })
+    const errCode = initData?.error?.code    || 'unknown'
+    const errMsg  = initData?.error?.message || `TikTok init error ${initRes.status}`
+    console.error('[tiktok/init-upload]', errCode, errMsg, JSON.stringify(initData))
+    return NextResponse.json({ error: `[${errCode}] ${errMsg}`, code: errCode }, { status: 502 })
   }
 
   const { publish_id, upload_url } = initData?.data ?? {}
