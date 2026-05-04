@@ -82,9 +82,13 @@ export async function POST(request: NextRequest) {
   const hashtagStr = (hashtags as string[]).map((t: string) => `#${t.replace(/^#/, '')}`).join(' ')
   const fullCaption = [post_caption, hashtagStr].filter(Boolean).join('\n\n').slice(0, 2200)
 
+  // Unaudited (pre-production-approval) apps can only post as SELF_ONLY.
+  // Once the TikTok app review passes, remove this override.
+  const effectivePrivacy = 'SELF_ONLY'
+
   const postInfo: Record<string, unknown> = {
     title:                    fullCaption,
-    privacy_level,
+    privacy_level:            effectivePrivacy,
     disable_duet,
     disable_comment,
     disable_stitch,

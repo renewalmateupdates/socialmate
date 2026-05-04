@@ -338,71 +338,20 @@ export default function TikTokStudioClient() {
   const handlePost = useCallback(async () => {
     if (!videoFile || !videoUrl) return
     setPostError(null)
-    setExporting(true)
+    setUploading(true)
 
     try {
-      // Step 1: Export trimmed + filtered video via canvas
-      const canvas = canvasRef.current!
-      const stream = canvas.captureStream(30)
+      // Use the original file directly — TikTok only accepts MP4/H.264, not WebM.
+      // Canvas re-encoding (for filters/trim) produces WebM which TikTok rejects.
+      const uploadBlob = videoFile
+      const mimeType   = videoFile.type === 'video/quicktime' ? 'video/mp4' : videoFile.type
 
-      // Add original audio — reuse AudioContext/source node across retries
-      // (createMediaElementSource throws if called twice on same element)
-      if (!audioCtxRef.current) {
-        audioCtxRef.current = new AudioContext()
-      }
-      if (!audioSrcRef.current && videoRef.current) {
-        audioSrcRef.current = audioCtxRef.current.createMediaElementSource(videoRef.current)
-      }
-      const dest = audioCtxRef.current.createMediaStreamDestination()
-      if (audioSrcRef.current) {
-        audioSrcRef.current.connect(dest)
-        audioSrcRef.current.connect(audioCtxRef.current.destination)
-      }
-      const audioTrack = dest.stream.getAudioTracks()[0]
-      if (audioTrack) stream.addTrack(audioTrack)
-
-      const chunks: Blob[] = []
-      const recorder = new MediaRecorder(stream, {
-        mimeType: 'video/webm;codecs=vp9',
-        videoBitsPerSecond: 2_500_000, // 2.5 Mbps — keeps file size manageable
-      })
-      recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data) }
-
-      await new Promise<void>((resolve, reject) => {
-        recorder.onstop = () => resolve()
-        recorder.onerror = reject
-        recorder.start(100)
-
-        const v = videoRef.current!
-        v.currentTime = trimStart
-        v.play()
-        setIsPlaying(true)
-
-        // Drive canvas during export
-        const driveCanvas = () => {
-          drawFrame()
-          if (v.currentTime < trimEnd) {
-            requestAnimationFrame(driveCanvas)
-          } else {
-            v.pause()
-            setIsPlaying(false)
-            recorder.stop()
-          }
-        }
-        requestAnimationFrame(driveCanvas)
-      })
-
-      const exportedBlob = new Blob(chunks, { type: 'video/webm' })
-      setExporting(false)
-      setUploading(true)
-
-      // Step 2: Initialize FILE_UPLOAD with TikTok — returns upload_url + publish_id
-      // No domain verification needed; browser uploads blob directly to TikTok's URL
+      // Step 1: Initialize FILE_UPLOAD with TikTok — returns upload_url + publish_id
       const initRes = await fetch('/api/tiktok/init-upload', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({
-          video_size:      exportedBlob.size,
+          video_size:      uploadBlob.size,
           post_caption:    postCaption,
           hashtags,
           privacy_level:   privacyLevel,
@@ -416,15 +365,15 @@ export default function TikTokStudioClient() {
       if (!initRes.ok) throw new Error(initData.error || 'Failed to initialize TikTok upload')
       const { upload_url, publish_id, open_id, full_caption } = initData
 
-      // Step 3: PUT blob directly to TikTok's upload URL (single-chunk upload)
-      const end = exportedBlob.size - 1
+      // Step 2: PUT original file directly to TikTok's upload URL (single-chunk)
+      const end = uploadBlob.size - 1
       const tikPutRes = await fetch(upload_url, {
         method:  'PUT',
-        body:    exportedBlob,
+        body:    uploadBlob,
         headers: {
-          'Content-Type':   'video/webm',
-          'Content-Range':  `bytes 0-${end}/${exportedBlob.size}`,
-          'Content-Length': String(exportedBlob.size),
+          'Content-Type':   mimeType,
+          'Content-Range':  `bytes 0-${end}/${uploadBlob.size}`,
+          'Content-Length': String(uploadBlob.size),
         },
       })
       if (!tikPutRes.ok) {
@@ -435,7 +384,7 @@ export default function TikTokStudioClient() {
       setUploading(false)
       setPosting(true)
 
-      // Step 4: Record the post in our DB + decrement quota
+      // Step 3: Record the post in our DB + decrement quota
       const confirmRes = await fetch('/api/tiktok/confirm-upload', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -443,8 +392,8 @@ export default function TikTokStudioClient() {
           publish_id,
           open_id,
           full_caption,
-          video_size_bytes:       exportedBlob.size,
-          video_duration_seconds: trimEnd - trimStart,
+          video_size_bytes:       uploadBlob.size,
+          video_duration_seconds: videoDuration,
           post_caption:           postCaption,
           hashtags,
           caption_overlay:        captionOverlay,
@@ -481,7 +430,7 @@ export default function TikTokStudioClient() {
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
-  const isWorking  = exporting || uploading || posting
+  const isWorking  = uploading || posting
   const charCount  = postCaption.length + (hashtags.length ? hashtags.map(t => `#${t}`).join(' ').length + 2 : 0)
 
   if (creatorLoading) {
@@ -562,6 +511,11 @@ export default function TikTokStudioClient() {
       <Sidebar />
 
       <div className="md:ml-56 flex-1 flex flex-col">
+        {/* Sandbox notice — remove once Production API is approved */}
+        <div className="bg-amber-500/10 border-b border-amber-500/30 px-6 py-2 text-xs text-amber-400 text-center">
+          ⚠️ Sandbox mode: videos post as <strong>Private</strong> (visible only to you). This is a TikTok restriction for unaudited apps — it lifts once Production API is approved.
+        </div>
+
         {/* Header */}
         <div className="sticky top-0 z-20 flex items-center justify-between px-6 py-3 bg-gray-950 border-b border-gray-800">
           <div className="flex items-center gap-3">
@@ -1075,16 +1029,15 @@ export default function TikTokStudioClient() {
                 disabled={!videoUrl || isWorking || (scheduleMode === 'schedule' && !scheduledAt)}
                 className="w-full bg-[#ff0050] text-white font-extrabold py-3.5 rounded-2xl hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition-all text-sm flex items-center justify-center gap-2"
               >
-                {exporting ? '🎬 Exporting… (video will play through)'
-                  : uploading ? '☁️ Uploading…'
+                {uploading ? '☁️ Uploading…'
                   : posting  ? '🚀 Publishing…'
                   : scheduleMode === 'schedule' ? '📅 Schedule Video'
                   : '🚀 Post to TikTok'}
               </button>
               <p className="text-xs text-gray-600 text-center">
-                {exporting
-                  ? 'Playing through to capture frames — this is normal, please wait.'
-                  : 'Video will be exported, uploaded, and published via TikTok\'s Content Posting API.'}
+                {uploading
+                  ? 'Uploading your video directly to TikTok…'
+                  : 'Your original video will be uploaded and published via TikTok\'s Content Posting API.'}
               </p>
             </div>
           </div>
