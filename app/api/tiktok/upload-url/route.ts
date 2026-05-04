@@ -27,11 +27,14 @@ export async function GET() {
     return NextResponse.json({ error: 'Failed to create upload URL' }, { status: 500 })
   }
 
-  const { data: urlData } = admin.storage.from('media').getPublicUrl(path)
+  // Return proxy URL through socialmate.studio (verified in TikTok portal)
+  // instead of direct Supabase URL — TikTok PULL_FROM_URL requires verified domain
+  const appUrl    = process.env.NEXT_PUBLIC_APP_URL!
+  const proxyUrl  = `${appUrl}/api/tiktok/video/${path}`
 
   return NextResponse.json({
     signedUrl:  signedData.signedUrl,
     path,
-    publicUrl:  urlData.publicUrl,
+    publicUrl:  proxyUrl,
   })
 }
