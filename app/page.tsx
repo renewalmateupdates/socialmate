@@ -17,8 +17,8 @@ const PLATFORMS = [
   { name: 'YouTube',     icon: '▶️', status: 'soon'    },
   { name: 'Pinterest',   icon: '📌', status: 'soon'    },
   { name: 'Reddit',      icon: '🤖', status: 'soon'    },
+  { name: 'TikTok',      icon: '🎵', status: 'live'    },
   { name: 'Instagram',   icon: '📸', status: 'planned' },
-  { name: 'TikTok',      icon: '🎵', status: 'planned' },
   { name: 'Facebook',    icon: '📘', status: 'planned' },
   { name: 'Threads',     icon: '🧵', status: 'planned' },
   { name: 'Snapchat',    icon: '👻', status: 'planned' },
@@ -45,7 +45,7 @@ const FEATURES = [
   {
     icon: '📅',
     title: 'Smart Scheduling',
-    desc: 'Schedule across 5 social platforms today, with Twitch and YouTube clips support built in. Bulk upload, automated queues, and platform-specific character limit enforcement included.',
+    desc: 'Schedule across 6 social platforms including TikTok, with Twitch and YouTube clips support built in. Bulk upload, automated queues, and platform-specific character limit enforcement included.',
   },
   {
     icon: '🤖',
@@ -151,15 +151,15 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
       <section className="max-w-4xl mx-auto px-6 pt-24 pb-20 text-center">
         <HeroLaunchBadge />
         <div className="inline-flex items-center gap-2 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 text-xs font-bold px-4 py-2 rounded-full mb-8">
-          🌱 Free forever · No credit card required · 5 social platforms · Twitch &amp; YouTube clips · 12 AI tools
+          🌱 Free forever · No credit card required · 6 social platforms · Twitch &amp; YouTube clips · 12 AI tools
         </div>
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight text-gray-900 dark:text-gray-100">
-          Social media management,{' '}
-          <span className="text-gray-400 dark:text-gray-500">finally built for everyone.</span>
+          Social media management{' '}
+          <span className="text-gray-400 dark:text-gray-500">without the $99/month price tag.</span>
         </h1>
         <p className="text-gray-500 dark:text-gray-400 text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
-          Schedule across 5 social platforms, browse and schedule Twitch clips and YouTube videos, write better content with 12 AI tools, and track what's actually working — all from one place.
-          Free to start. No $99/month trap.
+          Schedule across 6 social platforms including TikTok, browse and schedule Twitch clips and YouTube videos, write better content with 12 AI tools, and track what&apos;s actually working — all from one place.
+          Free to start. Pro from $5/month.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
           <Link href="/signup"
@@ -173,26 +173,21 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         </div>
         <p className="text-xs text-gray-400 dark:text-gray-500">No card required · Free forever · Setup in 60 seconds</p>
 
-        {/* BETA MILESTONE */}
+        {/* BUILT BY */}
         <div className="mt-10 max-w-md mx-auto bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl px-5 py-4 text-left">
-          <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">Beta milestone</p>
-            <Link href="/roadmap" className="text-xs font-semibold text-gray-400 hover:text-black dark:hover:text-white transition-all">See roadmap →</Link>
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-base flex-shrink-0">👤</div>
+            <div>
+              <p className="text-xs font-bold text-gray-800 dark:text-gray-200">Built solo by Joshua Bostic</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Bootstrapped. No VC. No $99/month trap. Just a builder who needed better tools and built them for everyone.</p>
+            </div>
           </div>
-          <div className="flex items-center justify-between mb-1.5">
-            <p className="text-xs text-gray-500 dark:text-gray-400">500 users to exit beta &amp; ship v1.0</p>
-            <span className="text-xs font-bold text-gray-700 dark:text-gray-300">4%</span>
-          </div>
-          <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
-            <div className="bg-black dark:bg-white h-1.5 rounded-full" style={{ width: '4%' }} />
-          </div>
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">Be part of the v1.0 launch.</p>
         </div>
 
         {/* STATS */}
         <div className="grid grid-cols-3 gap-4 sm:gap-6 mt-12 sm:mt-16 max-w-2xl mx-auto">
           {[
-            { value: '5',   label: 'social platforms live' },
+            { value: '6',   label: 'social platforms live' },
             { value: '12',  label: 'AI tools included' },
             { value: '$0',  label: 'To get started'    },
           ].map(stat => (
@@ -254,9 +249,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-10">
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Platform support</p>
-            <h2 className="text-3xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">5 social platforms live. Twitch &amp; YouTube clips built in.</h2>
+            <h2 className="text-3xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">6 social platforms live. Twitch &amp; YouTube clips built in.</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 max-w-lg mx-auto">
-              Bluesky, Discord, Telegram, Mastodon, and X/Twitter live now. Twitch clips and YouTube videos schedulable directly inside SocialMate. LinkedIn, Reddit, and more on the roadmap.
+              Bluesky, Discord, Telegram, Mastodon, X/Twitter, and TikTok live now. Twitch clips and YouTube videos schedulable directly inside SocialMate. LinkedIn, Reddit, and more on the roadmap.
             </p>
           </div>
           <div className="space-y-6">
@@ -311,8 +306,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
             </h2>
             <p className="text-gray-400 text-sm max-w-xl mx-auto leading-relaxed">
               Browse your Twitch clips or YouTube videos directly inside SocialMate and
-              schedule them to 5 platforms in one click. No downloading. No app-switching.
-              No copy-pasting URLs into five different tabs.
+              schedule them to 6 platforms in one click. No downloading. No app-switching.
+              No copy-pasting URLs into six different tabs.
             </p>
           </div>
 
@@ -349,7 +344,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
             {[
               { step: '1', label: 'Browse your clips' },
               { step: '2', label: 'Pick one' },
-              { step: '3', label: 'Schedule to 5 platforms' },
+              { step: '3', label: 'Schedule to 6 platforms' },
             ].map((item, i) => (
               <div key={item.step} className="flex items-center gap-2 sm:gap-3">
                 <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5">
@@ -616,34 +611,66 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         </div>
       </section>
 
-      {/* TESTIMONIALS PLACEHOLDER */}
-      <section className="py-20 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
-        <div className="max-w-4xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">From the community</p>
-            <h2 className="text-3xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">What creators are saying</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Real people. Real results. Testimonials coming as the community grows.</p>
+      {/* FREE GUIDES CTA */}
+      <section className="py-20 bg-[#0a0a0a] border-t border-gray-900">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold px-4 py-2 rounded-full mb-6">
+              📚 Free forever · No signup required
+            </div>
+            <h2 className="text-3xl font-extrabold tracking-tight mb-3 text-white">
+              Gilgamesh&apos;s Guides — the free playbooks
+            </h2>
+            <p className="text-sm text-gray-400 max-w-xl mx-auto">
+              Real-talk guides on starting a business, marketing from zero, and building with AI.
+              Written by the solo founder who built SocialMate between deli shifts. No courses to buy. No email required.
+            </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="bg-white dark:bg-gray-800 border border-dashed border-gray-200 dark:border-gray-700 rounded-2xl p-6 flex flex-col gap-3 opacity-40">
-                <div className="flex gap-1">{['★','★','★','★','★'].map((s, idx) => <span key={idx} className="text-amber-400 text-sm">{s}</span>)}</div>
-                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full w-5/6" />
-                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full w-full" />
-                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full w-4/6" />
-                <div className="flex items-center gap-2 mt-2">
-                  <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700" />
-                  <div>
-                    <div className="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-full w-20 mb-1" />
-                    <div className="h-2 bg-gray-100 dark:bg-gray-600 rounded-full w-14" />
-                  </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
+            {[
+              {
+                vol: 'Vol. 1',
+                title: 'Starting a Business From Scratch',
+                desc: 'Wyoming LLC for $150, Reddit validation, free stack, first customers, and what nobody tells you about doing it alone.',
+                href: '/guides/starting-a-business',
+                available: true,
+              },
+              {
+                vol: 'Vol. 2',
+                title: 'Marketing on Zero Budget',
+                desc: 'Organic growth, content flywheels, community seeding, and how to turn every platform into a distribution channel.',
+                href: '/guides',
+                available: false,
+              },
+              {
+                vol: 'Vol. 3',
+                title: 'Vibe Coding with AI',
+                desc: 'How to ship production software with no CS degree using AI as your co-pilot. The real workflow, the real mistakes.',
+                href: '/guides',
+                available: false,
+              },
+            ].map(g => (
+              <div key={g.vol} className="rounded-2xl border border-[#1f1f1f] bg-[#111111] p-6 flex flex-col">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-xs font-bold text-amber-400">{g.vol}</span>
+                  {g.available
+                    ? <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 text-xs font-semibold text-emerald-400">Live</span>
+                    : <span className="rounded-full bg-gray-800 border border-gray-700 px-2.5 py-0.5 text-xs text-gray-500">Soon</span>
+                  }
                 </div>
+                <h3 className="font-bold text-white text-sm mb-2">{g.title}</h3>
+                <p className="text-xs text-gray-500 leading-relaxed flex-1">{g.desc}</p>
+                <Link href={g.href} className={`mt-4 inline-flex items-center gap-1 text-xs font-bold transition-colors ${g.available ? 'text-amber-400 hover:text-amber-300' : 'text-gray-600 cursor-default pointer-events-none'}`}>
+                  {g.available ? 'Read free →' : 'Coming soon'}
+                </Link>
               </div>
             ))}
           </div>
-          <p className="text-center text-xs text-gray-400 dark:text-gray-600 mt-6">
-            Be one of the first — <Link href="/signup" className="underline hover:text-gray-600 dark:hover:text-gray-400">join SocialMate free today</Link>
-          </p>
+          <div className="text-center">
+            <Link href="/guides" className="inline-flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-7 py-3 text-sm font-bold text-amber-400 transition-colors hover:bg-amber-500/20">
+              Browse all guides →
+            </Link>
+          </div>
         </div>
       </section>
 
