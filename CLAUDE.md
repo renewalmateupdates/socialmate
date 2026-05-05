@@ -409,11 +409,19 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **TikTok API confirmed free** — No per-post charges from TikTok. Indirect costs only: Supabase storage + egress (~$1-2/100 active users/month). Legitimate competitive edge — most competitors charge $18+/mo for TikTok scheduling.
 - **Abdus Sohag cut** — `affiliates.status = 'inactive'`, workspace downgraded to free. SQL run directly in Supabase.
 
+**May 5, 2026:**
+- **TikTok FILE_UPLOAD posting working** ✅ — Full end-to-end flow confirmed. `init-upload` → client PUT to TikTok upload URL → `confirm-upload`. Unaudited app restriction: account must be in Private mode until Production API approved. Sandbox banner shown in TikTok Studio.
+- **TikTok demo submitted** ✅ — Loom demo video recorded and uploaded to TikTok developer portal. App resubmitted for Production API review. Support ticket `ad7714530aa61ad4` open. No action needed until approved.
+- **Gilgamesh's Guides launched** — Free long-form guide series at `/guides`. Vol. 1 "Starting a Business From Scratch" live (PR #278). Vol. 2 "Marketing on Zero Budget" (PR #281). Hub + Guides CTA added to landing page (PR #279). Guides linked in PublicNav Resources dropdown.
+- **Landing page polish** (PR #279) — Beta milestone bar removed, founder credibility card added, Guides CTA section replaced empty testimonials placeholder, hero headline tightened. Merged.
+- **TikTok status corrected** (PR #280) — Reverted to 'soon' on landing page (was prematurely set to 'live'); platform count back to 5. Will flip to 'live' when Production API approved.
+- **Google Play CI/CD** (PR #281) — `.github/workflows/android-release.yml` builds signed AAB on GitHub Actions (ubuntu-latest, no Android Studio needed). Triggers on `git tag v*`. `GOOGLE_PLAY_SETUP.md` rewritten with full GitHub Actions instructions.
+
 ---
 
 ## Pending / In Progress
 
-- **TikTok demo video** — Record OAuth connect flow + video post via sandbox for TikTok API resubmission. `socialmatehq` TikTok account already added as sandbox target user. Go to `/accounts` → Connect TikTok → authorize → record in Loom → upload to TikTok portal → submit. Also verify domain in portal before submitting.
+- ~~TikTok demo video~~ ✅ DONE — Loom demo recorded + submitted to TikTok portal May 5, 2026. Awaiting Production API approval.
 
 - ~~Inngest resync~~ ✅ DONE — all 26 functions confirmed synced May 1, 2026.
 
@@ -430,7 +438,9 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **TikTok API review** — submitted Apr 23. Support ticket `ad7714530aa61ad4` open re: app name. Check portal periodically. No action needed until approved.
 
 **Roadmap (next up):**
-- **PWA / Google Play Store** — `manifest.json` + service worker already added (PR #256). Next: Capacitor wrapper for Play Store submission.
+- **Google Play Store submission** — GitHub Actions CI/CD built (PR #281). Next steps: (1) run `npm install && npx cap add android` locally to generate `android/` dir, commit it. (2) Create keystore with `keytool`. (3) Add 4 GitHub Secrets. (4) `git tag v1.0.0 && git push origin v1.0.0` to trigger build. See `GOOGLE_PLAY_SETUP.md`.
+- **Gilgamesh's Guides Vol. 2** — ✅ Built (PR #281) at `/guides/marketing-zero-budget`. Update `/guides/page.tsx` to mark Vol. 2 as available after merge.
+- **Gilgamesh's Guides Vol. 3** — Vibe Coding with AI. Content ready from interviews. Write next session.
 - **LinkedIn publishing** — pending API credentials
 - **Schedule templates UI** — ✅ Built (PR #256) — `/schedules` page with full CRUD
 - **Workspace activity logging** — ✅ Wired into post publish (PR #256). Approval + member events still unwired.
