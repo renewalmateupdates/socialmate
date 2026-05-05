@@ -1,0 +1,91 @@
+name: Android Release Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      track:
+        description: 'Play Store track (internal/alpha/beta/production)'
+        default: 'internal'
+        required: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: npm ci
+
+      # If android/ doesn't exist yet, generate it.
+      # After first successful run, commit the android/ directory.
+      - name: Init Capacitor Android (first time only)
+        run: |
+          if [ ! -d "android" ]; then
+            npx cap add android
+            echo "android/ generated — commit this directory to the repo after first run"
+          fi
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      # Decode base64-encoded keystore from GitHub secret
+      - name: Decode keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > socialmate-release.jks
+
+      # Write signing config so Gradle can find it
+      - name: Write keystore.properties
+        run: |
+          cat > android/keystore.properties <<EOF
+          storeFile=../../socialmate-release.jks
+          storePassword=${{ secrets.KEYSTORE_PASSWORD }}
+          keyAlias=${{ secrets.KEYSTORE_ALIAS }}
+          keyPassword=${{ secrets.KEY_PASSWORD }}
+          EOF
+
+      - name: Make Gradle wrapper executable
+        run: chmod +x android/gradlew
+
+      - name: Build release AAB
+        working-directory: android
+        run: ./gradlew bundleRelease
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: socialmate-release-${{ github.ref_name }}
+          path: android/app/build/outputs/bundle/release/app-release.aab
+          retention-days: 30
+
+      # Optional: upload directly to Play Store internal track
+      # Uncomment once you have service account JSON set up
+      # - name: Upload to Play Store
+      #   uses: r0adkll/upload-google-play@v1
+      #   with:
+      #     serviceAccountJsonPlainText: ${{ secrets.PLAY_STORE_SERVICE_ACCOUNT_JSON }}
+      #     packageName: studio.socialmate.app
+      #     releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
+      #     track: ${{ github.event.inputs.track || 'internal' }}
+      #     status: completed
