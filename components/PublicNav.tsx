@@ -11,9 +11,10 @@ const AUDIENCES = [
 ]
 
 const RESOURCES = [
-  { label: '📰 Blog',        href: '/blog'      },
-  { label: "📖 Gil's Guide", href: '/gils-guide' },
-  { label: '❓ FAQ',         href: '/faq'        },
+  { label: '📰 Blog',              href: '/blog'       },
+  { label: "📖 Gil's Guide",       href: '/gils-guide' },
+  { label: "📚 Gilgamesh's Guides", href: '/guides'     },
+  { label: '❓ FAQ',               href: '/faq'        },
 ]
 
 type DropdownKey = 'audiences' | 'resources'
