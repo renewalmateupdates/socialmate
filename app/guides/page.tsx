@@ -59,6 +59,26 @@ const GUIDES = [
   },
   {
     number: 'Vol. 3',
+    title: 'Business Credit, Legal Foundations & Tax Breaks',
+    subtitle: 'DUNS Numbers, PAYDEX Scores, Licenses, Deductions — All of It, Free',
+    description:
+      'The complete no-BS guide to building business credit from scratch, getting your DUNS number, what licenses you actually need, every major tax deduction explained with real numbers, LLC vs S-Corp, and what insurance to buy. Everything they charge $500 courses for — free.',
+    href: '/guides/business-credit-legal',
+    available: true,
+    chapters: [
+      'The DUNS Number',
+      'Building Business Credit & PAYDEX',
+      'Licenses & Registrations',
+      'Tax Deductions (Section 179, Home Office, QBI)',
+      'LLC vs. S-Corp Election',
+      'Banking Setup',
+      'Insurance',
+    ],
+    readTime: '40 min read',
+    tags: ['Business Credit', 'Tax Breaks', 'LLC', 'Legal'],
+  },
+  {
+    number: 'Vol. 4',
     title: 'Vibe Coding — Building with AI',
     subtitle: 'The Solo Founder\'s Complete AI Development Playbook',
     description:
