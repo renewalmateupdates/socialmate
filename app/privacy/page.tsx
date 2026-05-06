@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import PublicNav from '@/components/PublicNav'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata = {
@@ -9,6 +10,7 @@ export const metadata = {
 export default function PrivacyPolicy() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-950">
+      <PublicNav />
       <div className="max-w-3xl mx-auto px-6 py-16">
 
         <div className="mb-12">
