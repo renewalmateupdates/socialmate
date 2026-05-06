@@ -21,6 +21,21 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'May 6, 2026',
+    version: "Gilgamesh's Guides Complete + TikTok + Android + 30 Blog Posts",
+    changes: [
+      { type: 'New',      text: "Gilgamesh's Guides Vol. 3 — Business Credit, Legal Foundations & Tax Breaks. 7 chapters: DUNS numbers, PAYDEX scores, Net-30 vendors, licenses, Section 179, home office, QBI, S-Corp election, SEP-IRA, banking, and insurance. Free." },
+      { type: 'New',      text: "Gilgamesh's Guides Vol. 4 — Vibe Coding with AI. 7 chapters: the full free stack (Next.js/Supabase/Vercel/Stripe/Inngest/Claude Code), build loop workflow, prompting patterns, debugging without panic, first deploy checklist, and the mindset of building in stolen hours. Free." },
+      { type: 'New',      text: "Gilgamesh's Guides series complete — all 4 volumes live at /guides. Starting a Business · Marketing on Zero Budget · Business Credit & Tax · Vibe Coding with AI." },
+      { type: 'New',      text: 'Google Play CI/CD — GitHub Actions workflow builds a signed Android AAB on every git tag. No Android Studio required. SocialMate is Android-ready.' },
+      { type: 'New',      text: 'TikTok Studio live — OAuth connect, video editor (trim, 8 filters, caption overlay), FILE_UPLOAD posting, scheduled publish via Inngest. Sandbox until Production API approved.' },
+      { type: 'New',      text: '30 new blog posts published — business credit, tax strategy, founder story, platform guides, vibe coding, AI builder stack. All indexed in sitemap.' },
+      { type: 'Improved', text: 'SocialMate logo fixed site-wide — canonical three-circle icon now displays correctly in nav, footer, Privacy page, and Terms page.' },
+      { type: 'Improved', text: 'Privacy policy overhauled for TikTok developer review — per-scope disclosure for user.info.basic, video.upload, and video.publish. App name reconciliation documented.' },
+      { type: 'Improved', text: 'Landing page — always dark background. Founder credibility card added. Guides CTA section added. Hero copy tightened.' },
+    ],
+  },
+  {
     date: 'May 1, 2026',
     version: 'Creator Monetization Complete + Paywalled Posts',
     changes: [
