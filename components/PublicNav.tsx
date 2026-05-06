@@ -89,7 +89,7 @@ export default function PublicNav() {
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-          <div className="w-7 h-7 bg-black dark:bg-white rounded-lg flex items-center justify-center text-white dark:text-black text-sm font-bold">S</div>
+          <img src="/icon-512.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
           <span className="font-bold text-base tracking-tight text-gray-900 dark:text-gray-100">
             SocialMate
             <span className="text-[10px] font-semibold bg-pink-500 text-white px-1.5 py-0.5 rounded-full align-super ml-1">Beta</span>
