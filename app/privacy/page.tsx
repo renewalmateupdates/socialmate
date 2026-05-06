@@ -18,7 +18,7 @@ export default function PrivacyPolicy() {
         </div>
 
         <h1 className="text-4xl font-extrabold tracking-tight mb-2 text-gray-900 dark:text-gray-100">Privacy Policy</h1>
-        <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">Last updated: April 13, 2026 · Gilgamesh Enterprise LLC</p>
+        <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">Last updated: May 6, 2026 · Gilgamesh Enterprise LLC</p>
         <p className="text-xs text-gray-400 dark:text-gray-500 mb-12">Your privacy matters to us. This policy explains what data we collect, why we collect it, and how we protect it.</p>
 
         <div className="space-y-10 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
@@ -26,7 +26,8 @@ export default function PrivacyPolicy() {
           {/* ── 1. Who We Are ── */}
           <section>
             <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-3">1. Who We Are</h2>
-            <p><span className="font-semibold">SocialMate</span> (also referred to as "SocialMate" in all connected third-party platform applications, including but not limited to TikTok, Meta, LinkedIn, and Google developer integrations) is a social media scheduling and content management platform operated by <span className="font-semibold">Gilgamesh Enterprise LLC</span>, a Wyoming limited liability company ("we", "us", "our"). Our Service is available at <span className="font-semibold">socialmate.studio</span> and associated domains and applications.</p>
+            <p><span className="font-semibold">SocialMate</span> is a social media scheduling and content management platform operated by <span className="font-semibold">Gilgamesh Enterprise LLC</span>, a Wyoming limited liability company ("we", "us", "our"). Our Service is available at <span className="font-semibold">socialmate.studio</span> and associated domains and applications.</p>
+            <p className="mt-2">SocialMate is registered on third-party developer platforms under the application name <span className="font-semibold">"SocialMatehq"</span> (TikTok developer portal) and <span className="font-semibold">"SocialMate"</span> on all other platforms including Meta, LinkedIn, and Google. These developer application names refer to the same product — SocialMate, operated by Gilgamesh Enterprise LLC — and this Privacy Policy applies to all integrations regardless of the registered developer app name.</p>
             <p className="mt-2">For all privacy-related questions, requests, or concerns, contact our privacy team at: <a href="mailto:socialmate.updates@gmail.com" className="font-semibold underline text-gray-900 dark:text-gray-100">socialmate.updates@gmail.com</a></p>
             <p className="mt-2">We will respond to all privacy inquiries within <span className="font-semibold">30 days</span>.</p>
           </section>
@@ -50,6 +51,7 @@ export default function PrivacyPolicy() {
               <li>Affiliate program participation data, including referral activity and payout information</li>
               <li>Twitch account data when you connect Twitch via OAuth: channel ID, channel name, and channel avatar. We store OAuth access and refresh tokens to fetch your clips on your behalf.</li>
               <li>YouTube channel URL you provide when connecting a YouTube channel for clip browsing. We do not require or store a YouTube OAuth token — channel data is retrieved via public RSS feed.</li>
+              <li>TikTok account data when you connect TikTok via OAuth: your TikTok Open ID (a platform-assigned unique identifier), display name, and avatar URL — obtained via the <code className="text-xs bg-gray-100 dark:bg-gray-800 px-1 rounded">user.info.basic</code> scope. We store your TikTok OAuth access token and refresh token solely to publish videos you schedule through SocialMate. We do not access, read, or store any of your TikTok video content, follower data, or private account information beyond what is described here.</li>
               <li>Email address submitted on the Gilgamesh's Guide waitlist (/gilgamesh), used solely to notify you when the guide is available. This list is separate from your SocialMate account and may be unsubscribed from at any time.</li>
             </ul>
 
@@ -72,6 +74,7 @@ export default function PrivacyPolicy() {
               <li>Billing and subscription status information from Stripe</li>
               <li>Twitch clip metadata (clip title, thumbnail URL, view count, duration, clip URL) fetched via the Twitch API using your connected OAuth token or via app-level credentials when you use the "Search Any Channel" feature to browse public channels</li>
               <li>YouTube video metadata (video title, thumbnail URL, publish date, video URL) fetched via public RSS feed for the channel URL you provide. No YouTube user account data is accessed.</li>
+              <li>TikTok basic profile data (Open ID, display name, avatar URL) retrieved at connection time via the <code className="text-xs bg-gray-100 dark:bg-gray-800 px-1 rounded">user.info.basic</code> scope. No TikTok inbox, messages, follower lists, liked videos, or private account data is ever accessed.</li>
             </ul>
           </section>
 
@@ -103,6 +106,7 @@ export default function PrivacyPolicy() {
               <li>To analyze aggregate usage patterns and improve the Service (using anonymized data)</li>
               <li>To comply with legal obligations, including responding to valid legal requests</li>
               <li>To power the Clips Studio feature: fetching your Twitch clips via your connected OAuth token and your YouTube videos via public RSS, and pre-filling the post composer when you click "Schedule" on a clip or video</li>
+              <li>To publish scheduled TikTok posts: uploading your video file to TikTok's servers via the <code className="text-xs bg-gray-100 dark:bg-gray-800 px-1 rounded">video.upload</code> API and triggering publication via <code className="text-xs bg-gray-100 dark:bg-gray-800 px-1 rounded">video.publish</code> at the scheduled time you selected. TikTok data is used solely for this purpose and for no other feature.</li>
               <li>To send a 3-email onboarding sequence (welcome, day 2 tip, day 5 check-in) via Resend upon account creation. These are service-related communications and are sent regardless of marketing preferences.</li>
               <li>To send product update announcements and newsletters (only with your consent; unsubscribe at any time)</li>
               <li>To notify Gilgamesh's Guide waitlist subscribers when the guide becomes available (separate opt-in, separate list)</li>
@@ -123,8 +127,16 @@ export default function PrivacyPolicy() {
               <li><span className="font-semibold">Inngest</span> — background job and scheduled task processing. <a href="https://inngest.com/privacy" target="_blank" rel="noopener noreferrer" className="underline">inngest.com/privacy</a></li>
               <li><span className="font-semibold">Twitch</span> — when you connect Twitch, we use your OAuth token to fetch your clips via the Twitch API. The "Search Any Channel" feature uses app-level credentials (not your account) to access public clip data from any channel you search. <a href="https://www.twitch.tv/p/legal/privacy-policy/" target="_blank" rel="noopener noreferrer" className="underline">twitch.tv privacy policy</a></li>
               <li><span className="font-semibold">YouTube (Google)</span> — when you connect a YouTube channel, we access that channel's public RSS feed using the URL you provide. No YouTube OAuth token is required or stored. <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline">google.com/policies/privacy</a></li>
-              <li><span className="font-semibold">TikTok</span> — the SocialMate application on TikTok's developer platform is registered under the name "SocialMate." When you connect TikTok, we request scopes for <code className="text-xs bg-gray-100 dark:bg-gray-800 px-1 rounded">user.info.basic</code>, <code className="text-xs bg-gray-100 dark:bg-gray-800 px-1 rounded">video.publish</code>, and <code className="text-xs bg-gray-100 dark:bg-gray-800 px-1 rounded">video.upload</code> to enable content publishing on your behalf. We do not access, store, or analyze your TikTok content beyond what is necessary to publish posts you schedule through SocialMate. <a href="https://www.tiktok.com/legal/page/global/privacy-policy/en" target="_blank" rel="noopener noreferrer" className="underline">TikTok Privacy Policy</a></li>
-              <li><span className="font-semibold">Connected Social Platforms</span> — data is shared with platforms you explicitly authorize for post scheduling: Bluesky, Discord, Mastodon, Telegram, and X/Twitter (live). LinkedIn, YouTube posting, Reddit, Instagram, Facebook, Pinterest, and TikTok (planned). Each platform's own privacy policy governs their data use.</li>
+              <li>
+                <span className="font-semibold">TikTok</span> — SocialMate is registered on TikTok's developer platform under the developer application name <span className="font-semibold">"SocialMatehq"</span>. This developer app name refers to the SocialMate product at socialmate.studio. When you connect TikTok, we request the following scopes:
+                <ul className="list-disc pl-5 mt-2 space-y-1">
+                  <li><code className="text-xs bg-gray-100 dark:bg-gray-800 px-1 rounded">user.info.basic</code> — to retrieve your TikTok Open ID (platform user identifier), display name, and avatar URL. This is used to identify your connected TikTok account within SocialMate.</li>
+                  <li><code className="text-xs bg-gray-100 dark:bg-gray-800 px-1 rounded">video.upload</code> — to upload video file data to TikTok's servers in preparation for publishing. The video data originates from files you upload to SocialMate for scheduling.</li>
+                  <li><code className="text-xs bg-gray-100 dark:bg-gray-800 px-1 rounded">video.publish</code> — to publish the uploaded video to your TikTok account at the time you scheduled, with the caption and settings you specified.</li>
+                </ul>
+                <p className="mt-2">We do not read, analyze, store, or share your TikTok video content, view counts, follower data, comments, inbox, or any account data beyond what is listed above. Your TikTok OAuth tokens are stored encrypted and used solely to fulfill your scheduled posts. Tokens are immediately revoked and deleted when you disconnect TikTok or delete your SocialMate account. <a href="https://www.tiktok.com/legal/page/global/privacy-policy/en" target="_blank" rel="noopener noreferrer" className="underline">TikTok Privacy Policy</a></p>
+              </li>
+              <li><span className="font-semibold">Connected Social Platforms</span> — data is shared with platforms you explicitly authorize for post scheduling: Bluesky, Discord, Mastodon, Telegram, X/Twitter, and TikTok (live). LinkedIn, YouTube posting, Reddit, Instagram, Facebook, and Pinterest (coming soon). Each platform's own privacy policy governs their data use.</li>
             </ul>
             <p className="mt-3">We do not share your personal data with advertising networks, data brokers, or analytics companies beyond the privacy-friendly analytics described above. We may disclose your data if required by law, court order, or valid government request, or to protect the rights, property, or safety of Gilgamesh Enterprise LLC, our users, or the public.</p>
             <p className="mt-2">In the event of a business acquisition, merger, or sale of substantially all of our assets, your data may be transferred to the acquiring entity, subject to the same privacy protections. We will notify you via email or prominent in-app notice before such a transfer.</p>
