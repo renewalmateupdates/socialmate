@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Metadata } from 'next'
 import PublicNav from '@/components/PublicNav'
 import PublicFooter from '@/components/PublicFooter'
+import FaqAccordion from './FaqAccordion'
 
 export const metadata: Metadata = {
   title: 'FAQ — SocialMate',
@@ -30,7 +31,15 @@ const sections = [
       },
       {
         q: 'Who built this?',
-        a: 'SocialMate was built by Joshua Bostic, a solo bootstrapped founder. He works a Walmart deli job and builds this nights and weekends. No VC funding, no team, no gatekeeping. The mission: power to the people.',
+        a: 'SocialMate was built by Joshua Bostic, a solo bootstrapped founder. He works a deli job and builds this nights and weekends. No VC funding, no team, no gatekeeping. The mission: power to the people.',
+      },
+      {
+        q: 'Is SocialMate available on mobile?',
+        a: 'Yes — SocialMate is a Progressive Web App (PWA). On mobile, open socialmate.studio in your browser and tap "Add to Home Screen" for a near-native app experience. An Android app via Google Play is also in the works. iOS App Store submission is planned for later in 2026.',
+      },
+      {
+        q: 'Does SocialMate have a referral program?',
+        a: 'Yes. Share your referral link from the dashboard. When someone signs up through your link and subscribes to a paid plan, you earn +25 credits. Hit milestones (10, 25, 50, 100 referrals) for bonus credit rewards. You can also join the affiliate program for cash commissions at /affiliates.',
       },
     ],
   },
@@ -59,7 +68,7 @@ const sections = [
       },
       {
         q: 'What does SOMA cost?',
-        a: 'SOMA is an add-on for Pro and Agency users. Safe Mode is included free. Autopilot is $10/month — posts auto-schedule, you get a notification batch to review. Full Send is $20/month — fully autonomous, zero review. Each generation run costs 75 SOMA credits. Weekly ingestion costs 25 credits. Pro users receive 500 credits/month, Agency 2,000/month. Credit packs start at $1.99.',
+        a: 'SOMA is an add-on for Pro and Agency users. Safe Mode is included free. Autopilot is $10/month — posts auto-schedule, you get a notification batch to review. Full Send is $20/month — fully autonomous, zero review. Each generation run costs 75 SOMA credits. Weekly ingestion costs 25 credits. Pro users receive 500 credits/month, Agency 2,000/month. Credit packs start at $4.99.',
       },
       {
         q: 'Can I use SOMA for multiple clients?',
@@ -90,6 +99,10 @@ const sections = [
         q: 'Is Enki financial advice?',
         a: 'No. Enki is a software tool. Nothing in Enki or SocialMate constitutes financial advice. Trading carries risk. Never trade more than you can afford to lose. Enki is provided as-is, for educational and experimental purposes.',
       },
+      {
+        q: 'What are the Enki tiers?',
+        a: 'Citizen is free (paper trading only). Commander is $15/month — live trading, full quant features. Emperor is $29/month — everything in Commander plus advanced position sizing and priority signals. Cloud Runner is $10/month for cloud-based strategy execution.',
+      },
     ],
   },
   {
@@ -102,6 +115,10 @@ const sections = [
       {
         q: 'How do I get listed?',
         a: 'Apply at /studio-stax/apply. We\'ll review your submission against our criteria checklist and approve or request changes. Founding Member pricing ($100/yr) is available while spots last. Standard listing is $150/yr after.',
+      },
+      {
+        q: 'What\'s included in a Studio Stax listing?',
+        a: 'Your public listing page at /studio-stax/[your-slug], visible to all SocialMate users and organic search. You control your description, categories, portfolio links, and contact method. Founding Members get a badge and priority placement.',
       },
     ],
   },
@@ -118,7 +135,7 @@ const sections = [
       },
       {
         q: 'When will TikTok be fully live?',
-        a: 'TikTok Studio is live now at /tiktok/studio — you can upload, trim, add filters and captions, and schedule videos. The connect button is live on /accounts. The hold-up is TikTok\'s developer app review process, which takes 2–4 weeks. We\'ve submitted for Production API approval and are waiting. Once approved, TikTok posting goes fully live for all plans. Sandbox testing is available in the meantime.',
+        a: 'TikTok Studio is live now at /tiktok/studio — you can upload, trim, add filters and captions, and schedule videos. The connect button is live on /accounts. The hold-up is TikTok\'s developer app review process, which takes 2–4 weeks. We\'ve submitted for Production API approval and are waiting. Once approved, TikTok posting goes fully live for all plans.',
       },
       {
         q: 'What\'s the platform philosophy?',
@@ -139,7 +156,7 @@ const sections = [
       },
       {
         q: 'What\'s included in Agency ($20/month)?',
-        a: 'Everything in Pro, plus 2,000 credits/month, 15 seats, 5 client workspaces, 10 SOMA projects, and priority support.',
+        a: 'Everything in Pro, plus 2,000 credits/month, 15 seats, 5 client workspaces, 10 SOMA projects, all 8 AI agents, and priority support.',
       },
       {
         q: 'Can I cancel anytime?',
@@ -152,6 +169,14 @@ const sections = [
       {
         q: 'Is there an affiliate program?',
         a: 'Yes. 30% recurring commission on all subscription payments. Hits 100+ active referrals? Jumps to 40% forever. Apply or learn more at /affiliates.',
+      },
+      {
+        q: 'Are there annual plan discounts?',
+        a: 'Yes. Pro Annual is $55/year (save ~8% vs monthly). Agency Annual is $209/year. Both include the same features as the monthly equivalents. You can switch from monthly to annual in Settings → Plan.',
+      },
+      {
+        q: 'What\'s SM-Give?',
+        a: 'SM-Give is SocialMate\'s community fund. 2% of every subscription, 100% of direct donations, and unclaimed affiliate proceeds all go toward school supply bookbags, baby essentials for struggling parents, and homeless care packages. You can donate directly at /give or learn more about the program there.',
       },
     ],
   },
@@ -170,6 +195,14 @@ const sections = [
         q: 'What happens to my master docs in SOMA?',
         a: 'Master docs are stored securely in your workspace, versioned for diffing. They\'re sent to Google Gemini API for analysis (governed by Google\'s data usage policies). We don\'t sell or share your content with third parties.',
       },
+      {
+        q: 'How do I delete my account?',
+        a: 'Go to Settings → Account and use the "Delete Account" option. This permanently removes your account, posts, drafts, and all associated data. Connected platform tokens are revoked. This action cannot be undone.',
+      },
+      {
+        q: 'Is my payment information stored securely?',
+        a: 'We never store your card details. All payments are processed by Stripe, which is PCI DSS Level 1 compliant. SocialMate only receives a customer ID and subscription status — never raw card data.',
+      },
     ],
   },
 ]
@@ -187,31 +220,15 @@ export default function FaqPage() {
             Everything you want to know.
           </h1>
           <p className="text-gray-400 text-lg max-w-xl mx-auto">
-            Straight answers. No marketing fluff. If something\'s missing, reach out.
+            Straight answers. No marketing fluff. Click any section to expand or collapse it.
           </p>
         </div>
 
-        <div className="space-y-12">
-          {sections.map(section => (
-            <div key={section.title}>
-              <h2 className="text-xs font-bold uppercase tracking-widest text-amber-400/80 mb-5 pb-2 border-b border-gray-800">
-                {section.title}
-              </h2>
-              <div className="space-y-6">
-                {section.faqs.map(faq => (
-                  <div key={faq.q} className="rounded-2xl border border-gray-800 bg-gray-900/50 p-5 sm:p-6">
-                    <p className="font-bold text-white mb-2 text-sm sm:text-base">{faq.q}</p>
-                    <p className="text-gray-400 text-sm leading-relaxed">{faq.a}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+        <FaqAccordion sections={sections} />
 
         <div className="mt-16 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-8 text-center">
           <p className="text-white font-bold text-lg mb-2">Still have questions?</p>
-          <p className="text-gray-400 text-sm mb-5">We\'re a small team and we actually read messages.</p>
+          <p className="text-gray-400 text-sm mb-5">We're a small team and we actually read messages.</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <a
               href="mailto:socialmatehq@gmail.com"

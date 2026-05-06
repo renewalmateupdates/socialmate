@@ -105,7 +105,7 @@ export default function GuidesHubPage() {
               </p>
               <p className="mb-4 text-lg leading-relaxed text-gray-200">
                 When I started building, I had no mentor, no co-founder who stayed, no VC, no
-                network. I had a laptop, a WiFi connection, and a chip on my shoulder the size
+                network. I had a desktop, a WiFi connection, and a chip on my shoulder the size
                 of a city block.
               </p>
               <p className="mb-4 leading-relaxed text-gray-400">
@@ -197,6 +197,56 @@ export default function GuidesHubPage() {
                 )}
               </article>
             ))}
+          </div>
+        </section>
+
+        {/* Support / Donate */}
+        <section className="border-t border-[#1f1f1f] px-6 py-16">
+          <div className="mx-auto max-w-3xl">
+            <div className="mb-8 text-center">
+              <div className="mb-3 text-4xl">☕</div>
+              <p className="mb-2 text-xs font-bold uppercase tracking-widest text-amber-400">Support the work</p>
+              <h2 className="mb-4 text-2xl font-black text-white">
+                These guides are free.<br />Your support keeps it that way.
+              </h2>
+              <p className="mx-auto max-w-xl text-base leading-relaxed text-gray-400">
+                Written between deli shifts, with no publisher, no team, no budget — just the belief
+                that what wealthy families pass down at the dinner table shouldn&apos;t cost $997.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              {/* Support Joshua */}
+              <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-7 text-center">
+                <div className="mb-3 text-3xl">👑</div>
+                <h3 className="mb-2 text-lg font-extrabold text-white">Support Joshua</h3>
+                <p className="mb-6 text-sm leading-relaxed text-gray-400">
+                  The fastest way to support this work is to use SocialMate. Every Pro or Agency subscriber directly funds more guides, more features, and more free resources.
+                </p>
+                <Link
+                  href="/pricing"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-6 py-3 text-sm font-bold text-black transition-colors hover:bg-amber-400"
+                >
+                  Try SocialMate Free →
+                </Link>
+              </div>
+              {/* Pay It Forward / donate */}
+              <div className="rounded-2xl border border-rose-500/20 bg-rose-500/5 p-7 text-center">
+                <div className="mb-3 text-3xl">❤️</div>
+                <h3 className="mb-2 text-lg font-extrabold text-white">Pay It Forward</h3>
+                <p className="mb-6 text-sm leading-relaxed text-gray-400">
+                  100% of donations go to SM-Give — our community fund for creators who need a leg up. You&apos;re not just supporting a guide. You&apos;re opening the door for the next person.
+                </p>
+                <Link
+                  href="/give"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-rose-500/40 bg-rose-500/15 px-6 py-3 text-sm font-bold text-rose-400 transition-colors hover:bg-rose-500/25"
+                >
+                  Donate via SM-Give →
+                </Link>
+              </div>
+            </div>
+            <p className="mt-6 text-center text-xs text-gray-700">
+              No pressure. The guides are yours. If you got value and want to give back — that means everything.
+            </p>
           </div>
         </section>
 

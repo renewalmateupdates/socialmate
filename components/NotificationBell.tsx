@@ -33,7 +33,7 @@ export default function NotificationBell() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading]             = useState(false)
   const [marking, setMarking]             = useState(false)
-  const panelRef                          = useRef<HTMLDivElement>(null)
+  const [panelPos, setPanelPos]           = useState({ top: 0, left: 0 })
   const buttonRef                         = useRef<HTMLButtonElement>(null)
 
   const unreadCount = notifications.filter(n => !n.read).length
@@ -62,16 +62,29 @@ export default function NotificationBell() {
   useEffect(() => {
     if (!open) return
     function handle(e: MouseEvent) {
-      if (
-        panelRef.current && !panelRef.current.contains(e.target as Node) &&
-        buttonRef.current && !buttonRef.current.contains(e.target as Node)
-      ) {
+      if (buttonRef.current && !buttonRef.current.contains(e.target as Node)) {
+        // Check if click is inside the fixed panel (by id)
+        const panel = document.getElementById('notification-panel')
+        if (panel && panel.contains(e.target as Node)) return
         setOpen(false)
       }
     }
     document.addEventListener('mousedown', handle)
     return () => document.removeEventListener('mousedown', handle)
   }, [open])
+
+  const openPanel = () => {
+    if (!open && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect()
+      // Position panel to the right of the sidebar button
+      setPanelPos({
+        top: rect.bottom + 8,
+        left: rect.right + 8,
+      })
+    }
+    setOpen(o => !o)
+    if (!open) load()
+  }
 
   const markAllRead = async () => {
     if (marking) return
@@ -101,7 +114,7 @@ export default function NotificationBell() {
     <div className="relative">
       <button
         ref={buttonRef}
-        onClick={() => { setOpen(o => !o); if (!open) load() }}
+        onClick={openPanel}
         className="relative flex items-center justify-center w-8 h-8 rounded-xl transition-all hover:opacity-80"
         style={{ color: 'var(--text-muted)' }}
         aria-label="Notifications"
@@ -119,9 +132,14 @@ export default function NotificationBell() {
 
       {open && (
         <div
-          ref={panelRef}
-          className="absolute right-0 top-10 w-80 rounded-2xl shadow-xl z-50 overflow-hidden"
-          style={{ background: 'var(--surface)', border: '1px solid var(--border-mid)' }}
+          id="notification-panel"
+          className="fixed w-80 rounded-2xl shadow-xl z-[9999] overflow-hidden"
+          style={{
+            top: panelPos.top,
+            left: panelPos.left,
+            background: 'var(--surface)',
+            border: '1px solid var(--border-mid)',
+          }}
         >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid var(--border-mid)' }}>

@@ -1,6 +1,8 @@
+import { Suspense } from 'react'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 import GiveLiveCounter from './GiveLiveCounter'
+import GiveDonate from './GiveDonate'
 
 // Amber/warm design tokens
 const amber   = '#F59E0B'
@@ -286,39 +288,53 @@ export default function GivePage() {
         </p>
       </section>
 
-      {/* Bottom CTA */}
-      <section style={{
-        maxWidth: 880, margin: '0 auto 72px', padding: '0 24px', width: '100%',
-      }}>
-        <div style={{
-          background: `linear-gradient(135deg, rgba(245,158,11,0.08), rgba(217,119,6,0.04))`,
-          border: `1px solid rgba(245,158,11,0.2)`, borderRadius: 20,
-          padding: '48px 40px', textAlign: 'center',
-        }}>
-          <h2 style={{ fontSize: 26, fontWeight: 800, color: '#f1f1f1', margin: '0 0 12px', letterSpacing: '-0.02em' }}>
-            Want to contribute directly?
-          </h2>
-          <p style={{ fontSize: 15, color: muted, margin: '0 auto 28px', maxWidth: 480, lineHeight: 1.7 }}>
-            The best way to support SM-Give right now is to use SocialMate, share it with others, or become an affiliate partner. Every subscription and referral fuels both the product and the giving.
-          </p>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 14, flexWrap: 'wrap' }}>
-            <Link href="/signup" style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              padding: '12px 28px', borderRadius: 12,
-              background: amber, color: '#000',
-              fontSize: 14, fontWeight: 800, textDecoration: 'none',
-              transition: 'opacity 0.15s',
-            }}>
-              Get Started Free →
-            </Link>
-            <Link href="/affiliates" style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              padding: '12px 28px', borderRadius: 12,
-              background: surface, border: `1px solid ${border}`,
-              color: '#d1d5db', fontSize: 14, fontWeight: 700, textDecoration: 'none',
-            }}>
-              Become an Affiliate
-            </Link>
+      {/* Donate directly */}
+      <section style={{ maxWidth: 880, margin: '0 auto 72px', padding: '0 24px', width: '100%' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20 }}>
+
+          {/* Donate now */}
+          <div style={{
+            background: 'rgba(245,158,11,0.05)', border: `1px solid rgba(245,158,11,0.2)`,
+            borderRadius: 20, padding: '36px 28px',
+          }}>
+            <Suspense fallback={<div style={{ color: '#9ca3af', textAlign: 'center', padding: '20px 0' }}>Loading…</div>}>
+              <GiveDonate />
+            </Suspense>
+          </div>
+
+          {/* Use SocialMate */}
+          <div style={{
+            background: 'rgba(245,158,11,0.03)', border: `1px solid ${border}`,
+            borderRadius: 20, padding: '36px 28px', textAlign: 'center',
+          }}>
+            <div style={{ fontSize: 36, marginBottom: 12 }}>👑</div>
+            <p style={{ fontSize: 11, fontWeight: 700, color: amber, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 12 }}>
+              Support through SocialMate
+            </p>
+            <h3 style={{ fontSize: 20, fontWeight: 800, color: '#f1f1f1', margin: '0 0 12px' }}>
+              Every subscription helps
+            </h3>
+            <p style={{ fontSize: 14, color: muted, lineHeight: 1.7, marginBottom: 24 }}>
+              2% of every SocialMate subscription goes directly to SM-Give. The best long-term way to support this work is to use and share the platform.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center' }}>
+              <Link href="/signup" style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                padding: '12px 28px', borderRadius: 12,
+                background: amber, color: '#000',
+                fontSize: 14, fontWeight: 800, textDecoration: 'none',
+              }}>
+                Get Started Free →
+              </Link>
+              <Link href="/affiliates" style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                padding: '10px 24px', borderRadius: 12,
+                background: surface, border: `1px solid ${border}`,
+                color: '#d1d5db', fontSize: 13, fontWeight: 700, textDecoration: 'none',
+              }}>
+                Become an Affiliate
+              </Link>
+            </div>
           </div>
         </div>
       </section>

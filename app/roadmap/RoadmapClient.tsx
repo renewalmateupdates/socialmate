@@ -25,7 +25,9 @@ const ROADMAP: RoadmapItem[] = [
   { title: 'Pinterest publishing',       desc: 'Pin creation via Pinterest v5 API with board selection. OAuth complete.',                                        status: 'coming-soon',  category: 'Platforms'     },
   { title: 'Blog auto-generation',       desc: 'Gemini writes a blog feature post for each Studio Stax lister once past the refund window. Lister gets notified by email when it\'s live.', status: 'coming-soon', category: 'Platform' },
   { title: 'Creator Monetization Hub',   desc: 'Tip jars, fan subscriptions, and paywalled content powered by Stripe Connect. 0% platform cut. Live at /monetize/hub (Pro+).',  status: 'shipped',  category: 'Monetization'  },
-  { title: 'Google Play Store app',     desc: 'Capacitor WebView wrapper for Android. Config + setup guide committed. Pending icon assets and Play Console submission.',               status: 'in-progress',  category: 'Mobile'        },
+  { title: 'Google Play Store app',              desc: 'Capacitor WebView wrapper for Android. GitHub Actions CI/CD pipeline built — signs and builds AAB on every git tag. Pending: npx cap add android locally + Play Console submission.', status: 'in-progress', category: 'Mobile' },
+  { title: "Gilgamesh's Guides Vol. 1",          desc: 'Free long-form entrepreneur guide at /guides/starting-a-business — 8 chapters covering LLC formation, Reddit validation, first customer, co-founder breakups, and building through loss. Written by Joshua Bostic.', status: 'shipped', category: 'Platform' },
+  { title: "Gilgamesh's Guides Vol. 2",          desc: 'Free marketing playbook at /guides/marketing-zero-budget — 8 chapters on content flywheels, platform seeding, community-first distribution, demo videos, and consistency as strategy.', status: 'shipped', category: 'Platform' },
 
   // ── PLANNED ───────────────────────────────────────────────
   { title: 'Instagram publishing',       desc: 'Instagram Graph API integration. Requires Facebook Business account and Meta app review.',                       status: 'planned',      category: 'Platforms'     },
