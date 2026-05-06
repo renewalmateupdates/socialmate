@@ -17,6 +17,9 @@ export default function TermsOfService() {
           <Link href="/" className="text-sm font-bold text-gray-400 hover:text-black dark:hover:text-white transition-all">← Back to SocialMate</Link>
         </div>
 
+        <div className="mb-6">
+          <img src="/logo.png" alt="SocialMate" className="w-16 h-16 rounded-2xl" />
+        </div>
         <h1 className="text-4xl font-extrabold tracking-tight mb-2 text-gray-900 dark:text-gray-100">Terms of Service</h1>
         <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">Last updated: May 6, 2026 · Gilgamesh Enterprise LLC</p>
         <p className="text-xs text-gray-400 dark:text-gray-500 mb-12">Please read these Terms carefully before using SocialMate. By accessing or using the Service, you agree to be bound by these Terms.</p>
