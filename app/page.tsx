@@ -626,7 +626,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
               Written by the solo founder who built SocialMate between deli shifts. No courses to buy. No email required.
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-10">
             {[
               {
                 vol: 'Vol. 1',
@@ -644,10 +644,17 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
               },
               {
                 vol: 'Vol. 3',
+                title: 'Business Credit, Legal & Tax',
+                desc: 'DUNS numbers, PAYDEX scores, every tax deduction explained, LLC vs S-Corp, banking setup, and insurance. All free.',
+                href: '/guides/business-credit-legal',
+                available: true,
+              },
+              {
+                vol: 'Vol. 4',
                 title: 'Vibe Coding with AI',
                 desc: 'How to ship production software with no CS degree using AI as your co-pilot. The real workflow, the real mistakes.',
-                href: '/guides',
-                available: false,
+                href: '/guides/vibe-coding-with-ai',
+                available: true,
               },
             ].map(g => (
               <div key={g.vol} className="rounded-2xl border border-[#1f1f1f] bg-[#111111] p-6 flex flex-col">
