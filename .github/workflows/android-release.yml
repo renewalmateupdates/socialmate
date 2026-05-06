@@ -48,7 +48,9 @@ jobs:
           fi
 
       - name: Sync Capacitor
-        run: npx cap sync android
+        run: |
+          mkdir -p android/app/src/main/assets
+          npx cap sync android
 
       # Decode base64-encoded keystore from GitHub secret
       - name: Decode keystore
