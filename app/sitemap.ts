@@ -169,6 +169,17 @@ const BLOG_SLUGS = [
   'bluesky-organic-reach-why-it-works-2026',
   'startup-costs-deduction-section-195-explained',
   'sep-ira-self-employed-retirement-tax-strategy',
+  // Vibe Coding & AI Builder batch (May 2026)
+  'vibe-coding-what-it-is-how-to-start',
+  'build-saas-no-cs-degree-ai-2026',
+  'claude-code-review-solo-founder',
+  'best-ai-coding-tools-solo-founders-2026',
+  'nextjs-supabase-starter-stack-2026',
+  'how-to-prompt-ai-for-coding-beginners',
+  'ship-software-faster-with-ai-workflow',
+  'building-saas-working-full-time-job',
+  'free-stack-build-saas-zero-cost-2026',
+  'solo-founder-tech-stack-no-team-2026',
 ]
 
 export default function sitemap(): MetadataRoute.Sitemap {
