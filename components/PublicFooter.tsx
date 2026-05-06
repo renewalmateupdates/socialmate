@@ -54,7 +54,7 @@ export default function PublicFooter() {
         {/* Logo + tagline */}
         <div className="flex items-center gap-2 mb-8">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black dark:bg-white rounded-lg flex items-center justify-center text-white dark:text-black text-xs font-bold">S</div>
+            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
             <span className="font-bold text-sm tracking-tight text-gray-900 dark:text-gray-100">SocialMate</span>
           </Link>
           <span className="text-xs text-gray-400 dark:text-gray-600 ml-1">by Gilgamesh Enterprise LLC</span>
