@@ -148,6 +148,27 @@ const BLOG_SLUGS = [
   'how-to-schedule-posts-in-advance',
   'creator-economy-trends-2026',
   'social-media-content-calendar-how-to-build-one',
+  // Business & Finance batch (May 2026)
+  'how-to-get-duns-number-free-2026',
+  'paydex-score-build-business-credit-scratch',
+  'tax-deductions-self-employed-creators-2026',
+  'wyoming-llc-solo-founders-why',
+  'how-to-schedule-tiktok-posts-2026',
+  'section-179-deduction-2026-write-off-tech',
+  'home-office-tax-deduction-2026-guide',
+  'building-software-working-deli-job-founder',
+  'gilgamesh-guides-free-business-playbooks',
+  'get-first-business-client-no-network',
+  's-corp-election-when-it-makes-sense-2026',
+  'qbi-deduction-20-percent-self-employed-2026',
+  'content-flywheel-create-once-post-everywhere',
+  'solo-founder-systems-build-without-team-2026',
+  'validate-business-idea-reddit-48-hours-method',
+  'net-30-vendors-report-dun-bradstreet-list',
+  'tiktok-scheduling-free-tool-creators-2026',
+  'bluesky-organic-reach-why-it-works-2026',
+  'startup-costs-deduction-section-195-explained',
+  'sep-ira-self-employed-retirement-tax-strategy',
 ]
 
 export default function sitemap(): MetadataRoute.Sitemap {
