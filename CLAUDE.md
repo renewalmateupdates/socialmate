@@ -417,6 +417,15 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **TikTok status corrected** (PR #280) — Reverted to 'soon' on landing page (was prematurely set to 'live'); platform count back to 5. Will flip to 'live' when Production API approved.
 - **Google Play CI/CD** (PR #281) — `.github/workflows/android-release.yml` builds signed AAB on GitHub Actions (ubuntu-latest, no Android Studio needed). Triggers on `git tag v*`. `GOOGLE_PLAY_SETUP.md` rewritten with full GitHub Actions instructions.
 
+**May 6, 2026 (PRs #285–#291):**
+- **`public/logo.png` added** (PR #288) — Canonical three-circle grayscale gradient SocialMate icon, copied from `public/image-1778082573747.png`. All nav/footer/page logo references now use `/logo.png`.
+- **PublicNav logo** (PR #287) — Bumped from `w-8 h-8` → `w-10 h-10`, pointing to `/logo.png`.
+- **PublicFooter logo** (PR #289) — Replaced hardcoded "S" lettermark div with `<img src="/logo.png" className="w-8 h-8 rounded-xl" />`.
+- **Privacy + Terms overhaul** (PR #290) — Large logo (`w-24 h-24 rounded-3xl`) added before h1 on both pages. "Last updated" bumped to May 6, 2026. Privacy policy: full TikTok per-scope documentation for developer review (`user.info.basic`, `video.upload`, `video.publish`), paragraph reconciling "SocialMatehq" developer portal name with "SocialMate" brand, "TikTok (planned)" → "TikTok (live)". TikTok app resubmitted May 2026.
+- **20 blog posts inserted via SQL** — Business credit, tax strategy, founder story, platform guides, content systems. All high-search-volume personal finance + creator business queries. Full slug list in memory.
+- **Sitemap updated** (PR #291) — 20 new blog slugs added to `app/sitemap.ts` `BLOG_SLUGS` array. **Pending merge.**
+- **Social posts content file** — `content-posts-may6-guides-batch.md` created locally at `C:\Users\jbost\socialmate\`. 23 ready-to-schedule posts (3 guides + 20 blog). Schedule 1–2/day across Bluesky, Mastodon, Telegram, Discord.
+
 ---
 
 ## Pending / In Progress
@@ -439,8 +448,8 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 **Roadmap (next up):**
 - **Google Play Store submission** — GitHub Actions CI/CD built (PR #281). Next steps: (1) run `npm install && npx cap add android` locally to generate `android/` dir, commit it. (2) Create keystore with `keytool`. (3) Add 4 GitHub Secrets. (4) `git tag v1.0.0 && git push origin v1.0.0` to trigger build. See `GOOGLE_PLAY_SETUP.md`.
-- **Gilgamesh's Guides Vol. 2** — ✅ Built (PR #281) at `/guides/marketing-zero-budget`. Update `/guides/page.tsx` to mark Vol. 2 as available after merge.
-- **Gilgamesh's Guides Vol. 3** — Vibe Coding with AI. Content ready from interviews. Write next session.
+- **Gilgamesh's Guides Vol. 2** — ✅ Built (PR #281) at `/guides/marketing-zero-budget`. Merged.
+- **Gilgamesh's Guides Vol. 3** — Business Credit, Legal & Tax. Content written. Build the page at `/guides/business-credit-legal` next session.
 - **LinkedIn publishing** — pending API credentials
 - **Schedule templates UI** — ✅ Built (PR #256) — `/schedules` page with full CRUD
 - **Workspace activity logging** — ✅ Wired into post publish (PR #256). Approval + member events still unwired.
