@@ -18,7 +18,7 @@ export default function PrivacyPolicy() {
         </div>
 
         <div className="mb-6">
-          <img src="/logo.png" alt="SocialMate" className="w-16 h-16 rounded-2xl" />
+          <img src="/logo.png" alt="SocialMate" className="w-24 h-24 rounded-3xl" />
         </div>
         <h1 className="text-4xl font-extrabold tracking-tight mb-2 text-gray-900 dark:text-gray-100">Privacy Policy</h1>
         <p className="text-sm text-gray-400 dark:text-gray-500 mb-2">Last updated: May 6, 2026 · Gilgamesh Enterprise LLC</p>
