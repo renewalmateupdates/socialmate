@@ -639,8 +639,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
                 vol: 'Vol. 2',
                 title: 'Marketing on Zero Budget',
                 desc: 'Organic growth, content flywheels, community seeding, and how to turn every platform into a distribution channel.',
-                href: '/guides',
-                available: false,
+                href: '/guides/marketing-zero-budget',
+                available: true,
               },
               {
                 vol: 'Vol. 3',
