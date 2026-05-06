@@ -80,14 +80,22 @@ const GUIDES = [
   {
     number: 'Vol. 4',
     title: 'Vibe Coding — Building with AI',
-    subtitle: 'The Solo Founder\'s Complete AI Development Playbook',
+    subtitle: 'Ship Real Software With No CS Degree',
     description:
-      'How to ship production software with no CS degree using AI as your co-pilot. The real workflow, the real mistakes, and why vision matters more than syntax. Coming soon.',
+      'The actual workflow, the real stack, how to prompt, how to debug, and the mindset of building in stolen hours. From a solo founder who built a live SaaS at night while working a deli job. No gatekeeping.',
     href: '/guides/vibe-coding-with-ai',
-    available: false,
-    chapters: [],
-    readTime: '~30 min read',
-    tags: ['AI', 'Development', 'Claude', 'Productivity'],
+    available: true,
+    chapters: [
+      'What Vibe Coding Actually Is',
+      'The Stack (What I Actually Use)',
+      'The Workflow',
+      'Prompting That Ships',
+      'When It Breaks — Debugging',
+      'Going Live — The First Deploy',
+      'The Mindset',
+    ],
+    readTime: '35 min read',
+    tags: ['AI', 'Development', 'Claude Code', 'Solo Founder'],
   },
 ]
 

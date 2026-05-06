@@ -206,6 +206,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/guides/starting-a-business`,    lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
     { url: `${base}/guides/marketing-zero-budget`,   lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
     { url: `${base}/guides/business-credit-legal`,   lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${base}/guides/vibe-coding-with-ai`,     lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
     { url: `${base}/support`,            lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${base}/changelog`,          lastModified: now, changeFrequency: 'weekly',  priority: 0.6 },
     { url: `${base}/clips`,              lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
