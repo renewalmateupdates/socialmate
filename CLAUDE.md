@@ -433,35 +433,31 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **Landing page always-dark** (PR #295) — Root div changed from `bg-white dark:bg-gray-950` to `dark min-h-screen bg-gray-950`. Forces dark background regardless of system preference. Merged.
 - **Changelog May 6 entry** (PR #296) — Covers guides complete, Google Play CI/CD, TikTok, blog posts, logo fix, privacy overhaul, dark landing. Merged.
 - **Landing page guides fix** (PR #297) — Fixed Vol. 3 (was wrongly showing Vibe Coding), added Vol. 4. Grid changed to 2×2. All 4 guides now live with correct hrefs. Merged.
-- **Google Play Console account created** — Developer name: SocialMate. Account ID: 8266379090016264889. Personal account under socialmatehq@gmail.com. AAB built successfully via GitHub Actions (v1.0.4, Android Release Build #5). Device verification: complete (verified via work Android phone). Identity verification: **pending** — Joshua needs to upload photo ID to unlock app publishing. Phone verification unlocks after identity approval.
+- **Google Play Console account created** — Developer name: SocialMate. Account ID: 8266379090016264889. Personal account under socialmatehq@gmail.com. AAB built successfully via GitHub Actions (v1.0.4, Android Release Build #5). Device verification: ✅ complete. Identity verification: **submitted May 6, 2026 — awaiting Google review (1–3 days)**. Once approved, phone verification auto-clears, then: create app in console → upload AAB → internal testing.
 
 ---
 
 ## Pending / In Progress
 
-- ~~TikTok demo video~~ ✅ DONE — Loom demo recorded + submitted to TikTok portal May 5, 2026. Awaiting Production API approval.
+- **Google Play identity review** — Submitted May 6, 2026. Awaiting Google approval (1–3 days). Check socialmatehq@gmail.com for approval email. Once approved: go to play.google.com/console → Create app → Upload AAB (v1.0.4 from GitHub Actions run #5 artifact) → Internal testing.
 
-- ~~Inngest resync~~ ✅ DONE — all 26 functions confirmed synced May 1, 2026.
+- **TikTok Production API** — Submitted Apr 23. Demo video submitted May 5. Support ticket `ad7714530aa61ad4` open. Check portal periodically. No action until approved.
 
-- ~~SOMA credit pack Stripe products~~ ✅ DONE — see Confirmed Done section.
+- **SOMA content generation** — Submit updated CLAUDE.md as master doc to SOMA at `/soma`. SOMA diffs the doc and generates a week of social posts automatically. Do NOT write posts manually.
 
-- **Test SOMA end-to-end** — voice profile → create project → paste master doc → ingest → generate. Joshua confirmed SOMA is generating posts. Monitor whether scheduled posts actually publish (Inngest cron).
+- **Enki Truth Mode** — 50-trade minimum per strategy before results are statistically valid. Check `/enki/truth` periodically.
 
-- **Push notification VAPID keys** — CONFIRMED SET in Vercel. Push notifications are live.
+- **LinkedIn integration** — Blocked on API credentials. Requires: LinkedIn Company Page published → developer app → Marketing Developer Platform approval. Low priority until TikTok + Google Play are settled.
 
-- **Enki Truth Mode testing** — 50-trade minimum per strategy before results are statistically valid.
-
-- **LinkedIn integration** — API credentials not yet acquired. Requires: (1) LinkedIn Company Page published, (2) developer app at linkedin.com/developers, (3) apply for Marketing Developer Platform. On hold until Joshua has time.
-
-- **TikTok API review** — submitted Apr 23. Support ticket `ad7714530aa61ad4` open re: app name. Check portal periodically. No action needed until approved.
+- **Push notifications** — VAPID keys confirmed set in Vercel. Live.
 
 **Roadmap (next up):**
-- **Google Play identity verification** — Joshua needs to upload photo ID at play.google.com/console. Once approved (1–3 days), create the app, upload the AAB (v1.0.4 artifact from GitHub Actions run #5), submit for internal testing.
-- **Gilgamesh's Guides** — ✅ All 4 volumes complete and live. Vol. 1: /guides/starting-a-business · Vol. 2: /guides/marketing-zero-budget · Vol. 3: /guides/business-credit-legal · Vol. 4: /guides/vibe-coding-with-ai
-- **LinkedIn publishing** — pending API credentials
-- **Schedule templates UI** — ✅ Built (PR #256) — `/schedules` page with full CRUD
-- **Workspace activity logging** — ✅ Wired into post publish (PR #256). Approval + member events still unwired.
-- **SOMA credit packs** — ✅ Fully live. Stripe products created Apr 30. Price IDs hardcoded (PR #262).
+- **Google Play launch** — Waiting on identity approval. Once cleared: create app, upload AAB, internal testing, then production listing (screenshots, description, content rating).
+- **Landing page "Available on Google Play" badge** — Add after Play Store app is live in internal testing.
+- **Apple App Store** — Deferred 3–6 months. Requires $99/yr Apple Developer account + Xcode on Mac. Not worth it until Google Play is proven.
+- **More Gilgamesh's Guides** — Joshua wants to research internet gurus/seminars for a masterwork Vol. 5+. Future work.
+- **LinkedIn publishing** — Pending API credentials. On hold.
+- **Instagram / Facebook / Threads** — Pending Meta API access. Long-term roadmap.
 
 ## Confirmed Done (stop asking about these)
 
