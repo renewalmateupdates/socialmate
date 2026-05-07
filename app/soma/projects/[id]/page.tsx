@@ -223,8 +223,6 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
       }
       setGenerateResult(data)
       await load()
-      // Show voice feedback modal after successful generation
-      setShowFeedbackModal(true)
     } catch {
       clearInterval(stageTimer)
       setGenerateError('Network error. Please try again.')
@@ -655,9 +653,17 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
                               ))}
                             </div>
                           )}
-                          <Link href={project.mode === 'safe' ? '/soma/dashboard' : '/queue'} className="text-xs text-emerald-300 hover:text-emerald-200 underline block text-center">
-                            {project.mode === 'safe' ? 'Review in SOMA queue →' : 'View in queue →'}
-                          </Link>
+                          <div className="flex items-center gap-2 mt-3">
+                            <Link href={project.mode === 'safe' ? '/soma/dashboard' : '/queue'} className="flex-1 text-xs text-emerald-300 hover:text-emerald-200 underline text-center">
+                              {project.mode === 'safe' ? 'Review in SOMA queue →' : 'View in queue →'}
+                            </Link>
+                            <button
+                              onClick={() => setShowFeedbackModal(true)}
+                              className="flex items-center gap-1.5 text-xs text-purple-400 hover:text-purple-300 border border-purple-700/40 rounded-lg px-3 py-1.5 transition-colors"
+                            >
+                              🎙️ Give feedback
+                            </button>
+                          </div>
                         </div>
                       ) : generating ? (
                         <div className="rounded-xl border border-violet-500/30 bg-violet-950/20 p-4">
