@@ -243,6 +243,7 @@ export default function SomaDashboardPage() {
   const [credits, setCredits]                 = useState<SomaCredits | null>(null)
   const [identity, setIdentity]               = useState<IdentityProfile | null>(null)
   const [identityChecked, setIdentityChecked] = useState(false)
+  const [voiceDnaTier, setVoiceDnaTier]       = useState<string>('none')
   const [ingestion, setIngestion]             = useState<WeeklyIngestion | null>(null)
   const [drafts, setDrafts]                   = useState<DraftPost[]>([])
   const [currentMode, setCurrentMode]         = useState<'safe' | 'autopilot' | 'full_send'>('safe')
@@ -285,6 +286,13 @@ export default function SomaDashboardPage() {
         setIdentity(identityData.profile ?? null)
       }
       setIdentityChecked(true)
+
+      // Voice DNA tier
+      const voiceRes = await fetch('/api/soma/voice')
+      if (voiceRes.ok) {
+        const voiceData = await voiceRes.json()
+        setVoiceDnaTier(voiceData.personality_tier ?? 'none')
+      }
 
       // Latest ingestion
       const ingRes = await fetch('/api/soma/ingestion/latest')
@@ -584,6 +592,14 @@ export default function SomaDashboardPage() {
                   <span className="w-2 h-2 rounded-full bg-green-400 flex-shrink-0" />
                   <p className="text-sm font-semibold text-green-300">✅ Voice profile active</p>
                 </div>
+                {voiceDnaTier !== 'none' && (
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-sm">🧬</span>
+                    <p className="text-xs font-semibold text-purple-300">
+                      Voice DNA: <span className="capitalize">{voiceDnaTier.replace('_', ' ')}</span> tier active
+                    </p>
+                  </div>
+                )}
                 <p className="text-xs text-gray-500 mb-3">
                   Last updated{' '}
                   {new Date(identity.last_updated).toLocaleDateString('en-US', {
@@ -824,12 +840,16 @@ export default function SomaDashboardPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Link
             href="/soma/voice"
-            className="flex items-center gap-3 rounded-xl border border-purple-800/40 bg-purple-950/20 hover:border-purple-500/50 hover:bg-purple-950/30 transition-all p-4 group"
+            className={`flex items-center gap-3 rounded-xl border transition-all p-4 group ${voiceDnaTier !== 'none' ? 'border-purple-600/50 bg-purple-950/30 hover:bg-purple-950/40' : 'border-purple-800/40 bg-purple-950/20 hover:border-purple-500/50 hover:bg-purple-950/30'}`}
           >
             <span className="text-xl">🧬</span>
             <div>
               <p className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">Voice DNA Builder</p>
-              <p className="text-[11px] text-gray-500 mt-0.5">25–40 questions that shape your AI voice</p>
+              {voiceDnaTier !== 'none' ? (
+                <p className="text-[11px] text-purple-400 mt-0.5 capitalize">✓ {voiceDnaTier.replace('_', ' ')} tier saved</p>
+              ) : (
+                <p className="text-[11px] text-gray-500 mt-0.5">25–40 questions that shape your AI voice</p>
+              )}
             </div>
             <span className="ml-auto text-gray-600 group-hover:text-purple-400 transition-colors text-sm">→</span>
           </Link>
