@@ -450,17 +450,32 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
   - SOMA dashboard: Voice DNA Builder quick action (purple, prominent). SOMA project page: banner CTA if no profile, tier indicator if active.
   - SQL applied: 3 columns added to `soma_identity_profiles` (`personality_tier`, `personality_answers`, `personality_summary`). New `soma_voice_feedback` table with RLS.
 
+**May 7, 2026 (PRs #304–#308):**
+- **SOMA Voice DNA 404 fix** (PR #305) — Done screen "Go to Projects" linked to /soma/projects (doesn't exist). Fixed to /soma/dashboard.
+- **SOMA Voice DNA dashboard indicator** (PR #306) — Identity Status card on SOMA dashboard now shows "🧬 Voice DNA: Advanced tier active" + tier badge when completed. Quick action shows "✓ Advanced tier saved" (purple) vs generic CTA.
+- **SOMA Project Memory system** (PR #308) — Full persistent content memory per project:
+  - `soma_project_memory` table: `running_summary` (rolling manager notes), `topics_covered` (string array), `angles_used` (string array), `total_posts_generated` (int).
+  - Ingest route reads memory before Gemini prompt and tells it what NOT to repeat. Gemini returns a mandatory `memory_update` field (2-3 sentence manager notes) appended with timestamp to `running_summary`.
+  - Project page SOMA Memory panel: shows running manager notes, topics covered pills, angles used pills, total posts generated, and a "🗑 Clear memory" button for fresh start.
+  - **500k character cap** on project ingest (up from 30k). Full document sent — no slicing, no truncation. Documents larger than 500k chars get a 400 error.
+  - `/api/soma/projects/[id]/memory` route: GET (read memory) + DELETE (clear/reset).
+  - SQL applied: `soma_project_memory` table with RLS.
+- **Feedback modal made on-demand** (PR #308) — Removed auto-popup after generate run (was firing before user could review posts). Now shown via "🎙️ Give feedback" button in generate result section. User-initiated only.
+- **Voice DNA interview completed by Joshua** — Full Advanced tier (40 questions) answered. Voice DNA summary active in SOMA. SOMA now knows: solo founder building in public, deli job worker, hip-hop + LoL + space culture, authentic hustle tone, "cooked/fire/slay" vocab, specific angles around bootstrapped building, creator tools, and inspiring others to start from nothing.
+- **Google Play identity verified** — Google Play Console identity review approved (screenshot confirmed May 7). Next step when ready: play.google.com/console → Create app → Upload AAB v1.0.4 (GitHub Actions run #5 artifact) → Internal testing.
+- **LinkedIn post written** — Long-form SEO/GEO/AIO LinkedIn post about SOMA, Voice DNA, and the bootstrapped builder grind. Includes Marcus Aurelius quote opener. Ready to publish manually.
+
 ---
 
 ## Pending / In Progress
 
-- **Google Play identity review** — Submitted May 6, 2026. Awaiting Google approval (1–3 days). Check socialmatehq@gmail.com for approval email. Once approved: go to play.google.com/console → Create app → Upload AAB (v1.0.4 from GitHub Actions run #5 artifact) → Internal testing.
+- **Google Play launch** — Identity approved May 7, 2026. Next: play.google.com/console → Create app → Upload AAB v1.0.4 (GitHub Actions run #5 artifact) → Internal testing → Production listing.
 
 - **TikTok Production API** — Submitted Apr 23. Demo video submitted May 5. Support ticket `ad7714530aa61ad4` open. Check portal periodically. No action until approved.
 
-- **Voice DNA interview** — Joshua should complete `/soma/voice` (Foundation tier minimum) before next SOMA content run. Deep Dive or Advanced recommended for best results.
+- **SOMA content generation** — Submit updated CLAUDE.md as master doc to SocialMate Growth SOMA project. Voice DNA (Advanced) is now active — SOMA will sound like Joshua. Do NOT write posts manually.
 
-- **SOMA content generation** — Submit updated CLAUDE.md as master doc to SOMA project. SOMA diffs against previous version and generates posts only about what's new. Do NOT write posts manually.
+- **LinkedIn post** — Long-form post written (May 7 session). Publish manually to LinkedIn company page.
 
 - **Enki Truth Mode** — 50-trade minimum per strategy before results are statistically valid. Check `/enki/truth` periodically.
 
@@ -469,9 +484,9 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **Push notifications** — VAPID keys confirmed set in Vercel. Live.
 
 **Roadmap (next up):**
-- **Voice DNA interview** — Go to `/soma/voice`, pick Deep Dive or Advanced, complete the interview. Then submit CLAUDE.md to SOMA — the first run with Voice DNA active will be noticeably different.
-- **Google Play launch** — Waiting on identity approval. Once cleared: create app, upload AAB, internal testing, then production listing (screenshots, description, content rating).
+- **Google Play launch** — Identity approved. Create app in console, upload AAB v1.0.4, complete internal testing, then production listing (screenshots, description, content rating).
 - **Landing page "Available on Google Play" badge** — Add after Play Store app is live in internal testing.
+- **SOMA content run** — Submit updated CLAUDE.md to SOMA project. First run with Voice DNA (Advanced tier) active.
 - **Gilgamesh's Guides Vol. 5+** — Deep-dive research-backed guides for people starting from nothing. Real playbooks, not fluff. Topics TBD.
 - **Apple App Store** — Deferred 3–6 months. Requires $99/yr Apple Developer account + Xcode on Mac.
 - **LinkedIn publishing** — Pending API credentials. On hold.
@@ -479,6 +494,12 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 ## Confirmed Done (stop asking about these)
 
+- ✅ **Voice DNA Builder completed (May 7)** — Joshua completed full Advanced tier (40 questions). Voice DNA summary active and injected into every SOMA generate prompt. Never ask Joshua to complete the interview again.
+- ✅ **SOMA Project Memory (PR #308, May 7)** — `soma_project_memory` table live. Ingest reads/writes memory. 500k char cap. Full doc no truncation. Project page shows memory panel + Clear button. `/api/soma/projects/[id]/memory` GET + DELETE live.
+- ✅ **Feedback modal on-demand (PR #308, May 7)** — Auto-popup removed. Manual "🎙️ Give feedback" button in generate result. User controls when to answer.
+- ✅ **Voice DNA 404 fix (PR #305, May 7)** — Done screen links to /soma/dashboard. Merged.
+- ✅ **Voice DNA dashboard indicator (PR #306, May 7)** — Tier badge + "✓ saved" state on SOMA dashboard. Merged.
+- ✅ **Google Play identity approved (May 7)** — Confirmed via screenshot. Console ready for app creation.
 - ✅ **SOMA Credit Packs fully live (Apr 30, PR #263)** — Stripe products created (Starter $4.99/75cr, Growth $12.99/225cr, Pro $24.99/500cr). Price IDs hardcoded. Labels updated. Webhook wired from PR #256.
 - ✅ **Capacitor Android wrapper + Link in Bio monetize blocks (Apr 30, PR #262)** — `capacitor.config.json`, Capacitor deps, `GOOGLE_PLAY_SETUP.md`, Link in Bio tip/subscribe quick-add, Creator Hub share section (QR + copy links).
 - ✅ **Toast safe-area fix (Apr 30, PR #261)** — `components/Toast.tsx` created. All 35 pages fixed. Zero remaining `fixed bottom-6 right-6` occurrences.
