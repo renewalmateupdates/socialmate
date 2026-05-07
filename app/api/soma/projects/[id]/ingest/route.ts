@@ -46,6 +46,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     if (!content?.trim()) return NextResponse.json({ error: 'content is required' }, { status: 400 })
+    if (content.length > 500000) return NextResponse.json({ error: 'Content exceeds 500,000 character limit. Please shorten your document.' }, { status: 400 })
 
     const admin = getSupabaseAdmin()
     const apiKey = process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY
@@ -124,10 +125,10 @@ Return ONLY valid JSON (no markdown):
 }
 
 PREVIOUS WEEK:
-${prevDoc.content.slice(0, 30000)}
+${prevDoc.content}
 
 CURRENT WEEK:
-${content.slice(0, 30000)}
+${content}
 
 Rules: Focus on what's NEW. emotional_tone must be: high, reflective, grinding, or celebratory.`
       : `Analyze this weekly master doc and extract content themes.
@@ -143,7 +144,7 @@ Return ONLY valid JSON (no markdown):
 }
 
 MASTER DOC:
-${content.slice(0, 30000)}
+${content}
 
 Rules: Be specific. emotional_tone must be: high, reflective, grinding, or celebratory.`
 
