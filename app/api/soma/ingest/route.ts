@@ -8,7 +8,31 @@ import { SOMA_COSTS } from '@/lib/soma-costs'
 
 const INGEST_COST = SOMA_COSTS.ingest_weekly // 25
 
-function buildIngestPrompt(raw_input: string): string {
+function buildIngestPrompt(raw_input: string, previous_raw_input?: string): string {
+  if (previous_raw_input) {
+    return `You are analyzing what is NEW or CHANGED in a master document between two versions.
+
+PREVIOUS VERSION (last submission):
+${previous_raw_input}
+
+CURRENT VERSION (new submission):
+${raw_input}
+
+Your job: identify ONLY what is new, changed, or different between the two versions. Ignore anything that appeared in the previous version unchanged.
+
+Return ONLY valid JSON (no markdown, no code blocks) about the NEW/CHANGED content:
+{
+  "key_themes": ["theme from new content only"],
+  "wins": ["new wins this week only"],
+  "challenges": ["new challenges only"],
+  "directional_shifts": ["things that changed direction"],
+  "content_angles": ["5 specific content angles about the new/changed things only"],
+  "emotional_tone": "grinding"
+}
+
+Rules: Be specific and concrete about what actually changed. No generic statements. No content that existed in the previous version. emotional_tone must be one of: high, reflective, grinding, celebratory`
+  }
+
   return `Analyze this weekly update from a social media creator and return ONLY valid JSON (no markdown, no code blocks):
 {
   "key_themes": ["theme1", "theme2"],
@@ -83,6 +107,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'insufficient_soma_credits' }, { status: 402 })
     }
 
+    // Fetch previous ingestion for diff
+    const { data: previousIngestion } = await supabase
+      .from('soma_weekly_ingestion')
+      .select('raw_input')
+      .eq('workspace_id', workspace.id)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    const previous_raw_input = previousIngestion?.raw_input as string | undefined
+
     // Call Gemini
     const apiKey = process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY
     if (!apiKey) {
@@ -91,7 +126,7 @@ export async function POST(req: NextRequest) {
 
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
-    const prompt = buildIngestPrompt(raw_input)
+    const prompt = buildIngestPrompt(raw_input, previous_raw_input)
 
     let extracted_insights: any
     try {
