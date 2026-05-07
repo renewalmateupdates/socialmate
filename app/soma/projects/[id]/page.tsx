@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
+import SomaVoiceFeedbackModal from '@/components/soma/SomaVoiceFeedbackModal'
 
 interface PlatformSchedule { posts_per_day: number; days: number[] }
 
@@ -81,6 +82,9 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
   const [localSchedule, setLocalSchedule]     = useState<Record<string, PlatformSchedule>>({})
   const [savingSchedule, setSavingSchedule]   = useState(false)
 
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false)
+  const [voiceProfile, setVoiceProfile]           = useState<{ tier: string; hasSummary: boolean } | null>(null)
+
   async function saveSchedule() {
     setSavingSchedule(true)
     try {
@@ -111,6 +115,16 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
       if (ingRes.ok) {
         const ingData = await ingRes.json()
         if (ingData.ingestion) setIngestResult(ingData.ingestion)
+      }
+
+      // Check voice profile status
+      const voiceRes = await fetch('/api/soma/voice')
+      if (voiceRes.ok) {
+        const voiceData = await voiceRes.json()
+        setVoiceProfile({
+          tier: voiceData.personality_tier ?? 'none',
+          hasSummary: !!voiceData.personality_summary,
+        })
       }
     } finally {
       setLoading(false)
@@ -201,6 +215,8 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
       }
       setGenerateResult(data)
       await load()
+      // Show voice feedback modal after successful generation
+      setShowFeedbackModal(true)
     } catch {
       clearInterval(stageTimer)
       setGenerateError('Network error. Please try again.')
@@ -242,6 +258,15 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
   return (
     <div className="flex min-h-screen bg-gray-950">
       <Sidebar />
+
+      {showFeedbackModal && (
+        <SomaVoiceFeedbackModal
+          projectId={projectId}
+          generationCount={project.runs_this_month}
+          onClose={() => setShowFeedbackModal(false)}
+        />
+      )}
+
       <main className="flex-1 md:ml-56 p-4 sm:p-6 lg:p-8 space-y-6 max-w-5xl">
 
         {/* ── HEADER ── */}
@@ -267,6 +292,38 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
             </button>
           </div>
         </div>
+
+        {/* ── VOICE DNA BANNER ── */}
+        {voiceProfile && voiceProfile.tier === 'none' && (
+          <Link
+            href="/soma/voice"
+            className="flex items-center justify-between gap-4 rounded-xl border border-purple-700/50 bg-purple-950/20 px-5 py-4 hover:bg-purple-950/30 transition-colors group"
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">🧬</span>
+              <div>
+                <p className="text-white font-semibold text-sm">Build your Voice DNA</p>
+                <p className="text-purple-300 text-xs">Answer 10–40 questions and SOMA generates content that actually sounds like you.</p>
+              </div>
+            </div>
+            <span className="text-purple-400 group-hover:translate-x-1 transition-transform text-sm">→</span>
+          </Link>
+        )}
+        {voiceProfile && voiceProfile.tier !== 'none' && (
+          <Link
+            href="/soma/voice"
+            className="flex items-center justify-between gap-4 rounded-xl border border-gray-700/50 bg-gray-900/50 px-5 py-3 hover:bg-gray-900 transition-colors group"
+          >
+            <div className="flex items-center gap-3">
+              <span className="text-xl">🧬</span>
+              <div>
+                <p className="text-gray-300 text-sm font-medium">Voice DNA active — <span className="capitalize text-purple-400">{voiceProfile.tier.replace('_', ' ')}</span> tier</p>
+                <p className="text-gray-600 text-xs">Click to deepen your profile or switch tiers</p>
+              </div>
+            </div>
+            <span className="text-gray-600 group-hover:text-gray-400 transition-colors text-xs">Update →</span>
+          </Link>
+        )}
 
         {/* ── PROJECT STATS ── */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

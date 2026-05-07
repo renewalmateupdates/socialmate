@@ -134,11 +134,20 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // Fetch voice profile
     const { data: profile } = await admin
       .from('soma_identity_profiles')
-      .select('tone_profile, writing_style_rules, behavioral_traits, voice_examples')
+      .select('tone_profile, writing_style_rules, behavioral_traits, voice_examples, personality_summary, personality_tier')
       .eq('workspace_id', project.workspace_id)
       .maybeSingle()
 
-    const identityContext = profile
+    const identityContext = profile?.personality_summary
+      ? `CREATOR VOICE DNA (${(profile.personality_tier as string ?? 'foundation').replace('_', ' ')} tier):
+${profile.personality_summary}
+
+ONBOARDING VOICE PROFILE:
+Tone: ${JSON.stringify(profile.tone_profile)}
+Style: ${JSON.stringify(profile.writing_style_rules)}
+Avoid: ${(profile.tone_profile as any)?.avoid ?? 'generic AI phrases'}
+Example posts: ${Array.isArray(profile.voice_examples) ? (profile.voice_examples as string[]).join(' | ') : 'none'}`
+      : profile
       ? `CREATOR VOICE PROFILE:
 Tone: ${JSON.stringify(profile.tone_profile)}
 Style: ${JSON.stringify(profile.writing_style_rules)}
