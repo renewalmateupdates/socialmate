@@ -95,15 +95,22 @@ export async function POST(req: NextRequest) {
       .eq('workspace_id', workspace.id)
       .maybeSingle()
 
-    const identityContext = profile
-      ? `
-CREATOR VOICE PROFILE:
+    const identityContext = (profile as any)?.personality_summary
+      ? `CREATOR VOICE DNA (${((profile as any).personality_tier ?? 'foundation').replace('_', ' ')} tier):
+${(profile as any).personality_summary}
+
+ONBOARDING VOICE PROFILE:
+Tone: ${JSON.stringify(profile!.tone_profile)}
+Style: ${JSON.stringify(profile!.writing_style_rules)}
+Avoid: ${(profile!.tone_profile as any)?.avoid ?? 'generic AI phrases'}
+Example posts: ${Array.isArray(profile!.voice_examples) ? profile!.voice_examples.join(' | ') : 'none provided'}`
+      : profile
+      ? `CREATOR VOICE PROFILE:
 Tone: ${JSON.stringify(profile.tone_profile)}
 Style: ${JSON.stringify(profile.writing_style_rules)}
 Avoid: ${(profile.tone_profile as any)?.avoid || 'generic AI phrases'}
 Personality: ${JSON.stringify(profile.behavioral_traits)}
-Example posts they like: ${Array.isArray(profile.voice_examples) ? profile.voice_examples.join(' | ') : 'none provided'}
-`
+Example posts they like: ${Array.isArray(profile.voice_examples) ? profile.voice_examples.join(' | ') : 'none provided'}`
       : 'No voice profile set — use authentic, direct tone.'
 
     const insights = ingestion.extracted_insights as any

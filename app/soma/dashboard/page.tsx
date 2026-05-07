@@ -823,15 +823,15 @@ export default function SomaDashboardPage() {
         {/* ── QUICK ACTIONS ─────────────────────────────────────────── */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Link
-            href="/soma/onboarding"
-            className="flex items-center gap-3 rounded-xl border border-gray-800 bg-gray-900 hover:border-amber-500/30 hover:bg-gray-900/80 transition-all p-4 group"
+            href="/soma/voice"
+            className="flex items-center gap-3 rounded-xl border border-purple-800/40 bg-purple-950/20 hover:border-purple-500/50 hover:bg-purple-950/30 transition-all p-4 group"
           >
-            <span className="text-xl">🧠</span>
+            <span className="text-xl">🧬</span>
             <div>
-              <p className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">Setup Voice Profile</p>
-              <p className="text-[11px] text-gray-500 mt-0.5">Teach SOMA how you speak</p>
+              <p className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">Voice DNA Builder</p>
+              <p className="text-[11px] text-gray-500 mt-0.5">25–40 questions that shape your AI voice</p>
             </div>
-            <span className="ml-auto text-gray-600 group-hover:text-amber-400 transition-colors text-sm">→</span>
+            <span className="ml-auto text-gray-600 group-hover:text-purple-400 transition-colors text-sm">→</span>
           </Link>
 
           <Link
