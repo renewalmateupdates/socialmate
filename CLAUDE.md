@@ -423,8 +423,17 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **PublicFooter logo** (PR #289) — Replaced hardcoded "S" lettermark div with `<img src="/logo.png" className="w-8 h-8 rounded-xl" />`.
 - **Privacy + Terms overhaul** (PR #290) — Large logo (`w-24 h-24 rounded-3xl`) added before h1 on both pages. "Last updated" bumped to May 6, 2026. Privacy policy: full TikTok per-scope documentation for developer review (`user.info.basic`, `video.upload`, `video.publish`), paragraph reconciling "SocialMatehq" developer portal name with "SocialMate" brand, "TikTok (planned)" → "TikTok (live)". TikTok app resubmitted May 2026.
 - **20 blog posts inserted via SQL** — Business credit, tax strategy, founder story, platform guides, content systems. All high-search-volume personal finance + creator business queries. Full slug list in memory.
-- **Sitemap updated** (PR #291) — 20 new blog slugs added to `app/sitemap.ts` `BLOG_SLUGS` array. **Pending merge.**
-- **Social posts content file** — `content-posts-may6-guides-batch.md` created locally at `C:\Users\jbost\socialmate\`. 23 ready-to-schedule posts (3 guides + 20 blog). Schedule 1–2/day across Bluesky, Mastodon, Telegram, Discord.
+- **Sitemap updated** (PR #291) — 20 new blog slugs added to `app/sitemap.ts` `BLOG_SLUGS` array. Merged.
+- **Social posts content file** — `content-posts-may6-guides-batch.md` created locally at `C:\Users\jbost\socialmate\`. Use SOMA to generate content from updated CLAUDE.md master doc — do NOT manually schedule posts.
+
+**May 6, 2026 (continued — PRs #292–#297):**
+- **Gilgamesh's Guides Vol. 3** (PR #292) — `/guides/business-credit-legal` live. 7 chapters: DUNS, PAYDEX, Licenses, Tax Deductions, LLC vs S-Corp, Banking, Insurance. Merged.
+- **Gilgamesh's Guides Vol. 4** (PR #293) — `/guides/vibe-coding-with-ai` live. 7 chapters: What Vibe Coding Is, The Stack, The Workflow, Prompting, Debugging, Going Live, The Mindset. Written in Joshua's voice. Merged.
+- **10 vibe coding blog posts + sitemap** (PR #294) — Slugs: vibe-coding-what-it-is-how-to-start, build-saas-no-cs-degree-ai-2026, claude-code-review-solo-founder, best-ai-coding-tools-solo-founders-2026, nextjs-supabase-starter-stack-2026, how-to-prompt-ai-for-coding-beginners, ship-software-faster-with-ai-workflow, building-saas-working-full-time-job, free-stack-build-saas-zero-cost-2026, solo-founder-tech-stack-no-team-2026. Merged.
+- **Landing page always-dark** (PR #295) — Root div changed from `bg-white dark:bg-gray-950` to `dark min-h-screen bg-gray-950`. Forces dark background regardless of system preference. Merged.
+- **Changelog May 6 entry** (PR #296) — Covers guides complete, Google Play CI/CD, TikTok, blog posts, logo fix, privacy overhaul, dark landing. Merged.
+- **Landing page guides fix** (PR #297) — Fixed Vol. 3 (was wrongly showing Vibe Coding), added Vol. 4. Grid changed to 2×2. All 4 guides now live with correct hrefs. Merged.
+- **Google Play Console account created** — Developer name: SocialMate. Account ID: 8266379090016264889. Personal account under socialmatehq@gmail.com. AAB built successfully via GitHub Actions (v1.0.4, Android Release Build #5). Device verification: complete (verified via work Android phone). Identity verification: **pending** — Joshua needs to upload photo ID to unlock app publishing. Phone verification unlocks after identity approval.
 
 ---
 
@@ -447,9 +456,8 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **TikTok API review** — submitted Apr 23. Support ticket `ad7714530aa61ad4` open re: app name. Check portal periodically. No action needed until approved.
 
 **Roadmap (next up):**
-- **Google Play Store submission** — GitHub Actions CI/CD built (PR #281). Next steps: (1) run `npm install && npx cap add android` locally to generate `android/` dir, commit it. (2) Create keystore with `keytool`. (3) Add 4 GitHub Secrets. (4) `git tag v1.0.0 && git push origin v1.0.0` to trigger build. See `GOOGLE_PLAY_SETUP.md`.
-- **Gilgamesh's Guides Vol. 2** — ✅ Built (PR #281) at `/guides/marketing-zero-budget`. Merged.
-- **Gilgamesh's Guides Vol. 3** — Business Credit, Legal & Tax. Content written. Build the page at `/guides/business-credit-legal` next session.
+- **Google Play identity verification** — Joshua needs to upload photo ID at play.google.com/console. Once approved (1–3 days), create the app, upload the AAB (v1.0.4 artifact from GitHub Actions run #5), submit for internal testing.
+- **Gilgamesh's Guides** — ✅ All 4 volumes complete and live. Vol. 1: /guides/starting-a-business · Vol. 2: /guides/marketing-zero-budget · Vol. 3: /guides/business-credit-legal · Vol. 4: /guides/vibe-coding-with-ai
 - **LinkedIn publishing** — pending API credentials
 - **Schedule templates UI** — ✅ Built (PR #256) — `/schedules` page with full CRUD
 - **Workspace activity logging** — ✅ Wired into post publish (PR #256). Approval + member events still unwired.
