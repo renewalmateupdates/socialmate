@@ -486,10 +486,10 @@ export default function SomaVoicePage() {
         </p>
         <div className="flex flex-col gap-3">
           <Link
-            href="/soma/projects"
+            href="/soma/dashboard"
             className="block w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold transition-colors"
           >
-            Go to Projects →
+            Go to Dashboard →
           </Link>
           <button
             onClick={() => { setCurrentIdx(0); setPhase('intro') }}
