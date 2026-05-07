@@ -84,6 +84,7 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
 
   const [showFeedbackModal, setShowFeedbackModal] = useState(false)
   const [voiceProfile, setVoiceProfile]           = useState<{ tier: string; hasSummary: boolean } | null>(null)
+  const [memory, setMemory]                       = useState<{ running_summary: string; topics_covered: string[]; angles_used: string[]; total_posts_generated: number } | null>(null)
 
   async function saveSchedule() {
     setSavingSchedule(true)
@@ -125,6 +126,13 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
           tier: voiceData.personality_tier ?? 'none',
           hasSummary: !!voiceData.personality_summary,
         })
+      }
+
+      // Load SOMA memory for this project
+      const memRes = await fetch(`/api/soma/projects/${projectId}/memory`)
+      if (memRes.ok) {
+        const memData = await memRes.json()
+        setMemory(memData.memory ?? null)
       }
     } finally {
       setLoading(false)
@@ -714,6 +722,61 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
 
           </div>
         </div>
+
+        {/* ── SOMA MEMORY ── */}
+        {memory && (
+          <div className="rounded-2xl border border-gray-800 bg-gray-900 p-5">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500">SOMA Memory</h2>
+                <p className="text-[11px] text-gray-600 mt-0.5">What SOMA has already covered — it won't repeat these</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-gray-600">{memory.total_posts_generated} posts generated</span>
+                <button
+                  onClick={async () => {
+                    if (!confirm('Clear SOMA\'s memory for this project? It will start fresh on next ingest.')) return
+                    await fetch(`/api/soma/projects/${projectId}/memory`, { method: 'DELETE' })
+                    setMemory(null)
+                  }}
+                  className="text-xs text-red-500 hover:text-red-400 transition-colors"
+                >
+                  Clear memory
+                </button>
+              </div>
+            </div>
+
+            {memory.running_summary && (
+              <div className="mb-4 bg-gray-800/50 rounded-xl p-4">
+                <p className="text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">Manager Notes</p>
+                <p className="text-xs text-gray-300 leading-relaxed whitespace-pre-wrap">{memory.running_summary}</p>
+              </div>
+            )}
+
+            <div className="grid sm:grid-cols-2 gap-3">
+              {memory.topics_covered?.length > 0 && (
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">Topics covered</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {memory.topics_covered.map((t, i) => (
+                      <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-gray-800 text-gray-400 border border-gray-700">{t}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {memory.angles_used?.length > 0 && (
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-gray-500 mb-2">Angles used</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {memory.angles_used.map((a, i) => (
+                      <span key={i} className="text-[10px] px-2 py-0.5 rounded-full bg-gray-800 text-gray-400 border border-gray-700">{a}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* ── DELETE CONFIRM ── */}
         {confirmDelete && (

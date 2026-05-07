@@ -298,6 +298,33 @@ Rules:
       last_generated_at: new Date().toISOString(),
     }).eq('id', projectId)
 
+    // Update SOMA memory — increment post count
+    await admin.from('soma_project_memory')
+      .upsert(
+        {
+          project_id:           projectId,
+          workspace_id:         project.workspace_id,
+          user_id:              user!.id,
+          total_posts_generated: postsCreated,
+          updated_at:           new Date().toISOString(),
+        },
+        { onConflict: 'project_id', ignoreDuplicates: false }
+      )
+      .then(async () => {
+        // Increment rather than overwrite — read current count first
+        const { data: mem } = await admin
+          .from('soma_project_memory')
+          .select('total_posts_generated')
+          .eq('project_id', projectId)
+          .maybeSingle()
+        if (mem) {
+          await admin.from('soma_project_memory')
+            .update({ total_posts_generated: (mem.total_posts_generated ?? 0) + postsCreated, updated_at: new Date().toISOString() })
+            .eq('project_id', projectId)
+        }
+      })
+      .catch(() => { /* non-fatal */ })
+
     // Deduct credits
     const monthlyAvailable = Math.max(0, monthly - used)
     const newUsed      = monthlyAvailable >= GENERATE_COST ? used + GENERATE_COST : monthly
