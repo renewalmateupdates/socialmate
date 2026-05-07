@@ -435,6 +435,11 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **Landing page guides fix** (PR #297) — Fixed Vol. 3 (was wrongly showing Vibe Coding), added Vol. 4. Grid changed to 2×2. All 4 guides now live with correct hrefs. Merged.
 - **Google Play Console account created** — Developer name: SocialMate. Account ID: 8266379090016264889. Personal account under socialmatehq@gmail.com. AAB built successfully via GitHub Actions (v1.0.4, Android Release Build #5). Device verification: ✅ complete. Identity verification: **submitted May 6, 2026 — awaiting Google review (1–3 days)**. Once approved, phone verification auto-clears, then: create app in console → upload AAB → internal testing.
 
+**May 6, 2026 (end of session — PRs #298–#301):**
+- **CLAUDE.md master doc updated** (PR #298, #299, #301) — Full session recap committed. Roadmap cleaned up. Ready to submit to SOMA.
+- **SOMA diff fix** (PR #300) — Two bugs fixed: (1) standalone `/api/soma/ingest` now fetches previous raw_input from DB and passes both old+new to Gemini with explicit "extract only what changed" instructions. (2) Project ingest `/api/soma/projects/[id]/ingest` had 4000-char content truncation — bumped to 30000 so full CLAUDE.md gets analyzed. SOMA now generates posts about what's actually new, not full history.
+- **SOMA posting schedule editable** (PR #300) — Project page schedule section now has Edit/Save/Cancel controls. Posts/day can be adjusted with +/− buttons. Day toggles work inline. Saves via PATCH to project API.
+
 ---
 
 ## Pending / In Progress
@@ -443,19 +448,19 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 - **TikTok Production API** — Submitted Apr 23. Demo video submitted May 5. Support ticket `ad7714530aa61ad4` open. Check portal periodically. No action until approved.
 
-- **SOMA content generation** — Submit updated CLAUDE.md as master doc to SOMA at `/soma`. SOMA diffs the doc and generates a week of social posts automatically. Do NOT write posts manually.
+- **SOMA content generation** — After merging PR #300: submit updated CLAUDE.md as master doc to SOMA project. SOMA diffs against previous version and generates posts only about what's new. Do NOT write posts manually.
 
 - **Enki Truth Mode** — 50-trade minimum per strategy before results are statistically valid. Check `/enki/truth` periodically.
 
-- **LinkedIn integration** — Blocked on API credentials. Requires: LinkedIn Company Page published → developer app → Marketing Developer Platform approval. Low priority until TikTok + Google Play are settled.
+- **LinkedIn integration** — Blocked on API credentials. Requires: LinkedIn Company Page published → developer app → Marketing Developer Platform approval. Low priority.
 
 - **Push notifications** — VAPID keys confirmed set in Vercel. Live.
 
 **Roadmap (next up):**
 - **Google Play launch** — Waiting on identity approval. Once cleared: create app, upload AAB, internal testing, then production listing (screenshots, description, content rating).
 - **Landing page "Available on Google Play" badge** — Add after Play Store app is live in internal testing.
-- **Apple App Store** — Deferred 3–6 months. Requires $99/yr Apple Developer account + Xcode on Mac. Not worth it until Google Play is proven.
-- **More Gilgamesh's Guides** — Joshua wants to research internet gurus/seminars for a masterwork Vol. 5+. Future work.
+- **Apple App Store** — Deferred 3–6 months. Requires $99/yr Apple Developer account + Xcode on Mac.
+- **More Gilgamesh's Guides** — Joshua wants to research internet gurus/seminars for masterwork guides. Future work.
 - **LinkedIn publishing** — Pending API credentials. On hold.
 - **Instagram / Facebook / Threads** — Pending Meta API access. Long-term roadmap.
 
