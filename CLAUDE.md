@@ -440,6 +440,16 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **SOMA diff fix** (PR #300) — Two bugs fixed: (1) standalone `/api/soma/ingest` now fetches previous raw_input from DB and passes both old+new to Gemini with explicit "extract only what changed" instructions. (2) Project ingest `/api/soma/projects/[id]/ingest` had 4000-char content truncation — bumped to 30000 so full CLAUDE.md gets analyzed. SOMA now generates posts about what's actually new, not full history.
 - **SOMA posting schedule editable** (PR #300) — Project page schedule section now has Edit/Save/Cancel controls. Posts/day can be adjusted with +/− buttons. Day toggles work inline. Saves via PATCH to project API.
 
+**May 6, 2026 (continued — PRs #302–#303):**
+- **SOMA project ingest 30k + editable schedule** (PR #302) — Cherry-picked missed commit from PR #300: project ingest content truncation bumped 4k→30k chars, editable posting schedule on project page (Edit/Save/Cancel buttons). Both live.
+- **SOMA Voice DNA Builder** (PR #303) — Full adaptive personality system:
+  - `/soma/voice` page: 40-question personality interview in 3 configurable tiers. Foundation (10q, ~5min): niche, audience, tone, slang, your story, what you solve, what you'd never sound like. Deep Dive (25q): endless topic, niche misconceptions, vulnerability stance, differentiator, contrarian belief, audience frustration, success vision. Advanced (40q): campaign style, hot take ratio, promo ratio, seasonal relevance, anything else.
+  - Gemini reads all answers and writes a **Voice DNA summary** (150-200 word instruction block) injected into every future SOMA content prompt. SOMA stops guessing and starts sounding like you.
+  - **Post-publish feedback modal**: pops up automatically after every content run. 3 rotating questions from a pool of 8 (voice match rating, more-of requests, what missed the mark, what's happening in your world, tone check). Every response is saved to `soma_voice_feedback` and Gemini rebuilds the Voice DNA from the last 20 feedback items. SOMA gets smarter every single run.
+  - Both generate routes now inject `personality_summary` as `CREATOR VOICE DNA` block when available.
+  - SOMA dashboard: Voice DNA Builder quick action (purple, prominent). SOMA project page: banner CTA if no profile, tier indicator if active.
+  - SQL applied: 3 columns added to `soma_identity_profiles` (`personality_tier`, `personality_answers`, `personality_summary`). New `soma_voice_feedback` table with RLS.
+
 ---
 
 ## Pending / In Progress
@@ -448,7 +458,9 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 - **TikTok Production API** — Submitted Apr 23. Demo video submitted May 5. Support ticket `ad7714530aa61ad4` open. Check portal periodically. No action until approved.
 
-- **SOMA content generation** — After merging PR #300: submit updated CLAUDE.md as master doc to SOMA project. SOMA diffs against previous version and generates posts only about what's new. Do NOT write posts manually.
+- **Voice DNA interview** — Joshua should complete `/soma/voice` (Foundation tier minimum) before next SOMA content run. Deep Dive or Advanced recommended for best results.
+
+- **SOMA content generation** — Submit updated CLAUDE.md as master doc to SOMA project. SOMA diffs against previous version and generates posts only about what's new. Do NOT write posts manually.
 
 - **Enki Truth Mode** — 50-trade minimum per strategy before results are statistically valid. Check `/enki/truth` periodically.
 
@@ -457,10 +469,11 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **Push notifications** — VAPID keys confirmed set in Vercel. Live.
 
 **Roadmap (next up):**
+- **Voice DNA interview** — Go to `/soma/voice`, pick Deep Dive or Advanced, complete the interview. Then submit CLAUDE.md to SOMA — the first run with Voice DNA active will be noticeably different.
 - **Google Play launch** — Waiting on identity approval. Once cleared: create app, upload AAB, internal testing, then production listing (screenshots, description, content rating).
 - **Landing page "Available on Google Play" badge** — Add after Play Store app is live in internal testing.
+- **Gilgamesh's Guides Vol. 5+** — Deep-dive research-backed guides for people starting from nothing. Real playbooks, not fluff. Topics TBD.
 - **Apple App Store** — Deferred 3–6 months. Requires $99/yr Apple Developer account + Xcode on Mac.
-- **More Gilgamesh's Guides** — Joshua wants to research internet gurus/seminars for masterwork guides. Future work.
 - **LinkedIn publishing** — Pending API credentials. On hold.
 - **Instagram / Facebook / Threads** — Pending Meta API access. Long-term roadmap.
 
