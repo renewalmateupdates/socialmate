@@ -77,6 +77,25 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting]           = useState(false)
 
+  const [editingSchedule, setEditingSchedule] = useState(false)
+  const [localSchedule, setLocalSchedule]     = useState<Record<string, PlatformSchedule>>({})
+  const [savingSchedule, setSavingSchedule]   = useState(false)
+
+  async function saveSchedule() {
+    setSavingSchedule(true)
+    try {
+      await fetch(`/api/soma/projects/${projectId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ platform_schedule: localSchedule }),
+      })
+      setProject(p => p ? { ...p, platform_schedule: localSchedule } : p)
+      setEditingSchedule(false)
+    } finally {
+      setSavingSchedule(false)
+    }
+  }
+
   const load = useCallback(async () => {
     setLoading(true)
     try {
@@ -396,31 +415,64 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
               </div>
             )}
 
-            {/* Per-platform day schedule preview */}
+            {/* Per-platform day schedule */}
             {schedule && Object.keys(schedule).length > 0 && (
               <div className="rounded-2xl border border-gray-800 bg-gray-900 p-5">
-                <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-3">Posting Schedule</h2>
-                <div className="space-y-3">
-                  {Object.entries(schedule).map(([pid, cfg]) => (
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500">Posting Schedule</h2>
+                  {!editingSchedule ? (
+                    <button
+                      onClick={() => { setLocalSchedule(JSON.parse(JSON.stringify(schedule))); setEditingSchedule(true) }}
+                      className="text-[11px] text-amber-400 hover:text-amber-300 font-semibold"
+                    >
+                      Edit
+                    </button>
+                  ) : (
+                    <div className="flex gap-2">
+                      <button onClick={() => setEditingSchedule(false)} className="text-[11px] text-gray-500 hover:text-gray-300">Cancel</button>
+                      <button onClick={saveSchedule} disabled={savingSchedule} className="text-[11px] text-emerald-400 hover:text-emerald-300 font-semibold disabled:opacity-50">
+                        {savingSchedule ? 'Saving…' : 'Save'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-4">
+                  {Object.entries(editingSchedule ? localSchedule : schedule).map(([pid, cfg]) => (
                     <div key={pid}>
                       <div className="flex items-center justify-between mb-1.5">
                         <span className="text-xs font-semibold text-gray-300 capitalize flex items-center gap-1.5">
                           <span>{PLATFORM_ICONS[pid] ?? '📱'}</span>{pid}
                         </span>
-                        <span className="text-[11px] text-amber-400 font-bold">{cfg.posts_per_day}/day</span>
+                        {editingSchedule ? (
+                          <div className="flex items-center gap-1">
+                            <button onClick={() => setLocalSchedule(s => ({ ...s, [pid]: { ...s[pid], posts_per_day: Math.max(1, s[pid].posts_per_day - 1) } }))} className="w-5 h-5 rounded bg-gray-800 text-gray-300 text-xs font-bold hover:bg-gray-700">−</button>
+                            <span className="text-[11px] text-amber-400 font-bold w-8 text-center">{cfg.posts_per_day}/day</span>
+                            <button onClick={() => setLocalSchedule(s => ({ ...s, [pid]: { ...s[pid], posts_per_day: Math.min(10, s[pid].posts_per_day + 1) } }))} className="w-5 h-5 rounded bg-gray-800 text-gray-300 text-xs font-bold hover:bg-gray-700">+</button>
+                          </div>
+                        ) : (
+                          <span className="text-[11px] text-amber-400 font-bold">{cfg.posts_per_day}/day</span>
+                        )}
                       </div>
                       <div className="flex gap-1">
                         {DAY_LABELS.map((d, i) => (
-                          <div
+                          <button
                             key={i}
-                            className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                            disabled={!editingSchedule}
+                            onClick={() => {
+                              if (!editingSchedule) return
+                              setLocalSchedule(s => {
+                                const days = s[pid].days.includes(i) ? s[pid].days.filter(x => x !== i) : [...s[pid].days, i]
+                                return { ...s, [pid]: { ...s[pid], days } }
+                              })
+                            }}
+                            className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold transition-colors ${
                               cfg.days.includes(i)
                                 ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
                                 : 'bg-gray-800 text-gray-600'
-                            }`}
+                            } ${editingSchedule ? 'cursor-pointer hover:opacity-80' : 'cursor-default'}`}
                           >
                             {d}
-                          </div>
+                          </button>
                         ))}
                       </div>
                     </div>

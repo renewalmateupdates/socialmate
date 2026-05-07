@@ -124,10 +124,10 @@ Return ONLY valid JSON (no markdown):
 }
 
 PREVIOUS WEEK:
-${prevDoc.content.slice(0, 4000)}
+${prevDoc.content.slice(0, 30000)}
 
 CURRENT WEEK:
-${content.slice(0, 4000)}
+${content.slice(0, 30000)}
 
 Rules: Focus on what's NEW. emotional_tone must be: high, reflective, grinding, or celebratory.`
       : `Analyze this weekly master doc and extract content themes.
@@ -143,7 +143,7 @@ Return ONLY valid JSON (no markdown):
 }
 
 MASTER DOC:
-${content.slice(0, 4000)}
+${content.slice(0, 30000)}
 
 Rules: Be specific. emotional_tone must be: high, reflective, grinding, or celebratory.`
 
