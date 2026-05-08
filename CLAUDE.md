@@ -465,11 +465,17 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **Google Play identity verified** — Google Play Console identity review approved (screenshot confirmed May 7). Next step when ready: play.google.com/console → Create app → Upload AAB v1.0.4 (GitHub Actions run #5 artifact) → Internal testing.
 - **LinkedIn post written** — Long-form SEO/GEO/AIO LinkedIn post about SOMA, Voice DNA, and the bootstrapped builder grind. Includes Marcus Aurelius quote opener. Ready to publish manually.
 
+**May 8, 2026:**
+- **Google Play closed testing confirmed active** — App is in console. Internal testing: Active. Closed testing: Active (1 track, closed test release published). **Blocker to production: 12 opted-in testers + 14-day run.** Currently 0 opted in.
+- **Reddit posts written for tester recruitment** — Two posts drafted May 8:
+  - **r/cofounderhunt** — Updated cofounder search post. Title: `[Looking for Cofounder | Sweat Equity Only | Startup Ready] Solo founder, live SaaS, 12 Google Play testers away from production — need someone who can grow this`. Lists all shipped features + equity offer (~10%).
+  - **r/buildinpublic** — Build-in-public progress post. Title: `6 weeks solo, bootstrapped, working a deli job — I'm 12 beta testers away from Google Play production. Here's what I actually built.` Shares journey + lessons + naturally asks for closed test opt-ins. Follows r/buildinpublic rules (no pure promo, share progress/lessons).
+
 ---
 
 ## Pending / In Progress
 
-- **Google Play launch** — Identity approved May 7, 2026. Next: play.google.com/console → Create app → Upload AAB v1.0.4 (GitHub Actions run #5 artifact) → Internal testing → Production listing.
+- **Google Play — closed testing** — App created in console. Internal testing: Active. Closed testing: Active (1 track). **Blocker: need 12 opted-in testers + 14-day run before Google allows "Apply for production."** Currently at 0 opted-in testers. Recruiting via Reddit (r/cofounderhunt + r/buildinpublic posts written May 8). Once 12 testers opt in, the 14-day clock starts. After that: answer Google's production questions + apply.
 
 - **TikTok Production API** — Submitted Apr 23. Demo video submitted May 5. Support ticket `ad7714530aa61ad4` open. Check portal periodically. No action until approved.
 
@@ -484,8 +490,8 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **Push notifications** — VAPID keys confirmed set in Vercel. Live.
 
 **Roadmap (next up):**
-- **Google Play launch** — Identity approved. Create app in console, upload AAB v1.0.4, complete internal testing, then production listing (screenshots, description, content rating).
-- **Landing page "Available on Google Play" badge** — Add after Play Store app is live in internal testing.
+- **Google Play production** — Get 12 testers to opt into closed test → wait 14 days → answer Google production questions → apply. Reddit posts live as of May 8 recruiting testers.
+- **Landing page "Available on Google Play" badge** — Add after Play Store app is approved for production.
 - **SOMA content run** — Submit updated CLAUDE.md to SOMA project. First run with Voice DNA (Advanced tier) active.
 - **Gilgamesh's Guides Vol. 5+** — Deep-dive research-backed guides for people starting from nothing. Real playbooks, not fluff. Topics TBD.
 - **Apple App Store** — Deferred 3–6 months. Requires $99/yr Apple Developer account + Xcode on Mac.
@@ -500,6 +506,7 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - ✅ **Voice DNA 404 fix (PR #305, May 7)** — Done screen links to /soma/dashboard. Merged.
 - ✅ **Voice DNA dashboard indicator (PR #306, May 7)** — Tier badge + "✓ saved" state on SOMA dashboard. Merged.
 - ✅ **Google Play identity approved (May 7)** — Confirmed via screenshot. Console ready for app creation.
+- ✅ **Google Play app created + closed testing active (May 8)** — App in console. Internal testing: Active. Closed testing: Active (1 track). Still need 12 opted-in testers + 14 days to apply for production.
 - ✅ **SOMA Credit Packs fully live (Apr 30, PR #263)** — Stripe products created (Starter $4.99/75cr, Growth $12.99/225cr, Pro $24.99/500cr). Price IDs hardcoded. Labels updated. Webhook wired from PR #256.
 - ✅ **Capacitor Android wrapper + Link in Bio monetize blocks (Apr 30, PR #262)** — `capacitor.config.json`, Capacitor deps, `GOOGLE_PLAY_SETUP.md`, Link in Bio tip/subscribe quick-add, Creator Hub share section (QR + copy links).
 - ✅ **Toast safe-area fix (Apr 30, PR #261)** — `components/Toast.tsx` created. All 35 pages fixed. Zero remaining `fixed bottom-6 right-6` occurrences.
