@@ -1,182 +1,42 @@
 'use client'
-import { useEffect, useState, Suspense } from 'react'
+import { useEffect, useState, useRef, Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
-const PLATFORMS = [
-  { id: 'discord',   label: 'Discord',     icon: '💬', desc: 'Announcements',  available: true,  isNew: false },
-  { id: 'bluesky',   label: 'Bluesky',     icon: '🦋', desc: 'Decentralized',  available: true,  isNew: false },
-  { id: 'mastodon',  label: 'Mastodon',    icon: '🐘', desc: 'Federated',      available: true,  isNew: false },
-  { id: 'telegram',  label: 'Telegram',    icon: '✈️', desc: 'Channels',       available: true,  isNew: false },
-  { id: 'twitter',   label: 'X / Twitter', icon: '🐦', desc: '280 char tweets', available: true,  isNew: true  },
-  { id: 'linkedin',  label: 'LinkedIn',    icon: '💼', desc: 'Coming soon',    available: false, isNew: false },
-  { id: 'youtube',   label: 'YouTube',     icon: '▶️', desc: 'Coming soon',    available: false, isNew: false },
-  { id: 'pinterest', label: 'Pinterest',   icon: '📌', desc: 'Coming soon',    available: false, isNew: false },
-  { id: 'reddit',    label: 'Reddit',      icon: '🤖', desc: 'Coming soon',    available: false, isNew: false },
-  { id: 'instagram', label: 'Instagram',   icon: '📸', desc: 'Coming soon',    available: false, isNew: false },
-  { id: 'tiktok',    label: 'TikTok',      icon: '🎵', desc: 'Coming soon',    available: false, isNew: false },
-  { id: 'threads',   label: 'Threads',     icon: '🧵', desc: 'Coming soon',    available: false, isNew: false },
+const LIVE_PLATFORMS = [
+  { id: 'bluesky',  label: 'Bluesky',     icon: '🦋', desc: 'Decentralized social — great for builders & creators', badge: '✨ Easiest to start' },
+  { id: 'mastodon', label: 'Mastodon',     icon: '🐘', desc: 'Federated network — engaged, ad-free community',       badge: null },
+  { id: 'discord',  label: 'Discord',      icon: '💬', desc: 'Post announcements to your server channels',           badge: null },
+  { id: 'telegram', label: 'Telegram',     icon: '✈️', desc: 'Broadcast to your Telegram channel or group',          badge: null },
+  { id: 'twitter',  label: 'X / Twitter',  icon: '🐦', desc: '280 characters — $0.01/tweet on free plan',           badge: null },
 ]
 
-const USE_CASES = [
-  { id: 'creator',   label: 'Content Creator',     icon: '🎨', desc: 'Growing my personal brand'    },
-  { id: 'business',  label: 'Business Owner',      icon: '🏢', desc: 'Marketing my business'        },
-  { id: 'agency',    label: 'Agency / Freelancer', icon: '💼', desc: 'Managing client accounts'     },
-  { id: 'marketing', label: 'Marketing Team',      icon: '📣', desc: 'Team social media management' },
-  { id: 'nonprofit', label: 'Nonprofit',           icon: '❤️', desc: 'Spreading our mission'        },
-  { id: 'other',     label: 'Just Exploring',      icon: '🔍', desc: 'Checking it out'              },
-]
+const CHAR_LIMITS: Record<string, number> = {
+  bluesky: 300, mastodon: 500, discord: 2000, telegram: 4096, twitter: 280,
+}
 
 const STRIPE_PRO_PRICE_ID    = 'price_1T9S2v7OMwDowUuULHznqUD5'
 const STRIPE_AGENCY_PRICE_ID = 'price_1TFMHp7OMwDowUuUgeLAeJNY'
 
-const PLAN_DETAILS = {
-  free: {
-    label: 'Free',
-    price: '$0/mo',
-    color: 'border-emerald-400',
-    cardBg: 'bg-emerald-50 dark:bg-emerald-950/20',
-    badgeBg: 'bg-emerald-100 text-emerald-700',
-    badgeLabel: 'Always Free',
-    badge: 'bg-gray-100 text-gray-600',
-    icon: '🆓',
-    credits: 50,
-    creditBank: 75,
-    platforms: 1,
-    seats: 2,
-    posts: 100,
-    storage: '1 GB',
-    schedule: '2 weeks',
-    analytics: '30 days',
-    features: [
-      '4 live platforms now',
-      '50 AI credits / month',
-      '1 connected account per platform',
-      '2 team seats',
-      '100 posts / month',
-      '1 GB media storage',
-      '2-week scheduling window',
-      'Link in Bio builder',
-      'Bulk scheduler',
-      'Post templates & hashtag library',
-      'Analytics dashboard',
-    ],
-    aiTools: [
-      { name: 'Caption Generator', cost: 5  },
-      { name: 'Hashtag Generator', cost: 5  },
-      { name: 'Post Rewrite',      cost: 5  },
-      { name: 'Viral Hook',        cost: 5  },
-      { name: 'Thread Generator',  cost: 10 },
-      { name: 'Content Repurposer',cost: 10 },
-      { name: 'Post Score',        cost: 5  },
-      { name: 'SM-Pulse',          cost: 20 },
-      { name: 'SM-Radar',          cost: 20 },
-      { name: 'Content Gap',       cost: 10 },
-    ],
-  },
-  pro: {
-    label: 'Pro',
-    price: '$5/mo',
-    color: 'border-amber-400',
-    cardBg: 'bg-amber-50 dark:bg-amber-950/20',
-    badgeBg: 'bg-amber-100 text-amber-700',
-    badgeLabel: 'Most Popular',
-    badge: 'bg-amber-400 text-black',
-    icon: '⚡',
-    credits: 500,
-    creditBank: 750,
-    platforms: 5,
-    seats: 5,
-    posts: 1000,
-    storage: '10 GB',
-    schedule: '1 month',
-    analytics: '90 days',
-    features: [
-      'Everything in Free',
-      '500 AI credits / month',
-      '5 connected accounts per platform',
-      '5 team seats',
-      '1,000 posts / month',
-      '10 GB media storage',
-      '1-month scheduling window',
-      '90-day analytics history',
-      'AI Content Calendar (25 cr)',
-      'AI Image Generation (25 cr)',
-      'White Label add-on available',
-    ],
-    aiTools: [
-      { name: 'Caption Generator',   cost: 5  },
-      { name: 'Hashtag Generator',   cost: 5  },
-      { name: 'Post Rewrite',        cost: 5  },
-      { name: 'Viral Hook',          cost: 5  },
-      { name: 'Thread Generator',    cost: 10 },
-      { name: 'Content Repurposer',  cost: 10 },
-      { name: 'Post Score',          cost: 5  },
-      { name: 'SM-Pulse',            cost: 20 },
-      { name: 'SM-Radar',            cost: 20 },
-      { name: 'Content Gap',         cost: 10 },
-      { name: 'AI Content Calendar', cost: 25 },
-      { name: 'AI Image Generation', cost: 25 },
-    ],
-  },
-  agency: {
-    label: 'Agency',
-    price: '$20/mo',
-    color: 'border-purple-500',
-    cardBg: 'bg-purple-50 dark:bg-purple-950/20',
-    badgeBg: 'bg-purple-100 text-purple-700',
-    badgeLabel: 'Power Users',
-    badge: 'bg-purple-600 text-white',
-    icon: '🏢',
-    credits: 2000,
-    creditBank: 3000,
-    platforms: 10,
-    seats: 15,
-    posts: 5000,
-    storage: '50 GB',
-    schedule: '3 months',
-    analytics: '6 months',
-    features: [
-      'Everything in Pro',
-      '2,000 AI credits / month',
-      '10 connected accounts per platform',
-      '15 team seats',
-      '5,000 posts / month',
-      '50 GB media storage',
-      '3-month scheduling window',
-      '6-month analytics history',
-      'Client workspace management',
-      'PDF analytics reports',
-      'White Label add-on available',
-    ],
-    aiTools: [
-      { name: 'Caption Generator',   cost: 5  },
-      { name: 'Hashtag Generator',   cost: 5  },
-      { name: 'Post Rewrite',        cost: 5  },
-      { name: 'Viral Hook',          cost: 5  },
-      { name: 'Thread Generator',    cost: 10 },
-      { name: 'Content Repurposer',  cost: 10 },
-      { name: 'Post Score',          cost: 5  },
-      { name: 'SM-Pulse',            cost: 20 },
-      { name: 'SM-Radar',            cost: 20 },
-      { name: 'Content Gap',         cost: 10 },
-      { name: 'AI Content Calendar', cost: 25 },
-      { name: 'AI Image Generation', cost: 25 },
-    ],
-  },
-}
-
 const STEPS = [
-  { id: 1, label: 'Welcome'   },
-  { id: 2, label: 'Your Plan' },
-  { id: 3, label: 'About You' },
-  { id: 4, label: 'Platforms' },
-  { id: 5, label: 'Connect'   },
-  { id: 6, label: 'Security'  },
-  { id: 7, label: 'First Post'},
-  { id: 8, label: "You're in!"},
+  { id: 1, label: 'Welcome'  },
+  { id: 2, label: 'Platform' },
+  { id: 3, label: 'Connect'  },
+  { id: 4, label: '5 Posts'  },
+  { id: 5, label: "You're in!" },
 ]
+
+function generateStarterPosts(topic: string): string[] {
+  const t = topic.trim() || 'my journey'
+  return [
+    `Hot take: Most people approach ${t} completely wrong. Here's what actually works:\n\n[share your take]`,
+    `3 things I wish I knew when I started with ${t}:\n\n1. [lesson one]\n2. [lesson two]\n3. [lesson three]`,
+    `The biggest mistake I see people make with ${t}: [describe it].\n\nHere's what to do instead: [your solution]`,
+    `Quick ${t} tip for today:\n\n[your tip here]\n\nSave this for when you need it. 💡`,
+    `Real talk — ${t} is harder than people say. But here's the one thing that changed everything for me:\n\n[your insight]`,
+  ]
+}
 
 function OnboardingInner() {
   const router = useRouter()
@@ -185,28 +45,21 @@ function OnboardingInner() {
   const [user, setUser] = useState<any>(null)
   const [step, setStep] = useState(1)
   const [displayName, setDisplayName] = useState('')
-  const [selectedPlan, setSelectedPlan] = useState<'free' | 'pro' | 'agency'>('free')
-  const [useCase, setUseCase] = useState('')
-  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([])
-  const [firstPost, setFirstPost] = useState('')
+  const [selectedPlatform, setSelectedPlatform] = useState('')
+  const [topic, setTopic] = useState('')
+  const [starterPosts, setStarterPosts] = useState<string[]>([])
+  const [postsGenerated, setPostsGenerated] = useState(false)
   const [saving, setSaving] = useState(false)
   const [hasFinished, setHasFinished] = useState(false)
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null)
-  const [toast, setToast] = useState<{ message: string; type: 'error' | 'info' } | null>(null)
-  const [couponInput, setCouponInput]     = useState('')
+  const [upgradedPlan, setUpgradedPlan] = useState<'free' | 'pro' | 'agency'>('free')
+  const [couponInput, setCouponInput] = useState('')
   const [couponValidating, setCouponValidating] = useState(false)
   const [couponApplied, setCouponApplied] = useState<{ id: string; code: string; discount_type: string; discount_value: number } | null>(null)
-  const [couponError, setCouponError]     = useState<string | null>(null)
-
-  // 2FA state
-  const [mfaStep, setMfaStep] = useState<'idle' | 'enroll'>('idle')
-  const [mfaQR, setMfaQR] = useState('')
-  const [mfaSecret, setMfaSecret] = useState('')
-  const [mfaEnrollId, setMfaEnrollId] = useState('')
-  const [mfaCode, setMfaCode] = useState('')
-  const [mfaLoading, setMfaLoading] = useState(false)
-  const [mfaError, setMfaError] = useState('')
-  const [mfaDone, setMfaDone] = useState(false)
+  const [couponError, setCouponError] = useState<string | null>(null)
+  const [connectionDetected, setConnectionDetected] = useState(false)
+  const [toast, setToast] = useState<{ message: string; type: 'error' | 'info' } | null>(null)
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const showToast = (message: string, type: 'error' | 'info' = 'error') => {
     setToast({ message, type })
@@ -220,7 +73,6 @@ function OnboardingInner() {
       setUser(authUser)
       setDisplayName(authUser.email?.split('@')[0] || '')
 
-      // Load existing plan from user_settings if returning from Stripe
       const { data: settings } = await supabase
         .from('user_settings')
         .select('plan')
@@ -228,34 +80,40 @@ function OnboardingInner() {
         .single()
 
       if (settings?.plan && settings.plan !== 'free') {
-        setSelectedPlan(settings.plan as 'pro' | 'agency')
+        setUpgradedPlan(settings.plan as 'pro' | 'agency')
       }
 
-      // Handle return from Stripe checkout
       const upgraded = searchParams.get('upgraded')
       const stepParam = searchParams.get('step')
       if (upgraded === 'true' && stepParam) {
+        setUpgradedPlan('pro')
         setStep(parseInt(stepParam))
       }
     }
     init()
   }, [router, searchParams])
 
-  const planConfig = PLAN_DETAILS[selectedPlan]
-  const maxPlatforms = planConfig.platforms
-
-  const togglePlatform = (id: string) => {
-    const platform = PLATFORMS.find(p => p.id === id)
-    if (!platform?.available) return
-    setSelectedPlatforms(prev => {
-      if (prev.includes(id)) return prev.filter(p => p !== id)
-      if (prev.length >= maxPlatforms) {
-        showToast(`Your ${selectedPlan} plan supports up to ${maxPlatforms} connected account${maxPlatforms > 1 ? 's' : ''}`, 'info')
-        return prev
-      }
-      return [...prev, id]
-    })
-  }
+  // Poll for connected account while on step 3
+  useEffect(() => {
+    if (step !== 3 || !selectedPlatform) return
+    const check = async () => {
+      try {
+        const res = await fetch('/api/accounts/connected')
+        if (!res.ok) return
+        const data = await res.json()
+        if ((data.platforms as string[]).includes(selectedPlatform)) {
+          setConnectionDetected(true)
+          if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null }
+          setTimeout(() => setStep(4), 1500)
+        }
+      } catch {}
+    }
+    pollRef.current = setInterval(check, 3000)
+    const timeout = setTimeout(() => {
+      if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null }
+    }, 90000)
+    return () => { clearInterval(pollRef.current!); clearTimeout(timeout) }
+  }, [step, selectedPlatform])
 
   async function applyCoupon() {
     if (!couponInput.trim()) return
@@ -280,46 +138,24 @@ function OnboardingInner() {
       const res = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ priceId, fromOnboarding: true, ...(couponApplied ? { coupon_code: couponApplied.code } : {}) }),
+        body: JSON.stringify({
+          priceId,
+          fromOnboarding: true,
+          returnStep: 5,
+          ...(couponApplied ? { coupon_code: couponApplied.code } : {}),
+        }),
       })
       const data = await res.json()
       if (data.url) window.location.href = data.url
-    } catch {
-      showToast('Checkout failed — please try again')
-    } finally {
-      setCheckoutLoading(null)
-    }
-  }
-
-  const handleEnroll2FA = async () => {
-    setMfaLoading(true); setMfaError('')
-    const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' })
-    if (error || !data) { setMfaError('Failed to start 2FA setup'); setMfaLoading(false); return }
-    setMfaEnrollId(data.id)
-    setMfaQR(data.totp.qr_code)
-    setMfaSecret(data.totp.secret)
-    setMfaStep('enroll')
-    setMfaLoading(false)
-  }
-
-  const handleVerify2FA = async () => {
-    if (mfaCode.length !== 6) { setMfaError('Enter the 6-digit code'); return }
-    setMfaLoading(true); setMfaError('')
-    const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({ factorId: mfaEnrollId })
-    if (challengeError || !challenge) { setMfaError('Challenge failed — try again'); setMfaLoading(false); return }
-    const { error } = await supabase.auth.mfa.verify({ factorId: mfaEnrollId, challengeId: challenge.id, code: mfaCode })
-    if (error) { setMfaError('Incorrect code — try again'); setMfaLoading(false); return }
-    setMfaDone(true)
-    setMfaStep('idle')
-    setMfaLoading(false)
+    } catch { showToast('Checkout failed — please try again') }
+    finally { setCheckoutLoading(null) }
   }
 
   const handleFinish = async () => {
-    if (hasFinished) return // prevent double-invoke (React StrictMode / double-click)
+    if (hasFinished) return
     setHasFinished(true)
     setSaving(true)
 
-    // Check if already completed (server-side guard against double award)
     const { data: currentSettings } = await supabase
       .from('user_settings')
       .select('onboarding_completed, ai_credits_remaining')
@@ -332,68 +168,61 @@ function OnboardingInner() {
       onboarding_completed: true,
     }).eq('id', user.id)
 
+    const platforms = selectedPlatform ? [selectedPlatform] : []
     const upsertPayload: Record<string, any> = {
       user_id: user.id,
       display_name: displayName,
-      use_case: useCase,
-      default_platforms: selectedPlatforms,
+      use_case: 'creator',
+      default_platforms: platforms,
       onboarding_completed: true,
     }
 
-    // Only award onboarding credits once
     if (!currentSettings?.onboarding_completed) {
-      const currentCredits = currentSettings?.ai_credits_remaining ?? 50
-      upsertPayload.ai_credits_remaining = currentCredits + 50
+      upsertPayload.ai_credits_remaining = (currentSettings?.ai_credits_remaining ?? 50) + 50
     }
 
     await supabase.from('user_settings').upsert(upsertPayload, { onConflict: 'user_id' })
 
-    if (firstPost.trim()) {
-      await supabase.from('posts').insert({
-        user_id: user.id,
-        content: firstPost.trim(),
-        platforms: selectedPlatforms,
-        status: 'draft',
-      })
+    const postsToSave = starterPosts.filter(p => p.trim())
+    if (postsToSave.length > 0) {
+      await supabase.from('posts').insert(
+        postsToSave.map(content => ({
+          user_id: user.id,
+          content: content.trim(),
+          platforms,
+          status: 'draft',
+        }))
+      )
     }
 
-    // Award 50 bonus onboarding credits to earned_credits pool
     const { data: settingsNow } = await supabase
       .from('user_settings')
       .select('ai_credits_remaining, earned_credits')
       .eq('user_id', user.id)
       .single()
 
-    const currentCredits = settingsNow?.ai_credits_remaining ?? 50
-    const currentEarned  = settingsNow?.earned_credits        ?? 0
-
     await supabase.from('user_settings').update({
-      ai_credits_remaining: currentCredits + 50,
-      earned_credits:       currentEarned + 50,
+      ai_credits_remaining: (settingsNow?.ai_credits_remaining ?? 50) + 50,
+      earned_credits:       (settingsNow?.earned_credits ?? 0) + 50,
     }).eq('user_id', user.id)
 
     setSaving(false)
-    // Use full page reload so WorkspaceContext re-fetches fresh credits from DB
-    // (Next.js router.push reuses the cached context and may show stale credits)
     window.location.href = '/dashboard?welcome=1'
   }
 
   const progress = ((step - 1) / (STEPS.length - 1)) * 100
-
-  const PlanBadge = () => (
-    <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${planConfig.badge}`}>
-      {planConfig.icon} {planConfig.label}
-    </span>
-  )
+  const platformData = LIVE_PLATFORMS.find(p => p.id === selectedPlatform)
+  const charLimit = CHAR_LIMITS[selectedPlatform] ?? 300
+  const isUpgraded = upgradedPlan !== 'free' || searchParams.get('upgraded') === 'true'
 
   return (
     <div className="min-h-dvh bg-theme flex flex-col">
 
+      {/* Header */}
       <div className="bg-surface border-b border-theme px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
+          <img src="/logo.png" alt="SocialMate" className="w-7 h-7 rounded-lg" />
           <span className="font-bold text-base tracking-tight">SocialMate</span>
-          {step > 2 && <PlanBadge />}
         </div>
         <div className="flex items-center gap-4">
           <span className="text-xs text-gray-400 dark:text-gray-500 font-semibold">Step {step} of {STEPS.length}</span>
@@ -402,28 +231,32 @@ function OnboardingInner() {
               if (user) await supabase.from('profiles').update({ onboarding_completed: true }).eq('id', user.id)
               router.push('/dashboard')
             }}
-            className="text-xs text-gray-400 dark:text-gray-500 hover:text-black transition-colors font-semibold">
+            className="text-xs text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white transition-colors font-semibold">
             Skip setup →
           </button>
         </div>
       </div>
 
+      {/* Progress bar */}
       <div className="w-full bg-gray-100 dark:bg-gray-800 h-1">
         <div className="bg-black h-1 transition-all duration-500" style={{ width: `${progress}%` }} />
       </div>
 
+      {/* Step pills */}
       <div className="flex items-center justify-center gap-1 py-4 overflow-x-auto px-4">
         {STEPS.map((s, i) => (
           <div key={s.id} className="flex items-center gap-1 flex-shrink-0">
             <div className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
               step === s.id ? 'bg-black text-white' :
               step > s.id  ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400' :
-              'text-gray-300 dark:text-gray-600'
+                             'text-gray-300 dark:text-gray-600'
             }`}>
               <span>{step > s.id ? '✓' : s.id}</span>
               <span className="hidden md:inline">{s.label}</span>
             </div>
-            {i < STEPS.length - 1 && <div className={`w-4 h-px ${step > s.id ? 'bg-gray-300 dark:bg-gray-600' : 'bg-gray-100 dark:bg-gray-700'}`} />}
+            {i < STEPS.length - 1 && (
+              <div className={`w-4 h-px ${step > s.id ? 'bg-gray-300 dark:bg-gray-600' : 'bg-gray-100 dark:bg-gray-800'}`} />
+            )}
           </div>
         ))}
       </div>
@@ -437,192 +270,92 @@ function OnboardingInner() {
               <div className="text-center mb-8">
                 <div className="text-5xl mb-4">👋</div>
                 <h1 className="text-3xl font-extrabold tracking-tight mb-2">Welcome to SocialMate</h1>
-                <p className="text-gray-400 dark:text-gray-500 text-sm">Let's get you set up in under 3 minutes.</p>
+                <p className="text-gray-400 dark:text-gray-500 text-sm">Set up in under 2 minutes.</p>
               </div>
 
               <div className="mb-6">
                 <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-2">What should we call you?</label>
-                <input type="text" value={displayName} onChange={e => setDisplayName(e.target.value)}
+                <input
+                  type="text"
+                  value={displayName}
+                  onChange={e => setDisplayName(e.target.value)}
                   placeholder="Your name or brand..."
                   onKeyDown={e => e.key === 'Enter' && displayName.trim() && setStep(2)}
                   className="w-full px-4 py-3 text-lg font-semibold text-center border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-2xl focus:outline-none focus:border-black transition-all"
-                  autoFocus />
+                  autoFocus
+                />
               </div>
 
-              <div className="bg-black rounded-2xl p-6 mb-6 text-white">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">What you get — free, forever</p>
-                <div className="grid grid-cols-2 gap-x-6 gap-y-2 mb-4">
+              <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-5 mb-5">
+                <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Here's what you'll do:</p>
+                <div className="space-y-2.5">
                   {[
-                    '4 live platforms now',
-                    '50 AI credits / month',
-                    'Bulk Scheduler',
-                    'Link in Bio page',
-                    '2 team seats',
-                    'Analytics dashboard',
-                    'Post templates',
-                    'Hashtag library',
-                    'Media library (1 GB)',
-                    '100 posts / month',
-                  ].map(f => (
-                    <div key={f} className="flex items-center gap-2 text-xs text-gray-300 dark:text-gray-400">
-                      <span className="text-green-400 font-bold flex-shrink-0">✓</span>{f}
+                    ['📱', 'Pick your main platform'],
+                    ['🔗', 'Connect your account'],
+                    ['✏️', 'Get 5 posts ready to go'],
+                    ['🚀', 'Hit the dashboard'],
+                  ].map(([icon, label]) => (
+                    <div key={label} className="flex items-center gap-3">
+                      <span className="text-base">{icon}</span>
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{label}</span>
                     </div>
                   ))}
                 </div>
-                <div className="border-t border-gray-700 pt-4">
-                  <p className="text-xs text-gray-400 dark:text-gray-500">Need more? Choose Pro or Agency on the next step — or upgrade anytime later.</p>
-                </div>
               </div>
 
-              <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 mb-4">
+              <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900 rounded-2xl p-4 mb-5">
                 <div className="flex items-start gap-3">
                   <span className="text-xl">⚡</span>
                   <div>
-                    <p className="text-xs font-extrabold text-blue-800 mb-1">Complete setup and earn 50 bonus AI credits</p>
-                    <p className="text-xs text-blue-600 leading-relaxed">Finish all setup steps and they'll go straight into your credit bank. Refer a friend after and you both earn 25 more.</p>
+                    <p className="text-xs font-extrabold text-blue-800 dark:text-blue-300 mb-1">Complete setup → earn 50 bonus AI credits</p>
+                    <p className="text-xs text-blue-600 dark:text-blue-400">Refer a friend after and you both earn 25 more.</p>
                   </div>
                 </div>
               </div>
 
-              <div className="border border-gray-100 dark:border-gray-700 rounded-2xl p-4 mb-6 space-y-2">
-                <div className="flex items-start gap-3">
-                  <span className="text-base">❤️</span>
-                  <p className="text-xs text-gray-600 dark:text-gray-400"><span className="font-bold text-gray-800 dark:text-gray-200">2% of every subscription goes to SM-Give</span> — our community charity initiative, built into the product from day one.</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <span className="text-base">🚫</span>
-                  <p className="text-xs text-gray-600 dark:text-gray-400"><span className="font-bold text-gray-800 dark:text-gray-200">No ads. No selling your data.</span> We suggest tools and features we believe in — we never spam.</p>
-                </div>
+              <div className="border border-gray-100 dark:border-gray-700 rounded-2xl p-4 mb-6 flex items-start gap-3">
+                <span className="text-base flex-shrink-0">❤️</span>
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  <span className="font-bold text-gray-800 dark:text-gray-200">2% of every subscription goes to SM-Give</span> — our built-in charity initiative. No ads, no selling your data.
+                </p>
               </div>
 
-              <button onClick={() => displayName.trim() ? setStep(2) : showToast('Enter your name to continue')}
+              <button
+                onClick={() => displayName.trim() ? setStep(2) : showToast('Enter your name to continue')}
                 className="w-full py-3.5 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all">
                 Let's go →
               </button>
             </div>
           )}
 
-          {/* ── STEP 2 — PLAN SELECTION ── */}
+          {/* ── STEP 2 — PICK PLATFORM ── */}
           {step === 2 && (
-            <div className="space-y-4">
-              <div className="text-center mb-6">
-                <div className="text-5xl mb-3">📦</div>
-                <h2 className="text-2xl font-extrabold tracking-tight mb-1">Choose your plan</h2>
-                <p className="text-gray-400 dark:text-gray-500 text-sm">Start free or go straight to Pro or Agency — no pressure, upgrade anytime.</p>
+            <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
+              <div className="text-center mb-8">
+                <div className="text-5xl mb-4">📱</div>
+                <h2 className="text-2xl font-extrabold tracking-tight mb-2">Which platform do you mainly post on?</h2>
+                <p className="text-gray-400 dark:text-gray-500 text-sm">Pick one to start — you can connect more later from Settings.</p>
               </div>
 
-              {/* Coupon code */}
-              <div className="flex flex-col items-center gap-2 mb-2">
-                {couponApplied ? (
-                  <div className="flex items-center gap-3 px-4 py-2 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-xl text-sm">
-                    <span className="text-green-700 dark:text-green-400 font-bold">
-                      {couponApplied.code} — {couponApplied.discount_type === 'percent' ? `${couponApplied.discount_value}% off` : couponApplied.discount_type === 'fixed' ? `$${couponApplied.discount_value} off` : `+${couponApplied.discount_value} trial days`} applied
-                    </span>
-                    <button onClick={() => { setCouponApplied(null); setCouponInput('') }} className="text-green-600 text-xs font-semibold">✕</button>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2">
-                    <input
-                      value={couponInput}
-                      onChange={e => { setCouponInput(e.target.value.toUpperCase()); setCouponError(null) }}
-                      onKeyDown={e => e.key === 'Enter' && applyCoupon()}
-                      placeholder="Have a coupon code?"
-                      className="text-sm bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:border-violet-400 w-48"
-                    />
-                    <button onClick={applyCoupon} disabled={couponValidating || !couponInput.trim()}
-                      className="px-3 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 text-gray-700 dark:text-gray-300 text-sm font-semibold rounded-xl transition-colors">
-                      {couponValidating ? '…' : 'Apply'}
-                    </button>
-                  </div>
-                )}
-                {couponError && <p className="text-xs text-red-500">{couponError}</p>}
-              </div>
-
-              {(['free', 'pro', 'agency'] as const).map(p => {
-                const cfg = PLAN_DETAILS[p]
-                const isSelected = selectedPlan === p
-                return (
-                  <div key={p} className={`border-2 rounded-2xl p-6 transition-all cursor-pointer ${cfg.color} ${isSelected ? cfg.cardBg : 'bg-surface hover:opacity-90'}`}
-                    onClick={() => { if (p === 'free') setSelectedPlan('free') }}>
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{cfg.icon}</span>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <p className="text-base font-extrabold">{cfg.label}</p>
-                            <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${cfg.badgeBg}`}>{cfg.badgeLabel}</span>
-                          </div>
-                          <p className="text-xl font-extrabold">{cfg.price}</p>
-                        </div>
+              <div className="space-y-3 mb-8">
+                {LIVE_PLATFORMS.map(p => (
+                  <button
+                    key={p.id}
+                    onClick={() => { setSelectedPlatform(p.id); setStep(3) }}
+                    className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-gray-100 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-500 text-left transition-all group">
+                    <span className="text-2xl flex-shrink-0">{p.icon}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-sm font-bold">{p.label}</p>
+                        {p.badge && (
+                          <span className="text-[10px] font-extrabold px-1.5 py-0.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 rounded-full leading-none flex-shrink-0">{p.badge}</span>
+                        )}
                       </div>
-                      {isSelected && p === 'free' && (
-                        <span className="text-xs font-bold bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full">Selected</span>
-                      )}
+                      <p className="text-xs text-gray-400 dark:text-gray-500">{p.desc}</p>
                     </div>
-
-                    <div className="grid grid-cols-3 gap-3 mb-4 text-center">
-                      {[
-                        { label: 'AI Credits',  value: cfg.credits.toLocaleString() + '/mo' },
-                        { label: 'Platforms',   value: cfg.platforms + ' accounts'           },
-                        { label: 'Team Seats',  value: cfg.seats + ' seats'                  },
-                      ].map(stat => (
-                        <div key={stat.label} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-2">
-                          <p className="text-xs font-extrabold">{stat.value}</p>
-                          <p className="text-xs text-gray-400 dark:text-gray-500">{stat.label}</p>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 mb-4">
-                      {cfg.features.slice(0, 6).map(f => (
-                        <div key={f} className="flex items-center gap-1.5 text-xs text-gray-600 dark:text-gray-400">
-                          <span className="text-green-500 font-bold flex-shrink-0">✓</span>{f}
-                        </div>
-                      ))}
-                    </div>
-
-                    {p === 'free' && (
-                      <button
-                        onClick={() => { setSelectedPlan('free'); setStep(3) }}
-                        className="w-full py-2.5 border-2 border-emerald-500 text-emerald-700 text-sm font-bold rounded-xl hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-all">
-                        Continue with Free →
-                      </button>
-                    )}
-                    {p === 'pro' && (
-                      <button
-                        onClick={() => handlePlanCheckout('pro')}
-                        disabled={checkoutLoading === 'pro'}
-                        className="w-full py-2.5 bg-amber-400 hover:bg-amber-500 text-black text-sm font-bold rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2">
-                        {checkoutLoading === 'pro' ? (
-                          <><div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />Processing...</>
-                        ) : 'Start Pro — $5/month →'}
-                      </button>
-                    )}
-                    {p === 'agency' && (
-                      <button
-                        onClick={() => handlePlanCheckout('agency')}
-                        disabled={checkoutLoading === 'agency'}
-                        className="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2">
-                        {checkoutLoading === 'agency' ? (
-                          <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Processing...</>
-                        ) : 'Start Agency — $20/month →'}
-                      </button>
-                    )}
-                  </div>
-                )
-              })}
-
-              <div className="bg-surface border border-theme rounded-2xl p-5">
-                <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">All AI tools included — every plan</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {PLAN_DETAILS.free.aiTools.map(tool => (
-                    <div key={tool.name} className="flex items-center justify-between text-xs py-1.5 border-b border-gray-50 dark:border-gray-800 last:border-0">
-                      <span className="text-gray-700 dark:text-gray-300 font-semibold">{tool.name}</span>
-                      <span className="text-gray-400 dark:text-gray-500 font-bold">{tool.cost} cr</span>
-                    </div>
-                  ))}
-                </div>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">Pro & Agency also unlock AI Content Calendar (20 cr) and AI Image Generation (25 cr).</p>
+                    <span className="text-gray-300 dark:text-gray-600 group-hover:text-black dark:group-hover:text-white transition-colors text-sm font-bold flex-shrink-0">→</span>
+                  </button>
+                ))}
               </div>
 
               <button onClick={() => setStep(1)}
@@ -632,449 +365,246 @@ function OnboardingInner() {
             </div>
           )}
 
-          {/* ── STEP 3 — USE CASE ── */}
+          {/* ── STEP 3 — CONNECT ── */}
           {step === 3 && (
             <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
-              {searchParams.get('upgraded') === 'true' && (
-                <div className="bg-green-50 border border-green-200 rounded-2xl px-4 py-3 mb-6 flex items-center gap-3">
-                  <span className="text-xl">🎉</span>
-                  <div>
-                    <p className="text-sm font-extrabold text-green-700">Payment confirmed — welcome to {planConfig.label}!</p>
-                    <p className="text-xs text-green-600 mt-0.5">Your {planConfig.credits.toLocaleString()} AI credits and all {planConfig.label} features are now active.</p>
-                  </div>
-                </div>
-              )}
               <div className="text-center mb-8">
-                <div className="text-5xl mb-4">🎯</div>
-                <h2 className="text-2xl font-extrabold tracking-tight mb-2">How will you use SocialMate?</h2>
-                <p className="text-gray-400 dark:text-gray-500 text-sm">Helps us personalize your dashboard and tips</p>
+                <div className="text-5xl mb-4">{platformData?.icon || '🔗'}</div>
+                <h2 className="text-2xl font-extrabold tracking-tight mb-2">
+                  Connect your {platformData?.label} account
+                </h2>
+                {connectionDetected ? (
+                  <p className="text-green-600 dark:text-green-400 font-bold text-sm">✓ Account connected — moving you along…</p>
+                ) : (
+                  <p className="text-gray-400 dark:text-gray-500 text-sm">Keep this tab open and come back when done.</p>
+                )}
               </div>
-              <div className="grid grid-cols-2 gap-3 mb-8">
-                {USE_CASES.map(uc => (
-                  <button key={uc.id} onClick={() => setUseCase(uc.id)}
-                    className={`p-4 rounded-2xl border-2 text-left transition-all ${
-                      useCase === uc.id ? 'border-black bg-black/5 dark:bg-white/5' : 'border-gray-100 dark:border-gray-700 hover:border-gray-300'
-                    }`}>
-                    <div className="text-2xl mb-2">{uc.icon}</div>
-                    <p className="text-sm font-bold">{uc.label}</p>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{uc.desc}</p>
-                  </button>
-                ))}
-              </div>
-              <div className="flex gap-3">
-                <button onClick={() => setStep(2)}
-                  className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
-                  ← Back
-                </button>
-                <button onClick={() => useCase ? setStep(4) : showToast('Pick an option to continue')}
-                  className="flex-1 py-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all">
-                  Continue →
-                </button>
-              </div>
+
+              {connectionDetected ? (
+                <div className="flex justify-center py-4">
+                  <div className="w-6 h-6 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                </div>
+              ) : (
+                <>
+                  <a
+                    href="/accounts"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full py-4 mb-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all">
+                    🔗 Connect {platformData?.label} →
+                  </a>
+                  <p className="text-xs text-center text-gray-400 dark:text-gray-500 mb-6">
+                    Opens accounts page in a new tab · come back here after connecting
+                  </p>
+
+                  <div className="flex gap-3">
+                    <button onClick={() => setStep(2)}
+                      className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
+                      ← Back
+                    </button>
+                    <button onClick={() => setStep(4)}
+                      className="flex-1 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all text-gray-500 dark:text-gray-400">
+                      Skip for now →
+                    </button>
+                  </div>
+                  <p className="text-xs text-center text-gray-400 dark:text-gray-500 mt-3">
+                    You can connect accounts anytime from Settings → Accounts
+                  </p>
+                </>
+              )}
             </div>
           )}
 
-          {/* ── STEP 4 — PLATFORMS ── */}
+          {/* ── STEP 4 — STARTER POSTS ── */}
           {step === 4 && (
             <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
               <div className="text-center mb-6">
-                <div className="text-5xl mb-4">📱</div>
-                <h2 className="text-2xl font-extrabold tracking-tight mb-2">Which platforms do you use?</h2>
+                <div className="text-5xl mb-4">✏️</div>
+                <h2 className="text-2xl font-extrabold tracking-tight mb-2">Let's get 5 posts ready</h2>
                 <p className="text-gray-400 dark:text-gray-500 text-sm">
-                  Your <span className={`font-bold ${selectedPlan === 'agency' ? 'text-purple-600' : 'text-black dark:text-white'}`}>{planConfig.label}</span> plan supports {maxPlatforms} connected account{maxPlatforms > 1 ? 's' : ''} · 5 live now · 11 more coming soon
+                  Tell us what you post about — we'll fill in 5 starter drafts you can edit and schedule.
                 </p>
               </div>
 
-              <div className="bg-blue-50 border border-blue-100 rounded-2xl px-4 py-3 mb-5 flex items-center gap-3">
-                <span>⚡</span>
-                <p className="text-xs text-blue-700 font-semibold">Connect at least one platform to activate your {planConfig.credits.toLocaleString()} AI credits</p>
-              </div>
+              {!postsGenerated ? (
+                <>
+                  <div className="mb-6">
+                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-2">
+                      What do you create or post about?
+                    </label>
+                    <input
+                      type="text"
+                      value={topic}
+                      onChange={e => setTopic(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && topic.trim() && (setStarterPosts(generateStarterPosts(topic)), setPostsGenerated(true))}
+                      placeholder="e.g. fitness tips, my SaaS startup, photography, cooking"
+                      className="w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-2xl focus:outline-none focus:border-black transition-all"
+                      autoFocus
+                    />
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">
+                      Be specific — "vegan meal prep for busy parents" beats "food"
+                    </p>
+                  </div>
 
-              <div className="grid grid-cols-2 gap-2 mb-4">
-                {PLATFORMS.map(p => {
-                  const isSelected = selectedPlatforms.includes(p.id)
-                  const isAtLimit = selectedPlatforms.length >= maxPlatforms && !isSelected
-                  return (
-                    <button key={p.id}
-                      onClick={() => togglePlatform(p.id)}
-                      className={`flex items-center gap-3 p-3 rounded-xl border-2 text-left transition-all ${
-                        !p.available || isAtLimit
-                          ? 'border-gray-50 dark:border-gray-800 bg-gray-50 dark:bg-gray-800 opacity-40 cursor-not-allowed'
-                          : isSelected
-                          ? 'border-black bg-black/5 dark:bg-white/5'
-                          : 'border-gray-100 dark:border-gray-700 hover:border-gray-300'
-                      }`}>
-                      <span className="text-xl">{p.icon}</span>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <p className="text-xs font-bold truncate">{p.label}</p>
-                          {p.isNew && (
-                            <span className="text-[10px] font-extrabold px-1.5 py-0.5 bg-sky-100 text-sky-700 rounded-full leading-none flex-shrink-0">🆕 New</span>
-                          )}
-                        </div>
-                        <p className="text-xs text-gray-400 dark:text-gray-500">{p.available ? p.desc : 'Coming soon'}</p>
-                      </div>
-                      {isSelected && p.available && <span className="text-black font-bold text-sm flex-shrink-0">✓</span>}
+                  <div className="flex gap-3 mb-4">
+                    <button onClick={() => setStep(3)}
+                      className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
+                      ← Back
                     </button>
-                  )
-                })}
-              </div>
-
-              <p className="text-xs text-center text-gray-400 dark:text-gray-500 mb-4">
-                {selectedPlatforms.length} / {maxPlatforms} accounts selected
-              </p>
-
-              <div className="flex items-center gap-3 bg-gray-50 dark:bg-gray-800 border border-theme rounded-2xl px-4 py-3 mb-6">
-                <span className="text-xl flex-shrink-0">📦</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-gray-800 dark:text-gray-200">Studio Stax — get your studio or creative service listed in our founder-approved directory.</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Founding price: $100/yr for the first 1,000 spots.</p>
-                </div>
-                <Link href="/studio-stax" className="text-xs font-bold text-black dark:text-white flex-shrink-0 hover:underline">Learn more →</Link>
-              </div>
-
-              <div className="flex gap-3">
-                <button onClick={() => setStep(3)}
-                  className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
-                  ← Back
-                </button>
-                {selectedPlatforms.length > 0 ? (
-                  <button onClick={() => setStep(5)}
-                    className="flex-1 py-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all">
-                    Continue →
-                  </button>
-                ) : (
-                  <button onClick={() => setStep(5)}
-                    className="flex-1 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all text-gray-500 dark:text-gray-400">
-                    Skip for now →
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* ── STEP 5 — CONNECT ACCOUNTS ── */}
-          {step === 5 && (
-            <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
-              <div className="text-center mb-6">
-                <div className="text-5xl mb-4">🔗</div>
-                <h2 className="text-2xl font-extrabold tracking-tight mb-2">Connect Your First Account</h2>
-                <p className="text-gray-400 dark:text-gray-500 text-sm">Link a real account to start posting — all 5 live platforms are ready now.</p>
-              </div>
-
-              <div className="space-y-3 mb-6">
-                {[
-                  { id: 'bluesky',  icon: '🦋', label: 'Bluesky',     desc: 'Connect your Bluesky handle to post to the decentralized web.',  isNew: false },
-                  { id: 'mastodon', icon: '🐘', label: 'Mastodon',    desc: 'Link your Mastodon account on any instance.',                    isNew: false },
-                  { id: 'discord',  icon: '💬', label: 'Discord',     desc: 'Post announcements to your Discord server channels.',            isNew: false },
-                  { id: 'telegram', icon: '✈️', label: 'Telegram',    desc: 'Publish to your Telegram channel or group.',                    isNew: false },
-                  { id: 'twitter',  icon: '🐦', label: 'X / Twitter', desc: 'Schedule tweets — 280 characters, up to 4 images.',             isNew: true  },
-                ].map(platform => (
-                  <div key={platform.id} className="flex items-center gap-4 p-4 border border-theme rounded-2xl">
-                    <span className="text-2xl flex-shrink-0">{platform.icon}</span>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-bold">{platform.label}</p>
-                        {platform.isNew && (
-                          <span className="text-[10px] font-extrabold px-1.5 py-0.5 bg-sky-100 text-sky-700 rounded-full leading-none">🆕 New</span>
-                        )}
-                      </div>
-                      <p className="text-xs text-gray-400 dark:text-gray-500">{platform.desc}</p>
-                    </div>
-                    <a href="/accounts" target="_blank" rel="noopener noreferrer"
-                      className="text-xs font-bold bg-black text-white px-3 py-1.5 rounded-xl hover:opacity-80 transition-all flex-shrink-0 whitespace-nowrap">
-                      Connect →
-                    </a>
+                    <button
+                      onClick={() => { setStarterPosts(generateStarterPosts(topic)); setPostsGenerated(true) }}
+                      disabled={!topic.trim()}
+                      className="flex-1 py-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all disabled:opacity-40">
+                      Generate 5 Posts →
+                    </button>
                   </div>
-                ))}
-              </div>
 
-              <p className="text-xs text-center text-gray-400 dark:text-gray-500 mb-1">Opens connection page in a new tab</p>
-              <p className="text-xs text-center text-gray-400 dark:text-gray-500 mb-6">You can always connect accounts from Settings → Accounts</p>
-
-              <div className="flex gap-3">
-                <button onClick={() => setStep(4)}
-                  className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
-                  ← Back
-                </button>
-                <button onClick={() => setStep(6)}
-                  className="flex-1 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all text-gray-500 dark:text-gray-400">
-                  Skip for now →
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* ── STEP 6 — SECURITY / 2FA ── */}
-          {step === 6 && (
-            <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
-              <div className="text-center mb-6">
-                <div className="text-5xl mb-4">🔐</div>
-                <h2 className="text-2xl font-extrabold tracking-tight mb-2">Secure your account</h2>
-                <p className="text-gray-400 dark:text-gray-500 text-sm">Two-factor authentication adds a second layer of protection. Takes 60 seconds.</p>
-              </div>
-
-              {mfaDone ? (
-                <div className="bg-green-50 border border-green-200 rounded-2xl p-6 text-center mb-6">
-                  <div className="text-4xl mb-3">✅</div>
-                  <p className="text-sm font-extrabold text-green-700 mb-1">2FA enabled — your account is secured</p>
-                  <p className="text-xs text-green-600">You'll need your authenticator app each time you log in from a new device.</p>
-                </div>
-              ) : mfaStep === 'idle' ? (
-                <div className="space-y-4 mb-6">
-                  <div className="bg-gray-50 dark:bg-gray-800 border border-theme rounded-2xl p-5">
-                    <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white text-lg flex-shrink-0">🛡️</div>
-                      <div>
-                        <p className="text-sm font-extrabold mb-1">Why enable 2FA?</p>
-                        <div className="space-y-1">
-                          {[
-                            'Protects your connected social accounts',
-                            'Blocks unauthorized logins even if password is leaked',
-                            'Required for Agency plan team security compliance',
-                          ].map(r => (
-                            <div key={r} className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
-                              <span className="text-green-500 font-bold flex-shrink-0">✓</span>{r}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <button onClick={handleEnroll2FA} disabled={mfaLoading}
-                    className="w-full py-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
-                    {mfaLoading ? (
-                      <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Setting up...</>
-                    ) : '🔐 Enable Two-Factor Authentication'}
+                  <button onClick={() => setStep(5)}
+                    className="w-full text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors py-2">
+                    Skip — I'll write my own posts later
                   </button>
-                </div>
+                </>
               ) : (
-                <div className="space-y-5 mb-6">
-                  <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-5">
-                    <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wide">Step 1 — Scan with your authenticator app</p>
-                    <div className="flex justify-center mb-4">
-                      <img src={mfaQR} alt="2FA QR Code" className="w-40 h-40 rounded-xl" />
-                    </div>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 text-center mb-2">Can't scan? Enter this code manually:</p>
-                    <div className="bg-surface border border-theme-md rounded-xl px-4 py-2 text-center">
-                      <p className="text-xs font-mono font-bold tracking-widest text-gray-700 dark:text-gray-300 break-all">{mfaSecret}</p>
-                    </div>
+                <>
+                  <div className="space-y-4 mb-5">
+                    {starterPosts.map((post, i) => (
+                      <div key={i} className="border border-gray-200 dark:border-gray-700 rounded-2xl p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-bold text-gray-400 dark:text-gray-500">Post {i + 1} of 5</span>
+                          <span className={`text-xs font-semibold ${post.length > charLimit ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
+                            {post.length} / {charLimit}
+                          </span>
+                        </div>
+                        <textarea
+                          value={post}
+                          onChange={e => {
+                            const updated = [...starterPosts]
+                            updated[i] = e.target.value
+                            setStarterPosts(updated)
+                          }}
+                          rows={4}
+                          className="w-full text-sm text-gray-800 dark:text-gray-200 bg-transparent resize-none outline-none leading-relaxed"
+                        />
+                      </div>
+                    ))}
                   </div>
-                  <div>
-                    <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">Step 2 — Enter the 6-digit code</p>
-                    <input type="text" inputMode="numeric" maxLength={6} value={mfaCode}
-                      onChange={e => setMfaCode(e.target.value.replace(/\D/g, ''))}
-                      placeholder="000000"
-                      className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl px-4 py-3 text-sm text-center font-mono tracking-widest outline-none focus:border-black transition-all" />
-                    {mfaError && <p className="text-xs text-red-500 font-semibold mt-2">❌ {mfaError}</p>}
-                  </div>
-                  <button onClick={handleVerify2FA} disabled={mfaLoading || mfaCode.length !== 6}
-                    className="w-full py-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all disabled:opacity-40 flex items-center justify-center gap-2">
-                    {mfaLoading ? (
-                      <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />Verifying...</>
-                    ) : 'Verify & Secure Account →'}
-                  </button>
-                </div>
-              )}
 
-              <div className="flex gap-3">
-                <button onClick={() => setStep(5)}
-                  className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
-                  ← Back
-                </button>
-                <button onClick={() => setStep(7)}
-                  className={`flex-1 py-3 text-sm font-bold rounded-2xl transition-all ${
-                    mfaDone
-                      ? 'bg-black text-white hover:opacity-80'
-                      : 'border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-400'
-                  }`}>
-                  {mfaDone ? 'Continue →' : 'Skip for now →'}
-                </button>
-              </div>
-              {!mfaDone && (
-                <p className="text-xs text-center text-gray-400 dark:text-gray-500 mt-2">You can enable 2FA anytime in Settings → Security</p>
-              )}
-            </div>
-          )}
+                  <p className="text-xs text-center text-gray-400 dark:text-gray-500 mb-4">
+                    Replace [brackets] with your actual content. These save as drafts — publish when ready.
+                  </p>
 
-          {/* ── STEP 7 — FIRST POST ── */}
-          {step === 7 && (
-            <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
-              <div className="text-center mb-6">
-                <div className="text-5xl mb-4">✏️</div>
-                <h2 className="text-2xl font-extrabold tracking-tight mb-2">Write your first post</h2>
-                <p className="text-gray-400 dark:text-gray-500 text-sm">Publish or schedule this to unlock your {planConfig.credits.toLocaleString()} AI credits</p>
-              </div>
-
-              <div className="bg-green-50 border border-green-100 rounded-2xl px-4 py-3 mb-5">
-                <div className="flex items-center gap-2 mb-2">
-                  <span>⚡</span>
-                  <p className="text-xs text-green-700 font-semibold">Credit unlock checklist</p>
-                </div>
-                <div className="flex items-center gap-4 flex-wrap">
-                  {[
-                    { label: 'Email verified',     done: true                         },
-                    { label: 'Platform connected', done: selectedPlatforms.length > 0 },
-                    { label: 'First post',         done: firstPost.trim().length > 0  },
-                  ].map(item => (
-                    <div key={item.label} className="flex items-center gap-1.5">
-                      <span className={`text-xs font-bold ${item.done ? 'text-green-600' : 'text-gray-400 dark:text-gray-500'}`}>{item.done ? '✓' : '○'}</span>
-                      <span className={`text-xs ${item.done ? 'text-green-700 font-semibold' : 'text-gray-400 dark:text-gray-500'}`}>{item.label}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="mb-4">
-                {selectedPlatforms.length > 0 && (
-                  <div className="flex items-center gap-1 flex-wrap mb-3">
-                    {selectedPlatforms.slice(0, 6).map(p => {
-                      const pl = PLATFORMS.find(pl => pl.id === p)
-                      return pl ? <span key={p} className="text-lg">{pl.icon}</span> : null
-                    })}
-                    {selectedPlatforms.length > 6 && <span className="text-xs text-gray-400 dark:text-gray-500">+{selectedPlatforms.length - 6} more</span>}
-                  </div>
-                )}
-                <textarea value={firstPost} onChange={e => setFirstPost(e.target.value)}
-                  placeholder={`Write something for your audience...\n\nTip: Use [brackets] for fill-in-the-blank sections`}
-                  rows={5}
-                  className="w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-black transition-all resize-none"
-                  autoFocus />
-                <div className="flex items-center justify-between mt-1.5">
-                  <p className="text-xs text-gray-400 dark:text-gray-500">Saved as a draft — edit before publishing</p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500">{firstPost.length} chars</p>
-                </div>
-              </div>
-
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 mb-6">
-                <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-2">Need inspiration?</p>
-                <div className="space-y-1.5">
-                  {[
-                    "Excited to share something new with you all 🎉 [describe what's coming]",
-                    "Here's what I've been working on lately: [project or update]",
-                    "Quick tip for [your audience]: [share a valuable insight]",
-                    "Something I wish I knew earlier about [your niche]: [insight]",
-                  ].map(idea => (
-                    <button key={idea} onClick={() => setFirstPost(idea)}
-                      className="w-full text-left text-xs text-gray-500 dark:text-gray-400 hover:text-black p-2 rounded-lg hover:bg-white dark:hover:bg-gray-700 transition-all">
-                      → {idea.length > 70 ? idea.slice(0, 70) + '...' : idea}
+                  <div className="flex gap-3">
+                    <button onClick={() => setPostsGenerated(false)}
+                      className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
+                      ← Redo
                     </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <button onClick={() => setStep(6)}
-                  className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
-                  ← Back
-                </button>
-                {firstPost.trim() ? (
-                  <button onClick={() => setStep(8)}
-                    className="flex-1 py-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all">
-                    Save Draft & Continue →
-                  </button>
-                ) : (
-                  <button onClick={() => setStep(8)}
-                    className="flex-1 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all text-gray-500 dark:text-gray-400">
-                    Skip for now →
-                  </button>
-                )}
-              </div>
+                    <button onClick={() => setStep(5)}
+                      className="flex-1 py-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all">
+                      Save all 5 as drafts →
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           )}
 
-          {/* ── STEP 8 — DONE ── */}
-          {step === 8 && (
+          {/* ── STEP 5 — DONE ── */}
+          {step === 5 && (
             <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10 text-center">
+              {searchParams.get('upgraded') === 'true' && (
+                <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-2xl px-4 py-3 mb-6 flex items-center gap-3 text-left">
+                  <span className="text-xl">🎉</span>
+                  <div>
+                    <p className="text-sm font-extrabold text-green-700 dark:text-green-400">Payment confirmed — you're on Pro!</p>
+                    <p className="text-xs text-green-600 dark:text-green-500 mt-0.5">500 AI credits and all Pro features are now active.</p>
+                  </div>
+                </div>
+              )}
+
               <div className="text-6xl mb-4">🚀</div>
               <h2 className="text-3xl font-extrabold tracking-tight mb-2">
                 You're all set, {displayName || 'friend'}!
               </h2>
-              <p className="text-gray-400 dark:text-gray-500 mb-2 text-sm">Your {planConfig.label} account is ready.</p>
-              <div className="flex justify-center mb-6"><PlanBadge /></div>
+              <p className="text-gray-400 dark:text-gray-500 mb-6 text-sm">
+                {starterPosts.filter(p => p.trim()).length > 0
+                  ? `${starterPosts.filter(p => p.trim()).length} draft posts saved and ready to schedule.`
+                  : 'Your account is ready.'}
+              </p>
 
-              <div className="bg-green-50 border border-green-200 rounded-2xl p-5 mb-6 text-left">
+              <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-2xl p-5 mb-5 text-left">
                 <div className="flex items-center gap-3">
                   <span className="text-3xl">⚡</span>
                   <div>
-                    <p className="text-sm font-extrabold text-green-700">50 bonus AI credits added to your account!</p>
-                    <p className="text-xs text-green-600 mt-0.5">
-                      {firstPost.trim()
-                        ? 'Your draft is saved and ready in the dashboard. Refer a friend to earn 25 more credits.'
-                        : 'Ready to use right now. Refer a friend and you both earn 25 more credits on top.'}
-                    </p>
+                    <p className="text-sm font-extrabold text-green-700 dark:text-green-400">50 bonus AI credits added!</p>
+                    <p className="text-xs text-green-600 dark:text-green-500 mt-0.5">Refer a friend and you both earn 25 more credits on top.</p>
                   </div>
                 </div>
               </div>
 
-              {mfaDone && (
-                <div className="bg-green-50 border border-green-100 rounded-2xl px-4 py-3 mb-4 flex items-center gap-2">
-                  <span>🔐</span>
-                  <p className="text-xs text-green-700 font-semibold">Two-factor authentication is enabled — your account is secured.</p>
+              {/* Upgrade CTA — only if still on free */}
+              {!isUpgraded && (
+                <div className="border-2 border-amber-400 bg-amber-50 dark:bg-amber-950/20 rounded-2xl p-5 mb-5 text-left">
+                  <div className="mb-3">
+                    <p className="text-sm font-extrabold text-amber-800 dark:text-amber-300">⚡ Upgrade to Pro — $5/month</p>
+                    <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">500 AI credits · 5 connected accounts · Smart Queue · Brand Voice AI</p>
+                  </div>
+                  <div className="mb-3">
+                    {couponApplied ? (
+                      <div className="flex items-center gap-2 text-xs">
+                        <span className="text-green-700 dark:text-green-400 font-bold">
+                          {couponApplied.code} — {couponApplied.discount_type === 'percent' ? `${couponApplied.discount_value}% off` : `$${couponApplied.discount_value} off`} applied ✓
+                        </span>
+                        <button onClick={() => { setCouponApplied(null); setCouponInput('') }} className="text-green-600">✕</button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <input
+                          value={couponInput}
+                          onChange={e => { setCouponInput(e.target.value.toUpperCase()); setCouponError(null) }}
+                          onKeyDown={e => e.key === 'Enter' && applyCoupon()}
+                          placeholder="Coupon code?"
+                          className="flex-1 text-xs bg-white dark:bg-gray-900 border border-amber-200 dark:border-amber-800 rounded-xl px-3 py-2 focus:outline-none focus:border-amber-400 dark:text-gray-100"
+                        />
+                        <button onClick={applyCoupon} disabled={couponValidating || !couponInput.trim()}
+                          className="px-3 py-2 bg-amber-100 dark:bg-amber-900/40 hover:bg-amber-200 disabled:opacity-50 text-amber-800 dark:text-amber-300 text-xs font-semibold rounded-xl transition-colors">
+                          {couponValidating ? '…' : 'Apply'}
+                        </button>
+                      </div>
+                    )}
+                    {couponError && <p className="text-xs text-red-500 mt-1">{couponError}</p>}
+                  </div>
+                  <button
+                    onClick={() => handlePlanCheckout('pro')}
+                    disabled={checkoutLoading === 'pro'}
+                    className="w-full py-2.5 bg-amber-400 hover:bg-amber-500 text-black text-sm font-bold rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+                    {checkoutLoading === 'pro'
+                      ? <><div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />Processing...</>
+                      : 'Upgrade to Pro →'}
+                  </button>
                 </div>
               )}
 
-              <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-800 rounded-2xl px-4 py-3 mb-4 flex items-center gap-3">
-                <span className="text-xl flex-shrink-0">🔥</span>
-                <p className="text-xs text-orange-700 dark:text-orange-400 font-semibold">Post every day to build a streak — your dashboard tracks consecutive days and keeps you on a roll.</p>
-              </div>
-
-              {/* SM-Give story card */}
+              {/* SM-Give */}
               <div className="rounded-2xl p-5 mb-6 text-left" style={{ background: 'linear-gradient(135deg, #FFF7ED 0%, #FEF3C7 100%)', border: '1px solid #FED7AA' }}>
                 <p className="text-sm font-extrabold text-amber-800 mb-2">Every plan powers something bigger 🧡</p>
                 <p className="text-xs text-amber-700 leading-relaxed mb-3">
-                  50% of every paid subscription goes to SM-Give — funding school supplies, baby essentials,
-                  and care packages for people experiencing homelessness. When you upgrade, you&apos;re not just
-                  getting more features. You&apos;re helping someone who needs it.
+                  2% of every subscription goes to SM-Give — funding school supplies, baby essentials, and care packages for people experiencing homelessness. When you upgrade, you're not just getting more features.
                 </p>
                 <Link href="/give" className="text-xs font-bold text-amber-800 underline underline-offset-2 hover:text-amber-900 transition-colors">
                   Learn more →
                 </Link>
               </div>
 
-              {/* Primary activation CTA */}
-              <Link
-                href="/compose"
-                className="flex items-center justify-center gap-2 w-full py-4 mb-4 bg-violet-600 hover:bg-violet-700 text-white text-sm font-extrabold rounded-2xl transition-all"
-              >
-                {firstPost.trim() ? '📬 Schedule Your Draft Now →' : '✏️ Write & Schedule Your First Post →'}
+              <Link href={starterPosts.filter(p => p.trim()).length > 0 ? '/queue' : '/compose'}
+                className="flex items-center justify-center gap-2 w-full py-4 mb-3 bg-violet-600 hover:bg-violet-700 text-white text-sm font-extrabold rounded-2xl transition-all">
+                {starterPosts.filter(p => p.trim()).length > 0 ? '📬 Schedule Your Drafts →' : '✏️ Write Your First Post →'}
               </Link>
-              {firstPost.trim() && (
-                <p className="text-xs text-center text-gray-400 mb-4 -mt-2">Your draft from step 7 is waiting in the compose screen</p>
-              )}
-
-              <div className="space-y-3 mb-8 text-left">
-                {[
-                  { icon: '🤖', title: 'Explore AI Features',   desc: `${planConfig.aiTools.length >= 12 ? planConfig.aiTools.length : 12} AI tools — captions, hooks, scoring & more`, href: '/ai-features', cta: 'Explore tools'   },
-                  { icon: '🤖', title: 'Explore AI Features',   desc: `${planConfig.aiTools.length >= 12 ? planConfig.aiTools.length : 12} AI tools — captions, hooks, scoring & more`, href: '/ai-features', cta: 'Explore tools'   },
-                  { icon: '📆', title: 'Bulk Scheduler & Calendar', desc: 'Plan a week at once — switch to Calendar view for a visual overview', href: '/bulk-scheduler',   cta: 'Open scheduler'  },
-                  { icon: '🔗', title: 'Set up Link in Bio',    desc: 'Your free bio page — no Linktree needed',      href: '/link-in-bio',      cta: 'Build page'      },
-                  { icon: '📊', title: 'Analytics',             desc: `Up to ${planConfig.analytics} of history`,    href: '/analytics',        cta: 'View analytics'  },
-                  ...(selectedPlatforms.length === 0 ? [
-                    { icon: '📱', title: 'Connect a Platform',  desc: 'Activate your AI credits',                    href: '/accounts',         cta: 'Connect now'     },
-                  ] : []),
-                ].map(action => (
-                  <div key={action.title}
-                    className="flex items-center gap-4 p-4 border border-theme rounded-2xl hover:border-gray-300 dark:hover:border-gray-600 transition-all group">
-                    <div className="w-10 h-10 bg-gray-50 dark:bg-gray-800 rounded-xl flex items-center justify-center text-xl flex-shrink-0">
-                      {action.icon}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold">{action.title}</p>
-                      <p className="text-xs text-gray-400 dark:text-gray-500">{action.desc}</p>
-                    </div>
-                    <Link href={action.href}
-                      className="text-xs font-bold text-gray-400 dark:text-gray-500 group-hover:text-black transition-colors flex-shrink-0">
-                      {action.cta} →
-                    </Link>
-                  </div>
-                ))}
-              </div>
 
               <button onClick={handleFinish} disabled={saving}
-                className="w-full py-4 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all disabled:opacity-50">
-                {saving ? 'Setting up your account...' : 'Go to Dashboard →'}
+                className="w-full py-3.5 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all disabled:opacity-50">
+                {saving ? 'Setting up your account…' : 'Go to Dashboard →'}
               </button>
+
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-4">
                 Everything can be changed anytime in <Link href="/settings" className="underline">Settings</Link>
               </p>
@@ -1085,9 +615,10 @@ function OnboardingInner() {
       </div>
 
       {toast && (
-        <div style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className={`fixed right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${
-          toast.type === 'info' ? 'bg-gray-800 text-white' : 'bg-red-500 text-white'
-        }`}>
+        <div style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
+          className={`fixed right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg ${
+            toast.type === 'info' ? 'bg-gray-800 text-white' : 'bg-red-500 text-white'
+          }`}>
           {toast.type === 'info' ? '💡' : '❌'} {toast.message}
         </div>
       )}

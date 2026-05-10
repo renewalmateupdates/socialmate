@@ -23,12 +23,12 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { priceId, fromOnboarding, coupon_code } = await req.json()
+  const { priceId, fromOnboarding, coupon_code, returnStep } = await req.json()
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
 
   const successUrl = fromOnboarding
-    ? `${appUrl}/onboarding?upgraded=true&step=3`
+    ? `${appUrl}/onboarding?upgraded=true&step=${returnStep ?? 3}`
     : `${appUrl}/dashboard?upgraded=true`
 
   // ── Coupon validation ────────────────────────────────────────────────────
