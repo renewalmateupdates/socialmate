@@ -480,33 +480,32 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
   - **r/sideprojects** — Full detail post (problem, tech stack, what shipped). No funnelling — link included directly. Flair: vibecoded showcase.
   - **r/buildinpublic** — Journey + lessons, callout to commenter advice about 1-2 core workflows. Tester ask woven in naturally.
   - **r/saasbuild** — SaaS Journey flair. Story-led, no links in post. Tester ask via comments.
+- **Reddit/DM community engagement** — Replied to comments on recruitment posts. Notable feedback received:
+  - OptimalYear2147: advised single success path onboarding ("pick channel → load 5 starter posts → auto-schedule with one tap") and 1-2 tight personas instead of chasing all users. Also volunteered as Android tester — DM sent.
+  - newtophillyfromkc: volunteered as Android tester — DM sent.
+  - Aggravating-Cheek318: Google Play tester requirement surprised them too, relatable moment.
+  - New_Sense2690 (Top 1%): validated deli job + ship grind, echoed "ship less, talk to users earlier" lesson.
+- **llms.txt updated (PR #313)** — AI discoverability file brought current: added Agents Hub (8 agents), Gilgamesh's Guides Vol 1-4, SOMA Voice DNA Builder, SOMA Project Memory, Creator Monetization Hub marked live, TikTok sandbox status, blog count bumped to 175+, all missing key pages added. This file is scanned by ChatGPT, Perplexity, Claude, Gemini when answering "what's a Hootsuite alternative" type queries.
 
 ---
 
 ## Pending / In Progress
 
-- **Google Play — closed testing** — App created in console. Internal testing: Active. Closed testing: Active (1 track). **Blocker: need 12 opted-in testers + 14-day run before Google allows "Apply for production."** Currently at 0 opted-in testers. Active recruitment: LinkedIn post drafted + 6 Reddit posts live as of May 9 (r/ShowMeYourApps, r/alphaandbetausers, r/SideProject, r/sideprojects, r/buildinpublic, r/saasbuild). Once 12 testers opt in, the 14-day clock starts. After that: answer Google's production questions + apply.
+- **Google Play — closed testing** — App in console. Internal + closed testing active. **Blocker: 12 opted-in testers + 14-day run.** 2 volunteers from Reddit as of May 9 (newtophillyfromkc + OptimalYear2147 — DMs sent). 6 Reddit posts live. Once 12 opt in, 14-day clock starts → answer Google production questions → apply.
 
 - **TikTok Production API** — Submitted Apr 23. Demo video submitted May 5. Support ticket `ad7714530aa61ad4` open. Check portal periodically. No action until approved.
 
 - **SOMA content generation** — Submit updated CLAUDE.md as master doc to SocialMate Growth SOMA project. Voice DNA (Advanced) is now active — SOMA will sound like Joshua. Do NOT write posts manually.
 
-- **LinkedIn post** — Two posts written: (1) May 7 — SOMA + Voice DNA + bootstrapped builder. (2) May 9 — app updates + tester recruitment + inspirational quote. Both ready to publish manually to LinkedIn company page.
+- **LinkedIn posts** — Two written: (1) May 7 — SOMA + Voice DNA + bootstrapped builder. (2) May 9 — app updates + tester recruitment + inspirational quote. Both ready to publish manually to LinkedIn company page.
+
+- **Onboarding UX simplification** — Community feedback (OptimalYear2147) strongly recommends narrowing to a single success path: "pick channel → 5 starter posts → auto-schedule with one tap." Agents/SOMA/Enki/monetization should surface as upgrades after the first win. Worth a focused sprint.
 
 - **Enki Truth Mode** — 50-trade minimum per strategy before results are statistically valid. Check `/enki/truth` periodically.
 
-- **LinkedIn integration** — Blocked on API credentials. Requires: LinkedIn Company Page published → developer app → Marketing Developer Platform approval. Low priority.
+- **LinkedIn integration** — Blocked on API credentials. Requires LinkedIn Company Page published → developer app → Marketing Developer Platform approval. Low priority.
 
 - **Push notifications** — VAPID keys confirmed set in Vercel. Live.
-
-**Roadmap (next up):**
-- **Google Play production** — Get 12 testers to opt into closed test → wait 14 days → answer Google production questions → apply. Active recruitment campaign: LinkedIn post drafted + 6 Reddit posts live (r/ShowMeYourApps, r/alphaandbetausers, r/SideProject, r/sideprojects, r/buildinpublic, r/saasbuild) as of May 9. Currently 0 opted-in testers.
-- **Landing page "Available on Google Play" badge** — Add after Play Store app is approved for production.
-- **SOMA content run** — Submit updated CLAUDE.md to SOMA project. First run with Voice DNA (Advanced tier) active.
-- **Gilgamesh's Guides Vol. 5+** — Deep-dive research-backed guides for people starting from nothing. Real playbooks, not fluff. Topics TBD.
-- **Apple App Store** — Deferred 3–6 months. Requires $99/yr Apple Developer account + Xcode on Mac.
-- **LinkedIn publishing** — Pending API credentials. On hold.
-- **Instagram / Facebook / Threads** — Pending Meta API access. Long-term roadmap.
 
 ## Confirmed Done (stop asking about these)
 
