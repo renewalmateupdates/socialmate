@@ -64,9 +64,10 @@ export default function CampaignDetailPage() {
   const [loading, setLoading]     = useState(true)
 
   // Auto-discover
-  const [discoverCategory, setDiscoverCategory] = useState('technology')
+  const [discoverKeyword, setDiscoverKeyword]   = useState('technology')
+  const [discoverSources, setDiscoverSources]   = useState(['substack', 'github', 'devto', 'hashnode'])
   const [discovering, setDiscovering]           = useState(false)
-  const [discoverResult, setDiscoverResult]     = useState<{ found: number; withEmail: number; imported: number; sent: number; skipped: number } | null>(null)
+  const [discoverResult, setDiscoverResult]     = useState<{ discovered: number; withEmail: number; imported: number; sent: number; skipped: number; sources: Record<string, number> } | null>(null)
   const [autoDiscoverEnabled, setAutoDiscoverEnabled] = useState(false)
 
   // Add prospect form
@@ -107,7 +108,15 @@ export default function CampaignDetailPage() {
         setCampaign(d.campaign)
         setProspects(d.prospects ?? [])
         setMessages(d.messages ?? [])
-        if (d.campaign?.apollo_query) setDiscoverCategory(d.campaign.apollo_query)
+        if (d.campaign?.apollo_query) {
+          try {
+            const cfg = JSON.parse(d.campaign.apollo_query)
+            if (cfg.keyword) setDiscoverKeyword(cfg.keyword)
+            if (cfg.sources) setDiscoverSources(cfg.sources)
+          } catch {
+            setDiscoverKeyword(d.campaign.apollo_query)
+          }
+        }
         if (d.campaign?.auto_discover_enabled) setAutoDiscoverEnabled(d.campaign.auto_discover_enabled)
       })
       .finally(() => setLoading(false))
@@ -118,13 +127,20 @@ export default function CampaignDetailPage() {
     if (campaign && !genChannel) setGenChannel(campaign.channels?.[0] ?? 'email')
   }, [campaign, genChannel])
 
+  const toggleSource = (src: string) => {
+    setDiscoverSources(prev =>
+      prev.includes(src) ? prev.filter(s => s !== src) : [...prev, src]
+    )
+  }
+
   const runDiscover = async () => {
+    if (discoverSources.length === 0) { showToast('Select at least one source'); return }
     setDiscovering(true)
     setDiscoverResult(null)
     const res = await fetch(`/api/hermes/campaigns/${id}/discover`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ category: discoverCategory }),
+      body: JSON.stringify({ keyword: discoverKeyword, sources: discoverSources }),
     })
     const data = await res.json()
     setDiscovering(false)
@@ -142,7 +158,7 @@ export default function CampaignDetailPage() {
     await fetch(`/api/hermes/campaigns/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ auto_discover_enabled: enabled, apollo_query: discoverCategory }),
+      body: JSON.stringify({ auto_discover_enabled: enabled, apollo_query: JSON.stringify({ keyword: discoverKeyword, sources: discoverSources }) }),
     })
     showToast(enabled ? 'Weekly auto-discover ON' : 'Weekly auto-discover OFF')
   }
@@ -301,7 +317,7 @@ export default function CampaignDetailPage() {
             <div className="flex items-center gap-2">
               <span className="text-base">🔭</span>
               <span className="font-bold text-sm">Auto-Discover Prospects</span>
-              <span className="text-xs text-gray-500">via Substack</span>
+              <span className="text-xs text-purple-400 font-bold">HERMES Engine — free</span>
             </div>
             <div className="flex items-center gap-3">
               <span className="text-xs text-gray-400">Run weekly</span>
@@ -312,20 +328,38 @@ export default function CampaignDetailPage() {
               </button>
             </div>
           </div>
+
+          {/* Source toggles */}
+          <div className="flex gap-2 mb-3 flex-wrap">
+            {[
+              { id: 'substack', label: 'Substack', icon: '📰' },
+              { id: 'github',   label: 'GitHub',   icon: '🐙' },
+              { id: 'devto',    label: 'Dev.to',   icon: '👩‍💻' },
+              { id: 'hashnode', label: 'Hashnode',  icon: '📝' },
+            ].map(src => (
+              <button
+                key={src.id}
+                onClick={() => toggleSource(src.id)}
+                className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition-all ${
+                  discoverSources.includes(src.id)
+                    ? 'bg-purple-500/15 border-purple-500/40 text-purple-300'
+                    : 'bg-gray-800 border-gray-700 text-gray-500 hover:border-gray-600'
+                }`}>
+                {src.icon} {src.label}
+              </button>
+            ))}
+          </div>
+
           <div className="flex gap-2 mb-3">
-            <select
-              value={discoverCategory}
-              onChange={e => setDiscoverCategory(e.target.value)}
-              className="flex-1 px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-xl text-sm text-white focus:outline-none focus:border-purple-400 transition-colors">
-              <option value="technology">💻 Technology</option>
-              <option value="business">📈 Business & Startups</option>
-              <option value="culture">🎨 Culture & Creator Economy</option>
-              <option value="science">🔬 Science</option>
-              <option value="health">🌿 Health & Wellness</option>
-            </select>
+            <input
+              value={discoverKeyword}
+              onChange={e => setDiscoverKeyword(e.target.value)}
+              placeholder='keyword — e.g. "technology", "saas", "creator", "startup"'
+              className="flex-1 px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 transition-colors"
+            />
             <button
               onClick={runDiscover}
-              disabled={discovering}
+              disabled={discovering || discoverSources.length === 0}
               className="px-4 py-2.5 bg-purple-500 hover:bg-purple-600 disabled:opacity-40 text-white text-sm font-extrabold rounded-xl transition-all flex items-center gap-2 whitespace-nowrap">
               {discovering
                 ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Finding...</>
@@ -334,15 +368,20 @@ export default function CampaignDetailPage() {
           </div>
           {discoverResult && (
             <div className="flex items-center gap-4 text-xs flex-wrap">
-              <span className="text-gray-400">Found <span className="text-white font-bold">{discoverResult.found}</span> newsletters</span>
+              <span className="text-gray-400">Scraped <span className="text-white font-bold">{discoverResult.discovered}</span></span>
               <span className="text-blue-400 font-bold">📧 {discoverResult.withEmail} with email</span>
               <span className="text-green-400 font-bold">↑ {discoverResult.imported} imported</span>
               <span className="text-amber-400 font-bold">⚡ {discoverResult.sent} sent</span>
-              {discoverResult.skipped > 0 && <span className="text-gray-500">{discoverResult.skipped} already in campaign</span>}
+              {discoverResult.skipped > 0 && <span className="text-gray-500">{discoverResult.skipped} dupes skipped</span>}
+              {discoverResult.sources && (
+                <span className="text-gray-600 text-xs">
+                  {Object.entries(discoverResult.sources).filter(([,n]) => n > 0).map(([s, n]) => `${s}:${n}`).join(' · ')}
+                </span>
+              )}
             </div>
           )}
           {autoDiscoverEnabled && (
-            <p className="text-xs text-purple-400 mt-2">⚡ Running every Monday — finds new Substack newsletters, scrapes emails, generates intros, and sends automatically.</p>
+            <p className="text-xs text-purple-400 mt-2">⚡ Running every Monday — scrapes {discoverSources.join(', ')} for new leads, extracts emails, generates intros, sends automatically.</p>
           )}
         </div>
 

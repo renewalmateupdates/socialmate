@@ -2,6 +2,7 @@ import { inngest } from '@/lib/inngest'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { dispatchHermesMessage, type HermesChannel } from '@/lib/hermes-send'
+import { discoverProspects, parseDiscoverConfig } from '@/lib/hermes-discover'
 
 const STEP_LABELS = ['Intro', 'Follow-up 1', 'Follow-up 2', 'Break-up']
 
@@ -179,56 +180,6 @@ export const hermesFollowUpCron = inngest.createFunction(
   }
 )
 
-const BOT_UA = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
-const EMAIL_BLOCK_DOMAINS = ['substack.com', 'example.com', 'sentry.io', 'amazonaws.com', 'cloudflare.com', 'google.com', 'wix.com']
-
-function isValidContactEmail(email: string): boolean {
-  const lower = email.toLowerCase()
-  const domain = lower.split('@')[1] ?? ''
-  if (EMAIL_BLOCK_DOMAINS.some(d => domain.includes(d))) return false
-  if (lower.startsWith('noreply') || lower.startsWith('no-reply') || lower.startsWith('donotreply')) return false
-  if (lower.split('@')[0].length < 2) return false
-  return true
-}
-
-function extractEmailsFromHtml(html: string): string[] {
-  const mailtoHits = Array.from(html.matchAll(/href="mailto:([^"?&\s]+)/gi))
-    .map(m => m[1].toLowerCase().trim())
-    .filter(isValidContactEmail)
-  if (mailtoHits.length > 0) return Array.from(new Set(mailtoHits))
-  const found = new Set(
-    (html.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g) ?? [])
-      .map(e => e.toLowerCase()).filter(isValidContactEmail)
-  )
-  return Array.from(found)
-}
-
-async function findEmailForNewsletter(subdomain: string, customDomain?: string | null): Promise<string | null> {
-  const headers = { 'User-Agent': BOT_UA }
-  try {
-    const res = await fetch(`https://${subdomain}.substack.com/api/v1/pub`, { headers, signal: AbortSignal.timeout(5000) })
-    if (res.ok) {
-      const data = await res.json()
-      if (data?.contact_email && isValidContactEmail(data.contact_email)) return data.contact_email.toLowerCase()
-      if (data?.author?.email && isValidContactEmail(data.author.email)) return data.author.email.toLowerCase()
-    }
-  } catch { /* continue */ }
-  const pages = [
-    `https://${subdomain}.substack.com/about`,
-    customDomain ? `https://${customDomain}/about` : null,
-    customDomain ? `https://${customDomain}/contact` : null,
-    customDomain ? `https://${customDomain}` : null,
-  ].filter(Boolean) as string[]
-  for (const url of pages) {
-    try {
-      const res = await fetch(url, { headers, signal: AbortSignal.timeout(5000) })
-      if (!res.ok) continue
-      const emails = extractEmailsFromHtml(await res.text())
-      if (emails.length > 0) return emails[0]
-    } catch { /* try next */ }
-  }
-  return null
-}
 
 // Weekly Monday 10am UTC: auto-discover + send for campaigns with auto_discover_enabled
 export const hermesAutoDiscoverCron = inngest.createFunction(
@@ -254,41 +205,26 @@ export const hermesAutoDiscoverCron = inngest.createFunction(
 
     for (const campaign of campaigns) {
       await step.run(`discover-campaign-${campaign.id}`, async () => {
-        const perPage  = Math.min(campaign.prospects_per_run ?? 10, 25)
-        const category = (campaign.apollo_query ?? 'technology').toLowerCase()
+        const perPage = Math.min(campaign.prospects_per_run ?? 10, 25)
+        const { keyword, sources } = parseDiscoverConfig(campaign.apollo_query)
+        const limitPerSource = Math.max(1, Math.ceil(perPage / sources.length))
 
-        // Substack leaderboard discovery (free, no API key needed)
-        const substackRes = await fetch(
-          `https://substack.com/api/v1/leaderboard?category=${encodeURIComponent(category)}&limit=${perPage * 2}&page=0`,
-          { headers: { 'User-Agent': BOT_UA } }
-        )
-        if (!substackRes.ok) return
+        const found = await discoverProspects({ sources, keyword, limitPerSource })
+        if (found.length === 0) return
 
-        const publications: Array<{ name: string; subdomain: string; custom_domain?: string | null; author_name?: string | null }>
-          = (await substackRes.json()).publications ?? []
-        if (publications.length === 0) return
-
-        // Dedup
         const { data: existingProspects } = await supabase
-          .from('hermes_prospects').select('email, notes').eq('campaign_id', campaign.id)
+          .from('hermes_prospects').select('email').eq('campaign_id', campaign.id)
         const existingEmails = new Set((existingProspects ?? []).map((r: { email: string }) => r.email?.toLowerCase()).filter(Boolean))
-        const existingSubdomains = new Set(
-          (existingProspects ?? []).map((r: { notes: string }) => r.notes?.match(/substack\.com\/([^/\s,]+)/)?.[1]).filter(Boolean)
-        )
-        const newPubs = publications.filter(p => !existingSubdomains.has(p.subdomain))
+        const newPeople = found.filter(p => !existingEmails.has(p.email))
 
         const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY!)
         const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
 
-        for (const pub of newPubs.slice(0, perPage)) {
-          const email = await findEmailForNewsletter(pub.subdomain, pub.custom_domain)
-          if (!email || existingEmails.has(email)) continue
-
-          const prospectName = pub.author_name || pub.name
-          const prompt = `Write a short cold email intro from Joshua Bostic, founder of SocialMate (socialmate.studio). Goal: ${campaign.goal ?? 'get featured in their newsletter/blog'}. Prospect: ${prospectName}, runs "${pub.name}" newsletter. Keep it 3-4 sentences, human, no buzzwords. Output JSON: {"subject":"...","body":"..."}`
+        for (const person of newPeople) {
+          const prompt = `Write a short cold email intro from Joshua Bostic, founder of SocialMate (socialmate.studio). Goal: ${campaign.goal ?? 'get featured in their newsletter/blog'}. Prospect: ${person.name}${person.company ? `, runs "${person.company}"` : ''}. Keep it 3-4 sentences, human, no buzzwords. Output JSON: {"subject":"...","body":"..."}`
 
           let subject = `Quick note — SocialMate`
-          let body    = `Hi ${prospectName},\n\nI built SocialMate (socialmate.studio) solo — a social media scheduler + AI toolkit for $5/mo vs competitors at $99. I work a deli job nights and weekends to build this.\n\nWould you consider a mention or feature in your newsletter?\n\n— Joshua`
+          let body    = `Hi ${person.name},\n\nI built SocialMate (socialmate.studio) solo — a social media scheduler + AI toolkit for $5/mo vs competitors at $99. I work a deli job nights and weekends to build this.\n\nWould you consider a mention or feature in your content?\n\n— Joshua`
 
           try {
             const result = await model.generateContent(prompt)
@@ -297,11 +233,11 @@ export const hermesAutoDiscoverCron = inngest.createFunction(
             const parsed = JSON.parse(json)
             subject = parsed.subject ?? subject
             body    = parsed.body ?? body
-          } catch { /* fallback already set */ }
+          } catch { /* fallback */ }
 
           const { data: prospect } = await supabase
             .from('hermes_prospects')
-            .insert({ campaign_id: campaign.id, user_id: campaign.user_id, name: prospectName, email, company: pub.name, notes: `substack.com/${pub.subdomain}` })
+            .insert({ campaign_id: campaign.id, user_id: campaign.user_id, name: person.name, email: person.email, company: person.company, notes: person.notes })
             .select().single()
           if (!prospect) continue
 
@@ -312,10 +248,10 @@ export const hermesAutoDiscoverCron = inngest.createFunction(
           if (!message) continue
 
           totalImported++
-          existingEmails.add(email)
+          existingEmails.add(person.email)
 
           if (campaign.mode === 'auto') {
-            const result = await dispatchHermesMessage({ messageId: message.id, channel: 'email', userId: campaign.user_id, prospectEmail: email, subject, body })
+            const result = await dispatchHermesMessage({ messageId: message.id, channel: 'email', userId: campaign.user_id, prospectEmail: person.email, subject, body })
             if (result.ok) {
               totalSent++
               const nextDays = campaign.sequence_days?.[1]
