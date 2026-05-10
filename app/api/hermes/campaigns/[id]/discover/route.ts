@@ -96,9 +96,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   // ── Apollo people search ──────────────────────────────────────────────────
   const apolloRes = await fetch('https://api.apollo.io/v1/mixed_people/search', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' },
+    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache', 'X-Api-Key': apolloKey },
     body: JSON.stringify({
-      api_key: apolloKey,
       q_keywords: query,
       ...(titles && titles.length > 0 ? { person_titles: titles } : {}),
       contact_email_status: ['verified', 'likely to engage'],
