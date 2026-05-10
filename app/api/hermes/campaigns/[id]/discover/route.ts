@@ -38,7 +38,7 @@ function extractEmailsFromHtml(html: string): string[] {
   const mailtoHits = Array.from(html.matchAll(/href="mailto:([^"?&\s]+)/gi))
     .map(m => m[1].toLowerCase().trim())
     .filter(isValidContactEmail)
-  if (mailtoHits.length > 0) return [...new Set(mailtoHits)]
+  if (mailtoHits.length > 0) return Array.from(new Set(mailtoHits))
 
   // Fall back to plain text email pattern
   const found = new Set(
