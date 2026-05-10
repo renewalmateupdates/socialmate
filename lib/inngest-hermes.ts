@@ -211,9 +211,8 @@ export const hermesAutoDiscoverCron = inngest.createFunction(
         // Apollo search
         const apolloRes = await fetch('https://api.apollo.io/v1/mixed_people/search', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' },
+          headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache', 'X-Api-Key': apolloKey },
           body: JSON.stringify({
-            api_key: apolloKey,
             q_keywords: campaign.apollo_query,
             contact_email_status: ['verified', 'likely to engage'],
             per_page: perPage,
