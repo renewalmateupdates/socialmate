@@ -64,14 +64,17 @@ export default function CampaignDetailPage() {
   const [loading, setLoading]     = useState(true)
 
   // Add prospect form
-  const [addOpen, setAddOpen]       = useState(false)
-  const [pName, setPName]           = useState('')
-  const [pEmail, setPEmail]         = useState('')
-  const [pBsky, setPBsky]           = useState('')
-  const [pMasto, setPMasto]         = useState('')
-  const [pCompany, setPCompany]     = useState('')
-  const [pNotes, setPNotes]         = useState('')
-  const [addLoading, setAddLoading] = useState(false)
+  const [addOpen, setAddOpen]         = useState(false)
+  const [pName, setPName]             = useState('')
+  const [pEmail, setPEmail]           = useState('')
+  const [pBsky, setPBsky]             = useState('')
+  const [pMasto, setPMasto]           = useState('')
+  const [pCompany, setPCompany]       = useState('')
+  const [pNotes, setPNotes]           = useState('')
+  const [pDomain, setPDomain]         = useState('')
+  const [addLoading, setAddLoading]   = useState(false)
+  const [findingEmail, setFindingEmail] = useState(false)
+  const [emailScore, setEmailScore]   = useState<number | null>(null)
 
   // Generate state
   const [generating, setGenerating]         = useState<string | null>(null) // prospect id
@@ -107,6 +110,27 @@ export default function CampaignDetailPage() {
     if (campaign && !genChannel) setGenChannel(campaign.channels?.[0] ?? 'email')
   }, [campaign, genChannel])
 
+  const findEmail = async () => {
+    if (!pName.trim() || !pDomain.trim()) { showToast('Enter a name and domain first'); return }
+    setFindingEmail(true)
+    setEmailScore(null)
+    const parts = pName.trim().split(' ')
+    const first = parts[0]
+    const last  = parts.slice(1).join(' ')
+    const params = new URLSearchParams({ first_name: first, domain: pDomain.trim() })
+    if (last) params.set('last_name', last)
+    const res = await fetch(`/api/hermes/find-email?${params}`)
+    const data = await res.json()
+    setFindingEmail(false)
+    if (data.email) {
+      setPEmail(data.email)
+      setEmailScore(data.score)
+      showToast(`Found: ${data.email} (${data.score}% confidence)`)
+    } else {
+      showToast(data.error ?? 'No email found for that name + domain')
+    }
+  }
+
   const addProspect = async (e: React.FormEvent) => {
     e.preventDefault()
     setAddLoading(true)
@@ -117,7 +141,8 @@ export default function CampaignDetailPage() {
     })
     setAddLoading(false)
     if (res.ok) {
-      setAddOpen(false); setPName(''); setPEmail(''); setPBsky(''); setPMasto(''); setPCompany(''); setPNotes('')
+      setAddOpen(false)
+      setPName(''); setPEmail(''); setPBsky(''); setPMasto(''); setPCompany(''); setPNotes(''); setPDomain(''); setEmailScore(null)
       reload()
       showToast('Prospect added')
     }
@@ -281,18 +306,43 @@ export default function CampaignDetailPage() {
               <form onSubmit={addProspect} className="bg-gray-900 border border-amber-400/20 rounded-2xl p-5 space-y-3">
                 <p className="text-sm font-bold mb-1">Add Prospect</p>
                 <div className="grid grid-cols-2 gap-3">
-                  <input value={pName} onChange={e => setPName(e.target.value)} placeholder="Name *" required
+                  <input value={pName} onChange={e => setPName(e.target.value)} placeholder="Full name *" required
                     className="px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-400" />
                   <input value={pCompany} onChange={e => setPCompany(e.target.value)} placeholder="Company"
                     className="px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-400" />
-                  <input value={pEmail} onChange={e => setPEmail(e.target.value)} placeholder="Email"
-                    className="px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-400" />
+                </div>
+
+                {/* Hunter.io email finder */}
+                <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-3 space-y-2">
+                  <p className="text-xs font-bold text-gray-400">🔍 Find email automatically</p>
+                  <div className="flex gap-2">
+                    <input value={pDomain} onChange={e => setPDomain(e.target.value)} placeholder="Company domain (e.g. stripe.com)"
+                      className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-400" />
+                    <button type="button" onClick={findEmail} disabled={findingEmail || !pName.trim() || !pDomain.trim()}
+                      className="px-3 py-2 bg-amber-400 hover:bg-amber-500 disabled:opacity-40 text-black text-xs font-extrabold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5">
+                      {findingEmail
+                        ? <><div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin" /> Finding...</>
+                        : '🔍 Find'}
+                    </button>
+                  </div>
+                  <div className="flex gap-2 items-center">
+                    <input value={pEmail} onChange={e => { setPEmail(e.target.value); setEmailScore(null) }} placeholder="Email (auto-filled or enter manually)"
+                      className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-400" />
+                    {emailScore !== null && (
+                      <span className={`text-xs font-bold px-2 py-1 rounded-lg ${emailScore >= 70 ? 'bg-green-500/10 text-green-400' : 'bg-amber-500/10 text-amber-400'}`}>
+                        {emailScore}% conf.
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
                   <input value={pBsky} onChange={e => setPBsky(e.target.value)} placeholder="Bluesky @handle"
                     className="px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-400" />
                   <input value={pMasto} onChange={e => setPMasto(e.target.value)} placeholder="Mastodon @user@instance"
                     className="px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-400" />
-                  <input value={pNotes} onChange={e => setPNotes(e.target.value)} placeholder="Notes (context for AI)"
-                    className="px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-400" />
+                  <input value={pNotes} onChange={e => setPNotes(e.target.value)} placeholder="Notes — context for AI (podcast name, what they do)"
+                    className="col-span-2 px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-400" />
                 </div>
                 <div className="flex gap-2">
                   <button type="submit" disabled={addLoading}
