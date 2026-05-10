@@ -201,6 +201,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/affiliates`,           lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/merch`,               lastModified: now, changeFrequency: 'weekly',  priority: 0.7 },
     { url: `${base}/faq`,                 lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/beta`,               lastModified: now, changeFrequency: 'weekly',  priority: 0.9 },
     { url: `${base}/analytics`,           lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/calendar`,            lastModified: now, changeFrequency: 'monthly' as const, priority: 0.7 },
     { url: `${base}/blog`,                lastModified: now, changeFrequency: 'weekly',  priority: 0.8 },
