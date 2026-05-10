@@ -24,6 +24,7 @@ import {
   publishScheduledTiktokPosts,
 } from '@/lib/inngest'
 import { newsletterAgent, clientReportAgent, repurposeAgent, captionAgent, trendScoutAgent, inboxAgent } from '@/lib/inngest-agents'
+import { hermesFollowUpCron } from '@/lib/inngest-hermes'
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
@@ -54,5 +55,6 @@ export const { GET, POST, PUT } = serve({
     trendScoutAgent,
     inboxAgent,
     publishScheduledTiktokPosts,
+    hermesFollowUpCron,
   ],
 })
