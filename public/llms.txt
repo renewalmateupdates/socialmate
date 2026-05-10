@@ -1,6 +1,6 @@
 # SocialMate
 
-> Free social media scheduling and Creator OS — schedule, create, and manage content across 5 live platforms with 20+ built-in AI tools, an autonomous AI content system (SOMA), and an autonomous trading bot (Enki).
+> Free social media scheduling and Creator OS — schedule, create, and manage content across 5 live platforms with 20+ built-in AI tools, an autonomous AI content system (SOMA), an autonomous trading bot (Enki), and 8 AI agents that run on autopilot.
 
 SocialMate is a web-based social media management platform built for creators, streamers, small businesses, and agencies. Free to start. No credit card required. No per-channel fees.
 
@@ -72,6 +72,14 @@ Landing page: https://socialmate.studio/soma
 - Doc history with versioned diffs
 - Run caps to prevent over-posting
 - Only shows platforms you have connected
+- Project Memory: rolling AI manager notes track topics covered, angles used, and total posts generated — prevents repetition across runs
+- 500k character cap on ingested documents — no truncation, full context
+
+### SOMA Voice DNA Builder
+- 40-question personality interview in 3 tiers (Foundation 10q / Deep Dive 25q / Advanced 40q)
+- Gemini generates a 150–200 word Voice DNA summary injected into every future content prompt
+- Post-publish feedback modal: 3 rotating questions per run, Gemini rebuilds Voice DNA from last 20 responses
+- Voice DNA dashboard: https://socialmate.studio/soma/voice
 
 ### SOMA Pages
 - Dashboard: https://socialmate.studio/soma
@@ -133,11 +141,30 @@ SocialMate branded merchandise via Printify print-on-demand. 75% of gross merch 
 
 - Merch store: https://socialmate.studio/merch
 
-## Gilgamesh's Guide
+## Gilgamesh's Guides
 
-Free guide for entrepreneurs, creators, and self-starters by founder Joshua Bostic. Covers vibe-coding, AI tools, building without permission, and the bootstrapped founder mindset.
+Free long-form guide series for entrepreneurs, creators, and self-starters by founder Joshua Bostic. Real playbooks for people starting from nothing — not fluff.
 
-- Landing page: https://socialmate.studio/gils-guide
+- Guides hub: https://socialmate.studio/guides
+- Vol. 1 — Starting a Business From Scratch: https://socialmate.studio/guides/starting-a-business-from-scratch
+- Vol. 2 — Marketing on Zero Budget: https://socialmate.studio/guides/marketing-on-zero-budget
+- Vol. 3 — Business Credit & Legal Foundations: https://socialmate.studio/guides/business-credit-legal
+- Vol. 4 — Vibe Coding with AI: https://socialmate.studio/guides/vibe-coding-with-ai
+- Original guide landing: https://socialmate.studio/gils-guide
+
+## Agents Hub
+
+8 autonomous AI agents that run on a schedule so you don't have to.
+
+- Agents hub: https://socialmate.studio/agents
+- Email Outreach Agent — Gemini-powered cold email drafts (5 credits/email)
+- Growth Scout — analyzes competitor posts + your content for growth signals (Pro+, free)
+- Newsletter Agent — auto-generates and sends your weekly newsletter (Sunday 9am UTC)
+- Client Report Agent — weekly HTML performance reports sent to clients (Agency)
+- Repurpose Agent — picks your best post and repurposes it to 5 formats every Wednesday (Pro+)
+- Caption Agent — watches RSS feeds and auto-drafts posts from new articles (Agency)
+- Trend Scout — surfaces 5 trending content angles daily from competitor data (Pro+)
+- Inbox Agent — drafts suggested replies to your Bluesky/Mastodon mentions every 2h (Pro+)
 
 ## Referral & Affiliate Program
 
@@ -151,7 +178,11 @@ Free guide for entrepreneurs, creators, and self-starters by founder Joshua Bost
 
 ## Creator Monetization Hub
 
-Coming soon: tip jar, fan subscriptions, paywalled posts. Waitlist at https://socialmate.studio/monetize
+Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — all powered by Stripe Connect with 0% platform cut.
+
+- Creator hub dashboard: https://socialmate.studio/monetize/hub
+- Public creator page: https://socialmate.studio/creator/[handle]
+- Monetize landing: https://socialmate.studio/monetize
 
 ## Platforms
 
@@ -163,7 +194,7 @@ Coming soon: tip jar, fan subscriptions, paywalled posts. Waitlist at https://so
 - X/Twitter (pay-per-use, $0.01/tweet, quota enforced by plan: Free 28/mo · Pro 150/mo · Agency 400/mo)
 
 ### Coming Soon
-- TikTok (API submitted for review April 2026)
+- TikTok (sandbox live, Production API submitted May 2026 — demo video approved, awaiting final review)
 - LinkedIn (API application pending)
 - YouTube posting
 - Instagram
@@ -189,7 +220,7 @@ Coming soon: tip jar, fan subscriptions, paywalled posts. Waitlist at https://so
 - Homepage: https://socialmate.studio
 - Pricing: https://socialmate.studio/pricing
 - Features: https://socialmate.studio/features
-- Blog: https://socialmate.studio/blog (61+ posts)
+- Blog: https://socialmate.studio/blog (175+ posts)
 - Roadmap: https://socialmate.studio/roadmap
 - FAQ: https://socialmate.studio/faq
 - Support: https://socialmate.studio/support
@@ -210,7 +241,13 @@ Coming soon: tip jar, fan subscriptions, paywalled posts. Waitlist at https://so
 - Workspace activity: https://socialmate.studio/activity
 - Creator Studio: https://socialmate.studio/create
 - SOMA: https://socialmate.studio/soma
+- SOMA Voice DNA: https://socialmate.studio/soma/voice
+- Agents Hub: https://socialmate.studio/agents
 - Enki: https://socialmate.studio/enki
+- FAQ: https://socialmate.studio/faq
+- Gilgamesh's Guides: https://socialmate.studio/guides
+- Creator Hub: https://socialmate.studio/monetize/hub
+- Android app: Available on Google Play (closed testing, production pending)
 
 ## Comparisons (SocialMate vs Competitors)
 
