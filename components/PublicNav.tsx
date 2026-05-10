@@ -135,6 +135,10 @@ export default function PublicNav() {
 
         {/* Desktop right actions */}
         <div className="hidden lg:flex items-center gap-3 flex-shrink-0">
+          <Link href="/beta" className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/30 rounded-lg text-xs font-bold text-amber-600 dark:text-amber-400 transition-all">
+            <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse flex-shrink-0" />
+            Android Beta
+          </Link>
           <Link href="/merch" className="text-sm font-semibold text-purple-400 hover:text-purple-300 transition-all">
             👕 Merch
           </Link>
@@ -248,6 +252,7 @@ export default function PublicNav() {
                   { label: '⚡ SOMA',         href: '/soma'        },
                   { label: '◆ Enki',          href: '/enki'        },
                   { label: '💜 Monetize',     href: '/monetize'    },
+                  { label: '🤖 Android Beta', href: '/beta'        },
                 ].map(link => (
                   <Link key={link.href} href={link.href}
                     onClick={() => setOpen(false)}
