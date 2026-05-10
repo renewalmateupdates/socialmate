@@ -63,18 +63,24 @@ export default function CampaignDetailPage() {
   const [tab, setTab]             = useState<'prospects' | 'messages'>('prospects')
   const [loading, setLoading]     = useState(true)
 
+  // Auto-discover
+  const [discoverQuery, setDiscoverQuery]     = useState('')
+  const [discovering, setDiscovering]         = useState(false)
+  const [discoverResult, setDiscoverResult]   = useState<{ found: number; imported: number; sent: number; skipped: number } | null>(null)
+  const [autoDiscoverEnabled, setAutoDiscoverEnabled] = useState(false)
+
   // Add prospect form
-  const [addOpen, setAddOpen]         = useState(false)
-  const [pName, setPName]             = useState('')
-  const [pEmail, setPEmail]           = useState('')
-  const [pBsky, setPBsky]             = useState('')
-  const [pMasto, setPMasto]           = useState('')
-  const [pCompany, setPCompany]       = useState('')
-  const [pNotes, setPNotes]           = useState('')
-  const [pDomain, setPDomain]         = useState('')
-  const [addLoading, setAddLoading]   = useState(false)
+  const [addOpen, setAddOpen]           = useState(false)
+  const [pName, setPName]               = useState('')
+  const [pEmail, setPEmail]             = useState('')
+  const [pBsky, setPBsky]               = useState('')
+  const [pMasto, setPMasto]             = useState('')
+  const [pCompany, setPCompany]         = useState('')
+  const [pNotes, setPNotes]             = useState('')
+  const [pDomain, setPDomain]           = useState('')
+  const [addLoading, setAddLoading]     = useState(false)
   const [findingEmail, setFindingEmail] = useState(false)
-  const [emailScore, setEmailScore]   = useState<number | null>(null)
+  const [emailScore, setEmailScore]     = useState<number | null>(null)
 
   // Generate state
   const [generating, setGenerating]         = useState<string | null>(null) // prospect id
@@ -101,6 +107,8 @@ export default function CampaignDetailPage() {
         setCampaign(d.campaign)
         setProspects(d.prospects ?? [])
         setMessages(d.messages ?? [])
+        if (d.campaign?.apollo_query) setDiscoverQuery(d.campaign.apollo_query)
+        if (d.campaign?.auto_discover_enabled) setAutoDiscoverEnabled(d.campaign.auto_discover_enabled)
       })
       .finally(() => setLoading(false))
   }, [id])
@@ -109,6 +117,36 @@ export default function CampaignDetailPage() {
   useEffect(() => {
     if (campaign && !genChannel) setGenChannel(campaign.channels?.[0] ?? 'email')
   }, [campaign, genChannel])
+
+  const runDiscover = async () => {
+    if (!discoverQuery.trim()) { showToast('Enter a search query first'); return }
+    setDiscovering(true)
+    setDiscoverResult(null)
+    const res = await fetch(`/api/hermes/campaigns/${id}/discover`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: discoverQuery, auto_import: true }),
+    })
+    const data = await res.json()
+    setDiscovering(false)
+    if (res.ok) {
+      setDiscoverResult(data)
+      reload()
+      showToast(`Imported ${data.imported} prospects, sent ${data.sent} intros`)
+    } else {
+      showToast(`Error: ${data.error}`)
+    }
+  }
+
+  const toggleAutoDiscover = async (enabled: boolean) => {
+    setAutoDiscoverEnabled(enabled)
+    await fetch(`/api/hermes/campaigns/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ auto_discover_enabled: enabled, apollo_query: discoverQuery }),
+    })
+    showToast(enabled ? 'Weekly auto-discover ON' : 'Weekly auto-discover OFF')
+  }
 
   const findEmail = async () => {
     if (!pName.trim() || !pDomain.trim()) { showToast('Enter a name and domain first'); return }
@@ -141,8 +179,7 @@ export default function CampaignDetailPage() {
     })
     setAddLoading(false)
     if (res.ok) {
-      setAddOpen(false)
-      setPName(''); setPEmail(''); setPBsky(''); setPMasto(''); setPCompany(''); setPNotes(''); setPDomain(''); setEmailScore(null)
+      setAddOpen(false); setPName(''); setPEmail(''); setPBsky(''); setPMasto(''); setPCompany(''); setPNotes(''); setPDomain(''); setEmailScore(null)
       reload()
       showToast('Prospect added')
     }
@@ -259,6 +296,52 @@ export default function CampaignDetailPage() {
           </div>
         </div>
 
+        {/* Auto-Discover panel */}
+        <div className="bg-gray-900 border border-purple-500/20 rounded-2xl p-5 mb-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-base">🔭</span>
+              <span className="font-bold text-sm">Auto-Discover Prospects</span>
+              <span className="text-xs text-gray-500">via Apollo</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-gray-400">Run weekly</span>
+              <button
+                onClick={() => toggleAutoDiscover(!autoDiscoverEnabled)}
+                className={`w-10 h-5 rounded-full transition-all relative ${autoDiscoverEnabled ? 'bg-purple-500' : 'bg-gray-700'}`}>
+                <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-all ${autoDiscoverEnabled ? 'left-5' : 'left-0.5'}`} />
+              </button>
+            </div>
+          </div>
+          <div className="flex gap-2 mb-3">
+            <input
+              value={discoverQuery}
+              onChange={e => setDiscoverQuery(e.target.value)}
+              placeholder='e.g. "indie hacker newsletter writer" or "bootstrapped SaaS blogger"'
+              className="flex-1 px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 transition-colors"
+            />
+            <button
+              onClick={runDiscover}
+              disabled={discovering || !discoverQuery.trim()}
+              className="px-4 py-2.5 bg-purple-500 hover:bg-purple-600 disabled:opacity-40 text-white text-sm font-extrabold rounded-xl transition-all flex items-center gap-2 whitespace-nowrap">
+              {discovering
+                ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Finding...</>
+                : '🔭 Find & Import'}
+            </button>
+          </div>
+          {discoverResult && (
+            <div className="flex items-center gap-4 text-xs">
+              <span className="text-gray-400">Found <span className="text-white font-bold">{discoverResult.found}</span></span>
+              <span className="text-green-400 font-bold">↑ {discoverResult.imported} imported</span>
+              <span className="text-amber-400 font-bold">⚡ {discoverResult.sent} sent</span>
+              {discoverResult.skipped > 0 && <span className="text-gray-500">{discoverResult.skipped} already in campaign</span>}
+            </div>
+          )}
+          {autoDiscoverEnabled && discoverQuery && (
+            <p className="text-xs text-purple-400 mt-2">⚡ Running every Monday — finds new prospects, generates intros, and sends automatically.</p>
+          )}
+        </div>
+
         {/* Generate channel picker */}
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 mb-6 flex items-center gap-4">
           <span className="text-xs font-bold text-gray-400 uppercase tracking-widest shrink-0">Generate via</span>
@@ -311,8 +394,6 @@ export default function CampaignDetailPage() {
                   <input value={pCompany} onChange={e => setPCompany(e.target.value)} placeholder="Company"
                     className="px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-400" />
                 </div>
-
-                {/* Hunter.io email finder */}
                 <div className="bg-gray-800/50 border border-gray-700 rounded-xl p-3 space-y-2">
                   <p className="text-xs font-bold text-gray-400">🔍 Find email automatically</p>
                   <div className="flex gap-2">
@@ -320,9 +401,7 @@ export default function CampaignDetailPage() {
                       className="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-400" />
                     <button type="button" onClick={findEmail} disabled={findingEmail || !pName.trim() || !pDomain.trim()}
                       className="px-3 py-2 bg-amber-400 hover:bg-amber-500 disabled:opacity-40 text-black text-xs font-extrabold rounded-xl transition-all whitespace-nowrap flex items-center gap-1.5">
-                      {findingEmail
-                        ? <><div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin" /> Finding...</>
-                        : '🔍 Find'}
+                      {findingEmail ? <><div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin" /> Finding...</> : '🔍 Find'}
                     </button>
                   </div>
                   <div className="flex gap-2 items-center">
@@ -335,13 +414,12 @@ export default function CampaignDetailPage() {
                     )}
                   </div>
                 </div>
-
                 <div className="grid grid-cols-2 gap-3">
                   <input value={pBsky} onChange={e => setPBsky(e.target.value)} placeholder="Bluesky @handle"
                     className="px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-400" />
                   <input value={pMasto} onChange={e => setPMasto(e.target.value)} placeholder="Mastodon @user@instance"
                     className="px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-400" />
-                  <input value={pNotes} onChange={e => setPNotes(e.target.value)} placeholder="Notes — context for AI (podcast name, what they do)"
+                  <input value={pNotes} onChange={e => setPNotes(e.target.value)} placeholder="Notes — context for AI"
                     className="col-span-2 px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-400" />
                 </div>
                 <div className="flex gap-2">
