@@ -21,7 +21,70 @@ async function getUser() {
   return supabase.auth.getUser()
 }
 
-const STEP_LABELS = ['Intro', 'Follow-up 1', 'Follow-up 2', 'Break-up']
+const BOT_UA = 'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)'
+const EMAIL_BLOCK_DOMAINS = ['substack.com', 'example.com', 'sentry.io', 'amazonaws.com', 'cloudflare.com', 'google.com', 'wix.com', 'squarespace.com']
+
+function isValidContactEmail(email: string): boolean {
+  const lower = email.toLowerCase()
+  const domain = lower.split('@')[1] ?? ''
+  if (EMAIL_BLOCK_DOMAINS.some(d => domain.includes(d))) return false
+  if (lower.startsWith('noreply') || lower.startsWith('no-reply') || lower.startsWith('donotreply')) return false
+  if (lower.split('@')[0].length < 2) return false
+  return true
+}
+
+function extractEmailsFromHtml(html: string): string[] {
+  // mailto: links are the most reliable signal
+  const mailtoHits = Array.from(html.matchAll(/href="mailto:([^"?&\s]+)/gi))
+    .map(m => m[1].toLowerCase().trim())
+    .filter(isValidContactEmail)
+  if (mailtoHits.length > 0) return [...new Set(mailtoHits)]
+
+  // Fall back to plain text email pattern
+  const found = new Set(
+    (html.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g) ?? [])
+      .map(e => e.toLowerCase())
+      .filter(isValidContactEmail)
+  )
+  return Array.from(found)
+}
+
+async function findEmailForNewsletter(subdomain: string, customDomain?: string | null): Promise<string | null> {
+  const headers = { 'User-Agent': BOT_UA }
+
+  // 1. Substack pub API — sometimes exposes contact_email
+  try {
+    const res = await fetch(`https://${subdomain}.substack.com/api/v1/pub`, {
+      headers,
+      signal: AbortSignal.timeout(5000),
+    })
+    if (res.ok) {
+      const data = await res.json()
+      if (data?.contact_email && isValidContactEmail(data.contact_email)) return data.contact_email.toLowerCase()
+      if (data?.author?.email && isValidContactEmail(data.author.email)) return data.author.email.toLowerCase()
+    }
+  } catch { /* continue */ }
+
+  // 2. Scrape about/contact pages
+  const pagesToTry = [
+    `https://${subdomain}.substack.com/about`,
+    customDomain ? `https://${customDomain}/about` : null,
+    customDomain ? `https://${customDomain}/contact` : null,
+    customDomain ? `https://${customDomain}` : null,
+  ].filter(Boolean) as string[]
+
+  for (const url of pagesToTry) {
+    try {
+      const res = await fetch(url, { headers, signal: AbortSignal.timeout(5000) })
+      if (!res.ok) continue
+      const html = await res.text()
+      const emails = extractEmailsFromHtml(html)
+      if (emails.length > 0) return emails[0]
+    } catch { /* try next */ }
+  }
+
+  return null
+}
 
 async function generateIntro(params: {
   campaignName: string
@@ -39,8 +102,8 @@ Target persona: ${params.personaDescription ?? 'not specified'}
 
 Prospect:
 - Name: ${params.prospectName}
-${params.prospectCompany ? `- Company/Publication: ${params.prospectCompany}` : ''}
-${params.prospectTitle ? `- Title: ${params.prospectTitle}` : ''}
+${params.prospectCompany ? `- Newsletter/Publication: ${params.prospectCompany}` : ''}
+${params.prospectTitle ? `- Notes: ${params.prospectTitle}` : ''}
 
 Instructions:
 - Sender is Joshua Bostic, solo founder of SocialMate (socialmate.studio) — a social media scheduler and AI creator toolkit. What competitors charge $99/month for, we give for $5 or free.
@@ -54,10 +117,10 @@ Instructions:
 
   try {
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY!)
-    const model  = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
     const result = await model.generateContent(prompt)
-    const raw    = result.response.text().trim()
-    const json   = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim()
+    const raw = result.response.text().trim()
+    const json = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim()
     return JSON.parse(json)
   } catch {
     return {
@@ -82,160 +145,112 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     .single()
   if (!campaign) return NextResponse.json({ error: 'Campaign not found' }, { status: 404 })
 
-  const body       = await req.json()
-  const query      = body.query ?? campaign.apollo_query ?? ''
-  const titles     = body.titles as string[] | undefined
-  const perPage    = Math.min(body.per_page ?? campaign.prospects_per_run ?? 10, 25)
-  const autoImport = body.auto_import !== false  // default true
+  const body = await req.json()
+  const category = (body.category ?? campaign.apollo_query ?? 'technology').toLowerCase()
+  const perPage = Math.min(body.per_page ?? campaign.prospects_per_run ?? 10, 25)
 
-  if (!query.trim()) return NextResponse.json({ error: 'Search query required' }, { status: 400 })
+  // ── Substack leaderboard discovery ───────────────────────────────────────
+  const substackRes = await fetch(
+    `https://substack.com/api/v1/leaderboard?category=${encodeURIComponent(category)}&limit=${perPage * 2}&page=0`,
+    { headers: { 'User-Agent': BOT_UA } }
+  )
 
-  const apolloKey = process.env.APOLLO_API_KEY
-  if (!apolloKey) return NextResponse.json({ error: 'Apollo API not configured' }, { status: 500 })
-
-  // ── Apollo people search ──────────────────────────────────────────────────
-  const apolloRes = await fetch('https://api.apollo.io/v1/mixed_people/search', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache', 'X-Api-Key': apolloKey },
-    body: JSON.stringify({
-      q_keywords: query,
-      ...(titles && titles.length > 0 ? { person_titles: titles } : {}),
-      contact_email_status: ['verified', 'likely to engage'],
-      per_page: perPage,
-      page: 1,
-    }),
-  })
-
-  if (!apolloRes.ok) {
-    const err = await apolloRes.json().catch(() => ({}))
-    return NextResponse.json({ error: err.error || `Apollo error: HTTP ${apolloRes.status}` }, { status: 500 })
+  if (!substackRes.ok) {
+    return NextResponse.json({ error: `Substack discovery failed (HTTP ${substackRes.status})` }, { status: 500 })
   }
 
-  const apolloData = await apolloRes.json()
-  const people: {
+  const substackData = await substackRes.json()
+  const publications: Array<{
     name: string
-    first_name: string
-    last_name: string
-    email: string | null
-    organization_name: string | null
-    title: string | null
-  }[] = apolloData.people ?? []
+    subdomain: string
+    custom_domain?: string | null
+    author_name?: string | null
+  }> = substackData.publications ?? []
 
-  const withEmail = people.filter(p => p.email)
-  if (withEmail.length === 0) {
-    return NextResponse.json({ found: 0, imported: 0, skipped: 0, prospects: [] })
+  if (publications.length === 0) {
+    return NextResponse.json({ found: 0, withEmail: 0, imported: 0, sent: 0, skipped: 0 })
   }
 
-  // ── Dedup: skip emails already in this campaign ───────────────────────────
-  const emails = withEmail.map(p => p.email!)
-  const { data: existing } = await supabase
+  // ── Dedup against existing prospects ────────────────────────────────────
+  const { data: existingProspects } = await supabase
     .from('hermes_prospects')
-    .select('email')
+    .select('email, notes')
     .eq('campaign_id', campaign_id)
-    .in('email', emails)
 
-  const existingEmails = new Set((existing ?? []).map(r => r.email))
-  const newPeople = withEmail.filter(p => !existingEmails.has(p.email!))
+  const existingEmails = new Set(
+    (existingProspects ?? []).map(r => r.email?.toLowerCase()).filter(Boolean)
+  )
+  const existingSubdomains = new Set(
+    (existingProspects ?? [])
+      .map(r => r.notes?.match(/substack\.com\/([^/\s,]+)/)?.[1])
+      .filter(Boolean)
+  )
 
-  if (!autoImport) {
-    return NextResponse.json({
-      found: withEmail.length,
-      new: newPeople.length,
-      skipped: withEmail.length - newPeople.length,
-      prospects: newPeople.map(p => ({
-        name: p.name,
-        email: p.email,
-        company: p.organization_name,
-        title: p.title,
-      })),
-    })
-  }
+  const newPublications = publications.filter(p => !existingSubdomains.has(p.subdomain))
 
-  // ── Import + generate + send ──────────────────────────────────────────────
+  // ── Find emails + import + generate + send ──────────────────────────────
+  let withEmail = 0
   let imported = 0
-  let sent     = 0
+  let sent = 0
 
-  for (const person of newPeople) {
-    // Insert prospect
+  for (const pub of newPublications.slice(0, perPage)) {
+    const email = await findEmailForNewsletter(pub.subdomain, pub.custom_domain)
+    if (!email || existingEmails.has(email)) continue
+    withEmail++
+
     const { data: prospect } = await supabase
       .from('hermes_prospects')
       .insert({
         campaign_id,
         user_id: user.id,
-        name: person.name,
-        email: person.email,
-        company: person.organization_name,
-        notes: person.title ?? null,
+        name: pub.author_name || pub.name,
+        email,
+        company: pub.name,
+        notes: `substack.com/${pub.subdomain}`,
       })
       .select()
       .single()
-
     if (!prospect) continue
     imported++
+    existingEmails.add(email)
 
-    // Generate intro
     const { subject, body: msgBody } = await generateIntro({
       campaignName: campaign.name,
       goal: campaign.goal,
       personaDescription: campaign.persona_description,
-      prospectName: person.name,
-      prospectCompany: person.organization_name,
-      prospectTitle: person.title,
+      prospectName: pub.author_name || pub.name,
+      prospectCompany: pub.name,
+      prospectTitle: `${category} newsletter on Substack`,
     })
 
-    // Save message
     const { data: message } = await supabase
       .from('hermes_messages')
-      .insert({
-        campaign_id,
-        prospect_id: prospect.id,
-        user_id: user.id,
-        channel: 'email',
-        subject,
-        body: msgBody,
-        step: 0,
-        status: 'draft',
-      })
+      .insert({ campaign_id, prospect_id: prospect.id, user_id: user.id, channel: 'email', subject, body: msgBody, step: 0, status: 'draft' })
       .select()
       .single()
-
     if (!message) continue
 
-    // Auto mode: send immediately
     if (campaign.mode === 'auto') {
-      const result = await dispatchHermesMessage({
-        messageId: message.id,
-        channel: 'email',
-        userId: user.id,
-        prospectEmail: person.email,
-        subject,
-        body: msgBody,
-      })
-
+      const result = await dispatchHermesMessage({ messageId: message.id, channel: 'email', userId: user.id, prospectEmail: email, subject, body: msgBody })
       if (result.ok) {
         sent++
-        const sequenceDays: number[] = campaign.sequence_days ?? [0, 3, 7]
-        const nextContactAt = sequenceDays[1] != null
-          ? new Date(Date.now() + sequenceDays[1] * 24 * 60 * 60 * 1000).toISOString()
-          : null
-        await supabase
-          .from('hermes_prospects')
+        const nextDays = (campaign.sequence_days ?? [0, 3, 7])[1]
+        const nextContactAt = nextDays != null ? new Date(Date.now() + nextDays * 24 * 60 * 60 * 1000).toISOString() : null
+        await supabase.from('hermes_prospects')
           .update({ status: 'contacted', sequence_step: 1, last_contacted_at: new Date().toISOString(), next_contact_at: nextContactAt })
           .eq('id', prospect.id)
       }
     }
   }
 
-  // Save query to campaign for future auto-runs
-  await supabase
-    .from('hermes_campaigns')
-    .update({ apollo_query: query })
-    .eq('id', campaign_id)
+  // Save category for future auto-runs
+  await supabase.from('hermes_campaigns').update({ apollo_query: category }).eq('id', campaign_id)
 
   return NextResponse.json({
-    found: withEmail.length,
+    found: publications.length,
+    withEmail,
     imported,
     sent,
-    skipped: withEmail.length - newPeople.length,
+    skipped: publications.length - newPublications.length,
   })
 }

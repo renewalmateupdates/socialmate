@@ -64,9 +64,9 @@ export default function CampaignDetailPage() {
   const [loading, setLoading]     = useState(true)
 
   // Auto-discover
-  const [discoverQuery, setDiscoverQuery]     = useState('')
-  const [discovering, setDiscovering]         = useState(false)
-  const [discoverResult, setDiscoverResult]   = useState<{ found: number; imported: number; sent: number; skipped: number } | null>(null)
+  const [discoverCategory, setDiscoverCategory] = useState('technology')
+  const [discovering, setDiscovering]           = useState(false)
+  const [discoverResult, setDiscoverResult]     = useState<{ found: number; withEmail: number; imported: number; sent: number; skipped: number } | null>(null)
   const [autoDiscoverEnabled, setAutoDiscoverEnabled] = useState(false)
 
   // Add prospect form
@@ -107,7 +107,7 @@ export default function CampaignDetailPage() {
         setCampaign(d.campaign)
         setProspects(d.prospects ?? [])
         setMessages(d.messages ?? [])
-        if (d.campaign?.apollo_query) setDiscoverQuery(d.campaign.apollo_query)
+        if (d.campaign?.apollo_query) setDiscoverCategory(d.campaign.apollo_query)
         if (d.campaign?.auto_discover_enabled) setAutoDiscoverEnabled(d.campaign.auto_discover_enabled)
       })
       .finally(() => setLoading(false))
@@ -119,13 +119,12 @@ export default function CampaignDetailPage() {
   }, [campaign, genChannel])
 
   const runDiscover = async () => {
-    if (!discoverQuery.trim()) { showToast('Enter a search query first'); return }
     setDiscovering(true)
     setDiscoverResult(null)
     const res = await fetch(`/api/hermes/campaigns/${id}/discover`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: discoverQuery, auto_import: true }),
+      body: JSON.stringify({ category: discoverCategory }),
     })
     const data = await res.json()
     setDiscovering(false)
@@ -143,7 +142,7 @@ export default function CampaignDetailPage() {
     await fetch(`/api/hermes/campaigns/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ auto_discover_enabled: enabled, apollo_query: discoverQuery }),
+      body: JSON.stringify({ auto_discover_enabled: enabled, apollo_query: discoverCategory }),
     })
     showToast(enabled ? 'Weekly auto-discover ON' : 'Weekly auto-discover OFF')
   }
@@ -302,7 +301,7 @@ export default function CampaignDetailPage() {
             <div className="flex items-center gap-2">
               <span className="text-base">🔭</span>
               <span className="font-bold text-sm">Auto-Discover Prospects</span>
-              <span className="text-xs text-gray-500">via Apollo</span>
+              <span className="text-xs text-gray-500">via Substack</span>
             </div>
             <div className="flex items-center gap-3">
               <span className="text-xs text-gray-400">Run weekly</span>
@@ -314,15 +313,19 @@ export default function CampaignDetailPage() {
             </div>
           </div>
           <div className="flex gap-2 mb-3">
-            <input
-              value={discoverQuery}
-              onChange={e => setDiscoverQuery(e.target.value)}
-              placeholder='e.g. "indie hacker newsletter writer" or "bootstrapped SaaS blogger"'
-              className="flex-1 px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 transition-colors"
-            />
+            <select
+              value={discoverCategory}
+              onChange={e => setDiscoverCategory(e.target.value)}
+              className="flex-1 px-3 py-2.5 bg-gray-800 border border-gray-700 rounded-xl text-sm text-white focus:outline-none focus:border-purple-400 transition-colors">
+              <option value="technology">💻 Technology</option>
+              <option value="business">📈 Business & Startups</option>
+              <option value="culture">🎨 Culture & Creator Economy</option>
+              <option value="science">🔬 Science</option>
+              <option value="health">🌿 Health & Wellness</option>
+            </select>
             <button
               onClick={runDiscover}
-              disabled={discovering || !discoverQuery.trim()}
+              disabled={discovering}
               className="px-4 py-2.5 bg-purple-500 hover:bg-purple-600 disabled:opacity-40 text-white text-sm font-extrabold rounded-xl transition-all flex items-center gap-2 whitespace-nowrap">
               {discovering
                 ? <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Finding...</>
@@ -330,15 +333,16 @@ export default function CampaignDetailPage() {
             </button>
           </div>
           {discoverResult && (
-            <div className="flex items-center gap-4 text-xs">
-              <span className="text-gray-400">Found <span className="text-white font-bold">{discoverResult.found}</span></span>
+            <div className="flex items-center gap-4 text-xs flex-wrap">
+              <span className="text-gray-400">Found <span className="text-white font-bold">{discoverResult.found}</span> newsletters</span>
+              <span className="text-blue-400 font-bold">📧 {discoverResult.withEmail} with email</span>
               <span className="text-green-400 font-bold">↑ {discoverResult.imported} imported</span>
               <span className="text-amber-400 font-bold">⚡ {discoverResult.sent} sent</span>
               {discoverResult.skipped > 0 && <span className="text-gray-500">{discoverResult.skipped} already in campaign</span>}
             </div>
           )}
-          {autoDiscoverEnabled && discoverQuery && (
-            <p className="text-xs text-purple-400 mt-2">⚡ Running every Monday — finds new prospects, generates intros, and sends automatically.</p>
+          {autoDiscoverEnabled && (
+            <p className="text-xs text-purple-400 mt-2">⚡ Running every Monday — finds new Substack newsletters, scrapes emails, generates intros, and sends automatically.</p>
           )}
         </div>
 
