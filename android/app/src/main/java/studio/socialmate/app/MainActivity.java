@@ -9,7 +9,7 @@ public class MainActivity extends BridgeActivity {
     private boolean deepLinkConsumed = false;
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         handleAuthDeepLink(getIntent());
     }
