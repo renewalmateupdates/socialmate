@@ -2,6 +2,7 @@ import { inngest } from '@/lib/inngest'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { dispatchHermesMessage, type HermesChannel } from '@/lib/hermes-send'
+import { discoverProspects, parseDiscoverConfig } from '@/lib/hermes-discover'
 
 const STEP_LABELS = ['Intro', 'Follow-up 1', 'Follow-up 2', 'Break-up']
 
@@ -179,6 +180,7 @@ export const hermesFollowUpCron = inngest.createFunction(
   }
 )
 
+
 // Weekly Monday 10am UTC: auto-discover + send for campaigns with auto_discover_enabled
 export const hermesAutoDiscoverCron = inngest.createFunction(
   { id: 'hermes-auto-discover-cron', name: 'HERMES: Weekly Auto-Discover' },
@@ -198,48 +200,28 @@ export const hermesAutoDiscoverCron = inngest.createFunction(
 
     if (!campaigns || campaigns.length === 0) return { ran: 0 }
 
-    const apolloKey = process.env.APOLLO_API_KEY
-    if (!apolloKey) return { error: 'Apollo API key not configured' }
-
     let totalImported = 0
     let totalSent     = 0
 
     for (const campaign of campaigns) {
       await step.run(`discover-campaign-${campaign.id}`, async () => {
         const perPage = Math.min(campaign.prospects_per_run ?? 10, 25)
+        const { keyword, sources } = parseDiscoverConfig(campaign.apollo_query)
+        const limitPerSource = Math.max(1, Math.ceil(perPage / sources.length))
 
-        // Apollo search
-        const apolloRes = await fetch('https://api.apollo.io/v1/mixed_people/search', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache', 'X-Api-Key': apolloKey },
-          body: JSON.stringify({
-            q_keywords: campaign.apollo_query,
-            contact_email_status: ['verified', 'likely to engage'],
-            per_page: perPage,
-            page: 1,
-          }),
-        })
-        if (!apolloRes.ok) return
+        const found = await discoverProspects({ sources, keyword, limitPerSource })
+        if (found.length === 0) return
 
-        const apolloData = await apolloRes.json()
-        const people = (apolloData.people ?? []).filter((p: { email?: string }) => p.email)
-        if (people.length === 0) return
-
-        // Dedup
-        const emails = people.map((p: { email: string }) => p.email)
-        const { data: existing } = await supabase
-          .from('hermes_prospects')
-          .select('email')
-          .eq('campaign_id', campaign.id)
-          .in('email', emails)
-        const existingEmails = new Set((existing ?? []).map((r: { email: string }) => r.email))
-        const newPeople = people.filter((p: { email: string }) => !existingEmails.has(p.email))
+        const { data: existingProspects } = await supabase
+          .from('hermes_prospects').select('email').eq('campaign_id', campaign.id)
+        const existingEmails = new Set((existingProspects ?? []).map((r: { email: string }) => r.email?.toLowerCase()).filter(Boolean))
+        const newPeople = found.filter(p => !existingEmails.has(p.email))
 
         const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY!)
         const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
 
         for (const person of newPeople) {
-          const prompt = `Write a short cold email intro from Joshua Bostic, founder of SocialMate (socialmate.studio). Goal: ${campaign.goal ?? 'get featured in their newsletter/blog'}. Prospect: ${person.name}${person.organization_name ? ` at ${person.organization_name}` : ''}${person.title ? `, ${person.title}` : ''}. Keep it 3-4 sentences, human, no buzzwords. Output JSON: {"subject":"...","body":"..."}`
+          const prompt = `Write a short cold email intro from Joshua Bostic, founder of SocialMate (socialmate.studio). Goal: ${campaign.goal ?? 'get featured in their newsletter/blog'}. Prospect: ${person.name}${person.company ? `, runs "${person.company}"` : ''}. Keep it 3-4 sentences, human, no buzzwords. Output JSON: {"subject":"...","body":"..."}`
 
           let subject = `Quick note — SocialMate`
           let body    = `Hi ${person.name},\n\nI built SocialMate (socialmate.studio) solo — a social media scheduler + AI toolkit for $5/mo vs competitors at $99. I work a deli job nights and weekends to build this.\n\nWould you consider a mention or feature in your content?\n\n— Joshua`
@@ -251,11 +233,11 @@ export const hermesAutoDiscoverCron = inngest.createFunction(
             const parsed = JSON.parse(json)
             subject = parsed.subject ?? subject
             body    = parsed.body ?? body
-          } catch { /* fallback already set */ }
+          } catch { /* fallback */ }
 
           const { data: prospect } = await supabase
             .from('hermes_prospects')
-            .insert({ campaign_id: campaign.id, user_id: campaign.user_id, name: person.name, email: person.email, company: person.organization_name, notes: person.title })
+            .insert({ campaign_id: campaign.id, user_id: campaign.user_id, name: person.name, email: person.email, company: person.company, notes: person.notes })
             .select().single()
           if (!prospect) continue
 
@@ -266,9 +248,9 @@ export const hermesAutoDiscoverCron = inngest.createFunction(
           if (!message) continue
 
           totalImported++
+          existingEmails.add(person.email)
 
           if (campaign.mode === 'auto') {
-            const { dispatchHermesMessage } = await import('@/lib/hermes-send')
             const result = await dispatchHermesMessage({ messageId: message.id, channel: 'email', userId: campaign.user_id, prospectEmail: person.email, subject, body })
             if (result.ok) {
               totalSent++
