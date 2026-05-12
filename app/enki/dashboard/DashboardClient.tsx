@@ -323,7 +323,7 @@ export default function DashboardClient() {
 
   async function toggleGuardian() {
     if (!profile || guardianToggling) return
-    const nextMode = profile.guardian_mode === 'dormant' ? 'approval' : 'dormant'
+    const nextMode = profile.guardian_mode === 'dormant' ? 'autonomous' : 'dormant'
     setGuardianToggling(true)
     try {
       const res = await fetch('/api/enki/profile', {
@@ -337,6 +337,27 @@ export default function DashboardClient() {
       }
     } catch (e) {
       console.error('Guardian toggle error:', e)
+    } finally {
+      setGuardianToggling(false)
+    }
+  }
+
+  async function toggleApprovalMode() {
+    if (!profile || guardianToggling || profile.guardian_mode === 'dormant') return
+    const nextMode = profile.guardian_mode === 'approval' ? 'autonomous' : 'approval'
+    setGuardianToggling(true)
+    try {
+      const res = await fetch('/api/enki/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guardian_mode: nextMode }),
+      })
+      const json = await res.json()
+      if (json.success) {
+        setProfile(prev => prev ? { ...prev, guardian_mode: nextMode } : prev)
+      }
+    } catch (e) {
+      console.error('Mode toggle error:', e)
     } finally {
       setGuardianToggling(false)
     }
@@ -416,9 +437,14 @@ export default function DashboardClient() {
                 <span className={`text-xs font-bold px-2.5 py-1 rounded-full capitalize ${TIER_BADGE[profile.tier]}`}>
                   {profile.tier}
                 </span>
-                <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${MODE_BADGE[profile.guardian_mode]}`}>
+                <button
+                  onClick={toggleApprovalMode}
+                  disabled={guardianToggling || profile.guardian_mode === 'dormant'}
+                  title={profile.guardian_mode === 'approval' ? 'Click to switch to Autonomous' : profile.guardian_mode === 'autonomous' ? 'Click to switch to Approval Mode' : ''}
+                  className={`text-xs font-bold px-2.5 py-1 rounded-full transition-opacity ${MODE_BADGE[profile.guardian_mode]} ${profile.guardian_mode !== 'dormant' ? 'hover:opacity-75 cursor-pointer' : 'cursor-default'}`}
+                >
                   {MODE_LABEL[profile.guardian_mode]}
-                </span>
+                </button>
               </>
             )}
             <Link
