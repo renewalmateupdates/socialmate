@@ -23,6 +23,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
   const { id } = await params
   const { data: { user } } = await getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (user.email !== 'socialmatehq@gmail.com') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const supabase = getSupabaseAdmin()
   const { data: campaign, error } = await supabase
@@ -53,6 +54,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { id } = await params
   const { data: { user } } = await getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (user.email !== 'socialmatehq@gmail.com') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const body = await req.json()
   const allowed = ['name', 'goal', 'persona_description', 'channels', 'sequence_days', 'mode', 'status']
@@ -78,6 +80,7 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   const { id } = await params
   const { data: { user } } = await getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (user.email !== 'socialmatehq@gmail.com') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const supabase = getSupabaseAdmin()
   const { error } = await supabase

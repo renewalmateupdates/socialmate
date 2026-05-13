@@ -74,6 +74,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const { id: campaign_id } = await params
   const { data: { user } } = await getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (user.email !== 'socialmatehq@gmail.com') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const supabase = getSupabaseAdmin()
 
