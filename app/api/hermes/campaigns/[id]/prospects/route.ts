@@ -23,6 +23,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const { id: campaign_id } = await params
   const { data: { user } } = await getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (user.email !== 'socialmatehq@gmail.com') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   // Verify campaign ownership
   const supabase = getSupabaseAdmin()
@@ -61,6 +62,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   const { id: campaign_id } = await params
   const { data: { user } } = await getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (user.email !== 'socialmatehq@gmail.com') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { prospect_id } = await req.json()
   if (!prospect_id) return NextResponse.json({ error: 'prospect_id required' }, { status: 400 })

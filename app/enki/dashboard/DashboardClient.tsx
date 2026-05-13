@@ -41,7 +41,6 @@ interface Trade {
   side: 'buy' | 'sell'
   qty: number
   price: number
-  total: number
   reason: string
   confidence: number
   paper: boolean
@@ -981,7 +980,7 @@ export default function DashboardClient() {
                       </td>
                       <td className="px-4 py-3 text-right text-gray-600 dark:text-gray-400">{t.qty}</td>
                       <td className="px-4 py-3 text-right text-gray-600 dark:text-gray-400">${t.price.toFixed(2)}</td>
-                      <td className="px-4 py-3 text-right font-bold text-gray-900 dark:text-gray-100">${t.total.toFixed(2)}</td>
+                      <td className="px-4 py-3 text-right font-bold text-gray-900 dark:text-gray-100">${((t.qty ?? 0) * (t.price ?? 0)).toFixed(2)}</td>
                       <td className="px-4 py-3 text-right">
                         {t.confidence > 0 && (
                           <span className="text-amber-500 font-bold">{t.confidence.toFixed(1)}</span>

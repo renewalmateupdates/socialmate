@@ -4,11 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { Resend } from 'resend'
 import { inngest } from '@/lib/inngest'
- 
-function getResend() { return new Resend(process.env.RESEND_API_KEY) }
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
  
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
@@ -122,38 +118,6 @@ export async function GET(request: NextRequest) {
             name: 'user/signup',
             data: { email, firstName },
           }).catch((err: unknown) => console.error('[auth/callback] Failed to send user/signup event:', err))
-
-          await getResend().emails.send({
-            from: 'SocialMate <hello@socialmate.studio>',
-            to: email,
-            subject: '👋 Welcome to SocialMate!',
-            html: `
-              <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 32px; color: #111;">
-                <div style="font-size: 24px; font-weight: 800; margin-bottom: 8px;">SocialMate</div>
-                <hr style="border: none; border-top: 1px solid #eee; margin: 16px 0;" />
-                <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 8px;">Welcome aboard! 🎉</h2>
-                <p style="color: #555; font-size: 15px; line-height: 1.6;">
-                  Your account is all set. You're on the <strong>Free plan</strong> — schedule posts to
-                  Bluesky, Discord, Telegram, Mastodon and more, with new platforms being added regularly.
-                </p>
-                <div style="background: #f9f9f9; border-radius: 12px; padding: 20px; margin: 24px 0;">
-                  <div style="font-size: 13px; font-weight: 700; color: #111; margin-bottom: 12px;">Here's what you can do right now:</div>
-                  <div style="font-size: 13px; color: #555; line-height: 2;">
-                    📅 &nbsp;<a href="${appUrl}/calendar" style="color: #000;">Schedule your first post</a><br/>
-                    🤖 &nbsp;<a href="${appUrl}/ai-features" style="color: #000;">Try the AI caption tools (50 credits free/month)</a><br/>
-                    📊 &nbsp;<a href="${appUrl}/analytics" style="color: #000;">Set up your analytics</a><br/>
-                    🔗 &nbsp;<a href="${appUrl}/link-in-bio" style="color: #000;">Build your link in bio page</a>
-                  </div>
-                </div>
-                <p style="color: #555; font-size: 14px; line-height: 1.6;">
-                  Need more AI credits or connected accounts?
-                  <a href="${appUrl}/pricing" style="color: #000; font-weight: 600;">Upgrade to Pro for $5/month →</a>
-                </p>
-                <hr style="border: none; border-top: 1px solid #eee; margin: 24px 0;" />
-                <p style="color: #aaa; font-size: 12px;">SocialMate · Built for creators, small businesses, and agencies</p>
-              </div>
-            `,
-          })
         }
       } catch (err) {
         console.error('Welcome email error:', err)

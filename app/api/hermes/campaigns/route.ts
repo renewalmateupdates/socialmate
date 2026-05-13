@@ -22,6 +22,7 @@ async function getUser() {
 export async function GET() {
   const { data: { user } } = await getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (user.email !== 'socialmatehq@gmail.com') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const supabase = getSupabaseAdmin()
   const { data: campaigns, error } = await supabase
@@ -37,6 +38,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const { data: { user } } = await getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (user.email !== 'socialmatehq@gmail.com') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const body = await req.json()
   const { name, goal, persona_description, channels, sequence_days, mode } = body
