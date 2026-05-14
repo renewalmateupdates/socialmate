@@ -458,9 +458,11 @@ function CreatorPageInner() {
         )}
 
         {/* Powered by */}
-        <div className="text-center pt-2">
-          <Link href="/" className="text-xs text-secondary hover:text-primary">
-            Powered by <span className="font-bold">SocialMate</span>
+        <div className="text-center pt-2 pb-2">
+          <Link href="https://socialmate.studio/signup"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-all">
+            <span className="font-black text-amber-500 text-sm leading-none">S</span>
+            Powered by SocialMate
           </Link>
         </div>
       </div>

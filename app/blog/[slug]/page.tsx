@@ -4338,6 +4338,13 @@ export async function generateMetadata(
       title:       post.title,
       description: post.excerpt,
       url:         `https://socialmate.studio/blog/${slug}`,
+      images:      [{ url: '/og-image.png', width: 1270, height: 760, alt: post.title }],
+    },
+    twitter: {
+      card:        'summary_large_image',
+      title:       post.title,
+      description: post.excerpt,
+      images:      ['/og-image.png'],
     },
     alternates: { canonical: `https://socialmate.studio/blog/${slug}` },
   }

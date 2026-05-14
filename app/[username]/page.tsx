@@ -188,9 +188,16 @@ export default function PublicBioPage() {
         </div>
 
         {/* POWERED BY */}
-        <div className="text-center">
-          <Link href="/signup" className={`text-xs opacity-40 hover:opacity-70 transition-all ${textColor}`}>
-            Made with SocialMate · Create yours free →
+        <div className="text-center mt-2">
+          <Link
+            href="https://socialmate.studio/signup"
+            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+              bg === 'white' || bg === 'gray'
+                ? 'bg-black/6 text-black/55 hover:bg-black/12 hover:text-black/75'
+                : 'bg-white/12 text-white/55 hover:bg-white/22 hover:text-white/80'
+            }`}>
+            <span className="font-black text-amber-500 text-sm leading-none">S</span>
+            Made with SocialMate
           </Link>
         </div>
 
