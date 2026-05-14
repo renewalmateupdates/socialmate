@@ -14,8 +14,12 @@ function buildHtml(params: {
   realNumbers: string
   whatsNext: string
   closing: string
+  recipientEmail?: string
 }): string {
   const date = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+  const unsubscribeUrl = params.recipientEmail
+    ? `https://socialmate.studio/api/unsubscribe/iris?email=${encodeURIComponent(params.recipientEmail)}`
+    : 'https://socialmate.studio/settings?tab=Notifications'
 
   function nl2br(s: string) {
     return s.replace(/\n/g, '<br />')
@@ -74,14 +78,17 @@ function buildHtml(params: {
 
             <!-- Footer -->
             <div style="border-top:1px solid #f3f4f6;padding-top:24px;text-align:center;">
-              <p style="font-size:12px;color:#9ca3af;margin:0 0 6px;">
+              <p style="font-size:12px;color:#9ca3af;margin:0 0 8px;">
                 You're receiving this because you opted in to The IRIS Dispatch on SocialMate.
               </p>
-              <p style="font-size:12px;color:#9ca3af;margin:0;">
-                <a href="https://socialmate.studio/settings" style="color:#d97706;text-decoration:none;">Manage preferences</a>
+              <p style="font-size:12px;color:#9ca3af;margin:0 0 6px;">
+                <a href="${unsubscribeUrl}" style="color:#d97706;text-decoration:underline;font-weight:600;">Unsubscribe</a>
                 &nbsp;·&nbsp;
-                <a href="https://socialmate.studio" style="color:#d97706;text-decoration:none;">socialmate.studio</a>
+                <a href="https://socialmate.studio/settings?tab=Notifications" style="color:#9ca3af;text-decoration:none;">Manage preferences</a>
+                &nbsp;·&nbsp;
+                <a href="https://socialmate.studio" style="color:#9ca3af;text-decoration:none;">socialmate.studio</a>
               </p>
+              <p style="font-size:11px;color:#d1d5db;margin:8px 0 0;">SocialMate · socialmate.studio</p>
             </div>
 
           </td>
@@ -124,7 +131,7 @@ export async function POST(req: Request) {
   const { count } = await admin.from('iris_dispatches').select('*', { count: 'exact', head: true })
   const edition = (count ?? 0) + 1
 
-  const bodyHtml = buildHtml({ edition, subject, intro, whatShipped: whatShipped ?? '', realNumbers: realNumbers ?? '', whatsNext: whatsNext ?? '', closing: closing ?? '' })
+  const bodyHtml = buildHtml({ edition, subject, intro, whatShipped: whatShipped ?? '', realNumbers: realNumbers ?? '', whatsNext: whatsNext ?? '', closing: closing ?? '', recipientEmail: undefined })
 
   // Preview mode — return HTML without sending
   if (preview) {
@@ -176,7 +183,7 @@ export async function POST(req: Request) {
         from: 'Joshua @ SocialMate <noreply@socialmate.studio>',
         to,
         subject,
-        html: bodyHtml,
+        html: buildHtml({ edition, subject, intro, whatShipped: whatShipped ?? '', realNumbers: realNumbers ?? '', whatsNext: whatsNext ?? '', closing: closing ?? '', recipientEmail: to }),
       })))
       sent += chunk.length
     } catch (err) {
