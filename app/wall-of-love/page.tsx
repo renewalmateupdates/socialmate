@@ -1,5 +1,11 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
+
+export const metadata: Metadata = {
+  title: 'Wall of Love — SocialMate',
+  description: 'Real testimonials from creators, founders, and teams using SocialMate to grow their audience.',
+}
 
 // Add real testimonials here as they come in. Each entry:
 // { name, handle, platform, quote, avatar (emoji or initials) }

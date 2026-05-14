@@ -49,7 +49,7 @@ export default function InstallPrompt() {
   if (!show || installed) return null
 
   return (
-    <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-sm">
+    <div className="fixed left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-sm" style={{ bottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}>
       <div className="bg-gray-900 text-white rounded-2xl shadow-2xl p-4 flex items-center gap-3 border border-white/10">
         <img src="/icon-192.png" alt="SocialMate" className="w-10 h-10 rounded-xl flex-shrink-0" />
         <div className="flex-1 min-w-0">
