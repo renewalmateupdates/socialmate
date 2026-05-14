@@ -1838,7 +1838,6 @@ export const enkiPaperTradingScan = inngest.createFunction(
                 side:        'sell',
                 qty:         sellQty,
                 price:       signal.price,
-                total:       sellQty * signal.price,
                 broker:      'paper',
                 paper:       true,
                 confidence:  9,
@@ -1892,7 +1891,7 @@ export const enkiPaperTradingScan = inngest.createFunction(
                 const { error: tsErr } = await db.from('enki_trades').insert({
                   user_id: user.user_id, doctrine_id: doctrine?.id ?? null,
                   symbol: ts.symbol, side: 'sell', qty: pos.qty, price: curPx,
-                  total: pos.qty * curPx, broker: 'paper', paper: true,
+                  broker: 'paper', paper: true,
                   confidence: 9, status: 'filled', reason, executed_at: now.toISOString(),
                 })
                 if (!tsErr) {
@@ -2136,7 +2135,6 @@ export const enkiPaperTradingScan = inngest.createFunction(
                       side,
                       qty,
                       price,
-                      total:            tradeAmount,
                       broker:           'alpaca',
                       paper:            !!user.alpaca_paper,
                       confidence,
@@ -2565,7 +2563,6 @@ export const enkiCloudRunnerScan = inngest.createFunction(
               side:        signal.side,
               qty,
               price:       signal.price,
-              total:       tradeAmount,
               broker:      'paper',
               paper:       true,
               confidence:  signal.confidence,

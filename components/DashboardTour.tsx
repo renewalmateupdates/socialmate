@@ -14,45 +14,31 @@ type TourStep = {
 const TOUR_STEPS: TourStep[] = [
   {
     id: 'compose',
-    title: 'Write your first post',
-    description: 'Compose and schedule posts to all your connected platforms from one place.',
+    title: 'Schedule your first post',
+    description: 'Write and schedule to all your connected platforms from one place. If you created drafts during setup, they\'re waiting in the queue.',
     anchor: 'tour-compose',
     position: 'bottom',
   },
   {
     id: 'ai-credits',
-    title: 'Your AI Credits',
-    description: 'Use these for captions, hashtags, viral hooks, and more. You start with 50 free each month.',
+    title: '100 credits to start',
+    description: '50 free every month + 50 bonus for completing setup. Use them for captions, hashtags, viral hooks, post rewrites, and more.',
     anchor: 'tour-ai-credits',
     position: 'right',
   },
   {
     id: 'ai-features',
-    title: '10+ AI Tools',
-    description: 'Generate captions, hashtags, threads, post scores, and more — all powered by AI.',
+    title: '20+ AI Tools',
+    description: 'Generate captions, rewrite posts, find viral hooks, score your content before posting, and more — all one click.',
     anchor: 'tour-ai-features',
-    position: 'right',
-  },
-  {
-    id: 'sm-pulse',
-    title: 'SM-Pulse',
-    description: 'Scan trending topics before they peak. Post early, get more reach.',
-    anchor: 'tour-sm-pulse',
     position: 'right',
   },
   {
     id: 'sidebar-customize',
     title: 'Make the sidebar yours',
-    description: 'Click any section label to collapse it. Drag sections to reorder them. Pick a color theme or toggle dark mode under the Theme section at the bottom — all saved automatically.',
+    description: 'Click any section label to collapse it. Drag sections to reorder. Pick from 29 color themes or toggle dark mode under Theme at the bottom — all saved automatically.',
     anchor: 'tour-sidebar-collapse',
     position: 'right',
-  },
-  {
-    id: 'upgrade',
-    title: 'Unlock more anytime',
-    description: 'Need more AI credits, connected accounts, or client workspaces? Upgrade for $5/month.',
-    anchor: 'tour-upgrade',
-    position: 'top',
   },
 ]
 
@@ -174,10 +160,10 @@ export default function DashboardTour({ userId }: Props) {
 
           {isLast ? (
             <Link
-              href="/compose"
+              href="/queue"
               onClick={() => completeTour()}
               className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-xs font-bold rounded-xl transition-all">
-              Start creating →
+              Go to queue →
             </Link>
           ) : (
             <button

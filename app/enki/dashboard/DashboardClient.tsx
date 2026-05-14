@@ -41,7 +41,6 @@ interface Trade {
   side: 'buy' | 'sell'
   qty: number
   price: number
-  total: number
   reason: string
   confidence: number
   paper: boolean
@@ -323,7 +322,7 @@ export default function DashboardClient() {
 
   async function toggleGuardian() {
     if (!profile || guardianToggling) return
-    const nextMode = profile.guardian_mode === 'dormant' ? 'approval' : 'dormant'
+    const nextMode = profile.guardian_mode === 'dormant' ? 'autonomous' : 'dormant'
     setGuardianToggling(true)
     try {
       const res = await fetch('/api/enki/profile', {
@@ -337,6 +336,27 @@ export default function DashboardClient() {
       }
     } catch (e) {
       console.error('Guardian toggle error:', e)
+    } finally {
+      setGuardianToggling(false)
+    }
+  }
+
+  async function toggleApprovalMode() {
+    if (!profile || guardianToggling || profile.guardian_mode === 'dormant') return
+    const nextMode = profile.guardian_mode === 'approval' ? 'autonomous' : 'approval'
+    setGuardianToggling(true)
+    try {
+      const res = await fetch('/api/enki/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ guardian_mode: nextMode }),
+      })
+      const json = await res.json()
+      if (json.success) {
+        setProfile(prev => prev ? { ...prev, guardian_mode: nextMode } : prev)
+      }
+    } catch (e) {
+      console.error('Mode toggle error:', e)
     } finally {
       setGuardianToggling(false)
     }
@@ -416,9 +436,14 @@ export default function DashboardClient() {
                 <span className={`text-xs font-bold px-2.5 py-1 rounded-full capitalize ${TIER_BADGE[profile.tier]}`}>
                   {profile.tier}
                 </span>
-                <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${MODE_BADGE[profile.guardian_mode]}`}>
+                <button
+                  onClick={toggleApprovalMode}
+                  disabled={guardianToggling || profile.guardian_mode === 'dormant'}
+                  title={profile.guardian_mode === 'approval' ? 'Click to switch to Autonomous' : profile.guardian_mode === 'autonomous' ? 'Click to switch to Approval Mode' : ''}
+                  className={`text-xs font-bold px-2.5 py-1 rounded-full transition-opacity ${MODE_BADGE[profile.guardian_mode]} ${profile.guardian_mode !== 'dormant' ? 'hover:opacity-75 cursor-pointer' : 'cursor-default'}`}
+                >
                   {MODE_LABEL[profile.guardian_mode]}
-                </span>
+                </button>
               </>
             )}
             <Link
@@ -955,7 +980,7 @@ export default function DashboardClient() {
                       </td>
                       <td className="px-4 py-3 text-right text-gray-600 dark:text-gray-400">{t.qty}</td>
                       <td className="px-4 py-3 text-right text-gray-600 dark:text-gray-400">${t.price.toFixed(2)}</td>
-                      <td className="px-4 py-3 text-right font-bold text-gray-900 dark:text-gray-100">${t.total.toFixed(2)}</td>
+                      <td className="px-4 py-3 text-right font-bold text-gray-900 dark:text-gray-100">${((t.qty ?? 0) * (t.price ?? 0)).toFixed(2)}</td>
                       <td className="px-4 py-3 text-right">
                         {t.confidence > 0 && (
                           <span className="text-amber-500 font-bold">{t.confidence.toFixed(1)}</span>

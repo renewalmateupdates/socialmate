@@ -28,9 +28,14 @@ function LoginInner() {
   const handleGoogleLogin = async () => {
     setGoogleLoading(true)
     setError('')
-    const callbackUrl = redirectTo && redirectTo !== '/dashboard'
-      ? `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirectTo)}`
-      : `${window.location.origin}/auth/callback`
+    // On Android (inside Capacitor app), use custom URI scheme so the OS
+    // intercepts the OAuth callback and routes it back into the app.
+    const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent)
+    const callbackUrl = isAndroid
+      ? 'studio.socialmate.app://auth/callback'
+      : redirectTo && redirectTo !== '/dashboard'
+        ? `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirectTo)}`
+        : `${window.location.origin}/auth/callback`
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: callbackUrl },

@@ -480,6 +480,32 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
   - **r/sideprojects** — Full detail post (problem, tech stack, what shipped). No funnelling — link included directly. Flair: vibecoded showcase.
   - **r/buildinpublic** — Journey + lessons, callout to commenter advice about 1-2 core workflows. Tester ask woven in naturally.
   - **r/saasbuild** — SaaS Journey flair. Story-led, no links in post. Tester ask via comments.
+- **Reddit/DM community engagement** — Replied to comments on recruitment posts. Notable feedback received:
+  - OptimalYear2147: advised single success path onboarding ("pick channel → load 5 starter posts → auto-schedule with one tap") and 1-2 tight personas instead of chasing all users. Also volunteered as Android tester — DM sent.
+  - newtophillyfromkc: volunteered as Android tester — DM sent.
+  - Aggravating-Cheek318: Google Play tester requirement surprised them too, relatable moment.
+  - New_Sense2690 (Top 1%): validated deli job + ship grind, echoed "ship less, talk to users earlier" lesson.
+- **llms.txt updated (PR #313)** — AI discoverability file brought current: added Agents Hub (8 agents), Gilgamesh's Guides Vol 1-4, SOMA Voice DNA Builder, SOMA Project Memory, Creator Monetization Hub marked live, TikTok sandbox status, blog count bumped to 175+, all missing key pages added. This file is scanned by ChatGPT, Perplexity, Claude, Gemini when answering "what's a Hootsuite alternative" type queries.
+
+**May 11–12, 2026 (PRs #323–#327):**
+- **Android Google OAuth deep link fix** (PR #323) — `AndroidManifest.xml` added intent filter for `studio.socialmate.app://` custom scheme. `MainActivity.java` rewritten to intercept OAuth callback, translate custom scheme back to HTTPS, and load in Capacitor WebView. `app/login/page.tsx` detects Android user agent and uses custom scheme as OAuth redirect. Supabase redirect URL `studio.socialmate.app://auth/callback` added to allowed list.
+- **Android build fixes** (PRs #324, #325) — Fixed `onResume()` access modifier (must be `public` to match `BridgeActivity`). Bumped `versionCode` 2→3, `versionName` 1.0.5→1.0.7. v1.0.7 (versionCode 3) built via GitHub Actions and uploaded to Play Console closed testing track. 1 tester opted in.
+- **Enki mode toggle fix** (PR #326) — Nav "Approval Mode" badge converted from static `<span>` to clickable `<button>`. New `toggleApprovalMode()` function cycles approval↔autonomous. Guardian Pause/Resume now activates in autonomous mode by default.
+- **Audit bug fixes** (PR #327) — 7 bugs fixed across 10 files:
+  - Duplicate welcome email removed from `auth/callback/route.ts` (Inngest sequence handles it)
+  - Enki `total` column removed from all `enki_trades` inserts in `lib/inngest.ts` (column doesn't exist — was silently failing all trades)
+  - Dashboard Recent Trades `$NaN` fixed — replaced `t.total.toFixed(2)` with `((t.qty ?? 0) * (t.price ?? 0)).toFixed(2)`
+  - HERMES API routes now return 403 for non-admin users (all 5 route files)
+  - SOMA `skipPost` status changed from `'failed'` to `'draft'`
+  - SOMA `approvePost` now falls back to `now + 10 min` if `scheduled_at` is null
+  - Trend Scout dead always-true condition fixed
+
+**May 12, 2026 — Growth & Marketing:**
+- **AlternativeTo** — SocialMate submitted, pending 24hr approval. Alternatives added: Buffer, Hootsuite, Later, SocialBee, Publer.
+- **Reddit** — u/CaptainNo3491 suspended (appeal submitted). New account: u/InterestingRun7594 (display: SocialMate). Pinned post written. r/cofounderhunt post written. Karma building in progress.
+- **Competitor research** — Full pricing audit of 20 competitors completed. Key gaps: Instagram/Facebook/LinkedIn (blocked on API). Key edges: Discord/Telegram scheduling (unique), SOMA Voice DNA, Enki, 8 agents at $5/mo, SM-Give, creator monetization.
+- **LinkedIn** — Multiple posts written including build-in-public update, cofounder search angle.
+- **Cofounder search** — Actively recruiting marketing cofounder via Reddit/LinkedIn. Offering ~10% sweat equity over 24-month vest, 2-week trial, real contract.
 
 **May 13–14, 2026 (PRs #329–#334):**
 - **62 new blog posts + sitemap update** (PR #329) — 3 batches of SQL INSERTs covering Platform Schedulers, Competitor Alternatives, How-To Guides, AI Tools, Creator Guides, Founder Story. 60 new slugs added to sitemap (2 skipped as duplicates).
@@ -498,11 +524,23 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 ## Pending / In Progress
 
-- **Google Play — closed testing** — App created in console. Internal testing: Active. Closed testing: Active (1 track). **Blocker: need 12 opted-in testers + 14-day run before Google allows "Apply for production."** Currently at 1 opted-in tester (from Reddit). Active recruitment: LinkedIn post drafted + 6 Reddit posts live as of May 9. Once 12 testers opt in, the 14-day clock starts.
+- **Google Play — closed testing** — App in console. Internal + closed testing active. v1.0.7 (versionCode 3) uploaded. **Blocker: 12 opted-in testers + 14-day run.** 1 tester opted in so far. Need 11 more. Nathan (newtophillyfromkc) waiting on Google sign-in confirmation with v1.0.7. 6 Reddit posts live. Once 12 opt in, 14-day clock starts → answer Google production questions → apply.
 
 - **TikTok Production API** — Submitted Apr 23. Demo video submitted May 5. Support ticket `ad7714530aa61ad4` open. Check portal periodically. No action until approved.
 
-- **SOMA content generation** — Submit updated CLAUDE.md as master doc to SocialMate Growth SOMA project. Voice DNA (Advanced) is now active — SOMA will sound like Joshua. Do NOT write posts manually.
+- **SOMA content generation** — Submit updated CLAUDE.md as master doc to SocialMate Growth SOMA project. Voice DNA (Advanced) is now active — SOMA will sound like Joshua. Do NOT write posts manually. Next run: May 13.
+
+- **LinkedIn posts** — Multiple posts written including build-in-public update, cofounder search angle (May 12), and May 14 session update. All ready to publish manually to LinkedIn company page.
+
+- **AlternativeTo listing** — Submitted May 12, pending 24hr approval. Alternatives added: Buffer, Hootsuite, Later, SocialBee, Publer.
+
+- **Reddit cofounder post** — Written and ready. Waiting on u/InterestingRun7594 karma build before posting to r/cofounderhunt. u/CaptainNo3491 suspended (appeal submitted).
+
+- **Wyoming LLC annual report** — Needs filing. Low funds currently — do when budget allows.
+
+- **Cofounder search** — Actively recruiting marketing cofounder via Reddit/LinkedIn. ~10% sweat equity over 24-month vest, 2-week trial, real contract.
+
+- **Onboarding UX simplification** — Community feedback (OptimalYear2147) strongly recommends narrowing to a single success path: "pick channel → 5 starter posts → auto-schedule with one tap." Agents/SOMA/Enki/monetization should surface as upgrades after the first win. Worth a focused sprint.
 
 - **Enki Truth Mode** — 50-trade minimum per strategy before results are statistically valid. Check `/enki/truth` periodically.
 
@@ -512,20 +550,20 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 - **Admin Pro count discrepancy** — Overview shows "1 Pro" from `workspaces.plan` but users page (reads `user_settings.plan`) shows 0. Likely Abdus Sohag's old workspace not synced. Not a real paying user. Needs investigation to sync the two plan fields.
 
-- **Inngest resync needed** — After merging the monthly credits reset email PR, resync `monthly-credits-reset-email` function in Inngest dashboard.
+- **Inngest resync needed** — After merging PR #334, resync `monthly-credits-reset-email` in Inngest dashboard.
 
 **Roadmap (next up):**
 - **SOMA content run** — Submit updated CLAUDE.md to SOMA project. Voice DNA (Advanced tier) active. This is the priority for content.
-- **Google Play production** — Need 11 more testers. Currently 1/12.
+- **Google Play production** — Need 11 more testers. Currently 1/12. Nathan pending.
+- **Onboarding UX simplification** — Single success path: pick channel → 5 starter posts → auto-schedule. High priority based on community feedback.
 - **Landing page "Available on Google Play" badge** — Add after Play Store production approval.
 - **Product Hunt follow-up** — "We've shipped 40+ features since launch" comment on original PH post. Deferred ~1 week.
-- **Testimonials** — Reach out to 5 existing users directly for a one-liner quote. Even 2 real quotes on landing page converts better than zero.
-- **Discord community** — SocialMate's own Discord server as a tester pool + feature feedback loop. No code needed, just create it.
+- **Testimonials** — Reach out to 5 existing users directly for a one-liner quote.
+- **Discord community** — SocialMate's own Discord server as a tester pool + feature feedback loop.
 - **Gilgamesh's Guides Vol. 5+** — Deep-dive research-backed guides. Topics TBD.
 - **Apple App Store** — Deferred 3–6 months.
 - **LinkedIn publishing** — Pending API credentials. On hold.
 - **Instagram / Facebook / Threads** — Pending Meta API access. Long-term roadmap.
-
 ## Confirmed Done (stop asking about these)
 
 - ✅ **IRIS Dispatch + unsubscribe (May 13–14, PRs #330–331)** — Newsletter live. Edition #1 sent + received. Unsubscribe flow CAN-SPAM compliant. Settings opt-in toggle live. Never ask about building IRIS again.

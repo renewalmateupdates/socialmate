@@ -379,7 +379,9 @@ export default function SomaDashboardPage() {
 
   const approvePost = async (id: string) => {
     setActionLoading(p => ({ ...p, [id]: true }))
-    await supabase.from('posts').update({ status: 'scheduled' }).eq('id', id)
+    const post = drafts.find(d => d.id === id)
+    const scheduled_at = post?.scheduled_at ?? new Date(Date.now() + 10 * 60 * 1000).toISOString()
+    await supabase.from('posts').update({ status: 'scheduled', scheduled_at }).eq('id', id)
     setDrafts(p => p.filter(d => d.id !== id))
     setActionLoading(p => ({ ...p, [id]: false }))
   }
@@ -388,7 +390,7 @@ export default function SomaDashboardPage() {
     setActionLoading(p => ({ ...p, [id]: true }))
     await supabase
       .from('posts')
-      .update({ status: 'failed', metadata: { source: 'soma', skip_reason: 'User skipped from SOMA queue' } })
+      .update({ status: 'draft', metadata: { source: 'soma', skip_reason: 'User skipped from SOMA queue' } })
       .eq('id', id)
     setDrafts(p => p.filter(d => d.id !== id))
     setActionLoading(p => ({ ...p, [id]: false }))

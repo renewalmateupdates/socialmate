@@ -121,7 +121,7 @@ export default function TrendScoutPage() {
                 <li>✓ Each comes with a ready-to-post draft</li>
               </ul>
               <p className="text-xs text-secondary mt-3">
-                {([] as any[]).length === 0
+                {results === null
                   ? <>Add competitors in <Link href="/competitors" className="text-amber-600 underline">Competitor Tracking</Link> first — Trend Scout uses that data.</>
                   : 'Enable the agent above — first results will arrive tomorrow at 7am UTC.'}
               </p>
