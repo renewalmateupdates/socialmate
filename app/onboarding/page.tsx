@@ -205,17 +205,6 @@ function OnboardingInner() {
       )
     }
 
-    const { data: settingsNow } = await supabase
-      .from('user_settings')
-      .select('ai_credits_remaining, earned_credits')
-      .eq('user_id', user.id)
-      .single()
-
-    await supabase.from('user_settings').update({
-      ai_credits_remaining: (settingsNow?.ai_credits_remaining ?? 50) + 50,
-      earned_credits:       (settingsNow?.earned_credits ?? 0) + 50,
-    }).eq('user_id', user.id)
-
     setSaving(false)
     window.location.href = '/dashboard?welcome=1'
   }
@@ -418,7 +407,7 @@ function OnboardingInner() {
                       className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
                       ← Back
                     </button>
-                    <button onClick={() => setStep(4)}
+                    <button onClick={() => setStep(quickMode ? 5 : 4)}
                       className="flex-1 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all text-gray-500 dark:text-gray-400">
                       Skip for now →
                     </button>
@@ -601,7 +590,7 @@ function OnboardingInner() {
               )}
 
               {/* SM-Give */}
-              <div className="rounded-2xl p-5 mb-6 text-left" style={{ background: 'linear-gradient(135deg, #FFF7ED 0%, #FEF3C7 100%)', border: '1px solid #FED7AA' }}>
+              <div className="rounded-2xl p-5 mb-6 text-left bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800">
                 <p className="text-sm font-extrabold text-amber-800 mb-2">Every plan powers something bigger 🧡</p>
                 <p className="text-xs text-amber-700 leading-relaxed mb-3">
                   2% of every subscription goes to SM-Give — funding school supplies, baby essentials, and care packages for people experiencing homelessness. When you upgrade, you're not just getting more features.
