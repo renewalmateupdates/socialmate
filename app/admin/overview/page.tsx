@@ -240,7 +240,27 @@ export default async function AdminOverviewPage() {
     }
   } catch { /* graceful fallback */ }
 
-  // ── 6. Recent signups ─────────────────────────────────────────────────
+  // ── 6. Platform distribution ─────────────────────────────────────────
+  interface PlatformCount { platform: string; count: number }
+  let platformDist: PlatformCount[] = []
+
+  try {
+    const { data: accounts } = await admin
+      .from('connected_accounts')
+      .select('platform, user_id')
+      .neq('user_id', adminUserId)
+    if (accounts) {
+      const pm = new Map<string, number>()
+      for (const acc of accounts) {
+        pm.set(acc.platform, (pm.get(acc.platform) ?? 0) + 1)
+      }
+      platformDist = Array.from(pm.entries())
+        .map(([platform, count]) => ({ platform, count }))
+        .sort((a, b) => b.count - a.count)
+    }
+  } catch { /* graceful fallback */ }
+
+  // ── 7. Recent signups ─────────────────────────────────────────────────
   interface RecentUser {
     email: string
     plan: string
@@ -343,10 +363,10 @@ export default async function AdminOverviewPage() {
         <section>
           <SectionLabel>Growth Snapshot</SectionLabel>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard label="Total Users" value={fmt(totalUsers)} accent="text-blue-400" sub="registered accounts" />
-            <StatCard label="New Last 7d" value={fmt(newUsers7d)} accent="text-emerald-400" sub="new signups" />
-            <StatCard label="Pro Subscribers" value={fmt(proCount)} accent="text-sky-400" sub="pro + pro annual" />
-            <StatCard label="Agency Subscribers" value={fmt(agencyCount)} accent="text-purple-400" sub="agency + annual" />
+            <StatCard label="Total Users" value={fmt(totalUsers)} accent="text-blue-400" sub="registered accounts" href="/admin/users" />
+            <StatCard label="New Last 7d" value={fmt(newUsers7d)} accent="text-emerald-400" sub="new signups" href="/admin/users" />
+            <StatCard label="Pro Subscribers" value={fmt(proCount)} accent="text-sky-400" sub="pro + pro annual" href="/admin/users?plan=pro" />
+            <StatCard label="Agency Subscribers" value={fmt(agencyCount)} accent="text-purple-400" sub="agency + annual" href="/admin/users?plan=agency" />
           </div>
         </section>
 
@@ -359,6 +379,7 @@ export default async function AdminOverviewPage() {
               value={fmt(activePaidCount)}
               accent="text-amber-400"
               sub="non-free personal workspaces"
+              href="/admin/users"
             />
             <StatCard
               label="SOMA Autopilot"
@@ -414,7 +435,25 @@ export default async function AdminOverviewPage() {
           </div>
         </section>
 
-        {/* ── Section 5: Churn signals ─────────────────────────────────── */}
+        {/* ── Section 5: Platform distribution ────────────────────────── */}
+        {platformDist.length > 0 && (
+          <section>
+            <SectionLabel>Platform Distribution</SectionLabel>
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                {platformDist.map(({ platform, count }) => (
+                  <div key={platform} className="flex items-center justify-between bg-gray-800/60 rounded-xl px-4 py-3">
+                    <span className="text-sm font-semibold text-gray-300 capitalize">{platform}</span>
+                    <span className="text-lg font-black text-amber-400">{count}</span>
+                  </div>
+                ))}
+              </div>
+              <p className="text-xs text-gray-600 mt-3">Connected accounts per platform — excludes admin</p>
+            </div>
+          </section>
+        )}
+
+        {/* ── Section 6: Churn signals ─────────────────────────────────── */}
         <section>
           <SectionLabel>Churn Signals</SectionLabel>
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
@@ -508,17 +547,32 @@ function StatCard({
   value,
   accent,
   sub,
+  href,
 }: {
   label: string
   value: string
   accent: string
   sub: string
+  href?: string
 }) {
-  return (
-    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+  const inner = (
+    <>
       <div className={`text-3xl font-black mb-1 ${accent}`}>{value}</div>
       <div className="text-sm font-semibold text-gray-300">{label}</div>
       <div className="text-xs text-gray-600 mt-0.5">{sub}</div>
+      {href && <div className="text-xs text-gray-700 mt-2 group-hover:text-amber-500 transition-colors">View →</div>}
+    </>
+  )
+  if (href) {
+    return (
+      <Link href={href} className="group bg-gray-900 border border-gray-800 rounded-2xl p-5 block hover:border-gray-600 transition-all">
+        {inner}
+      </Link>
+    )
+  }
+  return (
+    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+      {inner}
     </div>
   )
 }

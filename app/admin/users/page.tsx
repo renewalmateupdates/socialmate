@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 interface AdminUser {
   user_id: string
@@ -24,11 +24,12 @@ const PLAN_BADGE: Record<string, string> = {
 
 export default function AdminUsersPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [users, setUsers] = useState<AdminUser[]>([])
   const [loading, setLoading] = useState(true)
   const [forbidden, setForbidden] = useState(false)
   const [search, setSearch] = useState('')
-  const [planFilter, setPlanFilter] = useState('')
+  const [planFilter, setPlanFilter] = useState(searchParams.get('plan') || '')
   const [selected, setSelected] = useState<AdminUser | null>(null)
 
   const load = useCallback(async () => {
