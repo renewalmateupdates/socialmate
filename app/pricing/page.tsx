@@ -312,6 +312,9 @@ export default function Pricing() {
           <p className="text-gray-500 text-sm max-w-xl mx-auto leading-relaxed">
             Buffer charges $18/mo for 5 platforms. Hootsuite charges $99/mo. SocialMate gives you all 16 platforms, 12 AI tools, and a Link in Bio page — starting at $0.
           </p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-4">
+            Join <span className="font-bold text-gray-600 dark:text-gray-300">30+ creators</span> already scheduling with SocialMate
+          </p>
 
           <div className="flex items-center justify-center gap-1 mt-8 bg-gray-100 dark:bg-gray-800 rounded-2xl p-1 w-fit mx-auto">
             {(['monthly', 'annual'] as Interval[]).map(i => (
@@ -364,8 +367,51 @@ export default function Pricing() {
           )}
         </div>
 
+        {/* BIRTHDAY PROMO BANNER — teaser before 6/15, active 6/15–12/15 */}
+        {(() => {
+          const now = new Date()
+          const start = new Date('2026-06-15')
+          const end = new Date('2026-12-16')
+          const isActive = now >= start && now < end
+          const isTeaser = now < start
+          if (!isActive && !isTeaser) return null
+          return (
+            <div className={`mb-8 rounded-2xl p-5 border text-center ${
+              isActive
+                ? 'bg-amber-50 dark:bg-amber-950/20 border-amber-300 dark:border-amber-700'
+                : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+            }`}>
+              <p className="text-xl mb-1">🎂</p>
+              {isActive ? (
+                <>
+                  <p className="text-sm font-extrabold text-amber-800 dark:text-amber-300 mb-1">
+                    Birthday Deal — 31% off any plan
+                  </p>
+                  <p className="text-xs text-amber-700 dark:text-amber-400 mb-3 leading-relaxed">
+                    Joshua's turning 31. Six months of savings. Runs through Dec 15, 2026.
+                  </p>
+                  <button
+                    onClick={() => { setCouponInput('BDAY31'); setCouponError(null) }}
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-amber-400 hover:bg-amber-500 text-black text-xs font-bold rounded-xl transition-all">
+                    Apply code BDAY31 →
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm font-extrabold text-gray-700 dark:text-gray-300 mb-1">
+                    Big deal dropping June 15 — 31% off everything
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    Joshua's turning 31. Six months of discounts. Bookmark this page.
+                  </p>
+                </>
+              )}
+            </div>
+          )
+        })()}
+
         {/* PLAN CARDS */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {PLANS.map(plan => {
             const priceId = annual ? plan.annualPriceId : plan.monthlyPriceId
             return (
@@ -432,6 +478,21 @@ export default function Pricing() {
               </div>
             )
           })}
+        </div>
+
+        {/* SECURE CHECKOUT BADGE */}
+        <div className="flex items-center justify-center gap-4 mb-8 flex-wrap">
+          <div className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500">
+            <span>🔒</span><span>Secure checkout via Stripe</span>
+          </div>
+          <div className="w-px h-3 bg-gray-200 dark:bg-gray-700 hidden sm:block" />
+          <div className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500">
+            <span>↩️</span><span>Cancel anytime, no questions asked</span>
+          </div>
+          <div className="w-px h-3 bg-gray-200 dark:bg-gray-700 hidden sm:block" />
+          <div className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500">
+            <span>💳</span><span>No credit card required for Free plan</span>
+          </div>
         </div>
 
         {/* WHITE LABEL ADD-ON */}
