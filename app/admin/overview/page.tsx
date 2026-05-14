@@ -48,6 +48,9 @@ export default async function AdminOverviewPage() {
   const minus30d = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString()
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
 
+  // Exclude admin's own account from all business metrics so stats reflect real paying users
+  const adminUserId = user.id
+
   // ── 1. Growth snapshot ────────────────────────────────────────────────
   let totalUsers = 0
   let newUsers7d = 0
@@ -67,6 +70,7 @@ export default async function AdminOverviewPage() {
       .from('workspaces')
       .select('id', { count: 'exact', head: true })
       .eq('is_personal', true)
+      .neq('owner_id', adminUserId)
       .gte('created_at', minus7d)
     newUsers7d = count ?? 0
   } catch { /* graceful fallback */ }
@@ -77,6 +81,7 @@ export default async function AdminOverviewPage() {
       .select('id', { count: 'exact', head: true })
       .in('plan', ['pro', 'pro_annual'])
       .eq('is_personal', true)
+      .neq('owner_id', adminUserId)
     proCount = count ?? 0
   } catch { /* graceful fallback */ }
 
@@ -86,6 +91,7 @@ export default async function AdminOverviewPage() {
       .select('id', { count: 'exact', head: true })
       .in('plan', ['agency', 'agency_annual'])
       .eq('is_personal', true)
+      .neq('owner_id', adminUserId)
     agencyCount = count ?? 0
   } catch { /* graceful fallback */ }
 
@@ -99,6 +105,7 @@ export default async function AdminOverviewPage() {
       .select('id', { count: 'exact', head: true })
       .neq('plan', 'free')
       .eq('is_personal', true)
+      .neq('owner_id', adminUserId)
     activePaidCount = count ?? 0
   } catch { /* graceful fallback */ }
 
@@ -107,6 +114,7 @@ export default async function AdminOverviewPage() {
       .from('workspaces')
       .select('id', { count: 'exact', head: true })
       .eq('soma_autopilot_enabled', true)
+      .neq('owner_id', adminUserId)
     autopilotCount = count ?? 0
   } catch { /* graceful fallback */ }
 
@@ -198,6 +206,7 @@ export default async function AdminOverviewPage() {
       .select('id, owner_id')
       .in('plan', ['pro', 'pro_annual', 'agency', 'agency_annual'])
       .eq('is_personal', true)
+      .neq('owner_id', adminUserId)
       .lte('created_at', minus30d)
 
     if (paidWorkspaces && paidWorkspaces.length > 0) {
@@ -245,6 +254,7 @@ export default async function AdminOverviewPage() {
       .from('workspaces')
       .select('owner_id, plan, created_at')
       .eq('is_personal', true)
+      .neq('owner_id', adminUserId)
       .order('created_at', { ascending: false })
       .limit(10)
 
@@ -360,7 +370,7 @@ export default async function AdminOverviewPage() {
               <div className="text-3xl font-black text-amber-400 mb-1">{fmtMRR(estimatedMRR)}/mo</div>
               <div className="text-sm font-semibold text-gray-300">Est. MRR</div>
               <div className="text-xs text-gray-600 mt-0.5">pro×$5 + agency×$20 + autopilot×$10</div>
-              <div className="text-xs text-amber-600 mt-1 font-medium">est. — does not include add-ons or annual</div>
+              <div className="text-xs text-amber-600 mt-1 font-medium">est. — excludes admin account · does not include add-ons or annual</div>
             </div>
           </div>
         </section>
