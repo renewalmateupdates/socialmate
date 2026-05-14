@@ -185,6 +185,16 @@ function SignupForm() {
                 SocialMate is built on a simple belief: software should work for you, not extract from you. Free means free — not a 14-day trial, not a stripped-down version.
               </p>
             </div>
+            <div className="mt-4 flex items-center gap-3">
+              <div className="flex -space-x-1.5">
+                {['🧑‍💻','👩‍🎨','🧑‍🎤','👨‍💼'].map((e, i) => (
+                  <div key={i} className="w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-700 border-2 border-white dark:border-gray-900 flex items-center justify-center text-sm">{e}</div>
+                ))}
+              </div>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                <span className="font-bold text-gray-700 dark:text-gray-300">30+ creators</span> already scheduling with SocialMate
+              </p>
+            </div>
           </div>
 
           {/* RIGHT — FORM */}

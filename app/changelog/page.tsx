@@ -21,6 +21,31 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'May 14, 2026',
+    version: 'Admin Insights + Growth Infrastructure',
+    changes: [
+      { type: 'New',      text: 'IRIS Dispatch — biweekly build-in-public newsletter. Admin compose UI at /admin/iris with live preview, recipient count, send history. Subscribers manage opt-in in Settings → Notifications. One-click unsubscribe in every email.' },
+      { type: 'New',      text: 'Monthly credits reset email — automatic Resend email on the 1st of each month reminding users their credits refreshed. Free users get a soft Pro upgrade nudge.' },
+      { type: 'New',      text: 'Admin God Mode improvements — stat cards are now clickable (drill into filtered user lists). Platform distribution section shows connected account counts per platform across all real users.' },
+      { type: 'New',      text: 'Open Graph metadata for link-in-bio and creator pages — each public bio and creator page now generates its own og:title, og:description, and twitter card. Blog posts now include og:image.' },
+      { type: 'Improved', text: '"Made with SocialMate" badge on link-in-bio pages — upgraded from near-invisible to a proper amber-accented pill that adapts to light and dark page backgrounds.' },
+      { type: 'Improved', text: 'Admin overview stats now exclude the admin account — Pro count, Agency count, MRR, SOMA autopilot count, churn signals, and recent signups all reflect real paying users only.' },
+      { type: 'Fixed',    text: 'Admin users page — useSearchParams wrapped in Suspense boundary to fix Next.js 15 build error.' },
+    ],
+  },
+  {
+    date: 'May 9, 2026',
+    version: 'SOMA Voice DNA + Project Memory + Google Play',
+    changes: [
+      { type: 'New',      text: 'SOMA Voice DNA Builder — 40-question personality interview in 3 tiers (Foundation / Deep Dive / Advanced). Gemini writes a 150–200 word Voice DNA summary injected into every content prompt. SOMA stops guessing and starts sounding like you.' },
+      { type: 'New',      text: 'SOMA Project Memory — each project tracks running manager notes, topics covered, angles used, and total posts generated. Ingest reads memory and tells Gemini what NOT to repeat. Clear memory button for fresh start.' },
+      { type: 'New',      text: 'Post-publish feedback modal — "Give feedback" button after generate runs. 3 questions from a pool of 8 (voice match, more-of, what missed). Every response rebuilds Voice DNA from last 20 answers.' },
+      { type: 'New',      text: 'SOMA project ingest now supports up to 500k character documents — full doc, no truncation or slicing.' },
+      { type: 'Improved', text: 'Google Play closed testing active — internal + closed test tracks live. App requires 12 opted-in testers + 14-day run before production.' },
+      { type: 'Fixed',    text: 'Voice DNA done screen linked to /soma/dashboard (was 404). Voice DNA tier badge + "saved" state added to SOMA dashboard identity card.' },
+    ],
+  },
+  {
     date: 'May 6, 2026',
     version: "Gilgamesh's Guides Complete + TikTok + Android + 30 Blog Posts",
     changes: [
