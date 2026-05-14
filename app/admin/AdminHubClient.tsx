@@ -19,6 +19,7 @@ const NAV_CARDS = [
   { emoji: '🚩', label: 'Feature Flags',  sub: 'Enable / disable features',     href: '/admin/feature-flags'  },
   { emoji: '📊', label: 'Platform Stats', sub: 'Posts by platform & trends',    href: '/admin/platform-stats' },
   { emoji: '🔒', label: 'Account Jail',   sub: 'Cooling-period platform accounts', href: '/admin/platform-jail'  },
+  { emoji: '🌈', label: 'IRIS Dispatch',  sub: 'Send biweekly build-in-public newsletter', href: '/admin/iris' },
 ]
 
 export default function AdminHubClient() {
