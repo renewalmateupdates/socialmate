@@ -39,9 +39,10 @@ const FOOTER_COLUMNS: FooterColumn[] = [
   {
     heading: 'Legal',
     links: [
-      { label: 'Privacy',    href: '/privacy', rose: false },
-      { label: 'Terms',      href: '/terms',   rose: false },
-      { label: '❤️ SM-Give', href: '/give',    rose: true  },
+      { label: 'Privacy',       href: '/privacy',       rose: false },
+      { label: 'Terms',         href: '/terms',         rose: false },
+      { label: 'Wall of Love',  href: '/wall-of-love',  rose: false },
+      { label: '❤️ SM-Give',   href: '/give',          rose: true  },
     ],
   },
 ]
