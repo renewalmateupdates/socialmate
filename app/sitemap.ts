@@ -256,6 +256,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/studio-stax`,         lastModified: now, changeFrequency: 'weekly',  priority: 0.8 },
     { url: `${base}/studio-stax/apply`,   lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/give`,                lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/wall-of-love`,        lastModified: now, changeFrequency: 'weekly',  priority: 0.6 },
     { url: `${base}/partners`,            lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${base}/signup`,              lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/login`,               lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
