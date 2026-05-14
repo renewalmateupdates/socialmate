@@ -4543,3 +4543,103 @@ export const publishScheduledTiktokPosts = inngest.createFunction(
     return { published, total: due.length }
   }
 )
+
+// ─── Monthly Credits Reset Email ────────────────────────────────────────────
+// Fires on the 1st of every month at 10am UTC.
+// Reminds users their credits just reset + soft upgrade nudge for free tier.
+export const monthlyCreditsResetEmail = inngest.createFunction(
+  { id: 'monthly-credits-reset-email', name: 'Monthly Credits Reset Email', retries: 2 },
+  { cron: '0 10 1 * *' },
+  async ({ step }) => {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
+
+    // Fetch all users + their plan
+    const userData = await step.run('fetch-users', async () => {
+      const supabase = getSupabaseAdmin()
+      const usersRes = await supabase.auth.admin.listUsers({ perPage: 1000 })
+      const authUsers = usersRes.data?.users ?? []
+
+      const { data: settings } = await supabase
+        .from('user_settings')
+        .select('user_id, plan')
+        .limit(2000)
+
+      const planMap: Record<string, string> = {}
+      for (const s of settings ?? []) planMap[s.user_id] = s.plan ?? 'free'
+
+      return authUsers
+        .filter(u => u.email)
+        .map(u => ({ id: u.id, email: u.email!, plan: planMap[u.id] ?? 'free' }))
+    })
+
+    const users = userData as Array<{ id: string; email: string; plan: string }>
+    const CREDIT_MAP: Record<string, number> = {
+      free: 50, pro: 500, pro_annual: 500, agency: 2000, agency_annual: 2000,
+    }
+
+    const resend = getResend()
+    let sent = 0
+
+    for (const u of users) {
+      const credits = CREDIT_MAP[u.plan] ?? 50
+      const isFree = u.plan === 'free'
+      const month = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+
+      const html = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8" /><meta name="viewport" content="width=device-width,initial-scale=1" /></head>
+<body style="margin:0;padding:0;background:#f3f4f6;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6;">
+    <tr><td align="center" style="padding:32px 16px;">
+      <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+        <tr>
+          <td style="background:#000000;border-radius:16px 16px 0 0;padding:32px 40px;text-align:center;">
+            <div style="font-size:32px;font-weight:900;color:#ffffff;letter-spacing:-1px;">SocialMate</div>
+            <div style="font-size:13px;color:#9ca3af;margin-top:6px;">Your monthly credits just reset</div>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#ffffff;padding:40px;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 16px 16px;">
+            <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:24px;text-align:center;margin-bottom:28px;">
+              <div style="font-size:48px;font-weight:900;color:#16a34a;">${credits}</div>
+              <div style="font-size:14px;font-weight:700;color:#15803d;margin-top:4px;">credits available for ${month}</div>
+            </div>
+            <p style="font-size:15px;color:#374151;line-height:1.7;margin:0 0 20px;">Your ${credits} monthly credits are ready. Use them on AI captions, rewrites, hooks, hashtag suggestions, thread generation, and more.</p>
+            <div style="text-align:center;margin-bottom:28px;">
+              <a href="${appUrl}/compose" style="display:inline-block;background:#000000;color:#ffffff;padding:14px 36px;border-radius:999px;font-size:14px;font-weight:700;text-decoration:none;">Start scheduling →</a>
+            </div>
+            ${isFree ? `
+            <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:20px;margin-bottom:24px;">
+              <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:8px;">💡 Want 10× more credits?</div>
+              <div style="font-size:13px;color:#78350f;line-height:1.6;">Upgrade to Pro for <strong>500 credits/month</strong> — plus unlimited scheduling, 5 team seats, and priority support. Just $5/month.</div>
+              <div style="margin-top:12px;text-align:center;">
+                <a href="${appUrl}/pricing" style="display:inline-block;background:#d97706;color:#ffffff;padding:10px 24px;border-radius:999px;font-size:13px;font-weight:700;text-decoration:none;">Upgrade to Pro — $5/mo →</a>
+              </div>
+            </div>` : ''}
+            <div style="border-top:1px solid #f3f4f6;padding-top:20px;text-align:center;">
+              <p style="font-size:11px;color:#9ca3af;margin:0;">You're receiving this because you have a SocialMate account. <a href="${appUrl}/settings?tab=Notifications" style="color:#6b7280;">Manage preferences</a></p>
+            </div>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`
+
+      try {
+        await resend.emails.send({
+          from: 'SocialMate <noreply@socialmate.studio>',
+          to: u.email,
+          subject: `Your ${credits} SocialMate credits just reset — ${month}`,
+          html,
+        })
+        sent++
+      } catch (err) {
+        console.error('[Monthly Credits Email] failed for', u.email, err)
+      }
+    }
+
+    return { sent, total: users.length }
+  }
+)

@@ -481,35 +481,60 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
   - **r/buildinpublic** — Journey + lessons, callout to commenter advice about 1-2 core workflows. Tester ask woven in naturally.
   - **r/saasbuild** — SaaS Journey flair. Story-led, no links in post. Tester ask via comments.
 
+**May 13–14, 2026 (PRs #329–#334):**
+- **62 new blog posts + sitemap update** (PR #329) — 3 batches of SQL INSERTs covering Platform Schedulers, Competitor Alternatives, How-To Guides, AI Tools, Creator Guides, Founder Story. 60 new slugs added to sitemap (2 skipped as duplicates).
+- **IRIS Dispatch newsletter** (PR #330) — Biweekly build-in-public newsletter named after the Greek goddess of the rainbow + divine messenger (fits deity pantheon: HERMES/ENKI/SOMA/IRIS). Admin compose UI at `/admin/iris` with live preview (iframe), recipient count, confirmation modal, send history. Settings opt-in toggle in onboarding step 1 + Settings → Notifications. IRIS card added to Admin Hub.
+- **IRIS unsubscribe** (PR #331) — One-click unsubscribe via `GET /api/unsubscribe/iris?email=xxx`. Sets `iris_opt_in=false`. Confirmation page at `/unsubscribe/iris` with success/error states. CAN-SPAM compliant. Per-recipient HTML generation with unique unsubscribe URLs in every email batch.
+- **Admin God Mode fixes** (PR #332) — All workspace queries now exclude admin's own account (`owner_id != adminUserId`). Pro count, Agency count, MRR, SOMA autopilot, churn signals, and recent signups all reflect real users only.
+- **Admin God Mode + clickable stats + platform distribution** (PR #333) — Stat cards are now clickable links (Pro → `/admin/users?plan=pro`). Platform Distribution section shows connected account counts per platform. Admin users page reads `?plan=` from URL on mount (Suspense boundary added for Next.js 15 build fix).
+- **Badge + OG metadata** (PR #333) — Link-in-bio badge upgraded from 40%-opacity text to amber-S pill. Creator page badge same design. `app/[username]/layout.tsx` + `app/creator/[handle]/layout.tsx` added with `generateMetadata` for per-page OG tags. Blog posts now include `og:image` + Twitter card.
+- **Changelog updated** — May 9 + May 14 entries added. Changelog linked in PublicNav Resources dropdown.
+- **Monthly credits reset email** — Inngest cron `0 10 1 * *` (1st of each month, 10am UTC). Sends personalized Resend email to every user with their refreshed credit count. Free users get a soft Pro upgrade nudge. Registered in `/api/inngest/route.ts`.
+- **Signup social proof** — "30+ creators already scheduling with SocialMate" with emoji avatars added to signup page left panel.
+- **SQL to run in Supabase:** `supabase/migrations/20260513000001_iris_newsletter.sql` (ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS iris_opt_in BOOLEAN DEFAULT true; + CREATE TABLE iris_dispatches).
+- **Edition #1 of IRIS Dispatch sent** — Subject: "We're Live, We're Building, and We're Not Stopping". 29 recipients. Joshua confirmed receipt.
+
 ---
 
 ## Pending / In Progress
 
-- **Google Play — closed testing** — App created in console. Internal testing: Active. Closed testing: Active (1 track). **Blocker: need 12 opted-in testers + 14-day run before Google allows "Apply for production."** Currently at 0 opted-in testers. Active recruitment: LinkedIn post drafted + 6 Reddit posts live as of May 9 (r/ShowMeYourApps, r/alphaandbetausers, r/SideProject, r/sideprojects, r/buildinpublic, r/saasbuild). Once 12 testers opt in, the 14-day clock starts. After that: answer Google's production questions + apply.
+- **Google Play — closed testing** — App created in console. Internal testing: Active. Closed testing: Active (1 track). **Blocker: need 12 opted-in testers + 14-day run before Google allows "Apply for production."** Currently at 1 opted-in tester (from Reddit). Active recruitment: LinkedIn post drafted + 6 Reddit posts live as of May 9. Once 12 testers opt in, the 14-day clock starts.
 
 - **TikTok Production API** — Submitted Apr 23. Demo video submitted May 5. Support ticket `ad7714530aa61ad4` open. Check portal periodically. No action until approved.
 
 - **SOMA content generation** — Submit updated CLAUDE.md as master doc to SocialMate Growth SOMA project. Voice DNA (Advanced) is now active — SOMA will sound like Joshua. Do NOT write posts manually.
 
-- **LinkedIn post** — Two posts written: (1) May 7 — SOMA + Voice DNA + bootstrapped builder. (2) May 9 — app updates + tester recruitment + inspirational quote. Both ready to publish manually to LinkedIn company page.
-
 - **Enki Truth Mode** — 50-trade minimum per strategy before results are statistically valid. Check `/enki/truth` periodically.
 
-- **LinkedIn integration** — Blocked on API credentials. Requires: LinkedIn Company Page published → developer app → Marketing Developer Platform approval. Low priority.
+- **LinkedIn integration** — Blocked on API credentials. Low priority.
 
 - **Push notifications** — VAPID keys confirmed set in Vercel. Live.
 
+- **Admin Pro count discrepancy** — Overview shows "1 Pro" from `workspaces.plan` but users page (reads `user_settings.plan`) shows 0. Likely Abdus Sohag's old workspace not synced. Not a real paying user. Needs investigation to sync the two plan fields.
+
+- **Inngest resync needed** — After merging the monthly credits reset email PR, resync `monthly-credits-reset-email` function in Inngest dashboard.
+
 **Roadmap (next up):**
-- **Google Play production** — Get 12 testers to opt into closed test → wait 14 days → answer Google production questions → apply. Active recruitment campaign: LinkedIn post drafted + 6 Reddit posts live (r/ShowMeYourApps, r/alphaandbetausers, r/SideProject, r/sideprojects, r/buildinpublic, r/saasbuild) as of May 9. Currently 0 opted-in testers.
-- **Landing page "Available on Google Play" badge** — Add after Play Store app is approved for production.
-- **SOMA content run** — Submit updated CLAUDE.md to SOMA project. First run with Voice DNA (Advanced tier) active.
-- **Gilgamesh's Guides Vol. 5+** — Deep-dive research-backed guides for people starting from nothing. Real playbooks, not fluff. Topics TBD.
-- **Apple App Store** — Deferred 3–6 months. Requires $99/yr Apple Developer account + Xcode on Mac.
+- **SOMA content run** — Submit updated CLAUDE.md to SOMA project. Voice DNA (Advanced tier) active. This is the priority for content.
+- **Google Play production** — Need 11 more testers. Currently 1/12.
+- **Landing page "Available on Google Play" badge** — Add after Play Store production approval.
+- **Product Hunt follow-up** — "We've shipped 40+ features since launch" comment on original PH post. Deferred ~1 week.
+- **Testimonials** — Reach out to 5 existing users directly for a one-liner quote. Even 2 real quotes on landing page converts better than zero.
+- **Discord community** — SocialMate's own Discord server as a tester pool + feature feedback loop. No code needed, just create it.
+- **Gilgamesh's Guides Vol. 5+** — Deep-dive research-backed guides. Topics TBD.
+- **Apple App Store** — Deferred 3–6 months.
 - **LinkedIn publishing** — Pending API credentials. On hold.
 - **Instagram / Facebook / Threads** — Pending Meta API access. Long-term roadmap.
 
 ## Confirmed Done (stop asking about these)
 
+- ✅ **IRIS Dispatch + unsubscribe (May 13–14, PRs #330–331)** — Newsletter live. Edition #1 sent + received. Unsubscribe flow CAN-SPAM compliant. Settings opt-in toggle live. Never ask about building IRIS again.
+- ✅ **Admin God Mode exclusion fix (PR #332)** — Admin's own account excluded from all stats. Pro=0, Agency=0, MRR=$0 accurately reflects real users.
+- ✅ **Clickable admin stats + platform distribution (PR #333)** — Cards link to filtered users. Platform distribution section live. Suspense fix deployed.
+- ✅ **Badge + OG metadata (PR #333)** — Amber-S pill badge on bio + creator pages. Per-page OG tags for [username], creator/[handle], and blog posts.
+- ✅ **Monthly credits reset email** — Inngest cron live. Sends 1st of every month. Registered in route.ts.
+- ✅ **Changelog updated + linked in nav** — May 9 + May 14 entries. Changelog in PublicNav Resources.
+- ✅ **Signup social proof** — "30+ creators" social proof added to signup page left panel.
 - ✅ **Voice DNA Builder completed (May 7)** — Joshua completed full Advanced tier (40 questions). Voice DNA summary active and injected into every SOMA generate prompt. Never ask Joshua to complete the interview again.
 - ✅ **SOMA Project Memory (PR #308, May 7)** — `soma_project_memory` table live. Ingest reads/writes memory. 500k char cap. Full doc no truncation. Project page shows memory panel + Clear button. `/api/soma/projects/[id]/memory` GET + DELETE live.
 - ✅ **Feedback modal on-demand (PR #308, May 7)** — Auto-popup removed. Manual "🎙️ Give feedback" button in generate result. User controls when to answer.
