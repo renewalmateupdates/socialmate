@@ -45,6 +45,7 @@ function OnboardingInner() {
   const [user, setUser] = useState<any>(null)
   const [step, setStep] = useState(1)
   const [displayName, setDisplayName] = useState('')
+  const [irisOptIn, setIrisOptIn] = useState(true)
   const [selectedPlatform, setSelectedPlatform] = useState('')
   const [topic, setTopic] = useState('')
   const [starterPosts, setStarterPosts] = useState<string[]>([])
@@ -175,6 +176,7 @@ function OnboardingInner() {
       use_case: 'creator',
       default_platforms: platforms,
       onboarding_completed: true,
+      iris_opt_in: irisOptIn,
     }
 
     if (!currentSettings?.onboarding_completed) {
@@ -319,6 +321,20 @@ function OnboardingInner() {
                   <span className="font-bold text-gray-800 dark:text-gray-200">2% of every subscription goes to SM-Give</span> — our built-in charity initiative. No ads, no selling your data.
                 </p>
               </div>
+
+              {/* IRIS newsletter opt-in */}
+              <button
+                type="button"
+                onClick={() => setIrisOptIn(v => !v)}
+                className="w-full flex items-start gap-3 p-4 mb-4 rounded-2xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20 text-left hover:border-amber-300 dark:hover:border-amber-700 transition-all">
+                <div className={`w-5 h-5 mt-0.5 flex-shrink-0 rounded-md border-2 flex items-center justify-center transition-all ${irisOptIn ? 'bg-amber-500 border-amber-500' : 'border-gray-300 dark:border-gray-600'}`}>
+                  {irisOptIn && <span className="text-white text-xs font-black">✓</span>}
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-amber-800 dark:text-amber-300">📬 The IRIS Dispatch</p>
+                  <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">Biweekly build-in-public newsletter from Joshua — what shipped, real numbers, what's next. No spam.</p>
+                </div>
+              </button>
 
               <button
                 onClick={() => displayName.trim() ? setStep(2) : showToast('Enter your name to continue')}

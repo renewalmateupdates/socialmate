@@ -123,6 +123,8 @@ function SettingsInner() {
   const [wlActivated, setWlActivated]           = useState(false)
 
   const [creditPref, setCreditPref] = useState<'monthly_first' | 'bank_first'>('monthly_first')
+  const [irisOptIn, setIrisOptIn]   = useState(true)
+  const [irisSaving, setIrisSaving] = useState(false)
 
   // X Booster state
   const [boosterBalance, setBoosterBalance]       = useState<number | null>(null)
@@ -165,12 +167,13 @@ function SettingsInner() {
 
       const { data: settings } = await supabase
         .from('user_settings')
-        .select('referral_code, white_label_active, white_label_tier, white_label_brand_name, white_label_logo_url, white_label_custom_domain, white_label_brand_color, notification_prefs, credit_source_preference')
+        .select('referral_code, white_label_active, white_label_tier, white_label_brand_name, white_label_logo_url, white_label_custom_domain, white_label_brand_color, notification_prefs, credit_source_preference, iris_opt_in')
         .eq('user_id', user.id)
         .single()
 
       if (settings) {
         if (settings.referral_code) setReferralCode(settings.referral_code)
+        if (settings.iris_opt_in !== undefined && settings.iris_opt_in !== null) setIrisOptIn(settings.iris_opt_in)
         setWhiteLabelActive(settings.white_label_active || false)
         setWhiteLabelTier(settings.white_label_tier || null)
         setWlBrandName(settings.white_label_brand_name || '')
@@ -283,6 +286,17 @@ function SettingsInner() {
 
   const referralLink = referralCode ? `${appUrl}/?ref=${referralCode}` : ''
   const nextTier     = REFERRAL_TIERS.find(t => referralStats.payingReferrals < t.paying)
+
+  const handleIrisToggle = async () => {
+    const newVal = !irisOptIn
+    setIrisOptIn(newVal)
+    setIrisSaving(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      await supabase.from('user_settings').update({ iris_opt_in: newVal }).eq('user_id', user.id)
+    }
+    setIrisSaving(false)
+  }
 
   const handleNotifToggle = async (key: keyof typeof notifications) => {
     const newVal  = !notifications[key]
@@ -989,6 +1003,32 @@ function SettingsInner() {
                     </button>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {/* IRIS newsletter opt-in */}
+          {activeTab === 'Notifications' && (
+            <div className="bg-surface border border-theme rounded-2xl p-6">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-7 h-7 rounded-xl bg-amber-500 flex items-center justify-center text-white font-black text-xs">I</div>
+                <h2 className="text-base font-extrabold">The IRIS Dispatch</h2>
+              </div>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">Biweekly build-in-public newsletter from Joshua — what shipped, real numbers, what's next.</p>
+              <div className="flex items-center justify-between py-3">
+                <div className="flex-1 min-w-0 pr-4">
+                  <p className="text-sm font-bold">Subscribe to The IRIS Dispatch</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Sent every two weeks. No spam, unsubscribe any time.</p>
+                  {irisSaving && <p className="text-xs text-gray-400 mt-1">Saving...</p>}
+                </div>
+                <button
+                  role="switch"
+                  aria-checked={irisOptIn}
+                  onClick={handleIrisToggle}
+                  disabled={irisSaving}
+                  className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 disabled:opacity-60 ${irisOptIn ? 'bg-amber-500' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                  <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${irisOptIn ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                </button>
               </div>
             </div>
           )}
