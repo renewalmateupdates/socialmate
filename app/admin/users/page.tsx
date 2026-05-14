@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 interface AdminUser {
@@ -23,6 +23,14 @@ const PLAN_BADGE: Record<string, string> = {
 }
 
 export default function AdminUsersPage() {
+  return (
+    <Suspense fallback={<div className="min-h-dvh bg-gray-950 flex items-center justify-center text-gray-400 text-sm">Loading…</div>}>
+      <AdminUsersInner />
+    </Suspense>
+  )
+}
+
+function AdminUsersInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [users, setUsers] = useState<AdminUser[]>([])
