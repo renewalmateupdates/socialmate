@@ -60,6 +60,8 @@ function OnboardingInner() {
   const [couponError, setCouponError] = useState<string | null>(null)
   const [connectionDetected, setConnectionDetected] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'error' | 'info' } | null>(null)
+  const [quickMode, setQuickMode] = useState(false)
+  const [referralCode, setReferralCode] = useState<string | null>(null)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const showToast = (message: string, type: 'error' | 'info' = 'error') => {
@@ -73,6 +75,10 @@ function OnboardingInner() {
       if (!authUser) { router.push('/login'); return }
       setUser(authUser)
       setDisplayName(authUser.email?.split('@')[0] || '')
+
+      // Read referral cookie
+      const refCookie = document.cookie.split(';').find(c => c.trim().startsWith('ref_code='))
+      if (refCookie) setReferralCode(refCookie.split('=')[1]?.trim() || null)
 
       const { data: settings } = await supabase
         .from('user_settings')
@@ -105,7 +111,7 @@ function OnboardingInner() {
         if ((data.platforms as string[]).includes(selectedPlatform)) {
           setConnectionDetected(true)
           if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null }
-          setTimeout(() => setStep(4), 1500)
+          setTimeout(() => setStep(quickMode ? 5 : 4), 1500)
         }
       } catch {}
     }
@@ -187,12 +193,14 @@ function OnboardingInner() {
 
     const postsToSave = starterPosts.filter(p => p.trim())
     if (postsToSave.length > 0) {
+      const base = new Date(Date.now() + 2 * 60 * 60 * 1000) // start 2h from now
       await supabase.from('posts').insert(
-        postsToSave.map(content => ({
+        postsToSave.map((content, i) => ({
           user_id: user.id,
           content: content.trim(),
           platforms,
-          status: 'draft',
+          status: 'scheduled',
+          scheduled_at: new Date(base.getTime() + i * 30 * 60 * 1000).toISOString(),
         }))
       )
     }
@@ -269,13 +277,20 @@ function OnboardingInner() {
           {/* ── STEP 1 — WELCOME ── */}
           {step === 1 && (
             <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
-              <div className="text-center mb-8">
+              {referralCode && (
+                <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 rounded-2xl px-4 py-3 mb-6 flex items-center gap-3">
+                  <span className="text-xl">🎉</span>
+                  <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400">You were invited by a friend — you'll both earn bonus credits when you upgrade.</p>
+                </div>
+              )}
+
+              <div className="text-center mb-7">
                 <div className="text-5xl mb-4">👋</div>
                 <h1 className="text-3xl font-extrabold tracking-tight mb-2">Welcome to SocialMate</h1>
                 <p className="text-gray-400 dark:text-gray-500 text-sm">Set up in under 2 minutes.</p>
               </div>
 
-              <div className="mb-6">
+              <div className="mb-5">
                 <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-2">What should we call you?</label>
                 <input
                   type="text"
@@ -288,24 +303,7 @@ function OnboardingInner() {
                 />
               </div>
 
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-5 mb-5">
-                <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Here's what you'll do:</p>
-                <div className="space-y-2.5">
-                  {[
-                    ['📱', 'Pick your main platform'],
-                    ['🔗', 'Connect your account'],
-                    ['✏️', 'Get 5 posts ready to go'],
-                    ['🚀', 'Hit the dashboard'],
-                  ].map(([icon, label]) => (
-                    <div key={label} className="flex items-center gap-3">
-                      <span className="text-base">{icon}</span>
-                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{label}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900 rounded-2xl p-4 mb-5">
+              <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900 rounded-2xl p-4 mb-4">
                 <div className="flex items-start gap-3">
                   <span className="text-xl">⚡</span>
                   <div>
@@ -315,31 +313,33 @@ function OnboardingInner() {
                 </div>
               </div>
 
-              <div className="border border-gray-100 dark:border-gray-700 rounded-2xl p-4 mb-6 flex items-start gap-3">
-                <span className="text-base flex-shrink-0">❤️</span>
-                <p className="text-xs text-gray-600 dark:text-gray-400">
-                  <span className="font-bold text-gray-800 dark:text-gray-200">2% of every subscription goes to SM-Give</span> — our built-in charity initiative. No ads, no selling your data.
-                </p>
-              </div>
-
-              {/* IRIS newsletter opt-in */}
+              {/* Compact IRIS opt-in */}
               <button
                 type="button"
                 onClick={() => setIrisOptIn(v => !v)}
-                className="w-full flex items-start gap-3 p-4 mb-4 rounded-2xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/20 text-left hover:border-amber-300 dark:hover:border-amber-700 transition-all">
-                <div className={`w-5 h-5 mt-0.5 flex-shrink-0 rounded-md border-2 flex items-center justify-center transition-all ${irisOptIn ? 'bg-amber-500 border-amber-500' : 'border-gray-300 dark:border-gray-600'}`}>
-                  {irisOptIn && <span className="text-white text-xs font-black">✓</span>}
+                className="w-full flex items-center gap-3 px-4 py-3 mb-5 rounded-2xl border border-gray-200 dark:border-gray-700 text-left hover:border-gray-300 dark:hover:border-gray-600 transition-all">
+                <div className={`w-4 h-4 flex-shrink-0 rounded border-2 flex items-center justify-center transition-all ${irisOptIn ? 'bg-amber-500 border-amber-500' : 'border-gray-300 dark:border-gray-600'}`}>
+                  {irisOptIn && <span className="text-white text-[9px] font-black">✓</span>}
                 </div>
-                <div>
-                  <p className="text-sm font-bold text-amber-800 dark:text-amber-300">📬 The IRIS Dispatch</p>
-                  <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">Biweekly build-in-public newsletter from Joshua — what shipped, real numbers, what's next. No spam.</p>
-                </div>
+                <p className="text-xs text-gray-600 dark:text-gray-400">
+                  <span className="font-bold text-gray-800 dark:text-gray-200">📬 IRIS Dispatch</span> — biweekly build-in-public newsletter. No spam.
+                </p>
               </button>
 
               <button
                 onClick={() => displayName.trim() ? setStep(2) : showToast('Enter your name to continue')}
                 className="w-full py-3.5 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all">
                 Let's go →
+              </button>
+
+              <button
+                onClick={() => {
+                  setQuickMode(true)
+                  setDisplayName(user?.email?.split('@')[0] || 'Friend')
+                  setStep(2)
+                }}
+                className="w-full mt-3 py-2.5 text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors font-semibold">
+                Quick Start — skip the tour, just connect my account →
               </button>
             </div>
           )}
@@ -436,9 +436,9 @@ function OnboardingInner() {
             <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
               <div className="text-center mb-6">
                 <div className="text-5xl mb-4">✏️</div>
-                <h2 className="text-2xl font-extrabold tracking-tight mb-2">Let's get 5 posts ready</h2>
+                <h2 className="text-2xl font-extrabold tracking-tight mb-2">Let's schedule your first 5 posts</h2>
                 <p className="text-gray-400 dark:text-gray-500 text-sm">
-                  Tell us what you post about — we'll fill in 5 starter drafts you can edit and schedule.
+                  Tell us what you post about — we'll generate 5 posts and put them on your calendar, starting 2 hours from now.
                 </p>
               </div>
 
@@ -506,7 +506,7 @@ function OnboardingInner() {
                   </div>
 
                   <p className="text-xs text-center text-gray-400 dark:text-gray-500 mb-4">
-                    Replace [brackets] with your actual content. These save as drafts — publish when ready.
+                    Replace [brackets] with your actual content — then we'll schedule all 5, spaced 30 min apart starting in 2 hours.
                   </p>
 
                   <div className="flex gap-3">
@@ -516,7 +516,7 @@ function OnboardingInner() {
                     </button>
                     <button onClick={() => setStep(5)}
                       className="flex-1 py-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all">
-                      Save all 5 as drafts →
+                      Schedule all 5 →
                     </button>
                   </div>
                 </>
@@ -543,7 +543,7 @@ function OnboardingInner() {
               </h2>
               <p className="text-gray-400 dark:text-gray-500 mb-6 text-sm">
                 {starterPosts.filter(p => p.trim()).length > 0
-                  ? `${starterPosts.filter(p => p.trim()).length} draft posts saved and ready to schedule.`
+                  ? `${starterPosts.filter(p => p.trim()).length} posts scheduled and on your calendar.`
                   : 'Your account is ready.'}
               </p>
 
@@ -611,9 +611,9 @@ function OnboardingInner() {
                 </Link>
               </div>
 
-              <Link href={starterPosts.filter(p => p.trim()).length > 0 ? '/queue' : '/compose'}
+              <Link href={starterPosts.filter(p => p.trim()).length > 0 ? '/calendar' : '/compose'}
                 className="flex items-center justify-center gap-2 w-full py-4 mb-3 bg-violet-600 hover:bg-violet-700 text-white text-sm font-extrabold rounded-2xl transition-all">
-                {starterPosts.filter(p => p.trim()).length > 0 ? '📬 Schedule Your Drafts →' : '✏️ Write Your First Post →'}
+                {starterPosts.filter(p => p.trim()).length > 0 ? '📅 View Your Scheduled Posts →' : '✏️ Write Your First Post →'}
               </Link>
 
               <button onClick={handleFinish} disabled={saving}
