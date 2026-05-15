@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 
 interface JailedAccount {
@@ -19,11 +19,14 @@ const PLATFORM_EMOJI: Record<string, string> = {
   mastodon:  '🐘',
   discord:   '🎮',
   telegram:  '✈️',
+  tiktok:    '🎵',
   linkedin:  '💼',
   youtube:   '▶️',
   instagram: '📸',
   pinterest: '📌',
 }
+
+const ALL_PLATFORMS = ['twitter', 'bluesky', 'mastodon', 'discord', 'telegram', 'tiktok']
 
 function daysRemaining(coolingUntil: string | null): number {
   if (!coolingUntil) return 0
@@ -43,6 +46,12 @@ export default function AdminPlatformJailPage() {
   const [forbidden, setForbidden] = useState(false)
   const [releasing, setReleasing] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [platformFilter, setPlatformFilter] = useState<string>('')
+
+  const filteredAccounts = useMemo(() => {
+    if (!platformFilter) return accounts
+    return accounts.filter(a => a.platform.toLowerCase() === platformFilter)
+  }, [accounts, platformFilter])
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -127,15 +136,48 @@ export default function AdminPlatformJailPage() {
           </button>
         </div>
 
+        {/* Platform filter */}
+        {!loading && !error && accounts.length > 0 && (
+          <div className="flex gap-2 mb-4 flex-wrap">
+            <button
+              onClick={() => setPlatformFilter('')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                platformFilter === ''
+                  ? 'bg-black dark:bg-white text-white dark:text-black'
+                  : 'bg-surface text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:border-gray-400'
+              }`}>
+              All platforms
+            </button>
+            {ALL_PLATFORMS.filter(p => accounts.some(a => a.platform === p)).map(p => (
+              <button
+                key={p}
+                onClick={() => setPlatformFilter(p)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  platformFilter === p
+                    ? 'bg-black dark:bg-white text-white dark:text-black'
+                    : 'bg-surface text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:border-gray-400'
+                }`}>
+                <span>{PLATFORM_EMOJI[p] ?? '📡'}</span>
+                <span className="capitalize">{p}</span>
+                <span className="opacity-60">({accounts.filter(a => a.platform === p).length})</span>
+              </button>
+            ))}
+          </div>
+        )}
+
         {loading ? (
           <div className="text-center py-20 text-gray-400 text-sm">Loading jailed accounts…</div>
         ) : error ? (
           <div className="text-center py-20 text-red-500 text-sm">{error}</div>
-        ) : accounts.length === 0 ? (
+        ) : filteredAccounts.length === 0 ? (
           <div className="bg-surface border border-theme rounded-2xl p-12 text-center">
             <div className="text-4xl mb-3">🔓</div>
-            <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">No accounts in cooling period</p>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">All platform accounts are clear.</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">
+              {accounts.length === 0 ? 'No accounts in cooling period' : `No ${platformFilter} accounts in cooling period`}
+            </p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+              {accounts.length === 0 ? 'All platform accounts are clear.' : 'Try a different platform filter.'}
+            </p>
           </div>
         ) : (
           <>
@@ -143,7 +185,8 @@ export default function AdminPlatformJailPage() {
             <div className="mb-4 flex items-center gap-2">
               <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
                 <span className="inline-block w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
-                {accounts.length} account{accounts.length !== 1 ? 's' : ''} jailed
+                {accounts.length} account{accounts.length !== 1 ? 's' : ''} jailed total
+                {platformFilter && ` · ${filteredAccounts.length} shown`}
               </span>
             </div>
 
@@ -161,13 +204,13 @@ export default function AdminPlatformJailPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {accounts.map((account, i) => {
+                    {filteredAccounts.map((account, i) => {
                       const key = `${account.platform}:${account.platform_account_id}`
                       const days = daysRemaining(account.cooling_until)
                       const isReleasing = releasing === key
                       return (
                         <tr key={account.id}
-                          className={`transition-colors ${i < accounts.length - 1 ? 'border-b border-theme' : ''} hover:bg-gray-50 dark:hover:bg-gray-800/40`}>
+                          className={`transition-colors ${i < filteredAccounts.length - 1 ? 'border-b border-theme' : ''} hover:bg-gray-50 dark:hover:bg-gray-800/40`}>
                           <td className="px-5 py-3">
                             <div className="flex items-center gap-2">
                               <span className="text-base">{PLATFORM_EMOJI[account.platform.toLowerCase()] ?? '📡'}</span>
@@ -211,7 +254,7 @@ export default function AdminPlatformJailPage() {
 
             {/* Cards — mobile */}
             <div className="md:hidden space-y-3">
-              {accounts.map(account => {
+              {filteredAccounts.map(account => {
                 const key = `${account.platform}:${account.platform_account_id}`
                 const days = daysRemaining(account.cooling_until)
                 const isReleasing = releasing === key

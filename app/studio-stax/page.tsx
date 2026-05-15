@@ -49,7 +49,7 @@ export default async function StudioStaxPage() {
 
   const { data: listings } = await supabase
     .from('curated_listings')
-    .select('id, name, tagline, description, url, logo_url, category, smgive_donated_cents, consecutive_featured_months, admin_featured, created_at, is_nsfw')
+    .select('id, name, tagline, description, url, logo_url, category, smgive_donated_cents, consecutive_featured_months, admin_featured, created_at, is_nsfw, featured, featured_until')
     .eq('status', 'approved')
 
   // Founding spots counter
@@ -69,8 +69,18 @@ export default async function StudioStaxPage() {
   const now = Date.now()
   const allListings = listings ?? []
 
-  const garrison = allListings.filter(l => l.admin_featured)
-  const regular  = allListings.filter(l => !l.admin_featured)
+  const nowIso = new Date(now).toISOString()
+
+  const garrison    = allListings.filter(l => l.admin_featured)
+  const nonGarrison = allListings.filter(l => !l.admin_featured)
+
+  // Paid featured = featured=true AND featured_until is in the future
+  const paidFeatured = nonGarrison.filter(
+    l => l.featured && l.featured_until && l.featured_until > nowIso
+  )
+  const regular = nonGarrison.filter(
+    l => !(l.featured && l.featured_until && l.featured_until > nowIso)
+  )
 
   const ranked = regular.slice().sort((a, b) => {
     const ageMonthsA = Math.floor((now - new Date(a.created_at).getTime()) / (1000 * 60 * 60 * 24 * 30))
@@ -85,6 +95,7 @@ export default async function StudioStaxPage() {
     byCategory[cat.id] = ranked.filter(l => l.category === cat.id).slice(0, 5)
   }
   const hasRegular = Object.values(byCategory).some(arr => arr && arr.length > 0)
+  const hasPaidFeatured = paidFeatured.length > 0
 
   return (
     <PublicLayout>
@@ -198,6 +209,73 @@ export default async function StudioStaxPage() {
 
                   {/* URL */}
                   <div className="flex items-center gap-1.5 text-xs text-purple-600 dark:text-purple-400 font-semibold group-hover:underline">
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                    {getHostname(listing.url)}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ── PAID FEATURED ── */}
+        {hasPaidFeatured && (
+          <section className="mb-16">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="flex items-center gap-2 bg-yellow-500 dark:bg-yellow-600 text-black px-4 py-1.5 rounded-full">
+                <span className="text-base">⭐</span>
+                <span className="text-xs font-extrabold uppercase tracking-widest">Featured Listings</span>
+              </div>
+              <span className="text-xs text-gray-400 dark:text-gray-500">Paid spotlight placement</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {paidFeatured.map(listing => (
+                <Link
+                  key={listing.id}
+                  href={`/studio-stax/${nameToSlug(listing.name)}`}
+                  className="group relative flex flex-col bg-white dark:bg-gray-900 border-2 border-yellow-400 dark:border-yellow-500 ring-1 ring-yellow-200 dark:ring-yellow-700 rounded-2xl p-6 hover:shadow-xl hover:border-yellow-500 dark:hover:border-yellow-400 transition-all overflow-hidden"
+                >
+                  {/* Featured badge */}
+                  <span className="absolute top-3 right-3 z-10 text-[10px] font-extrabold bg-yellow-400 text-black px-2 py-0.5 rounded-full select-none">⭐ Featured</span>
+
+                  {listing.is_nsfw && (
+                    <span className="absolute top-3 left-3 z-10 text-[10px] font-extrabold bg-red-600 text-white px-2 py-0.5 rounded-full select-none">18+</span>
+                  )}
+
+                  <div className="flex items-start gap-4 mb-4">
+                    {listing.logo_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={listing.logo_url}
+                        alt={listing.name}
+                        className={`w-12 h-12 rounded-xl object-cover shrink-0 transition-all duration-300 ${listing.is_nsfw ? 'blur-md group-hover:blur-none' : ''}`}
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-xl bg-yellow-100 dark:bg-yellow-900/40 flex items-center justify-center text-yellow-700 dark:text-yellow-300 font-extrabold text-lg shrink-0">
+                        {listing.name.charAt(0)}
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0 pr-16">
+                      <p className="font-extrabold text-base text-gray-900 dark:text-gray-100 mb-0.5">{listing.name}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{listing.tagline}</p>
+                    </div>
+                  </div>
+
+                  {listing.is_nsfw ? (
+                    <div className="mb-4 flex-1">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2 blur-sm group-hover:blur-none transition-all duration-300 select-none group-hover:select-auto">{listing.description}</p>
+                      <p className="text-[10px] text-red-500 dark:text-red-400 mt-1 group-hover:hidden">Adult content — hover to reveal</p>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2 mb-4 flex-1">
+                      {listing.description}
+                    </p>
+                  )}
+
+                  <div className="flex items-center gap-1.5 text-xs text-yellow-600 dark:text-yellow-400 font-semibold group-hover:underline">
                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                     </svg>

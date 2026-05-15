@@ -698,13 +698,37 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true })
     }
 
-    // ── White label add-on ──
+    // ── White label add-on — set to pending, awaiting admin approval ──
     if (type === 'white_label' && userId) {
       const whiteLabelTier = session.metadata?.white_label_tier || 'basic'
+      // Do NOT activate immediately — set to pending so Joshua can review
       await supabase
         .from('user_settings')
-        .update({ white_label_active: true, white_label_tier: whiteLabelTier })
+        .update({
+          white_label_tier:         whiteLabelTier,
+          white_label_status:       'pending',
+          white_label_requested_at: new Date().toISOString(),
+        })
         .eq('user_id', userId)
+
+      // Send admin notification email
+      try {
+        const resend = new Resend(process.env.RESEND_API_KEY)
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
+        // Fetch user email for the notification
+        const { data: authUser } = await supabase.auth.admin.getUserById(userId)
+        const userEmail = authUser?.user?.email ?? userId
+        await resend.emails.send({
+          from: 'SocialMate <hello@socialmate.studio>',
+          to:   'socialmatehq@gmail.com',
+          subject: `New White Label Request — ${whiteLabelTier} — ${userEmail}`,
+          html: `<p>New White Label <strong>${whiteLabelTier}</strong> request from <strong>${userEmail}</strong>.</p>
+<p><a href="${appUrl}/admin/white-label">Review &amp; approve at /admin/white-label →</a></p>`,
+        })
+      } catch (emailErr) {
+        console.warn('[WhiteLabel] Admin notification email failed (non-fatal):', emailErr)
+      }
+
       return NextResponse.json({ received: true })
     }
 
@@ -941,11 +965,11 @@ const creditsToSet = alreadyOnPlan
     ? resolveCreditsOnPlanChange(existingSettings.plan, plan, existingSettings.ai_credits_remaining ?? 0)
     : PLAN_CREDITS[plan] ?? 100
 
+    // Do NOT set white_label_active here — it is controlled exclusively by the admin approval flow.
+    // White label is purchased via a separate checkout (type='white_label') and goes through pending → active.
     await supabase.from('user_settings').upsert({
       user_id:                    userId,
       plan,
-      white_label_active:         whiteLabelActive,
-      white_label_tier:           whiteLabelTier,
       stripe_customer_id:         customerId,
       stripe_subscription_id:     subscription.id,
       plan_expires_at:            safeDate((subscription as any).current_period_end),
@@ -1056,12 +1080,13 @@ const creditsToSet = alreadyOnPlan
     const subscription = event.data.object as Stripe.Subscription
     const { plan, whiteLabelActive, whiteLabelTier, isWhiteLabelOnly } = resolveSubscription(subscription)
 
-    // White-label-only renewal
+    // White-label-only renewal — only update if already approved (don't re-activate pending/rejected)
     if (isWhiteLabelOnly) {
       await supabase
         .from('user_settings')
-        .update({ white_label_active: whiteLabelActive, white_label_tier: whiteLabelTier })
+        .update({ white_label_tier: whiteLabelTier })
         .eq('stripe_customer_id', subscription.customer as string)
+        .eq('white_label_status', 'active') // only touch if already admin-approved
       return NextResponse.json({ received: true })
     }
 
@@ -1074,11 +1099,10 @@ const creditsToSet = alreadyOnPlan
       .single()
 
     const planChanged    = current?.plan !== plan
+    // Do NOT include white_label_active — that is controlled exclusively by admin approval flow
     const updatePayload: Record<string, any> = {
       plan,
-      white_label_active: whiteLabelActive,
-      white_label_tier:   whiteLabelTier,
-      plan_expires_at:    safeDate((subscription as any).current_period_end),
+      plan_expires_at: safeDate((subscription as any).current_period_end),
     }
 
     if (planChanged) {

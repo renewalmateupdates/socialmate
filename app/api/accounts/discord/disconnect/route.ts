@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     .select('platform_user_id')
     .eq('id', accountId)
     .eq('user_id', user.id)
-    .eq('platform', 'telegram')
+    .eq('platform', 'discord')
     .maybeSingle()
   const platformUserId = accountRow?.platform_user_id ?? null
 
@@ -48,14 +48,14 @@ export async function POST(request: NextRequest) {
     .delete()
     .eq('id', accountId)
     .eq('user_id', user.id)
-    .eq('platform', 'telegram')
+    .eq('platform', 'discord')
 
   if (error) {
-    console.error('Telegram disconnect error:', error)
+    console.error('Discord disconnect error:', error)
     return NextResponse.json({ error: 'Failed to disconnect account' }, { status: 500 })
   }
 
-  // Put the Telegram bot into 45-day cooling jail
+  // Put the Discord account/guild into 45-day cooling jail
   if (platformUserId) {
     const now = new Date()
     const coolingUntil = new Date(now.getTime() + 45 * 24 * 60 * 60 * 1000)
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
         cooling_until: coolingUntil.toISOString(),
         updated_at: now.toISOString(),
       })
-      .eq('platform', 'telegram')
+      .eq('platform', 'discord')
       .eq('platform_account_id', platformUserId)
   }
 

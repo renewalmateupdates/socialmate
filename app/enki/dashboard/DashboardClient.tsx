@@ -149,6 +149,9 @@ export default function DashboardClient() {
   const [approvalState, setApprovalState] = useState<Record<string, 'approved' | 'rejected' | 'loading'>>({})
   const [guardianToggling, setGuardianToggling] = useState(false)
   const [marketOpen, setMarketOpen] = useState(false)
+  // Co-pilot view mode
+  const [copilotOwnerEmail, setCopilotOwnerEmail] = useState<string | null>(null)
+  const [isCopilotMode, setIsCopilotMode] = useState(false)
 
   // Notification bell state
   const [notifications, setNotifications]         = useState<EnkiNotification[]>([])
@@ -159,9 +162,20 @@ export default function DashboardClient() {
   const unreadCount = notifications.filter(n => !n.is_read).length
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) { router.push('/login?redirect=/enki/dashboard'); return }
       setAuthed(true)
+
+      // Check if this user is a co-pilot for someone else
+      try {
+        const copilotRes = await fetch('/api/enki/copilot')
+        const copilotJson = await copilotRes.json()
+        if (copilotJson.role === 'copilot' && copilotJson.owner_email) {
+          setIsCopilotMode(true)
+          setCopilotOwnerEmail(copilotJson.owner_email)
+        }
+      } catch { /* non-fatal */ }
+
       loadAll()
     })
   }, [])
@@ -553,6 +567,18 @@ export default function DashboardClient() {
           </div>
         </div>
       </div>
+
+      {/* ── Co-pilot mode banner ── */}
+      {isCopilotMode && copilotOwnerEmail && (
+        <div className="bg-amber-500/10 border-b border-amber-500/30 px-6 py-3">
+          <div className="max-w-6xl mx-auto flex items-center gap-3">
+            <span className="text-amber-400 text-lg">👁</span>
+            <p className="text-sm text-amber-300 font-semibold">
+              Viewing <span className="text-white">{copilotOwnerEmail}</span>&apos;s account in Co-Pilot mode — read-only access
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-6xl mx-auto px-6 py-8">
 

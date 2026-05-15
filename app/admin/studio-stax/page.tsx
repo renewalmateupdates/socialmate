@@ -27,6 +27,8 @@ interface Listing {
   rank: number | null
   is_nsfw: boolean
   nsfw_reason: string | null
+  featured: boolean
+  featured_until: string | null
 }
 
 const STATUS_BADGE: Record<string, string> = {
@@ -261,6 +263,26 @@ export default function AdminStudioStaxPage() {
     }
   }
 
+  async function handleTogglePaidFeatured(id: string, currentlyFeatured: boolean) {
+    setActionLoading(true)
+    try {
+      const res = await fetch(`/api/admin/studio-stax/${id}/feature`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ enable: !currentlyFeatured }),
+      })
+      const json = await res.json()
+      if (json.success) {
+        showToast(currentlyFeatured ? 'Removed paid featured' : '⭐ Paid featured set (90 days)')
+        await load()
+      } else {
+        showToast(json.error || 'Action failed', false)
+      }
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
   const featuredCount = listings.filter(l => l.admin_featured).length
   const filtered = filter === 'all' ? listings : listings.filter(l => l.status === filter)
 
@@ -361,7 +383,8 @@ export default function AdminStudioStaxPage() {
                   <tr className="border-b border-theme bg-gray-50 dark:bg-gray-800/50">
                     <th className="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest">Studio</th>
                     <th className="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest">Status</th>
-                    <th className="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest">Featured</th>
+                    <th className="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest">Editor&apos;s Pick</th>
+                    <th className="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest">Paid Feature</th>
                     <th className="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest">SM-Give</th>
                     <th className="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest">Renewal</th>
                     <th className="text-left px-5 py-3 text-xs font-bold text-gray-400 uppercase tracking-widest">Applied</th>
@@ -399,6 +422,23 @@ export default function AdminStudioStaxPage() {
                           }`}>
                           {listing.admin_featured ? '⭐ Featured' : '☆ Pin'}
                         </button>
+                      </td>
+                      <td className="px-5 py-3">
+                        {listing.status === 'active' ? (
+                          <button
+                            onClick={() => handleTogglePaidFeatured(listing.id, listing.featured)}
+                            disabled={actionLoading}
+                            title={listing.featured && listing.featured_until ? `Until ${new Date(listing.featured_until).toLocaleDateString()}` : ''}
+                            className={`text-xs font-bold px-2.5 py-1 rounded-xl transition-all disabled:opacity-40 ${
+                              listing.featured
+                                ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400 border border-yellow-300 dark:border-yellow-700'
+                                : 'border border-gray-200 dark:border-gray-700 text-gray-400 hover:border-yellow-300 hover:text-yellow-600'
+                            }`}>
+                            {listing.featured ? '⭐ Active' : '☆ Feature'}
+                          </button>
+                        ) : (
+                          <span className="text-xs text-gray-400">—</span>
+                        )}
                       </td>
                       <td className="px-5 py-3 text-gray-600 dark:text-gray-400 text-xs">
                         {listing.smgive_donated_cents > 0 ? `$${(listing.smgive_donated_cents / 100).toFixed(2)}` : '—'}
@@ -603,6 +643,34 @@ export default function AdminStudioStaxPage() {
                           : 'bg-black dark:bg-white text-white dark:text-black hover:opacity-80'
                       }`}>
                       {selected.admin_featured ? 'Unpin' : 'Pin as featured'}
+                    </button>
+                  </div>
+                )}
+
+                {/* Paid Feature toggle */}
+                {selected.status === 'active' && (
+                  <div className={`flex items-center justify-between p-3 rounded-xl border ${
+                    selected.featured
+                      ? 'bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-800'
+                      : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
+                  }`}>
+                    <div>
+                      <p className="text-xs font-bold text-gray-700 dark:text-gray-300">⭐ Paid Featured Placement</p>
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        {selected.featured && selected.featured_until
+                          ? `Active until ${new Date(selected.featured_until).toLocaleDateString()}`
+                          : 'Shows first in directory with gold border + badge (90 days)'}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => handleTogglePaidFeatured(selected.id, selected.featured)}
+                      disabled={actionLoading}
+                      className={`text-xs font-bold px-3 py-1.5 rounded-xl transition-all disabled:opacity-40 ${
+                        selected.featured
+                          ? 'bg-yellow-500 text-white hover:opacity-80'
+                          : 'bg-black dark:bg-white text-white dark:text-black hover:opacity-80'
+                      }`}>
+                      {selected.featured ? 'Remove feature' : '⭐ Feature listing'}
                     </button>
                   </div>
                 )}

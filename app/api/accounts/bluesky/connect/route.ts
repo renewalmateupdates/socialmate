@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 export async function POST(request: NextRequest) {
   const cookieStore = await cookies()
@@ -52,6 +53,31 @@ export async function POST(request: NextRequest) {
 
   const session = await sessionRes.json()
   const { accessJwt, refreshJwt, did, handle: resolvedHandle } = session
+
+  // --- Platform Jail: check if this Bluesky DID is in cooldown ---
+  const { data: registryRecord } = await getSupabaseAdmin()
+    .from('platform_account_registry')
+    .select('id, status, connected_to_user, cooling_until')
+    .eq('platform', 'bluesky')
+    .eq('platform_account_id', did)
+    .maybeSingle()
+
+  if (registryRecord) {
+    if (registryRecord.status === 'active' && registryRecord.connected_to_user !== user.id) {
+      return NextResponse.json({ error: 'This Bluesky account is already connected to another SocialMate account.' }, { status: 409 })
+    }
+    if (registryRecord.status === 'cooling' && registryRecord.cooling_until) {
+      const coolingUntil = new Date(registryRecord.cooling_until)
+      if (coolingUntil > new Date()) {
+        const until = coolingUntil.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+        return NextResponse.json({
+          error: `This account was recently disconnected. You can reconnect it on ${until}. This protects against abuse.`,
+          cooldown_until: registryRecord.cooling_until,
+        }, { status: 429 })
+      }
+    }
+  }
+  // ----------------------------------------------------------------
 
   const profileRes = await fetch(
     `https://bsky.social/xrpc/app.bsky.actor.getProfile?actor=${did}`,
@@ -113,6 +139,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to save account' }, { status: 500 })
     }
   }
+
+  // Register in jail registry (upsert — marks as active, owned by this user)
+  await getSupabaseAdmin()
+    .from('platform_account_registry')
+    .upsert(
+      {
+        platform: 'bluesky',
+        platform_account_id: did,
+        connected_to_user: user.id,
+        status: 'active',
+        disconnected_at: null,
+        cooling_until: null,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'platform,platform_account_id' }
+    )
 
   return NextResponse.json({ success: true, handle: resolvedHandle, displayName: account_name })
 }
