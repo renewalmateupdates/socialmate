@@ -177,6 +177,20 @@ async function processReferralCredits(
             earned_credits: (referrerSettings.earned_credits ?? 0) + REFERRAL_CREDITS_PER_TIER,
           })
           .eq('user_id', conversion.affiliate_user_id)
+
+        // Notify referrer about earned credits (non-fatal)
+        try {
+          await supabase.from('notifications').insert({
+            user_id: conversion.affiliate_user_id,
+            type: 'referral_credited',
+            title: '🎉 Referral reward earned!',
+            message: 'Someone you referred just upgraded. 25 bonus credits added to your account.',
+            is_read: false,
+            data: { action_url: '/settings?tab=referrals' },
+          })
+        } catch (notifErr) {
+          console.warn('[Referral] Notification insert failed (non-fatal):', notifErr)
+        }
       }
     }
 
