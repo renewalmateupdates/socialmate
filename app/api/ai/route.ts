@@ -4,6 +4,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { notifyLowCredits } from '@/lib/notify-low-credits'
 
 const CREDIT_COSTS: Record<string, number> = {
   caption:     5,
@@ -332,10 +333,14 @@ Apply these guidelines to all content you generate.
       return NextResponse.json({ error: 'AI generation failed — credits refunded' }, { status: 500 })
     }
 
+    // Non-fatal low-credits in-app notification
+    const totalRemaining = newMonthly + newEarned + newPaid
+    await notifyLowCredits(user.id, totalRemaining)
+
     return NextResponse.json({
       result: text,
       creditCost,
-      creditsRemaining: newMonthly + newEarned + newPaid,
+      creditsRemaining: totalRemaining,
       monthlyRemaining: newMonthly,
       earnedRemaining:  newEarned,
       paidRemaining:    newPaid,
