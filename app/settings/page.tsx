@@ -115,6 +115,7 @@ function SettingsInner() {
   // White label state
   const [whiteLabelActive, setWhiteLabelActive] = useState(false)
   const [whiteLabelTier, setWhiteLabelTier]     = useState<string | null>(null)
+  const [whiteLabelStatus, setWhiteLabelStatus] = useState<string | null>(null)
   const [wlBrandName, setWlBrandName]           = useState('')
   const [wlLogoUrl, setWlLogoUrl]               = useState('')
   const [wlDomain, setWlDomain]                 = useState('')
@@ -167,7 +168,7 @@ function SettingsInner() {
 
       const { data: settings } = await supabase
         .from('user_settings')
-        .select('referral_code, white_label_active, white_label_tier, white_label_brand_name, white_label_logo_url, white_label_custom_domain, white_label_brand_color, notification_prefs, credit_source_preference, iris_opt_in')
+        .select('referral_code, white_label_active, white_label_tier, white_label_status, white_label_brand_name, white_label_logo_url, white_label_custom_domain, white_label_brand_color, notification_prefs, credit_source_preference, iris_opt_in')
         .eq('user_id', user.id)
         .single()
 
@@ -176,6 +177,7 @@ function SettingsInner() {
         if (settings.iris_opt_in !== undefined && settings.iris_opt_in !== null) setIrisOptIn(settings.iris_opt_in)
         setWhiteLabelActive(settings.white_label_active || false)
         setWhiteLabelTier(settings.white_label_tier || null)
+        setWhiteLabelStatus(settings.white_label_status || null)
         setWlBrandName(settings.white_label_brand_name || '')
         setWlLogoUrl(settings.white_label_logo_url || '')
         setWlDomain(settings.white_label_custom_domain || '')
@@ -1252,8 +1254,21 @@ function SettingsInner() {
                 </div>
               )}
 
+              {/* Pending review state */}
+              {plan !== 'free' && !whiteLabelActive && whiteLabelStatus === 'pending' && (
+                <div className="bg-amber-50 border border-amber-200 dark:bg-amber-900/10 dark:border-amber-800 rounded-2xl px-5 py-4 flex items-start gap-3">
+                  <span className="text-amber-500 text-lg shrink-0 mt-0.5">🕐</span>
+                  <div>
+                    <p className="text-sm font-bold text-amber-700 dark:text-amber-400">Your White Label request is under review</p>
+                    <p className="text-xs text-amber-600 dark:text-amber-500 mt-1 leading-relaxed">
+                      We typically review requests within 24 hours. You'll receive an email once it's approved and ready to configure.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* Pro or Agency — not yet purchased */}
-              {plan !== 'free' && !whiteLabelActive && (
+              {plan !== 'free' && !whiteLabelActive && whiteLabelStatus !== 'pending' && (
                 <div className="space-y-4">
                   {wlActivated && (
                     <div className="bg-green-50 border border-green-200 rounded-2xl px-5 py-4">

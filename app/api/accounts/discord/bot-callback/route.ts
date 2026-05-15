@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -90,6 +91,31 @@ export async function GET(request: NextRequest) {
 
   const expires_at = new Date(Date.now() + expires_in * 1000).toISOString()
   const metadata   = guildId ? { guild_id: guildId, guild_name: guildName } : {}
+  const platformAccountId = guildId ?? discordUser.id
+
+  // --- Platform Jail: check if this Discord guild/account is in cooldown ---
+  const { data: registryRecord } = await getSupabaseAdmin()
+    .from('platform_account_registry')
+    .select('id, status, connected_to_user, cooling_until')
+    .eq('platform', 'discord')
+    .eq('platform_account_id', platformAccountId)
+    .maybeSingle()
+
+  if (registryRecord) {
+    if (registryRecord.status === 'active' && registryRecord.connected_to_user !== user.id) {
+      cookieStore.delete('discord_bot_state')
+      return NextResponse.redirect(`${appUrl}/discord?error=discord_already_connected`)
+    }
+    if (registryRecord.status === 'cooling' && registryRecord.cooling_until) {
+      const coolingUntil = new Date(registryRecord.cooling_until)
+      if (coolingUntil > new Date()) {
+        cookieStore.delete('discord_bot_state')
+        const until = coolingUntil.toISOString()
+        return NextResponse.redirect(`${appUrl}/discord?error=discord_in_cooldown&until=${encodeURIComponent(until)}`)
+      }
+    }
+  }
+  // -----------------------------------------------------------------------
 
   // Check if a bot-connected account already exists for this guild
   const { data: existing } = await supabase
@@ -97,7 +123,7 @@ export async function GET(request: NextRequest) {
     .select('id')
     .eq('user_id', user.id)
     .eq('platform', 'discord')
-    .eq('platform_user_id', guildId ?? discordUser.id)
+    .eq('platform_user_id', platformAccountId)
     .maybeSingle()
 
   if (existing) {
@@ -112,7 +138,7 @@ export async function GET(request: NextRequest) {
       .insert({
         user_id:          user.id,
         platform:         'discord',
-        platform_user_id: guildId ?? discordUser.id,
+        platform_user_id: platformAccountId,
         account_name:     guildName ?? discordUser.global_name ?? discordUser.username,
         profile_image_url: discordUser.avatar
           ? `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png`
@@ -129,6 +155,22 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${appUrl}/discord?error=db_error`)
     }
   }
+
+  // Register in jail registry
+  await getSupabaseAdmin()
+    .from('platform_account_registry')
+    .upsert(
+      {
+        platform: 'discord',
+        platform_account_id: platformAccountId,
+        connected_to_user: user.id,
+        status: 'active',
+        disconnected_at: null,
+        cooling_until: null,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'platform,platform_account_id' }
+    )
 
   cookieStore.delete('discord_bot_state')
   return NextResponse.redirect(`${appUrl}/discord?success=bot_connected`)

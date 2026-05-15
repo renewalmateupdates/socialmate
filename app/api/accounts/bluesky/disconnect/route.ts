@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
+import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 export async function POST(request: NextRequest) {
   const cookieStore = await cookies()
@@ -32,6 +33,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'accountId is required' }, { status: 400 })
   }
 
+  // Fetch platform_user_id BEFORE deleting so we can update the jail registry
+  const { data: accountRow } = await supabase
+    .from('connected_accounts')
+    .select('platform_user_id')
+    .eq('id', accountId)
+    .eq('user_id', user.id)
+    .eq('platform', 'bluesky')
+    .maybeSingle()
+  const platformUserId = accountRow?.platform_user_id ?? null
+
   const { error } = await supabase
     .from('connected_accounts')
     .delete()
@@ -42,6 +53,23 @@ export async function POST(request: NextRequest) {
   if (error) {
     console.error('Bluesky disconnect error:', error)
     return NextResponse.json({ error: 'Failed to disconnect account' }, { status: 500 })
+  }
+
+  // Put the Bluesky account into 45-day cooling jail
+  if (platformUserId) {
+    const now = new Date()
+    const coolingUntil = new Date(now.getTime() + 45 * 24 * 60 * 60 * 1000)
+    await getSupabaseAdmin()
+      .from('platform_account_registry')
+      .update({
+        status: 'cooling',
+        connected_to_user: null,
+        disconnected_at: now.toISOString(),
+        cooling_until: coolingUntil.toISOString(),
+        updated_at: now.toISOString(),
+      })
+      .eq('platform', 'bluesky')
+      .eq('platform_account_id', platformUserId)
   }
 
   return NextResponse.json({ success: true })
