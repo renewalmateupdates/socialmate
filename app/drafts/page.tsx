@@ -37,6 +37,13 @@ function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse ${className}`} />
 }
 
+function tagColorDrafts(tag: string): string {
+  const COLORS = ['#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ef4444', '#f97316', '#06b6d4', '#ec4899']
+  let hash = 0
+  for (let i = 0; i < tag.length; i++) hash = tag.charCodeAt(i) + ((hash << 5) - hash)
+  return COLORS[Math.abs(hash) % COLORS.length]
+}
+
 const PLATFORM_ICONS: Record<string, string> = {
   instagram: '📸', twitter: '🐦', linkedin: '💼', tiktok: '🎵',
   facebook: '📘', pinterest: '📌', youtube: '▶️', threads: '🧵',
