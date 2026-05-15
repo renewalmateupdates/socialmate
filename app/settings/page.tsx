@@ -141,7 +141,10 @@ function SettingsInner() {
   const [bvNeverInclude, setBvNeverInclude]   = useState('')
   const [bvExamplePost, setBvExamplePost]     = useState('')
 
-  // Appearance — sidebar stats visibility
+  // Appearance — default platforms & sidebar stats visibility
+  const [defaultPlatforms, setDefaultPlatforms] = useState<string[]>([])
+  const [defaultPlatformsSaving, setDefaultPlatformsSaving] = useState(false)
+  const [defaultPlatformsSaved, setDefaultPlatformsSaved] = useState(false)
   const [sidebarStatsVisible, setSidebarStatsVisible] = useState(true)
   useEffect(() => {
     try {
@@ -167,13 +170,14 @@ function SettingsInner() {
 
       const { data: settings } = await supabase
         .from('user_settings')
-        .select('referral_code, white_label_active, white_label_tier, white_label_brand_name, white_label_logo_url, white_label_custom_domain, white_label_brand_color, notification_prefs, credit_source_preference, iris_opt_in')
+        .select('referral_code, white_label_active, white_label_tier, white_label_brand_name, white_label_logo_url, white_label_custom_domain, white_label_brand_color, notification_prefs, credit_source_preference, iris_opt_in, default_platforms')
         .eq('user_id', user.id)
         .single()
 
       if (settings) {
         if (settings.referral_code) setReferralCode(settings.referral_code)
         if (settings.iris_opt_in !== undefined && settings.iris_opt_in !== null) setIrisOptIn(settings.iris_opt_in)
+        if (Array.isArray(settings.default_platforms)) setDefaultPlatforms(settings.default_platforms)
         setWhiteLabelActive(settings.white_label_active || false)
         setWhiteLabelTier(settings.white_label_tier || null)
         setWlBrandName(settings.white_label_brand_name || '')
@@ -381,6 +385,18 @@ function SettingsInner() {
       if (data.error === 'Unauthorized') router.push('/login')
     } catch { console.error('Credit pack checkout failed') }
     finally { setCreditPackLoading(null) }
+  }
+
+  const saveDefaultPlatforms = async (platforms: string[]) => {
+    if (!userId) return
+    setDefaultPlatformsSaving(true)
+    await supabase
+      .from('user_settings')
+      .update({ default_platforms: platforms })
+      .eq('user_id', userId)
+    setDefaultPlatformsSaving(false)
+    setDefaultPlatformsSaved(true)
+    setTimeout(() => setDefaultPlatformsSaved(false), 2000)
   }
 
   const saveCreditPreference = async (pref: 'monthly_first' | 'bank_first') => {
@@ -1572,6 +1588,56 @@ function SettingsInner() {
                     }}
                     className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 ${sidebarStatsVisible ? 'bg-pink-500' : 'bg-gray-200 dark:bg-gray-700'}`}>
                     <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${sidebarStatsVisible ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                  </button>
+                </div>
+
+                {/* Default Platforms */}
+                <div className="pt-4">
+                  <p className="text-sm font-bold mb-0.5">Default Platforms</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">
+                    Pre-select these platforms every time you open Compose for a new post.
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {[
+                      { id: 'bluesky',  name: 'Bluesky',  icon: '🦋' },
+                      { id: 'mastodon', name: 'Mastodon', icon: '🐘' },
+                      { id: 'discord',  name: 'Discord',  icon: '💬' },
+                      { id: 'telegram', name: 'Telegram', icon: '✈️' },
+                      { id: 'twitter',  name: 'X',        icon: '🐦' },
+                      { id: 'linkedin', name: 'LinkedIn', icon: '💼' },
+                      { id: 'tiktok',   name: 'TikTok',   icon: '🎵' },
+                    ].map(platform => {
+                      const selected = defaultPlatforms.includes(platform.id)
+                      return (
+                        <button
+                          key={platform.id}
+                          type="button"
+                          onClick={() => {
+                            const next = selected
+                              ? defaultPlatforms.filter(p => p !== platform.id)
+                              : [...defaultPlatforms, platform.id]
+                            setDefaultPlatforms(next)
+                          }}
+                          className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl border transition-all ${
+                            selected
+                              ? 'bg-black text-white border-black dark:bg-white dark:text-black dark:border-white'
+                              : 'border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500'
+                          }`}>
+                          <span>{platform.icon}</span>
+                          <span>{platform.name}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                  <button
+                    onClick={() => saveDefaultPlatforms(defaultPlatforms)}
+                    disabled={defaultPlatformsSaving}
+                    className="text-xs font-bold px-4 py-2 bg-black text-white dark:bg-white dark:text-black rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center gap-1.5">
+                    {defaultPlatformsSaving
+                      ? <><div className="w-3 h-3 border-2 border-white/30 dark:border-black/30 border-t-white dark:border-t-black rounded-full animate-spin" />Saving...</>
+                      : defaultPlatformsSaved
+                        ? '✓ Saved'
+                        : 'Save defaults'}
                   </button>
                 </div>
               </div>
