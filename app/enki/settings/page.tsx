@@ -143,6 +143,11 @@ export default function EnkiSettingsPage() {
   const [authed, setAuthed]         = useState(false)
   const [profile, setProfile]       = useState<Profile | null>(null)
   const [mode, setMode]             = useState<'approval' | 'autonomous' | 'dormant'>('approval')
+  // Co-Pilot state
+  const [copilot, setCopilot]       = useState<{ id: string; copilot_email: string; status: string; copilot_user_id: string | null; accepted_at: string | null } | null>(null)
+  const [copilotEmail, setCopilotEmail] = useState('')
+  const [copilotSending, setCopilotSending] = useState(false)
+  const [copilotMsg, setCopilotMsg] = useState<{ text: string; ok: boolean } | null>(null)
   const [saved, setSaved]           = useState(false)
   const [riskPreset, setRiskPreset] = useState<RiskPreset>('balanced')
   const [presetSaving, setPresetSaving] = useState(false)
@@ -186,19 +191,24 @@ export default function EnkiSettingsPage() {
   async function loadProfile() {
     setLoading(true)
     try {
-      const [profileRes, doctrinesRes] = await Promise.all([
+      const [profileRes, doctrinesRes, copilotRes] = await Promise.all([
         fetch('/api/enki/profile'),
         fetch('/api/enki/doctrines'),
+        fetch('/api/enki/copilot'),
       ])
-      const [profileJson, doctrinesJson] = await Promise.all([
+      const [profileJson, doctrinesJson, copilotJson] = await Promise.all([
         profileRes.json(),
         doctrinesRes.json(),
+        copilotRes.json(),
       ])
       if (profileJson.profile) {
         setProfile(profileJson.profile)
         setMode(profileJson.profile.guardian_mode)
         setRiskPreset(profileJson.profile.risk_preset ?? 'balanced')
         setTruthMode(Boolean(profileJson.profile.truth_mode_enabled))
+      }
+      if (copilotJson.copilot && copilotJson.role === 'owner') {
+        setCopilot(copilotJson.copilot)
       }
       if (doctrinesJson.doctrines) {
         setDoctrines(doctrinesJson.doctrines)
@@ -391,6 +401,51 @@ export default function EnkiSettingsPage() {
       // silently ignore
     } finally {
       setCbConnecting(false)
+    }
+  }
+
+  async function inviteCopilot() {
+    if (!copilotEmail.includes('@')) {
+      setCopilotMsg({ text: 'Please enter a valid email address.', ok: false })
+      return
+    }
+    setCopilotSending(true)
+    setCopilotMsg(null)
+    try {
+      const res = await fetch('/api/enki/copilot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: copilotEmail }),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        setCopilotMsg({ text: json.error ?? 'Failed to send invitation.', ok: false })
+      } else {
+        setCopilotMsg({ text: 'Invitation sent! They\'ll receive an email to accept.', ok: true })
+        setCopilotEmail('')
+        // Refresh copilot state
+        const refreshRes = await fetch('/api/enki/copilot')
+        const refreshJson = await refreshRes.json()
+        if (refreshJson.copilot && refreshJson.role === 'owner') setCopilot(refreshJson.copilot)
+      }
+    } catch {
+      setCopilotMsg({ text: 'Network error. Please try again.', ok: false })
+    } finally {
+      setCopilotSending(false)
+    }
+  }
+
+  async function removeCopilot() {
+    if (!confirm('Remove your co-pilot? They will lose access to your dashboard immediately.')) return
+    setCopilotSending(true)
+    try {
+      await fetch('/api/enki/copilot', { method: 'DELETE' })
+      setCopilot(null)
+      setCopilotMsg({ text: 'Co-pilot removed.', ok: true })
+    } catch {
+      setCopilotMsg({ text: 'Network error. Please try again.', ok: false })
+    } finally {
+      setCopilotSending(false)
     }
   }
 
@@ -1008,6 +1063,102 @@ export default function EnkiSettingsPage() {
               Truth dashboard →
             </Link>
           </p>
+        </div>
+
+        {/* Co-Pilot */}
+        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
+          <div className="flex items-start justify-between mb-1">
+            <div>
+              <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                Co-Pilot Access
+                {!isCommander && <span className="ml-2 text-xs font-normal text-gray-400">(Commander+ only)</span>}
+              </h2>
+              <p className="text-sm text-gray-500 mt-1 max-w-lg">
+                Invite one trusted person to view your Enki dashboard in read-only mode. They can see your live trades, performance, and signals — but cannot trade or approve anything.
+              </p>
+            </div>
+            <span className="shrink-0 ml-4 text-xs font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2.5 py-1 rounded-full">
+              👁 Read-only
+            </span>
+          </div>
+
+          {!isCommander ? (
+            <div className="mt-4 bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-3">
+              <p className="text-xs text-gray-400">
+                Upgrade to Commander to invite a co-pilot.{' '}
+                <Link href="/enki#pricing" className="text-amber-500 hover:text-amber-400 font-semibold">Upgrade →</Link>
+              </p>
+            </div>
+          ) : (
+            <div className="mt-5 space-y-4">
+              {/* Current co-pilot status */}
+              {copilot && copilot.status !== 'removed' ? (
+                <div className={`rounded-xl border p-4 ${
+                  copilot.status === 'active'
+                    ? 'bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-800'
+                    : 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800'
+                }`}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-bold text-gray-700 dark:text-gray-300 mb-0.5">
+                        {copilot.status === 'active' ? '✅ Active co-pilot' : '⏳ Invitation pending'}
+                      </p>
+                      <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">{copilot.copilot_email}</p>
+                      {copilot.status === 'active' && copilot.accepted_at && (
+                        <p className="text-xs text-gray-400 mt-0.5">
+                          Accepted {new Date(copilot.accepted_at).toLocaleDateString()}
+                        </p>
+                      )}
+                      {copilot.status === 'pending' && (
+                        <p className="text-xs text-gray-400 mt-0.5">Waiting for them to accept the email invitation.</p>
+                      )}
+                    </div>
+                    <button
+                      onClick={removeCopilot}
+                      disabled={copilotSending}
+                      className="text-xs font-bold text-red-500 hover:text-red-400 disabled:opacity-50 transition-colors px-3 py-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* Invite form */
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1.5">
+                      Co-pilot email address
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="email"
+                        value={copilotEmail}
+                        onChange={e => setCopilotEmail(e.target.value)}
+                        placeholder="friend@example.com"
+                        className="flex-1 text-sm bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:border-amber-400 min-h-[44px]"
+                      />
+                      <button
+                        onClick={inviteCopilot}
+                        disabled={copilotSending || !copilotEmail}
+                        className="px-4 py-2 bg-amber-400 hover:bg-amber-300 disabled:opacity-50 disabled:cursor-not-allowed text-black text-sm font-bold rounded-xl transition-colors min-h-[44px] shrink-0"
+                      >
+                        {copilotSending ? 'Sending…' : 'Invite'}
+                      </button>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-400">
+                    They&apos;ll receive an email with a link to accept. They need a SocialMate account.
+                  </p>
+                </div>
+              )}
+
+              {copilotMsg && (
+                <p className={`text-xs font-medium ${copilotMsg.ok ? 'text-green-500' : 'text-red-500'}`}>
+                  {copilotMsg.text}
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Danger zone */}

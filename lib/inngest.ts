@@ -4642,3 +4642,126 @@ export const monthlyCreditsResetEmail = inngest.createFunction(
     return { sent, total: users.length }
   }
 )
+
+// ─── Studio Stax Quarterly Blog Generator ────────────────────────────────────
+// Fires on Jan/Apr/Jul/Oct 1st at 10am UTC.
+// For each active Studio Stax listing, generates a spotlight blog post if one
+// hasn't been created this quarter yet. Non-fatal per listing.
+export const studioStaxQuarterlyBlog = inngest.createFunction(
+  { id: 'studio-stax-quarterly-blog', name: 'Studio Stax Quarterly Blog', retries: 1 },
+  { cron: '0 10 1 1,4,7,10 *' },
+  async ({ step }) => {
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = now.getMonth() + 1 // 1-based
+    const quarter = month <= 3 ? 'Q1' : month <= 6 ? 'Q2' : month <= 9 ? 'Q3' : 'Q4'
+    const quarterLabel = `${quarter}-${year}`
+    const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString()
+
+    function nameToSlug(name: string): string {
+      return name
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim()
+    }
+
+    // Fetch active slots with their listing details
+    const listings = await step.run('fetch-active-listings', async () => {
+      const supabase = getSupabaseAdmin()
+      const { data: slots, error } = await supabase
+        .from('studio_stax_slots')
+        .select('id, listing_id')
+        .eq('status', 'active')
+
+      if (error || !slots?.length) return []
+
+      const listingIds = Array.from(new Set(slots.map((s: any) => s.listing_id).filter(Boolean))) as string[]
+      if (!listingIds.length) return []
+
+      const { data: listingRows } = await supabase
+        .from('curated_listings')
+        .select('id, name, description, tagline, url, category')
+        .in('id', listingIds)
+
+      return listingRows ?? []
+    })
+
+    if (!listings.length) return { generated: 0, skipped: 0 }
+
+    let generated = 0
+    let skipped = 0
+
+    for (const listing of listings as Array<{ id: string; name: string; description: string | null; tagline: string | null; url: string | null; category: string | null }>) {
+      await step.run(`blog-listing-${listing.id}`, async () => {
+        try {
+          const supabase = getSupabaseAdmin()
+          const listingSlug = nameToSlug(listing.name)
+          const blogSlug = `studio-stax-spotlight-${listingSlug}-${quarterLabel.toLowerCase()}`
+
+          // Check if already generated this quarter
+          const { data: existing } = await supabase
+            .from('blog_posts')
+            .select('id')
+            .like('slug', `studio-stax-spotlight-${listingSlug}-%`)
+            .gte('published_at', ninetyDaysAgo)
+            .maybeSingle()
+
+          if (existing) {
+            skipped++
+            return
+          }
+
+          const name = listing.name
+          const description = listing.description ?? listing.tagline ?? 'An innovative creator tool.'
+          const url = listing.url ?? 'https://socialmate.studio/studio-stax'
+          const excerpt = `Discover ${name} — a creator-first tool featured in Studio Stax. ${description.slice(0, 120)}${description.length > 120 ? '…' : ''}`
+
+          const content = `<article>
+<h1>${name} — Studio Stax Creator Spotlight</h1>
+<p class="lead">Every quarter, Studio Stax shines a spotlight on the tools that builders, creators, and communities are betting their workflows on. This quarter, we're featuring <strong>${name}</strong>.</p>
+
+<h2>About ${name}</h2>
+<p>${description}</p>
+${listing.tagline ? `<p><em>${listing.tagline}</em></p>` : ''}
+
+<h2>What Makes Them Unique</h2>
+<p>${name} stands out in the creator economy because they've built something that genuinely puts the user first. ${description} Whether you're a solo creator, a growing team, or an agency managing multiple clients, tools like ${name} exist to remove friction and amplify what you're already doing well.</p>
+<p>In an industry where most software is designed to extract value, ${name} takes a different approach — one that aligns with the SocialMate philosophy: technology should empower creators, not exploit them.</p>
+
+<h2>Connect with ${name}</h2>
+<p>Ready to explore what ${name} has to offer? Here's how to get started:</p>
+<ul>
+  <li><strong>Website:</strong> <a href="${url}" target="_blank" rel="noopener noreferrer">${url}</a></li>
+  <li><strong>Category:</strong> ${listing.category ?? 'Creator Tools'}</li>
+</ul>
+
+<h2>Browse More Creator Tools</h2>
+<p>Studio Stax is SocialMate's curated directory of founder-approved tools for creators, builders, and communities. Every listing is ranked by how much each tool gives back — not by who paid the most. If you're looking for tools that share the belief that technology should empower creators, <a href="https://socialmate.studio/studio-stax">browse Studio Stax</a>.</p>
+<p>If you build tools for creators and want to be listed, <a href="https://socialmate.studio/studio-stax/apply">apply for a listing</a> today.</p>
+</article>`
+
+          await supabase
+            .from('blog_posts')
+            .insert({
+              slug: blogSlug,
+              title: `${name} — Studio Stax Creator Spotlight`,
+              excerpt,
+              content,
+              category: 'Studio Stax',
+              author: 'SocialMate Team',
+              listing_id: listing.id,
+              published_at: now.toISOString(),
+            })
+
+          generated++
+        } catch (err) {
+          console.error(`[StaxQuarterlyBlog] failed for listing ${listing.id}:`, err)
+        }
+      })
+    }
+
+    return { generated, skipped, quarter: quarterLabel }
+  }
+)
