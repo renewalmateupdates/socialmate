@@ -8,6 +8,7 @@ import Sidebar from '@/components/Sidebar'
 import DashboardTour from '@/components/DashboardTour'
 import DidYouKnow from '@/components/DidYouKnow'
 import DashboardWidgets from '@/components/DashboardWidgets'
+import WelcomeOfferBanner from '@/components/WelcomeOfferBanner'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 import {
   DndContext,
@@ -460,6 +461,15 @@ function DashboardInner() {
                 </div>
               </div>
             </div>
+          )}
+
+          {/* WELCOME OFFER BANNER — free users, account 14+ days old */}
+          {user && plan === 'free' && (
+            <WelcomeOfferBanner
+              createdAt={user.created_at}
+              plan={plan}
+              onApplyOffer={() => window.location.href = '/pricing'}
+            />
           )}
 
           {/* PENDING APPROVALS BANNER — show to workspace owners when team posts await review */}

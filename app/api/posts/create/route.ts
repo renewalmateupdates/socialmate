@@ -47,6 +47,7 @@ export async function POST(request: NextRequest) {
       workspaceId, selectedAccountIds, mediaUrls,
       isRecurring, recurrenceRule, recurrenceEndDate,
       ab_test_id, ab_variant,
+      tags, poll_data,
     } = body
 
     if (!content?.trim()) return NextResponse.json({ error: 'Content is required' }, { status: 400 })
@@ -173,6 +174,8 @@ export async function POST(request: NextRequest) {
           recurrence_end_date:  isRecurring && recurrenceEndDate ? recurrenceEndDate : null,
           ab_test_id:           ab_test_id || null,
           ab_variant:           ab_variant || null,
+          tags:                 Array.isArray(tags) && tags.length > 0 ? tags : null,
+          poll_data:            poll_data || null,
         })
         .select()
         .single()
@@ -323,6 +326,8 @@ export async function POST(request: NextRequest) {
         status:       finalStatus,
         published_at: allFailed ? null : new Date().toISOString(),
         destinations: destinations || {},
+        tags:         Array.isArray(tags) && tags.length > 0 ? tags : null,
+        poll_data:    poll_data || null,
       })
       .select('id')
       .single()

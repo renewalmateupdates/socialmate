@@ -119,6 +119,14 @@ export async function GET(request: NextRequest) {
             data: { email, firstName },
           }).catch((err: unknown) => console.error('[auth/callback] Failed to send user/signup event:', err))
         }
+
+        // Sync IRIS newsletter opt-in preference from signup form metadata
+        const newsletterOptIn = session.user.user_metadata?.newsletter_opted_in
+        if (isNewAccount && typeof newsletterOptIn === 'boolean') {
+          await adminSupabase
+            .from('user_settings')
+            .upsert({ user_id: session.user.id, iris_opt_in: newsletterOptIn }, { onConflict: 'user_id' })
+        }
       } catch (err) {
         console.error('Welcome email error:', err)
       }

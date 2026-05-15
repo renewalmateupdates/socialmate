@@ -21,6 +21,7 @@ async function getUser() {
 export async function GET(req: NextRequest) {
   const { data: { user } } = await getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (user.email !== 'socialmatehq@gmail.com') return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { searchParams } = new URL(req.url)
   const firstName = searchParams.get('first_name')?.trim()

@@ -520,6 +520,20 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **SQL to run in Supabase:** `supabase/migrations/20260513000001_iris_newsletter.sql` (ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS iris_opt_in BOOLEAN DEFAULT true; + CREATE TABLE iris_dispatches).
 - **Edition #1 of IRIS Dispatch sent** — Subject: "We're Live, We're Building, and We're Not Stopping". 29 recipients. Joshua confirmed receipt.
 
+**May 14, 2026 (PR #335):**
+- **Onboarding Quick Start** — New "Quick Start" path on Step 1 skips name entry + post generation; jumps straight to platform select → connect → done. Full flow unchanged for users who want it.
+- **Auto-schedule starter posts** — Step 4 now saves posts as `status='scheduled'` with staggered times (2h from now, +30min each) instead of drafts. Users land on dashboard with posts already on calendar — first win moment.
+- **Referral detection** — Reads `ref_code` cookie on onboarding mount; shows personalized "You were invited by a friend" banner on Step 1.
+- **Simplified Step 1** — Removed "Here's what you'll do" info box. IRIS opt-in compacted to single checkbox row. Quick Start link added as secondary CTA.
+- **Signup page Google Play beta CTA** — "Android App — Join Beta" card on desktop panel and mobile hero, links to `play.google.com/apps/testing/studio.socialmate.app`. Passively recruits testers 24/7 from organic signup traffic.
+- **Pricing page updates** — "Join 30+ creators" social proof in header. Birthday promo banner: teaser before 6/15/2026, active 6/15–12/15 (code `BDAY31`, 31% off, Joshua turns 31). Secure checkout trust strip below plan cards (Stripe badge, cancel anytime, no CC for free).
+- **Stripe coupon BDAY31 created** — Promo ID: `promo_1TX2Ay7OMwDowUuUiLXH4Fe3`. 31% off, Once, expires Dec 15 2026.
+- **Wall of Love page** — `/wall-of-love` live. Empty state with social proof + mailto testimonial CTA. Add entries to `TESTIMONIALS` array in `app/wall-of-love/page.tsx` as quotes come in. In sitemap + PublicFooter.
+- **Email capture on all 4 Gilgamesh Guides** — `GuideEmailCapture` component added to end of all 4 guides. Uses existing `/api/gils-guide/subscribe` endpoint + `gils_guide_subscribers` table.
+- **Admin data fix** — `googlereview@socialmate.studio` workspace downgraded from pro → free in both `workspaces` and `user_settings` tables. Admin God Mode now shows 0 paid users (accurate).
+- **LinkedIn origin story saved** — Real founding story documented: RenewalMate marketing struggle → ProductHunt Claude Code crossover → built SocialMate with Claude. Use for all marketing copy.
+- **LinkedIn post style documented** — Memory saved: body + hashtags + quote, first comment has socialmate link. Always output both blocks.
+
 ---
 
 ## Pending / In Progress
@@ -528,11 +542,11 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 - **TikTok Production API** — Submitted Apr 23. Demo video submitted May 5. Support ticket `ad7714530aa61ad4` open. Check portal periodically. No action until approved.
 
-- **SOMA content generation** — Submit updated CLAUDE.md as master doc to SocialMate Growth SOMA project. Voice DNA (Advanced) is now active — SOMA will sound like Joshua. Do NOT write posts manually. Next run: May 13.
+- **SOMA content generation** — Submit updated CLAUDE.md (May 14 version) as master doc to SocialMate Growth SOMA project. Voice DNA (Advanced) is active. Do NOT write posts manually.
 
-- **LinkedIn posts** — Multiple posts written including build-in-public update, cofounder search angle (May 12), and May 14 session update. All ready to publish manually to LinkedIn company page.
+- **LinkedIn posts** — May 14 real founding story post written and ready (RenewalMate → ProductHunt Claude Code crossover → built SocialMate). Publish manually to LinkedIn.
 
-- **AlternativeTo listing** — Submitted May 12, pending 24hr approval. Alternatives added: Buffer, Hootsuite, Later, SocialBee, Publer.
+- **AlternativeTo listing** — Submitted May 12, auto-approved May 14. Live at alternativeto.net/software/socialmate-studio/. 9 listed alternatives.
 
 - **Reddit cofounder post** — Written and ready. Waiting on u/InterestingRun7594 karma build before posting to r/cofounderhunt. u/CaptainNo3491 suspended (appeal submitted).
 
@@ -540,32 +554,39 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 - **Cofounder search** — Actively recruiting marketing cofounder via Reddit/LinkedIn. ~10% sweat equity over 24-month vest, 2-week trial, real contract.
 
-- **Onboarding UX simplification** — Community feedback (OptimalYear2147) strongly recommends narrowing to a single success path: "pick channel → 5 starter posts → auto-schedule with one tap." Agents/SOMA/Enki/monetization should surface as upgrades after the first win. Worth a focused sprint.
-
 - **Enki Truth Mode** — 50-trade minimum per strategy before results are statistically valid. Check `/enki/truth` periodically.
 
 - **LinkedIn integration** — Blocked on API credentials. Low priority.
 
 - **Push notifications** — VAPID keys confirmed set in Vercel. Live.
 
-- **Admin Pro count discrepancy** — Overview shows "1 Pro" from `workspaces.plan` but users page (reads `user_settings.plan`) shows 0. Likely Abdus Sohag's old workspace not synced. Not a real paying user. Needs investigation to sync the two plan fields.
+- **Google Play production** — Need 11 more testers. Currently 1/12. Signup page now has passive "Join Beta" CTA. Once 12 opt in, 14-day clock starts.
 
-- **Inngest resync needed** — After merging PR #334, resync `monthly-credits-reset-email` in Inngest dashboard.
+- **TikTok Production API** — Submitted Apr 23. Demo video submitted May 5. Support ticket `ad7714530aa61ad4` open. No action until approved.
+
+- **Wall of Love** — Live at `/wall-of-love`. Add real testimonial entries to `TESTIMONIALS` array as quotes come in from users.
+
+- **Birthday promo BDAY31** — Active June 15 – Dec 15, 2026. Stripe coupon live (`promo_1TX2Ay7OMwDowUuUiLXH4Fe3`). Pricing page banner handles teaser/active states automatically.
 
 **Roadmap (next up):**
-- **SOMA content run** — Submit updated CLAUDE.md to SOMA project. Voice DNA (Advanced tier) active. This is the priority for content.
-- **Google Play production** — Need 11 more testers. Currently 1/12. Nathan pending.
-- **Onboarding UX simplification** — Single success path: pick channel → 5 starter posts → auto-schedule. High priority based on community feedback.
+- **SOMA content run** — Submit updated CLAUDE.md to SOMA project. This is the priority for content.
+- **Product Hunt follow-up** — "We've shipped 40+ features since launch" comment on original PH post. Target: June 1.
+- **Testimonials** — Reach out to 5 existing users directly for a one-liner quote → add to Wall of Love.
+- **Discord community** — SocialMate's own Discord server as a tester pool + feature feedback loop. Step-by-step setup TBD.
 - **Landing page "Available on Google Play" badge** — Add after Play Store production approval.
-- **Product Hunt follow-up** — "We've shipped 40+ features since launch" comment on original PH post. Deferred ~1 week.
-- **Testimonials** — Reach out to 5 existing users directly for a one-liner quote.
-- **Discord community** — SocialMate's own Discord server as a tester pool + feature feedback loop.
-- **Gilgamesh's Guides Vol. 5+** — Deep-dive research-backed guides. Topics TBD.
+- **Gilgamesh's Guides Vol. 5+** — Creator monetization deep-dive. Email capture now on all guides so subscribers auto-notified.
+- **Onboarding further polish** — Free vs paid slightly different flows (gated features). Empty state compose button on dashboard.
 - **Apple App Store** — Deferred 3–6 months.
 - **LinkedIn publishing** — Pending API credentials. On hold.
 - **Instagram / Facebook / Threads** — Pending Meta API access. Long-term roadmap.
 ## Confirmed Done (stop asking about these)
 
+- ✅ **Onboarding Quick Start + auto-schedule + referral detection (May 14, PR #335)** — Quick Start path live. Starter posts now schedule to calendar (not drafts). Referral cookie banner. Never revert posts to draft status.
+- ✅ **Pricing birthday promo + social proof + secure checkout (May 14, PR #335)** — BDAY31 coupon live in Stripe. Banner date-gated in UI. Trust strip below plan cards.
+- ✅ **Wall of Love page (May 14, PR #335)** — `/wall-of-love` live. Add testimonials to TESTIMONIALS array when collected.
+- ✅ **Guide email capture (May 14, PR #335)** — GuideEmailCapture component on all 4 Gilgamesh Guides. Never ask to add email capture to guides again.
+- ✅ **Admin data fix (May 14)** — googlereview@socialmate.studio downgraded to free. Admin God Mode shows accurate 0 paid users.
+- ✅ **AlternativeTo listing approved (May 14)** — Live. 9 alternatives listed. Never ask to submit again.
 - ✅ **IRIS Dispatch + unsubscribe (May 13–14, PRs #330–331)** — Newsletter live. Edition #1 sent + received. Unsubscribe flow CAN-SPAM compliant. Settings opt-in toggle live. Never ask about building IRIS again.
 - ✅ **Admin God Mode exclusion fix (PR #332)** — Admin's own account excluded from all stats. Pro=0, Agency=0, MRR=$0 accurately reflects real users.
 - ✅ **Clickable admin stats + platform distribution (PR #333)** — Cards link to filtered users. Platform distribution section live. Suspense fix deployed.

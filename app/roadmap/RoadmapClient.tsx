@@ -129,7 +129,17 @@ const ROADMAP: RoadmapItem[] = [
   { title: 'Workspace system',           desc: 'Personal workspace auto-created on signup. Client workspaces on Agency plan. Cookie-scoped isolation.',          status: 'shipped',      category: 'Teams'         },
   { title: 'AI credits system',          desc: 'Three-pool credit system: monthly (resets), earned (referrals), purchased (never expire). Consumed in that order. Real-time sidebar updates.', status: 'shipped', category: 'Platform' },
   { title: 'Scheduled publishing',       desc: 'Inngest-powered scheduling with sleepUntil, retry logic, idempotency guards, and atomic status tracking.',       status: 'shipped',      category: 'Scheduling'    },
+  { title: 'Onboarding Quick Start',      desc: 'Quick Start path skips name entry and post generation — connect your platform and go. Full 5-step flow still available. Starter posts now auto-schedule to calendar instead of saving as drafts.', status: 'shipped', category: 'Platform' },
   { title: 'Onboarding flow',            desc: '5-step onboarding tour with SM-Give card on final step. Referral system grants +25 credits per paying referral.', status: 'shipped',     category: 'Platform'      },
+  { title: 'Wall of Love',               desc: 'Public testimonials page at /wall-of-love. Add real user quotes as they come in.', status: 'shipped', category: 'Growth' },
+  { title: 'Birthday Deal — 31% off',    desc: 'Time-limited promo running June 15 – Dec 15, 2026. Code BDAY31. Joshua turns 31 — 6 months of savings. Auto-teaser on pricing page before launch date.', status: 'shipped', category: 'Growth' },
+  { title: 'Guide email capture',        desc: 'Email opt-in at the end of all 4 Gilgamesh Guides. Subscribers get the guide via Resend and are notified when new volumes drop.', status: 'shipped', category: 'Platform' },
+  { title: 'Google Play beta CTA on signup', desc: '"Android App — Join Beta" card on signup page links to Play Store closed testing opt-in. Passively recruits Android testers from organic signup traffic.', status: 'shipped', category: 'Mobile' },
+  { title: 'IRIS Dispatch newsletter',   desc: 'Biweekly build-in-public newsletter at /admin/iris. CAN-SPAM compliant unsubscribe. Edition #1 sent May 14, 2026 to 29 recipients.', status: 'shipped', category: 'Growth' },
+  { title: 'SOMA Voice DNA Builder',     desc: '40-question personality interview that builds a Voice DNA summary injected into every SOMA generate prompt. 3 tiers: Foundation/Deep Dive/Advanced. Post-publish feedback loop refines it over time.', status: 'shipped', category: 'AI' },
+  { title: 'SOMA Project Memory',        desc: 'Persistent per-project content memory — rolling manager notes, topics covered, angles used. Ingest route reads memory to avoid repetition. 500k char cap on master doc ingest.', status: 'shipped', category: 'AI' },
+  { title: "Gilgamesh's Guides Vol. 3",  desc: 'Business credit + legal guide at /guides/business-credit-legal. Covers DUNS, PAYDEX, licenses, LLC vs S-Corp, banking, and insurance.', status: 'shipped', category: 'Platform' },
+  { title: "Gilgamesh's Guides Vol. 4",  desc: 'Vibe coding guide at /guides/vibe-coding-with-ai. 7 chapters written in Joshua\'s voice covering the full AI-assisted build workflow.', status: 'shipped', category: 'Platform' },
 ]
 
 const STATUS_CONFIG = {

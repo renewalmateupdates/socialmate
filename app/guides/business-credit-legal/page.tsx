@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
+import GuideEmailCapture from '@/components/GuideEmailCapture'
 
 export const metadata: Metadata = {
   title: "Business Credit, Legal Foundations & Tax Breaks (Free Guide) — Gilgamesh's Guides",
@@ -707,6 +708,8 @@ export default function BusinessCreditLegalGuidePage() {
                   ))}
                 </div>
               </section>
+
+              <GuideEmailCapture />
 
               {/* Closing */}
               <section className="mb-16 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-8 text-center">

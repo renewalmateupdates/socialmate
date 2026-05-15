@@ -3782,7 +3782,7 @@ export const somaAutopilotRun = inngest.createFunction(
       const { data: projects, error } = await admin
         .from('soma_projects')
         .select(`
-          id, workspace_id, user_id, name, platforms, posts_per_day, content_window_days, mode, runs_this_month,
+          id, workspace_id, user_id, name, platforms, posts_per_day, content_window_days, mode, runs_this_month, paused,
           workspaces!inner(id, owner_id, soma_credits_monthly, soma_credits_used, soma_credits_purchased, soma_autopilot_enabled)
         `)
         .in('mode', ['autopilot', 'full_send'])
@@ -3795,6 +3795,8 @@ export const somaAutopilotRun = inngest.createFunction(
       return (projects ?? []).filter((p: any) => {
         const ws = p.workspaces
         if (!ws?.soma_autopilot_enabled) return false
+        // Skip paused projects
+        if (p.paused) return false
         const remaining = Math.max(0, (ws.soma_credits_monthly ?? 0) - (ws.soma_credits_used ?? 0)) + (ws.soma_credits_purchased ?? 0)
         // Run cap check
         const runCap = p.mode === 'full_send' ? 12 : 8
@@ -4060,7 +4062,7 @@ Rules:
 // Every Monday at 9am UTC — sends a summary email to each user who had at
 // least one trade in the past 7 days.
 export const enkiWeeklySummary = inngest.createFunction(
-  { id: 'enki-weekly-summary', name: 'Enki Weekly P&L Summary', retries: 1 },
+  { id: 'enki-weekly-summary', name: 'Enki Weekly Performance Report', retries: 1 },
   { cron: '0 9 * * 1' }, // Monday 9am UTC
   async ({ step }) => {
     const admin = getSupabaseAdmin()
@@ -4073,6 +4075,7 @@ export const enkiWeeklySummary = inngest.createFunction(
     if (!profiles || profiles.length === 0) return { sent: 0 }
 
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+    const weekLabel = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
     let sent = 0
 
     for (const profile of profiles) {
@@ -4088,8 +4091,50 @@ export const enkiWeeklySummary = inngest.createFunction(
 
           if (!weekTrades || weekTrades.length === 0) return // skip users with no activity
 
+          // Fetch all-time closed trades for running P&L
+          const { data: allTimeTrades } = await admin
+            .from('enki_trades')
+            .select('id, symbol, side, qty, price, status, created_at')
+            .eq('user_id', profile.user_id)
+            .in('status', ['filled', 'executed'])
+            .order('created_at', { ascending: true })
+
+          // Helper: FIFO P&L calculator
+          function computeFifoPnl(trades: any[]): Array<{ symbol: string; pnl_dollar: number; pnl_pct: number }> {
+            const buyQueues: Record<string, Array<{ qty: number; price: number }>> = {}
+            const results: Array<{ symbol: string; pnl_dollar: number; pnl_pct: number }> = []
+            for (const t of trades) {
+              if (t.side === 'buy') {
+                if (!buyQueues[t.symbol]) buyQueues[t.symbol] = []
+                buyQueues[t.symbol].push({ qty: Number(t.qty), price: Number(t.price) })
+              } else if (t.side === 'sell') {
+                const queue = buyQueues[t.symbol]
+                if (!queue || queue.length === 0) continue
+                let remainingQty = Number(t.qty)
+                let totalCost = 0
+                let matchedQty = 0
+                while (remainingQty > 0 && queue.length > 0) {
+                  const buy = queue[0]
+                  const take = Math.min(remainingQty, buy.qty)
+                  totalCost += take * buy.price
+                  matchedQty += take
+                  remainingQty -= take
+                  buy.qty -= take
+                  if (buy.qty <= 0) queue.shift()
+                }
+                if (matchedQty > 0) {
+                  const revenue = matchedQty * Number(t.price)
+                  const pnl_dollar = revenue - totalCost
+                  const pnl_pct = totalCost > 0 ? (pnl_dollar / totalCost) * 100 : 0
+                  results.push({ symbol: t.symbol, pnl_dollar, pnl_pct })
+                }
+              }
+            }
+            return results
+          }
+
           // Closed trades = filled or executed
-          const closedTrades = weekTrades.filter((t: any) =>
+          const closedWeekTrades = weekTrades.filter((t: any) =>
             t.status === 'filled' || t.status === 'executed'
           )
 
@@ -4098,109 +4143,101 @@ export const enkiWeeklySummary = inngest.createFunction(
             t.status === 'pending' || t.status === 'pending_approval'
           ).length
 
-          // Compute P&L from buy/sell pairs (FIFO)
-          const buyQueues: Record<string, Array<{ qty: number; price: number }>> = {}
-          const sellPnl: Array<{ symbol: string; pnl_dollar: number; pnl_pct: number }> = []
+          const weekSellPnl   = computeFifoPnl(closedWeekTrades)
+          const allTimeSellPnl = computeFifoPnl(allTimeTrades ?? [])
 
-          for (const t of closedTrades as any[]) {
-            if (t.side === 'buy') {
-              if (!buyQueues[t.symbol]) buyQueues[t.symbol] = []
-              buyQueues[t.symbol].push({ qty: Number(t.qty), price: Number(t.price) })
-            } else if (t.side === 'sell') {
-              const queue = buyQueues[t.symbol]
-              if (!queue || queue.length === 0) continue
-              let remainingQty = Number(t.qty)
-              let totalCost = 0
-              let matchedQty = 0
-              while (remainingQty > 0 && queue.length > 0) {
-                const buy = queue[0]
-                const take = Math.min(remainingQty, buy.qty)
-                totalCost += take * buy.price
-                matchedQty += take
-                remainingQty -= take
-                buy.qty -= take
-                if (buy.qty <= 0) queue.shift()
-              }
-              if (matchedQty > 0) {
-                const revenue = matchedQty * Number(t.price)
-                const pnl_dollar = revenue - totalCost
-                const pnl_pct = totalCost > 0 ? (pnl_dollar / totalCost) * 100 : 0
-                sellPnl.push({ symbol: t.symbol, pnl_dollar, pnl_pct })
-              }
-            }
-          }
+          const tradeCount   = weekTrades.length
+          const wins         = weekSellPnl.filter(p => p.pnl_dollar > 0)
+          const losses       = weekSellPnl.filter(p => p.pnl_dollar <= 0)
+          const winRate      = weekSellPnl.length > 0 ? Math.round((wins.length / weekSellPnl.length) * 100) : null
+          const weekTotalPnl = weekSellPnl.reduce((sum, p) => sum + p.pnl_dollar, 0)
+          const allTimePnl   = allTimeSellPnl.reduce((sum, p) => sum + p.pnl_dollar, 0)
 
-          const tradeCount  = weekTrades.length
-          const wins        = sellPnl.filter(p => p.pnl_dollar > 0)
-          const losses      = sellPnl.filter(p => p.pnl_dollar <= 0)
-          const winRate     = sellPnl.length > 0 ? Math.round((wins.length / sellPnl.length) * 100) : null
-          const totalPnl    = sellPnl.reduce((sum, p) => sum + p.pnl_dollar, 0)
-          const avgPnlPct   = sellPnl.length > 0
-            ? sellPnl.reduce((sum, p) => sum + p.pnl_pct, 0) / sellPnl.length
+          // Best and worst trade this week by pnl_dollar
+          const bestTrade  = weekSellPnl.length > 0
+            ? weekSellPnl.reduce((b, p) => p.pnl_dollar > b.pnl_dollar ? p : b, weekSellPnl[0])
             : null
-
-          // Best trade by pnl_pct
-          const bestTrade = sellPnl.length > 0
-            ? sellPnl.reduce((best, p) => p.pnl_pct > best.pnl_pct ? p : best, sellPnl[0])
+          const worstTrade = weekSellPnl.length > 1
+            ? weekSellPnl.reduce((b, p) => p.pnl_dollar < b.pnl_dollar ? p : b, weekSellPnl[0])
             : null
-
-          // Subject line
-          const avgPnlStr = avgPnlPct !== null
-            ? `${avgPnlPct >= 0 ? '+' : ''}${avgPnlPct.toFixed(1)}%`
-            : 'active'
-          const subject = `\u26a1 Enki week: ${tradeCount} trade${tradeCount !== 1 ? 's' : ''}, ${avgPnlStr} avg`
 
           // Fetch user email
           const { data: userData } = await admin.auth.admin.getUserById(profile.user_id)
           const email = userData?.user?.email
           if (!email || !process.env.RESEND_API_KEY) return
 
-          // Stats rows HTML
-          const statsRows = [
-            ['Trades This Week', String(tradeCount)],
-            ['Win Rate', winRate !== null ? `${winRate}% (${wins.length}W / ${losses.length}L)` : 'N/A'],
-            ['Total P&L', sellPnl.length > 0 ? `${totalPnl >= 0 ? '+' : ''}$${Math.abs(totalPnl).toFixed(2)}` : 'N/A'],
-            ['Open Positions', String(openPositions)],
-          ].map(([label, value]) => `
-            <tr>
-              <td style="padding:10px 14px;color:#999;font-size:12px;border-bottom:1px solid #1f1f1f;">${label}</td>
-              <td style="padding:10px 14px;color:#f5f5f5;font-size:13px;font-weight:700;text-align:right;border-bottom:1px solid #1f1f1f;">${value}</td>
-            </tr>`).join('')
+          const fmtPnl = (v: number) =>
+            `<span style="color:${v >= 0 ? '#4ade80' : '#f87171'}">${v >= 0 ? '+' : ''}$${Math.abs(v).toFixed(2)}</span>`
 
-          const bestTradeHtml = bestTrade ? `
-            <div style="background:#1a1200;border:1px solid #3d2f00;border-radius:10px;padding:14px 18px;margin:20px 0;">
-              <p style="color:#f59e0b;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 6px;">Best Trade This Week</p>
-              <p style="color:#fff;font-size:18px;font-weight:900;margin:0;">${bestTrade.symbol}
-                <span style="color:${bestTrade.pnl_pct >= 0 ? '#4ade80' : '#f87171'};font-size:16px;margin-left:10px;">
-                  ${bestTrade.pnl_pct >= 0 ? '+' : ''}${bestTrade.pnl_pct.toFixed(2)}%
-                </span>
-              </p>
-            </div>` : ''
+          // Stats grid \u2014 4 cards in 2\u00d72
+          const statsGrid = [
+            ['Win Rate',       winRate !== null ? `${winRate}%` : '\u2014',                  winRate !== null && winRate >= 50 ? '#4ade80' : '#f87171'],
+            ['Trades',         String(tradeCount),                                       '#f59e0b'],
+            ['Weekly P&L',     weekSellPnl.length > 0 ? `${weekTotalPnl >= 0 ? '+' : ''}$${Math.abs(weekTotalPnl).toFixed(2)}` : '\u2014', weekTotalPnl >= 0 ? '#4ade80' : '#f87171'],
+            ['All-Time P&L',   allTimeSellPnl.length > 0 ? `${allTimePnl >= 0 ? '+' : ''}$${Math.abs(allTimePnl).toFixed(2)}` : '\u2014', allTimePnl >= 0 ? '#4ade80' : '#f87171'],
+          ].map(([label, value, color]) => `
+            <td style="width:50%;padding:14px 16px;vertical-align:top;">
+              <p style="color:#666;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 4px;">${label}</p>
+              <p style="color:${color};font-size:20px;font-weight:900;margin:0;">${value}</p>
+            </td>`).join('')
+
+          const tradeHighlightHtml = (bestTrade || worstTrade) ? `
+            <table style="width:100%;border-collapse:collapse;margin:20px 0;">
+              ${bestTrade ? `
+              <tr>
+                <td style="padding:12px 16px;background:#0d1a0d;border:1px solid #1a3a1a;border-radius:8px 8px 0 0;">
+                  <p style="color:#86efac;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 2px;">Best Trade</p>
+                  <p style="color:#fff;font-size:15px;font-weight:900;margin:0;">${bestTrade.symbol}
+                    <span style="color:#4ade80;margin-left:10px;">${fmtPnl(bestTrade.pnl_dollar)}</span>
+                    <span style="color:#666;font-size:11px;margin-left:6px;">(${bestTrade.pnl_pct >= 0 ? '+' : ''}${bestTrade.pnl_pct.toFixed(2)}%)</span>
+                  </p>
+                </td>
+              </tr>` : ''}
+              ${worstTrade ? `
+              <tr>
+                <td style="padding:12px 16px;background:#1a0d0d;border:1px solid #3a1a1a;border-radius:${bestTrade ? '0 0 8px 8px' : '8px'};">
+                  <p style="color:#fca5a5;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 2px;">Worst Trade</p>
+                  <p style="color:#fff;font-size:15px;font-weight:900;margin:0;">${worstTrade.symbol}
+                    <span style="color:#f87171;margin-left:10px;">${fmtPnl(worstTrade.pnl_dollar)}</span>
+                    <span style="color:#666;font-size:11px;margin-left:6px;">(${worstTrade.pnl_pct >= 0 ? '+' : ''}${worstTrade.pnl_pct.toFixed(2)}%)</span>
+                  </p>
+                </td>
+              </tr>` : ''}
+            </table>` : ''
+
+          const subject = `\u26a1 Your Enki Weekly \u2014 Week of ${weekLabel}`
 
           await getResend().emails.send({
-            from: 'Enki <enki@socialmate.studio>',
+            from: 'Enki by SocialMate <hello@socialmate.studio>',
             to: email,
             subject,
-            html: `<div style="background:#0a0a0a;font-family:sans-serif;padding:32px;max-width:520px;margin:0 auto;border-radius:16px;">
-              <div style="margin-bottom:24px;">
-                <p style="color:#f59e0b;font-size:16px;font-weight:900;margin:0 0 2px;">\u26a1 Enki</p>
-                <p style="color:#555;font-size:11px;margin:0;">Treasury Guardian \u00b7 Weekly Briefing</p>
+            html: `<div style="background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:32px;max-width:520px;margin:0 auto;border-radius:16px;">
+              <!-- Header -->
+              <div style="margin-bottom:28px;">
+                <div style="display:inline-block;background:#f59e0b;border-radius:10px;padding:6px 12px;margin-bottom:10px;">
+                  <span style="color:#000;font-size:13px;font-weight:900;">\u26a1 ENKI</span>
+                </div>
+                <p style="color:#e5e5e5;font-size:20px;font-weight:900;margin:0 0 4px;">Weekly Performance Report</p>
+                <p style="color:#555;font-size:12px;margin:0;">Week of ${weekLabel} \u00b7 ${tradeCount} trade${tradeCount !== 1 ? 's' : ''} executed</p>
               </div>
-              <p style="color:#e5e5e5;font-size:22px;font-weight:900;margin:0 0 6px;">
-                ${tradeCount} trade${tradeCount !== 1 ? 's' : ''} executed
-              </p>
-              <p style="color:#666;font-size:13px;margin:0 0 24px;">
-                Past 7 days \u00b7 ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-              </p>
-              <table style="width:100%;border-collapse:collapse;background:#111;border-radius:10px;overflow:hidden;border:1px solid #1f1f1f;">
-                ${statsRows}
+
+              <!-- Stats grid -->
+              <table style="width:100%;border-collapse:collapse;background:#111;border-radius:12px;border:1px solid #1f1f1f;margin-bottom:20px;">
+                <tr>${statsGrid}</tr>
               </table>
-              ${bestTradeHtml}
-              <a href="https://socialmate.studio/enki/trades" style="display:inline-block;background:#f59e0b;color:#000;font-weight:900;font-size:13px;padding:13px 28px;border-radius:10px;text-decoration:none;margin-top:8px;">
+
+              <!-- Best / Worst trade -->
+              ${tradeHighlightHtml}
+
+              <!-- CTA -->
+              <a href="https://socialmate.studio/enki/trades" style="display:inline-block;background:#f59e0b;color:#000;font-weight:900;font-size:13px;padding:13px 28px;border-radius:10px;text-decoration:none;margin-top:4px;">
                 View Full Trade History \u2192
               </a>
-              <p style="color:#333;font-size:11px;margin-top:28px;line-height:1.6;">
-                SocialMate by Gilgamesh Enterprise LLC \u00b7 Paper trading results are simulated and not financial advice.
+
+              <!-- Footer -->
+              <p style="color:#444;font-size:11px;margin-top:28px;line-height:1.6;">
+                Enki learns every trade. Keep the signals coming.<br>
+                <a href="https://socialmate.studio/enki" style="color:#666;text-decoration:none;">SocialMate</a> by Gilgamesh Enterprise LLC \u00b7 Paper trading \u2014 not financial advice.
               </p>
             </div>`,
           })

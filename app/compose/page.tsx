@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 import UpgradeNudge from '@/components/UpgradeNudge'
 import PostImageExporter from '@/components/PostImageExporter'
+import PageTour from '@/components/PageTour'
 
 const PLATFORMS = [
   { id: 'discord',   name: 'Discord',   icon: '💬', limit: 2000,  live: true  },
@@ -148,6 +149,14 @@ type ConnectedAccount = {
   platform_user_id: string
 }
 
+// Deterministic color for a tag name — same tag always = same color
+function tagColor(tag: string): string {
+  const COLORS = ['#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ef4444', '#f97316', '#06b6d4', '#ec4899']
+  let hash = 0
+  for (let i = 0; i < tag.length; i++) hash = tag.charCodeAt(i) + ((hash << 5) - hash)
+  return COLORS[Math.abs(hash) % COLORS.length]
+}
+
 function getLocalDateString() {
   const d = new Date()
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
@@ -162,6 +171,22 @@ function ComposeInner() {
   const [userRole, setUserRole] = useState<'owner' | 'admin' | 'editor' | 'viewer' | 'client' | null>(null)
   const [showPostingDisclaimer, setShowPostingDisclaimer] = useState(false)
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['discord'])
+
+  // Post tags state
+  const [postTags, setPostTags] = useState<string[]>([])
+  const [tagInput, setTagInput] = useState('')
+
+  // GIF search state
+  const [showGifPanel, setShowGifPanel] = useState(false)
+  const [gifQuery, setGifQuery] = useState('')
+  const [gifResults, setGifResults] = useState<{ id: string; url: string; preview_url: string; title: string }[]>([])
+  const [gifSearching, setGifSearching] = useState(false)
+  const [gifMissingKey, setGifMissingKey] = useState(false)
+
+  // Poll state
+  const [showPollPanel, setShowPollPanel] = useState(false)
+  const [pollOptions, setPollOptions] = useState<string[]>(['', ''])
+  const [pollDuration, setPollDuration] = useState<'1h' | '6h' | '1d' | '3d' | '7d'>('1d')
   const [content, setContent] = useState('')
   const [scheduleDate, setScheduleDate] = useState('')
   const [scheduleTime, setScheduleTime] = useState('')
@@ -389,8 +414,20 @@ function ComposeInner() {
       }
       setConnectedPlatforms(platformsSet)
 
-      // Load draft/post if editing (?draft=id or ?id=id from calendar retry)
+      // Load default platforms from user_settings (only when not editing a draft)
       const draftId = searchParams.get('draft') || searchParams.get('id')
+      if (!draftId) {
+        const { data: uSettings } = await supabase
+          .from('user_settings')
+          .select('default_platforms')
+          .eq('user_id', data.user.id)
+          .single()
+        if (uSettings?.default_platforms && Array.isArray(uSettings.default_platforms) && uSettings.default_platforms.length > 0) {
+          setSelectedPlatforms(uSettings.default_platforms)
+        }
+      }
+
+      // Load draft/post if editing (?draft=id or ?id=id from calendar retry)
       if (draftId) {
         const { data: draft } = await supabase
           .from('posts')
@@ -401,6 +438,7 @@ function ComposeInner() {
         if (draft) {
           setContent(draft.content || '')
           if (draft.platforms?.length > 0) setSelectedPlatforms(draft.platforms)
+          if (draft.tags?.length > 0) setPostTags(draft.tags)
           setCurrentDraftId(draftId)
           const isFailed = draft.status === 'failed'
           setTemplateBanner(isFailed
@@ -821,6 +859,82 @@ function ComposeInner() {
     })
   }
 
+  // ── TAG HELPERS ────────────────────────────────────────────────
+  const handleTagKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault()
+      const tag = tagInput.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
+      if (tag && !postTags.includes(tag) && postTags.length < 5) {
+        setPostTags(prev => [...prev, tag])
+      }
+      setTagInput('')
+    }
+    if (e.key === 'Backspace' && !tagInput && postTags.length > 0) {
+      setPostTags(prev => prev.slice(0, -1))
+    }
+  }
+  const removeTag = (tag: string) => setPostTags(prev => prev.filter(t => t !== tag))
+
+  // ── GIF HELPERS ────────────────────────────────────────────────
+  const handleGifSearch = async () => {
+    if (!gifQuery.trim()) return
+    setGifSearching(true)
+    setGifResults([])
+    try {
+      const res = await fetch(`/api/gifs/search?q=${encodeURIComponent(gifQuery.trim())}`)
+      const data = await res.json()
+      if (data.missing_key) setGifMissingKey(true)
+      setGifResults(data.results || [])
+    } catch {
+      setGifResults([])
+    } finally {
+      setGifSearching(false)
+    }
+  }
+
+  const handleInsertGif = (gifUrl: string) => {
+    // Add the GIF URL as a media attachment — insert as text URL so publish picks it up
+    setMediaItems(prev => {
+      // Prevent duplicates
+      if (prev.some(m => m.url === gifUrl)) return prev
+      const item: MediaItem = {
+        file: new File([], 'gif.gif', { type: 'image/gif' }),
+        preview: gifUrl,
+        url: gifUrl,
+        type: 'image',
+        uploading: false,
+      }
+      return [...prev, item]
+    })
+    setShowGifPanel(false)
+    showToast('GIF attached ✓')
+  }
+
+  // ── POLL HELPERS ────────────────────────────────────────────────
+  const pollPlatformsActive = selectedPlatforms.some(p => p === 'twitter' || p === 'mastodon')
+  const pollCharLimit = selectedPlatforms.includes('twitter') ? 25 : 50
+
+  const handleAddPollOption = () => {
+    if (pollOptions.length < 4) setPollOptions(prev => [...prev, ''])
+  }
+  const handleRemovePollOption = (idx: number) => {
+    if (pollOptions.length <= 2) return
+    setPollOptions(prev => prev.filter((_, i) => i !== idx))
+  }
+  const handlePollOptionChange = (idx: number, val: string) => {
+    setPollOptions(prev => {
+      const next = Array.from(prev)
+      next[idx] = val
+      return next
+    })
+  }
+
+  // Build poll_data JSONB for saving
+  const pollData = showPollPanel && pollPlatformsActive ? {
+    options: pollOptions.filter(o => o.trim()),
+    duration: pollDuration,
+  } : null
+
   const handleInsertResult = () => {
     if (!aiResult) return
     setContent(prev => prev ? `${prev}\n\n${aiResult}` : aiResult)
@@ -1125,6 +1239,8 @@ function ComposeInner() {
           isRecurring: scheduledAt ? isRecurring : false,
           recurrenceRule: scheduledAt && isRecurring ? recurrenceRule : undefined,
           recurrenceEndDate: scheduledAt && isRecurring && recurrenceEndDate ? recurrenceEndDate : undefined,
+          tags: postTags.length > 0 ? postTags : undefined,
+          poll_data: pollData || undefined,
         }),
       })
 
@@ -1215,6 +1331,8 @@ function ComposeInner() {
           platforms: selectedPlatforms,
           postId: currentDraftId,
           workspaceId: activeWorkspace?.id,
+          tags: postTags.length > 0 ? postTags : undefined,
+          poll_data: pollData || undefined,
         }),
       })
       const data = await res.json()
@@ -1309,6 +1427,14 @@ function ComposeInner() {
   return (
     <div className="min-h-dvh bg-theme flex">
       <Sidebar />
+      <PageTour
+        tourId="compose_v1"
+        steps={[
+          { target: 'compose-platforms', title: 'Write once, post everywhere', body: 'Select your platforms below — toggle each one to include or exclude it from this post.' },
+          { target: 'compose-ai-tools',  title: 'AI tools at your fingertips', body: 'Generate captions, rewrite your post, find hashtags, and more — one click each.' },
+          { target: 'compose-schedule',  title: 'Schedule for later or post now', body: 'Pick a date and time to schedule, or leave it blank to publish instantly.' },
+        ]}
+      />
       <div className="md:ml-56 flex-1 flex flex-col overflow-y-auto">
         <div className="flex-1 p-4 md:p-8">
         <div className="max-w-5xl mx-auto">
@@ -1408,7 +1534,7 @@ function ComposeInner() {
             <div className="lg:col-span-2 space-y-4">
 
               {/* PLATFORM SELECTOR */}
-              <div className="bg-surface border border-theme rounded-2xl p-4">
+              <div id="compose-platforms" className="bg-surface border border-theme rounded-2xl p-4">
                 <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">Platforms</p>
                 <div className="flex flex-wrap gap-2">
                   {livePlatforms.map(p => {
@@ -1651,6 +1777,42 @@ function ComposeInner() {
                     <span className="text-xs text-gray-400 dark:text-gray-500">
                       {threadParts.length} part{threadParts.length !== 1 ? 's' : ''} · limit {mostRestrictiveLimit} chars each
                     </span>
+                  )}
+
+                  {/* GIF button */}
+                  {!threadMode && !abMode && (
+                    <button
+                      type="button"
+                      onClick={() => setShowGifPanel(p => !p)}
+                      className={`flex items-center gap-1.5 text-xs font-bold px-3 py-2 min-h-[36px] rounded-xl border transition-all ${
+                        showGifPanel
+                          ? 'bg-pink-500 text-white border-pink-500'
+                          : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-pink-400 hover:text-pink-600'
+                      }`}>
+                      GIF
+                    </button>
+                  )}
+
+                  {/* Poll button — only when twitter/mastodon selected */}
+                  {!threadMode && !abMode && (
+                    pollPlatformsActive ? (
+                      <button
+                        type="button"
+                        onClick={() => setShowPollPanel(p => !p)}
+                        className={`flex items-center gap-1.5 text-xs font-bold px-3 py-2 min-h-[36px] rounded-xl border transition-all ${
+                          showPollPanel
+                            ? 'bg-emerald-600 text-white border-emerald-600'
+                            : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:border-emerald-400 hover:text-emerald-600'
+                        }`}>
+                        📊 Poll {showPollPanel ? 'ON' : 'OFF'}
+                      </button>
+                    ) : (
+                      <span
+                        title="Select X or Mastodon to enable polls"
+                        className="flex items-center gap-1.5 text-xs font-bold px-3 py-2 min-h-[36px] rounded-xl border border-gray-100 dark:border-gray-800 text-gray-300 dark:text-gray-600 cursor-not-allowed select-none">
+                        📊 Poll
+                      </span>
+                    )
                   )}
 
                   {/* A/B Test toggle — Pro+ only */}
@@ -1907,6 +2069,151 @@ function ComposeInner() {
                     className="hidden"
                   />
                 </div>
+
+                {/* GIF SEARCH PANEL */}
+                {showGifPanel && (
+                  <div className="mt-3 pt-3 border-t border-gray-50 dark:border-gray-800">
+                    <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-2">GIF Search</p>
+                    {gifMissingKey ? (
+                      <p className="text-xs text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-xl px-3 py-2">
+                        GIF search coming soon — add <code className="font-mono">TENOR_API_KEY</code> to Vercel env vars (free at tenor.com/gifapi).
+                      </p>
+                    ) : (
+                      <>
+                        <div className="flex gap-2 mb-2">
+                          <input
+                            type="text"
+                            value={gifQuery}
+                            onChange={e => setGifQuery(e.target.value)}
+                            onKeyDown={e => e.key === 'Enter' && handleGifSearch()}
+                            placeholder="Search GIFs..."
+                            style={{ fontSize: '16px' }}
+                            className="flex-1 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-xs outline-none focus:border-pink-400 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200"
+                          />
+                          <button
+                            type="button"
+                            onClick={handleGifSearch}
+                            disabled={gifSearching || !gifQuery.trim()}
+                            className="px-4 py-2 bg-pink-500 text-white text-xs font-bold rounded-xl hover:bg-pink-600 disabled:opacity-40 transition-all flex items-center gap-1.5">
+                            {gifSearching ? <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Search'}
+                          </button>
+                        </div>
+                        {gifResults.length > 0 && (
+                          <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5 max-h-48 overflow-y-auto rounded-xl">
+                            {gifResults.map(gif => (
+                              <button
+                                key={gif.id}
+                                type="button"
+                                onClick={() => handleInsertGif(gif.url)}
+                                title={gif.title}
+                                className="relative overflow-hidden rounded-lg aspect-square bg-gray-100 dark:bg-gray-800 hover:ring-2 hover:ring-pink-400 transition-all">
+                                <img
+                                  src={gif.preview_url}
+                                  alt={gif.title}
+                                  className="w-full h-full object-cover"
+                                  loading="lazy"
+                                />
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                        {!gifSearching && gifResults.length === 0 && gifQuery && (
+                          <p className="text-xs text-gray-400 dark:text-gray-500 text-center py-4">No results — try a different search</p>
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {/* POLL PANEL */}
+                {showPollPanel && pollPlatformsActive && (
+                  <div className="mt-3 pt-3 border-t border-gray-50 dark:border-gray-800">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">📊 Poll Options</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500">{pollCharLimit} char limit per option</p>
+                    </div>
+                    <div className="space-y-2 mb-3">
+                      {pollOptions.map((opt, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-gray-400 dark:text-gray-500 w-5 flex-shrink-0">{idx + 1}.</span>
+                          <input
+                            type="text"
+                            value={opt}
+                            onChange={e => handlePollOptionChange(idx, e.target.value)}
+                            maxLength={pollCharLimit}
+                            placeholder={`Option ${idx + 1}`}
+                            style={{ fontSize: '16px' }}
+                            className="flex-1 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 text-xs outline-none focus:border-emerald-400 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200"
+                          />
+                          <span className="text-[10px] text-gray-400 dark:text-gray-500 w-8 text-right flex-shrink-0">{opt.length}/{pollCharLimit}</span>
+                          {pollOptions.length > 2 && (
+                            <button
+                              type="button"
+                              onClick={() => handleRemovePollOption(idx)}
+                              className="text-gray-400 hover:text-red-500 transition-colors w-6 h-6 flex items-center justify-center rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-base font-bold flex-shrink-0">
+                              ×
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    {pollOptions.length < 4 && (
+                      <button
+                        type="button"
+                        onClick={handleAddPollOption}
+                        className="w-full text-xs font-bold px-3 py-2 border border-dashed border-emerald-300 dark:border-emerald-700 rounded-xl hover:border-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 transition-all mb-3">
+                        + Add option ({pollOptions.length}/4)
+                      </button>
+                    )}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-xs text-gray-500 dark:text-gray-400 font-semibold">Duration:</span>
+                      {(['1h', '6h', '1d', '3d', '7d'] as const).map(d => (
+                        <button
+                          key={d}
+                          type="button"
+                          onClick={() => setPollDuration(d)}
+                          className={`text-xs font-bold px-2.5 py-1 rounded-full border transition-all ${
+                            pollDuration === d
+                              ? 'bg-emerald-600 text-white border-emerald-600'
+                              : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-emerald-400'
+                          }`}>
+                          {d}
+                        </button>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+                      Poll data is saved with the post. Publishing polls to X/Mastodon will be supported in a future update.
+                    </p>
+                  </div>
+                )}
+
+                {/* POST TAGS */}
+                <div className="mt-3 pt-3 border-t border-gray-50 dark:border-gray-800">
+                  <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-2">Tags <span className="font-normal normal-case">· {postTags.length}/5 · press Enter or comma to add</span></p>
+                  <div
+                    className="min-h-[44px] w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 bg-white dark:bg-gray-900 flex flex-wrap gap-1.5 items-center cursor-text"
+                    onClick={() => document.getElementById('sm-post-tag-input')?.focus()}>
+                    {postTags.map(tag => (
+                      <span key={tag} className="flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full"
+                        style={{ background: tagColor(tag) + '22', color: tagColor(tag), border: `1px solid ${tagColor(tag)}66` }}>
+                        {tag}
+                        <button type="button" onClick={() => removeTag(tag)} className="opacity-60 hover:opacity-100 transition-opacity leading-none font-bold">×</button>
+                      </span>
+                    ))}
+                    {postTags.length < 5 && (
+                      <input
+                        id="sm-post-tag-input"
+                        type="text"
+                        value={tagInput}
+                        onChange={e => setTagInput(e.target.value)}
+                        onKeyDown={handleTagKeyDown}
+                        placeholder={postTags.length === 0 ? 'campaign, content-type...' : ''}
+                        style={{ fontSize: '16px' }}
+                        className="flex-1 min-w-[120px] outline-none bg-transparent text-xs text-gray-700 dark:text-gray-300 placeholder-gray-300 dark:placeholder-gray-600"
+                      />
+                    )}
+                  </div>
+                </div>
               </div>
 
               {/* HASHTAG COLLECTIONS */}
@@ -2043,7 +2350,7 @@ function ComposeInner() {
               </div>
 
               {/* AI TOOLS */}
-              <div className="bg-surface border border-theme rounded-2xl p-4">
+              <div id="compose-ai-tools" className="bg-surface border border-theme rounded-2xl p-4">
                 <div className="flex items-center justify-between mb-3">
                   <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">AI Tools</p>
                   <span className="text-xs font-bold text-gray-500 dark:text-gray-400">{credits} credits remaining</span>
@@ -2335,7 +2642,7 @@ function ComposeInner() {
               </div>
 
               {/* SCHEDULE */}
-              <div className="bg-surface border border-theme rounded-2xl p-4">
+              <div id="compose-schedule" className="bg-surface border border-theme rounded-2xl p-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3">
                   <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Schedule</p>
                   <span className="text-xs text-gray-400 dark:text-gray-500">

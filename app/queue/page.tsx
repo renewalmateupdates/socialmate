@@ -20,6 +20,13 @@ function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse ${className}`} />
 }
 
+function tagColorQueue(tag: string): string {
+  const COLORS = ['#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ef4444', '#f97316', '#06b6d4', '#ec4899']
+  let hash = 0
+  for (let i = 0; i < tag.length; i++) hash = tag.charCodeAt(i) + ((hash << 5) - hash)
+  return COLORS[Math.abs(hash) % COLORS.length]
+}
+
 const PLATFORM_ICONS: Record<string, string> = {
   instagram: '📸', twitter: '🐦', linkedin: '💼', tiktok: '🎵',
   facebook: '📘', pinterest: '📌', youtube: '▶️', threads: '🧵',
@@ -90,7 +97,7 @@ function dateParamToDateString(param: string): string | null {
   return d.toDateString()
 }
 
-function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel, cancelling, handleCancel, onEvergreenToggle, isSelected, onToggleSelect }: {
+function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel, cancelling, handleCancel, onEvergreenToggle, isSelected, onToggleSelect, onDuplicate, duplicating }: {
   post: any
   isHighlighted: boolean
   confirmCancel: string | null
@@ -100,6 +107,8 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
   onEvergreenToggle: (id: string, current: boolean) => void
   isSelected: boolean
   onToggleSelect: (id: string) => void
+  onDuplicate: (post: any) => void
+  duplicating: string | null
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: post.id })
@@ -171,6 +180,12 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
                 🔁 <span className="hidden sm:inline capitalize">{post.recurrence_rule ?? 'Recurring'}</span>
               </span>
             )}
+            {(post.tags || []).map((tag: string) => (
+              <span key={tag} className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                style={{ background: tagColorQueue(tag) + '22', color: tagColorQueue(tag), border: `1px solid ${tagColorQueue(tag)}66` }}>
+                {tag}
+              </span>
+            ))}
           </div>
 
           {post.analytics && (() => {
@@ -218,6 +233,13 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
               className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
               Edit
             </Link>
+            <button
+              onClick={() => onDuplicate(post)}
+              disabled={duplicating === post.id}
+              title="Duplicate to drafts"
+              className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-blue-400 hover:text-blue-600 dark:hover:border-blue-500 dark:hover:text-blue-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+              {duplicating === post.id ? '...' : 'Copy'}
+            </button>
             <PostImageExporter
               content={post.content ?? ''}
               platform={(post.platforms ?? [])[0]}
@@ -264,6 +286,8 @@ function QueueInner() {
   const [selectedIds, setSelectedIds]   = useState<Set<string>>(new Set())
   const [bulkWorking, setBulkWorking]   = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [duplicating, setDuplicating]   = useState<string | null>(null)
+  const [tagFilter, setTagFilter]       = useState<string>('all')
   const router      = useRouter()
   const searchParams = useSearchParams()
   const targetDate  = searchParams.get('date')
@@ -314,6 +338,32 @@ function QueueInner() {
       showToast('Network error — try again', 'error')
     } finally {
       setRetrying(null)
+    }
+  }
+
+  const handleDuplicate = async (post: any) => {
+    setDuplicating(post.id)
+    try {
+      const res = await fetch('/api/posts/draft', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content:     post.content,
+          platforms:   post.platforms,
+          workspaceId: post.workspace_id,
+          tags:        post.tags?.length > 0 ? post.tags : undefined,
+        }),
+      })
+      if (res.ok) {
+        showToast('Duplicated to drafts ✓', 'success')
+      } else {
+        const d = await res.json()
+        showToast(d.error || 'Duplicate failed', 'error')
+      }
+    } catch {
+      showToast('Network error', 'error')
+    } finally {
+      setDuplicating(null)
     }
   }
 
@@ -563,7 +613,13 @@ function QueueInner() {
     }
   }
 
-  const grouped  = groupByDate(posts)
+  // Collect all unique tags across all posts
+  const allTags = Array.from(new Set(posts.flatMap(p => p.tags || []))) as string[]
+
+  // Filter posts by selected tag before grouping
+  const filteredPosts = tagFilter === 'all' ? posts : posts.filter(p => (p.tags || []).includes(tagFilter))
+
+  const grouped  = groupByDate(filteredPosts)
   const dateKeys = Object.keys(grouped).sort((a, b) => {
     if (a === 'Unscheduled') return 1
     if (b === 'Unscheduled') return -1
@@ -655,6 +711,29 @@ function QueueInner() {
               </Link>
             </div>
           </div>
+
+          {/* Tag filter */}
+          {allTags.length > 0 && (
+            <div className="flex items-center gap-2 mb-4 flex-wrap">
+              <span className="text-xs font-bold text-gray-400 dark:text-gray-500">Filter by tag:</span>
+              <button
+                onClick={() => setTagFilter('all')}
+                className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition-all ${tagFilter === 'all' ? 'bg-black text-white border-black dark:bg-white dark:text-black' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-400'}`}>
+                All
+              </button>
+              {allTags.map(tag => (
+                <button
+                  key={tag}
+                  onClick={() => setTagFilter(tagFilter === tag ? 'all' : tag)}
+                  className="text-xs font-bold px-3 py-1.5 rounded-xl border transition-all"
+                  style={tagFilter === tag
+                    ? { background: tagColorQueue(tag), color: '#fff', borderColor: tagColorQueue(tag) }
+                    : { background: tagColorQueue(tag) + '22', color: tagColorQueue(tag), borderColor: tagColorQueue(tag) + '66' }}>
+                  {tag}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Auto-schedule success banner */}
           {autoScheduleResult && (
@@ -880,6 +959,8 @@ function QueueInner() {
                               onEvergreenToggle={handleEvergreenToggle}
                               isSelected={selectedIds.has(post.id)}
                               onToggleSelect={toggleSelect}
+                              onDuplicate={handleDuplicate}
+                              duplicating={duplicating}
                             />
                           ))}
                         </div>

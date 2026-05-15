@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
+import PageTour from '@/components/PageTour'
 
 interface Post {
   id: string
@@ -14,6 +15,7 @@ interface Post {
   status: 'scheduled' | 'published' | 'draft' | 'failed' | 'partial'
   created_at: string
   platform_post_ids?: Record<string, string> | null
+  tags?: string[] | null
 }
 
 const PLATFORM_ICONS: Record<string, string> = {
@@ -114,6 +116,13 @@ function SkeletonBox({ className }: { className?: string }) {
   return <div className={`animate-pulse bg-gray-200 dark:bg-gray-700 rounded-lg ${className ?? ''}`} />
 }
 
+function tagColorCalendar(tag: string): string {
+  const COLORS = ['#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ef4444', '#f97316', '#06b6d4', '#ec4899']
+  let hash = 0
+  for (let i = 0; i < tag.length; i++) hash = tag.charCodeAt(i) + ((hash << 5) - hash)
+  return COLORS[Math.abs(hash) % COLORS.length]
+}
+
 export default function CalendarPage() {
   const router = useRouter()
   const { activeWorkspace } = useWorkspace()
@@ -127,6 +136,7 @@ export default function CalendarPage() {
   const [selectedDay,  setSelectedDay]  = useState<string | null>(null)
   const [retrying,     setRetrying]     = useState<string | null>(null)
   const [retryToast,   setRetryToast]   = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+  const [duplicating,  setDuplicating]  = useState<string | null>(null)
 
   const handleRetry = async (postId: string) => {
     setRetrying(postId)
@@ -140,7 +150,7 @@ export default function CalendarPage() {
         // Refresh posts to reflect new status
         const updated = await supabase
           .from('posts')
-          .select('id, content, platforms, scheduled_at, status, created_at, platform_post_ids')
+          .select('id, content, platforms, scheduled_at, status, created_at, platform_post_ids, tags')
           .eq('id', postId)
           .single()
         if (updated.data) {
@@ -155,6 +165,30 @@ export default function CalendarPage() {
     }
   }
 
+  const handleDuplicate = async (post: Post) => {
+    setDuplicating(post.id)
+    try {
+      const res = await fetch('/api/posts/draft', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: post.content,
+          platforms: post.platforms || [],
+          tags: post.tags || [],
+          status: 'draft',
+        }),
+      })
+      if (!res.ok) throw new Error('Failed to duplicate')
+      setRetryToast({ message: 'Duplicated!', type: 'success' })
+      setTimeout(() => setRetryToast(null), 3000)
+    } catch {
+      setRetryToast({ message: 'Failed to duplicate post', type: 'error' })
+      setTimeout(() => setRetryToast(null), 3000)
+    } finally {
+      setDuplicating(null)
+    }
+  }
+
   const fetchPosts = useCallback(async () => {
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
@@ -163,7 +197,7 @@ export default function CalendarPage() {
     const end   = new Date(currentYear, currentMonth + 2, 0, 23, 59, 59).toISOString()
     let query = supabase
       .from('posts')
-      .select('id, content, platforms, scheduled_at, status, created_at, platform_post_ids')
+      .select('id, content, platforms, scheduled_at, status, created_at, platform_post_ids, tags')
       .eq('user_id', user.id)
       .gte('created_at', start)
       .lte('created_at', end)
@@ -215,11 +249,18 @@ export default function CalendarPage() {
   return (
     <div className="min-h-dvh bg-theme flex">
       <Sidebar />
+      <PageTour
+        tourId="calendar_v1"
+        steps={[
+          { target: 'calendar-header', title: 'Your content calendar', body: 'All your scheduled posts at a glance — month by month. Blue = scheduled, green = published, red = failed.' },
+          { target: 'calendar-grid',   title: 'Click any post to manage it', body: 'Click a day to see its posts. From there you can edit, reschedule, or retry failed platforms.' },
+        ]}
+      />
       <div className="md:ml-56 flex-1 p-4 md:p-8">
         <div className="max-w-5xl mx-auto">
 
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div id="calendar-header" className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">
                 Content Calendar
@@ -290,7 +331,7 @@ export default function CalendarPage() {
           </div>
 
           {/* Calendar grid */}
-          <div className="bg-surface border border-theme rounded-2xl overflow-hidden mb-4">
+          <div id="calendar-grid" className="bg-surface border border-theme rounded-2xl overflow-hidden mb-4">
           <div className="overflow-x-auto"><div className="min-w-[320px]">
             <div className="grid grid-cols-7 border-b border-theme">
               {DAY_LABELS.map(day => (
@@ -458,6 +499,21 @@ export default function CalendarPage() {
                           {post.status === 'partial' && (
                             <PlatformBreakdown post={post} />
                           )}
+                          {(post.tags || []).length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-2">
+                              {(post.tags as string[]).map((tag: string) => (
+                                <span key={tag}
+                                  className="text-xs font-semibold px-2 py-0.5 rounded-full"
+                                  style={{
+                                    background: tagColorCalendar(tag) + '22',
+                                    color: tagColorCalendar(tag),
+                                    border: `1px solid ${tagColorCalendar(tag)}66`,
+                                  }}>
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                         </div>
                         <div className="flex flex-col items-end gap-2 flex-shrink-0">
                           <span className={`text-xs font-bold px-2.5 py-1 rounded-full capitalize ${STATUS_BADGE[post.status] ?? STATUS_BADGE.draft}`}>
@@ -483,6 +539,14 @@ export default function CalendarPage() {
                               {post.status === 'draft' ? 'Edit →' : post.status === 'failed' ? 'Retry →' : 'View in Queue →'}
                             </Link>
                           )}
+                          <button
+                            onClick={() => handleDuplicate(post)}
+                            disabled={duplicating === post.id}
+                            className="text-xs font-semibold text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors flex items-center gap-1 disabled:opacity-50">
+                            {duplicating === post.id
+                              ? <><div className="w-3 h-3 border-2 border-gray-300 border-t-gray-500 rounded-full animate-spin" />Copying...</>
+                              : '⧉ Copy'}
+                          </button>
                         </div>
                       </div>
                     </div>

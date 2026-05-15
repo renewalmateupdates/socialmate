@@ -92,7 +92,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // Fetch project including per-platform schedule
     const { data: project } = await admin
       .from('soma_projects')
-      .select('id, workspace_id, platforms, posts_per_day, content_window_days, mode, platform_schedule, runs_this_month')
+      .select('id, workspace_id, platforms, posts_per_day, content_window_days, mode, platform_schedule, runs_this_month, campaign_theme, campaign_start, campaign_end')
       .eq('id', projectId)
       .eq('user_id', user.id)
       .single()
@@ -165,13 +165,20 @@ Example posts: ${Array.isArray(profile.voice_examples) ? (profile.voice_examples
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
 
+    const campaignTheme = (project as any).campaign_theme as string | null
+    const campaignStart = (project as any).campaign_start as string | null
+    const campaignEnd   = (project as any).campaign_end   as string | null
+    const campaignBlock = campaignTheme
+      ? `\n\nACTIVE CAMPAIGN: Focus ALL content heavily on "${campaignTheme}". ${campaignStart && campaignEnd ? `This campaign runs ${campaignStart} to ${campaignEnd}.` : ''} Make every post timely and specific to this campaign theme. Weave the campaign angle into every piece of content.`
+      : ''
+
     const insightBlock = `THIS WEEK'S INSIGHTS (from master doc diff):
 Key themes: ${insights.key_themes?.join(', ') ?? 'none'}
 Wins: ${insights.wins?.join(', ') ?? 'none'}
 Challenges: ${insights.challenges?.join(', ') ?? 'none'}
 What changed: ${insights.diff_summary ?? 'New content week'}
 Content angles: ${insights.content_angles?.join(' | ') ?? 'none'}
-Emotional tone: ${insights.emotional_tone ?? 'motivated'}`
+Emotional tone: ${insights.emotional_tone ?? 'motivated'}${campaignBlock}`
 
     // Generate posts platform by platform so each gets its own post count + scheduling.
     // Gemini reliably handles ~14 posts per call — chunk larger batches to avoid truncated JSON.

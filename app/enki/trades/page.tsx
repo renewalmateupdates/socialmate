@@ -232,6 +232,12 @@ function EnkiTradesInner() {
             <Link href="/enki" className="text-xs font-bold text-gray-500 hover:text-white transition-colors">
               ← Back
             </Link>
+            <button
+              onClick={() => { window.location.href = '/api/enki/export-trades' }}
+              className="text-xs font-bold px-3 py-1.5 rounded-lg bg-amber-400/10 border border-amber-400/30 text-amber-400 hover:bg-amber-400/20 transition-colors"
+            >
+              ⬇ Export CSV
+            </button>
           </nav>
         </div>
       </div>
