@@ -204,6 +204,100 @@ export async function POST(request: NextRequest) {
         console.error('[INNGEST] FAILED to send post/scheduled for post', post.id, '— post is saved but will NOT auto-publish:', inngestErr)
       }
 
+      // ── ACTIVATION: first scheduled post milestone ──────────────────────────
+      try {
+        const { count: scheduledCount } = await supabase
+          .from('posts')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id)
+          .in('status', ['scheduled', 'published'])
+
+        if (scheduledCount === 1) {
+          // Insert in-app notification
+          await getSupabaseAdmin().from('notifications').insert({
+            user_id: user.id,
+            type:    'first_post',
+            title:   '🎉 First post scheduled!',
+            message: 'Your first post is on the calendar. Check your schedule to see it go live.',
+            data:    { action_url: '/calendar' },
+            is_read: false,
+          })
+
+          // Send activation email
+          const { data: authUser } = await getSupabaseAdmin().auth.admin.getUserById(user.id)
+          if (authUser?.user?.email) {
+            const Resend = (await import('resend')).Resend
+            const resend = new Resend(process.env.RESEND_API_KEY!)
+            const scheduledDate = new Date(scheduledAt).toLocaleString('en-US', {
+              weekday: 'long', month: 'long', day: 'numeric',
+              hour: 'numeric', minute: '2-digit', timeZoneName: 'short',
+            })
+            await resend.emails.send({
+              from: 'Joshua @ SocialMate <hello@socialmate.studio>',
+              to:   authUser.user.email,
+              subject: "🎉 Your first post is scheduled — you're officially a SocialMate creator",
+              html: `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+  <div style="max-width:600px;margin:0 auto;padding:32px 24px;">
+    <!-- Header -->
+    <div style="text-align:center;margin-bottom:32px;">
+      <div style="display:inline-block;background:#f59e0b;width:48px;height:48px;border-radius:14px;line-height:48px;font-size:24px;text-align:center;">🎉</div>
+    </div>
+    <!-- Main card -->
+    <div style="background:#111111;border:1px solid #222222;border-radius:20px;padding:32px;margin-bottom:24px;">
+      <h1 style="color:#ffffff;font-size:24px;font-weight:800;margin:0 0 12px;letter-spacing:-0.5px;">
+        You're officially a SocialMate creator.
+      </h1>
+      <p style="color:#9ca3af;font-size:15px;line-height:1.6;margin:0 0 20px;">
+        Your first post is scheduled and on its way — that's the hardest step, and you just did it.
+      </p>
+      <!-- Scheduled info -->
+      <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px;padding:16px;margin-bottom:24px;">
+        <p style="color:#6b7280;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;margin:0 0 6px;">Goes live</p>
+        <p style="color:#f59e0b;font-size:15px;font-weight:700;margin:0;">${scheduledDate}</p>
+      </div>
+      <!-- What to do next -->
+      <p style="color:#d1d5db;font-size:14px;font-weight:700;margin:0 0 12px;">What to do next:</p>
+      <div style="space-y:8px;">
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;">
+          <span style="color:#f59e0b;font-size:16px;flex-shrink:0;">✦</span>
+          <p style="color:#9ca3af;font-size:14px;margin:0;line-height:1.5;">Try <strong style="color:#e5e7eb;">AI Hashtag Suggestions</strong> in Compose — click the # button to get 12 suggestions for your next post (uses 1 credit).</p>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px;">
+          <span style="color:#f59e0b;font-size:16px;flex-shrink:0;">✦</span>
+          <p style="color:#9ca3af;font-size:14px;margin:0;line-height:1.5;">Schedule 3–5 more posts this week — consistency is what builds an audience.</p>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:10px;">
+          <span style="color:#f59e0b;font-size:16px;flex-shrink:0;">✦</span>
+          <p style="color:#9ca3af;font-size:14px;margin:0;line-height:1.5;">Try <strong style="color:#e5e7eb;">SOMA</strong> — it generates a full week of content for you automatically.</p>
+        </div>
+      </div>
+    </div>
+    <!-- CTA -->
+    <div style="text-align:center;margin-bottom:24px;">
+      <a href="https://socialmate.studio/calendar"
+         style="display:inline-block;background:#f59e0b;color:#000000;font-weight:800;font-size:14px;padding:14px 28px;border-radius:12px;text-decoration:none;letter-spacing:-0.2px;">
+        View your calendar →
+      </a>
+    </div>
+    <!-- Footer -->
+    <p style="color:#4b5563;font-size:12px;text-align:center;margin:0;">
+      You're receiving this because you just scheduled your first post on SocialMate.<br>
+      <a href="https://socialmate.studio/settings?tab=Notifications" style="color:#6b7280;">Manage email preferences</a>
+    </p>
+  </div>
+</body>
+</html>`,
+            }).catch((err: any) => console.warn('[activation-email] non-fatal:', err?.message))
+          }
+        }
+      } catch (activationErr) {
+        console.warn('[activation] non-fatal first-post check failed:', activationErr)
+      }
+      // ────────────────────────────────────────────────────────────────────────
+
       return NextResponse.json({ success: true, postId: post.id, status: 'scheduled' })
     }
 
