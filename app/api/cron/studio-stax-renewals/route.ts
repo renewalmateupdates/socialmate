@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-const FROM   = 'SocialMate <hello@socialmate.studio>'
+function getResend() { return new Resend(process.env.RESEND_API_KEY) }
+const FROM = 'SocialMate <hello@socialmate.studio>'
 
 // Renewal = 20% off what the member originally paid.
 // We derive this from amount_paid_cents — no tier column dependency.
@@ -192,7 +192,7 @@ export async function GET(req: NextRequest) {
       : `Your Studio Stax listing for ${toolName} expires in ${days} days`
 
     try {
-      await resend.emails.send({
+      await getResend().emails.send({
         from: FROM, to: slot.buyer_email, subject,
         html: renewalEmail({ name: slot.buyer_name, toolName, daysLeft: days, expiresAt: slot.expires_at, renewalLink, renewalPrice: renewal, tier: tierLabel }),
       })
@@ -242,7 +242,7 @@ export async function GET(req: NextRequest) {
           .update({ renewal_token: reclaimToken, renewal_token_expires: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString(), reclaim_offer_sent: true })
           .eq('id', stdSlot.id)
         try {
-          await resend.emails.send({
+          await getResend().emails.send({
             from: FROM,
             to:   stdSlot.buyer_email,
             subject: `🎉 A founding spot just opened in Studio Stax — it's yours`,
