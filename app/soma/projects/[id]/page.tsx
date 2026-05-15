@@ -20,6 +20,10 @@ interface Project {
   runs_this_month: number
   last_generated_at: string | null
   platform_schedule: Record<string, PlatformSchedule> | null
+  paused: boolean
+  campaign_theme: string | null
+  campaign_start: string | null
+  campaign_end: string | null
 }
 
 interface MasterDoc {
@@ -36,6 +40,61 @@ const MODE_COLORS = {
   autopilot: { text: 'text-violet-400',  bg: 'bg-violet-900/30 border-violet-700/40' },
   full_send: { text: 'text-amber-400',   bg: 'bg-amber-900/30 border-amber-700/40' },
 }
+
+const LOADING_QUOTES = [
+  // Hustle / Motivation
+  "You do not rise to the level of your goals. You fall to the level of your systems.",
+  "Do the work. The world doesn't owe you attention — you earn it.",
+  "Muhammad Ali didn't become the greatest by resting. He became great by showing up every single day.",
+  "The deli counter is not your ceiling. It's your origin story.",
+  "Broke doesn't mean broken. Bootstrap means you control the outcome.",
+  "Ship it. Fix it. Ship it again.",
+  "Every post is a rep. Keep showing up.",
+  "You're not waiting for the right moment. You're building it.",
+  "Marcus Aurelius said it: waste no more time arguing what a good person should be — be one. Build the thing.",
+  "The grind is the product. Everything else is the reward.",
+  "Bootstrapped means no permission needed. That's a superpower.",
+  "Naval: 'Escape competition through authenticity.' You're already one-of-one.",
+  "J. Cole dropped an album with no features. You can build a product with no funding.",
+  "The algorithm rewards consistency. Be consistent.",
+  "Nobody gives a damn about your potential. Ship the proof.",
+  "Hard times create strong builders. Strong builders create better tools.",
+  "Kanye filed for bankruptcy before Yeezy. Act accordingly.",
+  "Every epic started as a blank page. You're writing yours.",
+  "Build in public. The community doesn't just watch — it cheers.",
+  "One day at the deli. One night in the code. That's the formula.",
+  // SOMA tips
+  "SOMA gets smarter the more you use it — complete your Voice DNA for better results.",
+  "Tip: campaign mode lets you focus SOMA on a specific theme or holiday push.",
+  "Your Voice DNA is live — SOMA is generating content that actually sounds like you.",
+  "Safe mode = full control. Autopilot = time back in your day.",
+  "SOMA memory means no repeated angles. Every week is fresh.",
+  "The diff engine is reading what changed — the more specific your doc, the sharper the posts.",
+  "Tip: use the campaign theme field for launches, events, or seasonal pushes.",
+  "Pausing a project doesn't lose your settings — resume anytime.",
+  "Voice DNA Advanced tier means SOMA knows your slang, your references, your vibe.",
+  "Your master doc is SOMA's brain. The more detail you give it, the better it performs.",
+  "SOMA generates platform-native posts — Twitter gets hooks, LinkedIn gets depth, Bluesky gets authenticity.",
+  "Tip: run a campaign theme during a product launch to flood your feed with relevant content.",
+  "SOMA tracks what it's already covered. It won't repeat the same angles twice.",
+  "Every run gets smarter. Feedback you give SOMA shapes every future generation.",
+  // Building-in-public
+  "Build the door. Then hold it open for everyone behind you.",
+  "Your story — deli job, nights coding, no VC — is the content. Let SOMA tell it.",
+  "The people who ship consistently win. Not the people with the best ideas.",
+  "Imposter syndrome is proof you care. Ship anyway.",
+  "The smallest consistent action beats the biggest one-time effort.",
+  "Failure is research. Bugs are data. Keep iterating.",
+  "Your first version doesn't have to be perfect. It has to exist.",
+  "Power to the people. Build the door.",
+  "Progress is not linear. Ship anyway.",
+  "One year from now you'll wish you started today — so today you did.",
+  "The platform that charges $99 built what you're replacing. Remember that.",
+  "Creator OS. The home base. The foundation. You're building it.",
+  "You don't need a team. You need a deadline and the will to meet it.",
+  "Every creator deserves the tools the big players have. That's why this exists.",
+  "One more rep. One more post. One more day.",
+]
 
 const RUN_CAPS = { safe: 4, autopilot: 8, full_send: 12 }
 
@@ -70,7 +129,6 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
   const [ingestError, setIngestError]   = useState('')
 
   const [generating, setGenerating]         = useState(false)
-  const [generateStage, setGenerateStage]   = useState('')
   const [generateResult, setGenerateResult] = useState<any>(null)
   const [generateError, setGenerateError]   = useState('')
   const [startDate, setStartDate]           = useState(() => new Date().toISOString().split('T')[0])
@@ -85,6 +143,71 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
   const [showFeedbackModal, setShowFeedbackModal] = useState(false)
   const [voiceProfile, setVoiceProfile]           = useState<{ tier: string; hasSummary: boolean } | null>(null)
   const [memory, setMemory]                       = useState<{ running_summary: string; topics_covered: string[]; angles_used: string[]; total_posts_generated: number } | null>(null)
+
+  // Loading modal quote rotator
+  const [quoteIndex, setQuoteIndex] = useState(0)
+  useEffect(() => {
+    if (!generating) return
+    const id = setInterval(() => setQuoteIndex(i => (i + 1) % LOADING_QUOTES.length), 2500)
+    return () => clearInterval(id)
+  }, [generating])
+
+  // Pause toggle
+  const [togglingPause, setTogglingPause] = useState(false)
+  async function handleTogglePause() {
+    if (!project) return
+    setTogglingPause(true)
+    try {
+      await fetch(`/api/soma/projects/${projectId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paused: !project.paused }),
+      })
+      setProject(p => p ? { ...p, paused: !p.paused } : p)
+    } finally {
+      setTogglingPause(false)
+    }
+  }
+
+  // Campaign mode
+  const [campaignOpen, setCampaignOpen]       = useState(false)
+  const [campaignEnabled, setCampaignEnabled] = useState(false)
+  const [campaignTheme, setCampaignTheme]     = useState('')
+  const [campaignStart, setCampaignStart]     = useState('')
+  const [campaignEnd, setCampaignEnd]         = useState('')
+  const [savingCampaign, setSavingCampaign]   = useState(false)
+
+  // Sync campaign state when project loads
+  useEffect(() => {
+    if (!project) return
+    setCampaignEnabled(!!project.campaign_theme)
+    setCampaignTheme(project.campaign_theme ?? '')
+    setCampaignStart(project.campaign_start ?? '')
+    setCampaignEnd(project.campaign_end ?? '')
+  }, [project?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function saveCampaign() {
+    setSavingCampaign(true)
+    try {
+      const payload = campaignEnabled && campaignTheme.trim()
+        ? { campaign_theme: campaignTheme.trim(), campaign_start: campaignStart || null, campaign_end: campaignEnd || null }
+        : { campaign_theme: null, campaign_start: null, campaign_end: null }
+      await fetch(`/api/soma/projects/${projectId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      setProject(p => p ? { ...p, ...payload } : p)
+      if (!campaignEnabled || !campaignTheme.trim()) {
+        setCampaignEnabled(false)
+        setCampaignTheme('')
+        setCampaignStart('')
+        setCampaignEnd('')
+      }
+    } finally {
+      setSavingCampaign(false)
+    }
+  }
 
   async function saveSchedule() {
     setSavingSchedule(true)
@@ -190,22 +313,9 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
   async function handleGenerate() {
     if (!ingestResult?.ingestion_id) { setGenerateError('Run an ingest first.'); return }
     setGenerating(true)
-    setGenerateStage('Crafting platform-native posts…')
     setGenerateError('')
     setGenerateResult(null)
-
-    // Animate through stages so the user knows it's working
-    const stages = [
-      'Reading your diff…',
-      'Crafting platform-native posts…',
-      'Formatting for each platform…',
-      'Scheduling posts…',
-    ]
-    let stageIdx = 0
-    const stageTimer = setInterval(() => {
-      stageIdx = Math.min(stageIdx + 1, stages.length - 1)
-      setGenerateStage(stages[stageIdx])
-    }, 4000)
+    setQuoteIndex(0)
 
     try {
       const res = await fetch(`/api/soma/projects/${projectId}/generate`, {
@@ -213,7 +323,6 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ingestion_id: ingestResult.ingestion_id, start_date: startDate }),
       })
-      clearInterval(stageTimer)
       const data = await res.json()
       if (!res.ok) {
         if (data.error === 'insufficient_soma_credits') setGenerateError('Not enough SOMA credits.')
@@ -226,11 +335,9 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
       // Show voice feedback modal after successful generation
       setShowFeedbackModal(true)
     } catch {
-      clearInterval(stageTimer)
       setGenerateError('Network error. Please try again.')
     } finally {
       setGenerating(false)
-      setGenerateStage('')
     }
   }
 
@@ -275,6 +382,34 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
         />
       )}
 
+      {/* ── LOADING MODAL ── */}
+      {generating && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gray-950/95 backdrop-blur-sm px-6">
+          {/* Spinner */}
+          <div className="relative mb-8">
+            <div className="w-16 h-16 rounded-full border-4 border-amber-500/20 border-t-amber-500 animate-spin" />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="text-2xl">⚡</span>
+            </div>
+          </div>
+
+          {/* Rotating quote */}
+          <div className="max-w-md text-center">
+            <p
+              key={quoteIndex}
+              className="text-white text-sm sm:text-base font-medium leading-relaxed animate-fade-in"
+              style={{ animation: 'fadeIn 0.6s ease-in-out' }}
+            >
+              {LOADING_QUOTES[quoteIndex]}
+            </p>
+          </div>
+
+          <p className="mt-8 text-xs text-gray-600">SOMA is crafting your posts — do not close this tab</p>
+
+          <style>{`@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }`}</style>
+        </div>
+      )}
+
       <main className="flex-1 md:ml-56 p-4 sm:p-6 lg:p-8 space-y-6 max-w-5xl">
 
         {/* ── HEADER ── */}
@@ -287,11 +422,37 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
             </div>
             <h1 className="text-2xl font-extrabold text-white">{project.name}</h1>
             {project.description && <p className="text-sm text-gray-400 mt-0.5">{project.description}</p>}
+            {/* Status badges */}
+            <div className="flex flex-wrap items-center gap-2 mt-2">
+              {project.paused && (
+                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-900/40 border border-amber-600/50 text-amber-400">
+                  ⏸ PAUSED — weekly cron skipped
+                </span>
+              )}
+              {project.campaign_theme && (
+                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-orange-900/40 border border-orange-600/50 text-orange-300">
+                  🎯 Campaign: {project.campaign_theme}
+                </span>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0">
             <span className={`text-xs font-bold px-3 py-1 rounded-full border ${modeColors.bg} ${modeColors.text}`}>
               {project.mode === 'safe' ? '🟢 Safe' : project.mode === 'autopilot' ? '⚡ Autopilot' : '🚀 Full Send'}
             </span>
+            {/* Pause toggle */}
+            <button
+              onClick={handleTogglePause}
+              disabled={togglingPause}
+              className={`text-xs font-semibold px-3 py-1 rounded-full border transition-all disabled:opacity-50 ${
+                project.paused
+                  ? 'border-emerald-700/50 text-emerald-400 bg-emerald-900/20 hover:bg-emerald-900/40'
+                  : 'border-gray-700 text-gray-400 bg-gray-800/50 hover:text-amber-400 hover:border-amber-700/50'
+              }`}
+              title={project.paused ? 'Resume — autopilot cron will run again' : 'Pause — skip weekly cron without deleting'}
+            >
+              {togglingPause ? '…' : project.paused ? '▶ Resume' : '⏸ Pause'}
+            </button>
             <button
               onClick={() => setConfirmDelete(true)}
               className="text-xs text-gray-600 hover:text-red-400 transition-colors px-2 py-1"
@@ -545,6 +706,97 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
                 </div>
               </div>
             )}
+
+            {/* ── CAMPAIGN MODE ── */}
+            <div className="rounded-2xl border border-gray-800 bg-gray-900 p-5">
+              <button
+                type="button"
+                onClick={() => setCampaignOpen(o => !o)}
+                className="flex items-center justify-between w-full text-left"
+              >
+                <div className="flex items-center gap-2">
+                  <span>🎯</span>
+                  <span className="text-xs font-bold uppercase tracking-widest text-gray-400">Campaign Mode</span>
+                  {project.campaign_theme && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-900/40 border border-orange-700/40 text-orange-300">
+                      Active
+                    </span>
+                  )}
+                </div>
+                <span className="text-gray-600 text-xs">{campaignOpen ? '▲' : '▼'}</span>
+              </button>
+
+              {campaignOpen && (
+                <div className="mt-4 space-y-4">
+                  <p className="text-xs text-gray-500 leading-relaxed">
+                    Focus SOMA on a specific campaign — a product launch, holiday push, or event. When active, every generated post will tie back to this theme.
+                  </p>
+
+                  {/* Enable toggle */}
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <div
+                      onClick={() => setCampaignEnabled(e => !e)}
+                      className={`relative w-10 h-5 rounded-full transition-colors ${campaignEnabled ? 'bg-orange-500' : 'bg-gray-700'}`}
+                    >
+                      <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${campaignEnabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                    </div>
+                    <span className="text-xs text-gray-300 font-medium">{campaignEnabled ? 'Campaign mode on' : 'Campaign mode off'}</span>
+                  </label>
+
+                  {campaignEnabled && (
+                    <>
+                      <div>
+                        <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">
+                          Campaign theme or focus
+                        </label>
+                        <input
+                          type="text"
+                          value={campaignTheme}
+                          onChange={e => setCampaignTheme(e.target.value)}
+                          placeholder="e.g. Black Friday deals, product launch, New Year push…"
+                          maxLength={120}
+                          className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-orange-500/50"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">
+                            Start date (optional)
+                          </label>
+                          <input
+                            type="date"
+                            value={campaignStart}
+                            onChange={e => setCampaignStart(e.target.value)}
+                            className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-orange-500/50"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">
+                            End date (optional)
+                          </label>
+                          <input
+                            type="date"
+                            value={campaignEnd}
+                            min={campaignStart}
+                            onChange={e => setCampaignEnd(e.target.value)}
+                            className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-orange-500/50"
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  <button
+                    onClick={saveCampaign}
+                    disabled={savingCampaign || (campaignEnabled && !campaignTheme.trim())}
+                    className="w-full bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white font-bold py-2.5 rounded-xl text-sm transition-all"
+                  >
+                    {savingCampaign ? 'Saving…' : campaignEnabled ? 'Save Campaign' : 'Clear Campaign'}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* ── RIGHT: INSIGHTS + GUIDE ── */}
@@ -593,17 +845,6 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
                       <p className="text-xs text-gray-400 leading-relaxed">
                         Go back to the left panel and paste your most recent master doc. SOMA will diff the two, extract what changed, and then you can generate posts.
                       </p>
-                    </div>
-                  ) : generating ? (
-                    <div className="rounded-xl border border-violet-500/30 bg-violet-950/20 p-4">
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="w-2 h-2 rounded-full bg-violet-400 animate-pulse flex-shrink-0" />
-                        <p className="text-xs font-semibold text-violet-300">{generateStage}</p>
-                      </div>
-                      <div className="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden">
-                        <div className="h-full rounded-full bg-gradient-to-r from-violet-600 to-purple-400" style={{ width: '100%', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
-                      </div>
-                      <p className="text-[11px] text-gray-600 mt-2">Usually takes 15–30 seconds. Hang tight.</p>
                     </div>
                   ) : (
                     <>
@@ -655,25 +896,23 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
                               ))}
                             </div>
                           )}
-                          <Link href={project.mode === 'safe' ? '/soma/dashboard' : '/queue'} className="text-xs text-emerald-300 hover:text-emerald-200 underline block text-center">
-                            {project.mode === 'safe' ? 'Review in SOMA queue →' : 'View in queue →'}
-                          </Link>
-                        </div>
-                      ) : generating ? (
-                        <div className="rounded-xl border border-violet-500/30 bg-violet-950/20 p-4">
-                          <div className="flex items-center gap-2 mb-3">
-                            <div className="w-2 h-2 rounded-full bg-violet-400 animate-pulse flex-shrink-0" />
-                            <p className="text-xs font-semibold text-violet-300">{generateStage}</p>
+                          <div className="flex items-center justify-between mt-2">
+                            <Link href={project.mode === 'safe' ? '/soma/dashboard' : '/queue'} className="text-xs text-emerald-300 hover:text-emerald-200 underline">
+                              {project.mode === 'safe' ? 'Review in SOMA queue →' : 'View in queue →'}
+                            </Link>
+                            <button
+                              onClick={() => setShowFeedbackModal(true)}
+                              className="text-xs text-violet-400 hover:text-violet-300 transition-colors"
+                            >
+                              🎙️ Give feedback
+                            </button>
                           </div>
-                          <div className="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden">
-                            <div className="h-full rounded-full bg-gradient-to-r from-violet-600 to-purple-400" style={{ width: '100%', backgroundSize: '200% 100%', animation: 'shimmer 1.5s infinite' }} />
-                          </div>
-                          <p className="text-[11px] text-gray-600 mt-2">Usually takes 15–30 seconds. Hang tight.</p>
                         </div>
                       ) : (
                         <button
                           onClick={handleGenerate}
-                          className="w-full bg-violet-600 hover:bg-violet-500 text-white font-extrabold py-3 rounded-xl text-sm transition-all"
+                          disabled={generating}
+                          className="w-full bg-violet-600 hover:bg-violet-500 disabled:opacity-60 text-white font-extrabold py-3 rounded-xl text-sm transition-all"
                         >
                           Generate Posts →
                         </button>

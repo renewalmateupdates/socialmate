@@ -3782,7 +3782,7 @@ export const somaAutopilotRun = inngest.createFunction(
       const { data: projects, error } = await admin
         .from('soma_projects')
         .select(`
-          id, workspace_id, user_id, name, platforms, posts_per_day, content_window_days, mode, runs_this_month,
+          id, workspace_id, user_id, name, platforms, posts_per_day, content_window_days, mode, runs_this_month, paused,
           workspaces!inner(id, owner_id, soma_credits_monthly, soma_credits_used, soma_credits_purchased, soma_autopilot_enabled)
         `)
         .in('mode', ['autopilot', 'full_send'])
@@ -3795,6 +3795,8 @@ export const somaAutopilotRun = inngest.createFunction(
       return (projects ?? []).filter((p: any) => {
         const ws = p.workspaces
         if (!ws?.soma_autopilot_enabled) return false
+        // Skip paused projects
+        if (p.paused) return false
         const remaining = Math.max(0, (ws.soma_credits_monthly ?? 0) - (ws.soma_credits_used ?? 0)) + (ws.soma_credits_purchased ?? 0)
         // Run cap check
         const runCap = p.mode === 'full_send' ? 12 : 8
