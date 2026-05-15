@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const body = await request.json()
-    const { content, platforms, postId, workspaceId, status: requestedStatus, scheduledAt } = body
+    const { content, platforms, postId, workspaceId, status: requestedStatus, scheduledAt, tags, poll_data } = body
 
     // Only allow 'draft' or 'pending_approval' as valid statuses via this route
     const allowedStatuses = ['draft', 'pending_approval']
@@ -43,7 +43,13 @@ export async function POST(request: NextRequest) {
     if (!content?.trim()) return NextResponse.json({ error: 'Content is required' }, { status: 400 })
 
     if (postId) {
-      const updateData: Record<string, unknown> = { content, platforms, updated_at: new Date().toISOString() }
+      const updateData: Record<string, unknown> = {
+        content,
+        platforms,
+        updated_at: new Date().toISOString(),
+        tags: Array.isArray(tags) && tags.length > 0 ? tags : null,
+        poll_data: poll_data || null,
+      }
       if (insertStatus === 'pending_approval') {
         updateData.status = 'pending_approval'
         updateData.approval_status = 'pending'
@@ -167,11 +173,13 @@ export async function POST(request: NextRequest) {
     }
 
     const insertPayload: Record<string, unknown> = {
-      user_id:         user.id,
-      workspace_id:    resolvedWorkspaceId,
+      user_id:      user.id,
+      workspace_id: resolvedWorkspaceId,
       content,
-      platforms:       platforms || [],
-      status:          insertStatus,
+      platforms:    platforms || [],
+      status:       insertStatus,
+      tags:         Array.isArray(tags) && tags.length > 0 ? tags : null,
+      poll_data:    poll_data || null,
     }
     if (insertStatus === 'pending_approval') {
       insertPayload.approval_status = 'pending'

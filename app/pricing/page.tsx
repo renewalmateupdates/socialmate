@@ -1,8 +1,12 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import PublicLayout from '@/components/PublicLayout'
+
+const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000
+const LS_WELCOME_FIRST_SHOWN = 'welcome_offer_first_shown'
+const LS_WELCOME_DISMISSED = 'welcome_offer_dismissed'
 
 const STRIPE_PRO_PRICE_ID               = 'price_1T9S2v7OMwDowUuULHznqUD5'
 const STRIPE_AGENCY_PRICE_ID            = 'price_1TFMHp7OMwDowUuUgeLAeJNY'
@@ -214,6 +218,90 @@ export default function Pricing() {
   const [couponApplied, setCouponApplied]   = useState<AppliedCoupon | null>(null)
   const [couponError, setCouponError]       = useState<string | null>(null)
 
+  // Live user count
+  const [userCount, setUserCount] = useState<number | null>(null)
+
+  // Welcome offer banner state
+  const [showWelcomeOffer, setShowWelcomeOffer] = useState(false)
+  const [welcomeDaysLeft, setWelcomeDaysLeft]   = useState(14)
+
+  useEffect(() => {
+    // Fetch live user count
+    fetch('/api/public/user-count')
+      .then(r => r.json())
+      .then(d => { if (typeof d.count === 'number') setUserCount(d.count) })
+      .catch(() => {})
+
+    // Welcome offer — check if user is eligible (free plan, 14+ day old account)
+    // We detect plan + created_at from the session cookie via /api/auth/session pattern;
+    // for the pricing page (public) we use user_settings via client-side supabase
+    try {
+      const dismissed = localStorage.getItem(LS_WELCOME_DISMISSED)
+      if (!dismissed) {
+        // Try to get user info from any auth session
+        import('@/lib/supabase').then(({ supabase }) => {
+          supabase.auth.getUser().then(({ data }) => {
+            if (!data.user) return
+            const age = Date.now() - new Date(data.user.created_at).getTime()
+            if (age < FOURTEEN_DAYS_MS) return
+
+            // Check plan
+            supabase
+              .from('user_settings')
+              .select('plan')
+              .eq('user_id', data.user.id)
+              .single()
+              .then(({ data: settings }) => {
+                if (!settings || settings.plan !== 'free') return
+
+                let firstShown = parseInt(localStorage.getItem(LS_WELCOME_FIRST_SHOWN) ?? '0', 10)
+                if (!firstShown) {
+                  firstShown = Date.now()
+                  localStorage.setItem(LS_WELCOME_FIRST_SHOWN, String(firstShown))
+                }
+                const offerExpiry = firstShown + FOURTEEN_DAYS_MS
+                if (Date.now() > offerExpiry) return
+
+                const msLeft = offerExpiry - Date.now()
+                const days = Math.max(1, Math.ceil(msLeft / (24 * 60 * 60 * 1000)))
+                setWelcomeDaysLeft(days)
+                setShowWelcomeOffer(true)
+              })
+          })
+        }).catch(() => {})
+      }
+    } catch {}
+  }, [])
+
+  function displayUserCount(count: number | null): string {
+    const n = count ?? 30
+    const floored = Math.max(30, Math.floor(n / 10) * 10)
+    return `${floored}+`
+  }
+
+  function applyWelcomeOffer() {
+    setCouponInput('WELCOME50')
+    setCouponError(null)
+    setCouponApplied(null)
+    // Auto-validate and then scroll to Pro card
+    fetch('/api/coupons/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: 'WELCOME50' }),
+    })
+      .then(r => r.json())
+      .then(json => {
+        if (json.valid) {
+          setCouponApplied(json.coupon)
+          // Scroll to plan cards
+          document.querySelector('[data-plan-cards]')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        } else {
+          setCouponError(json.error || 'Code not valid')
+        }
+      })
+      .catch(() => { setCouponError('Could not validate code') })
+  }
+
   const annual = interval === 'annual'
 
   async function applyCoupon() {
@@ -313,7 +401,7 @@ export default function Pricing() {
             Buffer charges $18/mo for 5 platforms. Hootsuite charges $99/mo. SocialMate gives you all 16 platforms, 12 AI tools, and a Link in Bio page — starting at $0.
           </p>
           <p className="text-xs text-gray-400 dark:text-gray-500 mt-4">
-            Join <span className="font-bold text-gray-600 dark:text-gray-300">30+ creators</span> already scheduling with SocialMate
+            Join <span className="font-bold text-gray-600 dark:text-gray-300">{displayUserCount(userCount)} creators</span> already scheduling with SocialMate
           </p>
 
           <div className="flex items-center justify-center gap-1 mt-8 bg-gray-100 dark:bg-gray-800 rounded-2xl p-1 w-fit mx-auto">
@@ -367,6 +455,37 @@ export default function Pricing() {
           )}
         </div>
 
+        {/* WELCOME OFFER BANNER — free users, 14+ days old, offer valid 14 days */}
+        {showWelcomeOffer && (
+          <div className="relative flex items-start gap-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-300 dark:border-amber-700 rounded-2xl px-5 py-4 mb-8">
+            <span className="text-2xl flex-shrink-0">🎁</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-extrabold text-amber-800 dark:text-amber-300 leading-tight">
+                Welcome offer — 50% off your first month
+              </p>
+              <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
+                Expires in <span className="font-bold">{welcomeDaysLeft} day{welcomeDaysLeft !== 1 ? 's' : ''}</span> · Code:{' '}
+                <span className="font-mono font-bold">WELCOME50</span>
+              </p>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <button
+                onClick={applyWelcomeOffer}
+                className="text-xs font-bold px-3 py-1.5 bg-amber-400 hover:bg-amber-500 text-black rounded-xl transition-all"
+              >
+                Claim offer →
+              </button>
+              <button
+                onClick={() => { localStorage.setItem(LS_WELCOME_DISMISSED, '1'); setShowWelcomeOffer(false) }}
+                className="text-amber-500/60 hover:text-amber-700 transition-colors text-sm w-6 h-6 flex items-center justify-center"
+                aria-label="Dismiss"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* BIRTHDAY PROMO BANNER — teaser before 6/15, active 6/15–12/15 */}
         {(() => {
           const now = new Date()
@@ -411,7 +530,7 @@ export default function Pricing() {
         })()}
 
         {/* PLAN CARDS */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div data-plan-cards className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {PLANS.map(plan => {
             const priceId = annual ? plan.annualPriceId : plan.monthlyPriceId
             return (
