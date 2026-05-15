@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import DashboardTour from '@/components/DashboardTour'
+import DidYouKnow from '@/components/DidYouKnow'
+import DashboardWidgets from '@/components/DashboardWidgets'
 import WelcomeOfferBanner from '@/components/WelcomeOfferBanner'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 import {
@@ -758,6 +760,12 @@ function DashboardInner() {
             })()}
 
           </div>
+
+          {/* DID YOU KNOW — dismissable feature tip */}
+          <DidYouKnow />
+
+          {/* CONFIGURABLE DASHBOARD WIDGETS */}
+          <DashboardWidgets />
 
           {/* MAIN GRID */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
