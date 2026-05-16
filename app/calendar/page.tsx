@@ -193,22 +193,21 @@ export default function CalendarPage() {
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/login'); return }
-    // Filter by created_at with a wide window — every post has created_at regardless of type.
-    // getPostDateKey() uses scheduled_at || created_at for cell placement, so a post created
-    // in May but scheduled in August still lands in the August cell correctly.
-    const start = new Date(currentYear, currentMonth - 6, 1).toISOString()
-    const end   = new Date(currentYear, currentMonth + 12, 0, 23, 59, 59).toISOString()
+    // No date filter — fetch all user posts. SOMA-generated posts may have null created_at
+    // (DB default not guaranteed), so any created_at range filter silently drops them.
+    // getPostDateKey() uses scheduled_at || created_at for cell placement, which is correct.
+    // 500 post limit is plenty for any real user; add pagination if this ever becomes an issue.
     let query = supabase
       .from('posts')
       .select('id, content, platforms, scheduled_at, status, created_at, platform_post_ids, tags')
       .eq('user_id', user.id)
-      .gte('created_at', start)
-      .lte('created_at', end)
       .order('scheduled_at', { ascending: true, nullsFirst: false })
+      .limit(500)
     if (activeWorkspace && !activeWorkspace.is_personal) {
       query = query.eq('workspace_id', activeWorkspace.id)
     }
-    const { data } = await query
+    const { data, error } = await query
+    if (error) console.error('[Calendar] fetch error:', error)
     setPosts((data as Post[]) ?? [])
     setLoading(false)
   }, [currentYear, currentMonth, activeWorkspace, router])
