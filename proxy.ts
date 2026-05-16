@@ -1,7 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import createMiddleware from 'next-intl/middleware'
-import { routing } from './i18n/routing'
 
 // Routes that require authentication — redirect to /login if no session
 const PROTECTED_PATHS = [
@@ -37,21 +35,8 @@ const PROTECTED_PATHS = [
   '/search',
 ]
 
-// Locale prefixes for non-English routes (all are public pages, no auth needed)
-const LOCALE_PREFIXES = ['es', 'pt', 'fr', 'de', 'ru', 'zh']
-
-const intlMiddleware = createMiddleware(routing)
-
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
-
-  // Locale-prefixed paths (/es/..., /pt/...) are always public — run intl routing and return
-  const isLocalePrefixed = LOCALE_PREFIXES.some(
-    l => pathname.startsWith(`/${l}/`) || pathname === `/${l}`
-  )
-  if (isLocalePrefixed) {
-    return intlMiddleware(request)
-  }
 
   // Auth guard for protected routes
   let supabaseResponse = NextResponse.next({ request })
