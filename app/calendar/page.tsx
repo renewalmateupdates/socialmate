@@ -193,16 +193,17 @@ export default function CalendarPage() {
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/login'); return }
-    // Wide window: 3 months back + 7 months forward
-    const start = new Date(currentYear, currentMonth - 3, 1).toISOString()
-    const end   = new Date(currentYear, currentMonth + 7, 0, 23, 59, 59).toISOString()
-    // Include posts where scheduled_at is in range OR (scheduled_at is null AND created_at is in range)
-    // This preserves "now" posts and drafts that have no scheduled_at
+    // Filter by created_at with a wide window — every post has created_at regardless of type.
+    // getPostDateKey() uses scheduled_at || created_at for cell placement, so a post created
+    // in May but scheduled in August still lands in the August cell correctly.
+    const start = new Date(currentYear, currentMonth - 6, 1).toISOString()
+    const end   = new Date(currentYear, currentMonth + 12, 0, 23, 59, 59).toISOString()
     let query = supabase
       .from('posts')
       .select('id, content, platforms, scheduled_at, status, created_at, platform_post_ids, tags')
       .eq('user_id', user.id)
-      .or(`and(scheduled_at.gte.${start},scheduled_at.lte.${end}),and(scheduled_at.is.null,created_at.gte.${start},created_at.lte.${end})`)
+      .gte('created_at', start)
+      .lte('created_at', end)
       .order('scheduled_at', { ascending: true, nullsFirst: false })
     if (activeWorkspace && !activeWorkspace.is_personal) {
       query = query.eq('workspace_id', activeWorkspace.id)
