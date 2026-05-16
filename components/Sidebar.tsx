@@ -207,11 +207,61 @@ function SidebarContent({
   const [langOpen, setLangOpen] = useState(false)
 
   const SECTION_LABELS: Record<string, string> = {
-    Content:     t('app_sidebar.content'),
-    Insights:    t('app_sidebar.analytics'),
-    Grow:        t('app_sidebar.grow'),
-    Manage:      t('app_sidebar.manage'),
-    Account:     t('app_sidebar.settings'),
+    Content:     t('app_sidebar.section_content'),
+    Insights:    t('app_sidebar.section_insights'),
+    Grow:        t('app_sidebar.section_grow'),
+    Manage:      t('app_sidebar.section_manage'),
+    Account:     t('app_sidebar.section_account'),
+  }
+
+  const NAV_LABEL: Record<string, string> = {
+    'Bulk Scheduler': t('app_sidebar.nav_bulk_scheduler'),
+    'Calendar':       t('app_sidebar.nav_calendar'),
+    'Clips':          t('app_sidebar.nav_clips'),
+    'Compose':        t('app_sidebar.nav_compose'),
+    'Creator Studio': t('app_sidebar.nav_creator_studio'),
+    'Dashboard':      t('app_sidebar.nav_dashboard'),
+    'Drafts':         t('app_sidebar.nav_drafts'),
+    'Hashtags':       t('app_sidebar.nav_hashtags'),
+    'Link in Bio':    t('app_sidebar.nav_link_in_bio'),
+    'Link Shortener': t('app_sidebar.nav_link_shortener'),
+    'Media Library':  t('app_sidebar.nav_media_library'),
+    'Queue':          t('app_sidebar.nav_queue'),
+    'Schedules':      t('app_sidebar.nav_schedules'),
+    'Templates':      t('app_sidebar.nav_templates'),
+    'TikTok Studio':  t('app_sidebar.nav_tiktok_studio'),
+    'A/B Tests':      t('app_sidebar.nav_ab_tests'),
+    'Analytics':      t('app_sidebar.nav_analytics'),
+    'Best Times':     t('app_sidebar.nav_best_times'),
+    'Content DNA':    t('app_sidebar.nav_content_dna'),
+    'Streak':         t('app_sidebar.nav_streak'),
+    'Agents':         t('app_sidebar.nav_agents'),
+    'AI Features':    t('app_sidebar.nav_ai_features'),
+    'Competitors':    t('app_sidebar.nav_competitors'),
+    'Content Gaps':   t('app_sidebar.nav_content_gaps'),
+    'Creator Hub':    t('app_sidebar.nav_creator_hub'),
+    'HERMES':         'HERMES',
+    'Inbox':          t('app_sidebar.nav_inbox'),
+    'Partners':       t('app_sidebar.nav_partners'),
+    'Referrals':      t('app_sidebar.nav_referrals'),
+    'Roadmap':        t('app_sidebar.nav_roadmap'),
+    'SM-Pulse':       'SM-Pulse',
+    'SM-Radar':       'SM-Radar',
+    'SOMA':           'SOMA',
+    'Accounts':       t('app_sidebar.nav_accounts'),
+    'Activity':       t('app_sidebar.nav_activity'),
+    'Approvals':      t('app_sidebar.nav_approvals'),
+    'Destinations':   t('app_sidebar.nav_destinations'),
+    'Discord Hub':    t('app_sidebar.nav_discord_hub'),
+    'Enki':           'Enki',
+    'Evergreen':      t('app_sidebar.nav_evergreen'),
+    'RSS Import':     t('app_sidebar.nav_rss_import'),
+    'Team':           t('app_sidebar.nav_team'),
+    'Workspaces':     t('app_sidebar.nav_workspaces'),
+    'Notifications':  t('app_sidebar.nav_notifications'),
+    'Our Story':      t('app_sidebar.nav_our_story'),
+    'Search':         t('app_sidebar.nav_search'),
+    'Settings':       t('app_sidebar.nav_settings'),
   }
 
   const isIconOnly = !!desktopCollapsed
@@ -626,7 +676,7 @@ function SidebarContent({
                   href={href}
                   onClick={onNavClick}
                   {...((item as any).newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-                  title={item.label}
+                  title={NAV_LABEL[item.label] ?? item.label}
                   className="flex items-center justify-center w-10 h-10 mx-auto rounded-lg text-base transition-all"
                   style={{
                     background: active ? 'var(--sidebar-active)' : 'transparent',
@@ -671,7 +721,7 @@ function SidebarContent({
                             paddingLeft: active ? '10px' : '12px',
                           }}>
                           <span>{item.icon}</span>
-                          <span className="flex-1">{item.label}{isAdminUser && item.href === '/partners' ? ' ⚙️' : ''}</span>
+                          <span className="flex-1">{NAV_LABEL[item.label] ?? item.label}{isAdminUser && item.href === '/partners' ? ' ⚙️' : ''}</span>
                           {item.href === '/ai-features' && !loading && (
                             <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${
                               credits < 10 ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-400' :

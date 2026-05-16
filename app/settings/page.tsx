@@ -45,12 +45,25 @@ function SettingsInner() {
   const { plan } = useWorkspace()
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { t: tSettings } = useI18n()
 
   // Push notification support
   const { isSupported: pushSupported, permission: pushPermission, isSubscribed: pushSubscribed, isLoading: pushLoading, subscribe: pushSubscribe, unsubscribe: pushUnsubscribe } = usePushNotifications()
 
   // Tabs depend on plan — computed inside component
   const TABS = plan === 'free' ? FREE_TABS : ALL_TABS
+
+  const TAB_LABELS: Record<string, string> = {
+    'Profile':     tSettings('app_settings_tabs.profile'),
+    'Plan':        tSettings('app_settings_tabs.plan'),
+    'Referrals':   tSettings('app_settings_tabs.referrals'),
+    'Notifications': tSettings('app_settings_tabs.notifications'),
+    'Language':    tSettings('app_settings_tabs.language'),
+    'Security':    tSettings('app_settings_tabs.security'),
+    'White Label': tSettings('app_settings_tabs.white_label'),
+    'Appearance':  tSettings('app_settings_tabs.appearance'),
+    'Brand Voice': tSettings('app_settings_tabs.brand_voice'),
+  }
 
   const [userEmail, setUserEmail]       = useState('')
   const [userId, setUserId]             = useState<string | null>(null)
@@ -535,17 +548,17 @@ function SettingsInner() {
               onChange={e => setActiveTab(e.target.value)}
               className="w-full border border-theme rounded-2xl px-4 py-3 text-sm font-bold bg-surface text-gray-700 dark:text-gray-200 outline-none focus:border-gray-400 transition-all">
               {TABS.map(tab => (
-                <option key={tab} value={tab}>{tab}</option>
+                <option key={tab} value={tab}>{TAB_LABELS[tab] ?? tab}</option>
               ))}
             </select>
           </div>
 
-          {/* Desktop: pill tabs */}
-          <div className="hidden sm:flex items-center gap-1 mb-6 bg-surface border border-theme rounded-2xl p-1.5">
+          {/* Desktop: pill tabs — scrollable so Brand Voice never overflows */}
+          <div className="hidden sm:flex items-center gap-1 mb-6 bg-surface border border-theme rounded-2xl p-1.5 overflow-x-auto scrollbar-none">
             {TABS.map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${activeTab === tab ? 'bg-black text-white dark:bg-white dark:text-black' : 'text-gray-500 hover:text-black dark:hover:text-white'}`}>
-                {tab}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex-shrink-0 ${activeTab === tab ? 'bg-black text-white dark:bg-white dark:text-black' : 'text-gray-500 hover:text-black dark:hover:text-white'}`}>
+                {TAB_LABELS[tab] ?? tab}
               </button>
             ))}
           </div>
