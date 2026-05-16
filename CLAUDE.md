@@ -520,6 +520,13 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **SQL to run in Supabase:** `supabase/migrations/20260513000001_iris_newsletter.sql` (ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS iris_opt_in BOOLEAN DEFAULT true; + CREATE TABLE iris_dispatches).
 - **Edition #1 of IRIS Dispatch sent** — Subject: "We're Live, We're Building, and We're Not Stopping". 29 recipients. Joshua confirmed receipt.
 
+**May 16, 2026 (PRs #350–#355):**
+- **next-intl / Turbopack build error resolved** (PRs #350, #352) — `createNextIntlPlugin` injects a webpack alias that Turbopack silently ignores, causing "Couldn't find next-intl config file" at runtime. Fix: removed the plugin wrapper from `next.config.ts`, rewrote `LocalizedLanding.tsx` with direct JSON imports + `createT()` helper, deleted `i18n/routing.ts` + `i18n/request.ts` + all `/app/{locale}/layout.tsx` files, cleaned `proxy.ts` of all next-intl imports.
+- **i18n scope clarified** — Only public landing pages (`/es/`, `/de/`, `/fr/`, `/pt/`, `/ru/`, `/zh/`) are localized. The full app interior (Dashboard, SOMA, Enki, Compose, Analytics, Settings, etc.) is English-only. Full-app i18n added to roadmap as a major planned feature.
+- **Calendar bug fix** (PRs #351–#355) — Multiple PRs chasing a query issue. Root cause: `created_at` column may have no DB default, so SOMA-generated posts have `created_at = NULL`. Any `gte('created_at', start)` filter silently excludes them. Fix: removed all date filters from the calendar query. Fetch all user posts (`limit 500`) ordered by `scheduled_at`. `getPostDateKey()` uses `scheduled_at || created_at` for cell placement — correct for all post types.
+- **Girlfriend's SocialMatePR prompt** — Claude chat mentor prompt written for video content brand setup across TikTok, YouTube, Instagram Reels, Pinterest, Snapchat, Facebook Reels. Includes Phase 1 (account setup), Phase 2 (content strategy + schedule), Phase 3 (Video Launch Pack template per-platform for every video).
+- **r/cofounderhunt post updated** — New post written with updated stats (80+ scheduled posts, SOMA Voice DNA active, IRIS newsletter sent, all 8 agents live). Posted to r/cofounderhunt via u/InterestingRun7594.
+
 **May 14, 2026 (PR #335):**
 - **Onboarding Quick Start** — New "Quick Start" path on Step 1 skips name entry + post generation; jumps straight to platform select → connect → done. Full flow unchanged for users who want it.
 - **Auto-schedule starter posts** — Step 4 now saves posts as `status='scheduled'` with staggered times (2h from now, +30min each) instead of drafts. Users land on dashboard with posts already on calendar — first win moment.
@@ -538,49 +545,46 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 ## Pending / In Progress
 
-- **Google Play — closed testing** — App in console. Internal + closed testing active. v1.0.7 (versionCode 3) uploaded. **Blocker: 12 opted-in testers + 14-day run.** 1 tester opted in so far. Need 11 more. Nathan (newtophillyfromkc) waiting on Google sign-in confirmation with v1.0.7. 6 Reddit posts live. Once 12 opt in, 14-day clock starts → answer Google production questions → apply.
+- **Google Play — closed testing** — App in console. Internal + closed testing active. v1.0.7 (versionCode 3) uploaded. **Blocker: 12 opted-in testers + 14-day run.** 1 tester opted in. Need 11 more. Signup page has passive "Join Beta" CTA recruiting 24/7. Reddit posts live on 6 subreddits. Once 12 opt in → 14-day clock → answer Google questions → apply for production.
 
 - **TikTok Production API** — Submitted Apr 23. Demo video submitted May 5. Support ticket `ad7714530aa61ad4` open. Check portal periodically. No action until approved.
 
-- **SOMA content generation** — Submit updated CLAUDE.md (May 14 version) as master doc to SocialMate Growth SOMA project. Voice DNA (Advanced) is active. Do NOT write posts manually.
+- **SOMA content generation** — Submit updated CLAUDE.md (May 16 version) as master doc to SocialMate Growth SOMA project. Voice DNA (Advanced) is active. Do NOT write posts manually.
 
-- **LinkedIn posts** — May 14 real founding story post written and ready (RenewalMate → ProductHunt Claude Code crossover → built SocialMate). Publish manually to LinkedIn.
+- **LinkedIn posts** — Real founding story post ready (RenewalMate → ProductHunt Claude Code crossover → built SocialMate). Publish manually to LinkedIn.
 
-- **AlternativeTo listing** — Submitted May 12, auto-approved May 14. Live at alternativeto.net/software/socialmate-studio/. 9 listed alternatives.
+- **AlternativeTo listing** — Live at alternativeto.net/software/socialmate-studio/. 9 listed alternatives. ✅ Done.
 
-- **Reddit cofounder post** — Written and ready. Waiting on u/InterestingRun7594 karma build before posting to r/cofounderhunt. u/CaptainNo3491 suspended (appeal submitted).
-
-- **Wyoming LLC annual report** — Needs filing. Low funds currently — do when budget allows.
+- **Reddit cofounder post** — Posted to r/cofounderhunt via u/InterestingRun7594 (May 16 updated version). Continue replying to comments.
 
 - **Cofounder search** — Actively recruiting marketing cofounder via Reddit/LinkedIn. ~10% sweat equity over 24-month vest, 2-week trial, real contract.
 
+- **Wyoming LLC annual report** — Needs filing. Low funds currently — do when budget allows.
+
 - **Enki Truth Mode** — 50-trade minimum per strategy before results are statistically valid. Check `/enki/truth` periodically.
 
-- **LinkedIn integration** — Blocked on API credentials. Low priority.
-
-- **Push notifications** — VAPID keys confirmed set in Vercel. Live.
-
-- **Google Play production** — Need 11 more testers. Currently 1/12. Signup page now has passive "Join Beta" CTA. Once 12 opt in, 14-day clock starts.
-
-- **TikTok Production API** — Submitted Apr 23. Demo video submitted May 5. Support ticket `ad7714530aa61ad4` open. No action until approved.
-
-- **Wall of Love** — Live at `/wall-of-love`. Add real testimonial entries to `TESTIMONIALS` array as quotes come in from users.
+- **Wall of Love** — Live at `/wall-of-love`. Add real testimonial entries to `TESTIMONIALS` array as quotes come in.
 
 - **Birthday promo BDAY31** — Active June 15 – Dec 15, 2026. Stripe coupon live (`promo_1TX2Ay7OMwDowUuUiLXH4Fe3`). Pricing page banner handles teaser/active states automatically.
 
+- **SocialMatePR (girlfriend's video brand)** — Claude chat mentor prompt delivered May 16. She's setting up TikTok, YouTube, Instagram, Pinterest, Snapchat, Facebook video accounts. First video to all platforms once all profiles are ready.
+
 **Roadmap (next up):**
-- **SOMA content run** — Submit updated CLAUDE.md to SOMA project. This is the priority for content.
-- **Product Hunt follow-up** — "We've shipped 40+ features since launch" comment on original PH post. Target: June 1.
-- **Testimonials** — Reach out to 5 existing users directly for a one-liner quote → add to Wall of Love.
-- **Discord community** — SocialMate's own Discord server as a tester pool + feature feedback loop. Step-by-step setup TBD.
+- **Full-app i18n** — Translate entire app interior (Dashboard, SOMA, Enki, Compose, Analytics, Settings, Queue, Calendar, all ~40 pages). Currently only landing pages are translated. Major planned feature. See i18n plan in Confirmed Done section below.
+- **SOMA content run** — Submit updated CLAUDE.md (May 16) to SOMA project. Priority for content generation.
+- **Product Hunt follow-up** — "We've shipped 50+ features since launch" post/comment. Target: June 1.
+- **Testimonials** — Reach out to 5 existing users for one-liner quotes → add to Wall of Love.
+- **Discord community** — SocialMate's own Discord server as tester pool + feature feedback loop.
 - **Landing page "Available on Google Play" badge** — Add after Play Store production approval.
-- **Gilgamesh's Guides Vol. 5+** — Creator monetization deep-dive. Email capture now on all guides so subscribers auto-notified.
-- **Onboarding further polish** — Free vs paid slightly different flows (gated features). Empty state compose button on dashboard.
+- **Gilgamesh's Guides Vol. 5+** — Creator monetization deep-dive. Email capture live on all 4 guides.
 - **Apple App Store** — Deferred 3–6 months.
-- **LinkedIn publishing** — Pending API credentials. On hold.
+- **LinkedIn publishing** — Blocked on API credentials. On hold.
 - **Instagram / Facebook / Threads** — Pending Meta API access. Long-term roadmap.
 ## Confirmed Done (stop asking about these)
 
+- ✅ **Calendar query fix (May 16, PR #355)** — Removed all date filters. Fetch all user posts (limit 500) with no `created_at`/`scheduled_at` range. SOMA posts may have null `created_at`; date filters silently excluded them. Never add a date filter to the calendar query again.
+- ✅ **next-intl removed (May 16, PRs #350, #352)** — `createNextIntlPlugin` incompatible with Turbopack. Removed from `next.config.ts`. `LocalizedLanding.tsx` uses direct JSON imports. `i18n/routing.ts`, `i18n/request.ts`, and all locale layout files deleted. `proxy.ts` cleaned of all next-intl imports. Build is clean. Never re-introduce `next-intl` or `createNextIntlPlugin`.
+- ✅ **i18n scope — landing pages only** — The 7 locale routes (`/es/`, `/de/`, `/fr/`, `/pt/`, `/ru/`, `/zh/`) translate the marketing homepage only. Full app i18n is a roadmap feature, NOT done. When building full-app i18n: use `react-i18next` or `next-intl` with static config (NOT the Next.js plugin), translate all ~40 app pages, add locale switcher in sidebar.
 - ✅ **Onboarding Quick Start + auto-schedule + referral detection (May 14, PR #335)** — Quick Start path live. Starter posts now schedule to calendar (not drafts). Referral cookie banner. Never revert posts to draft status.
 - ✅ **Pricing birthday promo + social proof + secure checkout (May 14, PR #335)** — BDAY31 coupon live in Stripe. Banner date-gated in UI. Trust strip below plan cards.
 - ✅ **Wall of Love page (May 14, PR #335)** — `/wall-of-love` live. Add testimonials to TESTIMONIALS array when collected.
