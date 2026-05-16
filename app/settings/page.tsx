@@ -7,12 +7,14 @@ import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { usePushNotifications } from '@/hooks/usePushNotifications'
 import UpgradeNudge from '@/components/UpgradeNudge'
+import { useI18n } from '@/contexts/I18nContext'
+import { SUPPORTED_LOCALES } from '@/lib/i18n'
 
 const STRIPE_PRO_PRICE_ID    = 'price_1T9S2v7OMwDowUuULHznqUD5'
 const STRIPE_AGENCY_PRICE_ID = 'price_1TFMHp7OMwDowUuUgeLAeJNY'
 
-const ALL_TABS    = ['Profile', 'Plan', 'Referrals', 'Notifications', 'Security', 'White Label', 'Appearance', 'Brand Voice']
-const FREE_TABS   = ['Profile', 'Plan', 'Notifications', 'Security', 'Appearance']
+const ALL_TABS    = ['Profile', 'Plan', 'Referrals', 'Notifications', 'Language', 'Security', 'White Label', 'Appearance', 'Brand Voice']
+const FREE_TABS   = ['Profile', 'Plan', 'Notifications', 'Language', 'Security', 'Appearance']
 
 // Every 5 paying referrals = +100 bonus credits (stacking, no cap)
 const REFERRAL_TIERS = [
@@ -925,6 +927,9 @@ function SettingsInner() {
             </div>
           )}
 
+          {/* ── LANGUAGE ── */}
+          {activeTab === 'Language' && <LanguageTab />}
+
           {/* ── BROWSER PUSH NOTIFICATIONS ── */}
           {activeTab === 'Notifications' && !pushSupported && (
             <div className="bg-surface border border-theme rounded-2xl p-6">
@@ -1668,6 +1673,53 @@ function SettingsInner() {
           ✅ Credits added to your account!
         </div>
       )}
+    </div>
+  )
+}
+
+function LanguageTab() {
+  const { locale, setLocale, t } = useI18n()
+  const [saved, setSaved] = useState(false)
+  const [pending, setPending] = useState(locale)
+
+  const save = async () => {
+    await setLocale(pending)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
+  }
+
+  return (
+    <div className="bg-surface border border-theme rounded-2xl p-6 space-y-6">
+      <div>
+        <h2 className="text-base font-extrabold mb-1">{t('app_settings.language_tab.title')}</h2>
+        <p className="text-sm text-gray-400 dark:text-gray-500">{t('app_settings.language_tab.subtitle')}</p>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {SUPPORTED_LOCALES.map(loc => (
+          <button
+            key={loc.code}
+            onClick={() => setPending(loc.code)}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-sm font-semibold transition-all ${
+              pending === loc.code
+                ? 'border-amber-400 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300'
+                : 'border-theme bg-surface text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600'
+            }`}
+          >
+            <span className="text-xl">{loc.flag}</span>
+            <span>{loc.label}</span>
+            {pending === loc.code && <span className="ml-auto text-amber-500">✓</span>}
+          </button>
+        ))}
+      </div>
+      <div className="flex items-center gap-3">
+        <button
+          onClick={save}
+          className="px-6 py-2.5 rounded-xl text-sm font-bold bg-black dark:bg-white text-white dark:text-black hover:opacity-80 transition-all"
+        >
+          {t('app_settings.language_tab.save_language')}
+        </button>
+        {saved && <span className="text-sm font-semibold text-green-500">{t('app_settings.language_tab.saved')}</span>}
+      </div>
     </div>
   )
 }

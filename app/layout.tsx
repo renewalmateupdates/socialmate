@@ -5,6 +5,7 @@ import CookieBanner from '@/components/CookieBanner'
 import FeedbackWidget from '@/components/FeedbackWidget'
 import { WorkspaceProvider } from '@/contexts/WorkspaceContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
+import { I18nProvider } from '@/contexts/I18nContext'
 import { Analytics } from '@vercel/analytics/next'
 import InstallPrompt from '@/components/InstallPrompt'
 
@@ -141,7 +142,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${inter.variable} ${inter.className}`}>
         <ThemeProvider>
           <WorkspaceProvider>
-            {children}
+            <I18nProvider>
+              {children}
+            </I18nProvider>
           </WorkspaceProvider>
         </ThemeProvider>
         <FeedbackWidget />

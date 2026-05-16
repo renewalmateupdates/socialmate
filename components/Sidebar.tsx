@@ -8,6 +8,8 @@ import ThemeToggle from '@/components/ThemeToggle'
 import ComposeShortcut from '@/components/ComposeShortcut'
 import NotificationBell from '@/components/NotificationBell'
 import UpgradeNudge from '@/components/UpgradeNudge'
+import { useI18n } from '@/contexts/I18nContext'
+import { SUPPORTED_LOCALES } from '@/lib/i18n'
 import {
   DndContext,
   closestCenter,
@@ -126,9 +128,10 @@ const NAV_BASE = [
 
 // ── Sortable section header ───────────────────────────────────────────────────
 function SortableSectionHeader({
-  section, isCollapsed, onToggle, showBorder,
+  section, label, isCollapsed, onToggle, showBorder,
 }: {
   section: string
+  label?: string
   isCollapsed: boolean
   onToggle: () => void
   showBorder: boolean
@@ -161,7 +164,7 @@ function SortableSectionHeader({
         >⠿</span>
         <span className="text-xs font-extrabold uppercase tracking-widest flex-1 text-left"
           style={{ color: 'var(--sidebar-faint)' }}>
-          {section}
+          {label ?? section}
         </span>
         <span className="text-xs" style={{ color: 'var(--sidebar-faint)' }}>
           {isCollapsed ? '▸' : '▾'}
@@ -200,6 +203,16 @@ function SidebarContent({
   const [somaCredits, setSomaCredits]           = useState<{ monthly: number; remaining: number } | null>(null)
   const pathname = usePathname()
   const router   = useRouter()
+  const { t, locale, setLocale } = useI18n()
+  const [langOpen, setLangOpen] = useState(false)
+
+  const SECTION_LABELS: Record<string, string> = {
+    Content:     t('app_sidebar.content'),
+    Insights:    t('app_sidebar.analytics'),
+    Grow:        t('app_sidebar.grow'),
+    Manage:      t('app_sidebar.manage'),
+    Account:     t('app_sidebar.settings'),
+  }
 
   const isIconOnly = !!desktopCollapsed
 
@@ -636,6 +649,7 @@ function SidebarContent({
                   <div key={group.section}>
                     <SortableSectionHeader
                       section={group.section}
+                      label={SECTION_LABELS[group.section]}
                       isCollapsed={isCollapsed}
                       onToggle={() => toggleSection(group.section)}
                       showBorder={gi > 0}
@@ -836,6 +850,42 @@ function SidebarContent({
               </div>
             </Link>
           )}
+
+          {/* LANGUAGE SWITCHER */}
+          <div className="relative">
+            <button
+              onClick={() => setLangOpen(p => !p)}
+              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs transition-all hover:opacity-70"
+              style={{ color: 'var(--sidebar-muted)' }}
+            >
+              <span className="text-sm">{SUPPORTED_LOCALES.find(l => l.code === locale)?.flag ?? '🌐'}</span>
+              <span>{SUPPORTED_LOCALES.find(l => l.code === locale)?.label ?? 'English'}</span>
+              <span className="ml-auto text-[10px]">{langOpen ? '▴' : '▾'}</span>
+            </button>
+            {langOpen && (
+              <div
+                className="absolute bottom-full mb-1 left-0 right-0 rounded-xl overflow-hidden shadow-lg z-50"
+                style={{ background: 'var(--surface)', border: '1px solid var(--sidebar-border)' }}
+              >
+                {SUPPORTED_LOCALES.map(loc => (
+                  <button
+                    key={loc.code}
+                    onClick={() => { setLocale(loc.code); setLangOpen(false) }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs transition-all hover:opacity-70 text-left"
+                    style={{
+                      color: loc.code === locale ? 'var(--sidebar-fg)' : 'var(--sidebar-muted)',
+                      fontWeight: loc.code === locale ? '700' : '400',
+                      background: loc.code === locale ? 'var(--sidebar-active)' : 'transparent',
+                    }}
+                  >
+                    <span>{loc.flag}</span>
+                    <span>{loc.label}</span>
+                    {loc.code === locale && <span className="ml-auto">✓</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* THEME TOGGLE */}
           <ThemeToggle />
