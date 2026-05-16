@@ -193,8 +193,9 @@ export default function CalendarPage() {
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/login'); return }
-    const start = new Date(currentYear, currentMonth - 1, 1).toISOString()
-    const end   = new Date(currentYear, currentMonth + 2, 0, 23, 59, 59).toISOString()
+    // Wide window: 3 months back + 6 months forward so SOMA-scheduled posts always appear
+    const start = new Date(currentYear, currentMonth - 3, 1).toISOString()
+    const end   = new Date(currentYear, currentMonth + 7, 0, 23, 59, 59).toISOString()
     let query = supabase
       .from('posts')
       .select('id, content, platforms, scheduled_at, status, created_at, platform_post_ids, tags')
@@ -421,19 +422,31 @@ export default function CalendarPage() {
           </div>
 
           {/* Empty state */}
-          {!loading && !monthHasPosts && (
-            <div className="bg-surface border border-theme rounded-2xl p-10 text-center mb-4">
-              <p className="text-3xl mb-3">📅</p>
-              <p className="font-bold text-gray-700 dark:text-gray-200 mb-1">No posts this month</p>
-              <p className="text-sm text-gray-400 dark:text-gray-500 mb-5">
-                Schedule your first post to see it appear here.
-              </p>
-              <Link href="/compose"
-                className="inline-block text-sm font-bold px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-xl hover:opacity-80 transition-all">
-                Schedule your first post →
-              </Link>
-            </div>
-          )}
+          {!loading && !monthHasPosts && (() => {
+            const nextMonth = posts.length > 0
+              ? (() => {
+                  const d = new Date(posts[0].scheduled_at || posts[0].created_at)
+                  return `${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`
+                })()
+              : null
+            return (
+              <div className="bg-surface border border-theme rounded-2xl p-10 text-center mb-4">
+                <p className="text-3xl mb-3">📅</p>
+                <p className="font-bold text-gray-700 dark:text-gray-200 mb-1">No posts this month</p>
+                <p className="text-sm text-gray-400 dark:text-gray-500 mb-5">
+                  {nextMonth
+                    ? `Your next scheduled posts are in ${nextMonth} — use the arrow to navigate there.`
+                    : 'Schedule your first post to see it appear here.'}
+                </p>
+                {!nextMonth && (
+                  <Link href="/compose"
+                    className="inline-block text-sm font-bold px-6 py-3 bg-black dark:bg-white text-white dark:text-black rounded-xl hover:opacity-80 transition-all">
+                    Schedule your first post →
+                  </Link>
+                )}
+              </div>
+            )
+          })()}
 
           {/* Day detail panel */}
           {selectedDay && (
