@@ -199,8 +199,8 @@ export default function CalendarPage() {
       .from('posts')
       .select('id, content, platforms, scheduled_at, status, created_at, platform_post_ids, tags')
       .eq('user_id', user.id)
-      .gte('created_at', start)
-      .lte('created_at', end)
+      .gte('scheduled_at', start)
+      .lte('scheduled_at', end)
       .order('scheduled_at', { ascending: true, nullsFirst: false })
     if (activeWorkspace && !activeWorkspace.is_personal) {
       query = query.eq('workspace_id', activeWorkspace.id)
