@@ -36,6 +36,8 @@ const PROTECTED_PATHS = [
 ]
 
 export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
   // Auth guard for protected routes
   let supabaseResponse = NextResponse.next({ request })
 
