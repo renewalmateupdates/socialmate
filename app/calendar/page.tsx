@@ -193,15 +193,16 @@ export default function CalendarPage() {
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/login'); return }
-    // Wide window: 3 months back + 6 months forward so SOMA-scheduled posts always appear
+    // Wide window: 3 months back + 7 months forward
     const start = new Date(currentYear, currentMonth - 3, 1).toISOString()
     const end   = new Date(currentYear, currentMonth + 7, 0, 23, 59, 59).toISOString()
+    // Include posts where scheduled_at is in range OR (scheduled_at is null AND created_at is in range)
+    // This preserves "now" posts and drafts that have no scheduled_at
     let query = supabase
       .from('posts')
       .select('id, content, platforms, scheduled_at, status, created_at, platform_post_ids, tags')
       .eq('user_id', user.id)
-      .gte('scheduled_at', start)
-      .lte('scheduled_at', end)
+      .or(`and(scheduled_at.gte.${start},scheduled_at.lte.${end}),and(scheduled_at.is.null,created_at.gte.${start},created_at.lte.${end})`)
       .order('scheduled_at', { ascending: true, nullsFirst: false })
     if (activeWorkspace && !activeWorkspace.is_personal) {
       query = query.eq('workspace_id', activeWorkspace.id)
