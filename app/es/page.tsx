@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import LocalizedLanding, { generateLocaleMetadata } from '@/components/pages/LocalizedLanding'
 
-export async function generateMetadata(): Promise<Metadata> {
+export function generateMetadata(): Metadata {
   return generateLocaleMetadata('es')
 }
 

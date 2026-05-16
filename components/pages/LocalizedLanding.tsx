@@ -1,9 +1,31 @@
-import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import type { Metadata } from 'next'
 import PublicNav from '@/components/PublicNav'
+
+// Direct JSON imports — no next-intl server config required
+import enMessages from '@/messages/en.json'
+import esMessages from '@/messages/es.json'
+import ptMessages from '@/messages/pt.json'
+import frMessages from '@/messages/fr.json'
+import deMessages from '@/messages/de.json'
+import ruMessages from '@/messages/ru.json'
+import zhMessages from '@/messages/zh.json'
+
+const ALL_MESSAGES: Record<string, typeof enMessages> = {
+  en: enMessages, es: esMessages, pt: ptMessages,
+  fr: frMessages, de: deMessages, ru: ruMessages, zh: zhMessages,
+}
+
+function createT(namespace: Record<string, unknown>) {
+  return function t(key: string): string {
+    const parts = key.split('.')
+    let val: unknown = namespace
+    for (const p of parts) val = (val as Record<string, unknown>)?.[p]
+    return typeof val === 'string' ? val : key
+  }
+}
 
 const PLATFORMS = [
   { name: 'Discord',     icon: '💬', status: 'live'    },
@@ -24,11 +46,12 @@ const PLATFORMS = [
   { name: 'BeReal',      icon: '📷', status: 'planned' },
 ]
 
-export async function generateLocaleMetadata(locale: string): Promise<Metadata> {
-  const t = await getTranslations({ locale, namespace: 'home' })
+export function generateLocaleMetadata(locale: string): Metadata {
+  const msgs = ALL_MESSAGES[locale] ?? ALL_MESSAGES.en
+  const home = msgs.home as Record<string, unknown>
   return {
     title: 'SocialMate — Free Social Media Scheduler',
-    description: t('subheadline'),
+    description: String(home.subheadline ?? ''),
     alternates: {
       canonical: `https://socialmate.studio`,
       languages: {
@@ -54,12 +77,7 @@ export default async function LocalizedLanding({ locale }: { locale: string }) {
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll: () => cookieStore.getAll(),
-          setAll: () => {},
-        },
-      }
+      { cookies: { getAll: () => cookieStore.getAll(), setAll: () => {} } }
     )
     const { data: { user } } = await supabase.auth.getUser()
     if (user) isLoggedIn = true
@@ -69,8 +87,9 @@ export default async function LocalizedLanding({ locale }: { locale: string }) {
   const soon    = PLATFORMS.filter(p => p.status === 'soon')
   const planned = PLATFORMS.filter(p => p.status === 'planned')
 
-  const t  = await getTranslations({ locale, namespace: 'home' })
-  const tc = await getTranslations({ locale, namespace: 'common' })
+  const msgs = ALL_MESSAGES[locale] ?? ALL_MESSAGES.en
+  const t  = createT(msgs.home as Record<string, unknown>)
+  const tc = createT(msgs.common as Record<string, unknown>)
 
   return (
     <div className="dark min-h-screen bg-gray-950">
@@ -89,13 +108,11 @@ export default async function LocalizedLanding({ locale }: { locale: string }) {
           {t('subheadline')}
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
-          <Link
-            href={`${prefix}/signup`}
+          <Link href={`${prefix}/signup`}
             className="bg-black text-white font-bold px-8 py-4 rounded-2xl hover:opacity-80 transition-all text-base w-full sm:w-auto text-center">
             {t('cta_primary')}
           </Link>
-          <Link
-            href={`${prefix}/pricing`}
+          <Link href={`${prefix}/pricing`}
             className="text-gray-500 dark:text-gray-400 font-semibold hover:text-black dark:hover:text-white transition-all text-base">
             {t('cta_pricing')}
           </Link>
@@ -114,13 +131,13 @@ export default async function LocalizedLanding({ locale }: { locale: string }) {
 
         <div className="grid grid-cols-3 gap-4 sm:gap-6 mt-12 sm:mt-16 max-w-2xl mx-auto">
           {[
-            { value: '5',   labelKey: 'stats.platforms' },
-            { value: '12',  labelKey: 'stats.ai_tools'  },
-            { value: '$0',  labelKey: 'stats.price'     },
+            { value: '5',  labelKey: 'stats.platforms' },
+            { value: '12', labelKey: 'stats.ai_tools'  },
+            { value: '$0', labelKey: 'stats.price'     },
           ].map(stat => (
             <div key={stat.labelKey} className="text-center">
               <p className="text-4xl font-extrabold tracking-tight">{stat.value}</p>
-              <p className="text-xs text-gray-400 font-semibold mt-1">{t(stat.labelKey as Parameters<typeof t>[0])}</p>
+              <p className="text-xs text-gray-400 font-semibold mt-1">{t(stat.labelKey)}</p>
             </div>
           ))}
         </div>
@@ -131,28 +148,24 @@ export default async function LocalizedLanding({ locale }: { locale: string }) {
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-10">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">{t('free_tier.eyebrow')}</p>
-            <h2 className="text-3xl font-extrabold tracking-tight mb-3">
-              {t('free_tier.headline')}
-            </h2>
-            <p className="text-gray-400 text-sm max-w-xl mx-auto">
-              {t('free_tier.subheadline')}
-            </p>
+            <h2 className="text-3xl font-extrabold tracking-tight mb-3">{t('free_tier.headline')}</h2>
+            <p className="text-gray-400 text-sm max-w-xl mx-auto">{t('free_tier.subheadline')}</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             {[
-              { icon: '🤖', value: '50',      labelKey: 'free_tier.ai_credits'            },
-              { icon: '📅', value: '2 weeks', labelKey: 'free_tier.scheduling_window'     },
-              { icon: '👥', value: '2',        labelKey: 'free_tier.team_seats'           },
-              { icon: '💾', value: '1 GB',     labelKey: 'free_tier.media_storage'        },
-              { icon: '📝', value: '100',      labelKey: 'free_tier.posts_month'          },
-              { icon: '📊', value: '30 days',  labelKey: 'free_tier.analytics'            },
-              { icon: '🔗', value: tc('free'), labelKey: 'free_tier.link_in_bio'          },
-              { icon: '🔭', value: '3',        labelKey: 'free_tier.competitor_tracking'  },
+              { icon: '🤖', value: '50',      labelKey: 'free_tier.ai_credits'           },
+              { icon: '📅', value: '2 weeks', labelKey: 'free_tier.scheduling_window'    },
+              { icon: '👥', value: '2',        labelKey: 'free_tier.team_seats'          },
+              { icon: '💾', value: '1 GB',     labelKey: 'free_tier.media_storage'       },
+              { icon: '📝', value: '100',      labelKey: 'free_tier.posts_month'         },
+              { icon: '📊', value: '30 days',  labelKey: 'free_tier.analytics'           },
+              { icon: '🔗', value: tc('free'), labelKey: 'free_tier.link_in_bio'         },
+              { icon: '🔭', value: '3',        labelKey: 'free_tier.competitor_tracking' },
             ].map(stat => (
               <div key={stat.labelKey} className="bg-white/10 rounded-2xl p-4 text-center">
                 <div className="text-2xl mb-1">{stat.icon}</div>
                 <p className="text-lg font-extrabold">{stat.value}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{t(stat.labelKey as Parameters<typeof t>[0])}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{t(stat.labelKey)}</p>
               </div>
             ))}
           </div>
@@ -224,21 +237,17 @@ export default async function LocalizedLanding({ locale }: { locale: string }) {
             <p className="text-gray-400 text-sm max-w-xl mx-auto leading-relaxed">{t('clips.subheadline')}</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-purple-500/40 transition-all">
-              <div className="text-3xl mb-3">🟣</div>
-              <h3 className="font-bold text-base mb-2">{t('clips.twitch_title')}</h3>
-              <p className="text-sm text-gray-400 leading-relaxed">{t('clips.twitch_desc')}</p>
-            </div>
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-red-500/40 transition-all">
-              <div className="text-3xl mb-3">▶️</div>
-              <h3 className="font-bold text-base mb-2">{t('clips.youtube_title')}</h3>
-              <p className="text-sm text-gray-400 leading-relaxed">{t('clips.youtube_desc')}</p>
-            </div>
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-blue-500/40 transition-all">
-              <div className="text-3xl mb-3">🔍</div>
-              <h3 className="font-bold text-base mb-2">{t('clips.search_title')}</h3>
-              <p className="text-sm text-gray-400 leading-relaxed">{t('clips.search_desc')}</p>
-            </div>
+            {[
+              { icon: '🟣', titleKey: 'clips.twitch_title', descKey: 'clips.twitch_desc'   },
+              { icon: '▶️', titleKey: 'clips.youtube_title', descKey: 'clips.youtube_desc' },
+              { icon: '🔍', titleKey: 'clips.search_title',  descKey: 'clips.search_desc'  },
+            ].map(card => (
+              <div key={card.titleKey} className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-purple-500/40 transition-all">
+                <div className="text-3xl mb-3">{card.icon}</div>
+                <h3 className="font-bold text-base mb-2">{t(card.titleKey)}</h3>
+                <p className="text-sm text-gray-400 leading-relaxed">{t(card.descKey)}</p>
+              </div>
+            ))}
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-12 text-center">
             {[
@@ -249,7 +258,7 @@ export default async function LocalizedLanding({ locale }: { locale: string }) {
               <div key={item.step} className="flex items-center gap-2 sm:gap-3">
                 <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5">
                   <span className="text-xs font-bold text-purple-400">{item.step}</span>
-                  <span className="text-sm font-semibold text-white">{t(item.labelKey as Parameters<typeof t>[0])}</span>
+                  <span className="text-sm font-semibold text-white">{t(item.labelKey)}</span>
                 </div>
                 {i < 2 && <span className="text-gray-600 text-lg hidden sm:block">→</span>}
               </div>
@@ -304,8 +313,8 @@ export default async function LocalizedLanding({ locale }: { locale: string }) {
             ].map((f, i) => (
               <div key={i} className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 hover:border-gray-300 dark:hover:border-gray-500 transition-all">
                 <div className="text-3xl mb-3">{f.icon}</div>
-                <h3 className="text-sm font-extrabold mb-2 text-gray-900 dark:text-gray-100">{t(f.titleKey as Parameters<typeof t>[0])}</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{t(f.descKey as Parameters<typeof t>[0])}</p>
+                <h3 className="text-sm font-extrabold mb-2 text-gray-900 dark:text-gray-100">{t(f.titleKey)}</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{t(f.descKey)}</p>
               </div>
             ))}
           </div>
@@ -350,8 +359,8 @@ export default async function LocalizedLanding({ locale }: { locale: string }) {
             ].map((card, i) => (
               <div key={i} className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 text-left hover:border-gray-300 dark:hover:border-gray-500 transition-all">
                 <div className="text-2xl mb-3">{card.icon}</div>
-                <h3 className="text-sm font-extrabold mb-2 text-gray-900 dark:text-gray-100">{t(card.titleKey as Parameters<typeof t>[0])}</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{t(card.descKey as Parameters<typeof t>[0])}</p>
+                <h3 className="text-sm font-extrabold mb-2 text-gray-900 dark:text-gray-100">{t(card.titleKey)}</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{t(card.descKey)}</p>
               </div>
             ))}
           </div>
@@ -383,7 +392,7 @@ export default async function LocalizedLanding({ locale }: { locale: string }) {
                 ].map(tag => (
                   <div key={tag.labelKey} className="text-center">
                     <div className="text-xl mb-1">{tag.emoji}</div>
-                    <div className="text-xs text-gray-500 font-medium leading-tight">{t(tag.labelKey as Parameters<typeof t>[0])}</div>
+                    <div className="text-xs text-gray-500 font-medium leading-tight">{t(tag.labelKey)}</div>
                   </div>
                 ))}
               </div>
