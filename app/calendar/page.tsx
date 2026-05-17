@@ -125,7 +125,7 @@ function tagColorCalendar(tag: string): string {
 
 export default function CalendarPage() {
   const router = useRouter()
-  const { activeWorkspace } = useWorkspace()
+  const { activeWorkspace, loading: wsLoading } = useWorkspace()
   const today    = new Date()
   const todayKey = toDateKey(today)
 
@@ -150,7 +150,7 @@ export default function CalendarPage() {
         // Refresh posts to reflect new status
         const updated = await supabase
           .from('posts')
-          .select('id, content, platforms, scheduled_at, status, created_at, platform_post_ids, tags')
+          .select('*')
           .eq('id', postId)
           .single()
         if (updated.data) {
@@ -193,16 +193,14 @@ export default function CalendarPage() {
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/login'); return }
-    // No date filter — fetch all user posts. SOMA-generated posts may have null created_at
-    // (DB default not guaranteed), so any created_at range filter silently drops them.
-    // getPostDateKey() uses scheduled_at || created_at for cell placement, which is correct.
-    // 500 post limit is plenty for any real user; add pagination if this ever becomes an issue.
+    // select('*') avoids silent failures when a column in an explicit list doesn't exist in the DB.
+    // No date filter — fetch all user posts so any month is navigable without a re-fetch.
     let query = supabase
       .from('posts')
-      .select('id, content, platforms, scheduled_at, status, created_at, platform_post_ids, tags')
+      .select('*')
       .eq('user_id', user.id)
       .order('scheduled_at', { ascending: true, nullsFirst: false })
-      .limit(500)
+      .limit(1000)
     if (activeWorkspace && !activeWorkspace.is_personal) {
       query = query.eq('workspace_id', activeWorkspace.id)
     }
@@ -210,9 +208,30 @@ export default function CalendarPage() {
     if (error) console.error('[Calendar] fetch error:', error)
     setPosts((data as Post[]) ?? [])
     setLoading(false)
-  }, [currentYear, currentMonth, activeWorkspace, router])
+  }, [activeWorkspace, router])
 
-  useEffect(() => { fetchPosts() }, [fetchPosts])
+  // Wait for workspace context to resolve before fetching — avoids a double-fetch
+  // where the second run (with workspace filter) overwrites correct results.
+  useEffect(() => {
+    if (!wsLoading) fetchPosts()
+  }, [fetchPosts, wsLoading])
+
+  // Auto-navigate to the month containing the first scheduled post when current month is empty
+  useEffect(() => {
+    if (loading || posts.length === 0) return
+    const monthStart = new Date(currentYear, currentMonth, 1)
+    const monthEnd   = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59)
+    const currentMonthHasPosts = posts.some(p => {
+      const d = new Date(p.scheduled_at || p.created_at)
+      return d >= monthStart && d <= monthEnd
+    })
+    if (currentMonthHasPosts) return
+    const first = posts.find(p => p.scheduled_at)
+    if (!first) return
+    const d = new Date(first.scheduled_at!)
+    setCurrentYear(d.getFullYear())
+    setCurrentMonth(d.getMonth())
+  }, [loading]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const postMap = posts.reduce<Record<string, Post[]>>((acc, post) => {
     const key = getPostDateKey(post)
