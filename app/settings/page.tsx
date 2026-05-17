@@ -537,8 +537,8 @@ function SettingsInner() {
         <div className="max-w-3xl mx-auto">
 
           <div className="mb-8">
-            <h1 className="text-2xl font-extrabold tracking-tight">Settings</h1>
-            <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">Manage your account, plan, and preferences</p>
+            <h1 className="text-2xl font-extrabold tracking-tight">{tSettings('app_settings.title')}</h1>
+            <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">{tSettings('app_settings.subtitle')}</p>
           </div>
 
           {/* Mobile: dropdown selector */}
@@ -566,32 +566,32 @@ function SettingsInner() {
           {/* ── PROFILE ── */}
           {activeTab === 'Profile' && (
             <div className="bg-surface border border-theme rounded-2xl p-6 space-y-4">
-              <h2 className="text-base font-extrabold">Profile</h2>
+              <h2 className="text-base font-extrabold">{tSettings('app_settings.profile_tab.title')}</h2>
               <div>
-                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">Display Name</label>
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">{tSettings('app_settings.profile_tab.display_name')}</label>
                 <input value={displayName} onChange={e => setDisplayName(e.target.value)}
                   className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black dark:focus:border-gray-400 transition-all" />
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">Email</label>
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">{tSettings('app_settings.profile_tab.email')}</label>
                 <input value={userEmail} disabled
                   className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm outline-none bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-500 cursor-not-allowed" />
-                <p className="text-xs text-gray-400 mt-1">Email cannot be changed here.</p>
+                <p className="text-xs text-gray-400 mt-1">{tSettings('app_settings.profile_tab.email_note')}</p>
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">Username / Handle</label>
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">{tSettings('app_settings.profile_tab.username')}</label>
                 <input value={username} onChange={e => setUsername(e.target.value)} placeholder="@yourhandle"
                   className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black dark:focus:border-gray-400 transition-all" />
               </div>
               <div>
-                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">Bio</label>
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">{tSettings('app_settings.profile_tab.bio')}</label>
                 <textarea rows={3} value={bio} onChange={e => setBio(e.target.value)}
-                  placeholder="Tell your audience about yourself..."
+                  placeholder={tSettings('app_settings.profile_tab.bio_placeholder')}
                   className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black dark:focus:border-gray-400 transition-all resize-none" />
               </div>
               <button onClick={() => handleSave('Profile')}
                 className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${savedTab === 'Profile' ? 'bg-green-500 text-white' : 'bg-black text-white hover:opacity-80'}`}>
-                {savedTab === 'Profile' ? '✓ Saved!' : 'Save Changes'}
+                {savedTab === 'Profile' ? tSettings('app_settings.profile_tab.saved') : tSettings('app_settings.profile_tab.save_profile')}
               </button>
             </div>
           )}
@@ -614,8 +614,8 @@ function SettingsInner() {
               <div className="bg-surface border border-theme rounded-2xl p-6">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h2 className="text-base font-extrabold">Current Plan</h2>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Your active subscription</p>
+                    <h2 className="text-base font-extrabold">{tSettings('app_settings.plan_tab.title')}</h2>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{tSettings('app_settings.plan_tab.subtitle')}</p>
                   </div>
                   <span className={`text-xs font-bold px-3 py-1.5 rounded-full capitalize ${
                     plan === 'free' ? 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400' :
@@ -653,19 +653,19 @@ function SettingsInner() {
                 {plan === 'free' && (
                   <div className="space-y-3">
                     <div className="bg-black text-white rounded-xl p-4">
-                      <p className="text-sm font-extrabold mb-1">Upgrade to Pro — $5/month</p>
-                      <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">5 accounts per platform · 500 AI credits · 1 client workspace · 90-day analytics</p>
+                      <p className="text-sm font-extrabold mb-1">{tSettings('app_settings.plan_tab.upgrade_pro_title')}</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">{tSettings('app_settings.plan_tab.upgrade_pro_sub')}</p>
                       <button onClick={() => handleCheckout(STRIPE_PRO_PRICE_ID)} disabled={checkoutLoading}
                         className="bg-white text-black text-xs font-bold px-4 py-2 rounded-lg hover:opacity-80 transition-all disabled:opacity-60">
-                        {checkoutLoading ? 'Loading...' : 'Upgrade to Pro →'}
+                        {checkoutLoading ? tSettings('app_settings.plan_tab.loading') : tSettings('app_settings.plan_tab.upgrade_pro_btn')}
                       </button>
                     </div>
                     <div className="border border-purple-200 rounded-xl p-4">
-                      <p className="text-sm font-extrabold mb-1">Agency — $20/month</p>
-                      <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">15 team seats · 5 client workspaces · 2,000 AI credits · 6-month analytics</p>
+                      <p className="text-sm font-extrabold mb-1">{tSettings('app_settings.plan_tab.upgrade_agency_title')}</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">{tSettings('app_settings.plan_tab.upgrade_agency_sub')}</p>
                       <button onClick={() => handleCheckout(STRIPE_AGENCY_PRICE_ID)} disabled={checkoutLoading}
                         className="bg-purple-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:opacity-80 transition-all disabled:opacity-60">
-                        {checkoutLoading ? 'Loading...' : 'Upgrade to Agency →'}
+                        {checkoutLoading ? tSettings('app_settings.plan_tab.loading') : tSettings('app_settings.plan_tab.upgrade_agency_btn')}
                       </button>
                     </div>
                   </div>
@@ -674,18 +674,18 @@ function SettingsInner() {
                 {plan === 'pro' && (
                   <div className="space-y-3">
                     <div className="border border-purple-200 rounded-xl p-4">
-                      <p className="text-sm font-extrabold mb-1">Upgrade to Agency — $20/month</p>
-                      <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">15 team seats · 5 client workspaces · 2,000 AI credits · 6-month analytics</p>
+                      <p className="text-sm font-extrabold mb-1">{tSettings('app_settings.plan_tab.upgrade_agency_title_pro')}</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">{tSettings('app_settings.plan_tab.upgrade_agency_sub')}</p>
                       <button onClick={() => handleCheckout(STRIPE_AGENCY_PRICE_ID)} disabled={checkoutLoading}
                         className="bg-purple-600 text-white text-xs font-bold px-4 py-2 rounded-lg hover:opacity-80 transition-all disabled:opacity-60">
-                        {checkoutLoading ? 'Loading...' : 'Upgrade to Agency →'}
+                        {checkoutLoading ? tSettings('app_settings.plan_tab.loading') : tSettings('app_settings.plan_tab.upgrade_agency_btn')}
                       </button>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Manage billing, invoices, and cancellation below.</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">{tSettings('app_settings.plan_tab.manage_billing')}</p>
                       <button onClick={handlePortal} disabled={checkoutLoading}
                         className="text-xs font-bold text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all disabled:opacity-60">
-                        {checkoutLoading ? 'Loading...' : 'Manage Subscription →'}
+                        {checkoutLoading ? tSettings('app_settings.plan_tab.loading') : tSettings('app_settings.plan_tab.manage_sub')}
                       </button>
                     </div>
                   </div>
@@ -693,10 +693,10 @@ function SettingsInner() {
 
                 {plan === 'agency' && (
                   <div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Manage billing, invoices, and cancellation below.</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">{tSettings('app_settings.plan_tab.manage_billing')}</p>
                     <button onClick={handlePortal} disabled={checkoutLoading}
                       className="text-xs font-bold text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-all disabled:opacity-60">
-                      {checkoutLoading ? 'Loading...' : 'Manage Subscription →'}
+                      {checkoutLoading ? tSettings('app_settings.plan_tab.loading') : tSettings('app_settings.plan_tab.manage_sub')}
                     </button>
                   </div>
                 )}
@@ -704,9 +704,9 @@ function SettingsInner() {
 
               {/* AI CREDITS */}
               <div className="bg-surface border border-theme rounded-2xl p-6">
-                <h2 className="text-base font-extrabold mb-4">AI Credits</h2>
+                <h2 className="text-base font-extrabold mb-4">{tSettings('app_settings.plan_tab.ai_credits_title')}</h2>
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs text-gray-500 dark:text-gray-400">Monthly credits</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">{tSettings('app_settings.plan_tab.monthly_credits')}</span>
                   <span className="text-xs font-bold">
                     {plan === 'free' ? '100 / 100' : plan === 'pro' ? '500 / 500' : '2,000 / 2,000'}
                   </span>
@@ -715,19 +715,19 @@ function SettingsInner() {
                   <div className="bg-black h-2 rounded-full" style={{ width: '100%' }} />
                 </div>
                 <div className="flex items-center justify-between mb-6">
-                  <span className="text-xs text-gray-500 dark:text-gray-400">Credit bank capacity</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">{tSettings('app_settings.plan_tab.credit_bank')}</span>
                   <span className="text-xs font-bold">
                     {plan === 'free' ? '150' : plan === 'pro' ? '750' : '3,000'}
                   </span>
                 </div>
                 <div className="border-t border-gray-100 pt-5">
-                  <p className="text-xs font-extrabold mb-1">Buy Credit Packs</p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">One-time purchase — credits added instantly to your balance.</p>
+                  <p className="text-xs font-extrabold mb-1">{tSettings('app_settings.plan_tab.buy_credits')}</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">{tSettings('app_settings.plan_tab.buy_credits_sub')}</p>
                   <div className="grid grid-cols-2 gap-3">
                     {CREDIT_PACKS.map(pack => (
                       <div key={pack.priceId} className={`relative border rounded-xl p-4 ${pack.popular ? 'border-amber-400 dark:border-amber-500' : 'border-gray-200 dark:border-gray-700'}`}>
                         {pack.popular && (
-                          <span className="absolute -top-2 left-3 text-xs font-bold bg-amber-500 text-white px-2 py-0.5 rounded-full">Popular</span>
+                          <span className="absolute -top-2 left-3 text-xs font-bold bg-amber-500 text-white px-2 py-0.5 rounded-full">{tSettings('app_settings.plan_tab.popular_badge')}</span>
                         )}
                         <p className="text-sm font-extrabold mb-0.5">{pack.label}</p>
                         <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">{pack.credits.toLocaleString()} credits</p>
@@ -735,7 +735,7 @@ function SettingsInner() {
                           <span className="text-sm font-extrabold">{pack.price}</span>
                           <button onClick={() => handleCreditPack(pack.priceId)} disabled={creditPackLoading === pack.priceId}
                             className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-lg hover:opacity-80 transition-all disabled:opacity-60">
-                            {creditPackLoading === pack.priceId ? '...' : 'Buy'}
+                            {creditPackLoading === pack.priceId ? '...' : tSettings('app_settings.plan_tab.buy_btn')}
                           </button>
                         </div>
                       </div>
@@ -748,17 +748,17 @@ function SettingsInner() {
               <div id="x-booster" className="bg-surface border border-theme rounded-2xl p-6 scroll-mt-4">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-lg">𝕏</span>
-                  <h2 className="text-base font-extrabold">X Booster Packs</h2>
+                  <h2 className="text-base font-extrabold">{tSettings('app_settings.plan_tab.x_booster_title')}</h2>
                 </div>
                 <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
-                  Extra X posts that stack on top of your monthly quota and never expire.
+                  {tSettings('app_settings.plan_tab.x_booster_sub')}
                 </p>
 
                 {/* Booster balance */}
                 <div className="flex items-center gap-2 mb-5 px-4 py-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-xl">
                   <span className="text-amber-600 dark:text-amber-400 text-sm">⚡</span>
                   <span className="text-xs text-gray-700 dark:text-gray-300">
-                    Current X Booster Balance:{' '}
+                    {tSettings('app_settings.plan_tab.x_booster_balance')}{' '}
                     <strong className="text-amber-700 dark:text-amber-400">
                       {boosterBalance === null ? '…' : `${boosterBalance} posts remaining`}
                     </strong>
@@ -767,7 +767,7 @@ function SettingsInner() {
 
                 {savedTab === 'booster_purchased' && (
                   <div className="mb-4 px-4 py-2.5 bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 rounded-xl text-xs text-green-700 dark:text-green-400 font-semibold">
-                    ✓ X Booster credits added to your account!
+                    {tSettings('app_settings.plan_tab.x_booster_added')}
                   </div>
                 )}
 
@@ -775,7 +775,7 @@ function SettingsInner() {
                   {X_BOOSTER_PACKS.map(pack => (
                     <div key={pack.tier} className={`relative border rounded-xl p-4 ${pack.popular ? 'border-amber-400 dark:border-amber-600' : 'border-gray-200 dark:border-gray-700'}`}>
                       {pack.popular && (
-                        <span className="absolute -top-2 left-3 text-xs font-bold bg-amber-500 text-white px-2 py-0.5 rounded-full">Popular</span>
+                        <span className="absolute -top-2 left-3 text-xs font-bold bg-amber-500 text-white px-2 py-0.5 rounded-full">{tSettings('app_settings.plan_tab.popular_badge')}</span>
                       )}
                       <p className="text-sm font-extrabold mb-0.5">{pack.label}</p>
                       <p className="text-xs text-gray-400 dark:text-gray-500 mb-0.5">{pack.posts} extra X posts</p>
@@ -787,7 +787,7 @@ function SettingsInner() {
                           disabled={boosterLoading === pack.tier}
                           className="text-xs font-bold px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-all disabled:opacity-60"
                         >
-                          {boosterLoading === pack.tier ? '...' : 'Buy'}
+                          {boosterLoading === pack.tier ? '...' : tSettings('app_settings.plan_tab.buy_btn')}
                         </button>
                       </div>
                     </div>
@@ -797,9 +797,9 @@ function SettingsInner() {
 
               {/* CREDIT SOURCE PREFERENCE */}
               <div className="mt-6">
-                <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--text)' }}>Credit Usage Preference</h3>
+                <h3 className="text-sm font-semibold mb-1" style={{ color: 'var(--text)' }}>{tSettings('app_settings.plan_tab.credit_pref_title')}</h3>
                 <p className="text-xs mb-3" style={{ color: 'var(--text-muted)' }}>
-                  Choose which credits AI tools use first.
+                  {tSettings('app_settings.plan_tab.credit_pref_sub')}
                 </p>
                 <div className="flex gap-3">
                   <button
@@ -809,8 +809,8 @@ function SettingsInner() {
                         ? 'bg-black text-white border-black dark:bg-white dark:text-black'
                         : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300'
                     }`}>
-                    Monthly first
-                    <p className="font-normal text-xs opacity-70 mt-0.5">Use monthly allowance before bank</p>
+                    {tSettings('app_settings.plan_tab.monthly_first')}
+                    <p className="font-normal text-xs opacity-70 mt-0.5">{tSettings('app_settings.plan_tab.monthly_first_sub')}</p>
                   </button>
                   <button
                     onClick={() => saveCreditPreference('bank_first')}
@@ -819,8 +819,8 @@ function SettingsInner() {
                         ? 'bg-black text-white border-black dark:bg-white dark:text-black'
                         : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300'
                     }`}>
-                    Bank first
-                    <p className="font-normal text-xs opacity-70 mt-0.5">Save monthly credits, use bank</p>
+                    {tSettings('app_settings.plan_tab.bank_first')}
+                    <p className="font-normal text-xs opacity-70 mt-0.5">{tSettings('app_settings.plan_tab.bank_first_sub')}</p>
                   </button>
                 </div>
               </div>
@@ -838,9 +838,9 @@ function SettingsInner() {
                 <>
                   <div className="grid grid-cols-3 gap-4">
                     {[
-                      { label: 'Total Referrals',  value: referralStats.totalReferrals  },
-                      { label: 'Paying Referrals', value: referralStats.payingReferrals },
-                      { label: 'Credits Earned',   value: referralStats.creditsEarned   },
+                      { label: tSettings('app_settings.referrals_tab.total'),  value: referralStats.totalReferrals  },
+                      { label: tSettings('app_settings.referrals_tab.paying'), value: referralStats.payingReferrals },
+                      { label: tSettings('app_settings.referrals_tab.earned'), value: referralStats.creditsEarned   },
                     ].map((stat, i) => (
                       <div key={i} className="bg-surface border border-theme rounded-2xl p-5 text-center">
                         <p className="text-3xl font-extrabold mb-1">{stat.value}</p>
@@ -850,14 +850,14 @@ function SettingsInner() {
                   </div>
 
                   <div className="bg-black text-white rounded-2xl p-6">
-                    <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Your Referral Link</p>
+                    <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">{tSettings('app_settings.referrals_tab.your_link')}</p>
                     <div className="flex items-center gap-3 mb-3">
                       <div className="flex-1 bg-white/10 rounded-xl px-4 py-3 text-sm font-mono truncate">
-                        {referralLink || 'Loading...'}
+                        {referralLink || tSettings('app_settings.referrals_tab.loading')}
                       </div>
                       <button onClick={handleCopyLink} disabled={!referralLink}
                         className={`px-5 py-3 rounded-xl text-sm font-bold transition-all flex-shrink-0 ${copiedLink ? 'bg-green-500 text-white' : 'bg-white text-black hover:opacity-80'}`}>
-                        {copiedLink ? '✓ Copied!' : 'Copy'}
+                        {copiedLink ? tSettings('app_settings.referrals_tab.copied') : tSettings('app_settings.referrals_tab.copy')}
                       </button>
                     </div>
                     <p className="text-xs text-gray-400">
@@ -868,7 +868,7 @@ function SettingsInner() {
 
                   {nextTier && (
                     <div className="bg-surface border border-theme rounded-2xl p-6">
-                      <h2 className="text-base font-extrabold mb-1">Next Milestone</h2>
+                      <h2 className="text-base font-extrabold mb-1">{tSettings('app_settings.referrals_tab.next_milestone')}</h2>
                       <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
                         You have <span className="font-bold text-black">{referralStats.payingReferrals}</span> paying referral{referralStats.payingReferrals !== 1 ? 's' : ''}.
                         Reach <span className="font-bold text-black">{nextTier.paying}</span> to unlock <span className="font-bold text-black">{nextTier.reward}</span>.
@@ -882,7 +882,7 @@ function SettingsInner() {
                   )}
 
                   <div className="bg-surface border border-theme rounded-2xl p-6">
-                    <h2 className="text-base font-extrabold mb-5">Reward Tiers</h2>
+                    <h2 className="text-base font-extrabold mb-5">{tSettings('app_settings.referrals_tab.reward_tiers')}</h2>
                     <div className="space-y-3">
                       {REFERRAL_TIERS.map((tier, i) => {
                         const unlocked = referralStats.payingReferrals >= tier.paying
@@ -908,19 +908,19 @@ function SettingsInner() {
                   </div>
 
                   <div className="bg-surface border border-theme rounded-2xl p-6">
-                    <h2 className="text-base font-extrabold mb-5">Referral History</h2>
+                    <h2 className="text-base font-extrabold mb-5">{tSettings('app_settings.referrals_tab.history')}</h2>
                     {referralHistory.length === 0 ? (
                       <div className="text-center py-8">
                         <p className="text-3xl mb-3">🎁</p>
-                        <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">No referrals yet</p>
-                        <p className="text-xs text-gray-400 dark:text-gray-500">Share your link above to start earning credits.</p>
+                        <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">{tSettings('app_settings.referrals_tab.no_referrals')}</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500">{tSettings('app_settings.referrals_tab.no_referrals_sub')}</p>
                       </div>
                     ) : (
                       <div className="space-y-2">
                         {referralHistory.map((entry: any, i: number) => (
                           <div key={i} className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
                             <div>
-                              <p className="text-sm font-bold">Referred user</p>
+                              <p className="text-sm font-bold">{tSettings('app_settings.referrals_tab.referred_user')}</p>
                               <p className="text-xs text-gray-400 dark:text-gray-500">
                                 {new Date(entry.converted_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} · {entry.status}
                               </p>
@@ -947,28 +947,28 @@ function SettingsInner() {
           {activeTab === 'Notifications' && !pushSupported && (
             <div className="bg-surface border border-theme rounded-2xl p-6">
               <div className="flex items-center justify-between mb-1">
-                <h2 className="text-base font-extrabold">Browser Push Notifications</h2>
-                <span className="text-xs font-bold px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500">Not supported</span>
+                <h2 className="text-base font-extrabold">{tSettings('app_settings.notifications_tab.browser_push_title')}</h2>
+                <span className="text-xs font-bold px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500">{tSettings('app_settings.notifications_tab.not_supported')}</span>
               </div>
-              <p className="text-xs text-gray-400 dark:text-gray-500">Not supported in this browser. Try a modern browser like Chrome or Firefox on desktop.</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500">{tSettings('app_settings.notifications_tab.not_supported_sub')}</p>
             </div>
           )}
           {activeTab === 'Notifications' && pushSupported && (
             <div className="bg-surface border border-theme rounded-2xl p-6">
               <div className="flex items-center justify-between mb-1">
-                <h2 className="text-base font-extrabold">Browser Push Notifications</h2>
+                <h2 className="text-base font-extrabold">{tSettings('app_settings.notifications_tab.browser_push_title')}</h2>
                 <span className={`text-xs font-bold px-3 py-1 rounded-full ${pushSubscribed ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500'}`}>
-                  {pushSubscribed ? 'Active' : 'Off'}
+                  {pushSubscribed ? tSettings('app_settings.notifications_tab.active') : tSettings('app_settings.notifications_tab.off')}
                 </span>
               </div>
               <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">Get notified when Enki makes a trade, your posts publish, or your X quota is running low.</p>
               {pushPermission === 'denied' ? (
-                <p className="text-xs text-gray-400 dark:text-gray-500">Notifications blocked in browser settings. Enable them in your browser to use push notifications.</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500">{tSettings('app_settings.notifications_tab.push_blocked')}</p>
               ) : (
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-bold">Enable real-time browser alerts</p>
+                      <p className="text-sm font-bold">{tSettings('app_settings.notifications_tab.push_enable_label')}</p>
                       <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
                         {pushSubscribed ? 'You will receive browser push notifications from SocialMate' : 'Turn on to receive browser push notifications'}
                       </p>
@@ -982,12 +982,12 @@ function SettingsInner() {
                           : 'bg-black text-white hover:opacity-80'
                       }`}>
                       {pushLoading && <div className="w-3 h-3 border-2 border-current/30 border-t-current rounded-full animate-spin" />}
-                      {pushSubscribed ? 'Turn off' : 'Turn on'}
+                      {pushSubscribed ? tSettings('app_settings.notifications_tab.push_off') : tSettings('app_settings.notifications_tab.push_on')}
                     </button>
                   </div>
                   {pushSubscribed && (
                     <div className="pt-4 border-t border-theme">
-                      <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3">Test your push subscription</p>
+                      <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3">{tSettings('app_settings.notifications_tab.test_push')}</p>
                       <button
                         onClick={async () => {
                           try {
@@ -995,7 +995,7 @@ function SettingsInner() {
                           } catch {}
                         }}
                         className="px-4 py-2 border border-gray-200 dark:border-gray-600 text-xs font-bold rounded-xl hover:border-gray-400 transition-all">
-                        Send test notification
+                        {tSettings('app_settings.notifications_tab.send_test')}
                       </button>
                     </div>
                   )}
@@ -1007,8 +1007,8 @@ function SettingsInner() {
           {/* ── EMAIL NOTIFICATION PREFERENCES ── */}
           {activeTab === 'Notifications' && (
             <div className="bg-surface border border-theme rounded-2xl p-6">
-              <h2 className="text-base font-extrabold mb-1">Email Notification Preferences</h2>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">Each toggle saves immediately. Changes take effect on the next event.</p>
+              <h2 className="text-base font-extrabold mb-1">{tSettings('app_settings.notifications_tab.email_prefs_title')}</h2>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">{tSettings('app_settings.notifications_tab.email_prefs_sub')}</p>
               <div className="space-y-4">
                 {([
                   { key: 'post_published' as const, label: 'Email me when a post publishes successfully', desc: 'Get notified every time a scheduled post goes live' },
@@ -1023,10 +1023,10 @@ function SettingsInner() {
                       <p className="text-sm font-bold">{item.label}</p>
                       <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{item.desc}</p>
                       {notifSaving === item.key && (
-                        <p className="text-xs text-gray-400 mt-1">Saving...</p>
+                        <p className="text-xs text-gray-400 mt-1">{tSettings('app_settings.notifications_tab.saving')}</p>
                       )}
                       {notifSaved === item.key && notifSaving !== item.key && (
-                        <p className="text-xs text-green-500 mt-1">Saved ✓</p>
+                        <p className="text-xs text-green-500 mt-1">{tSettings('app_settings.notifications_tab.saved')}</p>
                       )}
                     </div>
                     <button
@@ -1048,14 +1048,14 @@ function SettingsInner() {
             <div className="bg-surface border border-theme rounded-2xl p-6">
               <div className="flex items-center gap-2 mb-1">
                 <div className="w-7 h-7 rounded-xl bg-amber-500 flex items-center justify-center text-white font-black text-xs">I</div>
-                <h2 className="text-base font-extrabold">The IRIS Dispatch</h2>
+                <h2 className="text-base font-extrabold">{tSettings('app_settings.notifications_tab.iris_title')}</h2>
               </div>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">Biweekly build-in-public newsletter from Joshua — what shipped, real numbers, what's next.</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">{tSettings('app_settings.notifications_tab.iris_sub')}</p>
               <div className="flex items-center justify-between py-3">
                 <div className="flex-1 min-w-0 pr-4">
-                  <p className="text-sm font-bold">Subscribe to The IRIS Dispatch</p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Sent every two weeks. No spam, unsubscribe any time.</p>
-                  {irisSaving && <p className="text-xs text-gray-400 mt-1">Saving...</p>}
+                  <p className="text-sm font-bold">{tSettings('app_settings.notifications_tab.iris_label')}</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{tSettings('app_settings.notifications_tab.iris_detail')}</p>
+                  {irisSaving && <p className="text-xs text-gray-400 mt-1">{tSettings('app_settings.notifications_tab.saving')}</p>}
                 </div>
                 <button
                   role="switch"
@@ -1074,12 +1074,12 @@ function SettingsInner() {
             <div className="space-y-4">
               <div className="bg-surface border border-theme rounded-2xl p-6">
                 <div className="flex items-center justify-between mb-1">
-                  <h2 className="text-base font-extrabold">Two-Factor Authentication</h2>
+                  <h2 className="text-base font-extrabold">{tSettings('app_settings.security_tab.title')}</h2>
                   <span className={`text-xs font-bold px-3 py-1 rounded-full ${mfaEnabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'}`}>
-                    {mfaEnabled ? '✓ Enabled' : 'Disabled'}
+                    {mfaEnabled ? tSettings('app_settings.security_tab.enabled') : tSettings('app_settings.security_tab.disabled')}
                   </span>
                 </div>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">Add an extra layer of security using Google Authenticator or any TOTP app.</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">{tSettings('app_settings.security_tab.desc')}</p>
                 {mfaError && (
                   <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-4">
                     <p className="text-xs font-semibold text-red-500">❌ {mfaError}</p>
@@ -1089,23 +1089,23 @@ function SettingsInner() {
                   <button onClick={handleEnroll2FA} disabled={mfaLoading}
                     className="px-5 py-2.5 bg-black text-white text-xs font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center gap-2">
                     {mfaLoading && <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
-                    Enable 2FA →
+                    {tSettings('app_settings.security_tab.enable_btn')}
                   </button>
                 )}
                 {mfaStep === 'enroll' && (
                   <div className="space-y-5">
                     <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-5">
-                      <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wide">Step 1 — Scan with your authenticator app</p>
+                      <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-3 uppercase tracking-wide">{tSettings('app_settings.security_tab.step1')}</p>
                       <div className="flex justify-center mb-4">
                         <img src={mfaQR} alt="2FA QR Code" className="w-40 h-40 rounded-xl" />
                       </div>
-                      <p className="text-xs text-gray-400 dark:text-gray-500 text-center mb-2">Can't scan? Enter this code manually:</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 text-center mb-2">{tSettings('app_settings.security_tab.cant_scan')}</p>
                       <div className="bg-surface border border-theme-md rounded-xl px-4 py-2 text-center">
                         <p className="text-xs font-mono font-bold tracking-widest text-gray-700 dark:text-gray-300 break-all">{mfaSecret}</p>
                       </div>
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">Step 2 — Enter the 6-digit code</p>
+                      <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">{tSettings('app_settings.security_tab.step2')}</p>
                       <input type="text" inputMode="numeric" maxLength={6} value={mfaCode}
                         onChange={e => setMfaCode(e.target.value.replace(/\D/g, ''))} placeholder="000000"
                         className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-3 text-sm text-center font-mono tracking-widest outline-none focus:border-black dark:focus:border-gray-400 transition-all" />
@@ -1113,12 +1113,12 @@ function SettingsInner() {
                     <div className="flex gap-3">
                       <button onClick={() => { setMfaStep('idle'); setMfaCode(''); setMfaError('') }}
                         className="px-5 py-2.5 border border-gray-200 text-xs font-bold rounded-xl hover:border-gray-400 transition-all">
-                        Cancel
+                        {tSettings('app_settings.security_tab.cancel')}
                       </button>
                       <button onClick={handleVerify2FA} disabled={mfaLoading || mfaCode.length !== 6}
                         className="flex-1 py-2.5 bg-black text-white text-xs font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
                         {mfaLoading && <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
-                        Verify & Enable →
+                        {tSettings('app_settings.security_tab.verify_btn')}
                       </button>
                     </div>
                   </div>
@@ -1126,21 +1126,21 @@ function SettingsInner() {
                 {mfaStep === 'idle' && mfaEnabled && (
                   <button onClick={() => setMfaStep('disable_confirm')}
                     className="text-xs font-bold text-red-500 border border-red-100 rounded-xl px-4 py-2.5 hover:bg-red-50 transition-all">
-                    Disable 2FA
+                    {tSettings('app_settings.security_tab.disable_btn')}
                   </button>
                 )}
                 {mfaStep === 'disable_confirm' && (
                   <div className="border border-red-200 rounded-xl px-4 py-4 bg-red-50">
-                    <p className="text-xs font-bold text-red-700 mb-3">Disabling 2FA will remove the extra security layer from your account. Are you sure?</p>
+                    <p className="text-xs font-bold text-red-700 mb-3">{tSettings('app_settings.security_tab.disable_confirm')}</p>
                     <div className="flex gap-2">
                       <button onClick={handleDisable2FA} disabled={mfaLoading}
                         className="text-xs font-bold px-4 py-2 bg-red-500 text-white rounded-lg hover:opacity-80 transition-all disabled:opacity-40 flex items-center gap-2">
                         {mfaLoading && <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
-                        Yes, disable 2FA
+                        {tSettings('app_settings.security_tab.yes_disable')}
                       </button>
                       <button onClick={() => setMfaStep('idle')}
                         className="text-xs font-bold px-4 py-2 border border-gray-200 rounded-lg hover:border-gray-400 transition-all">
-                        Cancel
+                        {tSettings('app_settings.security_tab.cancel')}
                       </button>
                     </div>
                   </div>
@@ -1148,11 +1148,11 @@ function SettingsInner() {
               </div>
 
               <div className="bg-surface border border-theme rounded-2xl p-6">
-                <h2 className="text-base font-extrabold mb-1">Change Password</h2>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">Must be at least 8 characters.</p>
+                <h2 className="text-base font-extrabold mb-1">{tSettings('app_settings.security_tab.password_title')}</h2>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">{tSettings('app_settings.security_tab.password_desc')}</p>
                 <div className="space-y-3">
                   <div>
-                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">Current Password</label>
+                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">{tSettings('app_settings.security_tab.current_password')}</label>
                     <input
                       type="password"
                       value={currentPassword}
@@ -1161,7 +1161,7 @@ function SettingsInner() {
                       className="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black dark:focus:border-gray-400 transition-all" />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">New Password</label>
+                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">{tSettings('app_settings.security_tab.new_password')}</label>
                     <input
                       type="password"
                       value={newPassword}
@@ -1170,7 +1170,7 @@ function SettingsInner() {
                       className="w-full border border-gray-200 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black dark:focus:border-gray-400 transition-all" />
                   </div>
                   <div>
-                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">Confirm New Password</label>
+                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">{tSettings('app_settings.security_tab.confirm_password')}</label>
                     <input
                       type="password"
                       value={confirmPassword}
@@ -1182,86 +1182,86 @@ function SettingsInner() {
                     <p className="text-xs text-red-500 font-semibold">{passwordError}</p>
                   )}
                   {passwordSuccess && (
-                    <p className="text-xs text-green-500 font-semibold">Password updated successfully ✓</p>
+                    <p className="text-xs text-green-500 font-semibold">{tSettings('app_settings.security_tab.password_success')}</p>
                   )}
                   <button
                     onClick={handleChangePassword}
                     disabled={passwordLoading || !newPassword}
                     className="px-5 py-2.5 rounded-xl text-xs font-bold transition-all bg-black dark:bg-white text-white dark:text-black hover:opacity-80 disabled:opacity-40 flex items-center gap-2">
                     {passwordLoading && <div className="w-3 h-3 border-2 border-white/30 dark:border-black/30 border-t-white dark:border-t-black rounded-full animate-spin" />}
-                    {passwordLoading ? 'Updating...' : 'Update Password'}
+                    {passwordLoading ? tSettings('app_settings.security_tab.updating') : tSettings('app_settings.security_tab.update_password')}
                   </button>
                 </div>
               </div>
 
               <div className="bg-surface border border-theme rounded-2xl p-6">
-                <h2 className="text-base font-extrabold mb-1">Active Sessions</h2>
+                <h2 className="text-base font-extrabold mb-1">{tSettings('app_settings.security_tab.sessions_title')}</h2>
                 <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
-                  You are currently signed in. Sign out all other browsers and devices.
+                  {tSettings('app_settings.security_tab.sessions_desc')}
                 </p>
                 <div className="flex items-center gap-3">
-                  <span className="text-xs font-semibold text-green-600 bg-green-50 px-3 py-1.5 rounded-full">Current session</span>
+                  <span className="text-xs font-semibold text-green-600 bg-green-50 px-3 py-1.5 rounded-full">{tSettings('app_settings.security_tab.current_session')}</span>
                   <button
                     onClick={handleSignOutOtherSessions}
                     disabled={sessionsLoading}
                     className="text-xs font-bold px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 dark:hover:border-gray-400 transition-all disabled:opacity-40">
-                    {sessionsLoading ? 'Signing out...' : 'Sign out all other sessions'}
+                    {sessionsLoading ? tSettings('app_settings.security_tab.signing_out') : tSettings('app_settings.security_tab.sign_out_others')}
                   </button>
-                  {sessionSignedOut && <span className="text-xs text-green-500 font-semibold">Done ✓</span>}
+                  {sessionSignedOut && <span className="text-xs text-green-500 font-semibold">{tSettings('app_settings.security_tab.done')}</span>}
                 </div>
               </div>
 
               <div className="bg-surface border border-theme rounded-2xl p-6">
-                <h2 className="text-base font-extrabold mb-1">Danger Zone</h2>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">These actions are irreversible. Please be certain.</p>
+                <h2 className="text-base font-extrabold mb-1">{tSettings('app_settings.security_tab.danger_title')}</h2>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">{tSettings('app_settings.security_tab.danger_desc')}</p>
                 <div className="space-y-3">
                   {confirmDeletePosts ? (
                     <div className="border border-red-200 rounded-xl px-4 py-3 bg-red-50">
-                      <p className="text-xs font-bold text-red-600 mb-2">This will permanently delete all your scheduled and draft posts. Are you sure?</p>
+                      <p className="text-xs font-bold text-red-600 mb-2">{tSettings('app_settings.security_tab.delete_posts_confirm')}</p>
                       <div className="flex gap-2">
                         <button onClick={handleDeleteAllPosts} disabled={dangerLoading}
                           className="text-xs font-bold px-4 py-2 bg-red-500 text-white rounded-lg hover:opacity-80 transition-all disabled:opacity-40">
-                          {dangerLoading ? 'Deleting...' : 'Yes, delete all posts'}
+                          {dangerLoading ? tSettings('app_settings.security_tab.deleting') : tSettings('app_settings.security_tab.yes_delete_posts')}
                         </button>
                         <button onClick={() => setConfirmDeletePosts(false)}
                           className="text-xs font-bold px-4 py-2 border border-gray-200 rounded-lg hover:border-gray-400 transition-all">
-                          Cancel
+                          {tSettings('app_settings.security_tab.cancel')}
                         </button>
                       </div>
                     </div>
                   ) : (
                     <button onClick={() => setConfirmDeletePosts(true)}
                       className="w-full text-left text-xs font-bold text-red-500 border border-red-100 rounded-xl px-4 py-3 hover:bg-red-50 transition-all">
-                      Delete all scheduled posts
+                      {tSettings('app_settings.security_tab.delete_posts_btn')}
                     </button>
                   )}
                   {confirmDeleteAccount ? (
                     <div className="border border-red-300 rounded-xl px-4 py-4 bg-red-50">
-                      <p className="text-xs font-bold text-red-700 mb-1">⚠️ This will permanently delete your account and all data.</p>
-                      <p className="text-xs text-red-600 mb-3">This action cannot be undone. Type <strong>DELETE</strong> to confirm.</p>
+                      <p className="text-xs font-bold text-red-700 mb-1">{tSettings('app_settings.security_tab.delete_account_warning')}</p>
+                      <p className="text-xs text-red-600 mb-3">{tSettings('app_settings.security_tab.delete_account_confirm_note')}</p>
                       <input
                         type="text"
                         value={deleteConfirmText}
                         onChange={e => setDeleteConfirmText(e.target.value)}
-                        placeholder="Type DELETE to confirm"
+                        placeholder={tSettings('app_settings.security_tab.delete_account_placeholder')}
                         className="w-full border border-red-200 rounded-xl px-3 py-2 text-sm mb-3 outline-none focus:border-red-400 transition-all" />
                       <div className="flex gap-2">
                         <button
                           onClick={handleDeleteAccount}
                           disabled={dangerLoading || deleteConfirmText !== 'DELETE'}
                           className="text-xs font-bold px-4 py-2 bg-red-600 text-white rounded-lg hover:opacity-80 transition-all disabled:opacity-40">
-                          {dangerLoading ? 'Processing...' : 'Delete my account'}
+                          {dangerLoading ? tSettings('app_settings.security_tab.processing') : tSettings('app_settings.security_tab.delete_account_final')}
                         </button>
                         <button onClick={() => { setConfirmDeleteAccount(false); setDeleteConfirmText('') }}
                           className="text-xs font-bold px-4 py-2 border border-gray-200 rounded-lg hover:border-gray-400 transition-all">
-                          Cancel
+                          {tSettings('app_settings.security_tab.cancel')}
                         </button>
                       </div>
                     </div>
                   ) : (
                     <button onClick={() => setConfirmDeleteAccount(true)}
                       className="w-full text-left text-xs font-bold text-red-600 border border-red-200 rounded-xl px-4 py-3 hover:bg-red-50 transition-all">
-                      Delete my account
+                      {tSettings('app_settings.security_tab.delete_account_btn')}
                     </button>
                   )}
                 </div>
@@ -1277,13 +1277,13 @@ function SettingsInner() {
               {plan === 'free' && (
                 <div className="bg-surface border border-theme rounded-2xl p-8 text-center">
                   <div className="text-3xl mb-3">🏷️</div>
-                  <h2 className="text-base font-extrabold mb-2">White Label is a Pro & Agency add-on</h2>
+                  <h2 className="text-base font-extrabold mb-2">{tSettings('app_settings.white_label_tab.locked_title')}</h2>
                   <p className="text-xs text-gray-400 dark:text-gray-500 mb-5 max-w-sm mx-auto leading-relaxed">
-                    Remove SocialMate branding and replace it with your own. Available in two tiers as a monthly add-on on Pro and Agency plans.
+                    {tSettings('app_settings.white_label_tab.locked_desc')}
                   </p>
                   <button onClick={() => handleCheckout(STRIPE_PRO_PRICE_ID)} disabled={checkoutLoading}
                     className="bg-black text-white text-xs font-bold px-5 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
-                    {checkoutLoading ? 'Loading...' : 'Upgrade to Pro to unlock →'}
+                    {checkoutLoading ? tSettings('app_settings.plan_tab.loading') : tSettings('app_settings.white_label_tab.upgrade_btn')}
                   </button>
                 </div>
               )}
@@ -1293,9 +1293,9 @@ function SettingsInner() {
                 <div className="bg-amber-50 border border-amber-200 dark:bg-amber-900/10 dark:border-amber-800 rounded-2xl px-5 py-4 flex items-start gap-3">
                   <span className="text-amber-500 text-lg shrink-0 mt-0.5">🕐</span>
                   <div>
-                    <p className="text-sm font-bold text-amber-700 dark:text-amber-400">Your White Label request is under review</p>
+                    <p className="text-sm font-bold text-amber-700 dark:text-amber-400">{tSettings('app_settings.white_label_tab.review_title')}</p>
                     <p className="text-xs text-amber-600 dark:text-amber-500 mt-1 leading-relaxed">
-                      We typically review requests within 24 hours. You'll receive an email once it's approved and ready to configure.
+                      {tSettings('app_settings.white_label_tab.review_desc')}
                     </p>
                   </div>
                 </div>
@@ -1306,19 +1306,19 @@ function SettingsInner() {
                 <div className="space-y-4">
                   {wlActivated && (
                     <div className="bg-green-50 border border-green-200 rounded-2xl px-5 py-4">
-                      <p className="text-sm font-extrabold text-green-700">✅ White Label activated! Configure your branding below.</p>
+                      <p className="text-sm font-extrabold text-green-700">{tSettings('app_settings.white_label_tab.activated')}</p>
                     </div>
                   )}
                   <div className="bg-surface border border-theme rounded-2xl p-6">
-                    <h2 className="text-base font-extrabold mb-1">White Label Add-on</h2>
+                    <h2 className="text-base font-extrabold mb-1">{tSettings('app_settings.white_label_tab.title')}</h2>
                     <p className="text-xs text-gray-400 dark:text-gray-500 mb-6 leading-relaxed">
-                      Remove SocialMate branding and replace it with your own. Billed monthly — cancel anytime from your billing portal.
+                      {tSettings('app_settings.white_label_tab.addon_sub')}
                     </p>
                     <div className="grid grid-cols-2 gap-4">
 
                       {/* Basic */}
                       <div className="border border-gray-200 dark:border-gray-600 rounded-2xl p-5">
-                        <p className="text-sm font-extrabold mb-1">White Label Basic</p>
+                        <p className="text-sm font-extrabold mb-1">{tSettings('app_settings.white_label_tab.basic_title')}</p>
                         <p className="text-2xl font-extrabold mb-1">$20<span className="text-sm font-semibold text-gray-400 dark:text-gray-500">/mo</span></p>
                         <ul className="space-y-1.5 mb-5">
                           {[
@@ -1334,14 +1334,14 @@ function SettingsInner() {
                         </ul>
                         <button onClick={() => handleWhiteLabelCheckout('basic')} disabled={wlCheckoutLoading}
                           className="w-full py-2.5 bg-black text-white text-xs font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-50">
-                          {wlCheckoutLoading ? 'Loading...' : 'Add White Label Basic →'}
+                          {wlCheckoutLoading ? tSettings('app_settings.plan_tab.loading') : tSettings('app_settings.white_label_tab.add_basic_btn')}
                         </button>
                       </div>
 
                       {/* Pro */}
                       <div className="border-2 border-black rounded-2xl p-5 relative">
-                        <span className="absolute -top-2.5 left-4 text-xs font-bold bg-black text-white px-2 py-0.5 rounded-full">Best for agencies</span>
-                        <p className="text-sm font-extrabold mb-1">White Label Pro</p>
+                        <span className="absolute -top-2.5 left-4 text-xs font-bold bg-black text-white px-2 py-0.5 rounded-full">{tSettings('app_settings.white_label_tab.best_for_agencies')}</span>
+                        <p className="text-sm font-extrabold mb-1">{tSettings('app_settings.white_label_tab.pro_title')}</p>
                         <p className="text-2xl font-extrabold mb-1">$40<span className="text-sm font-semibold text-gray-400 dark:text-gray-500">/mo</span></p>
                         <ul className="space-y-1.5 mb-5">
                           {[
@@ -1357,7 +1357,7 @@ function SettingsInner() {
                         </ul>
                         <button onClick={() => handleWhiteLabelCheckout('pro')} disabled={wlCheckoutLoading}
                           className="w-full py-2.5 bg-black text-white text-xs font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-50">
-                          {wlCheckoutLoading ? 'Loading...' : 'Add White Label Pro →'}
+                          {wlCheckoutLoading ? tSettings('app_settings.plan_tab.loading') : tSettings('app_settings.white_label_tab.add_pro_btn')}
                         </button>
                       </div>
                     </div>
@@ -1372,41 +1372,41 @@ function SettingsInner() {
                     <div className="flex items-center gap-2">
                       <span className="text-green-600 font-bold">✓</span>
                       <p className="text-xs font-bold text-green-700">
-                        White Label {whiteLabelTier === 'pro' ? 'Pro — $40/mo' : 'Basic — $20/mo'} Active
+                        {whiteLabelTier === 'pro' ? tSettings('app_settings.white_label_tab.pro_title') : tSettings('app_settings.white_label_tab.basic_title')} Active
                       </p>
                     </div>
                     <button onClick={handlePortal} className="text-xs font-bold text-green-700 hover:underline">
-                      Manage billing →
+                      {tSettings('app_settings.white_label_tab.manage_billing')}
                     </button>
                   </div>
 
                   <div className="bg-surface border border-theme rounded-2xl p-6 space-y-4">
-                    <h2 className="text-base font-extrabold">Brand Configuration</h2>
+                    <h2 className="text-base font-extrabold">{tSettings('app_settings.white_label_tab.brand_config_title')}</h2>
                     <div>
-                      <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">Brand Name</label>
+                      <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">{tSettings('app_settings.white_label_tab.brand_name_label')}</label>
                       <input value={wlBrandName} onChange={e => setWlBrandName(e.target.value)}
                         placeholder="Your Brand"
                         className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black dark:focus:border-gray-400 transition-all" />
-                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Replaces "SocialMate" throughout the app.</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{tSettings('app_settings.white_label_tab.brand_name_hint')}</p>
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">Logo URL</label>
+                      <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">{tSettings('app_settings.white_label_tab.logo_url_label')}</label>
                       <input value={wlLogoUrl} onChange={e => setWlLogoUrl(e.target.value)}
                         placeholder="https://yourbrand.com/logo.png"
                         className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black dark:focus:border-gray-400 transition-all" />
-                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">PNG or SVG recommended. Will replace the SocialMate logo.</p>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{tSettings('app_settings.white_label_tab.logo_url_hint')}</p>
                     </div>
                     {whiteLabelTier === 'pro' && (
                       <div>
-                        <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">Custom Domain</label>
+                        <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">{tSettings('app_settings.white_label_tab.domain_label')}</label>
                         <input value={wlDomain} onChange={e => setWlDomain(e.target.value)}
                           placeholder="app.yourbrand.com"
                           className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black dark:focus:border-gray-400 transition-all" />
-                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Point your DNS CNAME to socialmate.studio then enter your domain here.</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{tSettings('app_settings.white_label_tab.domain_hint')}</p>
                       </div>
                     )}
                     <div>
-                      <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">Brand Color</label>
+                      <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">{tSettings('app_settings.white_label_tab.color_label')}</label>
                       <div className="flex items-center gap-3">
                         <input type="color" value={wlColor} onChange={e => setWlColor(e.target.value)}
                           className="h-10 w-16 border border-gray-200 dark:border-gray-600 rounded-xl cursor-pointer" />
@@ -1419,24 +1419,24 @@ function SettingsInner() {
                     {/* Upgrade from Basic to Pro */}
                     {whiteLabelTier === 'basic' && (
                       <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl p-4">
-                        <p className="text-xs font-bold mb-1">Want a custom domain?</p>
-                        <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">Upgrade to White Label Pro for custom domain support and full rebrand at $40/mo.</p>
+                        <p className="text-xs font-bold mb-1">{tSettings('app_settings.white_label_tab.upgrade_to_pro_hint')}</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">{tSettings('app_settings.white_label_tab.upgrade_to_pro_hint_sub')}</p>
                         <button onClick={() => handleWhiteLabelCheckout('pro')} disabled={wlCheckoutLoading}
                           className="text-xs font-bold px-4 py-2 bg-black text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-50">
-                          {wlCheckoutLoading ? 'Loading...' : 'Upgrade to White Label Pro →'}
+                          {wlCheckoutLoading ? tSettings('app_settings.plan_tab.loading') : tSettings('app_settings.white_label_tab.upgrade_to_pro_btn')}
                         </button>
                       </div>
                     )}
 
                     <button onClick={() => handleSave('WhiteLabel')}
                       className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${savedTab === 'WhiteLabel' ? 'bg-green-500 text-white' : 'bg-black text-white hover:opacity-80'}`}>
-                      {savedTab === 'WhiteLabel' ? '✓ Saved!' : 'Save Branding'}
+                      {savedTab === 'WhiteLabel' ? tSettings('app_settings.white_label_tab.saved') : tSettings('app_settings.white_label_tab.save_branding')}
                     </button>
                   </div>
 
                   {wlLogoUrl && (
                     <div className="bg-surface border border-theme rounded-2xl p-5">
-                      <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">Logo Preview</p>
+                      <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">{tSettings('app_settings.white_label_tab.logo_preview')}</p>
                       <img src={wlLogoUrl} alt="Brand logo" className="h-10 object-contain"
                         onError={e => (e.currentTarget.style.display = 'none')} />
                     </div>
@@ -1452,28 +1452,28 @@ function SettingsInner() {
               <div className="bg-surface border border-theme rounded-2xl p-6">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-lg">🎙️</span>
-                  <h2 className="text-base font-extrabold">AI Brand Voice</h2>
+                  <h2 className="text-base font-extrabold">{tSettings('app_settings.brand_voice_tab.title')}</h2>
                 </div>
                 <p className="text-xs text-[#9ca3af] mb-6 leading-relaxed">
-                  Define how your brand sounds. Every AI-generated caption, hook, thread, and rewrite will follow these guidelines automatically.
+                  {tSettings('app_settings.brand_voice_tab.desc')}
                 </p>
 
                 <div className="space-y-5">
                   {/* Voice Name */}
                   <div>
-                    <label className="text-xs font-bold text-[#9ca3af] block mb-1.5">Voice Name</label>
+                    <label className="text-xs font-bold text-[#9ca3af] block mb-1.5">{tSettings('app_settings.brand_voice_tab.voice_name_label')}</label>
                     <input
                       value={voiceName}
                       onChange={e => setVoiceName(e.target.value)}
                       placeholder='e.g. "Bold & Direct" or "Warm Expert"'
                       className="w-full bg-[#111111] border border-[#1f1f1f] rounded-xl px-4 py-2.5 text-sm text-gray-100 outline-none focus:border-[#F59E0B] transition-all placeholder-[#9ca3af]"
                     />
-                    <p className="text-xs text-[#9ca3af] mt-1">A short name to remind you what this voice sounds like.</p>
+                    <p className="text-xs text-[#9ca3af] mt-1">{tSettings('app_settings.brand_voice_tab.voice_name_hint')}</p>
                   </div>
 
                   {/* Tone */}
                   <div>
-                    <label className="text-xs font-bold text-[#9ca3af] block mb-1.5">Tone</label>
+                    <label className="text-xs font-bold text-[#9ca3af] block mb-1.5">{tSettings('app_settings.brand_voice_tab.tone_label')}</label>
                     <select
                       value={bvTone}
                       onChange={e => setBvTone(e.target.value)}
@@ -1486,7 +1486,7 @@ function SettingsInner() {
 
                   {/* Writing Style */}
                   <div>
-                    <label className="text-xs font-bold text-[#9ca3af] block mb-1.5">Writing Style</label>
+                    <label className="text-xs font-bold text-[#9ca3af] block mb-1.5">{tSettings('app_settings.brand_voice_tab.style_label')}</label>
                     <select
                       value={bvWritingStyle}
                       onChange={e => setBvWritingStyle(e.target.value)}
@@ -1499,7 +1499,7 @@ function SettingsInner() {
 
                   {/* Vocabulary */}
                   <div>
-                    <label className="text-xs font-bold text-[#9ca3af] block mb-1.5">Vocabulary Rules</label>
+                    <label className="text-xs font-bold text-[#9ca3af] block mb-1.5">{tSettings('app_settings.brand_voice_tab.vocabulary_label')}</label>
                     <textarea
                       rows={3}
                       value={bvVocabulary}
@@ -1511,7 +1511,7 @@ function SettingsInner() {
 
                   {/* Always Include */}
                   <div>
-                    <label className="text-xs font-bold text-[#9ca3af] block mb-1.5">Always Include</label>
+                    <label className="text-xs font-bold text-[#9ca3af] block mb-1.5">{tSettings('app_settings.brand_voice_tab.always_include_label')}</label>
                     <textarea
                       rows={3}
                       value={bvAlwaysInclude}
@@ -1523,7 +1523,7 @@ function SettingsInner() {
 
                   {/* Never Include */}
                   <div>
-                    <label className="text-xs font-bold text-[#9ca3af] block mb-1.5">Never Include</label>
+                    <label className="text-xs font-bold text-[#9ca3af] block mb-1.5">{tSettings('app_settings.brand_voice_tab.never_include_label')}</label>
                     <textarea
                       rows={3}
                       value={bvNeverInclude}
@@ -1535,7 +1535,7 @@ function SettingsInner() {
 
                   {/* Example Post */}
                   <div>
-                    <label className="text-xs font-bold text-[#9ca3af] block mb-1.5">Example Post</label>
+                    <label className="text-xs font-bold text-[#9ca3af] block mb-1.5">{tSettings('app_settings.brand_voice_tab.example_label')}</label>
                     <textarea
                       rows={4}
                       value={bvExamplePost}
@@ -1565,10 +1565,10 @@ function SettingsInner() {
                       disabled={bvLoading}
                       className="min-h-[44px] px-5 py-2.5 rounded-xl text-xs font-bold transition-all bg-[#F59E0B] hover:bg-[#D97706] text-black disabled:opacity-50 flex items-center gap-2">
                       {bvLoading && <div className="w-3 h-3 border-2 border-black/30 border-t-black rounded-full animate-spin" />}
-                      {bvLoading ? 'Saving...' : 'Save Brand Voice'}
+                      {bvLoading ? tSettings('app_settings.brand_voice_tab.saving') : tSettings('app_settings.brand_voice_tab.save_btn')}
                     </button>
                     {bvSaved && (
-                      <span className="text-xs font-bold text-green-400">Saved ✓</span>
+                      <span className="text-xs font-bold text-green-400">{tSettings('app_settings.brand_voice_tab.saved')}</span>
                     )}
                   </div>
                 </div>
@@ -1577,18 +1577,18 @@ function SettingsInner() {
               {/* Preview card */}
               {voiceName && (
                 <div className="bg-[#0a0a0a] border border-[#1f1f1f] rounded-2xl p-5">
-                  <p className="text-xs font-bold text-[#9ca3af] uppercase tracking-wide mb-3">Active Voice Preview</p>
+                  <p className="text-xs font-bold text-[#9ca3af] uppercase tracking-wide mb-3">{tSettings('app_settings.brand_voice_tab.preview_label')}</p>
                   <div className="flex items-center gap-2 mb-3">
                     <span className="text-sm">🎙️</span>
                     <span className="text-sm font-extrabold text-[#F59E0B]">{voiceName}</span>
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="bg-[#111111] border border-[#1f1f1f] rounded-xl px-3 py-2">
-                      <p className="text-[#9ca3af] mb-0.5">Tone</p>
+                      <p className="text-[#9ca3af] mb-0.5">{tSettings('app_settings.brand_voice_tab.tone_preview')}</p>
                       <p className="font-semibold text-gray-200">{bvTone}</p>
                     </div>
                     <div className="bg-[#111111] border border-[#1f1f1f] rounded-xl px-3 py-2">
-                      <p className="text-[#9ca3af] mb-0.5">Style</p>
+                      <p className="text-[#9ca3af] mb-0.5">{tSettings('app_settings.brand_voice_tab.style_preview')}</p>
                       <p className="font-semibold text-gray-200">{bvWritingStyle}</p>
                     </div>
                   </div>
@@ -1600,13 +1600,13 @@ function SettingsInner() {
           {/* ── APPEARANCE ── */}
           {activeTab === 'Appearance' && (
             <div className="bg-surface border border-theme rounded-2xl p-6">
-              <h2 className="text-base font-extrabold mb-1">Appearance</h2>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">Customize how the app looks and behaves.</p>
+              <h2 className="text-base font-extrabold mb-1">{tSettings('app_settings.appearance_tab.title')}</h2>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mb-5">{tSettings('app_settings.appearance_tab.subtitle')}</p>
               <div className="space-y-4">
                 <div className="flex items-center justify-between py-3 border-b border-gray-50 dark:border-gray-800">
                   <div className="flex-1 min-w-0 pr-4">
-                    <p className="text-sm font-bold">Sidebar stats</p>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Show the AI Credits and Team Seats panels at the bottom of the sidebar.</p>
+                    <p className="text-sm font-bold">{tSettings('app_settings.appearance_tab.sidebar_stats_label')}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{tSettings('app_settings.appearance_tab.sidebar_stats_desc')}</p>
                   </div>
                   <button
                     role="switch"
@@ -1626,9 +1626,9 @@ function SettingsInner() {
 
                 {/* Default Platforms */}
                 <div className="pt-4">
-                  <p className="text-sm font-bold mb-0.5">Default Platforms</p>
+                  <p className="text-sm font-bold mb-0.5">{tSettings('app_settings.appearance_tab.default_platforms_label')}</p>
                   <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">
-                    Pre-select these platforms every time you open Compose for a new post.
+                    {tSettings('app_settings.appearance_tab.default_platforms_desc')}
                   </p>
                   <div className="flex flex-wrap gap-2 mb-3">
                     {[
@@ -1667,10 +1667,10 @@ function SettingsInner() {
                     disabled={defaultPlatformsSaving}
                     className="text-xs font-bold px-4 py-2 bg-black text-white dark:bg-white dark:text-black rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center gap-1.5">
                     {defaultPlatformsSaving
-                      ? <><div className="w-3 h-3 border-2 border-white/30 dark:border-black/30 border-t-white dark:border-t-black rounded-full animate-spin" />Saving...</>
+                      ? <><div className="w-3 h-3 border-2 border-white/30 dark:border-black/30 border-t-white dark:border-t-black rounded-full animate-spin" />{tSettings('app_settings.appearance_tab.saving')}</>
                       : defaultPlatformsSaved
-                        ? '✓ Saved'
-                        : 'Save defaults'}
+                        ? tSettings('app_settings.appearance_tab.saved')
+                        : tSettings('app_settings.appearance_tab.save_defaults')}
                   </button>
                 </div>
               </div>
@@ -1683,7 +1683,7 @@ function SettingsInner() {
       {/* TOASTS */}
       {savedTab === 'credits_purchased' && (
         <div style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className="fixed right-6 z-50 px-5 py-3 rounded-2xl text-sm font-semibold shadow-lg bg-black text-white">
-          ✅ Credits added to your account!
+          {tSettings('app_settings.plan_tab.credits_purchased')}
         </div>
       )}
     </div>
