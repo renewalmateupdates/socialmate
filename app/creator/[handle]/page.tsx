@@ -2,6 +2,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useParams, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { useI18n } from '@/contexts/I18nContext'
 
 type CreatorProfile = {
   page_handle:              string
@@ -34,6 +35,7 @@ const LS_UNLOCK_KEY = (postId: string) => `post_unlocked_${postId}`
 function CreatorPageInner() {
   const { handle }  = useParams<{ handle: string }>()
   const searchParams = useSearchParams()
+  const { t } = useI18n()
 
   const [creator,     setCreator]     = useState<CreatorProfile | null>(null)
   const [loading,     setLoading]     = useState(true)
@@ -227,7 +229,7 @@ function CreatorPageInner() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-secondary text-sm">Loading...</div>
+        <div className="text-secondary text-sm">{t('app_creator_public.loading')}</div>
       </div>
     )
   }
@@ -236,8 +238,8 @@ function CreatorPageInner() {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4 p-6 text-center">
         <span className="text-5xl">🤷</span>
-        <h1 className="text-xl font-black text-primary">Creator not found</h1>
-        <p className="text-secondary text-sm">This creator page doesn&apos;t exist or hasn&apos;t been set up yet.</p>
+        <h1 className="text-xl font-black text-primary">{t('app_creator_public.not_found_title')}</h1>
+        <p className="text-secondary text-sm">{t('app_creator_public.not_found_desc')}</p>
         <Link href="/" className="text-xs text-amber-500 hover:underline">← socialmate.studio</Link>
       </div>
     )
@@ -263,7 +265,7 @@ function CreatorPageInner() {
         <p className="text-xs mt-2" style={{ color: creator.header_color === '#ffffff' ? '#6b7280' : 'rgba(255,255,255,0.5)' }}>@{handle}</p>
         {isFan && (
           <span className="inline-block mt-2 text-xs font-bold px-3 py-1 rounded-full" style={{ background: 'rgba(0,0,0,0.2)', color: creator.header_color === '#ffffff' ? '#111827' : '#fff' }}>
-            Fan subscriber
+            {t('app_creator_public.fan_subscriber_badge')}
           </span>
         )}
       </div>
@@ -273,8 +275,8 @@ function CreatorPageInner() {
         {/* Fan verify prompt - shown after sub success or manually */}
         {(showVerify || (!isFan && hasPaywalledPosts && creator.subscription_enabled)) && !isFan && (
           <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-2xl p-4">
-            <p className="text-sm font-bold text-primary mb-1">Already a subscriber?</p>
-            <p className="text-xs text-secondary mb-3">Enter the email you subscribed with to unlock exclusive content.</p>
+            <p className="text-sm font-bold text-primary mb-1">{t('app_creator_public.already_subscriber')}</p>
+            <p className="text-xs text-secondary mb-3">{t('app_creator_public.already_subscriber_desc')}</p>
             <div className="flex gap-2">
               <input
                 type="email"
@@ -289,7 +291,7 @@ function CreatorPageInner() {
                 disabled={verifying || !fanEmail.trim()}
                 className="bg-amber-400 hover:bg-amber-300 disabled:opacity-50 text-black font-black px-4 py-2 rounded-xl text-sm"
               >
-                {verifying ? '...' : 'Verify'}
+                {verifying ? t('app_creator_public.verifying') : t('app_creator_public.verify')}
               </button>
             </div>
           </div>
@@ -301,8 +303,8 @@ function CreatorPageInner() {
             <div className="flex items-center gap-2 mb-4">
               <span className="text-2xl">💸</span>
               <div>
-                <p className="font-black text-primary">Send a Tip</p>
-                <p className="text-xs text-secondary">One-time support - every bit counts</p>
+                <p className="font-black text-primary">{t('app_creator_public.tip_title')}</p>
+                <p className="text-xs text-secondary">{t('app_creator_public.tip_desc')}</p>
               </div>
             </div>
 
@@ -352,7 +354,7 @@ function CreatorPageInner() {
               disabled={tipping}
               className="w-full bg-amber-400 hover:bg-amber-300 disabled:opacity-50 text-black font-black py-3 rounded-xl text-sm transition-all"
             >
-              {tipping ? 'Redirecting...' : `Send $${customTip || (tipAmount / 100)} Tip →`}
+              {tipping ? t('app_creator_public.tip_redirect') : `${t('app_creator_public.send_tip')} $${customTip || (tipAmount / 100)} →`}
             </button>
           </div>
         )}
@@ -372,7 +374,7 @@ function CreatorPageInner() {
             )}
             {hasPaywalledPosts && (
               <p className="text-xs text-amber-600 dark:text-amber-400 mb-3">
-                Subscribers get access to {posts.length} exclusive post{posts.length !== 1 ? 's' : ''}
+                {t('app_creator_public.subscribers_get')} {posts.length} {posts.length !== 1 ? t('app_creator_public.exclusive_post_plural') : t('app_creator_public.exclusive_post_single')}
               </p>
             )}
             <button
@@ -380,7 +382,7 @@ function CreatorPageInner() {
               disabled={subscribing}
               className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-white font-black py-3 rounded-xl text-sm transition-all"
             >
-              {subscribing ? 'Redirecting...' : `Become a ${creator.subscription_name} - $${creator.subscription_price / 100}/mo →`}
+              {subscribing ? t('app_creator_public.subscribe_redirect') : `${t('app_creator_public.subscribe_btn')} ${creator.subscription_name} - $${creator.subscription_price / 100}${t('app_creator_public.subscribe_per_mo')}`}
             </button>
           </div>
         )}
@@ -390,8 +392,8 @@ function CreatorPageInner() {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <span className="text-lg">🔒</span>
-              <p className="font-black text-primary">Exclusive Posts</p>
-              {isFan && <span className="text-xs bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-full">Fan access</span>}
+              <p className="font-black text-primary">{t('app_creator_public.exclusive_posts')}</p>
+              {isFan && <span className="text-xs bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-full">{t('app_creator_public.fan_access')}</span>}
             </div>
             <div className="space-y-3">
               {posts.map(post => {
@@ -410,7 +412,7 @@ function CreatorPageInner() {
                           onClick={() => setExpandedId(isExpanded ? null : post.id)}
                           className="text-xs text-amber-500 hover:underline shrink-0"
                         >
-                          {isExpanded ? 'Hide' : 'Read'}
+                          {isExpanded ? t('app_creator_public.hide') : t('app_creator_public.read')}
                         </button>
                       )}
                     </div>
@@ -428,7 +430,7 @@ function CreatorPageInner() {
                             disabled={unlocking === post.id}
                             className="w-full bg-amber-400 hover:bg-amber-300 disabled:opacity-50 text-black font-black py-2 rounded-xl text-xs transition-all"
                           >
-                            {unlocking === post.id ? 'Redirecting...' : `Unlock for $${post.unlock_price_cents / 100} →`}
+                            {unlocking === post.id ? t('app_creator_public.tip_redirect') : `${t('app_creator_public.unlock_for')} $${post.unlock_price_cents / 100} →`}
                           </button>
                         )}
                         {creator.subscription_enabled && (
@@ -436,7 +438,7 @@ function CreatorPageInner() {
                             onClick={subscribe}
                             className="w-full border border-emerald-400 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 font-bold py-2 rounded-xl text-xs transition-all"
                           >
-                            Subscribe to unlock all posts →
+                            {t('app_creator_public.subscribe_unlock')}
                           </button>
                         )}
                       </div>
@@ -447,7 +449,7 @@ function CreatorPageInner() {
                         onClick={() => setExpandedId(post.id)}
                         className="text-xs text-amber-500 hover:underline"
                       >
-                        Read full post →
+                        {t('app_creator_public.read_full')}
                       </button>
                     )}
                   </div>
@@ -462,7 +464,7 @@ function CreatorPageInner() {
           <Link href="https://socialmate.studio/signup"
             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-700 transition-all">
             <span className="font-black text-amber-500 text-sm leading-none">S</span>
-            Powered by SocialMate
+            {t('app_creator_public.powered_by')}
           </Link>
         </div>
       </div>

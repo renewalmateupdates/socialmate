@@ -6,6 +6,7 @@ import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import SomaCreditPacks from '@/components/SomaCreditPacks'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
+import { useI18n } from '@/contexts/I18nContext'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -63,8 +64,9 @@ function timeSlotIcon(scheduledAt: string | null): string {
   return '🌙'
 }
 
-function dayLabel(scheduledAt: string | null): string {
-  if (!scheduledAt) return 'Unscheduled'
+// Note: dayLabel is a plain function so it receives the label as a parameter
+function dayLabel(scheduledAt: string | null, unscheduledLabel: string): string {
+  if (!scheduledAt) return unscheduledLabel
   return new Date(scheduledAt).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })
 }
 
@@ -134,6 +136,7 @@ function AutopilotModal({
   autopilotEnabled: boolean
   fullSendEnabled: boolean
 }) {
+  const { t } = useI18n()
   const [loading, setLoading] = useState<string | null>(null)
   const [err, setErr] = useState('')
 
@@ -168,12 +171,12 @@ function AutopilotModal({
         <div className="p-6 sm:p-8">
           <div className="text-center mb-6">
             <h2 className="text-xl font-extrabold text-white mb-1">
-              {autopilotEnabled ? 'Upgrade to Full Send' : 'Unlock SOMA Automation'}
+              {autopilotEnabled ? t('app_soma_dashboard.upgrade_full_send') : t('app_soma_dashboard.unlock_automation')}
             </h2>
             <p className="text-gray-400 text-sm">
               {autopilotEnabled
-                ? 'You have Autopilot. Go fully autonomous with Full Send.'
-                : 'Choose how autonomous you want SOMA to be.'}
+                ? t('app_soma_dashboard.already_autopilot')
+                : t('app_soma_dashboard.choose_autonomous')}
             </p>
           </div>
 
@@ -181,8 +184,8 @@ function AutopilotModal({
             <div className="flex items-center gap-3 rounded-xl border border-violet-700/40 bg-violet-900/20 p-3 mb-4">
               <span className="text-lg">⚡</span>
               <div className="flex-1">
-                <p className="text-sm font-extrabold text-violet-300">Autopilot</p>
-                <p className="text-xs text-gray-400">Already active on your account</p>
+                <p className="text-sm font-extrabold text-violet-300">{t('app_soma_dashboard.mode_autopilot')}</p>
+                <p className="text-xs text-gray-400">{t('app_soma_dashboard.autopilot_active_label')}</p>
               </div>
               <span className="text-xs font-bold text-green-400 bg-green-900/40 border border-green-700/40 px-2 py-1 rounded-full">
                 ✓ Active
@@ -213,7 +216,7 @@ function AutopilotModal({
                   disabled={loading !== null}
                   className={`w-full bg-gradient-to-r ${tier.btn} text-gray-900 font-extrabold text-xs px-4 py-2.5 rounded-lg hover:opacity-90 transition-all disabled:opacity-60 disabled:cursor-not-allowed`}
                 >
-                  {loading === tier.id ? 'Redirecting…' : `Get ${tier.name} →`}
+                  {loading === tier.id ? t('app_soma_dashboard.redirecting') : `${t('app_soma_dashboard.get_tier')} ${tier.name} →`}
                 </button>
               </div>
             ))}
@@ -222,10 +225,10 @@ function AutopilotModal({
           {err && <p className="text-xs text-red-400 text-center mb-3">{err}</p>}
 
           <p className="text-center text-xs text-gray-600 mb-3">
-            Safe Mode (free) stays available. You can downgrade anytime from Settings.
+            {t('app_soma_dashboard.safe_mode_note')}
           </p>
           <button onClick={onClose} className="w-full text-center text-sm text-gray-500 hover:text-gray-300 transition-colors py-1">
-            {autopilotEnabled ? 'Stay on Autopilot' : 'Stay on Safe Mode'}
+            {autopilotEnabled ? t('app_soma_dashboard.stay_autopilot') : t('app_soma_dashboard.stay_safe')}
           </button>
         </div>
       </div>
@@ -238,6 +241,7 @@ function AutopilotModal({
 export default function SomaDashboardPage() {
   const router = useRouter()
   const { activeWorkspaceId } = useWorkspace()
+  const { t } = useI18n()
 
   const [loading, setLoading]                 = useState(true)
   const [credits, setCredits]                 = useState<SomaCredits | null>(null)
@@ -431,9 +435,9 @@ export default function SomaDashboardPage() {
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight flex items-center gap-2">
               <span className="text-amber-400">⚡</span>
-              <span className="text-white">SOMA</span>
+              <span className="text-white">{t('app_soma_dashboard.title')}</span>
             </h1>
-            <p className="text-gray-400 text-sm mt-0.5">Self-Optimizing Media Agent</p>
+            <p className="text-gray-400 text-sm mt-0.5">{t('app_soma_dashboard.subtitle')}</p>
           </div>
 
           {/* Mode toggle */}
@@ -446,7 +450,7 @@ export default function SomaDashboardPage() {
                   : 'text-gray-500 hover:text-gray-300'
               }`}
             >
-              <span>🟢</span> Safe
+              <span>🟢</span> {t('app_soma_dashboard.mode_safe')}
             </button>
             <button
               onClick={() => handleModeToggle('autopilot')}
@@ -456,7 +460,7 @@ export default function SomaDashboardPage() {
                   : 'text-gray-500 hover:text-gray-300'
               }`}
             >
-              <span>⚡</span> Autopilot
+              <span>⚡</span> {t('app_soma_dashboard.mode_autopilot')}
               {!credits?.autopilot_enabled && (
                 <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-amber-800/60 text-amber-400 border border-amber-700/40 ml-0.5">
                   $10
@@ -471,7 +475,7 @@ export default function SomaDashboardPage() {
                   : 'text-gray-500 hover:text-gray-300'
               }`}
             >
-              <span>🚀</span> Full Send
+              <span>🚀</span> {t('app_soma_dashboard.mode_full_send')}
               {!credits?.full_send_enabled && (
                 <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-purple-800/60 text-purple-400 border border-purple-700/40 ml-0.5">
                   $20
@@ -487,12 +491,12 @@ export default function SomaDashboardPage() {
           {/* Credits Card */}
           <div className="rounded-2xl border border-amber-500/20 bg-gray-900 p-5">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-xs font-bold uppercase tracking-widest text-amber-400/80">SOMA Credits</h2>
+              <h2 className="text-xs font-bold uppercase tracking-widest text-amber-400/80">{t('app_soma_dashboard.credits_section')}</h2>
               <Link
                 href="/settings?tab=plan"
                 className="text-xs text-amber-400 hover:text-amber-300 font-semibold transition-colors"
               >
-                + Add Credits
+                {t('app_soma_dashboard.add_credits')}
               </Link>
             </div>
 
@@ -505,7 +509,7 @@ export default function SomaDashboardPage() {
                     {credits?.remaining ?? 0}
                   </span>
                   <span className="text-gray-500 text-sm font-medium">
-                    / {credits?.monthly ?? 0} monthly
+                    / {credits?.monthly ?? 0} {t('app_soma_dashboard.monthly_label')}
                   </span>
                 </div>
 
@@ -517,7 +521,7 @@ export default function SomaDashboardPage() {
                 </div>
 
                 <div className="flex items-center justify-between text-xs text-gray-500">
-                  <span>{Math.round(creditsBar)}% remaining</span>
+                  <span>{Math.round(creditsBar)}{t('app_soma_dashboard.remaining_pct')}</span>
                   {(credits?.purchased ?? 0) > 0 && (
                     <span className="text-amber-400/80">+{credits!.purchased} purchased</span>
                   )}
@@ -528,16 +532,16 @@ export default function SomaDashboardPage() {
                   onClick={toggleLedger}
                   className="mt-3 text-xs text-amber-400/60 hover:text-amber-400 transition-colors font-medium"
                 >
-                  {showLedger ? '▲ Hide history' : '▼ View credit history'}
+                  {showLedger ? t('app_soma_dashboard.hide_history') : t('app_soma_dashboard.view_history')}
                 </button>
 
                 {showLedger && (
                   <div className="mt-3 border-t border-gray-800 pt-3 space-y-2">
                     {ledgerLoading && (
-                      <div className="text-xs text-gray-500 py-2 text-center">Loading…</div>
+                      <div className="text-xs text-gray-500 py-2 text-center">{t('app_soma_dashboard.approving')}</div>
                     )}
                     {!ledgerLoading && ledger.length === 0 && (
-                      <div className="text-xs text-gray-500 py-2 text-center">No credit activity yet.</div>
+                      <div className="text-xs text-gray-500 py-2 text-center">{t('app_soma_dashboard.no_credit_activity')}</div>
                     )}
                     {!ledgerLoading && ledger.map(entry => (
                       <div key={entry.id} className="flex items-center justify-between text-xs">
@@ -568,7 +572,7 @@ export default function SomaDashboardPage() {
 
           {/* Identity Card */}
           <div className="rounded-2xl border border-amber-500/20 bg-gray-900 p-5">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-amber-400/80 mb-3">Identity Status</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-amber-400/80 mb-3">{t('app_soma_dashboard.identity_status')}</h2>
 
             {!identityChecked || loading ? (
               <div className="h-8 bg-gray-800 rounded animate-pulse" />
@@ -576,34 +580,34 @@ export default function SomaDashboardPage() {
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="w-2 h-2 rounded-full bg-yellow-400 flex-shrink-0" />
-                  <p className="text-sm font-semibold text-yellow-300">⚠️ Voice profile not set up</p>
+                  <p className="text-sm font-semibold text-yellow-300">{t('app_soma_dashboard.voice_not_set')}</p>
                 </div>
                 <p className="text-xs text-gray-400 mb-3 leading-relaxed">
-                  SOMA needs to learn your voice before it can generate content that sounds like you.
+                  {t('app_soma_dashboard.voice_not_set_desc')}
                 </p>
                 <Link
                   href="/soma/onboarding"
                   className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors"
                 >
-                  Setup now →
+                  {t('app_soma_dashboard.setup_now')}
                 </Link>
               </div>
             ) : (
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="w-2 h-2 rounded-full bg-green-400 flex-shrink-0" />
-                  <p className="text-sm font-semibold text-green-300">✅ Voice profile active</p>
+                  <p className="text-sm font-semibold text-green-300">{t('app_soma_dashboard.voice_active')}</p>
                 </div>
                 {voiceDnaTier !== 'none' && (
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-sm">🧬</span>
                     <p className="text-xs font-semibold text-purple-300">
-                      Voice DNA: <span className="capitalize">{voiceDnaTier.replace('_', ' ')}</span> tier active
+                      {t('app_soma_dashboard.voice_dna_tier')} <span className="capitalize">{voiceDnaTier.replace('_', ' ')}</span> {t('app_soma_dashboard.tier_active')}
                     </p>
                   </div>
                 )}
                 <p className="text-xs text-gray-500 mb-3">
-                  Last updated{' '}
+                  {t('app_soma_dashboard.last_updated')}{' '}
                   {new Date(identity.last_updated).toLocaleDateString('en-US', {
                     month: 'short',
                     day: 'numeric',
@@ -614,7 +618,7 @@ export default function SomaDashboardPage() {
                   href="/soma/onboarding"
                   className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-400 hover:text-amber-300 transition-colors"
                 >
-                  Edit profile →
+                  {t('app_soma_dashboard.edit_profile')}
                 </Link>
               </div>
             )}
@@ -624,12 +628,12 @@ export default function SomaDashboardPage() {
         {/* ── WEEKLY INGESTION CARD ──────────────────────────────────── */}
         <div className="rounded-2xl border border-amber-500/20 bg-gray-900 p-5">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-xs font-bold uppercase tracking-widest text-amber-400/80">📋 This Week's Ingestion</h2>
+            <h2 className="text-xs font-bold uppercase tracking-widest text-amber-400/80">{t('app_soma_dashboard.ingestion_section')}</h2>
             <Link
               href="/soma/weekly"
               className="text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors"
             >
-              + New Ingestion →
+              {t('app_soma_dashboard.new_ingestion')}
             </Link>
           </div>
 
@@ -638,14 +642,14 @@ export default function SomaDashboardPage() {
           ) : !ingestion ? (
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
-                <p className="text-sm text-gray-400">No ingestion this week yet.</p>
-                <p className="text-xs text-gray-500 mt-0.5">Run an ingestion to give SOMA fresh material to work with.</p>
+                <p className="text-sm text-gray-400">{t('app_soma_dashboard.no_ingestion')}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{t('app_soma_dashboard.no_ingestion_desc')}</p>
               </div>
               <Link
                 href="/soma/weekly"
                 className="inline-flex items-center gap-1.5 text-xs font-bold px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 transition-all whitespace-nowrap"
               >
-                Start this week →
+                {t('app_soma_dashboard.start_this_week')}
               </Link>
             </div>
           ) : (
@@ -654,14 +658,14 @@ export default function SomaDashboardPage() {
                 <div>
                   <p className="text-sm font-semibold text-white">{ingestion.week_label}</p>
                   <p className="text-xs text-gray-400 mt-0.5">
-                    {ingestion.post_count ?? 0} posts generated
+                    {ingestion.post_count ?? 0} {t('app_soma_dashboard.posts_generated')}
                   </p>
                 </div>
                 <Link
                   href="/soma/weekly"
                   className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 transition-all whitespace-nowrap self-start sm:self-auto"
                 >
-                  New ingestion →
+                  {t('app_soma_dashboard.new_ingestion_btn')}
                 </Link>
               </div>
 
@@ -686,8 +690,8 @@ export default function SomaDashboardPage() {
         <div className="rounded-2xl border border-amber-500/20 bg-gray-900 p-5">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-xs font-bold uppercase tracking-widest text-amber-400/80">Content Queue</h2>
-              <p className="text-xs text-gray-500 mt-0.5">SOMA-generated drafts awaiting your approval</p>
+              <h2 className="text-xs font-bold uppercase tracking-widest text-amber-400/80">{t('app_soma_dashboard.content_queue')}</h2>
+              <p className="text-xs text-gray-500 mt-0.5">{t('app_soma_dashboard.content_queue_sub')}</p>
             </div>
             {drafts.length > 0 && (
               <button
@@ -695,7 +699,7 @@ export default function SomaDashboardPage() {
                 disabled={approvingAll}
                 className="text-xs font-bold px-4 py-2 rounded-xl bg-green-900/50 border border-green-700/40 text-green-300 hover:bg-green-900/70 transition-all disabled:opacity-60"
               >
-                {approvingAll ? 'Approving…' : `Approve All (${drafts.length})`}
+                {approvingAll ? t('app_soma_dashboard.approving') : `${t('app_soma_dashboard.approve_all')} (${drafts.length})`}
               </button>
             )}
           </div>
@@ -709,13 +713,13 @@ export default function SomaDashboardPage() {
           ) : drafts.length === 0 ? (
             <div className="text-center py-10">
               <span className="text-3xl mb-3 block">✅</span>
-              <p className="text-sm font-semibold text-gray-300">Queue is clear</p>
-              <p className="text-xs text-gray-500 mt-1">Run a weekly ingestion to generate new content.</p>
+              <p className="text-sm font-semibold text-gray-300">{t('app_soma_dashboard.queue_clear')}</p>
+              <p className="text-xs text-gray-500 mt-1">{t('app_soma_dashboard.queue_clear_sub')}</p>
               <Link
                 href="/soma/weekly"
                 className="inline-flex items-center gap-1.5 mt-4 text-xs font-bold px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 transition-all"
               >
-                Run ingestion →
+                {t('app_soma_dashboard.run_ingestion')}
               </Link>
             </div>
           ) : (
@@ -730,7 +734,7 @@ export default function SomaDashboardPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-base flex-shrink-0">{timeSlotIcon(post.scheduled_at)}</span>
-                        <span className="text-xs font-semibold text-gray-400">{dayLabel(post.scheduled_at)}</span>
+                        <span className="text-xs font-semibold text-gray-400">{dayLabel(post.scheduled_at, t('app_soma_dashboard.unscheduled'))}</span>
                         <div className="flex gap-1 flex-wrap">
                           {(post.platforms ?? []).map((p: string) => (
                             <PlatformBadge key={p} platform={p} />
@@ -749,20 +753,20 @@ export default function SomaDashboardPage() {
                         disabled={!!actionLoading[post.id]}
                         className="text-xs font-bold px-3 py-1.5 rounded-lg bg-green-900/50 border border-green-700/40 text-green-300 hover:bg-green-900/70 transition-all disabled:opacity-60 whitespace-nowrap"
                       >
-                        {actionLoading[post.id] ? '…' : 'Approve'}
+                        {actionLoading[post.id] ? '…' : t('app_soma_dashboard.approve')}
                       </button>
                       <Link
                         href={`/compose?edit=${post.id}`}
                         className="text-xs font-bold px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-gray-300 hover:bg-gray-700 transition-all whitespace-nowrap"
                       >
-                        Edit
+                        {t('app_soma_dashboard.edit')}
                       </Link>
                       <button
                         onClick={() => skipPost(post.id)}
                         disabled={!!actionLoading[post.id]}
                         className="text-xs font-bold px-3 py-1.5 rounded-lg bg-red-900/30 border border-red-800/40 text-red-400 hover:bg-red-900/50 transition-all disabled:opacity-60 whitespace-nowrap"
                       >
-                        Skip
+                        {t('app_soma_dashboard.skip')}
                       </button>
                     </div>
                   </div>
@@ -776,15 +780,15 @@ export default function SomaDashboardPage() {
         <div className="rounded-2xl border border-amber-500/20 bg-gray-900 p-5">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-xs font-bold uppercase tracking-widest text-amber-400/80">SOMA Projects</h2>
-              <p className="text-xs text-gray-500 mt-0.5">Named pipelines — each with their own master doc and settings</p>
+              <h2 className="text-xs font-bold uppercase tracking-widest text-amber-400/80">{t('app_soma_dashboard.projects_section')}</h2>
+              <p className="text-xs text-gray-500 mt-0.5">{t('app_soma_dashboard.projects_sub')}</p>
             </div>
             {projects.length < projectLimit && (
               <Link
                 href="/soma/projects/new"
                 className="text-xs font-bold px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 transition-all whitespace-nowrap"
               >
-                + New Project
+                {t('app_soma_dashboard.new_project')}
               </Link>
             )}
           </div>
@@ -795,13 +799,13 @@ export default function SomaDashboardPage() {
             </div>
           ) : projects.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-sm font-semibold text-gray-300 mb-1">No projects yet</p>
-              <p className="text-xs text-gray-500 mb-4">Create a project to start your master doc pipeline.</p>
+              <p className="text-sm font-semibold text-gray-300 mb-1">{t('app_soma_dashboard.no_projects')}</p>
+              <p className="text-xs text-gray-500 mb-4">{t('app_soma_dashboard.no_projects_sub')}</p>
               <Link
                 href="/soma/projects/new"
                 className="inline-flex items-center gap-1.5 text-xs font-bold px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 transition-all"
               >
-                Create your first project →
+                {t('app_soma_dashboard.create_first_project')}
               </Link>
             </div>
           ) : (
@@ -830,8 +834,8 @@ export default function SomaDashboardPage() {
               ))}
               {projects.length >= projectLimit && (
                 <p className="text-xs text-gray-500 text-center pt-2">
-                  {projectLimit} project limit on your plan.{' '}
-                  <Link href="/pricing" className="text-amber-400 hover:text-amber-300">Upgrade for more →</Link>
+                  {projectLimit} {t('app_soma_dashboard.project_limit')}{' '}
+                  <Link href="/pricing" className="text-amber-400 hover:text-amber-300">{t('app_soma_dashboard.upgrade_more')}</Link>
                 </p>
               )}
             </div>
@@ -846,11 +850,11 @@ export default function SomaDashboardPage() {
           >
             <span className="text-xl">🧬</span>
             <div>
-              <p className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">Voice DNA Builder</p>
+              <p className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">{t('app_soma_dashboard.quick_voice_dna')}</p>
               {voiceDnaTier !== 'none' ? (
                 <p className="text-[11px] text-purple-400 mt-0.5 capitalize">✓ {voiceDnaTier.replace('_', ' ')} tier saved</p>
               ) : (
-                <p className="text-[11px] text-gray-500 mt-0.5">25–40 questions that shape your AI voice</p>
+                <p className="text-[11px] text-gray-500 mt-0.5">{t('app_soma_dashboard.quick_voice_dna_sub')}</p>
               )}
             </div>
             <span className="ml-auto text-gray-600 group-hover:text-purple-400 transition-colors text-sm">→</span>
@@ -862,8 +866,8 @@ export default function SomaDashboardPage() {
           >
             <span className="text-xl">📋</span>
             <div>
-              <p className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">This Week's Ingestion</p>
-              <p className="text-[11px] text-gray-500 mt-0.5">Feed SOMA fresh content ideas</p>
+              <p className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">{t('app_soma_dashboard.quick_ingestion')}</p>
+              <p className="text-[11px] text-gray-500 mt-0.5">{t('app_soma_dashboard.quick_ingestion_sub')}</p>
             </div>
             <span className="ml-auto text-gray-600 group-hover:text-amber-400 transition-colors text-sm">→</span>
           </Link>
@@ -874,8 +878,8 @@ export default function SomaDashboardPage() {
           >
             <span className="text-xl">📂</span>
             <div>
-              <p className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">View All Drafts</p>
-              <p className="text-[11px] text-gray-500 mt-0.5">Everything in draft status</p>
+              <p className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors">{t('app_soma_dashboard.quick_drafts')}</p>
+              <p className="text-[11px] text-gray-500 mt-0.5">{t('app_soma_dashboard.quick_drafts_sub')}</p>
             </div>
             <span className="ml-auto text-gray-600 group-hover:text-amber-400 transition-colors text-sm">→</span>
           </Link>

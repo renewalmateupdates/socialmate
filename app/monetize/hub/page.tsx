@@ -4,6 +4,7 @@ import { useWorkspace } from '@/contexts/WorkspaceContext'
 import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Toast from '@/components/Toast'
+import { useI18n } from '@/contexts/I18nContext'
 
 type Settings = {
   stripe_account_id:         string | null
@@ -70,6 +71,7 @@ function MonetizeHubInner() {
   const { activeWorkspaceId: workspaceId, plan } = useWorkspace()
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { t } = useI18n()
 
   const [settings,  setSettings]  = useState<Settings>(DEFAULT)
   const [earnings,  setEarnings]  = useState<Earnings | null>(null)
@@ -189,10 +191,10 @@ function MonetizeHubInner() {
     return (
       <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center gap-4">
         <span className="text-5xl">💸</span>
-        <h1 className="text-2xl font-black text-primary">Creator Monetization Hub</h1>
-        <p className="text-secondary text-sm max-w-md">Tip jars, fan subscriptions, and paywalled content — powered by Stripe. 0% platform cut. Available on Pro and Agency plans.</p>
-        <Link href="/settings?tab=Plan" className="bg-amber-400 hover:bg-amber-300 text-black font-black px-6 py-3 rounded-xl text-sm">Upgrade to Pro →</Link>
-        <Link href="/monetize" className="text-xs text-secondary hover:text-primary">← Back to overview</Link>
+        <h1 className="text-2xl font-black text-primary">{t('app_creator_hub.pro_gate_title')}</h1>
+        <p className="text-secondary text-sm max-w-md">{t('app_creator_hub.pro_gate_desc')}</p>
+        <Link href="/settings?tab=Plan" className="bg-amber-400 hover:bg-amber-300 text-black font-black px-6 py-3 rounded-xl text-sm">{t('app_creator_hub.upgrade_pro')}</Link>
+        <Link href="/monetize" className="text-xs text-secondary hover:text-primary">{t('app_creator_hub.back_overview')}</Link>
       </div>
     )
   }
@@ -200,17 +202,17 @@ function MonetizeHubInner() {
   return (
     <div className="min-h-screen bg-background p-6 md:p-10 max-w-2xl mx-auto">
       <div className="mb-8">
-        <Link href="/monetize" className="text-xs text-secondary hover:text-primary mb-4 inline-block">← Overview</Link>
+        <Link href="/monetize" className="text-xs text-secondary hover:text-primary mb-4 inline-block">{t('app_creator_hub.back_short')}</Link>
         <div className="flex items-center gap-3 mb-2">
           <span className="text-3xl">💸</span>
-          <h1 className="text-2xl font-black text-primary">Creator Hub</h1>
+          <h1 className="text-2xl font-black text-primary">{t('app_creator_hub.title')}</h1>
           <span className="text-xs bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded-full">Pro+</span>
         </div>
-        <p className="text-secondary text-sm">Monetize your audience with tip jars and fan subscriptions. Stripe handles payments — you keep everything (minus Stripe's ~2.9% + 30¢).</p>
+        <p className="text-secondary text-sm">{t('app_creator_hub.subtitle')}</p>
       </div>
 
       {loading ? (
-        <div className="text-secondary text-sm py-10 text-center">Loading…</div>
+        <div className="text-secondary text-sm py-10 text-center">{t('app_creator_hub.loading')}</div>
       ) : (
         <div className="space-y-5">
 
@@ -219,12 +221,12 @@ function MonetizeHubInner() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="font-bold text-primary">
-                  {settings.stripe_onboarding_complete ? '✅ Stripe Connected' : 'Connect Stripe'}
+                  {settings.stripe_onboarding_complete ? t('app_creator_hub.stripe_connected') : t('app_creator_hub.connect_stripe')}
                 </p>
                 <p className="text-xs text-secondary mt-0.5">
                   {settings.stripe_onboarding_complete
                     ? `Account: ${settings.stripe_account_id}`
-                    : 'Required to receive payments. Takes ~2 minutes.'}
+                    : t('app_creator_hub.connect_stripe_desc')}
                 </p>
               </div>
               {!settings.stripe_onboarding_complete && (
@@ -232,7 +234,7 @@ function MonetizeHubInner() {
                   onClick={connectStripe}
                   className="bg-indigo-600 hover:bg-indigo-500 text-white font-black px-4 py-2 rounded-xl text-sm"
                 >
-                  Connect →
+                  {t('app_creator_hub.connect_btn')}
                 </button>
               )}
             </div>
@@ -241,18 +243,18 @@ function MonetizeHubInner() {
           {/* Share your page */}
           {settings.stripe_onboarding_complete && creatorUrl && (
             <div className="bg-surface border border-theme rounded-2xl p-5">
-              <p className="text-xs font-bold uppercase tracking-wide text-secondary mb-3">Share Your Page</p>
+              <p className="text-xs font-bold uppercase tracking-wide text-secondary mb-3">{t('app_creator_hub.share_page')}</p>
               <div className="flex items-center gap-2 bg-background border border-theme rounded-xl px-3 py-2 mb-3">
                 <span className="text-xs text-secondary truncate flex-1">{creatorUrl}</span>
                 <button
                   onClick={() => copyToClipboard(creatorUrl, 'Creator page link')}
                   className="text-xs font-bold text-amber-500 hover:text-amber-400 shrink-0"
                 >
-                  Copy
+                  {t('app_creator_hub.copy')}
                 </button>
                 <a href={creatorUrl} target="_blank" rel="noopener noreferrer"
                   className="text-xs font-bold text-secondary hover:text-primary shrink-0">
-                  Open →
+                  {t('app_creator_hub.open')}
                 </a>
               </div>
               <div className="grid grid-cols-3 gap-2">
@@ -261,7 +263,7 @@ function MonetizeHubInner() {
                     onClick={() => copyToClipboard(creatorUrl, 'Tip jar link')}
                     className="py-2 rounded-xl border border-theme bg-background text-xs font-bold text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all"
                   >
-                    💸 Copy Tip Link
+                    {t('app_creator_hub.copy_tip_link')}
                   </button>
                 )}
                 {settings.subscription_enabled && (
@@ -269,7 +271,7 @@ function MonetizeHubInner() {
                     onClick={() => copyToClipboard(creatorUrl, 'Subscribe link')}
                     className="py-2 rounded-xl border border-theme bg-background text-xs font-bold text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all"
                   >
-                    🔁 Copy Sub Link
+                    {t('app_creator_hub.copy_sub_link')}
                   </button>
                 )}
                 <a
@@ -277,11 +279,11 @@ function MonetizeHubInner() {
                   target="_blank" rel="noopener noreferrer"
                   className="py-2 rounded-xl border border-theme bg-background text-xs font-bold text-secondary hover:text-primary hover:border-amber-400/50 transition-all text-center"
                 >
-                  📱 QR Code
+                  {t('app_creator_hub.qr_code')}
                 </a>
               </div>
               <p className="text-xs text-secondary mt-2">
-                Add to your <a href="/link-in-bio" className="text-amber-500 hover:underline">Link in Bio →</a>
+                {t('app_creator_hub.add_to_bio')} <a href="/link-in-bio" className="text-amber-500 hover:underline">{t('app_creator_hub.link_in_bio')}</a>
               </p>
             </div>
           )}
@@ -291,20 +293,20 @@ function MonetizeHubInner() {
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-surface border border-theme rounded-2xl p-4 text-center">
                 <p className="text-2xl font-black text-amber-500">${(earnings.total_tips_cents / 100).toFixed(2)}</p>
-                <p className="text-xs text-secondary mt-1">Total tips received</p>
+                <p className="text-xs text-secondary mt-1">{t('app_creator_hub.total_tips')}</p>
               </div>
               <div className="bg-surface border border-theme rounded-2xl p-4 text-center">
                 <p className="text-2xl font-black text-emerald-500">{earnings.active_subscribers}</p>
-                <p className="text-xs text-secondary mt-1">Active subscribers</p>
+                <p className="text-xs text-secondary mt-1">{t('app_creator_hub.active_subscribers')}</p>
               </div>
             </div>
           )}
 
           {/* Creator page identity */}
           <div className="bg-surface border border-theme rounded-2xl p-5 space-y-3">
-            <p className="text-xs font-bold uppercase tracking-wide text-secondary">Your Creator Page</p>
+            <p className="text-xs font-bold uppercase tracking-wide text-secondary">{t('app_creator_hub.your_creator_page')}</p>
             <div>
-              <label className="block text-xs text-secondary mb-1">Page handle</label>
+              <label className="block text-xs text-secondary mb-1">{t('app_creator_hub.page_handle_label')}</label>
               <div className="flex items-center gap-1">
                 <span className="text-sm text-secondary">socialmate.studio/creator/</span>
                 <input
@@ -316,7 +318,7 @@ function MonetizeHubInner() {
               </div>
             </div>
             <div>
-              <label className="block text-xs text-secondary mb-1">Display name</label>
+              <label className="block text-xs text-secondary mb-1">{t('app_creator_hub.display_name_label')}</label>
               <input
                 value={settings.page_title ?? ''}
                 onChange={e => setSettings(s => ({ ...s, page_title: e.target.value }))}
@@ -325,7 +327,7 @@ function MonetizeHubInner() {
               />
             </div>
             <div>
-              <label className="block text-xs text-secondary mb-1">Bio</label>
+              <label className="block text-xs text-secondary mb-1">{t('app_creator_hub.bio_label')}</label>
               <textarea
                 value={settings.page_bio ?? ''}
                 onChange={e => setSettings(s => ({ ...s, page_bio: e.target.value }))}
@@ -335,7 +337,7 @@ function MonetizeHubInner() {
               />
             </div>
             <div>
-              <label className="block text-xs text-secondary mb-2">Header color</label>
+              <label className="block text-xs text-secondary mb-2">{t('app_creator_hub.header_color_label')}</label>
               <div className="flex flex-wrap gap-2">
                 {HEADER_COLORS.map(c => (
                   <button
@@ -360,7 +362,7 @@ function MonetizeHubInner() {
                 target="_blank"
                 className="text-xs text-amber-500 hover:underline"
               >
-                Preview page →
+                {t('app_creator_hub.preview_page')}
               </a>
             )}
           </div>
@@ -369,8 +371,8 @@ function MonetizeHubInner() {
           <div className="bg-surface border border-theme rounded-2xl p-5 space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-bold text-primary">💸 Tip Jar</p>
-                <p className="text-xs text-secondary mt-0.5">One-time payments from fans who love your work</p>
+                <p className="font-bold text-primary">{t('app_creator_hub.tip_jar_title')}</p>
+                <p className="text-xs text-secondary mt-0.5">{t('app_creator_hub.tip_jar_desc')}</p>
               </div>
               <button
                 onClick={() => setSettings(s => ({ ...s, tip_enabled: !s.tip_enabled }))}
@@ -382,7 +384,7 @@ function MonetizeHubInner() {
             {settings.tip_enabled && (
               <div className="grid grid-cols-2 gap-3 pt-2 border-t border-theme">
                 <div>
-                  <label className="block text-xs text-secondary mb-1">Min tip ($)</label>
+                  <label className="block text-xs text-secondary mb-1">{t('app_creator_hub.min_tip')}</label>
                   <input
                     type="number"
                     min={1} max={100}
@@ -392,7 +394,7 @@ function MonetizeHubInner() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-secondary mb-1">Max tip ($)</label>
+                  <label className="block text-xs text-secondary mb-1">{t('app_creator_hub.max_tip')}</label>
                   <input
                     type="number"
                     min={1} max={500}
@@ -409,8 +411,8 @@ function MonetizeHubInner() {
           <div className="bg-surface border border-theme rounded-2xl p-5 space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-bold text-primary">🔁 Fan Subscriptions</p>
-                <p className="text-xs text-secondary mt-0.5">Monthly recurring support from your community</p>
+                <p className="font-bold text-primary">{t('app_creator_hub.fan_subs_title')}</p>
+                <p className="text-xs text-secondary mt-0.5">{t('app_creator_hub.fan_subs_desc')}</p>
               </div>
               <button
                 onClick={() => setSettings(s => ({ ...s, subscription_enabled: !s.subscription_enabled }))}
@@ -422,7 +424,7 @@ function MonetizeHubInner() {
             {settings.subscription_enabled && (
               <div className="space-y-3 pt-2 border-t border-theme">
                 <div>
-                  <label className="block text-xs text-secondary mb-1">Monthly price ($)</label>
+                  <label className="block text-xs text-secondary mb-1">{t('app_creator_hub.monthly_price')}</label>
                   <input
                     type="number"
                     min={1} max={999}
@@ -432,7 +434,7 @@ function MonetizeHubInner() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-secondary mb-1">Tier name</label>
+                  <label className="block text-xs text-secondary mb-1">{t('app_creator_hub.tier_name')}</label>
                   <input
                     value={settings.subscription_name}
                     onChange={e => setSettings(s => ({ ...s, subscription_name: e.target.value }))}
@@ -441,7 +443,7 @@ function MonetizeHubInner() {
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-secondary mb-1">Tier description</label>
+                  <label className="block text-xs text-secondary mb-1">{t('app_creator_hub.tier_desc_label')}</label>
                   <textarea
                     value={settings.subscription_description}
                     onChange={e => setSettings(s => ({ ...s, subscription_description: e.target.value }))}
@@ -461,7 +463,7 @@ function MonetizeHubInner() {
             disabled={saving}
             className="w-full bg-amber-400 hover:bg-amber-300 disabled:opacity-50 text-black font-black py-3 rounded-xl text-sm transition-all"
           >
-            {saving ? 'Saving…' : 'Save Settings'}
+            {saving ? t('app_creator_hub.saving') : t('app_creator_hub.save_settings')}
           </button>
 
           {/* Paywalled posts */}
@@ -469,21 +471,21 @@ function MonetizeHubInner() {
             <div className="bg-surface border border-theme rounded-2xl p-5 space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-bold text-primary">🔒 Exclusive Posts</p>
-                  <p className="text-xs text-secondary mt-0.5">Paywalled content for fans and one-time buyers</p>
+                  <p className="font-bold text-primary">{t('app_creator_hub.exclusive_posts')}</p>
+                  <p className="text-xs text-secondary mt-0.5">{t('app_creator_hub.exclusive_posts_desc')}</p>
                 </div>
                 <button
                   onClick={() => setShowNewPost(v => !v)}
                   className="text-xs font-black text-amber-500 hover:text-amber-400 border border-amber-400/40 rounded-lg px-3 py-1.5"
                 >
-                  {showNewPost ? 'Cancel' : '+ New Post'}
+                  {showNewPost ? t('app_creator_hub.cancel') : t('app_creator_hub.new_post')}
                 </button>
               </div>
 
               {showNewPost && (
                 <div className="space-y-3 pt-3 border-t border-theme">
                   <div>
-                    <label className="block text-xs text-secondary mb-1">Title</label>
+                    <label className="block text-xs text-secondary mb-1">{t('app_creator_hub.post_title_label')}</label>
                     <input
                       value={newPost.title}
                       onChange={e => setNewPost(p => ({ ...p, title: e.target.value }))}
@@ -492,7 +494,7 @@ function MonetizeHubInner() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-secondary mb-1">Preview (shown to everyone)</label>
+                    <label className="block text-xs text-secondary mb-1">{t('app_creator_hub.preview_label')}</label>
                     <textarea
                       value={newPost.preview}
                       onChange={e => setNewPost(p => ({ ...p, preview: e.target.value }))}
@@ -502,7 +504,7 @@ function MonetizeHubInner() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-secondary mb-1">Full content (fans only)</label>
+                    <label className="block text-xs text-secondary mb-1">{t('app_creator_hub.full_content_label')}</label>
                     <textarea
                       value={newPost.content}
                       onChange={e => setNewPost(p => ({ ...p, content: e.target.value }))}
@@ -512,7 +514,7 @@ function MonetizeHubInner() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-secondary mb-1">One-time unlock price (optional — leave blank for sub-only)</label>
+                    <label className="block text-xs text-secondary mb-1">{t('app_creator_hub.unlock_price_label')}</label>
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-secondary">$</span>
                       <input
@@ -525,14 +527,14 @@ function MonetizeHubInner() {
                         className="flex-1 bg-background border border-theme rounded-xl px-4 py-2 text-sm text-primary focus:outline-none focus:border-amber-400"
                       />
                     </div>
-                    <p className="text-xs text-secondary mt-1">If set, non-subscribers can also pay once to unlock this post.</p>
+                    <p className="text-xs text-secondary mt-1">{t('app_creator_hub.unlock_price_note')}</p>
                   </div>
                   <button
                     onClick={createPost}
                     disabled={savingPost || !newPost.title.trim() || !newPost.preview.trim() || !newPost.content.trim()}
                     className="w-full bg-amber-400 hover:bg-amber-300 disabled:opacity-50 text-black font-black py-2 rounded-xl text-sm transition-all"
                   >
-                    {savingPost ? 'Creating…' : 'Create Post'}
+                    {savingPost ? t('app_creator_hub.creating') : t('app_creator_hub.create_post')}
                   </button>
                 </div>
               )}
@@ -562,7 +564,7 @@ function MonetizeHubInner() {
                   ))}
                 </div>
               ) : !showNewPost && (
-                <p className="text-xs text-secondary text-center py-4">No exclusive posts yet. Create your first one above.</p>
+                <p className="text-xs text-secondary text-center py-4">{t('app_creator_hub.no_exclusive_posts')}</p>
               )}
             </div>
           )}
@@ -570,7 +572,7 @@ function MonetizeHubInner() {
           {/* Recent tips */}
           {earnings && earnings.tips.length > 0 && (
             <div>
-              <p className="text-xs font-bold uppercase tracking-wide text-secondary mb-3">Recent Tips</p>
+              <p className="text-xs font-bold uppercase tracking-wide text-secondary mb-3">{t('app_creator_hub.recent_tips')}</p>
               <div className="space-y-2">
                 {earnings.tips.slice(0, 5).map((tip, i) => (
                   <div key={i} className="bg-surface border border-theme rounded-xl p-3 flex items-center justify-between">
@@ -588,7 +590,7 @@ function MonetizeHubInner() {
           {/* Fan list */}
           {earnings && earnings.subscriptions.length > 0 && (
             <div>
-              <p className="text-xs font-bold uppercase tracking-wide text-secondary mb-3">Fan Subscribers ({earnings.active_subscribers} active)</p>
+              <p className="text-xs font-bold uppercase tracking-wide text-secondary mb-3">{t('app_creator_hub.fan_subscribers')} ({earnings.active_subscribers} active)</p>
               <div className="space-y-2">
                 {earnings.subscriptions.slice(0, 5).map(sub => (
                   <div key={sub.id} className="bg-surface border border-theme rounded-xl p-3 flex items-center justify-between">
