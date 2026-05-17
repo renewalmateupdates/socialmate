@@ -1094,7 +1094,8 @@
     "subscribe_unlock": "订阅以解锁所有帖子 →",
     "subscribers_get": "订阅者可访问",
     "exclusive_post_plural": "篇专属帖子",
-    "exclusive_post_single": "篇专属帖子"
+    "exclusive_post_single": "篇专属帖子",
+    "loading": "加载中…"
   },
   "app_enki_landing": {
     "title": "Enki 交易机器人",
