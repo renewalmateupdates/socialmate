@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
+import { useI18n } from '@/contexts/I18nContext'
 import {
   DndContext, closestCenter, PointerSensor, TouchSensor,
   useSensor, useSensors, DragEndEvent,
@@ -110,6 +111,7 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
   onDuplicate: (post: any) => void
   duplicating: string | null
 }) {
+  const { t } = useI18n()
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: post.id })
 
@@ -231,7 +233,7 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
             )}
             <Link href={`/compose?draft=${post.id}`}
               className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
-              Edit
+              {t('app_common.edit')}
             </Link>
             <button
               onClick={() => onDuplicate(post)}
@@ -248,7 +250,7 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
             />
             <button onClick={() => setConfirmCancel(post.id)}
               className="text-xs font-bold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all">
-              Unschedule
+              {t('app_queue.reschedule')}
             </button>
           </div>
         )}
@@ -256,17 +258,17 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
 
       {isConfirming && (
         <div className="mt-3 pt-3 border-t border-theme flex flex-col sm:flex-row sm:items-center gap-2">
-          <p className="text-xs text-red-600 font-semibold flex-1">Move this post back to drafts?</p>
+          <p className="text-xs text-red-600 font-semibold flex-1">{t('app_queue.move_to_drafts')}?</p>
           <div className="flex items-center gap-2 flex-shrink-0">
             <button onClick={() => handleCancel(post.id)} disabled={isCancelling}
               className="text-xs font-bold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center gap-1.5">
               {isCancelling
-                ? <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Moving...</>
-                : 'Yes, unschedule'}
+                ? <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />{t('app_common.saving')}</>
+                : t('app_queue.reschedule')}
             </button>
             <button onClick={() => setConfirmCancel(null)}
               className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
-              Cancel
+              {t('app_common.cancel')}
             </button>
           </div>
         </div>
@@ -293,6 +295,7 @@ function QueueInner() {
   const targetDate  = searchParams.get('date')
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const { activeWorkspace, plan } = useWorkspace()
+  const { t } = useI18n()
 
   // Auto-schedule state
   const [draftCount, setDraftCount]               = useState<number | null>(null)
@@ -637,7 +640,7 @@ function QueueInner() {
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
-              <h1 className="text-2xl font-extrabold tracking-tight">Upcoming Queue</h1>
+              <h1 className="text-2xl font-extrabold tracking-tight">{t('app_queue.title')}</h1>
               <div className="flex items-center gap-3 mt-0.5">
                 <p className="text-sm text-gray-400">
                   {loading ? 'Loading...' : `${posts.length} post${posts.length !== 1 ? 's' : ''} scheduled${daysWithPosts > 0 ? ` across ${daysWithPosts} day${daysWithPosts !== 1 ? 's' : ''}` : ''}`}
@@ -654,14 +657,14 @@ function QueueInner() {
                         onClick={handleBulkUnschedule}
                         disabled={bulkWorking}
                         className="text-xs font-semibold text-gray-500 hover:text-blue-500 transition-colors disabled:opacity-40">
-                        {bulkWorking ? 'Working…' : 'Move to drafts'}
+                        {bulkWorking ? t('app_common.saving') : t('app_queue.move_to_drafts')}
                       </button>
                       <span className="text-gray-300 dark:text-gray-600">·</span>
                       <button
                         onClick={handleBulkDelete}
                         disabled={bulkWorking}
                         className="text-xs font-semibold text-red-400 hover:text-red-600 transition-colors disabled:opacity-40">
-                        Delete
+                        {t('app_common.delete')}
                       </button>
                       <span className="text-gray-300 dark:text-gray-600">·</span>
                       <button
@@ -674,7 +677,7 @@ function QueueInner() {
                     <button
                       onClick={selectAll}
                       className="text-xs font-semibold text-gray-400 hover:text-amber-500 transition-colors">
-                      Select all
+                      {t('app_queue.select_all')}
                     </button>
                   )
                 )}
@@ -878,11 +881,11 @@ function QueueInner() {
           ) : posts.length === 0 ? (
             <div className="bg-surface border border-theme rounded-2xl p-12 text-center">
               <div className="text-4xl mb-3">📅</div>
-              <p className="text-sm font-bold mb-1">Your queue is empty</p>
-              <p className="text-xs text-gray-400 mb-5">Schedule posts and they'll line up here, grouped by day.</p>
+              <p className="text-sm font-bold mb-1">{t('app_queue.empty')}</p>
+              <p className="text-xs text-gray-400 mb-5">{t('app_queue.empty_sub')}</p>
               <Link href="/compose"
                 className="inline-block bg-black text-white text-xs font-bold px-5 py-2.5 rounded-xl hover:opacity-80 transition-all">
-                Schedule your first post →
+                {t('app_queue.compose_first')}
               </Link>
             </div>
           ) : (
@@ -1002,12 +1005,12 @@ function QueueInner() {
               <button
                 onClick={() => setShowDeleteConfirm(false)}
                 className="flex-1 text-sm font-bold py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-gray-400 transition-all">
-                Cancel
+                {t('app_common.cancel')}
               </button>
               <button
                 onClick={confirmBulkDelete}
                 className="flex-1 text-sm font-bold py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white transition-all">
-                Delete
+                {t('app_common.delete')}
               </button>
             </div>
           </div>

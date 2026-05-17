@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
+import { useI18n } from '@/contexts/I18nContext'
 import PageTour from '@/components/PageTour'
 
 interface Post {
@@ -126,6 +127,7 @@ function tagColorCalendar(tag: string): string {
 export default function CalendarPage() {
   const router = useRouter()
   const { activeWorkspace, loading: wsLoading } = useWorkspace()
+  const { t } = useI18n()
   const today    = new Date()
   const todayKey = toDateKey(today)
 
@@ -284,7 +286,7 @@ export default function CalendarPage() {
           <div id="calendar-header" className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
             <div>
               <h1 className="text-2xl font-extrabold tracking-tight">
-                Content Calendar
+                {t('app_calendar.title')}
                 {activeWorkspace && !activeWorkspace.is_personal && (
                   <span className="ml-2 text-sm font-semibold text-purple-500">
                     — {(activeWorkspace as any).client_name || activeWorkspace.name}
@@ -328,24 +330,24 @@ export default function CalendarPage() {
               <div className="flex items-center gap-4">
                 <div className="hidden sm:flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-blue-400 inline-block" />Scheduled
+                    <span className="w-2.5 h-2.5 rounded-full bg-blue-400 inline-block" />{t('app_calendar.legend_scheduled')}
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-green-400 inline-block" />Published
+                    <span className="w-2.5 h-2.5 rounded-full bg-green-400 inline-block" />{t('app_calendar.legend_published')}
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" />Partial
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" />{t('app_common.status_partial')}
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-500 inline-block" />Draft
+                    <span className="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-500 inline-block" />{t('app_calendar.legend_draft')}
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-full bg-red-400 inline-block" />Failed
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-400 inline-block" />{t('app_calendar.legend_failed')}
                   </span>
                 </div>
                 <button onClick={goToToday}
                   className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
-                  Today
+                  {t('app_calendar.today')}
                 </button>
               </div>
             </div>
@@ -452,7 +454,7 @@ export default function CalendarPage() {
             return (
               <div className="bg-surface border border-theme rounded-2xl p-10 text-center mb-4">
                 <p className="text-3xl mb-3">📅</p>
-                <p className="font-bold text-gray-700 dark:text-gray-200 mb-1">No posts this month</p>
+                <p className="font-bold text-gray-700 dark:text-gray-200 mb-1">{t('app_calendar.no_posts')}</p>
                 <p className="text-sm text-gray-400 dark:text-gray-500 mb-5">
                   {nextMonth
                     ? `Your next scheduled posts are in ${nextMonth} — use the arrow to navigate there.`
@@ -592,19 +594,19 @@ export default function CalendarPage() {
           {/* Legend — mobile shows below calendar, desktop shows inline in header */}
           <div className="flex sm:hidden items-center justify-center gap-4 text-xs text-gray-400 dark:text-gray-500 pb-4 flex-wrap">
             <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-blue-400 inline-block" />Scheduled
+              <span className="w-2.5 h-2.5 rounded-full bg-blue-400 inline-block" />{t('app_calendar.legend_scheduled')}
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-green-400 inline-block" />Published
+              <span className="w-2.5 h-2.5 rounded-full bg-green-400 inline-block" />{t('app_calendar.legend_published')}
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" />Partial
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block" />{t('app_common.status_partial')}
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-500 inline-block" />Draft
+              <span className="w-2.5 h-2.5 rounded-full bg-gray-300 dark:bg-gray-500 inline-block" />{t('app_calendar.legend_draft')}
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-red-400 inline-block" />Failed
+              <span className="w-2.5 h-2.5 rounded-full bg-red-400 inline-block" />{t('app_calendar.legend_failed')}
             </span>
           </div>
 
