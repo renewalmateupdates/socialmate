@@ -4,6 +4,16 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
+const LANGUAGES = [
+  { code: 'en', flag: '🇺🇸', label: 'English'   },
+  { code: 'es', flag: '🇪🇸', label: 'Español'   },
+  { code: 'de', flag: '🇩🇪', label: 'Deutsch'   },
+  { code: 'fr', flag: '🇫🇷', label: 'Français'  },
+  { code: 'pt', flag: '🇧🇷', label: 'Português' },
+  { code: 'ru', flag: '🇷🇺', label: 'Русский'   },
+  { code: 'zh', flag: '🇨🇳', label: '中文'       },
+]
+
 const AUDIENCES = [
   { label: '🎮 Streamers',      href: '/for/streamers'     },
   { label: '🏢 Agencies',       href: '/for/agencies'      },
@@ -25,10 +35,28 @@ export default function PublicNav() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState<DropdownKey | null>(null)
   const [mobileExpanded, setMobileExpanded] = useState<DropdownKey | null>(null)
+  const [langOpen, setLangOpen] = useState(false)
+  const [locale, setLocaleState] = useState('en')
   const navRef = useRef<HTMLDivElement>(null)
+  const langRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setIsLoggedIn(!!data.user))
+    try { setLocaleState(localStorage.getItem('sm_locale') || 'en') } catch {}
+  }, [])
+
+  const setLocale = (code: string) => {
+    setLocaleState(code)
+    try { localStorage.setItem('sm_locale', code) } catch {}
+    setLangOpen(false)
+  }
+
+  useEffect(() => {
+    function handleOutside(e: MouseEvent) {
+      if (langRef.current && !langRef.current.contains(e.target as Node)) setLangOpen(false)
+    }
+    document.addEventListener('mousedown', handleOutside)
+    return () => document.removeEventListener('mousedown', handleOutside)
   }, [])
 
   useEffect(() => {
@@ -88,14 +116,44 @@ export default function PublicNav() {
       style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
 
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-          <img src="/logo.png" alt="SocialMate" className="w-10 h-10 rounded-xl" />
-          <span className="font-bold text-base tracking-tight text-gray-900 dark:text-gray-100">
-            SocialMate
-            <span className="text-[10px] font-semibold bg-pink-500 text-white px-1.5 py-0.5 rounded-full align-super ml-1">Beta</span>
-          </span>
-        </Link>
+        {/* Logo + language picker — top left */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <Link href="/" className="flex items-center gap-2">
+            <img src="/logo.png" alt="SocialMate" className="w-10 h-10 rounded-xl" />
+            <span className="font-bold text-base tracking-tight text-gray-900 dark:text-gray-100 hidden sm:inline">
+              SocialMate
+              <span className="text-[10px] font-semibold bg-pink-500 text-white px-1.5 py-0.5 rounded-full align-super ml-1">Beta</span>
+            </span>
+          </Link>
+
+          {/* Globe language picker */}
+          <div className="relative" ref={langRef}>
+            <button
+              onClick={() => setLangOpen(p => !p)}
+              className="flex items-center justify-center w-8 h-8 rounded-lg text-base bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
+              aria-label="Change language"
+              title="Change language"
+            >
+              {LANGUAGES.find(l => l.code === locale)?.flag ?? '🌐'}
+            </button>
+            {langOpen && (
+              <div className="absolute top-full left-0 mt-1.5 w-36 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-xl py-1 z-50">
+                {LANGUAGES.map(lang => (
+                  <button key={lang.code} onClick={() => setLocale(lang.code)}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-all text-left ${
+                      locale === lang.code
+                        ? 'font-semibold text-black dark:text-white bg-gray-50 dark:bg-gray-800'
+                        : 'text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800'
+                    }`}>
+                    <span>{lang.flag}</span>
+                    <span>{lang.label}</span>
+                    {locale === lang.code && <span className="ml-auto text-amber-500 text-xs">✓</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Desktop nav */}
         <nav ref={navRef} className="hidden lg:flex items-center gap-0.5 flex-1 justify-center">
@@ -304,6 +362,24 @@ export default function PublicNav() {
                   className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/20 transition-all">
                   🤝 Partners Portal
                 </Link>
+              </div>
+
+              {/* Language */}
+              <div className="pt-2 border-t border-gray-100 dark:border-gray-800 mt-2">
+                <p className="px-4 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-widest">🌐 Language</p>
+                <div className="grid grid-cols-2 gap-1 px-3 pb-2">
+                  {LANGUAGES.map(lang => (
+                    <button key={lang.code} onClick={() => { setLocale(lang.code); setOpen(false) }}
+                      className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm transition-all ${
+                        locale === lang.code
+                          ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 font-semibold'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                      }`}>
+                      <span>{lang.flag}</span>
+                      <span>{lang.label}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
             </nav>
 
