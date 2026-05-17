@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
+import { useI18n } from '@/contexts/I18nContext'
 
 const REPURPOSE_FORMATS = [
   { id: 'thread',        label: 'Thread'    },
@@ -22,6 +23,7 @@ function RepurposeCard({ credits, setCredits, applyCredits }: {
   setCredits: (n: number) => void
   applyCredits: (monthly: number, earned: number, paid: number) => void
 }) {
+  const { t } = useI18n()
   const [content, setContent]   = useState('')
   const [format, setFormat]     = useState<RepurposeFormat>('thread')
   const [result, setResult]     = useState('')
@@ -89,7 +91,7 @@ function RepurposeCard({ credits, setCredits, applyCredits }: {
       <textarea
         value={content}
         onChange={e => setContent(e.target.value)}
-        placeholder="Paste your post here..."
+        placeholder={t('app_ai_features.repurpose_placeholder')}
         rows={4}
         style={{ fontSize: '16px' }}
         className="w-full border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5 outline-none focus:border-amber-400 dark:focus:border-amber-500 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 placeholder-gray-300 dark:placeholder-gray-600 resize-none transition-colors mb-3"
@@ -115,8 +117,8 @@ function RepurposeCard({ credits, setCredits, applyCredits }: {
         disabled={loading || !content.trim()}
         className="w-full bg-amber-400 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-black text-sm font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-2">
         {loading ? (
-          <><div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />Repurposing...</>
-        ) : 'Repurpose →'}
+          <><div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />{t('app_ai_features.repurposing')}</>
+        ) : t('app_ai_features.repurpose_btn')}
       </button>
 
       {error && (
@@ -128,11 +130,11 @@ function RepurposeCard({ credits, setCredits, applyCredits }: {
       {result && !loading && (
         <div className="mt-4 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
           <div className="flex items-center justify-between mb-2">
-            <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Result</p>
+            <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">{t('app_ai_features.result_label')}</p>
             <button
               onClick={handleCopy}
               className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-lg hover:opacity-80 transition-all flex-shrink-0">
-              {copied ? 'Copied ✓' : 'Copy'}
+              {copied ? t('app_ai_features.copied') : t('app_ai_features.copy')}
             </button>
           </div>
           <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">{result}</p>
@@ -345,6 +347,7 @@ const CREATOR_TOOLS = [
 ]
 
 function ToolCard({ tool, plan }: { tool: any; plan: string }) {
+  const { t } = useI18n()
   const isLocked = tool.proOnly && plan === 'free'
 
   const inner = (
@@ -358,7 +361,7 @@ function ToolCard({ tool, plan }: { tool: any; plan: string }) {
           <span className="text-2xl">{tool.emoji}</span>
           <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">{tool.label}</p>
           {tool.proOnly && (
-            <span className="text-xs font-bold px-2 py-0.5 bg-purple-50 text-purple-600 rounded-full">Pro+</span>
+            <span className="text-xs font-bold px-2 py-0.5 bg-purple-50 text-purple-600 rounded-full">{t('app_ai_features.pro_badge')}</span>
           )}
         </div>
         <span className={`text-xs font-bold px-2.5 py-1 rounded-full flex-shrink-0 ${
@@ -371,22 +374,22 @@ function ToolCard({ tool, plan }: { tool: any; plan: string }) {
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">What it does</p>
+          <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">{t('app_ai_features.what_it_does')}</p>
           <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{tool.what}</p>
         </div>
         <div>
-          <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">How it works</p>
+          <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">{t('app_ai_features.how_it_works')}</p>
           <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{tool.how}</p>
         </div>
       </div>
       {!isLocked && tool.href && (
         <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-          <span className="text-xs font-bold text-black dark:text-white group-hover:underline">Use this tool →</span>
+          <span className="text-xs font-bold text-black dark:text-white group-hover:underline">{t('app_ai_features.use_this_tool')}</span>
         </div>
       )}
       {isLocked && (
         <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-          <span className="text-xs font-bold text-purple-500">Upgrade to Pro to unlock →</span>
+          <span className="text-xs font-bold text-purple-500">{t('app_ai_features.upgrade_to_pro')}</span>
         </div>
       )}
     </div>
@@ -415,6 +418,7 @@ function Section({ title, tools, plan }: { title: string; tools: any[]; plan: st
 export default function AIFeaturesPage() {
   const router = useRouter()
   const { credits, setCredits, applyCredits, creditsTotal, plan } = useWorkspace()
+  const { t } = useI18n()
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -440,19 +444,19 @@ export default function AIFeaturesPage() {
 
           <div className="flex items-start justify-between mb-8">
             <div>
-              <h1 className="text-2xl font-extrabold tracking-tight">AI Features</h1>
-              <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">All the tools available in your SocialMate account</p>
+              <h1 className="text-2xl font-extrabold tracking-tight">{t('app_ai_features.title')}</h1>
+              <p className="text-sm text-gray-400 dark:text-gray-500 mt-1">{t('app_ai_features.subtitle')}</p>
             </div>
             <div className={`text-right px-4 py-3 rounded-2xl border ${
               plan === 'agency' ? 'bg-purple-50 dark:bg-purple-950 border-purple-100 dark:border-purple-800' :
               plan === 'pro'    ? 'bg-blue-50 dark:bg-blue-950 border-blue-100 dark:border-blue-800'     :
               'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700'
             }`}>
-              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">AI Credits</p>
+              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">{t('app_ai_features.ai_credits')}</p>
               <p className="text-xl font-extrabold text-gray-900 dark:text-gray-100">{credits} <span className="text-sm font-semibold text-gray-400 dark:text-gray-500">/ {creditsTotal}</span></p>
               {plan === 'free' && (
                 <Link href="/settings?tab=Plan" className="text-xs font-bold text-black dark:text-white hover:underline">
-                  Get more credits →
+                  {t('app_ai_features.get_more_credits')}
                 </Link>
               )}
             </div>
@@ -460,34 +464,32 @@ export default function AIFeaturesPage() {
 
           <div className="bg-black text-white rounded-2xl p-5 mb-4 flex items-center justify-between">
             <div>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">All tools live</p>
-              <p className="text-sm font-extrabold">9 AI tools ready — including SM-Pulse, SM-Radar & Content Gap</p>
-              <p className="text-xs text-gray-400 mt-1">Pro+ required for AI Image Generation and AI Content Calendar.</p>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-1">{t('app_ai_features.all_tools_live')}</p>
+              <p className="text-sm font-extrabold">{t('app_ai_features.tools_ready')}</p>
+              <p className="text-xs text-gray-400 mt-1">{t('app_ai_features.pro_required')}</p>
             </div>
             <Link href="/compose"
               className="flex-shrink-0 bg-white text-black text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all">
-              Open Compose →
+              {t('app_ai_features.open_compose')}
             </Link>
           </div>
 
           <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-2xl px-5 py-3 mb-8 flex items-start gap-3">
             <span className="text-lg flex-shrink-0">💡</span>
             <p className="text-xs text-amber-800 dark:text-amber-300 leading-relaxed">
-              <strong>Why do AI tools cost credits?</strong> Every AI generation calls Google Gemini, which has real compute costs.
-              Credits keep SocialMate sustainable so we can stay free. Free plan includes 50 credits/month — enough to generate
-              ~15 captions, ~25 hashtag sets, or run ~5 SM-Pulse scans. Unused credits roll into your bank (up to 75 max).
+              <strong>{t('app_ai_features.why_credits')}</strong> {t('app_ai_features.credits_explanation')}
             </p>
           </div>
 
           <div className="mb-10">
-            <h2 className="text-base font-extrabold text-gray-900 dark:text-gray-100 mb-4">🔄 Content Repurpose</h2>
+            <h2 className="text-base font-extrabold text-gray-900 dark:text-gray-100 mb-4">{t('app_ai_features.content_repurpose')}</h2>
             <RepurposeCard credits={credits} setCredits={setCredits} applyCredits={applyCredits} />
           </div>
 
-          <Section title="🤖 AI Tools" tools={AI_TOOLS} plan={plan} />
-          <Section title="📈 Growth Intelligence" tools={GROWTH_TOOLS} plan={plan} />
-          <Section title="📆 Scheduling & Automation" tools={SCHEDULING_TOOLS} plan={plan} />
-          <Section title="🛠 Creator Tools" tools={CREATOR_TOOLS} plan={plan} />
+          <Section title={t('app_ai_features.section_ai_tools')} tools={AI_TOOLS} plan={plan} />
+          <Section title={t('app_ai_features.section_growth')} tools={GROWTH_TOOLS} plan={plan} />
+          <Section title={t('app_ai_features.section_scheduling')} tools={SCHEDULING_TOOLS} plan={plan} />
+          <Section title={t('app_ai_features.section_creator')} tools={CREATOR_TOOLS} plan={plan} />
 
         </div>
       </main>
