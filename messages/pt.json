@@ -687,5 +687,49 @@
     "white_label": "Marca branca",
     "appearance": "Aparência",
     "brand_voice": "Voz da marca"
+  },
+  "app_streak": {
+    "title": "Posting Streak",
+    "current_streak": "Current streak",
+    "longest_streak": "Longest streak",
+    "total_posts": "Total posts",
+    "active_days": "Active days",
+    "days": "days",
+    "no_streak": "No streak yet",
+    "start_streak": "Post today to start your streak!",
+    "keep_going": "Keep it going!",
+    "streak_broken": "Streak broken"
+  },
+  "app_links": {
+    "title": "Link Shortener",
+    "create_link": "Create short link",
+    "your_links": "Your links",
+    "no_links": "No short links yet",
+    "no_links_sub": "Create your first short link",
+    "copy_link": "Copy link",
+    "delete_link": "Delete link",
+    "clicks": "clicks",
+    "created": "Created",
+    "original_url": "Original URL",
+    "short_url": "Short URL"
+  },
+  "app_activity": {
+    "title": "Activity",
+    "no_activity": "No activity yet",
+    "no_activity_sub": "Workspace events will appear here",
+    "recent_activity": "Recent Activity",
+    "just_now": "just now",
+    "view_all": "View all"
+  },
+  "app_media": {
+    "title": "Media Library",
+    "upload": "Upload files",
+    "no_media": "No media files yet",
+    "no_media_sub": "Upload images, videos and files",
+    "file_size": "File size",
+    "uploaded_at": "Uploaded",
+    "copy_url": "Copy URL",
+    "delete_file": "Delete file",
+    "uploading": "Uploading…"
   }
 }
