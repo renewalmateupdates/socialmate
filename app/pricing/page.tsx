@@ -489,7 +489,7 @@ export default function Pricing() {
         {/* BIRTHDAY PROMO BANNER — teaser before 6/15, active 6/15–12/15 */}
         {(() => {
           const now = new Date()
-          const start = new Date('2026-06-15')
+          const start = new Date('2026-05-17')
           const end = new Date('2026-12-16')
           const isActive = now >= start && now < end
           const isTeaser = now < start
