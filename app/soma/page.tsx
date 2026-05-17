@@ -1,5 +1,7 @@
+'use client'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
+import { useI18n } from '@/contexts/I18nContext'
 
 const STATS = [
   { value: '3',    label: 'Posting Modes' },
@@ -33,6 +35,7 @@ const MODES = [
     price: '$0',
     priceSub: 'Included with Pro plan',
     badge: 'Included Free',
+    badgeKey: 'app_soma_landing.included_free',
     cardBg: 'bg-emerald-50 dark:bg-emerald-950/20',
     border: 'border-2 border-emerald-400',
     headerText: 'text-gray-900 dark:text-white',
@@ -56,6 +59,7 @@ const MODES = [
     price: '$10',
     priceSub: '/month add-on',
     badge: 'Most Popular',
+    badgeKey: 'app_soma_landing.most_popular',
     cardBg: 'bg-amber-50 dark:bg-amber-950/20',
     border: 'border-2 border-amber-400',
     headerText: 'text-gray-900 dark:text-white',
@@ -79,6 +83,7 @@ const MODES = [
     price: '$20',
     priceSub: '/month add-on',
     badge: 'Full Autonomous',
+    badgeKey: 'app_soma_landing.full_autonomous',
     cardBg: 'bg-purple-50 dark:bg-purple-950/20',
     border: 'border-2 border-purple-500',
     headerText: 'text-gray-900 dark:text-white',
@@ -137,6 +142,7 @@ const FAQS = [
 ]
 
 export default function SomaLandingPage() {
+  const { t } = useI18n()
   return (
     <PublicLayout>
       <div className="max-w-6xl mx-auto px-6 py-16">
@@ -145,19 +151,18 @@ export default function SomaLandingPage() {
         <section className="text-center mb-20">
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 text-xs font-bold mb-6 uppercase tracking-widest">
             <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
-            AI Marketing Agent
+            {t('app_soma_landing.badge')}
           </span>
 
           <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50 mb-6 leading-tight">
-            Your life has a changelog.<br className="hidden sm:block" />{' '}
+            {t('app_soma_landing.hero_headline')}<br className="hidden sm:block" />{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-fuchsia-500">
-              SOMA ships it.
+              {t('app_soma_landing.hero_emphasis')}
             </span>
           </h1>
 
           <p className="text-base sm:text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed mb-10">
-            SOMA watches what changed week over week in your master doc and turns the delta into a
-            platform-native content calendar. No brainstorming. No blank page. Just your story, told everywhere.
+            {t('app_soma_landing.hero_sub')}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
@@ -165,22 +170,22 @@ export default function SomaLandingPage() {
               href="/soma/dashboard"
               className="bg-violet-600 hover:bg-violet-700 text-white font-bold px-8 py-3.5 rounded-2xl transition-all text-sm w-full sm:w-auto text-center"
             >
-              Open SOMA Dashboard
+              {t('app_soma_landing.open_dashboard')}
             </Link>
             <a
               href="#how-it-works"
               className="border-2 border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-bold px-8 py-3.5 rounded-2xl hover:border-violet-500 hover:text-violet-600 dark:hover:border-violet-500 dark:hover:text-violet-400 transition-all text-sm w-full sm:w-auto text-center"
             >
-              See How It Works
+              {t('app_soma_landing.see_how')}
             </a>
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-gray-400 dark:text-gray-500 font-medium">
             {[
-              'Platform-native post generation',
-              'Weekly master doc diffing',
-              'Safe / Autopilot / Full Send modes',
-              'Built by Gilgamesh Enterprise LLC',
+              t('app_soma_landing.trust_1'),
+              t('app_soma_landing.trust_2'),
+              t('app_soma_landing.trust_3'),
+              t('app_soma_landing.trust_4'),
             ].map(item => (
               <span key={item} className="flex items-center gap-1.5">
                 <span className="text-violet-500">◆</span> {item}
@@ -204,9 +209,9 @@ export default function SomaLandingPage() {
         {/* ── HOW IT WORKS ── */}
         <section id="how-it-works" className="mb-20">
           <div className="text-center mb-12">
-            <p className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">The Process</p>
+            <p className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">{t('app_soma_landing.process_eyebrow')}</p>
             <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
-              How SOMA Works
+              {t('app_soma_landing.process_headline')}
             </h2>
           </div>
 
@@ -232,12 +237,12 @@ export default function SomaLandingPage() {
         {/* ── THREE MODES ── */}
         <section id="modes" className="mb-20">
           <div className="text-center mb-12">
-            <p className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">Control Levels</p>
+            <p className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">{t('app_soma_landing.modes_eyebrow')}</p>
             <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
-              You choose how much SOMA does
+              {t('app_soma_landing.modes_headline')}
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl mx-auto mt-3">
-              Start with Safe Mode on your Pro plan. Upgrade when you trust the agent.
+              {t('app_soma_landing.modes_sub')}
             </p>
           </div>
 
@@ -251,7 +256,7 @@ export default function SomaLandingPage() {
                   </div>
                   {mode.badge && (
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${mode.badgeStyle}`}>
-                      {mode.badge}
+                      {t(mode.badgeKey!)}
                     </span>
                   )}
                 </div>
@@ -272,11 +277,10 @@ export default function SomaLandingPage() {
         <section id="platforms" className="mb-20">
           <div className="bg-black dark:bg-gray-950 border border-gray-800 rounded-2xl overflow-hidden">
             <div className="px-8 py-8 border-b border-gray-800">
-              <p className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">Platform-Native Output</p>
-              <h2 className="text-2xl font-extrabold text-white mb-2">One story. Every format.</h2>
+              <p className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">{t('app_soma_landing.platforms_eyebrow')}</p>
+              <h2 className="text-2xl font-extrabold text-white mb-2">{t('app_soma_landing.platforms_headline')}</h2>
               <p className="text-sm text-gray-400 max-w-xl">
-                SOMA doesn&apos;t copy-paste the same post everywhere. It reformats your message natively
-                for each platform — so it sounds right everywhere.
+                {t('app_soma_landing.platforms_sub')}
               </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
@@ -284,7 +288,7 @@ export default function SomaLandingPage() {
                 <div key={p.name} className="px-6 py-5 border-b border-r border-gray-800">
                   <p className={`text-sm font-bold mb-1 flex items-center gap-2 ${p.live ? 'text-violet-400' : 'text-gray-600'}`}>
                     <span>{p.live ? '◆' : '○'}</span> {p.name}
-                    {!p.live && <span className="text-[10px] font-semibold bg-gray-800 text-gray-500 px-1.5 py-0.5 rounded">soon</span>}
+                    {!p.live && <span className="text-[10px] font-semibold bg-gray-800 text-gray-500 px-1.5 py-0.5 rounded">{t('app_soma_landing.platform_soon_badge')}</span>}
                   </p>
                   <p className="text-xs text-gray-500">{p.format}</p>
                 </div>
@@ -292,8 +296,8 @@ export default function SomaLandingPage() {
             </div>
             <div className="px-8 py-4 border-t border-gray-800 bg-gray-900/40">
               <p className="text-xs text-gray-500">
-                <span className="text-violet-400 font-semibold">◆ Live now</span> — SOMA generates and schedules automatically to your connected accounts.{' '}
-                <span className="text-gray-400 font-semibold">○ Coming soon</span> — SOMA generates the content anyway. Copy and post manually, or it queues automatically once the platform connects.
+                <span className="text-violet-400 font-semibold">{t('app_soma_landing.platform_live_note')}</span>{t('app_soma_landing.platform_live_desc')}{' '}
+                <span className="text-gray-400 font-semibold">{t('app_soma_landing.platform_soon_note')}</span>{t('app_soma_landing.platform_soon_desc')}
               </p>
             </div>
           </div>
@@ -302,13 +306,12 @@ export default function SomaLandingPage() {
         {/* ── PROJECTS (AGENCY) ── */}
         <section id="projects" className="mb-20">
           <div className="text-center mb-12">
-            <p className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">For Agencies</p>
+            <p className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">{t('app_soma_landing.projects_eyebrow')}</p>
             <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
-              One workspace. Multiple clients.
+              {t('app_soma_landing.projects_headline')}
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl mx-auto mt-3">
-              SOMA Projects let you run separate master doc pipelines per client — each with their own
-              voice profile, platform settings, and content history.
+              {t('app_soma_landing.projects_sub')}
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -329,9 +332,9 @@ export default function SomaLandingPage() {
         {/* ── PRICING ── */}
         <section id="pricing" className="mb-20">
           <div className="text-center mb-10">
-            <p className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">Pricing</p>
+            <p className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">{t('app_soma_landing.pricing_eyebrow')}</p>
             <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
-              Start free with Pro. Scale when ready.
+              {t('app_soma_landing.pricing_headline')}
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -344,7 +347,7 @@ export default function SomaLandingPage() {
                   </div>
                   {mode.badge && (
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${mode.badgeStyle}`}>
-                      {mode.badge}
+                      {t(mode.badgeKey!)}
                     </span>
                   )}
                 </div>
@@ -371,12 +374,12 @@ export default function SomaLandingPage() {
         {/* ── CREDIT COSTS ── */}
         <section id="credits" className="mb-20">
           <div className="text-center mb-10">
-            <p className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">Transparent Pricing</p>
+            <p className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">{t('app_soma_landing.credits_eyebrow')}</p>
             <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
-              What does each action cost?
+              {t('app_soma_landing.credits_headline')}
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl mx-auto mt-3">
-              SOMA uses your SocialMate AI credits. Credits reset monthly on Pro and Agency plans — or buy one-time packs anytime.
+              {t('app_soma_landing.credits_sub')}
             </p>
           </div>
 
@@ -405,12 +408,12 @@ export default function SomaLandingPage() {
             <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-800">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="text-xs text-gray-500 dark:text-gray-400">
-                  <span className="font-semibold text-gray-700 dark:text-gray-300">Full weekly run = 100 credits.</span>
-                  {' '}Pro plan (500 cr/mo) covers 5 full runs with 100 left over for other AI tools.
+                  <span className="font-semibold text-gray-700 dark:text-gray-300">{t('app_soma_landing.credits_full_run')}</span>
+                  {' '}{t('app_soma_landing.credits_pro_covers')}
                 </div>
                 <div className="flex items-center gap-4 text-xs font-semibold flex-shrink-0">
-                  <span className="text-gray-500">Credit packs from <span className="text-violet-600 dark:text-violet-400">$1.99</span></span>
-                  <a href="/pricing" className="text-violet-600 dark:text-violet-400 hover:underline">See all plans →</a>
+                  <span className="text-gray-500">{t('app_soma_landing.credits_packs_from')} <span className="text-violet-600 dark:text-violet-400">$1.99</span></span>
+                  <a href="/pricing" className="text-violet-600 dark:text-violet-400 hover:underline">{t('app_soma_landing.credits_see_plans')}</a>
                 </div>
               </div>
             </div>
@@ -420,9 +423,9 @@ export default function SomaLandingPage() {
         {/* ── FAQ ── */}
         <section id="faq" className="mb-20">
           <div className="text-center mb-10">
-            <p className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">FAQ</p>
+            <p className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">{t('app_soma_landing.faq_eyebrow')}</p>
             <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
-              Questions answered.
+              {t('app_soma_landing.faq_headline')}
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -440,24 +443,18 @@ export default function SomaLandingPage() {
           <div className="bg-amber-50 dark:bg-amber-950/30 border-2 border-amber-300 dark:border-amber-700 rounded-2xl p-8">
             <div className="text-center mb-4">
               <p className="text-base font-extrabold text-amber-700 dark:text-amber-400 uppercase tracking-widest">
-                Responsible Posting Policy
+                {t('app_soma_landing.responsible_eyebrow')}
               </p>
             </div>
             <div className="max-w-3xl mx-auto space-y-3 text-sm text-amber-800 dark:text-amber-300 leading-relaxed">
               <p>
-                <strong>SOMA is an automation tool — you are responsible for your content.</strong> Automated posting
-                must comply with each platform&apos;s Terms of Service. Do not use SOMA to spam, harass, mislead,
-                or post at volumes that could trigger platform rate limits or account restrictions.
+                <strong>{t('app_soma_landing.responsible_p1')}</strong>
               </p>
               <p>
-                SOMA&apos;s daily and monthly caps are designed to keep your accounts healthy. Exceeding
-                platform-recommended posting frequency — even within SOMA&apos;s limits — is at your own risk.
-                SocialMate and Gilgamesh Enterprise LLC are not liable for account suspensions or restrictions
-                resulting from your posting behavior.
+                {t('app_soma_landing.responsible_p2')}
               </p>
               <p className="text-xs text-amber-600 dark:text-amber-400 font-semibold pt-2 border-t border-amber-200 dark:border-amber-800">
-                By enabling Autopilot or Full Send mode, you acknowledge that posts will go live automatically
-                on your behalf and that you accept full responsibility for their content and timing.
+                {t('app_soma_landing.responsible_fine')}
               </p>
             </div>
           </div>
@@ -469,19 +466,18 @@ export default function SomaLandingPage() {
             J
           </div>
           <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100 mb-1">
-            Built by Joshua Bostic — Gilgamesh Enterprise LLC
+            {t('app_soma_landing.built_by')}
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400 max-w-lg mx-auto mb-5 leading-relaxed">
-            Solo founder. Bootstrapped. Building tools that give people the same marketing power that
-            agencies charge thousands for — at prices that don&apos;t gatekeep.
+            {t('app_soma_landing.built_by_sub')}
           </p>
           <div className="flex items-center justify-center gap-4">
             <Link href="/pricing" className="text-xs font-bold text-violet-500 hover:text-violet-400 transition-colors">
-              SocialMate Plans →
+              {t('app_soma_landing.socialmate_plans')}
             </Link>
             <span className="text-gray-300 dark:text-gray-700">|</span>
             <Link href="/enki" className="text-xs font-bold text-violet-500 hover:text-violet-400 transition-colors">
-              Enki Trading Agent →
+              {t('app_soma_landing.enki_link')}
             </Link>
           </div>
         </section>

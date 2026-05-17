@@ -1,7 +1,9 @@
+'use client'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import EnkiPricingSection from './PricingSection'
 import WaitlistButton from './WaitlistButton'
+import { useI18n } from '@/contexts/I18nContext'
 
 const FEATURES = [
   {
@@ -146,11 +148,12 @@ const STATS = [
 ]
 
 export default function EnkiPage() {
+  const { t } = useI18n()
   return (
     <PublicLayout>
       {/* ── DEV BANNER ── */}
       <div className="w-full bg-amber-400 text-black text-sm font-bold text-center py-3 px-4">
-        🚧 Enki is in active development — join the waitlist for founding member pricing and early access.
+        🚧 {t('app_enki_landing.dev_banner')}
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-16">
@@ -159,20 +162,18 @@ export default function EnkiPage() {
         <section className="text-center mb-20">
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-bold mb-6 uppercase tracking-widest">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-            Preview — Early Access
+            {t('app_enki_landing.badge')}
           </span>
 
           <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50 mb-6 leading-tight">
-            Build Your Empire<br className="hidden sm:block" />{' '}
+            {t('app_enki_landing.hero_headline')}<br className="hidden sm:block" />{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">
-              While You Sleep
+              {t('app_enki_landing.hero_emphasis')}
             </span>
           </h1>
 
           <p className="text-base sm:text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed mb-10">
-            Enki is the cold elite autonomous guardian of your treasury — executing disciplined
-            stock and crypto doctrines with fortress-grade downside protection and relentless compounding.
-            No finance degree required.
+            {t('app_enki_landing.hero_sub')}
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
@@ -180,23 +181,23 @@ export default function EnkiPage() {
               defaultTier="citizen"
               className="bg-black dark:bg-white text-white dark:text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm w-full sm:w-auto text-center"
             >
-              Start Citizen — Free
+              {t('app_enki_landing.start_citizen')}
             </WaitlistButton>
             <a
               href="#how-it-works"
               className="border-2 border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-bold px-8 py-3.5 rounded-2xl hover:border-black dark:hover:border-white hover:text-black dark:hover:text-white transition-all text-sm w-full sm:w-auto text-center"
             >
-              See How It Works
+              {t('app_enki_landing.see_how')}
             </a>
           </div>
 
           {/* Trust bar */}
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-gray-400 dark:text-gray-500 font-medium">
             {[
-              'Fortress-grade downside protection',
-              '24/7 stock + crypto execution',
-              'Zero-configuration safe defaults',
-              'Built by Gilgamesh Enterprise LLC',
+              t('app_enki_landing.trust_1'),
+              t('app_enki_landing.trust_2'),
+              t('app_enki_landing.trust_3'),
+              t('app_enki_landing.trust_4'),
             ].map((item) => (
               <span key={item} className="flex items-center gap-1.5">
                 <span className="text-amber-500">◆</span> {item}
@@ -220,9 +221,9 @@ export default function EnkiPage() {
         {/* ── HOW IT WORKS ── */}
         <section id="how-it-works" className="mb-20">
           <div className="text-center mb-12">
-            <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-2">The Process</p>
+            <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-2">{t('app_enki_landing.process_eyebrow')}</p>
             <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
-              How the Guardian Works
+              {t('app_enki_landing.process_headline')}
             </h2>
           </div>
 
@@ -252,12 +253,12 @@ export default function EnkiPage() {
         {/* ── SEVEN SIGNAL SOURCES ── */}
         <section id="signals" className="mb-20">
           <div className="text-center mb-12">
-            <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-2">Intelligence Layer</p>
+            <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-2">{t('app_enki_landing.signals_eyebrow')}</p>
             <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
-              Seven Signal Sources
+              {t('app_enki_landing.signals_headline')}
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl mx-auto mt-3">
-              All seven must align before confidence crosses the execution threshold. Below 6/10 — the guardian waits.
+              {t('app_enki_landing.signals_sub')}
             </p>
           </div>
 
@@ -274,9 +275,9 @@ export default function EnkiPage() {
             ))}
             {/* 8th card — summary */}
             <div className="bg-black dark:bg-amber-400/10 border border-amber-400/30 rounded-xl p-4 flex flex-col justify-center">
-              <p className="text-xs font-bold text-amber-400 mb-1">THRESHOLD</p>
+              <p className="text-xs font-bold text-amber-400 mb-1">{t('app_enki_landing.threshold_label')}</p>
               <p className="text-2xl font-extrabold text-amber-400 mb-1">6 / 10</p>
-              <p className="text-xs text-gray-400">Minimum confidence to execute a BUY. 5/10 for SELL.</p>
+              <p className="text-xs text-gray-400">{t('app_enki_landing.threshold_buy')}</p>
             </div>
           </div>
         </section>
@@ -285,11 +286,10 @@ export default function EnkiPage() {
         <section id="fortress" className="mb-20">
           <div className="bg-black dark:bg-gray-950 border border-gray-800 rounded-2xl overflow-hidden">
             <div className="px-8 py-8 border-b border-gray-800">
-              <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-2">Risk Doctrine</p>
-              <h2 className="text-2xl font-extrabold text-white mb-2">Fortress Guard</h2>
+              <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-2">{t('app_enki_landing.fortress_eyebrow')}</p>
+              <h2 className="text-2xl font-extrabold text-white mb-2">{t('app_enki_landing.fortress_headline')}</h2>
               <p className="text-sm text-gray-400 max-w-xl">
-                Your capital is protected before it can grow. These rules run before every single order —
-                no exceptions, no overrides on Citizen or Commander.
+                {t('app_enki_landing.fortress_sub')}
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
@@ -312,9 +312,9 @@ export default function EnkiPage() {
         {/* ── FEATURES GRID ── */}
         <section id="features" className="mb-20">
           <div className="text-center mb-12">
-            <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-2">Capabilities</p>
+            <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-2">{t('app_enki_landing.features_eyebrow')}</p>
             <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
-              Everything the Guardian Does
+              {t('app_enki_landing.features_headline')}
             </h2>
           </div>
 
@@ -344,21 +344,20 @@ export default function EnkiPage() {
           id="waitlist"
           className="bg-black dark:bg-gray-950 border border-gray-800 rounded-2xl p-8 sm:p-12 mb-16 text-center"
         >
-          <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-4">Early Access</p>
+          <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-4">{t('app_enki_landing.waitlist_eyebrow')}</p>
           <h2 className="text-3xl font-extrabold text-white mb-3">
-            The guardian awaits your command.
+            {t('app_enki_landing.waitlist_headline')}
           </h2>
           <p className="text-sm text-gray-400 max-w-lg mx-auto mb-8">
-            Join the waitlist and be among the first Architects to run paper trading when the beta opens.
-            Founding member pricing locked in — no price increases for early access members.
+            {t('app_enki_landing.waitlist_sub')}
           </p>
           <WaitlistButton
             defaultTier="citizen"
             className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-500 text-black font-bold px-8 py-3.5 rounded-2xl transition-all text-sm"
           >
-            Start as Citizen — Free →
+            {t('app_enki_landing.start_as_citizen')}
           </WaitlistButton>
-          <p className="text-xs text-gray-500 mt-4">No spam. No commitment. No credit card for Citizen.</p>
+          <p className="text-xs text-gray-500 mt-4">{t('app_enki_landing.waitlist_fine')}</p>
         </section>
 
         {/* ── LEGAL DISCLAIMER ── */}
@@ -367,22 +366,22 @@ export default function EnkiPage() {
             <div className="flex items-center justify-center gap-2 mb-4">
               <span className="text-2xl">⚠️</span>
               <p className="text-base font-extrabold text-red-700 dark:text-red-400 uppercase tracking-widest">
-                Important Risk Disclosure
+                {t('app_enki_landing.risk_eyebrow')}
               </p>
               <span className="text-2xl">⚠️</span>
             </div>
             <div className="max-w-3xl mx-auto space-y-3 text-sm text-red-800 dark:text-red-300 leading-relaxed">
               <p>
-                <strong>Enki is a trading automation tool — not a financial advisor, broker, or investment service.</strong> Nothing on this page or within the Enki platform constitutes financial, investment, legal, or tax advice.
+                <strong>{t('app_enki_landing.risk_p1')}</strong>
               </p>
               <p>
-                Trading in stocks, ETFs, and cryptocurrencies involves <strong>substantial risk of loss</strong>, including the possible loss of your entire principal. Past backtest or paper-trading performance does not guarantee future results. Markets are unpredictable and no algorithm can eliminate risk.
+                {t('app_enki_landing.risk_p2')}
               </p>
               <p>
-                Enki&apos;s Fortress Guard and risk rules reduce exposure but <strong>cannot protect against all losses</strong>. You are solely responsible for your investment decisions. Only trade with money you can afford to lose entirely.
+                {t('app_enki_landing.risk_p3')}
               </p>
               <p className="text-xs text-red-600 dark:text-red-400 font-semibold pt-2 border-t border-red-200 dark:border-red-800">
-                Gilgamesh Enterprise LLC does not provide investment advice. Use of Enki constitutes acceptance that you are acting as an independent investor making your own decisions. Consult a licensed financial professional before trading.
+                {t('app_enki_landing.risk_fine')}
               </p>
             </div>
           </div>
@@ -394,25 +393,24 @@ export default function EnkiPage() {
             J
           </div>
           <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100 mb-1">
-            Built by Joshua Bostic — Gilgamesh Enterprise LLC
+            {t('app_enki_landing.built_by')}
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400 max-w-lg mx-auto mb-5 leading-relaxed">
-            Solo founder. Bootstrapped. The same person behind SocialMate and RenewalMate.
-            Building the Gilgamesh Empire OS — tools for people who can&apos;t afford the expensive ones.
+            {t('app_enki_landing.built_by_sub')}
           </p>
           <div className="flex items-center justify-center gap-4">
             <Link
               href="https://socialmate.studio"
               className="text-xs font-bold text-amber-500 hover:text-amber-400 transition-colors"
             >
-              SocialMate →
+              {t('app_enki_landing.socialmate_link')}
             </Link>
             <span className="text-gray-300 dark:text-gray-700">|</span>
             <Link
               href="https://www.renewalmate.com"
               className="text-xs font-bold text-amber-500 hover:text-amber-400 transition-colors"
             >
-              RenewalMate →
+              {t('app_enki_landing.renewalmate_link')}
             </Link>
           </div>
         </section>

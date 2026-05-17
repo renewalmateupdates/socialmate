@@ -1,8 +1,11 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+
+// Landing pages that are server-rendered per locale — need a navigation to switch language
+const PUBLIC_LOCALE_PATHS = new Set(['/', '/es', '/de', '/fr', '/pt', '/ru', '/zh'])
 
 const LANGUAGES = [
   { code: 'en', flag: '🇺🇸', label: 'English'   },
@@ -31,6 +34,7 @@ type DropdownKey = 'audiences' | 'resources'
 
 export default function PublicNav() {
   const pathname = usePathname()
+  const router   = useRouter()
   const [open, setOpen] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState<DropdownKey | null>(null)
@@ -49,6 +53,10 @@ export default function PublicNav() {
     setLocaleState(code)
     try { localStorage.setItem('sm_locale', code) } catch {}
     setLangOpen(false)
+    // Public landing pages are server-rendered per locale — navigate to the locale URL
+    if (PUBLIC_LOCALE_PATHS.has(pathname)) {
+      router.push(code === 'en' ? '/' : `/${code}`)
+    }
   }
 
   useEffect(() => {
