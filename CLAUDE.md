@@ -520,10 +520,12 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **SQL to run in Supabase:** `supabase/migrations/20260513000001_iris_newsletter.sql` (ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS iris_opt_in BOOLEAN DEFAULT true; + CREATE TABLE iris_dispatches).
 - **Edition #1 of IRIS Dispatch sent** — Subject: "We're Live, We're Building, and We're Not Stopping". 29 recipients. Joshua confirmed receipt.
 
-**May 17, 2026 (PRs #361–#362):**
+**May 17, 2026 (PRs #361–#363):**
 - **Calendar definitive fix** (PR #361) — Root cause: `.select('id, content, ..., tags')` explicit column list fails silently if `tags` column doesn't exist (Supabase returns `error + null`, not empty array). Fix: changed to `select('*')` everywhere in calendar page. Also added `wsLoading` guard so fetch only runs after WorkspaceContext resolves, auto-navigate effect to jump to the month with first scheduled post when current month is empty, limit bumped to 1000. **Never add explicit column lists or date filters to the calendar query — both cause silent failures.**
-- **Full-app i18n — core pages wired** (PR #362) — All 12 core app pages now use `useI18n()` and `t()`: Dashboard, Queue, Calendar, Analytics, Accounts, Inbox, Team, Drafts, Streak, Links, Activity, Media Library. New namespaces added: `app_streak`, `app_links`, `app_activity`, `app_media` — in all 7 locale JSON files (en + zh with real translations, es/de/fr/pt/ru use English fallback). TypeScript enforces all locale files match `typeof enMessages` — all 5 previously missing locale files updated. Roadmap updated: i18n moved from in-progress → shipped.
-- **Language switcher on landing page fixed** — `PublicNav.setLocale()` now calls `router.push()` to the locale URL when on a public landing page (`/`, `/es`, `/de`, etc.). Previously it only wrote to localStorage which has no effect on server-rendered pages. App interior pages unchanged (I18nContext + localStorage still handles those).
+- **Full-app i18n — core pages wired** (PR #362) — All 12 core app pages now use `useI18n()` and `t()`: Dashboard, Queue, Calendar, Analytics, Accounts, Inbox, Team, Drafts, Streak, Links, Activity, Media Library. New namespaces added: `app_streak`, `app_links`, `app_activity`, `app_media` — in all 7 locale JSON files (en + zh with real translations, es/de/fr/pt/ru use English fallback). TypeScript enforces all locale files match `typeof enMessages` — **rule: any new key added to en.json must be added to ALL 6 other locale files in the same commit or build fails.**
+- **Full-app i18n — remaining pages wired** (PR #363) — Compose, AI Features, Agents hub, SOMA landing, Enki landing all wired with `t()`. New namespaces: `app_ai_features`, `app_agents`, `app_soma_landing`, `app_enki_landing`. All 7 locale files in sync — validated clean.
+- **Language switcher on landing page fixed** (PR #363) — `PublicNav.setLocale()` now calls `router.push()` to the locale URL when on a public landing page (`/`, `/es`, `/de`, etc.). Previously it only wrote to localStorage which has no effect on server-rendered pages.
+- **Birthday promo BDAY31 activated** (PR #363) — Start date moved from 2026-06-15 to 2026-05-17. Active now through Dec 15, 2026. Amber banner + BDAY31 apply button live on /pricing.
 
 **May 16, 2026 (PRs #350–#355):**
 - **next-intl / Turbopack build error resolved** (PRs #350, #352) — `createNextIntlPlugin` injects a webpack alias that Turbopack silently ignores, causing "Couldn't find next-intl config file" at runtime. Fix: removed the plugin wrapper from `next.config.ts`, rewrote `LocalizedLanding.tsx` with direct JSON imports + `createT()` helper, deleted `i18n/routing.ts` + `i18n/request.ts` + all `/app/{locale}/layout.tsx` files, cleaned `proxy.ts` of all next-intl imports.
@@ -550,46 +552,41 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 ## Pending / In Progress
 
-- **Google Play — closed testing** — App in console. Internal + closed testing active. v1.0.7 (versionCode 3) uploaded. **Blocker: 12 opted-in testers + 14-day run.** 1 tester opted in. Need 11 more. Signup page has passive "Join Beta" CTA recruiting 24/7. Reddit posts live on 6 subreddits. Once 12 opt in → 14-day clock → answer Google questions → apply for production.
+- **Google Play — closed testing** — Cooking slowly. v1.0.7 (versionCode 3) uploaded, 1 tester opted in. Passive CTA on signup page. *Do not revisit until June 2026.*
 
-- **TikTok Production API** — Submitted Apr 23. Demo video submitted May 5. Support ticket `ad7714530aa61ad4` open. Check portal periodically. No action until approved.
+- **TikTok Production API** — In review. Support ticket `ad7714530aa61ad4` open. *Do not revisit until June 2026.*
 
-- **SOMA content generation** — Submit updated CLAUDE.md (May 16 version) as master doc to SocialMate Growth SOMA project. Voice DNA (Advanced) is active. Do NOT write posts manually.
+- **LinkedIn API** — LinkedIn Company Page started. Next step: create Developer App at developer.linkedin.com → apply for `r_organization_social` + `w_organization_social` permissions. Review typically 2–4 weeks. **Medium difficulty — mostly a waiting game once submitted.**
 
-- **LinkedIn posts** — Real founding story post ready (RenewalMate → ProductHunt Claude Code crossover → built SocialMate). Publish manually to LinkedIn.
+- **Instagram / Facebook** — Both require Meta App Review (same process, can be one app). Harder than LinkedIn — Meta review is strict. Business account required, users need Business/Creator Instagram accounts. **Hard — plan for 4–8 week review timeline.** Not worth starting until LinkedIn is live.
 
-- **AlternativeTo listing** — Live at alternativeto.net/software/socialmate-studio/. 9 listed alternatives. ✅ Done.
-
-- **Reddit cofounder post** — Posted to r/cofounderhunt via u/InterestingRun7594 (May 16 updated version). Continue replying to comments.
+- **SOMA content run** — Submit updated CLAUDE.md (May 17) to SOMA project. Priority for content generation.
 
 - **Cofounder search** — Actively recruiting marketing cofounder via Reddit/LinkedIn. ~10% sweat equity over 24-month vest, 2-week trial, real contract.
 
-- **Wyoming LLC annual report** — Needs filing. Low funds currently — do when budget allows.
+- **Wyoming LLC annual report** — File when budget allows.
 
-- **Enki Truth Mode** — 50-trade minimum per strategy before results are statistically valid. Check `/enki/truth` periodically.
+- **Enki Truth Mode** — 50-trade minimum per strategy. Check `/enki/truth` periodically.
 
-- **Wall of Love** — Live at `/wall-of-love`. Add real testimonial entries to `TESTIMONIALS` array as quotes come in.
+- **Wall of Love** — Live at `/wall-of-love`. Add entries to `TESTIMONIALS` array when real quotes come in.
 
-- **Birthday promo BDAY31** — Active June 15 – Dec 15, 2026. Stripe coupon live (`promo_1TX2Ay7OMwDowUuUiLXH4Fe3`). Pricing page banner handles teaser/active states automatically.
+- **Birthday promo BDAY31** — ✅ ACTIVE NOW through Dec 15, 2026. Stripe coupon live (`promo_1TX2Ay7OMwDowUuUiLXH4Fe3`).
 
-- **SocialMatePR (girlfriend's video brand)** — Claude chat mentor prompt delivered May 16. She's setting up TikTok, YouTube, Instagram, Pinterest, Snapchat, Facebook video accounts. First video to all platforms once all profiles are ready.
+- **SocialMatePR (girlfriend's video brand)** — Claude chat mentor prompt delivered May 16. First video to all platforms once profiles are ready.
 
 **Roadmap (next up):**
-- **i18n — remaining pages** — SOMA, Enki, Compose, Settings (full), AI Features, Bio, Creator Hub, Agents, and other inner pages still use hardcoded English. Core pages done (PR #362). Remaining pages need the same `useI18n()` + `t()` wiring when touched.
-- **SOMA content run** — Submit updated CLAUDE.md (May 17) to SOMA project. Priority for content generation.
-- **Product Hunt follow-up** — "We've shipped 50+ features since launch" post/comment. Target: June 1.
-- **Testimonials** — Reach out to 5 existing users for one-liner quotes → add to Wall of Love.
-- **Discord community** — SocialMate's own Discord server as tester pool + feature feedback loop.
-- **Landing page "Available on Google Play" badge** — Add after Play Store production approval.
-- **Gilgamesh's Guides Vol. 5+** — Creator monetization deep-dive. Email capture live on all 4 guides.
+- **New features** — Core platform is stable. Focus: growth, testimonials, LinkedIn API application.
+- **i18n — remaining inner pages** — Creator Hub, Bio, Settings (full), SOMA/Enki sub-pages still need `t()` wiring. Wire when those pages are touched.
+- **Product Hunt follow-up** — "We've shipped 50+ features since launch" post. Target: June 1.
+- **Gilgamesh's Guides Vol. 5+** — Creator monetization deep-dive.
+- **Discord community** — Own Discord server as tester pool + feedback loop.
 - **Apple App Store** — Deferred 3–6 months.
 - **LinkedIn publishing** — Blocked on API credentials. On hold.
-- **Instagram / Facebook / Threads** — Pending Meta API access. Long-term roadmap.
 ## Confirmed Done (stop asking about these)
 
 - ✅ **Calendar query fix (May 16, PR #355)** — Removed all date filters. Fetch all user posts (limit 500) with no `created_at`/`scheduled_at` range. SOMA posts may have null `created_at`; date filters silently excluded them. Never add a date filter to the calendar query again.
 - ✅ **next-intl removed (May 16, PRs #350, #352)** — `createNextIntlPlugin` incompatible with Turbopack. Removed from `next.config.ts`. `LocalizedLanding.tsx` uses direct JSON imports. `i18n/routing.ts`, `i18n/request.ts`, and all locale layout files deleted. `proxy.ts` cleaned of all next-intl imports. Build is clean. Never re-introduce `next-intl` or `createNextIntlPlugin`.
-- ✅ **Full-app i18n core pages (May 17, PR #362)** — Dashboard, Queue, Calendar, Analytics, Accounts, Inbox, Team, Drafts, Streak, Links, Activity, Media all use `t()`. New JSON namespaces: `app_streak`, `app_links`, `app_activity`, `app_media` in all 7 locales. TypeScript enforces shape parity — all locale files must have all keys from `en.json`. Remaining un-translated pages: SOMA, Enki, Compose, Settings (partial), AI Features, Bio, Creator Hub, Agents.
+- ✅ **Full-app i18n (May 17, PRs #362–363)** — All core app pages use `t()`: Dashboard, Queue, Calendar, Compose, Analytics, Accounts, Inbox, Team, Drafts, Streak, Links, Activity, Media, AI Features, Agents hub, SOMA landing, Enki landing. **i18n build rule: any new key in `en.json` must be added to ALL 6 other locale files in the same commit — TypeScript enforces `typeof enMessages` shape parity across all locales.** Remaining inner pages (Creator Hub, Bio, SOMA/Enki sub-pages, Settings full) → wire when touched.
 - ✅ **Calendar select('*') fix (May 17, PR #361)** — Explicit column lists on calendar fetch caused silent null returns if any column (e.g. `tags`) didn't exist. Now uses `select('*')` + wsLoading guard. Never revert to explicit column list on calendar query.
 - ✅ **Landing page language switcher fix (May 17, PR #362)** — `PublicNav.setLocale()` now calls `router.push('/${code}')` when on a public locale path. Don't revert to localStorage-only.
 - ✅ **i18n scope — landing pages only** — The 7 locale routes (`/es/`, `/de/`, `/fr/`, `/pt/`, `/ru/`, `/zh/`) translate the marketing homepage only. Full app i18n is a roadmap feature, NOT done. When building full-app i18n: use `react-i18next` or `next-intl` with static config (NOT the Next.js plugin), translate all ~40 app pages, add locale switcher in sidebar.
