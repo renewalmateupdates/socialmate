@@ -125,7 +125,6 @@ function tagColorCalendar(tag: string): string {
 
 export default function CalendarPage() {
   const router = useRouter()
-  const { activeWorkspace } = useWorkspace()
   const today    = new Date()
   const todayKey = toDateKey(today)
 
@@ -189,29 +188,33 @@ export default function CalendarPage() {
     }
   }
 
+  const { activeWorkspace, loading: wsLoading } = useWorkspace()
+
   const fetchPosts = useCallback(async () => {
     setLoading(true)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/login'); return }
-    // Wide window: 3 months back + 6 months forward so SOMA-scheduled posts always appear
-    const start = new Date(currentYear, currentMonth - 3, 1).toISOString()
-    const end   = new Date(currentYear, currentMonth + 7, 0, 23, 59, 59).toISOString()
     let query = supabase
       .from('posts')
       .select('id, content, platforms, scheduled_at, status, created_at, platform_post_ids, tags')
       .eq('user_id', user.id)
-      .gte('scheduled_at', start)
-      .lte('scheduled_at', end)
       .order('scheduled_at', { ascending: true, nullsFirst: false })
+      .limit(1000)
     if (activeWorkspace && !activeWorkspace.is_personal) {
       query = query.eq('workspace_id', activeWorkspace.id)
     }
-    const { data } = await query
+    const { data, error } = await query
+    if (error) console.error('[Calendar] fetch error:', error)
     setPosts((data as Post[]) ?? [])
     setLoading(false)
-  }, [currentYear, currentMonth, activeWorkspace, router])
+  }, [activeWorkspace, router])
 
-  useEffect(() => { fetchPosts() }, [fetchPosts])
+  // Wait for workspace context to finish loading before fetching — prevents double-fetch
+  // race where first run (activeWorkspace=null) gets all posts, then second run (loaded
+  // workspace) overwrites with workspace-filtered results that may exclude SOMA posts.
+  useEffect(() => {
+    if (!wsLoading) fetchPosts()
+  }, [fetchPosts, wsLoading])
 
   const postMap = posts.reduce<Record<string, Post[]>>((acc, post) => {
     const key = getPostDateKey(post)
@@ -226,6 +229,16 @@ export default function CalendarPage() {
     const d = new Date(post.scheduled_at || post.created_at)
     return d >= monthStart && d <= monthEnd
   })
+
+  // Auto-jump to first month with posts when current month is empty (once, after load)
+  useEffect(() => {
+    if (loading || monthHasPosts || posts.length === 0) return
+    const scheduledPosts = posts.filter(p => p.scheduled_at)
+    if (scheduledPosts.length === 0) return
+    const firstScheduled = new Date(scheduledPosts[0].scheduled_at!)
+    setCurrentYear(firstScheduled.getFullYear())
+    setCurrentMonth(firstScheduled.getMonth())
+  }, [loading]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const days = buildCalendarDays(currentYear, currentMonth)
 

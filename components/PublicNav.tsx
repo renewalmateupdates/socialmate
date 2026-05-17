@@ -4,6 +4,16 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
+const LANGUAGES = [
+  { code: 'en', flag: '🇺🇸', label: 'English'    },
+  { code: 'es', flag: '🇪🇸', label: 'Español'    },
+  { code: 'de', flag: '🇩🇪', label: 'Deutsch'    },
+  { code: 'fr', flag: '🇫🇷', label: 'Français'   },
+  { code: 'pt', flag: '🇧🇷', label: 'Português'  },
+  { code: 'ru', flag: '🇷🇺', label: 'Русский'    },
+  { code: 'zh', flag: '🇨🇳', label: '中文'        },
+]
+
 const AUDIENCES = [
   { label: '🎮 Streamers',      href: '/for/streamers'     },
   { label: '🏢 Agencies',       href: '/for/agencies'      },
@@ -25,10 +35,30 @@ export default function PublicNav() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState<DropdownKey | null>(null)
   const [mobileExpanded, setMobileExpanded] = useState<DropdownKey | null>(null)
+  const [langOpen, setLangOpen] = useState(false)
+  const [locale, setLocaleState] = useState('en')
   const navRef = useRef<HTMLDivElement>(null)
+  const langRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setIsLoggedIn(!!data.user))
+    try { setLocaleState(localStorage.getItem('sm_locale') || 'en') } catch {}
+  }, [])
+
+  const setLocale = (code: string) => {
+    setLocaleState(code)
+    try { localStorage.setItem('sm_locale', code) } catch {}
+    setLangOpen(false)
+  }
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (langRef.current && !langRef.current.contains(e.target as Node)) {
+        setLangOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
   }, [])
 
   useEffect(() => {
@@ -136,6 +166,36 @@ export default function PublicNav() {
 
         {/* Desktop right actions */}
         <div className="hidden lg:flex items-center gap-3 flex-shrink-0">
+
+          {/* Language picker */}
+          <div className="relative" ref={langRef}>
+            <button
+              onClick={() => setLangOpen(p => !p)}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm text-gray-500 hover:text-black dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition-all"
+              aria-label="Change language">
+              <span className="text-base leading-none">{LANGUAGES.find(l => l.code === locale)?.flag ?? '🌐'}</span>
+              <svg className={`w-3 h-3 transition-transform ${langOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            {langOpen && (
+              <div className="absolute top-full right-0 mt-1 w-40 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-xl py-1 z-50">
+                {LANGUAGES.map(lang => (
+                  <button key={lang.code} onClick={() => setLocale(lang.code)}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-all ${
+                      locale === lang.code
+                        ? 'font-semibold text-black dark:text-white bg-gray-50 dark:bg-gray-800'
+                        : 'text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800'
+                    }`}>
+                    <span>{lang.flag}</span>
+                    <span>{lang.label}</span>
+                    {locale === lang.code && <span className="ml-auto text-amber-500 text-xs font-bold">✓</span>}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           <Link href="/beta" className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/30 rounded-lg text-xs font-bold text-amber-600 dark:text-amber-400 transition-all">
             <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse flex-shrink-0" />
             Android Beta
@@ -304,6 +364,24 @@ export default function PublicNav() {
                   className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/20 transition-all">
                   🤝 Partners Portal
                 </Link>
+              </div>
+
+              {/* Language */}
+              <div className="pt-2 border-t border-gray-100 dark:border-gray-800 mt-2">
+                <p className="px-4 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-widest">🌐 Language</p>
+                <div className="grid grid-cols-2 gap-1 px-3 pb-2">
+                  {LANGUAGES.map(lang => (
+                    <button key={lang.code} onClick={() => { setLocale(lang.code); setOpen(false) }}
+                      className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm transition-all ${
+                        locale === lang.code
+                          ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 font-semibold'
+                          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                      }`}>
+                      <span>{lang.flag}</span>
+                      <span>{lang.label}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
             </nav>
 
