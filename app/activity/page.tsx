@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Sidebar from '@/components/Sidebar'
+import { useI18n } from '@/contexts/I18nContext'
 
 interface ActivityEvent {
   id: string
@@ -52,6 +53,7 @@ export default function ActivityPage() {
   const [events, setEvents] = useState<ActivityEvent[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const { t } = useI18n()
 
   useEffect(() => {
     fetch('/api/workspace/activity')
@@ -66,7 +68,7 @@ export default function ActivityPage() {
       <Sidebar />
       <main className="md:ml-56 p-6 max-w-3xl mx-auto">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--fg)' }}>Workspace Activity</h1>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--fg)' }}>{t('app_activity.title')}</h1>
           <p className="text-sm mt-1" style={{ color: 'var(--text-faint)' }}>
             Recent actions across your workspace — last 50 events.
           </p>
@@ -86,8 +88,8 @@ export default function ActivityPage() {
             style={{ borderColor: 'var(--border-mid)', color: 'var(--text-faint)' }}
           >
             <div className="text-3xl mb-3">📋</div>
-            <p className="text-sm font-semibold">No activity yet</p>
-            <p className="text-xs mt-1">Actions taken in your workspace will show up here.</p>
+            <p className="text-sm font-semibold">{t('app_activity.no_activity')}</p>
+            <p className="text-xs mt-1">{t('app_activity.no_activity_sub')}</p>
           </div>
         )}
 

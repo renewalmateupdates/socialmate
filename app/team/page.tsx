@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
+import { useI18n } from '@/contexts/I18nContext'
 
 function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 dark:bg-gray-700 rounded-xl animate-pulse ${className}`} />
@@ -41,6 +42,7 @@ export default function Team() {
   const [removing, setRemoving]     = useState<string | null>(null)
   const router = useRouter()
   const { plan } = useWorkspace()
+  const { t } = useI18n()
 
   const planConfig     = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
   const seatLimit      = planConfig.seats
@@ -154,7 +156,7 @@ export default function Team() {
           {/* HEADER */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
-              <h1 className="text-2xl font-extrabold tracking-tight">Team</h1>
+              <h1 className="text-2xl font-extrabold tracking-tight">{t('app_team.title')}</h1>
               <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">Manage who has access to your workspace</p>
             </div>
             <div className={`self-start sm:self-auto flex items-center gap-2 text-xs font-semibold rounded-xl px-4 py-2.5 border ${
@@ -207,7 +209,7 @@ export default function Team() {
               {/* MEMBER LIST */}
               <div className="bg-surface border border-theme rounded-2xl overflow-hidden">
                 <div className="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
-                  <h2 className="text-sm font-bold tracking-tight text-gray-900 dark:text-white">Team Members</h2>
+                  <h2 className="text-sm font-bold tracking-tight text-gray-900 dark:text-white">{t('app_team.title')}</h2>
                 </div>
 
                 {loading ? (
@@ -266,11 +268,11 @@ export default function Team() {
                               <div className="flex items-center gap-1.5 flex-shrink-0">
                                 <button onClick={() => { setEditingId(member.id); setEditingRole(member.role) }}
                                   className="text-xs font-semibold px-2.5 py-1.5 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:border-gray-400 dark:hover:border-gray-400 transition-all">
-                                  Edit
+                                  {t('app_common.edit')}
                                 </button>
                                 <button onClick={() => setConfirmRemove(member.id)}
                                   className="text-xs font-semibold px-2.5 py-1.5 border border-red-200 dark:border-red-800 text-red-400 dark:text-red-400 rounded-xl hover:border-red-400 transition-all">
-                                  Remove
+                                  {t('app_team.remove_member')}
                                 </button>
                               </div>
                             )}
@@ -289,11 +291,11 @@ export default function Team() {
                                 </select>
                                 <button onClick={() => handleRoleChange(member.id, editingRole)}
                                   className="text-xs font-bold px-3 py-1.5 bg-black dark:bg-white text-white dark:text-black rounded-xl hover:opacity-80 transition-all">
-                                  Save
+                                  {t('app_common.save')}
                                 </button>
                                 <button onClick={() => setEditingId(null)}
                                   className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all">
-                                  Cancel
+                                  {t('app_common.cancel')}
                                 </button>
                               </div>
                             </div>
@@ -308,12 +310,12 @@ export default function Team() {
                                 <button onClick={() => handleRemove(member.id, member.email)} disabled={isRemoving}
                                   className="text-xs font-bold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center gap-1.5">
                                   {isRemoving
-                                    ? <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Removing...</>
-                                    : 'Yes, remove'}
+                                    ? <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />{t('app_common.deleting')}</>
+                                    : t('app_common.confirm')}
                                 </button>
                                 <button onClick={() => setConfirmRemove(null)}
                                   className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all">
-                                  Cancel
+                                  {t('app_common.cancel')}
                                 </button>
                               </div>
                             </div>
@@ -331,7 +333,7 @@ export default function Team() {
 
               {/* INVITE FORM */}
               <div className="bg-surface border border-theme rounded-2xl p-5">
-                <h2 className="text-sm font-bold tracking-tight mb-4 text-gray-900 dark:text-white">Invite Member</h2>
+                <h2 className="text-sm font-bold tracking-tight mb-4 text-gray-900 dark:text-white">{t('app_team.invite')}</h2>
                 {atLimit ? (
                   <div className="text-center py-4">
                     <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
@@ -354,7 +356,7 @@ export default function Team() {
                         className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-gray-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500" />
                     </div>
                     <div>
-                      <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1">Role</label>
+                      <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1">{t('app_team.invite_role')}</label>
                       <select value={inviteRole} onChange={e => setInviteRole(e.target.value as any)}
                         className="w-full px-3 py-2.5 text-sm border border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:border-gray-400 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
                         <option value="admin">Admin</option>
@@ -366,7 +368,7 @@ export default function Team() {
                     </div>
                     <button onClick={handleInvite} disabled={inviting || !inviteEmail.trim()}
                       className="w-full py-2.5 bg-black text-white text-sm font-semibold rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
-                      {inviting ? 'Sending...' : '📧 Send Invite'}
+                      {inviting ? t('app_common.saving') : `📧 ${t('app_team.send_invite')}`}
                     </button>
                     <p className="text-xs text-gray-400 dark:text-gray-500 text-center">
                       {seatsRemaining} seat{seatsRemaining !== 1 ? 's' : ''} remaining

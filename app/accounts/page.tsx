@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
+import { useI18n } from '@/contexts/I18nContext'
 import BlueskyConnectModal from '@/components/BlueskyConnectModal'
 import TelegramConnectModal from '@/components/TelegramConnectModal'
 import MastodonConnectModal from '@/components/MastodonConnectModal'
@@ -65,6 +66,7 @@ function PlatformCard({
   connectingPlatform: string | null
   onConnect: (platform: string) => void
 }) {
+  const { t } = useI18n()
   const meta = PLATFORM_META[platform]
   const isConnecting = connectingPlatform === platform
   const platformCount = accountsByPlatform[platform]?.length || 0
@@ -103,7 +105,7 @@ function PlatformCard({
             <p className="text-sm font-semibold">{meta.label}</p>
             {isConnected && (
               <span className="text-xs font-semibold px-2 py-0.5 bg-green-100 text-green-700 rounded-full">
-                Connected
+                {t('app_accounts.connected')}
               </span>
             )}
           </div>
@@ -121,7 +123,7 @@ function PlatformCard({
             onClick={() => onConnect(platform)}
             disabled={isConnecting}
             className="text-xs font-semibold px-3 py-2.5 min-h-[44px] bg-black text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex-shrink-0">
-            {isConnecting ? 'Connecting...' : isConnected ? '+ Add' : 'Connect'}
+            {isConnecting ? t('app_common.loading') : isConnected ? '+ Add' : t('app_accounts.connect')}
           </button>
         )}
       </div>
@@ -149,6 +151,7 @@ function AccountsInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { plan, activeWorkspace } = useWorkspace()
+  const { t } = useI18n()
 
   const planConfig = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
   const accountsPerPlatform = planConfig.accountsPerPlatform
@@ -323,7 +326,7 @@ function AccountsInner() {
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
-              <h1 className="text-2xl font-extrabold tracking-tight">Accounts</h1>
+              <h1 className="text-2xl font-extrabold tracking-tight">{t('app_accounts.title')}</h1>
               <p className="text-sm text-gray-400 mt-0.5">Connect and manage your social media accounts</p>
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
                 {activeWorkspace && !activeWorkspace.is_personal
@@ -411,7 +414,7 @@ function AccountsInner() {
           {/* CONNECTED ACCOUNTS */}
           {!loading && accounts.length > 0 && (
             <div className="mb-8">
-              <h2 className="text-sm font-bold tracking-tight mb-4">Connected Accounts</h2>
+              <h2 className="text-sm font-bold tracking-tight mb-4">{t('app_accounts.manage_accounts')}</h2>
               <div className="space-y-3">
                 {accounts.map(account => {
                   const meta = PLATFORM_META[account.platform] || { icon: '📱', color: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700', label: account.platform }
@@ -427,7 +430,7 @@ function AccountsInner() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <p className="text-sm font-bold">{meta.label}</p>
-                            <span className="text-xs font-semibold px-2 py-0.5 bg-green-100 text-green-700 rounded-full">Connected</span>
+                            <span className="text-xs font-semibold px-2 py-0.5 bg-green-100 text-green-700 rounded-full">{t('app_accounts.connected')}</span>
                             {platformCount > 1 && (
                               <span className="text-xs text-gray-400 dark:text-gray-500">{platformCount}/{accountsPerPlatform} accounts</span>
                             )}
@@ -439,7 +442,7 @@ function AccountsInner() {
                         {!isConfirming && (
                           <button onClick={() => setConfirmDisconnect(account.id)}
                             className="text-xs font-semibold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 hover:text-red-600 transition-all flex-shrink-0">
-                            Disconnect
+                            {t('app_accounts.disconnect')}
                           </button>
                         )}
                       </div>
@@ -494,7 +497,7 @@ function AccountsInner() {
                             </button>
                             <button onClick={() => setConfirmDisconnect(null)}
                               className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
-                              Cancel
+                              {t('app_common.cancel')}
                             </button>
                           </div>
                         </div>
@@ -509,7 +512,7 @@ function AccountsInner() {
           {/* LIVE INTEGRATIONS */}
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
-              <h2 className="text-sm font-bold tracking-tight">Live Integrations</h2>
+              <h2 className="text-sm font-bold tracking-tight">{t('app_accounts.add_account')}</h2>
               <span className="text-xs font-semibold px-2 py-0.5 bg-green-100 text-green-700 rounded-full">{LIVE_PLATFORMS.length} available now</span>
             </div>
             {loading ? (
@@ -604,7 +607,7 @@ function AccountsInner() {
             <div className="flex gap-3">
               <button onClick={() => setShowDiscordModal(false)}
                 className="flex-1 text-sm font-semibold px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
-                Cancel
+                {t('app_common.cancel')}
               </button>
               <button onClick={() => {
                 // Save workspace context before OAuth redirect

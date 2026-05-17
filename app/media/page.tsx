@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
+import { useI18n } from '@/contexts/I18nContext'
 import Link from 'next/link'
 
 function SkeletonBox({ className }: { className?: string }) {
@@ -34,6 +35,7 @@ export default function MediaLibrary() {
   const inputRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
   const { plan } = useWorkspace()
+  const { t } = useI18n()
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type })
@@ -156,7 +158,7 @@ export default function MediaLibrary() {
           {/* HEADER */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
             <div>
-              <h1 className="text-2xl font-extrabold tracking-tight">Media Library</h1>
+              <h1 className="text-2xl font-extrabold tracking-tight">{t('app_media.title')}</h1>
               <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">
                 {files.length} file{files.length !== 1 ? 's' : ''} · {formatSize(totalSize)} used
               </p>
@@ -166,7 +168,7 @@ export default function MediaLibrary() {
                 onChange={handleUpload} className="hidden" id="media-upload" />
               <label htmlFor="media-upload"
                 className={`inline-block bg-black text-white text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all cursor-pointer ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
-                {uploading ? '⏳ Uploading...' : '+ Upload Files'}
+                {uploading ? `⏳ ${t('app_media.uploading')}` : `+ ${t('app_media.upload')}`}
               </label>
             </div>
           </div>
@@ -237,7 +239,7 @@ export default function MediaLibrary() {
                         ? 'bg-green-500 text-white border-green-500'
                         : 'border-gray-200 dark:border-gray-600 hover:border-gray-400'
                     }`}>
-                    {copied === selectedFile.id ? '✓ Copied' : 'Copy URL'}
+                    {copied === selectedFile.id ? `✓ ${t('app_common.copied')}` : t('app_media.copy_url')}
                   </button>
                   {confirmDelete === selectedFile.id ? (
                     <>
@@ -245,23 +247,23 @@ export default function MediaLibrary() {
                         disabled={deleting === selectedFile.id}
                         className="text-xs font-bold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center gap-1.5">
                         {deleting === selectedFile.id
-                          ? <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Deleting...</>
-                          : 'Yes, delete'}
+                          ? <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />{t('app_common.deleting')}</>
+                          : t('app_common.confirm')}
                       </button>
                       <button onClick={() => setConfirmDelete(null)}
                         className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
-                        Cancel
+                        {t('app_common.cancel')}
                       </button>
                     </>
                   ) : (
                     <button onClick={() => setConfirmDelete(selectedFile.id)}
                       className="text-xs font-bold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all">
-                      Delete
+                      {t('app_media.delete_file')}
                     </button>
                   )}
                   <button onClick={() => { setSelectedFile(null); setConfirmDelete(null) }}
                     className="text-xs font-bold px-3 py-1.5 border border-gray-200 rounded-xl hover:border-gray-400 transition-all ml-auto">
-                    ✕ Close
+                    ✕ {t('app_common.close')}
                   </button>
                 </div>
               </div>
@@ -277,9 +279,9 @@ export default function MediaLibrary() {
             <div className="bg-surface border border-theme rounded-2xl p-12 text-center">
               <div className="text-4xl mb-3">📁</div>
               <p className="text-sm font-bold mb-1">
-                {filter === 'All' ? 'No media files yet' : `No ${filter.toLowerCase()} yet`}
+                {filter === 'All' ? t('app_media.no_media') : `No ${filter.toLowerCase()} yet`}
               </p>
-              <p className="text-xs text-gray-400 dark:text-gray-500">Upload images and videos to use in your posts.</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500">{t('app_media.no_media_sub')}</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
