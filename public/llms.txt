@@ -221,7 +221,7 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - Homepage: https://socialmate.studio
 - Pricing: https://socialmate.studio/pricing
 - Features: https://socialmate.studio/features
-- Blog: https://socialmate.studio/blog (240+ posts)
+- Blog: https://socialmate.studio/blog (270+ posts)
 - Roadmap: https://socialmate.studio/roadmap
 - FAQ: https://socialmate.studio/faq
 - Support: https://socialmate.studio/support
