@@ -20,7 +20,7 @@ const COMPARISON = [
   { feature: 'Scheduling included',         iconosquare: 'Limited (add-on focus)',        socialmate: '✅ Core feature'          },
   { feature: 'Instagram support',           iconosquare: '✅ Primary platform',           socialmate: '✅ (approval pending)'    },
   { feature: 'Facebook support',            iconosquare: '✅',                             socialmate: '✅ (approval pending)'    },
-  { feature: 'TikTok support',              iconosquare: '✅',                             socialmate: '✅ (approval pending)'    },
+  { feature: 'TikTok support',              iconosquare: '✅',                             socialmate: '✅ Live'                  },
   { feature: 'Discord support',             iconosquare: '❌',                             socialmate: '✅'                       },
   { feature: 'Telegram support',            iconosquare: '❌',                             socialmate: '✅'                       },
   { feature: 'Mastodon support',            iconosquare: '❌',                             socialmate: '✅'                       },

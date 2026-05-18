@@ -129,7 +129,7 @@ const FAQS = [
   },
   {
     q: 'What does "platform-native" mean?',
-    a: 'The same core message gets reformatted per platform. Twitter gets punchy ≤280 chars. Bluesky gets conversational copy. Mastodon gets community-native tone. Discord gets announcement style. For platforms coming soon (LinkedIn, Instagram, TikTok), SOMA generates the content anyway — you can copy and post manually, or it auto-queues once that platform connects.',
+    a: 'The same core message gets reformatted per platform. Twitter gets punchy ≤280 chars. Bluesky gets conversational copy. Mastodon gets community-native tone. Discord gets announcement style. TikTok gets caption-optimized copy. For platforms coming soon (LinkedIn, Instagram), SOMA generates the content anyway — you can copy and post manually, or it auto-queues once that platform connects.',
   },
   {
     q: 'Will SOMA spam my followers?',

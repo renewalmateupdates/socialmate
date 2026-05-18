@@ -999,7 +999,7 @@ export const onboardingSequence = inngest.createFunction(
               <p style="font-size:12px;font-weight:700;color:#71717a;text-transform:uppercase;letter-spacing:1px;margin:0 0 16px;">What's waiting for you</p>
               <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;">
                 <span style="color:#7C3AED;font-weight:700;font-size:15px;flex-shrink:0;">✓</span>
-                <span style="font-size:14px;color:#d4d4d8;line-height:1.5;">Schedule posts to <strong style="color:#ffffff;">5 live platforms</strong> — Bluesky, Discord, Telegram, Mastodon, X/Twitter</span>
+                <span style="font-size:14px;color:#d4d4d8;line-height:1.5;">Schedule posts to <strong style="color:#ffffff;">6 live platforms</strong> — Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok</span>
               </div>
               <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;">
                 <span style="color:#7C3AED;font-weight:700;font-size:15px;flex-shrink:0;">✓</span>

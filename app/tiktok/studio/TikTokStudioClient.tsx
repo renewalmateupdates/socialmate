@@ -516,7 +516,7 @@ export default function TikTokStudioClient() {
           <div className="flex items-center gap-3">
             <span className="text-xl">🎵</span>
             <span className="font-extrabold text-white tracking-tight">TikTok Studio</span>
-            <span className="text-xs bg-[#ff0050]/20 text-[#ff0050] font-bold px-2 py-0.5 rounded-full">BETA</span>
+            <span className="text-xs bg-green-500/20 text-green-400 font-bold px-2 py-0.5 rounded-full">LIVE</span>
           </div>
           <div className="flex items-center gap-3">
             {creator.avatar_url && (

@@ -237,6 +237,39 @@ const AI_TOOLS = [
   },
 ]
 
+const VIDEO_TOOLS = [
+  {
+    emoji: '🎵',
+    label: 'TikTok Script Generator',
+    credits: '5 credits',
+    what: 'Generate a complete TikTok video script: a scroll-stopping 3-second hook, main content points, and a strong CTA.',
+    how: 'Powered by Google Gemini. Optimized for TikTok native formats — 15s, 30s, and 60s. Copy your hook and shoot.',
+    href: '/ai-features/tiktok-script',
+    available: true,
+    proOnly: false,
+  },
+  {
+    emoji: '🎬',
+    label: 'Creator Studio & GIF Export',
+    credits: 'Free',
+    what: 'Trim video clips, apply filters, add caption overlays, and export for TikTok, YouTube, Instagram Reels, and more. Now with GIF export.',
+    how: 'No uploads to external services. Runs entirely in your browser. Export as WebM or animated GIF for Discord/X posts.',
+    href: '/create',
+    available: true,
+    proOnly: false,
+  },
+  {
+    emoji: '🎮',
+    label: 'Clips Studio',
+    credits: 'Free',
+    what: 'Browse your Twitch clips or any YouTube channel videos and schedule them to all 6 platforms in one click.',
+    how: 'Twitch requires OAuth (connect via Accounts). YouTube works via channel URL — no API key needed.',
+    href: '/clips',
+    available: true,
+    proOnly: false,
+  },
+]
+
 const GROWTH_TOOLS = [
   {
     emoji: '🔥',
@@ -485,6 +518,22 @@ export default function AIFeaturesPage() {
             <h2 className="text-base font-extrabold text-gray-900 dark:text-gray-100 mb-4">{t('app_ai_features.content_repurpose')}</h2>
             <RepurposeCard credits={credits} setCredits={setCredits} applyCredits={applyCredits} />
           </div>
+
+          <div className="bg-gradient-to-r from-[#010101] via-[#161616] to-[#010101] border border-gray-800 rounded-2xl p-5 mb-6 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">🎵</span>
+              <div>
+                <p className="text-xs font-bold text-emerald-400 uppercase tracking-wide mb-0.5">Now Live — TikTok</p>
+                <p className="text-sm font-extrabold text-white">Schedule TikTok videos directly from SocialMate</p>
+                <p className="text-xs text-gray-400 mt-0.5">Production API approved. Connect at /accounts → TikTok.</p>
+              </div>
+            </div>
+            <Link href="/accounts" className="flex-shrink-0 text-xs font-bold px-4 py-2 bg-white text-black rounded-xl hover:opacity-80 transition-all">
+              Connect TikTok →
+            </Link>
+          </div>
+
+          <Section title="Video & TikTok Tools" tools={VIDEO_TOOLS} plan={plan} />
 
           <Section title={t('app_ai_features.section_ai_tools')} tools={AI_TOOLS} plan={plan} />
           <Section title={t('app_ai_features.section_growth')} tools={GROWTH_TOOLS} plan={plan} />
