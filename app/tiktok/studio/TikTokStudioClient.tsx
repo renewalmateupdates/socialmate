@@ -511,17 +511,12 @@ export default function TikTokStudioClient() {
       <Sidebar />
 
       <div className="md:ml-56 flex-1 flex flex-col">
-        {/* Sandbox notice — remove once Production API is approved */}
-        <div className="bg-amber-500/10 border-b border-amber-500/30 px-6 py-2 text-xs text-amber-400 text-center">
-          ⚠️ Sandbox mode: videos post as <strong>Private</strong> (visible only to you). This is a TikTok restriction for unaudited apps — it lifts once Production API is approved.
-        </div>
-
         {/* Header */}
         <div className="sticky top-0 z-20 flex items-center justify-between px-6 py-3 bg-gray-950 border-b border-gray-800">
           <div className="flex items-center gap-3">
             <span className="text-xl">🎵</span>
             <span className="font-extrabold text-white tracking-tight">TikTok Studio</span>
-            <span className="text-xs bg-[#ff0050]/20 text-[#ff0050] font-bold px-2 py-0.5 rounded-full">BETA</span>
+            <span className="text-xs bg-green-500/20 text-green-400 font-bold px-2 py-0.5 rounded-full">LIVE</span>
           </div>
           <div className="flex items-center gap-3">
             {creator.avatar_url && (

@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import Sidebar from '@/components/Sidebar'
+import { useI18n } from '@/contexts/I18nContext'
 
 interface StreakData {
   day_map: Record<string, number>
@@ -89,6 +90,7 @@ export default function StreakPage() {
   const [data, setData]         = useState<StreakData | null>(null)
   const [loading, setLoading]   = useState(true)
   const [tooltip, setTooltip]   = useState<{ day: string; count: number; x: number; y: number } | null>(null)
+  const { t } = useI18n()
 
   useEffect(() => {
     fetch('/api/streak')
@@ -103,10 +105,10 @@ export default function StreakPage() {
   const GAP  = 3
 
   const stats = [
-    { label: 'Current streak', value: data ? `${data.current_streak}d` : '—', icon: '🔥' },
-    { label: 'Longest streak', value: data ? `${data.longest_streak}d` : '—', icon: '🏆' },
-    { label: 'Posts (365d)',    value: data ? String(data.total_posts)  : '—', icon: '📤' },
-    { label: 'Active days',     value: data ? String(data.active_days) : '—', icon: '📅' },
+    { label: t('app_streak.current_streak'), value: data ? `${data.current_streak}d` : '—', icon: '🔥' },
+    { label: t('app_streak.longest_streak'), value: data ? `${data.longest_streak}d` : '—', icon: '🏆' },
+    { label: t('app_streak.total_posts'),    value: data ? String(data.total_posts)  : '—', icon: '📤' },
+    { label: t('app_streak.active_days'),    value: data ? String(data.active_days) : '—', icon: '📅' },
   ]
 
   return (
@@ -133,7 +135,7 @@ export default function StreakPage() {
       <main className="md:ml-56 p-6">
         <div className="max-w-4xl mx-auto">
           <div className="mb-6">
-            <h1 className="text-2xl font-bold" style={{ color: 'var(--fg)' }}>Posting Streak</h1>
+            <h1 className="text-2xl font-bold" style={{ color: 'var(--fg)' }}>{t('app_streak.title')}</h1>
             <p className="text-sm mt-1" style={{ color: 'var(--text-faint)' }}>
               Your publishing activity over the last 365 days.
             </p>
@@ -280,7 +282,7 @@ export default function StreakPage() {
               style={{ borderColor: 'var(--border-mid)', background: 'var(--surface)' }}
             >
               <p className="text-sm font-bold" style={{ color: 'var(--fg)' }}>
-                🔥 {data.current_streak}-day streak — keep it going!
+                🔥 {data.current_streak}-{t('app_streak.days')} {t('app_streak.keep_going')}
               </p>
               <p className="text-xs mt-0.5" style={{ color: 'var(--text-faint)' }}>
                 Consistent creators grow 3× faster. Don&apos;t break the chain.
@@ -293,10 +295,10 @@ export default function StreakPage() {
               style={{ borderColor: 'var(--border-mid)', background: 'var(--surface)' }}
             >
               <p className="text-sm font-bold" style={{ color: 'var(--fg)' }}>
-                Start your streak today
+                {t('app_streak.no_streak')}
               </p>
               <p className="text-xs mt-0.5" style={{ color: 'var(--text-faint)' }}>
-                Post something now to kick off your first day.
+                {t('app_streak.start_streak')}
               </p>
             </div>
           )}

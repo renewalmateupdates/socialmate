@@ -32,7 +32,7 @@ const PLANS = [
     headerText: 'text-gray-900 dark:text-gray-100',
     subText: 'text-gray-500 dark:text-gray-400',
     features: [
-      { label: '5 live platforms now',             note: '11 more coming soon' },
+      { label: '6 live platforms now',             note: '10 more coming soon' },
       { label: '1 connected account per platform'                              },
       { label: '2 team seats'                                                  },
       { label: '100 posts / month'                                             },
@@ -489,7 +489,7 @@ export default function Pricing() {
         {/* BIRTHDAY PROMO BANNER — teaser before 6/15, active 6/15–12/15 */}
         {(() => {
           const now = new Date()
-          const start = new Date('2026-06-15')
+          const start = new Date('2026-05-17')
           const end = new Date('2026-12-16')
           const isActive = now >= start && now < end
           const isTeaser = now < start

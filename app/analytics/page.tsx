@@ -3,6 +3,7 @@ import { useEffect, useState, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
+import { useI18n } from '@/contexts/I18nContext'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 
@@ -333,6 +334,7 @@ export default function Analytics() {
   const [syncState, setSyncState] = useState<'idle' | 'syncing' | 'done'>('idle')
   const [syncCount, setSyncCount] = useState(0)
   const router = useRouter()
+  const { t } = useI18n()
 
   const loadStats = useCallback(async () => {
     try {
@@ -446,7 +448,7 @@ export default function Analytics() {
             {/* ── Header ──────────────────────────────────────────────────────── */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
               <h1 style={{ fontSize: 28, fontWeight: 800, color: T.text, margin: 0 }}>
-                Analytics
+                {t('app_analytics.title')}
               </h1>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                 {/* Date range pills */}
@@ -505,7 +507,7 @@ export default function Analytics() {
               ) : (
                 <>
                   <StatCard
-                    label="Total Published"
+                    label={t('app_analytics.posts_published')}
                     value={stats?.period_totals.total_all_time ?? 0}
                     sub={`${stats?.published_this_month ?? 0} this month`}
                   />
@@ -516,12 +518,12 @@ export default function Analytics() {
                     subColor={monthDelta >= 0 ? T.green : T.red}
                   />
                   <StatCard
-                    label="Current Streak"
+                    label={t('app_analytics.overview')}
                     value={`${stats?.current_streak ?? 0} 🔥`}
                     sub={`Longest: ${stats?.longest_streak ?? 0} days`}
                   />
                   <StatCard
-                    label="Avg / Week"
+                    label={t('app_analytics.avg_engagement')}
                     value={stats?.avg_posts_per_week ?? 0}
                     sub="posts (last 8 weeks)"
                   />
@@ -533,7 +535,7 @@ export default function Analytics() {
             <div style={{ ...sectionStyle, marginBottom: 20 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
                 <div>
-                  <p style={{ ...sectionHead, margin: 0 }}>Platform Analytics Status</p>
+                  <p style={{ ...sectionHead, margin: 0 }}>{t('app_analytics.platform_breakdown')}</p>
                   <p style={{ fontSize: 11, color: T.textDim, marginTop: 2 }}>What engagement data we can pull per platform</p>
                 </div>
                 <button
@@ -637,7 +639,7 @@ export default function Analytics() {
             {/* ── Platform breakdown ──────────────────────────────────────────── */}
             <div style={{ ...sectionStyle, marginBottom: 20 }}>
               <div style={{ marginBottom: 16 }}>
-                <p style={{ ...sectionHead, margin: 0 }}>Platform Breakdown</p>
+                <p style={{ ...sectionHead, margin: 0 }}>{t('app_analytics.platform_breakdown')}</p>
                 <p style={{ fontSize: 11, color: T.textDim, marginTop: 2 }}>Posts published per platform — from your SocialMate scheduling data</p>
               </div>
               {loading ? (
@@ -725,7 +727,7 @@ export default function Analytics() {
 
             {/* ── Best Times Heatmap ──────────────────────────────────────────── */}
             <div style={{ ...sectionStyle, marginBottom: 20 }}>
-              <p style={sectionHead}>Best Times Heatmap</p>
+              <p style={sectionHead}>{t('app_analytics.posting_history')}</p>
               {loading ? (
                 <Skeleton h={100} />
               ) : isEmpty || !stats ? (
@@ -741,7 +743,7 @@ export default function Analytics() {
             {/* ── Recent Posts table ──────────────────────────────────────────── */}
             <div style={{ background: T.surface, border: `1px solid ${T.border}`, borderRadius: 12, overflow: 'hidden', marginBottom: 20 }}>
               <div style={{ padding: '16px 24px', borderBottom: `1px solid ${T.border}` }}>
-                <p style={{ ...sectionHead, margin: 0 }}>Recent Published Posts</p>
+                <p style={{ ...sectionHead, margin: 0 }}>{t('app_analytics.top_posts')}</p>
               </div>
 
               {loading ? (

@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 import type { InboxItem } from '@/app/api/inbox/route'
+import { useI18n } from '@/contexts/I18nContext'
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const LS_KEY = 'sm_inbox_read_ids'
@@ -75,6 +76,7 @@ function InboxSkeleton() {
 // ── Page ──────────────────────────────────────────────────────────────────────
 export default function InboxPage() {
   const router = useRouter()
+  const { t } = useI18n()
 
   const [authLoading, setAuthLoading]           = useState(true)
   const [fetching, setFetching]                 = useState(false)
@@ -190,7 +192,7 @@ export default function InboxPage() {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-2xl">📬</span>
-                <h1 className="text-2xl font-extrabold tracking-tight">Social Inbox</h1>
+                <h1 className="text-2xl font-extrabold tracking-tight">{t('app_notifications.title')}</h1>
                 {unreadTotal > 0 && (
                   <span className="text-xs font-bold bg-black dark:bg-white text-white dark:text-black px-2 py-0.5 rounded-full">
                     {unreadTotal}
@@ -211,7 +213,7 @@ export default function InboxPage() {
                 <button
                   onClick={markAllRead}
                   className="text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">
-                  Mark all read
+                  {t('app_notifications.mark_all_read')}
                 </button>
               )}
               <button
@@ -349,6 +351,7 @@ function canReply(item: InboxItem) {
 }
 
 function InboxItemCard({ item, onRead }: { item: InboxItem; onRead: (id: string) => void }) {
+  const { t } = useI18n()
   const platformMeta = PLATFORM_META[item.platform]
   const typeMeta     = TYPE_META[item.type] ?? TYPE_META.message
 
@@ -536,7 +539,7 @@ function InboxItemCard({ item, onRead }: { item: InboxItem; onRead: (id: string)
                 <button
                   onClick={cancelReply}
                   className="text-xs font-semibold text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
-                  Cancel
+                  {t('app_common.cancel')}
                 </button>
                 <button
                   onClick={sendReply}
@@ -565,6 +568,7 @@ function EmptyState({
   connectedPlatforms: string[]
   fetching: boolean
 }) {
+  const { t } = useI18n()
   if (fetching) return null
 
   const isConnected = platform === 'all' || connectedPlatforms.includes(platform)
@@ -593,10 +597,10 @@ function EmptyState({
       <div className="bg-surface border border-theme rounded-2xl p-12 text-center">
         <div className="text-4xl mb-3">📭</div>
         <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
-          No platforms connected yet
+          {t('app_accounts.no_accounts')}
         </p>
         <p className="text-xs text-gray-400 dark:text-gray-500 mb-5 max-w-sm mx-auto leading-relaxed">
-          Connect Bluesky, Mastodon, Telegram, or Discord to see your messages and notifications here.
+          {t('app_accounts.no_accounts_sub')}
         </p>
         <Link href="/accounts"
           className="inline-block bg-black text-white text-xs font-bold px-5 py-2.5 rounded-xl hover:opacity-80 transition-all">
@@ -610,10 +614,10 @@ function EmptyState({
     <div className="bg-surface border border-theme rounded-2xl p-10 text-center">
       <div className="text-3xl mb-2">📭</div>
       <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">
-        All caught up
+        {t('app_notifications.no_notifications_sub')}
       </p>
       <p className="text-xs text-gray-400 dark:text-gray-500">
-        No new messages or notifications.
+        {t('app_notifications.no_notifications')}
       </p>
     </div>
   )

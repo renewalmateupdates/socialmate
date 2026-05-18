@@ -21,6 +21,45 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'May 18, 2026',
+    version: 'TikTok Now Live — 6 Platforms',
+    changes: [
+      { type: 'New',      text: 'TikTok Production API approved. SocialMate now supports 6 live platforms. Connect your TikTok account at /accounts and schedule videos from TikTok Studio at /tiktok/studio.' },
+      { type: 'Improved', text: 'Platform count updated to 6 across all pages, marketing copy, and metadata.' },
+      { type: 'Fixed',    text: 'TikTok Studio sandbox banner removed. All sandbox restrictions lifted.' },
+    ],
+  },
+  {
+    date: 'May 18, 2026',
+    version: 'TikTok Script Generator + GIF Export + 30 Blog Posts',
+    changes: [
+      { type: 'New', text: 'TikTok Script Generator — AI tool at /ai-features/tiktok-script. Generates hook + body + CTA for 15s/30s/60s TikToks. 5 credits, Gemini-powered.' },
+      { type: 'New', text: 'GIF Export in Creator Studio — export any trimmed/filtered clip as an animated GIF. Capped at 5 seconds, 480px wide. No external services.' },
+      { type: 'New', text: 'AI Features page — new Video & TikTok Tools section with TikTok Script Generator, Creator Studio, and Clips Studio cards. TikTok live banner added.' },
+      { type: 'New', text: '30 new blog posts covering TikTok scheduling, Twitch/YouTube clip repurposing, short-form video strategy, GIFs for social media, and creator tool stacks. 270+ total posts.' },
+    ],
+  },
+  {
+    date: 'May 17, 2026',
+    version: "Full-App i18n Complete + Guide Vol. 5 + Calendar Fix",
+    changes: [
+      { type: 'New',      text: "Gilgamesh's Guide Vol. 5 — Creator Monetization live at /guides/creator-monetization. 8 chapters covering tip jars, fan subscriptions, digital products, brand deals, affiliate income, and a realistic 12-month $5K/month roadmap. Free, no gate, no upsell." },
+      { type: 'New',      text: 'Full-app i18n complete — all major app pages now translate in 7 languages (en/es/de/fr/pt/ru/zh). Covers Dashboard, Queue, Calendar, Compose, Analytics, Accounts, Inbox, Team, Drafts, Streak, Links, Activity, Media, AI Features, Agents, SOMA, Enki, Creator Hub, and public creator pages.' },
+      { type: 'New',      text: 'Birthday promo BDAY31 now active — 31% off any plan through December 15, 2026. Code: BDAY31. Apply at /pricing.' },
+      { type: 'Fixed',    text: 'Calendar definitively fixed — explicit column select caused silent null returns when any column was missing. Changed to select(*) with a wsLoading guard throughout. All scheduled posts now load correctly.' },
+      { type: 'Fixed',    text: 'Language switcher on public landing pages — now navigates to the correct locale URL instead of only writing to localStorage (which had no effect on server-rendered pages).' },
+      { type: 'New',      text: 'TikTok Production API approved — TikTok is now a fully live platform. Connect at /accounts, schedule and publish videos from TikTok Studio at /tiktok/studio. Platform count updated to 6. Sandbox restrictions lifted.' },
+    ],
+  },
+  {
+    date: 'May 16, 2026',
+    version: 'i18n Architecture Rewrite',
+    changes: [
+      { type: 'Fixed',    text: 'Removed next-intl plugin from next.config.ts — createNextIntlPlugin injects a webpack alias that Turbopack silently ignores, causing a runtime "config not found" error. Rewrote LocalizedLanding.tsx with direct JSON imports and a createT() helper function.' },
+      { type: 'Improved', text: 'Public landing pages now server-render correctly in 7 languages via locale URL routes (/es, /de, /fr, /pt, /ru, /zh). TypeScript enforces all locale files match the en.json shape at build time.' },
+    ],
+  },
+  {
     date: 'May 14, 2026',
     version: 'Admin Insights + Growth Infrastructure',
     changes: [
@@ -53,7 +92,7 @@ const CHANGELOG: ChangelogEntry[] = [
       { type: 'New',      text: "Gilgamesh's Guides Vol. 4 — Vibe Coding with AI. 7 chapters: the full free stack (Next.js/Supabase/Vercel/Stripe/Inngest/Claude Code), build loop workflow, prompting patterns, debugging without panic, first deploy checklist, and the mindset of building in stolen hours. Free." },
       { type: 'New',      text: "Gilgamesh's Guides series complete — all 4 volumes live at /guides. Starting a Business · Marketing on Zero Budget · Business Credit & Tax · Vibe Coding with AI." },
       { type: 'New',      text: 'Google Play CI/CD — GitHub Actions workflow builds a signed Android AAB on every git tag. No Android Studio required. SocialMate is Android-ready.' },
-      { type: 'New',      text: 'TikTok Studio live — OAuth connect, video editor (trim, 8 filters, caption overlay), FILE_UPLOAD posting, scheduled publish via Inngest. Sandbox until Production API approved.' },
+      { type: 'New',      text: 'TikTok Studio live — OAuth connect, video editor (trim, 8 filters, caption overlay), FILE_UPLOAD posting, scheduled publish via Inngest. Production API approved May 17, 2026.' },
       { type: 'New',      text: '30 new blog posts published — business credit, tax strategy, founder story, platform guides, vibe coding, AI builder stack. All indexed in sitemap.' },
       { type: 'Improved', text: 'SocialMate logo fixed site-wide — canonical three-circle icon now displays correctly in nav, footer, Privacy page, and Terms page.' },
       { type: 'Improved', text: 'Privacy policy overhauled for TikTok developer review — per-scope disclosure for user.info.basic, video.upload, and video.publish. App name reconciliation documented.' },

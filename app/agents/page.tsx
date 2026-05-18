@@ -1,6 +1,7 @@
 'use client'
 import { useRouter } from 'next/navigation'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
+import { useI18n } from '@/contexts/I18nContext'
 
 const AGENTS = [
   {
@@ -116,6 +117,7 @@ const TIER_LABEL: Record<string, string> = {
 export default function AgentsPage() {
   const router = useRouter()
   const { plan } = useWorkspace()
+  const { t } = useI18n()
 
   const liveAgents    = AGENTS.filter(a => a.live)
   const comingAgents  = AGENTS.filter(a => !a.live)
@@ -126,21 +128,21 @@ export default function AgentsPage() {
       <div className="mb-10">
         <div className="flex items-center gap-3 mb-2">
           <span className="text-3xl">🤖</span>
-          <h1 className="text-3xl font-black text-primary">Agents</h1>
+          <h1 className="text-3xl font-black text-primary">{t('app_agents.title')}</h1>
         </div>
         <p className="text-secondary text-base max-w-xl">
-          Autonomous tools that work while you sleep. Each agent handles a specific job — from outreach to intel — so you can focus on creating.
+          {t('app_agents.subtitle')}
         </p>
         <div className="mt-4 flex items-center gap-3 text-xs text-secondary">
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" /> Free — no credits required</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400 inline-block" /> Credits-based</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-gray-300 inline-block" /> Coming soon</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" /> {t('app_agents.legend_free')}</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-400 inline-block" /> {t('app_agents.legend_credits')}</span>
+          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-gray-300 inline-block" /> {t('app_agents.legend_coming_soon')}</span>
         </div>
       </div>
 
       {/* Live agents */}
       <div className="mb-10">
-        <h2 className="text-xs font-bold uppercase tracking-widest text-secondary mb-4">Live Now</h2>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-secondary mb-4">{t('app_agents.section_live')}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {liveAgents.map(agent => (
             <button
@@ -167,7 +169,7 @@ export default function AgentsPage() {
               <p className="text-xs font-semibold text-amber-500 mb-1">{agent.tagline}</p>
               <p className="text-sm text-secondary">{agent.description}</p>
               <div className="mt-4 text-xs font-bold text-amber-500 group-hover:translate-x-1 transition-transform inline-block">
-                Launch Agent →
+                {t('app_agents.launch_agent')}
               </div>
             </button>
           ))}
@@ -176,7 +178,7 @@ export default function AgentsPage() {
 
       {/* Coming soon */}
       <div>
-        <h2 className="text-xs font-bold uppercase tracking-widest text-secondary mb-4">Coming Soon</h2>
+        <h2 className="text-xs font-bold uppercase tracking-widest text-secondary mb-4">{t('app_agents.section_coming')}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {comingAgents.map(agent => (
             <div
@@ -198,7 +200,7 @@ export default function AgentsPage() {
               <p className="text-xs font-semibold text-gray-400 mb-1">{agent.tagline}</p>
               <p className="text-sm text-secondary">{agent.description}</p>
               <div className="mt-4 text-xs font-bold text-gray-400">
-                Coming Soon
+                {t('app_agents.coming_soon')}
               </div>
             </div>
           ))}

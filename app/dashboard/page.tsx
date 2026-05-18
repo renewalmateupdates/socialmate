@@ -10,6 +10,7 @@ import DidYouKnow from '@/components/DidYouKnow'
 import DashboardWidgets from '@/components/DashboardWidgets'
 import WelcomeOfferBanner from '@/components/WelcomeOfferBanner'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
+import { useI18n } from '@/contexts/I18nContext'
 import {
   DndContext,
   closestCenter,
@@ -150,6 +151,7 @@ function DashboardInner() {
   // Drag-and-drop card order
   const [cardOrder, setCardOrder] = useState<string[]>(DEFAULT_CARD_ORDER)
   const { plan, credits, activeWorkspace, monthlyCredits, earnedCredits, paidCredits } = useWorkspace()
+  const { t } = useI18n()
 
   // DnD sensors — must be declared before any early returns (Rules of Hooks)
   const sensors = useSensors(
@@ -343,7 +345,7 @@ function DashboardInner() {
 
   const displayName  = profile?.display_name || user?.email?.split('@')[0] || 'there'
   const hour         = new Date().getHours()
-  const greeting     = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
+  const greeting     = hour < 12 ? t('app_dashboard.good_morning') : hour < 17 ? t('app_dashboard.good_afternoon') : t('app_dashboard.good_evening')
   const planConfig   = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
   const todayDayIdx  = new Date().getDay()
   const DAYS         = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
@@ -743,10 +745,10 @@ function DashboardInner() {
             {/* Stat cards — drag-and-drop reorderable */}
             {(() => {
               const cardDefs: Record<string, StatCardDef> = {
-                'scheduled':  { id: 'scheduled',  label: 'Scheduled', value: stats.scheduled,  icon: '📅', color: 'text-blue-600'   },
-                'drafts':     { id: 'drafts',      label: 'Drafts',    value: stats.drafts,     icon: '📁', color: 'text-yellow-600' },
-                'published':  { id: 'published',   label: 'Published', value: stats.published,  icon: '✅', color: 'text-green-600'  },
-                'this-week':  { id: 'this-week',   label: 'This Week', value: stats.thisWeek,   icon: '✏️', color: 'text-purple-600' },
+                'scheduled':  { id: 'scheduled',  label: t('app_dashboard.scheduled'), value: stats.scheduled,  icon: '📅', color: 'text-blue-600'   },
+                'drafts':     { id: 'drafts',      label: t('app_dashboard.drafts'),    value: stats.drafts,     icon: '📁', color: 'text-yellow-600' },
+                'published':  { id: 'published',   label: t('app_dashboard.published'), value: stats.published,  icon: '✅', color: 'text-green-600'  },
+                'this-week':  { id: 'this-week',   label: t('app_dashboard.this_week'), value: stats.thisWeek,   icon: '✏️', color: 'text-purple-600' },
               }
               return (
                 <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
@@ -776,7 +778,7 @@ function DashboardInner() {
               {/* WEEK ACTIVITY */}
               <div className="bg-surface rounded-2xl border border-theme p-5">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-sm font-extrabold">This Week's Activity</h2>
+                  <h2 className="text-sm font-extrabold">{t('app_dashboard.this_week')}</h2>
                   <Link href="/analytics" className="text-xs text-gray-400 dark:text-gray-500 hover:text-black transition-all">Full analytics →</Link>
                 </div>
                 <div className="grid grid-cols-7 gap-1">
@@ -805,7 +807,7 @@ function DashboardInner() {
               {/* UPCOMING POSTS */}
               <div className="bg-surface rounded-2xl border border-theme p-5">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-sm font-extrabold">Upcoming Posts</h2>
+                  <h2 className="text-sm font-extrabold">{t('app_dashboard.upcoming')}</h2>
                   <Link href="/queue" className="text-xs text-gray-400 dark:text-gray-500 hover:text-black transition-all">View all →</Link>
                 </div>
                 {upcomingPosts.length === 0 ? (
@@ -834,7 +836,7 @@ function DashboardInner() {
                             </span>
                           </div>
                         </div>
-                        <span className="text-xs font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full flex-shrink-0">Scheduled</span>
+                        <span className="text-xs font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full flex-shrink-0">{t('app_common.status_scheduled')}</span>
                       </div>
                     ))}
                   </div>
@@ -844,7 +846,7 @@ function DashboardInner() {
               {/* RECENT ACTIVITY */}
               <div className="bg-surface rounded-2xl border border-theme p-5">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-sm font-extrabold">Recent Activity</h2>
+                  <h2 className="text-sm font-extrabold">{t('app_dashboard.recent_posts')}</h2>
                   <Link href="/drafts" className="text-xs text-gray-400 dark:text-gray-500 hover:text-black transition-all">View drafts →</Link>
                 </div>
                 {recentPosts.length === 0 ? (
@@ -876,7 +878,7 @@ function DashboardInner() {
                         <span className={`text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${
                           post.status === 'published' ? 'bg-green-50 text-green-600' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
                         }`}>
-                          {post.status === 'published' ? 'Published' : 'Draft'}
+                          {post.status === 'published' ? t('app_common.status_published') : t('app_common.status_draft')}
                         </span>
                       </div>
                     ))}
@@ -891,7 +893,7 @@ function DashboardInner() {
 
               {/* QUICK ACTIONS */}
               <div className="bg-surface rounded-2xl border border-theme p-5">
-                <h2 className="text-sm font-extrabold mb-3">Quick Actions</h2>
+                <h2 className="text-sm font-extrabold mb-3">{t('app_dashboard.quick_actions')}</h2>
                 <div className="space-y-1">
                   {[
                     { label: 'Write a post',    sub: 'Compose & schedule',      href: '/compose',        icon: '✏️', featured: true  },

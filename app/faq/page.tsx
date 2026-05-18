@@ -19,7 +19,7 @@ const sections = [
       },
       {
         q: 'What platforms does SocialMate support?',
-        a: 'Live today: Bluesky, Mastodon, Discord, Telegram (all free), and X/Twitter (Pro+ plan — X charges us $0.01/tweet, so we gate it to Pro). TikTok Studio is live for uploading and editing; posting is pending Production API approval. Clip support: Twitch and YouTube. Coming soon: LinkedIn, Instagram, Threads, Pinterest, Reddit, Tumblr.',
+        a: 'Live today: Bluesky, Mastodon, Discord, Telegram (all free), X/Twitter (Pro+ plan — X charges us $0.01/tweet, so we gate it to Pro), and TikTok (Production API approved May 2026). Clip support: Twitch and YouTube. Coming soon: LinkedIn, Instagram, Threads, Pinterest, Reddit, Tumblr.',
       },
       {
         q: 'Is there a free plan?',
@@ -134,8 +134,8 @@ const sections = [
         a: 'TikTok\'s Content Posting API is free for developers — no per-post charges. We only pay for storage bandwidth (pennies per GB). That means we can offer generous free limits: 20 videos/month on Free, 60 on Pro, 200 on Agency. No catch. Our philosophy is simple: open APIs with no per-post cost → free for users. Gated APIs that charge per post → we pass the cost through.',
       },
       {
-        q: 'When will TikTok be fully live?',
-        a: 'TikTok Studio is live now at /tiktok/studio — you can upload, trim, add filters and captions, and schedule videos. The connect button is live on /accounts. The hold-up is TikTok\'s developer app review process, which takes 2–4 weeks. We\'ve submitted for Production API approval and are waiting. Once approved, TikTok posting goes fully live for all plans.',
+        q: 'Is TikTok fully live?',
+        a: 'Yes — TikTok Production API was approved in May 2026. Connect your account at /accounts and publish videos directly from TikTok Studio at /tiktok/studio. You can upload, trim, add filters and captions, schedule, and post. Available on all plans.',
       },
       {
         q: 'What\'s the platform philosophy?',
@@ -143,7 +143,7 @@ const sections = [
       },
       {
         q: 'Which platforms are live today?',
-        a: 'Live now: Bluesky, Mastodon, Discord, Telegram (all free), and X/Twitter (Pro+ plan). TikTok Studio is live for upload/editing; posting pending Production API approval. Clip support: Twitch (OAuth connect + clip scheduler) and YouTube (RSS-based, no API key needed). Coming soon: LinkedIn, Instagram, Threads, Pinterest, Reddit, Tumblr.',
+        a: 'Live now: Bluesky, Mastodon, Discord, Telegram (all free), X/Twitter (Pro+ plan), and TikTok (Production API approved May 2026 — connect at /accounts). Clip support: Twitch (OAuth connect + clip scheduler) and YouTube (RSS-based, no API key needed). Coming soon: LinkedIn, Instagram, Threads, Pinterest, Reddit, Tumblr.',
       },
     ],
   },

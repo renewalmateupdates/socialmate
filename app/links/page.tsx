@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Sidebar from '@/components/Sidebar'
+import { useI18n } from '@/contexts/I18nContext'
 
 type ShortLink = {
   id: string
@@ -23,6 +24,7 @@ export default function LinksPage() {
   const [links, setLinks] = useState<ShortLink[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const { t } = useI18n()
 
   // Create form state
   const [urlInput, setUrlInput] = useState('')
@@ -101,7 +103,7 @@ export default function LinksPage() {
       <Sidebar />
       <main className="md:ml-56 p-6 max-w-3xl mx-auto">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold" style={{ color: 'var(--fg)' }}>Link Shortener</h1>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--fg)' }}>{t('app_links.title')}</h1>
           <p className="text-sm mt-1" style={{ color: 'var(--text-faint)' }}>
             Create short links at socialmate.studio/go/[slug] with click tracking.
           </p>
@@ -114,7 +116,7 @@ export default function LinksPage() {
           style={{ background: 'var(--surface)', borderColor: 'var(--border-mid)' }}
         >
           <h2 className="text-sm font-bold mb-4 uppercase tracking-widest" style={{ color: 'var(--text-faint)' }}>
-            Create short link
+            {t('app_links.create_link')}
           </h2>
           <div className="flex flex-col gap-3">
             <div>
@@ -171,7 +173,7 @@ export default function LinksPage() {
         {/* LINKS LIST */}
         <div>
           <h2 className="text-sm font-bold mb-3 uppercase tracking-widest" style={{ color: 'var(--text-faint)' }}>
-            Your links {links.length > 0 && `(${links.length})`}
+            {t('app_links.your_links')} {links.length > 0 && `(${links.length})`}
           </h2>
 
           {loading && (
@@ -190,8 +192,8 @@ export default function LinksPage() {
               style={{ borderColor: 'var(--border-mid)', color: 'var(--text-faint)' }}
             >
               <div className="text-3xl mb-2">🔗</div>
-              <p className="text-sm font-semibold">No short links yet</p>
-              <p className="text-xs mt-1">Create your first one above or use the shortener in Compose.</p>
+              <p className="text-sm font-semibold">{t('app_links.no_links')}</p>
+              <p className="text-xs mt-1">{t('app_links.no_links_sub')}</p>
             </div>
           )}
 
@@ -240,13 +242,13 @@ export default function LinksPage() {
                       className="text-xs font-bold px-3 py-2 min-h-[36px] rounded-xl border transition-all hover:border-blue-400 hover:text-blue-500"
                       style={{ borderColor: 'var(--border-mid)', color: 'var(--fg)' }}
                     >
-                      {isCopied ? '✓ Copied!' : 'Copy'}
+                      {isCopied ? `✓ ${t('app_common.copied')}` : t('app_links.copy_link')}
                     </button>
                     <button
                       onClick={() => handleDelete(link.id)}
                       className="text-xs font-bold px-3 py-2 min-h-[36px] rounded-xl border border-red-200 dark:border-red-900 text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-all"
                     >
-                      Delete
+                      {t('app_links.delete_link')}
                     </button>
                   </div>
                 </div>

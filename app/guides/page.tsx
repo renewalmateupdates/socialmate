@@ -97,6 +97,27 @@ const GUIDES = [
     readTime: '35 min read',
     tags: ['AI', 'Development', 'Claude Code', 'Solo Founder'],
   },
+  {
+    number: 'Vol. 5',
+    title: 'Creator Monetization — How to Actually Get Paid',
+    subtitle: 'The Real Stack for Turning an Audience Into Income',
+    description:
+      'Why creators stay broke, and how to fix it. Tip jars, fan subscriptions, digital products, brand deals, and affiliate income — stacked together. A realistic 12-month roadmap to $5K/month starting from zero, for any audience size.',
+    href: '/guides/creator-monetization',
+    available: true,
+    chapters: [
+      'Why Creators Stay Broke',
+      'The Monetization Stack',
+      'Tip Jars — Zero-Barrier Start',
+      'Fan Subscriptions — Recurring Income',
+      'Digital Products & Courses',
+      'Brand Deals',
+      'Affiliate Marketing',
+      'Stacking to $5K/Month',
+    ],
+    readTime: '40 min read',
+    tags: ['Monetization', 'Creator Economy', 'Income Streams', 'Digital Products'],
+  },
 ]
 
 export default function GuidesHubPage() {

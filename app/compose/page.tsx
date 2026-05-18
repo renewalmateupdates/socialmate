@@ -8,6 +8,7 @@ import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 import UpgradeNudge from '@/components/UpgradeNudge'
 import PostImageExporter from '@/components/PostImageExporter'
 import PageTour from '@/components/PageTour'
+import { useI18n } from '@/contexts/I18nContext'
 
 const PLATFORMS = [
   { id: 'discord',   name: 'Discord',   icon: '💬', limit: 2000,  live: true  },
@@ -166,6 +167,7 @@ function ComposeInner() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { credits, setCredits, applyCredits, plan, activeWorkspace } = useWorkspace()
+  const { t } = useI18n()
 
   const [loading, setLoading] = useState(true)
   const [userRole, setUserRole] = useState<'owner' | 'admin' | 'editor' | 'viewer' | 'client' | null>(null)
@@ -1441,11 +1443,11 @@ function ComposeInner() {
 
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-extrabold tracking-tight">Compose</h1>
+              <h1 className="text-2xl font-extrabold tracking-tight">{t('app_compose.title')}</h1>
               <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">
                 {activeWorkspace && !activeWorkspace.is_personal
                   ? `Posting as ${activeWorkspace.client_name || activeWorkspace.name}`
-                  : 'Write, schedule, and publish your posts'}
+                  : t('app_compose.placeholder')}
               </p>
             </div>
             <button
@@ -1535,7 +1537,7 @@ function ComposeInner() {
 
               {/* PLATFORM SELECTOR */}
               <div id="compose-platforms" className="bg-surface border border-theme rounded-2xl p-4">
-                <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">Platforms</p>
+                <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">{t('app_compose.platforms')}</p>
                 <div className="flex flex-wrap gap-2">
                   {livePlatforms.map(p => {
                     if (p.id === 'twitter' && plan === 'free') {
@@ -1610,7 +1612,7 @@ function ComposeInner() {
 
               {selectedPlatforms.length === 0 && (
                 <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
-                  <p className="text-xs font-semibold text-amber-700">Select at least one platform to compose a post.</p>
+                  <p className="text-xs font-semibold text-amber-700">{t('app_compose.no_platform_selected')}</p>
                 </div>
               )}
 
@@ -1720,7 +1722,7 @@ function ComposeInner() {
               {/* STARTER TEMPLATES QUICK STRIP — only shown when textarea is empty */}
               {!content && !searchParams.get('draft') && !searchParams.get('id') && !searchParams.get('starterTemplate') && !searchParams.get('template') && (
                 <div className="bg-surface border border-theme rounded-2xl p-4">
-                  <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">Starter Templates</p>
+                  <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">{t('app_compose.template')}</p>
                   <div className="flex flex-wrap gap-2">
                     {[
                       { id: 'starter-1',  label: '🚀 Product Launch'        },
@@ -2352,8 +2354,8 @@ function ComposeInner() {
               {/* AI TOOLS */}
               <div id="compose-ai-tools" className="bg-surface border border-theme rounded-2xl p-4">
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">AI Tools</p>
-                  <span className="text-xs font-bold text-gray-500 dark:text-gray-400">{credits} credits remaining</span>
+                  <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">{t('app_compose.ai_tools_label')}</p>
+                  <span className="text-xs font-bold text-gray-500 dark:text-gray-400">{credits} {t('app_compose.credits_remaining')}</span>
                 </div>
 
                 {rateLimitedUntil && (
@@ -2878,7 +2880,7 @@ function ComposeInner() {
                         </button>
                         <button onClick={handleSaveDraft} disabled={saving || !content.trim()}
                           className="px-5 py-3 border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
-                          {saving ? 'Saving...' : currentDraftId ? 'Update Draft' : 'Save Draft'}
+                          {saving ? t('app_compose.publishing') : t('app_compose.save_draft')}
                         </button>
                       </>
                     ) : (
@@ -2896,12 +2898,12 @@ function ComposeInner() {
                           }
                           className="flex-1 bg-black text-white text-sm font-bold py-3 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
                           {publishing
-                            ? (scheduleDate ? 'Scheduling...' : 'Publishing...')
-                            : (scheduleDate ? 'Schedule Post' : 'Post Now')}
+                            ? (scheduleDate ? t('app_compose.publishing') : t('app_compose.publishing'))
+                            : (scheduleDate ? t('app_compose.schedule') : t('app_compose.schedule_now'))}
                         </button>
                         <button onClick={handleSaveDraft} disabled={saving || !content.trim()}
                           className="px-5 py-3 border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-300 rounded-xl hover:border-gray-400 transition-all disabled:opacity-40">
-                          {saving ? 'Saving...' : currentDraftId ? 'Update Draft' : 'Save Draft'}
+                          {saving ? t('app_compose.publishing') : t('app_compose.save_draft')}
                         </button>
                       </>
                     )}

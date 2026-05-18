@@ -531,6 +531,97 @@ export default function CreatePageClient() {
     animFrameRef.current = requestAnimationFrame(drawFrame)
   }
 
+  // ── Export GIF ──────────────────────────────────────────────────────────────
+
+  async function exportGif() {
+    const v = videoRef.current
+    if (!v) return
+
+    if (typeof window === 'undefined') {
+      setExportError('GIF export requires a browser environment.')
+      return
+    }
+
+    setExporting(true)
+    setExportError(null)
+
+    try {
+      const { GIFEncoder, quantize, applyPalette } = await import('gifenc')
+
+      const maxDuration = Math.min(trimEnd - trimStart, 5)
+      const fps = 10
+      const frameCount = Math.ceil(maxDuration * fps)
+      const delay = Math.round(1000 / fps)
+
+      const gifW = 480
+      const gifH = Math.round(gifW * (v.videoHeight / v.videoWidth)) || 270
+
+      const offscreen = document.createElement('canvas')
+      offscreen.width = gifW
+      offscreen.height = gifH
+      const ctx = offscreen.getContext('2d')!
+
+      const encoder = GIFEncoder()
+
+      for (let i = 0; i < frameCount; i++) {
+        v.currentTime = trimStart + (i / fps)
+        await new Promise<void>(resolve => {
+          const onSeeked = () => { v.removeEventListener('seeked', onSeeked); resolve() }
+          v.addEventListener('seeked', onSeeked)
+        })
+
+        ctx.clearRect(0, 0, gifW, gifH)
+        if (cssFilter) ctx.filter = cssFilter
+        ctx.drawImage(v, 0, 0, gifW, gifH)
+        ctx.filter = 'none'
+
+        if (captionText.trim()) {
+          const scaledFontSize = Math.round(captionFontSize * (gifH / 400))
+          ctx.font = `bold ${scaledFontSize}px Arial, sans-serif`
+          ctx.textAlign = 'center'
+          const textWidth = ctx.measureText(captionText).width
+          const x = gifW / 2
+          let y: number
+          if (captionPosition === 'top') y = gifH * 0.12
+          else if (captionPosition === 'center') y = gifH / 2
+          else y = gifH * 0.88
+
+          if (captionBg) {
+            const pad = scaledFontSize * 0.4
+            ctx.fillStyle = 'rgba(0,0,0,0.55)'
+            const rx = x - textWidth / 2 - pad
+            const ry = y - scaledFontSize - pad / 2
+            const rw = textWidth + pad * 2
+            const rh = scaledFontSize + pad
+            ctx.fillRect(rx, ry, rw, rh)
+          }
+          ctx.fillStyle = captionColor
+          ctx.fillText(captionText, x, y)
+        }
+
+        const { data } = ctx.getImageData(0, 0, gifW, gifH)
+        const palette = quantize(data, 256)
+        const index = applyPalette(data, palette)
+        encoder.writeFrame(index, gifW, gifH, { palette, delay })
+      }
+
+      encoder.finish()
+      const buffer = encoder.bytes()
+      const blob = new Blob([buffer.buffer as ArrayBuffer], { type: 'image/gif' })
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `socialmate-${selectedPlatform}.gif`
+      a.click()
+      setTimeout(() => URL.revokeObjectURL(url), 10000)
+    } catch (err) {
+      setExportError('GIF export failed. Try a shorter clip or a different browser.')
+      console.error('GIF export error:', err)
+    } finally {
+      setExporting(false)
+    }
+  }
+
   // ── Notify me ────────────────────────────────────────────────────────────────
 
   async function handleFilterNotify() {
@@ -1051,7 +1142,18 @@ export default function CreatePageClient() {
                         >
                           {exporting ? 'Exporting…' : '⬇ Download Export'}
                         </button>
+                        <button
+                          onClick={exportGif}
+                          disabled={!videoFile || exporting}
+                          className="flex flex-col items-center gap-1 px-4 py-3 rounded-xl border border-gray-800 bg-gray-900 hover:border-amber-500/40 transition-all text-sm font-medium text-gray-300 hover:text-white disabled:opacity-40 disabled:cursor-not-allowed">
+                          <span className="text-lg">🎞️</span>
+                          <span className="text-xs">Export GIF</span>
+                          <span className="text-[10px] text-gray-500">max 5s</span>
+                        </button>
                       </div>
+                      <p className="text-xs text-gray-600">
+                        GIFs are capped at 5 seconds and exported at 480px wide for optimal file size.
+                      </p>
                     </div>
                   )}
                 </>
@@ -1203,6 +1305,13 @@ export default function CreatePageClient() {
                   className="w-full px-4 py-2.5 rounded-xl border border-gray-700 text-gray-300 font-semibold text-sm hover:border-amber-500/40 hover:text-amber-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   📷 Capture Thumbnail
+                </button>
+                <button
+                  onClick={exportGif}
+                  disabled={!videoFile || exporting}
+                  className="w-full px-4 py-2.5 rounded-xl border border-gray-700 text-gray-300 font-semibold text-sm hover:border-amber-500/40 hover:text-amber-400 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  🎞️ Export GIF <span className="text-xs text-gray-500">(max 5s)</span>
                 </button>
                 <button
                   onClick={() => router.push('/compose')}

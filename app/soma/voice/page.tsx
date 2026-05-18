@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useI18n } from '@/contexts/I18nContext'
 
 // ─── Question bank ────────────────────────────────────────────────────────────
 
@@ -333,6 +334,7 @@ type Tier = keyof typeof TIER_CONFIG
 
 export default function SomaVoicePage() {
   const router = useRouter()
+  const { t } = useI18n()
   const [phase, setPhase] = useState<'intro' | 'quiz' | 'done'>('intro')
   const [selectedTier, setSelectedTier] = useState<Tier>('foundation')
   const [currentIdx, setCurrentIdx] = useState(0)
@@ -407,18 +409,18 @@ export default function SomaVoicePage() {
     <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center px-4 py-16">
       <div className="max-w-2xl w-full">
         <Link href="/soma/projects" className="text-gray-500 hover:text-gray-300 text-sm mb-8 inline-flex items-center gap-1">
-          ← Back to Projects
+          {t('app_soma_voice.back_to_projects')}
         </Link>
 
         <div className="text-center mb-10">
           <div className="text-5xl mb-4">🧬</div>
-          <h1 className="text-3xl font-bold text-white mb-3">Voice DNA Builder</h1>
+          <h1 className="text-3xl font-bold text-white mb-3">{t('app_soma_voice.title')}</h1>
           <p className="text-gray-400 text-lg leading-relaxed">
-            Answer questions about how you think, talk, and create. SOMA uses your answers to generate content that sounds like <em>you</em> — not a template.
+            {t('app_soma_voice.subtitle')}
           </p>
           {existingTier && (
             <div className="mt-4 inline-flex items-center gap-2 bg-purple-900/30 border border-purple-700 rounded-lg px-4 py-2 text-sm text-purple-300">
-              ✓ You completed <strong>{TIER_CONFIG[existingTier as Tier]?.label ?? existingTier}</strong> — retaking will update your Voice DNA
+              ✓ You completed <strong>{TIER_CONFIG[existingTier as Tier]?.label ?? existingTier}</strong> — {t('app_soma_voice.existing_tier_note')}
             </div>
           )}
         </div>
@@ -465,9 +467,9 @@ export default function SomaVoicePage() {
           onClick={() => { setCurrentIdx(0); setPhase('quiz') }}
           className="w-full py-4 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-lg transition-colors"
         >
-          Start {TIER_CONFIG[selectedTier].label} Interview →
+          {t('app_soma_voice.start_interview')} {TIER_CONFIG[selectedTier].label} {t('app_soma_voice.interview_suffix')}
         </button>
-        <p className="text-center text-gray-600 text-sm mt-3">You can save and come back anytime</p>
+        <p className="text-center text-gray-600 text-sm mt-3">{t('app_soma_voice.save_later')}</p>
       </div>
     </div>
   )
@@ -477,25 +479,25 @@ export default function SomaVoicePage() {
     <div className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center px-4">
       <div className="max-w-md w-full text-center">
         <div className="text-6xl mb-6">🧬✅</div>
-        <h2 className="text-2xl font-bold text-white mb-3">Voice DNA Saved</h2>
+        <h2 className="text-2xl font-bold text-white mb-3">{t('app_soma_voice.done_title')}</h2>
         <p className="text-gray-400 mb-2">
-          SOMA has built your voice model. Every post generated from here on will be shaped by who you are, how you talk, and what you stand for.
+          {t('app_soma_voice.done_desc')}
         </p>
         <p className="text-gray-500 text-sm mb-8">
-          After each content run, SOMA will ask 3 quick questions to keep learning and adapting to you over time.
+          {t('app_soma_voice.done_feedback')}
         </p>
         <div className="flex flex-col gap-3">
           <Link
             href="/soma/dashboard"
             className="block w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold transition-colors"
           >
-            Go to Dashboard →
+            {t('app_soma_voice.go_to_dashboard')}
           </Link>
           <button
             onClick={() => { setCurrentIdx(0); setPhase('intro') }}
             className="w-full py-3 rounded-xl border border-gray-700 text-gray-400 hover:text-white hover:border-gray-500 transition-colors text-sm"
           >
-            Retake or upgrade tier
+            {t('app_soma_voice.retake')}
           </button>
         </div>
       </div>
@@ -518,14 +520,14 @@ export default function SomaVoicePage() {
           {/* Counter */}
           <div className="flex items-center justify-between mb-8">
             <span className="text-gray-500 text-sm">
-              {currentIdx + 1} of {activeQuestions.length} — <span className="text-gray-400">{TIER_CONFIG[selectedTier].label}</span>
+              {currentIdx + 1} {t('app_soma_voice.of_label')} {activeQuestions.length} — <span className="text-gray-400">{TIER_CONFIG[selectedTier].label}</span>
             </span>
             {currentIdx > 0 && (
               <button
                 onClick={() => setCurrentIdx(i => i - 1)}
                 className="text-gray-500 hover:text-gray-300 text-sm"
               >
-                ← Back
+                {t('app_soma_voice.back')}
               </button>
             )}
           </div>
@@ -567,7 +569,7 @@ export default function SomaVoicePage() {
                 )
               })}
               {currentQ.type === 'multi' && (
-                <p className="text-gray-600 text-xs mt-1">Select all that apply</p>
+                <p className="text-gray-600 text-xs mt-1">{t('app_soma_voice.select_all_apply')}</p>
               )}
             </div>
           )}
@@ -580,7 +582,7 @@ export default function SomaVoicePage() {
                 disabled={!canProceed() && currentQ.type !== 'text'}
                 className="flex-1 py-3.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold transition-colors"
               >
-                Next →
+                {t('app_soma_voice.next')}
               </button>
             ) : (
               <button
@@ -588,7 +590,7 @@ export default function SomaVoicePage() {
                 disabled={saving}
                 className="flex-1 py-3.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-60 text-white font-semibold transition-colors"
               >
-                {saving ? 'Building your Voice DNA…' : '🧬 Build My Voice DNA'}
+                {saving ? t('app_soma_voice.building') : t('app_soma_voice.build_btn')}
               </button>
             )}
             {currentQ.type !== 'text' && (
@@ -596,7 +598,7 @@ export default function SomaVoicePage() {
                 onClick={() => currentIdx < activeQuestions.length - 1 ? setCurrentIdx(i => i + 1) : handleFinish()}
                 className="px-4 py-3.5 rounded-xl border border-gray-700 text-gray-500 hover:text-gray-300 text-sm transition-colors"
               >
-                Skip
+                {t('app_soma_voice.skip')}
               </button>
             )}
           </div>

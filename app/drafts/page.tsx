@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
+import { useI18n } from '@/contexts/I18nContext'
 
 const EDITABLE_PLATFORMS = [
   { id: 'discord',   name: 'Discord',   icon: '💬', limit: 2000  },
@@ -85,6 +86,7 @@ function DraftsInner() {
   const [editMap, setEditMap] = useState<Record<string, EditState>>({})
   const router = useRouter()
   const { activeWorkspace } = useWorkspace()
+  const { t } = useI18n()
 
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type })
@@ -261,11 +263,11 @@ function DraftsInner() {
                    posts.filter(d => effectiveStatus(d) === filter)
 
   const statusConfig: Record<string, { label: string; bg: string; text: string; icon: string }> = {
-    draft:     { label: 'Draft',     bg: 'bg-gray-100 dark:bg-gray-800',   text: 'text-gray-500 dark:text-gray-400',   icon: '📂' },
-    scheduled: { label: 'Scheduled', bg: 'bg-blue-100',   text: 'text-blue-600',   icon: '📅' },
-    published: { label: 'Published', bg: 'bg-green-100',  text: 'text-green-700',  icon: '✅' },
-    partial:   { label: 'Partial',   bg: 'bg-yellow-100', text: 'text-yellow-700', icon: '⚠️' },
-    failed:    { label: 'Failed',    bg: 'bg-red-100',    text: 'text-red-600',    icon: '❌' },
+    draft:     { label: t('app_common.status_draft'),      bg: 'bg-gray-100 dark:bg-gray-800',   text: 'text-gray-500 dark:text-gray-400',   icon: '📂' },
+    scheduled: { label: t('app_common.status_scheduled'),  bg: 'bg-blue-100',   text: 'text-blue-600',   icon: '📅' },
+    published: { label: t('app_common.status_published'),  bg: 'bg-green-100',  text: 'text-green-700',  icon: '✅' },
+    partial:   { label: t('app_common.status_partial'),    bg: 'bg-yellow-100', text: 'text-yellow-700', icon: '⚠️' },
+    failed:    { label: t('app_common.status_failed'),     bg: 'bg-red-100',    text: 'text-red-600',    icon: '❌' },
   }
 
   return (
@@ -471,12 +473,12 @@ function DraftsInner() {
                               <button
                                 onClick={() => openEdit(post)}
                                 className="text-xs font-bold px-3 py-1.5 bg-black text-white rounded-xl hover:opacity-80 transition-all">
-                                Edit
+                                {t('app_common.edit')}
                               </button>
                             )}
                             <button onClick={() => setConfirmDelete(post.id)}
                               className="text-xs font-bold px-3 py-1.5 border border-red-200 text-red-400 rounded-xl hover:border-red-400 transition-all">
-                              Delete
+                              {t('app_common.delete')}
                             </button>
                           </div>
                         )}
@@ -586,14 +588,14 @@ function DraftsInner() {
                             disabled={editState.saving}
                             className="text-xs font-bold px-4 py-2 bg-black text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center gap-1.5">
                             {editState.saving
-                              ? <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Saving...</>
-                              : 'Save changes'}
+                              ? <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />{t('app_common.saving')}</>
+                              : t('app_common.save')}
                           </button>
                           <button
                             onClick={() => closeEdit(post.id)}
                             className="text-xs font-bold px-4 py-2 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all"
                             style={{ color: 'var(--text-muted)' }}>
-                            Cancel
+                            {t('app_common.cancel')}
                           </button>
                         </div>
                       </div>
@@ -608,12 +610,12 @@ function DraftsInner() {
                           <button onClick={() => handleDelete(post.id)} disabled={isDeleting}
                             className="text-xs font-bold px-3 py-1.5 bg-red-500 text-white rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center gap-1.5">
                             {isDeleting
-                              ? <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Deleting...</>
-                              : 'Yes, delete'}
+                              ? <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />{t('app_common.deleting')}</>
+                              : t('app_common.confirm')}
                           </button>
                           <button onClick={() => setConfirmDelete(null)}
                             className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-600 rounded-xl hover:border-gray-400 transition-all">
-                            Cancel
+                            {t('app_common.cancel')}
                           </button>
                         </div>
                       </div>

@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createBrowserClient } from '@supabase/ssr'
+import { useI18n } from '@/contexts/I18nContext'
 
 // Returns how many minutes until the next 15-min scan boundary
 function minutesToNextScan(): number {
@@ -137,6 +138,7 @@ function timeAgo(dateStr: string): string {
 export default function DashboardClient() {
   const router       = useRouter()
   const searchParams = useSearchParams()
+  const { t } = useI18n()
   const justUpgraded = searchParams.get('upgrade') === 'success'
   const [loading, setLoading] = useState(true)
   const [authed, setAuthed] = useState(false)
@@ -425,7 +427,7 @@ export default function DashboardClient() {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
         <div className="text-center">
           <div className="w-10 h-10 border-2 border-amber-400 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-sm text-gray-400">Guardian initializing…</p>
+          <p className="text-sm text-gray-400">{t('app_enki_dashboard.loading')}</p>
         </div>
       </div>
     )
@@ -439,8 +441,8 @@ export default function DashboardClient() {
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-amber-400 rounded-lg flex items-center justify-center text-black font-extrabold text-sm">E</div>
             <div>
-              <p className="text-sm font-extrabold text-white leading-none">Enki</p>
-              <p className="text-xs text-gray-500 mt-0.5">Treasury Guardian</p>
+              <p className="text-sm font-extrabold text-white leading-none">{t('app_enki_dashboard.title')}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{t('app_enki_dashboard.subtitle')}</p>
             </div>
           </div>
 
@@ -464,25 +466,25 @@ export default function DashboardClient() {
               href="/enki/doctrines"
               className="text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors"
             >
-              Doctrines
+              {t('app_enki_dashboard.doctrines')}
             </Link>
             <Link
               href="/enki/leaderboard"
               className="text-xs font-bold text-gray-400 hover:text-amber-400 transition-colors"
             >
-              Leaderboard
+              {t('app_enki_dashboard.leaderboard')}
             </Link>
             <Link
               href="/enki/trades"
               className="text-xs font-bold text-gray-400 hover:text-amber-400 transition-colors"
             >
-              Trade History
+              {t('app_enki_dashboard.trade_history')}
             </Link>
             <Link
               href="/enki/truth"
               className="text-xs font-bold text-gray-400 hover:text-amber-400 transition-colors"
             >
-              Truth Mode
+              {t('app_enki_dashboard.truth_mode')}
             </Link>
 
             {/* ── Notification Bell ── */}
@@ -490,7 +492,7 @@ export default function DashboardClient() {
               <button
                 onClick={() => setNotifOpen(o => !o)}
                 className="relative w-8 h-8 flex items-center justify-center text-gray-400 hover:text-amber-400 transition-colors focus:outline-none"
-                aria-label="Notifications"
+                aria-label={t('app_enki_dashboard.notifications')}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5">
                   <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
@@ -506,22 +508,22 @@ export default function DashboardClient() {
               {notifOpen && (
                 <div className="absolute right-0 top-10 w-80 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-xl z-50 p-4">
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-sm font-bold text-gray-900 dark:text-gray-100">Notifications</p>
+                    <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{t('app_enki_dashboard.notifications')}</p>
                     {unreadCount > 0 && (
                       <button
                         onClick={markAllRead}
                         disabled={notifMarking}
                         className="text-xs text-amber-500 hover:text-amber-400 font-semibold disabled:opacity-50 transition-colors"
                       >
-                        {notifMarking ? 'Marking…' : 'Mark all read'}
+                        {notifMarking ? t('app_enki_dashboard.marking') : t('app_enki_dashboard.mark_all_read')}
                       </button>
                     )}
                   </div>
 
                   {notifications.length === 0 ? (
                     <div className="py-6 text-center">
-                      <p className="text-sm text-gray-400">No notifications yet.</p>
-                      <p className="text-xs text-gray-500 mt-1">Trade alerts and guardian updates appear here.</p>
+                      <p className="text-sm text-gray-400">{t('app_enki_dashboard.no_notifications')}</p>
+                      <p className="text-xs text-gray-500 mt-1">{t('app_enki_dashboard.no_notifications_sub')}</p>
                     </div>
                   ) : (
                     <div className="space-y-2 max-h-80 overflow-y-auto">
@@ -555,14 +557,14 @@ export default function DashboardClient() {
             {/* Market hours status indicator */}
             <span className={`hidden sm:flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full ${marketOpen ? 'bg-green-900/30 text-green-400' : 'bg-gray-800 text-gray-500'}`}>
               <span className={`w-1.5 h-1.5 rounded-full ${marketOpen ? 'bg-green-400 shadow-[0_0_4px_rgba(74,222,128,0.7)]' : 'bg-gray-500'}`} />
-              {marketOpen ? 'Live' : 'Market closed'}
+              {marketOpen ? t('app_enki_dashboard.live') : t('app_enki_dashboard.market_closed')}
             </span>
 
             <Link
               href="/enki"
               className="text-xs font-bold text-gray-400 hover:text-white transition-colors"
             >
-              ← Back
+              {t('app_enki_dashboard.back')}
             </Link>
           </div>
         </div>
@@ -574,7 +576,7 @@ export default function DashboardClient() {
           <div className="max-w-6xl mx-auto flex items-center gap-3">
             <span className="text-amber-400 text-lg">👁</span>
             <p className="text-sm text-amber-300 font-semibold">
-              Viewing <span className="text-white">{copilotOwnerEmail}</span>&apos;s account in Co-Pilot mode — read-only access
+              {t('app_enki_dashboard.copilot_banner').replace('{email}', copilotOwnerEmail ?? '')}
             </p>
           </div>
         </div>
@@ -596,31 +598,31 @@ export default function DashboardClient() {
                 <div className="flex items-center gap-2 mb-6">
                   <div className="flex items-center gap-1.5">
                     <span className="w-6 h-6 rounded-full bg-amber-400 text-black text-[11px] font-extrabold flex items-center justify-center shrink-0">1</span>
-                    <span className="text-xs font-bold text-amber-400">Arm a Doctrine</span>
+                    <span className="text-xs font-bold text-amber-400">{t('app_enki_dashboard.arm_doctrine')}</span>
                   </div>
                   <span className="text-gray-600 text-xs">→</span>
                   <div className="flex items-center gap-1.5 opacity-40">
                     <span className="w-6 h-6 rounded-full bg-gray-700 text-gray-400 text-[11px] font-extrabold flex items-center justify-center shrink-0">2</span>
-                    <span className="text-xs font-bold text-gray-400">Wait for First Scan</span>
+                    <span className="text-xs font-bold text-gray-400">{t('app_enki_dashboard.wait_scan')}</span>
                   </div>
                   <span className="text-gray-600 text-xs">→</span>
                   <div className="flex items-center gap-1.5 opacity-40">
                     <span className="w-6 h-6 rounded-full bg-gray-700 text-gray-400 text-[11px] font-extrabold flex items-center justify-center shrink-0">3</span>
-                    <span className="text-xs font-bold text-gray-400">Watch Trades Appear</span>
+                    <span className="text-xs font-bold text-gray-400">{t('app_enki_dashboard.watch_trades')}</span>
                   </div>
                 </div>
 
-                <h2 className="text-xl font-extrabold text-white mb-2">Welcome to Enki.</h2>
-                <p className="text-sm text-gray-300 mb-1">Here&apos;s how to start paper trading in 2 minutes.</p>
+                <h2 className="text-xl font-extrabold text-white mb-2">{t('app_enki_dashboard.welcome')}</h2>
+                <p className="text-sm text-gray-300 mb-1">{t('app_enki_dashboard.get_started_desc')}</p>
                 <p className="text-xs text-gray-400 leading-relaxed mb-6">
-                  Doctrines are your trading strategies. A Balanced Doctrine has already been created for you — trading SPY, QQQ, and AAPL at 10% position size. Just activate it and the guardian starts watching.
+                  {t('app_enki_dashboard.doctrine_desc')}
                 </p>
 
                 <Link
                   href="/enki/doctrines"
                   className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-500 text-black font-extrabold text-sm px-6 py-3 rounded-xl transition-colors"
                 >
-                  Go to Doctrines and arm one →
+                  {t('app_enki_dashboard.go_to_doctrines')}
                 </Link>
               </div>
             )
@@ -634,26 +636,26 @@ export default function DashboardClient() {
               <div className="flex items-center gap-2 mb-6">
                 <div className="flex items-center gap-1.5">
                   <span className="w-6 h-6 rounded-full bg-green-500 text-white text-[11px] font-extrabold flex items-center justify-center shrink-0">✓</span>
-                  <span className="text-xs font-bold text-green-400">Doctrine Armed</span>
+                  <span className="text-xs font-bold text-green-400">{t('app_enki_dashboard.doctrine_armed')}</span>
                 </div>
                 <span className="text-gray-600 text-xs">→</span>
                 <div className="flex items-center gap-1.5">
                   <span className="w-6 h-6 rounded-full bg-amber-400 text-black text-[11px] font-extrabold flex items-center justify-center shrink-0">2</span>
-                  <span className="text-xs font-bold text-amber-400">Wait for First Scan</span>
+                  <span className="text-xs font-bold text-amber-400">{t('app_enki_dashboard.wait_scan')}</span>
                 </div>
                 <span className="text-gray-600 text-xs">→</span>
                 <div className="flex items-center gap-1.5 opacity-40">
                   <span className="w-6 h-6 rounded-full bg-gray-700 text-gray-400 text-[11px] font-extrabold flex items-center justify-center shrink-0">3</span>
-                  <span className="text-xs font-bold text-gray-400">Watch Trades Appear</span>
+                  <span className="text-xs font-bold text-gray-400">{t('app_enki_dashboard.watch_trades')}</span>
                 </div>
               </div>
 
               <div className="flex items-center gap-2 mb-3">
                 <span className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.6)]" />
-                <p className="text-sm font-extrabold text-green-400">Doctrine armed — Guardian is watching</p>
+                <p className="text-sm font-extrabold text-green-400">{t('app_enki_dashboard.doctrine_armed_active')}</p>
               </div>
               <p className="text-xs text-gray-300 leading-relaxed mb-4">
-                Enki scans the market every 15 minutes during market hours (Mon–Fri 9:30 AM–4:00 PM ET). Your first trade will appear here after the next scan finds a qualifying signal.
+                {t('app_enki_dashboard.scan_desc')}
               </p>
 
               <div className="flex flex-wrap gap-4 items-center">
@@ -672,7 +674,7 @@ export default function DashboardClient() {
                 </div>
                 {/* Next scan countdown */}
                 <div className="bg-amber-900/20 border border-amber-700/30 rounded-xl px-4 py-3">
-                  <p className="text-[10px] font-bold text-amber-500 uppercase tracking-wider mb-0.5">Next Scan</p>
+                  <p className="text-[10px] font-bold text-amber-500 uppercase tracking-wider mb-0.5">{t('app_enki_dashboard.next_scan')}</p>
                   <p className="text-sm font-extrabold text-amber-400">~{minsToScan} min{minsToScan !== 1 ? 's' : ''}</p>
                 </div>
               </div>
@@ -683,13 +685,13 @@ export default function DashboardClient() {
         {/* ── No snapshot yet — non-citizen fallback ── */}
         {profile?.tier !== 'citizen' && snapshots.length === 0 && (
           <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 rounded-2xl p-6 mb-8">
-            <p className="text-sm font-bold text-amber-700 dark:text-amber-400 mb-1">Guardian Initializing</p>
+            <p className="text-sm font-bold text-amber-700 dark:text-amber-400 mb-1">{t('app_enki_dashboard.guardian_initializing')}</p>
             <p className="text-xs text-amber-600 dark:text-amber-500">
-              Connect your broker in Settings to start trading. Your treasury data will appear here once the first scan cycle runs.
+              {t('app_enki_dashboard.broker_connect_desc')}
             </p>
             <div className="mt-3 flex gap-3">
               <Link href="/enki/settings" className="text-xs font-bold text-amber-700 dark:text-amber-400 hover:underline">
-                Go to Settings →
+                {t('app_enki_dashboard.go_to_settings')}
               </Link>
             </div>
           </div>
@@ -700,13 +702,13 @@ export default function DashboardClient() {
           <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-300 dark:border-amber-700 rounded-2xl px-6 py-4 mb-6 flex items-center gap-4">
             <span className="text-2xl">🎖️</span>
             <div>
-              <p className="font-extrabold text-amber-800 dark:text-amber-300 text-sm">Welcome to the Empire.</p>
+              <p className="font-extrabold text-amber-800 dark:text-amber-300 text-sm">{t('app_enki_dashboard.welcome_empire')}</p>
               <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
-                Your tier has been activated. Create a doctrine to put the guardian to work.
+                {t('app_enki_dashboard.tier_activated')}
               </p>
             </div>
             <a href="/enki/doctrines" className="ml-auto shrink-0 bg-amber-400 hover:bg-amber-500 text-black font-bold text-xs px-4 py-2 rounded-xl transition-all">
-              Set Doctrine →
+              {t('app_enki_dashboard.set_doctrine')}
             </a>
           </div>
         )}
@@ -715,14 +717,14 @@ export default function DashboardClient() {
         {profile?.tier === 'citizen' && (
           <div className="bg-black dark:bg-gray-950 border border-amber-400/30 rounded-2xl p-5 mb-8 flex items-center justify-between gap-4">
             <div>
-              <p className="text-sm font-extrabold text-amber-400 mb-0.5">You're in Simulation Mode</p>
-              <p className="text-xs text-gray-400">Paper trading only. Upgrade to Commander to go live with real stocks.</p>
+              <p className="text-sm font-extrabold text-amber-400 mb-0.5">{t('app_enki_dashboard.simulation_mode')}</p>
+              <p className="text-xs text-gray-400">{t('app_enki_dashboard.simulation_desc')}</p>
             </div>
             <Link
               href="/enki#pricing"
               className="text-xs font-bold bg-amber-400 hover:bg-amber-500 text-black px-4 py-2 rounded-xl whitespace-nowrap transition-colors"
             >
-              Upgrade →
+              {t('app_enki_dashboard.upgrade')}
             </Link>
           </div>
         )}
@@ -735,17 +737,17 @@ export default function DashboardClient() {
                 className={`w-2.5 h-2.5 rounded-full shrink-0 ${profile.guardian_mode !== 'dormant' ? 'bg-green-500 shadow-[0_0_6px_rgba(34,197,94,0.6)]' : 'bg-gray-400'}`}
               />
               <span className="text-sm font-bold text-gray-900 dark:text-gray-100">
-                Guardian:{' '}
+                {t('app_enki_dashboard.guardian_label')}{' '}
                 {profile.guardian_mode === 'dormant'
-                  ? <span className="text-gray-400 font-semibold">PAUSED</span>
+                  ? <span className="text-gray-400 font-semibold">{t('app_enki_dashboard.guardian_paused')}</span>
                   : profile.guardian_mode === 'autonomous'
-                  ? <span className="text-green-500">ACTIVE</span>
-                  : <span className="text-green-500">ACTIVE</span>
+                  ? <span className="text-green-500">{t('app_enki_dashboard.guardian_active')}</span>
+                  : <span className="text-green-500">{t('app_enki_dashboard.guardian_active')}</span>
                 }
               </span>
               {profile.guardian_mode !== 'dormant' && (
                 <span className="text-xs text-gray-400 font-medium">
-                  — {profile.guardian_mode === 'autonomous' ? 'Autonomous' : 'Approval Mode'}
+                  — {profile.guardian_mode === 'autonomous' ? t('app_enki_dashboard.autonomous') : t('app_enki_dashboard.approval_mode')}
                 </span>
               )}
             </div>
@@ -758,7 +760,7 @@ export default function DashboardClient() {
                   : 'bg-green-600 border-green-700 text-white hover:bg-green-700'
               }`}
             >
-              {guardianToggling ? '…' : profile.guardian_mode !== 'dormant' ? 'Pause' : 'Resume'}
+              {guardianToggling ? '…' : profile.guardian_mode !== 'dormant' ? t('app_enki_dashboard.pause') : t('app_enki_dashboard.resume')}
             </button>
           </div>
         )}
@@ -769,14 +771,14 @@ export default function DashboardClient() {
             <div className="flex items-center gap-2.5">
               <span className="text-amber-500 text-base leading-none">⚡</span>
               <p className="text-sm font-bold text-amber-800 dark:text-amber-300">
-                {pendingTrades.length} trade{pendingTrades.length === 1 ? '' : 's'} waiting for your approval
+                {t('app_enki_dashboard.trades_waiting').replace('{count}', String(pendingTrades.length)).replace('{plural}', pendingTrades.length === 1 ? '' : 's')}
               </p>
             </div>
             <Link
               href="/enki/trades?tab=pending"
               className="text-xs font-bold text-amber-700 dark:text-amber-400 hover:text-amber-600 dark:hover:text-amber-300 whitespace-nowrap transition-colors"
             >
-              Review →
+              {t('app_enki_dashboard.review')}
             </Link>
           </div>
         )}
@@ -784,25 +786,25 @@ export default function DashboardClient() {
         {/* ── Stats row ── */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <StatCard
-            label="Treasury Value"
+            label={t('app_enki_dashboard.treasury_value')}
             value={totalValue > 0 ? `$${totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` : '—'}
-            sub={latestSnap ? `as of ${latestSnap.snapshot_date}` : 'No data yet'}
+            sub={latestSnap ? `${t('app_enki_dashboard.as_of')} ${latestSnap.snapshot_date}` : t('app_enki_dashboard.no_data_yet')}
             accent
           />
           <StatCard
-            label="Today's P&L"
+            label={t('app_enki_dashboard.todays_pnl')}
             value={latestSnap ? `${pnlSign(dailyPnl)}$${Math.abs(dailyPnl).toFixed(2)}` : '—'}
-            sub={dailyPnl !== 0 ? (dailyPnl >= 0 ? '▲ Positive day' : '▼ Drawdown') : undefined}
+            sub={dailyPnl !== 0 ? (dailyPnl >= 0 ? t('app_enki_dashboard.positive_day') : t('app_enki_dashboard.drawdown')) : undefined}
           />
           <StatCard
-            label="Total P&L"
+            label={t('app_enki_dashboard.total_pnl')}
             value={latestSnap ? `${pnlSign(totalPnl)}$${Math.abs(totalPnl).toFixed(2)}` : '—'}
-            sub="Since inception"
+            sub={t('app_enki_dashboard.since_inception')}
           />
           <StatCard
-            label="Open Positions"
+            label={t('app_enki_dashboard.open_positions')}
             value={String(openPos)}
-            sub={openPos === 0 ? 'Guardian watching' : `${openPos} active`}
+            sub={openPos === 0 ? t('app_enki_dashboard.guardian_watching') : `${openPos} ${t('app_enki_dashboard.active_positions')}`}
           />
         </div>
 
@@ -810,34 +812,34 @@ export default function DashboardClient() {
         {riskMetrics && (
           <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-5 mb-8">
             <div className="flex items-center justify-between mb-4">
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">Risk Metrics</p>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{t('app_enki_dashboard.risk_metrics')}</p>
               {riskMetrics.lowConfidence && (
                 <span className="text-[10px] font-bold bg-yellow-50 dark:bg-yellow-900/20 text-yellow-600 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-800 px-2 py-0.5 rounded-full">
-                  Low confidence — {riskMetrics.n} trading days
+                  {t('app_enki_dashboard.low_confidence').replace('{n}', String(riskMetrics.n))}
                 </span>
               )}
             </div>
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Sharpe Ratio</p>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">{t('app_enki_dashboard.sharpe_ratio')}</p>
                 <p className={`text-xl font-extrabold ${riskMetrics.sharpe === null ? 'text-gray-400' : riskMetrics.sharpe >= 1 ? 'text-green-500' : riskMetrics.sharpe >= 0 ? 'text-amber-500' : 'text-red-500'}`}>
                   {riskMetrics.sharpe === null ? '—' : riskMetrics.sharpe.toFixed(2)}
                 </p>
-                <p className="text-[10px] text-gray-400 mt-0.5">≥ 1.0 is strong</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">{t('app_enki_dashboard.sharpe_strong')}</p>
               </div>
               <div>
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Sortino Ratio</p>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">{t('app_enki_dashboard.sortino_ratio')}</p>
                 <p className={`text-xl font-extrabold ${riskMetrics.sortino === null ? 'text-gray-400' : riskMetrics.sortino >= 1 ? 'text-green-500' : riskMetrics.sortino >= 0 ? 'text-amber-500' : 'text-red-500'}`}>
                   {riskMetrics.sortino === null ? '—' : riskMetrics.sortino.toFixed(2)}
                 </p>
-                <p className="text-[10px] text-gray-400 mt-0.5">Downside risk adjusted</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">{t('app_enki_dashboard.sortino_desc')}</p>
               </div>
               <div>
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Max Drawdown</p>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">{t('app_enki_dashboard.max_drawdown')}</p>
                 <p className={`text-xl font-extrabold ${riskMetrics.maxDD > 0.2 ? 'text-red-500' : riskMetrics.maxDD > 0.1 ? 'text-amber-500' : 'text-green-500'}`}>
                   -{(riskMetrics.maxDD * 100).toFixed(1)}%
                 </p>
-                <p className="text-[10px] text-gray-400 mt-0.5">Peak-to-trough</p>
+                <p className="text-[10px] text-gray-400 mt-0.5">{t('app_enki_dashboard.peak_trough')}</p>
               </div>
             </div>
           </div>
@@ -846,12 +848,12 @@ export default function DashboardClient() {
         {/* ── Broker status ── */}
         {profile && (
           <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-5 mb-8">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Broker Connections</p>
+            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">{t('app_enki_dashboard.broker_connections')}</p>
             <div className="flex flex-wrap gap-3">
               <div className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border ${profile.alpaca_connected ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400' : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400'}`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${profile.alpaca_connected ? 'bg-green-500' : 'bg-gray-400'}`} />
                 Alpaca — Stocks (Mon–Fri)
-                {!profile.alpaca_connected && <span className="ml-1 font-normal opacity-70"><Link href="/enki/settings" className="hover:text-amber-400">Connect in Settings</Link></span>}
+                {!profile.alpaca_connected && <span className="ml-1 font-normal opacity-70"><Link href="/enki/settings" className="hover:text-amber-400">{t('app_enki_dashboard.connect_settings')}</Link></span>}
               </div>
               <div className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold border ${profile.coinbase_connected ? 'bg-green-50 dark:bg-green-900/10 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400' : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400'}`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${profile.coinbase_connected ? 'bg-green-500' : 'bg-gray-400'}`} />
@@ -859,8 +861,8 @@ export default function DashboardClient() {
                 {!profile.coinbase_connected && (
                   <span className="ml-1 font-normal opacity-70">
                     {profile.tier === 'emperor'
-                      ? <Link href="/enki/settings" className="hover:text-amber-400">Connect in Settings</Link>
-                      : 'Emperor only'}
+                      ? <Link href="/enki/settings" className="hover:text-amber-400">{t('app_enki_dashboard.connect_settings')}</Link>
+                      : t('app_enki_dashboard.emperor_only')}
                   </span>
                 )}
               </div>
@@ -873,8 +875,8 @@ export default function DashboardClient() {
           <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden mb-8">
             <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">Paper Positions</p>
-                <span className="text-[10px] font-bold bg-gray-100 dark:bg-gray-800 text-gray-500 px-1.5 py-0.5 rounded">SIMULATED</span>
+                <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">{t('app_enki_dashboard.paper_positions')}</p>
+                <span className="text-[10px] font-bold bg-gray-100 dark:bg-gray-800 text-gray-500 px-1.5 py-0.5 rounded">{t('app_enki_dashboard.simulated')}</span>
               </div>
               <span className="text-xs text-gray-400">{paperPositions.length} open</span>
             </div>
@@ -882,10 +884,10 @@ export default function DashboardClient() {
               <table className="w-full text-xs">
                 <thead>
                   <tr className="border-b border-gray-100 dark:border-gray-800">
-                    <th className="px-4 py-3 text-left font-bold text-gray-400 uppercase tracking-wider">Symbol</th>
-                    <th className="px-4 py-3 text-right font-bold text-gray-400 uppercase tracking-wider">Qty</th>
-                    <th className="px-4 py-3 text-right font-bold text-gray-400 uppercase tracking-wider">Avg Price</th>
-                    <th className="px-4 py-3 text-right font-bold text-gray-400 uppercase tracking-wider">Cost Basis</th>
+                    <th className="px-4 py-3 text-left font-bold text-gray-400 uppercase tracking-wider">{t('app_enki_dashboard.symbol')}</th>
+                    <th className="px-4 py-3 text-right font-bold text-gray-400 uppercase tracking-wider">{t('app_enki_dashboard.qty')}</th>
+                    <th className="px-4 py-3 text-right font-bold text-gray-400 uppercase tracking-wider">{t('app_enki_dashboard.avg_price')}</th>
+                    <th className="px-4 py-3 text-right font-bold text-gray-400 uppercase tracking-wider">{t('app_enki_dashboard.cost_basis')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -908,53 +910,53 @@ export default function DashboardClient() {
           <div className="bg-white dark:bg-gray-900 border border-amber-200 dark:border-amber-800/50 rounded-2xl overflow-hidden mb-8">
             <div className="px-6 py-4 border-b border-amber-100 dark:border-amber-800/40 flex items-center gap-3">
               <span className="text-amber-500">⚡</span>
-              <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">Pending Approvals</p>
+              <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">{t('app_enki_dashboard.pending_approvals')}</p>
               <span className="text-[11px] font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full">
-                {pendingTrades.length} pending
+                {pendingTrades.length} {t('app_enki_dashboard.pending_label')}
               </span>
             </div>
             <div className="divide-y divide-gray-50 dark:divide-gray-800/50">
-              {pendingTrades.map((t) => {
-                const state = approvalState[t.id]
+              {pendingTrades.map((trade) => {
+                const state = approvalState[trade.id]
                 const isLoading = state === 'loading'
                 const isDone    = state === 'approved' || state === 'rejected'
                 return (
-                  <div key={t.id} className="px-6 py-4 flex items-center justify-between gap-4 flex-wrap">
+                  <div key={trade.id} className="px-6 py-4 flex items-center justify-between gap-4 flex-wrap">
                     <div className="flex items-center gap-3 flex-wrap">
-                      <span className="font-extrabold text-sm text-gray-900 dark:text-gray-100">{t.symbol}</span>
-                      <span className={`text-xs font-bold uppercase px-2 py-0.5 rounded ${t.side === 'buy' ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400' : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'}`}>
-                        {t.side}
+                      <span className="font-extrabold text-sm text-gray-900 dark:text-gray-100">{trade.symbol}</span>
+                      <span className={`text-xs font-bold uppercase px-2 py-0.5 rounded ${trade.side === 'buy' ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400' : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'}`}>
+                        {trade.side}
                       </span>
-                      <span className="text-xs text-gray-500">{t.qty} shares</span>
-                      <span className="text-xs font-bold text-gray-700 dark:text-gray-300">${t.price.toFixed(2)}</span>
-                      {t.confidence > 0 && (
-                        <span className="text-xs text-amber-500 font-bold">{t.confidence.toFixed(1)}/10</span>
+                      <span className="text-xs text-gray-500">{trade.qty} {t('app_enki_dashboard.shares')}</span>
+                      <span className="text-xs font-bold text-gray-700 dark:text-gray-300">${trade.price.toFixed(2)}</span>
+                      {trade.confidence > 0 && (
+                        <span className="text-xs text-amber-500 font-bold">{trade.confidence.toFixed(1)}/10</span>
                       )}
                       <span className="text-xs text-gray-400">
-                        {new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        {new Date(trade.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-2">
                       {isDone ? (
                         <span className={`text-xs font-bold px-3 py-1.5 rounded-xl ${state === 'approved' ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400' : 'bg-red-50 dark:bg-red-900/20 text-red-500'}`}>
-                          {state === 'approved' ? '✓ Approved' : '✕ Rejected'}
+                          {state === 'approved' ? t('app_enki_dashboard.approved') : t('app_enki_dashboard.rejected')}
                         </span>
                       ) : (
                         <>
                           <button
                             disabled={isLoading}
-                            onClick={() => handleApproval(t.id, 'approve')}
+                            onClick={() => handleApproval(trade.id, 'approve')}
                             className="text-xs font-bold bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded-xl transition-colors disabled:opacity-50"
                           >
-                            {isLoading ? '…' : 'Approve ✓'}
+                            {isLoading ? '…' : t('app_enki_dashboard.approve')}
                           </button>
                           <button
                             disabled={isLoading}
-                            onClick={() => handleApproval(t.id, 'reject')}
+                            onClick={() => handleApproval(trade.id, 'reject')}
                             className="text-xs font-bold bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 px-3 py-1.5 rounded-xl transition-colors disabled:opacity-50"
                           >
-                            Reject ✕
+                            {t('app_enki_dashboard.reject')}
                           </button>
                         </>
                       )}
@@ -969,57 +971,57 @@ export default function DashboardClient() {
         {/* ── Recent trades ── */}
         <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden mb-8">
           <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
-            <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">Recent Trades</p>
+            <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">{t('app_enki_dashboard.recent_trades')}</p>
             <Link href="/enki/trades" className="text-xs font-bold text-amber-500 hover:text-amber-400 transition-colors">
-              View all →
+              {t('app_enki_dashboard.view_all')}
             </Link>
           </div>
 
           {trades.length === 0 ? (
             <div className="px-6 py-10 text-center">
-              <p className="text-sm text-gray-400">No trades yet.</p>
-              <p className="text-xs text-gray-500 mt-1">The guardian is watching. Trades execute when confidence hits 6/10.</p>
+              <p className="text-sm text-gray-400">{t('app_enki_dashboard.no_trades')}</p>
+              <p className="text-xs text-gray-500 mt-1">{t('app_enki_dashboard.no_trades_sub')}</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-xs">
                 <thead>
                   <tr className="border-b border-gray-100 dark:border-gray-800">
-                    <th className="px-4 py-3 text-left font-bold text-gray-400 uppercase tracking-wider">Symbol</th>
-                    <th className="px-4 py-3 text-left font-bold text-gray-400 uppercase tracking-wider">Side</th>
-                    <th className="px-4 py-3 text-right font-bold text-gray-400 uppercase tracking-wider">Qty</th>
-                    <th className="px-4 py-3 text-right font-bold text-gray-400 uppercase tracking-wider">Price</th>
-                    <th className="px-4 py-3 text-right font-bold text-gray-400 uppercase tracking-wider">Total</th>
-                    <th className="px-4 py-3 text-right font-bold text-gray-400 uppercase tracking-wider">Score</th>
-                    <th className="px-4 py-3 text-left font-bold text-gray-400 uppercase tracking-wider">Broker</th>
-                    <th className="px-4 py-3 text-left font-bold text-gray-400 uppercase tracking-wider">Date</th>
+                    <th className="px-4 py-3 text-left font-bold text-gray-400 uppercase tracking-wider">{t('app_enki_dashboard.symbol')}</th>
+                    <th className="px-4 py-3 text-left font-bold text-gray-400 uppercase tracking-wider">{t('app_enki_dashboard.side')}</th>
+                    <th className="px-4 py-3 text-right font-bold text-gray-400 uppercase tracking-wider">{t('app_enki_dashboard.qty')}</th>
+                    <th className="px-4 py-3 text-right font-bold text-gray-400 uppercase tracking-wider">{t('app_enki_dashboard.price')}</th>
+                    <th className="px-4 py-3 text-right font-bold text-gray-400 uppercase tracking-wider">{t('app_enki_dashboard.total')}</th>
+                    <th className="px-4 py-3 text-right font-bold text-gray-400 uppercase tracking-wider">{t('app_enki_dashboard.score')}</th>
+                    <th className="px-4 py-3 text-left font-bold text-gray-400 uppercase tracking-wider">{t('app_enki_dashboard.broker')}</th>
+                    <th className="px-4 py-3 text-left font-bold text-gray-400 uppercase tracking-wider">{t('app_enki_dashboard.date')}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {trades.map((t) => (
-                    <tr key={t.id} className="border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
-                      <td className="px-4 py-3 font-bold text-gray-900 dark:text-gray-100">{t.symbol}</td>
+                  {trades.map((trade) => (
+                    <tr key={trade.id} className="border-b border-gray-50 dark:border-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
+                      <td className="px-4 py-3 font-bold text-gray-900 dark:text-gray-100">{trade.symbol}</td>
                       <td className="px-4 py-3">
-                        <span className={`font-bold uppercase ${t.side === 'buy' ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
-                          {t.side}
+                        <span className={`font-bold uppercase ${trade.side === 'buy' ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
+                          {trade.side}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-right text-gray-600 dark:text-gray-400">{t.qty}</td>
-                      <td className="px-4 py-3 text-right text-gray-600 dark:text-gray-400">${t.price.toFixed(2)}</td>
-                      <td className="px-4 py-3 text-right font-bold text-gray-900 dark:text-gray-100">${((t.qty ?? 0) * (t.price ?? 0)).toFixed(2)}</td>
+                      <td className="px-4 py-3 text-right text-gray-600 dark:text-gray-400">{trade.qty}</td>
+                      <td className="px-4 py-3 text-right text-gray-600 dark:text-gray-400">${trade.price.toFixed(2)}</td>
+                      <td className="px-4 py-3 text-right font-bold text-gray-900 dark:text-gray-100">${((trade.qty ?? 0) * (trade.price ?? 0)).toFixed(2)}</td>
                       <td className="px-4 py-3 text-right">
-                        {t.confidence > 0 && (
-                          <span className="text-amber-500 font-bold">{t.confidence.toFixed(1)}</span>
+                        {trade.confidence > 0 && (
+                          <span className="text-amber-500 font-bold">{trade.confidence.toFixed(1)}</span>
                         )}
                       </td>
                       <td className="px-4 py-3">
                         <span className="flex items-center gap-1.5">
-                          {t.paper && <span className="text-gray-400 text-[10px] font-bold bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">PAPER</span>}
-                          <span className="text-gray-500 capitalize">{t.broker}</span>
+                          {trade.paper && <span className="text-gray-400 text-[10px] font-bold bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded">PAPER</span>}
+                          <span className="text-gray-500 capitalize">{trade.broker}</span>
                         </span>
                       </td>
                       <td className="px-4 py-3 text-gray-400">
-                        {new Date(t.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                        {new Date(trade.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                       </td>
                     </tr>
                   ))}
@@ -1031,22 +1033,22 @@ export default function DashboardClient() {
 
         {/* ── Fortress status ── */}
         <div className="bg-black dark:bg-gray-950 border border-gray-800 rounded-2xl p-6">
-          <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-4">Fortress Guard — Active Rules</p>
+          <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-4">{t('app_enki_dashboard.fortress_guard')}</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[
-              { label: 'Daily Drawdown', value: '3% max' },
-              { label: 'Loss Brake', value: '3 consecutive' },
-              { label: 'Macro Shield', value: 'CPI / FOMC / NFP' },
-              { label: 'Earnings Guard', value: '2-day buffer' },
-              { label: 'PDT Rule', value: 'Auto-enforced' },
-              { label: 'Sector Cap', value: '40% per sector' },
-              { label: 'Crypto Cap', value: '35% of treasury' },
-              { label: 'Confidence Gate', value: '6.0 / 10 min' },
-            ].map((item) => (
-              <div key={item.label} className="flex items-start gap-2">
+            {([
+              { labelKey: 'daily_drawdown', value: '3% max' },
+              { labelKey: 'loss_brake', value: '3 consecutive' },
+              { labelKey: 'macro_shield', value: 'CPI / FOMC / NFP' },
+              { labelKey: 'earnings_guard', value: '2-day buffer' },
+              { labelKey: 'pdt_rule', value: 'Auto-enforced' },
+              { labelKey: 'sector_cap', value: '40% per sector' },
+              { labelKey: 'crypto_cap', value: '35% of treasury' },
+              { labelKey: 'confidence_gate', value: '6.0 / 10 min' },
+            ] as { labelKey: string; value: string }[]).map((item) => (
+              <div key={item.labelKey} className="flex items-start gap-2">
                 <span className="text-amber-500 mt-0.5 text-xs">◆</span>
                 <div>
-                  <p className="text-xs font-bold text-gray-300">{item.label}</p>
+                  <p className="text-xs font-bold text-gray-300">{t(`app_enki_dashboard.${item.labelKey}` as Parameters<typeof t>[0])}</p>
                   <p className="text-xs text-gray-500">{item.value}</p>
                 </div>
               </div>

@@ -513,6 +513,40 @@ function SidebarContent({
           {!isIconOnly && (
             <div className="flex items-center gap-1 flex-shrink-0">
               <NotificationBell />
+              {/* Language button — compact globe in header */}
+              <div className="relative">
+                <button
+                  onClick={() => setLangOpen(p => !p)}
+                  className="flex items-center justify-center w-7 h-7 rounded-lg text-sm transition-all hover:opacity-70"
+                  style={{ background: 'var(--sidebar-active)', color: 'var(--sidebar-muted)' }}
+                  title="Change language"
+                >
+                  {SUPPORTED_LOCALES.find(l => l.code === locale)?.flag ?? '🌐'}
+                </button>
+                {langOpen && (
+                  <div
+                    className="absolute top-full right-0 mt-1 w-36 rounded-xl overflow-hidden shadow-xl z-50"
+                    style={{ background: 'var(--surface)', border: '1px solid var(--sidebar-border)' }}
+                  >
+                    {SUPPORTED_LOCALES.map(loc => (
+                      <button
+                        key={loc.code}
+                        onClick={() => { setLocale(loc.code); setLangOpen(false) }}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-xs transition-all hover:opacity-70 text-left"
+                        style={{
+                          color: loc.code === locale ? 'var(--sidebar-fg)' : 'var(--sidebar-muted)',
+                          fontWeight: loc.code === locale ? '700' : '400',
+                          background: loc.code === locale ? 'var(--sidebar-active)' : 'transparent',
+                        }}
+                      >
+                        <span>{loc.flag}</span>
+                        <span>{loc.label}</span>
+                        {loc.code === locale && <span className="ml-auto">✓</span>}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full whitespace-nowrap"
                 style={{ background: 'var(--sidebar-active)', color: 'var(--sidebar-muted)' }}>
                 {badge.label}
@@ -521,7 +555,39 @@ function SidebarContent({
           )}
 
           {isIconOnly && (
-            <NotificationBell />
+            <div className="flex flex-col items-center gap-1">
+              <NotificationBell />
+              <button
+                onClick={() => setLangOpen(p => !p)}
+                className="flex items-center justify-center w-8 h-8 rounded-lg text-sm transition-all hover:opacity-70"
+                style={{ background: 'var(--sidebar-active)' }}
+                title="Change language"
+              >
+                {SUPPORTED_LOCALES.find(l => l.code === locale)?.flag ?? '🌐'}
+              </button>
+              {langOpen && (
+                <div
+                  className="absolute left-14 top-4 w-36 rounded-xl overflow-hidden shadow-xl z-50"
+                  style={{ background: 'var(--surface)', border: '1px solid var(--sidebar-border)' }}
+                >
+                  {SUPPORTED_LOCALES.map(loc => (
+                    <button
+                      key={loc.code}
+                      onClick={() => { setLocale(loc.code); setLangOpen(false) }}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-xs transition-all hover:opacity-70 text-left"
+                      style={{
+                        color: loc.code === locale ? 'var(--sidebar-fg)' : 'var(--sidebar-muted)',
+                        fontWeight: loc.code === locale ? '700' : '400',
+                        background: loc.code === locale ? 'var(--sidebar-active)' : 'transparent',
+                      }}
+                    >
+                      <span>{loc.flag}</span>
+                      <span>{loc.label}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           )}
         </div>
 
@@ -900,42 +966,6 @@ function SidebarContent({
               </div>
             </Link>
           )}
-
-          {/* LANGUAGE SWITCHER */}
-          <div className="relative">
-            <button
-              onClick={() => setLangOpen(p => !p)}
-              className="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-xs transition-all hover:opacity-70"
-              style={{ color: 'var(--sidebar-muted)' }}
-            >
-              <span className="text-sm">{SUPPORTED_LOCALES.find(l => l.code === locale)?.flag ?? '🌐'}</span>
-              <span>{SUPPORTED_LOCALES.find(l => l.code === locale)?.label ?? 'English'}</span>
-              <span className="ml-auto text-[10px]">{langOpen ? '▴' : '▾'}</span>
-            </button>
-            {langOpen && (
-              <div
-                className="absolute bottom-full mb-1 left-0 right-0 rounded-xl overflow-hidden shadow-lg z-50"
-                style={{ background: 'var(--surface)', border: '1px solid var(--sidebar-border)' }}
-              >
-                {SUPPORTED_LOCALES.map(loc => (
-                  <button
-                    key={loc.code}
-                    onClick={() => { setLocale(loc.code); setLangOpen(false) }}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-xs transition-all hover:opacity-70 text-left"
-                    style={{
-                      color: loc.code === locale ? 'var(--sidebar-fg)' : 'var(--sidebar-muted)',
-                      fontWeight: loc.code === locale ? '700' : '400',
-                      background: loc.code === locale ? 'var(--sidebar-active)' : 'transparent',
-                    }}
-                  >
-                    <span>{loc.flag}</span>
-                    <span>{loc.label}</span>
-                    {loc.code === locale && <span className="ml-auto">✓</span>}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
 
           {/* THEME TOGGLE */}
           <ThemeToggle />

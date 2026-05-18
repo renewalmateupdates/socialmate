@@ -1,6 +1,6 @@
 # SocialMate
 
-> Free social media scheduling and Creator OS — schedule, create, and manage content across 5 live platforms with 20+ built-in AI tools, an autonomous AI content system (SOMA), an autonomous trading bot (Enki), and 8 AI agents that run on autopilot.
+> Free social media scheduling and Creator OS — schedule, create, and manage content across 6 live platforms with 20+ built-in AI tools, an autonomous AI content system (SOMA), an autonomous trading bot (Enki), and 8 AI agents that run on autopilot.
 
 SocialMate is a web-based social media management platform built for creators, streamers, small businesses, and agencies. Free to start. No credit card required. No per-channel fees.
 
@@ -12,7 +12,7 @@ Contact: socialmate.updates@gmail.com
 
 ## What SocialMate Does
 
-- Schedule and publish posts to Bluesky, Discord, Telegram, Mastodon, and X/Twitter (5 platforms live)
+- Schedule and publish posts to Bluesky, Discord, Telegram, Mastodon, X/Twitter, and TikTok (6 platforms live)
 - Compose with thread builder, per-platform preview, save-as-template, and post-as-image (PNG export)
 - Clips Studio: browse Twitch clips (OAuth) or YouTube videos (channel URL, no API key) and schedule them to all platforms in one click
 - 20+ AI-powered tools: caption generation, hashtag suggestions, post rewriter, viral hook generator, thread generator, content repurposer (6 formats), post scorer, SM-Pulse, SM-Radar, content gap detector, AI content calendar, AI image generation, brand voice injection
@@ -150,6 +150,7 @@ Free long-form guide series for entrepreneurs, creators, and self-starters by fo
 - Vol. 2 — Marketing on Zero Budget: https://socialmate.studio/guides/marketing-on-zero-budget
 - Vol. 3 — Business Credit & Legal Foundations: https://socialmate.studio/guides/business-credit-legal
 - Vol. 4 — Vibe Coding with AI: https://socialmate.studio/guides/vibe-coding-with-ai
+- Vol. 5 — Creator Monetization (tip jars, fan subs, digital products, brand deals, affiliate income, $5K/month roadmap): https://socialmate.studio/guides/creator-monetization
 - Original guide landing: https://socialmate.studio/gils-guide
 
 ## Agents Hub
@@ -192,9 +193,9 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - Telegram
 - Mastodon
 - X/Twitter (pay-per-use, $0.01/tweet, quota enforced by plan: Free 28/mo · Pro 150/mo · Agency 400/mo)
+- TikTok (Production API approved May 2026 — connect at /accounts, schedule videos from TikTok Studio at /tiktok/studio)
 
 ### Coming Soon
-- TikTok (sandbox live, Production API submitted May 2026 — demo video approved, awaiting final review)
 - LinkedIn (API application pending)
 - YouTube posting
 - Instagram
@@ -220,7 +221,7 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - Homepage: https://socialmate.studio
 - Pricing: https://socialmate.studio/pricing
 - Features: https://socialmate.studio/features
-- Blog: https://socialmate.studio/blog (175+ posts)
+- Blog: https://socialmate.studio/blog (270+ posts)
 - Roadmap: https://socialmate.studio/roadmap
 - FAQ: https://socialmate.studio/faq
 - Support: https://socialmate.studio/support
@@ -233,6 +234,7 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - Gilgamesh's Guide: https://socialmate.studio/gils-guide
 - Creator Monetize: https://socialmate.studio/monetize
 - Our Story: https://socialmate.studio/story
+- Video Creators: https://socialmate.studio/for/video-creators
 - Comparisons hub: https://socialmate.studio/vs
 - Streak heatmap: https://socialmate.studio/streak
 - Link shortener: https://socialmate.studio/links
@@ -247,7 +249,9 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - FAQ: https://socialmate.studio/faq
 - Gilgamesh's Guides: https://socialmate.studio/guides
 - Creator Hub: https://socialmate.studio/monetize/hub
+- TikTok Creators: https://socialmate.studio/for/tiktok-creators
 - Android app: Available on Google Play (closed testing, production pending)
+- Birthday Deal: BDAY31 — 31% off any plan, active through Dec 15 2026. Apply at checkout or /pricing
 
 ## Comparisons (SocialMate vs Competitors)
 
@@ -290,3 +294,6 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - vs Typefully: https://socialmate.studio/vs/typefully
 - vs Postcron: https://socialmate.studio/vs/postcron
 - vs Socialrails: https://socialmate.studio/vs/socialrails
+- vs Planly: https://socialmate.studio/vs/planly
+- vs Vista Social: https://socialmate.studio/vs/vista-social
+- vs Flick: https://socialmate.studio/vs/flick
