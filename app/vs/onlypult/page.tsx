@@ -26,8 +26,11 @@ const COMPARISON = [
   { feature: 'Competitor tracking',    onlypult: '❌',                      socialmate: '✅ Free'                  },
   { feature: 'Evergreen recycling',    onlypult: '❌',                      socialmate: '✅ Free'                  },
   { feature: 'RSS import',             onlypult: '❌',                      socialmate: '✅ Free'                  },
+  { feature: 'TikTok on free plan',     onlypult: '❌',                      socialmate: '✅ (20 videos/month)'    },
+  { feature: 'TikTok Script Generator',onlypult: '❌',                      socialmate: '✅'                       },
   { feature: 'Bluesky / Mastodon',     onlypult: '❌',                      socialmate: '✅'                       },
   { feature: 'Discord / Telegram',     onlypult: '❌',                      socialmate: '✅'                       },
+  { feature: 'GIF export',             onlypult: '❌',                      socialmate: '✅'                       },
   { feature: 'Client workspaces',      onlypult: 'Agency plan ($97/mo)',    socialmate: 'Pro+: from $5/mo'        },
   { feature: 'Hashtag manager',        onlypult: '❌',                      socialmate: '✅ Free'                  },
 ]
@@ -112,7 +115,7 @@ export default function VsOnlypult() {
 
         <div className="text-center mb-14">
           <div className="inline-flex items-center gap-2 bg-orange-50 border border-orange-200 text-orange-700 text-xs font-bold px-4 py-2 rounded-full mb-6">
-            💸 Onlypult starts at $25/month — no free plan, no AI tools
+            💸 Onlypult starts at $25/month — no free plan, no TikTok free, no AI tools
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight mb-4 dark:text-gray-100">
             SocialMate vs Onlypult (2026)
