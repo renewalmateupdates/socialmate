@@ -30,6 +30,16 @@ const CHANGELOG: ChangelogEntry[] = [
     ],
   },
   {
+    date: 'May 18, 2026',
+    version: 'TikTok Script Generator + GIF Export + 30 Blog Posts',
+    changes: [
+      { type: 'New', text: 'TikTok Script Generator — AI tool at /ai-features/tiktok-script. Generates hook + body + CTA for 15s/30s/60s TikToks. 5 credits, Gemini-powered.' },
+      { type: 'New', text: 'GIF Export in Creator Studio — export any trimmed/filtered clip as an animated GIF. Capped at 5 seconds, 480px wide. No external services.' },
+      { type: 'New', text: 'AI Features page — new Video & TikTok Tools section with TikTok Script Generator, Creator Studio, and Clips Studio cards. TikTok live banner added.' },
+      { type: 'New', text: '30 new blog posts covering TikTok scheduling, Twitch/YouTube clip repurposing, short-form video strategy, GIFs for social media, and creator tool stacks. 270+ total posts.' },
+    ],
+  },
+  {
     date: 'May 17, 2026',
     version: "Full-App i18n Complete + Guide Vol. 5 + Calendar Fix",
     changes: [
