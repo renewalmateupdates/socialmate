@@ -409,6 +409,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/vs/hypefury`,       lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/vs/typefully`,      lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/vs/postcron`,       lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/canva`,          lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/plann`,          lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/social-champ`,   lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/ripl`,           lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/preview-app`,    lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/gain-app`,       lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/kontentino`,     lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/unum`,           lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
   ]
 
   const blogPosts: MetadataRoute.Sitemap = BLOG_SLUGS.map(slug => ({
