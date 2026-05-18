@@ -520,6 +520,13 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **SQL to run in Supabase:** `supabase/migrations/20260513000001_iris_newsletter.sql` (ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS iris_opt_in BOOLEAN DEFAULT true; + CREATE TABLE iris_dispatches).
 - **Edition #1 of IRIS Dispatch sent** — Subject: "We're Live, We're Building, and We're Not Stopping". 29 recipients. Joshua confirmed receipt.
 
+**May 18, 2026 (PRs #371–#372):**
+- **TikTok Script Generator** (PR #371) — `/api/ai/tiktok-script` route (three-pool credit deduction, same pattern as hashtags). Accepts `{ topic, duration, tone }`, returns `{ hook, body[], cta }`. Dedicated page at `/ai-features/tiktok-script` with result cards + copy buttons. 5 credits. Gemini model `gemini-2.5-flash`.
+- **GIF Export in Creator Studio** (PR #371) — `gifenc` installed. `exportGif()` added to `app/create/CreatePageClient.tsx`. Frame-by-frame canvas render loop: CSS filter + caption overlay baked in, 10fps, capped at 5s, 480px wide. "Export GIF" button + "max 5s" label in action bar. `types/gifenc.d.ts` module declaration added.
+- **AI Features page** (PR #371) — `VIDEO_TOOLS` array added (TikTok Script Generator, Creator Studio & GIF Export, Clips Studio). New "Video & TikTok Tools" section. TikTok live banner (dark gradient, emerald badge, "Connect TikTok →" CTA) inserted before AI Tools section.
+- **Blog batch 10** (PR #372) — 30 posts: TikTok scheduling (6), Twitch/YouTube clips (5), video content strategy (5), GIFs for social media (4), creator tool stacks (5), TikTok growth (5). `supabase/blog_batch_10.sql`. Sitemap updated with all 30 slugs. `llms.txt` blog count bumped to 270+.
+- **Streamers page fix** — TikTok moved from `COMING_PLATFORMS` to `LIVE_PLATFORMS` in `app/for/streamers/page.tsx`.
+
 **May 18, 2026:**
 - **TikTok Production API approved** — Live since May 17, 2026 9:50 PM. Production credentials updated in Vercel. Platform count updated to 6 everywhere. Sandbox banner removed. TikTok now fully live for all users at /accounts and /tiktok/studio.
 
@@ -607,6 +614,9 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - ✅ **Wall of Love page (May 14, PR #335)** — `/wall-of-love` live. Add testimonials to TESTIMONIALS array when collected.
 - ✅ **Guide email capture (May 14, PR #335)** — GuideEmailCapture component on all 4 Gilgamesh Guides. Never ask to add email capture to guides again.
 - ✅ **Admin data fix (May 14)** — googlereview@socialmate.studio downgraded to free. Admin God Mode shows accurate 0 paid users.
+- ✅ **TikTok Script Generator (May 18, PR #371)** — Live at `/ai-features/tiktok-script`. 5 credits. Never ask to build again.
+- ✅ **GIF Export in Creator Studio (May 18, PR #371)** — gifenc installed, exportGif() live. Never ask to build again.
+- ✅ **Blog batch 10 (May 18, PR #372)** — 30 video/TikTok/creator posts. SQL in blog_batch_10.sql. Never ask to write these again.
 - ✅ **TikTok Production API approved (May 17, 2026)** — Production API approved by TikTok. Platform flipped to 'live' on landing page + LocalizedLanding. Platform count updated 5→6. Sandbox banner removed from /tiktok/studio. Roadmap entry moved to 'shipped'. llms.txt updated. CLAUDE.md Platforms section updated. Never list TikTok as coming soon or pending again.
 - ✅ **AlternativeTo listing approved (May 14)** — Live. 9 alternatives listed. Never ask to submit again.
 - ✅ **IRIS Dispatch + unsubscribe (May 13–14, PRs #330–331)** — Newsletter live. Edition #1 sent + received. Unsubscribe flow CAN-SPAM compliant. Settings opt-in toggle live. Never ask about building IRIS again.

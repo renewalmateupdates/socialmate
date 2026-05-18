@@ -148,6 +148,8 @@ const ROADMAP: RoadmapItem[] = [
   { title: "Gilgamesh's Guides Vol. 4",  desc: 'Vibe coding guide at /guides/vibe-coding-with-ai. 7 chapters written in Joshua\'s voice covering the full AI-assisted build workflow.', status: 'shipped', category: 'Platform' },
   { title: "Gilgamesh's Guides Vol. 5",  desc: 'Creator monetization guide at /guides/creator-monetization. 8 chapters: why creators stay broke, tip jars, fan subscriptions, digital products, brand deals, affiliate marketing, and a 12-month $5K/month roadmap.', status: 'shipped', category: 'Platform' },
   { title: 'Full-app i18n — inner pages', desc: 'SOMA dashboard, SOMA voice, Enki dashboard, Creator Hub, and creator public page all wired with useI18n(). All 7 locale files validated in sync. i18n now complete across all major app sections.', status: 'shipped', category: 'Platform' },
+  { title: 'TikTok Script Generator',     desc: 'AI tool at /ai-features/tiktok-script — enter topic, duration (15s/30s/60s), and tone. Gemini generates a hook, body bullets, and CTA. 5 credits. Backed by /api/ai/tiktok-script.', status: 'shipped', category: 'AI' },
+  { title: 'GIF Export in Creator Studio', desc: 'Export any trimmed, filtered, captioned clip as an animated GIF directly from /create. gifenc-based frame-by-frame render, 10fps, capped at 5 seconds, 480px wide. CSS filters and caption overlay baked into every frame.', status: 'shipped', category: 'Media' },
 ]
 
 const STATUS_CONFIG = {
