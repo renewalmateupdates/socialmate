@@ -4,7 +4,7 @@ import PublicLayout from '@/components/PublicLayout'
 
 export const metadata: Metadata = {
   title: 'Free Social Media Scheduler for Small Business — SocialMate',
-  description: 'Small business social media scheduling that actually fits your budget. Schedule posts to 5 platforms, use 12 AI tools, and grow your audience — free forever or $5/month Pro.',
+  description: 'Small business social media scheduling that actually fits your budget. Schedule posts to 6 platforms, use 12 AI tools, and grow your audience — free forever or $5/month Pro.',
   openGraph: {
     title: 'Free Social Media Scheduler for Small Business — SocialMate',
     description: 'What Buffer and Hootsuite charge $99/month for, SocialMate gives for $5 — or free. Built for small business owners who wear every hat.',
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Free Social Media Scheduler for Small Business — SocialMate',
-    description: 'Schedule 5 platforms, 12 AI tools, free forever. Built for small business.',
+    description: 'Schedule 6 platforms, 12 AI tools, free forever. Built for small business.',
     images: ['https://socialmate.studio/og-image.png'],
   },
   alternates: { canonical: 'https://socialmate.studio/for/small-business' },
@@ -34,7 +34,7 @@ const PERSONAS = [
 const PAIN_POINTS = [
   {
     before: 'Open 4 apps. Post the same thing 4 times. 45 minutes gone.',
-    after:  'Write once. Schedule to 5 platforms in 30 seconds.',
+    after:  'Write once. Schedule to 6 platforms in 30 seconds.',
     icon: '⏱️',
   },
   {
@@ -56,8 +56,8 @@ const PAIN_POINTS = [
 
 const FEATURES = [
   {
-    title: 'Schedule to 5 Platforms',
-    desc:  'Bluesky, X/Twitter, Mastodon, Discord, and Telegram live today. Write once, post everywhere. LinkedIn and more on the way.',
+    title: 'Schedule to 6 Platforms',
+    desc:  'Bluesky, X/Twitter, Mastodon, Discord, Telegram, and TikTok live today. Write once, post everywhere. LinkedIn and more on the way.',
     icon:  '📡',
     badge: 'Free',
   },
@@ -142,13 +142,13 @@ const COMPARISON = [
   { tool: 'Hootsuite Pro',   price: '$99/mo',  platforms: 10,  ai: 'Add-on', free: '✗' },
   { tool: 'Buffer Essentials', price: '$18/mo', platforms: 3,   ai: 'Limited', free: '✗' },
   { tool: 'Later Starter',   price: '$18/mo',  platforms: 1,   ai: 'Limited', free: '✗' },
-  { tool: 'SocialMate Pro',  price: '$5/mo',   platforms: 5,   ai: '500 cr',  free: '50cr', highlight: true },
+  { tool: 'SocialMate Pro',  price: '$5/mo',   platforms: 6,   ai: '500 cr',  free: '50cr', highlight: true },
 ]
 
 const FAQ = [
   {
     q: 'Is the free plan actually useful, or is it a bait-and-switch?',
-    a: 'Genuinely useful. 50 AI credits, 100 posts/month, 5 live platforms, link in bio, post calendar, drafts, and queue. We didn\'t gut the free plan to force upgrades. You\'ll outgrow it eventually, but it\'s not a demo.',
+    a: 'Genuinely useful. 50 AI credits, 100 posts/month, 6 live platforms, link in bio, post calendar, drafts, and queue. We didn\'t gut the free plan to force upgrades. You\'ll outgrow it eventually, but it\'s not a demo.',
   },
   {
     q: 'Do I need a credit card to start?',
@@ -156,7 +156,7 @@ const FAQ = [
   },
   {
     q: 'What platforms are supported right now?',
-    a: 'Bluesky, X/Twitter, Mastodon, Discord, and Telegram are live today. LinkedIn, YouTube, Pinterest, Reddit, Instagram, TikTok, Facebook, and Threads are on the roadmap. We don\'t lie about ETAs — see the roadmap page for honest status.',
+    a: 'Bluesky, X/Twitter, Mastodon, Discord, Telegram, and TikTok are live today. LinkedIn, YouTube, Pinterest, Reddit, Instagram, Facebook, and Threads are on the roadmap. We don\'t lie about ETAs — see the roadmap page for honest status.',
   },
   {
     q: 'What are AI credits and what can I do with them?',
@@ -192,7 +192,7 @@ export default function SmallBusinessPage() {
           <span className="text-blue-400">that fits a real budget.</span>
         </h1>
         <p className="text-gray-300 max-w-xl mx-auto text-base leading-relaxed mb-6">
-          Schedule to 5 platforms, generate captions with AI, and keep a full content calendar —
+          Schedule to 6 platforms, generate captions with AI, and keep a full content calendar —
           free forever, or $5/month when you need more.
           What Hootsuite charges $99 for, we give for $5.
         </p>
@@ -303,7 +303,7 @@ export default function SmallBusinessPage() {
                   <li>✓ {tier.posts}</li>
                   <li>✓ {tier.seats}</li>
                   <li>✓ {tier.window}</li>
-                  <li>✓ All 5 live platforms</li>
+                  <li>✓ All 6 live platforms</li>
                   <li>✓ Link in Bio page</li>
                 </ul>
                 <Link href={tier.href}
