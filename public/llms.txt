@@ -234,6 +234,7 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - Gilgamesh's Guide: https://socialmate.studio/gils-guide
 - Creator Monetize: https://socialmate.studio/monetize
 - Our Story: https://socialmate.studio/story
+- Video Creators: https://socialmate.studio/for/video-creators
 - Comparisons hub: https://socialmate.studio/vs
 - Streak heatmap: https://socialmate.studio/streak
 - Link shortener: https://socialmate.studio/links
@@ -248,6 +249,7 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - FAQ: https://socialmate.studio/faq
 - Gilgamesh's Guides: https://socialmate.studio/guides
 - Creator Hub: https://socialmate.studio/monetize/hub
+- TikTok Creators: https://socialmate.studio/for/tiktok-creators
 - Android app: Available on Google Play (closed testing, production pending)
 - Birthday Deal: BDAY31 — 31% off any plan, active through Dec 15 2026. Apply at checkout or /pricing
 
@@ -292,6 +294,9 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - vs Typefully: https://socialmate.studio/vs/typefully
 - vs Postcron: https://socialmate.studio/vs/postcron
 - vs Socialrails: https://socialmate.studio/vs/socialrails
+- vs Planly: https://socialmate.studio/vs/planly
+- vs Vista Social: https://socialmate.studio/vs/vista-social
+- vs Flick: https://socialmate.studio/vs/flick
 - vs Canva: https://socialmate.studio/vs/canva
 - vs Plann: https://socialmate.studio/vs/plann
 - vs Social Champ: https://socialmate.studio/vs/social-champ

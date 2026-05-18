@@ -22,7 +22,7 @@ const COMPARISON = [
   { feature: 'Telegram support',        later: '❌',                          socialmate: '✅'                      },
   { feature: 'Mastodon support',        later: '❌',                          socialmate: '✅'                      },
   { feature: 'Bluesky support',         later: '❌',                          socialmate: '✅'                      },
-  { feature: 'TikTok support',          later: '✅ (paid plans)',             socialmate: '✅'                      },
+  { feature: 'TikTok support',          later: '✅ (paid plans)',             socialmate: '✅ Live — free for all'  },
   { feature: 'AI writing tools',        later: 'Basic AI captions',          socialmate: '12 tools included'       },
   { feature: 'AI credits free tier',    later: 'None on free plan',          socialmate: '75/month free'            },
   { feature: 'Bulk scheduling',         later: 'Paid plans',                 socialmate: '✅ Free'                  },
@@ -88,7 +88,7 @@ export default function VsLaterPage() {
         {/* HERO */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-full px-4 py-1.5 text-xs font-bold text-blue-700 dark:text-blue-400 mb-4">
-            Updated April 2026
+            Updated May 2026
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight mb-4 dark:text-white">
             SocialMate vs Later
@@ -125,6 +125,7 @@ export default function VsLaterPage() {
             <p className="font-extrabold text-lg mb-2">All platforms. No limits. Free.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ 16 platforms on free plan</li>
+              <li>✅ TikTok live — free for all users</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
               <li>✅ Unlimited posts, no monthly cap</li>
               <li>✅ Bulk scheduling free</li>

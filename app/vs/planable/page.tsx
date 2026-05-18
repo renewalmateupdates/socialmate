@@ -46,7 +46,7 @@ const FAQ = [
   },
   {
     q: 'Does SocialMate support the platforms I need?',
-    a: "SocialMate supports Bluesky, Discord, Mastodon, Telegram, LinkedIn, YouTube, and Pinterest today — with Instagram, TikTok, Reddit, and Facebook in review. Planable covers primarily the Meta/LinkedIn/Twitter stack. If your audience is on Discord, Telegram, or decentralized platforms, SocialMate is the only option.",
+    a: "SocialMate supports Bluesky, Discord, Mastodon, Telegram, TikTok, LinkedIn, YouTube, and Pinterest today — with Instagram, Reddit, and Facebook in review. Planable covers primarily the Meta/LinkedIn/Twitter stack. If your audience is on Discord, Telegram, or decentralized platforms, SocialMate is the only option.",
   },
   {
     q: 'How many workspaces does SocialMate include?',
