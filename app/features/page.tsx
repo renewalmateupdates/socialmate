@@ -427,7 +427,7 @@ export default function Features() {
             <div>
               <h3 className="text-sm font-extrabold mb-1 text-gray-900 dark:text-gray-100">Platform support — 16 total</h3>
               <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-3">
-                5 platforms are live right now. LinkedIn, YouTube, Pinterest, and Reddit are coming very soon — code complete, awaiting platform approval. 7 more are on the roadmap.
+                6 platforms are live right now. LinkedIn, YouTube, Pinterest, and Reddit are coming very soon — code complete, awaiting platform approval. 6 more are on the roadmap.
               </p>
               <div className="flex flex-wrap gap-2">
                 {[
@@ -441,7 +441,7 @@ export default function Features() {
                   { name: 'Pinterest', icon: '📌', status: 'soon'    },
                   { name: 'Reddit',    icon: '🤖', status: 'soon'    },
                   { name: 'Instagram', icon: '📸', status: 'planned' },
-                  { name: 'TikTok',    icon: '🎵', status: 'planned' },
+                  { name: 'TikTok',    icon: '🎵', status: 'live'    },
                   { name: 'Facebook',  icon: '📘', status: 'planned' },
                   { name: 'Threads',   icon: '🧵', status: 'planned' },
                 ].map(p => (

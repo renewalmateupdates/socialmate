@@ -21,6 +21,15 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'May 18, 2026',
+    version: 'TikTok Now Live — 6 Platforms',
+    changes: [
+      { type: 'New',      text: 'TikTok Production API approved. SocialMate now supports 6 live platforms. Connect your TikTok account at /accounts and schedule videos from TikTok Studio at /tiktok/studio.' },
+      { type: 'Improved', text: 'Platform count updated to 6 across all pages, marketing copy, and metadata.' },
+      { type: 'Fixed',    text: 'TikTok Studio sandbox banner removed. All sandbox restrictions lifted.' },
+    ],
+  },
+  {
     date: 'May 17, 2026',
     version: "Full-App i18n Complete + Guide Vol. 5 + Calendar Fix",
     changes: [

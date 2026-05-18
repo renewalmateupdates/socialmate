@@ -75,8 +75,8 @@ const FEATURES = [
     badge: 'Agency',
   },
   {
-    title: '5 Live Platforms',
-    desc:  'Schedule to Bluesky, X/Twitter, Mastodon, Discord, and Telegram today. LinkedIn, YouTube, Pinterest, and Reddit are on the active roadmap.',
+    title: '6 Live Platforms',
+    desc:  'Schedule to Bluesky, X/Twitter, Mastodon, Discord, Telegram, and TikTok today. LinkedIn, YouTube, Pinterest, and Reddit are on the active roadmap.',
     icon:  '📡',
     badge: 'Live now',
   },

@@ -67,7 +67,7 @@ export async function generateMetadata(
   return {
     title: `${name} invites you to SocialMate`,
     description:
-      'What competitors charge $99/mo for, we give for $5. Schedule to 5+ platforms, 12 AI tools, and analytics — free forever or Pro from $5/mo.',
+      'What competitors charge $99/mo for, we give for $5. Schedule to 6 platforms, 12 AI tools, and analytics — free forever or Pro from $5/mo.',
   }
 }
 
@@ -76,8 +76,8 @@ export async function generateMetadata(
 const BENEFITS = [
   {
     icon: '📅',
-    title: 'Schedule to 5+ platforms',
-    desc: 'Bluesky, X/Twitter, Mastodon, Discord, Telegram — one composer, one queue.',
+    title: 'Schedule to 6 platforms',
+    desc: 'Bluesky, X/Twitter, Mastodon, Discord, Telegram, TikTok — one composer, one queue.',
   },
   {
     icon: '✨',

@@ -375,7 +375,7 @@ function AccountsInner() {
                 <div className="flex-1">
                   <p className="font-extrabold text-lg tracking-tight mb-1">Connect your first social account</p>
                   <p className="text-gray-300 text-sm leading-relaxed mb-4">
-                    Pick one of the four live platforms below to get started. You can connect as many as you want — all free.
+                    Pick one of the live platforms below to get started. You can connect as many as you want — all free.
                   </p>
                   <div className="flex flex-wrap gap-3">
                     {LIVE_PLATFORMS.map(platform => {

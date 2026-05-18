@@ -520,6 +520,9 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **SQL to run in Supabase:** `supabase/migrations/20260513000001_iris_newsletter.sql` (ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS iris_opt_in BOOLEAN DEFAULT true; + CREATE TABLE iris_dispatches).
 - **Edition #1 of IRIS Dispatch sent** — Subject: "We're Live, We're Building, and We're Not Stopping". 29 recipients. Joshua confirmed receipt.
 
+**May 18, 2026:**
+- **TikTok Production API approved** — Live since May 17, 2026 9:50 PM. Production credentials updated in Vercel. Platform count updated to 6 everywhere. Sandbox banner removed. TikTok now fully live for all users at /accounts and /tiktok/studio.
+
 **May 17, 2026 (PRs #361–#363):**
 - **Calendar definitive fix** (PR #361) — Root cause: `.select('id, content, ..., tags')` explicit column list fails silently if `tags` column doesn't exist (Supabase returns `error + null`, not empty array). Fix: changed to `select('*')` everywhere in calendar page. Also added `wsLoading` guard so fetch only runs after WorkspaceContext resolves, auto-navigate effect to jump to the month with first scheduled post when current month is empty, limit bumped to 1000. **Never add explicit column lists or date filters to the calendar query — both cause silent failures.**
 - **Full-app i18n — core pages wired** (PR #362) — All 12 core app pages now use `useI18n()` and `t()`: Dashboard, Queue, Calendar, Analytics, Accounts, Inbox, Team, Drafts, Streak, Links, Activity, Media Library. New namespaces added: `app_streak`, `app_links`, `app_activity`, `app_media` — in all 7 locale JSON files (en + zh with real translations, es/de/fr/pt/ru use English fallback). TypeScript enforces all locale files match `typeof enMessages` — **rule: any new key added to en.json must be added to ALL 6 other locale files in the same commit or build fails.**

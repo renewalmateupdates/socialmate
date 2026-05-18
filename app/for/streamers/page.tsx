@@ -350,7 +350,7 @@ export default function StreamersPage() {
                 <ul className="text-xs text-gray-400 space-y-2 mb-6 text-left">
                   <li>✓ {tier.credits}</li>
                   <li>✓ {tier.clips}</li>
-                  <li>✓ All 5 live platforms</li>
+                  <li>✓ All 6 live platforms</li>
                   <li>✓ AI caption writer</li>
                   <li>✓ Scheduling calendar</li>
                 </ul>
