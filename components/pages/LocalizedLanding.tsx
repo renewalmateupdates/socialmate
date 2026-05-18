@@ -37,7 +37,7 @@ const PLATFORMS = [
   { name: 'YouTube',     icon: '▶️', status: 'soon'    },
   { name: 'Pinterest',   icon: '📌', status: 'soon'    },
   { name: 'Reddit',      icon: '🤖', status: 'soon'    },
-  { name: 'TikTok',      icon: '🎵', status: 'soon'    },
+  { name: 'TikTok',      icon: '🎵', status: 'live'    },
   { name: 'Instagram',   icon: '📸', status: 'planned' },
   { name: 'Facebook',    icon: '📘', status: 'planned' },
   { name: 'Threads',     icon: '🧵', status: 'planned' },

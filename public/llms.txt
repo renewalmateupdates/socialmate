@@ -193,9 +193,9 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - Telegram
 - Mastodon
 - X/Twitter (pay-per-use, $0.01/tweet, quota enforced by plan: Free 28/mo · Pro 150/mo · Agency 400/mo)
+- TikTok (Production API approved May 2026 — connect at /accounts, schedule videos from TikTok Studio at /tiktok/studio)
 
 ### Coming Soon
-- TikTok (sandbox live, Production API submitted May 2026 — demo video approved, awaiting final review)
 - LinkedIn (API application pending)
 - YouTube posting
 - Instagram

@@ -29,6 +29,7 @@ const CHANGELOG: ChangelogEntry[] = [
       { type: 'New',      text: 'Birthday promo BDAY31 now active — 31% off any plan through December 15, 2026. Code: BDAY31. Apply at /pricing.' },
       { type: 'Fixed',    text: 'Calendar definitively fixed — explicit column select caused silent null returns when any column was missing. Changed to select(*) with a wsLoading guard throughout. All scheduled posts now load correctly.' },
       { type: 'Fixed',    text: 'Language switcher on public landing pages — now navigates to the correct locale URL instead of only writing to localStorage (which had no effect on server-rendered pages).' },
+      { type: 'New',      text: 'TikTok Production API approved — TikTok is now a fully live platform. Connect at /accounts, schedule and publish videos from TikTok Studio at /tiktok/studio. Platform count updated to 6. Sandbox restrictions lifted.' },
     ],
   },
   {
@@ -72,7 +73,7 @@ const CHANGELOG: ChangelogEntry[] = [
       { type: 'New',      text: "Gilgamesh's Guides Vol. 4 — Vibe Coding with AI. 7 chapters: the full free stack (Next.js/Supabase/Vercel/Stripe/Inngest/Claude Code), build loop workflow, prompting patterns, debugging without panic, first deploy checklist, and the mindset of building in stolen hours. Free." },
       { type: 'New',      text: "Gilgamesh's Guides series complete — all 4 volumes live at /guides. Starting a Business · Marketing on Zero Budget · Business Credit & Tax · Vibe Coding with AI." },
       { type: 'New',      text: 'Google Play CI/CD — GitHub Actions workflow builds a signed Android AAB on every git tag. No Android Studio required. SocialMate is Android-ready.' },
-      { type: 'New',      text: 'TikTok Studio live — OAuth connect, video editor (trim, 8 filters, caption overlay), FILE_UPLOAD posting, scheduled publish via Inngest. Sandbox until Production API approved.' },
+      { type: 'New',      text: 'TikTok Studio live — OAuth connect, video editor (trim, 8 filters, caption overlay), FILE_UPLOAD posting, scheduled publish via Inngest. Production API approved May 17, 2026.' },
       { type: 'New',      text: '30 new blog posts published — business credit, tax strategy, founder story, platform guides, vibe coding, AI builder stack. All indexed in sitemap.' },
       { type: 'Improved', text: 'SocialMate logo fixed site-wide — canonical three-circle icon now displays correctly in nav, footer, Privacy page, and Terms page.' },
       { type: 'Improved', text: 'Privacy policy overhauled for TikTok developer review — per-scope disclosure for user.info.basic, video.upload, and video.publish. App name reconciliation documented.' },

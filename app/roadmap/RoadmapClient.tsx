@@ -37,7 +37,7 @@ const ROADMAP: RoadmapItem[] = [
 
   // ── PLANNED ───────────────────────────────────────────────
   { title: 'Instagram publishing',       desc: 'Instagram Graph API integration. Requires Facebook Business account and Meta app review.',                       status: 'planned',      category: 'Platforms'     },
-  { title: 'TikTok publishing',          desc: 'TikTok Studio live at /tiktok/studio — upload, trim, filter, caption, and schedule videos. Connect button live on /accounts. API approval resubmitted May 2026.', status: 'coming-soon', category: 'Platforms' },
+  { title: 'TikTok publishing',          desc: 'TikTok Production API approved May 17, 2026. Connect, schedule, and publish videos to TikTok directly from SocialMate. Studio at /tiktok/studio — upload, trim, filter, caption, and schedule.', status: 'shipped', category: 'Platforms' },
   { title: 'Facebook Pages',             desc: 'Facebook Graph API for posting to Business Pages. Requires Meta app review.',                                    status: 'planned',      category: 'Platforms'     },
   { title: 'Threads',                    desc: 'Threads API integration once the API becomes publicly available.',                                                status: 'planned',      category: 'Platforms'     },
   { title: 'Reddit',                     desc: 'Reddit API integration for posting to subreddits. Respects rate limits and flair requirements.',                 status: 'planned',      category: 'Platforms'     },
