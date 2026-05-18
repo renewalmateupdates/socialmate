@@ -3,11 +3,11 @@ import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
-  title: 'SocialMate vs Other Social Media Tools (2026) — Full Comparisons',
-  description: 'See how SocialMate compares to Hootsuite, Buffer, Later, Sprout Social, Loomly, CoSchedule, MeetEdgar, Metricool, Sendible, SocialPilot, and more. Free plan, no credit card.',
+  title: 'SocialMate vs Everyone — 50+ Competitor Comparisons (2026)',
+  description: 'See how SocialMate compares to Hootsuite, Buffer, Later, Sprout Social, Canva, Kontentino, Gain, and 45+ more. Honest feature comparisons. Free plan, no credit card required.',
   openGraph: {
-    title:       'SocialMate vs Other Social Media Tools (2026)',
-    description: 'Honest, detailed comparisons between SocialMate and 14 popular social media scheduling tools. Free plan always available.',
+    title:       'SocialMate vs Every Competitor (2026)',
+    description: 'Honest, detailed comparisons: SocialMate vs Buffer, Hootsuite, Later, Sprout Social, Canva, and 45+ more. See who wins on price, platforms, and features.',
     url:         'https://socialmate.studio/vs',
   },
   alternates: { canonical: 'https://socialmate.studio/vs' },
@@ -257,15 +257,89 @@ const COMPARISONS = [
     tag:         'Enterprise pricing',
     tagColor:    'bg-red-50 text-red-600',
   },
+  {
+    slug:        'canva',
+    name:        'Canva',
+    emoji:       '🎨',
+    headline:    "Canva is a design tool — scheduling is bolt-on at $15/month",
+    angle:       "Canva Pro is $15/month for design features and basic scheduling. No Discord, Telegram, or Bluesky. No autonomous AI content. SocialMate Pro is $5/month and purpose-built for scheduling.",
+    tag:         'Design tool, not scheduler',
+    tagColor:    'bg-teal-50 text-teal-600',
+  },
+  {
+    slug:        'plann',
+    name:        'Plann',
+    emoji:       '🖼️',
+    headline:    "Plann is Instagram-centric at $13/month",
+    angle:       "Built around Instagram feed aesthetics. No Discord, Telegram, Bluesky, or TikTok. No autonomous AI content system. SocialMate covers 6 platforms for less.",
+    tag:         'Instagram-only focus',
+    tagColor:    'bg-pink-50 text-pink-600',
+  },
+  {
+    slug:        'social-champ',
+    name:        'Social Champ',
+    emoji:       '🏆',
+    headline:    "Social Champ starts at $29/month — 6x more than SocialMate Pro",
+    angle:       "Budget Buffer alternative but still $29/month. No Discord, Telegram, or Bluesky. SocialMate Pro is $5/month with more platforms, SOMA, and 20+ AI tools.",
+    tag:         'Overpriced for what it offers',
+    tagColor:    'bg-orange-50 text-orange-600',
+  },
+  {
+    slug:        'ripl',
+    name:        'Ripl',
+    emoji:       '🎬',
+    headline:    "Ripl is a video creator — not a real scheduling platform ($15/month)",
+    angle:       "Ripl makes animated videos. No bulk scheduling, no Discord/Telegram/Bluesky, no AI content system. SocialMate is purpose-built for scheduling and starts free.",
+    tag:         'Video creator, not scheduler',
+    tagColor:    'bg-purple-50 text-purple-600',
+  },
+  {
+    slug:        'preview-app',
+    name:        'Preview App',
+    emoji:       '👁️',
+    headline:    "Preview App: Instagram/Pinterest only, $8/month",
+    angle:       "Instagram and Pinterest planning only. No TikTok, Discord, Telegram, Bluesky, or X. No AI content tools. SocialMate is free and covers 6 platforms.",
+    tag:         'Instagram/Pinterest only',
+    tagColor:    'bg-rose-50 text-rose-600',
+  },
+  {
+    slug:        'gain-app',
+    name:        'Gain',
+    emoji:       '✅',
+    headline:    "Gain charges $99/month for client approvals SocialMate includes free",
+    angle:       "Gain is an approval workflow tool at $99/month. SocialMate has full client approval workflows built in on the free plan — plus 6 platforms and 20+ AI tools.",
+    tag:         '$99/mo for what we give free',
+    tagColor:    'bg-red-50 text-red-600',
+  },
+  {
+    slug:        'kontentino',
+    name:        'Kontentino',
+    emoji:       '🏢',
+    headline:    "Kontentino: $99/month enterprise tool — SocialMate Agency is $20",
+    angle:       "Enterprise collaboration tool at $99/month with no Discord, Telegram, or Bluesky. SocialMate Agency is $20/month with 5x more platform coverage and 20+ AI tools.",
+    tag:         '5x more expensive',
+    tagColor:    'bg-red-50 text-red-600',
+  },
+  {
+    slug:        'unum',
+    name:        'Unum',
+    emoji:       '📱',
+    headline:    "Unum is Instagram visual planning — no Discord, Telegram, or Bluesky",
+    angle:       "Instagram/TikTok/X visual planner at $8/month. No community platforms, no AI content system, no autonomous content. SocialMate is free and covers 6 platforms.",
+    tag:         'Instagram-first, limited',
+    tagColor:    'bg-pink-50 text-pink-600',
+  },
 ]
 
 const SOCIALMATE_WINS = [
   { icon: '✅', text: 'Genuinely free forever — no credit card, no trial' },
   { icon: '📦', text: 'Bulk scheduler included on the free plan' },
-  { icon: '🦋', text: 'Supports Bluesky, Discord, Telegram, Mastodon — not just Instagram' },
-  { icon: '💰', text: 'Flat pricing — no per-brand or per-seat fees' },
-  { icon: '🤖', text: 'AI caption tools built in, no add-ons needed' },
-  { icon: '📅', text: 'Content calendar, queue, and analytics in one place' },
+  { icon: '🌐', text: 'Discord + Telegram — platforms 99% of competitors skip entirely' },
+  { icon: '🦋', text: 'Bluesky, Mastodon, TikTok — 6 live platforms total' },
+  { icon: '💰', text: 'Flat pricing — Pro $5/mo, Agency $20/mo. No per-brand fees' },
+  { icon: '🤖', text: '20+ AI tools built in — no add-ons, no extra cost' },
+  { icon: '🧠', text: 'SOMA: autonomous AI content system learns your brand voice' },
+  { icon: '📈', text: 'Enki: autonomous trading bot — unique to SocialMate' },
 ]
 
 export default function VsIndex() {
@@ -296,12 +370,13 @@ export default function VsIndex() {
         <div className="text-center mb-14">
           <div className="text-5xl mb-5">⚔️</div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100 mb-4">
-            SocialMate vs Every Other<br className="hidden sm:block" /> Social Media Tool
+            SocialMate vs Everyone —<br className="hidden sm:block" /> 50+ Competitor Comparisons
           </h1>
           <p className="text-base text-gray-500 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
             Honest, detailed comparisons. No fluff. We break down pricing, free plans, feature limits,
             and who each tool is actually built for — so you can pick the right one.
           </p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">Updated May 2026 · Includes Canva, Kontentino, Gain, Plann, Social Champ, Ripl, Preview App, and Unum</p>
         </div>
 
         {/* WHY SOCIALMATE WINS */}
