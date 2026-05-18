@@ -19,6 +19,8 @@ const COMPARISON = [
   { feature: 'Free plan post limit',      publer: '10 posts per account',      socialmate: 'Unlimited'               },
   { feature: 'Pricing model',             publer: 'Per workspace',             socialmate: 'Flat rate'               },
   { feature: 'Platforms supported',       publer: '12+',                       socialmate: '16 (growing)'            },
+  { feature: 'TikTok scheduling',          publer: '✅ (paid plans)',             socialmate: '✅ Free'                  },
+  { feature: 'TikTok on free plan',        publer: '❌',                         socialmate: '✅ (20 videos/month)'    },
   { feature: 'Discord support',           publer: '❌',                         socialmate: '✅'                      },
   { feature: 'Telegram support',          publer: '❌',                         socialmate: '✅'                      },
   { feature: 'Mastodon support',          publer: '❌',                         socialmate: '✅'                      },
@@ -87,7 +89,7 @@ export default function VsPublerPage() {
         {/* HERO */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-full px-4 py-1.5 text-xs font-bold text-blue-700 dark:text-blue-400 mb-4">
-            Updated April 2026
+            Updated May 2026
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight mb-4 dark:text-white">
             SocialMate vs Publer

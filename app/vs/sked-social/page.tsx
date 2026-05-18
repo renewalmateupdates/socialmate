@@ -27,6 +27,10 @@ const COMPARISON = [
   { feature: 'Competitor tracking',    skedsocial: '❌',                     socialmate: '✅ Free'                  },
   { feature: 'Evergreen recycling',    skedsocial: '❌',                     socialmate: '✅ Free'                  },
   { feature: 'RSS import',             skedsocial: '❌',                     socialmate: '✅ Free'                  },
+  { feature: 'TikTok scheduling',       skedsocial: '✅ (paid only)',          socialmate: '✅ Free'                  },
+  { feature: 'TikTok Script Generator',skedsocial: '❌',                     socialmate: '✅'                       },
+  { feature: 'Clips Studio (Twitch/YouTube)', skedsocial: '❌',             socialmate: '✅'                       },
+  { feature: 'GIF export',             skedsocial: '❌',                     socialmate: '✅'                       },
   { feature: 'Bluesky / Mastodon',     skedsocial: '❌',                     socialmate: '✅'                       },
   { feature: 'Discord / Telegram',     skedsocial: '❌',                     socialmate: '✅'                       },
   { feature: 'Client workspaces',      skedsocial: 'Agency plan only',       socialmate: 'Pro+: from $5/mo'        },
@@ -46,8 +50,16 @@ const FAQ = [
     a: 'Sked Social\'s agency plan has collaboration features and client management, but the pricing is significantly higher than SocialMate. SocialMate\'s Agency plan at $20/month covers client workspaces and 15 team seats — a fraction of Sked\'s comparable tier.',
   },
   {
+    q: 'Is Sked Social good for TikTok?',
+    a: 'Sked Social supports TikTok scheduling on paid plans only, starting at $25/month. SocialMate supports TikTok scheduling on the free plan — Production API approved May 2026 — with 20 videos/month free, 60 on Pro, and 200 on Agency.',
+  },
+  {
+    q: 'How does SocialMate compare to Sked Social for video creators?',
+    a: 'SocialMate has features Sked Social does not offer at any price: TikTok scheduling free, Clips Studio for Twitch and YouTube, GIF export and video editing in Creator Studio, and an AI TikTok Script Generator. Sked Social is Instagram-first; SocialMate is built for the full video creator stack.',
+  },
+  {
     q: 'Does SocialMate support Instagram?',
-    a: 'Instagram is on SocialMate\'s near-term roadmap. In the meantime, SocialMate covers 16 platforms including Bluesky, Discord, Telegram, Mastodon, and X/Twitter, with Instagram coming soon.',
+    a: 'Instagram is on SocialMate\'s near-term roadmap. In the meantime, SocialMate covers 6 live platforms including TikTok (free), Bluesky, Discord, Telegram, Mastodon, and X/Twitter, with Instagram coming soon.',
   },
   {
     q: 'What does SocialMate offer that Sked doesn\'t?',
@@ -164,7 +176,7 @@ export default function VsSkedSocial() {
             The problem is depth vs. breadth. Sked Social is deep on Instagram workflows but narrow on platform support and feature set relative to its price. SocialMate ships AI tools, competitor tracking, evergreen recycling, and 16-platform support — for free.
           </p>
           <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-            For most creators and small agencies, SocialMate is the better value. If Instagram is literally your only platform and you need Story auto-publish today, Sked Social is worth a trial while Instagram support lands in SocialMate.
+            For most creators and small agencies, SocialMate is the better value. SocialMate now supports TikTok natively (Production API, free for all users), Clips Studio for Twitch and YouTube, and GIF export — features Sked Social doesn&#39;t offer at any price tier. If Instagram is literally your only platform and you need Story auto-publish today, Sked Social is worth a trial while Instagram support lands in SocialMate.
           </p>
         </div>
 

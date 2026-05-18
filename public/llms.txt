@@ -234,6 +234,7 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - Gilgamesh's Guide: https://socialmate.studio/gils-guide
 - Creator Monetize: https://socialmate.studio/monetize
 - Our Story: https://socialmate.studio/story
+- Video Creators: https://socialmate.studio/for/video-creators
 - Comparisons hub: https://socialmate.studio/vs
 - Streak heatmap: https://socialmate.studio/streak
 - Link shortener: https://socialmate.studio/links
