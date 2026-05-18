@@ -527,6 +527,16 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **Blog batch 10** (PR #372) — 30 posts: TikTok scheduling (6), Twitch/YouTube clips (5), video content strategy (5), GIFs for social media (4), creator tool stacks (5), TikTok growth (5). `supabase/blog_batch_10.sql`. Sitemap updated with all 30 slugs. `llms.txt` blog count bumped to 270+.
 - **Streamers page fix** — TikTok moved from `COMING_PLATFORMS` to `LIVE_PLATFORMS` in `app/for/streamers/page.tsx`.
 
+**May 18, 2026 (session 2 — nav fix + bug sweep):**
+- **TikTok Studio in public nav** — Added `/tiktok/studio` as flat link in desktop header (alongside Studio Stax / SOMA / Enki / Monetize). Added to mobile Products section. TikTok is Production-approved and live — it belongs in the nav.
+- **Audience pages added to nav** — `/for/tiktok-creators` and `/for/video-creators` added to the Audiences dropdown in `PublicNav.tsx`. Both pages already existed; they were just not linked.
+- **Calendar `pending_approval` status** — Bug: `Post` interface was missing `'pending_approval'` from status union type. `STATUS_DOT` and `STATUS_BADGE` maps also lacked an entry, so approval-queue posts would render with no dot/badge. Fixed with purple styling.
+- **blog_batch_11.sql INTERVAL syntax** — Doubled single-quotes (`''3 days''`) in 19 places caused SQL error when run in Supabase. Fixed in worktree copy (was already fixed on main via direct commit).
+- **Social media glossary** (PR #378) — `/glossary` page with 62 A-Z social media terms, client-side search, JSON-LD schema. PRs from background agents merged.
+- **vs/ hub + 8 new comparison pages** (PR #379) — Canva, Plann, Social Champ, Ripl, Preview App, Gain, Kontentino, Unum added. Sitemap + llms.txt updated.
+- **35 blog posts** (PR #380, batch 11) — SEO-targeted posts across platforms/scheduling/AI tools.
+- **TikTok Studio UX polish** (PR #379) — Mobile fix: settings panel extracted to `PostSettingsPanel` component, rendered in both desktop panel + Post tab. Audio tab explains API limitation. Filter tab with color swatches. TikTok brand color `#fe2c55`. Pill-style tabs + backdrop-blur header.
+
 **May 18, 2026:**
 - **TikTok Production API approved** — Live since May 17, 2026 9:50 PM. Production credentials updated in Vercel. Platform count updated to 6 everywhere. Sandbox banner removed. TikTok now fully live for all users at /accounts and /tiktok/studio.
 
@@ -617,6 +627,10 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - ✅ **TikTok Script Generator (May 18, PR #371)** — Live at `/ai-features/tiktok-script`. 5 credits. Never ask to build again.
 - ✅ **GIF Export in Creator Studio (May 18, PR #371)** — gifenc installed, exportGif() live. Never ask to build again.
 - ✅ **Blog batch 10 (May 18, PR #372)** — 30 video/TikTok/creator posts. SQL in blog_batch_10.sql. Never ask to write these again.
+- ✅ **TikTok Studio in public nav (May 18)** — Added to desktop header + mobile Products section. `/for/tiktok-creators` + `/for/video-creators` added to Audiences dropdown. Never say TikTok Studio is missing from nav again.
+- ✅ **Social media glossary (May 18, PR #378)** — `/glossary` live with 62 terms, A-Z nav, search, JSON-LD. Never ask to build again.
+- ✅ **vs/ hub + 8 new pages (May 18, PR #379)** — Canva, Plann, Social Champ, Ripl, Preview App, Gain, Kontentino, Unum. Never ask to add these again.
+- ✅ **Blog batch 11 (May 18, PR #380)** — 35 posts. SQL in blog_batch_11.sql. Never ask to write these again.
 - ✅ **TikTok Production API approved (May 17, 2026)** — Production API approved by TikTok. Platform flipped to 'live' on landing page + LocalizedLanding. Platform count updated 5→6. Sandbox banner removed from /tiktok/studio. Roadmap entry moved to 'shipped'. llms.txt updated. CLAUDE.md Platforms section updated. Never list TikTok as coming soon or pending again.
 - ✅ **AlternativeTo listing approved (May 14)** — Live. 9 alternatives listed. Never ask to submit again.
 - ✅ **IRIS Dispatch + unsubscribe (May 13–14, PRs #330–331)** — Newsletter live. Edition #1 sent + received. Unsubscribe flow CAN-SPAM compliant. Settings opt-in toggle live. Never ask about building IRIS again.

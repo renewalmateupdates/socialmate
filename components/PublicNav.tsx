@@ -18,9 +18,11 @@ const LANGUAGES = [
 ]
 
 const AUDIENCES = [
-  { label: '🎮 Streamers',      href: '/for/streamers'     },
-  { label: '🏢 Agencies',       href: '/for/agencies'      },
-  { label: '🏪 Small Business', href: '/for/small-business' },
+  { label: '🎮 Streamers',        href: '/for/streamers'       },
+  { label: '🏢 Agencies',         href: '/for/agencies'        },
+  { label: '🏪 Small Business',   href: '/for/small-business'  },
+  { label: '🎵 TikTok Creators',  href: '/for/tiktok-creators' },
+  { label: '🎬 Video Creators',   href: '/for/video-creators'  },
 ]
 
 const RESOURCES = [
@@ -182,10 +184,11 @@ export default function PublicNav() {
 
           <span className="w-px h-4 bg-gray-200 dark:bg-gray-700 mx-1.5" />
 
-          <Link href="/studio-stax" className={flatLinkCls('/studio-stax')}>Studio Stax</Link>
-          <Link href="/soma"        className={flatLinkCls('/soma')}>SOMA</Link>
-          <Link href="/enki"        className={flatLinkCls('/enki')}>Enki</Link>
-          <Link href="/monetize"    className={flatLinkCls('/monetize')}>Monetize</Link>
+          <Link href="/studio-stax"    className={flatLinkCls('/studio-stax')}>Studio Stax</Link>
+          <Link href="/soma"           className={flatLinkCls('/soma')}>SOMA</Link>
+          <Link href="/enki"           className={flatLinkCls('/enki')}>Enki</Link>
+          <Link href="/monetize"       className={flatLinkCls('/monetize')}>Monetize</Link>
+          <Link href="/tiktok/studio"  className={flatLinkCls('/tiktok/studio')}>TikTok Studio</Link>
 
           <span className="w-px h-4 bg-gray-200 dark:bg-gray-700 mx-1.5" />
 
@@ -315,11 +318,12 @@ export default function PublicNav() {
               <div className="pt-2 border-t border-gray-100 dark:border-gray-800 mt-2">
                 <p className="px-4 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-widest">Products</p>
                 {[
-                  { label: '🗂️ Studio Stax', href: '/studio-stax' },
-                  { label: '⚡ SOMA',         href: '/soma'        },
-                  { label: '◆ Enki',          href: '/enki'        },
-                  { label: '💜 Monetize',     href: '/monetize'    },
-                  { label: '🤖 Android Beta', href: '/beta'        },
+                  { label: '🗂️ Studio Stax',    href: '/studio-stax'    },
+                  { label: '⚡ SOMA',           href: '/soma'          },
+                  { label: '◆ Enki',            href: '/enki'          },
+                  { label: '💜 Monetize',       href: '/monetize'      },
+                  { label: '🎵 TikTok Studio',  href: '/tiktok/studio' },
+                  { label: '🤖 Android Beta',   href: '/beta'          },
                 ].map(link => (
                   <Link key={link.href} href={link.href}
                     onClick={() => setOpen(false)}
