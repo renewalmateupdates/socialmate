@@ -57,7 +57,7 @@ These have burned us before — always apply:
 
 ## Platforms
 
-**Live now:** Bluesky, Discord, Telegram, Mastodon, X/Twitter (pay-per-use, $0.01/tweet), TikTok (sandbox/beta — Production API approval pending)
+**Live now:** Bluesky, Discord, Telegram, Mastodon, X/Twitter (pay-per-use, $0.01/tweet), TikTok (Production API approved May 17, 2026)
 **Coming soon:** LinkedIn (no API acquired yet), YouTube, Pinterest, Reddit
 **Roadmap:** Instagram, Facebook, Threads, Tumblr, Pixelfed
 
@@ -92,7 +92,7 @@ These have burned us before — always apply:
 **TikTok quota (free API — no per-post charge):**
 - Free: 20 videos/month | Pro: 60/month | Agency: 200/month
 - Uses PULL_FROM_URL — TikTok pulls video from Supabase storage. Cost: only egress (~$0.09/GB)
-- Production API approval pending (submitted May 2026). Connect button live on /accounts. TikTok Studio live at /tiktok/studio.
+- Production API approved May 17, 2026. Connect button live on /accounts. TikTok Studio live at /tiktok/studio. Sandbox banner removed.
 
 **Platform philosophy:** Open social (Bluesky, Mastodon, Discord, Telegram, TikTok) = free. Gatekept social (X/Twitter charges $0.01/tweet) = Pro+ required.
 
@@ -564,8 +564,6 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 - **Google Play — closed testing** — Cooking slowly. v1.0.7 (versionCode 3) uploaded, 1 tester opted in. Passive CTA on signup page. *Do not revisit until June 2026.*
 
-- **TikTok Production API** — In review. Support ticket `ad7714530aa61ad4` open. *Do not revisit until June 2026.*
-
 - **LinkedIn API** — LinkedIn Company Page started. Next step: create Developer App at developer.linkedin.com → apply for `r_organization_social` + `w_organization_social` permissions. Review typically 2–4 weeks. **Medium difficulty — mostly a waiting game once submitted.**
 
 - **Instagram / Facebook** — Both require Meta App Review (same process, can be one app). Harder than LinkedIn — Meta review is strict. Business account required, users need Business/Creator Instagram accounts. **Hard — plan for 4–8 week review timeline.** Not worth starting until LinkedIn is live.
@@ -606,6 +604,7 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - ✅ **Wall of Love page (May 14, PR #335)** — `/wall-of-love` live. Add testimonials to TESTIMONIALS array when collected.
 - ✅ **Guide email capture (May 14, PR #335)** — GuideEmailCapture component on all 4 Gilgamesh Guides. Never ask to add email capture to guides again.
 - ✅ **Admin data fix (May 14)** — googlereview@socialmate.studio downgraded to free. Admin God Mode shows accurate 0 paid users.
+- ✅ **TikTok Production API approved (May 17, 2026)** — Production API approved by TikTok. Platform flipped to 'live' on landing page + LocalizedLanding. Platform count updated 5→6. Sandbox banner removed from /tiktok/studio. Roadmap entry moved to 'shipped'. llms.txt updated. CLAUDE.md Platforms section updated. Never list TikTok as coming soon or pending again.
 - ✅ **AlternativeTo listing approved (May 14)** — Live. 9 alternatives listed. Never ask to submit again.
 - ✅ **IRIS Dispatch + unsubscribe (May 13–14, PRs #330–331)** — Newsletter live. Edition #1 sent + received. Unsubscribe flow CAN-SPAM compliant. Settings opt-in toggle live. Never ask about building IRIS again.
 - ✅ **Admin God Mode exclusion fix (PR #332)** — Admin's own account excluded from all stats. Pro=0, Agency=0, MRR=$0 accurately reflects real users.
