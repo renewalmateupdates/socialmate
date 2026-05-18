@@ -21,6 +21,25 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'May 17, 2026',
+    version: "Full-App i18n Complete + Guide Vol. 5 + Calendar Fix",
+    changes: [
+      { type: 'New',      text: "Gilgamesh's Guide Vol. 5 — Creator Monetization live at /guides/creator-monetization. 8 chapters covering tip jars, fan subscriptions, digital products, brand deals, affiliate income, and a realistic 12-month $5K/month roadmap. Free, no gate, no upsell." },
+      { type: 'New',      text: 'Full-app i18n complete — all major app pages now translate in 7 languages (en/es/de/fr/pt/ru/zh). Covers Dashboard, Queue, Calendar, Compose, Analytics, Accounts, Inbox, Team, Drafts, Streak, Links, Activity, Media, AI Features, Agents, SOMA, Enki, Creator Hub, and public creator pages.' },
+      { type: 'New',      text: 'Birthday promo BDAY31 now active — 31% off any plan through December 15, 2026. Code: BDAY31. Apply at /pricing.' },
+      { type: 'Fixed',    text: 'Calendar definitively fixed — explicit column select caused silent null returns when any column was missing. Changed to select(*) with a wsLoading guard throughout. All scheduled posts now load correctly.' },
+      { type: 'Fixed',    text: 'Language switcher on public landing pages — now navigates to the correct locale URL instead of only writing to localStorage (which had no effect on server-rendered pages).' },
+    ],
+  },
+  {
+    date: 'May 16, 2026',
+    version: 'i18n Architecture Rewrite',
+    changes: [
+      { type: 'Fixed',    text: 'Removed next-intl plugin from next.config.ts — createNextIntlPlugin injects a webpack alias that Turbopack silently ignores, causing a runtime "config not found" error. Rewrote LocalizedLanding.tsx with direct JSON imports and a createT() helper function.' },
+      { type: 'Improved', text: 'Public landing pages now server-render correctly in 7 languages via locale URL routes (/es, /de, /fr, /pt, /ru, /zh). TypeScript enforces all locale files match the en.json shape at build time.' },
+    ],
+  },
+  {
     date: 'May 14, 2026',
     version: 'Admin Insights + Growth Infrastructure',
     changes: [

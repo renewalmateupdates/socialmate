@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
+import { useI18n } from '@/contexts/I18nContext'
 
 type LinkItem = {
   id: string
@@ -78,6 +79,7 @@ export default function PublicBioPage() {
   const username = params.username as string
   const [bioData, setBioData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const { t } = useI18n()
 
   useEffect(() => {
     if (!username || APP_ROUTES.includes(username)) {
@@ -109,8 +111,8 @@ export default function PublicBioPage() {
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
           <p className="text-2xl mb-2">🔍</p>
-          <p className="text-sm font-bold text-gray-700">Page not found</p>
-          <p className="text-xs text-gray-400 mt-1">This profile doesn't exist or has been removed.</p>
+          <p className="text-sm font-bold text-gray-700">{t('app_bio_public.not_found')}</p>
+          <p className="text-xs text-gray-400 mt-1">{t('app_bio_public.not_found_sub')}</p>
         </div>
       </div>
     )
@@ -174,7 +176,7 @@ export default function PublicBioPage() {
         <div className="space-y-3 mb-10">
           {activeLinks.length === 0 ? (
             <div className={`text-center py-8 text-sm opacity-50 ${textColor}`}>
-              No links yet
+              {t('app_bio_public.no_links')}
             </div>
           ) : (
             activeLinks.map((link) => (
@@ -197,7 +199,7 @@ export default function PublicBioPage() {
                 : 'bg-white/12 text-white/55 hover:bg-white/22 hover:text-white/80'
             }`}>
             <span className="font-black text-amber-500 text-sm leading-none">S</span>
-            Made with SocialMate
+            {t('app_bio_public.made_with')}
           </Link>
         </div>
 
