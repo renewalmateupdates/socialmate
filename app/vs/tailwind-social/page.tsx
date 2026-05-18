@@ -19,7 +19,7 @@ const COMPARISON = [
   { feature: 'Primary platform focus',      tailwind: 'Pinterest + Instagram',         socialmate: '16 platforms'             },
   { feature: 'Pinterest support',           tailwind: '✅ Core feature',               socialmate: '✅ (approval pending)'    },
   { feature: 'Instagram support',           tailwind: '✅',                             socialmate: '✅ (approval pending)'    },
-  { feature: 'TikTok / video platforms',    tailwind: '❌',                             socialmate: '✅ (approval pending)'    },
+  { feature: 'TikTok / video platforms',    tailwind: '❌',                             socialmate: '✅ Live'                  },
   { feature: 'Bluesky support',             tailwind: '❌',                             socialmate: '✅'                       },
   { feature: 'Discord support',             tailwind: '❌',                             socialmate: '✅'                       },
   { feature: 'Telegram support',            tailwind: '❌',                             socialmate: '✅'                       },
