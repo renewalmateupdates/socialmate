@@ -294,6 +294,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/refer`,              lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${base}/analytics/dna`,      lastModified: now, changeFrequency: 'weekly',  priority: 0.6 },
     { url: `${base}/monetize`,           lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/glossary`,           lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
   ]
 
   const comparisons: MetadataRoute.Sitemap = [
