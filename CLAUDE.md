@@ -527,6 +527,11 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **Language switcher on landing page fixed** (PR #363) — `PublicNav.setLocale()` now calls `router.push()` to the locale URL when on a public landing page (`/`, `/es`, `/de`, etc.). Previously it only wrote to localStorage which has no effect on server-rendered pages.
 - **Birthday promo BDAY31 activated** (PR #363) — Start date moved from 2026-06-15 to 2026-05-17. Active now through Dec 15, 2026. Amber banner + BDAY31 apply button live on /pricing.
 
+**May 17, 2026 (continued — PRs #366–#367):**
+- **Settings + Bio page i18n** (PR #366) — White Label tab, Brand Voice tab, Appearance tab, and `app/[username]/page.tsx` all wired with `useI18n()`. All 7 locale files validated clean.
+- **40 blog posts — batch 9** (PR #367, SQL: `supabase/blog_batch_9.sql`) — SM-Give/charity (6), creator monetization (6), Guide Vol. 5 promos (3), BDAY31 promo (3), building in public/founder (4), i18n/multi-language (3), SOMA (4), Enki (3), Studio Stax (3), creator economy (5). All 40 live in DB. Sitemap updated with all 40 slugs.
+- **Changelog** — May 16 + May 17 entries added. Blog count in llms.txt bumped to 240+.
+
 **May 17, 2026 (continued — PRs #364–#365):**
 - **i18n — inner app pages** (PR #364) — SOMA dashboard (`app_soma_dashboard`), SOMA voice (`app_soma_voice`), Enki dashboard (`app_enki_dashboard`), Creator Hub (`app_creator_hub`), creator public page (`app_creator_public`) all wired with `useI18n()`. Fixed variable shadowing bug in Enki dashboard where `.map((t) => ...)` shadowed the `t()` i18n function — was a correctness bug. All 7 locale files validated in sync. **i18n inner pages are now fully complete across all major app sections.**
 - **Gilgamesh's Guide Vol. 5 — Creator Monetization** (PR #365) — `/guides/creator-monetization` live. 8 chapters: Why Creators Stay Broke, The Monetization Stack, Tip Jars, Fan Subscriptions, Digital Products & Courses, Brand Deals, Affiliate Marketing, Stacking to $5K/month. Added to guides hub + sitemap.
