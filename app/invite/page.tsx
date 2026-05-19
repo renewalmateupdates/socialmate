@@ -25,7 +25,7 @@ function InviteInner() {
 
   const handleAccept = async () => {
     if (!user) {
-      router.push(`/login?next=/invite?token=${token}`)
+      router.push(`/login?redirect=/invite?token=${token}`)
       return
     }
     setStatus('accepting')

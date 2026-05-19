@@ -10,8 +10,8 @@ export async function GET(request: NextRequest) {
   const state = searchParams.get('state')
   const error = searchParams.get('error')
   const appUrl     = process.env.NEXT_PUBLIC_APP_URL!
-  const clientKey  = process.env.TIKTOK_SANDBOX_CLIENT_KEY || process.env.TIKTOK_CLIENT_KEY!
-  const clientSecret = process.env.TIKTOK_SANDBOX_CLIENT_SECRET || process.env.TIKTOK_CLIENT_SECRET!
+  const clientKey    = process.env.TIKTOK_CLIENT_KEY!
+  const clientSecret = process.env.TIKTOK_CLIENT_SECRET!
 
   if (error || !code) {
     return NextResponse.redirect(`${appUrl}/accounts?error=tiktok_denied`)

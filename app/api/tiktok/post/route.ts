@@ -27,8 +27,8 @@ async function getValidAccessToken(userId: string): Promise<{ token: string; ope
   if (account.expires_at) {
     const expiresAt = new Date(account.expires_at)
     if (expiresAt.getTime() - Date.now() < 5 * 60 * 1000 && account.refresh_token) {
-      const clientKey    = process.env.TIKTOK_SANDBOX_CLIENT_KEY || process.env.TIKTOK_CLIENT_KEY!
-      const clientSecret = process.env.TIKTOK_SANDBOX_CLIENT_SECRET || process.env.TIKTOK_CLIENT_SECRET!
+      const clientKey    = process.env.TIKTOK_CLIENT_KEY!
+      const clientSecret = process.env.TIKTOK_CLIENT_SECRET!
 
       const res = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
         method: 'POST',
