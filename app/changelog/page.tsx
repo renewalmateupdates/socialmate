@@ -22,6 +22,17 @@ interface ChangelogEntry {
 const CHANGELOG: ChangelogEntry[] = [
   {
     date: 'May 18, 2026',
+    version: 'Nav Polish + Bug Sweep',
+    changes: [
+      { type: 'New',      text: 'TikTok Studio added to header nav — now accessible from the main nav on desktop and mobile Products section.' },
+      { type: 'New',      text: 'TikTok Creators and Video Creators added to the Audiences dropdown in nav.' },
+      { type: 'Fixed',    text: 'Calendar status badges now correctly handle pending_approval posts — added purple styling so approval-queue posts are visible on the calendar instead of falling through to an unstyled fallback.' },
+      { type: 'Fixed',    text: 'blog_batch_11.sql — corrected INTERVAL syntax (doubled single-quotes) that would cause an error when running in Supabase.' },
+      { type: 'Fixed',    text: 'Social media glossary and vs/ comparison pages (Canva, Plann, Social Champ, Ripl, Preview App, Gain, Kontentino, Unum, Planly, Vista Social, Flick) added to sitemap and llms.txt.' },
+    ],
+  },
+  {
+    date: 'May 18, 2026',
     version: 'TikTok Now Live — 6 Platforms',
     changes: [
       { type: 'New',      text: 'TikTok Production API approved. SocialMate now supports 6 live platforms. Connect your TikTok account at /accounts and schedule videos from TikTok Studio at /tiktok/studio.' },
