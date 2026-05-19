@@ -21,6 +21,16 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'May 19, 2026',
+    version: 'Bluesky Fix + Error Visibility',
+    changes: [
+      { type: 'Fixed',    text: 'Bluesky token rotation race condition — when Inngest fired multiple Bluesky posts concurrently, the second post would fail with "authentication failed" because the first post had already rotated the shared refresh token. Fixed by re-reading the freshest token from the database on refresh failure.' },
+      { type: 'Fixed',    text: 'SOMA post scheduling jitter — all morning/afternoon/evening posts were scheduled at exactly the same second (09:00:00, 14:00:00, 19:00:00), causing the token race condition. Posts now spread randomly across a 44-minute window within each slot.' },
+      { type: 'Improved', text: 'Publish error visibility — failure reasons per platform are now saved to the database. Hovering over a failed or partial post in the calendar now shows the actual error message (e.g. "Bluesky failed: session expired") instead of just a red X.' },
+      { type: 'Fixed',    text: 'Calendar platform breakdown now also renders for fully-failed posts, not just partial ones.' },
+    ],
+  },
+  {
     date: 'May 18, 2026',
     version: 'Nav Polish + Bug Sweep',
     changes: [

@@ -520,6 +520,13 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **SQL to run in Supabase:** `supabase/migrations/20260513000001_iris_newsletter.sql` (ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS iris_opt_in BOOLEAN DEFAULT true; + CREATE TABLE iris_dispatches).
 - **Edition #1 of IRIS Dispatch sent** — Subject: "We're Live, We're Building, and We're Not Stopping". 29 recipients. Joshua confirmed receipt.
 
+**May 19, 2026 (PR #382):**
+- **Bluesky token rotation race condition fixed** — Root cause: Inngest runs up to 5 posts concurrently. When two Bluesky posts fire at the same time, both read the same refresh token from the DB. The first one rotates it via `refreshSession`; the second gets a 400 error and was falling through with the now-stale access token, causing `createRecord` to fail with 401. Fix: on non-401 refresh failure, immediately re-read the `connected_accounts` row from DB to get the freshest token before attempting `createRecord`.
+- **SOMA post time jitter** — `calculateScheduledAt` in `/api/soma/generate` was scheduling all morning posts at exactly `09:00:00`, afternoon at `14:00:00`, evening at `19:00:00`. Added 0–44 min random jitter so same-slot posts spread out and don't all land in the same Inngest concurrency window.
+- **`platform_errors` JSONB column added to `posts`** — Publish errors per platform are now persisted to the DB (both Inngest and direct-publish paths). Previously errors were only in memory during the publish run and couldn't be diagnosed after the fact.
+- **Calendar error visibility** — Failed/partial posts in the calendar now show the actual error message on hover (e.g. "Bluesky failed: session expired and could not be refreshed"). Also fixed: `PlatformBreakdown` was only rendered for `partial` posts — now also renders for fully `failed` posts.
+- **SQL applied:** `ALTER TABLE posts ADD COLUMN IF NOT EXISTS platform_errors JSONB DEFAULT NULL;`
+
 **May 18, 2026 (PRs #371–#372):**
 - **TikTok Script Generator** (PR #371) — `/api/ai/tiktok-script` route (three-pool credit deduction, same pattern as hashtags). Accepts `{ topic, duration, tone }`, returns `{ hook, body[], cta }`. Dedicated page at `/ai-features/tiktok-script` with result cards + copy buttons. 5 credits. Gemini model `gemini-2.5-flash`.
 - **GIF Export in Creator Studio** (PR #371) — `gifenc` installed. `exportGif()` added to `app/create/CreatePageClient.tsx`. Frame-by-frame canvas render loop: CSS filter + caption overlay baked in, 10fps, capped at 5s, 480px wide. "Export GIF" button + "max 5s" label in action bar. `types/gifenc.d.ts` module declaration added.
@@ -624,6 +631,7 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - ✅ **Wall of Love page (May 14, PR #335)** — `/wall-of-love` live. Add testimonials to TESTIMONIALS array when collected.
 - ✅ **Guide email capture (May 14, PR #335)** — GuideEmailCapture component on all 4 Gilgamesh Guides. Never ask to add email capture to guides again.
 - ✅ **Admin data fix (May 14)** — googlereview@socialmate.studio downgraded to free. Admin God Mode shows accurate 0 paid users.
+- ✅ **Bluesky token race condition + SOMA jitter + error visibility (May 19, PR #382)** — `platform_errors` JSONB column live. Calendar hover shows actual error. Token re-read on concurrent refresh failure. SOMA posts now staggered 0–44 min per slot. SQL applied.
 - ✅ **TikTok Script Generator (May 18, PR #371)** — Live at `/ai-features/tiktok-script`. 5 credits. Never ask to build again.
 - ✅ **GIF Export in Creator Studio (May 18, PR #371)** — gifenc installed, exportGif() live. Never ask to build again.
 - ✅ **Blog batch 10 (May 18, PR #372)** — 30 video/TikTok/creator posts. SQL in blog_batch_10.sql. Never ask to write these again.
