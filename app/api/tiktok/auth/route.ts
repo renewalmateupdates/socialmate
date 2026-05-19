@@ -4,7 +4,7 @@ import { cookies } from 'next/headers'
 import crypto from 'crypto'
 
 export async function GET() {
-  const clientKey = process.env.TIKTOK_SANDBOX_CLIENT_KEY || process.env.TIKTOK_CLIENT_KEY!
+  const clientKey = process.env.TIKTOK_CLIENT_KEY!
   const appUrl    = process.env.NEXT_PUBLIC_APP_URL!
 
   const state = crypto.randomBytes(16).toString('hex')

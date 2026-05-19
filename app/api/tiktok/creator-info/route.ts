@@ -5,8 +5,8 @@ import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 async function refreshTokenIfNeeded(accountId: string, refreshToken: string) {
-  const clientKey    = process.env.TIKTOK_SANDBOX_CLIENT_KEY || process.env.TIKTOK_CLIENT_KEY!
-  const clientSecret = process.env.TIKTOK_SANDBOX_CLIENT_SECRET || process.env.TIKTOK_CLIENT_SECRET!
+  const clientKey    = process.env.TIKTOK_CLIENT_KEY!
+  const clientSecret = process.env.TIKTOK_CLIENT_SECRET!
 
   const res = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
     method: 'POST',
