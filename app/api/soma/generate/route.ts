@@ -12,7 +12,10 @@ function calculateScheduledAt(day: number, slot: string): string {
   const base = new Date()
   base.setDate(base.getDate() + day - 1)
   const hours = slot === 'morning' ? 9 : slot === 'afternoon' ? 14 : 19
-  base.setHours(hours, 0, 0, 0)
+  // Jitter 0-44 min: prevents same-slot posts from all firing at the exact same second,
+  // which causes Bluesky token rotation race conditions when Inngest runs them concurrently.
+  const jitterMinutes = Math.floor(Math.random() * 45)
+  base.setHours(hours, jitterMinutes, 0, 0)
   return base.toISOString()
 }
 

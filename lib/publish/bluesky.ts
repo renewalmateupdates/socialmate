@@ -66,10 +66,23 @@ export async function publishToBluesky(
       .eq('id', account.id)
   } else {
     const errBody = await sessionRes.json().catch(() => ({}))
-    console.warn('[Bluesky] Token refresh failed, using existing token:', errBody)
+    console.warn('[Bluesky] Token refresh failed:', errBody)
 
     if (sessionRes.status === 401) {
       throw new Error('Bluesky session expired and could not be refreshed. Please reconnect your Bluesky account.')
+    }
+
+    // Non-401 failure (e.g. 400/expired): a concurrent publish may have already rotated
+    // this token. Re-read DB to get the freshest tokens before falling through.
+    const { data: freshAccount } = await getSupabaseAdmin()
+      .from('connected_accounts')
+      .select('access_token, refresh_token, platform_user_id')
+      .eq('id', account.id)
+      .maybeSingle()
+
+    if (freshAccount?.access_token) {
+      accessJwt = freshAccount.access_token
+      if (freshAccount.platform_user_id) did = freshAccount.platform_user_id
     }
   }
 
