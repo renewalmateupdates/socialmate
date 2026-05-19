@@ -541,7 +541,7 @@ export default function CalendarPage() {
                               🕐 {formatTime(post.scheduled_at || post.created_at)}
                             </p>
                           )}
-                          {post.status === 'partial' && (
+                          {(post.status === 'partial' || post.status === 'failed') && (
                             <PlatformBreakdown post={post} />
                           )}
                           {(post.tags || []).length > 0 && (
@@ -564,24 +564,24 @@ export default function CalendarPage() {
                           <span className={`text-xs font-bold px-2.5 py-1 rounded-full capitalize ${STATUS_BADGE[post.status] ?? STATUS_BADGE.draft}`}>
                             {post.status === 'partial' ? 'Partial' : post.status}
                           </span>
-                          {post.status === 'partial' ? (
+                          {(post.status === 'partial' || post.status === 'failed') ? (
                             <button
                               onClick={() => handleRetry(post.id)}
                               disabled={retrying === post.id}
-                              className="text-xs font-semibold text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-200 transition-colors flex items-center gap-1 disabled:opacity-50">
+                              className={`text-xs font-semibold transition-colors flex items-center gap-1 disabled:opacity-50 ${
+                                post.status === 'failed'
+                                  ? 'text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-200'
+                                  : 'text-amber-600 hover:text-amber-800 dark:text-amber-400 dark:hover:text-amber-200'
+                              }`}>
                               {retrying === post.id
-                                ? <><div className="w-3 h-3 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />Retrying...</>
-                                : 'Retry failed →'}
+                                ? <><div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />Retrying...</>
+                                : 'Retry →'}
                             </button>
                           ) : (
                             <Link
-                              href={post.status === 'draft' || post.status === 'failed' ? `/compose?id=${post.id}` : '/drafts'}
-                              className={`text-xs font-semibold transition-colors ${
-                                post.status === 'failed'
-                                  ? 'text-red-500 hover:text-red-700 dark:hover:text-red-300'
-                                  : 'text-blue-500 hover:text-blue-700 dark:hover:text-blue-300'
-                              }`}>
-                              {post.status === 'draft' ? 'Edit →' : post.status === 'failed' ? 'Retry →' : 'View in Queue →'}
+                              href={post.status === 'draft' ? `/compose?id=${post.id}` : '/drafts'}
+                              className="text-xs font-semibold text-blue-500 hover:text-blue-700 dark:hover:text-blue-300 transition-colors">
+                              {post.status === 'draft' ? 'Edit →' : 'View in Queue →'}
                             </Link>
                           )}
                           <button

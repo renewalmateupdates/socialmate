@@ -303,6 +303,47 @@ export default async function AdminOverviewPage() {
     }
   } catch { /* graceful fallback */ }
 
+  // ── 8. Activation funnel ─────────────────────────────────────────────
+  let funnelConnected = 0
+  let funnelPosted    = 0
+  let funnelPublished = 0
+  let funnelRetained  = 0
+
+  try {
+    const { data } = await admin
+      .from('connected_accounts')
+      .select('user_id')
+      .neq('user_id', adminUserId)
+    if (data) funnelConnected = new Set(data.map(r => r.user_id)).size
+  } catch { /* graceful fallback */ }
+
+  try {
+    const { data } = await admin
+      .from('posts')
+      .select('user_id')
+      .neq('user_id', adminUserId)
+    if (data) funnelPosted = new Set(data.map(r => r.user_id)).size
+  } catch { /* graceful fallback */ }
+
+  try {
+    const { data } = await admin
+      .from('posts')
+      .select('user_id')
+      .eq('status', 'published')
+      .neq('user_id', adminUserId)
+    if (data) funnelPublished = new Set(data.map(r => r.user_id)).size
+  } catch { /* graceful fallback */ }
+
+  try {
+    const { data } = await admin
+      .from('posts')
+      .select('user_id')
+      .eq('status', 'published')
+      .gte('published_at', minus7d)
+      .neq('user_id', adminUserId)
+    if (data) funnelRetained = new Set(data.map(r => r.user_id)).size
+  } catch { /* graceful fallback */ }
+
   // ── render ─────────────────────────────────────────────────────────────
   const PLAN_BADGE: Record<string, string> = {
     free:          'bg-gray-700 text-gray-400',
@@ -396,7 +437,47 @@ export default async function AdminOverviewPage() {
           </div>
         </section>
 
-        {/* ── Section 3: Platform health (24h) ────────────────────────── */}
+        {/* ── Section 3: Activation Funnel ────────────────────────────── */}
+        <section>
+          <SectionLabel>Activation Funnel</SectionLabel>
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-3">
+            {[
+              { label: 'Signed up',              value: totalUsers,       color: 'bg-blue-500'    },
+              { label: 'Connected a platform',   value: funnelConnected,  color: 'bg-sky-500'     },
+              { label: 'Created a post',         value: funnelPosted,     color: 'bg-amber-500'   },
+              { label: 'Published a post',       value: funnelPublished,  color: 'bg-emerald-500' },
+              { label: 'Active last 7 days',     value: funnelRetained,   color: 'bg-green-400'   },
+            ].map((step, i, arr) => {
+              const pct = arr[0].value > 0 ? Math.round((step.value / arr[0].value) * 100) : 0
+              const dropOff = i > 0 && arr[i - 1].value > 0
+                ? Math.round(((arr[i - 1].value - step.value) / arr[i - 1].value) * 100)
+                : null
+              return (
+                <div key={step.label}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-semibold text-gray-300">{step.label}</span>
+                    <div className="flex items-center gap-3">
+                      {dropOff !== null && dropOff > 0 && (
+                        <span className="text-xs text-red-400 font-medium">−{dropOff}%</span>
+                      )}
+                      <span className="text-sm font-black text-white w-8 text-right">{fmt(step.value)}</span>
+                      <span className="text-xs text-gray-600 w-10 text-right">{pct}%</span>
+                    </div>
+                  </div>
+                  <div className="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all ${step.color}`}
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                </div>
+              )
+            })}
+            <p className="text-xs text-gray-600 pt-1">Distinct users at each stage — excludes admin account</p>
+          </div>
+        </section>
+
+        {/* ── Section 4: Platform health (24h) ────────────────────────── */}
         <section>
           <SectionLabel>Platform Health — Last 24h</SectionLabel>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

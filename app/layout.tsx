@@ -8,6 +8,7 @@ import { ThemeProvider } from '@/contexts/ThemeContext'
 import { I18nProvider } from '@/contexts/I18nContext'
 import { Analytics } from '@vercel/analytics/next'
 import InstallPrompt from '@/components/InstallPrompt'
+import GoogleAnalytics from '@/components/GoogleAnalytics'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
@@ -151,6 +152,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <CookieBanner />
         <InstallPrompt />
         <Analytics />
+        <GoogleAnalytics />
       </body>
     </html>
   )
