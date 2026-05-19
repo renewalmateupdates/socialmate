@@ -242,6 +242,12 @@ function LoginInner() {
               Continue with Google
             </button>
 
+            {/* Google auth domain note */}
+            <p className="text-[11px] text-gray-400 dark:text-gray-500 text-center -mt-3 mb-4 leading-relaxed">
+              Google may show an unfamiliar URL during sign-in — that&apos;s our auth provider, not a third party.{' '}
+              <Link href="/give" className="underline hover:text-gray-600 dark:hover:text-gray-300 transition-colors">Help us upgrade</Link>
+            </p>
+
             {/* Divider */}
             <div className="flex items-center gap-3 mb-5">
               <div className="flex-1 h-px bg-gray-100 dark:bg-gray-700" />
