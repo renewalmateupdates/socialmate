@@ -16,6 +16,7 @@ interface Post {
   status: 'scheduled' | 'published' | 'draft' | 'failed' | 'partial' | 'pending_approval'
   created_at: string
   platform_post_ids?: Record<string, string> | null
+  platform_errors?: Record<string, string> | null
   tags?: string[] | null
 }
 
@@ -51,19 +52,26 @@ const PLATFORM_NAMES: Record<string, string> = {
   threads: 'Threads', snapchat: 'Snapchat', lemon8: 'Lemon8', bereal: 'BeReal',
 }
 
-/** Render a per-platform success/fail breakdown for partial posts */
+/** Render a per-platform success/fail breakdown for failed/partial posts */
 function PlatformBreakdown({ post }: { post: Post }) {
-  if (post.status !== 'partial') return null
-  const postIds = post.platform_post_ids ?? {}
+  if (post.status !== 'partial' && post.status !== 'failed') return null
+  const postIds   = post.platform_post_ids ?? {}
+  const postErrs  = post.platform_errors   ?? {}
   return (
     <div className="mt-2 flex flex-wrap gap-1.5" aria-label="Per-platform publish result">
       {(post.platforms ?? []).map(p => {
         const succeeded = !!postIds[p]
+        const errMsg    = postErrs[p]
+        const tooltip   = succeeded
+          ? `${PLATFORM_NAMES[p] ?? p} published`
+          : errMsg
+            ? `${PLATFORM_NAMES[p] ?? p} failed: ${errMsg}`
+            : `${PLATFORM_NAMES[p] ?? p} failed`
         return (
           <span
             key={p}
-            title={succeeded ? `${PLATFORM_NAMES[p] ?? p} published` : `${PLATFORM_NAMES[p] ?? p} failed`}
-            className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+            title={tooltip}
+            className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full cursor-help ${
               succeeded
                 ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                 : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400'

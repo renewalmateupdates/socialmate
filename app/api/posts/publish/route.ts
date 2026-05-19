@@ -63,8 +63,10 @@ export async function POST(request: NextRequest) {
     const someFailed = results.some(r => !r.success)
 
     const platformPostIds: Record<string, string> = {}
+    const platformErrors: Record<string, string> = {}
     results.forEach(r => {
       if (r.success && r.postId) platformPostIds[r.platform] = r.postId
+      if (!r.success && r.error) platformErrors[r.platform] = r.error
     })
 
     const finalStatusInngest = allFailed ? 'failed' : someFailed ? 'partial' : 'published'
@@ -80,6 +82,16 @@ export async function POST(request: NextRequest) {
         .eq('id', postId)
       if (pidError) console.warn('[STATUS-UPDATE] platform_post_ids write failed (non-fatal):', pidError.message)
       else console.log('[STATUS-UPDATE] platform_post_ids saved for post', postId)
+    }
+
+    if (Object.keys(platformErrors).length > 0) {
+      getSupabaseAdmin()
+        .from('posts')
+        .update({ platform_errors: platformErrors })
+        .eq('id', postId)
+        .then(({ error }) => {
+          if (error) console.warn('[STATUS-UPDATE] platform_errors write skipped (non-fatal):', error.message)
+        })
     }
 
     // Step 2: Update status with retries.
@@ -246,8 +258,10 @@ export async function POST(request: NextRequest) {
     const someFailed = results.some(r => !r.success)
 
     const platformPostIds: Record<string, string> = {}
+    const platformErrors: Record<string, string> = {}
     results.forEach(r => {
       if (r.success && r.postId) platformPostIds[r.platform] = r.postId
+      if (!r.success && r.error) platformErrors[r.platform] = r.error
     })
 
     const finalStatus = allFailed ? 'failed' : someFailed ? 'partial' : 'published'
@@ -276,6 +290,16 @@ export async function POST(request: NextRequest) {
         .eq('id', postId)
         .then(({ error }) => {
           if (error) console.warn('[publish] platform_post_ids skipped (non-fatal):', error.message)
+        })
+    }
+
+    if (Object.keys(platformErrors).length > 0) {
+      getSupabaseAdmin()
+        .from('posts')
+        .update({ platform_errors: platformErrors })
+        .eq('id', postId)
+        .then(({ error }) => {
+          if (error) console.warn('[publish] platform_errors skipped (non-fatal):', error.message)
         })
     }
 
