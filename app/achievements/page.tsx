@@ -16,8 +16,9 @@ const ACHIEVEMENTS = [
   { key: 'month_3',      icon: '🎯', label: 'Committed',        desc: '3 months on SocialMate',               reward: 100, category: 'Tenure'   },
   { key: 'month_6',      icon: '💎', label: 'Dedicated',        desc: '6 months on SocialMate',               reward: 100, category: 'Tenure'   },
   { key: 'month_12',     icon: '🏆', label: 'Veteran Creator',  desc: '1 year on SocialMate',                 reward: 100, category: 'Tenure'   },
-  { key: 'platforms_3',  icon: '🌐', label: 'Multi-Platform',   desc: 'Connect 3+ platforms',                 reward: 25,  category: 'Account'  },
-  { key: 'bio_builder',  icon: '🔗', label: 'Bio Builder',      desc: 'Create a Link in Bio page',            reward: 10,  category: 'Account'  },
+  { key: 'platforms_3',     icon: '🌐', label: 'Multi-Platform',      desc: 'Connect 3+ platforms',                      reward: 25,  category: 'Account'  },
+  { key: 'bio_builder',     icon: '🔗', label: 'Bio Builder',         desc: 'Create a SIGIL (Link in Bio) page',         reward: 10,  category: 'Account'  },
+  { key: '30_day_challenge', icon: '🏅', label: '30-Day Challenge',   desc: 'Post every day for 30 consecutive days',    reward: 50,  category: 'Streaks'  },
 ]
 
 type Earned = { achievement_key: string; earned_at: string; credits_awarded: number }

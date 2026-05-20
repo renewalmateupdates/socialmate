@@ -5088,7 +5088,8 @@ const ACHIEVEMENT_DEFS = [
   { key: 'month_3',     reward: 100, check: (_p: number, _s: number, m: number, _pl: number) => m >= 3   },
   { key: 'month_6',     reward: 100, check: (_p: number, _s: number, m: number, _pl: number) => m >= 6   },
   { key: 'month_12',    reward: 100, check: (_p: number, _s: number, m: number, _pl: number) => m >= 12  },
-  { key: 'platforms_3', reward: 25,  check: (_p: number, _s: number, _m: number, pl: number) => pl >= 3  },
+  { key: 'platforms_3',     reward: 25,  check: (_p: number, _s: number, _m: number, pl: number) => pl >= 3  },
+  { key: '30_day_challenge', reward: 50,  check: (_p: number, s: number, _m: number, _pl: number) => s >= 30 },
 ]
 
 export const checkAchievements = inngest.createFunction(

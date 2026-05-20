@@ -21,6 +21,25 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'May 20, 2026',
+    version: 'HESTIA, SIGIL, Guides PDF, Achievements, Scheduling Windows + More',
+    changes: [
+      { type: 'New',      text: 'HESTIA — community tab at /community. Post wins, questions, tips, feedback, and intros. Emoji reactions, threaded replies, and a connected-account gate to keep it real.' },
+      { type: 'New',      text: 'SIGIL — Link in Bio renamed to SIGIL. Same feature, new identity consistent with the SocialMate mythology naming system (HERMES, ENKI, SOMA, IRIS, SIGIL, HESTIA).' },
+      { type: 'New',      text: 'Guides PDF download — "Download as PDF" button on all 5 Gilgamesh Guides. Opens native print dialog with a faint SocialMate watermark baked into the background. No external services.' },
+      { type: 'New',      text: 'Achievements — 13 badges across Posts, Streaks, Tenure, and Account categories. Unlocking awards earned credits. Progress bars for locked badges. Accessed at /achievements and linked in the Grow section of the sidebar.' },
+      { type: 'New',      text: '30-day Creator Challenge — post every day for 30 days and earn 50 bonus credits. Daily progress heatmap and day counter at /challenge.' },
+      { type: 'New',      text: 'Scheduling window — set your posting hours (e.g. 9am–9pm) and a Do-Not-Disturb window in Settings → Scheduling. Smart Queue now respects your configured window.' },
+      { type: 'New',      text: 'Post Score — AI quality scorer for post drafts (Pro+, 5 credits). Rates 0–100 with feedback on hook, clarity, and engagement potential.' },
+      { type: 'New',      text: 'Built with SocialMate badge — embeddable SVG badge at /badge.svg. Copy the embed code from Settings → Profile to show it on your site.' },
+      { type: 'New',      text: 'Discount page at /discount — NONPROFIT50 (50% off Pro) and STUDENT25 (25% off Pro). Honor system, no email verification required.' },
+      { type: 'Improved', text: 'Goal-based onboarding — Step 1 now asks your goal (schedule content / grow audience / manage clients). Saved to your profile.' },
+      { type: 'Improved', text: 'UpgradeNudge dismiss now monthly instead of 7-day — dismissing resets at the start of each month.' },
+      { type: 'Improved', text: 'HERMES upgraded to Gemini 2.5-flash — faster, smarter content generation.' },
+      { type: 'Improved', text: 'AI rate limiting — 10 AI requests per minute per user to prevent abuse.' },
+    ],
+  },
+  {
     date: 'May 19, 2026',
     version: 'Bluesky Fix + Error Visibility',
     changes: [
