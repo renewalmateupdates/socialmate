@@ -24,6 +24,9 @@ import {
   publishScheduledTiktokPosts,
   monthlyCreditsResetEmail,
   studioStaxQuarterlyBlog,
+  comebackEmails,
+  irisDraftGenerator,
+  adminHealthAlert,
 } from '@/lib/inngest'
 import { newsletterAgent, clientReportAgent, repurposeAgent, captionAgent, trendScoutAgent, inboxAgent } from '@/lib/inngest-agents'
 import { hermesFollowUpCron, hermesAutoDiscoverCron } from '@/lib/inngest-hermes'
@@ -59,6 +62,9 @@ export const { GET, POST, PUT } = serve({
     publishScheduledTiktokPosts,
     monthlyCreditsResetEmail,
     studioStaxQuarterlyBlog,
+    comebackEmails,
+    irisDraftGenerator,
+    adminHealthAlert,
     hermesFollowUpCron,
     hermesAutoDiscoverCron,
   ],
