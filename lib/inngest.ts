@@ -5074,3 +5074,94 @@ export const adminHealthAlert = inngest.createFunction(
     return { failures, partial, alert: true }
   }
 )
+
+// ── Achievement checker — daily at 11am UTC ───────────────────────────────
+const ACHIEVEMENT_DEFS = [
+  { key: 'first_post',  reward: 0,   check: (p: number, _s: number, _m: number, _pl: number) => p >= 1   },
+  { key: 'posts_10',    reward: 25,  check: (p: number, _s: number, _m: number, _pl: number) => p >= 10  },
+  { key: 'posts_50',    reward: 50,  check: (p: number, _s: number, _m: number, _pl: number) => p >= 50  },
+  { key: 'posts_100',   reward: 100, check: (p: number, _s: number, _m: number, _pl: number) => p >= 100 },
+  { key: 'posts_500',   reward: 200, check: (p: number, _s: number, _m: number, _pl: number) => p >= 500 },
+  { key: 'streak_7',    reward: 25,  check: (_p: number, s: number, _m: number, _pl: number) => s >= 7   },
+  { key: 'streak_30',   reward: 50,  check: (_p: number, s: number, _m: number, _pl: number) => s >= 30  },
+  { key: 'streak_100',  reward: 150, check: (_p: number, s: number, _m: number, _pl: number) => s >= 100 },
+  { key: 'month_3',     reward: 100, check: (_p: number, _s: number, m: number, _pl: number) => m >= 3   },
+  { key: 'month_6',     reward: 100, check: (_p: number, _s: number, m: number, _pl: number) => m >= 6   },
+  { key: 'month_12',    reward: 100, check: (_p: number, _s: number, m: number, _pl: number) => m >= 12  },
+  { key: 'platforms_3', reward: 25,  check: (_p: number, _s: number, _m: number, pl: number) => pl >= 3  },
+]
+
+export const checkAchievements = inngest.createFunction(
+  { id: 'check-achievements', name: 'Daily Achievement Checker', retries: 1 },
+  { cron: '0 11 * * *' },
+  async ({ step }) => {
+    const db = getSupabaseAdmin()
+
+    const newlyAwarded = await step.run('check-all-users', async () => {
+      const { data: users } = await db.from('profiles').select('id, created_at')
+      if (!users?.length) return 0
+
+      let totalAwarded = 0
+
+      for (const user of users) {
+        try {
+          const userId = user.id
+          const joinedAt = new Date(user.created_at)
+          const monthsOn = (Date.now() - joinedAt.getTime()) / (1000 * 60 * 60 * 24 * 30)
+
+          const [{ count: pubCount }, { data: platforms }, { data: existing }, { data: scheduled }] = await Promise.all([
+            db.from('posts').select('*', { count: 'exact', head: true }).eq('user_id', userId).eq('status', 'published'),
+            db.from('connected_accounts').select('platform').eq('user_id', userId),
+            db.from('user_achievements').select('achievement_key').eq('user_id', userId),
+            db.from('posts').select('scheduled_at').eq('user_id', userId).in('status', ['published', 'scheduled']).order('scheduled_at', { ascending: false }),
+          ])
+
+          const publishedCount = pubCount ?? 0
+          const platformCount  = new Set((platforms || []).map((p: any) => p.platform)).size
+          const earnedKeys     = new Set((existing || []).map((e: any) => e.achievement_key))
+
+          // Calculate streak from scheduled_at dates
+          let streak = 0
+          if (scheduled?.length) {
+            const days = new Set(scheduled.map((p: any) => new Date(p.scheduled_at).toDateString()))
+            const sorted = Array.from(days).sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
+            let cursor = new Date(); cursor.setHours(0, 0, 0, 0)
+            for (const day of sorted) {
+              const d = new Date(day); d.setHours(0, 0, 0, 0)
+              const diff = Math.round((cursor.getTime() - d.getTime()) / 86400000)
+              if (diff <= 1) { streak++; cursor = d } else break
+            }
+          }
+
+          for (const def of ACHIEVEMENT_DEFS) {
+            if (earnedKeys.has(def.key)) continue
+            if (!def.check(publishedCount, streak, Math.floor(monthsOn), platformCount)) continue
+
+            await db.from('user_achievements').insert({ user_id: userId, achievement_key: def.key, credits_awarded: def.reward })
+
+            if (def.reward > 0) {
+              const { data: s } = await db.from('user_settings').select('earned_credits').eq('user_id', userId).single()
+              await db.from('user_settings').update({ earned_credits: (s?.earned_credits ?? 0) + def.reward }).eq('user_id', userId)
+            }
+
+            await db.from('notifications').insert({
+              user_id: userId,
+              type: 'achievement',
+              title: '🏆 Achievement Unlocked!',
+              message: `You earned the "${def.key.replace(/_/g, ' ')}" badge${def.reward > 0 ? ` + ${def.reward} bonus credits` : ''}`,
+              read: false,
+            })
+
+            totalAwarded++
+          }
+        } catch (err) {
+          console.error(`[checkAchievements] user ${user.id}:`, err)
+        }
+      }
+
+      return totalAwarded
+    })
+
+    return { newlyAwarded }
+  }
+)
