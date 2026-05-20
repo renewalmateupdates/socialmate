@@ -11,7 +11,10 @@ export interface UpgradeNudgeProps {
   dismissKey?: string // localStorage key for 7-day dismiss
 }
 
-const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000
+function currentMonthKey(base: string) {
+  const now = new Date()
+  return `${base}_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+}
 
 export default function UpgradeNudge({
   title,
@@ -26,22 +29,16 @@ export default function UpgradeNudge({
   useEffect(() => {
     if (!dismissKey) return
     try {
-      const stored = localStorage.getItem(dismissKey)
-      if (stored) {
-        const dismissedAt = parseInt(stored, 10)
-        if (Date.now() - dismissedAt < SEVEN_DAYS_MS) {
-          setVisible(false)
-          return
-        }
-      }
+      const monthlyKey = currentMonthKey(dismissKey)
+      const dismissed = localStorage.getItem(monthlyKey)
+      setVisible(!dismissed)
     } catch {}
-    setVisible(true)
   }, [dismissKey])
 
   const handleDismiss = () => {
     if (!dismissKey) return
     try {
-      localStorage.setItem(dismissKey, String(Date.now()))
+      localStorage.setItem(currentMonthKey(dismissKey), '1')
     } catch {}
     setVisible(false)
   }

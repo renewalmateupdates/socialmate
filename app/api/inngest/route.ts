@@ -27,6 +27,7 @@ import {
   comebackEmails,
   irisDraftGenerator,
   adminHealthAlert,
+  checkAchievements,
 } from '@/lib/inngest'
 import { newsletterAgent, clientReportAgent, repurposeAgent, captionAgent, trendScoutAgent, inboxAgent } from '@/lib/inngest-agents'
 import { hermesFollowUpCron, hermesAutoDiscoverCron } from '@/lib/inngest-hermes'
@@ -65,6 +66,7 @@ export const { GET, POST, PUT } = serve({
     comebackEmails,
     irisDraftGenerator,
     adminHealthAlert,
+    checkAchievements,
     hermesFollowUpCron,
     hermesAutoDiscoverCron,
   ],

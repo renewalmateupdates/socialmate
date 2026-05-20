@@ -2577,16 +2577,22 @@ function ComposeInner() {
               <div className="bg-surface border border-theme rounded-2xl p-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
                   <div>
-                    <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Post Score</p>
+                    <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Post Score <span className="ml-1 text-[10px] bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded font-bold">Pro+</span></p>
                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">AI predicts how your post will perform before you publish</p>
                   </div>
-                  <button onClick={handleScorePost}
-                    disabled={scoring || !content.trim() || credits < SCORE_CREDIT_COST || !!rateLimitedUntil}
-                    className="flex items-center gap-2 px-4 py-2.5 min-h-[44px] bg-black text-white text-xs font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed self-start sm:self-auto">
-                    {scoring ? (
-                      <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Scoring...</>
-                    ) : `⚡ Score Post — ${SCORE_CREDIT_COST} cr`}
-                  </button>
+                  {plan === 'free' ? (
+                    <a href="/pricing" className="flex items-center gap-2 px-4 py-2.5 min-h-[44px] bg-amber-500 text-white text-xs font-bold rounded-xl hover:bg-amber-600 transition-all self-start sm:self-auto">
+                      🔒 Upgrade to Score
+                    </a>
+                  ) : (
+                    <button onClick={handleScorePost}
+                      disabled={scoring || !content.trim() || credits < SCORE_CREDIT_COST || !!rateLimitedUntil}
+                      className="flex items-center gap-2 px-4 py-2.5 min-h-[44px] bg-black text-white text-xs font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed self-start sm:self-auto">
+                      {scoring ? (
+                        <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Scoring...</>
+                      ) : `⚡ Score Post — ${SCORE_CREDIT_COST} cr`}
+                    </button>
+                  )}
                 </div>
 
                 {scoreError && (

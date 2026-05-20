@@ -173,12 +173,20 @@ export async function POST(req: NextRequest) {
     // Server-side credit check and atomic deduction
     const { data: settings, error: settingsError } = await supabase
       .from('user_settings')
-      .select('ai_credits_remaining, monthly_credits_remaining, earned_credits, paid_credits, credit_source_preference')
+      .select('ai_credits_remaining, monthly_credits_remaining, earned_credits, paid_credits, credit_source_preference, plan')
       .eq('user_id', user.id)
       .single()
 
     if (settingsError || !settings) {
       return NextResponse.json({ error: 'Could not load account settings' }, { status: 500 })
+    }
+
+    // Pro+ gate for score tool
+    const PRO_ONLY_TOOLS = new Set(['score'])
+    const userPlan = (settings.plan ?? 'free') as string
+    const normalizedPlan = userPlan.replace('_annual', '')
+    if (PRO_ONLY_TOOLS.has(tool) && normalizedPlan === 'free') {
+      return NextResponse.json({ error: 'pro_required', message: 'Post Score is a Pro+ feature. Upgrade to unlock it.' }, { status: 403 })
     }
 
     const creditPref = settings.credit_source_preference || 'monthly_first'

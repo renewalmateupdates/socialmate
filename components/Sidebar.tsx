@@ -85,6 +85,7 @@ const NAV_BASE = [
   {
     section: 'Grow',
     items: [
+      { icon: '🏆', label: 'Achievements',  href: '/achievements'        },
       { icon: '🤖', label: 'Agents',       href: '/agents'              },
       { icon: '✨', label: 'AI Features',  href: '/ai-features'         },
       { icon: '🔭', label: 'Competitors',  href: '/competitor-tracking' },
