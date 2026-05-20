@@ -164,7 +164,7 @@ export default function AgoraPage() {
 
   if (!user) return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-950 text-white gap-4">
-      <p className="text-xl font-bold">Sign in to join AGORA</p>
+      <p className="text-xl font-bold">Sign in to join HESTIA</p>
       <a href="/login?redirect=/community" className="px-6 py-3 bg-amber-500 text-black font-bold rounded-xl">Sign in</a>
     </div>
   )
@@ -177,7 +177,7 @@ export default function AgoraPage() {
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <span className="text-3xl">🏛️</span>
-            <h1 className="text-3xl font-extrabold tracking-tight">AGORA</h1>
+            <h1 className="text-3xl font-extrabold tracking-tight">HESTIA</h1>
             <span className="text-xs font-bold bg-amber-500/20 text-amber-400 px-2.5 py-1 rounded-full">Community</span>
           </div>
           <p className="text-gray-400 text-sm">
@@ -190,7 +190,7 @@ export default function AgoraPage() {
           <div className="bg-gray-900 border border-amber-500/30 rounded-2xl p-8 text-center mb-8">
             <p className="text-2xl mb-3">🔌</p>
             <p className="font-extrabold text-lg mb-2">Connect a platform to post</p>
-            <p className="text-gray-400 text-sm mb-5">Link at least one social account to join the conversation. This keeps AGORA real.</p>
+            <p className="text-gray-400 text-sm mb-5">Link at least one social account to join the conversation. This keeps HESTIA real.</p>
             <a href="/accounts" className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-black font-bold rounded-xl hover:bg-amber-400 transition-all text-sm">
               Connect an account →
             </a>
@@ -254,7 +254,7 @@ export default function AgoraPage() {
         {filteredPosts.length === 0 ? (
           <div className="text-center py-16 text-gray-600">
             <p className="text-4xl mb-3">🏛️</p>
-            <p className="font-bold">No posts yet in {category === 'All' ? 'AGORA' : category}</p>
+            <p className="font-bold">No posts yet in {category === 'All' ? 'HESTIA' : category}</p>
             <p className="text-sm mt-1">Be the first to post.</p>
           </div>
         ) : (

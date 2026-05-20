@@ -87,7 +87,7 @@ const NAV_BASE = [
     items: [
       { icon: '🏆', label: 'Achievements',  href: '/achievements'        },
       { icon: '🤖', label: 'Agents',       href: '/agents'              },
-      { icon: '🏛️', label: 'AGORA',        href: '/community'           },
+      { icon: '🔥', label: 'HESTIA',         href: '/community'           },
       { icon: '✨', label: 'AI Features',  href: '/ai-features'         },
       { icon: '🔭', label: 'Competitors',  href: '/competitor-tracking' },
       { icon: '🕳️', label: 'Content Gaps', href: '/content-gap'         },
@@ -217,7 +217,7 @@ function SidebarContent({
   }
 
   const NAV_LABEL: Record<string, string> = {
-    'AGORA':          'AGORA',
+    'HESTIA':          'HESTIA',
     'Bulk Scheduler': t('app_sidebar.nav_bulk_scheduler'),
     'Calendar':       t('app_sidebar.nav_calendar'),
     'Clips':          t('app_sidebar.nav_clips'),
