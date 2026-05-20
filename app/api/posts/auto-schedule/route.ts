@@ -36,11 +36,14 @@ function etHourToUtc(dayUtcMidnight: Date, etHour: number): Date {
  * - platforms array (to choose best hour)
  * - target day (Date at UTC midnight)
  * - set of already-taken ISO timestamps (to avoid collisions, 30-min window)
+ * - optional scheduling window [windowStart, windowEnd] in local (ET) hours
  */
 function pickSlot(
   platforms: string[],
   dayUtcMidnight: Date,
   takenSlots: Set<string>,
+  windowStart = 0,
+  windowEnd   = 23,
 ): Date | null {
   // Collect candidate hours from all selected platforms
   const candidateHoursSet = new Set<number>()
@@ -50,6 +53,13 @@ function pickSlot(
   }
   // Fall back to defaults if nothing matched
   if (candidateHoursSet.size === 0) DEFAULT_HOURS.forEach(h => candidateHoursSet.add(h))
+
+  // Filter to user's scheduling window
+  for (const h of Array.from(candidateHoursSet)) {
+    if (h < windowStart || h > windowEnd) candidateHoursSet.delete(h)
+  }
+  // If all hours were filtered out, fall back to window start
+  if (candidateHoursSet.size === 0) candidateHoursSet.add(windowStart)
 
   // Sort candidates ascending
   const candidates = Array.from(candidateHoursSet).sort((a, b) => a - b)
@@ -99,6 +109,21 @@ export async function POST(request: NextRequest) {
   if (plan === 'free') {
     return NextResponse.json({ error: 'upgrade_required', plan: 'free' }, { status: 403 })
   }
+
+  // Load user's scheduling window
+  const { data: schedSettings } = await adminDb
+    .from('user_settings')
+    .select('scheduling_window_start, scheduling_window_end')
+    .eq('user_id', user.id)
+    .single()
+
+  const parseHour = (t: string | null | undefined, fallback: number) => {
+    if (!t) return fallback
+    const h = parseInt(t.split(':')[0], 10)
+    return isNaN(h) ? fallback : h
+  }
+  const windowStart = parseHour(schedSettings?.scheduling_window_start, 0)
+  const windowEnd   = parseHour(schedSettings?.scheduling_window_end, 23)
 
   // Parse optional filters from body
   const body = await request.json().catch(() => ({}))
@@ -178,7 +203,7 @@ export async function POST(request: NextRequest) {
     let slot: Date | null = null
     while (!slot && attempts < weekdays.length) {
       const day = weekdays[dayIndex % weekdays.length]
-      slot = pickSlot(platforms, day, takenSlots)
+      slot = pickSlot(platforms, day, takenSlots, windowStart, windowEnd)
       dayIndex++
       attempts++
     }

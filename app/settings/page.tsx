@@ -626,6 +626,27 @@ function SettingsInner() {
                 className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${savedTab === 'Profile' ? 'bg-green-500 text-white' : 'bg-black text-white hover:opacity-80'}`}>
                 {savedTab === 'Profile' ? tSettings('app_settings.profile_tab.saved') : tSettings('app_settings.profile_tab.save_profile')}
               </button>
+
+              {/* Built with SocialMate badge */}
+              <div className="border-t border-theme pt-5 mt-2">
+                <p className="text-sm font-bold mb-1">🏷️ Built with SocialMate Badge</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mb-3">Drop this on your website, link-in-bio, or portfolio to show your creator stack.</p>
+                <div className="flex items-center gap-3 mb-3">
+                  <img src="/badge.svg" alt="Built with SocialMate" className="h-8" />
+                </div>
+                <div className="bg-gray-50 dark:bg-gray-900 rounded-xl p-3 mb-2 font-mono text-xs text-gray-600 dark:text-gray-400 select-all break-all">
+                  {`<a href="https://socialmate.studio" target="_blank"><img src="https://socialmate.studio/badge.svg" alt="Built with SocialMate" height="30" /></a>`}
+                </div>
+                <button
+                  onClick={() => {
+                    try { navigator.clipboard.writeText(`<a href="https://socialmate.studio" target="_blank"><img src="https://socialmate.studio/badge.svg" alt="Built with SocialMate" height="30" /></a>`) } catch {}
+                    setSavedTab('badge_copied')
+                    setTimeout(() => setSavedTab(null), 2000)
+                  }}
+                  className={`text-xs font-bold px-4 py-2 rounded-xl transition-all ${savedTab === 'badge_copied' ? 'bg-green-500 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
+                  {savedTab === 'badge_copied' ? '✓ Copied!' : 'Copy embed code'}
+                </button>
+              </div>
             </div>
           )}
 

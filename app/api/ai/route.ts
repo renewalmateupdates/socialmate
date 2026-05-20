@@ -6,6 +6,18 @@ import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { notifyLowCredits } from '@/lib/notify-low-credits'
 
+// Per-user rate limit: 10 requests/minute per serverless instance
+const rlMap = new Map<string, number[]>()
+function checkRateLimit(userId: string): boolean {
+  const now = Date.now()
+  const window = 60_000
+  const prev = (rlMap.get(userId) || []).filter(t => now - t < window)
+  if (prev.length >= 10) return false
+  prev.push(now)
+  rlMap.set(userId, prev)
+  return true
+}
+
 const CREDIT_COSTS: Record<string, number> = {
   caption:     5,
   hashtags:    5,
@@ -158,6 +170,10 @@ export async function POST(req: NextRequest) {
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    if (!checkRateLimit(user.id)) {
+      return NextResponse.json({ error: 'rate_limited', message: "You're going too fast — wait a moment and try again." }, { status: 429 })
+    }
 
     const { tool, content, platform } = await req.json()
 

@@ -403,6 +403,9 @@ export default function Pricing() {
           <p className="text-xs text-gray-400 dark:text-gray-500 mt-4">
             Join <span className="font-bold text-gray-600 dark:text-gray-300">{displayUserCount(userCount)} creators</span> already scheduling with SocialMate
           </p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
+            Nonprofit or student? <a href="/discount" className="text-amber-500 hover:underline font-semibold">Special discounts available →</a>
+          </p>
 
           <div className="flex items-center justify-center gap-1 mt-8 bg-gray-100 dark:bg-gray-800 rounded-2xl p-1 w-fit mx-auto">
             {(['monthly', 'annual'] as Interval[]).map(i => (
