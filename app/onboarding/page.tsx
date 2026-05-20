@@ -62,6 +62,7 @@ function OnboardingInner() {
   const [toast, setToast] = useState<{ message: string; type: 'error' | 'info' } | null>(null)
   const [quickMode, setQuickMode] = useState(false)
   const [referralCode, setReferralCode] = useState<string | null>(null)
+  const [onboardingGoal, setOnboardingGoal] = useState<string | null>(null)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const showToast = (message: string, type: 'error' | 'info' = 'error') => {
@@ -183,6 +184,7 @@ function OnboardingInner() {
       default_platforms: platforms,
       onboarding_completed: true,
       iris_opt_in: irisOptIn,
+      ...(onboardingGoal ? { onboarding_goal: onboardingGoal } : {}),
     }
 
     if (!currentSettings?.onboarding_completed) {
@@ -290,6 +292,35 @@ function OnboardingInner() {
                   className="w-full px-4 py-3 text-lg font-semibold text-center border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-2xl focus:outline-none focus:border-black transition-all"
                   autoFocus
                 />
+              </div>
+
+              {/* Goal selection */}
+              <div className="mb-5">
+                <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-2">What's your main goal?</label>
+                <div className="grid grid-cols-1 gap-2">
+                  {[
+                    { id: 'schedule',  icon: '📅', label: 'Schedule & publish content', desc: 'Plan posts across platforms in advance' },
+                    { id: 'grow',      icon: '📈', label: 'Grow my audience',           desc: 'Build reach with consistent posting + AI tools' },
+                    { id: 'clients',   icon: '👥', label: 'Manage client accounts',     desc: 'Handle multiple brands from one workspace' },
+                  ].map(g => (
+                    <button
+                      key={g.id}
+                      type="button"
+                      onClick={() => setOnboardingGoal(g.id)}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-2xl border-2 text-left transition-all ${
+                        onboardingGoal === g.id
+                          ? 'border-black dark:border-white bg-gray-50 dark:bg-gray-800'
+                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                      }`}>
+                      <span className="text-xl flex-shrink-0">{g.icon}</span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-gray-800 dark:text-gray-100 leading-tight">{g.label}</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{g.desc}</p>
+                      </div>
+                      {onboardingGoal === g.id && <span className="ml-auto text-black dark:text-white font-black flex-shrink-0">✓</span>}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900 rounded-2xl p-4 mb-4">

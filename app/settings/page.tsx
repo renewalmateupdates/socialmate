@@ -13,8 +13,8 @@ import { SUPPORTED_LOCALES } from '@/lib/i18n'
 const STRIPE_PRO_PRICE_ID    = 'price_1T9S2v7OMwDowUuULHznqUD5'
 const STRIPE_AGENCY_PRICE_ID = 'price_1TFMHp7OMwDowUuUgeLAeJNY'
 
-const ALL_TABS    = ['Profile', 'Plan', 'Referrals', 'Notifications', 'Language', 'Security', 'White Label', 'Appearance', 'Brand Voice']
-const FREE_TABS   = ['Profile', 'Plan', 'Notifications', 'Language', 'Security', 'Appearance']
+const ALL_TABS    = ['Profile', 'Plan', 'Referrals', 'Notifications', 'Scheduling', 'Language', 'Security', 'White Label', 'Appearance', 'Brand Voice']
+const FREE_TABS   = ['Profile', 'Plan', 'Notifications', 'Scheduling', 'Language', 'Security', 'Appearance']
 
 // Every 5 paying referrals = +100 bonus credits (stacking, no cap)
 const REFERRAL_TIERS = [
@@ -63,6 +63,7 @@ function SettingsInner() {
     'White Label': tSettings('app_settings_tabs.white_label'),
     'Appearance':  tSettings('app_settings_tabs.appearance'),
     'Brand Voice': tSettings('app_settings_tabs.brand_voice'),
+    'Scheduling':  '⏰ Scheduling',
   }
 
   const [userEmail, setUserEmail]       = useState('')
@@ -162,6 +163,16 @@ function SettingsInner() {
   const [defaultPlatformsSaving, setDefaultPlatformsSaving] = useState(false)
   const [defaultPlatformsSaved, setDefaultPlatformsSaved] = useState(false)
   const [sidebarStatsVisible, setSidebarStatsVisible] = useState(true)
+
+  // Scheduling window + DND
+  const [schedStart, setSchedStart]         = useState('09:00')
+  const [schedEnd, setSchedEnd]             = useState('21:00')
+  const [dndEnabled, setDndEnabled]         = useState(false)
+  const [dndStart, setDndStart]             = useState('22:00')
+  const [dndEnd, setDndEnd]                 = useState('08:00')
+  const [schedSaving, setSchedSaving]       = useState(false)
+  const [schedSaved, setSchedSaved]         = useState(false)
+
   useEffect(() => {
     try {
       const stored = localStorage.getItem('sidebar_stats_visible')
@@ -186,7 +197,7 @@ function SettingsInner() {
 
       const { data: settings } = await supabase
         .from('user_settings')
-        .select('referral_code, white_label_active, white_label_tier, white_label_status, white_label_brand_name, white_label_logo_url, white_label_custom_domain, white_label_brand_color, notification_prefs, credit_source_preference, iris_opt_in, default_platforms')
+        .select('referral_code, white_label_active, white_label_tier, white_label_status, white_label_brand_name, white_label_logo_url, white_label_custom_domain, white_label_brand_color, notification_prefs, credit_source_preference, iris_opt_in, default_platforms, scheduling_window_start, scheduling_window_end, dnd_enabled, dnd_start, dnd_end')
         .eq('user_id', user.id)
         .single()
 
@@ -204,6 +215,11 @@ function SettingsInner() {
         if (settings.credit_source_preference) {
           setCreditPref(settings.credit_source_preference as 'monthly_first' | 'bank_first')
         }
+        if (settings.scheduling_window_start) setSchedStart(settings.scheduling_window_start)
+        if (settings.scheduling_window_end)   setSchedEnd(settings.scheduling_window_end)
+        if (settings.dnd_enabled !== null && settings.dnd_enabled !== undefined) setDndEnabled(settings.dnd_enabled)
+        if (settings.dnd_start) setDndStart(settings.dnd_start)
+        if (settings.dnd_end)   setDndEnd(settings.dnd_end)
         if (settings.notification_prefs) {
           setNotifications(prev => ({
             post_published:    settings.notification_prefs.post_published    ?? prev.post_published,
@@ -303,6 +319,23 @@ function SettingsInner() {
       if (data.error === 'Unauthorized') router.push('/login?redirect=/settings?tab=Plan')
     } catch { console.error('Booster checkout failed') }
     finally { setBoosterLoading(null) }
+  }
+
+  const handleSaveScheduling = async () => {
+    setSchedSaving(true)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      await supabase.from('user_settings').update({
+        scheduling_window_start: schedStart,
+        scheduling_window_end:   schedEnd,
+        dnd_enabled:             dndEnabled,
+        dnd_start:               dndStart,
+        dnd_end:                 dndEnd,
+      }).eq('user_id', user.id)
+    }
+    setSchedSaving(false)
+    setSchedSaved(true)
+    setTimeout(() => setSchedSaved(false), 2500)
   }
 
   const referralLink = referralCode ? `${appUrl}/?ref=${referralCode}` : ''
@@ -1594,6 +1627,70 @@ function SettingsInner() {
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* ── SCHEDULING ── */}
+          {activeTab === 'Scheduling' && (
+            <div className="bg-surface border border-theme rounded-2xl p-6 space-y-6">
+              <div>
+                <h2 className="text-base font-extrabold mb-1">⏰ Scheduling Window</h2>
+                <p className="text-xs text-gray-400 dark:text-gray-500">Posts auto-scheduled via Smart Queue will only land within this window. Times are in your local timezone.</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">Start time</label>
+                  <input type="time" value={schedStart} onChange={e => setSchedStart(e.target.value)}
+                    className="w-full px-3 py-2.5 text-sm font-semibold border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-black transition-all" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">End time</label>
+                  <input type="time" value={schedEnd} onChange={e => setSchedEnd(e.target.value)}
+                    className="w-full px-3 py-2.5 text-sm font-semibold border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-black transition-all" />
+                </div>
+              </div>
+
+              <div className="border-t border-theme pt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <p className="text-sm font-bold">🔕 Do Not Disturb</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Mute all app notifications during these hours</p>
+                  </div>
+                  <button
+                    role="switch"
+                    aria-checked={dndEnabled}
+                    onClick={() => setDndEnabled(v => !v)}
+                    className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 ${dndEnabled ? 'bg-amber-500' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                    <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${dndEnabled ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                  </button>
+                </div>
+
+                {dndEnabled && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">DND start</label>
+                      <input type="time" value={dndStart} onChange={e => setDndStart(e.target.value)}
+                        className="w-full px-3 py-2.5 text-sm font-semibold border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-black transition-all" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">DND end</label>
+                      <input type="time" value={dndEnd} onChange={e => setDndEnd(e.target.value)}
+                        className="w-full px-3 py-2.5 text-sm font-semibold border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-black transition-all" />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center gap-3 pt-2">
+                <button
+                  onClick={handleSaveScheduling}
+                  disabled={schedSaving}
+                  className="px-6 py-2.5 rounded-xl text-sm font-bold bg-black dark:bg-white text-white dark:text-black hover:opacity-80 transition-all disabled:opacity-50 flex items-center gap-1.5">
+                  {schedSaving ? <><div className="w-3 h-3 border-2 border-white/30 dark:border-black/30 border-t-white dark:border-t-black rounded-full animate-spin" />Saving...</> : 'Save'}
+                </button>
+                {schedSaved && <span className="text-sm font-semibold text-green-500">Saved ✓</span>}
+              </div>
             </div>
           )}
 
