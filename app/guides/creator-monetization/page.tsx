@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import GuideEmailCapture from '@/components/GuideEmailCapture'
+import GuidePDFDownload from '@/components/GuidePDFDownload'
 
 export const metadata: Metadata = {
   title: "Creator Monetization — How to Actually Get Paid Online (Free Guide) — Gilgamesh's Guides",
@@ -673,6 +674,7 @@ export default function CreatorMonetizationGuidePage() {
         {/* Email Capture */}
         <div className="border-t border-[#1f1f1f]">
           <GuideEmailCapture />
+          <GuidePDFDownload title="Creator Monetization — How to Actually Get Paid Online" />
         </div>
 
         <footer className="border-t border-[#1f1f1f] px-6 py-8 text-center">

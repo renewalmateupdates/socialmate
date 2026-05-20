@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import GuideEmailCapture from '@/components/GuideEmailCapture'
+import GuidePDFDownload from '@/components/GuidePDFDownload'
 
 export const metadata: Metadata = {
   title: "How to Start a Business From Scratch (Free Guide) — Gilgamesh's Guides",
@@ -850,6 +851,7 @@ export default function StartingABusinessGuidePage() {
               </section>
 
               <GuideEmailCapture />
+              <GuidePDFDownload title="How to Start a Business From Scratch" />
 
               {/* Bottom navigation */}
               <div className="border-t border-[#1f1f1f] pt-12 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
