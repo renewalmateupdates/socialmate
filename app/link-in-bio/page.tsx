@@ -394,7 +394,7 @@ export default function LinkInBio() {
           {/* HEADER */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
             <div>
-              <h1 className="text-2xl font-extrabold tracking-tight">Link in Bio</h1>
+              <h1 className="text-2xl font-extrabold tracking-tight">SIGIL</h1>
               <p className="text-sm text-gray-400 dark:text-gray-500 mt-0.5">Your free bio page — no Linktree needed</p>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
@@ -886,7 +886,7 @@ export default function LinkInBio() {
                           <h2 className="text-base font-extrabold">Custom Domain</h2>
                         </div>
                         <p className="text-xs text-gray-400 mb-4 leading-relaxed">
-                          Use your own domain for your Link in Bio page — available on Pro and Agency, or unlock it free by referring paying users.
+                          Use your own domain for your SIGIL page — available on Pro and Agency, or unlock it free by referring paying users.
                         </p>
                         <div className="bg-white/10 rounded-xl p-4 mb-4">
                           <div className="flex items-center justify-between mb-2">

@@ -499,3 +499,26 @@ body {
   0%   { background-position: 200% center; }
   100% { background-position: -200% center; }
 }
+
+/* ── GUIDE PDF PRINT ─────────────────────────────────────── */
+#guide-watermark { display: none; }
+@media print {
+  nav, footer, .no-print { display: none !important; }
+  #guide-watermark {
+    display: block !important;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-35deg);
+    font-size: 72px;
+    color: rgba(0, 0, 0, 0.04);
+    font-weight: 900;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 9999;
+    text-align: center;
+    line-height: 1.2;
+  }
+  body { background: white !important; color: black !important; }
+  a { color: inherit !important; text-decoration: none !important; }
+}

@@ -63,7 +63,7 @@ const NAV_BASE = [
       { icon: '🏠', label: 'Dashboard',      href: '/dashboard'      },
       { icon: '📂', label: 'Drafts',         href: '/drafts'         },
       { icon: '#️⃣', label: 'Hashtags',       href: '/hashtags'       },
-      { icon: '🔗', label: 'Link in Bio',    href: '/link-in-bio'    },
+      { icon: '🔗', label: 'SIGIL',          href: '/link-in-bio'    },
       { icon: '✂️', label: 'Link Shortener', href: '/links'          },
       { icon: '🖼️', label: 'Media Library',  href: '/media'          },
       { icon: '⏳', label: 'Queue',          href: '/queue'          },
@@ -87,6 +87,7 @@ const NAV_BASE = [
     items: [
       { icon: '🏆', label: 'Achievements',  href: '/achievements'        },
       { icon: '🤖', label: 'Agents',       href: '/agents'              },
+      { icon: '🏛️', label: 'AGORA',        href: '/community'           },
       { icon: '✨', label: 'AI Features',  href: '/ai-features'         },
       { icon: '🔭', label: 'Competitors',  href: '/competitor-tracking' },
       { icon: '🕳️', label: 'Content Gaps', href: '/content-gap'         },
@@ -216,6 +217,7 @@ function SidebarContent({
   }
 
   const NAV_LABEL: Record<string, string> = {
+    'AGORA':          'AGORA',
     'Bulk Scheduler': t('app_sidebar.nav_bulk_scheduler'),
     'Calendar':       t('app_sidebar.nav_calendar'),
     'Clips':          t('app_sidebar.nav_clips'),
@@ -224,7 +226,7 @@ function SidebarContent({
     'Dashboard':      t('app_sidebar.nav_dashboard'),
     'Drafts':         t('app_sidebar.nav_drafts'),
     'Hashtags':       t('app_sidebar.nav_hashtags'),
-    'Link in Bio':    t('app_sidebar.nav_link_in_bio'),
+    'SIGIL':          'SIGIL',
     'Link Shortener': t('app_sidebar.nav_link_shortener'),
     'Media Library':  t('app_sidebar.nav_media_library'),
     'Queue':          t('app_sidebar.nav_queue'),
