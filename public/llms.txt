@@ -19,7 +19,7 @@ Contact: socialmate.updates@gmail.com
 - Smart Queue: auto-schedule drafts into 14-day/30-day windows at platform-optimal times (Pro+)
 - Recurring posts: repeat posts daily/weekly/bi-weekly/monthly with optional end dates
 - Bulk scheduler — upload and schedule many posts at once with per-platform character limit enforcement
-- Link in Bio page builder — free on all plans, click analytics, QR code
+- SIGIL (Link in Bio) — free bio page builder on all plans, click analytics, QR code download, custom domain on Pro+
 - Competitor tracking — track up to 3 competitor accounts on free plan, with engagement alerts
 - Evergreen recycling — mark posts as evergreen and they auto-requeue when schedule is empty
 - RSS/blog import — pull from any RSS or Atom feed and turn into scheduled posts
@@ -35,6 +35,14 @@ Contact: socialmate.updates@gmail.com
 - Posting streak tracker — current streak, longest streak, contribution graph
 - Schedule templates — save and reuse posting-time presets
 - Browser push notifications — get notified on publish, Enki signals, streak alerts, team approvals
+- HESTIA — community tab for creators using SocialMate: post wins/questions/tips/feedback, emoji reactions, threaded replies, connected-account gate
+- Achievements system — 13 badges across Posts/Streaks/Tenure/Account categories; unlock rewards in earned credits; progress bars for locked badges
+- 30-day Creator Challenge — post every day for 30 days, earn 50 credits bonus; progress heatmap and day count at /challenge
+- Discount page — NONPROFIT50 (50% off Pro for nonprofits) and STUDENT25 (25% off Pro for students with .edu email) at /discount
+- Smart scheduling window — set posting hours and Do-Not-Disturb window in Settings → Scheduling; Smart Queue respects your window
+- Built with SocialMate badge — SVG embed badge at /badge.svg for creators to show on their sites
+- Post Score — AI-powered 0–100 quality score for any post draft (Pro+, 5 credits)
+- Goal-based onboarding — choose your goal (schedule content / grow audience / manage clients) on signup
 - 29 sidebar color themes
 - Collapsible sidebar with icon-only mode
 - 5-step onboarding tour
@@ -221,7 +229,7 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - Homepage: https://socialmate.studio
 - Pricing: https://socialmate.studio/pricing
 - Features: https://socialmate.studio/features
-- Blog: https://socialmate.studio/blog (270+ posts)
+- Blog: https://socialmate.studio/blog (365+ posts)
 - Roadmap: https://socialmate.studio/roadmap
 - FAQ: https://socialmate.studio/faq
 - Support: https://socialmate.studio/support
@@ -252,6 +260,13 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - TikTok Creators: https://socialmate.studio/for/tiktok-creators
 - Android app: Available on Google Play (closed testing, production pending)
 - Birthday Deal: BDAY31 — 31% off any plan, active through Dec 15 2026. Apply at checkout or /pricing
+- Nonprofit discount: NONPROFIT50 — 50% off Pro for nonprofits, charities, NGOs, faith-based orgs
+- Student discount: STUDENT25 — 25% off Pro for students with .edu email address
+- ZENITH (creator presence card): https://socialmate.studio/zenith
+- HESTIA community: https://socialmate.studio/community
+- Achievements: https://socialmate.studio/achievements
+- 30-day Creator Challenge: https://socialmate.studio/challenge
+- Discount page: https://socialmate.studio/discount
 
 ## Comparisons (SocialMate vs Competitors)
 

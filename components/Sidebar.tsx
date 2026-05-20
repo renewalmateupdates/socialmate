@@ -86,6 +86,8 @@ const NAV_BASE = [
     section: 'Grow',
     items: [
       { icon: '🏆', label: 'Achievements',  href: '/achievements'        },
+      { icon: '🔥', label: 'Challenge',     href: '/challenge'           },
+      { icon: '✦',  label: 'ZENITH',        href: '/zenith'              },
       { icon: '🤖', label: 'Agents',       href: '/agents'              },
       { icon: '🔥', label: 'HESTIA',         href: '/community'           },
       { icon: '✨', label: 'AI Features',  href: '/ai-features'         },
@@ -217,7 +219,9 @@ function SidebarContent({
   }
 
   const NAV_LABEL: Record<string, string> = {
-    'HESTIA':          'HESTIA',
+    'HESTIA':         'HESTIA',
+    'Challenge':      'Challenge',
+    'ZENITH':         'ZENITH',
     'Bulk Scheduler': t('app_sidebar.nav_bulk_scheduler'),
     'Calendar':       t('app_sidebar.nav_calendar'),
     'Clips':          t('app_sidebar.nav_clips'),
