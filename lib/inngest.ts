@@ -1270,6 +1270,15 @@ export const onboardingSequence = inngest.createFunction(
               </a>
             </div>
 
+            <!-- IRIS Newsletter mention -->
+            <div style="background:#111111;border:1px solid #222222;border-radius:12px;padding:16px 20px;margin-bottom:28px;">
+              <p style="font-size:12px;font-weight:700;color:#71717a;text-transform:uppercase;letter-spacing:1px;margin:0 0 8px;">📨 IRIS Dispatch — our biweekly newsletter</p>
+              <p style="font-size:13px;color:#a1a1aa;line-height:1.6;margin:0 0 10px;">
+                Every two weeks I send out the IRIS Dispatch — creator tips, product updates, and what we're shipping next. You're opted in by default. Manage it anytime in settings.
+              </p>
+              <a href="${appUrl}/settings" style="font-size:13px;color:#7C3AED;font-weight:600;text-decoration:none;">Newsletter preferences →</a>
+            </div>
+
             <!-- Divider -->
             <hr style="border:none;border-top:1px solid #222222;margin:28px 0;" />
 
@@ -4798,5 +4807,270 @@ ${listing.tagline ? `<p><em>${listing.tagline}</em></p>` : ''}
     }
 
     return { generated, skipped, quarter: quarterLabel }
+  }
+)
+
+// ─── Comeback Re-engagement Emails — daily 2pm UTC ────────────────────────────
+// Sends targeted re-engagement emails to users at 7, 14, and 30 days of inactivity.
+// Uses last_sign_in_at window (1-day bucket) for natural deduplication.
+export const comebackEmails = inngest.createFunction(
+  { id: 'comeback-emails', name: 'Comeback Re-engagement Emails', retries: 1 },
+  { cron: '0 14 * * *' },
+  async ({ step }) => {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
+    const now = Date.now()
+
+    const users = await step.run('fetch-users', async () => {
+      const { data: { users: authUsers } } = await getSupabaseAdmin().auth.admin.listUsers({ perPage: 1000 })
+      return (authUsers ?? [])
+        .filter(u => u.email && u.last_sign_in_at)
+        .map(u => ({
+          email: u.email!,
+          name: (u.user_metadata?.full_name as string || u.email!.split('@')[0]),
+          daysSince: Math.round((now - new Date(u.last_sign_in_at!).getTime()) / 86_400_000),
+        }))
+    })
+
+    const day7  = users.filter(u => u.daysSince === 7)
+    const day14 = users.filter(u => u.daysSince === 14)
+    const day30 = users.filter(u => u.daysSince === 30)
+
+    const emailLogo = `<div style="margin-bottom:32px;"><span style="font-weight:900;font-size:18px;color:#ffffff;letter-spacing:-0.5px;">SocialMate</span></div>`
+
+    await step.run('send-7d-batch', async () => {
+      const resend = getResend()
+      for (const u of day7) {
+        try {
+          await resend.emails.send({
+            from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
+            to: u.email,
+            subject: `${u.name}, your content isn't going to post itself`,
+            html: `<div style="background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:580px;margin:0 auto;padding:40px 24px;color:#ffffff;">
+              ${emailLogo}
+              <h1 style="font-size:24px;font-weight:800;color:#ffffff;margin:0 0 16px;letter-spacing:-0.5px;">It's been a week.</h1>
+              <p style="font-size:15px;color:#a1a1aa;line-height:1.7;margin:0 0 16px;">
+                You signed up for SocialMate, connected your accounts, and then... life happened. We get it.
+              </p>
+              <p style="font-size:15px;color:#a1a1aa;line-height:1.7;margin:0 0 24px;">
+                Here's the thing — scheduling your content takes 5 minutes a week with SocialMate. The AI tools do most of the heavy lifting. You just show up and pick what to post.
+              </p>
+              <div style="background:#111111;border:1px solid #222222;border-radius:12px;padding:20px;margin-bottom:28px;">
+                <p style="font-size:13px;color:#71717a;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">What you left on the table</p>
+                <p style="font-size:14px;color:#d4d4d8;margin:0 0 8px;">✦ AI captions + hooks — write your post in 10 seconds</p>
+                <p style="font-size:14px;color:#d4d4d8;margin:0 0 8px;">✦ Schedule to 6 platforms at once — Bluesky, X, TikTok, Discord, Telegram, Mastodon</p>
+                <p style="font-size:14px;color:#d4d4d8;margin:0;">✦ SOMA — your AI content agent that posts for you on autopilot</p>
+              </div>
+              <a href="${appUrl}/compose" style="display:inline-block;background:#7C3AED;color:#ffffff;font-size:14px;font-weight:700;padding:14px 28px;border-radius:12px;text-decoration:none;margin-bottom:28px;">Schedule one post right now →</a>
+              <p style="font-size:13px;color:#52525b;">— Joshua, Founder of SocialMate</p>
+              <p style="font-size:11px;color:#3f3f46;margin-top:16px;">Reply "unsubscribe" to stop these check-ins.</p>
+            </div>`,
+          })
+        } catch { /* non-fatal */ }
+      }
+    })
+
+    await step.run('send-14d-batch', async () => {
+      const resend = getResend()
+      for (const u of day14) {
+        try {
+          await resend.emails.send({
+            from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
+            to: u.email,
+            subject: 'Still here if you need us',
+            html: `<div style="background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:580px;margin:0 auto;padding:40px 24px;color:#ffffff;">
+              ${emailLogo}
+              <h1 style="font-size:24px;font-weight:800;color:#ffffff;margin:0 0 16px;letter-spacing:-0.5px;">Two weeks. We're still here.</h1>
+              <p style="font-size:15px;color:#a1a1aa;line-height:1.7;margin:0 0 16px;">
+                You haven't been back in two weeks. That's okay. Life is busy and you're probably building something worth talking about.
+              </p>
+              <p style="font-size:15px;color:#a1a1aa;line-height:1.7;margin:0 0 24px;">
+                Here's what's new since you left — TikTok scheduling is fully live, we launched 8 AI agents that post for you, and there's a creator monetization hub where your audience can support you directly.
+              </p>
+              <div style="background:#111111;border:1px solid #222222;border-radius:12px;padding:20px;margin-bottom:28px;">
+                <p style="font-size:13px;color:#71717a;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">What's new</p>
+                <p style="font-size:14px;color:#d4d4d8;margin:0 0 8px;">🎵 TikTok scheduling is live — schedule directly to TikTok</p>
+                <p style="font-size:14px;color:#d4d4d8;margin:0 0 8px;">🤖 8 AI agents — newsletter, repurpose, inbox, trend scout, and more</p>
+                <p style="font-size:14px;color:#d4d4d8;margin:0;">💸 Creator Monetization Hub — tip jar + fan subscriptions, 0% platform cut</p>
+              </div>
+              <a href="${appUrl}/dashboard" style="display:inline-block;background:#7C3AED;color:#ffffff;font-size:14px;font-weight:700;padding:14px 28px;border-radius:12px;text-decoration:none;margin-bottom:28px;">Come back and take a look →</a>
+              <p style="font-size:13px;color:#52525b;">— Joshua, Founder of SocialMate</p>
+              <p style="font-size:11px;color:#3f3f46;margin-top:16px;">Reply "unsubscribe" to stop these check-ins.</p>
+            </div>`,
+          })
+        } catch { /* non-fatal */ }
+      }
+    })
+
+    await step.run('send-30d-batch', async () => {
+      const resend = getResend()
+      for (const u of day30) {
+        try {
+          await resend.emails.send({
+            from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
+            to: u.email,
+            subject: 'One last note from me (for real)',
+            html: `<div style="background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:580px;margin:0 auto;padding:40px 24px;color:#ffffff;">
+              ${emailLogo}
+              <h1 style="font-size:24px;font-weight:800;color:#ffffff;margin:0 0 16px;letter-spacing:-0.5px;">One month. One last reach-out.</h1>
+              <p style="font-size:15px;color:#a1a1aa;line-height:1.7;margin:0 0 16px;">
+                It's been 30 days since you last logged in. I'm not going to keep emailing you after this — that's not how I operate.
+              </p>
+              <p style="font-size:15px;color:#a1a1aa;line-height:1.7;margin:0 0 16px;">
+                If SocialMate wasn't the right fit, that's genuinely okay. But if life just got in the way and you want to give it a real shot — I'd love to have you back. Your account is exactly as you left it.
+              </p>
+              <p style="font-size:15px;color:#a1a1aa;line-height:1.7;margin:0 0 24px;">
+                And if there's something specific that wasn't working — reply to this email and tell me. I actually read these.
+              </p>
+              <a href="${appUrl}/dashboard" style="display:inline-block;background:#7C3AED;color:#ffffff;font-size:14px;font-weight:700;padding:14px 28px;border-radius:12px;text-decoration:none;margin-bottom:28px;">Log back in →</a>
+              <p style="font-size:13px;color:#52525b;line-height:1.6;">— Joshua, Founder of SocialMate<br><span style="font-size:12px;color:#3f3f46;">After this I'll leave you alone. Promise.</span></p>
+            </div>`,
+          })
+        } catch { /* non-fatal */ }
+      }
+    })
+
+    return { day7: day7.length, day14: day14.length, day30: day30.length }
+  }
+)
+
+// ─── IRIS Weekly Draft Generator — Sunday 8pm UTC ─────────────────────────────
+// Auto-generates an IRIS Dispatch draft via Gemini and emails it to the admin
+// for review before manually sending. Admin reviews at /admin/iris.
+export const irisDraftGenerator = inngest.createFunction(
+  { id: 'iris-draft-generator', name: 'IRIS Weekly Draft Generator', retries: 1 },
+  { cron: '0 20 * * 0' },
+  async ({ step }) => {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
+    const minus7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+
+    const weekData = await step.run('gather-week-data', async () => {
+      const db = getSupabaseAdmin()
+      const [signupsRes, postsRes, tiktokRes, blogRes] = await Promise.all([
+        db.from('workspaces').select('id', { count: 'exact', head: true }).eq('is_personal', true).gte('created_at', minus7d),
+        db.from('posts').select('id', { count: 'exact', head: true }).eq('status', 'published').gte('published_at', minus7d),
+        db.from('tiktok_posts').select('id', { count: 'exact', head: true }).eq('status', 'published').gte('created_at', minus7d),
+        db.from('blog_posts').select('title').order('published_at', { ascending: false }).limit(3),
+      ])
+      return {
+        newSignups:     signupsRes.count ?? 0,
+        postsPublished: postsRes.count ?? 0,
+        tiktokPosts:    tiktokRes.count ?? 0,
+        recentBlogs:    (blogRes.data ?? []).map((p: { title: string }) => p.title),
+      }
+    })
+
+    const draft = await step.run('generate-draft', async () => {
+      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+      const result = await model.generateContent(`You are writing the IRIS Dispatch — a biweekly creator newsletter from SocialMate. Write in Joshua's authentic voice: bootstrapped solo founder, genuinely cares about creators, no corporate fluff.
+
+Platform stats this week:
+- New signups: ${weekData.newSignups}
+- Posts published by users: ${weekData.postsPublished}
+- TikTok posts: ${weekData.tiktokPosts}
+- Recent blog posts: ${weekData.recentBlogs.join(', ')}
+
+Write a complete newsletter draft with these sections:
+- intro: 2-3 sentences, punchy opener that feels personal (NOT "Hey creators!" — more like a friend writing to you)
+- creator_tip: One high-value actionable tip for growing on social media
+- what_shipped: 3-4 bullet points of recent SocialMate features/improvements (draw from: SOMA, AI agents, TikTok live, Creator Monetization Hub, calendar, analytics, etc.)
+- real_numbers: 1-2 sentences about growth/usage using the stats above
+- whats_next: 2-3 sentences teasing what's coming (vague but exciting — chrome extension, loyalty badges, community features, etc.)
+- closing: 1-2 sentence personal sign-off from Joshua
+
+Return ONLY valid JSON (no markdown, no code blocks): {"intro":"...","creator_tip":"...","what_shipped":"...","real_numbers":"...","whats_next":"...","closing":"..."}`)
+
+      const text = result.response.text().trim()
+      const jsonMatch = text.match(/\{[\s\S]*\}/)
+      if (!jsonMatch) return null
+      try { return JSON.parse(jsonMatch[0]) } catch { return null }
+    })
+
+    if (!draft) return { success: false, reason: 'generation_failed' }
+
+    // Email admin the full draft for review
+    await step.run('notify-admin', async () => {
+      await getResend().emails.send({
+        from: 'SocialMate System <joshua@socialmate.studio>',
+        to: 'socialmatehq@gmail.com',
+        subject: `📨 IRIS Dispatch draft ready — ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`,
+        html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:32px 24px;background:#f9fafb;">
+          <h2 style="color:#111;margin:0 0 8px;">IRIS Dispatch — Weekly Draft Ready</h2>
+          <p style="color:#6b7280;font-size:14px;margin:0 0 24px;">Generated Sunday auto-draft. Review, edit, and send at <a href="${appUrl}/admin/iris">/admin/iris</a>.</p>
+          <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:24px;margin-bottom:16px;">
+            <h3 style="color:#374151;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">INTRO</h3>
+            <p style="color:#111;font-size:14px;line-height:1.7;margin:0;">${draft.intro}</p>
+          </div>
+          <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:24px;margin-bottom:16px;">
+            <h3 style="color:#374151;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">CREATOR TIP</h3>
+            <p style="color:#111;font-size:14px;line-height:1.7;margin:0;">${draft.creator_tip}</p>
+          </div>
+          <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:24px;margin-bottom:16px;">
+            <h3 style="color:#374151;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">WHAT SHIPPED</h3>
+            <p style="color:#111;font-size:14px;line-height:1.7;margin:0;">${draft.what_shipped}</p>
+          </div>
+          <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:24px;margin-bottom:16px;">
+            <h3 style="color:#374151;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">REAL NUMBERS</h3>
+            <p style="color:#111;font-size:14px;line-height:1.7;margin:0;">${draft.real_numbers}</p>
+          </div>
+          <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:24px;margin-bottom:16px;">
+            <h3 style="color:#374151;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">WHAT'S NEXT</h3>
+            <p style="color:#111;font-size:14px;line-height:1.7;margin:0;">${draft.whats_next}</p>
+          </div>
+          <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:24px;">
+            <h3 style="color:#374151;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">CLOSING</h3>
+            <p style="color:#111;font-size:14px;line-height:1.7;margin:0;">${draft.closing}</p>
+          </div>
+          <p style="color:#9ca3af;font-size:12px;margin-top:24px;text-align:center;"><a href="${appUrl}/admin/iris">Open IRIS compose →</a></p>
+        </div>`,
+      })
+    })
+
+    return { success: true, sections: Object.keys(draft) }
+  }
+)
+
+// ─── Admin Health Alert — every 4 hours ───────────────────────────────────────
+// Emails admin if 3+ posts fail within a 4-hour window.
+// The 4h cron window naturally prevents repeat alerts for the same failure cluster.
+export const adminHealthAlert = inngest.createFunction(
+  { id: 'admin-health-alert', name: 'Admin Post Failure Alert', retries: 0 },
+  { cron: '0 */4 * * *' },
+  async ({ step }) => {
+    const threshold  = 3
+    const windowMs   = 4 * 60 * 60 * 1000
+    const windowStart = new Date(Date.now() - windowMs).toISOString()
+    const appUrl     = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
+
+    const { failures, partial } = await step.run('check-failures', async () => {
+      const db = getSupabaseAdmin()
+      const [failRes, partRes] = await Promise.all([
+        db.from('posts').select('id', { count: 'exact', head: true }).eq('status', 'failed').gte('updated_at', windowStart),
+        db.from('posts').select('id', { count: 'exact', head: true }).eq('status', 'partial').gte('updated_at', windowStart),
+      ])
+      return { failures: failRes.count ?? 0, partial: partRes.count ?? 0 }
+    })
+
+    if (failures < threshold) return { failures, partial, alert: false }
+
+    await step.run('send-alert', async () => {
+      await getResend().emails.send({
+        from: 'SocialMate System <joshua@socialmate.studio>',
+        to: 'socialmatehq@gmail.com',
+        subject: `⚠️ ${failures} post failures in the last 4h`,
+        html: `<div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:24px;">
+          <h2 style="color:#dc2626;">⚠️ Post Failure Alert</h2>
+          <p><strong>${failures} posts failed</strong> and <strong>${partial} partially failed</strong> in the last 4 hours.</p>
+          <p>This may indicate a platform API issue or a token expiration problem.</p>
+          <ul>
+            <li><a href="${appUrl}/admin/platform-stats">Platform Stats →</a></li>
+            <li><a href="${appUrl}/admin/overview">Admin Overview →</a></li>
+          </ul>
+          <p style="color:#6b7280;font-size:12px;">Threshold: ${threshold} failures / 4h window</p>
+        </div>`,
+      })
+    })
+
+    return { failures, partial, alert: true }
   }
 )
