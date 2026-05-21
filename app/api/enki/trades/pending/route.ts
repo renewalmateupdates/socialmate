@@ -53,11 +53,26 @@ export async function PATCH(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const body = await req.json() as { id?: string; action?: 'approve' | 'reject' }
+  const body = await req.json() as { id?: string; action?: 'approve' | 'reject' | 'cancel_all' }
   const { id, action } = body
 
-  if (!id || !action || !['approve', 'reject'].includes(action)) {
-    return NextResponse.json({ error: 'Missing or invalid id / action' }, { status: 400 })
+  if (!action || !['approve', 'reject', 'cancel_all'].includes(action)) {
+    return NextResponse.json({ error: 'Missing or invalid action' }, { status: 400 })
+  }
+
+  // Bulk-cancel all pending trades (used when switching to autonomous mode)
+  if (action === 'cancel_all') {
+    const { error } = await supabase
+      .from('enki_trades')
+      .update({ status: 'cancelled', reason: 'cleared on switch to autonomous mode' })
+      .eq('user_id', user.id)
+      .eq('status', 'pending_approval')
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ success: true })
+  }
+
+  if (!id) {
+    return NextResponse.json({ error: 'Missing id' }, { status: 400 })
   }
 
   const newStatus = action === 'approve' ? 'filled' : 'cancelled'

@@ -370,6 +370,16 @@ export default function DashboardClient() {
       const json = await res.json()
       if (json.success) {
         setProfile(prev => prev ? { ...prev, guardian_mode: nextMode } : prev)
+        // Switching to autonomous: cancel all stale pending trades so the queue
+        // doesn't sit full of signals that were queued under approval mode.
+        if (nextMode === 'autonomous') {
+          await fetch('/api/enki/trades/pending', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'cancel_all' }),
+          })
+          setPendingTrades([])
+        }
       }
     } catch (e) {
       console.error('Mode toggle error:', e)
@@ -765,8 +775,8 @@ export default function DashboardClient() {
           </div>
         )}
 
-        {/* ── Pending approvals amber banner ── */}
-        {pendingTrades.length > 0 && (
+        {/* ── Pending approvals amber banner (approval mode only) ── */}
+        {profile?.guardian_mode === 'approval' && pendingTrades.length > 0 && (
           <div className="flex items-center justify-between bg-amber-50 dark:bg-amber-950/20 border border-amber-300 dark:border-amber-700 rounded-2xl px-5 py-3.5 mb-6 gap-3">
             <div className="flex items-center gap-2.5">
               <span className="text-amber-500 text-base leading-none">⚡</span>
