@@ -111,6 +111,7 @@ const NAV_BASE = [
       { icon: '📋', label: 'Activity',     href: '/activity'              },
       { icon: '✅', label: 'Approvals',    href: '/approvals'             },
       { icon: '📍', label: 'Destinations', href: '/accounts/destinations' },
+      { icon: '💬', label: 'Community',     href: 'https://discord.gg/2se6FGrbRU', newTab: true },
       { icon: '🎮', label: 'Discord Hub',  href: '/discord'               },
       { icon: '⚗️', label: 'Enki',         href: '/enki/dashboard'        },
       { icon: '♻️', label: 'Evergreen',    href: '/evergreen'             },

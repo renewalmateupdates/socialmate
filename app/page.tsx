@@ -797,6 +797,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
                 {[['Our Story','/story'],['Blog','/blog'],['Merch','/merch'],['Affiliates','/affiliates'],['Referral','/referral']].map(([label,href])=>(
                   <li key={href}><Link href={href} className="text-sm text-gray-400 hover:text-white transition-colors">{label}</Link></li>
                 ))}
+                <li><a href="https://discord.gg/2se6FGrbRU" target="_blank" rel="noopener noreferrer" className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors">💬 Discord Community</a></li>
               </ul>
             </div>
             <div>
