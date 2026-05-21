@@ -3,6 +3,16 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 const MAX_BLUESKY_LENGTH = 300
 
+function countGraphemes(str: string): number {
+  return [...new Intl.Segmenter().segment(str)].length
+}
+
+function truncateToGraphemes(str: string, max: number): string {
+  const segs = [...new Intl.Segmenter().segment(str)]
+  if (segs.length <= max) return str
+  return segs.slice(0, max - 1).map(s => s.segment).join('') + '…'
+}
+
 export async function publishToBluesky(
   userId:     string,
   content:    string,
@@ -38,9 +48,9 @@ export async function publishToBluesky(
     throw new Error('Bluesky session expired. Please reconnect your account in Accounts → Bluesky.')
   }
 
-  // Enforce character limit
-  if (content.length > MAX_BLUESKY_LENGTH) {
-    throw new Error(`Post exceeds Bluesky's ${MAX_BLUESKY_LENGTH} character limit (${content.length} chars). Please shorten your post.`)
+  // Truncate to Bluesky's 300-grapheme limit (not UTF-16 code units — emojis are 1 grapheme but 2 code units)
+  if (countGraphemes(content) > MAX_BLUESKY_LENGTH) {
+    content = truncateToGraphemes(content, MAX_BLUESKY_LENGTH)
   }
 
   // Refresh session to get a fresh access token
