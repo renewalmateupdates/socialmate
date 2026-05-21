@@ -7,7 +7,7 @@ import ClipsPageClient from './ClipsPageClient'
 
 export const metadata: Metadata = {
   title: 'Clips Studio — Schedule Twitch & YouTube Clips',
-  description: 'Browse your Twitch clips or YouTube videos and schedule them to 6 social platforms in one click. No extra tabs, no copy-pasting. Free on all SocialMate plans.',
+  description: 'Browse your Twitch clips or YouTube videos and schedule them to 7 social platforms in one click. No extra tabs, no copy-pasting. Free on all SocialMate plans.',
   openGraph: {
     title: 'SocialMate Clips Studio — Schedule Twitch & YouTube Content',
     description: 'Browse your Twitch clips or YouTube videos and schedule them to Bluesky, Discord, Telegram, Mastodon, X/Twitter, and TikTok in one click.',
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'SocialMate Clips Studio — Schedule Twitch & YouTube Content',
-    description: 'Browse clips, schedule to 6 platforms in one click. Free on all plans.',
+    description: 'Browse clips, schedule to 7 platforms in one click. Free on all plans.',
     images: ['https://socialmate.studio/og-image.png'],
   },
   alternates: { canonical: 'https://socialmate.studio/clips' },

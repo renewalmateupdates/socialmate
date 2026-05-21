@@ -354,7 +354,7 @@ function AccountsInner() {
                 {plan === 'agency' && '🏢 Agency plan — up to 10 accounts per platform, client workspaces included'}
               </p>
               <p className="text-xs text-gray-400 mt-0.5">
-                {plan === 'free'   ? 'LinkedIn, YouTube, Pinterest & Reddit are coming very soon. Upgrade to Pro for more accounts per platform.' :
+                {plan === 'free'   ? 'YouTube, Pinterest & Reddit are coming very soon. Upgrade to Pro for more accounts per platform.' :
                  plan === 'pro'    ? 'Upgrade to Agency for 10 accounts per platform and client workspaces.' :
                  "You're on the highest tier — full access across all platforms as they go live."}
               </p>
@@ -584,7 +584,7 @@ function AccountsInner() {
               <div>
                 <p className="text-sm font-bold mb-1">More platforms are on the way</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                  LinkedIn, YouTube, Pinterest, and Reddit are code-complete and awaiting platform approval — launching very soon.
+                  YouTube, Pinterest, and Reddit are code-complete and launching very soon.
                   Instagram, Facebook, and Threads are in developer review.
                   We'll notify you on your dashboard the moment each one goes live.
                 </p>
