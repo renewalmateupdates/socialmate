@@ -3,11 +3,11 @@ import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
-  title: 'SocialMate vs Everyone — 50+ Competitor Comparisons (2026)',
-  description: 'See how SocialMate compares to Hootsuite, Buffer, Later, Sprout Social, Canva, Kontentino, Gain, and 45+ more. Honest feature comparisons. Free plan, no credit card required.',
+  title: 'SocialMate vs Everyone — 52+ Competitor Comparisons (2026)',
+  description: 'See how SocialMate compares to Hootsuite, Buffer, Taplio, Shield App, Canva, Kontentino, Gain, and 48+ more. Honest feature comparisons. Free plan, no credit card required.',
   openGraph: {
     title:       'SocialMate vs Every Competitor (2026)',
-    description: 'Honest, detailed comparisons: SocialMate vs Buffer, Hootsuite, Later, Sprout Social, Canva, and 45+ more. See who wins on price, platforms, and features.',
+    description: 'Honest, detailed comparisons: SocialMate vs Buffer, Hootsuite, Taplio, Shield App, Canva, and 48+ more. See who wins on price, platforms, and features.',
     url:         'https://socialmate.studio/vs',
   },
   alternates: { canonical: 'https://socialmate.studio/vs' },
@@ -325,9 +325,27 @@ const COMPARISONS = [
     name:        'Unum',
     emoji:       '📱',
     headline:    "Unum is Instagram visual planning — no Discord, Telegram, or Bluesky",
-    angle:       "Instagram/TikTok/X visual planner at $8/month. No community platforms, no AI content system, no autonomous content. SocialMate is free and covers 6 platforms.",
+    angle:       "Instagram/TikTok/X visual planner at $8/month. No community platforms, no AI content system, no autonomous content. SocialMate is free and covers 7 platforms.",
     tag:         'Instagram-first, limited',
     tagColor:    'bg-pink-50 text-pink-600',
+  },
+  {
+    slug:        'taplio',
+    name:        'Taplio',
+    emoji:       '💼',
+    headline:    'Taplio charges $39/month for LinkedIn-only scheduling',
+    angle:       "A single-platform tool at $39/month. SocialMate schedules LinkedIn plus 6 other platforms — Bluesky, X, TikTok, Discord, Telegram, and Mastodon — starting free.",
+    tag:         'LinkedIn-only, $39/month',
+    tagColor:    'bg-blue-50 text-blue-700',
+  },
+  {
+    slug:        'shield-app',
+    name:        'Shield App',
+    emoji:       '🛡️',
+    headline:    "Shield App tracks LinkedIn analytics — but can't schedule posts",
+    angle:       "Analytics-only tool at $8+/month. You still need a separate scheduler. SocialMate does both — LinkedIn scheduling and analytics — free to start.",
+    tag:         'Analytics only, no scheduling',
+    tagColor:    'bg-indigo-50 text-indigo-600',
   },
 ]
 
@@ -335,7 +353,7 @@ const SOCIALMATE_WINS = [
   { icon: '✅', text: 'Genuinely free forever — no credit card, no trial' },
   { icon: '📦', text: 'Bulk scheduler included on the free plan' },
   { icon: '🌐', text: 'Discord + Telegram — platforms 99% of competitors skip entirely' },
-  { icon: '🦋', text: 'Bluesky, Mastodon, TikTok — 6 live platforms total' },
+  { icon: '🦋', text: 'Bluesky, Mastodon, TikTok, LinkedIn — 7 live platforms total' },
   { icon: '💰', text: 'Flat pricing — Pro $5/mo, Agency $20/mo. No per-brand fees' },
   { icon: '🤖', text: '20+ AI tools built in — no add-ons, no extra cost' },
   { icon: '🧠', text: 'SOMA: autonomous AI content system learns your brand voice' },
@@ -376,7 +394,7 @@ export default function VsIndex() {
             Honest, detailed comparisons. No fluff. We break down pricing, free plans, feature limits,
             and who each tool is actually built for — so you can pick the right one.
           </p>
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">Updated May 2026 · Includes Canva, Kontentino, Gain, Plann, Social Champ, Ripl, Preview App, and Unum</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">Updated May 2026 · Now includes Taplio, Shield App, and all 50+ comparisons</p>
         </div>
 
         {/* WHY SOCIALMATE WINS */}
