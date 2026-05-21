@@ -18,11 +18,12 @@ const LANGUAGES = [
 ]
 
 const AUDIENCES = [
-  { label: '🎮 Streamers',        href: '/for/streamers'       },
-  { label: '🏢 Agencies',         href: '/for/agencies'        },
-  { label: '🏪 Small Business',   href: '/for/small-business'  },
-  { label: '🎵 TikTok Creators',  href: '/for/tiktok-creators' },
-  { label: '🎬 Video Creators',   href: '/for/video-creators'  },
+  { label: '🎮 Streamers',           href: '/for/streamers'          },
+  { label: '🏢 Agencies',            href: '/for/agencies'           },
+  { label: '🏪 Small Business',      href: '/for/small-business'     },
+  { label: '🎵 TikTok Creators',     href: '/for/tiktok-creators'    },
+  { label: '🎬 Video Creators',      href: '/for/video-creators'     },
+  { label: '💼 LinkedIn Creators',   href: '/for/linkedin-creators'  },
 ]
 
 const RESOURCES = [

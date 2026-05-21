@@ -27,6 +27,7 @@ const LIVE_PLATFORMS = [
   { name: 'Discord',   icon: '💬', note: 'Live' },
   { name: 'Telegram',  icon: '✈️', note: 'Live' },
   { name: 'TikTok',    icon: '🎵', note: 'Live' },
+  { name: 'LinkedIn',  icon: '💼', note: 'Live' },
 ]
 
 const COMING_PLATFORMS = [
@@ -174,7 +175,7 @@ const FAQ = [
   },
   {
     q: 'What platforms can I schedule to right now?',
-    a: 'Bluesky, X/Twitter, Mastodon, Discord, and Telegram are live today. LinkedIn, TikTok, Kick, Instagram, Reddit, and more are on the active roadmap.',
+    a: 'Bluesky, X/Twitter, Mastodon, Discord, Telegram, TikTok, and LinkedIn are live today. Kick, Instagram, Reddit, and more are on the active roadmap.',
   },
   {
     q: 'Do you have a clip editor?',
