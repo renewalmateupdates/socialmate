@@ -112,7 +112,7 @@ These have burned us before — always apply:
 
 ---
 
-## What's Been Built (as of April 26, 2026 — end of day)
+## What's Been Built (as of May 21, 2026)
 
 **Core:**
 - Post scheduling (Now + future via Inngest), drafts, queue, calendar, bulk scheduling
@@ -585,6 +585,11 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **LinkedIn origin story saved** — Real founding story documented: RenewalMate marketing struggle → ProductHunt Claude Code crossover → built SocialMate with Claude. Use for all marketing copy.
 - **LinkedIn post style documented** — Memory saved: body + hashtags + quote, first comment has socialmate link. Always output both blocks.
 
+**May 21, 2026 — Bluesky Bug Investigation:**
+- **Bluesky posting failures root-caused** — Two consecutive days of Bluesky failures diagnosed. Two bugs found:
+  1. **Refresh token expiry** — Bluesky AT Protocol sessions expire after extended periods (or when logged in from another client). When `refreshSession` returns 401, code throws immediately and post fails. Fix: go to `/accounts` → disconnect Bluesky → reconnect with app password → hit Retry on failed calendar posts.
+  2. **Character limit check bug (code fix pending)** — `lib/publish/bluesky.ts` uses `content.length` (UTF-16 code units) to enforce the 300-char limit, but Bluesky's actual limit is 300 *graphemes*. Every emoji is 2 UTF-16 code units but 1 grapheme. Posts with emojis that Bluesky would accept are being thrown out by our pre-flight check. Twitter's code truncates gracefully; Bluesky's code throws an error. Fix: use `Intl.Segmenter` for grapheme counting and truncate to 300 graphemes (+ "…") instead of throwing.
+
 ---
 
 ## Pending / In Progress
@@ -595,7 +600,9 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 - **Instagram / Facebook** — Both require Meta App Review (same process, can be one app). Harder than LinkedIn — Meta review is strict. Business account required, users need Business/Creator Instagram accounts. **Hard — plan for 4–8 week review timeline.** Not worth starting until LinkedIn is live.
 
-- **SOMA content run** — Submit updated CLAUDE.md (May 17) to SOMA project. Priority for content generation.
+- **SOMA content run** — Submit updated CLAUDE.md (May 21) to SOMA project. Priority for content generation.
+
+- **Bluesky character limit fix** — `lib/publish/bluesky.ts` checks `content.length` (UTF-16) instead of grapheme count. Emojis are 2 code units but 1 grapheme — posts Bluesky would accept get pre-rejected. Fix: use `Intl.Segmenter`, truncate gracefully like Twitter does instead of throwing. Also reconnect Bluesky at /accounts if refresh token expired.
 
 - **Cofounder search** — Actively recruiting marketing cofounder via Reddit/LinkedIn. ~10% sweat equity over 24-month vest, 2-week trial, real contract.
 
