@@ -427,7 +427,7 @@ export default function Features() {
             <div>
               <h3 className="text-sm font-extrabold mb-1 text-gray-900 dark:text-gray-100">Platform support — 16 total</h3>
               <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-3">
-                6 platforms are live right now. LinkedIn, YouTube, Pinterest, and Reddit are coming very soon — code complete, awaiting platform approval. 6 more are on the roadmap.
+                7 platforms are live right now. YouTube, Pinterest, and Reddit are coming very soon. 6 more are on the roadmap.
               </p>
               <div className="flex flex-wrap gap-2">
                 {[
@@ -436,7 +436,7 @@ export default function Features() {
                   { name: 'Telegram',    icon: '✈️', status: 'live'    },
                   { name: 'Mastodon',    icon: '🐘', status: 'live'    },
                   { name: 'X / Twitter', icon: '🐦', status: 'live'    },
-                  { name: 'LinkedIn',  icon: '💼', status: 'soon'    },
+                  { name: 'LinkedIn',  icon: '💼', status: 'live'    },
                   { name: 'YouTube',   icon: '▶️', status: 'soon'    },
                   { name: 'Pinterest', icon: '📌', status: 'soon'    },
                   { name: 'Reddit',    icon: '🤖', status: 'soon'    },

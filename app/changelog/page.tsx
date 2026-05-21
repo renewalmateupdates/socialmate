@@ -21,6 +21,17 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'May 21, 2026',
+    version: 'LinkedIn Now Live — 7 Platforms',
+    changes: [
+      { type: 'New',      text: 'LinkedIn OAuth integration live. Connect your personal LinkedIn profile at /accounts and schedule posts directly from /compose.' },
+      { type: 'New',      text: 'Platform count updated to 7. LinkedIn joins Discord, Bluesky, Telegram, Mastodon, X/Twitter, and TikTok as a fully live platform.' },
+      { type: 'Improved', text: 'Bluesky character limit now counts graphemes (not UTF-16 code units), so posts with emojis no longer get incorrectly rejected before reaching Bluesky.' },
+      { type: 'Fixed',    text: 'Enki: pending trades are now bulk-cancelled when switching to autonomous mode. The pending approvals banner is hidden in autonomous mode.' },
+      { type: 'New',      text: 'SocialMate Discord community server launched. Join at discord.gg/2se6FGrbRU — linked in the sidebar under Community.' },
+    ],
+  },
+  {
     date: 'May 20, 2026',
     version: 'HESTIA, SIGIL, Guides PDF, Achievements, Scheduling Windows + More',
     changes: [
