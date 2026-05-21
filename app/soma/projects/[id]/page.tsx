@@ -42,58 +42,49 @@ const MODE_COLORS = {
 }
 
 const LOADING_QUOTES = [
-  // Hustle / Motivation
-  "You do not rise to the level of your goals. You fall to the level of your systems.",
-  "Do the work. The world doesn't owe you attention — you earn it.",
-  "Muhammad Ali didn't become the greatest by resting. He became great by showing up every single day.",
-  "The deli counter is not your ceiling. It's your origin story.",
-  "Broke doesn't mean broken. Bootstrap means you control the outcome.",
-  "Ship it. Fix it. Ship it again.",
-  "Every post is a rep. Keep showing up.",
-  "You're not waiting for the right moment. You're building it.",
-  "Marcus Aurelius said it: waste no more time arguing what a good person should be — be one. Build the thing.",
-  "The grind is the product. Everything else is the reward.",
-  "Bootstrapped means no permission needed. That's a superpower.",
-  "Naval: 'Escape competition through authenticity.' You're already one-of-one.",
-  "J. Cole dropped an album with no features. You can build a product with no funding.",
-  "The algorithm rewards consistency. Be consistent.",
-  "Nobody gives a damn about your potential. Ship the proof.",
-  "Hard times create strong builders. Strong builders create better tools.",
-  "Kanye filed for bankruptcy before Yeezy. Act accordingly.",
-  "Every epic started as a blank page. You're writing yours.",
-  "Build in public. The community doesn't just watch — it cheers.",
-  "One day at the deli. One night in the code. That's the formula.",
-  // SOMA tips
-  "SOMA gets smarter the more you use it — complete your Voice DNA for better results.",
-  "Tip: campaign mode lets you focus SOMA on a specific theme or holiday push.",
-  "Your Voice DNA is live — SOMA is generating content that actually sounds like you.",
-  "Safe mode = full control. Autopilot = time back in your day.",
-  "SOMA memory means no repeated angles. Every week is fresh.",
-  "The diff engine is reading what changed — the more specific your doc, the sharper the posts.",
-  "Tip: use the campaign theme field for launches, events, or seasonal pushes.",
-  "Pausing a project doesn't lose your settings — resume anytime.",
-  "Voice DNA Advanced tier means SOMA knows your slang, your references, your vibe.",
-  "Your master doc is SOMA's brain. The more detail you give it, the better it performs.",
-  "SOMA generates platform-native posts — Twitter gets hooks, LinkedIn gets depth, Bluesky gets authenticity.",
-  "Tip: run a campaign theme during a product launch to flood your feed with relevant content.",
-  "SOMA tracks what it's already covered. It won't repeat the same angles twice.",
-  "Every run gets smarter. Feedback you give SOMA shapes every future generation.",
-  // Building-in-public
-  "Build the door. Then hold it open for everyone behind you.",
-  "Your story — deli job, nights coding, no VC — is the content. Let SOMA tell it.",
-  "The people who ship consistently win. Not the people with the best ideas.",
-  "Imposter syndrome is proof you care. Ship anyway.",
-  "The smallest consistent action beats the biggest one-time effort.",
-  "Failure is research. Bugs are data. Keep iterating.",
-  "Your first version doesn't have to be perfect. It has to exist.",
-  "Power to the people. Build the door.",
-  "Progress is not linear. Ship anyway.",
-  "One year from now you'll wish you started today — so today you did.",
-  "The platform that charges $99 built what you're replacing. Remember that.",
-  "Creator OS. The home base. The foundation. You're building it.",
-  "You don't need a team. You need a deadline and the will to meet it.",
-  "Every creator deserves the tools the big players have. That's why this exists.",
-  "One more rep. One more post. One more day.",
+  // Marcus Aurelius
+  '"Waste no more time arguing what a good person should be. Be one." — Marcus Aurelius',
+  '"You have power over your mind, not outside events. Realize this, and you will find strength." — Marcus Aurelius',
+  '"The impediment to action advances action. What stands in the way becomes the way." — Marcus Aurelius',
+  '"Do not indulge in dreams of what you do not have, but count the blessings you actually possess." — Marcus Aurelius',
+  '"It is not death that a man should fear, but he should fear never beginning to live." — Marcus Aurelius',
+  // Seneca
+  '"Luck is what happens when preparation meets opportunity." — Seneca',
+  '"It is not that I am brave, but that I choose which fears to obey." — Seneca',
+  '"Begin at once to live, and count each separate day as a separate life." — Seneca',
+  '"The whole future lies in uncertainty: live immediately." — Seneca',
+  '"No man was ever wise by chance." — Seneca',
+  // Epictetus
+  '"Make the best use of what is in your power, and take the rest as it happens." — Epictetus',
+  '"He is a wise man who does not grieve for the things which he has not, but rejoices for those which he has." — Epictetus',
+  '"First say to yourself what you would be; and then do what you have to do." — Epictetus',
+  // Heraclitus
+  '"No man ever steps in the same river twice, for it is not the same river and he is not the same man." — Heraclitus',
+  '"The soul is dyed the color of its thoughts." — Heraclitus',
+  '"Big results require big ambitions." — Heraclitus',
+  // Greek mythology / heroes
+  '"Even the gods cannot undo what has been done — only shape what comes next." — Greek proverb',
+  '"Prometheus did not steal fire to keep it. He stole it to give it away." — Greek myth',
+  '"Odysseus did not win by strength alone. He won because he refused to stop." — Homer, The Odyssey',
+  // Lao Tzu / Eastern wisdom
+  '"A journey of a thousand miles begins with a single step." — Lao Tzu',
+  '"To the mind that is still, the whole universe surrenders." — Lao Tzu',
+  '"He who conquers others is strong; he who conquers himself is mighty." — Lao Tzu',
+  '"When I let go of what I am, I become what I might be." — Lao Tzu',
+  // Sun Tzu
+  '"In the midst of chaos, there is also opportunity." — Sun Tzu',
+  '"Victorious warriors win first and then go to war. Defeated warriors go to war first and then seek to win." — Sun Tzu',
+  '"The supreme art of war is to subdue the enemy without fighting." — Sun Tzu',
+  // Aristotle / Plato
+  '"We are what we repeatedly do. Excellence, then, is not an act, but a habit." — Aristotle',
+  '"The roots of education are bitter, but the fruit is sweet." — Aristotle',
+  '"The measure of a man is what he does with power." — Plato',
+  // Norse / mythic
+  '"The wolf does not concern itself with the opinions of the sheep." — Norse proverb',
+  '"Cattle die, kindred die — but the words of the worthy live forever." — Norse Eddas',
+  // Gilgamesh (fitting for the brand)
+  '"When the gods created humanity, they kept immortality for themselves. But they gave us something else — the will to build." — The Epic of Gilgamesh',
+  '"Only the gods live forever. As for us men, our days are numbered. What we do with them is the monument we leave." — The Epic of Gilgamesh',
 ]
 
 const RUN_CAPS = { safe: 4, autopilot: 8, full_send: 12 }
@@ -148,7 +139,7 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
   const [quoteIndex, setQuoteIndex] = useState(0)
   useEffect(() => {
     if (!generating) return
-    const id = setInterval(() => setQuoteIndex(i => (i + 1) % LOADING_QUOTES.length), 2500)
+    const id = setInterval(() => setQuoteIndex(i => (i + 1) % LOADING_QUOTES.length), 5000)
     return () => clearInterval(id)
   }, [generating])
 
