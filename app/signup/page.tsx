@@ -196,12 +196,26 @@ function SignupForm() {
               </p>
             </div>
 
+            {/* Discord community */}
+            <a
+              href="https://discord.gg/2se6FGrbRU"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-5 flex items-center gap-3 p-4 rounded-2xl border border-indigo-200 dark:border-indigo-800/50 hover:border-indigo-400 dark:hover:border-indigo-600 transition-all group">
+              <div className="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0 text-white text-lg">💬</div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-bold text-gray-800 dark:text-gray-200">Join the Community</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500">Connect with creators on Discord</p>
+              </div>
+              <span className="text-xs text-gray-300 dark:text-gray-600 group-hover:text-indigo-400 transition-colors font-bold flex-shrink-0">→</span>
+            </a>
+
             {/* Google Play beta */}
             <a
               href="https://play.google.com/apps/testing/studio.socialmate.app"
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-5 flex items-center gap-3 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-all group">
+              className="mt-3 flex items-center gap-3 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-all group">
               <div className="w-9 h-9 bg-black rounded-xl flex items-center justify-center flex-shrink-0">
                 <svg viewBox="0 0 24 24" className="w-5 h-5 fill-white"><path d="M3.18 23.76c.37.21.8.22 1.18.06l12.29-7.08-2.85-2.85L3.18 23.76zm-1.6-19.7A2 2 0 0 0 1 5.6v12.8c0 .56.22 1.07.58 1.44l.08.07 7.18-7.18v-.17L1.58 4.06zm18.17 6.4-2.57-1.48-3.18 3.18 3.18 3.18 2.6-1.5c.74-.43.74-1.95-.03-2.38zM4.36.18 16.65 7.26l-2.85 2.85L3.54.23A1.4 1.4 0 0 1 4.36.18z"/></svg>
               </div>
