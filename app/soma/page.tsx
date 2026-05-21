@@ -109,7 +109,7 @@ const PLATFORMS = [
   { name: 'Mastodon',     format: 'Community-native tone. ≤500 chars.',       live: true  },
   { name: 'Discord',      format: 'Server announcement style.',                live: true  },
   { name: 'Telegram',     format: 'Clean, direct copy.',                      live: true  },
-  { name: 'LinkedIn',     format: 'Professional long-form. 3-6 sentences.',   live: false },
+  { name: 'LinkedIn',     format: 'Professional long-form. 3-6 sentences.',   live: true  },
   { name: 'Instagram',    format: 'Caption + 5-8 hashtags.',                  live: false },
   { name: 'TikTok',       format: 'Short punchy caption for video.',          live: false },
 ]
@@ -129,7 +129,7 @@ const FAQS = [
   },
   {
     q: 'What does "platform-native" mean?',
-    a: 'The same core message gets reformatted per platform. Twitter gets punchy ≤280 chars. Bluesky gets conversational copy. Mastodon gets community-native tone. Discord gets announcement style. TikTok gets caption-optimized copy. For platforms coming soon (LinkedIn, Instagram), SOMA generates the content anyway — you can copy and post manually, or it auto-queues once that platform connects.',
+    a: 'The same core message gets reformatted per platform. Twitter gets punchy ≤280 chars. Bluesky gets conversational copy. Mastodon gets community-native tone. Discord gets announcement style. TikTok gets caption-optimized copy. LinkedIn gets professional long-form. For platforms not yet connected, SOMA generates the content anyway — it auto-queues the moment you connect.',
   },
   {
     q: 'Will SOMA spam my followers?',

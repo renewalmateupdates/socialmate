@@ -192,7 +192,7 @@ export default function SmallBusinessPage() {
           <span className="text-blue-400">that fits a real budget.</span>
         </h1>
         <p className="text-gray-300 max-w-xl mx-auto text-base leading-relaxed mb-6">
-          Schedule to 6 platforms, generate captions with AI, and keep a full content calendar —
+          Schedule to 7 platforms, generate captions with AI, and keep a full content calendar —
           free forever, or $5/month when you need more.
           What Hootsuite charges $99 for, we give for $5.
         </p>
@@ -303,7 +303,7 @@ export default function SmallBusinessPage() {
                   <li>✓ {tier.posts}</li>
                   <li>✓ {tier.seats}</li>
                   <li>✓ {tier.window}</li>
-                  <li>✓ All 6 live platforms</li>
+                  <li>✓ All 7 live platforms</li>
                   <li>✓ Link in Bio page</li>
                 </ul>
                 <Link href={tier.href}
