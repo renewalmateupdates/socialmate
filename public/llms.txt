@@ -1,6 +1,6 @@
 # SocialMate
 
-> Free social media scheduling and Creator OS — schedule, create, and manage content across 6 live platforms with 20+ built-in AI tools, an autonomous AI content system (SOMA), an autonomous trading bot (Enki), and 8 AI agents that run on autopilot.
+> Free social media scheduling and Creator OS — schedule, create, and manage content across 7 live platforms with 20+ built-in AI tools, an autonomous AI content system (SOMA), an autonomous trading bot (Enki), and 8 AI agents that run on autopilot.
 
 SocialMate is a web-based social media management platform built for creators, streamers, small businesses, and agencies. Free to start. No credit card required. No per-channel fees.
 
@@ -12,7 +12,7 @@ Contact: socialmate.updates@gmail.com
 
 ## What SocialMate Does
 
-- Schedule and publish posts to Bluesky, Discord, Telegram, Mastodon, X/Twitter, and TikTok (6 platforms live)
+- Schedule and publish posts to Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok, and LinkedIn (7 platforms live)
 - Compose with thread builder, per-platform preview, save-as-template, and post-as-image (PNG export)
 - Clips Studio: browse Twitch clips (OAuth) or YouTube videos (channel URL, no API key) and schedule them to all platforms in one click
 - 20+ AI-powered tools: caption generation, hashtag suggestions, post rewriter, viral hook generator, thread generator, content repurposer (6 formats), post scorer, SM-Pulse, SM-Radar, content gap detector, AI content calendar, AI image generation, brand voice injection
@@ -202,9 +202,9 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - Mastodon
 - X/Twitter (pay-per-use, $0.01/tweet, quota enforced by plan: Free 28/mo · Pro 150/mo · Agency 400/mo)
 - TikTok (Production API approved May 2026 — connect at /accounts, schedule videos from TikTok Studio at /tiktok/studio)
+- LinkedIn (OAuth live May 2026 — connect personal profile at /accounts, schedule posts from /compose)
 
 ### Coming Soon
-- LinkedIn (API application pending)
 - YouTube posting
 - Instagram
 - Facebook

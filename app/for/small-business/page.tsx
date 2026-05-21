@@ -4,7 +4,7 @@ import PublicLayout from '@/components/PublicLayout'
 
 export const metadata: Metadata = {
   title: 'Free Social Media Scheduler for Small Business — SocialMate',
-  description: 'Small business social media scheduling that actually fits your budget. Schedule posts to 6 platforms, use 12 AI tools, and grow your audience — free forever or $5/month Pro.',
+  description: 'Small business social media scheduling that actually fits your budget. Schedule posts to 7 platforms, use 12 AI tools, and grow your audience — free forever or $5/month Pro.',
   openGraph: {
     title: 'Free Social Media Scheduler for Small Business — SocialMate',
     description: 'What Buffer and Hootsuite charge $99/month for, SocialMate gives for $5 — or free. Built for small business owners who wear every hat.',
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Free Social Media Scheduler for Small Business — SocialMate',
-    description: 'Schedule 6 platforms, 12 AI tools, free forever. Built for small business.',
+    description: 'Schedule 7 platforms, 12 AI tools, free forever. Built for small business.',
     images: ['https://socialmate.studio/og-image.png'],
   },
   alternates: { canonical: 'https://socialmate.studio/for/small-business' },
@@ -34,7 +34,7 @@ const PERSONAS = [
 const PAIN_POINTS = [
   {
     before: 'Open 4 apps. Post the same thing 4 times. 45 minutes gone.',
-    after:  'Write once. Schedule to 6 platforms in 30 seconds.',
+    after:  'Write once. Schedule to 7 platforms in 30 seconds.',
     icon: '⏱️',
   },
   {
@@ -148,7 +148,7 @@ const COMPARISON = [
 const FAQ = [
   {
     q: 'Is the free plan actually useful, or is it a bait-and-switch?',
-    a: 'Genuinely useful. 50 AI credits, 100 posts/month, 6 live platforms, link in bio, post calendar, drafts, and queue. We didn\'t gut the free plan to force upgrades. You\'ll outgrow it eventually, but it\'s not a demo.',
+    a: 'Genuinely useful. 50 AI credits, 100 posts/month, 7 live platforms, link in bio, post calendar, drafts, and queue. We didn\'t gut the free plan to force upgrades. You\'ll outgrow it eventually, but it\'s not a demo.',
   },
   {
     q: 'Do I need a credit card to start?',
