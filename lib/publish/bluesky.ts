@@ -4,11 +4,11 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 const MAX_BLUESKY_LENGTH = 300
 
 function countGraphemes(str: string): number {
-  return [...new Intl.Segmenter().segment(str)].length
+  return Array.from(new Intl.Segmenter().segment(str)).length
 }
 
 function truncateToGraphemes(str: string, max: number): string {
-  const segs = [...new Intl.Segmenter().segment(str)]
+  const segs = Array.from(new Intl.Segmenter().segment(str))
   if (segs.length <= max) return str
   return segs.slice(0, max - 1).map(s => s.segment).join('') + '…'
 }
