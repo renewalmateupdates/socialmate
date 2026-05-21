@@ -57,9 +57,9 @@ These have burned us before — always apply:
 
 ## Platforms
 
-**Live now:** Bluesky, Discord, Telegram, Mastodon, X/Twitter (pay-per-use, $0.01/tweet), TikTok (Production API approved May 17, 2026)
-**Coming soon:** LinkedIn (no API acquired yet), YouTube, Pinterest, Reddit
-**Roadmap:** Instagram, Facebook, Threads, Tumblr, Pixelfed
+**Live now:** Bluesky, Discord, Telegram, Mastodon, X/Twitter (pay-per-use, $0.01/tweet), TikTok (Production API approved May 17, 2026), LinkedIn (OAuth live May 21, 2026 — personal profile, `w_member_social` scope)
+**Coming soon:** YouTube, Pinterest, Reddit
+**Roadmap:** Instagram, Facebook, Threads, Tumblr, Pixelfed, LinkedIn Company Pages
 
 ---
 
@@ -585,6 +585,20 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **LinkedIn origin story saved** — Real founding story documented: RenewalMate marketing struggle → ProductHunt Claude Code crossover → built SocialMate with Claude. Use for all marketing copy.
 - **LinkedIn post style documented** — Memory saved: body + hashtags + quote, first comment has socialmate link. Always output both blocks.
 
+**May 21, 2026 — LinkedIn Launch (PRs #394–#399):**
+- **LinkedIn OAuth live** — Full end-to-end OAuth 2.0 flow with OpenID Connect. Connect at `/accounts` → OAuth authorize → callback upserts to `connected_accounts` (platform: `'linkedin'`) → disconnect button deletes the row. Route: `/api/accounts/linkedin/connect` + `/api/linkedin/callback` + `/api/accounts/linkedin/disconnect`.
+- **LinkedIn posting live** — `/api/publish/linkedin` uses UGC Posts API (`/v2/ugcPosts`) with `w_member_social` scope. 60-day access tokens (no refresh — re-auth on expiry). Confirmed working with a live post immediately after connecting.
+- **7 platforms** — LinkedIn joins Discord, Bluesky, Telegram, Mastodon, X/Twitter, and TikTok. Platform count updated to 7 across all pages: `app/page.tsx`, `app/features/page.tsx`, `app/accounts/page.tsx`, `app/compose/page.tsx`, `components/pages/LocalizedLanding.tsx`, `app/clips/page.tsx`, `app/ai-features/page.tsx`, `app/for/small-business/page.tsx`, `app/changelog/page.tsx`, `public/llms.txt`.
+- **`/for/linkedin-creators` audience page** (PR #398) — Full SEO landing page targeting "free LinkedIn scheduler", "schedule LinkedIn posts", "LinkedIn post scheduler". Hero, pain points, 8 features, 7-platform grid (LinkedIn highlighted), comparison table vs Hootsuite/Buffer/Later/Publer, pricing, FAQ with JSON-LD. Added to PublicNav Audiences dropdown + sitemap.
+- **vs/taplio** (PR #399) — New comparison page. Taplio = $39/mo LinkedIn-only. We = free + 7 platforms.
+- **vs/shield-app** (PR #399) — New comparison page. Shield App = analytics-only, no scheduling. We = schedule + analyze in one, free.
+- **19 LinkedIn blog posts** (PR #399) — `supabase/blog_batch_linkedin.sql`. SEO content covering LinkedIn scheduling, algorithm, content strategy, cross-posting, personal branding, hooks. Run SQL in Supabase.
+- **sitemap + llms.txt updated** — 19 new LinkedIn blog slugs, vs/taplio, vs/shield-app, /for/linkedin-creators all added.
+- **LinkedIn SOMA support** — SOMA project form updated so LinkedIn shows as a live platform option (generates content for personal profile; auto-queues on connect for users who haven't connected yet).
+- **Bluesky grapheme fix** — `lib/publish/bluesky.ts` now counts graphemes via `Intl.Segmenter` (not UTF-16 code units). Posts with emojis that Bluesky accepts were being pre-rejected. Now truncates to 300 graphemes + "…" gracefully.
+- **Enki pending trades fix** — Pending trades are now bulk-cancelled when switching to autonomous mode. Pending approvals banner hidden in autonomous mode.
+- **SocialMate Discord community server** — Launched at discord.gg/2se6FGrbRU. Linked in sidebar under Community.
+
 **May 21, 2026 — Bluesky Bug Investigation:**
 - **Bluesky posting failures root-caused** — Two consecutive days of Bluesky failures diagnosed. Two bugs found:
   1. **Refresh token expiry** — Bluesky AT Protocol sessions expire after extended periods (or when logged in from another client). When `refreshSession` returns 401, code throws immediately and post fails. Fix: go to `/accounts` → disconnect Bluesky → reconnect with app password → hit Retry on failed calendar posts.
@@ -596,13 +610,11 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 - **Google Play — closed testing** — Cooking slowly. v1.0.7 (versionCode 3) uploaded, 1 tester opted in. Passive CTA on signup page. *Do not revisit until June 2026.*
 
-- **LinkedIn API** — LinkedIn Company Page started. Next step: create Developer App at developer.linkedin.com → apply for `r_organization_social` + `w_organization_social` permissions. Review typically 2–4 weeks. **Medium difficulty — mostly a waiting game once submitted.**
+- **LinkedIn Company Pages** — Personal profile OAuth is live. Company page support requires `r_organization_social` + `w_organization_social` permissions. Next step: LinkedIn Developer Portal → existing app → request org permissions. **Lower priority — personal profile covers 90% of use cases.**
 
-- **Instagram / Facebook** — Both require Meta App Review (same process, can be one app). Harder than LinkedIn — Meta review is strict. Business account required, users need Business/Creator Instagram accounts. **Hard — plan for 4–8 week review timeline.** Not worth starting until LinkedIn is live.
+- **Instagram / Facebook** — Both require Meta App Review (same process, can be one app). Harder than LinkedIn — Meta review is strict. Business account required, users need Business/Creator Instagram accounts. **Hard — plan for 4–8 week review timeline.**
 
-- **SOMA content run** — Submit updated CLAUDE.md (May 21) to SOMA project. Priority for content generation.
-
-- **Bluesky character limit fix** — `lib/publish/bluesky.ts` checks `content.length` (UTF-16) instead of grapheme count. Emojis are 2 code units but 1 grapheme — posts Bluesky would accept get pre-rejected. Fix: use `Intl.Segmenter`, truncate gracefully like Twitter does instead of throwing. Also reconnect Bluesky at /accounts if refresh token expired.
+- **SOMA content run** — Submit updated CLAUDE.md to SOMA project. Priority for content generation when ready.
 
 - **Cofounder search** — Actively recruiting marketing cofounder via Reddit/LinkedIn. ~10% sweat equity over 24-month vest, 2-week trial, real contract.
 
@@ -617,15 +629,20 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **SocialMatePR (girlfriend's video brand)** — Claude chat mentor prompt delivered May 16. First video to all platforms once profiles are ready.
 
 **Roadmap (next up):**
-- **New features** — Core platform is stable. Focus: growth, testimonials, LinkedIn API application.
-- **i18n — remaining inner pages** — Creator Hub, Bio, Settings (full), SOMA/Enki sub-pages still need `t()` wiring. Wire when those pages are touched.
-- **Product Hunt follow-up** — "We've shipped 50+ features since launch" post. Target: June 1.
-- **Gilgamesh's Guides Vol. 5+** — Creator monetization deep-dive.
-- **Discord community** — Own Discord server as tester pool + feedback loop.
+- **Growth** — 7 platforms live. Focus: getting paying users. Product Hunt follow-up ("We've shipped 50+ features since launch"). Target: June 1.
+- **Wall of Love** — Collect first real testimonials. Add to TESTIMONIALS array in `app/wall-of-love/page.tsx`.
+- **LinkedIn Company Pages** — Personal profile live. Company page = next LinkedIn upgrade when there's demand.
+- **i18n — remaining inner pages** — Settings full, Bio editor, SOMA/Enki sub-pages (truth, trades, doctrines) still need `t()` wiring. Wire when those pages are touched.
+- **Discord community** — Server is live at discord.gg/2se6FGrbRU. Build it as a tester + feedback pool.
 - **Apple App Store** — Deferred 3–6 months.
-- **LinkedIn publishing** — Blocked on API credentials. On hold.
+- **SOMA content run** — Submit updated CLAUDE.md when Joshua is ready.
 ## Confirmed Done (stop asking about these)
 
+- ✅ **LinkedIn OAuth + posting live (May 21, PRs #394–#399)** — Personal profile connect, OAuth flow, UGC Posts API publishing. Confirmed with a live post. Platform count = 7. Never say LinkedIn is coming soon or pending again.
+- ✅ **Bluesky grapheme fix (May 21)** — `Intl.Segmenter` for grapheme counting in `lib/publish/bluesky.ts`. Truncates to 300 graphemes gracefully. Never revert to `content.length`.
+- ✅ **`/for/linkedin-creators` page (May 21, PR #398)** — Full SEO audience landing page. In PublicNav Audiences dropdown. Never ask to build it again.
+- ✅ **vs/taplio + vs/shield-app (May 21, PR #399)** — Both comparison pages live. In vs/ hub. In sitemap and llms.txt. Never ask to build them again.
+- ✅ **LinkedIn blog batch — 19 posts (May 21, PR #399)** — `supabase/blog_batch_linkedin.sql`. Run in Supabase. Never ask to write these again.
 - ✅ **Calendar query fix (May 16, PR #355)** — Removed all date filters. Fetch all user posts (limit 500) with no `created_at`/`scheduled_at` range. SOMA posts may have null `created_at`; date filters silently excluded them. Never add a date filter to the calendar query again.
 - ✅ **next-intl removed (May 16, PRs #350, #352)** — `createNextIntlPlugin` incompatible with Turbopack. Removed from `next.config.ts`. `LocalizedLanding.tsx` uses direct JSON imports. `i18n/routing.ts`, `i18n/request.ts`, and all locale layout files deleted. `proxy.ts` cleaned of all next-intl imports. Build is clean. Never re-introduce `next-intl` or `createNextIntlPlugin`.
 - ✅ **Full-app i18n — all major pages complete (May 17, PRs #362–365)** — Core pages (Dashboard, Queue, Calendar, Compose, Analytics, Accounts, Inbox, Team, Drafts, Streak, Links, Activity, Media, AI Features, Agents hub, SOMA landing, Enki landing) + inner pages (SOMA dashboard, SOMA voice, Enki dashboard, Creator Hub, creator public page). **i18n build rule: any new key in `en.json` must be added to ALL 6 other locale files in the same commit — TypeScript enforces `typeof enMessages` shape parity across all locales.** Still unwired: Settings full, Bio editor, SOMA/Enki sub-pages (truth, trades, doctrines) — wire when touched.
