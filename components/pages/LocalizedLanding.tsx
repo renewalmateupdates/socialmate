@@ -33,7 +33,7 @@ const PLATFORMS = [
   { name: 'Telegram',    icon: '✈️', status: 'live'    },
   { name: 'Mastodon',    icon: '🐘', status: 'live'    },
   { name: 'X / Twitter', icon: '🐦', status: 'live'    },
-  { name: 'LinkedIn',    icon: '💼', status: 'soon'    },
+  { name: 'LinkedIn',    icon: '💼', status: 'live'    },
   { name: 'YouTube',     icon: '▶️', status: 'soon'    },
   { name: 'Pinterest',   icon: '📌', status: 'soon'    },
   { name: 'Reddit',      icon: '🤖', status: 'soon'    },

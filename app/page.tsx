@@ -13,7 +13,7 @@ const PLATFORMS = [
   { name: 'Telegram',    icon: '✈️', status: 'live'    },
   { name: 'Mastodon',    icon: '🐘', status: 'live'    },
   { name: 'X / Twitter', icon: '🐦', status: 'live'    },
-  { name: 'LinkedIn',    icon: '💼', status: 'soon'    },
+  { name: 'LinkedIn',    icon: '💼', status: 'live'    },
   { name: 'YouTube',     icon: '▶️', status: 'soon'    },
   { name: 'Pinterest',   icon: '📌', status: 'soon'    },
   { name: 'Reddit',      icon: '🤖', status: 'soon'    },
@@ -249,9 +249,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-10">
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Platform support</p>
-            <h2 className="text-3xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">6 social platforms live. Twitch &amp; YouTube clips built in.</h2>
+            <h2 className="text-3xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">7 social platforms live. Twitch &amp; YouTube clips built in.</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 max-w-lg mx-auto">
-              Bluesky, Discord, Telegram, Mastodon, X/Twitter, and TikTok live now. Twitch clips and YouTube videos schedulable directly inside SocialMate. LinkedIn, Reddit, and more on the roadmap.
+              Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok, and LinkedIn live now. Twitch clips and YouTube videos schedulable directly inside SocialMate. Reddit and more on the roadmap.
             </p>
           </div>
           <div className="space-y-6">

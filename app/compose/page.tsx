@@ -16,7 +16,7 @@ const PLATFORMS = [
   { id: 'telegram',  name: 'Telegram',  icon: '✈️', limit: 4096,  live: true  },
   { id: 'mastodon',  name: 'Mastodon',  icon: '🐘', limit: 500,   live: true  },
   { id: 'twitter',   name: 'X',         icon: '🐦', limit: 280,   live: true  },
-  { id: 'linkedin',  name: 'LinkedIn',  icon: '💼', limit: 3000,  live: false },
+  { id: 'linkedin',  name: 'LinkedIn',  icon: '💼', limit: 3000,  live: true  },
   { id: 'youtube',   name: 'YouTube',   icon: '▶️', limit: 5000,  live: false },
   { id: 'pinterest', name: 'Pinterest', icon: '📌', limit: 500,   live: false },
   { id: 'reddit',    name: 'Reddit',    icon: '🤖', limit: 40000, live: false },
