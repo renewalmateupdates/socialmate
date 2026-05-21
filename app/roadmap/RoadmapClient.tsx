@@ -13,7 +13,6 @@ interface VotableFeature {
 
 const VOTABLE_FEATURES: Omit<VotableFeature, 'votes' | 'userVoted'>[] = [
   { key: 'instagram',          title: 'Instagram Scheduling',       desc: 'Schedule posts, Reels, and Stories to Instagram.',             category: 'Platforms'    },
-  { key: 'linkedin_scheduling',title: 'LinkedIn Scheduling',        desc: 'Schedule to LinkedIn personal + company pages.',               category: 'Platforms'    },
   { key: 'chrome_extension',   title: 'Chrome Extension',          desc: 'Grab any image/video from the web and schedule it in one click.', category: 'Tools'     },
   { key: 'youtube_scheduling', title: 'YouTube Scheduling',         desc: 'Schedule and publish YouTube videos and Shorts.',              category: 'Platforms'    },
   { key: 'zapier_integration', title: 'Zapier / Make Integration',  desc: 'Connect SocialMate to 5,000+ apps.',                          category: 'Integrations' },
@@ -51,7 +50,7 @@ const ROADMAP: RoadmapItem[] = [
   // ── COMING SOON ───────────────────────────────────────────
   { title: 'Streak notifications',       desc: 'Automated streak tracking with at-risk alerts — get notified when your posting streak is about to break.',        status: 'shipped',  category: 'Analytics'     },
   { title: 'SOMA credit packs',          desc: 'Buy more SOMA credits in-app without upgrading your plan. Three pack sizes: 75cr/$4.99, 225cr/$12.99, 500cr/$24.99. Stripe products live.', status: 'shipped', category: 'AI' },
-  { title: 'LinkedIn publishing',        desc: 'Full UGC Posts API integration. Requires LinkedIn developer app approval (r/w_member_social).',                 status: 'coming-soon',  category: 'Platforms'     },
+  { title: 'LinkedIn publishing',        desc: 'Live May 21, 2026. Connect your personal LinkedIn profile at /accounts. Schedules posts via official UGC Posts API (w_member_social). Company page support on roadmap.',  status: 'shipped',      category: 'Platforms'     },
   { title: 'YouTube Community Posts',    desc: 'Post to YouTube Community tab (requires 500+ subscribers). OAuth token management complete.',                    status: 'coming-soon',  category: 'Platforms'     },
   { title: 'Pinterest publishing',       desc: 'Pin creation via Pinterest v5 API with board selection. OAuth complete.',                                        status: 'coming-soon',  category: 'Platforms'     },
   { title: 'Blog auto-generation',       desc: 'Gemini writes a blog feature post for each Studio Stax lister once past the refund window. Lister gets notified by email when it\'s live.', status: 'coming-soon', category: 'Platform' },
