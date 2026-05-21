@@ -19,7 +19,7 @@ const PLATFORM_AVERAGES = [
   { platform: 'Telegram',  icon: '✈️', status: 'live', best: 'Mon–Fri, 8am–10am & 6pm–8pm',              peak: 'Wednesday 8am'  },
   { platform: 'Mastodon',  icon: '🐘', status: 'live', best: 'Mon–Fri, 9am–11am (local timezone)',        peak: 'Tuesday 10am'   },
   // Coming soon
-  { platform: 'LinkedIn',  icon: '💼', status: 'soon', best: 'Tue–Thu, 8am–10am & 12pm–1pm',             peak: 'Tuesday 9am'    },
+  { platform: 'LinkedIn',  icon: '💼', status: 'live', best: 'Tue–Thu, 8am–10am & 12pm–1pm',             peak: 'Tuesday 9am'    },
   { platform: 'YouTube',   icon: '▶️', status: 'soon', best: 'Thu–Sat, 12pm–4pm',                        peak: 'Saturday 3pm'   },
   { platform: 'Pinterest', icon: '📌', status: 'soon', best: 'Sat & Sun, 8pm–11pm',                      peak: 'Saturday 9pm'   },
   { platform: 'Reddit',    icon: '🤖', status: 'soon', best: 'Mon–Fri, 6am–8am & 12pm–1pm (EST)',        peak: 'Monday 8am'     },

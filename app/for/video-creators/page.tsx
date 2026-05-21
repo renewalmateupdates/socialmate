@@ -4,10 +4,10 @@ import PublicLayout from '@/components/PublicLayout'
 
 export const metadata: Metadata = {
   title: 'Free Social Media Tools for Video Creators — SocialMate',
-  description: 'Schedule TikTok videos, repurpose YouTube clips, share Twitch highlights — all from one free dashboard. GIF export, script generator, and 6 live platforms.',
+  description: 'Schedule TikTok videos, repurpose YouTube clips, share Twitch highlights — all from one free dashboard. GIF export, script generator, and 7 live platforms.',
   openGraph: {
     title: 'Free Social Media Tools for Video Creators — SocialMate',
-    description: 'Schedule TikTok videos, repurpose YouTube clips, share Twitch highlights — all from one free dashboard. GIF export, AI script generator, and 6 live platforms.',
+    description: 'Schedule TikTok videos, repurpose YouTube clips, share Twitch highlights — all from one free dashboard. GIF export, AI script generator, and 7 live platforms.',
     url: 'https://socialmate.studio/for/video-creators',
     images: [{ url: 'https://socialmate.studio/og-image.png', width: 1270, height: 760, alt: 'SocialMate for Video Creators' }],
   },
@@ -27,6 +27,7 @@ const LIVE_PLATFORMS = [
   { name: 'Mastodon',   icon: '🐘', note: 'Live',        highlight: false },
   { name: 'Discord',    icon: '💬', note: 'Live',        highlight: false },
   { name: 'Telegram',   icon: '✈️', note: 'Live',        highlight: false },
+  { name: 'LinkedIn',   icon: '💼', note: 'Live',        highlight: false },
 ]
 
 const COMING_PLATFORMS = [
@@ -39,7 +40,7 @@ const PAIN_POINTS = [
   {
     icon: '🎬',
     problem: 'Managing TikTok, Twitter, and Discord separately for every video upload — three tabs, three captions, three times the effort.',
-    solution: 'One dashboard. Write once, publish to all 6 platforms in one click. TikTok + Discord + Bluesky in 30 seconds flat.',
+    solution: 'One dashboard. Write once, publish to all 7 platforms in one click. TikTok + Discord + Bluesky + LinkedIn in 30 seconds flat.',
   },
   {
     icon: '✍️',
@@ -92,7 +93,7 @@ const FEATURES = [
   },
   {
     title: 'Cross-Platform Posting',
-    desc:  'Post to all 6 live platforms simultaneously — TikTok, X/Twitter, Bluesky, Mastodon, Discord, Telegram. Per-platform previews show exactly how each post will look.',
+    desc:  'Post to all 7 live platforms simultaneously — TikTok, X/Twitter, Bluesky, Mastodon, Discord, Telegram, LinkedIn. Per-platform previews show exactly how each post will look.',
     icon:  '🚀',
     live:  true,
     badge: 'Live now',
@@ -188,7 +189,7 @@ export default function VideoCreatorsPage() {
         </h1>
         <p className="text-gray-300 max-w-xl mx-auto text-base leading-relaxed mb-8">
           Schedule TikTok videos, repurpose YouTube clips, and share Twitch highlights
-          to all 6 live platforms in one click. AI script generator, GIF export, and Clips Studio
+          to all 7 live platforms in one click. AI script generator, GIF export, and Clips Studio
           — free on every plan.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
@@ -272,7 +273,7 @@ export default function VideoCreatorsPage() {
       <section className="bg-gradient-to-b from-gray-950 to-black text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Where your videos land</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">6 live platforms. All free.</h2>
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">7 live platforms. All free.</h2>
           <p className="text-gray-400 text-sm mb-8">Schedule to these platforms right now — no paywall, no trial.</p>
 
           <div className="flex flex-wrap justify-center gap-3 mb-12">
@@ -378,7 +379,7 @@ export default function VideoCreatorsPage() {
                 <ul className="text-xs text-gray-400 space-y-2 mb-6 text-left">
                   <li>✓ {tier.tiktok}</li>
                   <li>✓ {tier.ai}</li>
-                  <li>✓ All 6 live platforms</li>
+                  <li>✓ All 7 live platforms</li>
                   <li>✓ AI Script + Caption Generator</li>
                   <li>✓ Clips Studio (Twitch + YouTube)</li>
                 </ul>

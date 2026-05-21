@@ -45,7 +45,7 @@ const FEATURES = [
   {
     icon: '📅',
     title: 'Smart Scheduling',
-    desc: 'Schedule across 6 social platforms, with Twitch and YouTube clips support built in. Bulk upload, automated queues, and platform-specific character limit enforcement included.',
+    desc: 'Schedule across 7 social platforms, with Twitch and YouTube clips support built in. Bulk upload, automated queues, and platform-specific character limit enforcement included.',
   },
   {
     icon: '🤖',
@@ -151,14 +151,14 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
       <section className="max-w-4xl mx-auto px-6 pt-24 pb-20 text-center">
         <HeroLaunchBadge />
         <div className="inline-flex items-center gap-2 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 text-xs font-bold px-4 py-2 rounded-full mb-8">
-          🌱 Free forever · No credit card required · 6 social platforms · Twitch &amp; YouTube clips · 12 AI tools
+          🌱 Free forever · No credit card required · 7 social platforms · Twitch &amp; YouTube clips · 12 AI tools
         </div>
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight text-gray-900 dark:text-gray-100">
           Social media management{' '}
           <span className="text-gray-400 dark:text-gray-500">without the $99/month price tag.</span>
         </h1>
         <p className="text-gray-500 dark:text-gray-400 text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
-          Schedule across 6 social platforms, browse and schedule Twitch clips and YouTube videos, write better content with 12 AI tools, and track what&apos;s actually working — all from one place.
+          Schedule across 7 social platforms, browse and schedule Twitch clips and YouTube videos, write better content with 12 AI tools, and track what&apos;s actually working — all from one place.
           Free to start. Pro from $5/month.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
@@ -306,7 +306,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
             </h2>
             <p className="text-gray-400 text-sm max-w-xl mx-auto leading-relaxed">
               Browse your Twitch clips or YouTube videos directly inside SocialMate and
-              schedule them to 6 platforms in one click. No downloading. No app-switching.
+              schedule them to 7 platforms in one click. No downloading. No app-switching.
               No copy-pasting URLs into five different tabs.
             </p>
           </div>
@@ -344,7 +344,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
             {[
               { step: '1', label: 'Browse your clips' },
               { step: '2', label: 'Pick one' },
-              { step: '3', label: 'Schedule to 6 platforms' },
+              { step: '3', label: 'Schedule to 7 platforms' },
             ].map((item, i) => (
               <div key={item.step} className="flex items-center gap-2 sm:gap-3">
                 <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5">

@@ -66,10 +66,10 @@ const LIVE_PLATFORMS = [
   { name: 'Mastodon',  icon: '🐘', note: 'Live', highlight: false },
   { name: 'Discord',   icon: '💬', note: 'Live', highlight: false },
   { name: 'Telegram',  icon: '✈️', note: 'Live', highlight: false },
+  { name: 'LinkedIn',  icon: '💼', note: 'Live', highlight: false },
 ]
 
 const COMING_PLATFORMS = [
-  { name: 'LinkedIn',   icon: '💼' },
   { name: 'YouTube',    icon: '▶️' },
   { name: 'Instagram',  icon: '📸' },
   { name: 'Facebook',   icon: '📘' },
@@ -84,7 +84,7 @@ const PAIN_POINTS = [
   },
   {
     before: 'Manage TikTok in one app, Bluesky in another, Discord in a third. Five tabs, all chaos.',
-    after:  'One dashboard. All 6 platforms. Schedule once, post everywhere.',
+    after:  'One dashboard. All 7 platforms. Schedule once, post everywhere.',
     icon:   '📱',
   },
   {
@@ -118,7 +118,7 @@ const FEATURES = [
   },
   {
     title: 'Cross-Platform Posting',
-    desc:  'Schedule the same video or content to all 6 platforms at once. One compose session reaches TikTok, Bluesky, X, Mastodon, Discord, and Telegram simultaneously.',
+    desc:  'Schedule the same video or content to all 7 platforms at once. One compose session reaches TikTok, Bluesky, X, Mastodon, Discord, Telegram, and LinkedIn simultaneously.',
     icon:  '🚀',
     live:  true,
     badge: 'Live now',
@@ -300,7 +300,7 @@ export default function TikTokCreatorsPage() {
       <section className="bg-[#0a0a0a] text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">All your platforms</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">6 platforms live today</h2>
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">7 platforms live today</h2>
           <p className="text-gray-400 text-sm mb-8">Schedule to all of them from one compose window — free.</p>
 
           <div className="flex flex-wrap justify-center gap-3 mb-12">
@@ -371,7 +371,7 @@ export default function TikTokCreatorsPage() {
                 <ul className="text-xs text-gray-400 space-y-2 mb-6 text-left">
                   <li>✓ {tier.tiktok}</li>
                   <li>✓ {tier.credits}</li>
-                  <li>✓ All 6 live platforms</li>
+                  <li>✓ All 7 live platforms</li>
                   <li>✓ AI caption writer</li>
                   <li>✓ TikTok Script Generator</li>
                   <li>✓ Scheduling calendar</li>
