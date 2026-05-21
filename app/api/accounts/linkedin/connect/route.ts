@@ -17,7 +17,7 @@ export async function GET() {
   const params = new URLSearchParams({
     response_type: 'code',
     client_id: process.env.LINKEDIN_CLIENT_ID!,
-    redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/accounts/linkedin/callback`,
+    redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/linkedin/callback`,
     state,
     scope: 'openid profile email w_member_social',
   })

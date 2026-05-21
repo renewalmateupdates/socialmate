@@ -37,7 +37,7 @@ const PLATFORM_META: Record<string, {
   bluesky:   { icon: '🦋', color: 'bg-sky-50 border-sky-200',       label: 'Bluesky',     status: 'live'        },
   telegram:  { icon: '✈️', color: 'bg-sky-50 border-sky-200',       label: 'Telegram',    status: 'live'        },
   mastodon:  { icon: '🐘', color: 'bg-purple-50 border-purple-200', label: 'Mastodon',    status: 'live'        },
-  linkedin:  { icon: '💼', color: 'bg-blue-50 border-blue-200',     label: 'LinkedIn',    status: 'coming_soon', statusNote: 'Code complete — awaiting approval' },
+  linkedin:  { icon: '💼', color: 'bg-blue-50 border-blue-200',     label: 'LinkedIn',    status: 'live' },
   youtube:   { icon: '▶️', color: 'bg-red-50 border-red-200',       label: 'YouTube',     status: 'coming_soon', statusNote: 'Code complete — awaiting approval' },
   pinterest: { icon: '📌', color: 'bg-red-50 border-red-200',       label: 'Pinterest',   status: 'coming_soon', statusNote: 'Code complete — awaiting approval' },
   reddit:    { icon: '🤖', color: 'bg-orange-50 border-orange-200', label: 'Reddit',      status: 'coming_soon', statusNote: 'Code complete — awaiting approval' },
