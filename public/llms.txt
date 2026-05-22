@@ -229,7 +229,7 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - Homepage: https://socialmate.studio
 - Pricing: https://socialmate.studio/pricing
 - Features: https://socialmate.studio/features
-- Blog: https://socialmate.studio/blog (420+ posts)
+- Blog: https://socialmate.studio/blog (450+ posts)
 - Roadmap: https://socialmate.studio/roadmap
 - FAQ: https://socialmate.studio/faq
 - Support: https://socialmate.studio/support
@@ -273,6 +273,8 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - HERMES (cold outreach, admin-only): https://socialmate.studio/hermes
 - IRIS Dispatch newsletter: https://socialmate.studio/admin/iris (admin compose)
 - Social media glossary: https://socialmate.studio/glossary
+- Hashtag Collections: https://socialmate.studio/hashtag-collections
+- Integrations / Webhook docs: https://socialmate.studio/integrations
 
 ## Comparisons (SocialMate vs Competitors)
 
@@ -328,3 +330,13 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - vs Unum: https://socialmate.studio/vs/unum
 - vs Taplio: https://socialmate.studio/vs/taplio
 - vs Shield App: https://socialmate.studio/vs/shield-app
+- vs TweetHunter: https://socialmate.studio/vs/tweethunter
+- vs Circleboom: https://socialmate.studio/vs/circleboom
+- vs Postly: https://socialmate.studio/vs/postly
+- vs PromoRepublic: https://socialmate.studio/vs/promo-republic
+- vs SocialOomph: https://socialmate.studio/vs/socialoomph
+- vs Tweepsmap: https://socialmate.studio/vs/tweepsmap
+- vs Audiense: https://socialmate.studio/vs/audiense
+- vs HubSpot Social: https://socialmate.studio/vs/hubspot-social
+- vs SEMrush Social: https://socialmate.studio/vs/semrush-social
+- vs Later (free plan): https://socialmate.studio/vs/later-free

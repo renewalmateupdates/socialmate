@@ -482,6 +482,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/merch`,               lastModified: now, changeFrequency: 'weekly',  priority: 0.7 },
     { url: `${base}/faq`,                 lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/integrations`,        lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/hashtag-collections`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${base}/beta`,               lastModified: now, changeFrequency: 'weekly',  priority: 0.9 },
     { url: `${base}/analytics`,           lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/calendar`,            lastModified: now, changeFrequency: 'monthly' as const, priority: 0.7 },
