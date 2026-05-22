@@ -8,7 +8,7 @@ const BLOG_INTERVAL_DAYS = 90  // First article at 3 months; repeat every 3 mont
 
 function getGemini() {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-  return genAI.getGenerativeModel({ model: 'gemini-1.5-flash' })
+  return genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
 }
 
 async function generateBlogPost(tool: {
