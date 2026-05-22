@@ -229,7 +229,7 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - Homepage: https://socialmate.studio
 - Pricing: https://socialmate.studio/pricing
 - Features: https://socialmate.studio/features
-- Blog: https://socialmate.studio/blog (365+ posts)
+- Blog: https://socialmate.studio/blog (390+ posts)
 - Roadmap: https://socialmate.studio/roadmap
 - FAQ: https://socialmate.studio/faq
 - Support: https://socialmate.studio/support
@@ -258,6 +258,7 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - Gilgamesh's Guides: https://socialmate.studio/guides
 - Creator Hub: https://socialmate.studio/monetize/hub
 - TikTok Creators: https://socialmate.studio/for/tiktok-creators
+- LinkedIn Creators: https://socialmate.studio/for/linkedin-creators
 - Android app: Available on Google Play (closed testing, production pending)
 - Birthday Deal: BDAY31 — 31% off any plan, active through Dec 15 2026. Apply at checkout or /pricing
 - Nonprofit discount: NONPROFIT50 — 50% off Pro for nonprofits, charities, NGOs, faith-based orgs
@@ -320,3 +321,5 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - vs Gain: https://socialmate.studio/vs/gain-app
 - vs Kontentino: https://socialmate.studio/vs/kontentino
 - vs Unum: https://socialmate.studio/vs/unum
+- vs Taplio: https://socialmate.studio/vs/taplio
+- vs Shield App: https://socialmate.studio/vs/shield-app

@@ -407,6 +407,26 @@ const BLOG_SLUGS = [
   'build-loyal-community-around-your-content',
   'discord-community-vs-telegram-channel-which-is-better',
   'turning-lurkers-into-community-members',
+  // LinkedIn launch batch (May 2026)
+  'free-linkedin-post-scheduler-2026',
+  'how-to-schedule-linkedin-posts-free',
+  'best-linkedin-scheduler-2026',
+  'linkedin-content-strategy-2026',
+  'linkedin-algorithm-2026',
+  'best-time-to-post-on-linkedin-2026',
+  'linkedin-for-creators-2026',
+  'schedule-linkedin-posts-free-tool',
+  'linkedin-hook-writing-guide-2026',
+  'linkedin-personal-brand-2026',
+  'linkedin-vs-twitter-creators-2026',
+  'linkedin-vs-bluesky-2026',
+  'linkedin-scheduling-best-practices-2026',
+  'linkedin-content-ideas-2026',
+  'how-to-grow-linkedin-following-2026',
+  'cross-post-linkedin-bluesky-twitter-2026',
+  'linkedin-repurpose-content-strategy',
+  'linkedin-ai-content-tools-2026',
+  'socialmate-linkedin-integration-launch',
 ]
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -456,9 +476,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/for/streamers`,        lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/for/agencies`,         lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/for/small-business`,   lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${base}/for/tiktok-creators`,  lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${base}/for/video-creators`,      lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
-    { url: `${base}/for/linkedin-creators`,   lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/for/tiktok-creators`,   lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/for/video-creators`,    lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/for/linkedin-creators`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/referral`,           lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${base}/refer`,              lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${base}/analytics/dna`,      lastModified: now, changeFrequency: 'weekly',  priority: 0.6 },
@@ -521,6 +541,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/vs/gain-app`,       lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/vs/kontentino`,     lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/vs/unum`,           lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/taplio`,         lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/shield-app`,     lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
   ]
 
   const blogPosts: MetadataRoute.Sitemap = BLOG_SLUGS.map(slug => ({
