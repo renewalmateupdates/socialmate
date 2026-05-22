@@ -1,35 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
-
-interface VotableFeature {
-  key: string
-  title: string
-  desc: string
-  category: string
-  votes: number
-  userVoted: boolean
-}
-
-const VOTABLE_FEATURES: Omit<VotableFeature, 'votes' | 'userVoted'>[] = [
-  { key: 'instagram',          title: 'Instagram Scheduling',       desc: 'Schedule posts, Reels, and Stories to Instagram.',             category: 'Platforms'    },
-  { key: 'chrome_extension',   title: 'Chrome Extension',          desc: 'Grab any image/video from the web and schedule it in one click.', category: 'Tools'     },
-  { key: 'youtube_scheduling', title: 'YouTube Scheduling',         desc: 'Schedule and publish YouTube videos and Shorts.',              category: 'Platforms'    },
-  { key: 'zapier_integration', title: 'Zapier / Make Integration',  desc: 'Connect SocialMate to 5,000+ apps.',                          category: 'Integrations' },
-  { key: 'post_score',         title: 'AI Post Score',             desc: 'Gemini rates your post 1–10 for engagement before scheduling.', category: 'AI'          },
-  { key: 'dnd_scheduling',     title: 'Custom Scheduling Windows', desc: 'Set active hours + DND window. Posts spread evenly across your time frame.', category: 'Scheduling' },
-  { key: 'loyalty_badges',     title: 'Loyalty Badges',            desc: 'Earn badges + bonus credits for consistent posting. Show off on your link in bio.', category: 'Rewards' },
-  { key: 'facebook',           title: 'Facebook Scheduling',       desc: 'Schedule to Facebook pages and groups.',                       category: 'Platforms'    },
-  { key: 'threads',            title: 'Threads Scheduling',        desc: 'Schedule posts to Threads.',                                   category: 'Platforms'    },
-  { key: 'hashtag_collections',title: 'Hashtag Collections',       desc: 'Save and reuse your go-to hashtag sets.',                     category: 'Tools'        },
-  { key: 'mobile_ios',         title: 'iOS App',                   desc: 'Native iOS App Store app.',                                    category: 'Mobile'       },
-]
-
-const CATEGORY_COLORS: Record<string, string> = {
-  Platforms: 'text-blue-400', AI: 'text-violet-400', Integrations: 'text-indigo-400',
-  Scheduling: 'text-cyan-400', Tools: 'text-orange-400', Mobile: 'text-rose-400',
-  Rewards: 'text-amber-400',
-}
+import { useState } from 'react'
 
 type RoadmapItem = {
   title:    string
@@ -63,7 +33,7 @@ const ROADMAP: RoadmapItem[] = [
   { title: 'IRIS AI auto-generate',      desc: 'Admin IRIS Dispatch compose UI has "Generate draft with AI" — Gemini 2.5-flash writes the full newsletter from Joshua\'s voice rules and recent ship context. Avoids repeating previous subjects.', status: 'shipped', category: 'Engagement' },
   { title: 'YouTube Community Posts',    desc: 'Post to YouTube Community tab (requires 500+ subscribers). OAuth token management complete.',                    status: 'coming-soon',  category: 'Platforms'     },
   { title: 'Pinterest publishing',       desc: 'Pin creation via Pinterest v5 API with board selection. OAuth complete.',                                        status: 'coming-soon',  category: 'Platforms'     },
-  { title: 'Blog auto-generation',       desc: 'Gemini writes a blog feature post for each Studio Stax lister once past the refund window. Lister gets notified by email when it\'s live.', status: 'coming-soon', category: 'Platform' },
+  { title: 'Blog auto-generation',       desc: 'Gemini writes a blog feature post for each Studio Stax lister once past the refund window. Lister gets notified by email when it\'s live.', status: 'shipped', category: 'Platform' },
   { title: 'Creator Monetization Hub',   desc: 'Tip jars, fan subscriptions, and paywalled content powered by Stripe Connect. 0% platform cut. Live at /monetize/hub (Pro+).',  status: 'shipped',  category: 'Monetization'  },
   { title: 'Full-app internationalization (i18n)', desc: 'All core + inner app pages translate via useI18n(): Dashboard, Queue, Calendar, Compose, Analytics, Accounts, Inbox, Team, Drafts, Streak, Links, Media, AI Features, Agents, SOMA, Enki, Creator Hub, and creator public page. Language switcher in sidebar + public nav. Landing page navigates to locale URL on language change. All 7 locale files (en/es/de/fr/pt/ru/zh) kept in sync.', status: 'shipped', category: 'Platform' },
   { title: 'Google Play Store app',              desc: 'Capacitor WebView wrapper for Android. Closed testing active (1/12 testers). GitHub Actions CI/CD builds signed AAB. Need 12 opted-in testers + 14 days before Production approval.', status: 'in-progress', category: 'Mobile' },
@@ -190,6 +160,8 @@ const ROADMAP: RoadmapItem[] = [
   { title: 'Full-app i18n — inner pages', desc: 'SOMA dashboard, SOMA voice, Enki dashboard, Creator Hub, and creator public page all wired with useI18n(). All 7 locale files validated in sync. i18n now complete across all major app sections.', status: 'shipped', category: 'Platform' },
   { title: 'TikTok Script Generator',     desc: 'AI tool at /ai-features/tiktok-script — enter topic, duration (15s/30s/60s), and tone. Gemini generates a hook, body bullets, and CTA. 5 credits. Backed by /api/ai/tiktok-script.', status: 'shipped', category: 'AI' },
   { title: 'GIF Export in Creator Studio', desc: 'Export any trimmed, filtered, captioned clip as an animated GIF directly from /create. gifenc-based frame-by-frame render, 10fps, capped at 5 seconds, 480px wide. CSS filters and caption overlay baked into every frame.', status: 'shipped', category: 'Media' },
+  { title: 'Hashtag Collections', desc: 'Save and reuse your go-to hashtag sets. Manage named collections at /hashtag-collections and insert any collection into Compose with one click.', status: 'shipped', category: 'Tools' },
+  { title: 'Zapier / Make Integration', desc: 'Outbound webhooks fire on post.published and post.failed events. Add webhook URLs in Settings → Integrations. HMAC-signed payloads compatible with Zapier, Make, n8n, and any custom receiver.', status: 'shipped', category: 'Integrations' },
 ]
 
 const STATUS_CONFIG = {
@@ -206,56 +178,6 @@ export default function RoadmapClient() {
   const [feedbackEmail, setFeedbackEmail] = useState('')
   const [feedbackSent, setFeedbackSent]   = useState(false)
   const [sending, setSending]             = useState(false)
-  const [votableUser, setVotableUser]     = useState<{ id: string } | null>(null)
-  const [features, setFeatures]           = useState<VotableFeature[]>(
-    VOTABLE_FEATURES.map(f => ({ ...f, votes: 0, userVoted: false }))
-  )
-  const [voting, setVoting]               = useState<string | null>(null)
-  const [votesLoaded, setVotesLoaded]     = useState(false)
-
-  useEffect(() => {
-    async function loadVotes() {
-      const { data: { user } } = await supabase.auth.getUser()
-      setVotableUser(user)
-      const { data: allVotes } = await supabase
-        .from('roadmap_votes')
-        .select('feature_key, user_id')
-      const countMap: Record<string, number> = {}
-      const votedSet = new Set<string>()
-      for (const v of allVotes ?? []) {
-        countMap[v.feature_key] = (countMap[v.feature_key] ?? 0) + 1
-        if (user && v.user_id === user.id) votedSet.add(v.feature_key)
-      }
-      setFeatures(prev =>
-        prev
-          .map(f => ({ ...f, votes: countMap[f.key] ?? 0, userVoted: votedSet.has(f.key) }))
-          .sort((a, b) => b.votes - a.votes)
-      )
-      setVotesLoaded(true)
-    }
-    loadVotes()
-  }, [])
-
-  async function handleVote(key: string, shouldVote: boolean) {
-    if (!votableUser) { window.location.href = '/login?redirect=/roadmap'; return }
-    setVoting(key)
-    try {
-      const res = await fetch('/api/roadmap/vote', {
-        method: shouldVote ? 'POST' : 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ feature_key: key }),
-      })
-      if (res.ok) {
-        setFeatures(prev =>
-          prev
-            .map(f => f.key === key ? { ...f, userVoted: shouldVote, votes: Math.max(0, f.votes + (shouldVote ? 1 : -1)) } : f)
-            .sort((a, b) => b.votes - a.votes)
-        )
-      }
-    } finally {
-      setVoting(null)
-    }
-  }
 
   async function submitRequest() {
     if (!feedbackText.trim()) return
@@ -303,53 +225,6 @@ export default function RoadmapClient() {
           <p className="text-xs text-gray-400 dark:text-gray-500 leading-relaxed">
             When we hit 500 users, SocialMate exits beta — full v1.0 release, expanded platform support, and locked-in pricing for everyone who joined early.
           </p>
-        </div>
-      </div>
-
-      {/* COMMUNITY VOTE */}
-      <div className="mb-14">
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-base font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
-            🗳️ Vote on what we build next
-          </h2>
-          {!votableUser && (
-            <a href="/login?redirect=/roadmap" className="text-xs text-pink-500 hover:text-pink-400 font-semibold">
-              Log in to vote →
-            </a>
-          )}
-        </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mb-5">
-          Top-voted features move to the front of the queue. Your vote actually counts.
-        </p>
-        <div className="grid sm:grid-cols-2 gap-3">
-          {features.map(f => (
-            <div
-              key={f.key}
-              className={`flex items-start gap-3 p-4 rounded-2xl border transition-all ${
-                f.userVoted
-                  ? 'bg-pink-50 dark:bg-pink-900/10 border-pink-200 dark:border-pink-700/40'
-                  : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600'
-              }`}>
-              <button
-                onClick={() => handleVote(f.key, !f.userVoted)}
-                disabled={voting === f.key || !votesLoaded}
-                className={`shrink-0 flex flex-col items-center gap-0.5 px-2.5 py-2 rounded-xl border text-xs font-bold transition-all min-w-[44px] disabled:opacity-50 ${
-                  f.userVoted
-                    ? 'bg-pink-500 border-pink-500 text-white'
-                    : 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-pink-300 hover:text-pink-500'
-                }`}>
-                <span className="text-base leading-none">{f.userVoted ? '▲' : '△'}</span>
-                <span>{f.votes}</span>
-              </button>
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                  <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{f.title}</p>
-                  <span className={`text-xs font-medium ${CATEGORY_COLORS[f.category] ?? 'text-gray-400'}`}>{f.category}</span>
-                </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{f.desc}</p>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
 
