@@ -29,6 +29,8 @@ export default function IrisClient({ recipientCount, dispatches, nextEdition }: 
   const [sent, setSent]               = useState<{ edition: number; count: number } | null>(null)
   const [error, setError]             = useState<string | null>(null)
   const [confirm, setConfirm]         = useState(false)
+  const [generating, setGenerating]   = useState(false)
+  const [generated, setGenerated]     = useState(false)
 
   const payload = { subject, intro, whatShipped, realNumbers, whatsNext, closing }
 
@@ -70,6 +72,32 @@ export default function IrisClient({ recipientCount, dispatches, nextEdition }: 
       }
     } catch { setError('Send request failed') }
     finally { setSending(false); setConfirm(false) }
+  }
+
+  async function handleGenerate() {
+    setError(null)
+    setGenerated(false)
+    setGenerating(true)
+    try {
+      const res = await fetch('/api/admin/iris/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prevSubjects: dispatches.map(d => d.subject) }),
+      })
+      const json = await res.json()
+      if (json.subject) {
+        setSubject(json.subject)
+        setIntro(json.intro ?? '')
+        setWhatShipped(json.whatShipped ?? '')
+        setRealNumbers(json.realNumbers ?? '')
+        setWhatsNext(json.whatsNext ?? '')
+        // leave closing as-is — it already defaults correctly
+        setGenerated(true)
+      } else {
+        setError(json.error ?? 'Generation failed')
+      }
+    } catch { setError('Generate request failed') }
+    finally { setGenerating(false) }
   }
 
   const SECTION_CLASS = 'bg-surface border border-theme rounded-2xl p-6 mb-5'
@@ -132,10 +160,33 @@ export default function IrisClient({ recipientCount, dispatches, nextEdition }: 
 
         {/* Compose form */}
         <div className={SECTION_CLASS}>
-          <div className="flex items-center gap-2 mb-5">
-            <div className="w-1 h-6 bg-amber-500 rounded-full" />
-            <h2 className="font-bold text-gray-900 dark:text-gray-100">Compose Edition #{nextEdition}</h2>
+          <div className="flex items-center justify-between gap-2 mb-5">
+            <div className="flex items-center gap-2">
+              <div className="w-1 h-6 bg-amber-500 rounded-full" />
+              <h2 className="font-bold text-gray-900 dark:text-gray-100">Compose Edition #{nextEdition}</h2>
+            </div>
+            <button
+              onClick={handleGenerate}
+              disabled={generating}
+              className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-700 disabled:opacity-50 text-white text-sm font-bold rounded-xl transition-all"
+            >
+              {generating ? (
+                <>
+                  <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                  </svg>
+                  Generating...
+                </>
+              ) : '✨ Generate draft with AI'}
+            </button>
           </div>
+
+          {generated && (
+            <div className="bg-violet-50 dark:bg-violet-950/20 border border-violet-200 dark:border-violet-800 rounded-xl px-4 py-3 mb-4 text-sm text-violet-700 dark:text-violet-300 font-medium">
+              Draft generated — review and edit before sending
+            </div>
+          )}
 
           <div className="mb-4">
             <label className={LABEL_CLASS}>Subject line</label>
