@@ -2,7 +2,7 @@
 -- Topics: LinkedIn-focused (10), TikTok-focused (10), multi-platform/general (10)
 -- May 22, 2026
 
-INSERT INTO blog_posts (slug, title, category, excerpt, content, published, created_at) VALUES
+INSERT INTO blog_posts (slug, title, category, excerpt, content, published_at, created_at) VALUES
 
 ('how-to-schedule-linkedin-posts-free',
 'How to Schedule LinkedIn Posts for Free in 2026',
