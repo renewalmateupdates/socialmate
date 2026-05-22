@@ -576,6 +576,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/vs/unum`,           lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/vs/taplio`,         lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/vs/shield-app`,     lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/tweethunter`,    lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/circleboom`,     lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/postly`,         lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/promo-republic`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/socialoomph`,    lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/tweepsmap`,      lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/audiense`,       lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/hubspot-social`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/semrush-social`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/later-free`,     lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
   ]
 
   const blogPosts: MetadataRoute.Sitemap = BLOG_SLUGS.map(slug => ({
