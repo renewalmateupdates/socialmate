@@ -21,6 +21,16 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'May 22, 2026',
+    version: 'IRIS AI Draft, Docs Rule, vs/ Expansion',
+    changes: [
+      { type: 'New',      text: 'IRIS Dispatch AI auto-generate — "Generate draft with AI" button in the /admin/iris compose UI. Gemini 2.5-flash writes a complete newsletter draft (subject, intro, what shipped, real numbers, what\'s next, closing) using Joshua\'s voice rules. Passes previous subject lines to avoid repeated angles. Fields pre-fill on success.' },
+      { type: 'New',      text: 'Docs update rule — whenever llms.txt is updated, CLAUDE.md + changelog + roadmap are all updated in the same flow. No more out-of-sync project context.' },
+      { type: 'Improved', text: 'New vs/ comparison pages added — TweetHunter, Circleboom, Postly, PromoRepublic, SocialOomph, and more. Sitemap updated.' },
+      { type: 'Improved', text: 'Blog batch 13 — 30 posts covering LinkedIn scheduling, TikTok scheduling, and multi-platform content strategy. All live in DB.' },
+    ],
+  },
+  {
     date: 'May 21, 2026',
     version: 'LinkedIn Now Live — 7 Platforms',
     changes: [
