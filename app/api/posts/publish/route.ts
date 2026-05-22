@@ -7,6 +7,7 @@ import { publishToAll } from '@/lib/publish'
 import { inngest } from '@/lib/inngest'
 import { Resend } from 'resend'
 import { logActivity } from '@/lib/workspace-activity'
+import { dispatchWebhook } from '@/lib/webhooks'
 
 let _resend: Resend | null = null
 function getResend() {
@@ -197,6 +198,17 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    // Outbound webhooks — non-fatal, fire-and-forget
+    try {
+      const webhookEvent = allFailed ? 'post.failed' : 'post.published'
+      dispatchWebhook(userId, webhookEvent, {
+        post_id:      postId,
+        content:      post.content,
+        platforms:    post.platforms,
+        published_at: new Date().toISOString(),
+      }).catch(() => {})
+    } catch {}
+
     return NextResponse.json({
       success: !allFailed,
       results,
@@ -372,6 +384,17 @@ export async function POST(request: NextRequest) {
         metadata:     { platforms: post.platforms, status: finalStatus },
       })
     }
+
+    // Outbound webhooks — non-fatal, fire-and-forget
+    try {
+      const webhookEvent = allFailed ? 'post.failed' : 'post.published'
+      dispatchWebhook(userId, webhookEvent, {
+        post_id:      postId,
+        content:      post.content,
+        platforms:    post.platforms,
+        published_at: new Date().toISOString(),
+      }).catch(() => {})
+    } catch {}
 
     return NextResponse.json({
       success: !allFailed,

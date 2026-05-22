@@ -13,8 +13,8 @@ import { SUPPORTED_LOCALES } from '@/lib/i18n'
 const STRIPE_PRO_PRICE_ID    = 'price_1T9S2v7OMwDowUuULHznqUD5'
 const STRIPE_AGENCY_PRICE_ID = 'price_1TFMHp7OMwDowUuUgeLAeJNY'
 
-const ALL_TABS    = ['Profile', 'Plan', 'Referrals', 'Notifications', 'Scheduling', 'Language', 'Security', 'White Label', 'Appearance', 'Brand Voice']
-const FREE_TABS   = ['Profile', 'Plan', 'Notifications', 'Scheduling', 'Language', 'Security', 'Appearance']
+const ALL_TABS    = ['Profile', 'Plan', 'Referrals', 'Notifications', 'Scheduling', 'Language', 'Security', 'White Label', 'Appearance', 'Brand Voice', 'Integrations']
+const FREE_TABS   = ['Profile', 'Plan', 'Notifications', 'Scheduling', 'Language', 'Security', 'Appearance', 'Integrations']
 
 // Every 5 paying referrals = +100 bonus credits (stacking, no cap)
 const REFERRAL_TIERS = [
@@ -62,8 +62,9 @@ function SettingsInner() {
     'Security':    tSettings('app_settings_tabs.security'),
     'White Label': tSettings('app_settings_tabs.white_label'),
     'Appearance':  tSettings('app_settings_tabs.appearance'),
-    'Brand Voice': tSettings('app_settings_tabs.brand_voice'),
-    'Scheduling':  '⏰ Scheduling',
+    'Brand Voice':  tSettings('app_settings_tabs.brand_voice'),
+    'Scheduling':   '⏰ Scheduling',
+    'Integrations': '🔗 Integrations',
   }
 
   const [userEmail, setUserEmail]       = useState('')
@@ -75,7 +76,7 @@ function SettingsInner() {
 
   const tabFromUrl  = searchParams.get('tab')
   const [activeTab, setActiveTab] = useState(
-    tabFromUrl && ALL_TABS.includes(tabFromUrl) ? tabFromUrl : 'Profile'
+    tabFromUrl && [...ALL_TABS, ...FREE_TABS].includes(tabFromUrl) ? tabFromUrl : 'Profile'
   )
 
   const [savedTab, setSavedTab]                   = useState<string | null>(null)
@@ -1716,6 +1717,10 @@ function SettingsInner() {
           )}
 
           {/* ── APPEARANCE ── */}
+          {activeTab === 'Integrations' && (
+            <IntegrationsTab />
+          )}
+
           {activeTab === 'Appearance' && (
             <div className="bg-surface border border-theme rounded-2xl p-6">
               <h2 className="text-base font-extrabold mb-1">{tSettings('app_settings.appearance_tab.title')}</h2>
@@ -1804,6 +1809,248 @@ function SettingsInner() {
           {tSettings('app_settings.plan_tab.credits_purchased')}
         </div>
       )}
+    </div>
+  )
+}
+
+// ─── Integrations / Webhooks Tab ──────────────────────────────────────────
+type Webhook = {
+  id: string
+  url: string
+  events: string[]
+  active: boolean
+  created_at: string
+}
+
+function IntegrationsTab() {
+  const [webhooks, setWebhooks] = useState<Webhook[]>([])
+  const [loading, setLoading]   = useState(true)
+  const [newUrl, setNewUrl]     = useState('')
+  const [newEvents, setNewEvents] = useState<string[]>(['post.published', 'post.failed'])
+  const [adding, setAdding]     = useState(false)
+  const [addError, setAddError] = useState<string | null>(null)
+  const [newSecret, setNewSecret] = useState<string | null>(null)
+  const [copiedSecret, setCopiedSecret] = useState(false)
+  const [togglingId, setTogglingId] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetch('/api/webhooks')
+      .then(r => r.json())
+      .then(d => { setWebhooks(d.webhooks ?? []); setLoading(false) })
+      .catch(() => setLoading(false))
+  }, [])
+
+  const toggleEvent = (event: string) => {
+    setNewEvents(prev =>
+      prev.includes(event) ? prev.filter(e => e !== event) : [...prev, event]
+    )
+  }
+
+  const handleAdd = async () => {
+    if (!newUrl.trim()) { setAddError('URL is required'); return }
+    if (newEvents.length === 0) { setAddError('Select at least one event'); return }
+    setAdding(true)
+    setAddError(null)
+    setNewSecret(null)
+    try {
+      const res = await fetch('/api/webhooks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: newUrl.trim(), events: newEvents }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setAddError(data.error || 'Failed to add webhook'); return }
+      setWebhooks(prev => [data.webhook, ...prev])
+      setNewSecret(data.webhook.secret)
+      setNewUrl('')
+      setNewEvents(['post.published', 'post.failed'])
+    } catch {
+      setAddError('Network error — please try again')
+    } finally {
+      setAdding(false)
+    }
+  }
+
+  const handleToggle = async (wh: Webhook) => {
+    setTogglingId(wh.id)
+    try {
+      const res = await fetch(`/api/webhooks/${wh.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ active: !wh.active }),
+      })
+      const data = await res.json()
+      if (res.ok) {
+        setWebhooks(prev => prev.map(w => w.id === wh.id ? data.webhook : w))
+      }
+    } finally {
+      setTogglingId(null)
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Delete this webhook endpoint?')) return
+    setDeletingId(id)
+    try {
+      await fetch(`/api/webhooks/${id}`, { method: 'DELETE' })
+      setWebhooks(prev => prev.filter(w => w.id !== id))
+    } finally {
+      setDeletingId(null)
+    }
+  }
+
+  const copySecret = async () => {
+    if (!newSecret) return
+    try {
+      await navigator.clipboard.writeText(newSecret)
+      setCopiedSecret(true)
+      setTimeout(() => setCopiedSecret(false), 2000)
+    } catch {}
+  }
+
+  const fmtDate = (d: string) =>
+    new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+
+  return (
+    <div className="space-y-6">
+      {/* Explainer */}
+      <div className="bg-surface border border-theme rounded-2xl p-6">
+        <h2 className="text-base font-extrabold mb-1">Outbound Webhooks</h2>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+          SocialMate sends a signed POST request to your URL whenever the selected events fire.
+          Connect to <span className="font-semibold text-gray-700 dark:text-gray-300">Zapier</span>,{' '}
+          <span className="font-semibold text-gray-700 dark:text-gray-300">Make</span>,{' '}
+          <span className="font-semibold text-gray-700 dark:text-gray-300">n8n</span>, or any custom receiver.
+          Verify the <code className="text-xs bg-gray-100 dark:bg-gray-800 px-1.5 py-0.5 rounded font-mono">X-SocialMate-Signature</code> header to confirm authenticity.{' '}
+          <a href="/integrations" className="text-amber-500 hover:text-amber-600 font-semibold">View docs →</a>
+        </p>
+
+        {/* Add webhook form */}
+        <div className="space-y-3">
+          <div>
+            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">Endpoint URL</label>
+            <input
+              type="url"
+              value={newUrl}
+              onChange={e => setNewUrl(e.target.value)}
+              placeholder="https://hooks.zapier.com/hooks/catch/..."
+              className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black dark:focus:border-gray-400 transition-all bg-transparent"
+            />
+          </div>
+          <div>
+            <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-2">Events</label>
+            <div className="flex flex-wrap gap-2">
+              {(['post.published', 'post.failed'] as const).map(ev => (
+                <button
+                  key={ev}
+                  type="button"
+                  onClick={() => toggleEvent(ev)}
+                  className={`min-h-[44px] flex items-center gap-2 px-3 py-2 rounded-xl border text-xs font-semibold transition-all ${
+                    newEvents.includes(ev)
+                      ? 'bg-black text-white border-black dark:bg-white dark:text-black dark:border-white'
+                      : 'border-gray-200 dark:border-gray-600 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500'
+                  }`}
+                >
+                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${ev === 'post.published' ? 'bg-green-400' : 'bg-red-400'}`} />
+                  {ev}
+                </button>
+              ))}
+            </div>
+          </div>
+          {addError && (
+            <p className="text-xs text-red-500 font-semibold">{addError}</p>
+          )}
+          <button
+            onClick={handleAdd}
+            disabled={adding}
+            className="min-h-[44px] px-5 py-2.5 rounded-xl text-sm font-bold bg-black text-white dark:bg-white dark:text-black hover:opacity-80 transition-all disabled:opacity-50 flex items-center gap-2"
+          >
+            {adding
+              ? <><div className="w-4 h-4 border-2 border-white/40 dark:border-black/40 border-t-white dark:border-t-black rounded-full animate-spin" /> Adding...</>
+              : '+ Add webhook'}
+          </button>
+        </div>
+
+        {/* Secret reveal — shown once */}
+        {newSecret && (
+          <div className="mt-4 p-4 rounded-xl border border-amber-400 bg-amber-50 dark:bg-amber-900/20 space-y-2">
+            <p className="text-xs font-bold text-amber-700 dark:text-amber-300">
+              Save this secret — it will not be shown again
+            </p>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 text-xs font-mono bg-white dark:bg-gray-900 border border-amber-300 dark:border-amber-600 px-3 py-2 rounded-lg break-all text-gray-800 dark:text-gray-200">
+                {newSecret}
+              </code>
+              <button
+                onClick={copySecret}
+                className="min-h-[44px] min-w-[44px] px-3 py-2 rounded-lg border border-amber-400 text-xs font-bold text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-all flex-shrink-0"
+              >
+                {copiedSecret ? 'Copied!' : 'Copy'}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Existing webhooks */}
+      <div className="bg-surface border border-theme rounded-2xl p-6">
+        <h3 className="text-sm font-bold mb-4">Active endpoints</h3>
+        {loading ? (
+          <div className="flex items-center gap-2 text-sm text-gray-400">
+            <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+            Loading...
+          </div>
+        ) : webhooks.length === 0 ? (
+          <div className="text-center py-8 text-sm text-gray-400 dark:text-gray-500">
+            <p className="text-2xl mb-2">🔗</p>
+            <p className="font-semibold mb-1">No webhooks yet</p>
+            <p>Connect to Zapier, Make, n8n, or any custom receiver above.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {webhooks.map(wh => (
+              <div key={wh.id} className="flex items-start gap-3 p-4 rounded-xl border border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/40">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold truncate text-gray-800 dark:text-gray-200">{wh.url}</p>
+                  <div className="flex flex-wrap gap-1.5 mt-1.5">
+                    {wh.events.map(ev => (
+                      <span key={ev} className="text-xs px-2 py-0.5 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-mono">
+                        {ev}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Added {fmtDate(wh.created_at)}</p>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {/* Active toggle */}
+                  <button
+                    role="switch"
+                    aria-checked={wh.active}
+                    disabled={togglingId === wh.id}
+                    onClick={() => handleToggle(wh)}
+                    title={wh.active ? 'Disable' : 'Enable'}
+                    className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 disabled:opacity-50 ${wh.active ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-600'}`}
+                  >
+                    <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${wh.active ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                  </button>
+                  {/* Delete */}
+                  <button
+                    onClick={() => handleDelete(wh.id)}
+                    disabled={deletingId === wh.id}
+                    title="Delete"
+                    className="min-h-[44px] min-w-[44px] flex items-center justify-center text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors disabled:opacity-40 text-lg"
+                  >
+                    {deletingId === wh.id ? (
+                      <div className="w-4 h-4 border-2 border-red-300 border-t-red-500 rounded-full animate-spin" />
+                    ) : '×'}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
