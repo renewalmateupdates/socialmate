@@ -62,7 +62,7 @@ Your post appears on the calendar and publishes automatically at the scheduled t
 You can schedule LinkedIn posts for free in 2026. LinkedIn''s native scheduler works for simple use cases. SocialMate is the better option if you want AI writing tools, a calendar view, and the ability to cross-post to other platforms at the same time — all without paying.
 
 Start free at socialmate.studio.',
-true,
+NOW(),
 NOW()),
 
 ('best-linkedin-post-scheduler-2026',
@@ -136,7 +136,7 @@ If you''re managing multiple brand accounts professionally, Publer or Buffer giv
 If you''re enterprise, Hootsuite.
 
 Start free at socialmate.studio.',
-true,
+NOW(),
 NOW()),
 
 ('linkedin-scheduling-tool-comparison',
@@ -194,7 +194,7 @@ For most creators and founders in 2026, SocialMate wins the value comparison. Li
 For analytics on top of your LinkedIn strategy, pair SocialMate with Shield App''s free tier to get full visibility into what''s working.
 
 Visit socialmate.studio to connect your LinkedIn account for free.',
-true,
+NOW(),
 NOW()),
 
 ('schedule-linkedin-posts-in-advance',
@@ -259,7 +259,7 @@ Repeat for each post. Your calendar will show all scheduled LinkedIn content at 
 You can schedule LinkedIn posts in advance for free using LinkedIn''s native tool or SocialMate. If you''re posting to multiple platforms or want AI assistance, SocialMate saves significant time.
 
 Start scheduling at socialmate.studio.',
-true,
+NOW(),
 NOW()),
 
 ('free-linkedin-scheduler-no-credit-card',
@@ -314,7 +314,7 @@ MeetEdgar''s free tier includes some scheduling features, though LinkedIn suppor
 If you want truly free LinkedIn scheduling with no credit card and no artificial limits, SocialMate is the clear winner. The free plan is permanent (not a trial), covers LinkedIn plus 6 other platforms, and includes AI tools for content creation.
 
 Get started at socialmate.studio.',
-true,
+NOW(),
 NOW()),
 
 ('linkedin-content-strategy-2026',
@@ -375,7 +375,7 @@ SocialMate lets you schedule LinkedIn posts in advance on a free plan. Write a w
 A LinkedIn content strategy in 2026 is simple: show up 3–5 times a week with a mix of value, story, and soft offer. Use scheduling tools to maintain consistency without burning out. Batch your content creation and let automation handle publishing.
 
 SocialMate is free for LinkedIn scheduling. Start your system at socialmate.studio.',
-true,
+NOW(),
 NOW()),
 
 ('linkedin-algorithm-explained-2026',
@@ -431,7 +431,7 @@ Posts spread through your first-degree connections first. If your connections en
 **Watch your best-performing posts.** The algorithm tells you what your audience responds to. Double down on formats and topics that drive comments.
 
 Start scheduling your LinkedIn content for free at socialmate.studio.',
-true,
+NOW(),
 NOW()),
 
 ('linkedin-post-ideas-creators',
@@ -512,7 +512,7 @@ The biggest reason creators don''t post consistently on LinkedIn isn''t laziness
 Pick an idea. Write a hook (curiosity gap, bold claim, or story opener). Write 5–8 short paragraphs. End with a question to seed comments.
 
 Use SocialMate''s AI caption generator to write LinkedIn hooks and variations, then schedule your posts in advance. Free at socialmate.studio.',
-true,
+NOW(),
 NOW()),
 
 ('best-time-to-post-on-linkedin',
@@ -574,7 +574,7 @@ When composing a post in SocialMate, click "Use best time" in the scheduling pic
 Post on LinkedIn Tuesday through Thursday between 8am and 1pm. Avoid weekends and late evenings. Use analytics to refine further based on your own audience''s behavior.
 
 Schedule your LinkedIn posts in advance at socialmate.studio.',
-true,
+NOW(),
 NOW()),
 
 ('linkedin-vs-twitter-for-creators',
@@ -630,7 +630,7 @@ Use both if you can do it without diluting quality — cross-posting with adapta
 SocialMate lets you schedule to both LinkedIn and Twitter from the same dashboard, free on the base plan. You can write once and publish to both with platform-appropriate edits.
 
 Start cross-posting at socialmate.studio.',
-true,
+NOW(),
 NOW()),
 
 ('how-to-schedule-tiktok-posts-free',
@@ -694,7 +694,7 @@ SocialMate uses TikTok''s official Content Posting API (Production approved May 
 You can schedule TikTok posts for free in 2026 using TikTok''s native scheduler (desktop, 10-day limit) or SocialMate (multi-platform, AI tools, free plan). For creators posting on multiple platforms, SocialMate is the better workflow.
 
 Start scheduling TikTok for free at socialmate.studio.',
-true,
+NOW(),
 NOW()),
 
 ('best-tiktok-scheduler-2026',
@@ -768,7 +768,7 @@ Hootsuite added full TikTok support including analytics. If you''re managing Tik
 For most TikTok creators, SocialMate gives the best value: free TikTok scheduling with official API access, AI tools for captions and hashtags, and cross-platform posting to 6 other social networks.
 
 Connect your TikTok at socialmate.studio.',
-true,
+NOW(),
 NOW()),
 
 ('tiktok-scheduling-tool-comparison',
@@ -844,7 +844,7 @@ TikTok''s own built-in scheduler (desktop only, 10-day max). Official, free, but
 SocialMate wins for creators who want TikTok scheduling plus other platforms at the lowest price (free). Later wins for visual content planning if you''re primarily Instagram/TikTok. Publer is the best paid-only mid-range option.
 
 Start free with TikTok scheduling at socialmate.studio.',
-true,
+NOW(),
 NOW()),
 
 ('schedule-tiktok-in-advance',
@@ -914,7 +914,7 @@ Your specific best times depend on your niche. Use TikTok''s native analytics to
 - **Sustainable pace:** 1–2/day long-term. Quality matters more than volume after you have traction.
 
 Schedule your TikTok videos in advance at socialmate.studio.',
-true,
+NOW(),
 NOW()),
 
 ('free-tiktok-content-planner',
@@ -976,7 +976,7 @@ You get a visual calendar showing all your scheduled TikToks so you can see gaps
 Planning a month of TikTok content doesn''t require an elaborate system. It requires 3–4 content pillars, a brainstorm session, a filming batch, and a scheduling tool.
 
 Plan and schedule your TikTok content at socialmate.studio for free.',
-true,
+NOW(),
 NOW()),
 
 ('tiktok-content-strategy-for-beginners',
@@ -1042,7 +1042,7 @@ The fastest way to kill early TikTok growth is to post daily for 2 weeks and the
 Use SocialMate''s free TikTok scheduling to upload videos in batches and have them publish automatically. You do the filming and editing on your own schedule; TikTok sees a consistent posting cadence.
 
 Start your TikTok content system at socialmate.studio.',
-true,
+NOW(),
 NOW()),
 
 ('tiktok-algorithm-2026',
@@ -1097,7 +1097,7 @@ After watching, do people visit your profile? Do they follow? These signals tell
 **Be consistent.** The algorithm deprioritizes accounts that go silent for 7+ days. Consistent daily or near-daily posting keeps you in rotation.
 
 Use SocialMate to schedule TikTok posts in advance and maintain consistent posting without being online every day. Free at socialmate.studio.',
-true,
+NOW(),
 NOW()),
 
 ('best-time-to-post-on-tiktok-2026',
@@ -1162,7 +1162,7 @@ General data gives you a starting point, but your actual audience may differ. He
 Use SocialMate to schedule TikTok posts for those exact times. Set your posting schedule once, upload videos in batches, and let SocialMate publish at the right times automatically.
 
 Free TikTok scheduling at socialmate.studio.',
-true,
+NOW(),
 NOW()),
 
 ('tiktok-for-business-2026',
@@ -1232,7 +1232,7 @@ Use a scheduling tool to maintain consistency. SocialMate''s TikTok scheduling i
 TikTok is a legitimate business growth channel in 2026. The playbook: show your work, post consistently, use the free API-based scheduling tools available (like SocialMate), and measure profile visits and DMs, not just views.
 
 Start your TikTok business content calendar at socialmate.studio.',
-true,
+NOW(),
 NOW()),
 
 ('tiktok-scheduling-api',
@@ -1295,7 +1295,7 @@ When evaluating a TikTok scheduler, ask:
 If they''re using the official OAuth flow, you''ll be redirected to TikTok''s own login page to authorize. That''s the sign of legitimate integration.
 
 Connect your TikTok to SocialMate (official API, approved May 2026) at socialmate.studio.',
-true,
+NOW(),
 NOW()),
 
 ('schedule-tiktok-and-linkedin-same-tool',
@@ -1351,7 +1351,7 @@ Before SocialMate, scheduling TikTok and LinkedIn from one tool was genuinely no
 Now it''s free (or $5/month Pro).
 
 Get started at socialmate.studio.',
-true,
+NOW(),
 NOW()),
 
 ('social-media-scheduler-7-platforms',
@@ -1422,7 +1422,7 @@ Lower overhead (bootstrapped solo team, no VC burn rate), infrastructure built o
 The pitch is simple: what competitors charge $99/month for, we give for $5. Or free.
 
 Start at socialmate.studio.',
-true,
+NOW(),
 NOW()),
 
 ('discord-telegram-social-media-scheduling',
@@ -1486,7 +1486,7 @@ Imagine scheduling a product announcement to:
 All at the same time, from one compose screen, for free.
 
 That''s the SocialMate workflow. Start at socialmate.studio.',
-true,
+NOW(),
 NOW()),
 
 ('multi-platform-social-media-strategy',
@@ -1561,7 +1561,7 @@ A realistic multi-platform posting schedule for one person:
 Total unique content pieces per week: 5–7. Reach: 7 platforms.
 
 Build your multi-platform system at socialmate.studio.',
-true,
+NOW(),
 NOW()),
 
 ('social-media-scheduling-tools-small-business',
@@ -1626,7 +1626,7 @@ Metricool''s free plan is competitive and includes scheduling alongside analytic
 For most small businesses in 2026, start with SocialMate''s free plan. You get LinkedIn, TikTok, and 5 other platforms. If you need Instagram/Facebook, add a free Buffer account while you wait for SocialMate to add those platforms.
 
 Start free at socialmate.studio.',
-true,
+NOW(),
 NOW()),
 
 ('bluesky-linkedin-tiktok-scheduler',
@@ -1678,7 +1678,7 @@ SocialMate''s AI repurposing tool handles these adaptations automatically — pa
 All three go out automatically with no additional steps.
 
 **Free plan** covers all three platforms. Start at socialmate.studio.',
-true,
+NOW(),
 NOW()),
 
 ('creator-os-2026',
@@ -1754,7 +1754,7 @@ Your most loyal audience lives in community spaces, not social feeds. Scheduling
 | Community | Discord + SocialMate scheduling | Free |
 
 Build your Creator OS at socialmate.studio.',
-true,
+NOW(),
 NOW()),
 
 ('ai-social-media-tools-2026',
@@ -1822,7 +1822,7 @@ Enterprise AI tools for large content teams. Sophisticated but expensive ($59–
 Start with SocialMate''s built-in AI tools (free). They cover 90% of what individual creators need: captions, hooks, hashtags, and repurposing. Upgrade to specialized tools like Flick or Repurpose.io when your content volume justifies the additional cost.
 
 Start free at socialmate.studio.',
-true,
+NOW(),
 NOW()),
 
 ('social-media-automation-small-business',
@@ -1893,7 +1893,7 @@ Important: don''t fully automate caption writing. AI captions need a human voice
 For small businesses, automate publishing, repurposing, and research first. Keep the human elements human: comments, DMs, and content voice.
 
 Build your automation system at socialmate.studio.',
-true,
+NOW(),
 NOW()),
 
 ('hootsuite-alternative-with-tiktok-linkedin',
@@ -1964,5 +1964,5 @@ Hootsuite has OwlyWriter AI for content generation. SocialMate has 12 AI tools i
 - Budget is not a constraint
 
 Make the switch at socialmate.studio.',
-true,
+NOW(),
 NOW());
