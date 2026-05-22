@@ -1965,4 +1965,4 @@ Hootsuite has OwlyWriter AI for content generation. SocialMate has 12 AI tools i
 
 Make the switch at socialmate.studio.',
 NOW(),
-NOW());
+NOW()) ON CONFLICT (slug) DO NOTHING;
