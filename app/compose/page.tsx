@@ -233,6 +233,7 @@ function ComposeInner() {
 
   // AI Hashtag suggestions
   const [showHashtagSuggestPanel, setShowHashtagSuggestPanel] = useState(false)
+  const [hashtagPanelTab, setHashtagPanelTab]                 = useState<'ai' | 'collections'>('ai')
   const [suggestedHashtags, setSuggestedHashtags]             = useState<string[]>([])
   const [hashtagSuggestLoading, setHashtagSuggestLoading]     = useState(false)
   const [hashtagSuggestError, setHashtagSuggestError]         = useState('')
@@ -2475,11 +2476,36 @@ function ComposeInner() {
                   </div>
                 )}
 
-                {/* HASHTAG SUGGEST INLINE PANEL */}
+                {/* HASHTAG PANEL — AI Suggestions + My Collections tabs */}
                 {showHashtagSuggestPanel && (
                   <div className="mb-4 border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/20 rounded-xl p-4">
+                    {/* Header row */}
                     <div className="flex items-center justify-between mb-3">
-                      <p className="text-xs font-bold text-blue-800 dark:text-blue-300 uppercase tracking-wide">#️⃣ Hashtag Suggestions</p>
+                      <div className="flex items-center gap-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg p-0.5">
+                        <button
+                          onClick={() => setHashtagPanelTab('ai')}
+                          className={`text-xs font-bold px-3 py-1.5 rounded-md transition-all min-h-[32px] ${
+                            hashtagPanelTab === 'ai'
+                              ? 'bg-blue-500 text-white'
+                              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                          }`}>
+                          AI Suggest
+                        </button>
+                        <button
+                          onClick={() => { setHashtagPanelTab('collections'); loadHashtagCollections() }}
+                          className={`text-xs font-bold px-3 py-1.5 rounded-md transition-all min-h-[32px] ${
+                            hashtagPanelTab === 'collections'
+                              ? 'bg-blue-500 text-white'
+                              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                          }`}>
+                          My Collections
+                          {hashtagCollections.length > 0 && (
+                            <span className="ml-1 text-[10px] font-bold bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 px-1.5 py-0.5 rounded-full">
+                              {hashtagCollections.length}
+                            </span>
+                          )}
+                        </button>
+                      </div>
                       <button
                         onClick={() => { setShowHashtagSuggestPanel(false); setSuggestedHashtags([]); setHashtagSuggestError('') }}
                         className="text-blue-500 hover:text-blue-700 dark:hover:text-blue-300 transition-colors w-6 h-6 flex items-center justify-center rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 text-base font-bold">
@@ -2487,50 +2513,110 @@ function ComposeInner() {
                       </button>
                     </div>
 
-                    <p className="text-xs text-blue-700 dark:text-blue-400 mb-3">
-                      AI picks 12 hashtags optimized for your selected platforms — 1 credit per run.
-                    </p>
+                    {/* AI Suggestions tab */}
+                    {hashtagPanelTab === 'ai' && (
+                      <>
+                        <p className="text-xs text-blue-700 dark:text-blue-400 mb-3">
+                          AI picks 12 hashtags optimized for your selected platforms — 1 credit per run.
+                        </p>
 
-                    <button
-                      onClick={handleHashtagSuggest}
-                      disabled={hashtagSuggestLoading || !content.trim() || credits < 1 || !!rateLimitedUntil}
-                      className="w-full bg-blue-500 hover:bg-blue-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold py-2.5 min-h-[44px] rounded-xl transition-all flex items-center justify-center gap-2">
-                      {hashtagSuggestLoading ? (
-                        <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Generating hashtags...</>
-                      ) : 'Suggest Hashtags → (1 credit)'}
-                    </button>
+                        <button
+                          onClick={handleHashtagSuggest}
+                          disabled={hashtagSuggestLoading || !content.trim() || credits < 1 || !!rateLimitedUntil}
+                          className="w-full bg-blue-500 hover:bg-blue-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold py-2.5 min-h-[44px] rounded-xl transition-all flex items-center justify-center gap-2">
+                          {hashtagSuggestLoading ? (
+                            <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Generating hashtags...</>
+                          ) : 'Suggest Hashtags → (1 credit)'}
+                        </button>
 
-                    {hashtagSuggestError && (
-                      <div className="mt-2 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2">
-                        <p className="text-xs text-red-600 dark:text-red-400">{hashtagSuggestError}</p>
-                      </div>
+                        {hashtagSuggestError && (
+                          <div className="mt-2 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2">
+                            <p className="text-xs text-red-600 dark:text-red-400">{hashtagSuggestError}</p>
+                          </div>
+                        )}
+
+                        {suggestedHashtags.length > 0 && !hashtagSuggestLoading && (
+                          <div className="mt-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+                            <div className="flex items-center justify-between mb-3">
+                              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Click to add · {suggestedHashtags.length} suggestions</p>
+                              <button
+                                onClick={handleCopyAllHashtags}
+                                className="text-xs font-bold px-3 py-1.5 min-h-[36px] border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg hover:border-gray-500 transition-all">
+                                {hashtagsCopied ? 'Copied ✓' : 'Copy all'}
+                              </button>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {suggestedHashtags.map(tag => (
+                                <button
+                                  key={tag}
+                                  onClick={() => handleAppendHashtag(tag)}
+                                  title={content.includes(tag) ? 'Already in post' : `Add ${tag} to post`}
+                                  className={`text-xs font-medium px-3 py-1 rounded-full border transition-all cursor-pointer ${
+                                    content.includes(tag)
+                                      ? 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 cursor-default'
+                                      : 'bg-gray-800 hover:bg-gray-700 border border-gray-700 text-blue-400'
+                                  }`}>
+                                  {tag}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </>
                     )}
 
-                    {suggestedHashtags.length > 0 && !hashtagSuggestLoading && (
-                      <div className="mt-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-                        <div className="flex items-center justify-between mb-3">
-                          <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Click to add · {suggestedHashtags.length} suggestions</p>
-                          <button
-                            onClick={handleCopyAllHashtags}
-                            className="text-xs font-bold px-3 py-1.5 min-h-[36px] border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 rounded-lg hover:border-gray-500 transition-all">
-                            {hashtagsCopied ? 'Copied ✓' : 'Copy all'}
-                          </button>
-                        </div>
-                        <div className="flex flex-wrap gap-2">
-                          {suggestedHashtags.map(tag => (
-                            <button
-                              key={tag}
-                              onClick={() => handleAppendHashtag(tag)}
-                              title={content.includes(tag) ? 'Already in post' : `Add ${tag} to post`}
-                              className={`text-xs font-medium px-3 py-1 rounded-full border transition-all cursor-pointer ${
-                                content.includes(tag)
-                                  ? 'bg-gray-100 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 cursor-default'
-                                  : 'bg-gray-800 hover:bg-gray-700 border border-gray-700 text-blue-400'
-                              }`}>
-                              {tag}
-                            </button>
-                          ))}
-                        </div>
+                    {/* My Collections tab */}
+                    {hashtagPanelTab === 'collections' && (
+                      <div className="space-y-2">
+                        {hashtagCollections.length === 0 ? (
+                          <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 text-center">
+                            <p className="text-xs text-gray-400 dark:text-gray-500 mb-2">No collections yet.</p>
+                            <a
+                              href="/hashtag-collections"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs font-bold text-blue-500 hover:underline">
+                              Create collections →
+                            </a>
+                          </div>
+                        ) : (
+                          <>
+                            {hashtagCollections.map(col => (
+                              <div
+                                key={col.id}
+                                className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2.5">
+                                <div className="flex items-center justify-between mb-1.5">
+                                  <div className="min-w-0">
+                                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300 truncate block">{col.name}</span>
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500">{col.hashtags.length} tags</span>
+                                  </div>
+                                  <button
+                                    onClick={() => handleUseCollection(col)}
+                                    className="text-xs font-bold px-3 py-1.5 min-h-[36px] bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all flex-shrink-0 ml-2">
+                                    Add all
+                                  </button>
+                                </div>
+                                <div className="flex flex-wrap gap-1">
+                                  {col.hashtags.slice(0, 5).map(tag => (
+                                    <span key={tag} className="text-[10px] bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full">
+                                      #{tag}
+                                    </span>
+                                  ))}
+                                  {col.hashtags.length > 5 && (
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 px-1">+{col.hashtags.length - 5}</span>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                            <a
+                              href="/hashtag-collections"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block text-center text-xs font-bold text-blue-500 hover:underline pt-1">
+                              Manage collections →
+                            </a>
+                          </>
+                        )}
                       </div>
                     )}
                   </div>
