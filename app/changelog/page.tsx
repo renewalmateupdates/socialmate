@@ -22,6 +22,17 @@ interface ChangelogEntry {
 const CHANGELOG: ChangelogEntry[] = [
   {
     date: 'May 22, 2026',
+    version: 'Hashtag Collections, Zapier Webhooks, Roadmap Green',
+    changes: [
+      { type: 'New',      text: 'Hashtag Collections — save and reuse named hashtag sets. Manage collections at /hashtag-collections. Compose now has AI Suggest / My Collections tabs in the hashtag panel — "Add all" inserts a full collection with no-duplicate check.' },
+      { type: 'New',      text: 'Zapier / Outbound Webhooks — fire signed POST requests on post.published and post.failed events. Add webhook URLs in Settings → Integrations. HMAC-SHA256 signed payloads, compatible with Zapier, Make, n8n, and any custom receiver. Docs at /integrations.' },
+      { type: 'New',      text: 'Blog auto-generation (Studio Stax) — Gemini writes a blog feature post for each Studio Stax lister at the 90-day mark, then every 90 days while active. Lister gets notified by email when live. Cron: /api/cron/stax-blog-gen.' },
+      { type: 'Improved', text: 'Roadmap voting section removed — too early. Will revisit when user base grows. Roadmap is now nearly all green — only API-gated platforms (Instagram, Facebook, Threads, iOS) remain.' },
+      { type: 'Improved', text: 'All remaining Gemini 1.5-flash calls upgraded to 2.5-flash across stax-blog-gen, HERMES discover, and HERMES generate routes.' },
+    ],
+  },
+  {
+    date: 'May 22, 2026',
     version: 'IRIS AI Draft, Docs Rule, vs/ Expansion',
     changes: [
       { type: 'New',      text: 'IRIS Dispatch AI auto-generate — "Generate draft with AI" button in the /admin/iris compose UI. Gemini 2.5-flash writes a complete newsletter draft (subject, intro, what shipped, real numbers, what\'s next, closing) using Joshua\'s voice rules. Passes previous subject lines to avoid repeated angles. Fields pre-fill on success.' },
