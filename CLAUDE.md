@@ -585,6 +585,49 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **LinkedIn origin story saved** — Real founding story documented: RenewalMate marketing struggle → ProductHunt Claude Code crossover → built SocialMate with Claude. Use for all marketing copy.
 - **LinkedIn post style documented** — Memory saved: body + hashtags + quote, first comment has socialmate link. Always output both blocks.
 
+**May 14–18, 2026 — HERMES Cold Outreach System (PRs #318–#327):**
+- **HERMES** — Full cold outreach system for Joshua (admin-only at `/hermes`). Campaigns with goal, persona, channel selection (email/Bluesky/Mastodon), 4-step sequence (Intro/Follow-up 1/Follow-up 2/Break-up), draft + auto modes.
+- **Campaign management** — `/hermes/campaigns/new` creates campaigns. `/hermes/campaigns/[id]` shows prospects + messages tab.
+- **Prospect management** — Add prospects manually with Hunter.io email finder (enter domain + name → gets email + confidence score). `HUNTER_API_KEY` required in env.
+- **Auto-discover** — `lib/hermes-discover.ts` scrapes Substack leaderboard, GitHub user search, dev.to articles, and Hashnode GraphQL for prospects. Extracts emails from profile pages. No paid API required. Rate: ~5 prospects per source per run. Stores discover config in `apollo_query` JSONB column for weekly auto-runs.
+- **Message generation** — Gemini-2.5-flash writes personalized Intro email per prospect. Context-aware by source (newsletter writer vs developer blogger). Falls back to safe default on parse failure.
+- **Send** — Email via Resend. Bluesky DM via `chat.bsky.convo` XRPC. Mastodon DM via `/api/v1/statuses` with `visibility: 'direct'`.
+- **Sequence follow-ups** — `hermesFollowUpCron` Inngest function fires daily, checks `next_contact_at` per prospect, generates next step message and sends or drafts.
+- **Tables:** `hermes_campaigns`, `hermes_prospects`, `hermes_messages` — all with RLS.
+- **SM Pulse** (`/sm-pulse`) — 20-credit niche trend scan. Calls `tool: 'pulse'` on `/api/ai`. Returns ranked trending topics in user's niche. Blurred preview state when no result.
+- **SM Radar** (`/sm-radar`) — 20-credit content intelligence report. Calls `tool: 'radar'`. Returns content gaps, competitor weak spots, best formats, hook styles, timing signals, and one concrete opportunity for this week.
+
+**May 19, 2026 (PRs #385–#388):**
+- **Activation funnel** — First-use tracking: onboarding completion %, platform connected, first post published. Dashboard shows activation progress for new users. GA4 events fire on key milestones.
+- **GA4 integration** — Google Analytics 4 wired in. Events: `onboarding_complete`, `platform_connected`, `post_published`, `upgrade_clicked`, `ai_tool_used`. `NEXT_PUBLIC_GA4_ID` env var.
+- **Calendar retry button** — Failed posts in calendar now have a "Retry" button that re-fires the Inngest publish job for failed platforms only.
+- **Comeback emails** — `comebackEmails` Inngest cron fires weekly for users who haven't posted in 7+ days. Personalized Resend email with their last post + streak. Non-fatal.
+- **IRIS auto-draft cron** — Inngest function that generates a weekly IRIS Dispatch draft automatically (admin-only). Admin reviews before sending.
+- **Admin health alert** — Inngest daily cron checks for stuck scheduled posts (past due + still `status='scheduled'`). Sends admin email if count > 0.
+- **Roadmap voting** — Users can upvote roadmap items. Votes stored to DB, displayed on `/roadmap`.
+- **Post Score** (Pro+, 5 credits) — AI-powered 0–100 quality score for any draft. Rates hook, clarity, and engagement potential. Shown inline in Compose.
+- **Scheduling window + DND** — Settings → Scheduling tab. Set posting hours (e.g. 9am–9pm) and a Do-Not-Disturb window. Smart Queue respects window. Stored on `user_settings`.
+- **Goal-based onboarding** — Step 1 now asks primary goal (schedule content / grow audience / manage clients). Saved to `user_settings.onboarding_goal`.
+- **Loyalty achievement system** — `achievementCheckerCron` Inngest function fires daily. Awards credits for: first post, 10/50/100/500 posts, 7/30/100-day streaks, 3/6/12-month tenure, 3+ platforms connected, bio page created. Credits awarded via earned pool. `user_achievements` table with RLS.
+- **Monthly-reset upgrade nudges** — `UpgradeNudge` dismiss now resets monthly (was 7 days). Free users see nudge again at the start of each calendar month.
+
+**May 20, 2026 (PRs #389–#391):**
+- **SIGIL** — Link in Bio renamed to SIGIL across all UI, nav, sidebar, and copy. Consistent with SocialMate deity naming system (HERMES/ENKI/SOMA/IRIS/HESTIA/SIGIL/ZENITH).
+- **HESTIA** — Community tab at `/community` (was AGORA, renamed to HESTIA). Post wins, questions, tips, feedback, intros. Emoji reactions (🔥💯👏🚀❤️🤔), threaded replies, connected-account gate to keep it real. Categories: All / Wins / Questions / Tips / Feedback / Intros. Tables: `community_posts`, `community_replies`, `community_reactions`.
+- **Guides PDF download** — "Download as PDF" button on all 5 Gilgamesh Guides. Opens native print dialog with a faint SocialMate watermark baked into background via `@media print` CSS. No external services.
+- **Achievements page** — `/achievements` — 13 badges across Posts / Streaks / Tenure / Account. Unlocking awards earned credits. Progress bars for locked badges. Linked in sidebar Grow section.
+- **30-Day Creator Challenge** — `/challenge` — Post every day for 30 consecutive days, earn 50 bonus credits. Daily progress heatmap, day counter, streak display.
+- **ZENITH creator card** — `/zenith` — Shareable presence card showing platform connections, post count, streak, achievements, top post. Social share buttons.
+- **Badge embed** — Embeddable SVG badge at `/badge.svg`. Copy embed code from Settings → Profile to show "Built with SocialMate" on your site.
+- **Discount page** — `/discount` — `NONPROFIT50` (50% off Pro, honor system) and `STUDENT25` (25% off Pro, .edu email, honor system). No verification required.
+- **HERMES → Gemini 2.5-flash** — Message generation upgraded from 1.5-flash to 2.5-flash. Smarter, faster outreach copy.
+- **AI rate limiting** — 10 AI requests per minute per user. Returns 429 with retry-after header. Prevents accidental API abuse.
+- **Blog batch 12** — 55 posts on creator growth, platform strategy, and community. SQL in `supabase/blog_batch_12.sql`.
+
+**May 22, 2026 (PR #401):**
+- **IRIS AI auto-generate** — Admin UI at `/admin/iris` now has a violet "Generate draft with AI" button. `POST /api/admin/iris/generate` calls Gemini 2.5-flash with Joshua's tone rules + baked-in recent ship context. Returns complete newsletter draft (subject, intro, whatShipped, realNumbers, whatsNext, closing). Passes previous subject lines to avoid repeated angles. Fields pre-fill on success with inline confirmation banner. Admin-only gate.
+- **Docs update rule established** — Whenever llms.txt is updated, CLAUDE.md + changelog + roadmap must all update in the same flow. Never update llms.txt alone.
+
 **May 21, 2026 — LinkedIn Launch (PRs #394–#399):**
 - **LinkedIn OAuth live** — Full end-to-end OAuth 2.0 flow with OpenID Connect. Connect at `/accounts` → OAuth authorize → callback upserts to `connected_accounts` (platform: `'linkedin'`) → disconnect button deletes the row. Route: `/api/accounts/linkedin/connect` + `/api/linkedin/callback` + `/api/accounts/linkedin/disconnect`.
 - **LinkedIn posting live** — `/api/publish/linkedin` uses UGC Posts API (`/v2/ugcPosts`) with `w_member_social` scope. 60-day access tokens (no refresh — re-auth on expiry). Confirmed working with a live post immediately after connecting.
@@ -638,6 +681,25 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **SOMA content run** — Submit updated CLAUDE.md when Joshua is ready.
 ## Confirmed Done (stop asking about these)
 
+- ✅ **IRIS AI auto-generate (May 22, PR #401)** — Admin `/admin/iris` compose page has "Generate draft with AI" button. Gemini 2.5-flash writes subject + full body draft. Never ask to build this again.
+- ✅ **HERMES cold outreach system (May 14–18, PRs #318–#327)** — Full campaign system at `/hermes` (admin-only). Prospect discovery (free: Substack/GitHub/dev.to/Hashnode), Hunter.io email finder, Gemini-powered message generation, Resend email + Bluesky/Mastodon DM send, 4-step sequence, follow-up cron. Never ask to build HERMES again.
+- ✅ **SM Pulse + SM Radar** — `/sm-pulse` (trend scan, 20 credits) and `/sm-radar` (content intelligence report, 20 credits) both live. Never ask to build these.
+- ✅ **ZENITH creator card (May 20)** — `/zenith` live. Shareable presence card. In sitemap. Never build again.
+- ✅ **Achievements + 30-Day Challenge (May 19–20)** — `/achievements` (13 badges, credit rewards, progress bars) + `/challenge` (30-day heatmap, 50cr reward) both live. `user_achievements` table. Daily `achievementCheckerCron`. Never build again.
+- ✅ **HESTIA community tab (May 20)** — `/community` live (was AGORA). Emoji reactions, threads, connected-account gate. Tables: community_posts/replies/reactions. Never build again.
+- ✅ **SIGIL rename (May 20)** — Link in Bio is now SIGIL everywhere. Never revert to "Link in Bio".
+- ✅ **Discount page (May 20)** — `/discount` live. NONPROFIT50 (50% off Pro) + STUDENT25 (25% off Pro). Honor system. Never build again.
+- ✅ **Post Score (May 19)** — Pro+, 5 credits. AI 0–100 quality scorer inline in Compose. Never build again.
+- ✅ **Scheduling Window + DND (May 19)** — Settings → Scheduling tab. Smart Queue respects window. Never build again.
+- ✅ **Goal-based onboarding (May 19)** — Step 1 asks primary goal. Saved to user_settings.onboarding_goal. Never build again.
+- ✅ **Loyalty achievement system (May 19)** — `achievementCheckerCron` Inngest daily. Credits for milestones. Never build again.
+- ✅ **GA4 integration (May 19)** — NEXT_PUBLIC_GA4_ID env var. Key events fire on publish/upgrade/AI use. Never build again.
+- ✅ **Roadmap voting (May 19)** — Users can upvote roadmap items on /roadmap. Never build again.
+- ✅ **Comeback emails (May 19)** — Weekly cron for users inactive 7+ days. Never build again.
+- ✅ **Blog batch 12 — 55 posts (May 20)** — creator growth, platform strategy, community. SQL: blog_batch_12.sql. Never ask to write these again.
+- ✅ **Guides PDF download (May 20)** — All 5 Gilgamesh Guides have "Download as PDF" with watermark. No external services. Never build again.
+- ✅ **Badge embed (May 20)** — `/badge.svg` + Settings → Profile embed code. Never build again.
+- ✅ **AI rate limiting (May 20)** — 10 req/min/user. 429 + retry-after header. Never build again.
 - ✅ **LinkedIn OAuth + posting live (May 21, PRs #394–#399)** — Personal profile connect, OAuth flow, UGC Posts API publishing. Confirmed with a live post. Platform count = 7. Never say LinkedIn is coming soon or pending again.
 - ✅ **Bluesky grapheme fix (May 21)** — `Intl.Segmenter` for grapheme counting in `lib/publish/bluesky.ts`. Truncates to 300 graphemes gracefully. Never revert to `content.length`.
 - ✅ **`/for/linkedin-creators` page (May 21, PR #398)** — Full SEO audience landing page. In PublicNav Audiences dropdown. Never ask to build it again.

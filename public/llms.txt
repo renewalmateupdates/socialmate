@@ -229,7 +229,7 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - Homepage: https://socialmate.studio
 - Pricing: https://socialmate.studio/pricing
 - Features: https://socialmate.studio/features
-- Blog: https://socialmate.studio/blog (390+ posts)
+- Blog: https://socialmate.studio/blog (420+ posts)
 - Roadmap: https://socialmate.studio/roadmap
 - FAQ: https://socialmate.studio/faq
 - Support: https://socialmate.studio/support
@@ -268,6 +268,11 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - Achievements: https://socialmate.studio/achievements
 - 30-day Creator Challenge: https://socialmate.studio/challenge
 - Discount page: https://socialmate.studio/discount
+- SM-Pulse (trend scanner): https://socialmate.studio/sm-pulse
+- SM-Radar (content intelligence): https://socialmate.studio/sm-radar
+- HERMES (cold outreach, admin-only): https://socialmate.studio/hermes
+- IRIS Dispatch newsletter: https://socialmate.studio/admin/iris (admin compose)
+- Social media glossary: https://socialmate.studio/glossary
 
 ## Comparisons (SocialMate vs Competitors)
 

@@ -488,6 +488,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/achievements`,       lastModified: now, changeFrequency: 'weekly',  priority: 0.6 },
     { url: `${base}/challenge`,          lastModified: now, changeFrequency: 'weekly',  priority: 0.7 },
     { url: `${base}/zenith`,             lastModified: now, changeFrequency: 'weekly',  priority: 0.7 },
+    { url: `${base}/sm-pulse`,           lastModified: now, changeFrequency: 'weekly',  priority: 0.6 },
+    { url: `${base}/sm-radar`,           lastModified: now, changeFrequency: 'weekly',  priority: 0.6 },
   ]
 
   const comparisons: MetadataRoute.Sitemap = [
