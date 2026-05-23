@@ -588,6 +588,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/vs/hubspot-social`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/vs/semrush-social`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/vs/later-free`,     lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/storychief`,     lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/oneup`,          lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/brand24`,        lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/post-beyond`,    lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/combin`,         lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/keystroke`,      lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/mention`,        lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/emplifi`,        lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/postoplan`,      lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/social-report`,  lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/khoros`,         lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/talkwalker`,     lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
   ]
 
   const blogPosts: MetadataRoute.Sitemap = BLOG_SLUGS.map(slug => ({
