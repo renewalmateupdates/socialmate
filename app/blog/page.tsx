@@ -30,7 +30,7 @@ async function getDbPosts() {
       .from('blog_posts')
       .select('slug, title, excerpt, category, author, published_at, content')
       .order('published_at', { ascending: false })
-      .limit(30)
+      .limit(500)
     if (!data) return []
     return data.map((d: any) => {
       const wordCount = (d.content || '').trim().split(/\s+/).length
