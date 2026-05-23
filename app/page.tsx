@@ -49,7 +49,7 @@ const FEATURES = [
   },
   {
     icon: '🤖',
-    title: '12 AI Tools Built In',
+    title: '15+ AI Tools Built In',
     desc: 'Generate captions, hashtags, viral hooks, full threads, content calendars, and post scores — all powered by Google Gemini.',
   },
   {
@@ -151,14 +151,14 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
       <section className="max-w-4xl mx-auto px-6 pt-24 pb-20 text-center">
         <HeroLaunchBadge />
         <div className="inline-flex items-center gap-2 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 text-xs font-bold px-4 py-2 rounded-full mb-8">
-          🌱 Free forever · No credit card required · 7 social platforms · Twitch &amp; YouTube clips · 12 AI tools
+          🌱 Free forever · No credit card required · 7 social platforms · Twitch &amp; YouTube clips · 15+ AI tools
         </div>
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight text-gray-900 dark:text-gray-100">
           Social media management{' '}
           <span className="text-gray-400 dark:text-gray-500">without the $99/month price tag.</span>
         </h1>
         <p className="text-gray-500 dark:text-gray-400 text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
-          Schedule across 7 social platforms, browse and schedule Twitch clips and YouTube videos, write better content with 12 AI tools, and track what&apos;s actually working — all from one place.
+          Schedule across 7 social platforms, browse and schedule Twitch clips and YouTube videos, write better content with 15+ AI tools, and track what&apos;s actually working — all from one place.
           Free to start. Pro from $5/month.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
@@ -187,8 +187,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         {/* STATS */}
         <div className="grid grid-cols-3 gap-4 sm:gap-6 mt-12 sm:mt-16 max-w-2xl mx-auto">
           {[
-            { value: '5',   label: 'social platforms live' },
-            { value: '12',  label: 'AI tools included' },
+            { value: '7',   label: 'social platforms live' },
+            { value: '15+', label: 'AI tools included' },
             { value: '$0',  label: 'To get started'    },
           ].map(stat => (
             <div key={stat.label} className="text-center">
@@ -375,7 +375,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-12">
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">AI-Powered</p>
-            <h2 className="text-3xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">12 AI tools built in</h2>
+            <h2 className="text-3xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">15+ AI tools built in</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
               Every tool runs on Google Gemini. 50 credits included free every month —
               no separate AI subscription, no hidden costs. Credits exist to keep the service sustainable for everyone.
@@ -429,7 +429,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
           <div className="text-center">
             <Link href="/ai-features"
               className="inline-block bg-black text-white font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all text-sm">
-              See all 12 AI tools →
+              See all 15+ AI tools →
             </Link>
           </div>
         </div>

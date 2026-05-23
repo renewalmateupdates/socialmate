@@ -6,12 +6,12 @@ import Link from 'next/link'
 import { isDisposableEmail } from '@/lib/disposable-email-domains'
 
 const PERKS = [
-  '16 social platforms — all free',
-  'Unlimited scheduled posts',
+  '7 live platforms — more coming',
+  '100 posts/month free forever',
   'Bulk Scheduler & Calendar',
-  'Link in Bio builder',
-  'Team collaboration',
-  'Analytics & Best Times',
+  'SIGIL Link in Bio builder',
+  'Team collaboration (2 seats)',
+  'Analytics & Best Times heatmap',
 ]
 
 function SignupForm() {
@@ -102,11 +102,11 @@ function SignupForm() {
 
   if (done) {
     return (
-      <div className="min-h-dvh bg-theme flex flex-col">
-        <div className="border-b border-theme bg-surface px-8 py-4">
+      <div className="dark min-h-dvh bg-gray-950 flex flex-col">
+        <div className="border-b border-gray-800 bg-gray-900 px-8 py-4">
           <Link href="/" className="flex items-center gap-2 w-fit">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
-            <span className="font-bold text-base tracking-tight">SocialMate</span>
+            <img src="/logo.png" alt="SocialMate" className="w-7 h-7 rounded-lg" />
+            <span className="font-bold text-base tracking-tight text-white">SocialMate</span>
           </Link>
         </div>
         <div className="flex-1 flex items-center justify-center p-6">
@@ -126,11 +126,11 @@ function SignupForm() {
                 </p>
               </div>
             )}
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-2xl p-4 mb-6 text-left">
-              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-2">What's waiting for you</p>
+            <div className="bg-gray-800 rounded-2xl p-4 mb-6 text-left">
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">What's waiting for you</p>
               {PERKS.map(p => (
-                <div key={p} className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400 py-0.5">
-                  <span className="text-green-500 font-bold">✓</span> {p}
+                <div key={p} className="flex items-center gap-2 text-xs text-gray-400 py-0.5">
+                  <span className="text-amber-400 font-bold">✓</span> {p}
                 </div>
               ))}
             </div>
@@ -144,55 +144,55 @@ function SignupForm() {
   }
 
   return (
-    <div className="min-h-dvh bg-theme flex flex-col">
-      <div className="border-b border-theme bg-surface px-8 py-4 flex items-center justify-between">
+    <div className="dark min-h-dvh bg-gray-950 flex flex-col">
+      <div className="border-b border-gray-800 bg-gray-900 px-8 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
-          <span className="font-bold text-base tracking-tight">SocialMate</span>
+          <img src="/logo.png" alt="SocialMate" className="w-7 h-7 rounded-lg" />
+          <span className="font-bold text-base tracking-tight text-white">SocialMate</span>
         </Link>
-        <Link href="/login" className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-black transition-colors">
+        <Link href="/login" className="text-sm font-semibold text-gray-400 hover:text-white transition-colors">
           Already have an account? Sign in →
         </Link>
       </div>
 
       <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+        <div className="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
 
           {/* LEFT */}
           <div className="hidden md:block">
-            <div className="inline-flex items-center gap-2 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 text-xs font-bold px-3 py-1.5 rounded-full mb-6">
+            <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold px-3 py-1.5 rounded-full mb-6">
               🎉 Free forever · No credit card
             </div>
-            <h1 className="text-4xl font-extrabold tracking-tight leading-tight mb-4">
-              Professional tools shouldn't require a professional budget
+            <h1 className="text-4xl font-extrabold tracking-tight leading-tight mb-4 text-white">
+              Post everywhere.<br />All at once.
             </h1>
-            <p className="text-gray-400 dark:text-gray-500 mb-8 leading-relaxed">
-              Schedule to 16 platforms, manage your team, and grow your audience — completely free. No per-channel fees, no seat limits, no catch.
+            <p className="text-gray-400 mb-8 leading-relaxed">
+              Schedule to 7 live platforms, get 15+ AI tools, and grow your audience — completely free. No per-channel fees, no seat limits, no catch.
             </p>
             <div className="space-y-3 mb-8">
               {PERKS.map(perk => (
                 <div key={perk} className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-xs text-green-600 font-bold">✓</span>
+                  <div className="w-5 h-5 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                    <span className="text-xs text-amber-400 font-bold">✓</span>
                   </div>
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{perk}</span>
+                  <span className="text-sm font-medium text-gray-300">{perk}</span>
                 </div>
               ))}
             </div>
-            <div className="bg-gray-50 dark:bg-gray-800 border border-theme rounded-2xl p-5">
-              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">Part of the Mate Series</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+            <div className="bg-gray-800/60 border border-gray-700 rounded-2xl p-5 mb-4">
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Built by one person</p>
+              <p className="text-sm text-gray-400 leading-relaxed">
                 SocialMate is built on a simple belief: software should work for you, not extract from you. Free means free — not a 14-day trial, not a stripped-down version.
               </p>
             </div>
-            <div className="mt-4 flex items-center gap-3">
+            <div className="flex items-center gap-3 mb-5">
               <div className="flex -space-x-1.5">
                 {['🧑‍💻','👩‍🎨','🧑‍🎤','👨‍💼'].map((e, i) => (
-                  <div key={i} className="w-7 h-7 rounded-full bg-gray-200 dark:bg-gray-700 border-2 border-white dark:border-gray-900 flex items-center justify-center text-sm">{e}</div>
+                  <div key={i} className="w-7 h-7 rounded-full bg-gray-700 border-2 border-gray-900 flex items-center justify-center text-sm">{e}</div>
                 ))}
               </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                <span className="font-bold text-gray-700 dark:text-gray-300">30+ creators</span> already scheduling with SocialMate
+              <p className="text-xs text-gray-500">
+                <span className="font-bold text-gray-300">30+ creators</span> already scheduling with SocialMate
               </p>
             </div>
 
@@ -201,13 +201,13 @@ function SignupForm() {
               href="https://discord.gg/2se6FGrbRU"
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-5 flex items-center gap-3 p-4 rounded-2xl border border-indigo-200 dark:border-indigo-800/50 hover:border-indigo-400 dark:hover:border-indigo-600 transition-all group">
+              className="flex items-center gap-3 p-4 rounded-2xl border border-indigo-800/50 hover:border-indigo-600 bg-indigo-950/20 transition-all group mb-3">
               <div className="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0 text-white text-lg">💬</div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-gray-800 dark:text-gray-200">Join the Community</p>
-                <p className="text-xs text-gray-400 dark:text-gray-500">Connect with creators on Discord</p>
+                <p className="text-xs font-bold text-gray-200">Join the Community</p>
+                <p className="text-xs text-gray-500">Connect with creators on Discord</p>
               </div>
-              <span className="text-xs text-gray-300 dark:text-gray-600 group-hover:text-indigo-400 transition-colors font-bold flex-shrink-0">→</span>
+              <span className="text-xs text-gray-600 group-hover:text-indigo-400 transition-colors font-bold flex-shrink-0">→</span>
             </a>
 
             {/* Google Play beta */}
@@ -215,15 +215,15 @@ function SignupForm() {
               href="https://play.google.com/apps/testing/studio.socialmate.app"
               target="_blank"
               rel="noopener noreferrer"
-              className="mt-3 flex items-center gap-3 p-4 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-all group">
-              <div className="w-9 h-9 bg-black rounded-xl flex items-center justify-center flex-shrink-0">
+              className="flex items-center gap-3 p-4 rounded-2xl border border-gray-700 hover:border-gray-500 transition-all group">
+              <div className="w-9 h-9 bg-gray-800 rounded-xl flex items-center justify-center flex-shrink-0">
                 <svg viewBox="0 0 24 24" className="w-5 h-5 fill-white"><path d="M3.18 23.76c.37.21.8.22 1.18.06l12.29-7.08-2.85-2.85L3.18 23.76zm-1.6-19.7A2 2 0 0 0 1 5.6v12.8c0 .56.22 1.07.58 1.44l.08.07 7.18-7.18v-.17L1.58 4.06zm18.17 6.4-2.57-1.48-3.18 3.18 3.18 3.18 2.6-1.5c.74-.43.74-1.95-.03-2.38zM4.36.18 16.65 7.26l-2.85 2.85L3.54.23A1.4 1.4 0 0 1 4.36.18z"/></svg>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-gray-800 dark:text-gray-200">Android App — Join Beta</p>
-                <p className="text-xs text-gray-400 dark:text-gray-500">Get early access on Google Play</p>
+                <p className="text-xs font-bold text-gray-200">Android App — Join Beta</p>
+                <p className="text-xs text-gray-500">Get early access on Google Play</p>
               </div>
-              <span className="text-xs text-gray-300 dark:text-gray-600 group-hover:text-gray-500 transition-colors font-bold flex-shrink-0">→</span>
+              <span className="text-xs text-gray-600 group-hover:text-gray-400 transition-colors font-bold flex-shrink-0">→</span>
             </a>
           </div>
 
@@ -231,20 +231,20 @@ function SignupForm() {
           <div>
             {/* MOBILE HERO (shows only on small screens) */}
             <div className="md:hidden mb-6">
-              <div className="inline-flex items-center gap-2 bg-green-50 border border-green-200 text-green-700 text-xs font-bold px-3 py-1.5 rounded-full mb-4">
+              <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold px-3 py-1.5 rounded-full mb-4">
                 🎉 Free forever · No credit card
               </div>
-              <h1 className="text-2xl font-extrabold tracking-tight mb-2">
-                Professional tools,<br />zero cost
+              <h1 className="text-2xl font-extrabold tracking-tight mb-2 text-white">
+                Post everywhere.<br />All at once.
               </h1>
-              <p className="text-gray-400 dark:text-gray-500 text-sm mb-4 leading-relaxed">
-                Schedule to 16 platforms, get 12 AI tools, and grow your audience — completely free.
+              <p className="text-gray-400 text-sm mb-4 leading-relaxed">
+                Schedule to 7 platforms, get 15+ AI tools, and grow your audience — completely free.
               </p>
               <div className="grid grid-cols-2 gap-2 mb-4">
                 {PERKS.map(perk => (
-                  <div key={perk} className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 rounded-xl px-3 py-2">
-                    <span className="text-green-500 text-xs font-bold">✓</span>
-                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300 leading-tight">{perk}</span>
+                  <div key={perk} className="flex items-center gap-2 bg-gray-800 rounded-xl px-3 py-2">
+                    <span className="text-amber-400 text-xs font-bold">✓</span>
+                    <span className="text-xs font-medium text-gray-300 leading-tight">{perk}</span>
                   </div>
                 ))}
               </div>
@@ -252,19 +252,19 @@ function SignupForm() {
                 href="https://play.google.com/apps/testing/studio.socialmate.app"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-3 p-3 rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-gray-400 transition-all">
-                <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center flex-shrink-0">
+                className="flex items-center gap-3 p-3 rounded-2xl border border-gray-700 hover:border-gray-500 transition-all">
+                <div className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center flex-shrink-0">
                   <svg viewBox="0 0 24 24" className="w-4 h-4 fill-white"><path d="M3.18 23.76c.37.21.8.22 1.18.06l12.29-7.08-2.85-2.85L3.18 23.76zm-1.6-19.7A2 2 0 0 0 1 5.6v12.8c0 .56.22 1.07.58 1.44l.08.07 7.18-7.18v-.17L1.58 4.06zm18.17 6.4-2.57-1.48-3.18 3.18 3.18 3.18 2.6-1.5c.74-.43.74-1.95-.03-2.38zM4.36.18 16.65 7.26l-2.85 2.85L3.54.23A1.4 1.4 0 0 1 4.36.18z"/></svg>
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-gray-800 dark:text-gray-200">Android App — Join Beta</p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500">Get early access on Google Play</p>
+                  <p className="text-xs font-bold text-gray-200">Android App — Join Beta</p>
+                  <p className="text-xs text-gray-500">Get early access on Google Play</p>
                 </div>
               </a>
             </div>
 
-            <div className="bg-surface border border-theme rounded-3xl p-8">
-              <h2 className="text-lg font-extrabold tracking-tight mb-6 hidden md:block">Create your free account</h2>
+            <div className="bg-gray-900 border border-gray-700 rounded-3xl p-8">
+              <h2 className="text-lg font-extrabold tracking-tight mb-6 hidden md:block text-white">Create your free account</h2>
 
               {refCode && (
                 <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-xl px-4 py-3 mb-4">
@@ -278,7 +278,7 @@ function SignupForm() {
                 type="button"
                 onClick={() => setAgeConfirmed(a => !a)}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all mb-5 ${
-                  ageConfirmed ? 'border-green-400 bg-green-50 dark:bg-green-950/20 dark:border-green-600' : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-500'
+                  ageConfirmed ? 'border-green-500/60 bg-green-950/20' : 'border-gray-700 hover:border-gray-500'
                 }`}
               >
                 <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 border-2 transition-all ${
@@ -308,7 +308,7 @@ function SignupForm() {
               <button
                 onClick={handleGoogleSignup}
                 disabled={googleLoading}
-                className="w-full flex items-center justify-center gap-3 py-3 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-all disabled:opacity-50 mb-5"
+                className="w-full flex items-center justify-center gap-3 py-3 border border-gray-700 rounded-xl text-sm font-semibold text-gray-200 hover:bg-gray-800 transition-all disabled:opacity-50 mb-5"
               >
                 {googleLoading ? (
                   <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
@@ -345,7 +345,7 @@ function SignupForm() {
                     onChange={e => setEmail(e.target.value)}
                     placeholder="you@example.com"
                     autoFocus
-                    className="w-full px-4 py-3 text-base border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-gray-400 transition-colors"
+                    className="w-full px-4 py-3 text-base border border-gray-700 bg-gray-800 text-gray-100 rounded-xl focus:outline-none focus:border-amber-500/50 transition-colors placeholder:text-gray-600"
                   />
                 </div>
 
@@ -357,7 +357,7 @@ function SignupForm() {
                       value={password}
                       onChange={e => setPassword(e.target.value)}
                       placeholder="At least 6 characters"
-                      className="w-full px-4 py-3 text-base border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-gray-400 transition-colors pr-12"
+                      className="w-full px-4 py-3 text-base border border-gray-700 bg-gray-800 text-gray-100 rounded-xl focus:outline-none focus:border-amber-500/50 transition-colors pr-12 placeholder:text-gray-600"
                     />
                     <button
                       type="button"
@@ -388,12 +388,12 @@ function SignupForm() {
                     value={confirmPassword}
                     onChange={e => setConfirmPassword(e.target.value)}
                     placeholder="Same password again"
-                    className={`w-full px-4 py-3 text-base border rounded-xl focus:outline-none transition-colors ${
+                    className={`w-full px-4 py-3 text-base border rounded-xl focus:outline-none transition-colors bg-gray-800 text-gray-100 placeholder:text-gray-600 ${
                       confirmPassword && confirmPassword !== password
-                        ? 'border-red-300 focus:border-red-400'
+                        ? 'border-red-500/60 focus:border-red-400'
                         : confirmPassword && confirmPassword === password
-                        ? 'border-green-300 focus:border-green-400'
-                        : 'border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 focus:border-gray-400'
+                        ? 'border-green-500/60 focus:border-green-400'
+                        : 'border-gray-700 focus:border-amber-500/50'
                     }`}
                   />
                   {confirmPassword && confirmPassword === password && (
@@ -421,15 +421,15 @@ function SignupForm() {
               </form>
             </div>
 
-            <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-4">
+            <p className="text-center text-xs text-gray-500 mt-4">
               Already have an account?{' '}
-              <Link href="/login" className="font-bold text-black hover:underline">Sign in →</Link>
+              <Link href="/login" className="font-bold text-amber-400 hover:text-amber-300 transition-colors">Sign in →</Link>
             </p>
-            <p className="text-center text-xs text-gray-300 dark:text-gray-600 mt-2">
+            <p className="text-center text-xs text-gray-600 mt-2">
               By signing up you agree to our{' '}
-              <Link href="/terms" className="hover:text-gray-500 transition-colors">Terms</Link>
+              <Link href="/terms" className="hover:text-gray-400 transition-colors">Terms</Link>
               {' '}and{' '}
-              <Link href="/privacy" className="hover:text-gray-500 transition-colors">Privacy Policy</Link>
+              <Link href="/privacy" className="hover:text-gray-400 transition-colors">Privacy Policy</Link>
             </p>
           </div>
         </div>
