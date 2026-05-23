@@ -24,6 +24,11 @@ const AUDIENCES = [
   { label: '🎵 TikTok Creators',     href: '/for/tiktok-creators'    },
   { label: '🎬 Video Creators',      href: '/for/video-creators'     },
   { label: '💼 LinkedIn Creators',   href: '/for/linkedin-creators'  },
+  { label: '🏋️ Fitness Coaches',    href: '/for/fitness-coaches'    },
+  { label: '🎸 Musicians',           href: '/for/musicians'          },
+  { label: '🍕 Restaurants',         href: '/for/restaurants'        },
+  { label: '🏡 Real Estate',         href: '/for/real-estate'        },
+  { label: '❤️ Nonprofits',          href: '/for/nonprofits'         },
 ]
 
 const RESOURCES = [
