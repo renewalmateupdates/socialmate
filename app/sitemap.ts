@@ -631,6 +631,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/vs/social-report`,  lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/vs/khoros`,         lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/vs/talkwalker`,     lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/feedhive`,       lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
   ]
 
   const blogPosts: MetadataRoute.Sitemap = BLOG_SLUGS.map(slug => ({
