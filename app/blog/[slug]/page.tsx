@@ -4330,7 +4330,7 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { slug } = await params
   const post = POSTS[slug] ?? (await getDbPost(slug))
-  if (!post) return { title: 'Post not found — SocialMate Blog' }
+  if (!post) return { title: 'Coming Soon — SocialMate Blog' }
   return {
     title: `${post.title} — SocialMate Blog`,
     description: post.excerpt,
