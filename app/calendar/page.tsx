@@ -7,6 +7,18 @@ import Sidebar from '@/components/Sidebar'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 import { useI18n } from '@/contexts/I18nContext'
 import PageTour from '@/components/PageTour'
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  useDraggable,
+  useDroppable,
+} from '@dnd-kit/core'
 
 interface Post {
   id: string
@@ -134,6 +146,120 @@ function tagColorCalendar(tag: string): string {
   return COLORS[Math.abs(hash) % COLORS.length]
 }
 
+/** Draggable mini post pill in calendar grid cell */
+function DraggablePostPill({
+  post,
+  children,
+}: {
+  post: Post
+  children: React.ReactNode
+}) {
+  const canDrag = post.status === 'scheduled' || post.status === 'draft'
+  const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+    id: post.id,
+    disabled: !canDrag,
+    data: { post },
+  })
+  return (
+    <div
+      ref={setNodeRef}
+      className={`flex items-center gap-1 min-w-0 group/pill ${canDrag ? 'cursor-grab active:cursor-grabbing' : ''} ${isDragging ? 'opacity-40' : ''}`}
+      {...(canDrag ? { ...attributes, ...listeners } : {})}
+    >
+      {canDrag && (
+        <span className="opacity-0 group-hover/pill:opacity-60 transition-opacity flex-shrink-0 text-gray-400 dark:text-gray-500 touch-none select-none text-[8px] leading-none" aria-hidden>
+          ⋮⋮
+        </span>
+      )}
+      {children}
+    </div>
+  )
+}
+
+/** Each calendar cell — integrates useDroppable so the whole cell is a drop target */
+function CalendarDayCell({
+  day,
+  i,
+  currentMonth,
+  todayKey,
+  selectedDay,
+  onSelectDay,
+  dayPosts,
+}: {
+  day: Date
+  i: number
+  currentMonth: number
+  todayKey: string
+  selectedDay: string | null
+  onSelectDay: (key: string) => void
+  dayPosts: Post[]
+}) {
+  const key         = toDateKey(day)
+  const isCurrentMo = day.getMonth() === currentMonth
+  const isToday     = key === todayKey
+  const isSelected  = key === selectedDay
+  const visible     = dayPosts.slice(0, 3)
+  const overflow    = dayPosts.length - visible.length
+  const { setNodeRef, isOver } = useDroppable({ id: key })
+
+  return (
+    <div
+      ref={setNodeRef}
+      className={[
+        'relative text-left p-1.5 sm:p-2 border-b border-r border-theme transition-all min-h-[70px] sm:min-h-[85px]',
+        i % 7 === 6 ? 'border-r-0' : '',
+        isCurrentMo ? '' : 'opacity-40',
+        isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : '',
+        isOver ? 'bg-indigo-50 dark:bg-indigo-950/30 ring-2 ring-inset ring-indigo-400' : 'hover:bg-gray-50 dark:hover:bg-gray-800/40 cursor-pointer',
+      ].join(' ')}
+      onClick={() => onSelectDay(key)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={e => e.key === 'Enter' && onSelectDay(key)}
+    >
+      <div className="flex items-center justify-between mb-1">
+        <span className={[
+          'text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full',
+          isToday
+            ? 'bg-orange-500 text-white'
+            : isCurrentMo
+              ? 'text-gray-800 dark:text-gray-100'
+              : 'text-gray-400 dark:text-gray-600',
+        ].join(' ')}>
+          {day.getDate()}
+        </span>
+        {isSelected && <span className="text-[9px] text-blue-500 font-bold">▼</span>}
+      </div>
+
+      {/* Desktop: text pills */}
+      <div className="space-y-0.5 hidden sm:block">
+        {visible.map(post => (
+          <DraggablePostPill key={post.id} post={post}>
+            <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${STATUS_DOT[post.status] ?? STATUS_DOT.draft}`} />
+            <span className="text-[10px] text-gray-500 dark:text-gray-400 truncate leading-tight">
+              {post.platforms?.[0] ? (PLATFORM_ICONS[post.platforms[0]] ?? '') + ' ' : ''}
+              {post.content.slice(0, 16)}{post.content.length > 16 ? '…' : ''}
+            </span>
+          </DraggablePostPill>
+        ))}
+        {overflow > 0 && (
+          <span className="text-[10px] text-gray-400 dark:text-gray-500 font-semibold pl-2.5">+{overflow} more</span>
+        )}
+      </div>
+
+      {/* Mobile: dot indicators */}
+      {dayPosts.length > 0 && (
+        <div className="flex items-center gap-0.5 flex-wrap mt-0.5 sm:hidden">
+          {dayPosts.slice(0, 5).map(post => (
+            <span key={post.id} className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[post.status] ?? STATUS_DOT.draft}`} />
+          ))}
+          {dayPosts.length > 5 && <span className="text-[9px] text-gray-400 font-bold leading-none">+</span>}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function CalendarPage() {
   const router = useRouter()
   const { activeWorkspace, loading: wsLoading } = useWorkspace()
@@ -149,6 +275,63 @@ export default function CalendarPage() {
   const [retrying,     setRetrying]     = useState<string | null>(null)
   const [retryToast,   setRetryToast]   = useState<{ message: string; type: 'success' | 'error' } | null>(null)
   const [duplicating,  setDuplicating]  = useState<string | null>(null)
+  const [activeDragPost, setActiveDragPost] = useState<Post | null>(null)
+
+  const dragSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor,   { activationConstraint: { delay: 250, tolerance: 5 } }),
+  )
+
+  const handleDragStart = (event: DragStartEvent) => {
+    const post = event.active.data.current?.post as Post | undefined
+    if (post) setActiveDragPost(post)
+  }
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    setActiveDragPost(null)
+    const { active, over } = event
+    if (!over) return
+    const post = active.data.current?.post as Post | undefined
+    if (!post || !post.scheduled_at) return
+    const targetDateKey = over.id as string
+    const currentDateKey = toDateKey(new Date(post.scheduled_at))
+    if (targetDateKey === currentDateKey) return
+
+    // Parse target date and keep the same time
+    const [y, m, d] = targetDateKey.split('-').map(Number)
+    const orig = new Date(post.scheduled_at)
+    const newDate = new Date(y, m - 1, d, orig.getHours(), orig.getMinutes(), orig.getSeconds())
+    const newScheduledAt = newDate.toISOString()
+
+    // Optimistic update
+    setPosts(prev => prev.map(p => p.id === post.id ? { ...p, scheduled_at: newScheduledAt } : p))
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const token = session?.access_token
+      const res = await fetch(`/api/posts/${post.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({ scheduled_at: newScheduledAt }),
+      })
+      if (!res.ok) {
+        // Roll back
+        setPosts(prev => prev.map(p => p.id === post.id ? { ...p, scheduled_at: post.scheduled_at } : p))
+        setRetryToast({ message: 'Failed to reschedule post', type: 'error' })
+        setTimeout(() => setRetryToast(null), 3000)
+      } else {
+        setRetryToast({ message: 'Post rescheduled ✓', type: 'success' })
+        setTimeout(() => setRetryToast(null), 2500)
+      }
+    } catch {
+      setPosts(prev => prev.map(p => p.id === post.id ? { ...p, scheduled_at: post.scheduled_at } : p))
+      setRetryToast({ message: 'Network error — post not moved', type: 'error' })
+      setTimeout(() => setRetryToast(null), 3000)
+    }
+  }
 
   const handleRetry = async (postId: string) => {
     setRetrying(postId)
@@ -364,6 +547,11 @@ export default function CalendarPage() {
           </div>
 
           {/* Calendar grid */}
+          <DndContext
+            sensors={dragSensors}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
           <div id="calendar-grid" className="bg-surface border border-theme rounded-2xl overflow-hidden mb-4">
           <div className="overflow-x-auto"><div className="min-w-[320px]">
             <div className="grid grid-cols-7 border-b border-theme">
@@ -387,71 +575,34 @@ export default function CalendarPage() {
               </div>
             ) : (
               <div className="grid grid-cols-7">
-                {days.map((day, i) => {
-                  const key         = toDateKey(day)
-                  const isCurrentMo = day.getMonth() === currentMonth
-                  const isToday     = key === todayKey
-                  const isSelected  = key === selectedDay
-                  const dayPosts    = postMap[key] ?? []
-                  const visible     = dayPosts.slice(0, 3)
-                  const overflow    = dayPosts.length - visible.length
-                  return (
-                    <button
-                      key={i}
-                      onClick={() => setSelectedDay(isSelected ? null : key)}
-                      className={[
-                        'text-left p-1.5 sm:p-2 border-b border-r border-theme transition-all focus:outline-none min-h-[70px] sm:min-h-[85px]',
-                        i % 7 === 6 ? 'border-r-0' : '',
-                        isCurrentMo ? '' : 'opacity-40',
-                        isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-gray-50 dark:hover:bg-gray-800/40',
-                      ].join(' ')}>
-                      <div className="flex items-center justify-between mb-1">
-                        <span className={[
-                          'text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full',
-                          isToday
-                            ? 'bg-orange-500 text-white'
-                            : isCurrentMo
-                              ? 'text-gray-800 dark:text-gray-100'
-                              : 'text-gray-400 dark:text-gray-600',
-                        ].join(' ')}>
-                          {day.getDate()}
-                        </span>
-                        {isSelected && <span className="text-[9px] text-blue-500 font-bold">▼</span>}
-                      </div>
-
-                      {/* Desktop: text pills */}
-                      <div className="space-y-0.5 hidden sm:block">
-                        {visible.map(post => (
-                          <div key={post.id} className="flex items-center gap-1 min-w-0">
-                            <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${STATUS_DOT[post.status] ?? STATUS_DOT.draft}`} />
-                            <span className="text-[10px] text-gray-500 dark:text-gray-400 truncate leading-tight">
-                              {post.platforms?.[0] ? (PLATFORM_ICONS[post.platforms[0]] ?? '') + ' ' : ''}
-                              {post.content.slice(0, 16)}{post.content.length > 16 ? '…' : ''}
-                            </span>
-                          </div>
-                        ))}
-                        {overflow > 0 && (
-                          <span className="text-[10px] text-gray-400 dark:text-gray-500 font-semibold pl-2.5">+{overflow} more</span>
-                        )}
-                      </div>
-
-                      {/* Mobile: dot indicators */}
-                      {dayPosts.length > 0 && (
-                        <div className="flex items-center gap-0.5 flex-wrap mt-0.5 sm:hidden">
-                          {dayPosts.slice(0, 5).map(post => (
-                            <span key={post.id} className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[post.status] ?? STATUS_DOT.draft}`} />
-                          ))}
-                          {dayPosts.length > 5 && <span className="text-[9px] text-gray-400 font-bold leading-none">+</span>}
-                        </div>
-                      )}
-                    </button>
-                  )
-                })}
+                {days.map((day, i) => (
+                  <CalendarDayCell
+                    key={i}
+                    day={day}
+                    i={i}
+                    currentMonth={currentMonth}
+                    todayKey={todayKey}
+                    selectedDay={selectedDay}
+                    onSelectDay={key => setSelectedDay(selectedDay === key ? null : key)}
+                    dayPosts={postMap[toDateKey(day)] ?? []}
+                  />
+                ))}
               </div>
             )}
           </div>{/* end min-w */}
           </div>{/* end overflow-x-auto */}
           </div>
+
+          {/* Drag overlay — shows a floating ghost while dragging */}
+          <DragOverlay>
+            {activeDragPost && (
+              <div className="bg-white dark:bg-gray-900 border border-indigo-300 dark:border-indigo-700 rounded-lg px-2 py-1 shadow-lg text-[11px] font-semibold text-gray-700 dark:text-gray-200 max-w-[120px] truncate pointer-events-none">
+                {activeDragPost.platforms?.[0] ? (PLATFORM_ICONS[activeDragPost.platforms[0]] ?? '') + ' ' : ''}
+                {activeDragPost.content.slice(0, 24)}{activeDragPost.content.length > 24 ? '…' : ''}
+              </div>
+            )}
+          </DragOverlay>
+          </DndContext>
 
           {/* Empty state */}
           {!loading && !monthHasPosts && (() => {

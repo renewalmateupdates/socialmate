@@ -3,7 +3,7 @@ import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
-  title: 'SocialMate vs Everyone — 52+ Competitor Comparisons (2026)',
+  title: 'SocialMate vs Everyone — 53+ Competitor Comparisons (2026)',
   description: 'See how SocialMate compares to Hootsuite, Buffer, Taplio, Shield App, Canva, Kontentino, Gain, and 48+ more. Honest feature comparisons. Free plan, no credit card required.',
   openGraph: {
     title:       'SocialMate vs Every Competitor (2026)',
@@ -455,6 +455,15 @@ const COMPARISONS = [
     tag:         'Listening only, $9,600+/year',
     tagColor:    'bg-red-50 text-red-600',
   },
+  {
+    slug:        'feedhive',
+    name:        'FeedHive',
+    emoji:       '🐝',
+    headline:    "FeedHive starts at $19/month — no free plan, no Discord or Telegram",
+    angle:       "AI-assisted scheduling with no Discord, Telegram, Bluesky, or TikTok support. No free plan either. SocialMate covers 7 platforms with 12 AI tools and SOMA — starting free.",
+    tag:         'Limited platforms, no free plan',
+    tagColor:    'bg-yellow-50 text-yellow-600',
+  },
 ]
 
 const SOCIALMATE_WINS = [
@@ -502,7 +511,7 @@ export default function VsIndex() {
             Honest, detailed comparisons. No fluff. We break down pricing, free plans, feature limits,
             and who each tool is actually built for — so you can pick the right one.
           </p>
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">Updated May 2026 · Now includes Taplio, Shield App, and all 50+ comparisons</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">Updated May 2026 · Now includes FeedHive, Taplio, Shield App, and all 53+ comparisons</p>
         </div>
 
         {/* WHY SOCIALMATE WINS */}
