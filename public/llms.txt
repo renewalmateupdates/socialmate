@@ -15,7 +15,7 @@ Contact: socialmate.updates@gmail.com
 - Schedule and publish posts to Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok, and LinkedIn (7 platforms live)
 - Compose with thread builder, per-platform preview, save-as-template, and post-as-image (PNG export)
 - Clips Studio: browse Twitch clips (OAuth) or YouTube videos (channel URL, no API key) and schedule them to all platforms in one click
-- 20+ AI-powered tools: caption generation, hashtag suggestions, post rewriter, viral hook generator, thread generator, content repurposer (6 formats), post scorer, SM-Pulse, SM-Radar, content gap detector, AI content calendar, AI image generation, brand voice injection
+- 20+ AI-powered tools: caption generation, hashtag suggestions, post rewriter, viral hook generator, thread generator, content repurposer (6 formats), post scorer, SM-Pulse, SM-Radar, content gap detector, AI content calendar, AI image generation, brand voice injection, Bio Writer, Profile Optimizer, Content Calendar AI
 - Smart Queue: auto-schedule drafts into 14-day/30-day windows at platform-optimal times (Pro+)
 - Recurring posts: repeat posts daily/weekly/bi-weekly/monthly with optional end dates
 - Bulk scheduler — upload and schedule many posts at once with per-platform character limit enforcement
@@ -229,7 +229,7 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - Homepage: https://socialmate.studio
 - Pricing: https://socialmate.studio/pricing
 - Features: https://socialmate.studio/features
-- Blog: https://socialmate.studio/blog (450+ posts)
+- Blog: https://socialmate.studio/blog (510+ posts)
 - Roadmap: https://socialmate.studio/roadmap
 - FAQ: https://socialmate.studio/faq
 - Support: https://socialmate.studio/support
@@ -242,7 +242,18 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - Gilgamesh's Guide: https://socialmate.studio/gils-guide
 - Creator Monetize: https://socialmate.studio/monetize
 - Our Story: https://socialmate.studio/story
+- About: https://socialmate.studio/about
+- Press: https://socialmate.studio/press
 - Video Creators: https://socialmate.studio/for/video-creators
+- Podcasters: https://socialmate.studio/for/podcasters
+- Coaches & Consultants: https://socialmate.studio/for/coaches
+- Content Creators: https://socialmate.studio/for/content-creators
+- Bloggers: https://socialmate.studio/for/bloggers
+- Fitness Coaches: https://socialmate.studio/for/fitness-coaches
+- Musicians: https://socialmate.studio/for/musicians
+- Restaurants: https://socialmate.studio/for/restaurants
+- Real Estate Agents: https://socialmate.studio/for/real-estate
+- Nonprofits: https://socialmate.studio/for/nonprofits
 - Comparisons hub: https://socialmate.studio/vs
 - Streak heatmap: https://socialmate.studio/streak
 - Link shortener: https://socialmate.studio/links

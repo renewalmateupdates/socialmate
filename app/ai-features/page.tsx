@@ -144,6 +144,39 @@ function RepurposeCard({ credits, setCredits, applyCredits }: {
   )
 }
 
+const PROFILE_TOOLS = [
+  {
+    emoji: '✍️',
+    label: 'Bio Writer',
+    credits: '5 credits',
+    what: 'Generate a platform-optimized bio for X, LinkedIn, Instagram, TikTok, Bluesky, or a general bio — tailored to your tone and keywords.',
+    how: 'Powered by Gemini 2.5-flash. Knows every platform\'s character limit and style. Choose your tone (Professional, Casual, Bold, Playful, Authentic) and get a bio ready to paste.',
+    href: '/ai-features/bio-writer',
+    available: true,
+    proOnly: false,
+  },
+  {
+    emoji: '🔍',
+    label: 'Profile Optimizer',
+    credits: '5 credits',
+    what: 'Paste your current bio and get an AI score (0–100), 3 specific improvements, and a fully rewritten version aligned to your goal.',
+    how: 'Gemini scores your bio against clarity, hook strength, keyword presence, CTA, personality, and platform fit. Scores under 50 = Needs Work. Over 70 = Strong.',
+    href: '/ai-features/profile-optimizer',
+    available: true,
+    proOnly: false,
+  },
+  {
+    emoji: '📅',
+    label: 'Content Calendar AI',
+    credits: '5 credits',
+    what: 'Generate a structured 30-day content plan with daily themes, post ideas, caption hooks, and platform recommendations.',
+    how: 'Pick your niche, platforms, posts-per-day (1–3), tone, and goals. AI builds a full month of varied content — rotating 14 themes — ready to execute.',
+    href: '/ai-features/content-calendar',
+    available: true,
+    proOnly: false,
+  },
+]
+
 const AI_TOOLS = [
   {
     emoji: '✍️',
@@ -518,6 +551,8 @@ export default function AIFeaturesPage() {
             <h2 className="text-base font-extrabold text-gray-900 dark:text-gray-100 mb-4">{t('app_ai_features.content_repurpose')}</h2>
             <RepurposeCard credits={credits} setCredits={setCredits} applyCredits={applyCredits} />
           </div>
+
+          <Section title="Profile & Content Planning" tools={PROFILE_TOOLS} plan={plan} />
 
           <div className="bg-gradient-to-r from-[#010101] via-[#161616] to-[#010101] border border-gray-800 rounded-2xl p-5 mb-6 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">

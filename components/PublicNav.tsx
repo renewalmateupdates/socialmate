@@ -29,6 +29,10 @@ const AUDIENCES = [
   { label: '🍕 Restaurants',         href: '/for/restaurants'        },
   { label: '🏡 Real Estate',         href: '/for/real-estate'        },
   { label: '❤️ Nonprofits',          href: '/for/nonprofits'         },
+  { label: '🎙️ Podcasters',          href: '/for/podcasters'         },
+  { label: '🧑‍💼 Coaches',             href: '/for/coaches'            },
+  { label: '✍️ Content Creators',    href: '/for/content-creators'   },
+  { label: '📝 Bloggers',            href: '/for/bloggers'           },
 ]
 
 const RESOURCES = [
@@ -36,6 +40,8 @@ const RESOURCES = [
   { label: "📚 Gilgamesh's Guides", href: '/guides'    },
   { label: '❓ FAQ',                href: '/faq'       },
   { label: '📋 Changelog',          href: '/changelog' },
+  { label: '🏢 About',             href: '/about'     },
+  { label: '📣 Press',             href: '/press'     },
 ]
 
 type DropdownKey = 'audiences' | 'resources'
