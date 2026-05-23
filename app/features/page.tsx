@@ -7,7 +7,7 @@ const FEATURE_CATEGORIES = [
   {
     category: 'AI Tools',
     emoji: '🤖',
-    desc: '12 AI tools powered by Google Gemini. Credits included on every plan.',
+    desc: '15+ AI tools powered by Google Gemini. Credits included on every plan.',
     features: [
       {
         name: 'Caption Generator',

@@ -119,18 +119,18 @@ function LoginInner() {
   // ── 2FA challenge screen ──
   if (mfaRequired) {
     return (
-      <div className="min-h-dvh bg-theme flex flex-col">
-        <div className="border-b border-theme bg-surface px-8 py-4">
+      <div className="dark min-h-dvh bg-gray-950 flex flex-col">
+        <div className="border-b border-gray-800 bg-gray-900 px-8 py-4">
           <Link href="/" className="flex items-center gap-2 w-fit">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
-            <span className="font-bold text-base tracking-tight">SocialMate</span>
+            <img src="/logo.png" alt="SocialMate" className="w-7 h-7 rounded-lg" />
+            <span className="font-bold text-base tracking-tight text-white">SocialMate</span>
           </Link>
         </div>
         <div className="flex-1 flex items-center justify-center p-6">
-          <div className="bg-surface border border-theme rounded-3xl p-10 w-full max-w-md text-center">
+          <div className="bg-gray-900 border border-gray-700 rounded-3xl p-10 w-full max-w-md text-center">
             <div className="text-5xl mb-5">🔐</div>
-            <h1 className="text-2xl font-extrabold tracking-tight mb-2">Two-factor authentication</h1>
-            <p className="text-gray-400 dark:text-gray-500 text-sm mb-8">Open your authenticator app and enter the 6-digit code.</p>
+            <h1 className="text-2xl font-extrabold tracking-tight mb-2 text-white">Two-factor authentication</h1>
+            <p className="text-gray-400 text-sm mb-8">Open your authenticator app and enter the 6-digit code.</p>
 
             <input
               type="text"
@@ -140,12 +140,12 @@ function LoginInner() {
               onChange={e => setMfaCode(e.target.value.replace(/\D/g, ''))}
               placeholder="000000"
               autoFocus
-              className="w-full px-4 py-4 text-2xl font-mono text-center tracking-widest border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-gray-400 transition-colors mb-4"
+              className="w-full px-4 py-4 text-2xl font-mono text-center tracking-widest border border-gray-700 bg-gray-800 text-gray-100 rounded-xl focus:outline-none focus:border-amber-500/50 transition-colors mb-4"
             />
 
             {error && (
-              <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-4">
-                <p className="text-xs font-semibold text-red-500">❌ {error}</p>
+              <div className="bg-red-950/40 border border-red-800 rounded-xl px-4 py-3 mb-4">
+                <p className="text-xs font-semibold text-red-400">❌ {error}</p>
               </div>
             )}
 
@@ -161,7 +161,7 @@ function LoginInner() {
 
             <button
               onClick={() => { setMfaRequired(false); setMfaCode(''); setError('') }}
-              className="text-xs text-gray-400 dark:text-gray-500 hover:text-black transition-colors font-semibold"
+              className="text-xs text-gray-500 hover:text-gray-300 transition-colors font-semibold"
             >
               ← Back to login
             </button>
@@ -174,23 +174,23 @@ function LoginInner() {
   // ── Magic link sent screen ──
   if (magicSent) {
     return (
-      <div className="min-h-dvh bg-theme flex flex-col">
-        <div className="border-b border-theme bg-surface px-8 py-4">
+      <div className="dark min-h-dvh bg-gray-950 flex flex-col">
+        <div className="border-b border-gray-800 bg-gray-900 px-8 py-4">
           <Link href="/" className="flex items-center gap-2 w-fit">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
-            <span className="font-bold text-base tracking-tight">SocialMate</span>
+            <img src="/logo.png" alt="SocialMate" className="w-7 h-7 rounded-lg" />
+            <span className="font-bold text-base tracking-tight text-white">SocialMate</span>
           </Link>
         </div>
         <div className="flex-1 flex items-center justify-center p-6">
-          <div className="bg-surface border border-theme rounded-3xl p-10 w-full max-w-md text-center">
+          <div className="bg-gray-900 border border-gray-700 rounded-3xl p-10 w-full max-w-md text-center">
             <div className="text-6xl mb-6">📬</div>
-            <h1 className="text-2xl font-extrabold tracking-tight mb-3">Check your inbox</h1>
-            <p className="text-gray-400 dark:text-gray-500 text-sm mb-2">We sent a magic link to</p>
-            <p className="font-bold text-sm mb-6">{email}</p>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mb-8">Click the link in the email to sign in instantly. No password needed.</p>
+            <h1 className="text-2xl font-extrabold tracking-tight mb-3 text-white">Check your inbox</h1>
+            <p className="text-gray-400 text-sm mb-2">We sent a magic link to</p>
+            <p className="font-bold text-sm mb-6 text-white">{email}</p>
+            <p className="text-xs text-gray-500 mb-8">Click the link in the email to sign in instantly. No password needed.</p>
             <button
               onClick={() => { setMagicSent(false); setMode('password') }}
-              className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-black transition-colors"
+              className="text-sm font-semibold text-gray-500 hover:text-gray-300 transition-colors"
             >
               ← Try a different method
             </button>
@@ -202,13 +202,13 @@ function LoginInner() {
 
   // ── Main login screen ──
   return (
-    <div className="min-h-dvh bg-theme flex flex-col">
-      <div className="border-b border-theme bg-surface px-8 py-4 flex items-center justify-between">
+    <div className="dark min-h-dvh bg-gray-950 flex flex-col">
+      <div className="border-b border-gray-800 bg-gray-900 px-8 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
-          <span className="font-bold text-base tracking-tight">SocialMate</span>
+          <img src="/logo.png" alt="SocialMate" className="w-7 h-7 rounded-lg" />
+          <span className="font-bold text-base tracking-tight text-white">SocialMate</span>
         </Link>
-        <Link href="/signup" className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-black transition-colors">
+        <Link href="/signup" className="text-sm font-semibold text-gray-400 hover:text-white transition-colors">
           No account? Sign up free →
         </Link>
       </div>
@@ -217,17 +217,17 @@ function LoginInner() {
         <div className="w-full max-w-md">
 
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-extrabold tracking-tight mb-2">Welcome back</h1>
-            <p className="text-gray-400 dark:text-gray-500 text-sm">Sign in to your SocialMate account</p>
+            <h1 className="text-3xl font-extrabold tracking-tight mb-2 text-white">Welcome back</h1>
+            <p className="text-gray-400 text-sm">Sign in to your SocialMate account</p>
           </div>
 
-          <div className="bg-surface border border-theme rounded-3xl p-8">
+          <div className="bg-gray-900 border border-gray-700 rounded-3xl p-8">
 
             {/* Google Button */}
             <button
               onClick={handleGoogleLogin}
               disabled={googleLoading}
-              className="w-full flex items-center justify-center gap-3 py-3 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-semibold hover:bg-gray-50 dark:hover:bg-gray-800 transition-all disabled:opacity-50 mb-5"
+              className="w-full flex items-center justify-center gap-3 py-3 border border-gray-700 rounded-xl text-sm font-semibold text-gray-200 hover:bg-gray-800 transition-all disabled:opacity-50 mb-5"
             >
               {googleLoading ? (
                 <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
@@ -243,28 +243,28 @@ function LoginInner() {
             </button>
 
             {/* Google auth domain note */}
-            <p className="text-[11px] text-gray-400 dark:text-gray-500 text-center -mt-3 mb-4 leading-relaxed">
+            <p className="text-[11px] text-gray-500 text-center -mt-3 mb-4 leading-relaxed">
               Google may show an unfamiliar URL during sign-in — that&apos;s our auth provider, not a third party.{' '}
-              <Link href="/give" className="underline hover:text-gray-600 dark:hover:text-gray-300 transition-colors">Help us upgrade</Link>
+              <Link href="/give" className="underline hover:text-gray-400 transition-colors">Help us upgrade</Link>
             </p>
 
             {/* Divider */}
             <div className="flex items-center gap-3 mb-5">
-              <div className="flex-1 h-px bg-gray-100 dark:bg-gray-700" />
-              <span className="text-xs text-gray-400 dark:text-gray-500 font-medium">or</span>
-              <div className="flex-1 h-px bg-gray-100 dark:bg-gray-700" />
+              <div className="flex-1 h-px bg-gray-700" />
+              <span className="text-xs text-gray-500 font-medium">or</span>
+              <div className="flex-1 h-px bg-gray-700" />
             </div>
 
-            <div className="flex items-center gap-1 bg-gray-50 dark:bg-gray-800 rounded-xl p-1 mb-6">
+            <div className="flex items-center gap-1 bg-gray-800 rounded-xl p-1 mb-6">
               <button
                 onClick={() => { setMode('password'); setError('') }}
-                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${mode === 'password' ? 'bg-white dark:bg-gray-700 text-black dark:text-gray-100 shadow-sm' : 'text-gray-400 dark:text-gray-500 hover:text-black'}`}
+                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${mode === 'password' ? 'bg-gray-700 text-gray-100 shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
               >
                 🔑 Password
               </button>
               <button
                 onClick={() => { setMode('magic'); setError('') }}
-                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${mode === 'magic' ? 'bg-white dark:bg-gray-700 text-black dark:text-gray-100 shadow-sm' : 'text-gray-400 dark:text-gray-500 hover:text-black'}`}
+                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${mode === 'magic' ? 'bg-gray-700 text-gray-100 shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
               >
                 ✨ Magic Link
               </button>
@@ -272,7 +272,7 @@ function LoginInner() {
 
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">Email</label>
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">Email</label>
                 <input
                   type="email"
                   name="email"
@@ -281,15 +281,15 @@ function LoginInner() {
                   onChange={e => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   autoFocus
-                  className="w-full px-4 py-3 text-base border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-gray-400 transition-colors"
+                  className="w-full px-4 py-3 text-base border border-gray-700 bg-gray-800 text-gray-100 rounded-xl focus:outline-none focus:border-amber-500/50 transition-colors placeholder:text-gray-600"
                 />
               </div>
 
               {mode === 'password' && (
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Password</label>
-                    <Link href="/forgot-password" className="text-xs text-gray-400 dark:text-gray-500 hover:text-black transition-colors">
+                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Password</label>
+                    <Link href="/forgot-password" className="text-xs text-gray-500 hover:text-amber-400 transition-colors">
                       Forgot password?
                     </Link>
                   </div>
@@ -301,12 +301,12 @@ function LoginInner() {
                       value={password}
                       onChange={e => setPassword(e.target.value)}
                       placeholder="Your password"
-                      className="w-full px-4 py-3 text-base border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-gray-400 transition-colors pr-12"
+                      className="w-full px-4 py-3 text-base border border-gray-700 bg-gray-800 text-gray-100 rounded-xl focus:outline-none focus:border-amber-500/50 transition-colors pr-12 placeholder:text-gray-600"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(p => !p)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 hover:text-black transition-colors text-xs font-semibold"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors text-xs font-semibold"
                     >
                       {showPassword ? 'Hide' : 'Show'}
                     </button>
@@ -315,14 +315,14 @@ function LoginInner() {
               )}
 
               {mode === 'magic' && (
-                <div className="bg-blue-50 border border-blue-100 rounded-xl p-3">
-                  <p className="text-xs text-blue-600 font-medium">We'll email you a one-click sign-in link. No password needed.</p>
+                <div className="bg-blue-950/30 border border-blue-800/50 rounded-xl p-3">
+                  <p className="text-xs text-blue-400 font-medium">We'll email you a one-click sign-in link. No password needed.</p>
                 </div>
               )}
 
               {error && (
-                <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3">
-                  <p className="text-xs font-semibold text-red-500">❌ {error}</p>
+                <div className="bg-red-950/40 border border-red-800 rounded-xl px-4 py-3">
+                  <p className="text-xs font-semibold text-red-400">❌ {error}</p>
                 </div>
               )}
 
@@ -343,14 +343,14 @@ function LoginInner() {
             </form>
           </div>
 
-          <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-6">
-            Don't have an account?{' '}
-            <Link href="/signup" className="font-bold text-black hover:underline">
+          <p className="text-center text-xs text-gray-500 mt-6">
+            Don&apos;t have an account?{' '}
+            <Link href="/signup" className="font-bold text-amber-400 hover:text-amber-300 transition-colors">
               Sign up free →
             </Link>
           </p>
 
-          <p className="text-center text-xs text-gray-300 dark:text-gray-600 mt-3">
+          <p className="text-center text-xs text-gray-700 mt-3">
             By signing in you agree to our{' '}
             <Link href="/terms" className="hover:text-gray-500 transition-colors">Terms</Link>
             {' '}and{' '}
