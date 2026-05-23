@@ -22,6 +22,13 @@ interface ChangelogEntry {
 const CHANGELOG: ChangelogEntry[] = [
   {
     date: 'May 22, 2026',
+    version: 'FeedHive Comparison Page',
+    changes: [
+      { type: 'New', text: 'vs/FeedHive — new competitor comparison page covering pricing, platform gaps (no Discord, Telegram, Bluesky, or TikTok), and AI tool comparison. Sitemap and llms.txt updated.' },
+    ],
+  },
+  {
+    date: 'May 22, 2026',
     version: 'Hashtag Collections, Zapier Webhooks, Roadmap Green',
     changes: [
       { type: 'New',      text: 'Hashtag Collections — save and reuse named hashtag sets. Manage collections at /hashtag-collections. Compose now has AI Suggest / My Collections tabs in the hashtag panel — "Add all" inserts a full collection with no-duplicate check.' },
