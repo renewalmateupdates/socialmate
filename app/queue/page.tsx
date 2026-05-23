@@ -277,6 +277,29 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
   )
 }
 
+// Days offset helpers for bulk reschedule
+const RESCHEDULE_OPTIONS: { label: string; days: number }[] = [
+  { label: '1 day',   days: 1  },
+  { label: '2 days',  days: 2  },
+  { label: '3 days',  days: 3  },
+  { label: '1 week',  days: 7  },
+  { label: '2 weeks', days: 14 },
+]
+
+const LIVE_PLATFORMS = ['bluesky', 'discord', 'telegram', 'mastodon', 'twitter', 'tiktok', 'linkedin'] as const
+const PLATFORM_FILTER_LABELS: Record<string, string> = {
+  bluesky:  'Bluesky',
+  discord:  'Discord',
+  telegram: 'Telegram',
+  mastodon: 'Mastodon',
+  twitter:  'X/Twitter',
+  tiktok:   'TikTok',
+  linkedin: 'LinkedIn',
+}
+
+const STATUS_OPTIONS = ['scheduled', 'draft', 'published', 'failed'] as const
+type StatusOption = typeof STATUS_OPTIONS[number]
+
 function QueueInner() {
   const [posts, setPosts]               = useState<any[]>([])
   const [partialPosts, setPartialPosts] = useState<any[]>([])
@@ -290,6 +313,13 @@ function QueueInner() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [duplicating, setDuplicating]   = useState<string | null>(null)
   const [tagFilter, setTagFilter]       = useState<string>('all')
+  // Search + platform/status filters
+  const [searchQuery, setSearchQuery]       = useState<string>('')
+  const [platformFilter, setPlatformFilter] = useState<string>('all')
+  const [statusFilter, setStatusFilter]     = useState<string>('all')
+  // Bulk reschedule
+  const [showRescheduleBar, setShowRescheduleBar] = useState(false)
+  const [rescheduleOffset, setRescheduleOffset]   = useState<number>(1)
   const router      = useRouter()
   const searchParams = useSearchParams()
   const targetDate  = searchParams.get('date')
@@ -553,6 +583,49 @@ function QueueInner() {
     setShowDeleteConfirm(true)
   }
 
+  const handleBulkReschedule = async () => {
+    if (!selectedIds.size) return
+    setBulkWorking(true)
+    const { data: { session } } = await supabase.auth.getSession()
+    const token = session?.access_token
+    const ids = Array.from(selectedIds)
+    // Build updated scheduled_at for each post: shift by rescheduleOffset days
+    const postsToReschedule = posts.filter(p => selectedIds.has(p.id))
+    const results = await Promise.all(
+      postsToReschedule.map(async post => {
+        const base = post.scheduled_at ? new Date(post.scheduled_at) : new Date()
+        base.setDate(base.getDate() + rescheduleOffset)
+        const newScheduledAt = base.toISOString()
+        const res = await fetch(`/api/posts/${post.id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
+          body: JSON.stringify({ scheduled_at: newScheduledAt }),
+        })
+        return { id: post.id, ok: res.ok, scheduled_at: newScheduledAt }
+      })
+    )
+    const succeeded = results.filter(r => r.ok)
+    if (succeeded.length > 0) {
+      const map = Object.fromEntries(succeeded.map(r => [r.id, r.scheduled_at]))
+      setPosts(prev =>
+        prev
+          .map(p => map[p.id] ? { ...p, scheduled_at: map[p.id] } : p)
+          .sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())
+      )
+      setSelectedIds(new Set())
+      setShowRescheduleBar(false)
+      const label = RESCHEDULE_OPTIONS.find(o => o.days === rescheduleOffset)?.label ?? `${rescheduleOffset} days`
+      showToast(`${succeeded.length} post${succeeded.length !== 1 ? 's' : ''} moved forward ${label}`, 'success')
+    }
+    if (succeeded.length < ids.length) {
+      showToast('Some posts could not be rescheduled', 'error')
+    }
+    setBulkWorking(false)
+  }
+
   const confirmBulkDelete = async () => {
     setShowDeleteConfirm(false)
     setBulkWorking(true)
@@ -619,8 +692,20 @@ function QueueInner() {
   // Collect all unique tags across all posts
   const allTags = Array.from(new Set(posts.flatMap(p => p.tags || []))) as string[]
 
-  // Filter posts by selected tag before grouping
-  const filteredPosts = tagFilter === 'all' ? posts : posts.filter(p => (p.tags || []).includes(tagFilter))
+  // Determine if any filter is active
+  const hasActiveFilter = searchQuery.trim() !== '' || platformFilter !== 'all' || statusFilter !== 'all' || tagFilter !== 'all'
+
+  // Filter posts by search, platform, status, and tag before grouping
+  const filteredPosts = posts.filter(p => {
+    if (tagFilter !== 'all' && !(p.tags || []).includes(tagFilter)) return false
+    if (platformFilter !== 'all' && !(p.platforms || []).includes(platformFilter)) return false
+    if (statusFilter !== 'all' && p.status !== statusFilter) return false
+    if (searchQuery.trim() !== '') {
+      const q = searchQuery.trim().toLowerCase()
+      if (!(p.content || '').toLowerCase().includes(q)) return false
+    }
+    return true
+  })
 
   const grouped  = groupByDate(filteredPosts)
   const dateKeys = Object.keys(grouped).sort((a, b) => {
@@ -665,6 +750,13 @@ function QueueInner() {
                         disabled={bulkWorking}
                         className="text-xs font-semibold text-red-400 hover:text-red-600 transition-colors disabled:opacity-40">
                         {t('app_common.delete')}
+                      </button>
+                      <span className="text-gray-300 dark:text-gray-600">·</span>
+                      <button
+                        onClick={() => setShowRescheduleBar(v => !v)}
+                        disabled={bulkWorking}
+                        className="text-xs font-semibold text-indigo-500 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors disabled:opacity-40">
+                        Reschedule →
                       </button>
                       <span className="text-gray-300 dark:text-gray-600">·</span>
                       <button
@@ -715,6 +807,86 @@ function QueueInner() {
             </div>
           </div>
 
+          {/* Search input */}
+          {!loading && posts.length > 0 && (
+            <div className="mb-3">
+              <div className="relative">
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 w-3.5 h-3.5 pointer-events-none" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                </svg>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="Search posts..."
+                  className="w-full pl-9 pr-8 py-2 text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-amber-400/40 focus:border-amber-400 transition-all"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors text-base leading-none font-bold">
+                    ×
+                  </button>
+                )}
+              </div>
+              {searchQuery.trim() && (
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1 pl-1">
+                  {filteredPosts.length} result{filteredPosts.length !== 1 ? 's' : ''} for &ldquo;{searchQuery.trim()}&rdquo;
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Platform + Status filters */}
+          {!loading && posts.length > 0 && (
+            <div className="flex items-center gap-2 mb-3 flex-wrap">
+              {/* Platform filter */}
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <button
+                  onClick={() => setPlatformFilter('all')}
+                  className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition-all ${platformFilter === 'all' ? 'bg-black text-white border-black dark:bg-white dark:text-black' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-400'}`}>
+                  All Platforms
+                </button>
+                {LIVE_PLATFORMS.map(p => {
+                  const hasThisPlatform = posts.some(post => (post.platforms || []).includes(p))
+                  if (!hasThisPlatform) return null
+                  return (
+                    <button
+                      key={p}
+                      onClick={() => setPlatformFilter(platformFilter === p ? 'all' : p)}
+                      className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition-all ${platformFilter === p ? 'bg-black text-white border-black dark:bg-white dark:text-black' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-400'}`}>
+                      {PLATFORM_ICONS[p]} {PLATFORM_FILTER_LABELS[p]}
+                    </button>
+                  )
+                })}
+              </div>
+              {/* Status filter */}
+              <div className="w-px h-4 bg-gray-200 dark:bg-gray-700 hidden sm:block" />
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <button
+                  onClick={() => setStatusFilter('all')}
+                  className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition-all ${statusFilter === 'all' ? 'bg-black text-white border-black dark:bg-white dark:text-black' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-400'}`}>
+                  All
+                </button>
+                {STATUS_OPTIONS.map(s => (
+                  <button
+                    key={s}
+                    onClick={() => setStatusFilter(statusFilter === s ? 'all' : s as StatusOption)}
+                    className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition-all capitalize ${statusFilter === s ? 'bg-black text-white border-black dark:bg-white dark:text-black' : 'border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:border-gray-400'}`}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+              {hasActiveFilter && (platformFilter !== 'all' || statusFilter !== 'all') && (
+                <button
+                  onClick={() => { setPlatformFilter('all'); setStatusFilter('all') }}
+                  className="text-xs font-semibold text-gray-400 hover:text-red-500 dark:hover:text-red-400 transition-colors ml-1">
+                  Clear filters
+                </button>
+              )}
+            </div>
+          )}
+
           {/* Tag filter */}
           {allTags.length > 0 && (
             <div className="flex items-center gap-2 mb-4 flex-wrap">
@@ -735,6 +907,44 @@ function QueueInner() {
                   {tag}
                 </button>
               ))}
+            </div>
+          )}
+
+          {/* Bulk reschedule bar */}
+          {showRescheduleBar && selectedIds.size > 0 && (
+            <div className="mb-4 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800 rounded-2xl px-5 py-3 flex flex-col sm:flex-row sm:items-center gap-3">
+              <span className="text-xs font-bold text-indigo-700 dark:text-indigo-300 flex-shrink-0">
+                Move {selectedIds.size} post{selectedIds.size !== 1 ? 's' : ''} forward by:
+              </span>
+              <div className="flex items-center gap-2 flex-wrap">
+                {RESCHEDULE_OPTIONS.map(opt => (
+                  <button
+                    key={opt.days}
+                    onClick={() => setRescheduleOffset(opt.days)}
+                    className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition-all ${
+                      rescheduleOffset === opt.days
+                        ? 'bg-indigo-600 text-white border-indigo-600'
+                        : 'border-indigo-300 dark:border-indigo-700 text-indigo-600 dark:text-indigo-300 hover:border-indigo-500'
+                    }`}>
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-2 sm:ml-auto flex-shrink-0">
+                <button
+                  onClick={handleBulkReschedule}
+                  disabled={bulkWorking}
+                  className="text-xs font-bold px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-all disabled:opacity-50 flex items-center gap-1.5">
+                  {bulkWorking
+                    ? <><div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />Moving...</>
+                    : 'Confirm →'}
+                </button>
+                <button
+                  onClick={() => setShowRescheduleBar(false)}
+                  className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 font-semibold transition-colors">
+                  Cancel
+                </button>
+              </div>
             </div>
           )}
 
