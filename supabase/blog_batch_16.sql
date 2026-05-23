@@ -33,7 +33,7 @@ You already write show notes. Paste them into an AI tool and get 7 days of socia
 The podcasters winning on social right now aren''t the ones writing more. They''re the ones who built a system that works while they focus on making a great show.',
 'Podcasting',
 ARRAY['podcasting', 'social media', 'podcast promotion', 'content strategy'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 ('promote-podcast-on-social-media',
 'How to Promote Your Podcast on Social Media Without Burning Out',
@@ -66,7 +66,7 @@ RSS import is underused by podcasters. Connect your show''s RSS feed to a social
 SOMA (SocialMate''s AI content system) takes this further — upload your show notes and it generates platform-native posts for every channel in your voice. Monday morning content batch: done before your coffee gets cold.',
 'Podcasting',
 ARRAY['podcast promotion', 'social media', 'content batching', 'scheduling'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 ('repurpose-podcast-episodes-social',
 'How to Repurpose Podcast Episodes into 30 Social Posts',
@@ -103,7 +103,7 @@ One insight = 5 formats = 5 posts. With 6 insights per episode, you''re already 
 Don''t post everything at once. Spread it out over 30 days if you publish monthly, or 7–14 days if you publish weekly. Use a scheduler like SocialMate to plan it all in one batch session and let it fire automatically.',
 'Podcasting',
 ARRAY['podcast repurposing', 'content strategy', 'social media', 'batch content'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 ('tiktok-for-podcasters',
 'TikTok for Podcasters: Growing Your Audience with Short-Form Video',
@@ -132,7 +132,7 @@ TikTok works best with consistent posting — ideally 3–5x per week. That soun
 Use a scheduler with TikTok support (SocialMate''s TikTok integration is live after Production API approval in May 2026) to schedule your clips in advance and maintain consistency without daily effort.',
 'Podcasting',
 ARRAY['tiktok', 'podcasting', 'short-form video', 'audience growth'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 ('discord-for-podcast-community',
 'Why Your Podcast Needs a Discord Server in 2026',
@@ -163,7 +163,7 @@ The operational overhead of running a Discord kills most creator communities. Th
 When a new episode drops, your Discord announcement fires automatically alongside all your other platform posts. You don''t have to be online to keep your community informed.',
 'Podcasting',
 ARRAY['discord', 'podcasting', 'community building', 'audience engagement'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 ('schedule-podcast-promotion',
 'How to Schedule All Your Podcast Promotion in One Sitting',
@@ -195,7 +195,7 @@ Review the schedule in your calendar view. Make sure nothing is double-scheduled
 You''re done until next week. Your promotion will run automatically while you focus on recording your next episode.',
 'Podcasting',
 ARRAY['podcast promotion', 'scheduling', 'batch content', 'content system'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 -- COACHES & CONSULTANTS (5 posts)
 
@@ -224,7 +224,7 @@ The coach''s problem isn''t content ideas — most coaches have more insight tha
 The solution: batch your week of content in one 30-minute session. Write all your posts for the week, schedule them in a tool like SocialMate, and let them go out automatically. LinkedIn, X, Bluesky, Mastodon, Discord — all from one interface.',
 'Creator',
 ARRAY['coaching', 'social media', 'linkedin', 'thought leadership', 'clients'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 ('linkedin-for-life-coaches',
 'LinkedIn for Life Coaches: The Platform That Actually Gets You Clients',
@@ -253,7 +253,7 @@ LinkedIn rewards consistent posting with increased visibility. The algorithm not
 The problem: no coach has time to write 4–5 LinkedIn posts per week while also coaching. The solution is batching — write a week''s worth of posts in one 30-minute session, schedule them in SocialMate, and let them auto-post.',
 'Creator',
 ARRAY['linkedin', 'life coaching', 'social media', 'client acquisition'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 ('content-ideas-for-coaches',
 '30 Social Media Content Ideas for Coaches and Consultants',
@@ -304,7 +304,7 @@ NOW() - INTERVAL ''2 days''),
 Schedule these in batches using a tool like SocialMate. Mix across your platforms — LinkedIn for the longer ones, X/Bluesky for the punchy takes, Discord/Telegram for updates to your existing community.',
 'Creator',
 ARRAY['coaching', 'content ideas', 'social media', 'content strategy'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 ('thought-leadership-social-media',
 'How to Build Thought Leadership on Social Media (Without Sounding Arrogant)',
@@ -334,7 +334,7 @@ The mistake is looking for one post that goes viral and establishes you. Authori
 Use a scheduler like SocialMate to stay consistent without the daily effort. Write a week of posts in one session, schedule them, and let your presence build on autopilot.',
 'Creator',
 ARRAY['thought leadership', 'coaching', 'personal brand', 'social media authority'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 ('schedule-coaching-content',
 'How Coaches Can Schedule a Month of Content in 2 Hours',
@@ -363,7 +363,7 @@ Smart Queue can auto-fill optimal times on each platform automatically, so you d
 When you close the laptop, your content is scheduled for the month. You won''t think about it again until the batch session next month.',
 'Creator',
 ARRAY['coaching', 'content scheduling', 'content batching', 'social media system'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 -- BLOGGERS (5 posts)
 
@@ -396,7 +396,7 @@ RSS import is underused by bloggers. Connect your blog''s RSS feed to SocialMate
 SOMA takes it further — upload your post and it generates a full week of platform-native follow-up content. One publish, two weeks of promotion, minimal effort.',
 'Blogging',
 ARRAY['blogging', 'social media', 'content distribution', 'blog promotion'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 ('promote-blog-posts-social-media',
 'The Complete Guide to Promoting Blog Posts on Social Media',
@@ -428,7 +428,7 @@ If the post is evergreen (not news-dependent), schedule it to recycle. Set it to
 Every time it recycles, new people see it. Your blog builds a content machine that keeps producing traffic long after the initial launch.',
 'Blogging',
 ARRAY['blog promotion', 'social media', 'content marketing', 'distribution'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 ('repurpose-blog-content-social',
 'How to Turn One Blog Post into a Week of Social Media Content',
@@ -467,7 +467,7 @@ Before writing any social posts, read your blog post and identify:
 That''s 7 posts from one blog post. Write them all in one session, schedule them in SocialMate, and let the week run on autopilot.',
 'Blogging',
 ARRAY['blog repurposing', 'content strategy', 'social media', 'content system'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 ('rss-to-social-media',
 'RSS to Social Media: How to Automatically Turn Blog Posts into Scheduled Content',
@@ -498,7 +498,7 @@ But the announcement — the most consistent, repetitive part of blog promotion 
 This single change can save bloggers 2–3 hours per week in manual social media work.',
 'Blogging',
 ARRAY['rss', 'automation', 'blog promotion', 'social media scheduling'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 ('bluesky-for-bloggers',
 'Why Bloggers Are Moving to Bluesky in 2026',
@@ -525,7 +525,7 @@ Create an account. Post 5 times before expecting any engagement — the algorith
 Schedule your blog announcements and follow-up content to Bluesky alongside all your other platforms using a tool like SocialMate — zero extra effort once it''s connected.',
 'Blogging',
 ARRAY['bluesky', 'blogging', 'social media', 'organic reach', 'writers'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 -- SAAS FOUNDERS (7 posts)
 
@@ -554,7 +554,7 @@ Discord: great for community-led growth. Many SaaS products have active user com
 You can''t be manually active on all platforms all the time while also building your product. The answer is batch scheduling. One session per week, schedule a week of posts, let them go out automatically. SocialMate handles the cross-platform distribution so you write once and it posts everywhere.',
 'SaaS',
 ARRAY['saas', 'build in public', 'social media', 'founder', 'marketing'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 ('build-in-public-strategy-2026',
 'Build in Public: The Complete 2026 Strategy Guide',
@@ -583,7 +583,7 @@ Learnings: "3 things I learned from our first 100 paying customers." Distilled i
 X/Twitter and Bluesky for the community. LinkedIn for professional credibility. Discord for product community. Use a scheduler to post across all platforms from one place — SocialMate handles cross-platform publishing so you write once.',
 'SaaS',
 ARRAY['build in public', 'saas', 'founder', 'content strategy', 'marketing'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 ('twitter-bluesky-for-saas',
 'X vs Bluesky for SaaS Founders: Where to Build Your Audience',
@@ -610,7 +610,7 @@ The downside: smaller overall user base than X. The build-in-public community is
 Use a scheduler like SocialMate to post to both platforms simultaneously. Write once. Post everywhere. The incremental effort of adding Bluesky to your distribution is zero if you''re already scheduling to X. There''s no reason to choose.',
 'SaaS',
 ARRAY['twitter', 'bluesky', 'saas', 'founder', 'audience building'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 ('linkedin-for-saas-founders',
 'LinkedIn for SaaS Founders: The B2B Social Strategy That Actually Works',
@@ -638,7 +638,7 @@ No external links in the post body — put them in the first comment if needed. 
 LinkedIn rewards consistent posting over a sustained period. 3–5 posts per week for 6+ months builds real reach. This sounds daunting but is manageable with batch scheduling — write your LinkedIn posts for the week in one session, schedule through SocialMate, and let them post automatically.',
 'SaaS',
 ARRAY['linkedin', 'saas', 'b2b', 'founder', 'marketing'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 ('content-saas-pre-launch',
 'Social Media for SaaS Pre-Launch: How to Build Hype Before You Ship',
@@ -670,7 +670,7 @@ Product Hunt: coming soon page, maker following
 Use SocialMate to schedule cross-platform content consistently during the pre-launch phase.',
 'SaaS',
 ARRAY['saas', 'pre-launch', 'build in public', 'marketing', 'waitlist'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 ('discord-community-saas',
 'Why Every SaaS Should Have a Discord Community in 2026',
@@ -701,7 +701,7 @@ Running a Discord for a SaaS is operationally intense if you''re doing everythin
 When you ship a new feature, your Discord announcement fires automatically alongside your email and social posts. Consistent communication, minimal effort.',
 'SaaS',
 ARRAY['discord', 'saas', 'community', 'user retention', 'community building'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 ('schedule-saas-social-content',
 'How to Run Your Entire SaaS Social Presence in 1 Hour a Week',
@@ -728,7 +728,7 @@ Spend the last 5 minutes responding to any comments from last week''s posts. Gen
 Close the laptop. Social media is handled for the week. Go build your product.',
 'SaaS',
 ARRAY['saas', 'social media system', 'scheduling', 'founder', 'batch content'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 -- GENERAL CREATOR STRATEGY (7 posts)
 
@@ -757,7 +757,7 @@ Every creator should have a base layer: Bluesky (organic reach for writers and c
 Use a multi-platform scheduler like SocialMate to distribute from one compose window.',
 'Creator',
 ARRAY['multi-platform', 'content strategy', 'social media', 'cross-posting'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 ('content-repurposing-strategy',
 'The Content Repurposing System That Multiplies Your Output',
@@ -786,7 +786,7 @@ Manual repurposing still takes time even with a good system. AI tools like Socia
 Repurposing only works if the content actually gets published. Write everything in your batch session, then schedule it across your platforms using a tool like SocialMate. The posts go out automatically over the next 1–2 weeks. You created once, published everywhere, for 2 weeks.',
 'Creator',
 ARRAY['content repurposing', 'content strategy', 'social media', 'efficiency'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 ('batch-social-media-content',
 'Content Batching: How to Create a Month of Posts in One Day',
@@ -818,7 +818,7 @@ One final scan of the calendar. Make edits, reorder if needed, fill any gaps.
 Close the laptop. You''re done for the month. SocialMate handles the publishing automatically.',
 'Creator',
 ARRAY['content batching', 'social media', 'content strategy', 'productivity'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 ('best-time-to-post-2026',
 'When Is the Best Time to Post on Social Media in 2026?',
@@ -847,7 +847,7 @@ These are starting points. Your specific audience may behave differently. After 
 Most creators shouldn''t manually pick posting times. Use Smart Queue in SocialMate — it analyzes your past engagement data and automatically fills time slots at the historically optimal times on each platform. Set it once, let it optimize automatically.',
 'Creator',
 ARRAY['best time to post', 'social media', 'scheduling', 'engagement', 'platform strategy'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 ('social-media-without-burnout',
 'How to Stay Consistent on Social Media Without Burning Out',
@@ -880,7 +880,7 @@ A scheduler like SocialMate removes the daily execution friction. Write, schedul
 Evergreen recycling means your best content keeps working without you having to reshare it manually. Set it once, let it rotate.',
 'Creator',
 ARRAY['burnout', 'creator burnout', 'social media', 'consistency', 'mental health'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 ('cross-platform-social-strategy',
 'The Cross-Platform Social Media Strategy for 2026',
@@ -911,7 +911,7 @@ You can post the exact same content everywhere and it will perform fine. But sli
 SocialMate''s per-platform preview lets you check each version before publishing.',
 'Creator',
 ARRAY['cross-platform', 'social media strategy', 'content distribution', 'multi-platform'],
-NOW() - INTERVAL ''2 days''),
+NOW() - INTERVAL '2 days'),
 
 ('free-social-media-tools-2026',
 'The Best Free Social Media Tools for Creators in 2026',
@@ -947,6 +947,6 @@ Adobe Express (free tier) — strong for quick branded content.
 A creator with SocialMate (free), Canva (free), and native platform analytics can run a fully professional social media presence for $0. The gap between free and paid has never been smaller.',
 'Creator',
 ARRAY['free tools', 'social media tools', 'creator tools', 'free plan', 'budget creators'],
-NOW() - INTERVAL ''2 days'')
+NOW() - INTERVAL '2 days')
 
 ON CONFLICT (slug) DO NOTHING;
