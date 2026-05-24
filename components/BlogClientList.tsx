@@ -13,15 +13,26 @@ export type BlogPost = {
   featured: boolean
 }
 
-const CATEGORY_ORDER = [
-  'All',
+// Priority order for categories — any category not listed here appears alphabetically after
+const CATEGORY_PRIORITY = [
   'Our Story',
   'Guides',
   'Tips',
   'Resources',
   'Growth',
   'Comparisons',
+  'Features',
+  'Analytics',
+  'AI',
+  'Industry',
+  'Teams',
+  'Agencies',
   'Studio Stax',
+  'SocialMate',
+  'SOMA',
+  'Enki',
+  'RenewalMate',
+  'Founder Story',
 ]
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -41,14 +52,22 @@ export default function BlogClientList({ allPosts }: { allPosts: BlogPost[] }) {
 
   const featured = allPosts.find(p => p.featured)
 
+  /* ── derive category list dynamically from actual posts ── */
+  const categoryOrder = useMemo(() => {
+    const allCats = new Set(allPosts.map(p => p.category))
+    const prioritized = CATEGORY_PRIORITY.filter(c => allCats.has(c))
+    const remaining   = Array.from(allCats).filter(c => !CATEGORY_PRIORITY.includes(c)).sort()
+    return ['All', ...prioritized, ...remaining]
+  }, [allPosts])
+
   /* ── counts per category ── */
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = { All: allPosts.length }
-    for (const cat of CATEGORY_ORDER.slice(1)) {
+    for (const cat of categoryOrder.slice(1)) {
       counts[cat] = allPosts.filter(p => p.category === cat).length
     }
     return counts
-  }, [allPosts])
+  }, [allPosts, categoryOrder])
 
   /* ── filtered list ── */
   const filtered = useMemo(() => {
@@ -83,7 +102,7 @@ export default function BlogClientList({ allPosts }: { allPosts: BlogPost[] }) {
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
             placeholder="Search posts…"
-            className="w-full pl-9 pr-9 py-2.5 text-sm border border-gray-200 dark:border-gray-700 rounded-xl focus:outline-none focus:border-gray-400 bg-white dark:bg-gray-800 dark:text-gray-100 placeholder:text-gray-400"
+            className="w-full pl-9 pr-9 py-2.5 text-sm border border-gray-700 rounded-xl focus:outline-none focus:border-amber-500/50 bg-gray-800 text-gray-100 placeholder:text-gray-500"
           />
           {searchQuery && (
             <button
@@ -96,7 +115,7 @@ export default function BlogClientList({ allPosts }: { allPosts: BlogPost[] }) {
 
         {/* Category tab pills */}
         <div className="flex gap-2 flex-wrap">
-          {CATEGORY_ORDER.map(cat => {
+          {categoryOrder.map(cat => {
             const count = categoryCounts[cat] ?? 0
             if (count === 0 && cat !== 'All') return null
             const isActive = activeCategory === cat
@@ -106,8 +125,8 @@ export default function BlogClientList({ allPosts }: { allPosts: BlogPost[] }) {
                 onClick={() => setActiveCategory(cat)}
                 className={`text-xs font-bold px-3 py-1.5 rounded-full border transition-all ${
                   isActive
-                    ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-transparent'
-                    : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-400 bg-white dark:bg-gray-800'
+                    ? 'bg-white text-gray-900 border-transparent'
+                    : 'border-gray-700 text-gray-400 hover:border-gray-500 bg-gray-800'
                 }`}>
                 {cat}
                 <span className={`ml-1.5 tabular-nums ${isActive ? 'opacity-50' : 'opacity-40'}`}>
@@ -141,13 +160,13 @@ export default function BlogClientList({ allPosts }: { allPosts: BlogPost[] }) {
       {gridPosts.length === 0 && (
         <div className="text-center py-16">
           <div className="text-4xl mb-4">🔍</div>
-          <p className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-1">No posts found</p>
-          <p className="text-xs text-gray-400 dark:text-gray-500">
+          <p className="text-sm font-bold text-gray-100 mb-1">No posts found</p>
+          <p className="text-xs text-gray-500">
             {searchQuery ? `No results for "${searchQuery}"` : `Nothing in ${activeCategory} yet`}
           </p>
           <button
             onClick={() => { setActiveCategory('All'); setSearchQuery('') }}
-            className="mt-4 text-xs font-bold underline text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors">
+            className="mt-4 text-xs font-bold underline text-gray-400 hover:text-gray-200 transition-colors">
             Clear filters
           </button>
         </div>
@@ -160,7 +179,7 @@ export default function BlogClientList({ allPosts }: { allPosts: BlogPost[] }) {
             <Link
               key={post.slug || i}
               href={`/blog/${post.slug}`}
-              className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-5 hover:border-gray-300 dark:hover:border-gray-500 transition-all block">
+              className="bg-gray-800 border border-gray-700 rounded-2xl p-5 hover:border-gray-500 transition-all block">
               <div className="flex items-center gap-2 mb-3">
                 <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${CATEGORY_COLORS[post.category] || 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'}`}>
                   {post.category}
@@ -168,11 +187,11 @@ export default function BlogClientList({ allPosts }: { allPosts: BlogPost[] }) {
                 <span className="text-xs text-gray-400 dark:text-gray-500">{post.readTime}</span>
               </div>
               <div className="text-2xl mb-2">{post.emoji}</div>
-              <h2 className="text-sm font-extrabold mb-2 leading-snug text-gray-900 dark:text-gray-100">{post.title}</h2>
-              <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-3">{post.excerpt}</p>
+              <h2 className="text-sm font-extrabold mb-2 leading-snug text-gray-100">{post.title}</h2>
+              <p className="text-xs text-gray-400 leading-relaxed mb-3">{post.excerpt}</p>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-400 dark:text-gray-500">{post.date}</span>
-                <span className="text-xs font-bold text-gray-400 dark:text-gray-500">Read →</span>
+                <span className="text-xs text-gray-500">{post.date}</span>
+                <span className="text-xs font-bold text-gray-500">Read →</span>
               </div>
             </Link>
           ))}

@@ -121,20 +121,20 @@ const SOCIALS = [
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <PHLaunchBanner />
       <PublicNav />
       <main>{children}</main>
 
-      <footer className="border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 mt-16">
+      <footer className="border-t border-gray-800 bg-gray-900 mt-16">
         <div className="max-w-6xl mx-auto px-6 pt-10 pb-6">
 
           {/* Top row: logo + socials */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 bg-black dark:bg-white rounded-lg flex items-center justify-center text-white dark:text-black text-xs font-bold">S</div>
-              <span className="text-sm font-bold text-gray-900 dark:text-gray-100">SocialMate</span>
-              <span className="text-xs text-gray-400 dark:text-gray-600 ml-1">by Gilgamesh Enterprise LLC</span>
+              <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
+              <span className="text-sm font-bold text-gray-100">SocialMate</span>
+              <span className="text-xs text-gray-500 ml-1">by Gilgamesh Enterprise LLC</span>
             </div>
 
             {/* Social icons */}
@@ -146,7 +146,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={s.label}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 dark:text-gray-500 hover:text-black dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:text-white hover:bg-gray-800 transition-all"
                 >
                   {s.icon}
                 </a>
@@ -158,7 +158,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-10">
             {FOOTER_COLUMNS.map(col => (
               <div key={col.heading}>
-                <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-3">
+                <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-3">
                   {col.heading}
                 </p>
                 <ul className="space-y-2">
@@ -169,7 +169,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
                         className={`text-sm transition-colors ${
                           link.rose
                             ? 'text-rose-400 hover:text-rose-300 font-medium'
-                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+                            : 'text-gray-400 hover:text-gray-100'
                         }`}
                       >
                         {link.label}
@@ -182,7 +182,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
           </div>
 
           {/* Bottom row: badges + copyright */}
-          <div className="flex items-center justify-between flex-wrap gap-4 pt-6 border-t border-gray-100 dark:border-gray-800">
+          <div className="flex items-center justify-between flex-wrap gap-4 pt-6 border-t border-gray-800">
             <div className="flex items-center gap-4 flex-wrap">
               {/* Product Hunt badge */}
               <a href="https://www.producthunt.com/posts/socialmate-2"
@@ -196,7 +196,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
 
             </div>
 
-            <p className="text-xs text-gray-400 dark:text-gray-500">© 2026 SocialMate · All rights reserved</p>
+            <p className="text-xs text-gray-500">© 2026 SocialMate · All rights reserved</p>
           </div>
 
         </div>
