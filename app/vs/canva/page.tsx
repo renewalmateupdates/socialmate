@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -203,7 +203,7 @@ export default function VsCanvaPage() {
         <div className="bg-amber-400 text-black rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Ready for a scheduling platform — not a design tool?</h2>
           <p className="text-black/70 text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is purpose-built for social media. 6 platforms, 20+ AI tools, SOMA autonomous content — all starting at $0.
+            SocialMate is purpose-built for social media. 7 platforms, 20+ AI tools, SOMA autonomous content — all starting at $0.
           </p>
           <Link href="/signup" className="inline-block bg-black text-white font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm">
             Create free account →

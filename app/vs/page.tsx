@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -190,7 +190,7 @@ const COMPARISONS = [
     name:        'SocialBee',
     emoji:       '🐝',
     headline:    'SocialBee starts at $29/month — no free plan',
-    angle:       "Content categories are useful but paywalled. AI tools locked to higher tiers. SocialMate gives you categories, recycling, and 12 AI tools for $0.",
+    angle:       "Content categories are useful but paywalled. AI tools locked to higher tiers. SocialMate gives you categories, recycling, and 15+ AI tools for $0.",
     tag:         'Paywalled features',
     tagColor:    'bg-yellow-50 text-yellow-600',
   },
@@ -235,7 +235,7 @@ const COMPARISONS = [
     name:        'Nuelink',
     emoji:       '🔗',
     headline:    'Nuelink starts at $15/month — no free plan at all',
-    angle:       'Clean UI and bulk scheduling, but only a 7-day trial before you pay. SocialMate gives you the same core features plus 12 AI tools for free.',
+    angle:       'Clean UI and bulk scheduling, but only a 7-day trial before you pay. SocialMate gives you the same core features plus 15+ AI tools for free.',
     tag:         'No free plan',
     tagColor:    'bg-gray-100 text-gray-600',
   },
@@ -244,7 +244,7 @@ const COMPARISONS = [
     name:        'Fedica',
     emoji:       '🐦',
     headline:    'Fedica is a Twitter/X-only analytics tool — $15/month',
-    angle:       "If you post on Bluesky, Discord, Instagram, or Mastodon — Fedica can't help. SocialMate supports 16 platforms with full scheduling and analytics free.",
+    angle:       "If you post on Bluesky, Discord, Instagram, or Mastodon — Fedica can't help. SocialMate supports 7 platforms with full scheduling and analytics free.",
     tag:         'Twitter/X only',
     tagColor:    'bg-sky-50 text-sky-600',
   },
@@ -271,7 +271,7 @@ const COMPARISONS = [
     name:        'Plann',
     emoji:       '🖼️',
     headline:    "Plann is Instagram-centric at $13/month",
-    angle:       "Built around Instagram feed aesthetics. No Discord, Telegram, Bluesky, or TikTok. No autonomous AI content system. SocialMate covers 6 platforms for less.",
+    angle:       "Built around Instagram feed aesthetics. No Discord, Telegram, Bluesky, or TikTok. No autonomous AI content system. SocialMate covers 7 platforms for less.",
     tag:         'Instagram-only focus',
     tagColor:    'bg-pink-50 text-pink-600',
   },
@@ -298,7 +298,7 @@ const COMPARISONS = [
     name:        'Preview App',
     emoji:       '👁️',
     headline:    "Preview App: Instagram/Pinterest only, $8/month",
-    angle:       "Instagram and Pinterest planning only. No TikTok, Discord, Telegram, Bluesky, or X. No AI content tools. SocialMate is free and covers 6 platforms.",
+    angle:       "Instagram and Pinterest planning only. No TikTok, Discord, Telegram, Bluesky, or X. No AI content tools. SocialMate is free and covers 7 platforms.",
     tag:         'Instagram/Pinterest only',
     tagColor:    'bg-rose-50 text-rose-600',
   },
@@ -307,7 +307,7 @@ const COMPARISONS = [
     name:        'Gain',
     emoji:       '✅',
     headline:    "Gain charges $99/month for client approvals SocialMate includes free",
-    angle:       "Gain is an approval workflow tool at $99/month. SocialMate has full client approval workflows built in on the free plan — plus 6 platforms and 20+ AI tools.",
+    angle:       "Gain is an approval workflow tool at $99/month. SocialMate has full client approval workflows built in on the free plan — plus 7 platforms and 20+ AI tools.",
     tag:         '$99/mo for what we give free',
     tagColor:    'bg-red-50 text-red-600',
   },
@@ -352,7 +352,7 @@ const COMPARISONS = [
     name:        'StoryChief',
     emoji:       '📖',
     headline:    'StoryChief charges $99/month — a content platform, not a social scheduler',
-    angle:       'Built for content teams producing blog posts and campaigns. No Discord, Telegram, or Bluesky. No autonomous AI content. SocialMate is $5/month for 7 platforms and 12 AI tools.',
+    angle:       'Built for content teams producing blog posts and campaigns. No Discord, Telegram, or Bluesky. No autonomous AI content. SocialMate is $5/month for 7 platforms and 15+ AI tools.',
     tag:         'Content platform, high price',
     tagColor:    'bg-orange-50 text-orange-600',
   },
@@ -361,7 +361,7 @@ const COMPARISONS = [
     name:        'OneUp',
     emoji:       '⬆️',
     headline:    "OneUp is $18/month with no AI tools and no Discord or Telegram",
-    angle:       'Basic scheduling at $18/month with no free plan. No AI writing, no Discord, no Telegram, no Bluesky. SocialMate Pro has 12 AI tools and 7 platforms for $5/month.',
+    angle:       'Basic scheduling at $18/month with no free plan. No AI writing, no Discord, no Telegram, no Bluesky. SocialMate Pro has 15+ AI tools and 7 platforms for $5/month.',
     tag:         'No AI, limited platforms',
     tagColor:    'bg-yellow-50 text-yellow-600',
   },
@@ -388,7 +388,7 @@ const COMPARISONS = [
     name:        'Combin',
     emoji:       '📸',
     headline:    "Combin is Instagram-only — no scheduling for any other platform",
-    angle:       "Instagram growth tool at $15/month. Cannot schedule to Bluesky, Discord, Telegram, TikTok, LinkedIn, or X. SocialMate covers 7 platforms with 12 AI tools — starting free.",
+    angle:       "Instagram growth tool at $15/month. Cannot schedule to Bluesky, Discord, Telegram, TikTok, LinkedIn, or X. SocialMate covers 7 platforms with 15+ AI tools — starting free.",
     tag:         'Instagram-only, single platform',
     tagColor:    'bg-pink-50 text-pink-600',
   },
@@ -415,7 +415,7 @@ const COMPARISONS = [
     name:        'Emplifi',
     emoji:       '🏢',
     headline:    "Emplifi is $200+/month enterprise — no Discord, Telegram, or free plan",
-    angle:       "Enterprise social platform formerly Socialbakers. $200+/month, no self-serve. No Discord or Telegram. SocialMate is free for creators with 7 platforms and 12 AI tools built in.",
+    angle:       "Enterprise social platform formerly Socialbakers. $200+/month, no self-serve. No Discord or Telegram. SocialMate is free for creators with 7 platforms and 15+ AI tools built in.",
     tag:         'Enterprise only, $200+/month',
     tagColor:    'bg-red-50 text-red-600',
   },
@@ -424,7 +424,7 @@ const COMPARISONS = [
     name:        'Postoplan',
     emoji:       '📋',
     headline:    "Postoplan is $19/month with no AI and a 1-account free plan",
-    angle:       "Basic scheduler with a free plan limited to one account. No AI writing, no Discord, Telegram, or Bluesky. SocialMate Pro has 12 AI tools and 7 platforms for $5/month.",
+    angle:       "Basic scheduler with a free plan limited to one account. No AI writing, no Discord, Telegram, or Bluesky. SocialMate Pro has 15+ AI tools and 7 platforms for $5/month.",
     tag:         'No AI, 1-account free limit',
     tagColor:    'bg-yellow-50 text-yellow-600',
   },
@@ -433,7 +433,7 @@ const COMPARISONS = [
     name:        'Social Report',
     emoji:       '📊',
     headline:    "Social Report is $49/month — no AI tools and no Discord or Telegram",
-    angle:       "Strong analytics but no AI writing and no Discord, Telegram, or Bluesky support. Starts at $49/month with a 30-day trial. SocialMate has 12 AI tools and 7 platforms — starting free.",
+    angle:       "Strong analytics but no AI writing and no Discord, Telegram, or Bluesky support. Starts at $49/month with a 30-day trial. SocialMate has 15+ AI tools and 7 platforms — starting free.",
     tag:         'Analytics-strong, AI-absent',
     tagColor:    'bg-blue-50 text-blue-600',
   },
@@ -460,7 +460,7 @@ const COMPARISONS = [
     name:        'FeedHive',
     emoji:       '🐝',
     headline:    "FeedHive starts at $19/month — no free plan, no Discord or Telegram",
-    angle:       "AI-assisted scheduling with no Discord, Telegram, Bluesky, or TikTok support. No free plan either. SocialMate covers 7 platforms with 12 AI tools and SOMA — starting free.",
+    angle:       "AI-assisted scheduling with no Discord, Telegram, Bluesky, or TikTok support. No free plan either. SocialMate covers 7 platforms with 15+ AI tools and SOMA — starting free.",
     tag:         'Limited platforms, no free plan',
     tagColor:    'bg-yellow-50 text-yellow-600',
   },
@@ -479,7 +479,7 @@ const SOCIALMATE_WINS = [
 
 export default function VsIndex() {
   return (
-    <div className="min-h-dvh bg-white dark:bg-gray-950">
+    <div className="dark min-h-dvh bg-gray-950">
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 px-6 py-4 flex items-center justify-between max-w-5xl mx-auto">
         <Link href="/" className="text-sm font-extrabold tracking-tight text-gray-900 dark:text-gray-100">

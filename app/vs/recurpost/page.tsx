@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -49,7 +49,7 @@ const FAQ = [
   },
   {
     q: 'Is SocialMate a good RecurPost alternative for evergreen content?',
-    a: 'Yes. SocialMate includes evergreen recycling, content libraries, bulk scheduling, and 12 AI tools — all free, with no 100-post lifetime cap. RecurPost charges $25/month to remove that cap.',
+    a: 'Yes. SocialMate includes evergreen recycling, content libraries, bulk scheduling, and 15+ AI tools — all free, with no 100-post lifetime cap. RecurPost charges $25/month to remove that cap.',
   },
 ]
 
@@ -66,7 +66,7 @@ const faqSchema = {
 
 export default function VsRecurPostPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
@@ -124,7 +124,7 @@ export default function VsRecurPostPage() {
             <p className="font-extrabold text-lg mb-2">No lifetime cap. All platforms. $0.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ Free forever — no lifetime post limit</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
               <li>✅ Evergreen recycling free</li>
               <li>✅ Bulk scheduling free</li>
@@ -206,7 +206,7 @@ export default function VsRecurPostPage() {
         <div className="bg-black text-white rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">No lifetime caps — start free today</h2>
           <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is free forever — unlimited posts, evergreen recycling, 12 AI tools, 16 platforms. No credit card required.
+            SocialMate is free forever — unlimited posts, evergreen recycling, 15+ AI tools, 7 platforms. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             Create free account →

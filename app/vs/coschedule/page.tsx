@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -66,7 +66,7 @@ const faqSchema = {
 
 export default function VsCoSchedulePage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
@@ -93,7 +93,7 @@ export default function VsCoSchedulePage() {
             SocialMate vs CoSchedule
           </h1>
           <p className="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-            CoSchedule&apos;s free plan requires manual posting — no auto-publish. SocialMate auto-publishes for free, with bulk scheduling and 12 AI tools included.
+            CoSchedule&apos;s free plan requires manual posting — no auto-publish. SocialMate auto-publishes for free, with bulk scheduling and 15+ AI tools included.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-black text-white font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -125,7 +125,7 @@ export default function VsCoSchedulePage() {
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ Auto-publish on free plan</li>
               <li>✅ Analytics included on free tier</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
               <li>✅ Bulk scheduling free</li>
               <li>✅ No credit card required</li>
@@ -206,7 +206,7 @@ export default function VsCoSchedulePage() {
         <div className="bg-black text-white rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Done posting manually? Start auto-publishing free.</h2>
           <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
-            SocialMate auto-publishes on the free plan — bulk scheduling, 12 AI tools, 16 platforms, no per-user fees. No credit card required.
+            SocialMate auto-publishes on the free plan — bulk scheduling, 15+ AI tools, 7 platforms, no per-user fees. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             Create free account →

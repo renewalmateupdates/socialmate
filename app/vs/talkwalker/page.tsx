@@ -1,10 +1,10 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Talkwalker (2026) — Full Comparison',
-  description: 'Talkwalker charges $9,600+/year for social listening with no post scheduling. SocialMate gives you scheduling across 7 platforms, competitor tracking, and 12 AI tools — starting free.',
+  description: 'Talkwalker charges $9,600+/year for social listening with no post scheduling. SocialMate gives you scheduling across 7 platforms, competitor tracking, and 15+ AI tools — starting free.',
   openGraph: {
     title:       'SocialMate vs Talkwalker (2026)',
     description: 'Talkwalker is $9,600+/year for listening only. SocialMate schedules, monitors, and creates content across 7 platforms — free to start.',
@@ -55,7 +55,7 @@ const FAQ = [
   },
   {
     q: 'What AI tools does SocialMate include?',
-    a: "SocialMate's 12 AI tools include caption generation, viral hook writing, content repurposing (6 formats), hashtag research, thread generation, post rewriting, post scoring, brand voice injection, SM Pulse (trend scan), SM Radar (content intelligence report), and SOMA — an autonomous content agent that generates a full week of platform-native posts from your brand context automatically.",
+    a: "SocialMate's 15+ AI tools include caption generation, viral hook writing, content repurposing (6 formats), hashtag research, thread generation, post rewriting, post scoring, brand voice injection, SM Pulse (trend scan), SM Radar (content intelligence report), and SOMA — an autonomous content agent that generates a full week of platform-native posts from your brand context automatically.",
   },
 ]
 
@@ -71,7 +71,7 @@ const faqSchema = {
 
 export default function VsTalkwalkerPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
@@ -129,7 +129,7 @@ export default function VsTalkwalkerPage() {
             <p className="font-extrabold text-lg mb-2">Schedule + monitor + create. Free.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ Discord + Telegram + Bluesky + TikTok + LinkedIn + X + Mastodon</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ SOMA autonomous content agent</li>
               <li>✅ SM Radar: AI content intelligence report</li>
               <li>✅ Pro plan for $5/month total</li>

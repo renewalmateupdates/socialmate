@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: "Gain is an agency approval platform at $99/mo+. SocialMate's Agency plan is $20/mo with approval workflows, Discord/Telegram, 20+ AI tools, SOMA, and Enki.",
   openGraph: {
     title:       'SocialMate vs Gain (2026)',
-    description: "Gain: $99/mo+ for client approvals, no Discord/Telegram/Bluesky, no AI content. SocialMate Agency: $20/mo — full approval workflows + 6 platforms + SOMA + Enki.",
+    description: "Gain: $99/mo+ for client approvals, no Discord/Telegram/Bluesky, no AI content. SocialMate Agency: $20/mo — full approval workflows + 7 platforms + SOMA + Enki.",
     url:         'https://socialmate.studio/vs/gain-app',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/gain-app' },
@@ -90,7 +90,7 @@ export default function VsGainAppPage() {
             SocialMate vs Gain
           </h1>
           <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-            Gain charges $99/month for client approval workflows. SocialMate&apos;s Agency plan is $20/month — and includes approvals, 6 platforms, 20+ AI tools, SOMA, and Enki.
+            Gain charges $99/month for client approval workflows. SocialMate&apos;s Agency plan is $20/month — and includes approvals, 7 platforms, 20+ AI tools, SOMA, and Enki.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-amber-400 text-black font-bold rounded-2xl hover:bg-amber-300 transition-all text-sm">
@@ -121,7 +121,7 @@ export default function VsGainAppPage() {
             <p className="font-extrabold text-lg mb-2">Full agency platform. 5x cheaper than Gain.</p>
             <ul className="space-y-1 text-xs text-black/80">
               <li>✅ Client approval workflows (free)</li>
-              <li>✅ 6 platforms including Discord + Telegram</li>
+              <li>✅ 7 platforms including Discord + Telegram</li>
               <li>✅ 20+ AI content and writing tools</li>
               <li>✅ SOMA: autonomous weekly content generation</li>
               <li>✅ Agency plan: $20/month</li>
@@ -203,7 +203,7 @@ export default function VsGainAppPage() {
         <div className="bg-amber-400 text-black rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Agency tools at $20/mo — not $99/mo</h2>
           <p className="text-black/70 text-sm mb-6 max-w-lg mx-auto">
-            SocialMate Agency includes client workspaces, approval workflows, 6 platforms, 20+ AI tools, and SOMA. Everything Gain does — plus much more — at $20/month.
+            SocialMate Agency includes client workspaces, approval workflows, 7 platforms, 20+ AI tools, and SOMA. Everything Gain does — plus much more — at $20/month.
           </p>
           <Link href="/signup" className="inline-block bg-black text-white font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm">
             Create free account →

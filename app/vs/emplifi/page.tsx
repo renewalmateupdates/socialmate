@@ -1,13 +1,13 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Emplifi (2026) — Full Comparison',
-  description: 'Emplifi (formerly Socialbakers) charges $200+/month for enterprise social management. SocialMate gives creators and agencies 7 platforms, 12 AI tools, and SOMA — starting free.',
+  description: 'Emplifi (formerly Socialbakers) charges $200+/month for enterprise social management. SocialMate gives creators and agencies 7 platforms, 15+ AI tools, and SOMA — starting free.',
   openGraph: {
     title:       'SocialMate vs Emplifi (2026)',
-    description: 'Emplifi is $200+/month enterprise pricing. SocialMate is free — 7 platforms, 12 AI tools, and autonomous content generation.',
+    description: 'Emplifi is $200+/month enterprise pricing. SocialMate is free — 7 platforms, 15+ AI tools, and autonomous content generation.',
     url:         'https://socialmate.studio/vs/emplifi',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/emplifi' },
@@ -49,7 +49,7 @@ const FAQ = [
   },
   {
     q: 'What AI tools does SocialMate include?',
-    a: "SocialMate's 12 AI tools include caption generation, viral hook writing, content repurposing (6 formats), hashtag research, thread generation, post rewriting, post scoring, brand voice injection, SM Pulse (trend scan), SM Radar (content intelligence), and SOMA — an autonomous content agent that generates a full week of platform-native posts automatically.",
+    a: "SocialMate's 15+ AI tools include caption generation, viral hook writing, content repurposing (6 formats), hashtag research, thread generation, post rewriting, post scoring, brand voice injection, SM Pulse (trend scan), SM Radar (content intelligence), and SOMA — an autonomous content agent that generates a full week of platform-native posts automatically.",
   },
   {
     q: 'Why choose SocialMate over an enterprise tool like Emplifi?',
@@ -69,7 +69,7 @@ const faqSchema = {
 
 export default function VsEmplifPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
@@ -127,7 +127,7 @@ export default function VsEmplifPage() {
             <p className="font-extrabold text-lg mb-2">Built for creators. Self-serve. Free.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ Discord + Telegram + Bluesky + TikTok + LinkedIn + X + Mastodon</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ SOMA autonomous content agent</li>
               <li>✅ Pro plan for $5/month total</li>
               <li>✅ 8 autonomous AI agents</li>
@@ -211,7 +211,7 @@ export default function VsEmplifPage() {
           <h2 className="text-3xl font-extrabold mb-4">Start scheduling in minutes. Free.</h2>
           <p className="text-gray-400 mb-6 max-w-lg mx-auto text-sm">
             SocialMate is self-serve, free to start, and built for the creator workflow.
-            7 platforms, 12 AI tools, SOMA. No demo required.
+            7 platforms, 15+ AI tools, SOMA. No demo required.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-white text-black font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
             Start free — no credit card →

@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -49,7 +49,7 @@ const FAQ = [
   },
   {
     q: 'Can SocialMate compete with SEMrush\'s AI content tools?',
-    a: 'SocialMate\'s 12 AI tools cover social content creation: hook writing, caption generation, content repurposing, hashtag research, thread building, and the SOMA autonomous content system. SEMrush has AI writing tools optimized for SEO content. Different tools for different jobs. For social-first content, SocialMate\'s AI tools are purpose-built and free.',
+    a: 'SocialMate\'s 15+ AI tools cover social content creation: hook writing, caption generation, content repurposing, hashtag research, thread building, and the SOMA autonomous content system. SEMrush has AI writing tools optimized for SEO content. Different tools for different jobs. For social-first content, SocialMate\'s AI tools are purpose-built and free.',
   },
   {
     q: 'What social platforms does SEMrush Social support?',
@@ -69,7 +69,7 @@ const faqSchema = {
 
 export default function VsSEMrushSocialPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
@@ -129,7 +129,7 @@ export default function VsSEMrushSocialPage() {
               <li>✅ No SEO subscription required</li>
               <li>✅ TikTok free — SEMrush has none</li>
               <li>✅ X + LinkedIn + Bluesky + Discord + Telegram + Mastodon</li>
-              <li>✅ 12 AI tools free</li>
+              <li>✅ 15+ AI tools free</li>
               <li>✅ Pro $5/month — 96% cheaper than SEMrush entry</li>
               <li>✅ No credit card required to start</li>
             </ul>

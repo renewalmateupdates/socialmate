@@ -7,7 +7,7 @@ const FEATURE_CATEGORIES = [
   {
     category: 'AI Tools',
     emoji: '🤖',
-    desc: '12 AI tools powered by Google Gemini. Credits included on every plan.',
+    desc: '15+ AI tools powered by Google Gemini. Credits included on every plan.',
     features: [
       {
         name: 'Caption Generator',
@@ -117,7 +117,7 @@ const FEATURE_CATEGORIES = [
   {
     category: 'Scheduling & Automation',
     emoji: '🗓️',
-    desc: 'Schedule across 16 platforms from one place. Bulk upload, evergreen recycling, and automated queues.',
+    desc: 'Schedule across 7 live platforms from one place. Bulk upload, evergreen recycling, and automated queues.',
     features: [
       {
         name: 'Bulk Scheduler',

@@ -1,10 +1,10 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs StoryChief (2026) — Full Comparison',
-  description: 'StoryChief charges $99/month for content marketing with no Discord or Telegram support. SocialMate gives you 7 platforms, 12 AI tools, and autonomous content generation — starting free.',
+  description: 'StoryChief charges $99/month for content marketing with no Discord or Telegram support. SocialMate gives you 7 platforms, 15+ AI tools, and autonomous content generation — starting free.',
   openGraph: {
     title:       'SocialMate vs StoryChief (2026)',
     description: 'StoryChief is $99/month for content marketing. SocialMate is free — and covers 7 platforms including Discord and Telegram.',
@@ -51,7 +51,7 @@ const FAQ = [
   },
   {
     q: 'What AI tools does SocialMate include?',
-    a: "SocialMate's 12 AI tools include caption generation, viral hook writing, content repurposing (6 formats), hashtag research, thread generation, post rewriting, post scoring, brand voice injection, SM Pulse (trend scan), SM Radar (content intelligence), and SOMA — an autonomous content system that learns your voice and generates a full week of platform-native posts automatically.",
+    a: "SocialMate's 15+ AI tools include caption generation, viral hook writing, content repurposing (6 formats), hashtag research, thread generation, post rewriting, post scoring, brand voice injection, SM Pulse (trend scan), SM Radar (content intelligence), and SOMA — an autonomous content system that learns your voice and generates a full week of platform-native posts automatically.",
   },
   {
     q: 'What is SOMA and how does it compare to StoryChief AI?',
@@ -71,7 +71,7 @@ const faqSchema = {
 
 export default function VsStoryChiefPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
@@ -129,7 +129,7 @@ export default function VsStoryChiefPage() {
             <p className="font-extrabold text-lg mb-2">7 platforms. AI built in. Free to start.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ Discord + Telegram + Bluesky + TikTok + LinkedIn + X + Mastodon</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ SOMA autonomous content agent learns your voice</li>
               <li>✅ Pro plan for $5/month total</li>
               <li>✅ 8 autonomous AI agents</li>

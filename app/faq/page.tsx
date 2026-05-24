@@ -152,7 +152,7 @@ const sections = [
     faqs: [
       {
         q: 'What\'s included in Pro ($5/month)?',
-        a: '500 AI credits/month, 5 seats, all scheduling features, 12 AI tools, Link in Bio, competitor tracking, evergreen recycling, smart queue, brand voice, analytics dashboard, push notifications, and 1 SOMA project (with Autopilot add-on).',
+        a: '500 AI credits/month, 5 seats, all scheduling features, 15+ AI tools, Link in Bio, competitor tracking, evergreen recycling, smart queue, brand voice, analytics dashboard, push notifications, and 1 SOMA project (with Autopilot add-on).',
       },
       {
         q: 'What\'s included in Agency ($20/month)?',

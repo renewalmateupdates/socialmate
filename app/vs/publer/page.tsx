@@ -1,13 +1,13 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Publer (2026) — Full Comparison',
-  description: 'Publer free plan limits you to 3 accounts and 10 posts per account. SocialMate is unlimited posts, no per-account fees, and 12 AI tools free.',
+  description: 'Publer free plan limits you to 3 accounts and 10 posts per account. SocialMate is unlimited posts, no per-account fees, and 15+ AI tools free.',
   openGraph: {
     title:       'SocialMate vs Publer (2026)',
-    description: 'Publer caps free users at 3 accounts and 10 scheduled posts each. SocialMate is unlimited, free, with 12 AI tools built in.',
+    description: 'Publer caps free users at 3 accounts and 10 scheduled posts each. SocialMate is unlimited, free, with 15+ AI tools built in.',
     url:         'https://socialmate.studio/vs/publer',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/publer' },
@@ -43,7 +43,7 @@ const FAQ = [
   },
   {
     q: 'How does SocialMate compare to Publer for AI tools?',
-    a: 'Publer includes AI Assist on paid plans. SocialMate includes 12 AI tools on the free tier: caption generation, hashtag research, viral hook writing, content repurposing, thread generation, post scoring, trend scanning, and more.',
+    a: 'Publer includes AI Assist on paid plans. SocialMate includes 15+ AI tools on the free tier: caption generation, hashtag research, viral hook writing, content repurposing, thread generation, post scoring, trend scanning, and more.',
   },
   {
     q: 'What platforms does SocialMate have that Publer does not?',
@@ -68,7 +68,7 @@ const faqSchema = {
 
 export default function VsPublerPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
@@ -95,7 +95,7 @@ export default function VsPublerPage() {
             SocialMate vs Publer
           </h1>
           <p className="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-            Publer's free tier caps at 10 posts per account. SocialMate is unlimited — with 12 AI tools and no credit card needed.
+            Publer's free tier caps at 10 posts per account. SocialMate is unlimited — with 15+ AI tools and no credit card needed.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-black text-white font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -123,10 +123,10 @@ export default function VsPublerPage() {
           </div>
           <div className="bg-black text-white rounded-2xl p-6">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">Unlimited. 12 AI tools. Free.</p>
+            <p className="font-extrabold text-lg mb-2">Unlimited. 15+ AI tools. Free.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ Unlimited scheduled posts</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
               <li>✅ RSS import free</li>
               <li>✅ Bulk scheduling free</li>
@@ -172,7 +172,7 @@ export default function VsPublerPage() {
               {
                 n: '3',
                 title: 'AI tools should not be a paid upgrade',
-                desc: 'Publer\'s AI Assist is locked to paid plans. SocialMate includes 12 AI tools on the free tier — caption generation, hashtag research, post scoring, trend scanning, content repurposing, and more. You should not have to pay extra to write better content.',
+                desc: 'Publer\'s AI Assist is locked to paid plans. SocialMate includes 15+ AI tools on the free tier — caption generation, hashtag research, post scoring, trend scanning, content repurposing, and more. You should not have to pay extra to write better content.',
               },
               {
                 n: '4',
@@ -208,7 +208,7 @@ export default function VsPublerPage() {
         <div className="bg-black text-white rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Ready to stop counting posts?</h2>
           <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
-            Unlimited posts, 12 AI tools, 16 platforms. SocialMate is free forever — no credit card required.
+            Unlimited posts, 15+ AI tools, 7 platforms. SocialMate is free forever — no credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             Create free account →

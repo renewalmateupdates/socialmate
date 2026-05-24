@@ -1,10 +1,10 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Agorapulse (2026) — Full Comparison',
-  description: 'Agorapulse starts at $49/month with no free plan and is built for agencies. SocialMate is free forever with bulk scheduling, Discord/Bluesky/Telegram/Mastodon, and 12 AI tools included.',
+  description: 'Agorapulse starts at $49/month with no free plan and is built for agencies. SocialMate is free forever with bulk scheduling, Discord/Bluesky/Telegram/Mastodon, and 15+ AI tools included.',
   openGraph: {
     title:       'SocialMate vs Agorapulse (2026)',
     description: 'Agorapulse charges $49/month with no free plan and heavy agency features you may not need. SocialMate is free forever — no credit card, no agency overhead.',
@@ -67,7 +67,7 @@ const faqSchema = {
 
 export default function VsAgorapulsePage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
@@ -125,7 +125,7 @@ export default function VsAgorapulsePage() {
             <p className="font-extrabold text-lg mb-2">All platforms. All tools. $0.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ Free forever — no trial countdown</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
               <li>✅ Bulk scheduling free</li>
               <li>✅ No per-user fees</li>
@@ -207,7 +207,7 @@ export default function VsAgorapulsePage() {
         <div className="bg-black text-white rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Skip the $49/month — start free today</h2>
           <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is free forever — bulk scheduling, 12 AI tools, 16 platforms, no agency overhead. No credit card required.
+            SocialMate is free forever — bulk scheduling, 15+ AI tools, 7 platforms, no agency overhead. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             Create free account →

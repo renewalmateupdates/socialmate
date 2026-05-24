@@ -1,13 +1,13 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Iconosquare (2026) — Full Comparison',
-  description: 'Iconosquare starts at $49/month and is an analytics tool, not a scheduler. No free plan, no Discord/Telegram/Mastodon/Bluesky. SocialMate is free forever with 12 AI tools and real scheduling.',
+  description: 'Iconosquare starts at $49/month and is an analytics tool, not a scheduler. No free plan, no Discord/Telegram/Mastodon/Bluesky. SocialMate is free forever with 15+ AI tools and real scheduling.',
   openGraph: {
     title:       'SocialMate vs Iconosquare (2026)',
-    description: 'Iconosquare is an analytics-first platform starting at $49/month with no free plan. SocialMate is free forever with built-in scheduling, AI tools, and 16 platforms.',
+    description: 'Iconosquare is an analytics-first platform starting at $49/month with no free plan. SocialMate is free forever with built-in scheduling, AI tools, and 7 platforms.',
     url:         'https://socialmate.studio/vs/iconosquare',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/iconosquare' },
@@ -68,7 +68,7 @@ const faqSchema = {
 
 export default function VsIconosquarePage() {
   return (
-    <div className="min-h-dvh bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-dvh bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
@@ -126,8 +126,8 @@ export default function VsIconosquarePage() {
             <p className="font-extrabold text-lg mb-2">Schedule + analytics. $0.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ Free forever — no trial countdown</li>
-              <li>✅ Real scheduling across 16 platforms</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ Real scheduling across 7 platforms</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
               <li>✅ Bulk scheduling free</li>
               <li>✅ No credit card required</li>
@@ -208,7 +208,7 @@ export default function VsIconosquarePage() {
         <div className="bg-black text-white rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Skip the $49/month analytics bill — start free today</h2>
           <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is free forever — bulk scheduling, 12 AI tools, 16 platforms, analytics included. No credit card required.
+            SocialMate is free forever — bulk scheduling, 15+ AI tools, 7 platforms, analytics included. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             Create free account →

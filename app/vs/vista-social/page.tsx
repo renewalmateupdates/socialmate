@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: "Vista Social starts at $39/month with no permanent free plan. SocialMate is free forever with TikTok included, plus Discord, Telegram, and Mastodon that Vista Social doesn't support.",
   openGraph: {
     title: 'SocialMate vs Vista Social (2026)',
-    description: "Vista Social starts at $39/month — no free plan, just a 15-day trial. SocialMate is free forever, includes TikTok, Discord, Telegram, Mastodon, and 12 AI tools.",
+    description: "Vista Social starts at $39/month — no free plan, just a 15-day trial. SocialMate is free forever, includes TikTok, Discord, Telegram, Mastodon, and 15+ AI tools.",
     url: 'https://socialmate.studio/vs/vista-social',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/vista-social' },
@@ -40,7 +40,7 @@ const FAQ = [
   },
   {
     q: 'Is SocialMate a good Vista Social alternative?',
-    a: "Yes for creators and small teams. SocialMate covers TikTok scheduling free (Production API approved), plus Discord, Telegram, Mastodon, and Bluesky — platforms Vista Social does not support. SocialMate includes 12 AI tools on the free tier vs Vista Social's basic AI behind a paywall. The gap: Vista Social has stronger review management and YouTube/Pinterest support. If review monitoring is your primary need, Vista Social is worth evaluating. If you want cross-platform scheduling with open-web coverage and a $0 starting point, SocialMate wins.",
+    a: "Yes for creators and small teams. SocialMate covers TikTok scheduling free (Production API approved), plus Discord, Telegram, Mastodon, and Bluesky — platforms Vista Social does not support. SocialMate includes 15+ AI tools on the free tier vs Vista Social's basic AI behind a paywall. The gap: Vista Social has stronger review management and YouTube/Pinterest support. If review monitoring is your primary need, Vista Social is worth evaluating. If you want cross-platform scheduling with open-web coverage and a $0 starting point, SocialMate wins.",
   },
 ]
 
@@ -56,7 +56,7 @@ const faqSchema = {
 
 export default function VsVistaSocialPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
@@ -111,12 +111,12 @@ export default function VsVistaSocialPage() {
           </div>
           <div className="bg-black text-white rounded-2xl p-6">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">Free forever. TikTok included. 12 AI tools.</p>
+            <p className="font-extrabold text-lg mb-2">Free forever. TikTok included. 15+ AI tools.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ Free plan — no trial expiry</li>
               <li>✅ TikTok scheduling free (Production API approved)</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ 2 team seats free</li>
               <li>✅ No credit card required</li>
             </ul>
@@ -150,7 +150,7 @@ export default function VsVistaSocialPage() {
               {
                 n: '1',
                 title: '$39/month is a high floor for a scheduling tool',
-                desc: "Vista Social's entry plan is $39/month for 3 profiles. That is more than 7× the cost of SocialMate Pro ($5/month), which gives you unlimited profiles on 6 platforms. For creators, small businesses, and solo founders watching every dollar, $39/month before you've validated your content ROI is difficult to justify.",
+                desc: "Vista Social's entry plan is $39/month for 3 profiles. That is more than 7× the cost of SocialMate Pro ($5/month), which gives you unlimited profiles on 7 platforms. For creators, small businesses, and solo founders watching every dollar, $39/month before you've validated your content ROI is difficult to justify.",
               },
               {
                 n: '2',
@@ -165,7 +165,7 @@ export default function VsVistaSocialPage() {
               {
                 n: '4',
                 title: 'AI tools should not require a premium plan',
-                desc: "Vista Social has basic AI capabilities, but they are not the focus of the product. SocialMate includes 12 AI tools — caption generation, TikTok script generator, viral hook writer, content repurposer, hashtag research, and more — all on the free tier. You shouldn't have to pay $39/month to write better captions.",
+                desc: "Vista Social has basic AI capabilities, but they are not the focus of the product. SocialMate includes 15+ AI tools — caption generation, TikTok script generator, viral hook writer, content repurposer, hashtag research, and more — all on the free tier. You shouldn't have to pay $39/month to write better captions.",
               },
             ].map((r) => (
               <div key={r.n} className="flex gap-4 p-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl hover:border-gray-300 dark:hover:border-gray-600 transition-all">
@@ -196,7 +196,7 @@ export default function VsVistaSocialPage() {
         <div className="bg-black text-white rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Why pay $39 when $0 gets you started?</h2>
           <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is free forever — TikTok included, 12 AI tools, 6 platforms, 2 team seats. No trial. No expiry. No credit card.
+            SocialMate is free forever — TikTok included, 15+ AI tools, 7 platforms, 2 team seats. No trial. No expiry. No credit card.
           </p>
           <Link href="/signup" className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             Create free account →

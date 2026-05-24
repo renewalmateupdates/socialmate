@@ -1,13 +1,13 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Khoros (2026) — Full Comparison',
-  description: 'Khoros is an enterprise community and social management platform at $500+/month. SocialMate gives creators and small teams 7 platforms, 12 AI tools, and SOMA — starting free.',
+  description: 'Khoros is an enterprise community and social management platform at $500+/month. SocialMate gives creators and small teams 7 platforms, 15+ AI tools, and SOMA — starting free.',
   openGraph: {
     title:       'SocialMate vs Khoros (2026)',
-    description: 'Khoros is enterprise-only at $500+/month. SocialMate covers 7 platforms with 12 AI tools — free to start.',
+    description: 'Khoros is enterprise-only at $500+/month. SocialMate covers 7 platforms with 15+ AI tools — free to start.',
     url:         'https://socialmate.studio/vs/khoros',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/khoros' },
@@ -69,7 +69,7 @@ const faqSchema = {
 
 export default function VsKhorosPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
@@ -127,7 +127,7 @@ export default function VsKhorosPage() {
             <p className="font-extrabold text-lg mb-2">Self-serve. 7 platforms. Free.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ Discord + Telegram + Bluesky + TikTok + LinkedIn + X + Mastodon</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ SOMA autonomous content agent</li>
               <li>✅ HESTIA community tab</li>
               <li>✅ Pro plan for $5/month total</li>
@@ -211,7 +211,7 @@ export default function VsKhorosPage() {
           <h2 className="text-3xl font-extrabold mb-4">No demo. No contract. Just free.</h2>
           <p className="text-gray-400 mb-6 max-w-lg mx-auto text-sm">
             SocialMate is self-serve, free to start, and ready in minutes.
-            7 platforms, 12 AI tools, SOMA. Pro is $5/month.
+            7 platforms, 15+ AI tools, SOMA. Pro is $5/month.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-white text-black font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
             Start free — no credit card →

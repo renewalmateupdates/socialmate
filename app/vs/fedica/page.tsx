@@ -1,13 +1,13 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Fedica (2026) — Full Comparison',
-  description: 'Fedica is a Twitter/X-only analytics tool starting at $15/month with no multi-platform support. SocialMate is free forever with 16 platforms, AI tools, and scheduling built in.',
+  description: 'Fedica is a Twitter/X-only analytics tool starting at $15/month with no multi-platform support. SocialMate is free forever with 7 platforms, AI tools, and scheduling built in.',
   openGraph: {
     title:       'SocialMate vs Fedica (2026)',
-    description: 'Fedica focuses on Twitter/X analytics. If you post on Bluesky, Discord, Instagram, or Mastodon — it cannot help. SocialMate covers 16 platforms free.',
+    description: 'Fedica focuses on Twitter/X analytics. If you post on Bluesky, Discord, Instagram, or Mastodon — it cannot help. SocialMate covers 7 platforms free.',
     url:         'https://socialmate.studio/vs/fedica',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/fedica' },
@@ -17,7 +17,7 @@ const COMPARISON = [
   { feature: 'Starting price',            fedica: '$15/month (Tweepsmap)',        socialmate: '$0 — free forever'       },
   { feature: 'Free plan',                 fedica: '❌ None',                      socialmate: '✅ Free forever'         },
   { feature: 'Primary focus',             fedica: 'Twitter/X analytics only',    socialmate: 'Scheduling + analytics'  },
-  { feature: 'Platform support',          fedica: 'Twitter/X primary',           socialmate: '16 platforms'            },
+  { feature: 'Platform support',          fedica: 'Twitter/X primary',           socialmate: '7 platforms'            },
   { feature: 'Instagram support',         fedica: 'Limited',                      socialmate: '✅'                      },
   { feature: 'Discord support',           fedica: '❌',                           socialmate: '✅'                      },
   { feature: 'Telegram support',          fedica: '❌',                           socialmate: '✅'                      },
@@ -41,11 +41,11 @@ const FAQ = [
   },
   {
     q: 'Does Fedica support multiple platforms?',
-    a: 'Fedica is primarily a Twitter/X analytics tool. If you want to schedule and analyze content across Instagram, LinkedIn, Bluesky, Discord, Telegram, Mastodon, and more — Fedica is not the right tool. SocialMate supports 16 platforms.',
+    a: 'Fedica is primarily a Twitter/X analytics tool. If you want to schedule and analyze content across Instagram, LinkedIn, Bluesky, Discord, Telegram, Mastodon, and more — Fedica is not the right tool. SocialMate supports 7 platforms.',
   },
   {
     q: 'Is SocialMate a good Fedica alternative for multi-platform creators?',
-    a: 'Yes. SocialMate gives you scheduling, analytics, AI tools, bulk scheduling, evergreen recycling, and competitor tracking across 16 platforms — all free. Fedica charges $15/month and focuses primarily on Twitter/X analytics.',
+    a: 'Yes. SocialMate gives you scheduling, analytics, AI tools, bulk scheduling, evergreen recycling, and competitor tracking across 7 platforms — all free. Fedica charges $15/month and focuses primarily on Twitter/X analytics.',
   },
   {
     q: 'What if I just want Twitter/X analytics?',
@@ -66,7 +66,7 @@ const faqSchema = {
 
 export default function VsFedicaPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
@@ -93,7 +93,7 @@ export default function VsFedicaPage() {
             SocialMate vs Fedica
           </h1>
           <p className="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-            Fedica is a Twitter/X analytics tool — not a multi-platform scheduler. If you post beyond Twitter, it cannot help. SocialMate covers 16 platforms for free.
+            Fedica is a Twitter/X analytics tool — not a multi-platform scheduler. If you post beyond Twitter, it cannot help. SocialMate covers 7 platforms for free.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-black text-white font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -121,10 +121,10 @@ export default function VsFedicaPage() {
           </div>
           <div className="bg-black text-white rounded-2xl p-6">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">16 platforms. All tools. $0.</p>
+            <p className="font-extrabold text-lg mb-2">7 platforms. All tools. $0.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ Free forever — no trial countdown</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
               <li>✅ Full scheduling + analytics free</li>
               <li>✅ Bulk scheduling free</li>
@@ -165,7 +165,7 @@ export default function VsFedicaPage() {
               {
                 n: '2',
                 title: 'Single-platform focus in a multi-platform world',
-                desc: 'In 2026, audiences are spread across Twitter/X, Bluesky, Instagram, LinkedIn, Discord, Mastodon, Telegram, and more. A Twitter/X-only tool leaves the rest of your audience unserved. SocialMate schedules across 16 platforms from one dashboard.',
+                desc: 'In 2026, audiences are spread across Twitter/X, Bluesky, Instagram, LinkedIn, Discord, Mastodon, Telegram, and more. A Twitter/X-only tool leaves the rest of your audience unserved. SocialMate schedules across 7 platforms from one dashboard.',
               },
               {
                 n: '3',
@@ -206,7 +206,7 @@ export default function VsFedicaPage() {
         <div className="bg-black text-white rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Go beyond Twitter/X — start free today</h2>
           <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is free forever — 16 platforms, bulk scheduling, 12 AI tools, analytics. No credit card required.
+            SocialMate is free forever — 7 platforms, bulk scheduling, 15+ AI tools, analytics. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             Create free account →

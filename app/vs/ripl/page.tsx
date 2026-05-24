@@ -1,13 +1,13 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Ripl (2026) — Full Comparison',
-  description: "Ripl is a video/animated post tool for small businesses at $15/mo. SocialMate covers 6 platforms, has 20+ AI tools, SOMA autonomous content, Enki trading bot, and a free plan.",
+  description: "Ripl is a video/animated post tool for small businesses at $15/mo. SocialMate covers 7 platforms, has 20+ AI tools, SOMA autonomous content, Enki trading bot, and a free plan.",
   openGraph: {
     title:       'SocialMate vs Ripl (2026)',
-    description: "Ripl: $15/mo, video animations, limited platforms. SocialMate: $5/mo — 6 platforms, 20+ AI tools, SOMA, Enki, free plan included.",
+    description: "Ripl: $15/mo, video animations, limited platforms. SocialMate: $5/mo — 7 platforms, 20+ AI tools, SOMA, Enki, free plan included.",
     url:         'https://socialmate.studio/vs/ripl',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/ripl' },
@@ -90,7 +90,7 @@ export default function VsRiplPage() {
             SocialMate vs Ripl
           </h1>
           <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-            Ripl creates animated video posts for small businesses. SocialMate is a full Creator OS — 6 platforms, 20+ AI tools, autonomous content, and a $0 free plan.
+            Ripl creates animated video posts for small businesses. SocialMate is a full Creator OS — 7 platforms, 20+ AI tools, autonomous content, and a $0 free plan.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-amber-400 text-black font-bold rounded-2xl hover:bg-amber-300 transition-all text-sm">
@@ -118,7 +118,7 @@ export default function VsRiplPage() {
           </div>
           <div className="bg-amber-400 text-black rounded-2xl p-6">
             <p className="text-xs font-bold text-black/60 uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">Full Creator OS. 6 platforms. Starts free.</p>
+            <p className="font-extrabold text-lg mb-2">Full Creator OS. 7 platforms. Starts free.</p>
             <ul className="space-y-1 text-xs text-black/80">
               <li>✅ Bluesky, Discord, Telegram, Mastodon, X, TikTok</li>
               <li>✅ 20+ AI writing and content tools</li>
@@ -203,7 +203,7 @@ export default function VsRiplPage() {
         <div className="bg-amber-400 text-black rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Need more than animated videos? Start free.</h2>
           <p className="text-black/70 text-sm mb-6 max-w-lg mx-auto">
-            SocialMate covers 6 platforms, gives you 20+ AI tools, and lets SOMA generate your content on autopilot. All starting at $0.
+            SocialMate covers 7 platforms, gives you 20+ AI tools, and lets SOMA generate your content on autopilot. All starting at $0.
           </p>
           <Link href="/signup" className="inline-block bg-black text-white font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm">
             Create free account →

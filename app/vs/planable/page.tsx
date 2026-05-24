@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -67,7 +67,7 @@ const faqSchema = {
 
 export default function VsPlanablePage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
@@ -127,7 +127,7 @@ export default function VsPlanablePage() {
               <li>✅ Unlimited posts, no lifetime cap</li>
               <li>✅ Flat-rate workspaces ($20/mo for unlimited)</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ RSS import, evergreen, link in bio — all free</li>
               <li>✅ No credit card required</li>
             </ul>
@@ -176,7 +176,7 @@ export default function VsPlanablePage() {
               {
                 n: '4',
                 title: 'No RSS import, no evergreen recycling, no link in bio',
-                desc: 'Planable is primarily a scheduling and collaboration tool. SocialMate is a full content operations platform: RSS import, evergreen content recycling, link in bio builder, competitor tracking, hashtag manager, and 12 AI tools — all included free.',
+                desc: 'Planable is primarily a scheduling and collaboration tool. SocialMate is a full content operations platform: RSS import, evergreen content recycling, link in bio builder, competitor tracking, hashtag manager, and 15+ AI tools — all included free.',
               },
             ].map((r) => (
               <div key={r.n} className="flex gap-4 p-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl hover:border-gray-300 dark:hover:border-gray-600 transition-all">
@@ -207,7 +207,7 @@ export default function VsPlanablePage() {
         <div className="bg-black text-white rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">50 posts is not enough. SocialMate is.</h2>
           <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
-            Unlimited posts, 12 AI tools, 16 platforms — free forever. No lifetime caps, no credit card required.
+            Unlimited posts, 15+ AI tools, 7 platforms — free forever. No lifetime caps, no credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             Create free account →

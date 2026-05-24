@@ -1,10 +1,10 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Brand24 (2026) — Full Comparison',
-  description: 'Brand24 charges $79/month for social monitoring only — no scheduling. SocialMate gives you scheduling across 7 platforms, 12 AI tools, and monitoring features — starting free.',
+  description: 'Brand24 charges $79/month for social monitoring only — no scheduling. SocialMate gives you scheduling across 7 platforms, 15+ AI tools, and monitoring features — starting free.',
   openGraph: {
     title:       'SocialMate vs Brand24 (2026)',
     description: 'Brand24 is $79/month for monitoring only. SocialMate schedules, monitors, and creates content across 7 platforms — free to start.',
@@ -70,7 +70,7 @@ const faqSchema = {
 
 export default function VsBrand24Page() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
@@ -129,7 +129,7 @@ export default function VsBrand24Page() {
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ Full scheduling to 7 platforms</li>
               <li>✅ Competitor tracking + post alerts</li>
-              <li>✅ 12 AI tools including SM Pulse + SM Radar</li>
+              <li>✅ 15+ AI tools including SM Pulse + SM Radar</li>
               <li>✅ SOMA autonomous content generation</li>
               <li>✅ Pro plan for $5/month total</li>
               <li>✅ No credit card required to start</li>
@@ -169,7 +169,7 @@ export default function VsBrand24Page() {
               {
                 n: '2',
                 title: '$79/month for monitoring vs. $0 for everything',
-                desc: "Brand24's lowest plan is $79/month for just monitoring. SocialMate's free plan includes scheduling to 7 platforms, 12 AI tools, competitor tracking, and a link-in-bio page. Pro is $5/month. You're comparing $79/month for one narrow function against $5/month for a full creator platform.",
+                desc: "Brand24's lowest plan is $79/month for just monitoring. SocialMate's free plan includes scheduling to 7 platforms, 15+ AI tools, competitor tracking, and a link-in-bio page. Pro is $5/month. You're comparing $79/month for one narrow function against $5/month for a full creator platform.",
               },
               {
                 n: '3',

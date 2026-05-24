@@ -1,10 +1,10 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Social Report (2026) — Full Comparison',
-  description: 'Social Report charges $49/month for social scheduling and analytics with no Discord or Telegram. SocialMate gives you 7 platforms, 12 AI tools, and SOMA — starting free.',
+  description: 'Social Report charges $49/month for social scheduling and analytics with no Discord or Telegram. SocialMate gives you 7 platforms, 15+ AI tools, and SOMA — starting free.',
   openGraph: {
     title:       'SocialMate vs Social Report (2026)',
     description: 'Social Report is $49/month with no Discord, Telegram, or Bluesky. SocialMate covers 7 platforms with AI built in — free to start.',
@@ -38,7 +38,7 @@ const COMPARISON = [
 const FAQ = [
   {
     q: 'What is Social Report and how does it compare to SocialMate?',
-    a: "Social Report is a social media management tool with scheduling, analytics, and team features for agencies. It supports 35+ networks including the main platforms. Pricing starts at $49/month with a 30-day trial. Key gaps: no Discord, no Telegram, no Bluesky, and no AI writing tools. SocialMate covers fewer total legacy platforms but adds Discord, Telegram, and Bluesky — plus 12 AI tools and SOMA — starting free.",
+    a: "Social Report is a social media management tool with scheduling, analytics, and team features for agencies. It supports 35+ networks including the main platforms. Pricing starts at $49/month with a 30-day trial. Key gaps: no Discord, no Telegram, no Bluesky, and no AI writing tools. SocialMate covers fewer total legacy platforms but adds Discord, Telegram, and Bluesky — plus 15+ AI tools and SOMA — starting free.",
   },
   {
     q: 'Does Social Report have Discord and Telegram scheduling?',
@@ -50,7 +50,7 @@ const FAQ = [
   },
   {
     q: 'What AI tools does SocialMate include?',
-    a: "SocialMate's 12 AI tools include caption generation, viral hook writing, content repurposing (6 formats), hashtag research, thread generation, post rewriting, post scoring, brand voice injection, SM Pulse (trend scan), SM Radar (content intelligence), and SOMA — an autonomous content agent that generates a full week of platform-native posts automatically.",
+    a: "SocialMate's 15+ AI tools include caption generation, viral hook writing, content repurposing (6 formats), hashtag research, thread generation, post rewriting, post scoring, brand voice injection, SM Pulse (trend scan), SM Radar (content intelligence), and SOMA — an autonomous content agent that generates a full week of platform-native posts automatically.",
   },
   {
     q: 'Is $49/month for Social Report worth it?',
@@ -70,7 +70,7 @@ const faqSchema = {
 
 export default function VsSocialReportPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
@@ -97,7 +97,7 @@ export default function VsSocialReportPage() {
             SocialMate vs Social Report
           </h1>
           <p className="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-            Social Report is $49/month with no Discord, Telegram, or AI tools. SocialMate covers 7 platforms with 12 AI tools and SOMA — starting completely free.
+            Social Report is $49/month with no Discord, Telegram, or AI tools. SocialMate covers 7 platforms with 15+ AI tools and SOMA — starting completely free.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-black text-white font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -128,7 +128,7 @@ export default function VsSocialReportPage() {
             <p className="font-extrabold text-lg mb-2">Schedule + AI + analytics. Free.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ Discord + Telegram + Bluesky + TikTok + LinkedIn + X + Mastodon</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ SOMA autonomous content agent</li>
               <li>✅ Client Report Agent for agencies</li>
               <li>✅ Pro plan for $5/month total</li>
@@ -164,7 +164,7 @@ export default function VsSocialReportPage() {
               {
                 n: '1',
                 title: '$49/month for no AI is hard to justify in 2026',
-                desc: "Social Report's core value is scheduling + analytics. But in 2026, a scheduler without AI writing tools is incomplete. SocialMate's 12 AI tools write captions, craft hooks, repurpose content into 6 formats, generate hashtags, and score posts — all on the free plan. Paying $49/month for a tool that can't generate or assist with a single word is a significant limitation.",
+                desc: "Social Report's core value is scheduling + analytics. But in 2026, a scheduler without AI writing tools is incomplete. SocialMate's 15+ AI tools write captions, craft hooks, repurpose content into 6 formats, generate hashtags, and score posts — all on the free plan. Paying $49/month for a tool that can't generate or assist with a single word is a significant limitation.",
               },
               {
                 n: '2',
@@ -211,7 +211,7 @@ export default function VsSocialReportPage() {
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">More AI. More platforms. Less money.</p>
           <h2 className="text-3xl font-extrabold mb-4">Switch from Social Report today</h2>
           <p className="text-gray-400 mb-6 max-w-lg mx-auto text-sm">
-            SocialMate covers 7 platforms including Discord and Telegram — with 12 AI tools and SOMA built in.
+            SocialMate covers 7 platforms including Discord and Telegram — with 15+ AI tools and SOMA built in.
             Start free. Pro is $5/month.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-white text-black font-bold rounded-2xl hover:opacity-80 transition-all text-sm">

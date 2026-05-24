@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -68,7 +68,7 @@ const faqSchema = {
 
 export default function VsHubSpotSocialPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
@@ -128,7 +128,7 @@ export default function VsHubSpotSocialPage() {
               <li>✅ Built exclusively for social scheduling</li>
               <li>✅ TikTok free — HubSpot has none</li>
               <li>✅ X + LinkedIn + Bluesky + Discord + Telegram + Mastodon</li>
-              <li>✅ 12 AI tools free</li>
+              <li>✅ 15+ AI tools free</li>
               <li>✅ Pro $5/month — 160x cheaper than HubSpot</li>
               <li>✅ No credit card required to start</li>
             </ul>

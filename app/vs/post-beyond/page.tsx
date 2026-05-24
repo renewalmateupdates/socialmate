@@ -1,10 +1,10 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs PostBeyond (2026) — Full Comparison',
-  description: 'PostBeyond is an employee advocacy platform starting at $1,000+/month for enterprises. SocialMate gives creators and small teams 7 platforms and 12 AI tools — starting free.',
+  description: 'PostBeyond is an employee advocacy platform starting at $1,000+/month for enterprises. SocialMate gives creators and small teams 7 platforms and 15+ AI tools — starting free.',
   openGraph: {
     title:       'SocialMate vs PostBeyond (2026)',
     description: 'PostBeyond is enterprise employee advocacy at $1,000+/month. SocialMate is free for creators and small teams with 7 platforms and AI tools built in.',
@@ -50,7 +50,7 @@ const FAQ = [
   },
   {
     q: 'What AI tools does SocialMate include?',
-    a: "SocialMate's 12 AI tools include caption generation, viral hook writing, content repurposing (6 formats), hashtag research, thread generation, post rewriting, post scoring, brand voice injection, SM Pulse (trend scan), SM Radar (content intelligence), and SOMA — an autonomous content agent that generates a full week of platform-native posts from your brand context.",
+    a: "SocialMate's 15+ AI tools include caption generation, viral hook writing, content repurposing (6 formats), hashtag research, thread generation, post rewriting, post scoring, brand voice injection, SM Pulse (trend scan), SM Radar (content intelligence), and SOMA — an autonomous content agent that generates a full week of platform-native posts from your brand context.",
   },
   {
     q: 'Does SocialMate support LinkedIn like PostBeyond?',
@@ -70,7 +70,7 @@ const faqSchema = {
 
 export default function VsPostBeyondPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
@@ -97,7 +97,7 @@ export default function VsPostBeyondPage() {
             SocialMate vs PostBeyond
           </h1>
           <p className="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-            PostBeyond is enterprise employee advocacy at $1,000+/month. SocialMate is purpose-built for creators and small teams — 7 platforms, 12 AI tools, free to start.
+            PostBeyond is enterprise employee advocacy at $1,000+/month. SocialMate is purpose-built for creators and small teams — 7 platforms, 15+ AI tools, free to start.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-black text-white font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -128,7 +128,7 @@ export default function VsPostBeyondPage() {
             <p className="font-extrabold text-lg mb-2">Built for creators and teams. Free.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ 7 platforms: Discord, Telegram, Bluesky, TikTok, LinkedIn, X, Mastodon</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ SOMA autonomous content agent</li>
               <li>✅ Team approval workflows free</li>
               <li>✅ Pro plan for $5/month total</li>
@@ -174,7 +174,7 @@ export default function VsPostBeyondPage() {
               {
                 n: '3',
                 title: 'AI tools that PostBeyond will never build',
-                desc: "PostBeyond's value is in advocacy coordination — not AI content creation. SocialMate's 12 AI tools, SOMA autonomous content system, and 8 AI agents are purpose-built for the creator workflow: generate a hook, repurpose a thread, schedule a full week of content, auto-respond to mentions. This entire capability layer doesn't exist in PostBeyond.",
+                desc: "PostBeyond's value is in advocacy coordination — not AI content creation. SocialMate's 15+ AI tools, SOMA autonomous content system, and 8 AI agents are purpose-built for the creator workflow: generate a hook, repurpose a thread, schedule a full week of content, auto-respond to mentions. This entire capability layer doesn't exist in PostBeyond.",
               },
               {
                 n: '4',
@@ -211,7 +211,7 @@ export default function VsPostBeyondPage() {
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Built for creators, not enterprises</p>
           <h2 className="text-3xl font-extrabold mb-4">Schedule posts. Generate content. Free.</h2>
           <p className="text-gray-400 mb-6 max-w-lg mx-auto text-sm">
-            SocialMate is a full creator OS. 7 platforms, 12 AI tools, SOMA, and 8 agents — all for $0 to start.
+            SocialMate is a full creator OS. 7 platforms, 15+ AI tools, SOMA, and 8 agents — all for $0 to start.
             Pro is $5/month.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-white text-black font-bold rounded-2xl hover:opacity-80 transition-all text-sm">

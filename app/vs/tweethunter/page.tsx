@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -50,7 +50,7 @@ const FAQ = [
   },
   {
     q: 'What AI tools does SocialMate include for X content?',
-    a: 'SocialMate\'s 12 AI tools include hook writing (critical for X engagement), thread generation, caption rewriting for punchy X tone, hashtag research, and content repurposing (turn a LinkedIn post into an X thread). SOMA can generate a full week of X content automatically based on your voice profile.',
+    a: 'SocialMate\'s 15+ AI tools include hook writing (critical for X engagement), thread generation, caption rewriting for punchy X tone, hashtag research, and content repurposing (turn a LinkedIn post into an X thread). SOMA can generate a full week of X content automatically based on your voice profile.',
   },
   {
     q: 'Does SocialMate have analytics for X/Twitter?',
@@ -70,7 +70,7 @@ const faqSchema = {
 
 export default function VsTweetHunterPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
@@ -129,7 +129,7 @@ export default function VsTweetHunterPage() {
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ X + LinkedIn + TikTok + Bluesky + Discord + Telegram + Mastodon</li>
               <li>✅ Thread builder across multiple platforms</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Pro plan for $5/month total</li>
               <li>✅ SOMA AI content system built in</li>
               <li>✅ No credit card required to start</li>

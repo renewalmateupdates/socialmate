@@ -1,13 +1,13 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Postcron (2026) — Full Comparison',
-  description: 'Postcron starts at $8/month for basic scheduling. SocialMate starts at $0 with 16 platforms and 12 AI tools. See the full comparison.',
+  description: 'Postcron starts at $8/month for basic scheduling. SocialMate starts at $0 with 7 platforms and 15+ AI tools. See the full comparison.',
   openGraph: {
     title:       'SocialMate vs Postcron (2026)',
-    description: 'Postcron charges $8–$79/month. SocialMate is free with 16 platforms and 12 AI tools.',
+    description: 'Postcron charges $8–$79/month. SocialMate is free with 7 platforms and 15+ AI tools.',
     url:         'https://socialmate.studio/vs/postcron',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/postcron' },
@@ -47,11 +47,11 @@ const FAQ = [
   },
   {
     q: 'Does Postcron support modern platforms like Bluesky?',
-    a: 'No — Postcron supports the traditional platforms (Facebook, Instagram, Twitter, LinkedIn, Pinterest, Google My Business) but hasn\'t added support for Bluesky, Mastodon, Discord, Telegram, or other emerging platforms. SocialMate supports 16 platforms including all of these.',
+    a: 'No — Postcron supports the traditional platforms (Facebook, Instagram, Twitter, LinkedIn, Pinterest, Google My Business) but hasn\'t added support for Bluesky, Mastodon, Discord, Telegram, or other emerging platforms. SocialMate supports 7 platforms including all of these.',
   },
   {
     q: 'Why should I switch from Postcron to SocialMate?',
-    a: 'SocialMate is free, has no watermarks, supports 16 platforms (vs 6), includes 12 AI tools Postcron lacks, and ships features like competitor tracking, evergreen recycling, and hashtag collections. At every price point, SocialMate offers more.',
+    a: 'SocialMate is free, has no watermarks, supports 7 platforms (vs 6), includes 15+ AI tools Postcron lacks, and ships features like competitor tracking, evergreen recycling, and hashtag collections. At every price point, SocialMate offers more.',
   },
 ]
 
@@ -68,7 +68,7 @@ const faqSchema = {
 
 export default function VsPostcron() {
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
@@ -133,7 +133,7 @@ export default function VsPostcron() {
           <div className="border-2 border-green-200 bg-green-50 rounded-2xl p-6 text-center">
             <p className="text-xs font-bold text-green-600 uppercase tracking-widest mb-2">SocialMate</p>
             <p className="text-3xl font-extrabold text-green-700 mb-1">$0/month</p>
-            <p className="text-xs text-green-600">16 platforms · 12 AI tools · Free forever</p>
+            <p className="text-xs text-green-600">7 platforms · 15+ AI tools · Free forever</p>
           </div>
         </div>
 
@@ -164,7 +164,7 @@ export default function VsPostcron() {
             But the social media landscape has moved on. AI writing tools are table stakes in 2026. Emerging platforms like Bluesky and Mastodon are where audiences are migrating. Postcron hasn&#39;t kept up — no AI, limited platforms, and no free plan.
           </p>
           <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-            SocialMate is what Postcron would look like if it were built today. Everything Postcron does — and 12 AI tools, competitor tracking, evergreen recycling, hashtag collections, and 10 more platforms — for $0.
+            SocialMate is what Postcron would look like if it were built today. Everything Postcron does — and 15+ AI tools, competitor tracking, evergreen recycling, hashtag collections, and 10 more platforms — for $0.
           </p>
         </div>
 
@@ -183,7 +183,7 @@ export default function VsPostcron() {
         <div className="bg-black text-white rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3 dark:text-gray-100">Start for free today</h2>
           <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
-            16 platforms, 12 AI tools, unlimited posts, link in bio, competitor tracking — all free. No card required.
+            7 platforms, 15+ AI tools, unlimited posts, link in bio, competitor tracking — all free. No card required.
           </p>
           <Link href="/signup"
             className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">

@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -54,7 +54,7 @@ const FAQ = [
   },
   {
     q: 'What AI tools does SocialMate include?',
-    a: "SocialMate's 12 AI tools include caption generation, viral hook writing, content repurposing (6 formats), hashtag research, thread generation, post rewriting, post scoring, brand voice injection, SM Pulse (trend scan), SM Radar (content intelligence report), and SOMA — an autonomous content agent that generates a full week of platform-native posts from your brand context.",
+    a: "SocialMate's 15+ AI tools include caption generation, viral hook writing, content repurposing (6 formats), hashtag research, thread generation, post rewriting, post scoring, brand voice injection, SM Pulse (trend scan), SM Radar (content intelligence report), and SOMA — an autonomous content agent that generates a full week of platform-native posts from your brand context.",
   },
 ]
 
@@ -70,7 +70,7 @@ const faqSchema = {
 
 export default function VsMentionPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
@@ -130,7 +130,7 @@ export default function VsMentionPage() {
               <li>✅ Scheduling to 7 platforms</li>
               <li>✅ Competitor tracking + engagement alerts</li>
               <li>✅ SM Radar: AI content intelligence report</li>
-              <li>✅ 12 AI tools + SOMA autonomous content</li>
+              <li>✅ 15+ AI tools + SOMA autonomous content</li>
               <li>✅ Pro plan for $5/month total</li>
               <li>✅ No credit card required to start</li>
             </ul>
@@ -169,7 +169,7 @@ export default function VsMentionPage() {
               {
                 n: '2',
                 title: '$41/month for monitoring vs. $0 for everything',
-                desc: "Mention's lowest plan is $41/month for one user, one brand. SocialMate's free plan includes scheduling to 7 platforms, competitor tracking with alerts, AI content intelligence (SM Radar), and 12 AI tools. Pro is $5/month. The cost comparison at every tier strongly favors SocialMate.",
+                desc: "Mention's lowest plan is $41/month for one user, one brand. SocialMate's free plan includes scheduling to 7 platforms, competitor tracking with alerts, AI content intelligence (SM Radar), and 15+ AI tools. Pro is $5/month. The cost comparison at every tier strongly favors SocialMate.",
               },
               {
                 n: '3',

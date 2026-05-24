@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -22,7 +22,7 @@ const COMPARISON = [
   { feature: 'Discord scheduling',            competitor: '❌',                          socialmate: '✅ Free'                  },
   { feature: 'Telegram scheduling',           competitor: '❌',                          socialmate: '✅ Free'                  },
   { feature: 'Mastodon scheduling',           competitor: '❌',                          socialmate: '✅ Free'                  },
-  { feature: 'AI writing tools',              competitor: '✅ Template library (paid)',  socialmate: '12 AI tools free'        },
+  { feature: 'AI writing tools',              competitor: '✅ Template library (paid)',  socialmate: '15+ AI tools free'        },
   { feature: 'Content calendar',             competitor: '✅ (paid)',                  socialmate: '✅ Free'                  },
   { feature: 'Bulk scheduling',              competitor: '✅ (paid)',                  socialmate: '✅ Free'                  },
   { feature: 'RSS / blog import',             competitor: '❌',                          socialmate: '✅ Free'                  },
@@ -69,7 +69,7 @@ const faqSchema = {
 
 export default function VsPromoRepublicPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
@@ -128,7 +128,7 @@ export default function VsPromoRepublicPage() {
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ TikTok free (20 videos/mo) — PromoRepublic has none</li>
               <li>✅ X + LinkedIn + Bluesky + Discord + Telegram + Mastodon</li>
-              <li>✅ 12 AI tools free</li>
+              <li>✅ 15+ AI tools free</li>
               <li>✅ White label add-on from $20/month</li>
               <li>✅ Client workspaces on Agency plan</li>
               <li>✅ No credit card required to start</li>
@@ -173,7 +173,7 @@ export default function VsPromoRepublicPage() {
               {
                 n: '3',
                 title: 'AI content generation beats static templates',
-                desc: 'PromoRepublic\'s template library is broad but static — you still write the copy. SocialMate\'s SOMA AI system generates fully written posts based on your voice, audience, and niche. 12 AI tools handle hook writing, repurposing, hashtag research, and full-week content calendars. AI-first beats template-first.',
+                desc: 'PromoRepublic\'s template library is broad but static — you still write the copy. SocialMate\'s SOMA AI system generates fully written posts based on your voice, audience, and niche. 15+ AI tools handle hook writing, repurposing, hashtag research, and full-week content calendars. AI-first beats template-first.',
               },
               {
                 n: '4',

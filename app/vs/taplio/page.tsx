@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -50,7 +50,7 @@ const FAQ = [
   },
   {
     q: 'What AI tools does SocialMate include for LinkedIn content?',
-    a: 'SocialMate\'s 12 AI tools include LinkedIn-specific capabilities: long-form post generation, hook writing (critical for LinkedIn\'s algorithm), content repurposing (turn a tweet thread into a LinkedIn post), caption rewriting with professional tone, and hashtag research optimized for LinkedIn reach.',
+    a: 'SocialMate\'s 15+ AI tools include LinkedIn-specific capabilities: long-form post generation, hook writing (critical for LinkedIn\'s algorithm), content repurposing (turn a tweet thread into a LinkedIn post), caption rewriting with professional tone, and hashtag research optimized for LinkedIn reach.',
   },
   {
     q: 'Does SocialMate have LinkedIn analytics?',
@@ -70,7 +70,7 @@ const faqSchema = {
 
 export default function VsTaplioPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
@@ -128,7 +128,7 @@ export default function VsTaplioPage() {
             <p className="font-extrabold text-lg mb-2">LinkedIn + 6 more. Free to start.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ LinkedIn + Bluesky + X + TikTok + Discord + Telegram + Mastodon</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Bulk scheduling and RSS import free</li>
               <li>✅ Pro plan for $5/month total</li>
               <li>✅ Creator Monetization Hub built in</li>
@@ -174,7 +174,7 @@ export default function VsTaplioPage() {
               {
                 n: '3',
                 title: 'Taplio\'s AI carousel feature is real — but narrow',
-                desc: 'If PDF carousels are your primary LinkedIn format, Taplio\'s AI carousel generator is a genuine differentiator. SocialMate doesn\'t replicate that specific format. But for text posts, long-form posts, link sharing, and cross-platform repurposing — SocialMate\'s 12 AI tools cover everything else free.',
+                desc: 'If PDF carousels are your primary LinkedIn format, Taplio\'s AI carousel generator is a genuine differentiator. SocialMate doesn\'t replicate that specific format. But for text posts, long-form posts, link sharing, and cross-platform repurposing — SocialMate\'s 15+ AI tools cover everything else free.',
               },
               {
                 n: '4',

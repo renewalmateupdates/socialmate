@@ -1,13 +1,13 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Typefully (2026) — Full Comparison',
-  description: 'Typefully starts at $12.50/month and focuses on X/Twitter threads and LinkedIn. SocialMate starts at $0 with 16 platforms and 12 AI tools.',
+  description: 'Typefully starts at $12.50/month and focuses on X/Twitter threads and LinkedIn. SocialMate starts at $0 with 7 platforms and 15+ AI tools.',
   openGraph: {
     title:       'SocialMate vs Typefully (2026)',
-    description: 'Typefully charges $12.50–$29/month and is thread-focused. SocialMate is free with 16 platforms and 12 AI tools.',
+    description: 'Typefully charges $12.50–$29/month and is thread-focused. SocialMate is free with 7 platforms and 15+ AI tools.',
     url:         'https://socialmate.studio/vs/typefully',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/typefully' },
@@ -68,7 +68,7 @@ const faqSchema = {
 
 export default function VsTypefully() {
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
@@ -112,7 +112,7 @@ export default function VsTypefully() {
 
         <div className="text-center mb-14">
           <div className="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold px-4 py-2 rounded-full mb-6">
-            ✍️ Typefully is a thread-first editor — SocialMate covers 16 platforms for free
+            ✍️ Typefully is a thread-first editor — SocialMate covers 7 platforms for free
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight mb-4 dark:text-gray-100">
             SocialMate vs Typefully (2026)
@@ -133,7 +133,7 @@ export default function VsTypefully() {
           <div className="border-2 border-green-200 bg-green-50 rounded-2xl p-6 text-center">
             <p className="text-xs font-bold text-green-600 uppercase tracking-widest mb-2">SocialMate</p>
             <p className="text-3xl font-extrabold text-green-700 mb-1">$0/month</p>
-            <p className="text-xs text-green-600">16 platforms · 12 AI tools · Free forever</p>
+            <p className="text-xs text-green-600">7 platforms · 15+ AI tools · Free forever</p>
           </div>
         </div>
 
@@ -183,7 +183,7 @@ export default function VsTypefully() {
         <div className="bg-black text-white rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3 dark:text-gray-100">Start for free today</h2>
           <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
-            16 platforms, 12 AI tools, unlimited posts, link in bio, competitor tracking — all free. No card required.
+            7 platforms, 15+ AI tools, unlimited posts, link in bio, competitor tracking — all free. No card required.
           </p>
           <Link href="/signup"
             className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">

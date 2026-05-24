@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -69,7 +69,7 @@ const faqSchema = {
 
 export default function VsPostlyPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
@@ -128,7 +128,7 @@ export default function VsPostlyPage() {
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ TikTok direct publish (Production API — approved May 2026)</li>
               <li>✅ X + LinkedIn + Bluesky + Discord + Telegram + Mastodon</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Pro plan for $5/month — 72% less than Postly</li>
               <li>✅ SOMA AI content system</li>
               <li>✅ No credit card required to start</li>

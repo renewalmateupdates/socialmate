@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -68,7 +68,7 @@ const faqSchema = {
 
 export default function VsAudiensePage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
@@ -129,7 +129,7 @@ export default function VsAudiensePage() {
               <li>✅ Content performance analytics built in</li>
               <li>✅ Best-times heatmap per platform</li>
               <li>✅ Pro plan for $5/month — no second tool needed</li>
-              <li>✅ 12 AI tools free</li>
+              <li>✅ 15+ AI tools free</li>
               <li>✅ No credit card required to start</li>
             </ul>
           </div>

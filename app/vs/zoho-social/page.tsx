@@ -1,13 +1,13 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Zoho Social (2026) — Full Comparison',
-  description: 'Zoho Social has no free plan and starts at $15/month — and is built for teams already inside the Zoho ecosystem. SocialMate is free forever with 16 platforms, 12 AI tools, Discord, Telegram, Mastodon, Bluesky, and no CRM dependency.',
+  description: 'Zoho Social has no free plan and starts at $15/month — and is built for teams already inside the Zoho ecosystem. SocialMate is free forever with 7 platforms, 15+ AI tools, Discord, Telegram, Mastodon, Bluesky, and no CRM dependency.',
   openGraph: {
     title:       'SocialMate vs Zoho Social (2026)',
-    description: 'Zoho Social is a Zoho ecosystem add-on with no free plan. SocialMate is free forever — no Zoho required, no trial countdown, 16 platforms included.',
+    description: 'Zoho Social is a Zoho ecosystem add-on with no free plan. SocialMate is free forever — no Zoho required, no trial countdown, 7 platforms included.',
     url:         'https://socialmate.studio/vs/zoho-social',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/zoho-social' },
@@ -67,7 +67,7 @@ const faqSchema = {
 
 export default function VsZohoSocialPage() {
   return (
-    <div className="min-h-dvh bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-dvh bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
@@ -106,7 +106,7 @@ export default function VsZohoSocialPage() {
             </Link>
           </div>
           <div className="flex items-center justify-center gap-3 mt-5 flex-wrap">
-            {['16 platforms', '12 AI tools free', 'No Zoho required', 'Free forever'].map((pill) => (
+            {['7 platforms', '15+ AI tools free', 'No Zoho required', 'Free forever'].map((pill) => (
               <span key={pill} className="text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-3 py-1 rounded-full">
                 {pill}
               </span>
@@ -133,8 +133,8 @@ export default function VsZohoSocialPage() {
             <p className="font-extrabold text-lg mb-2">All platforms. All tools. $0.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ Free forever — no trial countdown</li>
-              <li>✅ 16 platforms including Discord and Telegram</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 7 platforms including Discord and Telegram</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Link in bio, hashtag manager, evergreen recycling</li>
               <li>✅ No Zoho account needed</li>
               <li>✅ No credit card required</li>
@@ -215,7 +215,7 @@ export default function VsZohoSocialPage() {
         <div className="bg-black text-white rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Skip the $15/month — start free today</h2>
           <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is free forever — 16 platforms, 12 AI tools, bulk scheduling, link in bio, hashtag manager. No Zoho account. No credit card required.
+            SocialMate is free forever — 7 platforms, 15+ AI tools, bulk scheduling, link in bio, hashtag manager. No Zoho account. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             Create free account →

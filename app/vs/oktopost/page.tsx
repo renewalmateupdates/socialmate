@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: 'Oktopost is an enterprise B2B platform starting at $500+/month. SocialMate starts at $0. See the full feature comparison.',
   openGraph: {
     title:       'SocialMate vs Oktopost (2026)',
-    description: 'Oktopost is built for enterprise B2B teams with a $500+/month price tag. SocialMate is free with 16 platforms and 12 AI tools.',
+    description: 'Oktopost is built for enterprise B2B teams with a $500+/month price tag. SocialMate is free with 7 platforms and 15+ AI tools.',
     url:         'https://socialmate.studio/vs/oktopost',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/oktopost' },
@@ -17,7 +17,7 @@ const COMPARISON = [
   { feature: 'Starting price',         oktopost: '$500+/month (enterprise)', socialmate: '$0 — free forever'       },
   { feature: 'Free plan',              oktopost: '❌ No free plan',           socialmate: '✅ Genuinely free'        },
   { feature: 'Target audience',        oktopost: 'Enterprise B2B teams',     socialmate: 'Creators, SMBs, agencies' },
-  { feature: 'Platforms supported',    oktopost: 'LinkedIn-focused',         socialmate: '16 platforms'            },
+  { feature: 'Platforms supported',    oktopost: 'LinkedIn-focused',         socialmate: '7 platforms'            },
   { feature: 'Team seats',             oktopost: 'Unlimited (enterprise)',   socialmate: '2 seats free'            },
   { feature: 'AI writing tools',       oktopost: 'Limited',                  socialmate: '12 tools free'           },
   { feature: 'Employee advocacy',      oktopost: '✅ Core feature',          socialmate: '❌'                       },
@@ -43,7 +43,7 @@ const FAQ = [
   },
   {
     q: 'Does SocialMate support LinkedIn?',
-    a: 'LinkedIn support is on SocialMate\'s roadmap and coming soon. In the meantime, SocialMate covers 16 platforms including Bluesky, Discord, Telegram, Mastodon, and X/Twitter — all channels most B2B creators are building on in 2026.',
+    a: 'LinkedIn support is on SocialMate\'s roadmap and coming soon. In the meantime, SocialMate covers 7 platforms including Bluesky, Discord, Telegram, Mastodon, and X/Twitter — all channels most B2B creators are building on in 2026.',
   },
   {
     q: 'What does Oktopost do better than SocialMate?',
@@ -68,7 +68,7 @@ const faqSchema = {
 
 export default function VsOktopost() {
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
@@ -133,7 +133,7 @@ export default function VsOktopost() {
           <div className="border-2 border-green-200 bg-green-50 rounded-2xl p-6 text-center">
             <p className="text-xs font-bold text-green-600 uppercase tracking-widest mb-2">SocialMate</p>
             <p className="text-3xl font-extrabold text-green-700 mb-1">$0/month</p>
-            <p className="text-xs text-green-600">16 platforms · 12 AI tools · Free forever</p>
+            <p className="text-xs text-green-600">7 platforms · 15+ AI tools · Free forever</p>
           </div>
         </div>
 
@@ -183,7 +183,7 @@ export default function VsOktopost() {
         <div className="bg-black text-white rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3 dark:text-gray-100">Start for free today</h2>
           <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
-            16 platforms, 12 AI tools, unlimited posts, link in bio, competitor tracking — all free. No card required.
+            7 platforms, 15+ AI tools, unlimited posts, link in bio, competitor tracking — all free. No card required.
           </p>
           <Link href="/signup"
             className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">

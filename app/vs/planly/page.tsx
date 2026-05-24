@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -39,7 +39,7 @@ const FAQ = [
   },
   {
     q: 'Can SocialMate replace Planly?',
-    a: 'Yes for most use cases. SocialMate covers TikTok, Instagram scheduling plans, plus platforms Planly does not support at all: Discord, Telegram, Mastodon, and Bluesky. SocialMate also includes 12 AI tools on the free tier, bulk scheduling, link in bio, and RSS import — all free. The main gap is Instagram (in-progress API application) and Facebook (planned).',
+    a: 'Yes for most use cases. SocialMate covers TikTok, Instagram scheduling plans, plus platforms Planly does not support at all: Discord, Telegram, Mastodon, and Bluesky. SocialMate also includes 15+ AI tools on the free tier, bulk scheduling, link in bio, and RSS import — all free. The main gap is Instagram (in-progress API application) and Facebook (planned).',
   },
   {
     q: 'Is Planly better for TikTok than SocialMate?',
@@ -59,7 +59,7 @@ const faqSchema = {
 
 export default function VsPlanlyPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
@@ -114,12 +114,12 @@ export default function VsPlanlyPage() {
           </div>
           <div className="bg-black text-white rounded-2xl p-6">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">TikTok free. 6 platforms. 12 AI tools.</p>
+            <p className="font-extrabold text-lg mb-2">TikTok free. 6 platforms. 15+ AI tools.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ TikTok scheduling free (Production API approved)</li>
               <li>✅ 20 TikTok videos/month on free plan</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Bulk scheduling free</li>
               <li>✅ No credit card required</li>
             </ul>
@@ -162,8 +162,8 @@ export default function VsPlanlyPage() {
               },
               {
                 n: '3',
-                title: '12 AI tools vs basic AI on paid plans',
-                desc: "SocialMate includes 12 AI tools on the free tier — caption generation, hashtag research, TikTok script generator, viral hook writer, thread builder, content repurposer, and more. Planly's AI tools are basic and require a paid plan. You should be able to write better content without paying for the privilege.",
+                title: '15+ AI tools vs basic AI on paid plans',
+                desc: "SocialMate includes 15+ AI tools on the free tier — caption generation, hashtag research, TikTok script generator, viral hook writer, thread builder, content repurposer, and more. Planly's AI tools are basic and require a paid plan. You should be able to write better content without paying for the privilege.",
               },
               {
                 n: '4',

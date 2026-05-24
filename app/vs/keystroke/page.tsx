@@ -1,10 +1,10 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Keystroke (2026) — Full Comparison',
-  description: 'Keystroke is a $29/month LinkedIn-only scheduler with basic AI. SocialMate gives you 7 platforms, 12 AI tools, and SOMA — starting free.',
+  description: 'Keystroke is a $29/month LinkedIn-only scheduler with basic AI. SocialMate gives you 7 platforms, 15+ AI tools, and SOMA — starting free.',
   openGraph: {
     title:       'SocialMate vs Keystroke (2026)',
     description: 'Keystroke is $29/month for LinkedIn-only scheduling. SocialMate covers LinkedIn plus 6 more platforms — free to start.',
@@ -51,7 +51,7 @@ const FAQ = [
   },
   {
     q: 'Does SocialMate have AI for LinkedIn content?',
-    a: "Yes. SocialMate's 12 AI tools include LinkedIn-optimized content generation: long-form post writing, hook generation (critical for LinkedIn's algorithm), content repurposing from other platforms into LinkedIn format, caption rewriting with professional tone, and SOMA — which generates a full week of LinkedIn-native posts automatically when LinkedIn is part of your project.",
+    a: "Yes. SocialMate's 15+ AI tools include LinkedIn-optimized content generation: long-form post writing, hook generation (critical for LinkedIn's algorithm), content repurposing from other platforms into LinkedIn format, caption rewriting with professional tone, and SOMA — which generates a full week of LinkedIn-native posts automatically when LinkedIn is part of your project.",
   },
   {
     q: 'What makes SocialMate better for creators who use multiple platforms?',
@@ -71,7 +71,7 @@ const faqSchema = {
 
 export default function VsKeystrokePage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
@@ -98,7 +98,7 @@ export default function VsKeystrokePage() {
             SocialMate vs Keystroke
           </h1>
           <p className="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-            Keystroke charges $29/month for LinkedIn-only scheduling. SocialMate covers LinkedIn plus 6 other platforms — with 12 AI tools — starting completely free.
+            Keystroke charges $29/month for LinkedIn-only scheduling. SocialMate covers LinkedIn plus 6 other platforms — with 15+ AI tools — starting completely free.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-black text-white font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -129,7 +129,7 @@ export default function VsKeystrokePage() {
             <p className="font-extrabold text-lg mb-2">LinkedIn + 6 more. Free to start.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ LinkedIn + Discord + Telegram + Bluesky + TikTok + X + Mastodon</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ SOMA autonomous content agent</li>
               <li>✅ Pro plan for $5/month total</li>
               <li>✅ 8 autonomous AI agents</li>

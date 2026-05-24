@@ -70,7 +70,7 @@ const FEATURES = [
   },
   {
     title: '2,000 AI Credits / Month',
-    desc:  '12 AI tools — caption writer, hook generator, thread builder, rewriter, and more. 2,000 credits go a long way across multiple clients.',
+    desc:  '15+ AI tools — caption writer, hook generator, thread builder, rewriter, and more. 2,000 credits go a long way across multiple clients.',
     icon:  '✨',
     badge: 'Agency',
   },

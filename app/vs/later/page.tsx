@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: "Later's free plan is Instagram-only with 1 profile and 30 posts/month. SocialMate supports Discord, Bluesky, Telegram, and Mastodon for free — no Instagram lock-in.",
   openGraph: {
     title:       'SocialMate vs Later (2026)',
-    description: "Later free plan: Instagram-only, 1 profile, 30 posts/month. SocialMate: 16 platforms including Discord and Bluesky, unlimited posts, free.",
+    description: "Later free plan: Instagram-only, 1 profile, 30 posts/month. SocialMate: 7 platforms including Discord and Bluesky, unlimited posts, free.",
     url:         'https://socialmate.studio/vs/later',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/later' },
@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 const COMPARISON = [
   { feature: 'Starting price',          later: '$18/month (Starter)',        socialmate: '$0 — free forever'       },
-  { feature: 'Free plan platforms',     later: 'Instagram only',             socialmate: '16 platforms'            },
+  { feature: 'Free plan platforms',     later: 'Instagram only',             socialmate: '7 platforms'            },
   { feature: 'Free plan profiles',      later: '1 profile',                  socialmate: 'Multiple'                },
   { feature: 'Free plan post limit',    later: '30 posts/month',             socialmate: 'Unlimited'               },
   { feature: 'Discord support',         later: '❌',                          socialmate: '✅'                      },
@@ -38,7 +38,7 @@ const COMPARISON = [
 const FAQ = [
   {
     q: "Is Later's free plan really Instagram-only?",
-    a: "Yes. Later's free plan supports only Instagram with 1 profile and 30 posts per month. To add other platforms like TikTok, Pinterest, or Facebook, you must upgrade to a paid plan starting at $18/month. SocialMate's free plan supports all 16 platforms from day one.",
+    a: "Yes. Later's free plan supports only Instagram with 1 profile and 30 posts per month. To add other platforms like TikTok, Pinterest, or Facebook, you must upgrade to a paid plan starting at $18/month. SocialMate's free plan supports all 7 platforms from day one.",
   },
   {
     q: 'Does Later support Discord, Bluesky, or Mastodon?',
@@ -67,7 +67,7 @@ const faqSchema = {
 
 export default function VsLaterPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
@@ -94,7 +94,7 @@ export default function VsLaterPage() {
             SocialMate vs Later
           </h1>
           <p className="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-            Later&apos;s free plan is Instagram-only with 30 posts per month. SocialMate supports 16 platforms including Discord and Bluesky — all free.
+            Later&apos;s free plan is Instagram-only with 30 posts per month. SocialMate supports 7 platforms including Discord and Bluesky — all free.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-black text-white font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -124,12 +124,12 @@ export default function VsLaterPage() {
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">SocialMate</p>
             <p className="font-extrabold text-lg mb-2">All platforms. No limits. Free.</p>
             <ul className="space-y-1 text-xs text-gray-300">
-              <li>✅ 16 platforms on free plan</li>
+              <li>✅ 7 platforms on free plan</li>
               <li>✅ TikTok live — free for all users</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
               <li>✅ Unlimited posts, no monthly cap</li>
               <li>✅ Bulk scheduling free</li>
-              <li>✅ 12 AI tools included free</li>
+              <li>✅ 15+ AI tools included free</li>
               <li>✅ No credit card required</li>
             </ul>
           </div>
@@ -176,7 +176,7 @@ export default function VsLaterPage() {
               },
               {
                 n: '4',
-                title: '12 AI tools vs a basic caption helper',
+                title: '15+ AI tools vs a basic caption helper',
                 desc: 'SocialMate includes caption generation, hashtag research, viral hook writing, thread generation, content repurposing, post scoring, and more — all on the free tier. Later has basic AI caption suggestions behind a paywall.',
               },
             ].map((r) => (
@@ -208,7 +208,7 @@ export default function VsLaterPage() {
         <div className="bg-black text-white rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Not just an Instagram tool.</h2>
           <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
-            SocialMate covers 16 platforms — including Discord, Bluesky, Telegram, and Mastodon. Unlimited posts. 12 AI tools. Free forever.
+            SocialMate covers 7 platforms — including Discord, Bluesky, Telegram, and Mastodon. Unlimited posts. 15+ AI tools. Free forever.
           </p>
           <Link href="/signup" className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             Create free account →
