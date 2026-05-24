@@ -187,8 +187,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         {/* STATS */}
         <div className="grid grid-cols-3 gap-4 sm:gap-6 mt-12 sm:mt-16 max-w-2xl mx-auto">
           {[
-            { value: '5',   label: 'social platforms live' },
-            { value: '12',  label: 'AI tools included' },
+            { value: '7',   label: 'social platforms live' },
+            { value: '15+', label: 'AI tools included' },
             { value: '$0',  label: 'To get started'    },
           ].map(stat => (
             <div key={stat.label} className="text-center">

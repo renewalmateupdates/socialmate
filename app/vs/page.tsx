@@ -3,11 +3,11 @@ import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
-  title: 'SocialMate vs Everyone — 53+ Competitor Comparisons (2026)',
-  description: 'See how SocialMate compares to Hootsuite, Buffer, Taplio, Shield App, Canva, Kontentino, Gain, and 48+ more. Honest feature comparisons. Free plan, no credit card required.',
+  title: 'SocialMate vs Everyone — 56+ Competitor Comparisons (2026)',
+  description: 'See how SocialMate compares to Hootsuite, Buffer, Taplio, Shield App, Canva, Kontentino, Gain, PostPickr, SocialOomph, eClincher, and 51+ more. Honest feature comparisons. Free plan, no credit card required.',
   openGraph: {
     title:       'SocialMate vs Every Competitor (2026)',
-    description: 'Honest, detailed comparisons: SocialMate vs Buffer, Hootsuite, Taplio, Shield App, Canva, and 48+ more. See who wins on price, platforms, and features.',
+    description: 'Honest, detailed comparisons: SocialMate vs Buffer, Hootsuite, Taplio, Shield App, Canva, PostPickr, SocialOomph, eClincher, and 51+ more. See who wins on price, platforms, and features.',
     url:         'https://socialmate.studio/vs',
   },
   alternates: { canonical: 'https://socialmate.studio/vs' },
@@ -464,6 +464,33 @@ const COMPARISONS = [
     tag:         'Limited platforms, no free plan',
     tagColor:    'bg-yellow-50 text-yellow-600',
   },
+  {
+    slug:        'socialoomph',
+    name:        'SocialOomph',
+    emoji:       '⏰',
+    headline:    "SocialOomph is $15/month — no TikTok, LinkedIn, or Discord support",
+    angle:       "Old-school queue-based scheduler with no TikTok, LinkedIn, Bluesky, Discord, or Telegram. SocialMate Pro is $5/month and covers all 7 live platforms with 12 AI tools and SOMA.",
+    tag:         'Outdated platform coverage',
+    tagColor:    'bg-gray-100 text-gray-600',
+  },
+  {
+    slug:        'eclincher',
+    name:        'eClincher',
+    emoji:       '🔧',
+    headline:    "eClincher charges $65/month for features SocialMate includes free",
+    angle:       "Agency-focused tool at $65–$425/month with no Discord, Telegram, Bluesky, or Mastodon. SocialMate is free to start with 7 platforms, 12 AI tools, and SOMA built in.",
+    tag:         'Agency-priced, missing platforms',
+    tagColor:    'bg-red-50 text-red-600',
+  },
+  {
+    slug:        'postpickr',
+    name:        'PostPickr',
+    emoji:       '🌍',
+    headline:    "PostPickr charges €8/month with no TikTok, Discord, Telegram, or Bluesky",
+    angle:       "European-focused scheduler at €8+/month with no free plan and no TikTok, Discord, Telegram, or Bluesky support. SocialMate covers 7 platforms — including all four — and starts completely free.",
+    tag:         'Missing key platforms, no free plan',
+    tagColor:    'bg-orange-50 text-orange-600',
+  },
 ]
 
 const SOCIALMATE_WINS = [
@@ -506,13 +533,13 @@ export default function VsIndex() {
         <div className="text-center mb-14">
           <div className="text-5xl mb-5">⚔️</div>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100 mb-4">
-            SocialMate vs Everyone —<br className="hidden sm:block" /> 50+ Competitor Comparisons
+            SocialMate vs Everyone —<br className="hidden sm:block" /> 56+ Competitor Comparisons
           </h1>
           <p className="text-base text-gray-500 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
             Honest, detailed comparisons. No fluff. We break down pricing, free plans, feature limits,
             and who each tool is actually built for — so you can pick the right one.
           </p>
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">Updated May 2026 · Now includes FeedHive, Taplio, Shield App, and all 53+ comparisons</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">Updated May 2026 · Now includes PostPickr, SocialOomph, eClincher, FeedHive, Taplio, Shield App, and all 56+ comparisons</p>
         </div>
 
         {/* WHY SOCIALMATE WINS */}

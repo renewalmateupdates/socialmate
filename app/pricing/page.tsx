@@ -32,7 +32,7 @@ const PLANS = [
     headerText: 'text-gray-900 dark:text-gray-100',
     subText: 'text-gray-500 dark:text-gray-400',
     features: [
-      { label: '7 live platforms',                  note: 'More coming soon'    },
+      { label: '6 live platforms now',             note: '10 more coming soon' },
       { label: '1 connected account per platform'                              },
       { label: '2 team seats'                                                  },
       { label: '100 posts / month'                                             },
@@ -193,7 +193,7 @@ const FAQ = [
   },
   {
     q: 'What platforms are live right now?',
-    a: 'Discord, Bluesky, Telegram, Mastodon, and X/Twitter are live. LinkedIn, YouTube, Pinterest, and Reddit are coming very soon — code complete, awaiting platform approval. 7 more are planned.',
+    a: 'Discord, Bluesky, Telegram, Mastodon, X/Twitter, TikTok, and LinkedIn are live — 7 platforms in total. YouTube, Pinterest, and Reddit are coming very soon. More on the roadmap.',
   },
   {
     q: 'Is White Label available on Free?',
@@ -398,7 +398,7 @@ export default function Pricing() {
             Simple, honest pricing
           </h1>
           <p className="text-gray-500 text-sm max-w-xl mx-auto leading-relaxed">
-            Buffer charges $18/mo for limited platforms. Hootsuite charges $99/mo. SocialMate gives you 7 live platforms, 15+ AI tools, and a Link in Bio page — starting at $0.
+            Buffer charges $18/mo for 5 platforms. Hootsuite charges $99/mo. SocialMate gives you all 7 live platforms, 15+ AI tools, and a Link in Bio page — starting at $0.
           </p>
           <p className="text-xs text-gray-400 dark:text-gray-500 mt-4">
             Join <span className="font-bold text-gray-600 dark:text-gray-300">{displayUserCount(userCount)} creators</span> already scheduling with SocialMate

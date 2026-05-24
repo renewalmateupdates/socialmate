@@ -364,3 +364,6 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - vs Khoros: https://socialmate.studio/vs/khoros
 - vs Talkwalker: https://socialmate.studio/vs/talkwalker
 - vs FeedHive: https://socialmate.studio/vs/feedhive
+- vs SocialOomph: https://socialmate.studio/vs/socialoomph
+- vs eClincher: https://socialmate.studio/vs/eclincher
+- vs PostPickr: https://socialmate.studio/vs/postpickr
