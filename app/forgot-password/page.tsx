@@ -26,7 +26,7 @@ export default function ForgotPassword() {
     <div className="min-h-dvh bg-theme flex flex-col">
       <div className="border-b border-theme bg-surface px-8 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
+          <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
           <span className="font-bold text-base tracking-tight">SocialMate</span>
         </Link>
         <Link href="/login" className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-black transition-colors">

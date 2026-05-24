@@ -139,7 +139,7 @@ export default function VsSmarterqueue() {
 
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-gray-100">Feature comparison</h2>
-          <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto"><div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-100 dark:border-gray-600 px-5 py-3">
               <span className="text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wide">Feature</span>
               <span className="text-xs font-bold text-gray-400 uppercase tracking-wide text-center">SmarterQueue</span>
@@ -152,6 +152,7 @@ export default function VsSmarterqueue() {
                 <span className="text-xs font-bold text-black dark:text-gray-100 text-center">{row.socialmate}</span>
               </div>
             ))}
+          </div>
           </div>
         </div>
 

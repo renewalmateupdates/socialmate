@@ -54,7 +54,7 @@ function InviteInner() {
 
         {status === 'ready' && (
           <>
-            <div className="w-16 h-16 bg-black rounded-2xl flex items-center justify-center text-white text-2xl font-bold mx-auto mb-6">S</div>
+            <img src="/logo.png" alt="SocialMate" className="w-16 h-16 rounded-2xl mx-auto mb-6" />
             <h1 className="text-2xl font-extrabold mb-2">You're invited!</h1>
             <p className="text-gray-500 dark:text-gray-400 text-sm mb-6 leading-relaxed">
               {user

@@ -133,7 +133,7 @@ export default function VsPlannPage() {
         {/* COMPARISON TABLE */}
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6">Feature comparison</h2>
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto"><div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-400 uppercase tracking-wide">
               <span>Feature</span>
               <span>Plann</span>
@@ -146,6 +146,7 @@ export default function VsPlannPage() {
                 <span className="text-xs font-semibold text-gray-100">{row.socialmate}</span>
               </div>
             ))}
+          </div>
           </div>
         </div>
 
