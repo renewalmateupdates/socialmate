@@ -49,23 +49,23 @@ const FOOTER_COLUMNS: FooterColumn[] = [
 
 export default function PublicFooter() {
   return (
-    <footer className="border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 mt-16">
+    <footer className="border-t border-gray-800 bg-gray-900 mt-16">
       <div className="max-w-5xl mx-auto px-6 pt-10 pb-6">
 
         {/* Logo + tagline */}
         <div className="flex items-center gap-2 mb-8">
           <Link href="/" className="flex items-center gap-2">
             <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
-            <span className="font-bold text-sm tracking-tight text-gray-900 dark:text-gray-100">SocialMate</span>
+            <span className="font-bold text-sm tracking-tight text-gray-100">SocialMate</span>
           </Link>
-          <span className="text-xs text-gray-400 dark:text-gray-600 ml-1">by Gilgamesh Enterprise LLC</span>
+          <span className="text-xs text-gray-500 ml-1">by Gilgamesh Enterprise LLC</span>
         </div>
 
         {/* Columns */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-8">
           {FOOTER_COLUMNS.map(col => (
             <div key={col.heading}>
-              <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-3">
+              <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-3">
                 {col.heading}
               </p>
               <ul className="space-y-2">
@@ -76,7 +76,7 @@ export default function PublicFooter() {
                       className={`text-sm transition-colors ${
                         link.rose
                           ? 'text-rose-400 hover:text-rose-300 font-medium'
-                          : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+                          : 'text-gray-400 hover:text-gray-100'
                       }`}
                     >
                       {link.label}
@@ -89,8 +89,8 @@ export default function PublicFooter() {
         </div>
 
         {/* Bottom bar */}
-        <div className="border-t border-gray-100 dark:border-gray-800 pt-5">
-          <p className="text-xs text-gray-400 dark:text-gray-500">© 2026 SocialMate · All rights reserved</p>
+        <div className="border-t border-gray-800 pt-5">
+          <p className="text-xs text-gray-500">© 2026 SocialMate · All rights reserved</p>
         </div>
 
       </div>

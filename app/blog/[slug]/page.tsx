@@ -53,7 +53,7 @@ async function getAllDbPosts(): Promise<Array<[string, ReturnType<typeof dbPostT
       .from('blog_posts')
       .select('slug, title, excerpt, content, category, author, published_at')
       .order('published_at', { ascending: false })
-      .limit(20)
+      .limit(50)
     if (!data) return []
     return (data as DbPost[]).map(d => [d.slug, dbPostToPost(d)])
   } catch {
@@ -4315,14 +4315,19 @@ SocialMate supports Bluesky, Mastodon, Discord, and Telegram scheduling alongsid
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  Strategy:  'bg-purple-50 text-purple-600',
-  Industry:  'bg-blue-50 text-blue-600',
-  Guide:     'bg-green-50 text-green-600',
-  Guides:    'bg-green-50 text-green-600',
-  Tips:      'bg-green-50 text-green-600',
-  Analytics: 'bg-yellow-50 text-yellow-700',
-  Resources: 'bg-blue-50 text-blue-600',
-  Growth:    'bg-pink-50 text-pink-600',
+  Strategy:    'bg-purple-950/40 text-purple-400',
+  Industry:    'bg-blue-950/40 text-blue-400',
+  Guide:       'bg-green-950/40 text-green-400',
+  Guides:      'bg-green-950/40 text-green-400',
+  Tips:        'bg-yellow-950/40 text-yellow-400',
+  Analytics:   'bg-yellow-950/40 text-yellow-400',
+  Resources:   'bg-blue-950/40 text-blue-400',
+  Growth:      'bg-pink-950/40 text-pink-400',
+  Comparisons: 'bg-orange-950/40 text-orange-400',
+  'Our Story': 'bg-purple-950/40 text-purple-400',
+  Features:    'bg-amber-950/40 text-amber-400',
+  AI:          'bg-emerald-950/40 text-emerald-400',
+  'Studio Stax': 'bg-amber-950/40 text-amber-400',
 }
 
 export async function generateMetadata(
@@ -4403,7 +4408,7 @@ function linkifyText(text: string): React.ReactNode {
 
     if (earliestIndex > 0) parts.push(remaining.slice(0, earliestIndex))
     parts.push(
-      <a key={linkKey++} href={earliestPath} className="text-purple-600 dark:text-purple-400 hover:underline font-medium">
+      <a key={linkKey++} href={earliestPath} className="text-amber-400 hover:underline font-medium">
         {earliestMatch[0]}
       </a>
     )
@@ -4425,25 +4430,25 @@ function renderContent(content: string) {
       elements.push(<div key={key++} className="h-2" />)
     } else if (trimmed.startsWith('## ')) {
       elements.push(
-        <h2 key={key++} className="text-xl font-extrabold tracking-tight mt-8 mb-3 dark:text-gray-100">
+        <h2 key={key++} className="text-xl font-extrabold tracking-tight mt-8 mb-3 text-gray-100">
           {trimmed.slice(3)}
         </h2>
       )
     } else if (trimmed.startsWith('**') && trimmed.endsWith('**')) {
       elements.push(
-        <p key={key++} className="text-sm font-bold text-black dark:text-gray-100 mt-4 mb-1">
+        <p key={key++} className="text-sm font-bold text-gray-100 mt-4 mb-1">
           {trimmed.slice(2, -2)}
         </p>
       )
     } else if (trimmed.startsWith('- ')) {
       elements.push(
-        <li key={key++} className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed ml-4 list-disc">
+        <li key={key++} className="text-sm text-gray-400 leading-relaxed ml-4 list-disc">
           {linkifyText(trimmed.slice(2))}
         </li>
       )
     } else {
       elements.push(
-        <p key={key++} className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+        <p key={key++} className="text-sm text-gray-400 leading-relaxed">
           {linkifyText(trimmed)}
         </p>
       )
@@ -4458,20 +4463,20 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
 
   if (!post) {
     return (
-      <div className="min-h-screen bg-white dark:bg-gray-900">
-        <nav className="border-b border-gray-100 dark:border-gray-800 px-8 py-4 flex items-center justify-between sticky top-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur z-40">
+      <div className="dark min-h-screen bg-gray-950">
+        <nav className="border-b border-gray-800 px-8 py-4 flex items-center justify-between sticky top-0 bg-gray-950/95 backdrop-blur z-40">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
-            <span className="font-bold text-base tracking-tight dark:text-gray-100">SocialMate</span>
+            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
+            <span className="font-bold text-base tracking-tight text-gray-100">SocialMate</span>
           </Link>
-          <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-500 dark:text-gray-400">
-            <Link href="/" className="hover:text-black dark:hover:text-white transition-colors">Home</Link>
-            <Link href="/pricing" className="hover:text-black dark:hover:text-white transition-colors">Pricing</Link>
-            <Link href="/blog" className="hover:text-black dark:hover:text-white transition-colors">Blog</Link>
+          <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-400">
+            <Link href="/" className="hover:text-white transition-colors">Home</Link>
+            <Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link>
+            <Link href="/blog" className="hover:text-white transition-colors">Blog</Link>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors hidden sm:block">Sign in</Link>
-            <Link href="/signup" className="bg-black text-white text-sm font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
+            <Link href="/login" className="text-sm font-semibold text-gray-400 hover:text-white transition-colors hidden sm:block">Sign in</Link>
+            <Link href="/signup" className="bg-amber-500 hover:bg-amber-400 text-gray-950 text-sm font-semibold px-4 py-2 rounded-xl transition-all">
               Get started free →
             </Link>
           </div>
@@ -4521,42 +4526,42 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }} />
-      <nav className="border-b border-gray-100 dark:border-gray-800 px-8 py-4 flex items-center justify-between sticky top-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur z-40">
+      <nav className="border-b border-gray-800 px-8 py-4 flex items-center justify-between sticky top-0 bg-gray-950/95 backdrop-blur z-40">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
-          <span className="font-bold text-base tracking-tight dark:text-gray-100">SocialMate</span>
+          <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
+          <span className="font-bold text-base tracking-tight text-gray-100">SocialMate</span>
         </Link>
-        <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-500 dark:text-gray-400">
-          <Link href="/features"    className="hover:text-black dark:hover:text-white transition-colors">Features</Link>
-          <Link href="/pricing"     className="hover:text-black dark:hover:text-white transition-colors">Pricing</Link>
-          <Link href="/studio-stax" className="hover:text-black dark:hover:text-white transition-colors">Studio Stax</Link>
-          <Link href="/roadmap"     className="hover:text-black dark:hover:text-white transition-colors">Roadmap</Link>
-          <Link href="/blog"        className="font-bold text-black dark:text-white">Blog</Link>
+        <div className="hidden md:flex items-center gap-6 text-sm font-medium text-gray-400">
+          <Link href="/features"    className="hover:text-white transition-colors">Features</Link>
+          <Link href="/pricing"     className="hover:text-white transition-colors">Pricing</Link>
+          <Link href="/studio-stax" className="hover:text-white transition-colors">Studio Stax</Link>
+          <Link href="/roadmap"     className="hover:text-white transition-colors">Roadmap</Link>
+          <Link href="/blog"        className="font-bold text-white">Blog</Link>
         </div>
         <div className="flex items-center gap-3">
           <Link href="/give"   className="text-sm font-semibold text-rose-400 hover:text-rose-300 transition-all hidden sm:block">❤️ Give</Link>
-          <Link href="/login"  className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors hidden sm:block">Sign in</Link>
-          <Link href="/signup" className="bg-black text-white text-sm font-semibold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
+          <Link href="/login"  className="text-sm font-semibold text-gray-400 hover:text-white transition-colors hidden sm:block">Sign in</Link>
+          <Link href="/signup" className="bg-amber-500 hover:bg-amber-400 text-gray-950 text-sm font-semibold px-4 py-2 rounded-xl transition-all">
             Get started free →
           </Link>
         </div>
       </nav>
 
       <div className="max-w-3xl mx-auto px-6 py-16">
-        <div className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 mb-8">
-          <Link href="/blog" className="hover:text-black dark:hover:text-white transition-colors">Blog</Link>
+        <div className="flex items-center gap-2 text-xs text-gray-500 mb-8">
+          <Link href="/blog" className="hover:text-gray-200 transition-colors">Blog</Link>
           <span>→</span>
-          <span className={`font-bold px-2 py-0.5 rounded-full ${CATEGORY_COLORS[post.category] || 'bg-gray-100 text-gray-600'}`}>
+          <span className={`font-bold px-2 py-0.5 rounded-full ${CATEGORY_COLORS[post.category] || 'bg-gray-800 text-gray-400'}`}>
             {post.category}
           </span>
         </div>
 
         <div className="mb-10">
-          <h1 className="text-4xl font-extrabold tracking-tight leading-tight mb-4 dark:text-gray-100">{post.title}</h1>
-          <p className="text-lg text-gray-400 dark:text-gray-500 leading-relaxed mb-6">{post.excerpt}</p>
-          <div className="flex items-center gap-4 text-xs text-gray-400 dark:text-gray-500 border-t border-gray-100 dark:border-gray-800 pt-4">
+          <h1 className="text-4xl font-extrabold tracking-tight leading-tight mb-4 text-gray-100">{post.title}</h1>
+          <p className="text-lg text-gray-400 leading-relaxed mb-6">{post.excerpt}</p>
+          <div className="flex items-center gap-4 text-xs text-gray-500 border-t border-gray-800 pt-4">
             <span>📅 {post.date}</span>
             <span>⏱ {post.readTime}</span>
           </div>
@@ -4566,20 +4571,20 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
           {renderContent(post.content)}
         </div>
 
-        <div className="bg-black text-white rounded-3xl p-8 text-center mb-16">
+        <div className="bg-amber-500 text-gray-950 rounded-3xl p-8 text-center mb-16">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Try SocialMate free</h2>
-          <p className="text-white/60 text-sm mb-6 max-w-md mx-auto">
-            Schedule to 16 platforms, manage your team, and grow your audience — all for free. No credit card required.
+          <p className="text-gray-950/70 text-sm mb-6 max-w-md mx-auto">
+            Schedule to 7 platforms, get 15+ AI tools, and grow your audience — all for free. No credit card required.
           </p>
-          <Link href="/signup" className="inline-block bg-white text-black text-sm font-bold px-8 py-4 rounded-2xl hover:opacity-90 transition-all">
+          <Link href="/signup" className="inline-block bg-gray-950 text-white text-sm font-bold px-8 py-4 rounded-2xl hover:opacity-90 transition-all">
             Create free account →
           </Link>
-          <p className="text-white/30 text-xs mt-3">16 platforms · Unlimited posts · Free forever</p>
+          <p className="text-gray-950/50 text-xs mt-3">7 platforms · 15+ AI tools · Free forever</p>
         </div>
 
         {/* ── Compare tools strip ── */}
-        <div className="mb-12 p-6 border border-gray-100 dark:border-gray-800 rounded-2xl">
-          <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">Comparing tools?</p>
+        <div className="mb-12 p-6 border border-gray-800 rounded-2xl">
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Comparing tools?</p>
           <div className="flex flex-wrap gap-2">
             {[
               { label: 'vs Hootsuite',    href: '/vs/hootsuite'    },
@@ -4610,12 +4615,12 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
               { label: 'vs Statusbrew',   href: '/vs/statusbrew'     },
             ].map(c => (
               <Link key={c.href} href={c.href}
-                className="text-xs font-bold px-3 py-1.5 border border-gray-200 dark:border-gray-700 rounded-full hover:border-gray-500 dark:hover:border-gray-400 text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-all">
+                className="text-xs font-bold px-3 py-1.5 border border-gray-700 rounded-full hover:border-gray-400 text-gray-400 hover:text-white transition-all">
                 {c.label}
               </Link>
             ))}
             <Link href="/vs"
-              className="text-xs font-bold px-3 py-1.5 bg-gray-100 dark:bg-gray-800 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400 transition-all">
+              className="text-xs font-bold px-3 py-1.5 bg-gray-800 rounded-full hover:bg-gray-700 text-gray-400 transition-all">
               See all comparisons →
             </Link>
           </div>
@@ -4623,21 +4628,21 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
 
         {otherPosts.length > 0 && (
           <div>
-            <h2 className="text-lg font-extrabold tracking-tight mb-6 dark:text-gray-100">More from the blog</h2>
+            <h2 className="text-lg font-extrabold tracking-tight mb-6 text-gray-100">More from the blog</h2>
             <div className="space-y-3">
               {otherPosts.map(([slug, p]) => (
                 <Link key={slug} href={`/blog/${slug}`}
-                  className="flex items-center gap-4 p-4 border border-gray-100 dark:border-gray-800 rounded-2xl hover:border-gray-300 dark:hover:border-gray-600 transition-all group">
+                  className="flex items-center gap-4 p-4 border border-gray-800 rounded-2xl hover:border-gray-600 transition-all group">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold truncate group-hover:text-gray-600 dark:text-gray-100 dark:group-hover:text-gray-300 transition-colors">{p.title}</p>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{p.date} · {p.readTime}</p>
+                    <p className="text-sm font-bold truncate text-gray-100 group-hover:text-gray-300 transition-colors">{p.title}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{p.date} · {p.readTime}</p>
                   </div>
-                  <span className="text-gray-300 dark:text-gray-600 group-hover:text-black dark:group-hover:text-white transition-colors">→</span>
+                  <span className="text-gray-600 group-hover:text-white transition-colors">→</span>
                 </Link>
               ))}
             </div>
             <div className="mt-4 text-center">
-              <Link href="/blog" className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">
+              <Link href="/blog" className="text-sm font-semibold text-gray-400 hover:text-white transition-colors">
                 View all posts →
               </Link>
             </div>
@@ -4646,10 +4651,10 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
       </div>
 
       {/* SM-Give strip */}
-      <div className="border-t border-gray-100 dark:border-gray-800 mt-16 pt-10 pb-4">
+      <div className="border-t border-gray-800 mt-16 pt-10 pb-4">
         <div className="max-w-4xl mx-auto px-6 text-center">
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            ❤️ <span className="font-semibold text-gray-700 dark:text-gray-300">2% of every SocialMate subscription</span> goes to SM-Give — our charity initiative.{' '}
+          <p className="text-sm text-gray-400">
+            ❤️ <span className="font-semibold text-gray-300">2% of every SocialMate subscription</span> goes to SM-Give — our charity initiative.{' '}
             <a href="/give" className="text-amber-500 hover:text-amber-400 font-semibold transition-colors">Learn about SM-Give →</a>
           </p>
         </div>

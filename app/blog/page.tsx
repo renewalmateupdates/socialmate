@@ -159,16 +159,16 @@ export default async function Blog() {
       <div className="max-w-4xl mx-auto px-6 py-16">
 
         <div className="mb-8">
-          <h1 className="text-3xl font-extrabold tracking-tight mb-2">Blog</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight mb-2 text-white">Blog</h1>
           <p className="text-sm text-gray-400">Tips, guides, and updates from SocialMate</p>
         </div>
 
         {/* Search, category filters, featured post, and grid — all client-side */}
         <BlogClientList allPosts={allPosts} />
 
-        <div className="mt-8 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 text-center">
-          <p className="text-sm font-extrabold mb-1 text-gray-900 dark:text-gray-100">Want to try SocialMate?</p>
-          <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">Free forever. No credit card. No catch.</p>
+        <div className="mt-8 bg-gray-800 border border-gray-700 rounded-2xl p-6 text-center">
+          <p className="text-sm font-extrabold mb-1 text-gray-100">Want to try SocialMate?</p>
+          <p className="text-xs text-gray-400 mb-4">Free forever. No credit card. No catch.</p>
           <Link href="/signup"
             className="inline-block bg-black text-white text-xs font-bold px-5 py-2.5 rounded-xl hover:opacity-80 transition-all">
             Start scheduling for free →
@@ -176,10 +176,10 @@ export default async function Blog() {
         </div>
 
         {/* SM-Give strip */}
-        <div className="border-t border-gray-100 dark:border-gray-800 mt-16 pt-10 pb-4">
+        <div className="border-t border-gray-800 mt-16 pt-10 pb-4">
           <div className="max-w-4xl mx-auto px-6 text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              ❤️ <span className="font-semibold text-gray-700 dark:text-gray-300">2% of every SocialMate subscription</span> goes to SM-Give — our charity initiative.{' '}
+            <p className="text-sm text-gray-400">
+              ❤️ <span className="font-semibold text-gray-300">2% of every SocialMate subscription</span> goes to SM-Give — our charity initiative.{' '}
               <a href="/give" className="text-amber-500 hover:text-amber-400 font-semibold transition-colors">Learn about SM-Give →</a>
             </p>
           </div>
