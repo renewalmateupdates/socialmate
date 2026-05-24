@@ -18,7 +18,7 @@ const COMPARISON = [
   { feature: 'Free plan',              napoleoncat: '14-day trial only',     socialmate: '✅ Genuinely free'        },
   { feature: 'Profiles on entry plan', napoleoncat: '3 profiles, 1 user',    socialmate: 'Unlimited profiles free' },
   { feature: 'Platforms supported',    napoleoncat: '7 (paid)',              socialmate: '16 (free)'               },
-  { feature: 'AI writing tools',       napoleoncat: 'AI Reply (paid)',       socialmate: '12 tools free'           },
+  { feature: 'AI writing tools',       napoleoncat: 'AI Reply (paid)',       socialmate: '15+ tools free'           },
   { feature: 'Bulk scheduling',        napoleoncat: '✅',                    socialmate: '✅ Free'                  },
   { feature: 'Link in bio',            napoleoncat: '❌',                    socialmate: '✅ Free'                  },
   { feature: 'Comment moderation',     napoleoncat: '✅ Core feature',       socialmate: '🔜 Coming soon'          },
@@ -73,7 +73,7 @@ export default function VsNapoleonCat() {
       <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-7 h-7 bg-black dark:bg-white rounded-lg flex items-center justify-center text-white dark:text-black text-sm font-bold">S</div>
+            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
             <span className="font-bold text-base tracking-tight text-gray-900 dark:text-gray-100">
               SocialMate
               <span className="text-[10px] font-semibold bg-pink-500 text-white px-1.5 py-0.5 rounded-full align-super ml-1">Beta</span>

@@ -26,7 +26,7 @@ const COMPARISON = [
   { feature: 'Instagram support',         meetedgar: '✅',                       socialmate: '✅'                      },
   { feature: 'LinkedIn support',          meetedgar: '✅',                       socialmate: '✅'                      },
   { feature: 'TikTok support',            meetedgar: '✅',                       socialmate: '✅'                      },
-  { feature: 'AI writing tools',          meetedgar: 'Basic AI captions',       socialmate: '12 tools included'       },
+  { feature: 'AI writing tools',          meetedgar: 'Basic AI captions',       socialmate: '15+ tools included'       },
   { feature: 'AI credits free tier',      meetedgar: 'N/A (no free plan)',      socialmate: '75/month free'            },
   { feature: 'Bulk scheduling',           meetedgar: 'Paid plans',              socialmate: '✅ Free'                  },
   { feature: 'Link in bio',               meetedgar: '❌',                       socialmate: '✅ Free'                  },
@@ -72,7 +72,7 @@ export default function VsMeetEdgarPage() {
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">S</div>
+            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
             <span className="font-bold tracking-tight dark:text-white">SocialMate</span>
           </Link>
           <div className="flex items-center gap-3">
@@ -136,7 +136,7 @@ export default function VsMeetEdgarPage() {
         {/* COMPARISON TABLE */}
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">Feature comparison</h2>
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto"><div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
               <span>Feature</span>
               <span>MeetEdgar</span>
@@ -149,6 +149,7 @@ export default function VsMeetEdgarPage() {
                 <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">{row.socialmate}</span>
               </div>
             ))}
+          </div>
           </div>
         </div>
 

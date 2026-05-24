@@ -160,7 +160,7 @@ const FAQ = [
   },
   {
     q: 'What are AI credits and what can I do with them?',
-    a: '12 built-in AI tools powered by Google Gemini. Caption writer, hook generator, thread builder, rewriter, content idea generator, and more. Each use costs 1–3 credits depending on the tool. Free plan gets 50/month, Pro gets 500.',
+    a: '15+ AI tools powered by Google Gemini. Caption writer, hook generator, thread builder, rewriter, content idea generator, and more. Each use costs 1–3 credits depending on the tool. Free plan gets 50/month, Pro gets 500.',
   },
   {
     q: 'Can my assistant or business partner use the account?',

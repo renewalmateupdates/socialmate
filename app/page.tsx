@@ -98,7 +98,7 @@ const COMPARISON = [
   },
   { label: 'Starting price',          industry: '$25–$99/month',        socialmate: '$0 — free forever'   },
   { label: 'Free plan',               industry: '❌ Removed or crippled', socialmate: '✅ Genuinely free'  },
-  { label: 'AI writing tools',        industry: '1–2 basic',            socialmate: '12 tools included'   },
+  { label: 'AI writing tools',        industry: '1–2 basic',            socialmate: '15+ tools included'  },
   { label: 'Bulk scheduling',         industry: 'Paid add-on',          socialmate: '✅ Free'              },
   { label: 'Link in bio',             industry: 'Separate paid tool',   socialmate: '✅ Free on all plans' },
   { label: 'Competitor tracking',     industry: 'Paid add-on',          socialmate: '✅ Free'              },

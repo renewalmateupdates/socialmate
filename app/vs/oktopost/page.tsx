@@ -19,7 +19,7 @@ const COMPARISON = [
   { feature: 'Target audience',        oktopost: 'Enterprise B2B teams',     socialmate: 'Creators, SMBs, agencies' },
   { feature: 'Platforms supported',    oktopost: 'LinkedIn-focused',         socialmate: '7 platforms'            },
   { feature: 'Team seats',             oktopost: 'Unlimited (enterprise)',   socialmate: '2 seats free'            },
-  { feature: 'AI writing tools',       oktopost: 'Limited',                  socialmate: '12 tools free'           },
+  { feature: 'AI writing tools',       oktopost: 'Limited',                  socialmate: '15+ tools free'           },
   { feature: 'Employee advocacy',      oktopost: '✅ Core feature',          socialmate: '❌'                       },
   { feature: 'B2B analytics',          oktopost: '✅ Deep attribution',      socialmate: 'Basic analytics free'    },
   { feature: 'Bulk scheduling',        oktopost: '✅',                       socialmate: '✅ Free'                  },
@@ -73,7 +73,7 @@ export default function VsOktopost() {
       <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-7 h-7 bg-black dark:bg-white rounded-lg flex items-center justify-center text-white dark:text-black text-sm font-bold">S</div>
+            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
             <span className="font-bold text-base tracking-tight text-gray-900 dark:text-gray-100">
               SocialMate
               <span className="text-[10px] font-semibold bg-pink-500 text-white px-1.5 py-0.5 rounded-full align-super ml-1">Beta</span>

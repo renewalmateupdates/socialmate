@@ -33,7 +33,7 @@ const PAIN_POINTS = [
   },
   {
     before: 'Write every caption from scratch. Pay a copywriter per post.',
-    after:  '12 built-in AI tools. Generate captions, hooks, and threads in seconds.',
+    after:  '15+ built-in AI tools. Generate captions, hooks, and threads in seconds.',
     icon: '🤖',
   },
   {
@@ -75,8 +75,8 @@ const FEATURES = [
     badge: 'Agency',
   },
   {
-    title: '6 Live Platforms',
-    desc:  'Schedule to Bluesky, X/Twitter, Mastodon, Discord, Telegram, and TikTok today. LinkedIn, YouTube, Pinterest, and Reddit are on the active roadmap.',
+    title: '7 Live Platforms',
+    desc:  'Schedule to Bluesky, X/Twitter, Mastodon, Discord, Telegram, TikTok, and LinkedIn today. YouTube, Pinterest, and Instagram are on the active roadmap.',
     icon:  '📡',
     badge: 'Live now',
   },
@@ -161,7 +161,7 @@ const FAQ = [
   },
   {
     q: 'What platforms can I post to right now?',
-    a: 'Bluesky, X/Twitter, Mastodon, Discord, and Telegram are live today. LinkedIn, YouTube, Pinterest, and Reddit are on the active roadmap with no fixed ETA. We don\'t vaporware — see the roadmap for honest status.',
+    a: 'Bluesky, X/Twitter, Mastodon, Discord, Telegram, TikTok, and LinkedIn are live today — 7 platforms. YouTube, Pinterest, and Instagram are on the active roadmap with no fixed ETA. We don\'t vaporware — see the roadmap for honest status.',
   },
   {
     q: 'Can I resell SocialMate to my clients?',

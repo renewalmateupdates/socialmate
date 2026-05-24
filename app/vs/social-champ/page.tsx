@@ -120,7 +120,7 @@ export default function VsSocialChampPage() {
             <p className="text-xs font-bold text-black/60 uppercase tracking-wide mb-2">SocialMate</p>
             <p className="font-extrabold text-lg mb-2">5x cheaper. More platforms. More AI.</p>
             <ul className="space-y-1 text-xs text-black/80">
-              <li>✅ 6 live platforms including Discord + Telegram</li>
+              <li>✅ 7 live platforms including Discord, Telegram + LinkedIn</li>
               <li>✅ 20+ AI content and writing tools</li>
               <li>✅ SOMA: autonomous weekly content generation</li>
               <li>✅ Enki: paper + live trading bot</li>

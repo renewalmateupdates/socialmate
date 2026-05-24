@@ -25,7 +25,7 @@ const COMPARISON = [
   { feature: 'LinkedIn scheduling',           talkwalker: '❌',                           socialmate: '✅ Free'                  },
   { feature: 'Social listening (web-wide)',   talkwalker: '✅ (core strength)',           socialmate: '✅ Competitor tracking'  },
   { feature: 'Sentiment analysis',            talkwalker: '✅ (enterprise AI)',           socialmate: '✅ SM Radar (AI-powered)' },
-  { feature: 'AI writing tools',              talkwalker: '❌',                           socialmate: '12 tools free'           },
+  { feature: 'AI writing tools',              talkwalker: '❌',                           socialmate: '15+ tools free'           },
   { feature: 'Autonomous content system',     talkwalker: '❌',                           socialmate: '✅ SOMA — learns your voice' },
   { feature: '8 autonomous AI agents',        talkwalker: '❌',                           socialmate: '✅ Pro+'                  },
   { feature: 'Content calendar',             talkwalker: '❌',                           socialmate: '✅ Free'                  },
@@ -77,7 +77,7 @@ export default function VsTalkwalkerPage() {
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">S</div>
+            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
             <span className="font-bold tracking-tight dark:text-white">SocialMate</span>
           </Link>
           <div className="flex items-center gap-3">
@@ -141,7 +141,7 @@ export default function VsTalkwalkerPage() {
         {/* TABLE */}
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">Feature comparison</h2>
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto"><div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
               <span>Feature</span>
               <span>Talkwalker</span>
@@ -154,6 +154,7 @@ export default function VsTalkwalkerPage() {
                 <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">{row.socialmate}</span>
               </div>
             ))}
+          </div>
           </div>
         </div>
 

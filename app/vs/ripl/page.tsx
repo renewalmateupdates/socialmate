@@ -162,7 +162,7 @@ export default function VsRiplPage() {
               {
                 n: '2',
                 title: "Ripl costs $15/month for platforms SocialMate covers free",
-                desc: "SocialMate's free plan covers 6 live platforms. Ripl costs $15/month for a smaller set of platforms and without Discord, Telegram, or Bluesky. SocialMate Pro at $5/month includes more platforms, more AI tools, and autonomous content.",
+                desc: "SocialMate's free plan covers 7 live platforms. Ripl costs $15/month for a smaller set of platforms and without Discord, Telegram, or Bluesky. SocialMate Pro at $5/month includes more platforms, more AI tools, and autonomous content.",
               },
               {
                 n: '3',

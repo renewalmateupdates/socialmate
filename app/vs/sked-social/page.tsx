@@ -18,7 +18,7 @@ const COMPARISON = [
   { feature: 'Free plan',              skedsocial: '7-day trial only',       socialmate: '✅ Genuinely free'        },
   { feature: 'Platforms supported',    skedsocial: '8 (Instagram-focused)',  socialmate: '16 (free)'               },
   { feature: 'Team seats',             skedsocial: '1 on Fundamentals',      socialmate: '2 seats free'            },
-  { feature: 'AI writing tools',       skedsocial: 'AI Assist (paid)',       socialmate: '12 tools free'           },
+  { feature: 'AI writing tools',       skedsocial: 'AI Assist (paid)',       socialmate: '15+ tools free'           },
   { feature: 'Instagram Stories',      skedsocial: '✅',                     socialmate: '🔜 Coming soon'          },
   { feature: 'Visual content calendar',skedsocial: '✅',                     socialmate: '✅ Free'                  },
   { feature: 'Bulk scheduling',        skedsocial: '✅ (paid)',              socialmate: '✅ Free'                  },
@@ -59,7 +59,7 @@ const FAQ = [
   },
   {
     q: 'Does SocialMate support Instagram?',
-    a: 'Instagram is on SocialMate\'s near-term roadmap. In the meantime, SocialMate covers 6 live platforms including TikTok (free), Bluesky, Discord, Telegram, Mastodon, and X/Twitter, with Instagram coming soon.',
+    a: 'Instagram is on SocialMate\'s near-term roadmap. In the meantime, SocialMate covers 7 live platforms including TikTok (free), Bluesky, Discord, Telegram, Mastodon, LinkedIn, and X/Twitter, with Instagram coming soon.',
   },
   {
     q: 'What does SocialMate offer that Sked doesn\'t?',
@@ -85,7 +85,7 @@ export default function VsSkedSocial() {
       <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-7 h-7 bg-black dark:bg-white rounded-lg flex items-center justify-center text-white dark:text-black text-sm font-bold">S</div>
+            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
             <span className="font-bold text-base tracking-tight text-gray-900 dark:text-gray-100">
               SocialMate
               <span className="text-[10px] font-semibold bg-pink-500 text-white px-1.5 py-0.5 rounded-full align-super ml-1">Beta</span>

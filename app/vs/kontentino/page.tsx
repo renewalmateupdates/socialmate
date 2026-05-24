@@ -47,7 +47,7 @@ const FAQ = [
   },
   {
     q: "Is SocialMate suitable for enterprise agency use?",
-    a: "SocialMate's Agency plan at $20/month supports 15 seats, 5 client workspaces, 2,000 AI credits/month, approval workflows, and 6 live platforms. For bootstrapped or growing agencies, it provides enterprise-level workflows at a fraction of the cost. Larger enterprises needing SOC2 compliance or dedicated account managers should evaluate accordingly.",
+    a: "SocialMate's Agency plan at $20/month supports 15 seats, 5 client workspaces, 2,000 AI credits/month, approval workflows, and 7 live platforms. For bootstrapped or growing agencies, it provides enterprise-level workflows at a fraction of the cost. Larger enterprises needing SOC2 compliance or dedicated account managers should evaluate accordingly.",
   },
 ]
 

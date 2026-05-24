@@ -39,7 +39,7 @@ const FAQ = [
   },
   {
     q: "Is SocialMate better than Canva for social media scheduling?",
-    a: "If your goal is to schedule and manage social media content across many platforms, SocialMate is purpose-built for that. Canva is a design tool first. SocialMate supports 6 live platforms (Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok), has 20+ AI writing tools, and an autonomous content system (SOMA). Canva Pro is $15/month for tools primarily built around graphic design.",
+    a: "If your goal is to schedule and manage social media content across many platforms, SocialMate is purpose-built for that. Canva is a design tool first. SocialMate supports 7 live platforms (Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok, and LinkedIn), has 15+ AI writing tools, and an autonomous content system (SOMA). Canva Pro is $15/month for tools primarily built around graphic design.",
   },
   {
     q: "What does Canva not support that SocialMate does?",
@@ -120,7 +120,7 @@ export default function VsCanvaPage() {
             <p className="text-xs font-bold text-black/60 uppercase tracking-wide mb-2">SocialMate</p>
             <p className="font-extrabold text-lg mb-2">Purpose-built Creator OS. Free to start.</p>
             <ul className="space-y-1 text-xs text-black/80">
-              <li>✅ 6 live platforms including Discord + Telegram</li>
+              <li>✅ 7 live platforms including Discord, Telegram + LinkedIn</li>
               <li>✅ 20+ AI content tools</li>
               <li>✅ SOMA: autonomous weekly content generation</li>
               <li>✅ Enki: autonomous trading bot</li>

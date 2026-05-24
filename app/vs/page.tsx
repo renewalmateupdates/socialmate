@@ -481,9 +481,10 @@ export default function VsIndex() {
   return (
     <div className="dark min-h-dvh bg-gray-950">
       {/* NAV */}
-      <nav className="border-b border-gray-100 dark:border-gray-800 px-6 py-4 flex items-center justify-between max-w-5xl mx-auto">
-        <Link href="/" className="text-sm font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
-          SocialMate
+      <nav className="border-b border-gray-800 px-6 py-4 flex items-center justify-between max-w-5xl mx-auto">
+        <Link href="/" className="flex items-center gap-2">
+          <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
+          <span className="text-sm font-extrabold tracking-tight text-gray-100">SocialMate</span>
         </Link>
         <div className="flex items-center gap-4">
           <Link href="/blog" className="text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">

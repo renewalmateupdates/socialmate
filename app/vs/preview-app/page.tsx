@@ -118,9 +118,9 @@ export default function VsPreviewAppPage() {
           </div>
           <div className="bg-amber-400 text-black rounded-2xl p-6">
             <p className="text-xs font-bold text-black/60 uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">6 platforms. Full Creator OS. Free to start.</p>
+            <p className="font-extrabold text-lg mb-2">7 platforms. Full Creator OS. Free to start.</p>
             <ul className="space-y-1 text-xs text-black/80">
-              <li>✅ TikTok, Discord, Telegram, Bluesky, Mastodon, X</li>
+              <li>✅ TikTok, Discord, Telegram, Bluesky, Mastodon, X, LinkedIn</li>
               <li>✅ 20+ AI writing and content tools</li>
               <li>✅ SOMA: autonomous weekly content generation</li>
               <li>✅ Enki: autonomous trading bot</li>
@@ -157,7 +157,7 @@ export default function VsPreviewAppPage() {
               {
                 n: '1',
                 title: 'Preview App only covers Instagram and Pinterest',
-                desc: "Preview App does not support TikTok, X/Twitter, Discord, Telegram, or Bluesky. If your content strategy extends beyond Instagram aesthetics, you immediately need additional tools. SocialMate covers 6 live platforms from a single dashboard.",
+                desc: "Preview App does not support TikTok, X/Twitter, Discord, Telegram, or Bluesky. If your content strategy extends beyond Instagram aesthetics, you immediately need additional tools. SocialMate covers 7 live platforms from a single dashboard.",
               },
               {
                 n: '2',

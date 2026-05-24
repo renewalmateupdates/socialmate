@@ -118,9 +118,9 @@ export default function VsPlannPage() {
           </div>
           <div className="bg-amber-400 text-black rounded-2xl p-6">
             <p className="text-xs font-bold text-black/60 uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">6 platforms. 20+ AI tools. Free to start.</p>
+            <p className="font-extrabold text-lg mb-2">7 platforms. 15+ AI tools. Free to start.</p>
             <ul className="space-y-1 text-xs text-black/80">
-              <li>✅ Bluesky, Discord, Telegram, Mastodon, X, TikTok</li>
+              <li>✅ Bluesky, Discord, Telegram, Mastodon, X, TikTok, LinkedIn</li>
               <li>✅ 20+ AI writing and content tools</li>
               <li>✅ SOMA autonomous weekly content generation</li>
               <li>✅ Enki autonomous trading bot</li>
