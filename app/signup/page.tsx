@@ -167,7 +167,7 @@ function SignupForm() {
               Professional tools shouldn't require a professional budget
             </h1>
             <p className="text-gray-400 dark:text-gray-500 mb-8 leading-relaxed">
-              Schedule to 16 platforms, manage your team, and grow your audience — completely free. No per-channel fees, no seat limits, no catch.
+              Schedule to 7 platforms, manage your team, and grow your audience — completely free. No per-channel fees, no seat limits, no catch.
             </p>
             <div className="space-y-3 mb-8">
               {PERKS.map(perk => (
@@ -238,7 +238,7 @@ function SignupForm() {
                 Professional tools,<br />zero cost
               </h1>
               <p className="text-gray-400 dark:text-gray-500 text-sm mb-4 leading-relaxed">
-                Schedule to 16 platforms, get 12 AI tools, and grow your audience — completely free.
+                Schedule to 7 platforms, get 15+ AI tools, and grow your audience — completely free.
               </p>
               <div className="grid grid-cols-2 gap-2 mb-4">
                 {PERKS.map(perk => (

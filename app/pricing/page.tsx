@@ -32,7 +32,7 @@ const PLANS = [
     headerText: 'text-gray-900 dark:text-gray-100',
     subText: 'text-gray-500 dark:text-gray-400',
     features: [
-      { label: '6 live platforms now',             note: '10 more coming soon' },
+      { label: '7 live platforms',                  note: 'More coming soon'    },
       { label: '1 connected account per platform'                              },
       { label: '2 team seats'                                                  },
       { label: '100 posts / month'                                             },
