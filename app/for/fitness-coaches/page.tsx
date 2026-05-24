@@ -82,7 +82,7 @@ const FEATURES = [
   },
   {
     title: 'AI Caption & Hook Generator',
-    desc:  'Never write "Transformation Tuesday" again. 12 AI tools generate punchy hooks, engaging captions, and hashtag sets built for fitness audiences.',
+    desc:  'Never write "Transformation Tuesday" again. 15+ AI tools generate punchy hooks, engaging captions, and hashtag sets built for fitness audiences.',
     icon:  '✍️',
     badge: 'Free',
   },

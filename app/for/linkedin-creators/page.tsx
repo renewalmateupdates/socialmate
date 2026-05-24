@@ -192,7 +192,7 @@ const COMPARISON = [
   { tool: 'Buffer',           price: '$18/mo',  linkedin: '✓', free: '✗', ai: 'Limited'  },
   { tool: 'Later',            price: '$25/mo',  linkedin: '✗', free: '✗', ai: 'Limited'  },
   { tool: 'Publer',           price: '$12/mo',  linkedin: '✓', free: '✗', ai: 'Limited'  },
-  { tool: 'SocialMate',       price: '$0–$5/mo',linkedin: '✓', free: '✓', ai: '12 tools', highlight: true },
+  { tool: 'SocialMate',       price: '$0–$5/mo',linkedin: '✓', free: '✓', ai: '15+ tools', highlight: true },
 ]
 
 const FAQ = [

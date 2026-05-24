@@ -1,10 +1,10 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Plann (2026) — Full Comparison',
-  description: "Plann is an Instagram-centric visual planner at $13/mo+. SocialMate covers 6 platforms including Discord and Telegram, has 20+ AI tools, SOMA autonomous content, and a $0 free plan.",
+  description: "Plann is an Instagram-centric visual planner at $13/mo+. SocialMate covers 7 platforms including Discord and Telegram, has 20+ AI tools, SOMA autonomous content, and a $0 free plan.",
   openGraph: {
     title:       'SocialMate vs Plann (2026)',
     description: "Plann is built for Instagram feeds. SocialMate is a full Creator OS — Discord, Telegram, Bluesky, TikTok, SOMA, Enki, 20+ AI tools — starting at $0.",
@@ -90,7 +90,7 @@ export default function VsPlannPage() {
             SocialMate vs Plann
           </h1>
           <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-            Plann is a visual planner built around Instagram. SocialMate is a full Creator OS covering 6 platforms — including Discord and Telegram — starting completely free.
+            Plann is a visual planner built around Instagram. SocialMate is a full Creator OS covering 7 platforms — including Discord and Telegram — starting completely free.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-amber-400 text-black font-bold rounded-2xl hover:bg-amber-300 transition-all text-sm">
@@ -118,9 +118,9 @@ export default function VsPlannPage() {
           </div>
           <div className="bg-amber-400 text-black rounded-2xl p-6">
             <p className="text-xs font-bold text-black/60 uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">6 platforms. 20+ AI tools. Free to start.</p>
+            <p className="font-extrabold text-lg mb-2">7 platforms. 15+ AI tools. Free to start.</p>
             <ul className="space-y-1 text-xs text-black/80">
-              <li>✅ Bluesky, Discord, Telegram, Mastodon, X, TikTok</li>
+              <li>✅ Bluesky, Discord, Telegram, Mastodon, X, TikTok, LinkedIn</li>
               <li>✅ 20+ AI writing and content tools</li>
               <li>✅ SOMA autonomous weekly content generation</li>
               <li>✅ Enki autonomous trading bot</li>
@@ -133,7 +133,7 @@ export default function VsPlannPage() {
         {/* COMPARISON TABLE */}
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6">Feature comparison</h2>
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto"><div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-400 uppercase tracking-wide">
               <span>Feature</span>
               <span>Plann</span>
@@ -146,6 +146,7 @@ export default function VsPlannPage() {
                 <span className="text-xs font-semibold text-gray-100">{row.socialmate}</span>
               </div>
             ))}
+          </div>
           </div>
         </div>
 

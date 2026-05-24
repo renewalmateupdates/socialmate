@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -25,7 +25,7 @@ const COMPARISON = [
   { feature: 'LinkedIn scheduling',           mention: '❌',                           socialmate: '✅ Free'                  },
   { feature: 'Brand mention monitoring',      mention: '✅ (core feature)',            socialmate: '✅ Competitor tracking'  },
   { feature: 'Sentiment analysis',            mention: '✅',                           socialmate: '✅ SM Radar (AI-powered)' },
-  { feature: 'AI writing tools',              mention: '❌',                           socialmate: '12 tools free'           },
+  { feature: 'AI writing tools',              mention: '❌',                           socialmate: '15+ tools free'           },
   { feature: 'Autonomous content system',     mention: '❌',                           socialmate: '✅ SOMA — learns your voice' },
   { feature: '8 autonomous AI agents',        mention: '❌',                           socialmate: '✅ Pro+'                  },
   { feature: 'Content calendar',             mention: '❌',                           socialmate: '✅ Free'                  },
@@ -54,7 +54,7 @@ const FAQ = [
   },
   {
     q: 'What AI tools does SocialMate include?',
-    a: "SocialMate's 12 AI tools include caption generation, viral hook writing, content repurposing (6 formats), hashtag research, thread generation, post rewriting, post scoring, brand voice injection, SM Pulse (trend scan), SM Radar (content intelligence report), and SOMA — an autonomous content agent that generates a full week of platform-native posts from your brand context.",
+    a: "SocialMate's 15+ AI tools include caption generation, viral hook writing, content repurposing (6 formats), hashtag research, thread generation, post rewriting, post scoring, brand voice injection, SM Pulse (trend scan), SM Radar (content intelligence report), and SOMA — an autonomous content agent that generates a full week of platform-native posts from your brand context.",
   },
 ]
 
@@ -70,13 +70,13 @@ const faqSchema = {
 
 export default function VsMentionPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">S</div>
+            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
             <span className="font-bold tracking-tight dark:text-white">SocialMate</span>
           </Link>
           <div className="flex items-center gap-3">
@@ -130,7 +130,7 @@ export default function VsMentionPage() {
               <li>✅ Scheduling to 7 platforms</li>
               <li>✅ Competitor tracking + engagement alerts</li>
               <li>✅ SM Radar: AI content intelligence report</li>
-              <li>✅ 12 AI tools + SOMA autonomous content</li>
+              <li>✅ 15+ AI tools + SOMA autonomous content</li>
               <li>✅ Pro plan for $5/month total</li>
               <li>✅ No credit card required to start</li>
             </ul>
@@ -140,7 +140,7 @@ export default function VsMentionPage() {
         {/* TABLE */}
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">Feature comparison</h2>
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto"><div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
               <span>Feature</span>
               <span>Mention</span>
@@ -153,6 +153,7 @@ export default function VsMentionPage() {
                 <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">{row.socialmate}</span>
               </div>
             ))}
+          </div>
           </div>
         </div>
 
@@ -169,7 +170,7 @@ export default function VsMentionPage() {
               {
                 n: '2',
                 title: '$41/month for monitoring vs. $0 for everything',
-                desc: "Mention's lowest plan is $41/month for one user, one brand. SocialMate's free plan includes scheduling to 7 platforms, competitor tracking with alerts, AI content intelligence (SM Radar), and 12 AI tools. Pro is $5/month. The cost comparison at every tier strongly favors SocialMate.",
+                desc: "Mention's lowest plan is $41/month for one user, one brand. SocialMate's free plan includes scheduling to 7 platforms, competitor tracking with alerts, AI content intelligence (SM Radar), and 15+ AI tools. Pro is $5/month. The cost comparison at every tier strongly favors SocialMate.",
               },
               {
                 n: '3',

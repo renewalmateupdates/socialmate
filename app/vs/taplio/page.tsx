@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -23,7 +23,7 @@ const COMPARISON = [
   { feature: 'TikTok scheduling',             taplio: '❌',                         socialmate: '✅ Free (20 videos/mo)'  },
   { feature: 'Discord + Telegram',            taplio: '❌',                         socialmate: '✅ Free'                  },
   { feature: 'Mastodon',                      taplio: '❌',                         socialmate: '✅ Free'                  },
-  { feature: 'AI writing tools',              taplio: '✅ (paid — carousel gen)',   socialmate: '12 tools free'           },
+  { feature: 'AI writing tools',              taplio: '✅ (paid — carousel gen)',   socialmate: '15+ tools free'           },
   { feature: 'Content calendar',             taplio: '✅ (paid)',                  socialmate: '✅ Free'                  },
   { feature: 'Bulk scheduling',              taplio: '❌',                         socialmate: '✅ Free'                  },
   { feature: 'RSS / blog import',             taplio: '❌',                         socialmate: '✅ Free'                  },
@@ -50,7 +50,7 @@ const FAQ = [
   },
   {
     q: 'What AI tools does SocialMate include for LinkedIn content?',
-    a: 'SocialMate\'s 12 AI tools include LinkedIn-specific capabilities: long-form post generation, hook writing (critical for LinkedIn\'s algorithm), content repurposing (turn a tweet thread into a LinkedIn post), caption rewriting with professional tone, and hashtag research optimized for LinkedIn reach.',
+    a: 'SocialMate\'s 15+ AI tools include LinkedIn-specific capabilities: long-form post generation, hook writing (critical for LinkedIn\'s algorithm), content repurposing (turn a tweet thread into a LinkedIn post), caption rewriting with professional tone, and hashtag research optimized for LinkedIn reach.',
   },
   {
     q: 'Does SocialMate have LinkedIn analytics?',
@@ -70,13 +70,13 @@ const faqSchema = {
 
 export default function VsTaplioPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">S</div>
+            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
             <span className="font-bold tracking-tight dark:text-white">SocialMate</span>
           </Link>
           <div className="flex items-center gap-3">
@@ -128,7 +128,7 @@ export default function VsTaplioPage() {
             <p className="font-extrabold text-lg mb-2">LinkedIn + 6 more. Free to start.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ LinkedIn + Bluesky + X + TikTok + Discord + Telegram + Mastodon</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Bulk scheduling and RSS import free</li>
               <li>✅ Pro plan for $5/month total</li>
               <li>✅ Creator Monetization Hub built in</li>
@@ -140,7 +140,7 @@ export default function VsTaplioPage() {
         {/* TABLE */}
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">Feature comparison</h2>
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto"><div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
               <span>Feature</span>
               <span>Taplio</span>
@@ -153,6 +153,7 @@ export default function VsTaplioPage() {
                 <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">{row.socialmate}</span>
               </div>
             ))}
+          </div>
           </div>
         </div>
 
@@ -174,7 +175,7 @@ export default function VsTaplioPage() {
               {
                 n: '3',
                 title: 'Taplio\'s AI carousel feature is real — but narrow',
-                desc: 'If PDF carousels are your primary LinkedIn format, Taplio\'s AI carousel generator is a genuine differentiator. SocialMate doesn\'t replicate that specific format. But for text posts, long-form posts, link sharing, and cross-platform repurposing — SocialMate\'s 12 AI tools cover everything else free.',
+                desc: 'If PDF carousels are your primary LinkedIn format, Taplio\'s AI carousel generator is a genuine differentiator. SocialMate doesn\'t replicate that specific format. But for text posts, long-form posts, link sharing, and cross-platform repurposing — SocialMate\'s 15+ AI tools cover everything else free.',
               },
               {
                 n: '4',

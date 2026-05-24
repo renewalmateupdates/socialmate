@@ -1,10 +1,10 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Sprout Social (2026) — Full Comparison',
-  description: 'Sprout Social starts at $249/month for just 5 social profiles with no free plan. SocialMate is free forever — bulk scheduling, 12 AI tools, and 16 platforms included at $0.',
+  description: 'Sprout Social starts at $249/month for just 5 social profiles with no free plan. SocialMate is free forever — bulk scheduling, 15+ AI tools, and 7 platforms included at $0.',
   openGraph: {
     title:       'SocialMate vs Sprout Social (2026)',
     description: 'Sprout Social costs $249/mo for 5 profiles and zero free plan. SocialMate is free forever — no credit card, no profile cap, bulk scheduling included.',
@@ -24,7 +24,7 @@ const COMPARISON = [
   { feature: 'Telegram support',        sprout: '❌',                          socialmate: '✅'                      },
   { feature: 'Mastodon support',        sprout: '❌',                          socialmate: '✅'                      },
   { feature: 'Bluesky support',         sprout: '❌',                          socialmate: '✅'                      },
-  { feature: 'AI writing tools',        sprout: 'AI Assist (paid add-on)',    socialmate: '12 tools included'       },
+  { feature: 'AI writing tools',        sprout: 'AI Assist (paid add-on)',    socialmate: '15+ tools included'       },
   { feature: 'AI credits free tier',    sprout: 'N/A (no free plan)',         socialmate: '75/month free'            },
   { feature: 'Bulk scheduling',         sprout: '✅ Paid plans',               socialmate: '✅ Free'                  },
   { feature: 'Link in bio',             sprout: '❌',                          socialmate: '✅ Free'                  },
@@ -66,13 +66,13 @@ const faqSchema = {
 
 export default function VsSproutSocialPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">S</div>
+            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
             <span className="font-bold tracking-tight dark:text-white">SocialMate</span>
           </Link>
           <div className="flex items-center gap-3">
@@ -124,7 +124,7 @@ export default function VsSproutSocialPage() {
             <p className="font-extrabold text-lg mb-2">Enterprise features. Zero dollars.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ Free forever — no trial countdown</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
               <li>✅ Bulk scheduling free</li>
               <li>✅ Competitor tracking free</li>
@@ -136,7 +136,7 @@ export default function VsSproutSocialPage() {
         {/* COMPARISON TABLE */}
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">Feature comparison</h2>
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto"><div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
               <span>Feature</span>
               <span>Sprout Social</span>
@@ -149,6 +149,7 @@ export default function VsSproutSocialPage() {
                 <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">{row.socialmate}</span>
               </div>
             ))}
+          </div>
           </div>
         </div>
 
@@ -165,7 +166,7 @@ export default function VsSproutSocialPage() {
               {
                 n: '2',
                 title: 'The "affordable" plan still locks out most features',
-                desc: 'Even at $249/month, competitor analytics, premium reporting, and AI tools are either paywalled at a higher tier or sold as add-ons. You end up paying enterprise prices to discover you need to upgrade again. SocialMate puts 12 AI tools and competitor tracking on the free plan.',
+                desc: 'Even at $249/month, competitor analytics, premium reporting, and AI tools are either paywalled at a higher tier or sold as add-ons. You end up paying enterprise prices to discover you need to upgrade again. SocialMate puts 15+ AI tools and competitor tracking on the free plan.',
               },
               {
                 n: '3',
@@ -206,7 +207,7 @@ export default function VsSproutSocialPage() {
         <div className="bg-black text-white rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Why pay $249/mo when $0 works?</h2>
           <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is free forever — bulk scheduling, 12 AI tools, 16 platforms, no credit card required.
+            SocialMate is free forever — bulk scheduling, 15+ AI tools, 7 platforms, no credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             Create free account →

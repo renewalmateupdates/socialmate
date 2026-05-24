@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -24,7 +24,7 @@ const COMPARISON = [
   { feature: 'Mastodon scheduling',           competitor: '❌',                          socialmate: '✅ Free'                  },
   { feature: 'X / Twitter scheduling',        competitor: '✅ (paid)',                  socialmate: '✅ Free (5 tweets/mo)'   },
   { feature: 'Facebook scheduling',           competitor: '✅ (paid)',                  socialmate: '🔜 Roadmap'              },
-  { feature: 'AI writing tools',              competitor: '❌ No AI tools',             socialmate: '12 AI tools free'        },
+  { feature: 'AI writing tools',              competitor: '❌ No AI tools',             socialmate: '15+ AI tools free'        },
   { feature: 'Content calendar',             competitor: '✅ Basic',                   socialmate: '✅ Free'                  },
   { feature: 'Bulk scheduling',              competitor: '✅ (paid)',                  socialmate: '✅ Free'                  },
   { feature: 'RSS / blog import',             competitor: '✅ (paid)',                  socialmate: '✅ Free'                  },
@@ -46,7 +46,7 @@ const FAQ = [
   },
   {
     q: 'Does SocialOomph have AI writing tools?',
-    a: 'No. SocialOomph has no AI writing assistance. SocialMate includes 12 AI tools free: caption writing, hook generation, thread builder, content repurposing, hashtag research, and the full SOMA autonomous content system. If you\'re still writing every post from scratch with no AI assist, you\'re spending hours that competitors aren\'t.',
+    a: 'No. SocialOomph has no AI writing assistance. SocialMate includes 15+ AI tools free: caption writing, hook generation, thread builder, content repurposing, hashtag research, and the full SOMA autonomous content system. If you\'re still writing every post from scratch with no AI assist, you\'re spending hours that competitors aren\'t.',
   },
   {
     q: 'Can SocialMate replace SocialOomph for Twitter/X scheduling?',
@@ -70,13 +70,13 @@ const faqSchema = {
 
 export default function VsSocialOomphPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">S</div>
+            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
             <span className="font-bold tracking-tight dark:text-white">SocialMate</span>
           </Link>
           <div className="flex items-center gap-3">
@@ -97,7 +97,7 @@ export default function VsSocialOomphPage() {
             SocialMate vs SocialOomph
           </h1>
           <p className="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-            SocialOomph is a legacy scheduler with no TikTok, no LinkedIn, and no AI tools. SocialMate covers 7 modern platforms with 12 AI tools — starting free.
+            SocialOomph is a legacy scheduler with no TikTok, no LinkedIn, and no AI tools. SocialMate covers 7 modern platforms with 15+ AI tools — starting free.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-black text-white font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -128,7 +128,7 @@ export default function VsSocialOomphPage() {
             <p className="font-extrabold text-lg mb-2">Modern AI-powered scheduler. Free to start.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ TikTok + LinkedIn + X + Bluesky + Discord + Telegram + Mastodon</li>
-              <li>✅ 12 AI tools free — SocialOomph has zero</li>
+              <li>✅ 15+ AI tools free — SocialOomph has zero</li>
               <li>✅ SOMA autonomous content system</li>
               <li>✅ Pro plan for $5/month — cheaper than SocialOomph</li>
               <li>✅ Modern mobile-ready UI</li>
@@ -140,7 +140,7 @@ export default function VsSocialOomphPage() {
         {/* TABLE */}
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">Feature comparison</h2>
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto"><div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
               <span>Feature</span>
               <span>SocialOomph</span>
@@ -153,6 +153,7 @@ export default function VsSocialOomphPage() {
                 <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">{row.socialmate}</span>
               </div>
             ))}
+          </div>
           </div>
         </div>
 
@@ -169,7 +170,7 @@ export default function VsSocialOomphPage() {
               {
                 n: '2',
                 title: 'Zero AI tools vs 12 free AI tools',
-                desc: 'SocialOomph has no AI writing assistance at any price tier. SocialMate includes 12 AI tools free: hook writing, caption rewriting, thread generation, content repurposing, hashtag suggestions, and the SOMA system that generates a full week of posts across all your platforms. The time savings alone justify switching.',
+                desc: 'SocialOomph has no AI writing assistance at any price tier. SocialMate includes 15+ AI tools free: hook writing, caption rewriting, thread generation, content repurposing, hashtag suggestions, and the SOMA system that generates a full week of posts across all your platforms. The time savings alone justify switching.',
               },
               {
                 n: '3',
@@ -211,7 +212,7 @@ export default function VsSocialOomphPage() {
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Modern + cheaper + more platforms</p>
           <h2 className="text-3xl font-extrabold mb-4">Upgrade from SocialOomph for free</h2>
           <p className="text-gray-400 mb-6 max-w-lg mx-auto text-sm">
-            SocialMate is free to start. 7 platforms, 12 AI tools, SOMA content system.
+            SocialMate is free to start. 7 platforms, 15+ AI tools, SOMA content system.
             Pro is $5/month — less than SocialOomph&apos;s entry price.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-white text-black font-bold rounded-2xl hover:opacity-80 transition-all text-sm">

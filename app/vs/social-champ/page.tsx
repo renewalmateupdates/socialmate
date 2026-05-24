@@ -1,13 +1,13 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Social Champ (2026) — Full Comparison',
-  description: "Social Champ starts at $29/mo with no Discord, Telegram, or Bluesky. SocialMate is $5/mo with 6 platforms, 20+ AI tools, SOMA autonomous content, and a free plan.",
+  description: "Social Champ starts at $29/mo with no Discord, Telegram, or Bluesky. SocialMate is $5/mo with 7 platforms, 20+ AI tools, SOMA autonomous content, and a free plan.",
   openGraph: {
     title:       'SocialMate vs Social Champ (2026)',
-    description: "Social Champ: $29/mo, no Discord/Telegram/Bluesky. SocialMate: $5/mo — 6 platforms, 20+ AI tools, SOMA, Enki, free plan included.",
+    description: "Social Champ: $29/mo, no Discord/Telegram/Bluesky. SocialMate: $5/mo — 7 platforms, 20+ AI tools, SOMA, Enki, free plan included.",
     url:         'https://socialmate.studio/vs/social-champ',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/social-champ' },
@@ -120,7 +120,7 @@ export default function VsSocialChampPage() {
             <p className="text-xs font-bold text-black/60 uppercase tracking-wide mb-2">SocialMate</p>
             <p className="font-extrabold text-lg mb-2">5x cheaper. More platforms. More AI.</p>
             <ul className="space-y-1 text-xs text-black/80">
-              <li>✅ 6 live platforms including Discord + Telegram</li>
+              <li>✅ 7 live platforms including Discord, Telegram + LinkedIn</li>
               <li>✅ 20+ AI content and writing tools</li>
               <li>✅ SOMA: autonomous weekly content generation</li>
               <li>✅ Enki: paper + live trading bot</li>
@@ -133,7 +133,7 @@ export default function VsSocialChampPage() {
         {/* COMPARISON TABLE */}
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6">Feature comparison</h2>
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto"><div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-400 uppercase tracking-wide">
               <span>Feature</span>
               <span>Social Champ</span>
@@ -146,6 +146,7 @@ export default function VsSocialChampPage() {
                 <span className="text-xs font-semibold text-gray-100">{row.socialmate}</span>
               </div>
             ))}
+          </div>
           </div>
         </div>
 

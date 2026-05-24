@@ -624,6 +624,13 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **AI rate limiting** — 10 AI requests per minute per user. Returns 429 with retry-after header. Prevents accidental API abuse.
 - **Blog batch 12** — 55 posts on creator growth, platform strategy, and community. SQL in `supabase/blog_batch_12.sql`.
 
+**May 24, 2026 (PRs #426):**
+- **Full public site sweep — dark mode, mobile, accuracy** — Three-phase sweep across every public-facing page. PR #426 on branch `fix/dark-mode-accuracy-sweep`.
+  - **Phase 1 (dark mode):** All `for/`, `blog/`, `guides/`, `vs/`, and misc public pages audited for dark mode consistency. `PublicLayout` adds `dark` class forcing all `dark:` variants active regardless of system preference.
+  - **Phase 2 (accuracy):** Every stat in the codebase updated to reflect current reality — 15+ AI tools (was 12), 7 live platforms (was 5 or 6). Files touched: `app/page.tsx`, `app/features/page.tsx`, `app/features/layout.tsx`, `app/for/agencies/page.tsx`, `app/for/small-business/page.tsx`, `app/for/streamers/page.tsx`, `app/for/tiktok-creators/page.tsx`, `app/for/linkedin-creators/page.tsx`, `app/faq/page.tsx`, `app/blog/[slug]/page.tsx`, `app/dashboard/page.tsx`, `app/roadmap/RoadmapClient.tsx`, `lib/inngest.ts` (email templates). All 75 vs/ pages: "12 AI tools" → "15+ AI tools". vs/canva, flick, kontentino, planly, plann, preview-app, ripl, sked-social, social-champ, unum: "6 platforms" → "7 platforms" + LinkedIn added to platform lists. vs/postcron "16 (free)" typo fixed → "7 live (free)".
+  - **Phase 3 (mobile + logo consistency):** All 75 vs/ comparison tables wrapped with `overflow-x-auto` + `min-w-[480px]` for horizontal scroll on 375px screens. All 75 pages verified JSX-balanced programmatically. S lettermark (`<div>S</div>`) replaced with `<img src="/logo.png">` everywhere it appeared outside `LandingHeader.tsx` (dead code): `app/login/page.tsx` (3), `app/signup/page.tsx` (2), `app/forgot-password/page.tsx`, `app/reset-password/page.tsx`, `app/error.tsx`, `app/not-found.tsx`, `app/invite/page.tsx`, `app/page.tsx` footer, `src/app/signup/page.tsx`.
+- **Rule confirmed:** `LandingHeader.tsx` is dead code (replaced by `PublicNav` on `/` in April 2026) — do not import or touch it.
+
 **May 22, 2026 (PR #401):**
 - **IRIS AI auto-generate** — Admin UI at `/admin/iris` now has a violet "Generate draft with AI" button. `POST /api/admin/iris/generate` calls Gemini 2.5-flash with Joshua's tone rules + baked-in recent ship context. Returns complete newsletter draft (subject, intro, whatShipped, realNumbers, whatsNext, closing). Passes previous subject lines to avoid repeated angles. Fields pre-fill on success with inline confirmation banner. Admin-only gate.
 - **Docs update rule established** — Whenever llms.txt is updated, CLAUDE.md + changelog + roadmap must all update in the same flow. Never update llms.txt alone.
@@ -681,6 +688,7 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **SOMA content run** — Submit updated CLAUDE.md when Joshua is ready.
 ## Confirmed Done (stop asking about these)
 
+- ✅ **Full site sweep — dark mode + mobile + accuracy (May 24, PR #426)** — All public pages: dark mode consistent, comparison tables mobile-scrollable (overflow-x-auto), all stats updated to 15+ AI tools / 7 platforms, logo.png replaces S lettermark everywhere. All 75 vs/ pages JSX-balanced. Never ask to do this sweep again — it's done.
 - ✅ **IRIS AI auto-generate (May 22, PR #401)** — Admin `/admin/iris` compose page has "Generate draft with AI" button. Gemini 2.5-flash writes subject + full body draft. Never ask to build this again.
 - ✅ **HERMES cold outreach system (May 14–18, PRs #318–#327)** — Full campaign system at `/hermes` (admin-only). Prospect discovery (free: Substack/GitHub/dev.to/Hashnode), Hunter.io email finder, Gemini-powered message generation, Resend email + Bluesky/Mastodon DM send, 4-step sequence, follow-up cron. Never ask to build HERMES again.
 - ✅ **SM Pulse + SM Radar** — `/sm-pulse` (trend scan, 20 credits) and `/sm-radar` (content intelligence report, 20 credits) both live. Never ask to build these.

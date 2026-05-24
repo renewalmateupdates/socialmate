@@ -24,7 +24,7 @@ export default function SignUp() {
     <main className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
       <div className="bg-white border border-gray-200 rounded-2xl p-8 w-full max-w-md shadow-sm">
         <div className="flex items-center gap-2 mb-8">
-          <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-sm font-bold">S</div>
+          <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
           <span className="font-bold text-lg tracking-tight">SocialMate</span>
         </div>
         <h1 className="text-2xl font-extrabold tracking-tight mb-1">Create your account</h1>

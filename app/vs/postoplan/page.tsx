@@ -1,10 +1,10 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Postoplan (2026) — Full Comparison',
-  description: 'Postoplan charges $19/month for social scheduling with no Discord or Telegram. SocialMate gives you 7 platforms, 12 AI tools, and autonomous content generation — starting free.',
+  description: 'Postoplan charges $19/month for social scheduling with no Discord or Telegram. SocialMate gives you 7 platforms, 15+ AI tools, and autonomous content generation — starting free.',
   openGraph: {
     title:       'SocialMate vs Postoplan (2026)',
     description: 'Postoplan is $19/month with no Discord, Telegram, or Bluesky. SocialMate covers all 7 platforms with AI built in — free to start.',
@@ -22,7 +22,7 @@ const COMPARISON = [
   { feature: 'Bluesky scheduling',            postoplan: '❌',                         socialmate: '✅ Free'                  },
   { feature: 'TikTok scheduling',             postoplan: '✅ (paid)',                  socialmate: '✅ Free (20 videos/mo)'  },
   { feature: 'LinkedIn scheduling',           postoplan: '✅ (paid)',                  socialmate: '✅ Free'                  },
-  { feature: 'AI writing tools',              postoplan: '❌',                         socialmate: '12 tools free'           },
+  { feature: 'AI writing tools',              postoplan: '❌',                         socialmate: '15+ tools free'           },
   { feature: 'Autonomous content system',     postoplan: '❌',                         socialmate: '✅ SOMA — learns your voice' },
   { feature: '8 autonomous AI agents',        postoplan: '❌',                         socialmate: '✅ Pro+'                  },
   { feature: 'Content calendar',             postoplan: '✅',                         socialmate: '✅ Free'                  },
@@ -42,7 +42,7 @@ const FAQ = [
   },
   {
     q: 'What does SocialMate have that Postoplan does not?',
-    a: "SocialMate adds Discord and Telegram scheduling (Postoplan can't reach community platforms), 12 AI tools (Postoplan has zero AI writing), SOMA autonomous content generation, 8 AI agents that run on autopilot, evergreen recycling, RSS import, and a link-in-bio page (SIGIL). On pricing, SocialMate Pro at $5/month does more than Postoplan's paid plans at nearly 4x the price.",
+    a: "SocialMate adds Discord and Telegram scheduling (Postoplan can't reach community platforms), 15+ AI tools (Postoplan has zero AI writing), SOMA autonomous content generation, 8 AI agents that run on autopilot, evergreen recycling, RSS import, and a link-in-bio page (SIGIL). On pricing, SocialMate Pro at $5/month does more than Postoplan's paid plans at nearly 4x the price.",
   },
   {
     q: 'Does Postoplan have a free plan?',
@@ -54,7 +54,7 @@ const FAQ = [
   },
   {
     q: 'What AI tools does SocialMate include?',
-    a: "SocialMate's 12 AI tools include caption generation, viral hook writing, content repurposing (6 formats), hashtag research, thread generation, post rewriting, post scoring, brand voice injection, SM Pulse (trend scan), SM Radar (content intelligence report), and SOMA — an autonomous content agent that generates a full week of platform-native posts automatically.",
+    a: "SocialMate's 15+ AI tools include caption generation, viral hook writing, content repurposing (6 formats), hashtag research, thread generation, post rewriting, post scoring, brand voice injection, SM Pulse (trend scan), SM Radar (content intelligence report), and SOMA — an autonomous content agent that generates a full week of platform-native posts automatically.",
   },
 ]
 
@@ -70,13 +70,13 @@ const faqSchema = {
 
 export default function VsPostoplanPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">S</div>
+            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
             <span className="font-bold tracking-tight dark:text-white">SocialMate</span>
           </Link>
           <div className="flex items-center gap-3">
@@ -97,7 +97,7 @@ export default function VsPostoplanPage() {
             SocialMate vs Postoplan
           </h1>
           <p className="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-            Postoplan is $19/month with no Discord, Telegram, or AI tools. SocialMate covers 7 platforms with 12 AI tools built in — starting completely free.
+            Postoplan is $19/month with no Discord, Telegram, or AI tools. SocialMate covers 7 platforms with 15+ AI tools built in — starting completely free.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-black text-white font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -125,10 +125,10 @@ export default function VsPostoplanPage() {
           </div>
           <div className="bg-black text-white rounded-2xl p-6">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">7 platforms. 12 AI tools. Free.</p>
+            <p className="font-extrabold text-lg mb-2">7 platforms. 15+ AI tools. Free.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ Discord + Telegram + Bluesky + TikTok + LinkedIn + X + Mastodon</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ SOMA autonomous content agent</li>
               <li>✅ Pro plan for $5/month total</li>
               <li>✅ 8 autonomous AI agents</li>
@@ -140,7 +140,7 @@ export default function VsPostoplanPage() {
         {/* TABLE */}
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">Feature comparison</h2>
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto"><div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
               <span>Feature</span>
               <span>Postoplan</span>
@@ -153,6 +153,7 @@ export default function VsPostoplanPage() {
                 <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">{row.socialmate}</span>
               </div>
             ))}
+          </div>
           </div>
         </div>
 
@@ -174,7 +175,7 @@ export default function VsPostoplanPage() {
               {
                 n: '3',
                 title: 'Postoplan has zero AI tools — SocialMate has 12',
-                desc: "Postoplan's content idea library suggests topics but doesn't write anything. SocialMate's 12 AI tools write captions, craft hooks, repurpose content into 6 formats, generate hashtag sets, score posts for quality, and run SOMA — which autonomously generates a full week of posts from your brand context.",
+                desc: "Postoplan's content idea library suggests topics but doesn't write anything. SocialMate's 15+ AI tools write captions, craft hooks, repurpose content into 6 formats, generate hashtag sets, score posts for quality, and run SOMA — which autonomously generates a full week of posts from your brand context.",
               },
               {
                 n: '4',
@@ -211,7 +212,7 @@ export default function VsPostoplanPage() {
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">More platforms. More AI. Actually free.</p>
           <h2 className="text-3xl font-extrabold mb-4">Switch from Postoplan today</h2>
           <p className="text-gray-400 mb-6 max-w-lg mx-auto text-sm">
-            SocialMate covers 7 platforms including Discord and Telegram — with 12 AI tools and SOMA built in.
+            SocialMate covers 7 platforms including Discord and Telegram — with 15+ AI tools and SOMA built in.
             Start free. Pro is $5/month.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-white text-black font-bold rounded-2xl hover:opacity-80 transition-all text-sm">

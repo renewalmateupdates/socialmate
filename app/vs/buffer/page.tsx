@@ -1,13 +1,13 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Buffer (2026) — Full Comparison',
-  description: "Buffer's free plan limits you to 3 channels and 10 queued posts total. SocialMate's free plan includes bulk scheduling, no channel cap, and 12 AI tools.",
+  description: "Buffer's free plan limits you to 3 channels and 10 queued posts total. SocialMate's free plan includes bulk scheduling, no channel cap, and 15+ AI tools.",
   openGraph: {
     title:       'SocialMate vs Buffer (2026)',
-    description: "Buffer free plan: 3 channels, 10 queued posts, no bulk scheduling. SocialMate free plan: no channel cap, bulk scheduler included, 12 AI tools.",
+    description: "Buffer free plan: 3 channels, 10 queued posts, no bulk scheduling. SocialMate free plan: no channel cap, bulk scheduler included, 15+ AI tools.",
     url:         'https://socialmate.studio/vs/buffer',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/buffer' },
@@ -24,7 +24,7 @@ const COMPARISON = [
   { feature: 'Telegram support',        buffer: '❌',                         socialmate: '✅'                      },
   { feature: 'Mastodon support',        buffer: '❌',                         socialmate: '✅'                      },
   { feature: 'Bluesky support',         buffer: '✅ (basic)',                 socialmate: '✅'                      },
-  { feature: 'AI writing tools',        buffer: 'AI assistant (paid)',       socialmate: '12 tools included free'  },
+  { feature: 'AI writing tools',        buffer: 'AI assistant (paid)',       socialmate: '15+ tools included free'  },
   { feature: 'AI credits free tier',    buffer: 'None on free plan',         socialmate: '75/month free'            },
   { feature: 'Link in bio',             buffer: 'Start page (limited free)', socialmate: '✅ Free'                  },
   { feature: 'Hashtag manager',         buffer: '❌',                         socialmate: '✅ Free'                  },
@@ -67,13 +67,13 @@ const faqSchema = {
 
 export default function VsBufferPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">S</div>
+            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
             <span className="font-bold tracking-tight dark:text-white">SocialMate</span>
           </Link>
           <div className="flex items-center gap-3">
@@ -94,7 +94,7 @@ export default function VsBufferPage() {
             SocialMate vs Buffer
           </h1>
           <p className="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-            Buffer free plan: 3 channels, 10 queued posts, no bulk scheduling. SocialMate free plan: no caps, bulk scheduler, 12 AI tools included.
+            Buffer free plan: 3 channels, 10 queued posts, no bulk scheduling. SocialMate free plan: no caps, bulk scheduler, 15+ AI tools included.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-black text-white font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -127,7 +127,7 @@ export default function VsBufferPage() {
               <li>✅ Unlimited posts, no queue cap</li>
               <li>✅ Bulk scheduling free</li>
               <li>✅ Analytics built in — no add-on</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
               <li>✅ No credit card required</li>
             </ul>
@@ -137,7 +137,7 @@ export default function VsBufferPage() {
         {/* COMPARISON TABLE */}
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">Feature comparison</h2>
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto"><div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
               <span>Feature</span>
               <span>Buffer</span>
@@ -150,6 +150,7 @@ export default function VsBufferPage() {
                 <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">{row.socialmate}</span>
               </div>
             ))}
+          </div>
           </div>
         </div>
 
@@ -207,7 +208,7 @@ export default function VsBufferPage() {
         <div className="bg-black text-white rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Done working around Buffer&apos;s limits?</h2>
           <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is unlimited posts, bulk scheduling, 12 AI tools, 16 platforms — completely free to start. No credit card required.
+            SocialMate is unlimited posts, bulk scheduling, 15+ AI tools, 7 platforms — completely free to start. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             Create free account →

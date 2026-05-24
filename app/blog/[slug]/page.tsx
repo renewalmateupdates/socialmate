@@ -104,9 +104,9 @@ These are real people with real needs. The existing tools weren't built for them
 
 ## What Makes SocialMate Different
 
-We're live with four platforms right now — Discord, Bluesky, Mastodon, and Telegram — with LinkedIn, YouTube, Pinterest, Reddit, Instagram, TikTok, Facebook, and Threads coming soon as platform approvals come through. We're building toward 16 total. Every platform you can connect is included on the free plan at no extra cost.
+We're live with 7 platforms — Bluesky, Discord, Mastodon, Telegram, X/Twitter, TikTok, and LinkedIn. YouTube, Pinterest, Instagram, Facebook, and Threads are on the active roadmap. Every platform you can connect is included on the free plan at no extra cost.
 
-We built 12 AI tools into the platform — caption generation, hashtag sets, viral hook writing, post rewriting, thread generation, content repurposing, post scoring, SM-Pulse trend analysis, SM-Radar competitive intelligence, content gap detection, AI content calendar, and AI image generation. All tools are accessible on the free tier through a monthly credit allowance (75 credits/month free, more on paid plans). Credits reset monthly so you always have access — the system is designed to be generous, not to wall things off.
+We built 15+ AI tools into the platform — caption generation, hashtag sets, viral hook writing, post rewriting, thread generation, content repurposing, post scoring, SM-Pulse trend analysis, SM-Radar competitive intelligence, content gap detection, AI content calendar, and AI image generation. All tools are accessible on the free tier through a monthly credit allowance (75 credits/month free, more on paid plans). Credits reset monthly so you always have access — the system is designed to be generous, not to wall things off.
 
 We built in features that other tools charge for separately: bulk scheduling, a link in bio page, evergreen content recycling, competitor tracking, RSS import, team collaboration with content approval workflows.
 
@@ -350,7 +350,7 @@ Buffer Team plan: 6 channels × $10/month = $60/month. That's $720/year.
 
 Hootsuite Standard: $99/month for up to 10 accounts, 1 user. Add a second user and you're negotiating with their sales team.
 
-SocialMate: $0/month. All 6 platforms, both team members, bulk scheduler, analytics, link in bio, hashtag collections, AI credits — included.
+SocialMate: $0/month. All 7 platforms, both team members, bulk scheduler, analytics, link in bio, hashtag collections, AI credits — included.
 
 The $5/month Pro plan would cover 5 accounts per platform and 5 team members. The $20/month Agency plan covers 10 accounts per platform and unlimited team members.
 
@@ -1775,7 +1775,7 @@ This guide covers the best free options across categories, with honest assessmen
 
 **SocialMate AI (free with account)**
 
-SocialMate includes 12 AI tools in its free plan, covering most of what a creator or small business needs:
+SocialMate includes 15+ AI tools in its free plan, covering most of what a creator or small business needs:
 
 - **Caption Generator** — Generates platform-appropriate captions from a topic or image description. Specify tone (casual, professional, witty) and it adapts.
 - **Viral Hook Generator** — Produces high-performing opening lines for posts. Trained on engagement patterns, not generic copy.

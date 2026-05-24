@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: 'Oktopost is an enterprise B2B platform starting at $500+/month. SocialMate starts at $0. See the full feature comparison.',
   openGraph: {
     title:       'SocialMate vs Oktopost (2026)',
-    description: 'Oktopost is built for enterprise B2B teams with a $500+/month price tag. SocialMate is free with 16 platforms and 12 AI tools.',
+    description: 'Oktopost is built for enterprise B2B teams with a $500+/month price tag. SocialMate is free with 7 platforms and 15+ AI tools.',
     url:         'https://socialmate.studio/vs/oktopost',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/oktopost' },
@@ -17,9 +17,9 @@ const COMPARISON = [
   { feature: 'Starting price',         oktopost: '$500+/month (enterprise)', socialmate: '$0 — free forever'       },
   { feature: 'Free plan',              oktopost: '❌ No free plan',           socialmate: '✅ Genuinely free'        },
   { feature: 'Target audience',        oktopost: 'Enterprise B2B teams',     socialmate: 'Creators, SMBs, agencies' },
-  { feature: 'Platforms supported',    oktopost: 'LinkedIn-focused',         socialmate: '16 platforms'            },
+  { feature: 'Platforms supported',    oktopost: 'LinkedIn-focused',         socialmate: '7 platforms'            },
   { feature: 'Team seats',             oktopost: 'Unlimited (enterprise)',   socialmate: '2 seats free'            },
-  { feature: 'AI writing tools',       oktopost: 'Limited',                  socialmate: '12 tools free'           },
+  { feature: 'AI writing tools',       oktopost: 'Limited',                  socialmate: '15+ tools free'           },
   { feature: 'Employee advocacy',      oktopost: '✅ Core feature',          socialmate: '❌'                       },
   { feature: 'B2B analytics',          oktopost: '✅ Deep attribution',      socialmate: 'Basic analytics free'    },
   { feature: 'Bulk scheduling',        oktopost: '✅',                       socialmate: '✅ Free'                  },
@@ -43,7 +43,7 @@ const FAQ = [
   },
   {
     q: 'Does SocialMate support LinkedIn?',
-    a: 'LinkedIn support is on SocialMate\'s roadmap and coming soon. In the meantime, SocialMate covers 16 platforms including Bluesky, Discord, Telegram, Mastodon, and X/Twitter — all channels most B2B creators are building on in 2026.',
+    a: 'LinkedIn support is on SocialMate\'s roadmap and coming soon. In the meantime, SocialMate covers 7 platforms including Bluesky, Discord, Telegram, Mastodon, and X/Twitter — all channels most B2B creators are building on in 2026.',
   },
   {
     q: 'What does Oktopost do better than SocialMate?',
@@ -68,12 +68,12 @@ const faqSchema = {
 
 export default function VsOktopost() {
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-7 h-7 bg-black dark:bg-white rounded-lg flex items-center justify-center text-white dark:text-black text-sm font-bold">S</div>
+            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
             <span className="font-bold text-base tracking-tight text-gray-900 dark:text-gray-100">
               SocialMate
               <span className="text-[10px] font-semibold bg-pink-500 text-white px-1.5 py-0.5 rounded-full align-super ml-1">Beta</span>
@@ -133,13 +133,13 @@ export default function VsOktopost() {
           <div className="border-2 border-green-200 bg-green-50 rounded-2xl p-6 text-center">
             <p className="text-xs font-bold text-green-600 uppercase tracking-widest mb-2">SocialMate</p>
             <p className="text-3xl font-extrabold text-green-700 mb-1">$0/month</p>
-            <p className="text-xs text-green-600">16 platforms · 12 AI tools · Free forever</p>
+            <p className="text-xs text-green-600">7 platforms · 15+ AI tools · Free forever</p>
           </div>
         </div>
 
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-gray-100">Feature comparison</h2>
-          <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto"><div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-100 dark:border-gray-600 px-5 py-3">
               <span className="text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wide">Feature</span>
               <span className="text-xs font-bold text-gray-400 uppercase tracking-wide text-center">Oktopost</span>
@@ -152,6 +152,7 @@ export default function VsOktopost() {
                 <span className="text-xs font-bold text-black dark:text-gray-100 text-center">{row.socialmate}</span>
               </div>
             ))}
+          </div>
           </div>
         </div>
 
@@ -183,7 +184,7 @@ export default function VsOktopost() {
         <div className="bg-black text-white rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3 dark:text-gray-100">Start for free today</h2>
           <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
-            16 platforms, 12 AI tools, unlimited posts, link in bio, competitor tracking — all free. No card required.
+            7 platforms, 15+ AI tools, unlimited posts, link in bio, competitor tracking — all free. No card required.
           </p>
           <Link href="/signup"
             className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">

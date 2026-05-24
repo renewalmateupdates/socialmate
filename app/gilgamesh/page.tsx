@@ -354,7 +354,7 @@ export default function GilgameshGuidePage() {
             </h2>
             <p style={{ fontSize: 15, color: muted, lineHeight: 1.7, marginBottom: 28 }}>
               The tools referenced in these guides include SocialMate — free social media scheduling,
-              12 AI writing tools, link in bio, analytics, and more. Free forever plan, no card required.
+              15+ AI writing tools, link in bio, analytics, and more. Free forever plan, no card required.
             </p>
             <Link href="/signup" style={{
               background: '#fff', color: '#000', fontWeight: 800,

@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: 'Tailwind App (tailwindapp.com) starts at $12.99/month and focuses on Pinterest and Instagram only. No free auto-publish, no Discord/Telegram/Mastodon/Bluesky, no AI writing tools. SocialMate is free forever.',
   openGraph: {
     title:       'SocialMate vs Tailwind App (2026)',
-    description: 'Tailwind App is a Pinterest-focused scheduler with no free auto-publish plan. SocialMate is free forever with 16 platforms and 12 AI tools.',
+    description: 'Tailwind App is a Pinterest-focused scheduler with no free auto-publish plan. SocialMate is free forever with 7 platforms and 15+ AI tools.',
     url:         'https://socialmate.studio/vs/tailwind-social',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/tailwind-social' },
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
 const COMPARISON = [
   { feature: 'Starting price',              tailwind: '$12.99/month (Pro)',            socialmate: '$0 — free forever'        },
   { feature: 'Free plan with auto-publish', tailwind: '❌ Manual posting only',        socialmate: '✅ Free auto-publish'     },
-  { feature: 'Primary platform focus',      tailwind: 'Pinterest + Instagram',         socialmate: '16 platforms'             },
+  { feature: 'Primary platform focus',      tailwind: 'Pinterest + Instagram',         socialmate: '7 platforms'             },
   { feature: 'Pinterest support',           tailwind: '✅ Core feature',               socialmate: '✅ (approval pending)'    },
   { feature: 'Instagram support',           tailwind: '✅',                             socialmate: '✅ (approval pending)'    },
   { feature: 'TikTok / video platforms',    tailwind: '❌',                             socialmate: '✅ Live'                  },
@@ -24,7 +24,7 @@ const COMPARISON = [
   { feature: 'Discord support',             tailwind: '❌',                             socialmate: '✅'                       },
   { feature: 'Telegram support',            tailwind: '❌',                             socialmate: '✅'                       },
   { feature: 'Mastodon support',            tailwind: '❌',                             socialmate: '✅'                       },
-  { feature: 'AI writing tools',            tailwind: '❌',                             socialmate: '12 tools included'        },
+  { feature: 'AI writing tools',            tailwind: '❌',                             socialmate: '15+ tools included'        },
   { feature: 'AI credits free tier',        tailwind: 'N/A (no free auto-publish)',    socialmate: '75/month free'            },
   { feature: 'SmartSchedule feature',       tailwind: '✅ (paid plan)',                socialmate: 'Best-time AI (free tier)' },
   { feature: 'Bulk scheduling',             tailwind: 'Paid plans only',               socialmate: '✅ Free'                  },
@@ -50,7 +50,7 @@ const FAQ = [
   },
   {
     q: 'Is SocialMate better than Tailwind App for creators?',
-    a: 'For most creators, yes. SocialMate covers 16 platforms with real auto-publishing on the free plan, includes 12 AI writing tools, and adds features like bulk scheduling, link in bio, and evergreen recycling — all free. Tailwind App is useful if Pinterest is your primary and almost exclusive platform. For anyone posting across multiple channels, SocialMate is the better fit.',
+    a: 'For most creators, yes. SocialMate covers 7 platforms with real auto-publishing on the free plan, includes 12 AI writing tools, and adds features like bulk scheduling, link in bio, and evergreen recycling — all free. Tailwind App is useful if Pinterest is your primary and almost exclusive platform. For anyone posting across multiple channels, SocialMate is the better fit.',
   },
 ]
 
@@ -67,13 +67,13 @@ const faqSchema = {
 
 export default function VsTailwindSocialPage() {
   return (
-    <div className="min-h-dvh bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-dvh bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">S</div>
+            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
             <span className="font-bold tracking-tight dark:text-white">SocialMate</span>
           </Link>
           <div className="flex items-center gap-3">
@@ -94,7 +94,7 @@ export default function VsTailwindSocialPage() {
             SocialMate vs Tailwind App
           </h1>
           <p className="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-            Tailwind App (tailwindapp.com) is a Pinterest-focused scheduler with no free auto-publish. SocialMate covers 16 platforms and is free forever.
+            Tailwind App (tailwindapp.com) is a Pinterest-focused scheduler with no free auto-publish. SocialMate covers 7 platforms and is free forever.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-black text-white font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -122,10 +122,10 @@ export default function VsTailwindSocialPage() {
           </div>
           <div className="bg-black text-white rounded-2xl p-6">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">16 platforms. AI tools. $0.</p>
+            <p className="font-extrabold text-lg mb-2">7 platforms. AI tools. $0.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ Free forever with real auto-publishing</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
               <li>✅ Bulk scheduling free</li>
               <li>✅ Link in bio included free</li>
@@ -137,7 +137,7 @@ export default function VsTailwindSocialPage() {
         {/* COMPARISON TABLE */}
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">Feature comparison</h2>
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto"><div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
               <span>Feature</span>
               <span>Tailwind App</span>
@@ -150,6 +150,7 @@ export default function VsTailwindSocialPage() {
                 <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">{row.socialmate}</span>
               </div>
             ))}
+          </div>
           </div>
         </div>
 
@@ -166,12 +167,12 @@ export default function VsTailwindSocialPage() {
               {
                 n: '2',
                 title: 'Pinterest-only focus is too narrow for most content strategies',
-                desc: 'Tailwind App was built for Pinterest. If Pinterest is your one and only platform, it does the job well. But most creators and businesses post to multiple places. Tailwind App does not support TikTok, YouTube, Discord, Bluesky, Mastodon, Telegram, or most other platforms. SocialMate covers 16 platforms from a single dashboard.',
+                desc: 'Tailwind App was built for Pinterest. If Pinterest is your one and only platform, it does the job well. But most creators and businesses post to multiple places. Tailwind App does not support TikTok, YouTube, Discord, Bluesky, Mastodon, Telegram, or most other platforms. SocialMate covers 7 platforms from a single dashboard.',
               },
               {
                 n: '3',
                 title: 'No AI writing tools means more manual work',
-                desc: 'Tailwind App does not include AI caption generation, hashtag assistance, or any writing tools. Every piece of copy comes entirely from you. SocialMate includes 12 AI tools on the free tier — caption generation, viral hook writing, post scoring, hashtag sets, and more — saving hours every week.',
+                desc: 'Tailwind App does not include AI caption generation, hashtag assistance, or any writing tools. Every piece of copy comes entirely from you. SocialMate includes 15+ AI tools on the free tier — caption generation, viral hook writing, post scoring, hashtag sets, and more — saving hours every week.',
               },
               {
                 n: '4',
@@ -207,7 +208,7 @@ export default function VsTailwindSocialPage() {
         <div className="bg-black text-white rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">More than Pinterest — start free today</h2>
           <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is free forever — 16 platforms, bulk scheduling, 12 AI tools, real auto-publishing. No credit card required.
+            SocialMate is free forever — 7 platforms, bulk scheduling, 15+ AI tools, real auto-publishing. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             Create free account →

@@ -999,11 +999,11 @@ export const onboardingSequence = inngest.createFunction(
               <p style="font-size:12px;font-weight:700;color:#71717a;text-transform:uppercase;letter-spacing:1px;margin:0 0 16px;">What's waiting for you</p>
               <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;">
                 <span style="color:#7C3AED;font-weight:700;font-size:15px;flex-shrink:0;">✓</span>
-                <span style="font-size:14px;color:#d4d4d8;line-height:1.5;">Schedule posts to <strong style="color:#ffffff;">6 live platforms</strong> — Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok</span>
+                <span style="font-size:14px;color:#d4d4d8;line-height:1.5;">Schedule posts to <strong style="color:#ffffff;">7 live platforms</strong> — Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok, LinkedIn</span>
               </div>
               <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;">
                 <span style="color:#7C3AED;font-weight:700;font-size:15px;flex-shrink:0;">✓</span>
-                <span style="font-size:14px;color:#d4d4d8;line-height:1.5;"><strong style="color:#ffffff;">12 AI content tools</strong> — captions, hooks, threads, hashtags and more (50 free credits/month)</span>
+                <span style="font-size:14px;color:#d4d4d8;line-height:1.5;"><strong style="color:#ffffff;">15+ AI content tools</strong> — captions, hooks, threads, hashtags and more (50 free credits/month)</span>
               </div>
               <div style="display:flex;align-items:flex-start;gap:12px;">
                 <span style="color:#7C3AED;font-weight:700;font-size:15px;flex-shrink:0;">✓</span>
@@ -4857,7 +4857,7 @@ export const comebackEmails = inngest.createFunction(
               <div style="background:#111111;border:1px solid #222222;border-radius:12px;padding:20px;margin-bottom:28px;">
                 <p style="font-size:13px;color:#71717a;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">What you left on the table</p>
                 <p style="font-size:14px;color:#d4d4d8;margin:0 0 8px;">✦ AI captions + hooks — write your post in 10 seconds</p>
-                <p style="font-size:14px;color:#d4d4d8;margin:0 0 8px;">✦ Schedule to 6 platforms at once — Bluesky, X, TikTok, Discord, Telegram, Mastodon</p>
+                <p style="font-size:14px;color:#d4d4d8;margin:0 0 8px;">✦ Schedule to 7 platforms at once — Bluesky, X, TikTok, Discord, Telegram, Mastodon, LinkedIn</p>
                 <p style="font-size:14px;color:#d4d4d8;margin:0;">✦ SOMA — your AI content agent that posts for you on autopilot</p>
               </div>
               <a href="${appUrl}/compose" style="display:inline-block;background:#7C3AED;color:#ffffff;font-size:14px;font-weight:700;padding:14px 28px;border-radius:12px;text-decoration:none;margin-bottom:28px;">Schedule one post right now →</a>

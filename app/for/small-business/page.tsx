@@ -4,7 +4,7 @@ import PublicLayout from '@/components/PublicLayout'
 
 export const metadata: Metadata = {
   title: 'Free Social Media Scheduler for Small Business — SocialMate',
-  description: 'Small business social media scheduling that actually fits your budget. Schedule posts to 7 platforms, use 12 AI tools, and grow your audience — free forever or $5/month Pro.',
+  description: 'Small business social media scheduling that actually fits your budget. Schedule posts to 7 platforms, use 15+ AI tools, and grow your audience — free forever or $5/month Pro.',
   openGraph: {
     title: 'Free Social Media Scheduler for Small Business — SocialMate',
     description: 'What Buffer and Hootsuite charge $99/month for, SocialMate gives for $5 — or free. Built for small business owners who wear every hat.',
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Free Social Media Scheduler for Small Business — SocialMate',
-    description: 'Schedule 7 platforms, 12 AI tools, free forever. Built for small business.',
+    description: 'Schedule 7 platforms, 15+ AI tools, free forever. Built for small business.',
     images: ['https://socialmate.studio/og-image.png'],
   },
   alternates: { canonical: 'https://socialmate.studio/for/small-business' },
@@ -160,7 +160,7 @@ const FAQ = [
   },
   {
     q: 'What are AI credits and what can I do with them?',
-    a: '12 built-in AI tools powered by Google Gemini. Caption writer, hook generator, thread builder, rewriter, content idea generator, and more. Each use costs 1–3 credits depending on the tool. Free plan gets 50/month, Pro gets 500.',
+    a: '15+ AI tools powered by Google Gemini. Caption writer, hook generator, thread builder, rewriter, content idea generator, and more. Each use costs 1–3 credits depending on the tool. Free plan gets 50/month, Pro gets 500.',
   },
   {
     q: 'Can my assistant or business partner use the account?',

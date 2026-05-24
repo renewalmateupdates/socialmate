@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: 'Combin is an Instagram-only growth tool at $15/month with no scheduling. SocialMate gives you scheduling across 7 platforms plus AI tools — starting free.',
   openGraph: {
     title:       'SocialMate vs Combin (2026)',
-    description: 'Combin is Instagram-only with no scheduling at $15/month. SocialMate schedules to 7 platforms with 12 AI tools — free to start.',
+    description: 'Combin is Instagram-only with no scheduling at $15/month. SocialMate schedules to 7 platforms with 15+ AI tools — free to start.',
     url:         'https://socialmate.studio/vs/combin',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/combin' },
@@ -24,7 +24,7 @@ const COMPARISON = [
   { feature: 'TikTok scheduling',             combin: '❌',                            socialmate: '✅ Free (20 videos/mo)'  },
   { feature: 'LinkedIn scheduling',           combin: '❌',                            socialmate: '✅ Free'                  },
   { feature: 'Instagram growth automation',   combin: '✅ (core feature)',             socialmate: '❌ Not built for this'   },
-  { feature: 'AI writing tools',              combin: '❌',                            socialmate: '12 tools free'           },
+  { feature: 'AI writing tools',              combin: '❌',                            socialmate: '15+ tools free'           },
   { feature: 'Autonomous content system',     combin: '❌',                            socialmate: '✅ SOMA — learns your voice' },
   { feature: '8 autonomous AI agents',        combin: '❌',                            socialmate: '✅ Pro+'                  },
   { feature: 'Content calendar',             combin: '✅ (Instagram only)',           socialmate: '✅ Free — all platforms'  },
@@ -70,13 +70,13 @@ const faqSchema = {
 
 export default function VsCombinPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">S</div>
+            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
             <span className="font-bold tracking-tight dark:text-white">SocialMate</span>
           </Link>
           <div className="flex items-center gap-3">
@@ -97,7 +97,7 @@ export default function VsCombinPage() {
             SocialMate vs Combin
           </h1>
           <p className="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-            Combin is Instagram-only at $15/month. SocialMate schedules to 7 platforms with 12 AI tools and autonomous content generation — starting free.
+            Combin is Instagram-only at $15/month. SocialMate schedules to 7 platforms with 15+ AI tools and autonomous content generation — starting free.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-black text-white font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -128,7 +128,7 @@ export default function VsCombinPage() {
             <p className="font-extrabold text-lg mb-2">7 platforms. AI. Free to start.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ Discord + Telegram + Bluesky + TikTok + LinkedIn + X + Mastodon</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ SOMA autonomous content agent</li>
               <li>✅ Pro plan for $5/month total</li>
               <li>✅ Competitor tracking + Trend Scout agent</li>
@@ -140,7 +140,7 @@ export default function VsCombinPage() {
         {/* TABLE */}
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">Feature comparison</h2>
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto"><div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
               <span>Feature</span>
               <span>Combin</span>
@@ -153,6 +153,7 @@ export default function VsCombinPage() {
                 <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">{row.socialmate}</span>
               </div>
             ))}
+          </div>
           </div>
         </div>
 
@@ -211,7 +212,7 @@ export default function VsCombinPage() {
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">Beyond Instagram</p>
           <h2 className="text-3xl font-extrabold mb-4">Schedule everywhere. Free.</h2>
           <p className="text-gray-400 mb-6 max-w-lg mx-auto text-sm">
-            SocialMate covers 7 platforms including Discord and Telegram — with 12 AI tools and SOMA built in.
+            SocialMate covers 7 platforms including Discord and Telegram — with 15+ AI tools and SOMA built in.
             Start free. Pro is $5/month.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-white text-black font-bold rounded-2xl hover:opacity-80 transition-all text-sm">

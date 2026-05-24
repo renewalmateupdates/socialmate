@@ -117,7 +117,7 @@ const FEATURE_CATEGORIES = [
   {
     category: 'Scheduling & Automation',
     emoji: '🗓️',
-    desc: 'Schedule across 16 platforms from one place. Bulk upload, evergreen recycling, and automated queues.',
+    desc: 'Schedule across 7 live platforms from one place. Bulk upload, evergreen recycling, and automated queues.',
     features: [
       {
         name: 'Bulk Scheduler',
@@ -336,7 +336,7 @@ export default function Features() {
           <div className="flex items-start justify-between mb-4">
             <div>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">AI Credit Quick Reference</p>
-              <p className="text-sm font-extrabold">12 tools — 50 credits free every month</p>
+              <p className="text-sm font-extrabold">15+ tools — 50 credits free every month</p>
             </div>
             <Link href="/pricing" className="text-xs font-bold text-gray-400 hover:text-white transition-all flex-shrink-0">
               See pricing →

@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -39,7 +39,7 @@ const FAQ = [
   },
   {
     q: "Is SocialMate better than Canva for social media scheduling?",
-    a: "If your goal is to schedule and manage social media content across many platforms, SocialMate is purpose-built for that. Canva is a design tool first. SocialMate supports 6 live platforms (Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok), has 20+ AI writing tools, and an autonomous content system (SOMA). Canva Pro is $15/month for tools primarily built around graphic design.",
+    a: "If your goal is to schedule and manage social media content across many platforms, SocialMate is purpose-built for that. Canva is a design tool first. SocialMate supports 7 live platforms (Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok, and LinkedIn), has 15+ AI writing tools, and an autonomous content system (SOMA). Canva Pro is $15/month for tools primarily built around graphic design.",
   },
   {
     q: "What does Canva not support that SocialMate does?",
@@ -120,7 +120,7 @@ export default function VsCanvaPage() {
             <p className="text-xs font-bold text-black/60 uppercase tracking-wide mb-2">SocialMate</p>
             <p className="font-extrabold text-lg mb-2">Purpose-built Creator OS. Free to start.</p>
             <ul className="space-y-1 text-xs text-black/80">
-              <li>✅ 6 live platforms including Discord + Telegram</li>
+              <li>✅ 7 live platforms including Discord, Telegram + LinkedIn</li>
               <li>✅ 20+ AI content tools</li>
               <li>✅ SOMA: autonomous weekly content generation</li>
               <li>✅ Enki: autonomous trading bot</li>
@@ -133,7 +133,7 @@ export default function VsCanvaPage() {
         {/* COMPARISON TABLE */}
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6">Feature comparison</h2>
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto"><div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-400 uppercase tracking-wide">
               <span>Feature</span>
               <span>Canva</span>
@@ -146,6 +146,7 @@ export default function VsCanvaPage() {
                 <span className="text-xs font-semibold text-gray-100">{row.socialmate}</span>
               </div>
             ))}
+          </div>
           </div>
         </div>
 
@@ -203,7 +204,7 @@ export default function VsCanvaPage() {
         <div className="bg-amber-400 text-black rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Ready for a scheduling platform — not a design tool?</h2>
           <p className="text-black/70 text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is purpose-built for social media. 6 platforms, 20+ AI tools, SOMA autonomous content — all starting at $0.
+            SocialMate is purpose-built for social media. 7 platforms, 20+ AI tools, SOMA autonomous content — all starting at $0.
           </p>
           <Link href="/signup" className="inline-block bg-black text-white font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm">
             Create free account →

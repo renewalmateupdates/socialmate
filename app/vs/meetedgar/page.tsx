@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: 'MeetEdgar starts at $29.99/month with no free plan. SocialMate has evergreen recycling free, supports Bluesky/Discord/Telegram/Mastodon, and costs $0 to start.',
   openGraph: {
     title:       'SocialMate vs MeetEdgar (2026)',
-    description: 'MeetEdgar charges $29.99/month and skips Bluesky, Discord, Telegram, and Mastodon. SocialMate does evergreen recycling free on 16 platforms.',
+    description: 'MeetEdgar charges $29.99/month and skips Bluesky, Discord, Telegram, and Mastodon. SocialMate does evergreen recycling free on 7 platforms.',
     url:         'https://socialmate.studio/vs/meetedgar',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/meetedgar' },
@@ -26,7 +26,7 @@ const COMPARISON = [
   { feature: 'Instagram support',         meetedgar: '✅',                       socialmate: '✅'                      },
   { feature: 'LinkedIn support',          meetedgar: '✅',                       socialmate: '✅'                      },
   { feature: 'TikTok support',            meetedgar: '✅',                       socialmate: '✅'                      },
-  { feature: 'AI writing tools',          meetedgar: 'Basic AI captions',       socialmate: '12 tools included'       },
+  { feature: 'AI writing tools',          meetedgar: 'Basic AI captions',       socialmate: '15+ tools included'       },
   { feature: 'AI credits free tier',      meetedgar: 'N/A (no free plan)',      socialmate: '75/month free'            },
   { feature: 'Bulk scheduling',           meetedgar: 'Paid plans',              socialmate: '✅ Free'                  },
   { feature: 'Link in bio',               meetedgar: '❌',                       socialmate: '✅ Free'                  },
@@ -66,13 +66,13 @@ const faqSchema = {
 
 export default function VsMeetEdgarPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">S</div>
+            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
             <span className="font-bold tracking-tight dark:text-white">SocialMate</span>
           </Link>
           <div className="flex items-center gap-3">
@@ -121,11 +121,11 @@ export default function VsMeetEdgarPage() {
           </div>
           <div className="bg-black text-white rounded-2xl p-6">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">Evergreen recycling. 16 platforms. $0.</p>
+            <p className="font-extrabold text-lg mb-2">Evergreen recycling. 7 platforms. $0.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ Evergreen recycling on free plan</li>
               <li>✅ Bluesky, Discord, Telegram, Mastodon</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Bulk scheduling free</li>
               <li>✅ Hashtag manager and competitor tracking</li>
               <li>✅ No credit card required</li>
@@ -136,7 +136,7 @@ export default function VsMeetEdgarPage() {
         {/* COMPARISON TABLE */}
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">Feature comparison</h2>
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto"><div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
               <span>Feature</span>
               <span>MeetEdgar</span>
@@ -149,6 +149,7 @@ export default function VsMeetEdgarPage() {
                 <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">{row.socialmate}</span>
               </div>
             ))}
+          </div>
           </div>
         </div>
 
@@ -174,7 +175,7 @@ export default function VsMeetEdgarPage() {
               },
               {
                 n: '4',
-                title: 'SocialMate brings 12 AI tools MeetEdgar does not have',
+                title: 'SocialMate brings 15+ AI tools MeetEdgar does not have',
                 desc: 'SocialMate includes caption generation, viral hook writing, hashtag research, thread generation, content repurposing, post scoring, and more — all on the free tier. MeetEdgar offers basic AI caption help. If AI-assisted content creation matters to your workflow, SocialMate is the stronger choice.',
               },
             ].map((r) => (
@@ -206,7 +207,7 @@ export default function VsMeetEdgarPage() {
         <div className="bg-black text-white rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Get evergreen recycling free — no $30/month required</h2>
           <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is free forever — evergreen recycling, bulk scheduling, 12 AI tools, 16 platforms. No credit card required.
+            SocialMate is free forever — evergreen recycling, bulk scheduling, 15+ AI tools, 7 platforms. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             Create free account →

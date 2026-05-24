@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: "Flick starts at £14/month (~$18) with no free plan. SocialMate is free forever with TikTok included, plus Bluesky, Discord, and Telegram that Flick doesn't support.",
   openGraph: {
     title: 'SocialMate vs Flick (2026)',
-    description: "Flick is £14/month (~$18) with a 14-day trial only. SocialMate is free forever — TikTok, Bluesky, Discord, Telegram, 12 AI tools, all included.",
+    description: "Flick is £14/month (~$18) with a 14-day trial only. SocialMate is free forever — TikTok, Bluesky, Discord, Telegram, 15+ AI tools, all included.",
     url: 'https://socialmate.studio/vs/flick',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/flick' },
@@ -21,7 +21,7 @@ const COMPARISON = [
   { feature: 'Discord support',             flick: '❌',                         socialmate: '✅'                       },
   { feature: 'Telegram support',            flick: '❌',                         socialmate: '✅'                       },
   { feature: 'Mastodon support',            flick: '❌',                         socialmate: '✅'                       },
-  { feature: 'AI caption tools',            flick: '✅',                         socialmate: '✅ (12 tools)'            },
+  { feature: 'AI caption tools',            flick: '✅',                         socialmate: '✅ (15+ tools)'            },
   { feature: 'AI credits free tier',        flick: 'None',                       socialmate: '50/month free'            },
   { feature: 'TikTok Script Generator',     flick: '❌',                         socialmate: '✅'                       },
   { feature: 'GIF export for clips',        flick: '❌',                         socialmate: '✅'                       },
@@ -39,7 +39,7 @@ const FAQ = [
   },
   {
     q: 'Does Flick have a free plan?',
-    a: "No. Flick offers a 14-day free trial, after which you must pay £14/month (~$18) or higher. There is no permanent free plan. SocialMate offers a free plan with no expiry — TikTok scheduling included, 50 AI credits per month, link in bio, bulk scheduling, and all 6 live platforms. No credit card required to start.",
+    a: "No. Flick offers a 14-day free trial, after which you must pay £14/month (~$18) or higher. There is no permanent free plan. SocialMate offers a free plan with no expiry — TikTok scheduling included, 50 AI credits per month, link in bio, bulk scheduling, and all 7 live platforms. No credit card required to start.",
   },
   {
     q: 'Is SocialMate better than Flick for TikTok?',
@@ -59,13 +59,13 @@ const faqSchema = {
 
 export default function VsFlickPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">S</div>
+            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
             <span className="font-bold tracking-tight dark:text-white">SocialMate</span>
           </Link>
           <div className="flex items-center gap-3">
@@ -114,14 +114,14 @@ export default function VsFlickPage() {
           </div>
           <div className="bg-black text-white rounded-2xl p-6">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">Free forever. TikTok + 5 more. 12 AI tools.</p>
+            <p className="font-extrabold text-lg mb-2">Free forever. TikTok + 5 more. 15+ AI tools.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ Free plan — permanent, no trial expiry</li>
               <li>✅ TikTok scheduling free (Production API approved)</li>
               <li>✅ Bluesky, Discord, Telegram, Mastodon, X</li>
               <li>✅ TikTok Script Generator included</li>
               <li>✅ Link in bio — free</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
             </ul>
           </div>
         </div>
@@ -129,7 +129,7 @@ export default function VsFlickPage() {
         {/* COMPARISON TABLE */}
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">Feature comparison</h2>
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto"><div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
               <span>Feature</span>
               <span>Flick</span>
@@ -142,6 +142,7 @@ export default function VsFlickPage() {
                 <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">{row.socialmate}</span>
               </div>
             ))}
+          </div>
           </div>
         </div>
 
@@ -197,9 +198,9 @@ export default function VsFlickPage() {
 
         {/* CTA */}
         <div className="bg-black text-white rounded-2xl p-8 text-center">
-          <h2 className="text-2xl font-extrabold tracking-tight mb-3">TikTok free. 6 platforms. 12 AI tools. Forever.</h2>
+          <h2 className="text-2xl font-extrabold tracking-tight mb-3">TikTok free. 7 platforms. 15+ AI tools. Forever.</h2>
           <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is free forever — TikTok Production API included, Bluesky, Discord, Telegram, link in bio, TikTok Script Generator, and 12 AI tools. No trial clock.
+            SocialMate is free forever — TikTok Production API included, Bluesky, Discord, Telegram, link in bio, TikTok Script Generator, and 15+ AI tools. No trial clock.
           </p>
           <Link href="/signup" className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             Create free account →

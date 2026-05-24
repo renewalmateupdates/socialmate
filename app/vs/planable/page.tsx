@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -23,7 +23,7 @@ const COMPARISON = [
   { feature: 'Telegram support',          planable: '❌',                        socialmate: '✅'                      },
   { feature: 'Mastodon support',          planable: '❌',                        socialmate: '✅'                      },
   { feature: 'Bluesky support',           planable: '❌',                        socialmate: '✅'                      },
-  { feature: 'AI writing tools',          planable: 'Basic AI (paid)',           socialmate: '12 tools included'       },
+  { feature: 'AI writing tools',          planable: 'Basic AI (paid)',           socialmate: '15+ tools included'       },
   { feature: 'Approval workflows',        planable: '✅ (paid plans)',           socialmate: 'In development'          },
   { feature: 'Bulk scheduling',           planable: 'Paid plans',               socialmate: '✅ Free'                  },
   { feature: 'RSS import',                planable: '❌',                        socialmate: '✅ Free'                  },
@@ -67,13 +67,13 @@ const faqSchema = {
 
 export default function VsPlanablePage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">S</div>
+            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
             <span className="font-bold tracking-tight dark:text-white">SocialMate</span>
           </Link>
           <div className="flex items-center gap-3">
@@ -127,7 +127,7 @@ export default function VsPlanablePage() {
               <li>✅ Unlimited posts, no lifetime cap</li>
               <li>✅ Flat-rate workspaces ($20/mo for unlimited)</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ RSS import, evergreen, link in bio — all free</li>
               <li>✅ No credit card required</li>
             </ul>
@@ -137,7 +137,7 @@ export default function VsPlanablePage() {
         {/* TABLE */}
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">Feature comparison</h2>
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto"><div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
               <span>Feature</span>
               <span>Planable</span>
@@ -150,6 +150,7 @@ export default function VsPlanablePage() {
                 <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">{row.socialmate}</span>
               </div>
             ))}
+          </div>
           </div>
         </div>
 
@@ -176,7 +177,7 @@ export default function VsPlanablePage() {
               {
                 n: '4',
                 title: 'No RSS import, no evergreen recycling, no link in bio',
-                desc: 'Planable is primarily a scheduling and collaboration tool. SocialMate is a full content operations platform: RSS import, evergreen content recycling, link in bio builder, competitor tracking, hashtag manager, and 12 AI tools — all included free.',
+                desc: 'Planable is primarily a scheduling and collaboration tool. SocialMate is a full content operations platform: RSS import, evergreen content recycling, link in bio builder, competitor tracking, hashtag manager, and 15+ AI tools — all included free.',
               },
             ].map((r) => (
               <div key={r.n} className="flex gap-4 p-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl hover:border-gray-300 dark:hover:border-gray-600 transition-all">
@@ -207,7 +208,7 @@ export default function VsPlanablePage() {
         <div className="bg-black text-white rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">50 posts is not enough. SocialMate is.</h2>
           <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
-            Unlimited posts, 12 AI tools, 16 platforms — free forever. No lifetime caps, no credit card required.
+            Unlimited posts, 15+ AI tools, 7 platforms — free forever. No lifetime caps, no credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             Create free account →

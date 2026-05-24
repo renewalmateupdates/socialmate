@@ -1,10 +1,10 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Brand24 (2026) — Full Comparison',
-  description: 'Brand24 charges $79/month for social monitoring only — no scheduling. SocialMate gives you scheduling across 7 platforms, 12 AI tools, and monitoring features — starting free.',
+  description: 'Brand24 charges $79/month for social monitoring only — no scheduling. SocialMate gives you scheduling across 7 platforms, 15+ AI tools, and monitoring features — starting free.',
   openGraph: {
     title:       'SocialMate vs Brand24 (2026)',
     description: 'Brand24 is $79/month for monitoring only. SocialMate schedules, monitors, and creates content across 7 platforms — free to start.',
@@ -24,7 +24,7 @@ const COMPARISON = [
   { feature: 'TikTok scheduling',             brand24: '❌',                           socialmate: '✅ Free (20 videos/mo)'  },
   { feature: 'LinkedIn scheduling',           brand24: '❌',                           socialmate: '✅ Free'                  },
   { feature: 'Brand mention monitoring',      brand24: '✅ (core feature)',            socialmate: '✅ Competitor tracking'  },
-  { feature: 'AI writing tools',              brand24: '❌',                           socialmate: '12 tools free'           },
+  { feature: 'AI writing tools',              brand24: '❌',                           socialmate: '15+ tools free'           },
   { feature: 'Autonomous content system',     brand24: '❌',                           socialmate: '✅ SOMA — learns your voice' },
   { feature: '8 autonomous AI agents',        brand24: '❌',                           socialmate: '✅ Pro+'                  },
   { feature: 'Content calendar',             brand24: '❌',                           socialmate: '✅ Free'                  },
@@ -70,13 +70,13 @@ const faqSchema = {
 
 export default function VsBrand24Page() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">S</div>
+            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
             <span className="font-bold tracking-tight dark:text-white">SocialMate</span>
           </Link>
           <div className="flex items-center gap-3">
@@ -129,7 +129,7 @@ export default function VsBrand24Page() {
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ Full scheduling to 7 platforms</li>
               <li>✅ Competitor tracking + post alerts</li>
-              <li>✅ 12 AI tools including SM Pulse + SM Radar</li>
+              <li>✅ 15+ AI tools including SM Pulse + SM Radar</li>
               <li>✅ SOMA autonomous content generation</li>
               <li>✅ Pro plan for $5/month total</li>
               <li>✅ No credit card required to start</li>
@@ -140,7 +140,7 @@ export default function VsBrand24Page() {
         {/* TABLE */}
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">Feature comparison</h2>
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto"><div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
               <span>Feature</span>
               <span>Brand24</span>
@@ -153,6 +153,7 @@ export default function VsBrand24Page() {
                 <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">{row.socialmate}</span>
               </div>
             ))}
+          </div>
           </div>
         </div>
 
@@ -169,7 +170,7 @@ export default function VsBrand24Page() {
               {
                 n: '2',
                 title: '$79/month for monitoring vs. $0 for everything',
-                desc: "Brand24's lowest plan is $79/month for just monitoring. SocialMate's free plan includes scheduling to 7 platforms, 12 AI tools, competitor tracking, and a link-in-bio page. Pro is $5/month. You're comparing $79/month for one narrow function against $5/month for a full creator platform.",
+                desc: "Brand24's lowest plan is $79/month for just monitoring. SocialMate's free plan includes scheduling to 7 platforms, 15+ AI tools, competitor tracking, and a link-in-bio page. Pro is $5/month. You're comparing $79/month for one narrow function against $5/month for a full creator platform.",
               },
               {
                 n: '3',

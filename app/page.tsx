@@ -98,7 +98,7 @@ const COMPARISON = [
   },
   { label: 'Starting price',          industry: '$25–$99/month',        socialmate: '$0 — free forever'   },
   { label: 'Free plan',               industry: '❌ Removed or crippled', socialmate: '✅ Genuinely free'  },
-  { label: 'AI writing tools',        industry: '1–2 basic',            socialmate: '12 tools included'   },
+  { label: 'AI writing tools',        industry: '1–2 basic',            socialmate: '15+ tools included'  },
   { label: 'Bulk scheduling',         industry: 'Paid add-on',          socialmate: '✅ Free'              },
   { label: 'Link in bio',             industry: 'Separate paid tool',   socialmate: '✅ Free on all plans' },
   { label: 'Competitor tracking',     industry: 'Paid add-on',          socialmate: '✅ Free'              },
@@ -768,7 +768,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
 
           {/* Top: logo + tagline */}
           <div className="flex items-center gap-2 mb-8">
-            <div className="w-7 h-7 bg-white rounded-lg flex items-center justify-center text-black text-xs font-bold">S</div>
+            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
             <span className="text-sm font-bold text-white">SocialMate</span>
             <span className="text-xs text-gray-500 ml-1">by Gilgamesh Enterprise LLC</span>
           </div>

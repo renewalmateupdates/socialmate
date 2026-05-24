@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -23,7 +23,7 @@ const COMPARISON = [
   { feature: 'Discord scheduling',            competitor: '❌',                            socialmate: '✅ Free'                  },
   { feature: 'Telegram scheduling',           competitor: '❌',                            socialmate: '✅ Free'                  },
   { feature: 'Mastodon scheduling',           competitor: '❌',                            socialmate: '✅ Free'                  },
-  { feature: 'AI writing tools',              competitor: '✅ (SEMrush AI, paid)',         socialmate: '12 tools free'           },
+  { feature: 'AI writing tools',              competitor: '✅ (SEMrush AI, paid)',         socialmate: '15+ tools free'           },
   { feature: 'SEO / keyword tools',           competitor: '✅ Industry-leading',           socialmate: '🔜 Roadmap'              },
   { feature: 'Content calendar',             competitor: '✅ (paid)',                    socialmate: '✅ Free'                  },
   { feature: 'Bulk scheduling',              competitor: '✅ (paid)',                    socialmate: '✅ Free'                  },
@@ -49,7 +49,7 @@ const FAQ = [
   },
   {
     q: 'Can SocialMate compete with SEMrush\'s AI content tools?',
-    a: 'SocialMate\'s 12 AI tools cover social content creation: hook writing, caption generation, content repurposing, hashtag research, thread building, and the SOMA autonomous content system. SEMrush has AI writing tools optimized for SEO content. Different tools for different jobs. For social-first content, SocialMate\'s AI tools are purpose-built and free.',
+    a: 'SocialMate\'s 15+ AI tools cover social content creation: hook writing, caption generation, content repurposing, hashtag research, thread building, and the SOMA autonomous content system. SEMrush has AI writing tools optimized for SEO content. Different tools for different jobs. For social-first content, SocialMate\'s AI tools are purpose-built and free.',
   },
   {
     q: 'What social platforms does SEMrush Social support?',
@@ -69,13 +69,13 @@ const faqSchema = {
 
 export default function VsSEMrushSocialPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">S</div>
+            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
             <span className="font-bold tracking-tight dark:text-white">SocialMate</span>
           </Link>
           <div className="flex items-center gap-3">
@@ -129,7 +129,7 @@ export default function VsSEMrushSocialPage() {
               <li>✅ No SEO subscription required</li>
               <li>✅ TikTok free — SEMrush has none</li>
               <li>✅ X + LinkedIn + Bluesky + Discord + Telegram + Mastodon</li>
-              <li>✅ 12 AI tools free</li>
+              <li>✅ 15+ AI tools free</li>
               <li>✅ Pro $5/month — 96% cheaper than SEMrush entry</li>
               <li>✅ No credit card required to start</li>
             </ul>
@@ -139,7 +139,7 @@ export default function VsSEMrushSocialPage() {
         {/* TABLE */}
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">Feature comparison</h2>
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto"><div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
               <span>Feature</span>
               <span>SEMrush Social</span>
@@ -152,6 +152,7 @@ export default function VsSEMrushSocialPage() {
                 <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">{row.socialmate}</span>
               </div>
             ))}
+          </div>
           </div>
         </div>
 

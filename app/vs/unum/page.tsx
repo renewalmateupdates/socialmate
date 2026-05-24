@@ -1,13 +1,13 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Unum (2026) — Full Comparison',
-  description: "Unum is an Instagram visual planner at $8/mo. SocialMate covers 6 platforms including Discord and Telegram, has 20+ AI tools, SOMA autonomous content, Enki trading bot, and a free plan.",
+  description: "Unum is an Instagram visual planner at $8/mo. SocialMate covers 7 platforms including Discord and Telegram, has 20+ AI tools, SOMA autonomous content, Enki trading bot, and a free plan.",
   openGraph: {
     title:       'SocialMate vs Unum (2026)',
-    description: "Unum: $8/mo, Instagram/TikTok/X only, no SOMA or AI content system. SocialMate: free — 6 platforms, 20+ AI tools, SOMA, Enki, full Creator OS.",
+    description: "Unum: $8/mo, Instagram/TikTok/X only, no SOMA or AI content system. SocialMate: free — 7 platforms, 20+ AI tools, SOMA, Enki, full Creator OS.",
     url:         'https://socialmate.studio/vs/unum',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/unum' },
@@ -90,7 +90,7 @@ export default function VsUnumPage() {
             SocialMate vs Unum
           </h1>
           <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-            Unum is an Instagram visual planner. SocialMate is a full Creator OS — 6 platforms including Discord and Telegram, 20+ AI tools, SOMA autonomous content, and a $0 free plan.
+            Unum is an Instagram visual planner. SocialMate is a full Creator OS — 7 platforms including Discord and Telegram, 20+ AI tools, SOMA autonomous content, and a $0 free plan.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-amber-400 text-black font-bold rounded-2xl hover:bg-amber-300 transition-all text-sm">
@@ -118,9 +118,9 @@ export default function VsUnumPage() {
           </div>
           <div className="bg-amber-400 text-black rounded-2xl p-6">
             <p className="text-xs font-bold text-black/60 uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">6 platforms. Full Creator OS. Cheaper than Unum.</p>
+            <p className="font-extrabold text-lg mb-2">7 platforms. Full Creator OS. Cheaper than Unum.</p>
             <ul className="space-y-1 text-xs text-black/80">
-              <li>✅ Bluesky, Discord, Telegram, Mastodon, X, TikTok</li>
+              <li>✅ Bluesky, Discord, Telegram, Mastodon, X, TikTok, LinkedIn</li>
               <li>✅ 20+ AI writing and content tools</li>
               <li>✅ SOMA: autonomous weekly content generation</li>
               <li>✅ Enki: autonomous trading bot</li>
@@ -133,7 +133,7 @@ export default function VsUnumPage() {
         {/* COMPARISON TABLE */}
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6">Feature comparison</h2>
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto"><div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-400 uppercase tracking-wide">
               <span>Feature</span>
               <span>Unum</span>
@@ -146,6 +146,7 @@ export default function VsUnumPage() {
                 <span className="text-xs font-semibold text-gray-100">{row.socialmate}</span>
               </div>
             ))}
+          </div>
           </div>
         </div>
 
@@ -203,7 +204,7 @@ export default function VsUnumPage() {
         <div className="bg-amber-400 text-black rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">More than an Instagram planner — free to start</h2>
           <p className="text-black/70 text-sm mb-6 max-w-lg mx-auto">
-            SocialMate covers 6 platforms, gives you 20+ AI tools, SOMA autonomous content, and Enki. All starting at $0 — cheaper than Unum Pro.
+            SocialMate covers 7 platforms, gives you 20+ AI tools, SOMA autonomous content, and Enki. All starting at $0 — cheaper than Unum Pro.
           </p>
           <Link href="/signup" className="inline-block bg-black text-white font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm">
             Create free account →

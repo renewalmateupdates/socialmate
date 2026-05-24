@@ -1,13 +1,13 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs OneUp (2026) — Full Comparison',
-  description: 'OneUp charges $18/month for social scheduling with limited AI and no Discord or Telegram. SocialMate gives you 7 platforms, 12 AI tools, and SOMA — starting free.',
+  description: 'OneUp charges $18/month for social scheduling with limited AI and no Discord or Telegram. SocialMate gives you 7 platforms, 15+ AI tools, and SOMA — starting free.',
   openGraph: {
     title:       'SocialMate vs OneUp (2026)',
-    description: 'OneUp is $18/month with limited AI. SocialMate is free — and covers 7 platforms with 12 AI tools built in.',
+    description: 'OneUp is $18/month with limited AI. SocialMate is free — and covers 7 platforms with 15+ AI tools built in.',
     url:         'https://socialmate.studio/vs/oneup',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/oneup' },
@@ -22,7 +22,7 @@ const COMPARISON = [
   { feature: 'Bluesky scheduling',            oneup: '❌',                            socialmate: '✅ Free'                  },
   { feature: 'TikTok scheduling',             oneup: '✅ (paid)',                     socialmate: '✅ Free (20 videos/mo)'  },
   { feature: 'LinkedIn scheduling',           oneup: '✅',                            socialmate: '✅ Free'                  },
-  { feature: 'AI writing tools',              oneup: '❌ No AI tools',               socialmate: '12 tools free'           },
+  { feature: 'AI writing tools',              oneup: '❌ No AI tools',               socialmate: '15+ tools free'           },
   { feature: 'Autonomous content system',     oneup: '❌',                            socialmate: '✅ SOMA — learns your voice' },
   { feature: '8 autonomous AI agents',        oneup: '❌',                            socialmate: '✅ Pro+'                  },
   { feature: 'Recurring posts',               oneup: '✅ (strength)',                 socialmate: '✅ Free'                  },
@@ -47,7 +47,7 @@ const FAQ = [
   },
   {
     q: 'What AI tools does SocialMate include that OneUp lacks?',
-    a: "OneUp has no AI tools. SocialMate's 12 AI tools include caption generation, viral hook writing, content repurposing (6 formats), hashtag research, thread generation, post rewriting, post scoring, brand voice injection, SM Pulse (trend scan), and SM Radar (content intelligence). Plus SOMA — an autonomous content agent that generates a full week of posts from your brand context.",
+    a: "OneUp has no AI tools. SocialMate's 15+ AI tools include caption generation, viral hook writing, content repurposing (6 formats), hashtag research, thread generation, post rewriting, post scoring, brand voice injection, SM Pulse (trend scan), and SM Radar (content intelligence). Plus SOMA — an autonomous content agent that generates a full week of posts from your brand context.",
   },
   {
     q: 'Why does SocialMate include Discord and Telegram but OneUp does not?',
@@ -55,7 +55,7 @@ const FAQ = [
   },
   {
     q: 'Is $18/month for OneUp worth it compared to SocialMate free?',
-    a: "OneUp's $18/month plan gives you unlimited posts, recurring schedules, and CSV bulk upload. SocialMate's free plan gives you the same core scheduling features plus 12 AI tools, Discord/Telegram/Bluesky support, and a full link-in-bio page (SIGIL). For $5/month, SocialMate Pro adds 500 AI credits/month, 5 seats, SOMA access, and 8 autonomous agents. The value comparison strongly favors SocialMate at every price point.",
+    a: "OneUp's $18/month plan gives you unlimited posts, recurring schedules, and CSV bulk upload. SocialMate's free plan gives you the same core scheduling features plus 15+ AI tools, Discord/Telegram/Bluesky support, and a full link-in-bio page (SIGIL). For $5/month, SocialMate Pro adds 500 AI credits/month, 5 seats, SOMA access, and 8 autonomous agents. The value comparison strongly favors SocialMate at every price point.",
   },
 ]
 
@@ -71,13 +71,13 @@ const faqSchema = {
 
 export default function VsOneUpPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">S</div>
+            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
             <span className="font-bold tracking-tight dark:text-white">SocialMate</span>
           </Link>
           <div className="flex items-center gap-3">
@@ -98,7 +98,7 @@ export default function VsOneUpPage() {
             SocialMate vs OneUp
           </h1>
           <p className="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
-            OneUp is $18/month with no AI tools and no Discord or Telegram support. SocialMate is free — with 12 AI tools and all 7 platforms.
+            OneUp is $18/month with no AI tools and no Discord or Telegram support. SocialMate is free — with 15+ AI tools and all 7 platforms.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-black text-white font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -126,10 +126,10 @@ export default function VsOneUpPage() {
           </div>
           <div className="bg-black text-white rounded-2xl p-6">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">7 platforms. 12 AI tools. Free.</p>
+            <p className="font-extrabold text-lg mb-2">7 platforms. 15+ AI tools. Free.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ Discord + Telegram + Bluesky + TikTok + LinkedIn + X + Mastodon</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ SOMA autonomous content agent</li>
               <li>✅ Pro plan for $5/month total</li>
               <li>✅ Evergreen recycling + recurring posts free</li>
@@ -141,7 +141,7 @@ export default function VsOneUpPage() {
         {/* TABLE */}
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">Feature comparison</h2>
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto"><div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
               <span>Feature</span>
               <span>OneUp</span>
@@ -154,6 +154,7 @@ export default function VsOneUpPage() {
                 <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">{row.socialmate}</span>
               </div>
             ))}
+          </div>
           </div>
         </div>
 
@@ -170,7 +171,7 @@ export default function VsOneUpPage() {
               {
                 n: '2',
                 title: 'No free plan vs. genuinely free forever',
-                desc: "OneUp gives you a 7-day trial. After that, you pay $18/month minimum. SocialMate is free forever with no post caps and no time limits. The free plan includes Discord, Telegram, Bluesky, Mastodon, TikTok, and LinkedIn scheduling — plus 12 AI tools and a full link-in-bio page. That's more than OneUp's paid plan for $0.",
+                desc: "OneUp gives you a 7-day trial. After that, you pay $18/month minimum. SocialMate is free forever with no post caps and no time limits. The free plan includes Discord, Telegram, Bluesky, Mastodon, TikTok, and LinkedIn scheduling — plus 15+ AI tools and a full link-in-bio page. That's more than OneUp's paid plan for $0.",
               },
               {
                 n: '3',
@@ -212,7 +213,7 @@ export default function VsOneUpPage() {
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">The obvious choice</p>
           <h2 className="text-3xl font-extrabold mb-4">More platforms. More AI. Free.</h2>
           <p className="text-gray-400 mb-6 max-w-lg mx-auto text-sm">
-            SocialMate has everything OneUp offers — plus 12 AI tools, Discord, Telegram, Bluesky, and SOMA.
+            SocialMate has everything OneUp offers — plus 15+ AI tools, Discord, Telegram, Bluesky, and SOMA.
             Start free. Pro is $5/month.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-white text-black font-bold rounded-2xl hover:opacity-80 transition-all text-sm">

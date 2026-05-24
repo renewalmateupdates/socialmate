@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: 'SocialPilot has no free plan — cheapest option is $25.50/month for 1 user and 10 accounts. SocialMate is free forever with Discord, Bluesky, Telegram, and Mastodon support.',
   openGraph: {
     title:       'SocialMate vs SocialPilot (2026)',
-    description: 'SocialPilot calls itself affordable but has zero free tier. SocialMate is genuinely free — no credit card, unlimited posts, 12 AI tools, and alternative platform support.',
+    description: 'SocialPilot calls itself affordable but has zero free tier. SocialMate is genuinely free — no credit card, unlimited posts, 15+ AI tools, and alternative platform support.',
     url:         'https://socialmate.studio/vs/socialpilot',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/socialpilot' },
@@ -23,7 +23,7 @@ const COMPARISON = [
   { feature: 'Telegram support',        socialpilot: '❌',                     socialmate: '✅'                      },
   { feature: 'Mastodon support',        socialpilot: '❌',                     socialmate: '✅'                      },
   { feature: 'Bluesky support',         socialpilot: '❌',                     socialmate: '✅'                      },
-  { feature: 'AI writing tools',        socialpilot: 'AI Assistant (basic)',  socialmate: '12 tools included'       },
+  { feature: 'AI writing tools',        socialpilot: 'AI Assistant (basic)',  socialmate: '15+ tools included'       },
   { feature: 'AI credits free tier',    socialpilot: 'N/A (no free plan)',    socialmate: '75/month free'            },
   { feature: 'Bulk scheduling',         socialpilot: '✅ Paid plans',          socialmate: '✅ Free'                  },
   { feature: 'Link in bio',             socialpilot: '❌',                     socialmate: '✅ Free'                  },
@@ -66,13 +66,13 @@ const faqSchema = {
 
 export default function VsSocialPilotPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">S</div>
+            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
             <span className="font-bold tracking-tight dark:text-white">SocialMate</span>
           </Link>
           <div className="flex items-center gap-3">
@@ -124,7 +124,7 @@ export default function VsSocialPilotPage() {
             <p className="font-extrabold text-lg mb-2">Truly free. Every platform.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ Free forever — no trial countdown</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
               <li>✅ Bulk scheduling free</li>
               <li>✅ 2 team seats on free plan</li>
@@ -136,7 +136,7 @@ export default function VsSocialPilotPage() {
         {/* COMPARISON TABLE */}
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">Feature comparison</h2>
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto"><div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
               <span>Feature</span>
               <span>SocialPilot</span>
@@ -149,6 +149,7 @@ export default function VsSocialPilotPage() {
                 <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">{row.socialmate}</span>
               </div>
             ))}
+          </div>
           </div>
         </div>
 
@@ -169,7 +170,7 @@ export default function VsSocialPilotPage() {
               },
               {
                 n: '3',
-                title: '12 AI tools vs a basic AI assistant',
+                title: '15+ AI tools vs a basic AI assistant',
                 desc: 'SocialMate includes caption generation, viral hook writing, hashtag research, thread creation, post scoring, content repurposing, trend scanning, and more — all on the free tier. SocialPilot has a basic AI assistant that does not come close to matching that depth.',
               },
               {
@@ -206,7 +207,7 @@ export default function VsSocialPilotPage() {
         <div className="bg-black text-white rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">No free plan? No deal.</h2>
           <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is free forever — bulk scheduling, 12 AI tools, 16 platforms including Discord and Bluesky. No credit card required.
+            SocialMate is free forever — bulk scheduling, 15+ AI tools, 7 platforms including Discord and Bluesky. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             Create free account →

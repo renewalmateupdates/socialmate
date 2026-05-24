@@ -16,7 +16,7 @@ export default function Error({
   return (
     <div className="min-h-screen bg-white flex items-center justify-center p-6">
       <div className="max-w-md w-full text-center">
-        <div className="w-16 h-16 bg-black rounded-2xl flex items-center justify-center text-white text-2xl font-bold mx-auto mb-8">S</div>
+        <img src="/logo.png" alt="SocialMate" className="w-16 h-16 rounded-2xl mx-auto mb-8" />
         <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Something went wrong</p>
         <h1 className="text-3xl font-extrabold tracking-tight mb-4">Unexpected error</h1>
         <p className="text-sm text-gray-500 leading-relaxed mb-8">

@@ -1,13 +1,13 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Emplifi (2026) — Full Comparison',
-  description: 'Emplifi (formerly Socialbakers) charges $200+/month for enterprise social management. SocialMate gives creators and agencies 7 platforms, 12 AI tools, and SOMA — starting free.',
+  description: 'Emplifi (formerly Socialbakers) charges $200+/month for enterprise social management. SocialMate gives creators and agencies 7 platforms, 15+ AI tools, and SOMA — starting free.',
   openGraph: {
     title:       'SocialMate vs Emplifi (2026)',
-    description: 'Emplifi is $200+/month enterprise pricing. SocialMate is free — 7 platforms, 12 AI tools, and autonomous content generation.',
+    description: 'Emplifi is $200+/month enterprise pricing. SocialMate is free — 7 platforms, 15+ AI tools, and autonomous content generation.',
     url:         'https://socialmate.studio/vs/emplifi',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/emplifi' },
@@ -22,7 +22,7 @@ const COMPARISON = [
   { feature: 'Bluesky scheduling',            emplifi: '❌',                           socialmate: '✅ Free'                  },
   { feature: 'TikTok scheduling',             emplifi: '✅ (enterprise)',              socialmate: '✅ Free (20 videos/mo)'  },
   { feature: 'LinkedIn scheduling',           emplifi: '✅ (enterprise)',              socialmate: '✅ Free'                  },
-  { feature: 'AI writing tools',              emplifi: '✅ (enterprise paid)',         socialmate: '12 tools free'           },
+  { feature: 'AI writing tools',              emplifi: '✅ (enterprise paid)',         socialmate: '15+ tools free'           },
   { feature: 'Autonomous content system',     emplifi: '❌',                           socialmate: '✅ SOMA — learns your voice' },
   { feature: '8 autonomous AI agents',        emplifi: '❌',                           socialmate: '✅ Pro+'                  },
   { feature: 'Enterprise analytics',          emplifi: '✅ (deep BI-level)',           socialmate: '✅ Multi-platform (creator-level)' },
@@ -49,7 +49,7 @@ const FAQ = [
   },
   {
     q: 'What AI tools does SocialMate include?',
-    a: "SocialMate's 12 AI tools include caption generation, viral hook writing, content repurposing (6 formats), hashtag research, thread generation, post rewriting, post scoring, brand voice injection, SM Pulse (trend scan), SM Radar (content intelligence), and SOMA — an autonomous content agent that generates a full week of platform-native posts automatically.",
+    a: "SocialMate's 15+ AI tools include caption generation, viral hook writing, content repurposing (6 formats), hashtag research, thread generation, post rewriting, post scoring, brand voice injection, SM Pulse (trend scan), SM Radar (content intelligence), and SOMA — an autonomous content agent that generates a full week of platform-native posts automatically.",
   },
   {
     q: 'Why choose SocialMate over an enterprise tool like Emplifi?',
@@ -69,13 +69,13 @@ const faqSchema = {
 
 export default function VsEmplifPage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">S</div>
+            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
             <span className="font-bold tracking-tight dark:text-white">SocialMate</span>
           </Link>
           <div className="flex items-center gap-3">
@@ -127,7 +127,7 @@ export default function VsEmplifPage() {
             <p className="font-extrabold text-lg mb-2">Built for creators. Self-serve. Free.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ Discord + Telegram + Bluesky + TikTok + LinkedIn + X + Mastodon</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ SOMA autonomous content agent</li>
               <li>✅ Pro plan for $5/month total</li>
               <li>✅ 8 autonomous AI agents</li>
@@ -139,7 +139,7 @@ export default function VsEmplifPage() {
         {/* TABLE */}
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">Feature comparison</h2>
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto"><div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
               <span>Feature</span>
               <span>Emplifi</span>
@@ -152,6 +152,7 @@ export default function VsEmplifPage() {
                 <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">{row.socialmate}</span>
               </div>
             ))}
+          </div>
           </div>
         </div>
 
@@ -211,7 +212,7 @@ export default function VsEmplifPage() {
           <h2 className="text-3xl font-extrabold mb-4">Start scheduling in minutes. Free.</h2>
           <p className="text-gray-400 mb-6 max-w-lg mx-auto text-sm">
             SocialMate is self-serve, free to start, and built for the creator workflow.
-            7 platforms, 12 AI tools, SOMA. No demo required.
+            7 platforms, 15+ AI tools, SOMA. No demo required.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-white text-black font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
             Start free — no credit card →

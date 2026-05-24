@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -23,7 +23,7 @@ const COMPARISON = [
   { feature: 'Discord scheduling',            competitor: '❌',                           socialmate: '✅ Free'                  },
   { feature: 'Telegram scheduling',           competitor: '❌',                           socialmate: '✅ Free'                  },
   { feature: 'Mastodon scheduling',           competitor: '❌',                           socialmate: '✅ Free'                  },
-  { feature: 'AI writing tools (free)',        competitor: '❌ No AI on free plan',       socialmate: '✅ 12 AI tools free'     },
+  { feature: 'AI writing tools (free)',        competitor: '❌ No AI on free plan',       socialmate: '✅ 15+ AI tools free'     },
   { feature: 'Content calendar (free)',        competitor: '❌ Locked behind paid',       socialmate: '✅ Free'                  },
   { feature: 'Analytics (free)',              competitor: '❌ Paid only',                socialmate: '✅ Free'                  },
   { feature: 'RSS / blog import',             competitor: '❌',                           socialmate: '✅ Free'                  },
@@ -69,13 +69,13 @@ const faqSchema = {
 
 export default function VsLaterFreePage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">S</div>
+            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
             <span className="font-bold tracking-tight dark:text-white">SocialMate</span>
           </Link>
           <div className="flex items-center gap-3">
@@ -124,11 +124,11 @@ export default function VsLaterFreePage() {
           </div>
           <div className="bg-black text-white rounded-2xl p-6">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">SocialMate Free Plan</p>
-            <p className="font-extrabold text-lg mb-2">50 credits. 7 platforms. 12 AI tools. All free.</p>
+            <p className="font-extrabold text-lg mb-2">50 credits. 7 platforms. 15+ AI tools. All free.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ 50 credits/month — 10x more than Later</li>
               <li>✅ All 7 platforms on free (TikTok + LinkedIn included)</li>
-              <li>✅ 12 AI tools free — Later has none on free</li>
+              <li>✅ 15+ AI tools free — Later has none on free</li>
               <li>✅ Calendar, analytics, link in bio all free</li>
               <li>✅ No social set restriction</li>
               <li>✅ No credit card required</li>
@@ -139,7 +139,7 @@ export default function VsLaterFreePage() {
         {/* TABLE */}
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">Free plan comparison</h2>
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto"><div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
               <span>Feature</span>
               <span>Later Free</span>
@@ -152,6 +152,7 @@ export default function VsLaterFreePage() {
                 <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">{row.socialmate}</span>
               </div>
             ))}
+          </div>
           </div>
         </div>
 
@@ -173,7 +174,7 @@ export default function VsLaterFreePage() {
               {
                 n: '3',
                 title: 'AI writing tools free vs nothing',
-                desc: 'Later\'s free plan has zero AI tools. SocialMate\'s free plan includes all 12 AI tools: hook writing, caption generation, hashtag suggestions, content repurposing, thread building, and more. Every free user gets AI assistance from day one.',
+                desc: 'Later\'s free plan has zero AI tools. SocialMate\'s free plan includes all 15+ AI tools: hook writing, caption generation, hashtag suggestions, content repurposing, thread building, and more. Every free user gets AI assistance from day one.',
               },
               {
                 n: '4',
@@ -208,7 +209,7 @@ export default function VsLaterFreePage() {
         {/* BOTTOM CTA */}
         <div className="text-center py-12 bg-black text-white rounded-3xl px-8">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3">A free plan that actually works</p>
-          <h2 className="text-3xl font-extrabold mb-4">50 credits. 7 platforms. 12 AI tools. Free.</h2>
+          <h2 className="text-3xl font-extrabold mb-4">50 credits. 7 platforms. 15+ AI tools. Free.</h2>
           <p className="text-gray-400 mb-6 max-w-lg mx-auto text-sm">
             SocialMate&apos;s free plan includes TikTok, LinkedIn, Bluesky, Discord, Telegram, Mastodon, and X.
             When you&apos;re ready to scale, Pro is $5/month — not $18.

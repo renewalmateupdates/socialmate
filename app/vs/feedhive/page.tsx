@@ -1,13 +1,13 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs FeedHive (2026) — Full Comparison',
-  description: 'FeedHive starts at $19/month with limited platform support and no Discord, Telegram, or Bluesky. SocialMate is free forever with 7 platforms, 12 AI tools, and SOMA built in.',
+  description: 'FeedHive starts at $19/month with limited platform support and no Discord, Telegram, or Bluesky. SocialMate is free forever with 7 platforms, 15+ AI tools, and SOMA built in.',
   openGraph: {
     title:       'SocialMate vs FeedHive (2026)',
-    description: 'FeedHive charges $19/month with AI features but misses Discord, Telegram, Bluesky, and TikTok. SocialMate covers 7 platforms with 12 AI tools — starting free.',
+    description: 'FeedHive charges $19/month with AI features but misses Discord, Telegram, Bluesky, and TikTok. SocialMate covers 7 platforms with 15+ AI tools — starting free.',
     url:         'https://socialmate.studio/vs/feedhive',
   },
   alternates: { canonical: 'https://socialmate.studio/vs/feedhive' },
@@ -22,7 +22,7 @@ const COMPARISON = [
   { feature: 'Mastodon support',        feedhive: '❌',                          socialmate: '✅'                       },
   { feature: 'Bluesky support',         feedhive: '❌',                          socialmate: '✅'                       },
   { feature: 'TikTok support',          feedhive: '❌',                          socialmate: '✅'                       },
-  { feature: 'AI writing tools',        feedhive: 'AI Inspiration (limited)',   socialmate: '12 tools included'        },
+  { feature: 'AI writing tools',        feedhive: 'AI Inspiration (limited)',   socialmate: '15+ tools included'        },
   { feature: 'AI credits free tier',    feedhive: 'N/A (no free plan)',         socialmate: '50/month free'            },
   { feature: 'Autonomous AI content',   feedhive: '❌',                          socialmate: '✅ SOMA'                  },
   { feature: 'Bulk scheduling',         feedhive: 'Paid plans',                 socialmate: '✅ Free'                  },
@@ -65,13 +65,13 @@ const faqSchema = {
 
 export default function VsFeedHivePage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">S</div>
+            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
             <span className="font-bold tracking-tight dark:text-white">SocialMate</span>
           </Link>
           <div className="flex items-center gap-3">
@@ -120,10 +120,10 @@ export default function VsFeedHivePage() {
           </div>
           <div className="bg-black text-white rounded-2xl p-6">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">7 platforms. 12 AI tools. $0.</p>
+            <p className="font-extrabold text-lg mb-2">7 platforms. 15+ AI tools. $0.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ Free forever — no trial countdown</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky, TikTok</li>
               <li>✅ SOMA: autonomous AI content OS</li>
               <li>✅ Bulk scheduling free</li>
@@ -135,7 +135,7 @@ export default function VsFeedHivePage() {
         {/* COMPARISON TABLE */}
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">Feature comparison</h2>
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto"><div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
               <span>Feature</span>
               <span>FeedHive</span>
@@ -148,6 +148,7 @@ export default function VsFeedHivePage() {
                 <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">{row.socialmate}</span>
               </div>
             ))}
+          </div>
           </div>
         </div>
 
@@ -174,7 +175,7 @@ export default function VsFeedHivePage() {
               {
                 n: '4',
                 title: 'Flat pricing beats per-feature upgrades',
-                desc: "FeedHive's feature gates push you toward higher tiers as you grow. SocialMate Pro is $5/month — flat — with 12 AI tools, 7 platforms, SOMA, team seats, and client workspaces. The Agency plan is $20/month. What competitors charge $99/month for, we give for $5.",
+                desc: "FeedHive's feature gates push you toward higher tiers as you grow. SocialMate Pro is $5/month — flat — with 15+ AI tools, 7 platforms, SOMA, team seats, and client workspaces. The Agency plan is $20/month. What competitors charge $99/month for, we give for $5.",
               },
             ].map((r) => (
               <div key={r.n} className="flex gap-4 p-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl hover:border-gray-300 dark:hover:border-gray-600 transition-all">
@@ -203,7 +204,7 @@ export default function VsFeedHivePage() {
 
         {/* CTA */}
         <div className="bg-black text-white rounded-2xl p-8 text-center">
-          <h2 className="text-2xl font-extrabold tracking-tight mb-3">7 platforms. 12 AI tools. Free forever.</h2>
+          <h2 className="text-2xl font-extrabold tracking-tight mb-3">7 platforms. 15+ AI tools. Free forever.</h2>
           <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
             SocialMate covers everything FeedHive does — plus Discord, Telegram, Mastodon, Bluesky, TikTok, and SOMA. No credit card required.
           </p>

@@ -1,10 +1,10 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Sendible (2026) — Full Comparison',
-  description: 'Sendible starts at $29/mo for only 1 user and 6 profiles with no free plan. SocialMate is free forever with no profile limits and 12 AI tools included.',
+  description: 'Sendible starts at $29/mo for only 1 user and 6 profiles with no free plan. SocialMate is free forever with no profile limits and 15+ AI tools included.',
   openGraph: {
     title:       'SocialMate vs Sendible (2026)',
     description: 'Sendible charges $29/mo for just 1 user and 6 profiles. SocialMate is free — no credit card, no profile cap, no agency pricing required.',
@@ -23,7 +23,7 @@ const COMPARISON = [
   { feature: 'Telegram support',        sendible: '❌',                        socialmate: '✅'                      },
   { feature: 'Mastodon support',        sendible: '❌',                        socialmate: '✅'                      },
   { feature: 'Bluesky support',         sendible: '❌',                        socialmate: '✅'                      },
-  { feature: 'AI writing tools',        sendible: 'Basic AI assist',          socialmate: '12 tools included'       },
+  { feature: 'AI writing tools',        sendible: 'Basic AI assist',          socialmate: '15+ tools included'       },
   { feature: 'AI credits free tier',    sendible: 'N/A (no free plan)',       socialmate: '75/month free'            },
   { feature: 'Bulk scheduling',         sendible: 'Paid plans',               socialmate: '✅ Free'                  },
   { feature: 'Link in bio',             sendible: '❌',                        socialmate: '✅ Free'                  },
@@ -66,13 +66,13 @@ const faqSchema = {
 
 export default function VsSendiblePage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
       <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-black rounded-lg flex items-center justify-center text-white text-xs font-bold">S</div>
+            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
             <span className="font-bold tracking-tight dark:text-white">SocialMate</span>
           </Link>
           <div className="flex items-center gap-3">
@@ -124,7 +124,7 @@ export default function VsSendiblePage() {
             <p className="font-extrabold text-lg mb-2">Full feature set. Zero dollars.</p>
             <ul className="space-y-1 text-xs text-gray-300">
               <li>✅ Free forever — no trial countdown</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
               <li>✅ Bulk scheduling free</li>
               <li>✅ 2 team seats on free plan</li>
@@ -136,7 +136,7 @@ export default function VsSendiblePage() {
         {/* COMPARISON TABLE */}
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">Feature comparison</h2>
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
+          <div className="overflow-x-auto"><div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
               <span>Feature</span>
               <span>Sendible</span>
@@ -149,6 +149,7 @@ export default function VsSendiblePage() {
                 <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">{row.socialmate}</span>
               </div>
             ))}
+          </div>
           </div>
         </div>
 
@@ -206,7 +207,7 @@ export default function VsSendiblePage() {
         <div className="bg-black text-white rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Why pay $29/mo when $0 works?</h2>
           <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is free forever — bulk scheduling, 12 AI tools, 16 platforms, no credit card required.
+            SocialMate is free forever — bulk scheduling, 15+ AI tools, 7 platforms, no credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             Create free account →

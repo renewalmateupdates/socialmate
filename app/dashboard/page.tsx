@@ -900,7 +900,7 @@ function DashboardInner() {
                     { label: 'Bulk schedule',   sub: 'Schedule many at once',   href: '/bulk-scheduler', icon: '📅', featured: false },
                     { label: 'View calendar',   sub: 'See all scheduled posts', href: '/calendar',       icon: '🗓️', featured: false },
                     { label: 'Use a template',  sub: 'Start from a saved format', href: '/templates',    icon: '📋', featured: false },
-                    { label: 'Explore AI tools',sub: '12 tools available',      href: '/ai-features',    icon: '🤖', featured: false },
+                    { label: 'Explore AI tools',sub: '15+ tools available',     href: '/ai-features',    icon: '🤖', featured: false },
                     { label: 'Connect accounts',sub: 'Add social platforms',    href: '/accounts',       icon: '📱', featured: false },
                   ].map(a => (
                     <Link key={a.href} href={a.href}
