@@ -603,6 +603,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/for/streamers`,        lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/for/agencies`,         lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/for/small-business`,   lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/tiktok`,                lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/for/tiktok-creators`,   lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/for/video-creators`,    lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/for/linkedin-creators`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
