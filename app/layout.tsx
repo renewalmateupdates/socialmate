@@ -7,6 +7,7 @@ import { WorkspaceProvider } from '@/contexts/WorkspaceContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { I18nProvider } from '@/contexts/I18nContext'
 import { Analytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import InstallPrompt from '@/components/InstallPrompt'
 import GoogleAnalytics from '@/components/GoogleAnalytics'
 
@@ -152,6 +153,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <CookieBanner />
         <InstallPrompt />
         <Analytics />
+        <SpeedInsights />
         <GoogleAnalytics />
       </body>
     </html>
