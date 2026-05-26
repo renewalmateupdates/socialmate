@@ -200,7 +200,7 @@ export default function PublicNav() {
           <Link href="/soma"           className={flatLinkCls('/soma')}>SOMA</Link>
           <Link href="/enki"           className={flatLinkCls('/enki')}>Enki</Link>
           <Link href="/monetize"       className={flatLinkCls('/monetize')}>Monetize</Link>
-          <Link href="/tiktok/studio"  className={flatLinkCls('/tiktok/studio')}>TikTok Studio</Link>
+          <Link href="/tiktok"  className={flatLinkCls('/tiktok')}>TikTok Studio</Link>
 
           <span className="w-px h-4 bg-gray-200 dark:bg-gray-700 mx-1.5" />
 
@@ -334,7 +334,7 @@ export default function PublicNav() {
                   { label: '⚡ SOMA',           href: '/soma'          },
                   { label: '◆ Enki',            href: '/enki'          },
                   { label: '💜 Monetize',       href: '/monetize'      },
-                  { label: '🎵 TikTok Studio',  href: '/tiktok/studio' },
+                  { label: '🎵 TikTok Studio',  href: '/tiktok' },
                   { label: '🤖 Android Beta',   href: '/beta'          },
                 ].map(link => (
                   <Link key={link.href} href={link.href}
