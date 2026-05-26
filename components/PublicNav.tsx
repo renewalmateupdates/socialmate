@@ -35,6 +35,14 @@ const AUDIENCES = [
   { label: '📝 Bloggers',            href: '/for/bloggers'           },
 ]
 
+const PRODUCTS = [
+  { label: '🗂️ Studio Stax',   href: '/studio-stax' },
+  { label: '⚡ SOMA',          href: '/soma'         },
+  { label: '◆ Enki',           href: '/enki'         },
+  { label: '💜 Monetize',      href: '/monetize'     },
+  { label: '🎵 TikTok Studio', href: '/tiktok'       },
+]
+
 const RESOURCES = [
   { label: '📰 Blog',               href: '/blog'      },
   { label: "📚 Gilgamesh's Guides", href: '/guides'    },
@@ -44,7 +52,7 @@ const RESOURCES = [
   { label: '📣 Press',             href: '/press'     },
 ]
 
-type DropdownKey = 'audiences' | 'resources'
+type DropdownKey = 'audiences' | 'products' | 'resources'
 
 export default function PublicNav() {
   const pathname = usePathname()
@@ -194,13 +202,15 @@ export default function PublicNav() {
             {activeDropdown === 'audiences' && dropdownPanel(AUDIENCES)}
           </div>
 
-          <span className="w-px h-4 bg-gray-200 dark:bg-gray-700 mx-1.5" />
-
-          <Link href="/studio-stax"    className={flatLinkCls('/studio-stax')}>Studio Stax</Link>
-          <Link href="/soma"           className={flatLinkCls('/soma')}>SOMA</Link>
-          <Link href="/enki"           className={flatLinkCls('/enki')}>Enki</Link>
-          <Link href="/monetize"       className={flatLinkCls('/monetize')}>Monetize</Link>
-          <Link href="/tiktok"  className={flatLinkCls('/tiktok')}>TikTok Studio</Link>
+          {/* Products dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => toggleDropdown('products')}
+              className={dropdownTriggerCls('products', PRODUCTS)}>
+              Products {chevron(activeDropdown === 'products')}
+            </button>
+            {activeDropdown === 'products' && dropdownPanel(PRODUCTS)}
+          </div>
 
           <span className="w-px h-4 bg-gray-200 dark:bg-gray-700 mx-1.5" />
 
@@ -217,16 +227,6 @@ export default function PublicNav() {
 
         {/* Desktop right actions */}
         <div className="hidden lg:flex items-center gap-3 flex-shrink-0">
-          <Link href="/beta" className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-400/10 hover:bg-amber-400/20 border border-amber-400/30 rounded-lg text-xs font-bold text-amber-600 dark:text-amber-400 transition-all">
-            <span className="w-1.5 h-1.5 bg-amber-400 rounded-full animate-pulse flex-shrink-0" />
-            Android Beta
-          </Link>
-          <Link href="/merch" className="text-sm font-semibold text-purple-400 hover:text-purple-300 transition-all">
-            👕 Merch
-          </Link>
-          <Link href="/give" className="text-sm font-semibold text-rose-400 hover:text-rose-300 transition-all">
-            ❤️ Give
-          </Link>
           <Link href="/partners" className="text-sm font-semibold text-amber-500 hover:text-amber-400 transition-all">
             Partners
           </Link>
