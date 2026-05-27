@@ -19,6 +19,7 @@ import {
   useDraggable,
   useDroppable,
 } from '@dnd-kit/core'
+import UnsplashCredit from '@/components/UnsplashCredit'
 
 interface Post {
   id: string
@@ -30,6 +31,7 @@ interface Post {
   platform_post_ids?: Record<string, string> | null
   platform_errors?: Record<string, string> | null
   tags?: string[] | null
+  media_urls?: string[] | null
 }
 
 const PLATFORM_ICONS: Record<string, string> = {
@@ -687,6 +689,7 @@ export default function CalendarPage() {
                           <p className="text-sm text-gray-700 dark:text-gray-200 leading-relaxed">
                             {post.content.slice(0, 80)}{post.content.length > 80 ? '…' : ''}
                           </p>
+                          <UnsplashCredit mediaUrls={post.media_urls} size="md" />
                           {(post.scheduled_at || post.created_at) && (
                             <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">
                               🕐 {formatTime(post.scheduled_at || post.created_at)}
