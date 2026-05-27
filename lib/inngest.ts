@@ -3791,7 +3791,7 @@ export const somaAutopilotRun = inngest.createFunction(
       const { data: projects, error } = await admin
         .from('soma_projects')
         .select(`
-          id, workspace_id, user_id, name, platforms, posts_per_day, content_window_days, mode, runs_this_month, paused,
+          id, workspace_id, user_id, name, platforms, posts_per_day, content_window_days, mode, runs_this_month, paused, include_media,
           workspaces!inner(id, owner_id, soma_credits_monthly, soma_credits_used, soma_credits_purchased, soma_autopilot_enabled)
         `)
         .in('mode', ['autopilot', 'full_send'])
@@ -3973,6 +3973,49 @@ Rules:
           const genResult = await model.generateContent(genPrompt)
           const { posts: generatedPosts = [] } = somaParseGeminiJson(genResult.response.text())
 
+          // Unsplash image helpers (inline, non-fatal) — only used when include_media is true
+          interface AutopilotUnsplashResult { url: string; attribution: string }
+          const autopilotImageCache = new Map<string, AutopilotUnsplashResult>()
+          const autopilotStopWords = new Set(['the','a','an','is','are','was','were','be','been','have','has','had','do','does','did','will','would','could','should','to','of','in','for','on','with','at','by','from','as','it','its','this','that','and','or','but','if','you','we','your','our','my','not','just','so','up','out','down','what','how','when','where','who','why','all','can','get','let','than','then','one','more','some','here','there','i'])
+
+          function autopilotExtractKeyword(content: string): string {
+            const words = content.replace(/[#@\n]/g, ' ').replace(/[^a-zA-Z\s]/g, '').toLowerCase().split(/\s+/)
+            const meaningful = words.filter(w => w.length > 3 && !autopilotStopWords.has(w))
+            return meaningful.slice(0, 3).join(' ') || 'creator social media'
+          }
+
+          async function autopilotFetchUnsplashImage(keyword: string): Promise<AutopilotUnsplashResult | null> {
+            const unsplashKey = process.env.UNSPLASH_ACCESS_KEY
+            if (!unsplashKey) return null
+            if (autopilotImageCache.has(keyword)) return autopilotImageCache.get(keyword) ?? null
+            try {
+              const res = await fetch(
+                `https://api.unsplash.com/photos/random?query=${encodeURIComponent(keyword)}&orientation=landscape&client_id=${unsplashKey}`,
+                { signal: AbortSignal.timeout(5000) }
+              )
+              if (!res.ok) return null
+              const data = await res.json() as {
+                urls?: { regular?: string }
+                user?: { name?: string; links?: { html?: string } }
+                links?: { download_location?: string }
+              }
+              const url = data?.urls?.regular
+              if (!url) return null
+              const photographerName = data?.user?.name ?? 'Unknown'
+              const photographerUrl = data?.user?.links?.html ?? 'https://unsplash.com'
+              const downloadLocation = data?.links?.download_location
+              if (downloadLocation) {
+                fetch(`${downloadLocation}?client_id=${unsplashKey}`, { signal: AbortSignal.timeout(3000) }).catch(() => {})
+              }
+              const result: AutopilotUnsplashResult = {
+                url,
+                attribution: `Photo by ${photographerName} on Unsplash | ${photographerUrl}`,
+              }
+              autopilotImageCache.set(keyword, result)
+              return result
+            } catch { return null }
+          }
+
           // Insert posts
           let postsCreated = 0
           const postStatus = project.mode === 'full_send' ? 'scheduled' : 'scheduled' // both auto modes schedule
@@ -3982,6 +4025,16 @@ Rules:
             const hours = post.slot === 'morning' ? 9 : post.slot === 'afternoon' ? 14 : 19
             base.setHours(hours, 0, 0, 0)
 
+            // Fetch Unsplash image if media toggle is enabled (non-fatal)
+            let mediaUrls: string[] | undefined
+            if ((project as any).include_media) {
+              try {
+                const keyword = autopilotExtractKeyword(post.content ?? '')
+                const imgResult = await autopilotFetchUnsplashImage(keyword)
+                if (imgResult) mediaUrls = [imgResult.url, imgResult.attribution]
+              } catch { /* non-fatal — post still gets created without media */ }
+            }
+
             const { data: insertedPost, error: postErr } = await admin.from('posts').insert({
               user_id: project.user_id,
               workspace_id: project.workspace_id,
@@ -3990,6 +4043,7 @@ Rules:
               status: postStatus,
               scheduled_at: base.toISOString(),
               metadata: { source: 'soma_autopilot', project_id: project.id, ingestion_id: ingestion.id, day: post.day, slot: post.slot, content_type: post.content_type },
+              ...(mediaUrls ? { media_urls: mediaUrls } : {}),
             }).select('id').single()
             if (!postErr && insertedPost) {
               postsCreated++
