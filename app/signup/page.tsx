@@ -24,7 +24,7 @@ function SignupForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [done, setDone] = useState(false)
   const [refCode, setRefCode] = useState('')
-  const [ageConfirmed, setAgeConfirmed] = useState(false)
+  const [tosAccepted, setTosAccepted] = useState(false)
   const [newsletterOptIn, setNewsletterOptIn] = useState(true)
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -37,7 +37,7 @@ function SignupForm() {
   }, [searchParams])
 
   const handleGoogleSignup = async () => {
-    if (!ageConfirmed) { setError('Please confirm you are 13 or older to continue'); return }
+    if (!tosAccepted) { setError('Please accept our Terms of Service and Privacy Policy to continue'); return }
     setGoogleLoading(true)
     setError('')
     const callbackUrl = redirectTo
@@ -73,7 +73,7 @@ function SignupForm() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    if (!ageConfirmed) { setError('Please confirm you are 13 or older to continue'); return }
+    if (!tosAccepted) { setError('Please accept our Terms of Service and Privacy Policy to continue'); return }
     if (!email.trim()) { setError('Enter your email'); return }
     if (!email.includes('@')) { setError('Enter a valid email'); return }
     if (isDisposableEmail(email)) { setError('Disposable email addresses are not allowed. Please use a real email.'); return }
@@ -273,34 +273,37 @@ function SignupForm() {
                 </div>
               )}
 
-              {/* Age Gate */}
+              {/* ToS / Privacy acceptance — required */}
               <button
                 type="button"
-                onClick={() => setAgeConfirmed(a => !a)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all mb-5 ${
-                  ageConfirmed ? 'border-green-500/60 bg-green-950/20' : 'border-gray-700 hover:border-gray-500'
+                onClick={() => setTosAccepted(a => !a)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border-2 text-left transition-all mb-4 ${
+                  tosAccepted ? 'border-amber-500/60 bg-amber-950/20' : 'border-gray-700 hover:border-gray-500'
                 }`}
               >
-                <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 border-2 transition-all ${
-                  ageConfirmed ? 'bg-green-500 border-green-500' : 'border-gray-300 dark:border-gray-600'
+                <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 border-2 transition-all flex-shrink-0 ${
+                  tosAccepted ? 'bg-amber-500 border-amber-500' : 'border-gray-600'
                 }`}>
-                  {ageConfirmed && <span className="text-white text-xs font-bold">✓</span>}
+                  {tosAccepted && <span className="text-white text-xs font-bold">✓</span>}
                 </div>
-                <span className="text-xs font-semibold text-gray-600 dark:text-gray-400">
-                  I confirm I am 13 years of age or older
+                <span className="text-xs text-gray-400 leading-relaxed">
+                  I agree to SocialMate&apos;s{' '}
+                  <Link href="/terms" className="underline text-gray-300 hover:text-white transition-colors" onClick={e => e.stopPropagation()}>Terms of Service</Link>
+                  {' '}and{' '}
+                  <Link href="/privacy" className="underline text-gray-300 hover:text-white transition-colors" onClick={e => e.stopPropagation()}>Privacy Policy</Link>
                 </span>
               </button>
 
-              {/* Newsletter opt-in */}
-              <label className="flex items-start gap-3 cursor-pointer">
+              {/* IRIS Newsletter opt-in — optional */}
+              <label className="flex items-start gap-3 cursor-pointer mb-5">
                 <input
                   type="checkbox"
                   checked={newsletterOptIn}
                   onChange={e => setNewsletterOptIn(e.target.checked)}
-                  className="mt-0.5 rounded border-gray-300 text-black focus:ring-black"
+                  className="mt-0.5 rounded border-gray-600 bg-gray-800 text-amber-500 focus:ring-amber-500"
                 />
-                <span className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                  Send me the monthly SocialMate newsletter — what we shipped, what&apos;s coming, and tips for growing your audience. Unsubscribe anytime.
+                <span className="text-xs text-gray-500 leading-relaxed">
+                  Subscribe to <span className="text-gray-300 font-semibold">IRIS Dispatch</span> — our biweekly build-in-public newsletter. What shipped, what&apos;s next, creator tips. Unsubscribe anytime.
                 </span>
               </label>
 
@@ -424,12 +427,6 @@ function SignupForm() {
             <p className="text-center text-xs text-gray-500 mt-4">
               Already have an account?{' '}
               <Link href="/login" className="font-bold text-amber-400 hover:text-amber-300 transition-colors">Sign in →</Link>
-            </p>
-            <p className="text-center text-xs text-gray-600 mt-2">
-              By signing up you agree to our{' '}
-              <Link href="/terms" className="hover:text-gray-400 transition-colors">Terms</Link>
-              {' '}and{' '}
-              <Link href="/privacy" className="hover:text-gray-400 transition-colors">Privacy Policy</Link>
             </p>
           </div>
         </div>
