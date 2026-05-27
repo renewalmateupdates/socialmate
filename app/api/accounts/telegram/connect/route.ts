@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
     existingQuery = existingQuery.is('workspace_id', null) as typeof existingQuery
   }
 
-  const { data: existing } = await existingQuery.single()
+  const { data: existing } = await existingQuery.maybeSingle()
 
   if (existing) {
     await supabase

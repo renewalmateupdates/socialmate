@@ -18,7 +18,7 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
   title: {
-    default: 'SocialMate — Free Social Media Scheduler — 6 Platforms Live',
+    default: 'SocialMate — Free Social Media Scheduler — 7 Platforms Live',
     template: '%s | SocialMate',
   },
   description: 'Schedule posts to Bluesky, Discord, Telegram, Mastodon, X/Twitter, and TikTok for free. AI content tools, Twitch & YouTube clip scheduling, bulk scheduling, and more. No credit card required.',
@@ -50,13 +50,13 @@ export const metadata: Metadata = {
     url: APP_URL,
     siteName: 'SocialMate',
     title: 'SocialMate — Free Social Media Scheduler',
-    description: 'Schedule posts to Bluesky, Discord, Telegram, and Mastodon for free. AI content tools included. No per-channel fees, no post limits, no credit card required.',
+    description: 'Schedule posts to Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok, and LinkedIn for free. 15+ AI tools included. No credit card required.',
     images: [{ url: '/og-image.png', width: 1270, height: 760, alt: 'SocialMate — Schedule smarter. Start free.' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'SocialMate — Free Social Media Scheduler',
-    description: 'Schedule posts to Bluesky, Discord, Telegram, and Mastodon for free. AI content tools included. No per-channel fees, no post limits, no credit card required.',
+    description: 'Schedule posts to Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok, and LinkedIn for free. 15+ AI tools included. No credit card required.',
     images: ['/og-image.png'],
     creator: '@socialmatehq',
   },
