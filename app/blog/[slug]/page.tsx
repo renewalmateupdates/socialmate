@@ -4460,9 +4460,24 @@ function renderContent(content: string) {
   return elements
 }
 
-// Pre-build all hardcoded slugs at deploy time. DB-only posts use ISR (revalidate above).
+// Pre-build all slugs (hardcoded + DB) at deploy time so every blog post is a static page.
+// Falls back to hardcoded list only if the DB query fails (e.g. during local builds without env vars).
 export async function generateStaticParams() {
-  return Object.keys(POSTS).map((slug) => ({ slug }))
+  const hardcodedSlugs = Object.keys(POSTS)
+
+  let dbSlugs: string[] = []
+  try {
+    const supabase = getSupabaseAdmin()
+    const { data, error } = await supabase.from('blog_posts').select('slug')
+    if (!error && data) {
+      dbSlugs = data.map((row: { slug: string }) => row.slug)
+    }
+  } catch {
+    // If admin client fails (missing env vars in local dev), silently fall back to hardcoded list
+  }
+
+  const allSlugs = Array.from(new Set([...hardcodedSlugs, ...dbSlugs]))
+  return allSlugs.map((slug) => ({ slug }))
 }
 
 export default async function BlogPost({ params }: { params: Promise<{ slug: string }> }) {
