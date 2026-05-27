@@ -624,6 +624,16 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **AI rate limiting** — 10 AI requests per minute per user. Returns 429 with retry-after header. Prevents accidental API abuse.
 - **Blog batch 12** — 55 posts on creator growth, platform strategy, and community. SQL in `supabase/blog_batch_12.sql`.
 
+**May 26, 2026 (PRs #431–#432):**
+- **Bug sweep — `.maybeSingle()` fixes (PR #431)** — Switched `.single()` → `.maybeSingle()` on upsert lookups in Bluesky connect, Telegram connect, and admin coupons routes. `.single()` returns a PGRST116 error for 0 rows; `.maybeSingle()` returns `{ data: null, error: null }` as intended. Metadata updated: title "7 Platforms Live", OG/Twitter descriptions list all 7 platforms.
+- **Performance — initial JS bundle cut ~400KB (PR #432)** — Five targeted fixes to push desktop Real Experience Score from 88 → 90+:
+  - `lib/i18n.ts` + `I18nContext.tsx`: Only English (~62KB) is statically bundled. The 6 other locale files (es/de/fr/pt/ru/zh, ~394KB combined) now load on demand via `dynamic import()` when a user switches language. Previously all 7 locales were eagerly bundled into every page's JS.
+  - `app/layout.tsx` + `components/LazyClientComponents.tsx`: FeedbackWidget, CookieBanner, InstallPrompt moved to a `'use client'` wrapper loaded with `next/dynamic + ssr:false`. `ssr:false` can't live in a Server Component — requires the client wrapper.
+  - `app/page.tsx`: Removed dead server-side `supabase.auth.getUser()` call (result was computed but never used in JSX) and removed `PHLaunchBanner` (launch window was April 1–2, always returns null).
+  - `app/blog/[slug]/page.tsx`: Added `export const revalidate = 3600` (ISR) + `generateStaticParams` for hardcoded slugs — blog posts now pre-build at deploy time instead of hitting Supabase on every request.
+- **`/tiktok` public landing page** — SEO landing page at `/tiktok` targeting "TikTok scheduler" search queries. Added to sitemap.
+- **PublicNav desktop consolidation** — Products dropdown on desktop nav, cleaner right side.
+
 **May 24, 2026 (PRs #426):**
 - **Full public site sweep — dark mode, mobile, accuracy** — Three-phase sweep across every public-facing page. PR #426 on branch `fix/dark-mode-accuracy-sweep`.
   - **Phase 1 (dark mode):** All `for/`, `blog/`, `guides/`, `vs/`, and misc public pages audited for dark mode consistency. `PublicLayout` adds `dark` class forcing all `dark:` variants active regardless of system preference.
@@ -688,6 +698,7 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **SOMA content run** — Submit updated CLAUDE.md when Joshua is ready.
 ## Confirmed Done (stop asking about these)
 
+- ✅ **Performance bundle cut + bug sweep (May 26, PRs #431–#432)** — `.maybeSingle()` on all upsert lookups. i18n lazy loading (−394KB from every page). LazyClientComponents wrapper for `ssr:false` dynamic imports. Dead landing page auth call removed. PHLaunchBanner removed. Blog ISR + generateStaticParams. `/tiktok` landing page + nav consolidation all merged. Never redo these.
 - ✅ **Full site sweep — dark mode + mobile + accuracy (May 24, PR #426)** — All public pages: dark mode consistent, comparison tables mobile-scrollable (overflow-x-auto), all stats updated to 15+ AI tools / 7 platforms, logo.png replaces S lettermark everywhere. All 75 vs/ pages JSX-balanced. Never ask to do this sweep again — it's done.
 - ✅ **IRIS AI auto-generate (May 22, PR #401)** — Admin `/admin/iris` compose page has "Generate draft with AI" button. Gemini 2.5-flash writes subject + full body draft. Never ask to build this again.
 - ✅ **HERMES cold outreach system (May 14–18, PRs #318–#327)** — Full campaign system at `/hermes` (admin-only). Prospect discovery (free: Substack/GitHub/dev.to/Hashnode), Hunter.io email finder, Gemini-powered message generation, Resend email + Bluesky/Mastodon DM send, 4-step sequence, follow-up cron. Never ask to build HERMES again.
