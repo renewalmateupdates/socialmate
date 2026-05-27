@@ -3,6 +3,7 @@ import { useEffect, useState, useRef, KeyboardEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createBrowserClient } from '@supabase/ssr'
+import { useI18n } from '@/contexts/I18nContext'
 
 const supabase = createBrowserClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -167,6 +168,7 @@ function NumberInput({
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function EnkiDoctrinesPage() {
+  const { t: td } = useI18n()
   const router = useRouter()
   const [authed, setAuthed] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -213,7 +215,7 @@ export default function EnkiDoctrinesPage() {
       if (profJson.profile)    setProfile(profJson.profile)
     } catch (e) {
       console.error('Doctrines load error:', e)
-      showToast('Failed to load doctrines', 'error')
+      showToast(td('app_enki_doctrines.failed_load'), 'error')
     } finally {
       setLoading(false)
     }
@@ -265,7 +267,7 @@ export default function EnkiDoctrinesPage() {
     const ticker = raw.trim().toUpperCase().replace(/[^A-Z0-9./-]/g, '')
     if (!ticker) return
     if (form.config.symbols.length >= 10) {
-      showToast('Max 10 symbols per doctrine', 'error')
+      showToast(td('app_enki_doctrines.toast_max_symbols'), 'error')
       return
     }
     if (form.config.symbols.includes(ticker)) return
@@ -304,19 +306,19 @@ export default function EnkiDoctrinesPage() {
     // Add any pending symbol input
     if (symbolInput.trim()) addSymbol(symbolInput)
 
-    if (!form.name.trim()) { showToast('Name is required', 'error'); return }
-    if (form.config.symbols.length === 0) { showToast('Add at least one symbol', 'error'); return }
+    if (!form.name.trim()) { showToast(td('app_enki_doctrines.toast_name_required'), 'error'); return }
+    if (form.config.symbols.length === 0) { showToast(td('app_enki_doctrines.toast_symbol_required'), 'error'); return }
 
     // Warn about active limit only when enabling
     if (form.is_active && !editingId && atActiveLimit) {
-      showToast('You already have 5 active doctrines (the max)', 'error')
+      showToast(td('app_enki_doctrines.toast_max_active'), 'error')
       return
     }
     if (form.is_active && editingId) {
       const currentDoc = doctrines.find((d) => d.id === editingId)
       const wasInactive = currentDoc && !currentDoc.is_active
       if (wasInactive && atActiveLimit) {
-        showToast('You already have 5 active doctrines (the max)', 'error')
+        showToast(td('app_enki_doctrines.toast_max_active'), 'error')
         return
       }
     }
@@ -336,13 +338,13 @@ export default function EnkiDoctrinesPage() {
         : await fetch('/api/enki/doctrines', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
 
       const json = await res.json()
-      if (!res.ok) { showToast(json.error ?? 'Save failed', 'error'); return }
+      if (!res.ok) { showToast(json.error ?? td('app_enki_doctrines.toast_save_failed'), 'error'); return }
 
-      showToast(editingId ? 'Doctrine updated' : 'Doctrine created')
+      showToast(editingId ? td('app_enki_doctrines.toast_updated') : td('app_enki_doctrines.toast_created'))
       closePanel()
       await loadAll()
     } catch {
-      showToast('Network error — try again', 'error')
+      showToast(td('app_enki_doctrines.toast_network_error'), 'error')
     } finally {
       setSaving(false)
     }
@@ -353,7 +355,7 @@ export default function EnkiDoctrinesPage() {
   async function toggleActive(d: Doctrine) {
     const nextActive = !d.is_active
     if (nextActive && activeCount >= 5) {
-      showToast('5-doctrine limit reached. Deactivate one first.', 'error')
+      showToast(td('app_enki_doctrines.toast_limit_reached'), 'error')
       return
     }
     try {
@@ -362,11 +364,11 @@ export default function EnkiDoctrinesPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ is_active: nextActive }),
       })
-      if (!res.ok) { showToast('Update failed', 'error'); return }
+      if (!res.ok) { showToast(td('app_enki_doctrines.toast_update_failed'), 'error'); return }
       setDoctrines((prev) => prev.map((x) => x.id === d.id ? { ...x, is_active: nextActive } : x))
-      showToast(nextActive ? `${d.name} activated` : `${d.name} deactivated`)
+      showToast(nextActive ? td('app_enki_doctrines.toast_activated').replace('{name}', d.name) : td('app_enki_doctrines.toast_deactivated').replace('{name}', d.name))
     } catch {
-      showToast('Network error', 'error')
+      showToast(td('app_enki_doctrines.toast_network_error_short'), 'error')
     }
   }
 
@@ -377,12 +379,12 @@ export default function EnkiDoctrinesPage() {
     setDeleting(true)
     try {
       const res = await fetch(`/api/enki/doctrines/${deleteId}`, { method: 'DELETE' })
-      if (!res.ok) { showToast('Delete failed', 'error'); return }
+      if (!res.ok) { showToast(td('app_enki_doctrines.toast_delete_failed'), 'error'); return }
       setDoctrines((prev) => prev.filter((d) => d.id !== deleteId))
-      showToast('Doctrine deleted')
+      showToast(td('app_enki_doctrines.toast_deleted'))
       setDeleteId(null)
     } catch {
-      showToast('Network error', 'error')
+      showToast(td('app_enki_doctrines.toast_network_error_short'), 'error')
     } finally {
       setDeleting(false)
     }
@@ -395,7 +397,7 @@ export default function EnkiDoctrinesPage() {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">
         <div className="text-center">
           <div className="w-10 h-10 border-2 border-amber-400 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <p className="text-sm text-gray-400">Loading doctrines…</p>
+          <p className="text-sm text-gray-400">{td('app_enki_doctrines.loading')}</p>
         </div>
       </div>
     )
@@ -414,8 +416,8 @@ export default function EnkiDoctrinesPage() {
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-amber-400 rounded-lg flex items-center justify-center text-black font-extrabold text-sm">E</div>
             <div>
-              <p className="text-sm font-extrabold text-white leading-none">Doctrines</p>
-              <p className="text-xs text-gray-500 mt-0.5">Strategy Command</p>
+              <p className="text-sm font-extrabold text-white leading-none">{td('app_enki_doctrines.page_title')}</p>
+              <p className="text-xs text-gray-500 mt-0.5">{td('app_enki_doctrines.page_subtitle')}</p>
             </div>
           </div>
 
@@ -429,13 +431,13 @@ export default function EnkiDoctrinesPage() {
               href="/enki/dashboard"
               className="text-xs font-bold text-gray-400 hover:text-amber-400 transition-colors"
             >
-              ← Dashboard
+              {td('app_enki_doctrines.nav_back')}
             </Link>
             <button
               onClick={openCreate}
               className="text-xs font-bold bg-amber-400 hover:bg-amber-500 text-black px-4 py-2 rounded-xl transition-colors"
             >
-              + New Doctrine
+              {td('app_enki_doctrines.new_doctrine_button')}
             </button>
           </div>
         </div>
@@ -448,13 +450,9 @@ export default function EnkiDoctrinesPage() {
           <div className="flex items-start gap-3">
             <span className="text-amber-500 text-base mt-0.5 flex-shrink-0">◆</span>
             <div>
-              <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">Fortress Guard — Scan Protocol</p>
+              <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-1">{td('app_enki_doctrines.scan_protocol_eyebrow')}</p>
               <p className="text-xs text-gray-400 leading-relaxed">
-                Enki scans every <span className="text-gray-300 font-semibold">15 minutes</span> during market hours{' '}
-                <span className="text-gray-300 font-semibold">(Mon–Fri, 9:30 AM–4:00 PM ET)</span>. Active doctrines run
-                automatically — no action required once armed. Confidence threshold:{' '}
-                <span className="text-gray-300 font-semibold">0.04% price movement</span>. Max{' '}
-                <span className="text-amber-400 font-bold">5 active doctrines</span> per account.{' '}
+                {td('app_enki_doctrines.scan_protocol_body')}{' '}
                 {activeCount > 0 && (
                   <span className="text-amber-400 font-bold">{activeCount}/5 currently active.</span>
                 )}
@@ -468,7 +466,7 @@ export default function EnkiDoctrinesPage() {
           <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800 rounded-2xl p-4 mb-6 flex items-center gap-3">
             <span className="text-amber-600 dark:text-amber-400 text-sm font-bold flex-shrink-0">⚠</span>
             <p className="text-xs text-amber-700 dark:text-amber-400">
-              Maximum active doctrines reached (5/5). Deactivate one before enabling another.
+              {td('app_enki_doctrines.active_limit_warning')}
             </p>
           </div>
         )}
@@ -505,8 +503,8 @@ export default function EnkiDoctrinesPage() {
             {/* Panel header */}
             <div className="bg-black dark:bg-gray-950 border-b border-gray-800 px-6 py-4 flex items-center justify-between flex-shrink-0">
               <div>
-                <p className="text-sm font-extrabold text-white">{editingId ? 'Edit Doctrine' : 'New Doctrine'}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{editingId ? 'Modify strategy parameters' : 'Define a trading strategy'}</p>
+                <p className="text-sm font-extrabold text-white">{editingId ? td('app_enki_doctrines.panel_edit_title') : td('app_enki_doctrines.panel_new_title')}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{editingId ? td('app_enki_doctrines.panel_edit_subtitle') : td('app_enki_doctrines.panel_new_subtitle')}</p>
               </div>
               <button onClick={closePanel} className="text-gray-500 hover:text-white transition-colors text-xl leading-none">×</button>
             </div>
@@ -516,16 +514,16 @@ export default function EnkiDoctrinesPage() {
 
               {/* Name + Description */}
               <section>
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Identity</p>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">{td('app_enki_doctrines.section_identity')}</p>
                 <div className="space-y-4">
                   <div>
                     <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">
-                      Doctrine Name <span className="text-red-500">*</span>
+                      {td('app_enki_doctrines.field_name_label')} <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
                       maxLength={60}
-                      placeholder="e.g. Momentum Assault Alpha"
+                      placeholder={td('app_enki_doctrines.field_name_placeholder')}
                       value={form.name}
                       onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
                       className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition"
@@ -533,10 +531,10 @@ export default function EnkiDoctrinesPage() {
                     <p className="text-[10px] text-gray-400 mt-1 text-right">{form.name.length}/60</p>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Description</label>
+                    <label className="block text-xs font-bold text-gray-500 mb-1.5 uppercase tracking-wider">{td('app_enki_doctrines.field_description_label')}</label>
                     <textarea
                       rows={2}
-                      placeholder="Optional — describe the strategy's intent"
+                      placeholder={td('app_enki_doctrines.field_description_placeholder')}
                       value={form.description}
                       onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
                       className="w-full bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2.5 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent transition resize-none"
@@ -547,11 +545,11 @@ export default function EnkiDoctrinesPage() {
 
               {/* Asset class + Broker */}
               <section>
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Asset Class & Broker</p>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">{td('app_enki_doctrines.section_asset_broker')}</p>
                 <div className="space-y-4">
                   {/* Asset class toggle */}
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">Asset Class</label>
+                    <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">{td('app_enki_doctrines.field_asset_class')}</label>
                     <div className="grid grid-cols-2 gap-2">
                       {(['stocks', 'crypto'] as AssetClass[]).map((ac) => (
                         <button
@@ -573,7 +571,7 @@ export default function EnkiDoctrinesPage() {
                               : 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 hover:border-amber-400/50'
                           }`}
                         >
-                          {ac === 'stocks' ? '📈 Stocks' : '₿ Crypto'}
+                          {ac === 'stocks' ? td('app_enki_doctrines.asset_stocks') : td('app_enki_doctrines.asset_crypto')}
                         </button>
                       ))}
                     </div>
@@ -581,15 +579,15 @@ export default function EnkiDoctrinesPage() {
 
                   {/* Broker radio group */}
                   <div>
-                    <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">Broker</label>
+                    <label className="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-wider">{td('app_enki_doctrines.field_broker')}</label>
                     <div className="space-y-2">
                       {/* Paper */}
                       <BrokerOption
                         selected={form.config.broker === 'paper'}
                         disabled={false}
-                        label="Paper Trading"
-                        sublabel="Simulated — no real money"
-                        badge="Always available"
+                        label={td('app_enki_doctrines.broker_paper_label')}
+                        sublabel={td('app_enki_doctrines.broker_paper_sublabel')}
+                        badge={td('app_enki_doctrines.broker_paper_badge')}
                         badgeColor="gray"
                         onClick={() => setConfig('broker', 'paper')}
                       />
@@ -597,15 +595,15 @@ export default function EnkiDoctrinesPage() {
                       <BrokerOption
                         selected={form.config.broker === 'alpaca'}
                         disabled={!profile?.alpaca_connected || form.config.asset_class === 'crypto'}
-                        label="Alpaca"
+                        label={td('app_enki_doctrines.broker_alpaca_label')}
                         sublabel={
                           form.config.asset_class === 'crypto'
-                            ? 'Stocks only — switch asset class to use Alpaca'
+                            ? td('app_enki_doctrines.broker_alpaca_sublabel_stocks_only')
                             : profile?.alpaca_connected
-                            ? 'Real money — US stocks (Mon–Fri)'
-                            : 'Not connected'
+                            ? td('app_enki_doctrines.broker_alpaca_sublabel_connected')
+                            : td('app_enki_doctrines.broker_alpaca_sublabel_not_connected')
                         }
-                        badge={profile?.alpaca_connected ? 'Connected' : undefined}
+                        badge={profile?.alpaca_connected ? td('app_enki_doctrines.broker_alpaca_badge') : undefined}
                         badgeColor="blue"
                         connectHref={!profile?.alpaca_connected ? '/enki/settings' : undefined}
                         onClick={() => setConfig('broker', 'alpaca')}
@@ -614,15 +612,15 @@ export default function EnkiDoctrinesPage() {
                       <BrokerOption
                         selected={form.config.broker === 'coinbase'}
                         disabled={!profile?.coinbase_connected || form.config.asset_class === 'stocks'}
-                        label="Coinbase"
+                        label={td('app_enki_doctrines.broker_coinbase_label')}
                         sublabel={
                           form.config.asset_class === 'stocks'
-                            ? 'Crypto only — switch asset class to use Coinbase'
+                            ? td('app_enki_doctrines.broker_coinbase_sublabel_crypto_only')
                             : profile?.coinbase_connected
-                            ? 'Real money — Crypto 24/7'
-                            : 'Not connected'
+                            ? td('app_enki_doctrines.broker_coinbase_sublabel_connected')
+                            : td('app_enki_doctrines.broker_coinbase_sublabel_not_connected')
                         }
-                        badge={profile?.coinbase_connected ? 'Connected' : undefined}
+                        badge={profile?.coinbase_connected ? td('app_enki_doctrines.broker_coinbase_badge') : undefined}
                         badgeColor="orange"
                         connectHref={!profile?.coinbase_connected ? '/enki/settings' : undefined}
                         onClick={() => setConfig('broker', 'coinbase')}
@@ -635,7 +633,7 @@ export default function EnkiDoctrinesPage() {
               {/* Symbols */}
               <section>
                 <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">
-                  Target Symbols <span className="text-gray-600">({form.config.symbols.length}/10)</span>
+                  {td('app_enki_doctrines.section_symbols')} <span className="text-gray-600">({form.config.symbols.length}/10)</span>
                 </p>
                 <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 min-h-[52px] flex flex-wrap gap-1.5 items-center focus-within:ring-2 focus-within:ring-amber-400 transition">
                   {form.config.symbols.map((sym) => (
@@ -655,7 +653,7 @@ export default function EnkiDoctrinesPage() {
                   ))}
                   <input
                     type="text"
-                    placeholder={form.config.symbols.length === 0 ? 'AAPL, TSLA, QQQ…' : ''}
+                    placeholder={form.config.symbols.length === 0 ? td('app_enki_doctrines.symbols_placeholder') : ''}
                     value={symbolInput}
                     onChange={(e) => setSymbolInput(e.target.value.toUpperCase())}
                     onKeyDown={onSymbolKeyDown}
@@ -664,15 +662,15 @@ export default function EnkiDoctrinesPage() {
                     disabled={form.config.symbols.length >= 10}
                   />
                 </div>
-                <p className="text-[10px] text-gray-400 mt-1.5">Press Enter or comma to add. Backspace removes last.</p>
+                <p className="text-[10px] text-gray-400 mt-1.5">{td('app_enki_doctrines.symbols_hint')}</p>
               </section>
 
               {/* Risk parameters */}
               <section>
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Risk Parameters</p>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">{td('app_enki_doctrines.section_risk')}</p>
                 <div className="space-y-5">
                   <NumberInput
-                    label="Max Positions"
+                    label={td('app_enki_doctrines.risk_max_positions')}
                     value={form.config.max_positions}
                     min={1}
                     max={20}
@@ -680,28 +678,28 @@ export default function EnkiDoctrinesPage() {
                     onChange={(v) => setConfig('max_positions', v)}
                   />
                   <NumberInput
-                    label="Stop Loss"
+                    label={td('app_enki_doctrines.risk_stop_loss')}
                     value={form.config.stop_loss_pct}
                     min={1}
                     max={50}
                     onChange={(v) => setConfig('stop_loss_pct', v)}
                   />
                   <NumberInput
-                    label="Take Profit"
+                    label={td('app_enki_doctrines.risk_take_profit')}
                     value={form.config.take_profit_pct}
                     min={1}
                     max={200}
                     onChange={(v) => setConfig('take_profit_pct', v)}
                   />
                   <NumberInput
-                    label="Max Daily Drawdown"
+                    label={td('app_enki_doctrines.risk_max_drawdown')}
                     value={form.config.max_daily_drawdown_pct}
                     min={1}
                     max={10}
                     onChange={(v) => setConfig('max_daily_drawdown_pct', v)}
                   />
                   <NumberInput
-                    label="Sector Limit"
+                    label={td('app_enki_doctrines.risk_sector_limit')}
                     value={form.config.sector_limit_pct}
                     min={20}
                     max={80}
@@ -712,50 +710,50 @@ export default function EnkiDoctrinesPage() {
 
               {/* Strategy toggles */}
               <section>
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Strategy Options</p>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">{td('app_enki_doctrines.section_strategy')}</p>
                 <div className="space-y-4">
                   <Toggle
                     checked={form.config.trailing_stop}
                     onChange={(v) => setConfig('trailing_stop', v)}
-                    label="Trailing Stop"
-                    sublabel="Stop-loss follows price upward as it rises"
+                    label={td('app_enki_doctrines.toggle_trailing_stop')}
+                    sublabel={td('app_enki_doctrines.toggle_trailing_stop_sub')}
                   />
                   <Toggle
                     checked={form.config.compound_mode}
                     onChange={(v) => setConfig('compound_mode', v)}
-                    label="Compound Mode"
-                    sublabel="Reinvest profits into subsequent positions"
+                    label={td('app_enki_doctrines.toggle_compound_mode')}
+                    sublabel={td('app_enki_doctrines.toggle_compound_mode_sub')}
                   />
                 </div>
               </section>
 
               {/* Activation */}
               <section>
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Deployment</p>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">{td('app_enki_doctrines.section_deployment')}</p>
                 <div className="space-y-4">
                   <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 space-y-4">
                     <Toggle
                       checked={form.is_active}
                       onChange={(v) => {
                         if (v && !editingId && atActiveLimit) {
-                          showToast('5-doctrine limit reached', 'error')
+                          showToast(td('app_enki_doctrines.toast_limit_short'), 'error')
                           return
                         }
                         setForm((p) => ({ ...p, is_active: v }))
                       }}
-                      label="Activate Doctrine"
+                      label={td('app_enki_doctrines.toggle_activate_label')}
                       sublabel={
                         atActiveLimit && !form.is_active
-                          ? '⚠ 5-doctrine limit reached — deactivate one first'
-                          : 'Guardian picks this up on the next 15-min scan'
+                          ? td('app_enki_doctrines.toggle_activate_sublabel_limit')
+                          : td('app_enki_doctrines.toggle_activate_sublabel_normal')
                       }
                       disabled={atActiveLimit && !form.is_active && !editingId}
                     />
                     <Toggle
                       checked={form.is_public}
                       onChange={() => {}}
-                      label="Share in Marketplace"
-                      sublabel="Coming soon — not available yet"
+                      label={td('app_enki_doctrines.toggle_marketplace_label')}
+                      sublabel={td('app_enki_doctrines.toggle_marketplace_sublabel')}
                       disabled
                     />
                   </div>
@@ -770,14 +768,14 @@ export default function EnkiDoctrinesPage() {
                 onClick={closePanel}
                 className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
-                Cancel
+                {td('app_enki_doctrines.panel_cancel')}
               </button>
               <button
                 onClick={handleSave}
                 disabled={saving}
                 className="flex-1 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-500 disabled:opacity-60 disabled:cursor-not-allowed text-black text-sm font-bold transition-colors"
               >
-                {saving ? 'Saving…' : editingId ? 'Save Changes' : 'Create Doctrine'}
+                {saving ? td('app_enki_doctrines.panel_saving') : editingId ? td('app_enki_doctrines.panel_save') : td('app_enki_doctrines.panel_create')}
               </button>
             </div>
           </div>
@@ -789,23 +787,23 @@ export default function EnkiDoctrinesPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setDeleteId(null)} />
           <div className="relative bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-6 w-full max-w-sm mx-4 shadow-2xl">
-            <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100 mb-2">Delete Doctrine?</p>
+            <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100 mb-2">{td('app_enki_doctrines.delete_modal_title')}</p>
             <p className="text-xs text-gray-400 mb-6">
-              This will permanently remove the doctrine and cannot be undone. The Guardian will stop scanning for it immediately.
+              {td('app_enki_doctrines.delete_modal_body')}
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setDeleteId(null)}
                 className="flex-1 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
               >
-                Cancel
+                {td('app_enki_doctrines.delete_cancel')}
               </button>
               <button
                 onClick={handleDelete}
                 disabled={deleting}
                 className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 disabled:opacity-60 text-white text-sm font-bold transition-colors"
               >
-                {deleting ? 'Deleting…' : 'Delete'}
+                {deleting ? td('app_enki_doctrines.delete_deleting') : td('app_enki_doctrines.delete_confirm')}
               </button>
             </div>
           </div>
@@ -862,6 +860,7 @@ function DoctrineCard({
   onDelete: () => void
   atLimit: boolean
 }) {
+  const { t: td } = useI18n()
   const { config } = doctrine
 
   const brokerBadge: Record<BrokerType, string> = {
@@ -935,7 +934,7 @@ function DoctrineCard({
 
       {/* Symbols */}
       <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-800">
-        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">Symbols</p>
+        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2">{td('app_enki_doctrines.card_symbols_label')}</p>
         <div className="flex flex-wrap gap-1">
           {config.symbols.slice(0, 8).map((sym) => (
             <span key={sym} className="text-[10px] font-bold bg-amber-400/10 border border-amber-400/20 text-amber-500 dark:text-amber-400 px-1.5 py-0.5 rounded">
@@ -951,9 +950,9 @@ function DoctrineCard({
       {/* Risk stats */}
       <div className="px-5 py-3 border-b border-gray-100 dark:border-gray-800">
         <div className="grid grid-cols-3 gap-2">
-          <RiskStat label="Max Pos" value={String(config.max_positions)} />
-          <RiskStat label="Stop Loss" value={`${config.stop_loss_pct}%`} />
-          <RiskStat label="Take Profit" value={`${config.take_profit_pct}%`} />
+          <RiskStat label={td('app_enki_doctrines.card_stat_max_pos')} value={String(config.max_positions)} />
+          <RiskStat label={td('app_enki_doctrines.card_stat_stop_loss')} value={`${config.stop_loss_pct}%`} />
+          <RiskStat label={td('app_enki_doctrines.card_stat_take_profit')} value={`${config.take_profit_pct}%`} />
         </div>
       </div>
 
@@ -963,12 +962,12 @@ function DoctrineCard({
           onClick={onEdit}
           className="flex-1 py-2 rounded-xl border border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
         >
-          Edit
+          {td('app_enki_doctrines.card_edit')}
         </button>
         <button
           onClick={onToggleActive}
           disabled={atLimit}
-          title={atLimit ? '5-doctrine limit reached' : undefined}
+          title={atLimit ? td('app_enki_doctrines.toast_limit_short') : undefined}
           className={`flex-1 py-2 rounded-xl text-xs font-bold transition-colors ${
             doctrine.is_active
               ? 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-600 dark:hover:text-red-400'
@@ -977,7 +976,7 @@ function DoctrineCard({
               : 'bg-amber-400 hover:bg-amber-500 text-black'
           }`}
         >
-          {doctrine.is_active ? 'Deactivate' : 'Activate'}
+          {doctrine.is_active ? td('app_enki_doctrines.card_deactivate') : td('app_enki_doctrines.card_activate')}
         </button>
       </div>
     </div>
@@ -1016,6 +1015,7 @@ function BrokerOption({
   connectHref?: string
   onClick: () => void
 }) {
+  const { t: td } = useI18n()
   const badgeStyles: Record<string, string> = {
     gray:   'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400',
     blue:   'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400',
@@ -1059,7 +1059,7 @@ function BrokerOption({
               <>
                 {' — '}
                 <Link href={connectHref} className="text-amber-400 hover:underline font-semibold" onClick={(e) => e.stopPropagation()}>
-                  Connect in Settings →
+                  {td('app_enki_doctrines.broker_connect_settings')}
                 </Link>
               </>
             )}
@@ -1073,20 +1073,21 @@ function BrokerOption({
 // ─── Empty state ───────────────────────────────────────────────────────────────
 
 function EmptyState({ onNew }: { onNew: () => void }) {
+  const { t: td } = useI18n()
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
       <div className="w-16 h-16 bg-black dark:bg-gray-950 border border-amber-400/30 rounded-2xl flex items-center justify-center mb-5">
         <span className="text-2xl text-amber-400">◆</span>
       </div>
-      <p className="text-lg font-extrabold text-gray-900 dark:text-gray-100 mb-2">No Doctrines Yet</p>
+      <p className="text-lg font-extrabold text-gray-900 dark:text-gray-100 mb-2">{td('app_enki_doctrines.empty_title')}</p>
       <p className="text-sm text-gray-400 max-w-sm mb-6 leading-relaxed">
-        Doctrines are the rules Enki fights by. Define your symbols, risk tolerance, and broker — then arm it and let the Guardian execute.
+        {td('app_enki_doctrines.empty_body')}
       </p>
       <button
         onClick={onNew}
         className="bg-amber-400 hover:bg-amber-500 text-black text-sm font-bold px-6 py-3 rounded-xl transition-colors"
       >
-        Build your first doctrine →
+        {td('app_enki_doctrines.empty_cta')}
       </button>
     </div>
   )

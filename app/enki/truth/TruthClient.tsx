@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
+import { useI18n } from '@/contexts/I18nContext'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -94,13 +95,14 @@ function badge(label: string, color: string) {
 }
 
 function ProgressBar({ value, target }: { value: number; target: number }) {
+  const { t } = useI18n()
   const fill = Math.min(100, (value / target) * 100)
   const done = value >= target
   return (
     <div className="mt-1">
       <div className="flex justify-between text-xs text-zinc-400 mb-1">
         <span>{value} / {target} trades</span>
-        <span>{done ? '✓ Sufficient sample' : `${target - value} more needed`}</span>
+        <span>{done ? t('app_enki_truth.progress_sufficient') : `${target - value} more needed`}</span>
       </div>
       <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
         <div
@@ -115,15 +117,16 @@ function ProgressBar({ value, target }: { value: number; target: number }) {
 // ─── Sanity warnings ──────────────────────────────────────────────────────────
 
 function SanityWarnings({ stats, totalClosed }: { stats: StratStats[]; totalClosed: number }) {
+  const { t } = useI18n()
   const warnings: string[] = []
 
   if (totalClosed < 20) {
-    warnings.push('Not enough data yet — results are not statistically meaningful')
+    warnings.push(t('app_enki_truth.warning_not_enough_data'))
   }
 
   for (const s of stats) {
     if (s.total_trades > 0 && s.total_trades < 15) {
-      const name = s.strategy === 'momentum' ? 'Momentum' : 'Mean Reversion'
+      const name = s.strategy === 'momentum' ? t('app_enki_truth.progress_momentum') : t('app_enki_truth.progress_mean_reversion')
       warnings.push(`Low sample size for ${name} (${s.total_trades} trades)`)
     }
 
@@ -132,7 +135,7 @@ function SanityWarnings({ stats, totalClosed }: { stats: StratStats[]; totalClos
       const highWR   = s.high_conf_wins / s.high_conf_trades
       const mediumWR = s.medium_conf_wins / s.medium_conf_trades
       if (Math.abs(highWR - mediumWR) < 0.05) {
-        const name = s.strategy === 'momentum' ? 'Momentum' : 'Mean Reversion'
+        const name = s.strategy === 'momentum' ? t('app_enki_truth.progress_momentum') : t('app_enki_truth.progress_mean_reversion')
         warnings.push(`${name}: Confidence scoring not yet validated — HIGH and MEDIUM win rates are similar`)
       }
     }
@@ -155,7 +158,8 @@ function SanityWarnings({ stats, totalClosed }: { stats: StratStats[]; totalClos
 // ─── Strategy card ────────────────────────────────────────────────────────────
 
 function StratCard({ s, progress }: { s: StratStats; progress: number }) {
-  const label      = s.strategy === 'momentum' ? 'Momentum' : 'Mean Reversion'
+  const { t } = useI18n()
+  const label      = s.strategy === 'momentum' ? t('app_enki_truth.progress_momentum') : t('app_enki_truth.progress_mean_reversion')
   const hrWin      = s.high_conf_trades ? ((s.high_conf_wins / s.high_conf_trades) * 100).toFixed(1) : '—'
   const mrWin      = s.medium_conf_trades ? ((s.medium_conf_wins / s.medium_conf_trades) * 100).toFixed(1) : '—'
   const cgWin      = s.congress_trades ? ((s.congress_wins / s.congress_trades) * 100).toFixed(1) : '—'
@@ -167,55 +171,55 @@ function StratCard({ s, progress }: { s: StratStats; progress: number }) {
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-base font-bold text-white">{label}</h3>
         {hasSample
-          ? badge('Sample ready', 'bg-emerald-900/60 text-emerald-400')
+          ? badge(t('app_enki_truth.badge_sample_ready'), 'bg-emerald-900/60 text-emerald-400')
           : lowSample
-            ? badge('Low sample', 'bg-amber-900/60 text-amber-400')
-            : badge('Collecting data', 'bg-violet-900/60 text-violet-400')}
+            ? badge(t('app_enki_truth.badge_low_sample'), 'bg-amber-900/60 text-amber-400')
+            : badge(t('app_enki_truth.badge_collecting'), 'bg-violet-900/60 text-violet-400')}
       </div>
 
       <div className="grid grid-cols-3 gap-3 mb-4 text-center">
         <div>
           <div className="text-xl font-bold text-white">{(s.win_rate * 100).toFixed(1)}%</div>
-          <div className="text-xs text-zinc-500">Win Rate</div>
+          <div className="text-xs text-zinc-500">{t('app_enki_truth.stat_win_rate')}</div>
         </div>
         <div>
           <div className={`text-xl font-bold ${s.profit_factor && s.profit_factor >= 1.5 ? 'text-emerald-400' : 'text-red-400'}`}>
             {s.profit_factor ? s.profit_factor.toFixed(2) : '—'}
           </div>
-          <div className="text-xs text-zinc-500">Profit Factor</div>
+          <div className="text-xs text-zinc-500">{t('app_enki_truth.stat_profit_factor')}</div>
         </div>
         <div>
           <div className={`text-xl font-bold ${s.total_pnl_pct >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
             {pct(s.total_pnl_pct)}
           </div>
-          <div className="text-xs text-zinc-500">Total P&amp;L</div>
+          <div className="text-xs text-zinc-500">{t('app_enki_truth.stat_total_pnl')}</div>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-2 text-xs text-zinc-400 mb-4">
-        <div>Avg Win: <span className="text-emerald-400 font-semibold">{pct(s.avg_win_pct)}</span></div>
-        <div>Avg Loss: <span className="text-red-400 font-semibold">{pct(s.avg_loss_pct)}</span></div>
-        <div>Trades: <span className="text-white font-semibold">{s.total_trades}</span></div>
-        <div>Max Consec. L: <span className="text-red-400 font-semibold">{s.max_consecutive_losses}</span></div>
+        <div>{t('app_enki_truth.stat_avg_win')} <span className="text-emerald-400 font-semibold">{pct(s.avg_win_pct)}</span></div>
+        <div>{t('app_enki_truth.stat_avg_loss')} <span className="text-red-400 font-semibold">{pct(s.avg_loss_pct)}</span></div>
+        <div>{t('app_enki_truth.stat_trades')} <span className="text-white font-semibold">{s.total_trades}</span></div>
+        <div>{t('app_enki_truth.stat_max_consec_loss')} <span className="text-red-400 font-semibold">{s.max_consecutive_losses}</span></div>
       </div>
 
       <div className="border-t border-zinc-800 pt-3 space-y-1 text-xs text-zinc-400">
         <div className="flex justify-between">
-          <span>HIGH conf ({s.high_conf_trades} trades)</span>
-          <span className="font-semibold text-white">{hrWin}% WR</span>
+          <span>{t('app_enki_truth.conf_high')} ({s.high_conf_trades} trades)</span>
+          <span className="font-semibold text-white">{hrWin}{t('app_enki_truth.conf_wr_suffix')}</span>
         </div>
         <div className="flex justify-between">
-          <span>MEDIUM conf ({s.medium_conf_trades} trades)</span>
-          <span className="font-semibold text-white">{mrWin}% WR</span>
+          <span>{t('app_enki_truth.conf_medium')} ({s.medium_conf_trades} trades)</span>
+          <span className="font-semibold text-white">{mrWin}{t('app_enki_truth.conf_wr_suffix')}</span>
         </div>
         <div className="flex justify-between">
-          <span>Congress boost ({s.congress_trades} trades)</span>
-          <span className="font-semibold text-white">{cgWin}% WR</span>
+          <span>{t('app_enki_truth.conf_congress')} ({s.congress_trades} trades)</span>
+          <span className="font-semibold text-white">{cgWin}{t('app_enki_truth.conf_wr_suffix')}</span>
         </div>
       </div>
 
       <div className="mt-4">
-        <div className="text-xs text-zinc-500 mb-1">Experiment progress (50 trades needed)</div>
+        <div className="text-xs text-zinc-500 mb-1">{t('app_enki_truth.experiment_progress_label')}</div>
         <ProgressBar value={progress} target={50} />
       </div>
     </div>
@@ -225,10 +229,11 @@ function StratCard({ s, progress }: { s: StratStats; progress: number }) {
 // ─── Equity curve with SPY overlay ───────────────────────────────────────────
 
 function EquityCurve({ points, spyCurve }: { points: EquityPoint[]; spyCurve: SpyCurvePoint[] }) {
+  const { t } = useI18n()
   if (points.length < 2) {
     return (
       <div className="flex items-center justify-center h-32 text-zinc-600 text-sm">
-        Not enough trades yet
+        {t('app_enki_truth.equity_not_enough')}
       </div>
     )
   }
@@ -282,11 +287,11 @@ function EquityCurve({ points, spyCurve }: { points: EquityPoint[]; spyCurve: Sp
         <div className="flex items-center gap-4 mt-2 text-xs text-zinc-500">
           <span className="flex items-center gap-1.5">
             <span className="inline-block w-5 h-0.5 bg-emerald-400"></span>
-            Truth Mode
+            {t('app_enki_truth.equity_legend_truth')}
           </span>
           <span className="flex items-center gap-1.5">
             <span className="inline-block w-5 h-0.5 bg-indigo-400 opacity-60" style={{ background: 'repeating-linear-gradient(to right, #6366f1 0, #6366f1 4px, transparent 4px, transparent 7px)' }}></span>
-            SPY (buy &amp; hold)
+            {t('app_enki_truth.equity_legend_spy')}
           </span>
         </div>
       )}
@@ -318,12 +323,13 @@ function exportCSV(closed: ClosedTrade[]) {
 // ─── Truth Mode OFF hero ──────────────────────────────────────────────────────
 
 function TruthModeOffHero({ onStart, starting }: { onStart: () => void; starting: boolean }) {
+  const { t } = useI18n()
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
       {/* Page header */}
       <div className="flex items-center gap-3 mb-2">
-        <h1 className="text-2xl font-bold text-white">Truth Mode</h1>
-        {badge('Parallel Experiment', 'bg-violet-900/60 text-violet-300')}
+        <h1 className="text-2xl font-bold text-white">{t('app_enki_truth.title')}</h1>
+        {badge(t('app_enki_truth.badge_parallel'), 'bg-violet-900/60 text-violet-300')}
       </div>
 
       {/* Hero CTA */}
@@ -333,28 +339,26 @@ function TruthModeOffHero({ onStart, starting }: { onStart: () => void; starting
         </div>
 
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">Truth Mode is not running</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">{t('app_enki_truth.off_heading')}</h2>
           <p className="text-sm text-zinc-400 max-w-xl mx-auto leading-relaxed">
-            Truth Mode runs a simplified two-strategy trading system in parallel to validate real performance.
-            Results are recorded separately and do not affect your main portfolio.
-            Parameters lock once started to preserve data integrity.
+            {t('app_enki_truth.off_description')}
           </p>
         </div>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 text-xs text-zinc-500">
           <span className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-violet-500 shrink-0" />
-            Momentum strategy
+            {t('app_enki_truth.off_bullet_momentum')}
           </span>
           <span className="hidden sm:block text-zinc-700">·</span>
           <span className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-violet-500 shrink-0" />
-            Mean Reversion strategy
+            {t('app_enki_truth.off_bullet_mean_reversion')}
           </span>
           <span className="hidden sm:block text-zinc-700">·</span>
           <span className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
-            50 trades minimum for valid results
+            {t('app_enki_truth.off_bullet_minimum')}
           </span>
         </div>
 
@@ -366,24 +370,24 @@ function TruthModeOffHero({ onStart, starting }: { onStart: () => void; starting
           {starting ? (
             <>
               <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              Starting…
+              {t('app_enki_truth.starting_button')}
             </>
           ) : (
-            'Start Truth Mode'
+            t('app_enki_truth.start_button')
           )}
         </button>
 
         <p className="text-xs text-zinc-600 max-w-sm mx-auto">
-          The scan runs every 15 minutes. Your Risk Profile and Position Size settings will be locked while Truth Mode is active.
+          {t('app_enki_truth.off_scan_note')}
         </p>
       </div>
 
       {/* Rules reminder */}
       <div className="bg-amber-950/40 border border-amber-800/50 rounded-lg px-4 py-3 text-xs text-amber-300 space-y-1">
-        <div className="font-bold text-amber-200 mb-1">NON-NEGOTIABLE EXPERIMENT RULES</div>
-        <div>• No parameter changes while data is collecting — if you change anything, reset the dataset</div>
-        <div>• No new signals added mid-experiment</div>
-        <div>• Minimum 50 trades per strategy before drawing any conclusions</div>
+        <div className="font-bold text-amber-200 mb-1">{t('app_enki_truth.rules_title')}</div>
+        <div>{t('app_enki_truth.rule_1')}</div>
+        <div>{t('app_enki_truth.rule_2')}</div>
+        <div>{t('app_enki_truth.rule_3')}</div>
       </div>
     </div>
   )
@@ -392,6 +396,7 @@ function TruthModeOffHero({ onStart, starting }: { onStart: () => void; starting
 // ─── Truth Mode ON status bar ─────────────────────────────────────────────────
 
 function TruthModeRunningBar({ onStop, stopping }: { onStop: () => void; stopping: boolean }) {
+  const { t } = useI18n()
   return (
     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-emerald-950/40 border border-emerald-800/50 rounded-xl px-4 py-3">
       <div className="flex items-center gap-3">
@@ -401,16 +406,16 @@ function TruthModeRunningBar({ onStop, stopping }: { onStop: () => void; stoppin
           <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500" />
         </span>
         <span className="text-sm font-semibold text-emerald-300">
-          Truth Mode Running
+          {t('app_enki_truth.running_label')}
         </span>
-        <span className="text-xs text-emerald-600 hidden sm:inline">— scanning every 15 minutes</span>
+        <span className="text-xs text-emerald-600 hidden sm:inline">{t('app_enki_truth.running_scan_note')}</span>
       </div>
       <button
         onClick={onStop}
         disabled={stopping}
         className="shrink-0 px-4 py-2 text-xs font-semibold text-zinc-300 border border-zinc-600 hover:border-zinc-500 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors min-h-[44px]"
       >
-        {stopping ? 'Stopping…' : 'Stop Truth Mode'}
+        {stopping ? t('app_enki_truth.stopping_button') : t('app_enki_truth.stop_button')}
       </button>
     </div>
   )
@@ -419,6 +424,7 @@ function TruthModeRunningBar({ onStop, stopping }: { onStop: () => void; stoppin
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function TruthClient() {
+  const { t } = useI18n()
   const [data, setData]             = useState<TruthData | null>(null)
   const [error, setError]           = useState<string | null>(null)
   const [loading, setLoading]       = useState(true)
@@ -466,7 +472,7 @@ export default function TruthClient() {
   }
 
   async function handleStop() {
-    if (!confirm('Stopping Truth Mode will reset your experiment. All recorded trades will be cleared and you will start fresh next time. Are you sure?')) {
+    if (!confirm(t('app_enki_truth.stop_confirm'))) {
       return
     }
     setToggling(true)
@@ -486,7 +492,7 @@ export default function TruthClient() {
 
   if (loading) return (
     <div className="flex items-center justify-center min-h-[60vh] text-zinc-500 text-sm">
-      Loading…
+      {t('app_enki_truth.loading')}
     </div>
   )
   if (error) return (
@@ -514,12 +520,11 @@ export default function TruthClient() {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <h1 className="text-2xl font-bold text-white">Truth Mode</h1>
-            {badge('Parallel Experiment', 'bg-violet-900/60 text-violet-300')}
+            <h1 className="text-2xl font-bold text-white">{t('app_enki_truth.title')}</h1>
+            {badge(t('app_enki_truth.badge_parallel'), 'bg-violet-900/60 text-violet-300')}
           </div>
           <p className="text-sm text-zinc-400 max-w-2xl">
-            Two strategies only. No fusion, no magic numbers. Goal: determine whether any real edge exists
-            before adding complexity. Conclusions require ≥50 trades per strategy.
+            {t('app_enki_truth.description')}
           </p>
         </div>
         {closed.length > 0 && (
@@ -527,7 +532,7 @@ export default function TruthClient() {
             onClick={() => exportCSV(closed)}
             className="shrink-0 ml-4 px-3 py-2 text-xs font-semibold text-zinc-300 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 rounded-lg transition-colors"
           >
-            Export CSV
+            {t('app_enki_truth.export_csv')}
           </button>
         )}
       </div>
@@ -537,10 +542,10 @@ export default function TruthClient() {
 
       {/* Rules reminder */}
       <div className="bg-amber-950/40 border border-amber-800/50 rounded-lg px-4 py-3 text-xs text-amber-300 space-y-1">
-        <div className="font-bold text-amber-200 mb-1">NON-NEGOTIABLE EXPERIMENT RULES</div>
-        <div>• No parameter changes while data is collecting — if you change anything, reset the dataset</div>
-        <div>• No new signals added mid-experiment</div>
-        <div>• Minimum 50 trades per strategy before drawing any conclusions</div>
+        <div className="font-bold text-amber-200 mb-1">{t('app_enki_truth.rules_title')}</div>
+        <div>{t('app_enki_truth.rule_1')}</div>
+        <div>{t('app_enki_truth.rule_2')}</div>
+        <div>{t('app_enki_truth.rule_3')}</div>
       </div>
 
       {/* Sanity warnings */}
@@ -550,36 +555,36 @@ export default function TruthClient() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 text-center">
           <div className="text-2xl font-bold text-white">{totalClosed}</div>
-          <div className="text-xs text-zinc-500 mt-1">Closed Trades</div>
+          <div className="text-xs text-zinc-500 mt-1">{t('app_enki_truth.summary_closed_trades')}</div>
         </div>
         <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 text-center">
           <div className={`text-2xl font-bold ${totalCumPnl >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
             {pct(totalCumPnl)}
           </div>
-          <div className="text-xs text-zinc-500 mt-1">Cumulative P&amp;L</div>
+          <div className="text-xs text-zinc-500 mt-1">{t('app_enki_truth.summary_cumulative_pnl')}</div>
         </div>
         <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 text-center">
           <div className={`text-2xl font-bold ${spyReturn3mo == null ? 'text-zinc-400' : beatsSpy ? 'text-emerald-400' : 'text-red-400'}`}>
             {spyReturn3mo != null ? pct(spyReturn3mo) : '—'}
           </div>
-          <div className="text-xs text-zinc-500 mt-1">SPY 3-mo (baseline)</div>
+          <div className="text-xs text-zinc-500 mt-1">{t('app_enki_truth.summary_spy_baseline')}</div>
         </div>
         <div className="bg-zinc-900 border border-zinc-800 rounded-lg p-4 text-center">
           <div className="text-2xl font-bold text-white">{open.length}</div>
-          <div className="text-xs text-zinc-500 mt-1">Open Positions</div>
+          <div className="text-xs text-zinc-500 mt-1">{t('app_enki_truth.summary_open_positions')}</div>
         </div>
       </div>
 
       {/* Progress bars */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-        <h2 className="text-sm font-semibold text-white mb-4">Experiment Progress</h2>
+        <h2 className="text-sm font-semibold text-white mb-4">{t('app_enki_truth.experiment_progress_title')}</h2>
         <div className="space-y-4">
           <div>
-            <div className="text-xs text-zinc-400 mb-1">Momentum</div>
+            <div className="text-xs text-zinc-400 mb-1">{t('app_enki_truth.progress_momentum')}</div>
             <ProgressBar value={progress.momentum} target={50} />
           </div>
           <div>
-            <div className="text-xs text-zinc-400 mb-1">Mean Reversion</div>
+            <div className="text-xs text-zinc-400 mb-1">{t('app_enki_truth.progress_mean_reversion')}</div>
             <ProgressBar value={progress.mean_reversion} target={50} />
           </div>
         </div>
@@ -588,10 +593,10 @@ export default function TruthClient() {
       {/* Equity curve */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-white">Equity Curve vs SPY</h2>
+          <h2 className="text-sm font-semibold text-white">{t('app_enki_truth.equity_curve_title')}</h2>
           {spyReturn3mo != null && (
             <span className={`text-xs font-semibold ${beatsSpy ? 'text-emerald-400' : 'text-red-400'}`}>
-              {beatsSpy ? '▲ Beating SPY' : '▼ Below SPY'}
+              {beatsSpy ? t('app_enki_truth.equity_beating_spy') : t('app_enki_truth.equity_below_spy')}
             </span>
           )}
         </div>
@@ -605,7 +610,7 @@ export default function TruthClient() {
           if (!s) {
             return (
               <div key={strat} className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 text-zinc-500 text-sm flex items-center justify-center min-h-[200px]">
-                {strat === 'momentum' ? 'Momentum' : 'Mean Reversion'} — no data yet
+                {strat === 'momentum' ? t('app_enki_truth.progress_momentum') : t('app_enki_truth.progress_mean_reversion')} — {t('app_enki_truth.no_data_yet').replace('{strategy} — ', '')}
               </div>
             )
           }
@@ -622,19 +627,19 @@ export default function TruthClient() {
       {/* Open positions */}
       {open.length > 0 && (
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-          <h2 className="text-sm font-semibold text-white mb-3">Open Positions ({open.length})</h2>
+          <h2 className="text-sm font-semibold text-white mb-3">{t('app_enki_truth.open_positions_title').replace('{count}', String(open.length))}</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-zinc-300">
               <thead>
                 <tr className="text-zinc-500 border-b border-zinc-800">
-                  <th className="text-left pb-2 pr-3">Symbol</th>
-                  <th className="text-left pb-2 pr-3">Strategy</th>
-                  <th className="text-left pb-2 pr-3">Conf</th>
-                  <th className="text-right pb-2 pr-3">Entry</th>
-                  <th className="text-right pb-2 pr-3">Stop</th>
-                  <th className="text-right pb-2 pr-3">TP1</th>
-                  <th className="text-right pb-2 pr-3">TP2</th>
-                  <th className="text-left pb-2">Flags</th>
+                  <th className="text-left pb-2 pr-3">{t('app_enki_truth.col_symbol')}</th>
+                  <th className="text-left pb-2 pr-3">{t('app_enki_truth.col_strategy')}</th>
+                  <th className="text-left pb-2 pr-3">{t('app_enki_truth.col_conf')}</th>
+                  <th className="text-right pb-2 pr-3">{t('app_enki_truth.col_entry')}</th>
+                  <th className="text-right pb-2 pr-3">{t('app_enki_truth.col_stop')}</th>
+                  <th className="text-right pb-2 pr-3">{t('app_enki_truth.col_tp1')}</th>
+                  <th className="text-right pb-2 pr-3">{t('app_enki_truth.col_tp2')}</th>
+                  <th className="text-left pb-2">{t('app_enki_truth.col_flags')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -656,9 +661,9 @@ export default function TruthClient() {
                       ${p.tp2_price.toFixed(2)}
                     </td>
                     <td className="py-2 flex gap-1 flex-wrap">
-                      {p.tp1_hit && badge('TP1 ✓', 'bg-emerald-900/50 text-emerald-400')}
-                      {p.tp2_hit && badge('TP2 ✓', 'bg-emerald-900/50 text-emerald-400')}
-                      {p.congressional_boost && badge('Congress', 'bg-blue-900/50 text-blue-400')}
+                      {p.tp1_hit && badge(t('app_enki_truth.flag_tp1'), 'bg-emerald-900/50 text-emerald-400')}
+                      {p.tp2_hit && badge(t('app_enki_truth.flag_tp2'), 'bg-emerald-900/50 text-emerald-400')}
+                      {p.congressional_boost && badge(t('app_enki_truth.flag_congress'), 'bg-blue-900/50 text-blue-400')}
                     </td>
                   </tr>
                 ))}
@@ -672,19 +677,19 @@ export default function TruthClient() {
       {closed.length > 0 && (
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-5">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-white">Closed Trades ({closed.length})</h2>
+            <h2 className="text-sm font-semibold text-white">{t('app_enki_truth.closed_trades_title').replace('{count}', String(closed.length))}</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-zinc-300">
               <thead>
                 <tr className="text-zinc-500 border-b border-zinc-800">
-                  <th className="text-left pb-2 pr-3">Symbol</th>
-                  <th className="text-left pb-2 pr-3">Strategy</th>
-                  <th className="text-left pb-2 pr-3">Conf</th>
-                  <th className="text-right pb-2 pr-3">P&amp;L %</th>
-                  <th className="text-right pb-2 pr-3">P&amp;L $</th>
-                  <th className="text-left pb-2 pr-3">Exit Reason</th>
-                  <th className="text-left pb-2">Date</th>
+                  <th className="text-left pb-2 pr-3">{t('app_enki_truth.col_symbol')}</th>
+                  <th className="text-left pb-2 pr-3">{t('app_enki_truth.col_strategy')}</th>
+                  <th className="text-left pb-2 pr-3">{t('app_enki_truth.col_conf')}</th>
+                  <th className="text-right pb-2 pr-3">{t('app_enki_truth.col_pnl_pct')}</th>
+                  <th className="text-right pb-2 pr-3">{t('app_enki_truth.col_pnl_dollar')}</th>
+                  <th className="text-left pb-2 pr-3">{t('app_enki_truth.col_exit_reason')}</th>
+                  <th className="text-left pb-2">{t('app_enki_truth.col_date')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -719,8 +724,8 @@ export default function TruthClient() {
       {closed.length === 0 && open.length === 0 && (
         <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-10 text-center text-zinc-500">
           <div className="text-4xl mb-3">🔬</div>
-          <div className="text-sm font-semibold text-zinc-400 mb-1">Waiting for first signals</div>
-          <div className="text-xs">Truth Mode is running. The scanner checks for signals every 15 minutes during market hours.</div>
+          <div className="text-sm font-semibold text-zinc-400 mb-1">{t('app_enki_truth.empty_waiting_title')}</div>
+          <div className="text-xs">{t('app_enki_truth.empty_waiting_body')}</div>
         </div>
       )}
     </div>
