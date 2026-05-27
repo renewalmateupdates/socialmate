@@ -1,15 +1,18 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import CookieBanner from '@/components/CookieBanner'
-import FeedbackWidget from '@/components/FeedbackWidget'
 import { WorkspaceProvider } from '@/contexts/WorkspaceContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { I18nProvider } from '@/contexts/I18nContext'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
-import InstallPrompt from '@/components/InstallPrompt'
 import GoogleAnalytics from '@/components/GoogleAnalytics'
+import dynamic from 'next/dynamic'
+
+// Lazy-loaded: not needed for initial paint, defer to keep critical bundle small
+const FeedbackWidget  = dynamic(() => import('@/components/FeedbackWidget'),  { ssr: false })
+const CookieBanner    = dynamic(() => import('@/components/CookieBanner'),    { ssr: false })
+const InstallPrompt   = dynamic(() => import('@/components/InstallPrompt'),   { ssr: false })
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 

@@ -1,12 +1,10 @@
+// Only English is statically bundled (~62KB). All other locales (~394KB combined)
+// are loaded on demand via dynamic import when a user switches language.
+// This prevents ~400KB of dead JSON from landing in every page's JS bundle.
 import en from '@/messages/en.json'
-import es from '@/messages/es.json'
-import de from '@/messages/de.json'
-import fr from '@/messages/fr.json'
-import pt from '@/messages/pt.json'
-import ru from '@/messages/ru.json'
-import zh from '@/messages/zh.json'
 
 export type Locale = 'en' | 'es' | 'de' | 'fr' | 'pt' | 'ru' | 'zh'
+export type Messages = typeof en
 
 export const SUPPORTED_LOCALES: { code: Locale; label: string; flag: string }[] = [
   { code: 'en', label: 'English',    flag: '🇺🇸' },
@@ -18,18 +16,39 @@ export const SUPPORTED_LOCALES: { code: Locale; label: string; flag: string }[] 
   { code: 'zh', label: '中文',        flag: '🇨🇳' },
 ]
 
-const ALL_MESSAGES: Record<Locale, typeof en> = { en, es, de, fr, pt, ru, zh }
+const SUPPORTED_CODES = new Set<string>(SUPPORTED_LOCALES.map(l => l.code))
 
-export function translate(key: string, locale: Locale): string {
-  const messages = (ALL_MESSAGES[locale] ?? ALL_MESSAGES.en) as Record<string, unknown>
+// The statically-bundled English messages. Used as the initial state and fallback.
+export const englishMessages: Messages = en
+
+// Dynamically load a locale's messages. Returns English on failure.
+export async function loadMessages(locale: Locale): Promise<Messages> {
+  if (locale === 'en') return en
+  try {
+    switch (locale) {
+      case 'es': return (await import('@/messages/es.json')).default as unknown as Messages
+      case 'de': return (await import('@/messages/de.json')).default as unknown as Messages
+      case 'fr': return (await import('@/messages/fr.json')).default as unknown as Messages
+      case 'pt': return (await import('@/messages/pt.json')).default as unknown as Messages
+      case 'ru': return (await import('@/messages/ru.json')).default as unknown as Messages
+      case 'zh': return (await import('@/messages/zh.json')).default as unknown as Messages
+      default:   return en
+    }
+  } catch {
+    return en
+  }
+}
+
+// Resolve a dot-separated key against a messages object, falling back to English.
+export function translate(key: string, messages: Messages): string {
   const parts = key.split('.')
   let val: unknown = messages
   for (const p of parts) {
     val = (val as Record<string, unknown>)?.[p]
   }
-  // Fall back to English if key is missing in the target locale
   if (typeof val !== 'string') {
-    let fallback: unknown = ALL_MESSAGES.en as Record<string, unknown>
+    // Fall back to English default messages
+    let fallback: unknown = en
     for (const p of parts) {
       fallback = (fallback as Record<string, unknown>)?.[p]
     }
@@ -40,9 +59,9 @@ export function translate(key: string, locale: Locale): string {
 
 export function detectLocale(): Locale {
   if (typeof window === 'undefined') return 'en'
-  const stored = localStorage.getItem('sm_locale') as Locale | null
-  if (stored && ALL_MESSAGES[stored]) return stored
-  const browser = navigator.language?.slice(0, 2) as Locale
-  if (ALL_MESSAGES[browser]) return browser
+  const stored = localStorage.getItem('sm_locale')
+  if (stored && SUPPORTED_CODES.has(stored)) return stored as Locale
+  const browser = navigator.language?.slice(0, 2)
+  if (browser && SUPPORTED_CODES.has(browser)) return browser as Locale
   return 'en'
 }
