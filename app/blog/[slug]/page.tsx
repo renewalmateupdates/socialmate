@@ -3,6 +3,9 @@ import Link from 'next/link'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import PublicFooter from '@/components/PublicFooter'
 
+// Revalidate every hour so DB posts stay fresh without per-request fetching.
+export const revalidate = 3600
+
 // ── DB post shape ─────────────────────────────────────────────────────────────
 type DbPost = {
   slug: string
@@ -4455,6 +4458,11 @@ function renderContent(content: string) {
     }
   }
   return elements
+}
+
+// Pre-build all hardcoded slugs at deploy time. DB-only posts use ISR (revalidate above).
+export async function generateStaticParams() {
+  return Object.keys(POSTS).map((slug) => ({ slug }))
 }
 
 export default async function BlogPost({ params }: { params: Promise<{ slug: string }> }) {

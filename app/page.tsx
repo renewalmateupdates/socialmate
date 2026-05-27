@@ -1,10 +1,7 @@
 import Link from 'next/link'
-import { cookies } from 'next/headers'
-import { createServerClient } from '@supabase/ssr'
 import ReferralBanner from '@/app/components/ReferralBanner'
 import PublicNav from '@/components/PublicNav'
 import UserStatsCounter from '@/components/UserStatsCounter'
-import PHLaunchBanner from '@/components/PHLaunchBanner'
 import HeroLaunchBadge from '@/components/HeroLaunchBadge'
 
 const PLATFORMS = [
@@ -114,26 +111,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
   const params = await searchParams
   const refCode = params?.ref || ''
 
-  // Check if user is logged in (server-side)
-  let isLoggedIn = false
-  try {
-    const cookieStore = await cookies()
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll: () => cookieStore.getAll(),
-          setAll: () => {},
-        },
-      }
-    )
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) isLoggedIn = true
-  } catch {
-    // If auth check fails, stays false — safe default
-  }
-
   const live    = PLATFORMS.filter(p => p.status === 'live')
   const soon    = PLATFORMS.filter(p => p.status === 'soon')
   const planned = PLATFORMS.filter(p => p.status === 'planned')
@@ -142,7 +119,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
     <div className="dark min-h-screen bg-gray-950">
 
       {refCode && <ReferralBanner refCode={refCode} />}
-      <PHLaunchBanner />
 
       {/* NAV */}
       <PublicNav />
