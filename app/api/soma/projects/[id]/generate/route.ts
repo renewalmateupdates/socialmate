@@ -22,6 +22,35 @@ const PLATFORM_INSTRUCTIONS: Record<string, string> = {
 
 const CONTENT_TYPES = ['mindset', 'progress', 'insight', 'story', 'value', 'question', 'win', 'lesson']
 
+const STOP_WORDS = new Set(['the','a','an','is','are','was','were','be','been','have','has','had','do','does','did','will','would','could','should','to','of','in','for','on','with','at','by','from','as','it','its','this','that','and','or','but','if','you','we','your','our','my','not','just','so','up','out','down','what','how','when','where','who','why','all','can','get','let','its','than','then','been','was','one','more','some','here','there'])
+
+function extractKeyword(content: string): string {
+  const words = content.replace(/[#@\n]/g, ' ').replace(/[^a-zA-Z\s]/g, '').toLowerCase().split(/\s+/)
+  const meaningful = words.filter(w => w.length > 3 && !STOP_WORDS.has(w))
+  return meaningful.slice(0, 3).join(' ') || 'creator social media'
+}
+
+const imageCache = new Map<string, string>()
+
+async function fetchUnsplashImage(keyword: string): Promise<string | null> {
+  const key = process.env.UNSPLASH_ACCESS_KEY
+  if (!key) return null
+  if (imageCache.has(keyword)) return imageCache.get(keyword) ?? null
+  try {
+    const res = await fetch(
+      `https://api.unsplash.com/photos/random?query=${encodeURIComponent(keyword)}&orientation=landscape&client_id=${key}`,
+      { signal: AbortSignal.timeout(5000) }
+    )
+    if (!res.ok) return null
+    const data = await res.json() as { urls?: { regular?: string } }
+    const url = data?.urls?.regular ?? null
+    if (url) imageCache.set(keyword, url)
+    return url
+  } catch {
+    return null
+  }
+}
+
 function parseGeminiJson(text: string): any {
   return JSON.parse(text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim())
 }
@@ -92,7 +121,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // Fetch project including per-platform schedule
     const { data: project } = await admin
       .from('soma_projects')
-      .select('id, workspace_id, platforms, posts_per_day, content_window_days, mode, platform_schedule, runs_this_month, campaign_theme, campaign_start, campaign_end')
+      .select('id, workspace_id, platforms, posts_per_day, content_window_days, mode, platform_schedule, runs_this_month, campaign_theme, campaign_start, campaign_end, include_media')
       .eq('id', projectId)
       .eq('user_id', user.id)
       .single()
@@ -268,6 +297,14 @@ Rules:
           const post = chunkPosts[i]
           const slot = chunk[i] ?? chunk[chunk.length - 1]
 
+          // Fetch a relevant image from Unsplash if media is enabled (non-fatal)
+          let mediaUrls: string[] | undefined
+          if (project.include_media) {
+            const keyword  = extractKeyword(post.content ?? '')
+            const imageUrl = await fetchUnsplashImage(keyword)
+            if (imageUrl) mediaUrls = [imageUrl]
+          }
+
           const { data: inserted, error: postErr } = await admin
             .from('posts')
             .insert({
@@ -278,6 +315,7 @@ Rules:
               status:       project.mode === 'safe' ? 'draft' : 'scheduled',
               scheduled_at: scheduledAt(slot.dayOffset, slot.slotIdx, ppd, start_date),
               destinations: {},
+              ...(mediaUrls ? { media_urls: mediaUrls } : {}),
             })
             .select('id')
             .single()
