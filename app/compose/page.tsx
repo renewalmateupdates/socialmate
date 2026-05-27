@@ -9,6 +9,7 @@ import UpgradeNudge from '@/components/UpgradeNudge'
 import PostImageExporter from '@/components/PostImageExporter'
 import PageTour from '@/components/PageTour'
 import { useI18n } from '@/contexts/I18nContext'
+import UnsplashCredit from '@/components/UnsplashCredit'
 
 const PLATFORMS = [
   { id: 'discord',   name: 'Discord',   icon: '💬', limit: 2000,  live: true  },
@@ -261,6 +262,7 @@ function ComposeInner() {
   // Media attachments
   type MediaItem = { file: File; preview: string; url?: string; type: 'image' | 'video'; uploading: boolean }
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([])
+  const [draftMediaUrls, setDraftMediaUrls] = useState<string[] | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [destinations, setDestinations] = useState<Record<string, Destination[]>>({})
@@ -442,6 +444,7 @@ function ComposeInner() {
           setContent(draft.content || '')
           if (draft.platforms?.length > 0) setSelectedPlatforms(draft.platforms)
           if (draft.tags?.length > 0) setPostTags(draft.tags)
+          if (draft.media_urls?.length > 0) setDraftMediaUrls(draft.media_urls)
           setCurrentDraftId(draftId)
           const isFailed = draft.status === 'failed'
           setTemplateBanner(isFailed
@@ -2062,6 +2065,14 @@ function ComposeInner() {
                       Discord, Bluesky, Mastodon, Telegram · JPEG, PNG, GIF, WebP, MP4
                     </span>
                   </div>
+
+                  {/* SOMA Unsplash image preview — shown when editing a SOMA post with an attached image */}
+                  {draftMediaUrls && draftMediaUrls.length > 0 && draftMediaUrls[0]?.startsWith('http') && (
+                    <div className="mt-3 pt-3 border-t border-gray-50 dark:border-gray-800">
+                      <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1.5">Attached image (from SOMA)</p>
+                      <UnsplashCredit mediaUrls={draftMediaUrls} size="md" />
+                    </div>
+                  )}
 
                   <input
                     ref={fileInputRef}
