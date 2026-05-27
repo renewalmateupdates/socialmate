@@ -7,12 +7,8 @@ import { I18nProvider } from '@/contexts/I18nContext'
 import { Analytics } from '@vercel/analytics/next'
 import { SpeedInsights } from '@vercel/speed-insights/next'
 import GoogleAnalytics from '@/components/GoogleAnalytics'
-import dynamic from 'next/dynamic'
-
-// Lazy-loaded: not needed for initial paint, defer to keep critical bundle small
-const FeedbackWidget  = dynamic(() => import('@/components/FeedbackWidget'),  { ssr: false })
-const CookieBanner    = dynamic(() => import('@/components/CookieBanner'),    { ssr: false })
-const InstallPrompt   = dynamic(() => import('@/components/InstallPrompt'),   { ssr: false })
+// ssr:false dynamic imports must live in a 'use client' module — see LazyClientComponents
+import LazyClientComponents from '@/components/LazyClientComponents'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
@@ -152,9 +148,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </I18nProvider>
           </WorkspaceProvider>
         </ThemeProvider>
-        <FeedbackWidget />
-        <CookieBanner />
-        <InstallPrompt />
+        <LazyClientComponents />
         <Analytics />
         <SpeedInsights />
         <GoogleAnalytics />
