@@ -138,7 +138,7 @@ export async function PATCH(req: NextRequest) {
   const db = getSupabaseAdmin()
 
   // Deactivate in Stripe too (for percent/fixed types)
-  const { data: coupon } = await db.from('coupons').select('stripe_promo_id').eq('id', id).single()
+  const { data: coupon } = await db.from('coupons').select('stripe_promo_id').eq('id', id).maybeSingle()
   if (coupon?.stripe_promo_id && active === false) {
     try {
       await getStripe().promotionCodes.update(coupon.stripe_promo_id, { active: false })
