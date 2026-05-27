@@ -1,0 +1,2 @@
+ALTER TABLE soma_projects
+  ADD COLUMN IF NOT EXISTS include_media BOOLEAN NOT NULL DEFAULT false;

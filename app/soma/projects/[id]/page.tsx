@@ -21,6 +21,7 @@ interface Project {
   last_generated_at: string | null
   platform_schedule: Record<string, PlatformSchedule> | null
   paused: boolean
+  include_media: boolean
   campaign_theme: string | null
   campaign_start: string | null
   campaign_end: string | null
@@ -157,6 +158,23 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
       setProject(p => p ? { ...p, paused: !p.paused } : p)
     } finally {
       setTogglingPause(false)
+    }
+  }
+
+  // Media toggle
+  const [togglingMedia, setTogglingMedia] = useState(false)
+  async function handleToggleMedia() {
+    if (!project) return
+    setTogglingMedia(true)
+    try {
+      await fetch(`/api/soma/projects/${projectId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ include_media: !project.include_media }),
+      })
+      setProject(p => p ? { ...p, include_media: !p.include_media } : p)
+    } finally {
+      setTogglingMedia(false)
     }
   }
 
@@ -529,6 +547,23 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
             <p className="text-sm font-bold text-white">{project.runs_this_month} / {runCap}</p>
             <p className="text-[10px] text-gray-600 mt-0.5">resets monthly</p>
           </div>
+        </div>
+
+        {/* Media toggle */}
+        <div className="rounded-xl border border-gray-800 bg-gray-900 px-4 py-3 flex items-center justify-between">
+          <div>
+            <p className="text-sm font-bold text-white">Auto-attach images</p>
+            <p className="text-xs text-gray-500 mt-0.5">Pulls a relevant photo from Unsplash for each generated post. Requires <code className="text-amber-400 text-[10px]">UNSPLASH_ACCESS_KEY</code> env var.</p>
+          </div>
+          <button
+            type="button"
+            onClick={handleToggleMedia}
+            disabled={togglingMedia}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${project.include_media ? 'bg-amber-500' : 'bg-gray-700'}`}
+            aria-label="Toggle auto-attach images"
+          >
+            <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${project.include_media ? 'translate-x-6' : 'translate-x-1'}`} />
+          </button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
