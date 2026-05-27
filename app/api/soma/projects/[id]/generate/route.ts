@@ -30,9 +30,10 @@ function extractKeyword(content: string): string {
   return meaningful.slice(0, 3).join(' ') || 'creator social media'
 }
 
-const imageCache = new Map<string, string>()
+interface UnsplashResult { url: string; attribution: string }
+const imageCache = new Map<string, UnsplashResult>()
 
-async function fetchUnsplashImage(keyword: string): Promise<string | null> {
+async function fetchUnsplashImage(keyword: string): Promise<UnsplashResult | null> {
   const key = process.env.UNSPLASH_ACCESS_KEY
   if (!key) return null
   if (imageCache.has(keyword)) return imageCache.get(keyword) ?? null
@@ -42,10 +43,28 @@ async function fetchUnsplashImage(keyword: string): Promise<string | null> {
       { signal: AbortSignal.timeout(5000) }
     )
     if (!res.ok) return null
-    const data = await res.json() as { urls?: { regular?: string } }
-    const url = data?.urls?.regular ?? null
-    if (url) imageCache.set(keyword, url)
-    return url
+    const data = await res.json() as {
+      urls?: { regular?: string }
+      user?: { name?: string; links?: { html?: string } }
+      links?: { download_location?: string }
+    }
+    const url = data?.urls?.regular
+    if (!url) return null
+
+    const photographerName = data?.user?.name ?? 'Unknown'
+    const photographerUrl  = data?.user?.links?.html ?? 'https://unsplash.com'
+    // Required by Unsplash API guidelines: trigger download tracking
+    const downloadLocation = data?.links?.download_location
+    if (downloadLocation) {
+      fetch(`${downloadLocation}?client_id=${key}`, { signal: AbortSignal.timeout(3000) }).catch(() => {})
+    }
+
+    const result: UnsplashResult = {
+      url,
+      attribution: `Photo by ${photographerName} on Unsplash | ${photographerUrl}`,
+    }
+    imageCache.set(keyword, result)
+    return result
   } catch {
     return null
   }
@@ -297,12 +316,13 @@ Rules:
           const post = chunkPosts[i]
           const slot = chunk[i] ?? chunk[chunk.length - 1]
 
-          // Fetch a relevant image from Unsplash if media is enabled (non-fatal)
+          // Fetch a relevant image from Unsplash if media is enabled (non-fatal).
+          // media_urls[0] = image URL, media_urls[1] = "Photo by X on Unsplash | profile_url"
           let mediaUrls: string[] | undefined
           if (project.include_media) {
-            const keyword  = extractKeyword(post.content ?? '')
-            const imageUrl = await fetchUnsplashImage(keyword)
-            if (imageUrl) mediaUrls = [imageUrl]
+            const keyword = extractKeyword(post.content ?? '')
+            const result  = await fetchUnsplashImage(keyword)
+            if (result) mediaUrls = [result.url, result.attribution]
           }
 
           const { data: inserted, error: postErr } = await admin
