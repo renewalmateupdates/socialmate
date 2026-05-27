@@ -696,6 +696,7 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **Discord community** — Server is live at discord.gg/2se6FGrbRU. Build it as a tester + feedback pool.
 - **Apple App Store** — Deferred 3–6 months.
 - **SOMA content run** — Submit updated CLAUDE.md when Joshua is ready.
+- **SOMA media toggle** — Add `include_media` boolean to `soma_projects`. On generate, pull relevant image from Unsplash API (free, non-copyrighted) or GIF from GIPHY free tier based on post content keywords. Attach as media URL on the post. Toggle per project. Video content attachment = future milestone after media toggle ships.
 ## Confirmed Done (stop asking about these)
 
 - ✅ **Performance bundle cut + bug sweep (May 26, PRs #431–#432)** — `.maybeSingle()` on all upsert lookups. i18n lazy loading (−394KB from every page). LazyClientComponents wrapper for `ssr:false` dynamic imports. Dead landing page auth call removed. PHLaunchBanner removed. Blog ISR + generateStaticParams. `/tiktok` landing page + nav consolidation all merged. Never redo these.
@@ -845,6 +846,38 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 Each Friday (or end of sprint), archive the current CLAUDE.md as `CLAUDE-week-of-YYYY-MM-DD.md`.
 Then diff the two files through Gemini/Claude to generate a week's worth of social posts based on what changed.
 The diff = the story. Ship it to every platform.
+
+---
+
+## SOMA Content Guidelines
+
+When SOMA generates content from this document, follow these behavioral rules on every run:
+
+**Overall tone:** Professional and motivational. We are a bootstrapped startup solving real problems for real creators. Address our challenges (solo founder, building nights and weekends, bootstrapped) as proof that anyone can build — not as complaints. Lead with progress and mission, never with hardship.
+
+**LinkedIn posts (SOMA automates LinkedIn — `w_member_social` scope, personal profile):**
+- Always open with OR weave in a relevant inspirational quote from a public domain / clearly attributed source (philosophers, builders, athletes, leaders — Marcus Aurelius, Seneca, Steve Jobs, Kobe Bryant, etc.)
+- The quote must be thematically connected to the post topic — do not use a generic filler quote
+- Format: Quote styled as a standalone line, then the post body, then hashtags
+- Tone: thought leadership + builder credibility + creator empowerment
+- Always close with relevant hashtags (8-12, mix of broad and niche)
+
+**All platforms:**
+- Always include hashtags tailored to each platform's norms (LinkedIn: professional/industry tags, Bluesky/Mastodon: creator/tech tags, Twitter: short punchy tags)
+- Motivational closing line that connects back to mission: "Power to the people. Build the door." or a natural variation
+- Keep voice consistent with Joshua's Voice DNA (confident, authentic, hip-hop + space + LoL culture influences, "cooked/fire/slay" vocabulary used sparingly and naturally)
+- Never repeat an angle that already exists in SOMA Project Memory — check topics_covered and angles_used before generating
+
+**SOMA does NOT need a new document to generate content:**
+- SOMA can run anytime using the master doc as evergreen context about who we are, what we've built, and what we stand for
+- When there is no new diff or update to post about, SOMA should generate: product education posts (explaining features), platform-specific tips ("did you know you can schedule LinkedIn posts with SocialMate?"), creator tips and value posts, founder story / mission posts, engagement posts (questions, polls, hot takes), community shoutouts, and motivational content tied to the creator mission
+- Not every post needs to be an update. Some of the best content is timeless brand-building, not changelog announcements
+- Use Project Memory to avoid repeating the same angles regardless of whether a diff was submitted
+
+**Media (current limitation — feature in progress):**
+- SOMA does not yet auto-attach images or GIFs to posts
+- Roadmap: toggle on SOMA projects to pull non-copyrighted images from Unsplash API and GIFs from GIPHY free tier, matched to post content
+- Video content attachment planned for future milestone
 
 ---
 
