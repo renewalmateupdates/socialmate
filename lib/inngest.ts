@@ -4121,6 +4121,186 @@ Rules:
   }
 )
 
+// ─── SOMA Full Send Daily Run ─────────────────────────────────────────────────
+// Runs every day at 1pm UTC (9am EDT) — only for Full Send workspaces.
+// Full Send users get a daily auto-run (vs Autopilot's weekly Monday run).
+// Max 7 posts/day per platform. Workspaces must have soma_full_send_enabled=true.
+export const somaFullSendDailyRun = inngest.createFunction(
+  { id: 'soma-full-send-daily-run', name: 'SOMA Full Send Daily Run', retries: 1 },
+  { cron: '0 13 * * *' }, // Every day at 1pm UTC (9am EDT)
+  async ({ step }) => {
+    const GENERATE_COST = SOMA_COSTS.generate_week // 75 credits
+    const now = new Date()
+    const weekLabel = `Full Send — ${now.toISOString().slice(0, 10)}`
+    const todayStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())).toISOString()
+
+    // Find all full_send projects whose workspaces have Full Send enabled + enough credits
+    const eligibleProjects = await step.run('find-full-send-projects', async () => {
+      const admin = getSupabaseAdmin()
+
+      const { data: projects, error } = await admin
+        .from('soma_projects')
+        .select(`
+          id, workspace_id, user_id, name, platforms, posts_per_day, content_window_days, mode, runs_this_month, paused, include_media,
+          workspaces!inner(id, owner_id, soma_credits_monthly, soma_credits_used, soma_credits_purchased, soma_autopilot_enabled, soma_full_send_enabled)
+        `)
+        .eq('mode', 'full_send')
+
+      if (error) {
+        console.error('[SomaFullSend] Failed to query projects:', error.message)
+        return []
+      }
+
+      return (projects ?? []).filter((p: any) => {
+        const ws = p.workspaces
+        // Must have Full Send enabled on the workspace
+        if (!ws?.soma_full_send_enabled) return false
+        if (p.paused) return false
+        const remaining = Math.max(0, (ws.soma_credits_monthly ?? 0) - (ws.soma_credits_used ?? 0)) + (ws.soma_credits_purchased ?? 0)
+        // Full Send run cap: 30 per month (daily = ~30/mo)
+        if ((p.runs_this_month ?? 0) >= 30) return false
+        return remaining >= GENERATE_COST
+      })
+    })
+
+    if (!eligibleProjects.length) {
+      console.log('[SomaFullSend] No eligible Full Send projects')
+      return { processed: 0 }
+    }
+
+    // Skip projects that already ran today (idempotency)
+    const alreadyRanProjectIds = await step.run('check-already-ran', async () => {
+      const { data } = await getSupabaseAdmin()
+        .from('soma_weekly_ingestion')
+        .select('metadata')
+        .gte('created_at', todayStart)
+      const ran = (data ?? [])
+        .map((r: any) => r.metadata?.project_id)
+        .filter(Boolean)
+      return ran as string[]
+    })
+
+    const alreadyRanSet = new Set<string>(alreadyRanProjectIds)
+    const toProcess = eligibleProjects.filter((p: any) => !alreadyRanSet.has(p.id))
+
+    if (!toProcess.length) {
+      console.log('[SomaFullSend] All eligible projects already ran today')
+      return { processed: 0, skipped: eligibleProjects.length }
+    }
+
+    const apiKey = process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY
+    if (!apiKey) {
+      console.error('[SomaFullSend] Missing Gemini API key')
+      return { processed: 0, error: 'missing_api_key' }
+    }
+
+    let processed = 0
+    let failed = 0
+
+    for (const project of toProcess) {
+      try {
+        await step.run(`full-send-project-${project.id}`, async () => {
+          const admin = getSupabaseAdmin()
+          const genAI = new GoogleGenerativeAI(apiKey)
+          const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+
+          // Fetch project memory to avoid repetition
+          const { data: memory } = await admin
+            .from('soma_project_memory')
+            .select('running_summary, topics_covered, angles_used')
+            .eq('project_id', project.id)
+            .maybeSingle()
+
+          const memoryBlock = memory?.running_summary
+            ? `\n\nPROJECT MEMORY (do NOT repeat these topics/angles):\n${memory.running_summary}\nTopics covered: ${Array.from(memory.topics_covered ?? []).join(', ')}\nAngles used: ${Array.from(memory.angles_used ?? []).join(', ')}`
+            : ''
+
+          // Build platform list — Full Send cap is 7 posts/day per platform
+          const MAX_PPD = 7
+          const platforms: string[] = Array.from(project.platforms ?? [])
+          if (!platforms.length) return
+
+          // Fetch identity/voice for this user
+          const { data: identity } = await admin
+            .from('soma_identity_profiles')
+            .select('brand_name, niche, target_audience, tone, personality_summary')
+            .eq('user_id', project.user_id)
+            .maybeSingle()
+
+          const voiceBlock = identity?.personality_summary
+            ? `\n\nCREATOR VOICE DNA:\n${identity.personality_summary}`
+            : ''
+
+          const prompt = `You are a social media content strategist. Generate ${MAX_PPD} posts for each of these platforms: ${platforms.join(', ')}.
+
+Brand: ${identity?.brand_name || 'SocialMate'}
+Niche: ${identity?.niche || 'creator tools'}
+Audience: ${identity?.target_audience || 'creators and businesses'}
+Tone: ${identity?.tone || 'professional and motivational'}
+${voiceBlock}
+${memoryBlock}
+
+Return ONLY a valid JSON array. Each item: { "platform": string, "content": string, "scheduled_date": "YYYY-MM-DD", "scheduled_time": "HH:MM" }.
+Generate posts spread across today and tomorrow. Platform rules: Twitter/X max 280 chars, Bluesky max 300 chars, LinkedIn professional tone, Discord casual.
+Generate exactly ${MAX_PPD} posts per platform.`
+
+          let posts: any[] = []
+          try {
+            const result = await model.generateContent(prompt)
+            const text = result.response.text().trim().replace(/```json\n?/g, '').replace(/```\n?/g, '')
+            posts = JSON.parse(text)
+          } catch {
+            console.error(`[SomaFullSend] Gemini parse error for project ${project.id}`)
+            return
+          }
+
+          // Insert posts into the approval queue (full_send = auto-schedule directly)
+          let postsCreated = 0
+          for (const post of posts) {
+            if (!post.content || !post.platform) continue
+            const scheduledAt = post.scheduled_date && post.scheduled_time
+              ? new Date(`${post.scheduled_date}T${post.scheduled_time}:00Z`).toISOString()
+              : new Date(Date.now() + 30 * 60 * 1000).toISOString()
+
+            const { error: insertErr } = await admin.from('posts').insert({
+              user_id: project.user_id,
+              workspace_id: project.workspace_id,
+              content: post.content,
+              platforms: [post.platform],
+              status: 'scheduled',
+              scheduled_at: scheduledAt,
+              metadata: { soma_project_id: project.id, soma_run: weekLabel, auto_source: 'full_send_daily' },
+            })
+            if (!insertErr) postsCreated++
+          }
+
+          // Deduct credits
+          if (postsCreated > 0) {
+            await admin.from('workspaces').update({
+              soma_credits_used: (project.workspaces as any).soma_credits_used + GENERATE_COST,
+            }).eq('id', project.workspace_id)
+
+            // Update run counter
+            await admin.from('soma_projects').update({
+              runs_this_month: (project.runs_this_month ?? 0) + 1,
+              last_run_at: new Date().toISOString(),
+            }).eq('id', project.id)
+          }
+
+          console.log(`[SomaFullSend] project ${project.id} (${project.name}): ${postsCreated} posts scheduled`)
+        })
+        processed++
+      } catch (err: any) {
+        console.error(`[SomaFullSend] project ${project.id} failed:`, err?.message)
+        failed++
+      }
+    }
+
+    console.log(`[SomaFullSend] processed: ${processed}, failed: ${failed}, skipped: ${alreadyRanSet.size}`)
+    return { processed, failed, skipped: alreadyRanSet.size }
+  }
+)
+
 // ─── Enki Weekly P&L Summary Email ───────────────────────────────────────────
 // Every Monday at 9am UTC — sends a summary email to each user who had at
 // least one trade in the past 7 days.
