@@ -1,6 +1,6 @@
 # SocialMate
 
-> Free social media scheduling and Creator OS — schedule, create, and manage content across 7 live platforms with 20+ built-in AI tools, an autonomous AI content system (SOMA), an autonomous trading bot (Enki), and 8 AI agents that run on autopilot.
+> Free social media scheduling and Creator OS — schedule, create, and manage content across 7 live platforms with 20+ built-in AI tools, an autonomous AI content system (SOMA) with Unsplash media integration, an autonomous trading bot (Enki), and 8 AI agents that run on autopilot.
 
 SocialMate is a web-based social media management platform built for creators, streamers, small businesses, and agencies. Free to start. No credit card required. No per-channel fees.
 
@@ -82,6 +82,7 @@ Landing page: https://socialmate.studio/soma
 - Only shows platforms you have connected
 - Project Memory: rolling AI manager notes track topics covered, angles used, and total posts generated — prevents repetition across runs
 - 500k character cap on ingested documents — no truncation, full context
+- Media toggle: enable Unsplash image attachment per project — each generated post gets a relevant landscape photo with full photographer attribution (required by Unsplash API guidelines)
 
 ### SOMA Voice DNA Builder
 - 40-question personality interview in 3 tiers (Foundation 10q / Deep Dive 25q / Advanced 40q)
@@ -231,7 +232,7 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - Pricing: https://socialmate.studio/pricing
 - Features: https://socialmate.studio/features
 - Enterprise: https://socialmate.studio/enterprise
-- Blog: https://socialmate.studio/blog (540+ posts)
+- Blog: https://socialmate.studio/blog (570+ posts, all pre-rendered as static pages)
 - Roadmap: https://socialmate.studio/roadmap
 - FAQ: https://socialmate.studio/faq
 - Support: https://socialmate.studio/support

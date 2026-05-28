@@ -30,9 +30,10 @@ function extractKeyword(content: string): string {
   return meaningful.slice(0, 3).join(' ') || 'creator social media'
 }
 
-const imageCache = new Map<string, string>()
+interface UnsplashResult { url: string; attribution: string }
+const imageCache = new Map<string, UnsplashResult>()
 
-async function fetchUnsplashImage(keyword: string): Promise<string | null> {
+async function fetchUnsplashImage(keyword: string): Promise<UnsplashResult | null> {
   const key = process.env.UNSPLASH_ACCESS_KEY
   if (!key) return null
   if (imageCache.has(keyword)) return imageCache.get(keyword) ?? null
@@ -42,10 +43,28 @@ async function fetchUnsplashImage(keyword: string): Promise<string | null> {
       { signal: AbortSignal.timeout(5000) }
     )
     if (!res.ok) return null
-    const data = await res.json() as { urls?: { regular?: string } }
-    const url = data?.urls?.regular ?? null
-    if (url) imageCache.set(keyword, url)
-    return url
+    const data = await res.json() as {
+      urls?: { regular?: string }
+      user?: { name?: string; links?: { html?: string } }
+      links?: { download_location?: string }
+    }
+    const url = data?.urls?.regular
+    if (!url) return null
+
+    const photographerName = data?.user?.name ?? 'Unknown'
+    const photographerUrl  = data?.user?.links?.html ?? 'https://unsplash.com'
+    // Required by Unsplash API guidelines: trigger download tracking
+    const downloadLocation = data?.links?.download_location
+    if (downloadLocation) {
+      fetch(`${downloadLocation}?client_id=${key}`, { signal: AbortSignal.timeout(3000) }).catch(() => {})
+    }
+
+    const result: UnsplashResult = {
+      url,
+      attribution: `Photo by ${photographerName} on Unsplash | ${photographerUrl}`,
+    }
+    imageCache.set(keyword, result)
+    return result
   } catch {
     return null
   }
@@ -121,7 +140,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // Fetch project including per-platform schedule
     const { data: project } = await admin
       .from('soma_projects')
-      .select('id, workspace_id, platforms, posts_per_day, content_window_days, mode, platform_schedule, runs_this_month, campaign_theme, campaign_start, campaign_end, include_media')
+      .select('id, workspace_id, platforms, posts_per_day, content_window_days, mode, platform_schedule, runs_this_month, campaign_theme, campaign_start, campaign_end, include_media, include_video_url')
       .eq('id', projectId)
       .eq('user_id', user.id)
       .single()
@@ -189,7 +208,7 @@ Example posts: ${Array.isArray(profile.voice_examples) ? (profile.voice_examples
     const windowDays  = project.content_window_days ?? 7
     const globalPpd   = project.posts_per_day ?? 2
     const schedule    = (project.platform_schedule ?? {}) as Record<string, { posts_per_day: number; days: number[] }>
-    const maxPpd      = project.mode === 'full_send' ? 10 : project.mode === 'autopilot' ? 5 : 2
+    const maxPpd      = project.mode === 'full_send' ? 7 : project.mode === 'autopilot' ? 5 : 2
 
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
@@ -199,6 +218,11 @@ Example posts: ${Array.isArray(profile.voice_examples) ? (profile.voice_examples
     const campaignEnd   = (project as any).campaign_end   as string | null
     const campaignBlock = campaignTheme
       ? `\n\nACTIVE CAMPAIGN: Focus ALL content heavily on "${campaignTheme}". ${campaignStart && campaignEnd ? `This campaign runs ${campaignStart} to ${campaignEnd}.` : ''} Make every post timely and specific to this campaign theme. Weave the campaign angle into every piece of content.`
+      : ''
+
+    const includeVideoUrl = (project as any).include_video_url as string | null
+    const videoBlock = includeVideoUrl
+      ? `\n\nVIDEO URL TO INCLUDE: ${includeVideoUrl}\nNaturally include this video URL in each post. You can append it at the end on its own line, or weave it in naturally with context like "Watch here:" or "Full clip:" — but always include it so followers can actually watch the video.`
       : ''
 
     const insightBlock = `THIS WEEK'S INSIGHTS (from master doc diff):
@@ -245,7 +269,7 @@ Emotional tone: ${insights.emotional_tone ?? 'motivated'}${campaignBlock}`
         const chunkDays  = chunk.length
         const prompt = `${identityContext}
 
-${insightBlock}
+${insightBlock}${videoBlock}
 
 PLATFORM: ${platform.toUpperCase()}
 FORMAT RULES: ${instruction}
@@ -297,12 +321,13 @@ Rules:
           const post = chunkPosts[i]
           const slot = chunk[i] ?? chunk[chunk.length - 1]
 
-          // Fetch a relevant image from Unsplash if media is enabled (non-fatal)
+          // Fetch a relevant image from Unsplash if media is enabled (non-fatal).
+          // media_urls[0] = image URL, media_urls[1] = "Photo by X on Unsplash | profile_url"
           let mediaUrls: string[] | undefined
           if (project.include_media) {
-            const keyword  = extractKeyword(post.content ?? '')
-            const imageUrl = await fetchUnsplashImage(keyword)
-            if (imageUrl) mediaUrls = [imageUrl]
+            const keyword = extractKeyword(post.content ?? '')
+            const result  = await fetchUnsplashImage(keyword)
+            if (result) mediaUrls = [result.url, result.attribution]
           }
 
           const { data: inserted, error: postErr } = await admin

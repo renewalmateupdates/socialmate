@@ -634,6 +634,29 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **`/tiktok` public landing page** — SEO landing page at `/tiktok` targeting "TikTok scheduler" search queries. Added to sitemap.
 - **PublicNav desktop consolidation** — Products dropdown on desktop nav, cleaner right side.
 
+**May 27, 2026 (PRs #433–#440):**
+- **SOMA media toggle (PR #433)** — `include_media` BOOLEAN column added to `soma_projects` (migration `20260527000001_soma_include_media.sql`). Unsplash API integration in manual generate route: keyword extraction (strips stop words, returns first meaningful term from post content), `fetchUnsplashImage()` calls Unsplash random photo endpoint, fires required download-location tracking ping (API compliance), caches per-keyword within run. Attribution stored as `media_urls[1] = "Photo by X on Unsplash | profile_url"`. Non-fatal — posts still create if Unsplash unavailable. Toggle UI on project page (amber pill switch). `UNSPLASH_ACCESS_KEY` env var required.
+- **Enki i18n (PR #434)** — 207 translation keys across 3 new namespaces: `app_enki_truth` (77 keys for TruthClient.tsx), `app_enki_trades` (38 keys, alias `tk` to avoid shadowing trade loop variable), `app_enki_doctrines` (92 keys, alias `td`). All 7 locale files (en/es/de/fr/pt/ru/zh) updated and validated in sync. Server component `page.tsx` files left unchanged — only client components wired.
+- **Unsplash attribution compliance (PR #435)** — Cherry-picked compliance fix for generate route ensuring photographer credit format and download tracking are always triggered correctly.
+- **UnsplashCredit component (PR #436)** — `components/UnsplashCredit.tsx` renders Unsplash thumbnail + "📷 Photo by [Name] on Unsplash" attribution link with `utm_source=socialmate&utm_medium=referral` UTM params. `size` prop: `'sm'` (queue cards, h-20) / `'md'` (calendar panel, h-28). Wired into `app/queue/page.tsx` (sm) and `app/calendar/page.tsx` (md). Both queries updated to include `media_urls` in select.
+- **Landing page visual overhaul + signup cleanup (PR #437)**:
+  - Hero headline: "Social media management without the $99/month price tag." → **"Post everywhere. All at once."** with amber→orange gradient on second line
+  - Added radial depth glows behind hero (amber/purple/blue at low opacity, `blur-[100px+]`) — removes flat look
+  - 7 live platform pills rendered directly in hero using `live` PLATFORMS array
+  - Green pill badge → amber/white (`bg-amber-500/15 border-amber-500/30 text-white`)
+  - CTA button → `bg-amber-500 hover:bg-amber-400` with `shadow-amber-500/25`
+  - Stats numbers: explicit `text-white` added
+  - Founder card condensed and moved below stats
+  - Signup: removed `ageConfirmed` state + all guards → replaced with required `tosAccepted` ToS/Privacy checkbox (amber border/fill, inline links to /terms and /privacy)
+  - Newsletter opt-in updated to reference **IRIS Dispatch** specifically (optional checkbox)
+  - Removed redundant "By signing up you agree to our Terms" text at bottom
+- **Blog FCP fix (PR #438)** — `generateStaticParams` in `app/blog/[slug]/page.tsx` now queries Supabase `blog_posts` table for all slugs at build time, merges with hardcoded list using `Array.from(new Set([...]))`. All 500+ DB-inserted blog posts now pre-render as static HTML at deploy time. FCP dropped from 3.72s Poor → CDN-edge fast. `revalidate = 3600` stays for ISR on posts between deploys.
+- **Compose media preview (PR #439)** — `app/compose/page.tsx` now shows `<UnsplashCredit mediaUrls={draftMediaUrls} size="md" />` in the media attachments section when editing a SOMA-generated post with `media_urls`. State: `draftMediaUrls` set when draft loads. Label: "Attached image (from SOMA)".
+- **Autopilot cron media toggle (PR #440)** — `somaAutopilotRun` in `lib/inngest.ts` now fetches `include_media` from each `soma_projects` row. If true, extracts keyword from post content, calls `autopilotFetchUnsplashImage()` (same pattern as manual route, scoped to step to avoid cross-run state leak), attaches `media_urls` to post insert. Non-fatal. **Remember to resync `soma-autopilot-run` in Inngest dashboard after deploy.**
+- **Zaira Angelique E. Canuto onboarded** — Marketing team member. DocuSign sent. Welcome email sent. SocialMate media outline/guide created including platform access policy, suggested account names, brand voice + creative freedom guidelines.
+- **Analytics snapshot (May 27)** — 794 visitors (+61%), 2,127 page views, 74% bounce rate. Top pages: / (300), /blog/discord-community-management-guide (93), /login (88). Top referrers: bing.com (98), duckduckgo.com (36), google.com (33), t.co (23). 33% USA, 21% Singapore, 9% China. 80% desktop, 19% mobile. RES jumped 94 → **96** after all merges. / page at **99**. Blog still at 65 (Needs Improvement — static params will help future visits).
+- **Reddit + LinkedIn posts** — r/saasbuild post live: "Deli worker turned SaaS founder. 400 PRs, 7 platforms, 2 months. AMA, open to collabs." LinkedIn post live with landing page screenshot, Leo Burnett quote, 2 engagement questions.
+
 **May 24, 2026 (PRs #426):**
 - **Full public site sweep — dark mode, mobile, accuracy** — Three-phase sweep across every public-facing page. PR #426 on branch `fix/dark-mode-accuracy-sweep`.
   - **Phase 1 (dark mode):** All `for/`, `blog/`, `guides/`, `vs/`, and misc public pages audited for dark mode consistency. `PublicLayout` adds `dark` class forcing all `dark:` variants active regardless of system preference.
@@ -695,10 +718,29 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **i18n — remaining inner pages** — Settings full, Bio editor, SOMA/Enki sub-pages (truth, trades, doctrines) still need `t()` wiring. Wire when those pages are touched.
 - **Discord community** — Server is live at discord.gg/2se6FGrbRU. Build it as a tester + feedback pool.
 - **Apple App Store** — Deferred 3–6 months.
-- **SOMA content run** — Submit updated CLAUDE.md when Joshua is ready.
-- **SOMA media toggle** — Add `include_media` boolean to `soma_projects`. On generate, pull relevant image from Unsplash API (free, non-copyrighted) or GIF from GIPHY free tier based on post content keywords. Attach as media URL on the post. Toggle per project. Video content attachment = future milestone after media toggle ships.
+- **SOMA content run** — CLAUDE.md updated May 27. Submit to SOMA project now.
+- **SOMA video attachment** — Next milestone after media toggle (now shipped). On generate, allow video URL attachment per post. Roadmap: support short-form video links from TikTok/YouTube for cross-posting via SOMA.
+- **i18n — remaining pages** — Settings full, Bio editor, SOMA/Enki sub-pages (truth, trades, doctrines had their keys added but Settings/Bio still need `t()` wiring.
+- **White Label improvements** — More customization options for White Label Basic/Pro tiers. Better branding controls, additional color schemes, agency admin panel.
+- **Enterprise tier** — New plan above Agency. Higher seat counts, SLA, priority support, dedicated onboarding, custom contract. Pricing TBD.
+- **SOMA Full Send expansion** — Expand Full Send to support more posting cadences, video content scheduling, and additional platform types.
+- **Google Play — closed testing** — 1 tester opted in. Passive CTA on signup page. *Do not revisit until June 2026.*
+- **LinkedIn Company Pages** — Personal profile OAuth is live. Company page support requires `r_organization_social` + `w_organization_social` permissions.
+- **Instagram / Facebook** — Meta App Review. 4–8 week timeline.
+- **Wyoming LLC annual report** — File when budget allows.
+- **Enki Truth Mode** — 50-trade minimum per strategy. Check `/enki/truth` periodically.
+- **Wall of Love** — Live at `/wall-of-love`. Add entries to `TESTIMONIALS` array when real quotes come in.
+- **Birthday promo BDAY31** — ✅ ACTIVE NOW through Dec 15, 2026.
+- **Product Hunt follow-up** — "We've shipped 50+ features since launch." Target: June 1, 2026.
+
 ## Confirmed Done (stop asking about these)
 
+- ✅ **SOMA media toggle + Unsplash attribution display (May 27, PRs #433–#436)** — `include_media` on `soma_projects`. Unsplash API integration in generate route (keyword extraction, image fetch, attribution, download tracking). `UnsplashCredit` component in queue (sm) and calendar (md). Compliance cherry-pick PR #435. Never ask to build SOMA media toggle again.
+- ✅ **Enki i18n (May 27, PR #434)** — 207 keys, 3 namespaces (app_enki_truth/trades/doctrines), all 7 locales validated. TruthClient, trades page, doctrines page all wired. Aliases `tk`/`td` to avoid loop variable shadowing. Never re-wire these files.
+- ✅ **Landing page visual overhaul + signup cleanup (May 27, PR #437)** — "Post everywhere. All at once." headline, amber gradient, radial glows, platform pills in hero, amber CTA, white stats. Signup: age gate removed, ToS/Privacy required checkbox added, IRIS newsletter opt-in updated. Never revert these changes.
+- ✅ **Blog FCP fix (May 27, PR #438)** — `generateStaticParams` queries all `blog_posts` slugs from Supabase at build time. All 500+ posts now static CDN-served. FCP dropped from 3.72s Poor. Never revert to hardcoded-only list.
+- ✅ **Compose media preview (May 27, PR #439)** — `draftMediaUrls` state + `UnsplashCredit` in compose media section for SOMA posts with images. Never ask to add this again.
+- ✅ **Autopilot cron media toggle (May 27, PR #440)** — `somaAutopilotRun` respects `include_media` per project. Images attached on Monday auto-runs. Never ask to add this again.
 - ✅ **Performance bundle cut + bug sweep (May 26, PRs #431–#432)** — `.maybeSingle()` on all upsert lookups. i18n lazy loading (−394KB from every page). LazyClientComponents wrapper for `ssr:false` dynamic imports. Dead landing page auth call removed. PHLaunchBanner removed. Blog ISR + generateStaticParams. `/tiktok` landing page + nav consolidation all merged. Never redo these.
 - ✅ **Full site sweep — dark mode + mobile + accuracy (May 24, PR #426)** — All public pages: dark mode consistent, comparison tables mobile-scrollable (overflow-x-auto), all stats updated to 15+ AI tools / 7 platforms, logo.png replaces S lettermark everywhere. All 75 vs/ pages JSX-balanced. Never ask to do this sweep again — it's done.
 - ✅ **IRIS AI auto-generate (May 22, PR #401)** — Admin `/admin/iris` compose page has "Generate draft with AI" button. Gemini 2.5-flash writes subject + full body draft. Never ask to build this again.

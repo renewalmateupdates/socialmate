@@ -16,6 +16,7 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import PostImageExporter from '@/components/PostImageExporter'
+import UnsplashCredit from '@/components/UnsplashCredit'
 
 function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse ${className}`} />
@@ -165,10 +166,11 @@ function SortablePostCard({ post, isHighlighted, confirmCancel, setConfirmCancel
               </span>
             </div>
           )}
-          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-2 mb-3">
+          <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed line-clamp-2 mb-2">
             {post.content || <span className="text-gray-300 dark:text-gray-600 italic">No content</span>}
           </p>
-          <div className="flex items-center gap-1.5 flex-wrap">
+          <UnsplashCredit mediaUrls={post.media_urls} size="sm" />
+          <div className="flex items-center gap-1.5 flex-wrap mt-3">
             {(post.platforms || []).map((p: string) => (
               <span key={p} className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 px-2 py-0.5 rounded-full">
                 <span>{PLATFORM_ICONS[p] || '📱'}</span>
@@ -359,7 +361,7 @@ function QueueInner() {
           // Re-fetch updated post to show refreshed breakdown
           const { data: updated } = await supabase
             .from('posts')
-            .select('id, content, platforms, scheduled_at, published_at, status, platform_post_ids, created_at')
+            .select('id, content, platforms, scheduled_at, published_at, status, platform_post_ids, created_at, media_urls')
             .eq('id', postId)
             .single()
           if (updated) {
