@@ -1,6 +1,7 @@
 'use client'
 import { useState, useRef } from 'react'
 import Link from 'next/link'
+import { useI18n } from '@/contexts/I18nContext'
 
 function getCurrentWeekLabel(): string {
   const now = new Date()
@@ -20,6 +21,7 @@ const PLATFORM_OPTIONS = [
 ]
 
 export default function SomaWeeklyPage() {
+  const { t } = useI18n()
   const [tab, setTab] = useState<'form' | 'upload'>('form')
   const [weekLabel, setWeekLabel] = useState(getCurrentWeekLabel())
   const [whatHappened, setWhatHappened] = useState('')
@@ -47,7 +49,7 @@ export default function SomaWeeklyPage() {
 
   async function handleFileSelect(file: File) {
     if (!file.name.endsWith('.txt') && !file.name.endsWith('.md')) {
-      setIngestError('Only .txt and .md files are supported.')
+      setIngestError(t('app_soma_weekly.err_file_type'))
       return
     }
     setUploadedFile(file)
@@ -66,7 +68,7 @@ export default function SomaWeeklyPage() {
   async function handleIngestForm() {
     const rawParts = [whatHappened, workingToward, wins, challenges].filter(Boolean)
     if (rawParts.length === 0) {
-      setIngestError('Please fill in at least one field.')
+      setIngestError(t('app_soma_weekly.err_fill_one'))
       return
     }
     const raw_input = rawParts.join('\n\n')
@@ -81,16 +83,16 @@ export default function SomaWeeklyPage() {
       const data = await res.json()
       if (!res.ok) {
         if (data.error === 'insufficient_soma_credits') {
-          setIngestError('Not enough SOMA credits. You need 25 credits to analyze a week.')
+          setIngestError(t('app_soma_weekly.err_insufficient_credits'))
         } else {
-          setIngestError(data.error || 'Something went wrong. Please try again.')
+          setIngestError(data.error || t('app_soma_weekly.err_generic'))
         }
         return
       }
       setInsights(data.extracted_insights)
       setIngestionId(data.ingestion_id)
     } catch {
-      setIngestError('Network error. Please try again.')
+      setIngestError(t('app_soma_weekly.err_network'))
     } finally {
       setIngesting(false)
     }
@@ -98,7 +100,7 @@ export default function SomaWeeklyPage() {
 
   async function handleIngestUpload() {
     if (!uploadedFile) {
-      setIngestError('Please select a file first.')
+      setIngestError(t('app_soma_weekly.err_select_file'))
       return
     }
     setIngesting(true)
@@ -114,16 +116,16 @@ export default function SomaWeeklyPage() {
       const data = await res.json()
       if (!res.ok) {
         if (data.error === 'insufficient_soma_credits') {
-          setIngestError('Not enough SOMA credits. You need 25 credits to analyze a week.')
+          setIngestError(t('app_soma_weekly.err_insufficient_credits'))
         } else {
-          setIngestError(data.error || 'Something went wrong. Please try again.')
+          setIngestError(data.error || t('app_soma_weekly.err_generic'))
         }
         return
       }
       setInsights(data.extracted_insights)
       setIngestionId(data.ingestion_id)
     } catch {
-      setIngestError('Network error. Please try again.')
+      setIngestError(t('app_soma_weekly.err_network'))
     } finally {
       setIngesting(false)
     }
@@ -132,7 +134,7 @@ export default function SomaWeeklyPage() {
   async function handleGenerate() {
     if (!ingestionId) return
     if (selectedPlatforms.length === 0) {
-      setGenerateError('Select at least one platform.')
+      setGenerateError(t('app_soma_weekly.err_select_platform'))
       return
     }
     setGenerating(true)
@@ -146,15 +148,15 @@ export default function SomaWeeklyPage() {
       const data = await res.json()
       if (!res.ok) {
         if (data.error === 'insufficient_soma_credits') {
-          setGenerateError('Not enough SOMA credits. You need 75 credits to generate a week.')
+          setGenerateError(t('app_soma_weekly.err_insufficient_credits_gen'))
         } else {
-          setGenerateError(data.error || 'Generation failed. Please try again.')
+          setGenerateError(data.error || t('app_soma_weekly.err_gen_failed'))
         }
         return
       }
       setDone(true)
     } catch {
-      setGenerateError('Network error. Please try again.')
+      setGenerateError(t('app_soma_weekly.err_network'))
     } finally {
       setGenerating(false)
     }
@@ -166,9 +168,9 @@ export default function SomaWeeklyPage() {
       <div className="min-h-screen bg-[#0d0d0d] flex items-center justify-center px-4">
         <div className="max-w-md w-full text-center space-y-6">
           <div className="text-5xl">⚡</div>
-          <h2 className="text-2xl font-bold text-white">21 posts created as drafts</h2>
+          <h2 className="text-2xl font-bold text-white">{t('app_soma_weekly.done_title')}</h2>
           <p className="text-zinc-400 text-sm">
-            Spread across 7 days · morning, afternoon, evening slots
+            {t('app_soma_weekly.done_sub')}
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
             <Link
@@ -195,12 +197,12 @@ export default function SomaWeeklyPage() {
 
         {/* Header */}
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold tracking-tight">⚡ This Week&rsquo;s Ingestion</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{t('app_soma_weekly.title')}</h1>
           <p className="text-zinc-400 text-sm">
-            Tell SOMA what happened this week. She&rsquo;ll turn it into 21 posts.
+            {t('app_soma_weekly.subtitle')}
           </p>
           <div className="flex items-center gap-2 pt-1">
-            <label className="text-xs text-zinc-500 shrink-0">Week:</label>
+            <label className="text-xs text-zinc-500 shrink-0">{t('app_soma_weekly.week_label')}</label>
             <input
               type="text"
               value={weekLabel}
@@ -311,8 +313,8 @@ export default function SomaWeeklyPage() {
               className="w-full py-3.5 rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold text-sm transition-colors"
             >
               {generating
-                ? 'Generating 21 posts…'
-                : '⚡ Generate 21 Posts → (75 SOMA credits)'}
+                ? t('app_soma_weekly.generating')
+                : t('app_soma_weekly.generate_btn')}
             </button>
           </div>
         ) : (
@@ -328,7 +330,7 @@ export default function SomaWeeklyPage() {
                     : 'text-zinc-500 hover:text-zinc-300'
                 }`}
               >
-                📝 Fill Form
+                {t('app_soma_weekly.tab_form')}
               </button>
               <button
                 onClick={() => { setTab('upload'); setIngestError('') }}
@@ -338,7 +340,7 @@ export default function SomaWeeklyPage() {
                     : 'text-zinc-500 hover:text-zinc-300'
                 }`}
               >
-                📁 Upload File
+                {t('app_soma_weekly.tab_upload')}
               </button>
             </div>
 
@@ -398,7 +400,7 @@ export default function SomaWeeklyPage() {
                     disabled={ingesting}
                     className="w-full py-3.5 rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold text-sm transition-colors"
                   >
-                    {ingesting ? 'Analyzing…' : 'Analyze My Week → (25 SOMA credits)'}
+                    {ingesting ? t('app_soma_weekly.analyzing') : t('app_soma_weekly.analyze_btn')}
                   </button>
                 </>
               ) : (
@@ -463,7 +465,7 @@ export default function SomaWeeklyPage() {
                     disabled={ingesting || !uploadedFile}
                     className="w-full py-3.5 rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 disabled:cursor-not-allowed text-black font-bold text-sm transition-colors"
                   >
-                    {ingesting ? 'Analyzing…' : 'Analyze This File → (25 SOMA credits)'}
+                    {ingesting ? t('app_soma_weekly.analyzing') : t('app_soma_weekly.analyze_btn')}
                   </button>
                 </>
               )}
@@ -474,7 +476,7 @@ export default function SomaWeeklyPage() {
         {/* Back link */}
         <div className="text-center">
           <Link href="/soma/dashboard" className="text-zinc-600 hover:text-zinc-400 text-xs transition-colors">
-            ← Back to SOMA
+            {t('app_soma_weekly.back_link')}
           </Link>
         </div>
 

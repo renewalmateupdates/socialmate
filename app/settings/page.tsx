@@ -63,8 +63,8 @@ function SettingsInner() {
     'White Label': tSettings('app_settings_tabs.white_label'),
     'Appearance':  tSettings('app_settings_tabs.appearance'),
     'Brand Voice':  tSettings('app_settings_tabs.brand_voice'),
-    'Scheduling':   '⏰ Scheduling',
-    'Integrations': '🔗 Integrations',
+    'Scheduling':   tSettings('app_settings_tabs.scheduling'),
+    'Integrations': tSettings('app_settings_tabs.integrations'),
   }
 
   const [userEmail, setUserEmail]       = useState('')
@@ -1656,18 +1656,18 @@ function SettingsInner() {
           {activeTab === 'Scheduling' && (
             <div className="bg-surface border border-theme rounded-2xl p-6 space-y-6">
               <div>
-                <h2 className="text-base font-extrabold mb-1">⏰ Scheduling Window</h2>
-                <p className="text-xs text-gray-400 dark:text-gray-500">Posts auto-scheduled via Smart Queue will only land within this window. Times are in your local timezone.</p>
+                <h2 className="text-base font-extrabold mb-1">{tSettings('app_settings_scheduling_tab.title')}</h2>
+                <p className="text-xs text-gray-400 dark:text-gray-500">{tSettings('app_settings_scheduling_tab.desc')}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">Start time</label>
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">{tSettings('app_settings_scheduling_tab.start_time')}</label>
                   <input type="time" value={schedStart} onChange={e => setSchedStart(e.target.value)}
                     className="w-full px-3 py-2.5 text-sm font-semibold border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-black transition-all" />
                 </div>
                 <div>
-                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">End time</label>
+                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">{tSettings('app_settings_scheduling_tab.end_time')}</label>
                   <input type="time" value={schedEnd} onChange={e => setSchedEnd(e.target.value)}
                     className="w-full px-3 py-2.5 text-sm font-semibold border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-black transition-all" />
                 </div>
@@ -1676,8 +1676,8 @@ function SettingsInner() {
               <div className="border-t border-theme pt-6">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <p className="text-sm font-bold">🔕 Do Not Disturb</p>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Mute all app notifications during these hours</p>
+                    <p className="text-sm font-bold">{tSettings('app_settings_scheduling_tab.dnd_title')}</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{tSettings('app_settings_scheduling_tab.dnd_desc')}</p>
                   </div>
                   <button
                     role="switch"
@@ -1691,12 +1691,12 @@ function SettingsInner() {
                 {dndEnabled && (
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">DND start</label>
+                      <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">{tSettings('app_settings_scheduling_tab.dnd_start')}</label>
                       <input type="time" value={dndStart} onChange={e => setDndStart(e.target.value)}
                         className="w-full px-3 py-2.5 text-sm font-semibold border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-black transition-all" />
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">DND end</label>
+                      <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">{tSettings('app_settings_scheduling_tab.dnd_end')}</label>
                       <input type="time" value={dndEnd} onChange={e => setDndEnd(e.target.value)}
                         className="w-full px-3 py-2.5 text-sm font-semibold border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-black transition-all" />
                     </div>
@@ -1709,9 +1709,9 @@ function SettingsInner() {
                   onClick={handleSaveScheduling}
                   disabled={schedSaving}
                   className="px-6 py-2.5 rounded-xl text-sm font-bold bg-black dark:bg-white text-white dark:text-black hover:opacity-80 transition-all disabled:opacity-50 flex items-center gap-1.5">
-                  {schedSaving ? <><div className="w-3 h-3 border-2 border-white/30 dark:border-black/30 border-t-white dark:border-t-black rounded-full animate-spin" />Saving...</> : 'Save'}
+                  {schedSaving ? <><div className="w-3 h-3 border-2 border-white/30 dark:border-black/30 border-t-white dark:border-t-black rounded-full animate-spin" />{tSettings('app_settings_scheduling_tab.saving')}</> : tSettings('app_settings_scheduling_tab.save')}
                 </button>
-                {schedSaved && <span className="text-sm font-semibold text-green-500">Saved ✓</span>}
+                {schedSaved && <span className="text-sm font-semibold text-green-500">{tSettings('app_settings_scheduling_tab.saved')}</span>}
               </div>
             </div>
           )}

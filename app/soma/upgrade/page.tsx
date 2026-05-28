@@ -1,16 +1,19 @@
 'use client'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
-
-const FEATURES = [
-  { icon: '🧠', label: 'Voice identity profile — SOMA learns your tone' },
-  { icon: '📥', label: 'Weekly content ingestion — themes, hooks, ideas' },
-  { icon: '✨', label: 'AI content generation — ready-to-approve posts' },
-  { icon: '📅', label: 'Smart scheduling — posts at your best times' },
-  { icon: '🔥', label: 'Autopilot mode — fully automated on Pro+ (add-on)' },
-]
+import { useI18n } from '@/contexts/I18nContext'
 
 export default function SomaUpgradePage() {
+  const { t } = useI18n()
+
+  const FEATURES = [
+    { icon: '🧠', label: t('app_soma_upgrade.feature_voice') },
+    { icon: '📥', label: t('app_soma_upgrade.feature_ingest') },
+    { icon: '✨', label: t('app_soma_upgrade.feature_generate') },
+    { icon: '📅', label: t('app_soma_upgrade.feature_schedule') },
+    { icon: '🔥', label: t('app_soma_upgrade.feature_autopilot') },
+  ]
+
   return (
     <div className="flex min-h-screen bg-gray-950">
       <Sidebar />
@@ -30,11 +33,10 @@ export default function SomaUpgradePage() {
                   <span className="text-3xl">⚡</span>
                 </div>
                 <h1 className="text-2xl font-extrabold text-white mb-2">
-                  SOMA is a Pro feature
+                  {t('app_soma_upgrade.title')}
                 </h1>
                 <p className="text-gray-400 text-sm leading-relaxed">
-                  Self-Optimizing Media Agent is available on Pro and Agency plans.
-                  Upgrade to unlock AI-powered content intelligence.
+                  {t('app_soma_upgrade.subtitle')}
                 </p>
               </div>
 
@@ -53,13 +55,13 @@ export default function SomaUpgradePage() {
                 href="/pricing"
                 className="block w-full text-center bg-gradient-to-r from-amber-500 to-yellow-400 text-gray-900 font-extrabold text-sm px-6 py-3.5 rounded-xl hover:opacity-90 transition-all shadow-lg shadow-amber-500/20"
               >
-                Upgrade to Pro — $5/mo →
+                {t('app_soma_upgrade.cta')}
               </Link>
 
               <p className="text-center text-xs text-gray-500 mt-4">
-                Already on Pro?{' '}
+                {t('app_soma_upgrade.already_pro')}{' '}
                 <Link href="/settings" className="text-amber-400 hover:underline">
-                  Check your settings
+                  {t('app_soma_upgrade.check_settings')}
                 </Link>
               </p>
             </div>
