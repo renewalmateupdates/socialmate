@@ -22,6 +22,7 @@ interface Project {
   platform_schedule: Record<string, PlatformSchedule> | null
   paused: boolean
   include_media: boolean
+  include_video_url: string | null
   campaign_theme: string | null
   campaign_start: string | null
   campaign_end: string | null
@@ -175,6 +176,52 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
       setProject(p => p ? { ...p, include_media: !p.include_media } : p)
     } finally {
       setTogglingMedia(false)
+    }
+  }
+
+  // Video URL attachment
+  const [videoUrlInput, setVideoUrlInput]   = useState('')
+  const [savingVideoUrl, setSavingVideoUrl] = useState(false)
+  const [videoUrlSaved, setVideoUrlSaved]   = useState(false)
+
+  // Sync video URL input when project loads
+  useEffect(() => {
+    if (!project) return
+    setVideoUrlInput(project.include_video_url ?? '')
+  }, [project?.id]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function handleSaveVideoUrl() {
+    if (!project) return
+    setSavingVideoUrl(true)
+    setVideoUrlSaved(false)
+    try {
+      await fetch(`/api/soma/projects/${projectId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ include_video_url: videoUrlInput.trim() || null }),
+      })
+      const saved = videoUrlInput.trim() || null
+      setProject(p => p ? { ...p, include_video_url: saved } : p)
+      setVideoUrlSaved(true)
+      setTimeout(() => setVideoUrlSaved(false), 3000)
+    } finally {
+      setSavingVideoUrl(false)
+    }
+  }
+
+  async function handleClearVideoUrl() {
+    if (!project) return
+    setSavingVideoUrl(true)
+    try {
+      await fetch(`/api/soma/projects/${projectId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ include_video_url: null }),
+      })
+      setProject(p => p ? { ...p, include_video_url: null } : p)
+      setVideoUrlInput('')
+    } finally {
+      setSavingVideoUrl(false)
     }
   }
 
@@ -564,6 +611,50 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
           >
             <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${project.include_media ? 'translate-x-6' : 'translate-x-1'}`} />
           </button>
+        </div>
+
+        {/* Video attachment */}
+        <div className="rounded-xl border border-gray-800 bg-gray-900 px-4 py-4">
+          <div className="mb-3">
+            <p className="text-sm font-bold text-white">🎬 Video attachment</p>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Paste a TikTok or YouTube short URL. Posts will include this video link when generated.
+            </p>
+          </div>
+
+          {project.include_video_url && videoUrlInput === project.include_video_url ? (
+            /* Current saved URL display */
+            <div className="flex items-center gap-2 bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 mb-3">
+              <span className="text-xs text-emerald-400 font-semibold flex-shrink-0">✓ Saved:</span>
+              <span className="text-xs text-gray-300 truncate flex-1">{project.include_video_url}</span>
+              <button
+                type="button"
+                onClick={handleClearVideoUrl}
+                disabled={savingVideoUrl}
+                className="text-[10px] text-red-400 hover:text-red-300 font-semibold flex-shrink-0 disabled:opacity-50"
+              >
+                Remove
+              </button>
+            </div>
+          ) : null}
+
+          <div className="flex gap-2">
+            <input
+              type="url"
+              value={videoUrlInput}
+              onChange={e => { setVideoUrlInput(e.target.value); setVideoUrlSaved(false) }}
+              placeholder="https://www.tiktok.com/@handle/video/... or https://youtube.com/shorts/..."
+              className="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-cyan-500/50"
+            />
+            <button
+              type="button"
+              onClick={handleSaveVideoUrl}
+              disabled={savingVideoUrl || videoUrlInput.trim() === (project.include_video_url ?? '')}
+              className="px-3 py-2 bg-cyan-700 hover:bg-cyan-600 disabled:opacity-40 text-white text-xs font-bold rounded-xl transition-all flex-shrink-0"
+            >
+              {savingVideoUrl ? '…' : videoUrlSaved ? '✓ Saved' : 'Save'}
+            </button>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

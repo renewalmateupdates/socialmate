@@ -121,7 +121,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // Fetch project including per-platform schedule
     const { data: project } = await admin
       .from('soma_projects')
-      .select('id, workspace_id, platforms, posts_per_day, content_window_days, mode, platform_schedule, runs_this_month, campaign_theme, campaign_start, campaign_end, include_media')
+      .select('id, workspace_id, platforms, posts_per_day, content_window_days, mode, platform_schedule, runs_this_month, campaign_theme, campaign_start, campaign_end, include_media, include_video_url')
       .eq('id', projectId)
       .eq('user_id', user.id)
       .single()
@@ -201,6 +201,11 @@ Example posts: ${Array.isArray(profile.voice_examples) ? (profile.voice_examples
       ? `\n\nACTIVE CAMPAIGN: Focus ALL content heavily on "${campaignTheme}". ${campaignStart && campaignEnd ? `This campaign runs ${campaignStart} to ${campaignEnd}.` : ''} Make every post timely and specific to this campaign theme. Weave the campaign angle into every piece of content.`
       : ''
 
+    const includeVideoUrl = (project as any).include_video_url as string | null
+    const videoBlock = includeVideoUrl
+      ? `\n\nVIDEO URL TO INCLUDE: ${includeVideoUrl}\nNaturally include this video URL in each post. You can append it at the end on its own line, or weave it in naturally with context like "Watch here:" or "Full clip:" — but always include it so followers can actually watch the video.`
+      : ''
+
     const insightBlock = `THIS WEEK'S INSIGHTS (from master doc diff):
 Key themes: ${insights.key_themes?.join(', ') ?? 'none'}
 Wins: ${insights.wins?.join(', ') ?? 'none'}
@@ -245,7 +250,7 @@ Emotional tone: ${insights.emotional_tone ?? 'motivated'}${campaignBlock}`
         const chunkDays  = chunk.length
         const prompt = `${identityContext}
 
-${insightBlock}
+${insightBlock}${videoBlock}
 
 PLATFORM: ${platform.toUpperCase()}
 FORMAT RULES: ${instruction}
