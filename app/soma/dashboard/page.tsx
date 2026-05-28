@@ -121,7 +121,7 @@ const TIERS = [
     features: [
       'Fully autonomous — posts go live with zero review',
       'Maximum 12 generation runs/month',
-      'Up to 10 posts/day, 14-day windows',
+      'Up to 7 posts/day per platform, daily runs',
       'Priority Gemini processing',
     ],
   },
@@ -484,6 +484,23 @@ export default function SomaDashboardPage() {
             </button>
           </div>
         </div>
+
+        {/* ── FULL SEND ACTIVE BANNER ────────────────────────────────── */}
+        {credits?.full_send_enabled && currentMode === 'full_send' && (
+          <div className="flex items-center gap-3 rounded-xl border border-amber-500/30 bg-amber-900/15 px-4 py-3">
+            <span className="relative flex-shrink-0">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-400 block" />
+              <span className="absolute inset-0 rounded-full bg-amber-400 animate-ping opacity-60" />
+            </span>
+            <div className="flex-1">
+              <p className="text-sm font-extrabold text-amber-300">🚀 Full Send is active</p>
+              <p className="text-xs text-gray-400 mt-0.5">SOMA auto-schedules posts every day at 9am EDT — no review required. Up to 7 posts/day per platform.</p>
+            </div>
+            <Link href="/queue" className="text-xs font-bold text-amber-400 hover:text-amber-300 transition-colors whitespace-nowrap flex-shrink-0">
+              View schedule →
+            </Link>
+          </div>
+        )}
 
         {/* ── TOP CARDS ROW ──────────────────────────────────────────── */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

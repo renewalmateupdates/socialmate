@@ -208,7 +208,7 @@ Example posts: ${Array.isArray(profile.voice_examples) ? (profile.voice_examples
     const windowDays  = project.content_window_days ?? 7
     const globalPpd   = project.posts_per_day ?? 2
     const schedule    = (project.platform_schedule ?? {}) as Record<string, { posts_per_day: number; days: number[] }>
-    const maxPpd      = project.mode === 'full_send' ? 10 : project.mode === 'autopilot' ? 5 : 2
+    const maxPpd      = project.mode === 'full_send' ? 7 : project.mode === 'autopilot' ? 5 : 2
 
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })

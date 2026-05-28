@@ -37,6 +37,15 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
     if (error || !project) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
+    // Fetch workspace to get Full Send enabled flag
+    const { data: workspace } = await admin
+      .from('workspaces')
+      .select('soma_full_send_enabled')
+      .eq('id', project.workspace_id)
+      .maybeSingle()
+
+    const fullSendEnabled = workspace?.soma_full_send_enabled ?? false
+
     // Fetch last 2 master docs for diff display
     const { data: docs } = await admin
       .from('soma_master_docs')
@@ -45,7 +54,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
       .order('version', { ascending: false })
       .limit(2)
 
-    return NextResponse.json({ project, docs: docs ?? [] })
+    return NextResponse.json({ project: { ...project, full_send_enabled: fullSendEnabled }, docs: docs ?? [] })
   } catch (err) {
     console.error('[SOMA Project GET]', err)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
