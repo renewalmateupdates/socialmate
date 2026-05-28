@@ -45,6 +45,13 @@ const ROADMAP: RoadmapItem[] = [
   { title: 'Onboarding Quick Start',             desc: 'Skip the full onboarding and jump straight to platform connect → done. Starter posts auto-schedule to calendar with staggered times — first win moment before the user composes anything.', status: 'shipped', category: 'Platform' },
   { title: 'Wall of Love',                       desc: 'Public testimonial wall at /wall-of-love. Add testimonials to TESTIMONIALS array in app/wall-of-love/page.tsx. Empty state with mailto CTA for first quotes.', status: 'shipped', category: 'Growth' },
 
+  // ── IN PROGRESS ──────────────────────────────────────────
+  { title: 'SOMA video attachment',         desc: 'Attach short-form video URLs to SOMA-generated posts for cross-platform scheduling. TikTok/YouTube source support. Natural next step after the Unsplash image media toggle.', status: 'in-progress', category: 'AI' },
+  { title: 'White Label improvements',      desc: 'Expanded branding controls for White Label Basic/Pro — additional color scheme options, custom favicon, agency admin panel, and more granular branding customization.', status: 'in-progress', category: 'Platform' },
+  { title: 'Enterprise tier',               desc: 'New plan above Agency — higher seat counts, SLA, priority support, dedicated onboarding, and custom contract. Built for larger agencies and teams.', status: 'in-progress', category: 'Platform' },
+  { title: 'SOMA Full Send expansion',      desc: 'Expand Full Send mode to support higher posting cadences, video-native content scheduling, and additional platform types. More power for heavy users.', status: 'in-progress', category: 'AI' },
+  { title: 'i18n — remaining app pages',   desc: 'Wire useI18n() into Settings full, Bio editor, and remaining SOMA/Enki sub-pages. Core pages + Enki truth/trades/doctrines already done. Completing full-app translation coverage.', status: 'in-progress', category: 'Platform' },
+
   // ── PLANNED ───────────────────────────────────────────────
   { title: 'Instagram publishing',       desc: 'Instagram Graph API integration. Requires Facebook Business account and Meta app review.',                       status: 'planned',      category: 'Platforms'     },
   { title: 'TikTok publishing',          desc: 'TikTok Production API approved May 17, 2026. Connect, schedule, and publish videos to TikTok directly from SocialMate. Studio at /tiktok/studio — upload, trim, filter, caption, and schedule.', status: 'shipped', category: 'Platforms' },

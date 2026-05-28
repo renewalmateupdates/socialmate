@@ -21,6 +21,20 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'May 27, 2026',
+    version: 'SOMA Media, Enki i18n, Landing Redesign, Blog Speed Fix',
+    changes: [
+      { type: 'New',      text: 'SOMA media toggle — enable Unsplash images per project. Each generated post gets a relevant photo attached automatically. Photographer attribution displayed inline per Unsplash API guidelines.' },
+      { type: 'New',      text: 'Unsplash image preview in Queue and Calendar — posts with attached images now show a thumbnail and "Photo by X on Unsplash" attribution link in post cards.' },
+      { type: 'New',      text: 'Compose media preview — opening a SOMA-generated post with an attached image in Compose now shows the Unsplash thumbnail and attribution in the media section.' },
+      { type: 'Improved', text: 'Enki pages fully translated — Truth Mode, Trade History, and Doctrines pages are now wired with i18n. All 7 languages (en/es/de/fr/pt/ru/zh) supported. 207 translation keys added.' },
+      { type: 'Improved', text: 'Landing page redesign — new headline "Post everywhere. All at once." with amber gradient. Platform pills in hero. Visual depth glows. Amber CTA button. Stats now white. Less flat, more alive.' },
+      { type: 'Improved', text: 'Signup page cleanup — age gate checkbox removed and replaced with a proper ToS/Privacy acceptance checkbox. Newsletter opt-in updated to reference IRIS Dispatch by name.' },
+      { type: 'Improved', text: 'Blog pages now pre-render at build time — all 500+ blog posts are generated as static HTML at deploy time instead of hitting Supabase on every first load. Significant FCP improvement.' },
+      { type: 'New',      text: 'SOMA autopilot cron now respects the media toggle — projects with include_media enabled will receive Unsplash images on Monday auto-runs, not just manual generate runs.' },
+    ],
+  },
+  {
     date: 'May 22, 2026',
     version: 'FeedHive Comparison Page',
     changes: [
