@@ -218,6 +218,7 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - Free: $0/month — 50 AI credits/month, 2 team seats, link in bio, all core features
 - Pro: $5/month or $55/year — 500 AI credits/month, 5 seats, Smart Queue, Brand Voice, A/B testing
 - Agency: $20/month or $209/year — 2,000 AI credits/month, 15 seats, 5 client workspaces
+- Enterprise: Custom pricing — unlimited seats, unlimited client workspaces, custom credit allocation, dedicated onboarding, 99.9% SLA, White Label Pro included, priority support (< 4hr), custom contract. Contact us at /enterprise or hello@socialmate.studio
 - White Label Basic: +$20/month — custom logo, colors, branding
 - White Label Pro: +$40/month — custom domain + everything above
 - AI Credit Packs: $1.99 (100cr), $4.99 (300cr), $9.99 (750cr), $19.99 (2,000cr)
@@ -230,6 +231,7 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - Homepage: https://socialmate.studio
 - Pricing: https://socialmate.studio/pricing
 - Features: https://socialmate.studio/features
+- Enterprise: https://socialmate.studio/enterprise
 - Blog: https://socialmate.studio/blog (570+ posts, all pre-rendered as static pages)
 - Roadmap: https://socialmate.studio/roadmap
 - FAQ: https://socialmate.studio/faq

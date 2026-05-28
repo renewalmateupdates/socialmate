@@ -629,6 +629,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/zenith`,             lastModified: now, changeFrequency: 'weekly',  priority: 0.7 },
     { url: `${base}/sm-pulse`,           lastModified: now, changeFrequency: 'weekly',  priority: 0.6 },
     { url: `${base}/sm-radar`,           lastModified: now, changeFrequency: 'weekly',  priority: 0.6 },
+    { url: `${base}/enterprise`,         lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
   ]
 
   const comparisons: MetadataRoute.Sitemap = [

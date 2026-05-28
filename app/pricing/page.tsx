@@ -533,7 +533,7 @@ export default function Pricing() {
         })()}
 
         {/* PLAN CARDS */}
-        <div data-plan-cards className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div data-plan-cards className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
           {PLANS.map(plan => {
             const priceId = annual ? plan.annualPriceId : plan.monthlyPriceId
             return (
@@ -600,6 +600,52 @@ export default function Pricing() {
               </div>
             )
           })}
+
+          {/* Enterprise card */}
+          <div className="bg-gray-900 border-2 border-blue-500/60 rounded-2xl overflow-hidden flex flex-col relative">
+            {/* Top glow */}
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-blue-500/60 to-transparent" />
+            <div className="px-6 py-6">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-lg font-extrabold text-white">Enterprise</h2>
+                <span className="text-xs font-bold px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30">For Teams</span>
+              </div>
+              <div className="flex items-end gap-1 mb-2">
+                <span className="text-4xl font-extrabold text-white">Custom</span>
+              </div>
+              <p className="text-xs leading-relaxed text-gray-400">For agencies and enterprises that need unlimited scale, custom terms, and a real SLA.</p>
+            </div>
+
+            <div className="px-6 py-5 flex-1 flex flex-col">
+              <ul className="space-y-2.5 flex-1 mb-6">
+                {[
+                  { label: 'Everything in Agency' },
+                  { label: 'Unlimited seats' },
+                  { label: 'Unlimited client workspaces' },
+                  { label: 'Custom credit allocation' },
+                  { label: 'Dedicated onboarding' },
+                  { label: 'SLA guarantee', note: '99.9% uptime' },
+                  { label: 'White Label Pro included' },
+                  { label: 'Priority support', note: '< 4hr response' },
+                  { label: 'Custom contract' },
+                ].map((f, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <span className="text-blue-400 mt-0.5 flex-shrink-0 font-bold">✓</span>
+                    <span className="text-xs text-gray-300">
+                      {f.label}
+                      {f.note && <span className="text-gray-500"> — {f.note}</span>}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+
+              <Link
+                href="/enterprise"
+                className="w-full text-center text-sm font-bold py-3 rounded-xl transition-all bg-blue-600 hover:bg-blue-500 text-white">
+                Contact us →
+              </Link>
+            </div>
+          </div>
         </div>
 
         {/* SECURE CHECKOUT BADGE */}
