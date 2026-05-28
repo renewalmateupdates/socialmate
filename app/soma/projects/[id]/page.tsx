@@ -25,6 +25,7 @@ interface Project {
   campaign_theme: string | null
   campaign_start: string | null
   campaign_end: string | null
+  full_send_enabled: boolean
 }
 
 interface MasterDoc {
@@ -449,6 +450,12 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
             <span className={`text-xs font-bold px-3 py-1 rounded-full border ${modeColors.bg} ${modeColors.text}`}>
               {project.mode === 'safe' ? '🟢 Safe' : project.mode === 'autopilot' ? '⚡ Autopilot' : '🚀 Full Send'}
             </span>
+            {project.full_send_enabled && project.mode === 'full_send' && (
+              <span className="flex items-center gap-1.5 text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-900/40 border border-amber-600/50 text-amber-300">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse flex-shrink-0" />
+                🚀 Full Send active — posts daily at 9am EDT
+              </span>
+            )}
             {/* Pause toggle */}
             <button
               onClick={handleTogglePause}
@@ -671,7 +678,12 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
             {schedule && Object.keys(schedule).length > 0 && (
               <div className="rounded-2xl border border-gray-800 bg-gray-900 p-5">
                 <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500">Posting Schedule</h2>
+                  <div>
+                    <h2 className="text-xs font-bold uppercase tracking-widest text-gray-500">Posting Schedule</h2>
+                    <p className="text-[10px] text-gray-600 mt-0.5">
+                      Max {project.mode === 'full_send' ? '7' : project.mode === 'autopilot' ? '3' : '2'}/day per platform on {project.mode === 'full_send' ? 'Full Send' : project.mode === 'autopilot' ? 'Autopilot' : 'Safe'} mode
+                    </p>
+                  </div>
                   {!editingSchedule ? (
                     <button
                       onClick={() => { setLocalSchedule(JSON.parse(JSON.stringify(schedule))); setEditingSchedule(true) }}
@@ -699,7 +711,7 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
                           <div className="flex items-center gap-1">
                             <button onClick={() => setLocalSchedule(s => ({ ...s, [pid]: { ...s[pid], posts_per_day: Math.max(1, s[pid].posts_per_day - 1) } }))} className="w-5 h-5 rounded bg-gray-800 text-gray-300 text-xs font-bold hover:bg-gray-700">−</button>
                             <span className="text-[11px] text-amber-400 font-bold w-8 text-center">{cfg.posts_per_day}/day</span>
-                            <button onClick={() => setLocalSchedule(s => ({ ...s, [pid]: { ...s[pid], posts_per_day: Math.min(10, s[pid].posts_per_day + 1) } }))} className="w-5 h-5 rounded bg-gray-800 text-gray-300 text-xs font-bold hover:bg-gray-700">+</button>
+                            <button onClick={() => setLocalSchedule(s => ({ ...s, [pid]: { ...s[pid], posts_per_day: Math.min(project.mode === 'full_send' ? 7 : project.mode === 'autopilot' ? 3 : 2, s[pid].posts_per_day + 1) } }))} className="w-5 h-5 rounded bg-gray-800 text-gray-300 text-xs font-bold hover:bg-gray-700">+</button>
                           </div>
                         ) : (
                           <span className="text-[11px] text-amber-400 font-bold">{cfg.posts_per_day}/day</span>
