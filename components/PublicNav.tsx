@@ -187,8 +187,9 @@ export default function PublicNav() {
 
         {/* Desktop nav */}
         <nav ref={navRef} className="hidden lg:flex items-center gap-0.5 flex-1 justify-center">
-          <Link href="/features" className={flatLinkCls('/features')}>Features</Link>
-          <Link href="/pricing"  className={flatLinkCls('/pricing')}>Pricing</Link>
+          <Link href="/features"   className={flatLinkCls('/features')}>Features</Link>
+          <Link href="/pricing"   className={flatLinkCls('/pricing')}>Pricing</Link>
+          <Link href="/enterprise" className={flatLinkCls('/enterprise')}>Enterprise</Link>
 
           <span className="w-px h-4 bg-gray-200 dark:bg-gray-700 mx-1.5" />
 
@@ -336,6 +337,7 @@ export default function PublicNav() {
                   { label: '💜 Monetize',       href: '/monetize'      },
                   { label: '🎵 TikTok Studio',  href: '/tiktok' },
                   { label: '🤖 Android Beta',   href: '/beta'          },
+                  { label: '🏢 Enterprise',     href: '/enterprise'    },
                 ].map(link => (
                   <Link key={link.href} href={link.href}
                     onClick={() => setOpen(false)}
