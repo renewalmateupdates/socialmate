@@ -21,6 +21,18 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'May 28, 2026',
+    version: 'Enterprise Tier, Full Send Daily Cron, White Label, i18n Completion, SOMA Video URL',
+    changes: [
+      { type: 'New',      text: 'Enterprise tier — new /enterprise landing page with contact form. Enterprise plan card added to /pricing (custom pricing, unlimited seats, SLA, White Label Pro included, dedicated onboarding). Inquiries saved to DB and emailed to Joshua. No Stripe checkout — provisioned manually.' },
+      { type: 'New',      text: 'SOMA Full Send daily auto-run — Full Send users now get a daily 9am EDT cron (somaFullSendDailyRun). Max 7 posts/day per platform, 30 runs/month cap. Autopilot keeps its weekly Monday schedule. 🚀 Full Send active banner on SOMA dashboard.' },
+      { type: 'New',      text: 'SOMA video URL attachment — add a video URL per SOMA project. Injected into Gemini prompts so generated posts reference the video naturally. Cyan URL input + saved state with remove button on project page.' },
+      { type: 'Improved', text: 'White Label settings fully built — logo URL, custom brand name, primary color picker, remove-branding Pro toggle, and custom domain input (Pro only). File upload via /api/white-label/logo-upload to Supabase media bucket. Default accent color corrected to amber.' },
+      { type: 'Improved', text: 'i18n completed — Settings Scheduling tab, SOMA Weekly page, and SOMA Upgrade gate fully wired with useI18n(). 54 new translation keys across all 7 locale files (en/es/de/fr/pt/ru/zh). Full-app translation coverage now complete.' },
+      { type: 'Fixed',    text: 'Build error fixed — somaFullSendDailyRun was imported in route.ts but never written. Full function added to lib/inngest.ts. Vercel deploy unblocked.' },
+    ],
+  },
+  {
     date: 'May 27, 2026',
     version: 'SOMA Media, Enki i18n, Landing Redesign, Blog Speed Fix',
     changes: [

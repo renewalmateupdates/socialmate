@@ -634,6 +634,16 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **`/tiktok` public landing page** — SEO landing page at `/tiktok` targeting "TikTok scheduler" search queries. Added to sitemap.
 - **PublicNav desktop consolidation** — Products dropdown on desktop nav, cleaner right side.
 
+**May 28, 2026 (PRs #442–#446 + hotfix):**
+- **SOMA video URL attachment (PR #442)** — `include_video_url TEXT DEFAULT NULL` column added to `soma_projects` (migration `20260527000002_soma_video_url.sql`). Text input on project page for a video URL. PATCH to project API saves it. Generate route reads `include_video_url` and injects a `VIDEO URL TO INCLUDE:` instruction block into Gemini prompt. Clear button removes saved URL. Cyan input + green "✓ Saved" pill with Remove button.
+- **Enterprise tier (PR #443)** — `/enterprise` landing page (dark-forced, contact form with name/email/company/team size/message). Enterprise plan card added as 4th column on `/pricing` (custom pricing, unlimited seats, SLA, White Label Pro included, dedicated onboarding, priority support, custom contract). `POST /api/enterprise/inquiry` saves to `enterprise_inquiries` table + sends Resend HTML email to `socialmatehq@gmail.com`. "Enterprise" link in PublicNav desktop + mobile. Sitemap + llms.txt updated. SQL: `enterprise_inquiries` table (no RLS — admin-only). No Stripe — provisioned manually by Joshua.
+- **White Label improvements (PR #444)** — 4 missing state vars added to Settings white label panel (`wlRemoveBranding`, `wlSaving`, `wlLogoUploading`, `wlLogoError`). Full UI: file upload button (calls `/api/white-label/logo-upload` to Supabase media bucket), inline logo preview, color swatch, remove-branding Pro-only toggle, custom domain locked state for Basic users. Default accent color corrected from `#000000` → `#f59e0b` (amber). SQL: `ALTER TABLE user_settings ADD COLUMN IF NOT EXISTS white_label_remove_branding BOOLEAN DEFAULT FALSE;`
+- **SOMA Full Send expansion (PR #445)** — `somaFullSendDailyRun` Inngest function: cron `'0 13 * * *'` (daily 1pm UTC / 9am EDT), only Full Send workspaces (`soma_full_send_enabled = true`), max 7 posts/day per platform, 30 runs/month cap. Registered in `app/api/inngest/route.ts`. Project page shows 🚀 Full Send badge when active. Mode-aware max shown in schedule editor. Full Send daily cron runs separately from Autopilot's weekly Monday run — both coexist. **Resync `soma-full-send-daily-run` in Inngest after deploy.**
+- **i18n remaining pages (PR #446)** — Settings Scheduling tab (title, description, start/end time labels, DND block), SOMA Weekly page (all JSX strings, error messages, button states), SOMA Upgrade page (feature list, CTA, footer). 54 new keys across 3 namespaces: `app_settings_scheduling_tab` (11), `app_soma_weekly` (34), `app_soma_upgrade` (9). All 7 locale files validated in sync. Full-app translation coverage now complete.
+- **Build error hotfix (direct to main)** — `somaFullSendDailyRun` was imported in `route.ts` by the agent but never written to `lib/inngest.ts`. Full 180-line function added manually. Vercel deploy unblocked. Build passing.
+- **Reddit posts live** — r/alphaandbetausers: updated tester recruitment post (2/12 opted in, feature update, Android CTA). r/buildinpublic: build-in-public update — "I said no new features then shipped 10 more things" — honest state, tech decisions, "what moved you from user to paying customer?" question.
+- **Merge conflict resolved (PR #444)** — `llms.txt` conflict between white-label branch and main resolved — kept 570+ blog count from main.
+
 **May 27, 2026 (PRs #433–#440):**
 - **SOMA media toggle (PR #433)** — `include_media` BOOLEAN column added to `soma_projects` (migration `20260527000001_soma_include_media.sql`). Unsplash API integration in manual generate route: keyword extraction (strips stop words, returns first meaningful term from post content), `fetchUnsplashImage()` calls Unsplash random photo endpoint, fires required download-location tracking ping (API compliance), caches per-keyword within run. Attribution stored as `media_urls[1] = "Photo by X on Unsplash | profile_url"`. Non-fatal — posts still create if Unsplash unavailable. Toggle UI on project page (amber pill switch). `UNSPLASH_ACCESS_KEY` env var required.
 - **Enki i18n (PR #434)** — 207 translation keys across 3 new namespaces: `app_enki_truth` (77 keys for TruthClient.tsx), `app_enki_trades` (38 keys, alias `tk` to avoid shadowing trade loop variable), `app_enki_doctrines` (92 keys, alias `td`). All 7 locale files (en/es/de/fr/pt/ru/zh) updated and validated in sync. Server component `page.tsx` files left unchanged — only client components wired.
@@ -697,7 +707,7 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 - **Instagram / Facebook** — Both require Meta App Review (same process, can be one app). Harder than LinkedIn — Meta review is strict. Business account required, users need Business/Creator Instagram accounts. **Hard — plan for 4–8 week review timeline.**
 
-- **SOMA content run** — Submit updated CLAUDE.md to SOMA project. Priority for content generation when ready.
+- **SOMA content run** — CLAUDE.md submitted to SOMA on May 28. Next run when ready.
 
 - **Cofounder search** — Actively recruiting marketing cofounder via Reddit/LinkedIn. ~10% sweat equity over 24-month vest, 2-week trial, real contract.
 
@@ -715,26 +725,22 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **Growth** — 7 platforms live. Focus: getting paying users. Product Hunt follow-up ("We've shipped 50+ features since launch"). Target: June 1.
 - **Wall of Love** — Collect first real testimonials. Add to TESTIMONIALS array in `app/wall-of-love/page.tsx`.
 - **LinkedIn Company Pages** — Personal profile live. Company page = next LinkedIn upgrade when there's demand.
-- **i18n — remaining inner pages** — Settings full, Bio editor, SOMA/Enki sub-pages (truth, trades, doctrines) still need `t()` wiring. Wire when those pages are touched.
 - **Discord community** — Server is live at discord.gg/2se6FGrbRU. Build it as a tester + feedback pool.
 - **Apple App Store** — Deferred 3–6 months.
-- **SOMA content run** — CLAUDE.md updated May 27. Submit to SOMA project now.
-- **SOMA video attachment** — Next milestone after media toggle (now shipped). On generate, allow video URL attachment per post. Roadmap: support short-form video links from TikTok/YouTube for cross-posting via SOMA.
-- **i18n — remaining pages** — Settings full, Bio editor, SOMA/Enki sub-pages (truth, trades, doctrines had their keys added but Settings/Bio still need `t()` wiring.
-- **White Label improvements** — More customization options for White Label Basic/Pro tiers. Better branding controls, additional color schemes, agency admin panel.
-- **Enterprise tier** — New plan above Agency. Higher seat counts, SLA, priority support, dedicated onboarding, custom contract. Pricing TBD.
-- **SOMA Full Send expansion** — Expand Full Send to support more posting cadences, video content scheduling, and additional platform types.
 - **Google Play — closed testing** — 1 tester opted in. Passive CTA on signup page. *Do not revisit until June 2026.*
-- **LinkedIn Company Pages** — Personal profile OAuth is live. Company page support requires `r_organization_social` + `w_organization_social` permissions.
 - **Instagram / Facebook** — Meta App Review. 4–8 week timeline.
 - **Wyoming LLC annual report** — File when budget allows.
 - **Enki Truth Mode** — 50-trade minimum per strategy. Check `/enki/truth` periodically.
-- **Wall of Love** — Live at `/wall-of-love`. Add entries to `TESTIMONIALS` array when real quotes come in.
 - **Birthday promo BDAY31** — ✅ ACTIVE NOW through Dec 15, 2026.
 - **Product Hunt follow-up** — "We've shipped 50+ features since launch." Target: June 1, 2026.
 
 ## Confirmed Done (stop asking about these)
 
+- ✅ **SOMA video URL attachment (May 28, PR #442)** — `include_video_url TEXT` on `soma_projects`. Text input on project page, PATCH saves it, generate route injects video URL block into Gemini prompt. Clear button. Never ask to build this again.
+- ✅ **Enterprise tier (May 28, PR #443)** — `/enterprise` landing + contact form. Enterprise card on `/pricing`. `enterprise_inquiries` table. Resend email to admin on inquiry. "Enterprise" in PublicNav. No Stripe — manual provisioning. Never ask to build again.
+- ✅ **White Label improvements (May 28, PR #444)** — Full Settings white label UI: logo upload, brand name, color picker, remove-branding toggle, custom domain gated to Pro. `/api/white-label/logo-upload` to Supabase. `white_label_remove_branding` column on user_settings. Never ask to improve white label UI again.
+- ✅ **SOMA Full Send daily cron (May 28, PR #445)** — `somaFullSendDailyRun` function in `lib/inngest.ts`. Daily 1pm UTC, Full Send workspaces only, 7 posts/day cap, 30 runs/month cap. Dashboard badge. Coexists with Autopilot Monday cron. Resync `soma-full-send-daily-run` in Inngest. Never ask to build again.
+- ✅ **i18n remaining pages complete (May 28, PR #446)** — Settings Scheduling tab, SOMA Weekly, SOMA Upgrade wired with useI18n(). 54 keys, all 7 locales in sync. Full-app i18n is now complete. Never ask about unwired pages again.
 - ✅ **SOMA media toggle + Unsplash attribution display (May 27, PRs #433–#436)** — `include_media` on `soma_projects`. Unsplash API integration in generate route (keyword extraction, image fetch, attribution, download tracking). `UnsplashCredit` component in queue (sm) and calendar (md). Compliance cherry-pick PR #435. Never ask to build SOMA media toggle again.
 - ✅ **Enki i18n (May 27, PR #434)** — 207 keys, 3 namespaces (app_enki_truth/trades/doctrines), all 7 locales validated. TruthClient, trades page, doctrines page all wired. Aliases `tk`/`td` to avoid loop variable shadowing. Never re-wire these files.
 - ✅ **Landing page visual overhaul + signup cleanup (May 27, PR #437)** — "Post everywhere. All at once." headline, amber gradient, radial glows, platform pills in hero, amber CTA, white stats. Signup: age gate removed, ToS/Privacy required checkbox added, IRIS newsletter opt-in updated. Never revert these changes.
