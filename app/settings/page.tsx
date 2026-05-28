@@ -136,7 +136,11 @@ function SettingsInner() {
   const [wlBrandName, setWlBrandName]           = useState('')
   const [wlLogoUrl, setWlLogoUrl]               = useState('')
   const [wlDomain, setWlDomain]                 = useState('')
-  const [wlColor, setWlColor]                   = useState('#000000')
+  const [wlColor, setWlColor]                   = useState('#f59e0b')
+  const [wlRemoveBranding, setWlRemoveBranding] = useState(false)
+  const [wlSaving, setWlSaving]                 = useState(false)
+  const [wlLogoUploading, setWlLogoUploading]   = useState(false)
+  const [wlLogoError, setWlLogoError]           = useState<string | null>(null)
   const [wlCheckoutLoading, setWlCheckoutLoading] = useState(false)
   const [wlActivated, setWlActivated]           = useState(false)
 
@@ -198,7 +202,7 @@ function SettingsInner() {
 
       const { data: settings } = await supabase
         .from('user_settings')
-        .select('referral_code, white_label_active, white_label_tier, white_label_status, white_label_brand_name, white_label_logo_url, white_label_custom_domain, white_label_brand_color, notification_prefs, credit_source_preference, iris_opt_in, default_platforms, scheduling_window_start, scheduling_window_end, dnd_enabled, dnd_start, dnd_end')
+        .select('referral_code, white_label_active, white_label_tier, white_label_status, white_label_brand_name, white_label_logo_url, white_label_custom_domain, white_label_brand_color, white_label_remove_branding, notification_prefs, credit_source_preference, iris_opt_in, default_platforms, scheduling_window_start, scheduling_window_end, dnd_enabled, dnd_start, dnd_end')
         .eq('user_id', user.id)
         .single()
 
@@ -212,7 +216,8 @@ function SettingsInner() {
         setWlBrandName(settings.white_label_brand_name || '')
         setWlLogoUrl(settings.white_label_logo_url || '')
         setWlDomain(settings.white_label_custom_domain || '')
-        setWlColor(settings.white_label_brand_color || '#000000')
+        setWlColor(settings.white_label_brand_color || '#f59e0b')
+        setWlRemoveBranding(settings.white_label_remove_branding || false)
         if (settings.credit_source_preference) {
           setCreditPref(settings.credit_source_preference as 'monthly_first' | 'bank_first')
         }
@@ -1437,6 +1442,8 @@ function SettingsInner() {
 
                   <div className="bg-surface border border-theme rounded-2xl p-6 space-y-4">
                     <h2 className="text-base font-extrabold">{tSettings('app_settings.white_label_tab.brand_config_title')}</h2>
+
+                    {/* Brand name */}
                     <div>
                       <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">{tSettings('app_settings.white_label_tab.brand_name_label')}</label>
                       <input value={wlBrandName} onChange={e => setWlBrandName(e.target.value)}
@@ -1444,13 +1451,62 @@ function SettingsInner() {
                         className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black dark:focus:border-gray-400 transition-all" />
                       <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{tSettings('app_settings.white_label_tab.brand_name_hint')}</p>
                     </div>
+
+                    {/* Logo — file upload or URL */}
                     <div>
-                      <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">{tSettings('app_settings.white_label_tab.logo_url_label')}</label>
+                      <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-2">{tSettings('app_settings.white_label_tab.logo_url_label')}</label>
+
+                      {/* File upload button */}
+                      <div className="flex items-center gap-3 mb-2">
+                        {wlLogoUrl && (
+                          <img src={wlLogoUrl} alt="Logo preview" className="h-10 w-10 object-contain rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 flex-shrink-0"
+                            onError={e => (e.currentTarget.style.display = 'none')} />
+                        )}
+                        <label className={`min-h-[40px] flex items-center gap-2 px-4 py-2 rounded-xl border text-xs font-bold cursor-pointer transition-all ${
+                          wlLogoUploading
+                            ? 'border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed opacity-60'
+                            : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-black dark:hover:border-gray-400'
+                        }`}>
+                          {wlLogoUploading
+                            ? <><div className="w-3 h-3 border-2 border-gray-400 border-t-gray-700 rounded-full animate-spin" /> Uploading...</>
+                            : '📁 Upload logo'}
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp,image/svg+xml"
+                            className="hidden"
+                            disabled={wlLogoUploading}
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0]
+                              if (!file) return
+                              setWlLogoUploading(true)
+                              setWlLogoError(null)
+                              try {
+                                const fd = new FormData()
+                                fd.append('file', file)
+                                const res = await fetch('/api/white-label/logo-upload', { method: 'POST', body: fd })
+                                const data = await res.json()
+                                if (!res.ok) { setWlLogoError(data.error || 'Upload failed'); return }
+                                setWlLogoUrl(data.url)
+                              } catch {
+                                setWlLogoError('Upload failed — please try again')
+                              } finally {
+                                setWlLogoUploading(false)
+                                e.target.value = ''
+                              }
+                            }}
+                          />
+                        </label>
+                      </div>
+
+                      {/* Or paste URL */}
                       <input value={wlLogoUrl} onChange={e => setWlLogoUrl(e.target.value)}
-                        placeholder="https://yourbrand.com/logo.png"
+                        placeholder="https://yourbrand.com/logo.png (or upload above)"
                         className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black dark:focus:border-gray-400 transition-all" />
-                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{tSettings('app_settings.white_label_tab.logo_url_hint')}</p>
+                      {wlLogoError && <p className="text-xs text-red-500 mt-1">{wlLogoError}</p>}
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Upload PNG, JPG, WebP, or SVG (max 5MB). Stored in your media library.</p>
                     </div>
+
+                    {/* Custom domain — Pro only */}
                     {whiteLabelTier === 'pro' && (
                       <div>
                         <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">{tSettings('app_settings.white_label_tab.domain_label')}</label>
@@ -1460,15 +1516,63 @@ function SettingsInner() {
                         <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{tSettings('app_settings.white_label_tab.domain_hint')}</p>
                       </div>
                     )}
+
+                    {/* Custom domain — locked for Basic */}
+                    {whiteLabelTier === 'basic' && (
+                      <div className="opacity-60 cursor-not-allowed">
+                        <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">
+                          Custom domain <span className="text-amber-500 font-bold">Pro only</span>
+                        </label>
+                        <div className="w-full border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm bg-gray-50 dark:bg-gray-800 text-gray-400 dark:text-gray-500">
+                          app.yourbrand.com
+                        </div>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Upgrade to White Label Pro to use a custom domain.</p>
+                      </div>
+                    )}
+
+                    {/* Brand color */}
                     <div>
                       <label className="text-xs font-bold text-gray-500 dark:text-gray-400 block mb-1">{tSettings('app_settings.white_label_tab.color_label')}</label>
                       <div className="flex items-center gap-3">
                         <input type="color" value={wlColor} onChange={e => setWlColor(e.target.value)}
                           className="h-10 w-16 border border-gray-200 dark:border-gray-600 rounded-xl cursor-pointer" />
                         <input value={wlColor} onChange={e => setWlColor(e.target.value)}
-                          placeholder="#000000"
+                          placeholder="#f59e0b"
                           className="flex-1 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-black dark:focus:border-gray-400 transition-all font-mono" />
+                        {wlColor && (
+                          <div
+                            className="w-10 h-10 rounded-xl flex-shrink-0 border border-gray-200 dark:border-gray-700"
+                            style={{ backgroundColor: wlColor }}
+                            title="Color preview"
+                          />
+                        )}
                       </div>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">Replaces the amber accent color throughout the app.</p>
+                    </div>
+
+                    {/* Remove SocialMate branding — Pro only */}
+                    <div className={`flex items-start justify-between gap-4 py-3 border-t border-gray-100 dark:border-gray-800 ${whiteLabelTier !== 'pro' ? 'opacity-60' : ''}`}>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <p className="text-sm font-bold">Remove SocialMate branding</p>
+                          {whiteLabelTier !== 'pro' && (
+                            <span className="text-xs font-bold bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full">Pro only</span>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-400 dark:text-gray-500">
+                          {whiteLabelTier === 'pro'
+                            ? 'Hides the "Powered by SocialMate" footer and removes SocialMate attribution from your white-labeled app.'
+                            : 'Upgrade to White Label Pro to fully remove SocialMate branding for your clients.'}
+                        </p>
+                      </div>
+                      <button
+                        role="switch"
+                        aria-checked={wlRemoveBranding}
+                        disabled={whiteLabelTier !== 'pro'}
+                        onClick={() => whiteLabelTier === 'pro' && setWlRemoveBranding(v => !v)}
+                        className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed ${wlRemoveBranding && whiteLabelTier === 'pro' ? 'bg-black dark:bg-white' : 'bg-gray-200 dark:bg-gray-700'}`}>
+                        <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white dark:bg-gray-900 shadow transition-transform ${wlRemoveBranding && whiteLabelTier === 'pro' ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                      </button>
                     </div>
 
                     {/* Upgrade from Basic to Pro */}
@@ -1483,8 +1587,11 @@ function SettingsInner() {
                       </div>
                     )}
 
-                    <button onClick={() => handleSave('WhiteLabel')}
-                      className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${savedTab === 'WhiteLabel' ? 'bg-green-500 text-white' : 'bg-black text-white hover:opacity-80'}`}>
+                    <button
+                      onClick={() => handleSave('WhiteLabel')}
+                      disabled={wlSaving}
+                      className={`min-h-[44px] flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold transition-all disabled:opacity-60 ${savedTab === 'WhiteLabel' ? 'bg-green-500 text-white' : 'bg-black text-white hover:opacity-80'}`}>
+                      {wlSaving && <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />}
                       {savedTab === 'WhiteLabel' ? tSettings('app_settings.white_label_tab.saved') : tSettings('app_settings.white_label_tab.save_branding')}
                     </button>
                   </div>
@@ -1492,8 +1599,16 @@ function SettingsInner() {
                   {wlLogoUrl && (
                     <div className="bg-surface border border-theme rounded-2xl p-5">
                       <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-3">{tSettings('app_settings.white_label_tab.logo_preview')}</p>
-                      <img src={wlLogoUrl} alt="Brand logo" className="h-10 object-contain"
-                        onError={e => (e.currentTarget.style.display = 'none')} />
+                      <div className="flex items-center gap-4">
+                        <img src={wlLogoUrl} alt="Brand logo" className="h-12 object-contain rounded-xl"
+                          onError={e => (e.currentTarget.style.display = 'none')} />
+                        {wlBrandName && (
+                          <div>
+                            <p className="text-sm font-bold" style={{ color: wlColor || undefined }}>{wlBrandName}</p>
+                            <p className="text-xs text-gray-400 dark:text-gray-500">Sidebar preview</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
