@@ -53,7 +53,8 @@ ${!isEmail ? `- body must be under ${charLimit} characters.` : ''}
     const jsonStr = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim()
     const parsed = JSON.parse(jsonStr)
     return { subject: isEmail ? (parsed.subject ?? null) : null, body: parsed.body ?? '' }
-  } catch {
+  } catch (err) {
+    console.error('[HERMES] Gemini generateFollowUp failed:', err)
     return {
       subject: isEmail ? `${stepLabel} — ${params.campaignName}` : null,
       body: `Hi ${params.prospectName}, just following up on my previous message. Would love to connect. — Joshua`,
@@ -122,14 +123,15 @@ export const hermesFollowUpCron = inngest.createFunction(
             step: step_num,
             status: 'draft',
           })
-          // Advance next_contact_at to avoid re-drafting same step
-          const nextDays = campaign.sequence_days?.[step_num + 1]
+          // Advance sequence_step + next_contact_at so cron doesn't re-draft the same step
+          const nextStep = step_num + 1
+          const nextDays = campaign.sequence_days?.[nextStep]
           const nextContactAt = nextDays != null
             ? new Date(Date.now() + nextDays * 24 * 60 * 60 * 1000).toISOString()
             : null
           await supabase
             .from('hermes_prospects')
-            .update({ next_contact_at: nextContactAt })
+            .update({ sequence_step: nextStep, next_contact_at: nextContactAt })
             .eq('id', prospect.id)
         } else {
           // Auto-send mode: insert + dispatch immediately
@@ -233,7 +235,7 @@ export const hermesAutoDiscoverCron = inngest.createFunction(
             const parsed = JSON.parse(json)
             subject = parsed.subject ?? subject
             body    = parsed.body ?? body
-          } catch { /* fallback */ }
+          } catch (err) { console.error('[HERMES] Gemini auto-discover generation failed:', err) }
 
           const { data: prospect } = await supabase
             .from('hermes_prospects')

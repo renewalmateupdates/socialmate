@@ -93,12 +93,7 @@ export async function sendHermesBluesky(params: {
     'atproto-proxy': 'did:web:api.bsky.chat#bsky_chat',
   }
 
-  // Get or create DM convo
-  const convoRes = await fetch('https://bsky.social/xrpc/chat.bsky.convo.getConvoForMembers', {
-    method: 'GET',
-    headers: { ...chatHeaders, 'Content-Type': '' },
-  })
-  // getConvoForMembers uses query params
+  // Get or create DM convo (uses query params)
   const convoResQ = await fetch(
     `https://bsky.social/xrpc/chat.bsky.convo.getConvoForMembers?members[]=${encodeURIComponent(recipientDid)}`,
     { headers: chatHeaders }
