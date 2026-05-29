@@ -44,7 +44,11 @@
     "pricing": "定价",
     "enterprise": "企业版",
     "partners": "合作伙伴",
-    "products_label": "产品"
+    "products_label": "产品",
+    "mobile_menu": "菜单",
+    "mobile_language": "🌐 语言",
+    "mobile_merch": "👕 周边",
+    "mobile_sm_give": "❤️ SM-Give"
   },
   "footer": {
     "tagline": "由 Gilgamesh Enterprise LLC 荣誉出品",
@@ -87,7 +91,7 @@
     "cta_pricing": "查看定价 →",
     "no_card": "无需信用卡 · 永久免费 · 60秒内完成设置",
     "built_by_name": "由 Joshua Bostic 独立打造",
-    "built_by_desc": "白手起家。无风投。没有每月99美元的陷阱。只是一位需要更好工具并为所有人打造它们的开发者。",
+    "built_by_desc": "自力更生。无风投。无$99/月陷阱。只是一个需要更好工具并为所有人构建它们的创建者。",
     "stats": {
       "platforms": "个社交平台上线",
       "ai_tools": "个AI工具已包含",
@@ -137,7 +141,11 @@
       "eyebrow": "AI驱动",
       "headline": "内置15+个AI工具",
       "subheadline": "所有工具基于Google Gemini运行。每月免费包含50个积分。",
-      "cta": "查看所有15+个AI工具 →"
+      "cta": "查看所有15+个AI工具 →",
+      "sm_pulse_tagline": "实时趋势情报",
+      "sm_pulse_desc": "实时扫描Reddit和YouTube，发现您所在领域的热门话题、病毒格式和参与度峰值。",
+      "sm_radar_tagline": "个人增长情报",
+      "sm_radar_desc": "分析Reddit和YouTube的实时数据，发现内容差距、竞争对手弱点以及本周最佳内容策略。"
     },
     "features": {
       "eyebrow": "完整功能集",
@@ -198,7 +206,7 @@
       "feature_url": "您自己的公共URL — 免费",
       "feature_domain": "自定义域名 — 通过推荐免费获取，或包含在专业版+",
       "feature_branding": "在专业版+中移除 SocialMate 品牌标识",
-      "cta": "创建您的免费个人简介页面 →",
+      "cta": "创建免费个人主页 →",
       "demo_name": "您的姓名",
       "demo_bio": "您的个人简介在此",
       "demo_link1": "🌐 我的网站",
@@ -242,7 +250,7 @@
       "headline": "专业工具不应需要专业预算。",
       "subheadline": "SocialMate 完全白手起家——由一人独立打造，身兼数职，没有投资者，也没有安全网。其核心信念是：创作者和小型企业理应获得真正有效的工具，且价格无需商业预算来支撑。那些每月收费99美元的平台深知这一点。他们只是赌您不会寻找更好的选择。",
       "read_story": "阅读完整故事 →",
-      "see_pricing": "查看定价详情 →"
+      "see_pricing": "了解定价方式 →"
     },
     "sm_give": {
       "eyebrow": "SM-Give 倡议",
@@ -251,18 +259,18 @@
       "school": "学习用品",
       "baby": "婴儿必需品",
       "homeless": "无家可归者关怀",
-      "learn_more": "了解 SM-Give →"
+      "learn_more": "了解SM-Give →"
     },
     "final_cta": {
       "headline": "准备好开始了吗？",
       "subheadline": "永久免费。无需信用卡。每月免费包含50个AI积分。60秒内完成设置。",
       "cta_primary": "创建免费账户 →",
-      "cta_secondary": "比较计划 →"
+      "cta_secondary": "比较方案 →"
     },
-    "hero_headline": "到处发帖。",
-    "hero_tagline": "一次搞定。",
+    "hero_headline": "随处发布。",
+    "hero_tagline": "一次完成。",
     "cta_no_card": "无需信用卡 · 永久免费 · 60秒完成设置",
-    "more_coming": "+ 更多即将上线",
+    "more_coming": "+ 更多即将推出",
     "user_stats": {
       "posts_published": "篇帖子已发布",
       "free": "免费版",

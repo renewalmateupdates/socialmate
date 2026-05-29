@@ -44,7 +44,11 @@
     "pricing": "Precios",
     "enterprise": "Empresa",
     "partners": "Socios",
-    "products_label": "Productos"
+    "products_label": "Productos",
+    "mobile_menu": "Menú",
+    "mobile_language": "🌐 Idioma",
+    "mobile_merch": "👕 Tienda",
+    "mobile_sm_give": "❤️ SM-Give"
   },
   "footer": {
     "tagline": "de Gilgamesh Enterprise LLC",
@@ -83,11 +87,11 @@
     "headline": "Gestión de redes sociales",
     "headline_emphasis": "sin el precio de $99/mes.",
     "subheadline": "Programa en 7 plataformas, escribe mejor contenido con 15+ herramientas de IA y rastrea lo que funciona — todo gratis. Pro desde $5/mes.",
-    "cta_primary": "Crear cuenta gratis →",
+    "cta_primary": "Crear cuenta gratuita →",
     "cta_pricing": "Ver precios →",
     "no_card": "No se requiere tarjeta · Gratis para siempre · Configuración en 60 segundos",
     "built_by_name": "Construido en solitario por Joshua Bostic",
-    "built_by_desc": "Autofinanciado. Sin capital de riesgo. Sin la trampa de los $99/mes. Solo un desarrollador que necesitaba mejores herramientas y las construyó para todos.",
+    "built_by_desc": "Autofinanciado. Sin inversores. Sin trampa de $99/mes. Solo un creador que necesitaba mejores herramientas y las construyó para todos.",
     "stats": {
       "platforms": "plataformas sociales activas",
       "ai_tools": "herramientas de IA incluidas",
@@ -105,7 +109,7 @@
       "analytics": "Historial de análisis",
       "link_in_bio": "Página de enlace en la biografía",
       "competitor_tracking": "Cuentas de competidores rastreadas",
-      "cta": "Empieza gratis — no se necesita tarjeta →"
+      "cta": "Comenzar gratis — sin tarjeta →"
     },
     "platforms": {
       "eyebrow": "Soporte de plataformas",
@@ -137,7 +141,11 @@
       "eyebrow": "Impulsado por IA",
       "headline": "Más de 15 herramientas de IA incluidas",
       "subheadline": "Todas las herramientas funcionan con Google Gemini. 50 créditos incluidos gratis cada mes.",
-      "cta": "Ver las 15+ herramientas de IA →"
+      "cta": "Ver las 15+ herramientas de IA →",
+      "sm_pulse_tagline": "Inteligencia de tendencias en tiempo real",
+      "sm_pulse_desc": "Escanea Reddit y YouTube ahora para descubrir temas de tendencia, formatos virales y picos de engagement en tu nicho.",
+      "sm_radar_tagline": "Inteligencia de crecimiento personal",
+      "sm_radar_desc": "Analiza datos en vivo de Reddit y YouTube para descubrir brechas de contenido, debilidades de competidores y la mejor estrategia para tu nicho esta semana."
     },
     "features": {
       "eyebrow": "Conjunto completo de funcionalidades",
@@ -174,7 +182,7 @@
       "cta_headline": "Todo lo anterior. Gratis para empezar. $5/mes para crecer.",
       "cta_sub1": "Sin tarifas por puesto. Sin bloqueo de funcionalidades básicas. Sin plan gratuito eliminado.",
       "cta_sub2": "Las funcionalidades marcadas como \"✅ Gratis\" son siempre gratuitas. Las herramientas de IA usan créditos — los usuarios gratuitos obtienen 50/mes para mantener la infraestructura sostenible.",
-      "cta": "Empieza gratis →",
+      "cta": "Comenzar gratis →",
       "rows": {
         "starting_price": "Precio inicial",
         "free_plan": "Plan gratuito",
@@ -198,7 +206,7 @@
       "feature_url": "Tu propia URL pública — gratis",
       "feature_domain": "Dominio personalizado — gánalo gratis por referidos, o incluido en Pro+",
       "feature_branding": "Elimina la marca SocialMate en Pro+",
-      "cta": "Crea tu página de biografía gratuita →",
+      "cta": "Crear tu página bio gratuita →",
       "demo_name": "Tu Nombre",
       "demo_bio": "Tu biografía aquí",
       "demo_link1": "🌐 Mi Sitio Web",
@@ -217,7 +225,7 @@
       "credits_desc": "La generación de IA utiliza computación real — usamos créditos para mantenerla sostenible, no como una palanca para forzar actualizaciones. El sistema de créditos permite que el nivel gratuito prospere.",
       "no_bait_title": "Sin engaños",
       "no_bait_desc": "Gratis significa gratis. El plan gratuito no es una prueba, no es una cuenta regresiva y no está diseñado para frustrarte y obligarte a actualizar. Lo que ves es lo que obtienes.",
-      "cta": "Empieza gratis — no se necesita tarjeta →"
+      "cta": "Comenzar gratis — sin tarjeta →"
     },
     "guides": {
       "badge": "📚 Gratis para siempre · No se requiere registro",
@@ -235,7 +243,7 @@
       "soon_badge": "Próximamente",
       "read_free": "Leer gratis →",
       "coming_soon": "Próximamente",
-      "browse_all": "Explorar todas las guías →"
+      "browse_all": "Ver todas las guías →"
     },
     "story": {
       "eyebrow": "Por qué construimos esto",
@@ -251,18 +259,18 @@
       "school": "Útiles Escolares",
       "baby": "Artículos Esenciales para Bebés",
       "homeless": "Ayuda para Personas sin Hogar",
-      "learn_more": "Más información sobre SM-Give →"
+      "learn_more": "Más sobre SM-Give →"
     },
     "final_cta": {
       "headline": "¿Listo para empezar?",
       "subheadline": "Gratis para siempre. No se requiere tarjeta. 50 créditos de IA al mes, incluidos gratis. Configuración en 60 segundos.",
-      "cta_primary": "Crear cuenta gratis →",
+      "cta_primary": "Crear cuenta gratuita →",
       "cta_secondary": "Comparar planes →"
     },
     "hero_headline": "Publica en todas partes.",
     "hero_tagline": "Todo a la vez.",
-    "cta_no_card": "Sin tarjeta · Gratis para siempre · Configuración en 60 segundos",
-    "more_coming": "+ más próximamente",
+    "cta_no_card": "Sin tarjeta · Gratis para siempre · Configura en 60 segundos",
+    "more_coming": "+ más en camino",
     "user_stats": {
       "posts_published": "publicaciones publicadas",
       "free": "Gratis",

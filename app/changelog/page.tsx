@@ -21,6 +21,16 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'May 29, 2026',
+    version: 'i18n Full Parity — 9 Locales, Mobile Sweep',
+    changes: [
+      { type: 'New',      text: 'Japanese (ja) and Korean (ko) added as full locales — complete translations for all landing page sections including hero, platforms, free tier, clips, AI tools, features, comparison, bio link, guides, story, SM-Give, and final CTA.' },
+      { type: 'Improved', text: 'i18n parity sweep — all remaining hardcoded English strings replaced with t() calls. SM-Pulse and SM-Radar card descriptions in LocalizedLanding now translate. Mobile nav labels (Menu, Language, Merch, SM-Give) fully translated. All 9 locale files validated in sync.' },
+      { type: 'Improved', text: 'Mobile nav labels translated — "Menu", "Language", "👕 Merch", and "❤️ SM-Give" in the mobile drawer now use t() and render in the user\'s chosen language.' },
+      { type: 'Fixed',    text: 'Landing page locale files — critical missing keys backfilled for es/de/fr/pt/ru/zh (hero_headline, cta_primary, cta_no_card, more_coming, built_by_desc, and all CTA buttons). These were present but had English placeholder values that would not trigger auto-fallback.' },
+    ],
+  },
+  {
     date: 'May 28, 2026',
     version: 'Enterprise Tier, Full Send Daily Cron, White Label, i18n Completion, SOMA Video URL',
     changes: [

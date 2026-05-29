@@ -290,6 +290,22 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 - Hashtag Collections: https://socialmate.studio/hashtag-collections
 - Integrations / Webhook docs: https://socialmate.studio/integrations
 
+## Language Support
+
+SocialMate is fully internationalized. The public landing page is available in 9 languages with complete translations for all sections including hero, platform list, AI tools, feature grid, comparison table, bio link, guides, and final CTA:
+
+- English: https://socialmate.studio
+- Spanish: https://socialmate.studio/es
+- German: https://socialmate.studio/de
+- French: https://socialmate.studio/fr
+- Portuguese: https://socialmate.studio/pt
+- Russian: https://socialmate.studio/ru
+- Chinese (Simplified): https://socialmate.studio/zh
+- Japanese: https://socialmate.studio/ja
+- Korean: https://socialmate.studio/ko
+
+The full app (dashboard, compose, analytics, SOMA, Enki, etc.) also translates to all 9 languages via a language switcher in the sidebar. All locale files are validated in sync at build time.
+
 ## Comparisons (SocialMate vs Competitors)
 
 - vs Hootsuite: https://socialmate.studio/vs/hootsuite

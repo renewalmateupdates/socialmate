@@ -278,7 +278,7 @@ export default function PublicNav() {
           <div className="fixed top-0 right-0 z-50 h-screen w-72 max-w-[85vw] bg-white dark:bg-gray-950 shadow-2xl flex flex-col">
 
             <div className="flex items-center justify-between px-5 h-16 border-b border-gray-100 dark:border-gray-800 flex-shrink-0">
-              <span className="font-bold text-sm text-gray-900 dark:text-gray-100">Menu</span>
+              <span className="font-bold text-sm text-gray-900 dark:text-gray-100">{t('nav.mobile_menu')}</span>
               <button
                 onClick={() => setOpen(false)}
                 className="w-11 h-11 rounded-xl flex items-center justify-center hover:bg-gray-100 dark:hover:bg-gray-800 transition-all text-gray-500 dark:text-gray-400 text-lg font-bold"
@@ -378,11 +378,11 @@ export default function PublicNav() {
               <div className="pt-2 border-t border-gray-100 dark:border-gray-800 mt-2">
                 <Link href="/merch" onClick={() => setOpen(false)}
                   className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/20 transition-all">
-                  👕 Merch
+                  {t('nav.mobile_merch')}
                 </Link>
                 <Link href="/give" onClick={() => setOpen(false)}
                   className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all">
-                  ❤️ SM-Give
+                  {t('nav.mobile_sm_give')}
                 </Link>
                 <Link href="/partners" onClick={() => setOpen(false)}
                   className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/20 transition-all">
@@ -392,7 +392,7 @@ export default function PublicNav() {
 
               {/* Language picker */}
               <div className="pt-2 border-t border-gray-100 dark:border-gray-800 mt-2">
-                <p className="px-4 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-widest">🌐 Language</p>
+                <p className="px-4 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-widest">{t('nav.mobile_language')}</p>
                 <div className="grid grid-cols-2 gap-1 px-3 pb-2">
                   {SUPPORTED_LOCALES.map(lang => (
                     <button key={lang.code} onClick={() => { handleSetLocale(lang.code); setOpen(false) }}

@@ -44,7 +44,11 @@
     "pricing": "Tarifs",
     "enterprise": "Entreprise",
     "partners": "Partenaires",
-    "products_label": "Produits"
+    "products_label": "Produits",
+    "mobile_menu": "Menu",
+    "mobile_language": "🌐 Langue",
+    "mobile_merch": "👕 Merch",
+    "mobile_sm_give": "❤️ SM-Give"
   },
   "footer": {
     "tagline": "par Gilgamesh Enterprise LLC",
@@ -87,7 +91,7 @@
     "cta_pricing": "Voir les tarifs →",
     "no_card": "Aucune carte requise · Gratuit pour toujours · Configuration en 60 secondes",
     "built_by_name": "Développé en solo par Joshua Bostic",
-    "built_by_desc": "Autofinancé. Pas de capital-risque. Pas de piège à 99 $/mois. Juste un développeur qui avait besoin de meilleurs outils et les a créés pour tous.",
+    "built_by_desc": "Autofinancé. Pas de capital-risque. Pas de piège à $99/mois. Juste un créateur qui avait besoin de meilleurs outils et les a construits pour tous.",
     "stats": {
       "platforms": "plateformes actives",
       "ai_tools": "outils IA inclus",
@@ -105,7 +109,7 @@
       "analytics": "Historique des analyses",
       "link_in_bio": "Page Lien en bio",
       "competitor_tracking": "Comptes concurrents suivis",
-      "cta": "Commencer gratuitement — aucune carte requise →"
+      "cta": "Commencer gratuitement — sans carte →"
     },
     "platforms": {
       "eyebrow": "Prise en charge des plateformes",
@@ -137,7 +141,11 @@
       "eyebrow": "Propulsé par l'IA",
       "headline": "15+ outils IA intégrés",
       "subheadline": "Tous les outils fonctionnent sur Google Gemini. 50 crédits inclus gratuitement chaque mois.",
-      "cta": "Voir les 15+ outils IA →"
+      "cta": "Voir les 15+ outils IA →",
+      "sm_pulse_tagline": "Intelligence des tendances en temps réel",
+      "sm_pulse_desc": "Scanne Reddit et YouTube maintenant pour découvrir les sujets tendances, les formats viraux et les pics d'engagement dans votre niche.",
+      "sm_radar_tagline": "Intelligence de croissance personnelle",
+      "sm_radar_desc": "Analyse les données en direct de Reddit et YouTube pour découvrir les lacunes de contenu, les faiblesses des concurrents et la meilleure stratégie pour votre niche cette semaine."
     },
     "features": {
       "eyebrow": "Ensemble complet de fonctionnalités",
@@ -198,7 +206,7 @@
       "feature_url": "Votre propre URL publique — gratuite",
       "feature_domain": "Nom de domaine personnalisé — gagnez-le gratuitement via parrainage, ou inclus sur Pro+",
       "feature_branding": "Supprimer le branding SocialMate sur Pro+",
-      "cta": "Créez votre page bio gratuite →",
+      "cta": "Créer votre page bio gratuite →",
       "demo_name": "Votre Nom",
       "demo_bio": "Votre bio ici",
       "demo_link1": "🌐 Mon site web",
@@ -217,7 +225,7 @@
       "credits_desc": "La génération IA utilise de la puissance de calcul réelle — nous utilisons des crédits pour maintenir cela durable, pas comme un levier pour forcer les mises à niveau. Le système de crédits permet au niveau gratuit de prospérer.",
       "no_bait_title": "Pas de fausses promesses",
       "no_bait_desc": "Gratuit signifie gratuit. Le plan gratuit n'est pas un essai, pas un compte à rebours, et n'est pas conçu pour vous frustrer et vous pousser à la mise à niveau. Ce que vous voyez est ce que vous obtenez.",
-      "cta": "Commencer gratuitement — aucune carte requise →"
+      "cta": "Commencer gratuitement — sans carte →"
     },
     "guides": {
       "badge": "📚 Gratuit pour toujours · Aucune inscription requise",
@@ -242,7 +250,7 @@
       "headline": "Les outils professionnels ne devraient pas exiger un budget professionnel.",
       "subheadline": "SocialMate est entièrement autofinancé — construit en solo, à travers chaque rôle, sans investisseurs et sans filet de sécurité. La conviction qui le motive : les créateurs et les petites entreprises méritent des outils qui fonctionnent réellement à un prix qui ne nécessite pas un budget d'entreprise pour être justifié. Les plateformes qui facturent 99 $/mois le savent. Elles parient simplement que vous ne chercherez pas une meilleure option.",
       "read_story": "Lire l'histoire complète →",
-      "see_pricing": "Voir comment fonctionnent les tarifs →"
+      "see_pricing": "Voir comment fonctionne la tarification →"
     },
     "sm_give": {
       "eyebrow": "Initiative SM-Give",
@@ -261,8 +269,8 @@
     },
     "hero_headline": "Publiez partout.",
     "hero_tagline": "Tout en même temps.",
-    "cta_no_card": "Sans carte · Gratuit pour toujours · Configuration en 60 secondes",
-    "more_coming": "+ en cours",
+    "cta_no_card": "Pas de carte · Gratuit pour toujours · Configuration en 60 secondes",
+    "more_coming": "d'autres à venir +",
     "user_stats": {
       "posts_published": "publications publiées",
       "free": "Gratuit",
