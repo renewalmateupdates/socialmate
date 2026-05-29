@@ -23,19 +23,23 @@ const I18nContext = createContext<I18nContextValue>({
 })
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('en')
-  // Start with English — no async needed for the most common locale.
+  // Lazy initializer: read locale synchronously from URL/localStorage on mount.
+  // This eliminates the English flash on locale pages (e.g. /es) because the
+  // locale is correct from the very first render, not after a useEffect tick.
+  const [locale, setLocaleState] = useState<Locale>(() => {
+    if (typeof window === 'undefined') return 'en'
+    return detectLocale()
+  })
+  // Start with English — non-English bundles load async after mount.
   const [messages, setMessages] = useState<Messages>(englishMessages)
 
   useEffect(() => {
-    const detected = detectLocale()
-    setLocaleState(detected)
-    // Only fetch non-English bundles (they're not in the initial JS payload)
-    if (detected !== 'en') {
-      loadMessages(detected).then(setMessages)
+    // Load non-English message bundle if needed
+    if (locale !== 'en') {
+      loadMessages(locale).then(setMessages)
     }
 
-    // Confirm/override from user_settings in DB (non-blocking)
+    // Also sync with DB preference for logged-in users (non-blocking)
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) return
       supabase
@@ -44,28 +48,31 @@ export function I18nProvider({ children }: { children: ReactNode }) {
         .eq('user_id', user.id)
         .maybeSingle()
         .then(({ data }) => {
-          if (data?.locale && data.locale !== detected) {
+          if (data?.locale && data.locale !== locale) {
             const dbLocale = data.locale as Locale
             setLocaleState(dbLocale)
-            localStorage.setItem('sm_locale', dbLocale)
+            persistLocale(dbLocale)
             loadMessages(dbLocale).then(setMessages)
           }
         })
     })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const setLocale = useCallback(async (newLocale: Locale) => {
     setLocaleState(newLocale)
-    localStorage.setItem('sm_locale', newLocale)
+    persistLocale(newLocale)
     const msgs = await loadMessages(newLocale)
     setMessages(msgs)
     // Persist to DB (non-fatal if fails)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      await supabase
-        .from('user_settings')
-        .upsert({ user_id: user.id, locale: newLocale }, { onConflict: 'user_id' })
-    }
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        await supabase
+          .from('user_settings')
+          .upsert({ user_id: user.id, locale: newLocale }, { onConflict: 'user_id' })
+      }
+    } catch {}
   }, [])
 
   const t = useCallback((key: string) => translate(key, messages), [messages])
@@ -79,4 +86,13 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 
 export function useI18n() {
   return useContext(I18nContext)
+}
+
+/** Save locale to both localStorage and a cookie (cookie allows server-side reads in API routes). */
+function persistLocale(locale: Locale) {
+  try {
+    localStorage.setItem('sm_locale', locale)
+    // 1-year cookie, readable by Next.js API routes for Stripe checkout locale
+    document.cookie = `sm_locale=${locale}; path=/; max-age=31536000; SameSite=Lax`
+  } catch {}
 }

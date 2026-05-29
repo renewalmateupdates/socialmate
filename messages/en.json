@@ -18,11 +18,18 @@
     "products": {
       "soma": "SOMA",
       "studio_stax": "Studio Stax",
-      "enki": "Enki"
+      "enki": "Enki",
+      "hermes": "⚡ HERMES",
+      "tiktok_studio": "🎵 TikTok Studio",
+      "monetize": "💜 Monetize"
     },
     "sign_in": "Sign in",
     "go_to_dashboard": "Go to dashboard",
-    "get_started": "Get started free"
+    "get_started": "Get started free",
+    "features": "Features",
+    "pricing": "Pricing",
+    "enterprise": "Enterprise",
+    "partners": "Partners"
   },
   "footer": {
     "tagline": "by Gilgamesh Enterprise LLC",
@@ -46,7 +53,12 @@
       "referral": "Referral",
       "privacy": "Privacy",
       "terms": "Terms",
-      "sm_give": "❤️ SM-Give"
+      "sm_give": "❤️ SM-Give",
+      "wall_of_love": "Wall of Love",
+      "gils_guide": "Gil's Guide",
+      "soma": "SOMA",
+      "enki": "Enki",
+      "monetize": "Monetize"
     },
     "product_hunt": "Featured on Product Hunt",
     "copyright": "© 2026 SocialMate · All rights reserved"
@@ -276,7 +288,21 @@
     "terms_agree": "By signing up, you agree to our",
     "terms": "Terms",
     "and": "and",
-    "privacy": "Privacy Policy"
+    "privacy": "Privacy Policy",
+    "free_forever_badge": "🎉 Free forever · No credit card",
+    "tos_i_agree": "I agree to SocialMate's",
+    "tos_terms": "Terms of Service",
+    "google_cta": "Continue with Google",
+    "divider": "or sign up with email",
+    "confirm_password_label": "Confirm Password",
+    "create_free_cta": "Create Free Account →",
+    "creating": "Creating account...",
+    "post_everywhere": "Post everywhere.",
+    "all_at_once": "All at once.",
+    "desktop_subheadline": "Schedule to 7 live platforms, get 15+ AI tools, and grow your audience — completely free.",
+    "mobile_subheadline": "Schedule to 7 platforms, get 15+ AI tools, and grow your audience — completely free.",
+    "almost_in": "You're almost in!",
+    "go_sign_in": "Go to Sign In →"
   },
   "login": {
     "headline": "Sign in to SocialMate",
@@ -286,7 +312,14 @@
     "submit": "Sign in",
     "submitting": "Signing in…",
     "no_account": "Don't have an account?",
-    "sign_up": "Sign up free"
+    "sign_up": "Sign up free",
+    "google_cta": "Continue with Google",
+    "sending": "Sending link...",
+    "signing_in": "Signing in...",
+    "send_magic_link": "Send Magic Link →",
+    "sign_in_cta": "Sign In →",
+    "or": "or",
+    "subheadline": "Welcome back."
   },
   "blog": {
     "headline": "SocialMate Blog",

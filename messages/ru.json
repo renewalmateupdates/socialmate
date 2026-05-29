@@ -18,11 +18,18 @@
     "products": {
       "soma": "SOMA",
       "studio_stax": "Studio Stax",
-      "enki": "Enki"
+      "enki": "Enki",
+      "hermes": "⚡ HERMES",
+      "tiktok_studio": "🎵 TikTok Studio",
+      "monetize": "💜 Monetize"
     },
     "sign_in": "Войти",
     "go_to_dashboard": "Перейти в панель управления",
-    "get_started": "Начать бесплатно"
+    "get_started": "Начать бесплатно",
+    "features": "Функции",
+    "pricing": "Цены",
+    "enterprise": "Корпоративный",
+    "partners": "Партнёры"
   },
   "footer": {
     "tagline": "от Gilgamesh Enterprise LLC",
@@ -46,7 +53,12 @@
       "referral": "Реферальная программа",
       "privacy": "Конфиденциальность",
       "terms": "Условия",
-      "sm_give": "❤️ SM-Give"
+      "sm_give": "❤️ SM-Give",
+      "wall_of_love": "Стена любви",
+      "gils_guide": "Руководство Гила",
+      "soma": "SOMA",
+      "enki": "Enki",
+      "monetize": "Монетизация"
     },
     "product_hunt": "Представлено на Product Hunt",
     "copyright": "© 2026 SocialMate · Все права защищены"
@@ -276,7 +288,21 @@
     "terms_agree": "Регистрируясь, вы соглашаетесь с нашими",
     "terms": "Условиями",
     "and": "и",
-    "privacy": "Политикой конфиденциальности"
+    "privacy": "Политикой конфиденциальности",
+    "free_forever_badge": "🎉 Бесплатно навсегда · Без кредитной карты",
+    "tos_i_agree": "Я принимаю",
+    "tos_terms": "Условия обслуживания",
+    "google_cta": "Продолжить с Google",
+    "divider": "или зарегистрируйтесь через email",
+    "confirm_password_label": "Подтвердите пароль",
+    "create_free_cta": "Создать бесплатный аккаунт →",
+    "creating": "Создание аккаунта...",
+    "post_everywhere": "Публикуйте везде.",
+    "all_at_once": "Всё сразу.",
+    "desktop_subheadline": "Планируйте на 7 платформах, получите 15+ ИИ-инструментов и растите аудиторию — полностью бесплатно.",
+    "mobile_subheadline": "Планируйте на 7 платформах, получите 15+ ИИ-инструментов и растите аудиторию — полностью бесплатно.",
+    "almost_in": "Почти готово!",
+    "go_sign_in": "Перейти к входу →"
   },
   "login": {
     "headline": "Войти в SocialMate",
@@ -286,7 +312,14 @@
     "submit": "Войти",
     "submitting": "Вход…",
     "no_account": "Нет аккаунта?",
-    "sign_up": "Зарегистрироваться бесплатно"
+    "sign_up": "Зарегистрироваться бесплатно",
+    "google_cta": "Продолжить с Google",
+    "sending": "Отправка ссылки...",
+    "signing_in": "Вход...",
+    "send_magic_link": "Отправить magic-ссылку →",
+    "sign_in_cta": "Войти →",
+    "or": "или",
+    "subheadline": "С возвращением."
   },
   "blog": {
     "headline": "Блог SocialMate",

@@ -4,8 +4,10 @@ import { supabase } from '@/lib/supabase'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { isDisposableEmail } from '@/lib/disposable-email-domains'
+import { useI18n } from '@/contexts/I18nContext'
 
 function LoginInner() {
+  const { t } = useI18n()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -209,7 +211,7 @@ function LoginInner() {
           <span className="font-bold text-base tracking-tight text-white">SocialMate</span>
         </Link>
         <Link href="/signup" className="text-sm font-semibold text-gray-400 hover:text-white transition-colors">
-          No account? Sign up free →
+          {t('login.no_account')} {t('login.sign_up')} →
         </Link>
       </div>
 
@@ -217,8 +219,8 @@ function LoginInner() {
         <div className="w-full max-w-md">
 
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-extrabold tracking-tight mb-2 text-white">Welcome back</h1>
-            <p className="text-gray-400 text-sm">Sign in to your SocialMate account</p>
+            <h1 className="text-3xl font-extrabold tracking-tight mb-2 text-white">{t('login.headline')}</h1>
+            <p className="text-gray-400 text-sm">{t('login.subheadline')}</p>
           </div>
 
           <div className="bg-gray-900 border border-gray-700 rounded-3xl p-8">
@@ -239,7 +241,7 @@ function LoginInner() {
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                 </svg>
               )}
-              Continue with Google
+              {t('login.google_cta')}
             </button>
 
             {/* Google auth domain note */}
@@ -251,7 +253,7 @@ function LoginInner() {
             {/* Divider */}
             <div className="flex items-center gap-3 mb-5">
               <div className="flex-1 h-px bg-gray-700" />
-              <span className="text-xs text-gray-500 font-medium">or</span>
+              <span className="text-xs text-gray-500 font-medium">{t('login.or')}</span>
               <div className="flex-1 h-px bg-gray-700" />
             </div>
 
@@ -272,7 +274,7 @@ function LoginInner() {
 
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">Email</label>
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">{t('login.email_label')}</label>
                 <input
                   type="email"
                   name="email"
@@ -288,9 +290,9 @@ function LoginInner() {
               {mode === 'password' && (
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Password</label>
+                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{t('login.password_label')}</label>
                     <Link href="/forgot-password" className="text-xs text-gray-500 hover:text-amber-400 transition-colors">
-                      Forgot password?
+                      {t('login.forgot_password')}
                     </Link>
                   </div>
                   <div className="relative">
@@ -334,27 +336,27 @@ function LoginInner() {
                 {loading ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    {mode === 'magic' ? 'Sending link...' : 'Signing in...'}
+                    {mode === 'magic' ? t('login.sending') : t('login.signing_in')}
                   </>
                 ) : (
-                  mode === 'magic' ? 'Send Magic Link →' : 'Sign In →'
+                  mode === 'magic' ? t('login.send_magic_link') : t('login.sign_in_cta')
                 )}
               </button>
             </form>
           </div>
 
           <p className="text-center text-xs text-gray-500 mt-6">
-            Don&apos;t have an account?{' '}
+            {t('login.no_account')}{' '}
             <Link href="/signup" className="font-bold text-amber-400 hover:text-amber-300 transition-colors">
-              Sign up free →
+              {t('login.sign_up')} →
             </Link>
           </p>
 
           <p className="text-center text-xs text-gray-700 mt-3">
-            By signing in you agree to our{' '}
-            <Link href="/terms" className="hover:text-gray-500 transition-colors">Terms</Link>
-            {' '}and{' '}
-            <Link href="/privacy" className="hover:text-gray-500 transition-colors">Privacy Policy</Link>
+            {t('signup.tos_i_agree')}{' '}
+            <Link href="/terms" className="hover:text-gray-500 transition-colors">{t('signup.tos_terms')}</Link>
+            {' '}{t('signup.and')}{' '}
+            <Link href="/privacy" className="hover:text-gray-500 transition-colors">{t('signup.privacy')}</Link>
           </p>
         </div>
       </div>

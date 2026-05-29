@@ -18,11 +18,18 @@
     "products": {
       "soma": "SOMA",
       "studio_stax": "Studio Stax",
-      "enki": "Enki"
+      "enki": "Enki",
+      "hermes": "⚡ HERMES",
+      "tiktok_studio": "🎵 TikTok Studio",
+      "monetize": "💜 Monetize"
     },
     "sign_in": "登录",
     "go_to_dashboard": "前往控制面板",
-    "get_started": "免费开始"
+    "get_started": "免费开始",
+    "features": "功能",
+    "pricing": "定价",
+    "enterprise": "企业版",
+    "partners": "合作伙伴"
   },
   "footer": {
     "tagline": "由 Gilgamesh Enterprise LLC 荣誉出品",
@@ -46,7 +53,12 @@
       "referral": "推荐",
       "privacy": "隐私政策",
       "terms": "服务条款",
-      "sm_give": "❤️ SM-Give"
+      "sm_give": "❤️ SM-Give",
+      "wall_of_love": "爱的墙",
+      "gils_guide": "Gil的指南",
+      "soma": "SOMA",
+      "enki": "Enki",
+      "monetize": "变现"
     },
     "product_hunt": "Product Hunt 推荐",
     "copyright": "© 2026 SocialMate · 保留所有权利"
@@ -276,7 +288,21 @@
     "terms_agree": "注册即表示您同意我们的",
     "terms": "服务条款",
     "and": "和",
-    "privacy": "隐私政策"
+    "privacy": "隐私政策",
+    "free_forever_badge": "🎉 永久免费 · 无需信用卡",
+    "tos_i_agree": "我同意SocialMate的",
+    "tos_terms": "服务条款",
+    "google_cta": "使用Google继续",
+    "divider": "或通过邮箱注册",
+    "confirm_password_label": "确认密码",
+    "create_free_cta": "创建免费账户 →",
+    "creating": "正在创建账户...",
+    "post_everywhere": "到处发帖。",
+    "all_at_once": "一次搞定。",
+    "desktop_subheadline": "在7个平台发帖，获得15+个AI工具，拓展受众——完全免费。",
+    "mobile_subheadline": "在7个平台发帖，获得15+个AI工具，拓展受众——完全免费。",
+    "almost_in": "快好了！",
+    "go_sign_in": "前往登录 →"
   },
   "login": {
     "headline": "登录 SocialMate",
@@ -286,7 +312,14 @@
     "submit": "登录",
     "submitting": "正在登录…",
     "no_account": "没有账户？",
-    "sign_up": "免费注册"
+    "sign_up": "免费注册",
+    "google_cta": "使用Google继续",
+    "sending": "正在发送链接...",
+    "signing_in": "登录中...",
+    "send_magic_link": "发送魔法链接 →",
+    "sign_in_cta": "登录 →",
+    "or": "或",
+    "subheadline": "欢迎回来。"
   },
   "blog": {
     "headline": "SocialMate 博客",

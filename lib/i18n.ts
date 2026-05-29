@@ -1,9 +1,8 @@
-// Only English is statically bundled (~62KB). All other locales (~394KB combined)
-// are loaded on demand via dynamic import when a user switches language.
-// This prevents ~400KB of dead JSON from landing in every page's JS bundle.
+// Only English is statically bundled (~62KB). All other locales are loaded on demand.
+// This prevents dead JSON from landing in every page's JS bundle.
 import en from '@/messages/en.json'
 
-export type Locale = 'en' | 'es' | 'de' | 'fr' | 'pt' | 'ru' | 'zh'
+export type Locale = 'en' | 'es' | 'de' | 'fr' | 'pt' | 'ru' | 'zh' | 'ja' | 'ko'
 export type Messages = typeof en
 
 export const SUPPORTED_LOCALES: { code: Locale; label: string; flag: string }[] = [
@@ -14,9 +13,11 @@ export const SUPPORTED_LOCALES: { code: Locale; label: string; flag: string }[] 
   { code: 'pt', label: 'Português',  flag: '🇧🇷' },
   { code: 'ru', label: 'Русский',    flag: '🇷🇺' },
   { code: 'zh', label: '中文',        flag: '🇨🇳' },
+  { code: 'ja', label: '日本語',      flag: '🇯🇵' },
+  { code: 'ko', label: '한국어',      flag: '🇰🇷' },
 ]
 
-const SUPPORTED_CODES = new Set<string>(SUPPORTED_LOCALES.map(l => l.code))
+export const SUPPORTED_CODES = new Set<string>(SUPPORTED_LOCALES.map(l => l.code))
 
 // The statically-bundled English messages. Used as the initial state and fallback.
 export const englishMessages: Messages = en
@@ -32,6 +33,8 @@ export async function loadMessages(locale: Locale): Promise<Messages> {
       case 'pt': return (await import('@/messages/pt.json')).default as unknown as Messages
       case 'ru': return (await import('@/messages/ru.json')).default as unknown as Messages
       case 'zh': return (await import('@/messages/zh.json')).default as unknown as Messages
+      case 'ja': return (await import('@/messages/ja.json')).default as unknown as Messages
+      case 'ko': return (await import('@/messages/ko.json')).default as unknown as Messages
       default:   return en
     }
   } catch {
@@ -57,11 +60,26 @@ export function translate(key: string, messages: Messages): string {
   return val
 }
 
+/** Read locale from URL path segment (e.g. /es/... → 'es'). Server + client safe. */
+export function localeFromPath(pathname: string): Locale | null {
+  const seg = pathname.split('/')[1]
+  return seg && SUPPORTED_CODES.has(seg) ? (seg as Locale) : null
+}
+
 export function detectLocale(): Locale {
   if (typeof window === 'undefined') return 'en'
-  const stored = localStorage.getItem('sm_locale')
-  if (stored && SUPPORTED_CODES.has(stored)) return stored as Locale
-  const browser = navigator.language?.slice(0, 2)
-  if (browser && SUPPORTED_CODES.has(browser)) return browser as Locale
+  // 1. URL path takes highest priority (e.g. user is on /es)
+  const fromPath = localeFromPath(window.location.pathname)
+  if (fromPath) return fromPath
+  // 2. Stored preference
+  try {
+    const stored = localStorage.getItem('sm_locale')
+    if (stored && SUPPORTED_CODES.has(stored)) return stored as Locale
+  } catch {}
+  // 3. Browser language
+  try {
+    const browser = navigator.language?.slice(0, 2)
+    if (browser && SUPPORTED_CODES.has(browser)) return browser as Locale
+  } catch {}
   return 'en'
 }

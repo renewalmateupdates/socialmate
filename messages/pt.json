@@ -18,11 +18,18 @@
     "products": {
       "soma": "SOMA",
       "studio_stax": "Studio Stax",
-      "enki": "Enki"
+      "enki": "Enki",
+      "hermes": "⚡ HERMES",
+      "tiktok_studio": "🎵 TikTok Studio",
+      "monetize": "💜 Monetize"
     },
     "sign_in": "Entrar",
     "go_to_dashboard": "Ir para o painel",
-    "get_started": "Comece grátis"
+    "get_started": "Comece grátis",
+    "features": "Recursos",
+    "pricing": "Preços",
+    "enterprise": "Empresa",
+    "partners": "Parceiros"
   },
   "footer": {
     "tagline": "por Gilgamesh Enterprise LLC",
@@ -46,7 +53,12 @@
       "referral": "Indicação",
       "privacy": "Privacidade",
       "terms": "Termos",
-      "sm_give": "❤️ SM-Give"
+      "sm_give": "❤️ SM-Give",
+      "wall_of_love": "Muro do Amor",
+      "gils_guide": "Guia do Gil",
+      "soma": "SOMA",
+      "enki": "Enki",
+      "monetize": "Monetizar"
     },
     "product_hunt": "Destaque no Product Hunt",
     "copyright": "© 2026 SocialMate · Todos os direitos reservados"
@@ -276,7 +288,21 @@
     "terms_agree": "Ao se cadastrar, você concorda com nossos",
     "terms": "Termos",
     "and": "e",
-    "privacy": "Política de Privacidade"
+    "privacy": "Política de Privacidade",
+    "free_forever_badge": "🎉 Gratuito para sempre · Sem cartão de crédito",
+    "tos_i_agree": "Concordo com os",
+    "tos_terms": "Termos de Serviço",
+    "google_cta": "Continuar com o Google",
+    "divider": "ou cadastre-se com e-mail",
+    "confirm_password_label": "Confirmar Senha",
+    "create_free_cta": "Criar Conta Gratuita →",
+    "creating": "Criando conta...",
+    "post_everywhere": "Poste em todo lugar.",
+    "all_at_once": "Tudo de uma vez.",
+    "desktop_subheadline": "Agende em 7 plataformas, obtenha 15+ ferramentas de IA e cresça seu público — completamente gratuito.",
+    "mobile_subheadline": "Agende em 7 plataformas, obtenha 15+ ferramentas de IA e cresça seu público — completamente gratuito.",
+    "almost_in": "Você está quase lá!",
+    "go_sign_in": "Ir para entrar →"
   },
   "login": {
     "headline": "Entrar no SocialMate",
@@ -286,7 +312,14 @@
     "submit": "Entrar",
     "submitting": "Entrando…",
     "no_account": "Não tem uma conta?",
-    "sign_up": "Cadastre-se grátis"
+    "sign_up": "Cadastre-se grátis",
+    "google_cta": "Continuar com o Google",
+    "sending": "Enviando link...",
+    "signing_in": "Entrando...",
+    "send_magic_link": "Enviar link mágico →",
+    "sign_in_cta": "Entrar →",
+    "or": "ou",
+    "subheadline": "Bem-vindo de volta."
   },
   "blog": {
     "headline": "Blog do SocialMate",

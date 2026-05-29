@@ -3,19 +3,11 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { useI18n } from '@/contexts/I18nContext'
+import { SUPPORTED_LOCALES, localeFromPath } from '@/lib/i18n'
 
-// Landing pages that are server-rendered per locale — need a navigation to switch language
-const PUBLIC_LOCALE_PATHS = new Set(['/', '/es', '/de', '/fr', '/pt', '/ru', '/zh'])
-
-const LANGUAGES = [
-  { code: 'en', flag: '🇺🇸', label: 'English'   },
-  { code: 'es', flag: '🇪🇸', label: 'Español'   },
-  { code: 'de', flag: '🇩🇪', label: 'Deutsch'   },
-  { code: 'fr', flag: '🇫🇷', label: 'Français'  },
-  { code: 'pt', flag: '🇧🇷', label: 'Português' },
-  { code: 'ru', flag: '🇷🇺', label: 'Русский'   },
-  { code: 'zh', flag: '🇨🇳', label: '中文'       },
-]
+// Locale-prefixed landing pages — switching language navigates to the locale URL
+const PUBLIC_LOCALE_PATHS = new Set(['/', '/es', '/de', '/fr', '/pt', '/ru', '/zh', '/ja', '/ko'])
 
 const AUDIENCES = [
   { label: '🎮 Streamers',           href: '/for/streamers'          },
@@ -57,26 +49,26 @@ type DropdownKey = 'audiences' | 'products' | 'resources'
 export default function PublicNav() {
   const pathname = usePathname()
   const router   = useRouter()
+  const { locale, setLocale, t } = useI18n()
+
   const [open, setOpen] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState<DropdownKey | null>(null)
   const [mobileExpanded, setMobileExpanded] = useState<DropdownKey | null>(null)
   const [langOpen, setLangOpen] = useState(false)
-  const [locale, setLocaleState] = useState('en')
   const navRef = useRef<HTMLDivElement>(null)
   const langRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setIsLoggedIn(!!data.user))
-    try { setLocaleState(localStorage.getItem('sm_locale') || 'en') } catch {}
   }, [])
 
-  const setLocale = (code: string) => {
-    setLocaleState(code)
-    try { localStorage.setItem('sm_locale', code) } catch {}
+  const handleSetLocale = (code: string) => {
+    setLocale(code as Parameters<typeof setLocale>[0])
     setLangOpen(false)
-    // Public landing pages are server-rendered per locale — navigate to the locale URL
-    if (PUBLIC_LOCALE_PATHS.has(pathname)) {
+    // Navigate to the locale landing page when on the root or a locale page
+    const isOnLocalePage = PUBLIC_LOCALE_PATHS.has(pathname) || localeFromPath(pathname) !== null
+    if (isOnLocalePage) {
       router.push(code === 'en' ? '/' : `/${code}`)
     }
   }
@@ -140,19 +132,21 @@ export default function PublicNav() {
     </div>
   )
 
+  const currentLocaleFlag = SUPPORTED_LOCALES.find(l => l.code === locale)?.flag ?? '🌐'
+
   return (
     <header
       className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800"
       style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
 
-        {/* Logo + language picker — top left */}
+        {/* Logo + language picker */}
         <div className="flex items-center gap-2 flex-shrink-0">
           <Link href="/" className="flex items-center gap-2">
-            <img src="/logo.png" alt="SocialMate" className="w-10 h-10 rounded-xl" />
+            <img src="/logo.png" alt={t('nav.logo_alt')} className="w-10 h-10 rounded-xl" />
             <span className="font-bold text-base tracking-tight text-gray-900 dark:text-gray-100 hidden sm:inline">
               SocialMate
-              <span className="text-[10px] font-semibold bg-pink-500 text-white px-1.5 py-0.5 rounded-full align-super ml-1">Beta</span>
+              <span className="text-[10px] font-semibold bg-pink-500 text-white px-1.5 py-0.5 rounded-full align-super ml-1">{t('nav.beta')}</span>
             </span>
           </Link>
 
@@ -164,12 +158,12 @@ export default function PublicNav() {
               aria-label="Change language"
               title="Change language"
             >
-              {LANGUAGES.find(l => l.code === locale)?.flag ?? '🌐'}
+              {currentLocaleFlag}
             </button>
             {langOpen && (
-              <div className="absolute top-full left-0 mt-1.5 w-36 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-xl py-1 z-50">
-                {LANGUAGES.map(lang => (
-                  <button key={lang.code} onClick={() => setLocale(lang.code)}
+              <div className="absolute top-full left-0 mt-1.5 w-40 bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-xl shadow-xl py-1 z-50 max-h-72 overflow-y-auto">
+                {SUPPORTED_LOCALES.map(lang => (
+                  <button key={lang.code} onClick={() => handleSetLocale(lang.code)}
                     className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-all text-left ${
                       locale === lang.code
                         ? 'font-semibold text-black dark:text-white bg-gray-50 dark:bg-gray-800'
@@ -187,9 +181,9 @@ export default function PublicNav() {
 
         {/* Desktop nav */}
         <nav ref={navRef} className="hidden lg:flex items-center gap-0.5 flex-1 justify-center">
-          <Link href="/features"   className={flatLinkCls('/features')}>Features</Link>
-          <Link href="/pricing"   className={flatLinkCls('/pricing')}>Pricing</Link>
-          <Link href="/enterprise" className={flatLinkCls('/enterprise')}>Enterprise</Link>
+          <Link href="/features"   className={flatLinkCls('/features')}>{t('nav.features')}</Link>
+          <Link href="/pricing"    className={flatLinkCls('/pricing')}>{t('nav.pricing')}</Link>
+          <Link href="/enterprise" className={flatLinkCls('/enterprise')}>{t('nav.enterprise')}</Link>
 
           <span className="w-px h-4 bg-gray-200 dark:bg-gray-700 mx-1.5" />
 
@@ -198,7 +192,7 @@ export default function PublicNav() {
             <button
               onClick={() => toggleDropdown('audiences')}
               className={dropdownTriggerCls('audiences', AUDIENCES)}>
-              Audiences {chevron(activeDropdown === 'audiences')}
+              {t('nav.audiences')} {chevron(activeDropdown === 'audiences')}
             </button>
             {activeDropdown === 'audiences' && dropdownPanel(AUDIENCES)}
           </div>
@@ -220,7 +214,7 @@ export default function PublicNav() {
             <button
               onClick={() => toggleDropdown('resources')}
               className={dropdownTriggerCls('resources', RESOURCES)}>
-              Resources {chevron(activeDropdown === 'resources')}
+              {t('nav.resources')} {chevron(activeDropdown === 'resources')}
             </button>
             {activeDropdown === 'resources' && dropdownPanel(RESOURCES)}
           </div>
@@ -229,21 +223,21 @@ export default function PublicNav() {
         {/* Desktop right actions */}
         <div className="hidden lg:flex items-center gap-3 flex-shrink-0">
           <Link href="/partners" className="text-sm font-semibold text-amber-500 hover:text-amber-400 transition-all">
-            Partners
+            {t('nav.partners')}
           </Link>
           {isLoggedIn ? (
             <Link href="/dashboard"
               className="bg-black dark:bg-white text-white dark:text-black text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
-              Dashboard →
+              {t('nav.go_to_dashboard')}
             </Link>
           ) : (
             <>
               <Link href="/login" className="text-sm font-semibold text-gray-500 hover:text-black dark:hover:text-white transition-all">
-                Sign in
+                {t('nav.sign_in')}
               </Link>
               <Link href="/signup"
                 className="bg-black dark:bg-white text-white dark:text-black text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
-                Get started free →
+                {t('nav.get_started')} →
               </Link>
             </>
           )}
@@ -253,11 +247,11 @@ export default function PublicNav() {
         <div className="flex lg:hidden items-center gap-2">
           {isLoggedIn ? (
             <Link href="/dashboard" className="text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-all px-2 py-1">
-              Dashboard
+              {t('nav.go_to_dashboard')}
             </Link>
           ) : (
             <Link href="/login" className="text-sm font-semibold text-gray-500 hover:text-black dark:hover:text-white transition-all px-2 py-1">
-              Sign in
+              {t('nav.sign_in')}
             </Link>
           )}
           <button
@@ -290,8 +284,8 @@ export default function PublicNav() {
             <nav className="flex-1 overflow-y-auto p-4 space-y-1">
               {/* Main links */}
               {[
-                { label: 'Features', href: '/features' },
-                { label: 'Pricing',  href: '/pricing'  },
+                { label: t('nav.features'), href: '/features' },
+                { label: t('nav.pricing'),  href: '/pricing'  },
               ].map(link => (
                 <Link key={link.href} href={link.href}
                   onClick={() => setOpen(false)}
@@ -309,7 +303,7 @@ export default function PublicNav() {
                 <button
                   onClick={() => setMobileExpanded(prev => prev === 'audiences' ? null : 'audiences')}
                   className="w-full flex items-center justify-between px-4 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-widest hover:text-gray-600 dark:hover:text-gray-300 transition-all">
-                  <span>Audiences</span>
+                  <span>{t('nav.audiences')}</span>
                   <svg className={`w-3.5 h-3.5 transition-transform ${mobileExpanded === 'audiences' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
@@ -336,7 +330,7 @@ export default function PublicNav() {
                   { label: '◆ Enki',            href: '/enki'          },
                   { label: '💜 Monetize',       href: '/monetize'      },
                   { label: '🎵 TikTok Studio',  href: '/tiktok' },
-                  { label: '🤖 Android Beta',   href: '/beta'          },
+                  { label: '⚡ HERMES',         href: '/hermes'        },
                   { label: '🏢 Enterprise',     href: '/enterprise'    },
                 ].map(link => (
                   <Link key={link.href} href={link.href}
@@ -356,7 +350,7 @@ export default function PublicNav() {
                 <button
                   onClick={() => setMobileExpanded(prev => prev === 'resources' ? null : 'resources')}
                   className="w-full flex items-center justify-between px-4 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-widest hover:text-gray-600 dark:hover:text-gray-300 transition-all">
-                  <span>Resources</span>
+                  <span>{t('nav.resources')}</span>
                   <svg className={`w-3.5 h-3.5 transition-transform ${mobileExpanded === 'resources' ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
@@ -386,16 +380,16 @@ export default function PublicNav() {
                 </Link>
                 <Link href="/partners" onClick={() => setOpen(false)}
                   className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-950/20 transition-all">
-                  🤝 Partners Portal
+                  🤝 {t('nav.partners')}
                 </Link>
               </div>
 
-              {/* Language */}
+              {/* Language picker */}
               <div className="pt-2 border-t border-gray-100 dark:border-gray-800 mt-2">
                 <p className="px-4 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-widest">🌐 Language</p>
                 <div className="grid grid-cols-2 gap-1 px-3 pb-2">
-                  {LANGUAGES.map(lang => (
-                    <button key={lang.code} onClick={() => { setLocale(lang.code); setOpen(false) }}
+                  {SUPPORTED_LOCALES.map(lang => (
+                    <button key={lang.code} onClick={() => { handleSetLocale(lang.code); setOpen(false) }}
                       className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm transition-all ${
                         locale === lang.code
                           ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 font-semibold'
@@ -413,12 +407,12 @@ export default function PublicNav() {
               {isLoggedIn ? (
                 <Link href="/dashboard" onClick={() => setOpen(false)}
                   className="flex items-center justify-center w-full px-4 py-3 rounded-xl bg-black dark:bg-white text-white dark:text-black text-sm font-bold hover:opacity-80 transition-all">
-                  Dashboard →
+                  {t('nav.go_to_dashboard')}
                 </Link>
               ) : (
                 <Link href="/signup" onClick={() => setOpen(false)}
                   className="flex items-center justify-center w-full px-4 py-3 rounded-xl bg-black dark:bg-white text-white dark:text-black text-sm font-bold hover:opacity-80 transition-all">
-                  Get started free →
+                  {t('nav.get_started')} →
                 </Link>
               )}
             </div>

@@ -25,6 +25,13 @@ export async function POST(req: NextRequest) {
 
   const { priceId, fromOnboarding, coupon_code, returnStep } = await req.json()
 
+  // Detect user's locale from cookie for Stripe checkout page translation
+  const STRIPE_SUPPORTED: Record<string, string> = {
+    en: 'en', es: 'es', de: 'de', fr: 'fr', pt: 'pt', ru: 'ru', zh: 'zh', ja: 'ja', ko: 'ko',
+  }
+  const rawLocale = cookieStore.get('sm_locale')?.value ?? 'en'
+  const stripeLocale = (STRIPE_SUPPORTED[rawLocale] ?? 'auto') as 'auto' | 'en' | 'es' | 'de' | 'fr' | 'pt' | 'ru' | 'zh' | 'ja' | 'ko'
+
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
 
   const successUrl = fromOnboarding
@@ -96,6 +103,7 @@ export async function POST(req: NextRequest) {
     payment_method_types: ['card'],
     customer_email: user.email,
     line_items: [{ price: priceId, quantity: 1 }],
+    locale: stripeLocale,
     metadata,
     automatic_tax: { enabled: true },
     // allow_promotion_codes only when no coupon applied (can't combine with discounts[])

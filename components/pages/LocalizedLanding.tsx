@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import type { Metadata } from 'next'
 import PublicNav from '@/components/PublicNav'
+import PublicFooter from '@/components/PublicFooter'
 
 // Direct JSON imports — zero next-intl dependency
 import enMessages from '@/messages/en.json'
@@ -12,10 +13,14 @@ import frMessages from '@/messages/fr.json'
 import deMessages from '@/messages/de.json'
 import ruMessages from '@/messages/ru.json'
 import zhMessages from '@/messages/zh.json'
+import jaMessages from '@/messages/ja.json'
+import koMessages from '@/messages/ko.json'
 
 const ALL_MESSAGES: Record<string, typeof enMessages> = {
   en: enMessages, es: esMessages, pt: ptMessages,
   fr: frMessages, de: deMessages, ru: ruMessages, zh: zhMessages,
+  ja: jaMessages as unknown as typeof enMessages,
+  ko: koMessages as unknown as typeof enMessages,
 }
 
 function createT(namespace: Record<string, unknown>) {
@@ -63,6 +68,8 @@ export function generateLocaleMetadata(locale: string): Metadata {
         de: 'https://socialmate.studio/de',
         ru: 'https://socialmate.studio/ru',
         zh: 'https://socialmate.studio/zh',
+        ja: 'https://socialmate.studio/ja',
+        ko: 'https://socialmate.studio/ko',
       },
     },
   }
@@ -437,23 +444,8 @@ export default async function LocalizedLanding({ locale }: { locale: string }) {
         </div>
       </section>
 
-      {/* FOOTER */}
-      <footer className="border-t border-gray-800 bg-black dark:bg-gray-950">
-        <div className="max-w-6xl mx-auto px-6 pt-10 pb-6">
-          <div className="flex items-center gap-2 mb-8">
-            <img src="/logo.png" alt="SocialMate" className="w-7 h-7 rounded-lg" />
-            <span className="text-sm font-bold text-white">SocialMate</span>
-          </div>
-          <div className="flex items-center justify-between flex-wrap gap-4 pt-6 border-t border-gray-800">
-            <a href="https://www.producthunt.com/posts/socialmate-2"
-              target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#FF6154] hover:bg-[#e5564a] text-white text-xs font-semibold rounded-lg transition-colors">
-              Featured on Product Hunt
-            </a>
-            <p className="text-xs text-gray-600">© 2026 SocialMate · All rights reserved</p>
-          </div>
-        </div>
-      </footer>
+      {/* FOOTER — full translated footer, same as all other public pages */}
+      <PublicFooter />
     </div>
   )
 }
