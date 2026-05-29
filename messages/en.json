@@ -29,7 +29,8 @@
     "features": "Features",
     "pricing": "Pricing",
     "enterprise": "Enterprise",
-    "partners": "Partners"
+    "partners": "Partners",
+    "products_label": "Products"
   },
   "footer": {
     "tagline": "by Gilgamesh Enterprise LLC",
@@ -64,10 +65,10 @@
     "copyright": "© 2026 SocialMate · All rights reserved"
   },
   "home": {
-    "badge": "🌱 Free forever · No credit card required · 5 social platforms · Twitch & YouTube clips · 12 AI tools",
+    "badge": "🌱 Free forever · No credit card required · 7 live platforms · 15+ AI tools",
     "headline": "Social media management",
     "headline_emphasis": "without the $99/month price tag.",
-    "subheadline": "Schedule across 5 social platforms, browse and schedule Twitch clips and YouTube videos, write better content with 12 AI tools, and track what's actually working — all from one place. Free to start. Pro from $5/month.",
+    "subheadline": "Schedule to 7 social platforms, write better content with 15+ AI tools, and track what's working — all free. Pro from $5/month.",
     "cta_primary": "Create free account →",
     "cta_pricing": "See pricing →",
     "no_card": "No card required · Free forever · Setup in 60 seconds",
@@ -76,7 +77,7 @@
     "stats": {
       "platforms": "social platforms live",
       "ai_tools": "AI tools included",
-      "price": "To get started"
+      "price": "to get started"
     },
     "free_tier": {
       "eyebrow": "Free plan — no catch",
@@ -230,7 +231,11 @@
       "subheadline": "Free forever. No card required. 50 AI credits per month, included free. Set up in 60 seconds.",
       "cta_primary": "Create free account →",
       "cta_secondary": "Compare plans →"
-    }
+    },
+    "hero_headline": "Post everywhere.",
+    "hero_tagline": "All at once.",
+    "cta_no_card": "No card required · Free forever · Setup in 60 seconds",
+    "more_coming": "+ more coming"
   },
   "pricing": {
     "headline": "Simple, transparent pricing",

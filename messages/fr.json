@@ -29,7 +29,8 @@
     "features": "Fonctionnalités",
     "pricing": "Tarifs",
     "enterprise": "Entreprise",
-    "partners": "Partenaires"
+    "partners": "Partenaires",
+    "products_label": "Produits"
   },
   "footer": {
     "tagline": "par Gilgamesh Enterprise LLC",
@@ -64,19 +65,19 @@
     "copyright": "© 2026 SocialMate · Tous droits réservés"
   },
   "home": {
-    "badge": "🌱 Gratuit pour toujours · Aucune carte de crédit requise · 5 plateformes sociales · Clips Twitch & YouTube · 12 outils IA",
+    "badge": "🌱 Gratuit pour toujours · Sans carte · 7 plateformes · 15+ outils IA",
     "headline": "Gestion des réseaux sociaux",
     "headline_emphasis": "sans le prix de 99 $/mois.",
-    "subheadline": "Planifiez sur 5 plateformes sociales, parcourez et programmez des clips Twitch et des vidéos YouTube, rédigez de meilleurs contenus avec 12 outils IA, et suivez ce qui fonctionne réellement — le tout depuis un seul endroit. Gratuit pour commencer. Pro à partir de 5 $/mois.",
+    "subheadline": "Planifiez sur 7 plateformes, créez de meilleurs contenus avec 15+ outils IA et suivez ce qui fonctionne — tout gratuitement. Pro à partir de 5 $/mois.",
     "cta_primary": "Créer un compte gratuit →",
     "cta_pricing": "Voir les tarifs →",
     "no_card": "Aucune carte requise · Gratuit pour toujours · Configuration en 60 secondes",
     "built_by_name": "Développé en solo par Joshua Bostic",
     "built_by_desc": "Autofinancé. Pas de capital-risque. Pas de piège à 99 $/mois. Juste un développeur qui avait besoin de meilleurs outils et les a créés pour tous.",
     "stats": {
-      "platforms": "plateformes sociales en direct",
+      "platforms": "plateformes actives",
       "ai_tools": "outils IA inclus",
-      "price": "Pour commencer"
+      "price": "pour commencer"
     },
     "free_tier": {
       "eyebrow": "Plan gratuit — sans piège",
@@ -230,7 +231,11 @@
       "subheadline": "Gratuit pour toujours. Aucune carte requise. 50 crédits IA par mois, inclus gratuitement. Configuration en 60 secondes.",
       "cta_primary": "Créer un compte gratuit →",
       "cta_secondary": "Comparer les plans →"
-    }
+    },
+    "hero_headline": "Publiez partout.",
+    "hero_tagline": "Tout en même temps.",
+    "cta_no_card": "Sans carte · Gratuit pour toujours · Configuration en 60 secondes",
+    "more_coming": "+ en cours"
   },
   "pricing": {
     "headline": "Tarifs simples et transparents",

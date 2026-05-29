@@ -29,7 +29,8 @@
       "hermes": "⚡ HERMES",
       "tiktok_studio": "🎵 TikTok Studio",
       "monetize": "💜 マネタイズ"
-    }
+    },
+    "products_label": "製品"
   },
   "footer": {
     "tagline": "by Gilgamesh Enterprise LLC",
@@ -64,19 +65,19 @@
     "copyright": "© 2026 SocialMate · All rights reserved"
   },
   "home": {
-    "badge": "🌱 Free forever · No credit card required · 5 social platforms · Twitch & YouTube clips · 12 AI tools",
+    "badge": "🌱 永久無料 · クレジットカード不要 · 7つのプラットフォーム · 15以上のAIツール",
     "headline": "Social media management",
     "headline_emphasis": "without the $99/month price tag.",
-    "subheadline": "Schedule across 5 social platforms, browse and schedule Twitch clips and YouTube videos, write better content with 12 AI tools, and track what's actually working — all from one place. Free to start. Pro from $5/month.",
+    "subheadline": "7つのプラットフォームにスケジュール投稿、15以上のAIツールでより良いコンテンツを作成、効果を追跡 — すべて無料。Proは月$5から。",
     "cta_primary": "Create free account →",
     "cta_pricing": "See pricing →",
     "no_card": "No card required · Free forever · Setup in 60 seconds",
     "built_by_name": "Built solo by Joshua Bostic",
     "built_by_desc": "Bootstrapped. No VC. No $99/month trap. Just a builder who needed better tools and built them for everyone.",
     "stats": {
-      "platforms": "social platforms live",
-      "ai_tools": "AI tools included",
-      "price": "To get started"
+      "platforms": "のプラットフォームが稼働中",
+      "ai_tools": "のAIツール付き",
+      "price": "始めるのに"
     },
     "free_tier": {
       "eyebrow": "Free plan — no catch",
@@ -230,7 +231,11 @@
       "subheadline": "Free forever. No card required. 50 AI credits per month, included free. Set up in 60 seconds.",
       "cta_primary": "Create free account →",
       "cta_secondary": "Compare plans →"
-    }
+    },
+    "hero_headline": "どこでも投稿。",
+    "hero_tagline": "一度に。",
+    "cta_no_card": "カード不要 · 永久無料 · 60秒でセットアップ",
+    "more_coming": "+ 続々追加予定"
   },
   "pricing": {
     "headline": "Simple, transparent pricing",

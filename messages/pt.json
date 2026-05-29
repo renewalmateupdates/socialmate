@@ -29,7 +29,8 @@
     "features": "Recursos",
     "pricing": "Preços",
     "enterprise": "Empresa",
-    "partners": "Parceiros"
+    "partners": "Parceiros",
+    "products_label": "Produtos"
   },
   "footer": {
     "tagline": "por Gilgamesh Enterprise LLC",
@@ -64,19 +65,19 @@
     "copyright": "© 2026 SocialMate · Todos os direitos reservados"
   },
   "home": {
-    "badge": "🌱 Grátis para sempre · Não é necessário cartão de crédito · 5 plataformas sociais · Clipes do Twitch e YouTube · 12 ferramentas de IA",
+    "badge": "🌱 Gratuito para sempre · Sem cartão · 7 plataformas · 15+ ferramentas de IA",
     "headline": "Gerenciamento de redes sociais",
     "headline_emphasis": "sem o preço de $99/mês.",
-    "subheadline": "Agende em 5 plataformas sociais, navegue e agende clipes do Twitch e vídeos do YouTube, crie conteúdo melhor com 12 ferramentas de IA e acompanhe o que realmente funciona — tudo em um só lugar. Grátis para começar. Pro a partir de $5/mês.",
+    "subheadline": "Agende em 7 plataformas, crie conteúdo melhor com 15+ ferramentas de IA e acompanhe o que funciona — tudo de graça. Pro a partir de $5/mês.",
     "cta_primary": "Criar conta grátis →",
     "cta_pricing": "Ver preços →",
     "no_card": "Não é necessário cartão · Grátis para sempre · Configure em 60 segundos",
     "built_by_name": "Desenvolvido sozinho por Joshua Bostic",
     "built_by_desc": "Autofinanciado. Sem VCs. Sem a armadilha de $99/mês. Apenas um desenvolvedor que precisava de ferramentas melhores e as construiu para todos.",
     "stats": {
-      "platforms": "plataformas sociais ativas",
+      "platforms": "plataformas ativas",
       "ai_tools": "ferramentas de IA incluídas",
-      "price": "Para começar"
+      "price": "para começar"
     },
     "free_tier": {
       "eyebrow": "Plano grátis — sem pegadinhas",
@@ -230,7 +231,11 @@
       "subheadline": "Grátis para sempre. Não é necessário cartão. 50 créditos de IA por mês, incluídos gratuitamente. Configure em 60 segundos.",
       "cta_primary": "Criar conta grátis →",
       "cta_secondary": "Comparar planos →"
-    }
+    },
+    "hero_headline": "Poste em todo lugar.",
+    "hero_tagline": "Tudo de uma vez.",
+    "cta_no_card": "Sem cartão · Gratuito para sempre · Configuração em 60 segundos",
+    "more_coming": "+ em breve"
   },
   "pricing": {
     "headline": "Preços simples e transparentes",

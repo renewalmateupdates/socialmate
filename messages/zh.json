@@ -29,7 +29,8 @@
     "features": "功能",
     "pricing": "定价",
     "enterprise": "企业版",
-    "partners": "合作伙伴"
+    "partners": "合作伙伴",
+    "products_label": "产品"
   },
   "footer": {
     "tagline": "由 Gilgamesh Enterprise LLC 荣誉出品",
@@ -64,19 +65,19 @@
     "copyright": "© 2026 SocialMate · 保留所有权利"
   },
   "home": {
-    "badge": "🌱 永久免费 · 无需信用卡 · 支持5个社交平台 · Twitch和YouTube剪辑 · 12款AI工具",
+    "badge": "🌱 永久免费 · 无需信用卡 · 7个平台 · 15+个AI工具",
     "headline": "社交媒体管理",
     "headline_emphasis": "无需每月支付99美元。",
-    "subheadline": "在一个地方即可管理5个社交平台，浏览并发布Twitch剪辑和YouTube视频，利用12款AI工具创作更优质内容，并追踪实际效果。免费开始，专业版每月仅需5美元起。",
+    "subheadline": "在7个平台发帖，使用15+个AI工具创作更好的内容，追踪效果——全部免费。Pro套餐每月5美元起。",
     "cta_primary": "创建免费账户 →",
     "cta_pricing": "查看定价 →",
     "no_card": "无需信用卡 · 永久免费 · 60秒内完成设置",
     "built_by_name": "由 Joshua Bostic 独立打造",
     "built_by_desc": "白手起家。无风投。没有每月99美元的陷阱。只是一位需要更好工具并为所有人打造它们的开发者。",
     "stats": {
-      "platforms": "社交平台已上线",
-      "ai_tools": "AI工具已包含",
-      "price": "开始使用"
+      "platforms": "个社交平台上线",
+      "ai_tools": "个AI工具已包含",
+      "price": "即可开始"
     },
     "free_tier": {
       "eyebrow": "免费计划 — 绝无套路",
@@ -230,7 +231,11 @@
       "subheadline": "永久免费。无需信用卡。每月免费包含50个AI积分。60秒内完成设置。",
       "cta_primary": "创建免费账户 →",
       "cta_secondary": "比较计划 →"
-    }
+    },
+    "hero_headline": "到处发帖。",
+    "hero_tagline": "一次搞定。",
+    "cta_no_card": "无需信用卡 · 永久免费 · 60秒完成设置",
+    "more_coming": "+ 更多即将上线"
   },
   "pricing": {
     "headline": "简单透明的定价",
