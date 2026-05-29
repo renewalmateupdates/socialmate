@@ -29,7 +29,8 @@
     "features": "Características",
     "pricing": "Precios",
     "enterprise": "Empresa",
-    "partners": "Socios"
+    "partners": "Socios",
+    "products_label": "Productos"
   },
   "footer": {
     "tagline": "de Gilgamesh Enterprise LLC",
@@ -64,10 +65,10 @@
     "copyright": "© 2026 SocialMate · Todos los derechos reservados"
   },
   "home": {
-    "badge": "🌱 Gratis para siempre · No se requiere tarjeta de crédito · 5 plataformas sociales · Clips de Twitch y YouTube · 12 herramientas de IA",
+    "badge": "🌱 Gratis para siempre · Sin tarjeta · 7 plataformas · 15+ herramientas de IA",
     "headline": "Gestión de redes sociales",
     "headline_emphasis": "sin el precio de $99/mes.",
-    "subheadline": "Programa publicaciones en 5 plataformas sociales, busca y programa clips de Twitch y videos de YouTube, crea mejor contenido con 12 herramientas de IA y rastrea lo que realmente funciona, todo desde un solo lugar. Empieza gratis. Pro desde $5/mes.",
+    "subheadline": "Programa en 7 plataformas, escribe mejor contenido con 15+ herramientas de IA y rastrea lo que funciona — todo gratis. Pro desde $5/mes.",
     "cta_primary": "Crear cuenta gratis →",
     "cta_pricing": "Ver precios →",
     "no_card": "No se requiere tarjeta · Gratis para siempre · Configuración en 60 segundos",
@@ -76,7 +77,7 @@
     "stats": {
       "platforms": "plataformas sociales activas",
       "ai_tools": "herramientas de IA incluidas",
-      "price": "Para empezar"
+      "price": "para comenzar"
     },
     "free_tier": {
       "eyebrow": "Plan gratuito — sin trucos",
@@ -230,7 +231,11 @@
       "subheadline": "Gratis para siempre. No se requiere tarjeta. 50 créditos de IA al mes, incluidos gratis. Configuración en 60 segundos.",
       "cta_primary": "Crear cuenta gratis →",
       "cta_secondary": "Comparar planes →"
-    }
+    },
+    "hero_headline": "Publica en todas partes.",
+    "hero_tagline": "Todo a la vez.",
+    "cta_no_card": "Sin tarjeta · Gratis para siempre · Configuración en 60 segundos",
+    "more_coming": "+ más próximamente"
   },
   "pricing": {
     "headline": "Precios simples y transparentes",

@@ -202,7 +202,7 @@ export default function PublicNav() {
             <button
               onClick={() => toggleDropdown('products')}
               className={dropdownTriggerCls('products', PRODUCTS)}>
-              Products {chevron(activeDropdown === 'products')}
+              {t('nav.products_label')} {chevron(activeDropdown === 'products')}
             </button>
             {activeDropdown === 'products' && dropdownPanel(PRODUCTS)}
           </div>
@@ -323,7 +323,7 @@ export default function PublicNav() {
 
               {/* Products */}
               <div className="pt-2 border-t border-gray-100 dark:border-gray-800 mt-2">
-                <p className="px-4 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-widest">Products</p>
+                <p className="px-4 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-widest">{t('nav.products_label')}</p>
                 {[
                   { label: '🗂️ Studio Stax',    href: '/studio-stax'    },
                   { label: '⚡ SOMA',           href: '/soma'          },

@@ -29,7 +29,8 @@
     "features": "Funktionen",
     "pricing": "Preise",
     "enterprise": "Unternehmen",
-    "partners": "Partner"
+    "partners": "Partner",
+    "products_label": "Produkte"
   },
   "footer": {
     "tagline": "von Gilgamesh Enterprise LLC",
@@ -64,19 +65,19 @@
     "copyright": "© 2026 SocialMate · Alle Rechte vorbehalten"
   },
   "home": {
-    "badge": "🌱 Für immer kostenlos · Keine Kreditkarte erforderlich · 5 soziale Plattformen · Twitch- & YouTube-Clips · 12 KI-Tools",
+    "badge": "🌱 Kostenlos für immer · Keine Karte · 7 Plattformen · 15+ KI-Tools",
     "headline": "Social Media Management",
     "headline_emphasis": "ohne das 99 $/Monat Preisschild.",
-    "subheadline": "Planen Sie Beiträge für 5 soziale Plattformen, durchsuchen und planen Sie Twitch-Clips und YouTube-Videos, erstellen Sie bessere Inhalte mit 12 KI-Tools und verfolgen Sie, was wirklich funktioniert – alles von einem Ort aus. Kostenlos starten. Pro ab 5 $/Monat.",
+    "subheadline": "Plane auf 7 Plattformen, erstelle bessere Inhalte mit 15+ KI-Tools und verfolge, was funktioniert — alles kostenlos. Pro ab $5/Monat.",
     "cta_primary": "Kostenloses Konto erstellen →",
     "cta_pricing": "Preise ansehen →",
     "no_card": "Keine Karte erforderlich · Für immer kostenlos · Einrichtung in 60 Sekunden",
     "built_by_name": "Alleine entwickelt von Joshua Bostic",
     "built_by_desc": "Bootstrapped. Keine Risikokapitalgeber. Keine 99 $/Monat Falle. Nur ein Entwickler, der bessere Tools brauchte und sie für alle gebaut hat.",
     "stats": {
-      "platforms": "soziale Plattformen live",
-      "ai_tools": "KI-Tools enthalten",
-      "price": "Zum Starten"
+      "platforms": "Social-Plattformen live",
+      "ai_tools": "KI-Tools inklusive",
+      "price": "zum Starten"
     },
     "free_tier": {
       "eyebrow": "Kostenloser Plan — ohne Haken",
@@ -230,7 +231,11 @@
       "subheadline": "Für immer kostenlos. Keine Karte erforderlich. 50 KI-Credits pro Monat, kostenlos enthalten. Einrichtung in 60 Sekunden.",
       "cta_primary": "Kostenloses Konto erstellen →",
       "cta_secondary": "Pläne vergleichen →"
-    }
+    },
+    "hero_headline": "Überall posten.",
+    "hero_tagline": "Alles auf einmal.",
+    "cta_no_card": "Keine Karte · Kostenlos für immer · Setup in 60 Sekunden",
+    "more_coming": "+ mehr folgt"
   },
   "pricing": {
     "headline": "Einfache, transparente Preise",

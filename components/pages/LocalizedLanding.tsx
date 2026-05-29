@@ -107,52 +107,83 @@ export default async function LocalizedLanding({ locale }: { locale: string }) {
       <PublicNav />
 
       {/* HERO */}
-      <section className="max-w-4xl mx-auto px-6 pt-24 pb-20 text-center">
-        <div className="inline-flex items-center gap-2 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-400 text-xs font-bold px-4 py-2 rounded-full mb-8">
+      <section className="relative max-w-5xl mx-auto px-6 pt-24 pb-20 text-center overflow-hidden">
+        {/* Background depth glows */}
+        <div className="absolute inset-0 -z-10 pointer-events-none">
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full bg-amber-500/8 blur-[130px]" />
+          <div className="absolute top-1/3 left-1/4 w-[350px] h-[350px] rounded-full bg-purple-600/8 blur-[100px]" />
+          <div className="absolute top-1/4 right-1/4 w-[300px] h-[300px] rounded-full bg-blue-600/6 blur-[100px]" />
+        </div>
+
+        {/* Badge */}
+        <div className="inline-flex items-center gap-2 bg-amber-500/15 border border-amber-500/30 text-white text-xs font-bold px-4 py-2 rounded-full mb-8">
           {t('badge')}
         </div>
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight text-gray-900 dark:text-gray-100">
-          {t('headline')}{' '}
-          <span className="text-gray-400 dark:text-gray-500">{t('headline_emphasis')}</span>
+
+        {/* Headline */}
+        <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight mb-6 leading-[1.08] text-white">
+          {t('hero_headline')}<br />
+          <span className="bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 bg-clip-text text-transparent">
+            {t('hero_tagline')}
+          </span>
         </h1>
-        <p className="text-gray-500 dark:text-gray-400 text-lg max-w-2xl mx-auto mb-10 leading-relaxed">
+
+        <p className="text-gray-400 text-lg max-w-xl mx-auto mb-10 leading-relaxed">
           {t('subheadline')}
         </p>
+
+        {/* Platform pill icons */}
+        <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
+          {live.map(p => (
+            <div key={p.name}
+              className="flex items-center gap-1.5 bg-gray-800/80 border border-gray-700/60 text-gray-200 text-xs font-semibold px-3 py-1.5 rounded-xl backdrop-blur-sm hover:border-gray-500 transition-colors">
+              <span>{p.icon}</span>
+              <span>{p.name}</span>
+            </div>
+          ))}
+          <div className="flex items-center gap-1.5 bg-gray-800/40 border border-gray-700/40 text-gray-500 text-xs font-semibold px-3 py-1.5 rounded-xl">
+            {t('more_coming')}
+          </div>
+        </div>
+
+        {/* CTAs */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
           <Link
             href={`${prefix}/signup`}
-            className="bg-black text-white font-bold px-8 py-4 rounded-2xl hover:opacity-80 transition-all text-base w-full sm:w-auto text-center">
+            className="bg-amber-500 hover:bg-amber-400 text-black font-bold px-8 py-4 rounded-2xl transition-all text-base w-full sm:w-auto text-center shadow-lg shadow-amber-500/25">
             {t('cta_primary')}
           </Link>
           <Link
             href={`${prefix}/pricing`}
-            className="text-gray-500 dark:text-gray-400 font-semibold hover:text-black dark:hover:text-white transition-all text-base">
+            className="text-gray-400 font-semibold hover:text-white transition-all text-base">
             {t('cta_pricing')}
           </Link>
         </div>
-        <p className="text-xs text-gray-400 dark:text-gray-500">{t('no_card')}</p>
+        <p className="text-xs text-gray-500">{t('cta_no_card')}</p>
 
-        <div className="mt-10 max-w-md mx-auto bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl px-5 py-4 text-left">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-base flex-shrink-0">👤</div>
-            <div>
-              <p className="text-xs font-bold text-gray-800 dark:text-gray-200">{t('built_by_name')}</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{t('built_by_desc')}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-3 gap-4 sm:gap-6 mt-12 sm:mt-16 max-w-2xl mx-auto">
+        {/* Stats */}
+        <div className="grid grid-cols-3 gap-4 sm:gap-8 mt-14 max-w-xl mx-auto">
           {[
-            { value: '5',   labelKey: 'stats.platforms' },
-            { value: '12',  labelKey: 'stats.ai_tools'  },
+            { value: '7',   labelKey: 'stats.platforms' },
+            { value: '15+', labelKey: 'stats.ai_tools'  },
             { value: '$0',  labelKey: 'stats.price'     },
           ].map(stat => (
             <div key={stat.labelKey} className="text-center">
-              <p className="text-4xl font-extrabold tracking-tight">{stat.value}</p>
-              <p className="text-xs text-gray-400 font-semibold mt-1">{t(stat.labelKey)}</p>
+              <p className="text-4xl font-extrabold tracking-tight text-white">{stat.value}</p>
+              <p className="text-xs text-gray-400 font-medium mt-1">{t(stat.labelKey)}</p>
             </div>
           ))}
+        </div>
+
+        {/* Founder card */}
+        <div className="mt-10 max-w-sm mx-auto bg-gray-900/60 border border-gray-800 rounded-2xl px-5 py-3.5 text-left backdrop-blur-sm">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-sm flex-shrink-0">👤</div>
+            <div>
+              <p className="text-xs font-bold text-gray-200">{t('built_by_name')}</p>
+              <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{t('built_by_desc')}</p>
+            </div>
+          </div>
         </div>
       </section>
 
