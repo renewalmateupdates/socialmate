@@ -94,7 +94,7 @@ const NAV_BASE = [
       { icon: '🔭', label: 'Competitors',  href: '/competitor-tracking' },
       { icon: '🕳️', label: 'Content Gaps', href: '/content-gap'         },
       { icon: '💸', label: 'Creator Hub',  href: '/monetize/hub'        },
-      { icon: '⚡', label: 'HERMES',       href: '/hermes'              },
+      { icon: '⚡', label: 'HERMES',       href: '/hermes/dashboard'    },
       { icon: '📬', label: 'Inbox',        href: '/inbox'               },
       { icon: '🤝', label: 'Partners',     href: '/partners'            },
       { icon: '🎁', label: 'Referrals',    href: '/affiliate'           },
