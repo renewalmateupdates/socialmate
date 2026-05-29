@@ -4,21 +4,26 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 const CHANNELS = [
-  { id: 'email',    label: 'Email',    icon: '📧' },
-  { id: 'bluesky',  label: 'Bluesky',  icon: '🦋' },
-  { id: 'mastodon', label: 'Mastodon', icon: '🐘' },
+  { id: 'email',    label: 'Email',    icon: '📧', desc: 'Via Hunter.io + Resend. Best for agencies & freelancers.' },
+  { id: 'bluesky',  label: 'Bluesky',  icon: '🦋', desc: 'DM via AT Protocol. Great for creators & builders.' },
+  { id: 'mastodon', label: 'Mastodon', icon: '🐘', desc: 'Direct mention as DM. Open-source communities.' },
+]
+
+const COMING_CHANNELS = [
+  { label: 'LinkedIn', icon: '💼', reason: 'Partner API required' },
+  { label: 'X / Twitter', icon: '✖️', reason: '$100/mo API access' },
 ]
 
 export default function NewCampaignPage() {
   const router = useRouter()
-  const [name, setName]                   = useState('')
-  const [goal, setGoal]                   = useState('')
-  const [persona, setPersona]             = useState('')
-  const [channels, setChannels]           = useState<string[]>(['email'])
-  const [mode, setMode]                   = useState<'draft' | 'auto'>('draft')
-  const [sequenceDays, setSequenceDays]   = useState([0, 3, 7])
-  const [loading, setLoading]             = useState(false)
-  const [error, setError]                 = useState<string | null>(null)
+  const [name, setName]                 = useState('')
+  const [goal, setGoal]                 = useState('')
+  const [persona, setPersona]           = useState('')
+  const [channels, setChannels]         = useState<string[]>(['email'])
+  const [mode, setMode]                 = useState<'draft' | 'auto'>('draft')
+  const [sequenceDays, setSequenceDays] = useState([0, 3, 7])
+  const [loading, setLoading]           = useState(false)
+  const [error, setError]               = useState<string | null>(null)
 
   const toggleChannel = (ch: string) => {
     setChannels(prev => prev.includes(ch) ? prev.filter(c => c !== ch) : [...prev, ch])
@@ -50,24 +55,28 @@ export default function NewCampaignPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-6">
-      <div className="max-w-xl mx-auto">
-        <div className="flex items-center gap-3 mb-8">
-          <Link href="/hermes" className="text-gray-500 hover:text-white transition-colors text-sm">← HERMES</Link>
+    <div className="min-h-screen bg-gray-950 text-white">
+      <div className="max-w-xl mx-auto px-6 py-8">
+
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-2 mb-8 text-sm">
+          <Link href="/hermes" className="text-gray-500 hover:text-white transition-colors">← HERMES</Link>
           <span className="text-gray-700">/</span>
-          <span className="text-sm text-gray-300">New Campaign</span>
+          <span className="text-gray-300">New Campaign</span>
         </div>
 
-        <h1 className="text-2xl font-extrabold mb-6">New Campaign</h1>
+        <h1 className="text-2xl font-extrabold mb-1">New Campaign</h1>
+        <p className="text-sm text-gray-500 mb-8">HERMES will write, schedule, and send your outreach automatically.</p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+
           {/* Name */}
           <div>
             <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Campaign Name *</label>
             <input
               value={name}
               onChange={e => setName(e.target.value)}
-              placeholder="e.g. Podcast Guest Pitches"
+              placeholder="e.g. Agency Outreach — May 2026"
               required
               className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-400 transition-colors"
             />
@@ -79,7 +88,7 @@ export default function NewCampaignPage() {
             <input
               value={goal}
               onChange={e => setGoal(e.target.value)}
-              placeholder="e.g. Get booked as a podcast guest to talk SocialMate"
+              placeholder="e.g. Get social media agencies on Agency plan ($20/mo)"
               className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-400 transition-colors"
             />
           </div>
@@ -91,28 +100,51 @@ export default function NewCampaignPage() {
               value={persona}
               onChange={e => setPersona(e.target.value)}
               rows={3}
-              placeholder="e.g. Indie hackers + creator economy podcast hosts with 1k-50k listeners"
+              placeholder="e.g. Freelance social media managers handling 3–10 clients, looking to cut tool costs"
               className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-400 transition-colors resize-none"
             />
+            <p className="text-xs text-gray-600 mt-1">HERMES uses this to personalize every message.</p>
           </div>
 
           {/* Channels */}
           <div>
-            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Channels *</label>
-            <div className="flex gap-3">
+            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Channels *</label>
+            <div className="space-y-2">
               {CHANNELS.map(ch => (
                 <button
                   key={ch.id}
                   type="button"
                   onClick={() => toggleChannel(ch.id)}
-                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all ${
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition-all ${
                     channels.includes(ch.id)
-                      ? 'bg-amber-400/10 border-amber-400/40 text-amber-400'
+                      ? 'bg-amber-400/10 border-amber-400/30 text-white'
                       : 'bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-500'
                   }`}>
-                  <span>{ch.icon}</span>
-                  <span>{ch.label}</span>
+                  <span className="text-xl">{ch.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold">{ch.label}</p>
+                    <p className="text-xs text-gray-500">{ch.desc}</p>
+                  </div>
+                  <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 transition-all ${
+                    channels.includes(ch.id)
+                      ? 'bg-amber-400 border-amber-400'
+                      : 'border-gray-600'
+                  }`} />
                 </button>
+              ))}
+
+              {/* Coming soon */}
+              {COMING_CHANNELS.map(ch => (
+                <div
+                  key={ch.label}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-800 bg-gray-900/50 opacity-50 cursor-not-allowed">
+                  <span className="text-xl grayscale">{ch.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-gray-500">{ch.label}</p>
+                    <p className="text-xs text-gray-600">{ch.reason}</p>
+                  </div>
+                  <span className="text-xs bg-gray-800 text-gray-600 px-2 py-0.5 rounded-full border border-gray-700 flex-shrink-0">soon</span>
+                </div>
               ))}
             </div>
           </div>
@@ -120,74 +152,81 @@ export default function NewCampaignPage() {
           {/* Mode */}
           <div>
             <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Mode</label>
-            <div className="flex gap-3">
-              {(['draft', 'auto'] as const).map(m => (
+            <div className="grid grid-cols-2 gap-3">
+              {([
+                { id: 'draft', icon: '✏️', label: 'Draft Mode', desc: 'AI writes messages for your review. You send manually.' },
+                { id: 'auto',  icon: '⚡', label: 'Auto-Send',  desc: 'AI writes and sends follow-ups automatically on schedule.' },
+              ] as const).map(m => (
                 <button
-                  key={m}
+                  key={m.id}
                   type="button"
-                  onClick={() => setMode(m)}
-                  className={`flex-1 py-3 rounded-xl border text-sm font-bold transition-all ${
-                    mode === m
-                      ? m === 'auto'
-                        ? 'bg-purple-500/10 border-purple-500/40 text-purple-400'
-                        : 'bg-gray-800 border-gray-600 text-white'
-                      : 'bg-gray-900 border-gray-700 text-gray-400 hover:border-gray-500'
+                  onClick={() => setMode(m.id)}
+                  className={`p-4 rounded-xl border text-left transition-all ${
+                    mode === m.id
+                      ? m.id === 'auto'
+                        ? 'bg-purple-500/10 border-purple-500/40'
+                        : 'bg-gray-800 border-gray-500'
+                      : 'bg-gray-900 border-gray-700 hover:border-gray-500'
                   }`}>
-                  {m === 'draft' ? '✏️ Draft mode' : '⚡ Auto-send'}
+                  <p className="text-sm font-bold mb-1">{m.icon} {m.label}</p>
+                  <p className="text-xs text-gray-500">{m.desc}</p>
                 </button>
               ))}
             </div>
-            <p className="text-xs text-gray-500 mt-2">
-              {mode === 'draft'
-                ? 'AI writes messages for your review. You send manually.'
-                : 'AI writes and sends follow-ups automatically on schedule.'}
-            </p>
           </div>
 
-          {/* Sequence days */}
+          {/* Sequence */}
           <div>
-            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Follow-up Schedule (days after intro)</label>
-            <div className="flex gap-3 items-center">
-              <div className="flex-1 bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-300">
-                Day 0 — Intro
+            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Follow-up Schedule</label>
+            <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+              <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
+                <span className="w-2 h-2 rounded-full bg-amber-400" />
+                <span>Intro sent immediately · follow-ups on the days below</span>
               </div>
-              <span className="text-gray-600">→</span>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 bg-gray-900 border border-gray-700 rounded-xl px-4 py-3">
-                  <span className="text-xs text-gray-500">Day</span>
+              <div className="flex items-center gap-3">
+                <div className="flex-1 px-3 py-2 bg-gray-800 rounded-lg text-xs text-center text-gray-400">
+                  Day 0<br/><span className="text-white font-bold">Intro</span>
+                </div>
+                <span className="text-gray-700 text-sm">→</span>
+                <div className="flex-1 px-3 py-2 bg-gray-800 rounded-lg text-xs text-center">
+                  <span className="text-gray-500">Day </span>
                   <input
-                    type="number"
-                    min={1}
+                    type="number" min={1}
                     value={sequenceDays[1] ?? 3}
                     onChange={e => updateDay(1, e.target.value)}
-                    className="w-12 bg-transparent text-sm text-white focus:outline-none text-center"
+                    className="w-8 bg-transparent text-white font-bold focus:outline-none text-center"
                   />
-                  <span className="text-xs text-gray-500 ml-auto">Follow-up 1</span>
+                  <br/><span className="text-gray-400">Follow-up 1</span>
                 </div>
-              </div>
-              <span className="text-gray-600">→</span>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 bg-gray-900 border border-gray-700 rounded-xl px-4 py-3">
-                  <span className="text-xs text-gray-500">Day</span>
+                <span className="text-gray-700 text-sm">→</span>
+                <div className="flex-1 px-3 py-2 bg-gray-800 rounded-lg text-xs text-center">
+                  <span className="text-gray-500">Day </span>
                   <input
-                    type="number"
-                    min={1}
+                    type="number" min={1}
                     value={sequenceDays[2] ?? 7}
                     onChange={e => updateDay(2, e.target.value)}
-                    className="w-12 bg-transparent text-sm text-white focus:outline-none text-center"
+                    className="w-8 bg-transparent text-white font-bold focus:outline-none text-center"
                   />
-                  <span className="text-xs text-gray-500 ml-auto">Follow-up 2</span>
+                  <br/><span className="text-gray-400">Follow-up 2</span>
+                </div>
+                <span className="text-gray-700 text-sm">→</span>
+                <div className="flex-1 px-3 py-2 bg-gray-800 rounded-lg text-xs text-center text-gray-400">
+                  Auto<br/><span className="text-white font-bold">Break-up</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {error && <p className="text-xs text-red-400">{error}</p>}
+          {error && (
+            <div className="px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-xl text-xs text-red-400">
+              {error}
+            </div>
+          )}
 
           <button
             type="submit"
-            disabled={loading}
-            className="w-full py-3.5 bg-amber-400 hover:bg-amber-500 disabled:opacity-50 text-black font-extrabold rounded-xl transition-all text-sm flex items-center justify-center gap-2">
+            disabled={loading || channels.length === 0}
+            className="w-full py-3.5 bg-amber-400 hover:bg-amber-300 disabled:opacity-50 text-black font-extrabold rounded-xl transition-all text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-400/10">
             {loading
               ? <><div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" /> Creating...</>
               : 'Create Campaign →'}
