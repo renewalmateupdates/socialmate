@@ -7,13 +7,27 @@
     "audiences_items": {
       "streamers": "🎮 Streamers",
       "agencies": "🏢 Agencies",
-      "small_business": "🏪 Small Business"
+      "small_business": "🏪 Small Business",
+      "tiktok_creators": "🎵 TikTok Creators",
+      "video_creators": "🎬 Video Creators",
+      "linkedin_creators": "💼 LinkedIn Creators",
+      "fitness_coaches": "🏋️ Fitness Coaches",
+      "musicians": "🎸 Musicians",
+      "restaurants": "🍕 Restaurants",
+      "real_estate": "🏡 Real Estate",
+      "nonprofits": "❤️ Nonprofits",
+      "podcasters": "🎙️ Podcasters",
+      "coaches": "🧑‍💼 Coaches",
+      "content_creators": "✍️ Content Creators",
+      "bloggers": "📝 Bloggers"
     },
     "resources_items": {
       "blog": "📰 Blog",
       "guides": "📚 Gilgamesh's Guides",
       "faq": "❓ FAQ",
-      "changelog": "📋 Changelog"
+      "changelog": "📋 Changelog",
+      "about": "🏢 About",
+      "press": "📣 Press"
     },
     "products": {
       "soma": "SOMA",
@@ -95,8 +109,8 @@
     },
     "platforms": {
       "eyebrow": "Platform support",
-      "headline": "5 social platforms live. Twitch & YouTube clips built in.",
-      "subheadline": "Bluesky, Discord, Telegram, Mastodon, and X/Twitter live now. TikTok coming very soon. Twitch clips and YouTube videos schedulable directly inside SocialMate. LinkedIn, Reddit, and more on the roadmap.",
+      "headline": "7 social platforms live. Twitch & YouTube clips built in.",
+      "subheadline": "Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok, and LinkedIn live now. Twitch clips and YouTube videos schedulable directly inside SocialMate.",
       "live_label": "✅ Live now",
       "soon_label": "🔜 Coming very soon",
       "planned_label": "📋 Planned",
@@ -115,15 +129,15 @@
       "search_desc": "You don't even need to own the channel. Search any Twitch streamer's top clips and schedule them directly — perfect for clippers and fan accounts.",
       "step1": "Browse your clips",
       "step2": "Pick one",
-      "step3": "Schedule to 5 platforms",
+      "step3": "Schedule to 7 platforms",
       "cta": "Try Clips Studio free →",
       "cta_note": "Free on all plans · Twitch OAuth · YouTube via channel URL"
     },
     "ai_tools": {
       "eyebrow": "AI-Powered",
-      "headline": "12 AI tools built in",
-      "subheadline": "Every tool runs on Google Gemini. 50 credits included free every month — no separate AI subscription, no hidden costs. Credits exist to keep the service sustainable for everyone.",
-      "cta": "See all 12 AI tools →"
+      "headline": "15+ AI tools built in",
+      "subheadline": "Every tool runs on Google Gemini. 50 credits included free every month — no separate AI subscription, no hidden costs.",
+      "cta": "See all 15+ AI tools →"
     },
     "features": {
       "eyebrow": "Full feature set",
@@ -131,8 +145,8 @@
       "subheadline": "Every feature that matters. Most of them free.",
       "items": {
         "scheduling_title": "Smart Scheduling",
-        "scheduling_desc": "Schedule across 5 social platforms, with Twitch and YouTube clips support built in. Bulk upload, automated queues, and platform-specific character limit enforcement included.",
-        "ai_title": "12 AI Tools Built In",
+        "scheduling_desc": "Schedule across 7 social platforms, with Twitch and YouTube clips support built in. Bulk upload, automated queues, and platform-specific character limit enforcement included.",
+        "ai_title": "15+ AI Tools Built In",
         "ai_desc": "Generate captions, hashtags, viral hooks, full threads, content calendars, and post scores — all powered by Google Gemini.",
         "analytics_title": "Real Analytics",
         "analytics_desc": "Posting streaks, platform breakdown, best days and times, consistency scores, and engagement tracking. No inflated numbers.",
@@ -160,7 +174,20 @@
       "cta_headline": "Everything above. Free to start. $5/month to grow.",
       "cta_sub1": "No per-seat fees. No feature gating for basics. No removed free plan.",
       "cta_sub2": "Features marked \"✅ Free\" are always free. AI tools use credits — free users get 50/month to keep infrastructure sustainable.",
-      "cta": "Get started free →"
+      "cta": "Get started free →",
+      "rows": {
+        "starting_price": "Starting price",
+        "free_plan": "Free plan",
+        "ai_tools": "AI writing tools",
+        "bulk_scheduling": "Bulk scheduling",
+        "link_in_bio": "Link in bio",
+        "competitor": "Competitor tracking",
+        "evergreen": "Evergreen recycling",
+        "rss": "RSS import",
+        "team_seats": "Team seats",
+        "client_workspaces": "Client workspaces",
+        "white_label": "White label"
+      }
     },
     "bio_link": {
       "badge": "Free bio link builder",
@@ -235,7 +262,14 @@
     "hero_headline": "Post everywhere.",
     "hero_tagline": "All at once.",
     "cta_no_card": "No card required · Free forever · Setup in 60 seconds",
-    "more_coming": "+ more coming"
+    "more_coming": "+ more coming",
+    "user_stats": {
+      "posts_published": "posts published",
+      "free": "Free",
+      "pro": "Pro",
+      "agency": "Agency",
+      "white_label": "White Label"
+    }
   },
   "pricing": {
     "headline": "Simple, transparent pricing",

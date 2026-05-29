@@ -14,13 +14,27 @@
     "audiences_items": {
       "streamers": "🎮 스트리머",
       "agencies": "🏢 에이전시",
-      "small_business": "🏪 소상공인"
+      "small_business": "🏪 소상공인",
+      "tiktok_creators": "🎵 TikTok 크리에이터",
+      "video_creators": "🎬 비디오 크리에이터",
+      "linkedin_creators": "💼 LinkedIn 크리에이터",
+      "fitness_coaches": "🏋️ 피트니스 코치",
+      "musicians": "🎸 뮤지션",
+      "restaurants": "🍕 음식점",
+      "real_estate": "🏡 부동산",
+      "nonprofits": "❤️ 비영리단체",
+      "podcasters": "🎙️ 팟캐스터",
+      "coaches": "🧑‍💼 코치",
+      "content_creators": "✍️ 콘텐츠 크리에이터",
+      "bloggers": "📝 블로거"
     },
     "resources_items": {
       "blog": "📰 블로그",
       "guides": "📚 가이드",
       "faq": "❓ FAQ",
-      "changelog": "📋 변경 기록"
+      "changelog": "📋 변경 기록",
+      "about": "🏢 소개",
+      "press": "📣 보도"
     },
     "products": {
       "soma": "SOMA",
@@ -95,8 +109,8 @@
     },
     "platforms": {
       "eyebrow": "Platform support",
-      "headline": "5 social platforms live. Twitch & YouTube clips built in.",
-      "subheadline": "Bluesky, Discord, Telegram, Mastodon, and X/Twitter live now. TikTok coming very soon. Twitch clips and YouTube videos schedulable directly inside SocialMate. LinkedIn, Reddit, and more on the roadmap.",
+      "headline": "7개 소셜 플랫폼 운영 중. Twitch 및 YouTube 클립 내장.",
+      "subheadline": "Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok, LinkedIn 지금 바로 사용 가능.",
       "live_label": "✅ Live now",
       "soon_label": "🔜 Coming very soon",
       "planned_label": "📋 Planned",
@@ -115,15 +129,15 @@
       "search_desc": "You don't even need to own the channel. Search any Twitch streamer's top clips and schedule them directly — perfect for clippers and fan accounts.",
       "step1": "Browse your clips",
       "step2": "Pick one",
-      "step3": "Schedule to 5 platforms",
+      "step3": "7개 플랫폼에 예약 게시",
       "cta": "Try Clips Studio free →",
       "cta_note": "Free on all plans · Twitch OAuth · YouTube via channel URL"
     },
     "ai_tools": {
       "eyebrow": "AI-Powered",
-      "headline": "12 AI tools built in",
-      "subheadline": "Every tool runs on Google Gemini. 50 credits included free every month — no separate AI subscription, no hidden costs. Credits exist to keep the service sustainable for everyone.",
-      "cta": "See all 12 AI tools →"
+      "headline": "15개 이상의 AI 도구 내장",
+      "subheadline": "모든 도구는 Google Gemini로 구동됩니다. 매월 50 크레딧 무료 제공.",
+      "cta": "15개 이상의 AI 도구 보기 →"
     },
     "features": {
       "eyebrow": "Full feature set",
@@ -131,9 +145,9 @@
       "subheadline": "Every feature that matters. Most of them free.",
       "items": {
         "scheduling_title": "Smart Scheduling",
-        "scheduling_desc": "Schedule across 5 social platforms, with Twitch and YouTube clips support built in. Bulk upload, automated queues, and platform-specific character limit enforcement included.",
-        "ai_title": "12 AI Tools Built In",
-        "ai_desc": "Generate captions, hashtags, viral hooks, full threads, content calendars, and post scores — all powered by Google Gemini.",
+        "scheduling_desc": "7개 소셜 플랫폼에 예약 게시, Twitch 및 YouTube 클립 지원 내장.",
+        "ai_title": "15개 이상의 AI 도구 내장",
+        "ai_desc": "캡션, 해시태그, 바이럴 훅, 전체 스레드, 게시물 점수를 생성하세요.",
         "analytics_title": "Real Analytics",
         "analytics_desc": "Posting streaks, platform breakdown, best days and times, consistency scores, and engagement tracking. No inflated numbers.",
         "bio_title": "Link in Bio Builder",
@@ -160,7 +174,20 @@
       "cta_headline": "Everything above. Free to start. $5/month to grow.",
       "cta_sub1": "No per-seat fees. No feature gating for basics. No removed free plan.",
       "cta_sub2": "Features marked \"✅ Free\" are always free. AI tools use credits — free users get 50/month to keep infrastructure sustainable.",
-      "cta": "Get started free →"
+      "cta": "Get started free →",
+      "rows": {
+        "starting_price": "시작 가격",
+        "free_plan": "무료 플랜",
+        "ai_tools": "AI 작성 도구",
+        "bulk_scheduling": "대량 예약",
+        "link_in_bio": "바이오 링크",
+        "competitor": "경쟁사 추적",
+        "evergreen": "에버그린 재활용",
+        "rss": "RSS 가져오기",
+        "team_seats": "팀 멤버",
+        "client_workspaces": "클라이언트 작업 공간",
+        "white_label": "화이트 레이블"
+      }
     },
     "bio_link": {
       "badge": "Free bio link builder",
@@ -235,7 +262,14 @@
     "hero_headline": "어디서나 게시.",
     "hero_tagline": "한 번에.",
     "cta_no_card": "카드 불필요 · 영원히 무료 · 60초 설정",
-    "more_coming": "+ 더 많은 플랫폼 예정"
+    "more_coming": "+ 더 많은 플랫폼 예정",
+    "user_stats": {
+      "posts_published": "개 게시물 게시됨",
+      "free": "무료",
+      "pro": "Pro",
+      "agency": "에이전시",
+      "white_label": "화이트 레이블"
+    }
   },
   "pricing": {
     "headline": "Simple, transparent pricing",
