@@ -4,10 +4,10 @@ import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
 
 const STATS = [
-  { value: '3',    label: 'Posting Modes' },
-  { value: '6+',   label: 'Platforms' },
+  { value: '6+',   label: 'Live Platforms' },
   { value: '21',   label: 'Posts / Week' },
-  { value: '$0',   label: 'Setup Cost' },
+  { value: '$10',  label: 'Starting Price' },
+  { value: '3',    label: 'Automation Modes' },
 ]
 
 const STEPS = [
@@ -30,30 +30,6 @@ const STEPS = [
 
 const MODES = [
   {
-    name: 'Safe Mode',
-    icon: '🟢',
-    price: '$0',
-    priceSub: 'Included with Pro plan',
-    badge: 'Included Free',
-    badgeKey: 'app_soma_landing.included_free',
-    cardBg: 'bg-emerald-50 dark:bg-emerald-950/20',
-    border: 'border-2 border-emerald-400',
-    headerText: 'text-gray-900 dark:text-white',
-    subText: 'text-gray-500 dark:text-gray-400',
-    badgeStyle: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300',
-    ctaStyle: 'border-2 border-emerald-500 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30',
-    ctaLabel: 'Open Dashboard',
-    ctaHref: '/soma/dashboard',
-    desc: 'SOMA generates your content queue. You review and approve each post before anything goes live. Full control, zero risk.',
-    features: [
-      '7-day content window',
-      'Up to 2 posts/day',
-      '4 generation runs/month',
-      'All connected platforms',
-      'Approve before posting',
-    ],
-  },
-  {
     name: 'Autopilot',
     icon: '⚡',
     price: '$10',
@@ -66,15 +42,15 @@ const MODES = [
     subText: 'text-gray-500 dark:text-gray-400',
     badgeStyle: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300',
     ctaStyle: 'bg-amber-400 hover:bg-amber-500 text-gray-900 font-extrabold',
-    ctaLabel: 'Upgrade to Autopilot',
+    ctaLabel: 'Get Started',
     ctaHref: '/soma/dashboard',
-    desc: 'SOMA generates and auto-schedules. You get a notification to review but posts go live on schedule. Hands-off content marketing.',
+    desc: 'SOMA generates and schedules content on your behalf. Posts go live on schedule — you can review, edit, or skip anything before it publishes.',
     features: [
       '14-day content window',
       'Up to 5 posts/day',
       '8 generation runs/month',
       'All connected platforms',
-      'Auto-schedules with notification',
+      'Auto-schedules with review option',
     ],
   },
   {
@@ -92,13 +68,37 @@ const MODES = [
     ctaStyle: 'bg-purple-600 hover:bg-purple-700 text-white font-extrabold',
     ctaLabel: 'Upgrade to Full Send',
     ctaHref: '/soma/dashboard',
-    desc: 'Maximum frequency. Drop your master doc, SOMA handles everything. Platform-native posts, optimized times, zero friction.',
+    desc: 'Drop your master doc and walk away. SOMA handles everything — platform-native posts, optimized schedules, zero friction, no approvals needed.',
     features: [
-      '14-day content window',
+      '30-day content window',
       'Up to 10 posts/day',
-      '12 generation runs/month',
+      '15 generation runs/month',
       'All connected platforms',
       'Fully autonomous — no approval needed',
+    ],
+  },
+  {
+    name: 'Enterprise',
+    icon: '🏢',
+    price: 'Custom',
+    priceSub: 'Contact us for pricing',
+    badge: 'Enterprise',
+    badgeKey: null,
+    cardBg: 'bg-gray-100 dark:bg-gray-900',
+    border: 'border-2 border-gray-400 dark:border-gray-600',
+    headerText: 'text-gray-900 dark:text-white',
+    subText: 'text-gray-500 dark:text-gray-400',
+    badgeStyle: 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
+    ctaStyle: 'border-2 border-gray-400 dark:border-gray-500 text-gray-700 dark:text-gray-300 hover:border-gray-600 dark:hover:border-white hover:text-gray-900 dark:hover:text-white',
+    ctaLabel: 'Contact Us',
+    ctaHref: '/enterprise',
+    desc: 'Unlimited generation, custom integrations, dedicated onboarding, and SLA. For agencies and teams that need more than the standard tiers allow.',
+    features: [
+      'Unlimited posts/day',
+      'Unlimited generation runs',
+      'All connected platforms',
+      'Custom content workflows',
+      'Dedicated support + SLA',
     ],
   },
 ]
@@ -256,7 +256,7 @@ export default function SomaLandingPage() {
                   </div>
                   {mode.badge && (
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${mode.badgeStyle}`}>
-                      {t(mode.badgeKey!)}
+                      {mode.badgeKey ? t(mode.badgeKey) : mode.badge}
                     </span>
                   )}
                 </div>
@@ -347,13 +347,13 @@ export default function SomaLandingPage() {
                   </div>
                   {mode.badge && (
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${mode.badgeStyle}`}>
-                      {t(mode.badgeKey!)}
+                      {mode.badgeKey ? t(mode.badgeKey) : mode.badge}
                     </span>
                   )}
                 </div>
                 <div className="flex items-end gap-1 mb-1">
                   <span className={`text-4xl font-extrabold ${mode.headerText}`}>{mode.price}</span>
-                  {mode.price !== '$0' && <span className={`text-xs mb-1.5 ${mode.subText}`}>/mo</span>}
+                  {mode.price.startsWith('$') && <span className={`text-xs mb-1.5 ${mode.subText}`}>/mo</span>}
                 </div>
                 <p className={`text-xs mb-5 ${mode.subText}`}>{mode.priceSub}</p>
                 <ul className="space-y-2.5 flex-1 mb-6">
