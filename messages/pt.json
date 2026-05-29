@@ -44,7 +44,11 @@
     "pricing": "Preços",
     "enterprise": "Empresa",
     "partners": "Parceiros",
-    "products_label": "Produtos"
+    "products_label": "Produtos",
+    "mobile_menu": "Menu",
+    "mobile_language": "🌐 Idioma",
+    "mobile_merch": "👕 Merch",
+    "mobile_sm_give": "❤️ SM-Give"
   },
   "footer": {
     "tagline": "por Gilgamesh Enterprise LLC",
@@ -83,11 +87,11 @@
     "headline": "Gerenciamento de redes sociais",
     "headline_emphasis": "sem o preço de $99/mês.",
     "subheadline": "Agende em 7 plataformas, crie conteúdo melhor com 15+ ferramentas de IA e acompanhe o que funciona — tudo de graça. Pro a partir de $5/mês.",
-    "cta_primary": "Criar conta grátis →",
+    "cta_primary": "Criar conta gratuita →",
     "cta_pricing": "Ver preços →",
     "no_card": "Não é necessário cartão · Grátis para sempre · Configure em 60 segundos",
     "built_by_name": "Desenvolvido sozinho por Joshua Bostic",
-    "built_by_desc": "Autofinanciado. Sem VCs. Sem a armadilha de $99/mês. Apenas um desenvolvedor que precisava de ferramentas melhores e as construiu para todos.",
+    "built_by_desc": "Bootstrapped. Sem VC. Sem armadilha de $99/mês. Apenas um criador que precisava de melhores ferramentas e as construiu para todos.",
     "stats": {
       "platforms": "plataformas ativas",
       "ai_tools": "ferramentas de IA incluídas",
@@ -105,7 +109,7 @@
       "analytics": "Histórico de análises",
       "link_in_bio": "Página Link na Bio",
       "competitor_tracking": "Contas de concorrentes rastreadas",
-      "cta": "Comece grátis — não precisa de cartão →"
+      "cta": "Começar grátis — sem cartão →"
     },
     "platforms": {
       "eyebrow": "Suporte a plataformas",
@@ -137,7 +141,11 @@
       "eyebrow": "Com IA",
       "headline": "15+ ferramentas de IA incluídas",
       "subheadline": "Todas as ferramentas funcionam no Google Gemini. 50 créditos gratuitos incluídos por mês.",
-      "cta": "Ver todas as 15+ ferramentas de IA →"
+      "cta": "Ver todas as 15+ ferramentas de IA →",
+      "sm_pulse_tagline": "Inteligência de tendências em tempo real",
+      "sm_pulse_desc": "Varre Reddit e YouTube agora para descobrir tópicos em alta, formatos virais e picos de engajamento no seu nicho.",
+      "sm_radar_tagline": "Inteligência de crescimento pessoal",
+      "sm_radar_desc": "Analisa dados ao vivo do Reddit e YouTube para descobrir lacunas de conteúdo, fraquezas da concorrência e a melhor estratégia para seu nicho esta semana."
     },
     "features": {
       "eyebrow": "Conjunto completo de recursos",
@@ -174,7 +182,7 @@
       "cta_headline": "Tudo acima. Grátis para começar. $5/mês para crescer.",
       "cta_sub1": "Sem taxas por assento. Sem bloqueio de recursos básicos. Sem plano grátis removido.",
       "cta_sub2": "Recursos marcados como \"✅ Grátis\" são sempre grátis. Ferramentas de IA usam créditos — usuários grátis recebem 50/mês para manter a infraestrutura sustentável.",
-      "cta": "Comece grátis →",
+      "cta": "Começar grátis →",
       "rows": {
         "starting_price": "Preço inicial",
         "free_plan": "Plano gratuito",
@@ -198,7 +206,7 @@
       "feature_url": "Sua própria URL pública — grátis",
       "feature_domain": "Domínio personalizado — ganhe grátis via indicações, ou incluído no Pro+",
       "feature_branding": "Remova a marca SocialMate no Pro+",
-      "cta": "Crie sua página de bio grátis →",
+      "cta": "Criar sua página bio gratuita →",
       "demo_name": "Seu Nome",
       "demo_bio": "Sua bio vai aqui",
       "demo_link1": "🌐 Meu Site",
@@ -217,7 +225,7 @@
       "credits_desc": "A geração de IA usa poder de computação real — usamos créditos para manter isso sustentável, não como uma alavanca para forçar upgrades. O sistema de créditos permite que o plano grátis prospere.",
       "no_bait_title": "Sem isca e troca",
       "no_bait_desc": "Grátis significa grátis. O plano grátis não é um teste, não é uma contagem regressiva e não foi projetado para frustrá-lo a fazer um upgrade. O que você vê é o que você obtém.",
-      "cta": "Comece grátis — não precisa de cartão →"
+      "cta": "Começar grátis — sem cartão →"
     },
     "guides": {
       "badge": "📚 Grátis para sempre · Não é necessário cadastro",
@@ -241,8 +249,8 @@
       "eyebrow": "Por que construímos isso",
       "headline": "Ferramentas profissionais não deveriam exigir um orçamento profissional.",
       "subheadline": "O SocialMate é totalmente autofinanciado — construído sozinho, em todas as funções, sem investidores e sem rede de segurança. A crença que o impulsiona: criadores e pequenas empresas merecem ferramentas que realmente funcionam a um preço que não exige um orçamento empresarial para justificar. As plataformas que cobram $99/mês sabem disso. Elas apenas apostam que você não procurará uma opção melhor.",
-      "read_story": "Leia a história completa →",
-      "see_pricing": "Veja como os preços funcionam →"
+      "read_story": "Ler a história completa →",
+      "see_pricing": "Ver como funciona o preço →"
     },
     "sm_give": {
       "eyebrow": "Iniciativa SM-Give",
@@ -251,18 +259,18 @@
       "school": "Material Escolar",
       "baby": "Itens Essenciais para Bebês",
       "homeless": "Cuidado para Pessoas em Situação de Rua",
-      "learn_more": "Saiba mais sobre o SM-Give →"
+      "learn_more": "Saiba mais sobre SM-Give →"
     },
     "final_cta": {
       "headline": "Pronto para começar?",
       "subheadline": "Grátis para sempre. Não é necessário cartão. 50 créditos de IA por mês, incluídos gratuitamente. Configure em 60 segundos.",
-      "cta_primary": "Criar conta grátis →",
+      "cta_primary": "Criar conta gratuita →",
       "cta_secondary": "Comparar planos →"
     },
-    "hero_headline": "Poste em todo lugar.",
+    "hero_headline": "Publique em todo lugar.",
     "hero_tagline": "Tudo de uma vez.",
-    "cta_no_card": "Sem cartão · Gratuito para sempre · Configuração em 60 segundos",
-    "more_coming": "+ em breve",
+    "cta_no_card": "Sem cartão · Grátis para sempre · Configure em 60 segundos",
+    "more_coming": "+ mais em breve",
     "user_stats": {
       "posts_published": "publicações publicadas",
       "free": "Gratuito",

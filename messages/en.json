@@ -44,7 +44,11 @@
     "pricing": "Pricing",
     "enterprise": "Enterprise",
     "partners": "Partners",
-    "products_label": "Products"
+    "products_label": "Products",
+    "mobile_menu": "Menu",
+    "mobile_language": "🌐 Language",
+    "mobile_merch": "👕 Merch",
+    "mobile_sm_give": "❤️ SM-Give"
   },
   "footer": {
     "tagline": "by Gilgamesh Enterprise LLC",
@@ -137,7 +141,11 @@
       "eyebrow": "AI-Powered",
       "headline": "15+ AI tools built in",
       "subheadline": "Every tool runs on Google Gemini. 50 credits included free every month — no separate AI subscription, no hidden costs.",
-      "cta": "See all 15+ AI tools →"
+      "cta": "See all 15+ AI tools →",
+      "sm_pulse_tagline": "Real-time trend intelligence",
+      "sm_pulse_desc": "Scans Reddit and YouTube right now to surface trending topics, viral formats, and engagement spikes in your niche — before you create your next post.",
+      "sm_radar_tagline": "Personal growth intelligence",
+      "sm_radar_desc": "Analyzes live Reddit and YouTube data to surface content gaps, competitor weaknesses, and the single best content strategy for your niche this week."
     },
     "features": {
       "eyebrow": "Full feature set",

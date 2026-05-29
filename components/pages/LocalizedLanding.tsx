@@ -376,26 +376,24 @@ export default async function LocalizedLanding({ locale }: { locale: string }) {
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <p className="font-extrabold text-lg">SM-Pulse</p>
-                  <p className="text-xs text-gray-400">Real-time trend intelligence</p>
+                  <p className="text-xs text-gray-400">{t('ai_tools.sm_pulse_tagline')}</p>
                 </div>
                 <span className="text-xs font-bold px-2.5 py-1 bg-white/20 rounded-full flex-shrink-0">20 credits</span>
               </div>
               <p className="text-xs text-gray-400 leading-relaxed">
-                Scans Reddit and YouTube right now to surface trending topics, viral formats,
-                and engagement spikes in your niche — before you create your next post.
+                {t('ai_tools.sm_pulse_desc')}
               </p>
             </div>
             <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6">
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <p className="font-extrabold text-lg text-gray-900 dark:text-gray-100">SM-Radar</p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500">Personal growth intelligence</p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">{t('ai_tools.sm_radar_tagline')}</p>
                 </div>
                 <span className="text-xs font-bold px-2.5 py-1 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full flex-shrink-0">20 credits</span>
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                Analyzes live Reddit and YouTube data to surface content gaps, competitor weaknesses,
-                and the single best content strategy for your niche this week.
+                {t('ai_tools.sm_radar_desc')}
               </p>
             </div>
           </div>
