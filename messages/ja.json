@@ -14,13 +14,27 @@
     "audiences_items": {
       "streamers": "🎮 ストリーマー",
       "agencies": "🏢 代理店",
-      "small_business": "🏪 中小企業"
+      "small_business": "🏪 中小企業",
+      "tiktok_creators": "🎵 TikTokクリエイター",
+      "video_creators": "🎬 動画クリエイター",
+      "linkedin_creators": "💼 LinkedInクリエイター",
+      "fitness_coaches": "🏋️ フィットネスコーチ",
+      "musicians": "🎸 ミュージシャン",
+      "restaurants": "🍕 レストラン",
+      "real_estate": "🏡 不動産",
+      "nonprofits": "❤️ 非営利団体",
+      "podcasters": "🎙️ ポッドキャスター",
+      "coaches": "🧑‍💼 コーチ",
+      "content_creators": "✍️ コンテンツクリエイター",
+      "bloggers": "📝 ブロガー"
     },
     "resources_items": {
       "blog": "📰 ブログ",
       "guides": "📚 ガイド",
       "faq": "❓ FAQ",
-      "changelog": "📋 変更履歴"
+      "changelog": "📋 変更履歴",
+      "about": "🏢 会社概要",
+      "press": "📣 プレス"
     },
     "products": {
       "soma": "SOMA",
@@ -95,8 +109,8 @@
     },
     "platforms": {
       "eyebrow": "Platform support",
-      "headline": "5 social platforms live. Twitch & YouTube clips built in.",
-      "subheadline": "Bluesky, Discord, Telegram, Mastodon, and X/Twitter live now. TikTok coming very soon. Twitch clips and YouTube videos schedulable directly inside SocialMate. LinkedIn, Reddit, and more on the roadmap.",
+      "headline": "7つのソーシャルプラットフォームが稼働中。TwitchとYouTubeのクリップも内蔵。",
+      "subheadline": "Bluesky、Discord、Telegram、Mastodon、X/Twitter、TikTok、LinkedInが今すぐ使えます。",
       "live_label": "✅ Live now",
       "soon_label": "🔜 Coming very soon",
       "planned_label": "📋 Planned",
@@ -115,15 +129,15 @@
       "search_desc": "You don't even need to own the channel. Search any Twitch streamer's top clips and schedule them directly — perfect for clippers and fan accounts.",
       "step1": "Browse your clips",
       "step2": "Pick one",
-      "step3": "Schedule to 5 platforms",
+      "step3": "7つのプラットフォームに予約投稿",
       "cta": "Try Clips Studio free →",
       "cta_note": "Free on all plans · Twitch OAuth · YouTube via channel URL"
     },
     "ai_tools": {
       "eyebrow": "AI-Powered",
-      "headline": "12 AI tools built in",
-      "subheadline": "Every tool runs on Google Gemini. 50 credits included free every month — no separate AI subscription, no hidden costs. Credits exist to keep the service sustainable for everyone.",
-      "cta": "See all 12 AI tools →"
+      "headline": "15以上のAIツールが内蔵",
+      "subheadline": "すべてのツールはGoogle Geminiで動作。毎月50クレジット無料付き。",
+      "cta": "15以上のAIツールを見る →"
     },
     "features": {
       "eyebrow": "Full feature set",
@@ -131,9 +145,9 @@
       "subheadline": "Every feature that matters. Most of them free.",
       "items": {
         "scheduling_title": "Smart Scheduling",
-        "scheduling_desc": "Schedule across 5 social platforms, with Twitch and YouTube clips support built in. Bulk upload, automated queues, and platform-specific character limit enforcement included.",
-        "ai_title": "12 AI Tools Built In",
-        "ai_desc": "Generate captions, hashtags, viral hooks, full threads, content calendars, and post scores — all powered by Google Gemini.",
+        "scheduling_desc": "7つのソーシャルプラットフォームに予約投稿。TwitchとYouTubeクリップのサポートも内蔵。",
+        "ai_title": "15以上のAIツール内蔵",
+        "ai_desc": "キャプション、ハッシュタグ、バイラルフック、スレッド全体、投稿スコアを生成。",
         "analytics_title": "Real Analytics",
         "analytics_desc": "Posting streaks, platform breakdown, best days and times, consistency scores, and engagement tracking. No inflated numbers.",
         "bio_title": "Link in Bio Builder",
@@ -160,7 +174,20 @@
       "cta_headline": "Everything above. Free to start. $5/month to grow.",
       "cta_sub1": "No per-seat fees. No feature gating for basics. No removed free plan.",
       "cta_sub2": "Features marked \"✅ Free\" are always free. AI tools use credits — free users get 50/month to keep infrastructure sustainable.",
-      "cta": "Get started free →"
+      "cta": "Get started free →",
+      "rows": {
+        "starting_price": "開始価格",
+        "free_plan": "無料プラン",
+        "ai_tools": "AI文章ツール",
+        "bulk_scheduling": "一括スケジュール",
+        "link_in_bio": "リンクインバイオ",
+        "competitor": "競合分析",
+        "evergreen": "エバーグリーンリサイクル",
+        "rss": "RSSインポート",
+        "team_seats": "チームシート",
+        "client_workspaces": "クライアントワークスペース",
+        "white_label": "ホワイトラベル"
+      }
     },
     "bio_link": {
       "badge": "Free bio link builder",
@@ -235,7 +262,14 @@
     "hero_headline": "どこでも投稿。",
     "hero_tagline": "一度に。",
     "cta_no_card": "カード不要 · 永久無料 · 60秒でセットアップ",
-    "more_coming": "+ 続々追加予定"
+    "more_coming": "+ 続々追加予定",
+    "user_stats": {
+      "posts_published": "件の投稿が公開されました",
+      "free": "無料",
+      "pro": "Pro",
+      "agency": "エージェンシー",
+      "white_label": "ホワイトラベル"
+    }
   },
   "pricing": {
     "headline": "Simple, transparent pricing",

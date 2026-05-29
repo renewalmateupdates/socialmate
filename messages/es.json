@@ -7,13 +7,27 @@
     "audiences_items": {
       "streamers": "🎮 Streamers",
       "agencies": "🏢 Agencias",
-      "small_business": "🏪 Pequeñas empresas"
+      "small_business": "🏪 Pequeñas empresas",
+      "tiktok_creators": "🎵 Creadores de TikTok",
+      "video_creators": "🎬 Creadores de vídeo",
+      "linkedin_creators": "💼 Creadores de LinkedIn",
+      "fitness_coaches": "🏋️ Entrenadores de fitness",
+      "musicians": "🎸 Músicos",
+      "restaurants": "🍕 Restaurantes",
+      "real_estate": "🏡 Inmobiliaria",
+      "nonprofits": "❤️ ONG",
+      "podcasters": "🎙️ Podcasters",
+      "coaches": "🧑‍💼 Coaches",
+      "content_creators": "✍️ Creadores de contenido",
+      "bloggers": "📝 Bloggers"
     },
     "resources_items": {
       "blog": "📰 Blog",
       "guides": "📚 Guías de Gilgamesh",
       "faq": "❓ Preguntas frecuentes",
-      "changelog": "📋 Registro de cambios"
+      "changelog": "📋 Registro de cambios",
+      "about": "🏢 Sobre nosotros",
+      "press": "📣 Prensa"
     },
     "products": {
       "soma": "SOMA",
@@ -95,8 +109,8 @@
     },
     "platforms": {
       "eyebrow": "Soporte de plataformas",
-      "headline": "5 plataformas sociales activas. Clips de Twitch y YouTube integrados.",
-      "subheadline": "Bluesky, Discord, Telegram, Mastodon y X/Twitter ya están activos. TikTok muy pronto. Clips de Twitch y videos de YouTube programables directamente dentro de SocialMate. LinkedIn, Reddit y más en la hoja de ruta.",
+      "headline": "7 plataformas sociales en vivo. Clips de Twitch y YouTube incluidos.",
+      "subheadline": "Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok y LinkedIn ya disponibles. Clips de Twitch y vídeos de YouTube programables directamente en SocialMate.",
       "live_label": "✅ Activo ahora",
       "soon_label": "🔜 Muy pronto",
       "planned_label": "📋 Planificado",
@@ -115,15 +129,15 @@
       "search_desc": "Ni siquiera necesitas ser el propietario del canal. Busca los mejores clips de cualquier streamer de Twitch y prográmalos directamente — perfecto para editores de clips y cuentas de fans.",
       "step1": "Explora tus clips",
       "step2": "Elige uno",
-      "step3": "Programa en 5 plataformas",
+      "step3": "Programa en 7 plataformas",
       "cta": "Prueba Clips Studio gratis →",
       "cta_note": "Gratis en todos los planes · Twitch OAuth · YouTube vía URL del canal"
     },
     "ai_tools": {
       "eyebrow": "Impulsado por IA",
-      "headline": "12 herramientas de IA integradas",
-      "subheadline": "Cada herramienta funciona con Google Gemini. 50 créditos incluidos gratis cada mes — sin suscripción de IA separada, sin costos ocultos. Los créditos existen para mantener el servicio sostenible para todos.",
-      "cta": "Ver las 12 herramientas de IA →"
+      "headline": "Más de 15 herramientas de IA incluidas",
+      "subheadline": "Todas las herramientas funcionan con Google Gemini. 50 créditos incluidos gratis cada mes.",
+      "cta": "Ver las 15+ herramientas de IA →"
     },
     "features": {
       "eyebrow": "Conjunto completo de funcionalidades",
@@ -131,9 +145,9 @@
       "subheadline": "Todas las funcionalidades importantes. La mayoría de ellas gratis.",
       "items": {
         "scheduling_title": "Programación Inteligente",
-        "scheduling_desc": "Programa en 5 plataformas sociales, con soporte integrado para clips de Twitch y YouTube. Incluye carga masiva, colas automatizadas y aplicación de límites de caracteres específicos de cada plataforma.",
-        "ai_title": "12 Herramientas de IA Integradas",
-        "ai_desc": "Genera subtítulos, hashtags, ganchos virales, hilos completos, calendarios de contenido y puntuaciones de publicaciones, todo impulsado por Google Gemini.",
+        "scheduling_desc": "Programa en 7 plataformas sociales, con soporte de clips de Twitch y YouTube integrado.",
+        "ai_title": "Más de 15 herramientas de IA",
+        "ai_desc": "Genera subtítulos, hashtags, ganchos virales, hilos completos y puntuaciones de publicaciones.",
         "analytics_title": "Análisis Reales",
         "analytics_desc": "Rachas de publicaciones, desglose por plataforma, mejores días y horas, puntuaciones de consistencia y seguimiento de la interacción. Sin números inflados.",
         "bio_title": "Constructor de Enlace en la Biografía",
@@ -160,7 +174,20 @@
       "cta_headline": "Todo lo anterior. Gratis para empezar. $5/mes para crecer.",
       "cta_sub1": "Sin tarifas por puesto. Sin bloqueo de funcionalidades básicas. Sin plan gratuito eliminado.",
       "cta_sub2": "Las funcionalidades marcadas como \"✅ Gratis\" son siempre gratuitas. Las herramientas de IA usan créditos — los usuarios gratuitos obtienen 50/mes para mantener la infraestructura sostenible.",
-      "cta": "Empieza gratis →"
+      "cta": "Empieza gratis →",
+      "rows": {
+        "starting_price": "Precio inicial",
+        "free_plan": "Plan gratuito",
+        "ai_tools": "Herramientas de IA",
+        "bulk_scheduling": "Programación masiva",
+        "link_in_bio": "Enlace en bio",
+        "competitor": "Seguimiento de competidores",
+        "evergreen": "Reciclaje evergreen",
+        "rss": "Importación RSS",
+        "team_seats": "Asientos de equipo",
+        "client_workspaces": "Espacios de clientes",
+        "white_label": "Marca blanca"
+      }
     },
     "bio_link": {
       "badge": "Constructor de enlace en la biografía gratuito",
@@ -235,7 +262,14 @@
     "hero_headline": "Publica en todas partes.",
     "hero_tagline": "Todo a la vez.",
     "cta_no_card": "Sin tarjeta · Gratis para siempre · Configuración en 60 segundos",
-    "more_coming": "+ más próximamente"
+    "more_coming": "+ más próximamente",
+    "user_stats": {
+      "posts_published": "publicaciones publicadas",
+      "free": "Gratis",
+      "pro": "Pro",
+      "agency": "Agencia",
+      "white_label": "Marca blanca"
+    }
   },
   "pricing": {
     "headline": "Precios simples y transparentes",

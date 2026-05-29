@@ -7,13 +7,27 @@
     "audiences_items": {
       "streamers": "🎮 Streamer",
       "agencies": "🏢 Agenturen",
-      "small_business": "🏪 Kleinunternehmen"
+      "small_business": "🏪 Kleinunternehmen",
+      "tiktok_creators": "🎵 TikTok-Creators",
+      "video_creators": "🎬 Video-Creators",
+      "linkedin_creators": "💼 LinkedIn-Creators",
+      "fitness_coaches": "🏋️ Fitness-Coaches",
+      "musicians": "🎸 Musiker",
+      "restaurants": "🍕 Restaurants",
+      "real_estate": "🏡 Immobilien",
+      "nonprofits": "❤️ Non-Profits",
+      "podcasters": "🎙️ Podcaster",
+      "coaches": "🧑‍💼 Coaches",
+      "content_creators": "✍️ Content-Creators",
+      "bloggers": "📝 Blogger"
     },
     "resources_items": {
       "blog": "📰 Blog",
       "guides": "📚 Gilgameshs Anleitungen",
       "faq": "❓ FAQ",
-      "changelog": "📋 Changelog"
+      "changelog": "📋 Changelog",
+      "about": "🏢 Über uns",
+      "press": "📣 Presse"
     },
     "products": {
       "soma": "SOMA",
@@ -95,8 +109,8 @@
     },
     "platforms": {
       "eyebrow": "Plattform-Unterstützung",
-      "headline": "5 soziale Plattformen live. Twitch- & YouTube-Clips integriert.",
-      "subheadline": "Bluesky, Discord, Telegram, Mastodon und X/Twitter sind jetzt live. TikTok kommt sehr bald. Twitch-Clips und YouTube-Videos können direkt in SocialMate geplant werden. LinkedIn, Reddit und mehr sind in Planung.",
+      "headline": "7 Social-Plattformen live. Twitch- und YouTube-Clips integriert.",
+      "subheadline": "Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok und LinkedIn jetzt live.",
       "live_label": "✅ Jetzt live",
       "soon_label": "🔜 Kommt sehr bald",
       "planned_label": "📋 Geplant",
@@ -115,15 +129,15 @@
       "search_desc": "Sie müssen den Kanal nicht einmal besitzen. Durchsuchen Sie die besten Clips jedes Twitch-Streamers und planen Sie sie direkt – perfekt für Clipper und Fan-Accounts.",
       "step1": "Ihre Clips durchsuchen",
       "step2": "Einen auswählen",
-      "step3": "Für 5 Plattformen planen",
+      "step3": "Auf 7 Plattformen planen",
       "cta": "Clips Studio kostenlos testen →",
       "cta_note": "Kostenlos in allen Plänen · Twitch OAuth · YouTube via Kanal-URL"
     },
     "ai_tools": {
       "eyebrow": "KI-gestützt",
-      "headline": "12 KI-Tools integriert",
-      "subheadline": "Jedes Tool läuft auf Google Gemini. 50 Credits sind jeden Monat kostenlos enthalten – kein separates KI-Abonnement, keine versteckten Kosten. Credits dienen dazu, den Dienst für alle nachhaltig zu halten.",
-      "cta": "Alle 12 KI-Tools ansehen →"
+      "headline": "15+ KI-Tools integriert",
+      "subheadline": "Alle Tools laufen auf Google Gemini. 50 Credits kostenlos inklusive jeden Monat.",
+      "cta": "Alle 15+ KI-Tools ansehen →"
     },
     "features": {
       "eyebrow": "Voller Funktionsumfang",
@@ -131,9 +145,9 @@
       "subheadline": "Jede wichtige Funktion. Die meisten davon kostenlos.",
       "items": {
         "scheduling_title": "Intelligente Planung",
-        "scheduling_desc": "Planen Sie Beiträge für 5 soziale Plattformen, mit integrierter Unterstützung für Twitch- und YouTube-Clips. Massen-Upload, automatisierte Warteschlangen und plattformspezifische Zeichenbegrenzungen sind enthalten.",
-        "ai_title": "12 KI-Tools integriert",
-        "ai_desc": "Generieren Sie Bildunterschriften, Hashtags, virale Hooks, vollständige Threads, Inhaltskalender und Beitragsbewertungen – alles powered by Google Gemini.",
+        "scheduling_desc": "Plane auf 7 Social-Plattformen, mit Twitch- und YouTube-Clips-Unterstützung.",
+        "ai_title": "15+ KI-Tools integriert",
+        "ai_desc": "Erstelle Bildunterschriften, Hashtags, virale Hooks, vollständige Threads und Post-Bewertungen.",
         "analytics_title": "Echte Analysen",
         "analytics_desc": "Posting-Serien, Plattform-Aufschlüsselung, beste Tage und Zeiten, Konsistenz-Scores und Engagement-Tracking. Keine überhöhten Zahlen.",
         "bio_title": "Link-in-Bio-Builder",
@@ -160,7 +174,20 @@
       "cta_headline": "Alles oben Genannte. Kostenlos starten. 5 $/Monat zum Wachsen.",
       "cta_sub1": "Keine Gebühren pro Platz. Keine Funktionssperren für Grundlagen. Kein entfernter kostenloser Plan.",
       "cta_sub2": "Funktionen, die mit „✅ Kostenlos“ gekennzeichnet sind, sind immer kostenlos. KI-Tools verwenden Credits – kostenlose Nutzer erhalten 50/Monat, um die Infrastruktur nachhaltig zu halten.",
-      "cta": "Kostenlos starten →"
+      "cta": "Kostenlos starten →",
+      "rows": {
+        "starting_price": "Einstiegspreis",
+        "free_plan": "Kostenloser Plan",
+        "ai_tools": "KI-Tools",
+        "bulk_scheduling": "Massen-Planung",
+        "link_in_bio": "Link in Bio",
+        "competitor": "Wettbewerber-Tracking",
+        "evergreen": "Evergreen-Recycling",
+        "rss": "RSS-Import",
+        "team_seats": "Team-Plätze",
+        "client_workspaces": "Kunden-Arbeitsbereiche",
+        "white_label": "White Label"
+      }
     },
     "bio_link": {
       "badge": "Kostenloser Bio-Link-Builder",
@@ -235,7 +262,14 @@
     "hero_headline": "Überall posten.",
     "hero_tagline": "Alles auf einmal.",
     "cta_no_card": "Keine Karte · Kostenlos für immer · Setup in 60 Sekunden",
-    "more_coming": "+ mehr folgt"
+    "more_coming": "+ mehr folgt",
+    "user_stats": {
+      "posts_published": "Posts veröffentlicht",
+      "free": "Kostenlos",
+      "pro": "Pro",
+      "agency": "Agentur",
+      "white_label": "White Label"
+    }
   },
   "pricing": {
     "headline": "Einfache, transparente Preise",

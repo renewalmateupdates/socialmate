@@ -9,24 +9,35 @@ import { SUPPORTED_LOCALES, localeFromPath } from '@/lib/i18n'
 // Locale-prefixed landing pages — switching language navigates to the locale URL
 const PUBLIC_LOCALE_PATHS = new Set(['/', '/es', '/de', '/fr', '/pt', '/ru', '/zh', '/ja', '/ko'])
 
-const AUDIENCES = [
-  { label: '🎮 Streamers',           href: '/for/streamers'          },
-  { label: '🏢 Agencies',            href: '/for/agencies'           },
-  { label: '🏪 Small Business',      href: '/for/small-business'     },
-  { label: '🎵 TikTok Creators',     href: '/for/tiktok-creators'    },
-  { label: '🎬 Video Creators',      href: '/for/video-creators'     },
-  { label: '💼 LinkedIn Creators',   href: '/for/linkedin-creators'  },
-  { label: '🏋️ Fitness Coaches',    href: '/for/fitness-coaches'    },
-  { label: '🎸 Musicians',           href: '/for/musicians'          },
-  { label: '🍕 Restaurants',         href: '/for/restaurants'        },
-  { label: '🏡 Real Estate',         href: '/for/real-estate'        },
-  { label: '❤️ Nonprofits',          href: '/for/nonprofits'         },
-  { label: '🎙️ Podcasters',          href: '/for/podcasters'         },
-  { label: '🧑‍💼 Coaches',             href: '/for/coaches'            },
-  { label: '✍️ Content Creators',    href: '/for/content-creators'   },
-  { label: '📝 Bloggers',            href: '/for/bloggers'           },
+// Audience + resource hrefs — labels are computed inside the component via t()
+const AUDIENCE_HREFS = [
+  { key: 'audiences_items.streamers',        href: '/for/streamers'         },
+  { key: 'audiences_items.agencies',         href: '/for/agencies'          },
+  { key: 'audiences_items.small_business',   href: '/for/small-business'    },
+  { key: 'audiences_items.tiktok_creators',  href: '/for/tiktok-creators'   },
+  { key: 'audiences_items.video_creators',   href: '/for/video-creators'    },
+  { key: 'audiences_items.linkedin_creators',href: '/for/linkedin-creators' },
+  { key: 'audiences_items.fitness_coaches',  href: '/for/fitness-coaches'   },
+  { key: 'audiences_items.musicians',        href: '/for/musicians'         },
+  { key: 'audiences_items.restaurants',      href: '/for/restaurants'       },
+  { key: 'audiences_items.real_estate',      href: '/for/real-estate'       },
+  { key: 'audiences_items.nonprofits',       href: '/for/nonprofits'        },
+  { key: 'audiences_items.podcasters',       href: '/for/podcasters'        },
+  { key: 'audiences_items.coaches',          href: '/for/coaches'           },
+  { key: 'audiences_items.content_creators', href: '/for/content-creators'  },
+  { key: 'audiences_items.bloggers',         href: '/for/bloggers'          },
 ]
 
+const RESOURCE_HREFS = [
+  { key: 'resources_items.blog',      href: '/blog'      },
+  { key: 'resources_items.guides',    href: '/guides'    },
+  { key: 'resources_items.faq',       href: '/faq'       },
+  { key: 'resources_items.changelog', href: '/changelog' },
+  { key: 'resources_items.about',     href: '/about'     },
+  { key: 'resources_items.press',     href: '/press'     },
+]
+
+// Products use brand names — no translation needed for the names themselves
 const PRODUCTS = [
   { label: '🗂️ Studio Stax',   href: '/studio-stax' },
   { label: '⚡ SOMA',          href: '/soma'         },
@@ -35,21 +46,16 @@ const PRODUCTS = [
   { label: '🎵 TikTok Studio', href: '/tiktok'       },
 ]
 
-const RESOURCES = [
-  { label: '📰 Blog',               href: '/blog'      },
-  { label: "📚 Gilgamesh's Guides", href: '/guides'    },
-  { label: '❓ FAQ',                href: '/faq'       },
-  { label: '📋 Changelog',          href: '/changelog' },
-  { label: '🏢 About',             href: '/about'     },
-  { label: '📣 Press',             href: '/press'     },
-]
-
 type DropdownKey = 'audiences' | 'products' | 'resources'
 
 export default function PublicNav() {
   const pathname = usePathname()
   const router   = useRouter()
   const { locale, setLocale, t } = useI18n()
+
+  // Build translated label arrays inside the component so t() picks up locale
+  const AUDIENCES = AUDIENCE_HREFS.map(a => ({ label: t(`nav.${a.key}`), href: a.href }))
+  const RESOURCES = RESOURCE_HREFS.map(r => ({ label: t(`nav.${r.key}`), href: r.href }))
 
   const [open, setOpen] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)

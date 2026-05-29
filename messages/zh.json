@@ -7,13 +7,27 @@
     "audiences_items": {
       "streamers": "🎮 主播",
       "agencies": "🏢 机构",
-      "small_business": "🏪 小型企业"
+      "small_business": "🏪 小型企业",
+      "tiktok_creators": "🎵 TikTok创作者",
+      "video_creators": "🎬 视频创作者",
+      "linkedin_creators": "💼 LinkedIn创作者",
+      "fitness_coaches": "🏋️ 健身教练",
+      "musicians": "🎸 音乐人",
+      "restaurants": "🍕 餐厅",
+      "real_estate": "🏡 房地产",
+      "nonprofits": "❤️ 非营利组织",
+      "podcasters": "🎙️ 播客主",
+      "coaches": "🧑‍💼 教练",
+      "content_creators": "✍️ 内容创作者",
+      "bloggers": "📝 博主"
     },
     "resources_items": {
       "blog": "📰 博客",
       "guides": "📚 吉尔伽美什指南",
       "faq": "❓ 常见问题",
-      "changelog": "📋 更新日志"
+      "changelog": "📋 更新日志",
+      "about": "🏢 关于我们",
+      "press": "📣 媒体"
     },
     "products": {
       "soma": "SOMA",
@@ -95,8 +109,8 @@
     },
     "platforms": {
       "eyebrow": "平台支持",
-      "headline": "5个社交平台已上线。内置Twitch和YouTube剪辑功能。",
-      "subheadline": "Bluesky、Discord、Telegram、Mastodon 和 X/Twitter 现已上线。TikTok 即将推出。Twitch 剪辑和 YouTube 视频可直接在 SocialMate 内部进行排期。LinkedIn、Reddit 等更多平台正在规划中。",
+      "headline": "7个社交平台上线。内置Twitch和YouTube剪辑。",
+      "subheadline": "Bluesky、Discord、Telegram、Mastodon、X/Twitter、TikTok和LinkedIn现已上线。",
       "live_label": "✅ 现已上线",
       "soon_label": "🔜 即将推出",
       "planned_label": "📋 规划中",
@@ -115,15 +129,15 @@
       "search_desc": "您甚至无需拥有该频道。直接搜索任何 Twitch 主播的热门剪辑并进行发布——非常适合剪辑师和粉丝账户。",
       "step1": "浏览您的剪辑",
       "step2": "选择一个",
-      "step3": "发布到5个平台",
+      "step3": "发布到7个平台",
       "cta": "免费试用剪辑工作室 →",
       "cta_note": "所有计划均免费 · Twitch OAuth · 通过频道URL访问YouTube"
     },
     "ai_tools": {
       "eyebrow": "AI驱动",
-      "headline": "内置12款AI工具",
-      "subheadline": "所有工具均由 Google Gemini 提供支持。每月免费包含50个积分——无单独AI订阅，无隐藏费用。积分旨在维持服务的可持续性，惠及所有人。",
-      "cta": "查看所有12款AI工具 →"
+      "headline": "内置15+个AI工具",
+      "subheadline": "所有工具基于Google Gemini运行。每月免费包含50个积分。",
+      "cta": "查看所有15+个AI工具 →"
     },
     "features": {
       "eyebrow": "完整功能集",
@@ -131,9 +145,9 @@
       "subheadline": "所有重要功能。大部分免费。",
       "items": {
         "scheduling_title": "智能排期",
-        "scheduling_desc": "支持在5个社交平台进行排期，内置Twitch和YouTube剪辑支持。包含批量上传、自动化队列和平台特定字符限制强制执行功能。",
-        "ai_title": "内置12款AI工具",
-        "ai_desc": "生成文案、话题标签、爆款钩子、完整推文串、内容日历和帖子评分——所有功能均由 Google Gemini 提供支持。",
+        "scheduling_desc": "在7个社交平台上安排发帖，内置Twitch和YouTube剪辑支持。",
+        "ai_title": "内置15+个AI工具",
+        "ai_desc": "生成标题、话题标签、病毒式钩子、完整线程和帖子评分。",
         "analytics_title": "真实数据分析",
         "analytics_desc": "发布连贯性、平台细分、最佳发布日期和时间、一致性评分以及互动追踪。绝无虚报数据。",
         "bio_title": "个人简介链接生成器",
@@ -160,7 +174,20 @@
       "cta_headline": "以上所有功能。免费开始。每月5美元即可成长。",
       "cta_sub1": "无按席位收费。无基础功能限制。无取消免费计划。",
       "cta_sub2": "标有“✅ 免费”的功能始终免费。AI工具使用积分——免费用户每月可获得50个积分，以维持基础设施的可持续性。",
-      "cta": "免费开始 →"
+      "cta": "免费开始 →",
+      "rows": {
+        "starting_price": "起始价格",
+        "free_plan": "免费计划",
+        "ai_tools": "AI写作工具",
+        "bulk_scheduling": "批量安排",
+        "link_in_bio": "简介链接",
+        "competitor": "竞争对手追踪",
+        "evergreen": "常青内容循环",
+        "rss": "RSS导入",
+        "team_seats": "团队席位",
+        "client_workspaces": "客户工作区",
+        "white_label": "白标"
+      }
     },
     "bio_link": {
       "badge": "免费个人简介链接生成器",
@@ -235,7 +262,14 @@
     "hero_headline": "到处发帖。",
     "hero_tagline": "一次搞定。",
     "cta_no_card": "无需信用卡 · 永久免费 · 60秒完成设置",
-    "more_coming": "+ 更多即将上线"
+    "more_coming": "+ 更多即将上线",
+    "user_stats": {
+      "posts_published": "篇帖子已发布",
+      "free": "免费版",
+      "pro": "Pro版",
+      "agency": "机构版",
+      "white_label": "白标版"
+    }
   },
   "pricing": {
     "headline": "简单透明的定价",
