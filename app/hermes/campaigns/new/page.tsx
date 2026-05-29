@@ -60,7 +60,7 @@ export default function NewCampaignPage() {
 
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 mb-8 text-sm">
-          <Link href="/hermes" className="text-gray-500 hover:text-white transition-colors">← HERMES</Link>
+          <Link href="/hermes/dashboard" className="text-gray-500 hover:text-white transition-colors">← HERMES</Link>
           <span className="text-gray-700">/</span>
           <span className="text-gray-300">New Campaign</span>
         </div>
