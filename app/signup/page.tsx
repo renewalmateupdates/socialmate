@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { isDisposableEmail } from '@/lib/disposable-email-domains'
+import { useI18n } from '@/contexts/I18nContext'
 
 const PERKS = [
   '7 live platforms — more coming',
@@ -15,6 +16,7 @@ const PERKS = [
 ]
 
 function SignupForm() {
+  const { t } = useI18n()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -112,7 +114,7 @@ function SignupForm() {
         <div className="flex-1 flex items-center justify-center p-6">
           <div className="bg-surface border border-theme rounded-3xl p-10 w-full max-w-md text-center">
             <div className="text-6xl mb-6">🎉</div>
-            <h1 className="text-2xl font-extrabold tracking-tight mb-3">You're almost in!</h1>
+            <h1 className="text-2xl font-extrabold tracking-tight mb-3">{t('signup.almost_in')}</h1>
             <p className="text-gray-400 dark:text-gray-500 text-sm mb-2">We sent a confirmation email to</p>
             <p className="font-bold text-sm mb-6">{email}</p>
             <p className="text-xs text-gray-400 dark:text-gray-500 mb-8 leading-relaxed">
@@ -135,7 +137,7 @@ function SignupForm() {
               ))}
             </div>
             <Link href="/login" className="block w-full py-3 bg-black text-white text-sm font-bold rounded-xl hover:opacity-80 transition-all">
-              Go to Sign In →
+              {t('signup.go_sign_in')}
             </Link>
           </div>
         </div>
@@ -151,7 +153,7 @@ function SignupForm() {
           <span className="font-bold text-base tracking-tight text-white">SocialMate</span>
         </Link>
         <Link href="/login" className="text-sm font-semibold text-gray-400 hover:text-white transition-colors">
-          Already have an account? Sign in →
+          {t('signup.already_have_account')} {t('signup.sign_in')} →
         </Link>
       </div>
 
@@ -161,13 +163,13 @@ function SignupForm() {
           {/* LEFT */}
           <div className="hidden md:block">
             <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold px-3 py-1.5 rounded-full mb-6">
-              🎉 Free forever · No credit card
+              {t('signup.free_forever_badge')}
             </div>
             <h1 className="text-4xl font-extrabold tracking-tight leading-tight mb-4 text-white">
-              Post everywhere.<br />All at once.
+              {t('signup.post_everywhere')}<br />{t('signup.all_at_once')}
             </h1>
             <p className="text-gray-400 mb-8 leading-relaxed">
-              Schedule to 7 live platforms, get 15+ AI tools, and grow your audience — completely free. No per-channel fees, no seat limits, no catch.
+              {t('signup.desktop_subheadline')}
             </p>
             <div className="space-y-3 mb-8">
               {PERKS.map(perk => (
@@ -192,7 +194,7 @@ function SignupForm() {
                 ))}
               </div>
               <p className="text-xs text-gray-500">
-                <span className="font-bold text-gray-300">30+ creators</span> already scheduling with SocialMate
+                {t('signup.social_proof')}
               </p>
             </div>
 
@@ -232,13 +234,13 @@ function SignupForm() {
             {/* MOBILE HERO (shows only on small screens) */}
             <div className="md:hidden mb-6">
               <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold px-3 py-1.5 rounded-full mb-4">
-                🎉 Free forever · No credit card
+                {t('signup.free_forever_badge')}
               </div>
               <h1 className="text-2xl font-extrabold tracking-tight mb-2 text-white">
-                Post everywhere.<br />All at once.
+                {t('signup.post_everywhere')}<br />{t('signup.all_at_once')}
               </h1>
               <p className="text-gray-400 text-sm mb-4 leading-relaxed">
-                Schedule to 7 platforms, get 15+ AI tools, and grow your audience — completely free.
+                {t('signup.mobile_subheadline')}
               </p>
               <div className="grid grid-cols-2 gap-2 mb-4">
                 {PERKS.map(perk => (
@@ -264,7 +266,7 @@ function SignupForm() {
             </div>
 
             <div className="bg-gray-900 border border-gray-700 rounded-3xl p-8">
-              <h2 className="text-lg font-extrabold tracking-tight mb-6 hidden md:block text-white">Create your free account</h2>
+              <h2 className="text-lg font-extrabold tracking-tight mb-6 hidden md:block text-white">{t('signup.headline')}</h2>
 
               {refCode && (
                 <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-xl px-4 py-3 mb-4">
@@ -287,10 +289,10 @@ function SignupForm() {
                   {tosAccepted && <span className="text-white text-xs font-bold">✓</span>}
                 </div>
                 <span className="text-xs text-gray-400 leading-relaxed">
-                  I agree to SocialMate&apos;s{' '}
-                  <Link href="/terms" className="underline text-gray-300 hover:text-white transition-colors" onClick={e => e.stopPropagation()}>Terms of Service</Link>
-                  {' '}and{' '}
-                  <Link href="/privacy" className="underline text-gray-300 hover:text-white transition-colors" onClick={e => e.stopPropagation()}>Privacy Policy</Link>
+                  {t('signup.tos_i_agree')}{' '}
+                  <Link href="/terms" className="underline text-gray-300 hover:text-white transition-colors" onClick={e => e.stopPropagation()}>{t('signup.tos_terms')}</Link>
+                  {' '}{t('signup.and')}{' '}
+                  <Link href="/privacy" className="underline text-gray-300 hover:text-white transition-colors" onClick={e => e.stopPropagation()}>{t('signup.privacy')}</Link>
                 </span>
               </button>
 
@@ -323,7 +325,7 @@ function SignupForm() {
                     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 2.47 2.18 4.93l3.66 2.84c.87-2.6 3.3-4.39 6.16-4.39z"/>
                   </svg>
                 )}
-                Continue with Google
+                {t('signup.google_cta')}
               </button>
 
               {/* Google auth domain note */}
@@ -335,13 +337,13 @@ function SignupForm() {
               {/* Divider */}
               <div className="flex items-center gap-3 mb-5">
                 <div className="flex-1 h-px bg-gray-100 dark:bg-gray-700" />
-                <span className="text-xs text-gray-400 dark:text-gray-500 font-medium">or sign up with email</span>
+                <span className="text-xs text-gray-400 dark:text-gray-500 font-medium">{t('signup.divider')}</span>
                 <div className="flex-1 h-px bg-gray-100 dark:bg-gray-700" />
               </div>
 
               <form onSubmit={handleSignup} className="space-y-4">
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">Email</label>
+                  <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">{t('signup.email_label')}</label>
                   <input
                     type="email"
                     value={email}
@@ -353,7 +355,7 @@ function SignupForm() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">Password</label>
+                  <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">{t('signup.password_label')}</label>
                   <div className="relative">
                     <input
                       type={showPassword ? 'text' : 'password'}
@@ -385,7 +387,7 @@ function SignupForm() {
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">Confirm Password</label>
+                  <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">{t('signup.confirm_password_label')}</label>
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={confirmPassword}
@@ -417,16 +419,16 @@ function SignupForm() {
                   {loading ? (
                     <>
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Creating account...
+                      {t('signup.creating')}
                     </>
-                  ) : 'Create Free Account →'}
+                  ) : t('signup.create_free_cta')}
                 </button>
               </form>
             </div>
 
             <p className="text-center text-xs text-gray-500 mt-4">
-              Already have an account?{' '}
-              <Link href="/login" className="font-bold text-amber-400 hover:text-amber-300 transition-colors">Sign in →</Link>
+              {t('signup.already_have_account')}{' '}
+              <Link href="/login" className="font-bold text-amber-400 hover:text-amber-300 transition-colors">{t('signup.sign_in')} →</Link>
             </p>
           </div>
         </div>
