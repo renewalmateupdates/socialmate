@@ -75,12 +75,12 @@ const TIERS = [
     price: '$12',
     priceSub: '/month add-on',
     badge: 'Starter',
-    cardBg: 'bg-amber-950/20',
-    border: 'border-2 border-amber-400',
-    badgeStyle: 'bg-amber-400/20 text-amber-400',
-    ctaStyle: 'bg-amber-400 hover:bg-amber-300 text-black font-extrabold',
-    ctaLabel: 'Join Waitlist',
-    ctaHref: '/signup',
+    cardBg: 'bg-emerald-50 dark:bg-emerald-950/20',
+    border: 'border-2 border-emerald-400',
+    badgeStyle: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300',
+    ctaStyle: 'border-2 border-emerald-500 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 font-extrabold',
+    ctaLabel: 'Get Started',
+    ctaHref: '/pricing',
     features: [
       '3 active campaigns',
       '75 prospects / month',
@@ -96,12 +96,12 @@ const TIERS = [
     price: '$25',
     priceSub: '/month add-on',
     badge: 'Most Popular',
-    cardBg: 'bg-purple-950/20',
-    border: 'border-2 border-purple-500',
-    badgeStyle: 'bg-purple-500/20 text-purple-400',
-    ctaStyle: 'bg-purple-600 hover:bg-purple-700 text-white font-extrabold',
-    ctaLabel: 'Join Waitlist',
-    ctaHref: '/signup',
+    cardBg: 'bg-amber-50 dark:bg-amber-950/20',
+    border: 'border-2 border-amber-400',
+    badgeStyle: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300',
+    ctaStyle: 'bg-amber-400 hover:bg-amber-500 text-black font-extrabold',
+    ctaLabel: 'Get Started',
+    ctaHref: '/pricing',
     features: [
       '10 active campaigns',
       '400 prospects / month',
@@ -117,10 +117,10 @@ const TIERS = [
     price: 'Custom',
     priceSub: 'Contact us for pricing',
     badge: 'Enterprise',
-    cardBg: 'bg-blue-950/20',
-    border: 'border-2 border-blue-500',
-    badgeStyle: 'bg-blue-500/20 text-blue-400',
-    ctaStyle: 'bg-blue-600 hover:bg-blue-700 text-white font-extrabold',
+    cardBg: 'bg-purple-50 dark:bg-purple-950/20',
+    border: 'border-2 border-purple-500',
+    badgeStyle: 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300',
+    ctaStyle: 'bg-purple-600 hover:bg-purple-700 text-white font-extrabold',
     ctaLabel: 'Contact Us',
     ctaHref: '/enterprise',
     features: [
@@ -156,8 +156,8 @@ const FAQS = [
     a: "That's the primary use case. Run a campaign targeting freelance social media managers or small agencies, auto-discover from Substack or GitHub, and let HERMES pitch your services on autopilot.",
   },
   {
-    q: 'When is HERMES available to users?',
-    a: "Currently in private beta — being tested internally before rollout. Join the waitlist to be notified when it opens up. Enterprise inquiries get priority access.",
+    q: 'How do I add HERMES to my plan?',
+    a: "Head to the pricing page and add HERMES as an add-on to any SocialMate plan. Once added, you'll find HERMES in your sidebar and can start your first campaign immediately. Enterprise teams can contact us for custom pricing and dedicated onboarding.",
   },
 ]
 
@@ -170,7 +170,7 @@ export default function HermesLandingPage() {
         <section className="text-center mb-20">
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold mb-6 uppercase tracking-widest">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-            Cold Outreach — Now in Private Beta
+            Cold Outreach — Now Live
           </span>
 
           <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight text-gray-50 mb-6 leading-tight">
@@ -186,9 +186,9 @@ export default function HermesLandingPage() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
             <Link
-              href="/signup"
+              href="/pricing"
               className="bg-amber-400 hover:bg-amber-300 text-black font-extrabold px-8 py-3.5 rounded-2xl transition-all text-sm w-full sm:w-auto text-center shadow-lg shadow-amber-400/20">
-              Join the Waitlist →
+              Get Started →
             </Link>
             <a
               href="#how-it-works"
@@ -376,11 +376,11 @@ export default function HermesLandingPage() {
             We don&apos;t think that&apos;s right. HERMES is $12/mo flat — or $25/mo for the Pro tier. Same AI-powered outreach, same sequences, more channels, a fraction of the price.
           </p>
           <Link
-            href="/signup"
+            href="/pricing"
             className="inline-flex items-center gap-2 bg-amber-400 hover:bg-amber-300 text-black font-extrabold px-8 py-4 rounded-2xl transition-all text-sm shadow-lg shadow-amber-400/20">
-            Join the Waitlist — It&apos;s Free →
+            Add HERMES to Your Plan →
           </Link>
-          <p className="text-xs text-gray-600 mt-4">Private beta · Enterprise inquiries get priority access.</p>
+          <p className="text-xs text-gray-600 mt-4">Enterprise? <Link href="/enterprise" className="underline hover:text-gray-400">Contact us</Link> for custom pricing.</p>
         </section>
 
         {/* ── BUILT BY ── */}
