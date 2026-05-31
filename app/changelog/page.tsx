@@ -21,6 +21,16 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'May 31, 2026',
+    version: 'FCP Performance Fix — Dashboard, Onboarding, Blog',
+    changes: [
+      { type: 'Fixed',    text: 'Dashboard FCP fixed — loading spinner used border-black which is invisible on dark mode backgrounds. Changed to border-amber-500. Was causing measured FCP of 3+ seconds because the browser painted nothing visible.' },
+      { type: 'New',      text: 'Dashboard and Onboarding loading skeletons — added loading.tsx to both routes. Next.js App Router now shows a server-rendered skeleton instantly during navigation instead of waiting for the full JS bundle to execute.' },
+      { type: 'Improved', text: 'Blog post ISR cache extended from 1 hour to 24 hours — hourly cache expiry was causing international CDN nodes to hit the US East origin server on cache miss, resulting in 3s+ FCP for visitors in Argentina, France, China, and Singapore.' },
+      { type: 'Improved', text: 'Blog index now cached — /blog was doing a fresh 500-row Supabase query on every single page load with no revalidation. Now cached for 24 hours.' },
+    ],
+  },
+  {
     date: 'May 29, 2026',
     version: 'i18n Full Parity — 9 Locales, Mobile Sweep',
     changes: [

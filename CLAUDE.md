@@ -624,6 +624,9 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **AI rate limiting** — 10 AI requests per minute per user. Returns 429 with retry-after header. Prevents accidental API abuse.
 - **Blog batch 12** — 55 posts on creator growth, platform strategy, and community. SQL in `supabase/blog_batch_12.sql`.
 
+**May 31, 2026 (PR #459):**
+- **FCP performance sweep** — Vercel Speed Insights audit done. Dashboard (67 RES, 3.23s FCP) and Onboarding (70 RES, 4.28s FCP) had no `loading.tsx` anywhere in the app — client pages painted nothing visible while JS bundle loaded. Added `app/dashboard/loading.tsx` and `app/onboarding/loading.tsx` (animated skeletons). Dashboard loading spinner was `border-black` — invisible on dark mode backgrounds (anti-flash script sets dark class before hydration), causing browser to measure 3s+ FCP on painted-but-invisible content. Fixed to `border-amber-500`. Blog `[slug]` revalidate bumped 3600→86400 — hourly ISR cache expiry caused international CDN nodes (China 5.98s, Argentina 4.02s, France 3.59s) to hit US East origin. Blog index `revalidate = 86400` added — was SSR on every request (500-row Supabase query per page load). PR merged.
+
 **May 26, 2026 (PRs #431–#432):**
 - **Bug sweep — `.maybeSingle()` fixes (PR #431)** — Switched `.single()` → `.maybeSingle()` on upsert lookups in Bluesky connect, Telegram connect, and admin coupons routes. `.single()` returns a PGRST116 error for 0 rows; `.maybeSingle()` returns `{ data: null, error: null }` as intended. Metadata updated: title "7 Platforms Live", OG/Twitter descriptions list all 7 platforms.
 - **Performance — initial JS bundle cut ~400KB (PR #432)** — Five targeted fixes to push desktop Real Experience Score from 88 → 90+:
@@ -735,6 +738,8 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **Product Hunt follow-up** — "We've shipped 50+ features since launch." Target: June 1, 2026.
 
 ## Confirmed Done (stop asking about these)
+
+- ✅ **FCP performance sweep (May 31, PR #459)** — `loading.tsx` added to dashboard + onboarding. Dashboard spinner fixed (border-black → border-amber-500, was invisible on dark mode). Blog revalidate 3600→86400. Blog index revalidate added. Merged. Never ask to add loading skeletons or fix blog revalidate again.
 
 - ✅ **SOMA video URL attachment (May 28, PR #442)** — `include_video_url TEXT` on `soma_projects`. Text input on project page, PATCH saves it, generate route injects video URL block into Gemini prompt. Clear button. Never ask to build this again.
 - ✅ **Enterprise tier (May 28, PR #443)** — `/enterprise` landing + contact form. Enterprise card on `/pricing`. `enterprise_inquiries` table. Resend email to admin on inquiry. "Enterprise" in PublicNav. No Stripe — manual provisioning. Never ask to build again.
