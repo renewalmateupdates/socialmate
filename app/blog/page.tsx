@@ -4,6 +4,9 @@ import PublicLayout from '@/components/PublicLayout'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import BlogClientList from '@/components/BlogClientList'
 
+// Cache blog index for 24h — fetches 500 posts from Supabase; without this it was SSR on every request.
+export const revalidate = 86400
+
 export const metadata: Metadata = {
   title: 'Blog — SocialMate',
   description: 'Guides, tips, and insights on social media scheduling, content strategy, AI tools, and growing your audience across Bluesky, Discord, Mastodon, and more.',

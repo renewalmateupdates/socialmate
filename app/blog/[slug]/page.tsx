@@ -3,8 +3,9 @@ import Link from 'next/link'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import PublicFooter from '@/components/PublicFooter'
 
-// Revalidate every hour so DB posts stay fresh without per-request fetching.
-export const revalidate = 3600
+// Revalidate every 24h — blog posts rarely change; shorter TTL caused hourly ISR cache misses
+// that hit the origin server, causing 3s+ FCP for international visitors on each cache expiry.
+export const revalidate = 86400
 
 // ── DB post shape ─────────────────────────────────────────────────────────────
 type DbPost = {
