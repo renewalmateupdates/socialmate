@@ -1,24 +1,8 @@
-import type { Metadata } from 'next'
+'use client'
+
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
-
-export const metadata: Metadata = {
-  title: 'Social Media Tools for Streamers & Clippers — SocialMate',
-  description: 'Schedule Twitch clips and YouTube videos to every social platform in seconds. Free tools built for streamers, clippers, and content creators. No $99/month nonsense.',
-  openGraph: {
-    title: 'Social Media Tools for Streamers & Clippers — SocialMate',
-    description: 'Browse your Twitch VODs and YouTube videos, pick the best moments, and schedule them to every platform — Bluesky, X, Mastodon, Discord, Telegram — in one click.',
-    url: 'https://socialmate.studio/for/streamers',
-    images: [{ url: 'https://socialmate.studio/og-image.png', width: 1270, height: 760, alt: 'SocialMate for Streamers' }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Social Media Tools for Streamers & Clippers — SocialMate',
-    description: 'Schedule Twitch clips to every platform in seconds. Free on all plans.',
-    images: ['https://socialmate.studio/og-image.png'],
-  },
-  alternates: { canonical: 'https://socialmate.studio/for/streamers' },
-}
+import { useI18n } from '@/contexts/I18nContext'
 
 const LIVE_PLATFORMS = [
   { name: 'Bluesky',   icon: '🦋', note: 'Live' },
@@ -184,50 +168,49 @@ const FAQ = [
 ]
 
 export default function StreamersPage() {
+  const { t } = useI18n()
   return (
     <PublicLayout>
 
       {/* ─── HERO ─── */}
       <section className="bg-black text-white py-24 px-6 text-center">
-        <p className="text-xs font-bold text-purple-400 uppercase tracking-widest mb-4">Built for streamers &amp; clippers</p>
+        <p className="text-xs font-bold text-purple-400 uppercase tracking-widest mb-4">{t('for_streamers.eyebrow')}</p>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-3xl mx-auto mb-6">
-          Stop wasting time posting clips.<br />
-          <span className="text-purple-400">Schedule everything from one place.</span>
+          {t('for_streamers.hero_title_1')}<br />
+          <span className="text-purple-400">{t('for_streamers.hero_title_2')}</span>
         </h1>
         <p className="text-gray-300 max-w-xl mx-auto text-base leading-relaxed mb-8">
-          Browse your Twitch VODs and YouTube videos right inside SocialMate.
-          Pick the best moments and fire them out to every platform — Bluesky, X, Mastodon,
-          Discord, Telegram — in 30 seconds flat.
+          {t('for_streamers.hero_desc')}
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
           <Link href="/signup"
             className="bg-purple-500 hover:bg-purple-400 text-white font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
-            Start free — no credit card →
+            {t('for_streamers.hero_cta_primary')}
           </Link>
           <Link href="/clips"
             className="border border-gray-700 hover:border-gray-400 text-gray-300 hover:text-white font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
-            See Clips Studio
+            {t('for_streamers.hero_cta_secondary')}
           </Link>
         </div>
-        <p className="text-gray-500 text-xs mt-4">Free forever on all plans · Twitch OAuth · YouTube via channel URL</p>
+        <p className="text-gray-500 text-xs mt-4">{t('for_streamers.hero_note')}</p>
       </section>
 
       {/* ─── PAIN POINTS ─── */}
       <section className="bg-gray-950 text-white py-20 px-6">
         <div className="max-w-4xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Sound familiar?</p>
+          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_streamers.pain_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
-            The clip-posting grind is killing your time
+            {t('for_streamers.pain_title')}
           </h2>
           <div className="space-y-6">
             {PAIN_POINTS.map((p, i) => (
               <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
                 <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-                  <p className="text-xs text-red-400 font-bold uppercase tracking-wide mb-2">Without SocialMate</p>
+                  <p className="text-xs text-red-400 font-bold uppercase tracking-wide mb-2">{t('for_streamers.pain_before_label')}</p>
                   <p className="text-sm text-gray-400 leading-relaxed">{p.before}</p>
                 </div>
                 <div className="bg-purple-950 border border-purple-800 rounded-2xl p-5">
-                  <p className="text-xs text-purple-300 font-bold uppercase tracking-wide mb-2">With SocialMate</p>
+                  <p className="text-xs text-purple-300 font-bold uppercase tracking-wide mb-2">{t('for_streamers.pain_after_label')}</p>
                   <p className="text-sm text-white leading-relaxed">{p.icon} {p.after}</p>
                 </div>
               </div>
@@ -239,12 +222,12 @@ export default function StreamersPage() {
       {/* ─── FEATURES ─── */}
       <section className="bg-black text-white py-20 px-6">
         <div className="max-w-5xl mx-auto">
-          <p className="text-center text-xs font-bold text-purple-400 uppercase tracking-widest mb-3">What you get</p>
+          <p className="text-center text-xs font-bold text-purple-400 uppercase tracking-widest mb-3">{t('for_streamers.features_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-3">
-            Everything a streamer needs. Nothing you don&apos;t.
+            {t('for_streamers.features_title')}
           </h2>
           <p className="text-center text-gray-400 text-sm mb-12 max-w-xl mx-auto">
-            Clips Studio is free on every plan. No feature-gating for the core tools.
+            {t('for_streamers.features_desc')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map((f, i) => (
@@ -259,7 +242,7 @@ export default function StreamersPage() {
                     ? 'bg-green-900 text-green-400'
                     : 'bg-gray-800 text-gray-400'
                   }`}>
-                    {f.badge}
+                    {f.live ? t('for_streamers.badge_live') : t('for_streamers.badge_soon')}
                   </span>
                 </div>
                 <h3 className="text-sm font-extrabold mb-2">{f.title}</h3>
@@ -273,13 +256,13 @@ export default function StreamersPage() {
       {/* ─── HOW IT WORKS ─── */}
       <section className="bg-gradient-to-b from-purple-950 to-gray-950 text-white py-20 px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <p className="text-xs font-bold text-purple-300 uppercase tracking-widest mb-3">3 steps</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-12">Post a clip in under a minute</h2>
+          <p className="text-xs font-bold text-purple-300 uppercase tracking-widest mb-3">{t('for_streamers.how_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-12">{t('for_streamers.how_title')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
             {[
-              { step: '1', title: 'Connect & Browse', desc: 'Link your Twitch account or paste a YouTube URL. Your clips load instantly in the built-in browser.' },
-              { step: '2', title: 'Pick & Caption', desc: 'Click any clip to open the compose window. Write your caption, or let AI write it for you in one click.' },
-              { step: '3', title: 'Schedule Everywhere', desc: 'Choose your platforms, pick your time (or post now), and hit Schedule. Done.' },
+              { step: '1', title: t('for_streamers.step1_title'), desc: t('for_streamers.step1_desc') },
+              { step: '2', title: t('for_streamers.step2_title'), desc: t('for_streamers.step2_desc') },
+              { step: '3', title: t('for_streamers.step3_title'), desc: t('for_streamers.step3_desc') },
             ].map((s) => (
               <div key={s.step} className="bg-black/40 border border-purple-900/50 rounded-2xl p-6">
                 <div className="text-3xl font-black text-purple-400 mb-3">{s.step}</div>
@@ -294,9 +277,9 @@ export default function StreamersPage() {
       {/* ─── PLATFORMS ─── */}
       <section className="bg-black text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Where your clips land</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">Live today</h2>
-          <p className="text-gray-400 text-sm mb-8">Schedule to these platforms right now, for free.</p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_streamers.platforms_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_streamers.platforms_title')}</h2>
+          <p className="text-gray-400 text-sm mb-8">{t('for_streamers.platforms_desc')}</p>
 
           <div className="flex flex-wrap justify-center gap-3 mb-12">
             {LIVE_PLATFORMS.map((p) => (
@@ -304,15 +287,14 @@ export default function StreamersPage() {
                 className="flex items-center gap-2 bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5">
                 <span className="text-lg">{p.icon}</span>
                 <span className="text-sm font-bold">{p.name}</span>
-                <span className="text-xs bg-green-900 text-green-400 px-2 py-0.5 rounded-full font-bold">✓ Live</span>
+                <span className="text-xs bg-green-900 text-green-400 px-2 py-0.5 rounded-full font-bold">{t('for_streamers.platforms_live_badge')}</span>
               </div>
             ))}
           </div>
 
-          <h3 className="text-base font-extrabold text-gray-400 mb-4">In the pipeline</h3>
+          <h3 className="text-base font-extrabold text-gray-400 mb-4">{t('for_streamers.pipeline_title')}</h3>
           <p className="text-gray-500 text-xs mb-6 max-w-md mx-auto">
-            We&apos;re actively working through platform API applications. These are real roadmap items, not vaporware.
-            See the full <Link href="/roadmap" className="text-purple-400 hover:text-purple-300 underline">roadmap</Link> for ETAs.
+            {t('for_streamers.pipeline_desc')} <Link href="/roadmap" className="text-purple-400 hover:text-purple-300 underline">{t('for_streamers.pipeline_roadmap')}</Link> {t('for_streamers.pipeline_desc_end')}
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             {COMING_PLATFORMS.map((p) => (
@@ -320,7 +302,7 @@ export default function StreamersPage() {
                 className="flex items-center gap-2 bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 opacity-60">
                 <span className="text-lg">{p.icon}</span>
                 <span className="text-sm font-bold text-gray-400">{p.name}</span>
-                <span className="text-xs bg-gray-800 text-gray-500 px-2 py-0.5 rounded-full font-bold">Soon</span>
+                <span className="text-xs bg-gray-800 text-gray-500 px-2 py-0.5 rounded-full font-bold">{t('for_streamers.pipeline_badge')}</span>
               </div>
             ))}
           </div>
@@ -330,9 +312,9 @@ export default function StreamersPage() {
       {/* ─── PRICING ─── */}
       <section className="bg-gray-950 text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Pricing</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">What competitors charge $99 for, we give for $5.</h2>
-          <p className="text-gray-400 text-sm mb-12">Clips Studio is included on every plan, including free.</p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_streamers.pricing_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_streamers.pricing_title')}</h2>
+          <p className="text-gray-400 text-sm mb-12">{t('for_streamers.pricing_desc')}</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
             {PRICING.map((tier) => (
               <div key={tier.plan}
@@ -341,7 +323,7 @@ export default function StreamersPage() {
                   : 'bg-gray-900 border-gray-800'
                 }`}>
                 {tier.highlight && (
-                  <p className="text-xs font-bold text-purple-300 uppercase tracking-widest mb-3">Most popular</p>
+                  <p className="text-xs font-bold text-purple-300 uppercase tracking-widest mb-3">{t('for_streamers.pricing_most_popular')}</p>
                 )}
                 <p className="text-sm font-extrabold mb-1">{tier.plan}</p>
                 <div className="flex items-end gap-1 mb-4">
@@ -351,9 +333,9 @@ export default function StreamersPage() {
                 <ul className="text-xs text-gray-400 space-y-2 mb-6 text-left">
                   <li>✓ {tier.credits}</li>
                   <li>✓ {tier.clips}</li>
-                  <li>✓ All 7 live platforms</li>
-                  <li>✓ AI caption writer</li>
-                  <li>✓ Scheduling calendar</li>
+                  <li>✓ {t('for_streamers.pricing_feature_platforms')}</li>
+                  <li>✓ {t('for_streamers.pricing_feature_ai_caption')}</li>
+                  <li>✓ {t('for_streamers.pricing_feature_calendar')}</li>
                 </ul>
                 <Link href={tier.href}
                   className={`block text-center text-sm font-bold py-3 rounded-xl transition-all ${tier.highlight
@@ -365,15 +347,15 @@ export default function StreamersPage() {
               </div>
             ))}
           </div>
-          <p className="text-gray-500 text-xs">No credit card required for the free plan. Cancel anytime on paid plans.</p>
+          <p className="text-gray-500 text-xs">{t('for_streamers.pricing_note')}</p>
         </div>
       </section>
 
       {/* ─── FAQ ─── */}
       <section className="bg-black text-white py-20 px-6">
         <div className="max-w-3xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Questions</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">Streamer FAQ</h2>
+          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_streamers.faq_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">{t('for_streamers.faq_title')}</h2>
           <div className="space-y-6">
             {FAQ.map((item, i) => (
               <div key={i} className="border-b border-gray-900 pb-6 last:border-0">
@@ -388,16 +370,16 @@ export default function StreamersPage() {
       {/* ─── BOTTOM CTA ─── */}
       <section className="bg-gradient-to-br from-purple-950 via-gray-950 to-black text-white py-20 px-6 text-center">
         <h2 className="text-2xl sm:text-3xl font-extrabold mb-4">
-          Your clips deserve more than one platform.
+          {t('for_streamers.bottom_title')}
         </h2>
         <p className="text-gray-400 text-sm mb-8 max-w-md mx-auto">
-          Join SocialMate free and start scheduling your Twitch and YouTube content everywhere in minutes.
+          {t('for_streamers.bottom_desc')}
         </p>
         <Link href="/signup"
           className="inline-block bg-purple-500 hover:bg-purple-400 text-white font-bold px-10 py-4 rounded-xl text-sm transition-all">
-          Create free account →
+          {t('for_streamers.bottom_cta')}
         </Link>
-        <p className="text-gray-600 text-xs mt-4">No credit card · No trial · Free forever on the free plan</p>
+        <p className="text-gray-600 text-xs mt-4">{t('for_streamers.bottom_note')}</p>
       </section>
 
     </PublicLayout>

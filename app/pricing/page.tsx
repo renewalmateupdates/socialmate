@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import PublicLayout from '@/components/PublicLayout'
+import { useI18n } from '@/contexts/I18nContext'
 
 const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000
 const LS_WELCOME_FIRST_SHOWN = 'welcome_offer_first_shown'
@@ -209,6 +210,7 @@ interface AppliedCoupon {
 }
 
 export default function Pricing() {
+  const { t } = useI18n()
   const [interval, setInterval] = useState<Interval>('monthly')
   const [loading, setLoading]   = useState<string | null>(null)
   const router = useRouter()
@@ -395,13 +397,13 @@ export default function Pricing() {
         <div className="text-center mb-14">
           <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Pricing</p>
           <h1 className="text-4xl font-extrabold tracking-tight mb-4">
-            Simple, honest pricing
+            {t('pricing.headline')}
           </h1>
           <p className="text-gray-500 text-sm max-w-xl mx-auto leading-relaxed">
-            Buffer charges $18/mo for 5 platforms. Hootsuite charges $99/mo. SocialMate gives you all 7 live platforms, 15+ AI tools, and a Link in Bio page — starting at $0.
+            {t('pricing.subheadline')}
           </p>
           <p className="text-xs text-gray-400 dark:text-gray-500 mt-4">
-            Join <span className="font-bold text-gray-600 dark:text-gray-300">{displayUserCount(userCount)} creators</span> already scheduling with SocialMate
+            <span className="font-bold text-gray-600 dark:text-gray-300">{t('pricing.social_proof', { count: displayUserCount(userCount) })}</span>
           </p>
           <p className="text-xs text-gray-400 dark:text-gray-500 mt-2">
             Nonprofit or student? <a href="/discount" className="text-amber-500 hover:underline font-semibold">Special discounts available →</a>
@@ -413,10 +415,10 @@ export default function Pricing() {
                 className={`px-5 py-2 rounded-xl text-sm font-bold transition-all ${
                   interval === i ? 'bg-white dark:bg-gray-700 text-black dark:text-white shadow-sm' : 'text-gray-500 hover:text-black dark:hover:text-white'
                 }`}>
-                {i === 'monthly' ? 'Monthly' : (
+                {i === 'monthly' ? t('pricing.interval_monthly') : (
                   <span className="flex items-center gap-2">
-                    Annual
-                    <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">Save up to 13%</span>
+                    {t('pricing.interval_annual')}
+                    <span className="text-xs font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">{t('pricing.annual_save')}</span>
                   </span>
                 )}
               </button>
@@ -440,7 +442,7 @@ export default function Pricing() {
                   value={couponInput}
                   onChange={e => { setCouponInput(e.target.value.toUpperCase()); setCouponError(null) }}
                   onKeyDown={e => e.key === 'Enter' && applyCoupon()}
-                  placeholder="Have a coupon code?"
+                  placeholder={t('pricing.coupon_placeholder')}
                   className="text-sm bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 py-2 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:border-violet-400 w-52"
                 />
                 <button
@@ -448,7 +450,7 @@ export default function Pricing() {
                   disabled={couponValidating || !couponInput.trim()}
                   className="px-4 py-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 disabled:opacity-50 text-gray-700 dark:text-gray-300 text-sm font-semibold rounded-xl transition-colors"
                 >
-                  {couponValidating ? '…' : 'Apply'}
+                  {couponValidating ? t('pricing.coupon_applying') : t('pricing.coupon_apply')}
                 </button>
               </div>
               {couponError && (
@@ -651,15 +653,15 @@ export default function Pricing() {
         {/* SECURE CHECKOUT BADGE */}
         <div className="flex items-center justify-center gap-4 mb-8 flex-wrap">
           <div className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500">
-            <span>🔒</span><span>Secure checkout via Stripe</span>
+            <span>🔒</span><span>{t('pricing.trust_stripe')}</span>
           </div>
           <div className="w-px h-3 bg-gray-200 dark:bg-gray-700 hidden sm:block" />
           <div className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500">
-            <span>↩️</span><span>Cancel anytime, no questions asked</span>
+            <span>↩️</span><span>{t('pricing.trust_cancel')}</span>
           </div>
           <div className="w-px h-3 bg-gray-200 dark:bg-gray-700 hidden sm:block" />
           <div className="flex items-center gap-1.5 text-xs text-gray-400 dark:text-gray-500">
-            <span>💳</span><span>No credit card required for Free plan</span>
+            <span>💳</span><span>{t('pricing.trust_no_cc')}</span>
           </div>
         </div>
 
@@ -667,7 +669,7 @@ export default function Pricing() {
         <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6 mb-8">
           <div className="mb-5">
             <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-base font-extrabold">White Label Add-on</h3>
+              <h3 className="text-base font-extrabold">{t('pricing.white_label_headline')}</h3>
               <span className="text-xs font-bold px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-full">Pro & Agency only</span>
             </div>
             <p className="text-xs text-gray-500">Turn SocialMate into your own branded product. Agencies are charging $99–$299/mo for tools built on exactly this. Your clients never know we exist.</p>
@@ -711,9 +713,9 @@ export default function Pricing() {
         <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6 mb-8">
           <div className="flex items-start justify-between mb-5">
             <div>
-              <h3 className="text-base font-extrabold mb-1">AI Credit Costs</h3>
+              <h3 className="text-base font-extrabold mb-1">{t('pricing.ai_credits_title')}</h3>
               <p className="text-xs text-gray-500 max-w-xl">
-                Credits refresh monthly. Unused credits roll over into your bank — Free banks up to 75, Pro up to 750, Agency up to 3,000. Banks reset every 6 months.
+                {t('pricing.ai_credits_sub')}
               </p>
             </div>
             <Link href="/ai-features"
@@ -780,7 +782,7 @@ export default function Pricing() {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-lg">𝕏</span>
-                <h3 className="text-base font-extrabold">X / Twitter Post Boosters</h3>
+                <h3 className="text-base font-extrabold">{t('pricing.x_boosters_headline')}</h3>
               </div>
               <p className="text-xs text-gray-400 max-w-xl leading-relaxed">
                 Need more X posts? Buy a one-time booster pack. Stacks on your plan quota. Never expires. No subscription required.
@@ -901,7 +903,7 @@ export default function Pricing() {
 
         {/* FAQ */}
         <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
-          <h3 className="text-base font-extrabold mb-6">Frequently asked questions</h3>
+          <h3 className="text-base font-extrabold mb-6">{t('pricing.faq_headline')}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {FAQ.map((item, i) => (
               <div key={i}>

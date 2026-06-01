@@ -1,24 +1,8 @@
-import type { Metadata } from 'next'
+'use client'
+
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
-
-export const metadata: Metadata = {
-  title: 'Social Media for Coaches & Consultants — SocialMate',
-  description: 'Stop losing clients to coaches with worse credentials but better social media. Schedule a week of posts in 30 minutes, let AI write thought leadership content, and stay visible on LinkedIn — free or $5/month.',
-  openGraph: {
-    title: 'Social Media for Coaches & Consultants — SocialMate',
-    description: 'Schedule posts to LinkedIn, X, Bluesky, Discord, and more in 30 minutes a week. SOMA generates coaching content in your voice automatically.',
-    url: 'https://socialmate.studio/for/coaches',
-    images: [{ url: 'https://socialmate.studio/og-image.png', width: 1270, height: 760, alt: 'SocialMate for Coaches' }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Social Media for Coaches & Consultants — SocialMate',
-    description: 'Schedule a week of coaching content in 30 minutes. AI writes thought leadership in your voice.',
-    images: ['https://socialmate.studio/og-image.png'],
-  },
-  alternates: { canonical: 'https://socialmate.studio/for/coaches' },
-}
+import { useI18n } from '@/contexts/I18nContext'
 
 const PERSONAS = [
   { label: 'Life coach',           icon: '🌱' },
@@ -166,20 +150,19 @@ const FAQ = [
 ]
 
 export default function CoachesPage() {
+  const { t } = useI18n()
   return (
     <PublicLayout>
 
       {/* ─── HERO ─── */}
       <section className="bg-black text-white py-24 px-6 text-center">
-        <p className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-4">Built for coaches &amp; consultants</p>
+        <p className="text-xs font-bold text-emerald-400 uppercase tracking-widest mb-4">{t('for_coaches.eyebrow')}</p>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-3xl mx-auto mb-6">
-          Schedule a week of content<br />
-          <span className="text-emerald-400">in 30 minutes flat.</span>
+          {t('for_coaches.hero_title_1')}<br />
+          <span className="text-emerald-400">{t('for_coaches.hero_title_2')}</span>
         </h1>
         <p className="text-gray-300 max-w-xl mx-auto text-base leading-relaxed mb-6">
-          Your expertise is in delivering results — not posting on LinkedIn every day.
-          SocialMate schedules your thought leadership content to all 7 platforms while you&apos;re
-          busy coaching. AI writes it. You just approve.
+          {t('for_coaches.hero_desc')}
         </p>
 
         <div className="flex flex-wrap justify-center gap-2 mb-8 max-w-2xl mx-auto">
@@ -194,32 +177,32 @@ export default function CoachesPage() {
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
           <Link href="/signup"
             className="bg-emerald-500 hover:bg-emerald-400 text-white font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
-            Start free — no credit card →
+            {t('for_coaches.hero_cta_primary')}
           </Link>
           <Link href="/pricing"
             className="border border-gray-700 hover:border-gray-400 text-gray-300 hover:text-white font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
-            See pricing
+            {t('for_coaches.hero_cta_secondary')}
           </Link>
         </div>
-        <p className="text-gray-500 text-xs mt-4">Free forever · LinkedIn scheduling live · No credit card required</p>
+        <p className="text-gray-500 text-xs mt-4">{t('for_coaches.hero_note')}</p>
       </section>
 
       {/* ─── PAIN POINTS ─── */}
       <section className="bg-gray-950 text-white py-20 px-6">
         <div className="max-w-4xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">We know the feeling</p>
+          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_coaches.pain_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
-            Your content shouldn&apos;t take<br />as long as your client sessions.
+            {t('for_coaches.pain_title')}
           </h2>
           <div className="space-y-5">
             {PAIN_POINTS.map((p, i) => (
               <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
                 <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-                  <p className="text-xs text-red-400 font-bold uppercase tracking-wide mb-2">Right now</p>
+                  <p className="text-xs text-red-400 font-bold uppercase tracking-wide mb-2">{t('for_coaches.pain_before_label')}</p>
                   <p className="text-sm text-gray-400 leading-relaxed">{p.before}</p>
                 </div>
                 <div className="bg-emerald-950/40 border border-emerald-800/50 rounded-2xl p-5">
-                  <p className="text-xs text-emerald-300 font-bold uppercase tracking-wide mb-2">With SocialMate</p>
+                  <p className="text-xs text-emerald-300 font-bold uppercase tracking-wide mb-2">{t('for_coaches.pain_after_label')}</p>
                   <p className="text-sm text-white leading-relaxed">{p.icon} {p.after}</p>
                 </div>
               </div>
@@ -231,12 +214,12 @@ export default function CoachesPage() {
       {/* ─── FEATURES ─── */}
       <section className="bg-black text-white py-20 px-6">
         <div className="max-w-5xl mx-auto">
-          <p className="text-center text-xs font-bold text-emerald-400 uppercase tracking-widest mb-3">What you get</p>
+          <p className="text-center text-xs font-bold text-emerald-400 uppercase tracking-widest mb-3">{t('for_coaches.features_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-3">
-            The tools you actually need.
+            {t('for_coaches.features_title')}
           </h2>
           <p className="text-center text-gray-400 text-sm mb-12 max-w-lg mx-auto">
-            Most features are free. SOMA and advanced AI tools unlock at Pro ($5/month).
+            {t('for_coaches.features_desc')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map((f, i) => (
@@ -262,9 +245,9 @@ export default function CoachesPage() {
       {/* ─── PLATFORMS ─── */}
       <section className="bg-gray-950 text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Where your content lands</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">7 platforms. One compose window.</h2>
-          <p className="text-gray-400 text-sm mb-8">LinkedIn is live. Your clients are already there.</p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_coaches.platforms_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_coaches.platforms_title')}</h2>
+          <p className="text-gray-400 text-sm mb-8">{t('for_coaches.platforms_desc')}</p>
           <div className="flex flex-wrap justify-center gap-3">
             {LIVE_PLATFORMS.map((p) => (
               <div key={p.name}
@@ -275,7 +258,7 @@ export default function CoachesPage() {
                 }`}>
                 <span className="text-lg">{p.icon}</span>
                 <span className="text-sm font-bold">{p.name}</span>
-                <span className="text-xs bg-green-900 text-green-400 px-2 py-0.5 rounded-full font-bold">✓ Live</span>
+                <span className="text-xs bg-green-900 text-green-400 px-2 py-0.5 rounded-full font-bold">{t('for_coaches.platforms_live_badge')}</span>
               </div>
             ))}
           </div>
@@ -285,9 +268,9 @@ export default function CoachesPage() {
       {/* ─── PRICING ─── */}
       <section className="bg-black text-white py-20 px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Pricing</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">No tricks. No tiers designed to confuse you.</h2>
-          <p className="text-gray-400 text-sm mb-12 max-w-lg mx-auto">Free plan is real. Pro is $5. That&apos;s it.</p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_coaches.pricing_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_coaches.pricing_title')}</h2>
+          <p className="text-gray-400 text-sm mb-12 max-w-lg mx-auto">{t('for_coaches.pricing_desc')}</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-xl mx-auto mb-8">
             {PRICING.map((tier) => (
               <div key={tier.plan}
@@ -296,7 +279,7 @@ export default function CoachesPage() {
                   : 'bg-gray-900 border-gray-800'
                 }`}>
                 {tier.highlight && (
-                  <p className="text-xs font-bold text-emerald-300 uppercase tracking-widest mb-3">Most popular</p>
+                  <p className="text-xs font-bold text-emerald-300 uppercase tracking-widest mb-3">{t('for_coaches.pricing_most_popular')}</p>
                 )}
                 <p className="text-sm font-extrabold mb-1">{tier.plan}</p>
                 <div className="flex items-end gap-1 mb-4">
@@ -321,15 +304,15 @@ export default function CoachesPage() {
               </div>
             ))}
           </div>
-          <p className="text-gray-500 text-xs">No credit card required for the free plan. Cancel anytime on paid plans.</p>
+          <p className="text-gray-500 text-xs">{t('for_coaches.pricing_note')}</p>
         </div>
       </section>
 
       {/* ─── FAQ ─── */}
       <section className="bg-gray-950 text-white py-20 px-6">
         <div className="max-w-3xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Questions</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">Coach &amp; Consultant FAQ</h2>
+          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_coaches.faq_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">{t('for_coaches.faq_title')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {FAQ.map((item, i) => (
               <div key={i} className="border-b border-gray-900 pb-6 last:border-0">
@@ -344,17 +327,16 @@ export default function CoachesPage() {
       {/* ─── BOTTOM CTA ─── */}
       <section className="bg-gradient-to-b from-emerald-950 to-black text-white py-20 px-6 text-center">
         <h2 className="text-2xl sm:text-3xl font-extrabold mb-4">
-          Your expertise deserves an audience.<br />Let&apos;s build it.
+          {t('for_coaches.bottom_title')}
         </h2>
         <p className="text-gray-400 text-sm mb-8 max-w-md mx-auto">
-          Free forever on the free plan. $5/month if you need more.
-          No credit card, no commitment, no fluff.
+          {t('for_coaches.bottom_desc')}
         </p>
         <Link href="/signup"
           className="inline-block bg-emerald-500 hover:bg-emerald-400 text-white font-bold px-10 py-4 rounded-xl text-sm transition-all">
-          Create free account →
+          {t('for_coaches.bottom_cta')}
         </Link>
-        <p className="text-gray-600 text-xs mt-4">LinkedIn scheduling live · AI content writer included · All 7 platforms</p>
+        <p className="text-gray-600 text-xs mt-4">{t('for_coaches.bottom_note')}</p>
       </section>
 
     </PublicLayout>

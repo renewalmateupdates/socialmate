@@ -1,6 +1,8 @@
+'use client'
 ﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
+import { useI18n } from '@/contexts/I18nContext'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs Gain (2026) — Full Comparison',
@@ -62,6 +64,7 @@ const faqSchema = {
 }
 
 export default function VsGainAppPage() {
+  const { t } = useI18n()
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
@@ -73,8 +76,8 @@ export default function VsGainAppPage() {
             <span className="font-bold tracking-tight">SocialMate</span>
           </Link>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="text-xs font-semibold text-gray-400 hover:text-white transition-colors">Log in</Link>
-            <Link href="/signup" className="text-xs font-bold px-4 py-2 bg-amber-400 text-black rounded-xl hover:bg-amber-300 transition-all">Start free →</Link>
+            <Link href="/login" className="text-xs font-semibold text-gray-400 hover:text-white transition-colors">{t('vs_shared.nav_login')}</Link>
+            <Link href="/signup" className="text-xs font-bold px-4 py-2 bg-amber-400 text-black rounded-xl hover:bg-amber-300 transition-all">{t('vs_shared.nav_start_free')}</Link>
           </div>
         </div>
       </nav>
@@ -94,10 +97,10 @@ export default function VsGainAppPage() {
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-amber-400 text-black font-bold rounded-2xl hover:bg-amber-300 transition-all text-sm">
-              Try SocialMate free →
+              {t('vs_shared.cta_try_free')}
             </Link>
             <Link href="/pricing" className="px-6 py-3 border border-gray-700 font-semibold rounded-2xl hover:border-gray-500 transition-all text-sm text-gray-200">
-              See pricing
+              {t('vs_shared.cta_see_pricing')}
             </Link>
           </div>
         </div>
@@ -132,12 +135,12 @@ export default function VsGainAppPage() {
 
         {/* COMPARISON TABLE */}
         <div className="mb-12">
-          <h2 className="text-xl font-extrabold tracking-tight mb-6">Feature comparison</h2>
+          <h2 className="text-xl font-extrabold tracking-tight mb-6">{t('vs_shared.feature_comparison')}</h2>
           <div className="overflow-x-auto"><div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-400 uppercase tracking-wide">
-              <span>Feature</span>
+              <span>{t('vs_shared.table_feature')}</span>
               <span>Gain</span>
-              <span>SocialMate</span>
+              <span>{t('vs_shared.table_socialmate')}</span>
             </div>
             {COMPARISON.map((row, i) => (
               <div key={i} className={`grid grid-cols-3 px-5 py-3.5 text-sm border-t border-gray-800 ${i % 2 === 0 ? 'bg-gray-900' : 'bg-gray-800/30'}`}>
@@ -189,7 +192,7 @@ export default function VsGainAppPage() {
 
         {/* FAQ */}
         <div className="mb-12">
-          <h2 className="text-xl font-extrabold tracking-tight mb-6">Frequently asked questions</h2>
+          <h2 className="text-xl font-extrabold tracking-tight mb-6">{t('vs_shared.faq_heading')}</h2>
           <div className="space-y-4">
             {FAQ.map((faq, i) => (
               <div key={i} className="p-5 bg-gray-900 border border-gray-800 rounded-2xl">
@@ -207,9 +210,9 @@ export default function VsGainAppPage() {
             SocialMate Agency includes client workspaces, approval workflows, 7 platforms, 20+ AI tools, and SOMA. Everything Gain does — plus much more — at $20/month.
           </p>
           <Link href="/signup" className="inline-block bg-black text-white font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm">
-            Create free account →
+            {t('vs_shared.cta_create_free')}
           </Link>
-          <p className="text-black/50 text-xs mt-3">No card required · Free forever</p>
+          <p className="text-black/50 text-xs mt-3">{t('vs_shared.cta_no_card')}</p>
         </div>
       </div>
       <PublicFooter />

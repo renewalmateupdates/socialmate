@@ -1,24 +1,8 @@
-import type { Metadata } from 'next'
+'use client'
+
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
-
-export const metadata: Metadata = {
-  title: 'Social Media Management for Agencies — SocialMate',
-  description: 'Manage every client from one dashboard. White label the entire platform as your own brand. SocialMate Agency plan: 2,000 AI credits, 15 seats, 5 client workspaces — $20/month.',
-  openGraph: {
-    title: 'Social Media Management for Agencies — SocialMate',
-    description: 'Stop paying $299/month for agency tools. SocialMate gives you white label, client workspaces, team seats, and 2,000 AI credits for $20/month.',
-    url: 'https://socialmate.studio/for/agencies',
-    images: [{ url: 'https://socialmate.studio/og-image.png', width: 1270, height: 760, alt: 'SocialMate for Agencies' }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Social Media Management for Agencies — SocialMate',
-    description: 'White label social media scheduling for $20/month. Client workspaces, team seats, AI tools included.',
-    images: ['https://socialmate.studio/og-image.png'],
-  },
-  alternates: { canonical: 'https://socialmate.studio/for/agencies' },
-}
+import { useI18n } from '@/contexts/I18nContext'
 
 const PAIN_POINTS = [
   {
@@ -182,49 +166,49 @@ const FAQ = [
 ]
 
 export default function AgenciesPage() {
+  const { t } = useI18n()
   return (
     <PublicLayout>
 
       {/* ─── HERO ─── */}
       <section className="bg-black text-white py-24 px-6 text-center">
-        <p className="text-xs font-bold text-amber-400 uppercase tracking-widest mb-4">Built for agencies</p>
+        <p className="text-xs font-bold text-amber-400 uppercase tracking-widest mb-4">{t('for_agencies.eyebrow')}</p>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-3xl mx-auto mb-6">
-          Stop overpaying for agency tools.<br />
-          <span className="text-amber-400">Manage every client for $20/month.</span>
+          {t('for_agencies.hero_title_1')}<br />
+          <span className="text-amber-400">{t('for_agencies.hero_title_2')}</span>
         </h1>
         <p className="text-gray-300 max-w-xl mx-auto text-base leading-relaxed mb-8">
-          Client workspaces. 15 team seats. 2,000 AI credits. White label optional.
-          Everything you charge clients $500/month to manage — for $20.
+          {t('for_agencies.hero_desc')}
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
           <Link href="/signup"
             className="bg-amber-400 hover:bg-amber-300 text-black font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
-            Start Agency plan — $20/month →
+            {t('for_agencies.hero_cta_primary')}
           </Link>
           <Link href="/pricing"
             className="border border-gray-700 hover:border-gray-400 text-gray-300 hover:text-white font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
-            See full pricing
+            {t('for_agencies.hero_cta_secondary')}
           </Link>
         </div>
-        <p className="text-gray-500 text-xs mt-4">No contract · No setup fee · Cancel anytime</p>
+        <p className="text-gray-500 text-xs mt-4">{t('for_agencies.hero_note')}</p>
       </section>
 
       {/* ─── PAIN POINTS ─── */}
       <section className="bg-gray-950 text-white py-20 px-6">
         <div className="max-w-4xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">The agency tax is real</p>
+          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_agencies.pain_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
-            The tools are charging you a fortune.<br />You don&apos;t have to keep paying it.
+            {t('for_agencies.pain_title_1')}<br />{t('for_agencies.pain_title_2')}
           </h2>
           <div className="space-y-5">
             {PAIN_POINTS.map((p, i) => (
               <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
                 <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-                  <p className="text-xs text-red-400 font-bold uppercase tracking-wide mb-2">The old way</p>
+                  <p className="text-xs text-red-400 font-bold uppercase tracking-wide mb-2">{t('for_agencies.pain_before_label')}</p>
                   <p className="text-sm text-gray-400 leading-relaxed">{p.before}</p>
                 </div>
                 <div className="bg-amber-950/40 border border-amber-800/50 rounded-2xl p-5">
-                  <p className="text-xs text-amber-300 font-bold uppercase tracking-wide mb-2">With SocialMate</p>
+                  <p className="text-xs text-amber-300 font-bold uppercase tracking-wide mb-2">{t('for_agencies.pain_after_label')}</p>
                   <p className="text-sm text-white leading-relaxed">{p.icon} {p.after}</p>
                 </div>
               </div>
@@ -236,17 +220,17 @@ export default function AgenciesPage() {
       {/* ─── COMPARISON TABLE ─── */}
       <section className="bg-black text-white py-20 px-6">
         <div className="max-w-3xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Price comparison</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-10">What you&apos;re paying vs what you could pay</h2>
+          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_agencies.comparison_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-10">{t('for_agencies.comparison_title')}</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-800 text-xs text-gray-500 uppercase tracking-wide">
-                  <th className="text-left py-3 pr-4">Tool</th>
-                  <th className="text-left py-3 pr-4">Monthly cost</th>
-                  <th className="text-left py-3 pr-4">Seats</th>
-                  <th className="text-left py-3 pr-4">AI included</th>
-                  <th className="text-left py-3">White label</th>
+                  <th className="text-left py-3 pr-4">{t('for_agencies.comparison_col_tool')}</th>
+                  <th className="text-left py-3 pr-4">{t('for_agencies.comparison_col_cost')}</th>
+                  <th className="text-left py-3 pr-4">{t('for_agencies.comparison_col_seats')}</th>
+                  <th className="text-left py-3 pr-4">{t('for_agencies.comparison_col_ai')}</th>
+                  <th className="text-left py-3">{t('for_agencies.comparison_col_wl')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -264,19 +248,19 @@ export default function AgenciesPage() {
               </tbody>
             </table>
           </div>
-          <p className="text-xs text-gray-600 mt-4">Prices approximate as of April 2026. See competitor sites for current pricing.</p>
+          <p className="text-xs text-gray-600 mt-4">{t('for_agencies.comparison_note')}</p>
         </div>
       </section>
 
       {/* ─── FEATURES ─── */}
       <section className="bg-gray-950 text-white py-20 px-6">
         <div className="max-w-5xl mx-auto">
-          <p className="text-center text-xs font-bold text-amber-400 uppercase tracking-widest mb-3">What you get</p>
+          <p className="text-center text-xs font-bold text-amber-400 uppercase tracking-widest mb-3">{t('for_agencies.features_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-3">
-            Built for agencies. Priced for reality.
+            {t('for_agencies.features_title')}
           </h2>
           <p className="text-center text-gray-400 text-sm mb-12 max-w-xl mx-auto">
-            Every feature below is included in the $20/month Agency plan unless marked as an add-on.
+            {t('for_agencies.features_desc')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map((f, i) => (
@@ -302,10 +286,10 @@ export default function AgenciesPage() {
       {/* ─── PRICING ─── */}
       <section className="bg-black text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Pricing</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">Simple. No per-seat nonsense.</h2>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_agencies.pricing_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_agencies.pricing_title')}</h2>
           <p className="text-gray-400 text-sm mb-12 max-w-xl mx-auto">
-            One flat price. 15 seats. 5 client workspaces. White label available as an add-on.
+            {t('for_agencies.pricing_desc')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
             {PRICING.map((tier) => (
@@ -315,7 +299,7 @@ export default function AgenciesPage() {
                   : 'bg-gray-900 border-gray-800'
                 }`}>
                 {tier.highlight && (
-                  <p className="text-xs font-bold text-amber-300 uppercase tracking-widest mb-3">Start here</p>
+                  <p className="text-xs font-bold text-amber-300 uppercase tracking-widest mb-3">{t('for_agencies.pricing_start_here')}</p>
                 )}
                 <p className="text-sm font-extrabold mb-1">{tier.name}</p>
                 <div className="flex items-end gap-1 mb-4">
@@ -338,30 +322,28 @@ export default function AgenciesPage() {
               </div>
             ))}
           </div>
-          <p className="text-gray-500 text-xs">Need more than 5 client workspaces? <Link href="/support" className="text-amber-400 hover:text-amber-300 underline">Contact us.</Link></p>
+          <p className="text-gray-500 text-xs">{t('for_agencies.pricing_need_more')} <Link href="/support" className="text-amber-400 hover:text-amber-300 underline">{t('for_agencies.pricing_contact')}</Link></p>
         </div>
       </section>
 
       {/* ─── WHITE LABEL CALLOUT ─── */}
       <section className="bg-gradient-to-br from-amber-950 via-gray-950 to-black text-white py-20 px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <p className="text-xs font-bold text-amber-300 uppercase tracking-widest mb-3">White label</p>
+          <p className="text-xs font-bold text-amber-300 uppercase tracking-widest mb-3">{t('for_agencies.wl_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-4">
-            Put your brand on it.<br />Your clients never know it&apos;s SocialMate.
+            {t('for_agencies.wl_title_1')}<br />{t('for_agencies.wl_title_2')}
           </h2>
           <p className="text-gray-400 text-sm mb-8 max-w-xl mx-auto leading-relaxed">
-            Add White Label Basic for $20/month and the platform becomes yours — your logo,
-            your colors, your name. Add White Label Pro for $40/month and run it on your own domain.
-            Charge clients $200/month. Margin is yours.
+            {t('for_agencies.wl_desc')}
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/pricing"
               className="bg-amber-400 hover:bg-amber-300 text-black font-bold px-8 py-4 rounded-xl text-sm transition-all">
-              See white label pricing →
+              {t('for_agencies.wl_cta_primary')}
             </Link>
             <Link href="/signup"
               className="border border-gray-700 hover:border-gray-400 text-gray-300 hover:text-white font-bold px-8 py-4 rounded-xl text-sm transition-all">
-              Start Agency plan first
+              {t('for_agencies.wl_cta_secondary')}
             </Link>
           </div>
         </div>
@@ -370,8 +352,8 @@ export default function AgenciesPage() {
       {/* ─── FAQ ─── */}
       <section className="bg-black text-white py-20 px-6">
         <div className="max-w-3xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Questions</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">Agency FAQ</h2>
+          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_agencies.faq_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">{t('for_agencies.faq_title')}</h2>
           <div className="space-y-6">
             {FAQ.map((item, i) => (
               <div key={i} className="border-b border-gray-900 pb-6 last:border-0">
@@ -386,17 +368,16 @@ export default function AgenciesPage() {
       {/* ─── BOTTOM CTA ─── */}
       <section className="bg-gray-950 text-white py-20 px-6 text-center">
         <h2 className="text-2xl sm:text-3xl font-extrabold mb-4">
-          Your agency deserves better margins.
+          {t('for_agencies.bottom_title')}
         </h2>
         <p className="text-gray-400 text-sm mb-8 max-w-md mx-auto">
-          Start the Agency plan today. 15 seats, 5 client workspaces, 2,000 AI credits.
-          White label when you&apos;re ready.
+          {t('for_agencies.bottom_desc')}
         </p>
         <Link href="/signup"
           className="inline-block bg-amber-400 hover:bg-amber-300 text-black font-bold px-10 py-4 rounded-xl text-sm transition-all">
-          Start Agency plan — $20/month →
+          {t('for_agencies.bottom_cta')}
         </Link>
-        <p className="text-gray-600 text-xs mt-4">No contract · No setup fee · Month-to-month · Cancel anytime</p>
+        <p className="text-gray-600 text-xs mt-4">{t('for_agencies.bottom_note')}</p>
       </section>
 
     </PublicLayout>

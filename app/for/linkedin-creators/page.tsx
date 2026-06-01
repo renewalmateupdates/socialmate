@@ -1,24 +1,8 @@
-import type { Metadata } from 'next'
+'use client'
+
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
-
-export const metadata: Metadata = {
-  title: 'Free LinkedIn Post Scheduler — Schedule LinkedIn Posts Automatically | SocialMate',
-  description: 'Schedule LinkedIn posts in advance, free. Write once, publish automatically at the best time. No $99/month tool required. SocialMate\'s LinkedIn scheduler is free on all plans.',
-  openGraph: {
-    title: 'Free LinkedIn Post Scheduler — SocialMate',
-    description: 'Schedule LinkedIn posts automatically. Write once, publish at the right time. Free on every SocialMate plan — no credit card required.',
-    url: 'https://socialmate.studio/for/linkedin-creators',
-    images: [{ url: 'https://socialmate.studio/og-image.png', width: 1270, height: 760, alt: 'SocialMate LinkedIn Scheduler' }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Free LinkedIn Post Scheduler — SocialMate',
-    description: 'Schedule LinkedIn posts automatically. Free on all plans — no per-post charges.',
-    images: ['https://socialmate.studio/og-image.png'],
-  },
-  alternates: { canonical: 'https://socialmate.studio/for/linkedin-creators' },
-}
+import { useI18n } from '@/contexts/I18nContext'
 
 const faqSchema = {
   '@context': 'https://schema.org',
@@ -227,6 +211,7 @@ const FAQ = [
 ]
 
 export default function LinkedInCreatorsPage() {
+  const { t } = useI18n()
   return (
     <PublicLayout>
       <script
@@ -236,38 +221,37 @@ export default function LinkedInCreatorsPage() {
 
       {/* ─── HERO ─── */}
       <section className="bg-black text-white py-24 px-6 text-center">
-        <p className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-4">LinkedIn scheduling</p>
+        <p className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-4">{t('for_linkedin.api_badge')}</p>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-3xl mx-auto mb-6">
-          Schedule LinkedIn posts<br />
-          <span className="text-blue-400">without paying $99/month.</span>
+          {t('for_linkedin.hero_title_1')}<br />
+          <span className="text-blue-400">{t('for_linkedin.hero_title_2')}</span>
         </h1>
         <p className="text-gray-300 max-w-xl mx-auto text-base leading-relaxed mb-8">
-          Write your LinkedIn content in advance and let SocialMate publish it at the right time —
-          automatically, through LinkedIn&apos;s official API. Free on every plan.
+          {t('for_linkedin.hero_desc')}
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
           <Link
             href="/signup"
             className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-8 py-4 rounded-2xl transition-all text-base w-full sm:w-auto text-center"
           >
-            Connect LinkedIn free →
+            {t('for_linkedin.hero_cta_primary')}
           </Link>
           <Link
             href="/accounts"
             className="border border-white/20 text-white font-semibold px-6 py-4 rounded-2xl hover:bg-white/5 transition-all text-sm w-full sm:w-auto text-center"
           >
-            Already have an account? Connect →
+            {t('for_linkedin.hero_cta_secondary')}
           </Link>
         </div>
-        <p className="text-gray-500 text-xs mt-4">No credit card · Official LinkedIn API · Free forever</p>
+        <p className="text-gray-500 text-xs mt-4">{t('for_linkedin.hero_note')}</p>
       </section>
 
       {/* ─── BEFORE / AFTER ─── */}
       <section className="bg-gray-950 text-white py-20 px-6">
         <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 text-center">The LinkedIn creator problem</p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 text-center">{t('for_linkedin.pain_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
-            Stop opening LinkedIn cold every morning.
+            {t('for_linkedin.pain_title')}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {PAIN_POINTS.map((p, i) => (
@@ -275,11 +259,11 @@ export default function LinkedInCreatorsPage() {
                 <div className="text-2xl mb-4">{p.icon}</div>
                 <div className="space-y-3">
                   <div className="bg-red-950/40 border border-red-900/30 rounded-xl p-3">
-                    <p className="text-xs font-bold text-red-400 uppercase tracking-widest mb-1">Before</p>
+                    <p className="text-xs font-bold text-red-400 uppercase tracking-widest mb-1">{t('for_linkedin.pain_before_label')}</p>
                     <p className="text-sm text-gray-300">{p.before}</p>
                   </div>
                   <div className="bg-green-950/40 border border-green-900/30 rounded-xl p-3">
-                    <p className="text-xs font-bold text-green-400 uppercase tracking-widest mb-1">After</p>
+                    <p className="text-xs font-bold text-green-400 uppercase tracking-widest mb-1">{t('for_linkedin.pain_after_label')}</p>
                     <p className="text-sm text-gray-300">{p.after}</p>
                   </div>
                 </div>
@@ -292,9 +276,9 @@ export default function LinkedInCreatorsPage() {
       {/* ─── FEATURES ─── */}
       <section className="bg-gray-900 text-white py-20 px-6">
         <div className="max-w-5xl mx-auto">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 text-center">What you get</p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 text-center">{t('for_linkedin.features_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
-            Everything a LinkedIn creator needs.
+            {t('for_linkedin.features_title')}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {FEATURES.map((f) => (
@@ -320,9 +304,9 @@ export default function LinkedInCreatorsPage() {
       {/* ─── PLATFORMS ─── */}
       <section className="bg-[#0a0a0a] text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">All your platforms</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">LinkedIn + 6 more. All from one place.</h2>
-          <p className="text-gray-400 text-sm mb-10">Schedule to all of them from one compose window — free.</p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_linkedin.platforms_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_linkedin.platforms_title')}</h2>
+          <p className="text-gray-400 text-sm mb-10">{t('for_linkedin.platforms_desc')}</p>
           <div className="flex flex-wrap justify-center gap-3 mb-12">
             {LIVE_PLATFORMS.map((p) => (
               <div
@@ -337,7 +321,7 @@ export default function LinkedInCreatorsPage() {
                 <span>{p.name}</span>
                 <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${
                   p.highlight ? 'bg-blue-500/20 text-blue-300' : 'bg-green-950 text-green-400'
-                }`}>{p.note}</span>
+                }`}>{p.highlight ? t('for_linkedin.platforms_new_badge') : t('for_linkedin.platforms_live_badge')}</span>
               </div>
             ))}
           </div>
@@ -347,19 +331,19 @@ export default function LinkedInCreatorsPage() {
       {/* ─── COMPARISON ─── */}
       <section className="bg-gray-950 text-white py-20 px-6">
         <div className="max-w-3xl mx-auto">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 text-center">How we compare</p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 text-center">{t('for_linkedin.comparison_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-10">
-            Why pay $99/month for LinkedIn scheduling?
+            {t('for_linkedin.comparison_title')}
           </h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-white/10">
-                  <th className="text-left py-3 pr-4 text-gray-400 font-semibold">Tool</th>
-                  <th className="text-center py-3 px-3 text-gray-400 font-semibold">Price</th>
-                  <th className="text-center py-3 px-3 text-gray-400 font-semibold">LinkedIn</th>
-                  <th className="text-center py-3 px-3 text-gray-400 font-semibold">Free plan</th>
-                  <th className="text-center py-3 px-3 text-gray-400 font-semibold">AI tools</th>
+                  <th className="text-left py-3 pr-4 text-gray-400 font-semibold">{t('for_linkedin.comparison_col_tool')}</th>
+                  <th className="text-center py-3 px-3 text-gray-400 font-semibold">{t('for_linkedin.comparison_col_price')}</th>
+                  <th className="text-center py-3 px-3 text-gray-400 font-semibold">{t('for_linkedin.comparison_col_linkedin')}</th>
+                  <th className="text-center py-3 px-3 text-gray-400 font-semibold">{t('for_linkedin.comparison_col_platforms')}</th>
+                  <th className="text-center py-3 px-3 text-gray-400 font-semibold">{t('for_linkedin.comparison_col_ai')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -383,9 +367,9 @@ export default function LinkedInCreatorsPage() {
       {/* ─── PRICING ─── */}
       <section className="bg-gray-900 text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Pricing</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">LinkedIn scheduling. Free forever.</h2>
-          <p className="text-gray-400 text-sm mb-10">Upgrade when you want more AI credits or team seats — not to unlock LinkedIn.</p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_linkedin.pricing_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_linkedin.pricing_title')}</h2>
+          <p className="text-gray-400 text-sm mb-10">{t('for_linkedin.pricing_desc')}</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
             {PRICING.map((tier) => (
               <div key={tier.plan} className={`rounded-2xl border p-6 text-left ${
@@ -393,14 +377,14 @@ export default function LinkedInCreatorsPage() {
                   ? 'bg-blue-950 border-blue-500'
                   : 'bg-white/5 border-white/10'
               }`}>
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">{tier.plan}</p>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">{tier.highlight ? t('for_linkedin.pricing_most_popular') : tier.plan}</p>
                 <p className="text-3xl font-extrabold mb-0.5">{tier.price}</p>
                 <p className="text-xs text-gray-400 mb-4">{tier.period}</p>
                 <ul className="text-xs text-gray-300 space-y-2 mb-6">
                   <li>✓ {tier.credits}</li>
                   <li>✓ {tier.posts}</li>
                   <li>✓ {tier.seats}</li>
-                  <li>✓ All 7 live platforms</li>
+                  <li>✓ {t('for_linkedin.platforms_title')}</li>
                   <li>✓ LinkedIn scheduling</li>
                   <li>✓ AI hook + caption generator</li>
                 </ul>
@@ -423,8 +407,8 @@ export default function LinkedInCreatorsPage() {
       {/* ─── FAQ ─── */}
       <section className="bg-gray-950 text-white py-20 px-6">
         <div className="max-w-2xl mx-auto">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 text-center">FAQ</p>
-          <h2 className="text-2xl font-extrabold text-center mb-10">LinkedIn scheduler questions</h2>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 text-center">{t('for_linkedin.faq_eyebrow')}</p>
+          <h2 className="text-2xl font-extrabold text-center mb-10">{t('for_linkedin.faq_title')}</h2>
           <div className="space-y-4">
             {FAQ.map((item) => (
               <div key={item.q} className="bg-white/5 border border-white/10 rounded-2xl p-5">
@@ -439,22 +423,18 @@ export default function LinkedInCreatorsPage() {
       {/* ─── CTA ─── */}
       <section className="bg-black text-white py-20 px-6 text-center">
         <h2 className="text-3xl sm:text-4xl font-extrabold mb-4">
-          Start scheduling LinkedIn posts today.
+          {t('for_linkedin.bottom_title')}
         </h2>
         <p className="text-gray-400 text-base max-w-xl mx-auto mb-8">
-          Free forever. Official LinkedIn API. No credit card required.
-          Connect your account and schedule your first post in under 2 minutes.
+          {t('for_linkedin.bottom_desc')}
         </p>
         <Link
           href="/signup"
           className="inline-block bg-blue-600 hover:bg-blue-500 text-white font-bold px-10 py-4 rounded-2xl transition-all text-base"
         >
-          Create free account →
+          {t('for_linkedin.bottom_cta')}
         </Link>
-        <p className="text-gray-600 text-xs mt-4">
-          Already have an account?{' '}
-          <Link href="/accounts" className="text-blue-400 hover:underline">Connect LinkedIn at /accounts →</Link>
-        </p>
+        <p className="text-gray-600 text-xs mt-4">{t('for_linkedin.bottom_note')}</p>
       </section>
 
     </PublicLayout>

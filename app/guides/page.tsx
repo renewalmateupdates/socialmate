@@ -1,18 +1,7 @@
-import type { Metadata } from 'next'
+'use client'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
-
-export const metadata: Metadata = {
-  title: "Gilgamesh's Guides — Free Business & Creator Playbooks",
-  description:
-    "Real-talk guides for solo builders, creators, and people starting from nothing. No fluff. No gatekeeping. Written by Joshua Bostic, founder of SocialMate.",
-  openGraph: {
-    title: "Gilgamesh's Guides — Free Playbooks for Real Builders",
-    description:
-      "Free, no-BS guides on starting a business, marketing from zero, and building with AI. From a bootstrapped solo founder who works a deli job and ships software at night.",
-    type: 'website',
-  },
-}
+import { useI18n } from '@/contexts/I18nContext'
 
 const GUIDES = [
   {
@@ -225,6 +214,7 @@ const GUIDES = [
 ]
 
 export default function GuidesHubPage() {
+  const { t } = useI18n()
   return (
     <PublicLayout>
       <main className="min-h-screen bg-[#0a0a0a] text-white">
@@ -232,19 +222,18 @@ export default function GuidesHubPage() {
         <section className="border-b border-[#1f1f1f] px-6 py-20 text-center">
           <div className="mx-auto max-w-3xl">
             <div className="mb-4 inline-block rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1 text-xs font-semibold uppercase tracking-widest text-amber-400">
-              Free. Always.
+              {t('guides_landing.free_badge')}
             </div>
             <h1 className="mb-6 text-4xl font-black leading-tight text-white md:text-6xl">
-              Gilgamesh&apos;s Guides
+              {t('guides_landing.title')}
             </h1>
             <p className="mb-4 text-xl leading-relaxed text-gray-300 md:text-2xl">
-              Real playbooks for people building from nothing.
+              {t('guides_landing.hero_tagline')}
             </p>
             <p className="mx-auto max-w-2xl text-base leading-relaxed text-gray-500">
-              Written by{' '}
-              <span className="text-amber-400">Joshua Bostic</span> — founder of SocialMate,
-              bootstrapped solo builder, works a deli job nights and weekends, ships software
-              at 2am. Everything in these guides is earned, not theorized.
+              {t('guides_landing.hero_desc_before')}{' '}
+              <span className="text-amber-400">Joshua Bostic</span>{' '}
+              {t('guides_landing.hero_desc_after')}
             </p>
           </div>
         </section>
@@ -254,24 +243,17 @@ export default function GuidesHubPage() {
           <div className="mx-auto max-w-3xl">
             <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-8">
               <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-amber-400">
-                Why these exist
+                {t('guides_landing.why_badge')}
               </p>
               <p className="mb-4 text-lg leading-relaxed text-gray-200">
-                When I started building, I had no mentor, no co-founder who stayed, no VC, no
-                network. I had a desktop, a WiFi connection, and a chip on my shoulder the size
-                of a city block.
+                {t('guides_landing.why_para1')}
               </p>
               <p className="mb-4 leading-relaxed text-gray-400">
-                I couldn&apos;t afford the $500 business courses. I didn&apos;t have a CTO friend. I
-                learned everything the hard way — by doing it wrong first, then figuring it
-                out. I watched free YouTube videos at 3am. I Googled everything. I read
-                Reddit threads from other broke founders. And eventually, I shipped something
-                real.
+                {t('guides_landing.why_para2')}
               </p>
               <p className="leading-relaxed text-gray-400">
-                These guides are everything I wish someone had handed me. No fluff. No
-                gatekeeping. No upsell at the end.{' '}
-                <span className="text-white">Just the door, wide open.</span>
+                {t('guides_landing.why_para3')}{' '}
+                <span className="text-white">{t('guides_landing.why_para3_highlight')}</span>
               </p>
             </div>
           </div>
@@ -291,11 +273,11 @@ export default function GuidesHubPage() {
                   </span>
                   {guide.available ? (
                     <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-400 border border-emerald-500/20">
-                      Available Now
+                      {t('guides_landing.available_now')}
                     </span>
                   ) : (
                     <span className="rounded-full bg-gray-800 px-3 py-1 text-xs font-semibold text-gray-500 border border-gray-700">
-                      Coming Soon
+                      {t('guides_landing.coming_soon')}
                     </span>
                   )}
                   <span className="text-xs text-gray-600">{guide.readTime}</span>
@@ -308,7 +290,7 @@ export default function GuidesHubPage() {
                 {guide.chapters.length > 0 && (
                   <div className="mb-6">
                     <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-gray-600">
-                      Chapters
+                      {t('guides_landing.chapters_label')}
                     </p>
                     <ul className="grid grid-cols-1 gap-1 sm:grid-cols-2">
                       {guide.chapters.map((ch, i) => (
@@ -337,7 +319,7 @@ export default function GuidesHubPage() {
                     href={guide.href}
                     className="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-6 py-3 text-sm font-bold text-black transition-colors hover:bg-amber-400"
                   >
-                    Read the Guide
+                    {t('guides_landing.read_guide_cta')}
                     <span>→</span>
                   </Link>
                 ) : (
@@ -345,7 +327,7 @@ export default function GuidesHubPage() {
                     disabled
                     className="inline-flex cursor-not-allowed items-center gap-2 rounded-xl border border-[#2a2a2a] bg-[#1a1a1a] px-6 py-3 text-sm font-bold text-gray-600"
                   >
-                    Coming Soon
+                    {t('guides_landing.coming_soon')}
                   </button>
                 )}
               </article>
@@ -358,47 +340,46 @@ export default function GuidesHubPage() {
           <div className="mx-auto max-w-3xl">
             <div className="mb-8 text-center">
               <div className="mb-3 text-4xl">☕</div>
-              <p className="mb-2 text-xs font-bold uppercase tracking-widest text-amber-400">Support the work</p>
+              <p className="mb-2 text-xs font-bold uppercase tracking-widest text-amber-400">{t('guides_landing.support_badge')}</p>
               <h2 className="mb-4 text-2xl font-black text-white">
-                These guides are free.<br />Your support keeps it that way.
+                {t('guides_landing.support_title')}
               </h2>
               <p className="mx-auto max-w-xl text-base leading-relaxed text-gray-400">
-                Written between deli shifts, with no publisher, no team, no budget — just the belief
-                that what wealthy families pass down at the dinner table shouldn&apos;t cost $997.
+                {t('guides_landing.support_desc')}
               </p>
             </div>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               {/* Support Joshua */}
               <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-7 text-center">
                 <div className="mb-3 text-3xl">👑</div>
-                <h3 className="mb-2 text-lg font-extrabold text-white">Support Joshua</h3>
+                <h3 className="mb-2 text-lg font-extrabold text-white">{t('guides_landing.support_joshua_title')}</h3>
                 <p className="mb-6 text-sm leading-relaxed text-gray-400">
-                  The fastest way to support this work is to use SocialMate. Every Pro or Agency subscriber directly funds more guides, more features, and more free resources.
+                  {t('guides_landing.support_joshua_desc')}
                 </p>
                 <Link
                   href="/pricing"
                   className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-6 py-3 text-sm font-bold text-black transition-colors hover:bg-amber-400"
                 >
-                  Try SocialMate Free →
+                  {t('guides_landing.try_socialmate_cta')}
                 </Link>
               </div>
               {/* Pay It Forward / donate */}
               <div className="rounded-2xl border border-rose-500/20 bg-rose-500/5 p-7 text-center">
                 <div className="mb-3 text-3xl">❤️</div>
-                <h3 className="mb-2 text-lg font-extrabold text-white">Pay It Forward</h3>
+                <h3 className="mb-2 text-lg font-extrabold text-white">{t('guides_landing.pay_forward_title')}</h3>
                 <p className="mb-6 text-sm leading-relaxed text-gray-400">
-                  100% of donations go to SM-Give — our community fund for creators who need a leg up. You&apos;re not just supporting a guide. You&apos;re opening the door for the next person.
+                  {t('guides_landing.pay_forward_desc')}
                 </p>
                 <Link
                   href="/give"
                   className="inline-flex items-center justify-center gap-2 rounded-xl border border-rose-500/40 bg-rose-500/15 px-6 py-3 text-sm font-bold text-rose-400 transition-colors hover:bg-rose-500/25"
                 >
-                  Donate via SM-Give →
+                  {t('guides_landing.donate_cta')}
                 </Link>
               </div>
             </div>
             <p className="mt-6 text-center text-xs text-gray-700">
-              No pressure. The guides are yours. If you got value and want to give back — that means everything.
+              {t('guides_landing.no_pressure')}
             </p>
           </div>
         </section>
@@ -407,25 +388,23 @@ export default function GuidesHubPage() {
         <section className="border-t border-[#1f1f1f] px-6 py-20 text-center">
           <div className="mx-auto max-w-2xl">
             <p className="mb-4 text-2xl font-black text-white">
-              Want more from Joshua?
+              {t('guides_landing.footer_cta_title')}
             </p>
             <p className="mb-8 leading-relaxed text-gray-500">
-              SocialMate is the tool he built while writing these guides — a full social
-              media OS for creators and businesses. Free plan, always. Because power to the
-              people isn&apos;t just a tagline.
+              {t('guides_landing.footer_cta_desc')}
             </p>
             <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
               <Link
                 href="/signup"
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-amber-500 px-8 py-3 font-bold text-black transition-colors hover:bg-amber-400"
               >
-                Try SocialMate Free
+                {t('guides_landing.try_socialmate_cta')}
               </Link>
               <Link
                 href="/gils-guide"
                 className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#2a2a2a] bg-[#111111] px-8 py-3 font-bold text-white transition-colors hover:border-amber-500/30"
               >
-                About Gilgamesh&apos;s Guide
+                {t('guides_landing.about_guide_cta')}
               </Link>
             </div>
           </div>
@@ -433,7 +412,7 @@ export default function GuidesHubPage() {
 
         <footer className="border-t border-[#1f1f1f] px-6 py-8 text-center">
           <p className="text-xs text-gray-700">
-            © Gilgamesh Enterprise LLC — Written by Joshua Bostic. All guides are free, forever.
+            {t('guides_landing.footer_copy')}
           </p>
         </footer>
       </main>

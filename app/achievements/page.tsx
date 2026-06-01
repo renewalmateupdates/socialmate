@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
+import { useI18n } from '@/contexts/I18nContext'
 
 const ACHIEVEMENTS = [
   { key: 'first_post',   icon: '🚀', label: 'First Post',       desc: 'Publish your first post',              reward: 0,   category: 'Posts'    },
@@ -24,6 +25,7 @@ const ACHIEVEMENTS = [
 type Earned = { achievement_key: string; earned_at: string; credits_awarded: number }
 
 export default function AchievementsPage() {
+  const { t } = useI18n()
   const [earned, setEarned]           = useState<Earned[]>([])
   const [postCount, setPostCount]     = useState(0)
   const [streakCount, setStreakCount] = useState(0)
@@ -119,16 +121,16 @@ export default function AchievementsPage() {
 
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-2xl font-extrabold tracking-tight mb-1">🏆 Achievements</h1>
-            <p className="text-sm text-gray-400 dark:text-gray-500">Earn badges and bonus credits by hitting milestones.</p>
+            <h1 className="text-2xl font-extrabold tracking-tight mb-1">🏆 {t('achievements.title')}</h1>
+            <p className="text-sm text-gray-400 dark:text-gray-500">{t('achievements.subtitle')}</p>
           </div>
 
           {/* Stats bar */}
           <div className="grid grid-cols-3 gap-4 mb-8">
             {[
-              { label: 'Earned',         value: `${earnedCount} / ${ACHIEVEMENTS.length}` },
-              { label: 'Credits earned', value: `${totalCreditsEarned}` },
-              { label: 'Current streak', value: `${streakCount} days` },
+              { label: t('achievements.stat_earned'),  value: `${earnedCount} / ${ACHIEVEMENTS.length}` },
+              { label: t('achievements.stat_credits'), value: `${totalCreditsEarned}` },
+              { label: t('achievements.stat_streak'),  value: `${streakCount} ${t('achievements.days')}` },
             ].map(s => (
               <div key={s.label} className="bg-surface border border-theme rounded-2xl p-4 text-center">
                 <p className="text-xl font-extrabold">{s.value}</p>
@@ -162,7 +164,7 @@ export default function AchievementsPage() {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 flex-wrap">
                             <p className={`text-sm font-bold ${isEarned ? '' : 'text-gray-500 dark:text-gray-400'}`}>{ach.label}</p>
-                            {isEarned && <span className="text-[10px] bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded font-bold">✓ Earned</span>}
+                            {isEarned && <span className="text-[10px] bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded font-bold">✓ {t('achievements.earned_badge')}</span>}
                             {ach.reward > 0 && <span className="text-[10px] bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 px-1.5 py-0.5 rounded font-bold">+{ach.reward} cr</span>}
                           </div>
                           <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{ach.desc}</p>
@@ -179,7 +181,7 @@ export default function AchievementsPage() {
                           )}
                           {isEarned && earnedEntry && (
                             <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-1">
-                              Earned {new Date(earnedEntry.earned_at).toLocaleDateString()}
+                              {t('achievements.earned_on')} {new Date(earnedEntry.earned_at).toLocaleDateString()}
                             </p>
                           )}
                         </div>
@@ -192,8 +194,8 @@ export default function AchievementsPage() {
           })}
 
           <div className="text-center pt-4 pb-8">
-            <p className="text-xs text-gray-400 dark:text-gray-500">Achievements are checked daily. Keep posting to unlock more! 🔥</p>
-            <Link href="/streak" className="text-xs text-amber-500 font-semibold mt-1 block hover:underline">View streak heatmap →</Link>
+            <p className="text-xs text-gray-400 dark:text-gray-500">{t('achievements.footer_note')}</p>
+            <Link href="/streak" className="text-xs text-amber-500 font-semibold mt-1 block hover:underline">{t('achievements.streak_link')}</Link>
           </div>
 
         </div>

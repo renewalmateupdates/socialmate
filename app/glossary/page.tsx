@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import PublicNav from '@/components/PublicNav'
 import PublicFooter from '@/components/PublicFooter'
+import { useI18n } from '@/contexts/I18nContext'
 
 const TERMS: { letter: string; term: string; definition: string; related?: string[] }[] = [
   // A
@@ -522,6 +523,7 @@ const jsonLd = {
 }
 
 export default function GlossaryPage() {
+  const { t } = useI18n()
   const [search, setSearch] = useState('')
 
   const filtered = useMemo(() => {
@@ -561,14 +563,13 @@ export default function GlossaryPage() {
         {/* Hero */}
         <div className="text-center mb-12">
           <p className="text-xs font-bold uppercase tracking-widest text-amber-400 mb-3">
-            Reference Guide
+            {t('glossary.eyebrow')}
           </p>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-white mb-4 leading-tight">
-            Social Media Glossary
+            {t('glossary.title')}
           </h1>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Every term you need to know — from algorithms and engagement rate to Voice DNA and
-            webhooks. Plain language. No fluff.
+            {t('glossary.subtitle')}
           </p>
         </div>
 
@@ -586,7 +587,7 @@ export default function GlossaryPage() {
           </svg>
           <input
             type="text"
-            placeholder="Search terms..."
+            placeholder={t('glossary.search_placeholder')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-12 pr-4 py-3 rounded-xl bg-gray-900 border border-gray-800 text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/60 text-sm transition-colors"
@@ -595,7 +596,7 @@ export default function GlossaryPage() {
             <button
               onClick={() => setSearch('')}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors text-lg leading-none"
-              aria-label="Clear search"
+              aria-label={t('glossary.search_clear_aria')}
             >
               ×
             </button>
@@ -630,12 +631,12 @@ export default function GlossaryPage() {
         {/* Terms */}
         {filtered.length === 0 ? (
           <div className="text-center py-16">
-            <p className="text-gray-500 text-lg">No terms match &ldquo;{search}&rdquo;</p>
+            <p className="text-gray-500 text-lg">{t('glossary.no_results', { search })}</p>
             <button
               onClick={() => setSearch('')}
               className="mt-4 text-amber-400 hover:text-amber-300 text-sm font-semibold transition-colors"
             >
-              Clear search
+              {t('glossary.search_clear_btn')}
             </button>
           </div>
         ) : (
@@ -660,7 +661,7 @@ export default function GlossaryPage() {
                       {item.related && item.related.length > 0 && (
                         <div className="mt-3 flex flex-wrap items-center gap-2">
                           <span className="text-xs text-gray-600 font-semibold uppercase tracking-wider">
-                            Related:
+                            {t('glossary.related_label')}
                           </span>
                           {item.related.map((rel) => {
                             const targetSlug = TERMS.find((t) => t.term === rel)
@@ -696,35 +697,38 @@ export default function GlossaryPage() {
         {/* Count badge */}
         {!search && (
           <p className="text-center text-gray-600 text-xs mt-10">
-            {TERMS.length} terms defined across {LETTERS.filter((l) => LETTER_SET.has(l)).length} letters
+            {t('glossary.terms_count', { count: TERMS.length, letters: LETTERS.filter((l) => LETTER_SET.has(l)).length })}
           </p>
         )}
         {search && filtered.length > 0 && (
           <p className="text-center text-gray-600 text-xs mt-10">
-            {filtered.length} result{filtered.length !== 1 ? 's' : ''} for &ldquo;{search}&rdquo;
+            {filtered.length === 1
+            ? t('glossary.results_count', { count: filtered.length, search })
+            : t('glossary.results_count_plural', { count: filtered.length, search })
+          }
           </p>
         )}
 
         {/* CTA */}
         <div className="mt-16 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-8 text-center">
           <p className="text-white font-bold text-lg mb-2">
-            Ready to put these terms into practice?
+            {t('glossary.cta_title')}
           </p>
           <p className="text-gray-400 text-sm mb-6">
-            Schedule posts, analyze performance, and grow your audience — all in one place.
+            {t('glossary.cta_subtitle')}
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/signup"
               className="px-6 py-3 rounded-xl bg-amber-500 text-black font-extrabold text-sm hover:bg-amber-400 transition-all"
             >
-              Try SocialMate free →
+              {t('glossary.cta_signup')}
             </Link>
             <Link
               href="/features"
               className="px-6 py-3 rounded-xl border border-gray-700 text-gray-300 font-semibold text-sm hover:border-gray-500 transition-all"
             >
-              See all features
+              {t('glossary.cta_features')}
             </Link>
           </div>
         </div>

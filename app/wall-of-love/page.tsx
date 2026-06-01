@@ -1,11 +1,7 @@
-import type { Metadata } from 'next'
+'use client'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
-
-export const metadata: Metadata = {
-  title: 'Wall of Love — SocialMate',
-  description: 'Real testimonials from creators, founders, and teams using SocialMate to grow their audience.',
-}
+import { useI18n } from '@/contexts/I18nContext'
 
 // Add real testimonials here as they come in. Each entry:
 // { name, handle, platform, quote, avatar (emoji or initials) }
@@ -31,6 +27,7 @@ const TESTIMONIALS: {
 const STAR = '★'
 
 export default function WallOfLove() {
+  const { t } = useI18n()
   const hasTestimonials = TESTIMONIALS.length > 0
 
   return (
@@ -39,12 +36,12 @@ export default function WallOfLove() {
 
         {/* Header */}
         <div className="text-center mb-14">
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Wall of Love</p>
+          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">{t('wall_of_love.badge')}</p>
           <h1 className="text-4xl font-extrabold tracking-tight mb-4">
-            Real people. Real results.
+            {t('wall_of_love.hero_title')}
           </h1>
           <p className="text-gray-500 text-sm max-w-lg mx-auto leading-relaxed">
-            What creators, founders, and teams are saying about SocialMate. No cherry-picking. Just the truth.
+            {t('wall_of_love.hero_desc')}
           </p>
         </div>
 
@@ -73,10 +70,9 @@ export default function WallOfLove() {
           /* Empty state — shows until real testimonials are added */
           <div className="text-center py-16 mb-10">
             <div className="text-6xl mb-6">🧡</div>
-            <p className="text-lg font-extrabold tracking-tight mb-3">The reviews are coming</p>
+            <p className="text-lg font-extrabold tracking-tight mb-3">{t('wall_of_love.empty_title')}</p>
             <p className="text-gray-400 dark:text-gray-500 text-sm max-w-md mx-auto leading-relaxed mb-8">
-              SocialMate soft-launched March 26, 2026. We&apos;re 30+ users in and building fast.
-              Real testimonials are on their way — check back soon.
+              {t('wall_of_love.empty_desc')}
             </p>
             <div className="flex items-center justify-center gap-2 mb-6">
               <div className="flex -space-x-1.5">
@@ -87,7 +83,7 @@ export default function WallOfLove() {
                 ))}
               </div>
               <p className="text-sm text-gray-500 dark:text-gray-400">
-                <span className="font-bold text-gray-700 dark:text-gray-300">30+</span> creators already using SocialMate
+                <span className="font-bold text-gray-700 dark:text-gray-300">30+</span> {t('wall_of_love.creators_using')}
               </p>
             </div>
           </div>
@@ -95,20 +91,19 @@ export default function WallOfLove() {
 
         {/* CTA */}
         <div className="bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-3xl p-8 text-center">
-          <p className="text-base font-extrabold tracking-tight mb-2">Are you a SocialMate user?</p>
+          <p className="text-base font-extrabold tracking-tight mb-2">{t('wall_of_love.cta_title')}</p>
           <p className="text-gray-400 dark:text-gray-500 text-sm mb-6 leading-relaxed">
-            If SocialMate has made your content life easier, we&apos;d love to hear about it.
-            A one-liner is enough — just honest words.
+            {t('wall_of_love.cta_desc')}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <a
               href="mailto:hey@socialmate.studio?subject=SocialMate%20testimonial&body=Hi%20Joshua%2C%0A%0AHere%27s%20my%20honest%20take%20on%20SocialMate%3A%0A%0A"
               className="px-6 py-3 bg-black text-white text-sm font-bold rounded-xl hover:opacity-80 transition-all">
-              Send a testimonial →
+              {t('wall_of_love.send_testimonial_cta')}
             </a>
             <Link href="/signup"
               className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-xl hover:border-gray-400 transition-all text-gray-600 dark:text-gray-400">
-              Try SocialMate free →
+              {t('wall_of_love.try_free_cta')}
             </Link>
           </div>
         </div>

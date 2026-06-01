@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import Link from 'next/link'
+import { useI18n } from '@/contexts/I18nContext'
 
 const PLATFORM_ICONS: Record<string, string> = {
   bluesky:  '🦋',
@@ -33,6 +34,7 @@ interface ZenithStats {
 }
 
 export default function ZenithPage() {
+  const { t } = useI18n()
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -117,8 +119,8 @@ export default function ZenithPage() {
 
   if (!user || !stats) return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-950 text-white gap-4">
-      <p className="text-xl font-bold">Sign in to see your ZENITH</p>
-      <a href="/login?redirect=/zenith" className="px-6 py-3 bg-amber-500 text-black font-bold rounded-xl">Sign in</a>
+      <p className="text-xl font-bold">{t('zenith.sign_in_prompt')}</p>
+      <a href="/login?redirect=/zenith" className="px-6 py-3 bg-amber-500 text-black font-bold rounded-xl">{t('zenith.sign_in_btn')}</a>
     </div>
   )
 
@@ -130,9 +132,9 @@ export default function ZenithPage() {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <p className="text-amber-400 text-xs font-bold uppercase tracking-widest mb-2">Your Glow Across the Web</p>
+          <p className="text-amber-400 text-xs font-bold uppercase tracking-widest mb-2">{t('zenith.subtitle')}</p>
           <h1 className="text-4xl font-extrabold tracking-tight mb-2">ZENITH</h1>
-          <p className="text-gray-400 text-sm">Your creator presence, distilled. Share it anywhere.</p>
+          <p className="text-gray-400 text-sm">{t('zenith.tagline')}</p>
         </div>
 
         {/* The Card */}
@@ -148,7 +150,7 @@ export default function ZenithPage() {
               </div>
               <div>
                 <p className="text-xl font-extrabold">{stats.displayName}</p>
-                <p className="text-xs text-gray-500">Creator since {joinedYear}</p>
+                <p className="text-xs text-gray-500">{t('zenith.creator_since')} {joinedYear}</p>
               </div>
             </div>
           </div>
@@ -156,9 +158,9 @@ export default function ZenithPage() {
           {/* Stats grid */}
           <div className="grid grid-cols-3 gap-3 mb-6">
             {[
-              { label: 'Posts', value: stats.totalPosts.toLocaleString() },
-              { label: 'Day Streak', value: stats.streak },
-              { label: 'Badges', value: stats.achievements },
+              { label: t('zenith.stat_posts'), value: stats.totalPosts.toLocaleString() },
+              { label: t('zenith.stat_streak'), value: stats.streak },
+              { label: t('zenith.stat_badges'), value: stats.achievements },
             ].map(s => (
               <div key={s.label} className="bg-black/20 rounded-2xl p-3 text-center">
                 <p className="text-2xl font-extrabold text-amber-400">{s.value}</p>
@@ -170,7 +172,7 @@ export default function ZenithPage() {
           {/* Platforms */}
           {stats.platforms.length > 0 && (
             <div className="mb-6">
-              <p className="text-xs text-gray-500 font-bold uppercase tracking-wide mb-2">Active on</p>
+              <p className="text-xs text-gray-500 font-bold uppercase tracking-wide mb-2">{t('zenith.active_on')}</p>
               <div className="flex flex-wrap gap-2">
                 {stats.platforms.map(p => (
                   <span key={p} className={`text-xs font-bold px-3 py-1.5 rounded-full border ${PLATFORM_COLORS[p] ?? 'bg-gray-800 text-gray-400 border-gray-700'}`}>
@@ -184,7 +186,7 @@ export default function ZenithPage() {
           {/* Top post preview */}
           {stats.topPost && (
             <div className="bg-black/20 rounded-2xl p-4">
-              <p className="text-xs text-gray-500 font-bold uppercase tracking-wide mb-2">Latest post</p>
+              <p className="text-xs text-gray-500 font-bold uppercase tracking-wide mb-2">{t('zenith.latest_post')}</p>
               <p className="text-sm text-gray-300 leading-relaxed line-clamp-3">{stats.topPost.content}</p>
             </div>
           )}
@@ -202,7 +204,7 @@ export default function ZenithPage() {
 
         {/* Share section */}
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 mb-6">
-          <p className="text-sm font-bold mb-3">Share your ZENITH</p>
+          <p className="text-sm font-bold mb-3">{t('zenith.share_title')}</p>
           <div className="flex items-center gap-2">
             <div className="flex-1 bg-gray-800 rounded-xl px-3 py-2.5 text-xs text-gray-400 font-mono truncate">
               {cardUrl}
@@ -211,10 +213,10 @@ export default function ZenithPage() {
               onClick={copyLink}
               className={`px-4 py-2.5 text-xs font-bold rounded-xl transition-all flex-shrink-0 ${copied ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-black hover:bg-amber-400'}`}
             >
-              {copied ? '✓ Copied' : 'Copy link'}
+              {copied ? t('zenith.copied') : t('zenith.copy_link')}
             </button>
           </div>
-          <p className="text-xs text-gray-600 mt-2">Drop this in your Twitter/X bio, Bluesky profile, or Discord about section.</p>
+          <p className="text-xs text-gray-600 mt-2">{t('zenith.share_hint')}</p>
         </div>
 
         {/* Quick links */}
@@ -222,12 +224,12 @@ export default function ZenithPage() {
           <Link href="/achievements" className="bg-gray-900 border border-gray-800 rounded-2xl p-4 text-center hover:border-amber-500/30 transition-all">
             <p className="text-2xl mb-1">🏆</p>
             <p className="text-xs font-bold">Achievements</p>
-            <p className="text-xs text-gray-500 mt-0.5">{stats.achievements} earned</p>
+            <p className="text-xs text-gray-500 mt-0.5">{stats.achievements} {t('zenith.earned')}</p>
           </Link>
           <Link href="/challenge" className="bg-gray-900 border border-gray-800 rounded-2xl p-4 text-center hover:border-amber-500/30 transition-all">
             <p className="text-2xl mb-1">🔥</p>
-            <p className="text-xs font-bold">30-Day Challenge</p>
-            <p className="text-xs text-gray-500 mt-0.5">{stats.streak} day streak</p>
+            <p className="text-xs font-bold">{t('zenith.challenge_title')}</p>
+            <p className="text-xs text-gray-500 mt-0.5">{stats.streak} {t('zenith.day_streak')}</p>
           </Link>
         </div>
 

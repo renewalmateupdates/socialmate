@@ -3,41 +3,43 @@ import { useState } from 'react'
 import Link from 'next/link'
 import PublicNav from '@/components/PublicNav'
 import PublicFooter from '@/components/PublicFooter'
-
-const DISCOUNTS = [
-  {
-    id: 'nonprofit',
-    icon: '🤝',
-    label: 'Nonprofit Discount',
-    badge: '50% off Pro',
-    desc: 'For registered nonprofits, charities, and community organizations doing meaningful work.',
-    eligibility: [
-      '501(c)(3) or equivalent nonprofit status',
-      'Community organizations and NGOs',
-      'Faith-based organizations',
-      'Educational nonprofits',
-    ],
-    code: 'NONPROFIT50',
-    color: 'emerald',
-  },
-  {
-    id: 'student',
-    icon: '🎓',
-    label: 'Student Discount',
-    badge: '25% off Pro',
-    desc: 'For current students at accredited colleges, universities, and trade schools.',
-    eligibility: [
-      'Active enrollment at any accredited institution',
-      'Must have a valid .edu email address',
-      'Community college students welcome',
-      'Bootcamp students — reach out directly',
-    ],
-    code: 'STUDENT25',
-    color: 'blue',
-  },
-]
+import { useI18n } from '@/contexts/I18nContext'
 
 export default function DiscountPage() {
+  const { t } = useI18n()
+
+  const DISCOUNTS = [
+    {
+      id: 'nonprofit',
+      icon: '🤝',
+      label: t('discount.nonprofit_label'),
+      badge: t('discount.nonprofit_badge'),
+      desc: t('discount.nonprofit_desc'),
+      eligibility: [
+        t('discount.nonprofit_elig1'),
+        t('discount.nonprofit_elig2'),
+        t('discount.nonprofit_elig3'),
+        t('discount.nonprofit_elig4'),
+      ],
+      code: 'NONPROFIT50',
+      color: 'emerald',
+    },
+    {
+      id: 'student',
+      icon: '🎓',
+      label: t('discount.student_label'),
+      badge: t('discount.student_badge'),
+      desc: t('discount.student_desc'),
+      eligibility: [
+        t('discount.student_elig1'),
+        t('discount.student_elig2'),
+        t('discount.student_elig3'),
+        t('discount.student_elig4'),
+      ],
+      code: 'STUDENT25',
+      color: 'blue',
+    },
+  ]
   const [copied, setCopied] = useState<string | null>(null)
 
   const copy = (code: string) => {
@@ -53,12 +55,12 @@ export default function DiscountPage() {
       <main className="max-w-3xl mx-auto px-4 py-20">
 
         <div className="text-center mb-14">
-          <p className="text-amber-400 text-xs font-bold uppercase tracking-widest mb-3">Special Access</p>
+          <p className="text-amber-400 text-xs font-bold uppercase tracking-widest mb-3">{t('discount.badge')}</p>
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
-            Discounts for Those<br />Doing the Work
+            {t('discount.hero_title')}
           </h1>
           <p className="text-gray-400 text-lg max-w-xl mx-auto">
-            SocialMate is already the most affordable creator tool out there. These discounts are for people who need it most — no strings attached.
+            {t('discount.hero_desc')}
           </p>
         </div>
 
@@ -87,7 +89,7 @@ export default function DiscountPage() {
               </div>
 
               <div className="mb-6">
-                <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Who qualifies</p>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">{t('discount.who_qualifies')}</p>
                 <ul className="space-y-1.5">
                   {d.eligibility.map((e, i) => (
                     <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
@@ -100,7 +102,7 @@ export default function DiscountPage() {
 
               <div className="bg-gray-800 rounded-2xl p-4 flex items-center justify-between gap-4">
                 <div>
-                  <p className="text-xs text-gray-500 mb-0.5">Coupon code</p>
+                  <p className="text-xs text-gray-500 mb-0.5">{t('discount.coupon_code_label')}</p>
                   <p className="text-xl font-extrabold tracking-widest">{d.code}</p>
                 </div>
                 <button
@@ -112,20 +114,20 @@ export default function DiscountPage() {
                         ? 'bg-emerald-500 text-white hover:bg-emerald-400'
                         : 'bg-blue-500 text-white hover:bg-blue-400'
                   }`}>
-                  {copied === d.code ? '✓ Copied!' : 'Copy code'}
+                  {copied === d.code ? t('discount.copied') : t('discount.copy_code')}
                 </button>
               </div>
 
               <p className="text-xs text-gray-500 mt-3">
-                Apply this code at checkout on the <Link href="/pricing" className="underline hover:text-gray-300">pricing page</Link>. Honor system — we trust you.
+                {t('discount.apply_instructions_before')} <Link href="/pricing" className="underline hover:text-gray-300">{t('discount.pricing_link')}</Link>. {t('discount.honor_system')}
               </p>
             </div>
           ))}
         </div>
 
         <div className="bg-gray-900 border border-gray-800 rounded-3xl p-8 text-center">
-          <p className="text-xl font-extrabold mb-2">Not sure if you qualify?</p>
-          <p className="text-gray-400 text-sm mb-5">Reach out directly and we'll figure it out. We want to help.</p>
+          <p className="text-xl font-extrabold mb-2">{t('discount.unsure_title')}</p>
+          <p className="text-gray-400 text-sm mb-5">{t('discount.unsure_desc')}</p>
           <a
             href="mailto:hi@socialmate.studio"
             className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-black font-bold rounded-xl hover:bg-amber-400 transition-all">

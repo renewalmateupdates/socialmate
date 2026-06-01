@@ -1,24 +1,8 @@
-import type { Metadata } from 'next'
+'use client'
+
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
-
-export const metadata: Metadata = {
-  title: 'Social Media for Musicians & Independent Artists — SocialMate',
-  description: 'Free social media scheduler for independent musicians and artists. Schedule release campaigns, grow on Bluesky and Mastodon, post to TikTok, and let AI write your music captions — no label required.',
-  openGraph: {
-    title: 'Social Media for Musicians & Independent Artists — SocialMate',
-    description: 'Release campaigns, fan community posting, and AI-generated captions for indie musicians — all from one free dashboard.',
-    url: 'https://socialmate.studio/for/musicians',
-    images: [{ url: 'https://socialmate.studio/og-image.png', width: 1270, height: 760, alt: 'SocialMate for Musicians' }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Social Media for Musicians & Independent Artists — SocialMate',
-    description: 'Schedule music content to 7 platforms. Free forever or $5/month.',
-    images: ['https://socialmate.studio/og-image.png'],
-  },
-  alternates: { canonical: 'https://socialmate.studio/for/musicians' },
-}
+import { useI18n } from '@/contexts/I18nContext'
 
 const LIVE_PLATFORMS = [
   { name: 'Bluesky',    icon: '🦋', note: 'Live' },
@@ -172,6 +156,7 @@ const faqJsonLd = {
 }
 
 export default function MusiciansPage() {
+  const { t } = useI18n()
   return (
     <PublicLayout>
       <script
@@ -181,45 +166,43 @@ export default function MusiciansPage() {
 
       {/* ─── HERO ─── */}
       <section className="bg-black text-white py-24 px-6 text-center">
-        <p className="text-xs font-bold text-purple-400 uppercase tracking-widest mb-4">Built for independent musicians &amp; artists</p>
+        <p className="text-xs font-bold text-purple-400 uppercase tracking-widest mb-4">{t('for_musicians.eyebrow')}</p>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-3xl mx-auto mb-6">
-          Build your fanbase.<br />
-          <span className="text-purple-400">Without a label telling you how.</span>
+          {t('for_musicians.hero_title_1')}<br />
+          <span className="text-purple-400">{t('for_musicians.hero_title_2')}</span>
         </h1>
         <p className="text-gray-300 max-w-xl mx-auto text-base leading-relaxed mb-8">
-          Schedule your release campaigns, grow on Bluesky and Mastodon where indie fans actually are,
-          and let AI write your captions — all for free. What major artists pay teams for,
-          you get for $5/month.
+          {t('for_musicians.hero_desc')}
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
           <Link href="/signup"
             className="bg-purple-500 hover:bg-purple-400 text-white font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
-            Start free — no credit card →
+            {t('for_musicians.hero_cta_primary')}
           </Link>
           <Link href="/pricing"
             className="border border-gray-700 hover:border-gray-400 text-gray-300 hover:text-white font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
-            See pricing
+            {t('for_musicians.hero_cta_secondary')}
           </Link>
         </div>
-        <p className="text-gray-500 text-xs mt-4">Free forever · 7 live platforms · No credit card required</p>
+        <p className="text-gray-500 text-xs mt-4">{t('for_musicians.hero_note')}</p>
       </section>
 
       {/* ─── PAIN POINTS ─── */}
       <section className="bg-gray-950 text-white py-20 px-6">
         <div className="max-w-4xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">The indie artist grind</p>
+          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_musicians.pain_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
-            You&apos;re the artist, manager,<br />and social media team all at once.
+            {t('for_musicians.pain_title')}
           </h2>
           <div className="space-y-5">
             {PAIN_POINTS.map((p, i) => (
               <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
                 <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-                  <p className="text-xs text-red-400 font-bold uppercase tracking-wide mb-2">Right now</p>
+                  <p className="text-xs text-red-400 font-bold uppercase tracking-wide mb-2">{t('for_musicians.pain_before_label')}</p>
                   <p className="text-sm text-gray-400 leading-relaxed">{p.before}</p>
                 </div>
                 <div className="bg-purple-950/40 border border-purple-800/50 rounded-2xl p-5">
-                  <p className="text-xs text-purple-300 font-bold uppercase tracking-wide mb-2">With SocialMate</p>
+                  <p className="text-xs text-purple-300 font-bold uppercase tracking-wide mb-2">{t('for_musicians.pain_after_label')}</p>
                   <p className="text-sm text-white leading-relaxed">{p.icon} {p.after}</p>
                 </div>
               </div>
@@ -231,12 +214,12 @@ export default function MusiciansPage() {
       {/* ─── FEATURES ─── */}
       <section className="bg-black text-white py-20 px-6">
         <div className="max-w-5xl mx-auto">
-          <p className="text-center text-xs font-bold text-purple-400 uppercase tracking-widest mb-3">What you get</p>
+          <p className="text-center text-xs font-bold text-purple-400 uppercase tracking-widest mb-3">{t('for_musicians.features_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-3">
-            How SocialMate helps independent artists grow.
+            {t('for_musicians.features_title')}
           </h2>
           <p className="text-center text-gray-400 text-sm mb-12 max-w-xl mx-auto">
-            The tools your label would use — at indie artist prices.
+            {t('for_musicians.features_desc')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map((f, i) => (
@@ -262,27 +245,27 @@ export default function MusiciansPage() {
       {/* ─── PLATFORMS ─── */}
       <section className="bg-gray-950 text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Where your music spreads</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">7 platforms. One dashboard.</h2>
-          <p className="text-gray-400 text-sm mb-8">Schedule to all of these right now, for free.</p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_musicians.platforms_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_musicians.platforms_title')}</h2>
+          <p className="text-gray-400 text-sm mb-8">{t('for_musicians.platforms_desc')}</p>
           <div className="flex flex-wrap justify-center gap-3 mb-12">
             {LIVE_PLATFORMS.map((p) => (
               <div key={p.name}
                 className="flex items-center gap-2 bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5">
                 <span className="text-lg">{p.icon}</span>
                 <span className="text-sm font-bold">{p.name}</span>
-                <span className="text-xs bg-green-900 text-green-400 px-2 py-0.5 rounded-full font-bold">✓ Live</span>
+                <span className="text-xs bg-green-900 text-green-400 px-2 py-0.5 rounded-full font-bold">{t('for_musicians.platforms_live_badge')}</span>
               </div>
             ))}
           </div>
-          <h3 className="text-base font-extrabold text-gray-400 mb-4">Coming soon</h3>
+          <h3 className="text-base font-extrabold text-gray-400 mb-4">{t('for_musicians.platforms_coming_title')}</h3>
           <div className="flex flex-wrap justify-center gap-3">
             {COMING_PLATFORMS.map((p) => (
               <div key={p.name}
                 className="flex items-center gap-2 bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 opacity-60">
                 <span className="text-lg">{p.icon}</span>
                 <span className="text-sm font-bold text-gray-400">{p.name}</span>
-                <span className="text-xs bg-gray-800 text-gray-500 px-2 py-0.5 rounded-full font-bold">Soon</span>
+                <span className="text-xs bg-gray-800 text-gray-500 px-2 py-0.5 rounded-full font-bold">{t('for_musicians.platforms_coming_badge')}</span>
               </div>
             ))}
           </div>
@@ -292,9 +275,9 @@ export default function MusiciansPage() {
       {/* ─── PRICING ─── */}
       <section className="bg-black text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Pricing</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">What major labels pay teams for, you get for $5.</h2>
-          <p className="text-gray-400 text-sm mb-12">Free plan is real. Pro is $5. Agency for artist managers with multiple clients.</p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_musicians.pricing_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_musicians.pricing_title')}</h2>
+          <p className="text-gray-400 text-sm mb-12">{t('for_musicians.pricing_desc')}</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
             {PRICING.map((tier) => (
               <div key={tier.plan}
@@ -303,7 +286,7 @@ export default function MusiciansPage() {
                   : 'bg-gray-900 border-gray-800'
                 }`}>
                 {tier.highlight && (
-                  <p className="text-xs font-bold text-purple-300 uppercase tracking-widest mb-3">Most popular</p>
+                  <p className="text-xs font-bold text-purple-300 uppercase tracking-widest mb-3">{t('for_musicians.pricing_most_popular')}</p>
                 )}
                 <p className="text-sm font-extrabold mb-1">{tier.plan}</p>
                 <div className="flex items-end gap-1 mb-4">
@@ -325,15 +308,15 @@ export default function MusiciansPage() {
               </div>
             ))}
           </div>
-          <p className="text-gray-500 text-xs">No credit card required for the free plan. Cancel anytime on paid plans.</p>
+          <p className="text-gray-500 text-xs">{t('for_musicians.pricing_note')}</p>
         </div>
       </section>
 
       {/* ─── FAQ ─── */}
       <section className="bg-gray-950 text-white py-20 px-6">
         <div className="max-w-3xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Questions</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">Musician FAQ</h2>
+          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_musicians.faq_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">{t('for_musicians.faq_title')}</h2>
           <div className="space-y-6">
             {FAQ.map((item, i) => (
               <div key={i} className="border-b border-gray-800 pb-6 last:border-0">
@@ -348,17 +331,16 @@ export default function MusiciansPage() {
       {/* ─── BOTTOM CTA ─── */}
       <section className="bg-gradient-to-b from-purple-950 to-black text-white py-20 px-6 text-center">
         <h2 className="text-2xl sm:text-3xl font-extrabold mb-4">
-          The music is made. Now let the world hear it.
+          {t('for_musicians.bottom_title')}
         </h2>
         <p className="text-gray-400 text-sm mb-8 max-w-md mx-auto">
-          Start free. Schedule your next release campaign in the next hour.
-          No label, no budget, no problem.
+          {t('for_musicians.bottom_desc')}
         </p>
         <Link href="/signup"
           className="inline-block bg-purple-500 hover:bg-purple-400 text-white font-bold px-10 py-4 rounded-xl text-sm transition-all">
-          Create free account →
+          {t('for_musicians.bottom_cta')}
         </Link>
-        <p className="text-gray-600 text-xs mt-4">No credit card · No trial · Free forever on the free plan</p>
+        <p className="text-gray-600 text-xs mt-4">{t('for_musicians.bottom_note')}</p>
       </section>
 
     </PublicLayout>

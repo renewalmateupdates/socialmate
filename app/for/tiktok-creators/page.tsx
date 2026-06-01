@@ -1,24 +1,8 @@
-import type { Metadata } from 'next'
+'use client'
+
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
-
-export const metadata: Metadata = {
-  title: 'Free TikTok Scheduler for Creators — SocialMate',
-  description: 'Schedule TikTok videos to go live automatically. Production API approved. Free for all users — no per-post charges. Plus 5 other platforms in one dashboard.',
-  openGraph: {
-    title: 'Free TikTok Scheduler for Creators — SocialMate',
-    description: 'Schedule TikTok videos to go live automatically. Production API approved. Free for all users — no per-post charges. Plus 5 other platforms in one dashboard.',
-    url: 'https://socialmate.studio/for/tiktok-creators',
-    images: [{ url: 'https://socialmate.studio/og-image.png', width: 1270, height: 760, alt: 'SocialMate TikTok Scheduler' }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Free TikTok Scheduler for Creators — SocialMate',
-    description: 'Schedule TikTok videos automatically. Production API approved. Free on all plans — no per-post charges.',
-    images: ['https://socialmate.studio/og-image.png'],
-  },
-  alternates: { canonical: 'https://socialmate.studio/for/tiktok-creators' },
-}
+import { useI18n } from '@/contexts/I18nContext'
 
 const faqSchema = {
   '@context': 'https://schema.org',
@@ -173,6 +157,7 @@ const PRICING = [
 ]
 
 export default function TikTokCreatorsPage() {
+  const { t } = useI18n()
   return (
     <PublicLayout>
       <script
@@ -183,52 +168,50 @@ export default function TikTokCreatorsPage() {
       {/* ─── HERO ─── */}
       <section className="bg-[#0a0a0a] text-white py-24 px-6 text-center">
         <div className="inline-flex items-center gap-2 bg-green-950 border border-green-700 rounded-full px-4 py-1.5 text-xs font-bold text-green-400 mb-6">
-          🎵 TikTok Production API — Live
+          {t('for_tiktok.api_badge')}
         </div>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-3xl mx-auto mb-6">
-          Schedule TikTok. Post to 6 Platforms.{' '}
-          <span className="text-[#fe2c55]">Free.</span>
+          {t('for_tiktok.hero_title_1')}{' '}
+          <span className="text-[#fe2c55]">{t('for_tiktok.hero_title_2')}</span>
         </h1>
         <p className="text-gray-300 max-w-xl mx-auto text-base leading-relaxed mb-8">
-          TikTok&apos;s Production API is approved and live on SocialMate. Schedule videos
-          directly to TikTok — plus Bluesky, X, Mastodon, Discord, and Telegram — from one
-          dashboard. No per-post charges. Free on every plan.
+          {t('for_tiktok.hero_desc')}
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
           <Link
             href="/signup"
             className="bg-[#fe2c55] hover:opacity-90 text-white font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center"
           >
-            Connect TikTok Free →
+            {t('for_tiktok.hero_cta_primary')}
           </Link>
           <Link
             href="/pricing"
             className="border border-gray-700 hover:border-gray-400 text-gray-300 hover:text-white font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center"
           >
-            See pricing
+            {t('for_tiktok.hero_cta_secondary')}
           </Link>
         </div>
         <p className="text-gray-500 text-xs mt-4">
-          Free forever · Production API approved · No per-post charges
+          {t('for_tiktok.hero_note')}
         </p>
       </section>
 
       {/* ─── PAIN POINTS ─── */}
       <section className="bg-gray-950 text-white py-20 px-6">
         <div className="max-w-4xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Sound familiar?</p>
+          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_tiktok.pain_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
-            Manual TikTok posting is a full-time job
+            {t('for_tiktok.pain_title')}
           </h2>
           <div className="space-y-6">
             {PAIN_POINTS.map((p, i) => (
               <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
                 <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-                  <p className="text-xs text-red-400 font-bold uppercase tracking-wide mb-2">Without SocialMate</p>
+                  <p className="text-xs text-red-400 font-bold uppercase tracking-wide mb-2">{t('for_tiktok.pain_before_label')}</p>
                   <p className="text-sm text-gray-400 leading-relaxed">{p.before}</p>
                 </div>
                 <div className="bg-[#fe2c55]/10 border border-[#fe2c55]/30 rounded-2xl p-5">
-                  <p className="text-xs text-[#fe2c55] font-bold uppercase tracking-wide mb-2">With SocialMate</p>
+                  <p className="text-xs text-[#fe2c55] font-bold uppercase tracking-wide mb-2">{t('for_tiktok.pain_after_label')}</p>
                   <p className="text-sm text-white leading-relaxed">{p.icon} {p.after}</p>
                 </div>
               </div>
@@ -240,12 +223,12 @@ export default function TikTokCreatorsPage() {
       {/* ─── FEATURES ─── */}
       <section className="bg-[#0a0a0a] text-white py-20 px-6">
         <div className="max-w-5xl mx-auto">
-          <p className="text-center text-xs font-bold text-[#fe2c55] uppercase tracking-widest mb-3">What you get</p>
+          <p className="text-center text-xs font-bold text-[#fe2c55] uppercase tracking-widest mb-3">{t('for_tiktok.features_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-3">
-            Built for TikTok creators. Free for everyone.
+            {t('for_tiktok.features_title')}
           </h2>
           <p className="text-center text-gray-400 text-sm mb-12 max-w-xl mx-auto">
-            All TikTok scheduling features are included on the free plan. No gatekeeping.
+            {t('for_tiktok.features_desc')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map((f, i) => (
@@ -270,15 +253,12 @@ export default function TikTokCreatorsPage() {
       {/* ─── WHY FREE ─── */}
       <section className="bg-gradient-to-b from-[#fe2c55]/10 to-gray-950 text-white py-20 px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <p className="text-xs font-bold text-[#fe2c55] uppercase tracking-widest mb-3">Why it&apos;s free</p>
+          <p className="text-xs font-bold text-[#fe2c55] uppercase tracking-widest mb-3">{t('for_tiktok.why_free_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-6">
-            TikTok doesn&apos;t charge per post. We don&apos;t either.
+            {t('for_tiktok.why_free_title')}
           </h2>
           <p className="text-gray-300 text-sm leading-relaxed mb-8 max-w-2xl mx-auto">
-            X/Twitter charges $0.01 per tweet through their API, so SocialMate gates that behind
-            a Pro plan. TikTok&apos;s Content Posting API has no per-post fee — just Supabase
-            storage egress (~$0.09/GB). That cost is absorbed into the platform. You pay nothing
-            extra to schedule TikTok videos.
+            {t('for_tiktok.why_free_desc')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
             {[
@@ -299,9 +279,9 @@ export default function TikTokCreatorsPage() {
       {/* ─── PLATFORMS ─── */}
       <section className="bg-[#0a0a0a] text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">All your platforms</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">7 platforms live today</h2>
-          <p className="text-gray-400 text-sm mb-8">Schedule to all of them from one compose window — free.</p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_tiktok.platforms_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_tiktok.platforms_title')}</h2>
+          <p className="text-gray-400 text-sm mb-8">{t('for_tiktok.platforms_desc')}</p>
 
           <div className="flex flex-wrap justify-center gap-3 mb-12">
             {LIVE_PLATFORMS.map((p) => (
@@ -318,13 +298,13 @@ export default function TikTokCreatorsPage() {
                 <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${
                   p.highlight ? 'bg-[#fe2c55]/20 text-[#fe2c55]' : 'bg-green-900 text-green-400'
                 }`}>
-                  ✓ Live
+                  {t('for_tiktok.platforms_live_badge')}
                 </span>
               </div>
             ))}
           </div>
 
-          <h3 className="text-base font-extrabold text-gray-400 mb-4">Coming soon</h3>
+          <h3 className="text-base font-extrabold text-gray-400 mb-4">{t('for_tiktok.platforms_coming_title')}</h3>
           <div className="flex flex-wrap justify-center gap-3">
             {COMING_PLATFORMS.map((p) => (
               <div
@@ -333,7 +313,7 @@ export default function TikTokCreatorsPage() {
               >
                 <span className="text-lg">{p.icon}</span>
                 <span className="text-sm font-bold text-gray-400">{p.name}</span>
-                <span className="text-xs bg-gray-800 text-gray-500 px-2 py-0.5 rounded-full font-bold">Soon</span>
+                <span className="text-xs bg-gray-800 text-gray-500 px-2 py-0.5 rounded-full font-bold">{t('for_tiktok.platforms_coming_badge')}</span>
               </div>
             ))}
           </div>
@@ -343,12 +323,12 @@ export default function TikTokCreatorsPage() {
       {/* ─── PRICING ─── */}
       <section className="bg-gray-950 text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Pricing</p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_tiktok.pricing_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">
-            TikTok scheduling included on every plan.
+            {t('for_tiktok.pricing_title')}
           </h2>
           <p className="text-gray-400 text-sm mb-12">
-            Competitors charge $18+/month just for TikTok. SocialMate includes it free.
+            {t('for_tiktok.pricing_desc')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
             {PRICING.map((tier) => (
@@ -361,7 +341,7 @@ export default function TikTokCreatorsPage() {
                 }`}
               >
                 {tier.highlight && (
-                  <p className="text-xs font-bold text-[#fe2c55] uppercase tracking-widest mb-3">Most popular</p>
+                  <p className="text-xs font-bold text-[#fe2c55] uppercase tracking-widest mb-3">{t('for_tiktok.pricing_most_popular')}</p>
                 )}
                 <p className="text-sm font-extrabold mb-1">{tier.plan}</p>
                 <div className="flex items-end gap-1 mb-4">
@@ -371,10 +351,10 @@ export default function TikTokCreatorsPage() {
                 <ul className="text-xs text-gray-400 space-y-2 mb-6 text-left">
                   <li>✓ {tier.tiktok}</li>
                   <li>✓ {tier.credits}</li>
-                  <li>✓ All 7 live platforms</li>
-                  <li>✓ AI caption writer</li>
-                  <li>✓ TikTok Script Generator</li>
-                  <li>✓ Scheduling calendar</li>
+                  <li>✓ {t('for_tiktok.pricing_feature_platforms')}</li>
+                  <li>✓ {t('for_tiktok.pricing_feature_ai')}</li>
+                  <li>✓ {t('for_tiktok.pricing_feature_script')}</li>
+                  <li>✓ {t('for_tiktok.pricing_feature_calendar')}</li>
                 </ul>
                 <Link
                   href={tier.href}
@@ -389,15 +369,15 @@ export default function TikTokCreatorsPage() {
               </div>
             ))}
           </div>
-          <p className="text-gray-500 text-xs">No credit card required for the free plan. Cancel anytime on paid plans.</p>
+          <p className="text-gray-500 text-xs">{t('for_tiktok.pricing_note')}</p>
         </div>
       </section>
 
       {/* ─── FAQ ─── */}
       <section className="bg-[#0a0a0a] text-white py-20 px-6">
         <div className="max-w-3xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Questions</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">TikTok Scheduler FAQ</h2>
+          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_tiktok.faq_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">{t('for_tiktok.faq_title')}</h2>
           <div className="space-y-6">
             {[
               {
@@ -429,18 +409,18 @@ export default function TikTokCreatorsPage() {
       {/* ─── BOTTOM CTA ─── */}
       <section className="bg-gradient-to-br from-[#fe2c55]/20 via-gray-950 to-[#0a0a0a] text-white py-20 px-6 text-center">
         <h2 className="text-2xl sm:text-3xl font-extrabold mb-4">
-          The only free TikTok scheduler with a Production API.
+          {t('for_tiktok.bottom_title')}
         </h2>
         <p className="text-gray-400 text-sm mb-8 max-w-md mx-auto">
-          Join SocialMate and schedule TikTok videos automatically — plus 5 other platforms — starting today. No credit card. No per-post fees.
+          {t('for_tiktok.bottom_desc')}
         </p>
         <Link
           href="/signup"
           className="inline-block bg-[#fe2c55] hover:opacity-90 text-white font-bold px-10 py-4 rounded-xl text-sm transition-all"
         >
-          Connect TikTok Free →
+          {t('for_tiktok.bottom_cta')}
         </Link>
-        <p className="text-gray-600 text-xs mt-4">No credit card · Production API approved · Free forever on the free plan</p>
+        <p className="text-gray-600 text-xs mt-4">{t('for_tiktok.bottom_note')}</p>
       </section>
     </PublicLayout>
   )

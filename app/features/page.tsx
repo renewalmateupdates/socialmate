@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
+import { useI18n } from '@/contexts/I18nContext'
 
 const FEATURE_CATEGORIES = [
   {
@@ -311,9 +312,10 @@ const CREDIT_SUMMARY = [
 ]
 
 export default function Features() {
+  const { t } = useI18n()
   const [activeCategory, setActiveCategory] = useState('All')
-  const categories = ['All', ...FEATURE_CATEGORIES.map(c => c.category)]
-  const filtered = activeCategory === 'All'
+  const categories = [t('features.filter_all'), ...FEATURE_CATEGORIES.map(c => c.category)]
+  const filtered = activeCategory === t('features.filter_all')
     ? FEATURE_CATEGORIES
     : FEATURE_CATEGORIES.filter(c => c.category === activeCategory)
 
@@ -323,11 +325,10 @@ export default function Features() {
 
         {/* HEADER */}
         <div className="mb-10">
-          <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Full feature set</p>
-          <h1 className="text-4xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">Everything SocialMate can do</h1>
+          <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">{t('features.eyebrow')}</p>
+          <h1 className="text-4xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">{t('features.hero_title')}</h1>
           <p className="text-sm text-gray-500 dark:text-gray-400 max-w-2xl leading-relaxed">
-            Every tool, every feature, exactly what it does, and what it costs.
-            Scheduling is always free. AI features use credits so you stay in control of what you spend.
+            {t('features.hero_desc')}
           </p>
         </div>
 
@@ -335,11 +336,11 @@ export default function Features() {
         <div className="bg-black text-white rounded-2xl p-6 mb-10">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">AI Credit Quick Reference</p>
-              <p className="text-sm font-extrabold">15+ tools — 50 credits free every month</p>
+              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">{t('features.credit_ref_eyebrow')}</p>
+              <p className="text-sm font-extrabold">{t('features.credit_ref_title')}</p>
             </div>
             <Link href="/pricing" className="text-xs font-bold text-gray-400 hover:text-white transition-all flex-shrink-0">
-              See pricing →
+              {t('features.see_pricing')}
             </Link>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
@@ -353,7 +354,7 @@ export default function Features() {
               </div>
             ))}
           </div>
-          <p className="text-xs text-gray-500 mt-4">Credits refresh monthly. Unused credits bank — Free banks 75, Pro 750, Agency 3,000.</p>
+          <p className="text-xs text-gray-500 mt-4">{t('features.credits_bank_note')}</p>
         </div>
 
         {/* CATEGORY FILTER */}
@@ -406,11 +407,11 @@ export default function Features() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">What it does</p>
+                      <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">{t('features.what_it_does')}</p>
                       <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{f.what}</p>
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">How it works</p>
+                      <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">{t('features.how_it_works')}</p>
                       <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{f.how}</p>
                     </div>
                   </div>
@@ -425,9 +426,9 @@ export default function Features() {
           <div className="flex items-start gap-4">
             <span className="text-3xl">📱</span>
             <div>
-              <h3 className="text-sm font-extrabold mb-1 text-gray-900 dark:text-gray-100">Platform support — 16 total</h3>
+              <h3 className="text-sm font-extrabold mb-1 text-gray-900 dark:text-gray-100">{t('features.platform_note_title')}</h3>
               <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-3">
-                7 platforms are live right now. YouTube, Pinterest, and Reddit are coming very soon. 6 more are on the roadmap.
+                {t('features.platform_note_desc')}
               </p>
               <div className="flex flex-wrap gap-2">
                 {[
@@ -453,7 +454,7 @@ export default function Features() {
                     <span>{p.icon}</span>
                     <span>{p.name}</span>
                     {p.status === 'live' && <span className="font-bold">✓</span>}
-                    {p.status === 'soon' && <span className="text-blue-400 font-bold">Soon</span>}
+                    {p.status === 'soon' && <span className="text-blue-400 font-bold">{t('features.platform_soon')}</span>}
                   </div>
                 ))}
               </div>
@@ -466,25 +467,25 @@ export default function Features() {
           <div className="max-w-4xl mx-auto px-6 text-center">
             <p className="text-sm text-gray-500 dark:text-gray-400">
               ❤️ <span className="font-semibold text-gray-700 dark:text-gray-300">2% of every SocialMate subscription</span> goes to SM-Give — our charity initiative.{' '}
-              <a href="/give" className="text-amber-500 hover:text-amber-400 font-semibold transition-colors">Learn about SM-Give →</a>
+              <a href="/give" className="text-amber-500 hover:text-amber-400 font-semibold transition-colors">{t('features.sm_give_link')}</a>
             </p>
           </div>
         </div>
 
         {/* BOTTOM CTA */}
         <div className="bg-black rounded-2xl p-8 text-center text-white">
-          <h2 className="text-2xl font-extrabold mb-2">Ready to get started?</h2>
+          <h2 className="text-2xl font-extrabold mb-2">{t('features.cta_title')}</h2>
           <p className="text-sm text-gray-400 mb-6 max-w-md mx-auto">
-            All of this — free to start. No credit card required. 50 AI credits included free every month.
+            {t('features.cta_desc')}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link href="/signup"
               className="bg-white text-black text-sm font-bold px-6 py-3 rounded-xl hover:opacity-90 transition-all w-full sm:w-auto text-center">
-              Start for free →
+              {t('features.cta_primary')}
             </Link>
             <Link href="/pricing"
               className="border border-gray-600 text-white text-sm font-bold px-6 py-3 rounded-xl hover:border-gray-400 transition-all w-full sm:w-auto text-center">
-              Compare plans →
+              {t('features.cta_secondary')}
             </Link>
           </div>
         </div>
