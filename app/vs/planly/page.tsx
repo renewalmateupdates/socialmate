@@ -1,19 +1,10 @@
 'use client'
-﻿import type { Metadata } from 'next'
+
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 import { useI18n } from '@/contexts/I18nContext'
 
-export const metadata: Metadata = {
-  title: 'SocialMate vs Planly (2026) — Full Comparison',
-  description: "Planly starts at $15/month with no TikTok on the free plan. SocialMate is free forever with TikTok scheduling included, plus Discord, Telegram, and Mastodon that Planly doesn't support.",
-  openGraph: {
-    title: 'SocialMate vs Planly (2026)',
-    description: "Planly starts at $15/month with TikTok locked behind paid plans. SocialMate includes TikTok free — Production API approved — plus Discord, Telegram, and Mastodon.",
-    url: 'https://socialmate.studio/vs/planly',
-  },
-  alternates: { canonical: 'https://socialmate.studio/vs/planly' },
-}
+
 
 const COMPARISON = [
   { feature: 'Starting price',                   planly: '$15/month',              socialmate: '$0 — free forever'          },

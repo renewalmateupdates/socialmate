@@ -1,19 +1,10 @@
 'use client'
-﻿import type { Metadata } from 'next'
+
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 import { useI18n } from '@/contexts/I18nContext'
 
-export const metadata: Metadata = {
-  title: 'SocialMate vs Statusbrew (2026) — Full Comparison',
-  description: 'Statusbrew starts at $69/month with no free plan — built for enterprise teams and agencies. SocialMate is free forever with bulk scheduling, AI tools, and Discord/Bluesky included.',
-  openGraph: {
-    title:       'SocialMate vs Statusbrew (2026)',
-    description: 'Statusbrew charges $69/month minimum with no free plan and enterprise-focused features. SocialMate is free forever for creators and small teams.',
-    url:         'https://socialmate.studio/vs/statusbrew',
-  },
-  alternates: { canonical: 'https://socialmate.studio/vs/statusbrew' },
-}
+
 
 const COMPARISON = [
   { feature: 'Starting price',            statusbrew: '$69/month (Lite)',          socialmate: '$0 — free forever'       },

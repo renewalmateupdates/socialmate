@@ -1,19 +1,10 @@
 'use client'
-﻿import type { Metadata } from 'next'
+
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 import { useI18n } from '@/contexts/I18nContext'
 
-export const metadata: Metadata = {
-  title: 'SocialMate vs Postcron (2026) — Full Comparison',
-  description: 'Postcron starts at $8/month for basic scheduling. SocialMate starts at $0 with 7 platforms and 15+ AI tools. See the full comparison.',
-  openGraph: {
-    title:       'SocialMate vs Postcron (2026)',
-    description: 'Postcron charges $8–$79/month. SocialMate is free with 7 platforms and 15+ AI tools.',
-    url:         'https://socialmate.studio/vs/postcron',
-  },
-  alternates: { canonical: 'https://socialmate.studio/vs/postcron' },
-}
+
 
 const COMPARISON = [
   { feature: 'Starting price',         postcron: '$8/month',                socialmate: '$0 — free forever'       },

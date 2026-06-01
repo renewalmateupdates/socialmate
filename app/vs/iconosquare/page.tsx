@@ -1,19 +1,10 @@
 'use client'
-﻿import type { Metadata } from 'next'
+
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 import { useI18n } from '@/contexts/I18nContext'
 
-export const metadata: Metadata = {
-  title: 'SocialMate vs Iconosquare (2026) — Full Comparison',
-  description: 'Iconosquare starts at $49/month and is an analytics tool, not a scheduler. No free plan, no Discord/Telegram/Mastodon/Bluesky. SocialMate is free forever with 15+ AI tools and real scheduling.',
-  openGraph: {
-    title:       'SocialMate vs Iconosquare (2026)',
-    description: 'Iconosquare is an analytics-first platform starting at $49/month with no free plan. SocialMate is free forever with built-in scheduling, AI tools, and 7 platforms.',
-    url:         'https://socialmate.studio/vs/iconosquare',
-  },
-  alternates: { canonical: 'https://socialmate.studio/vs/iconosquare' },
-}
+
 
 const COMPARISON = [
   { feature: 'Starting price',              iconosquare: '$49/month (Solo plan)',         socialmate: '$0 — free forever'        },

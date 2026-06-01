@@ -1,19 +1,10 @@
 'use client'
-﻿import type { Metadata } from 'next'
+
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 import { useI18n } from '@/contexts/I18nContext'
 
-export const metadata: Metadata = {
-  title: 'SocialMate vs Fedica (2026) — Full Comparison',
-  description: 'Fedica is a Twitter/X-only analytics tool starting at $15/month with no multi-platform support. SocialMate is free forever with 7 platforms, AI tools, and scheduling built in.',
-  openGraph: {
-    title:       'SocialMate vs Fedica (2026)',
-    description: 'Fedica focuses on Twitter/X analytics. If you post on Bluesky, Discord, Instagram, or Mastodon — it cannot help. SocialMate covers 7 platforms free.',
-    url:         'https://socialmate.studio/vs/fedica',
-  },
-  alternates: { canonical: 'https://socialmate.studio/vs/fedica' },
-}
+
 
 const COMPARISON = [
   { feature: 'Starting price',            fedica: '$15/month (Tweepsmap)',        socialmate: '$0 — free forever'       },

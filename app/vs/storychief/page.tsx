@@ -1,19 +1,10 @@
 'use client'
-﻿import type { Metadata } from 'next'
+
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 import { useI18n } from '@/contexts/I18nContext'
 
-export const metadata: Metadata = {
-  title: 'SocialMate vs StoryChief (2026) — Full Comparison',
-  description: 'StoryChief charges $99/month for content marketing with no Discord or Telegram support. SocialMate gives you 7 platforms, 15+ AI tools, and autonomous content generation — starting free.',
-  openGraph: {
-    title:       'SocialMate vs StoryChief (2026)',
-    description: 'StoryChief is $99/month for content marketing. SocialMate is free — and covers 7 platforms including Discord and Telegram.',
-    url:         'https://socialmate.studio/vs/storychief',
-  },
-  alternates: { canonical: 'https://socialmate.studio/vs/storychief' },
-}
+
 
 const COMPARISON = [
   { feature: 'Starting price',               storychief: '$99/month',                 socialmate: '$0 — free forever'       },

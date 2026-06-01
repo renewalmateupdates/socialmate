@@ -1,19 +1,10 @@
 'use client'
-﻿import type { Metadata } from 'next'
+
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 import { useI18n } from '@/contexts/I18nContext'
 
-export const metadata: Metadata = {
-  title: 'SocialMate vs Tweepsmap (2026) — Full Comparison',
-  description: 'Tweepsmap costs $12+/month for X/Twitter analytics only — no scheduling. SocialMate schedules 7 platforms with analytics — free to start.',
-  openGraph: {
-    title:       'SocialMate vs Tweepsmap (2026)',
-    description: 'Tweepsmap is Twitter analytics only. SocialMate schedules 7 platforms and includes analytics — free to start.',
-    url:         'https://socialmate.studio/vs/tweepsmap',
-  },
-  alternates: { canonical: 'https://socialmate.studio/vs/tweepsmap' },
-}
+
 
 const COMPARISON = [
   { feature: 'Starting price',               competitor: '$12+/month',                 socialmate: '$0 — free forever'       },

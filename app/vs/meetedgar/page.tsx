@@ -1,19 +1,10 @@
 'use client'
-﻿import type { Metadata } from 'next'
+
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 import { useI18n } from '@/contexts/I18nContext'
 
-export const metadata: Metadata = {
-  title: 'SocialMate vs MeetEdgar (2026) — Full Comparison',
-  description: 'MeetEdgar starts at $29.99/month with no free plan. SocialMate has evergreen recycling free, supports Bluesky/Discord/Telegram/Mastodon, and costs $0 to start.',
-  openGraph: {
-    title:       'SocialMate vs MeetEdgar (2026)',
-    description: 'MeetEdgar charges $29.99/month and skips Bluesky, Discord, Telegram, and Mastodon. SocialMate does evergreen recycling free on 7 platforms.',
-    url:         'https://socialmate.studio/vs/meetedgar',
-  },
-  alternates: { canonical: 'https://socialmate.studio/vs/meetedgar' },
-}
+
 
 const COMPARISON = [
   { feature: 'Starting price',            meetedgar: '$29.99/month (Eddie)',    socialmate: '$0 — free forever'       },
