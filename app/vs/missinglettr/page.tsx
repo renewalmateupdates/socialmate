@@ -1,19 +1,10 @@
 'use client'
-﻿import type { Metadata } from 'next'
+
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 import { useI18n } from '@/contexts/I18nContext'
 
-export const metadata: Metadata = {
-  title: 'SocialMate vs MissingLettr (2026) — Full Comparison',
-  description: 'MissingLettr auto-creates drip campaigns but has no free plan and starts at $19/month. SocialMate is free forever with bulk scheduling, Discord/Bluesky/Telegram/Mastodon, and 15+ AI tools.',
-  openGraph: {
-    title:       'SocialMate vs MissingLettr (2026)',
-    description: 'MissingLettr charges $19/month with no free plan. Its drip campaign feature is clever but paywalled. SocialMate is free forever.',
-    url:         'https://socialmate.studio/vs/missinglettr',
-  },
-  alternates: { canonical: 'https://socialmate.studio/vs/missinglettr' },
-}
+
 
 const COMPARISON = [
   { feature: 'Starting price',            missinglettr: '$19/month (Solo)',             socialmate: '$0 — free forever'       },

@@ -1,19 +1,10 @@
 'use client'
-﻿import type { Metadata } from 'next'
+
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 import { useI18n } from '@/contexts/I18nContext'
 
-export const metadata: Metadata = {
-  title: 'SocialMate vs Plann (2026) — Full Comparison',
-  description: "Plann is an Instagram-centric visual planner at $13/mo+. SocialMate covers 7 platforms including Discord and Telegram, has 20+ AI tools, SOMA autonomous content, and a $0 free plan.",
-  openGraph: {
-    title:       'SocialMate vs Plann (2026)',
-    description: "Plann is built for Instagram feeds. SocialMate is a full Creator OS — Discord, Telegram, Bluesky, TikTok, SOMA, Enki, 20+ AI tools — starting at $0.",
-    url:         'https://socialmate.studio/vs/plann',
-  },
-  alternates: { canonical: 'https://socialmate.studio/vs/plann' },
-}
+
 
 const COMPARISON = [
   { feature: 'Starting price',              plann: '$13/mo (Solo)',               socialmate: '$0 — free forever'         },

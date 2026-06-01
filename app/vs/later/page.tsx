@@ -1,19 +1,10 @@
 'use client'
-﻿import type { Metadata } from 'next'
+
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 import { useI18n } from '@/contexts/I18nContext'
 
-export const metadata: Metadata = {
-  title: 'SocialMate vs Later (2026) — Full Comparison',
-  description: "Later's free plan is Instagram-only with 1 profile and 30 posts/month. SocialMate supports Discord, Bluesky, Telegram, and Mastodon for free — no Instagram lock-in.",
-  openGraph: {
-    title:       'SocialMate vs Later (2026)',
-    description: "Later free plan: Instagram-only, 1 profile, 30 posts/month. SocialMate: 7 platforms including Discord and Bluesky, unlimited posts, free.",
-    url:         'https://socialmate.studio/vs/later',
-  },
-  alternates: { canonical: 'https://socialmate.studio/vs/later' },
-}
+
 
 const COMPARISON = [
   { feature: 'Starting price',          later: '$18/month (Starter)',        socialmate: '$0 — free forever'       },

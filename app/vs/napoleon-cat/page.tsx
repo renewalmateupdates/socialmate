@@ -1,19 +1,10 @@
 'use client'
-﻿import type { Metadata } from 'next'
+
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 import { useI18n } from '@/contexts/I18nContext'
 
-export const metadata: Metadata = {
-  title: 'SocialMate vs NapoleonCat (2026) — Full Comparison',
-  description: 'NapoleonCat starts at $32/month for 1 user and 3 profiles. SocialMate starts at $0. See the full feature and pricing comparison.',
-  openGraph: {
-    title:       'SocialMate vs NapoleonCat (2026)',
-    description: 'NapoleonCat charges $32–$76+/month. SocialMate is free with 7 platforms and 15+ AI tools.',
-    url:         'https://socialmate.studio/vs/napoleon-cat',
-  },
-  alternates: { canonical: 'https://socialmate.studio/vs/napoleon-cat' },
-}
+
 
 const COMPARISON = [
   { feature: 'Starting price',         napoleoncat: '$32/month',             socialmate: '$0 — free forever'       },

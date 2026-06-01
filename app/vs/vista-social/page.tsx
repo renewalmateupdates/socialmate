@@ -1,19 +1,10 @@
 'use client'
-﻿import type { Metadata } from 'next'
+
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 import { useI18n } from '@/contexts/I18nContext'
 
-export const metadata: Metadata = {
-  title: 'SocialMate vs Vista Social (2026) — Full Comparison',
-  description: "Vista Social starts at $39/month with no permanent free plan. SocialMate is free forever with TikTok included, plus Discord, Telegram, and Mastodon that Vista Social doesn't support.",
-  openGraph: {
-    title: 'SocialMate vs Vista Social (2026)',
-    description: "Vista Social starts at $39/month — no free plan, just a 15-day trial. SocialMate is free forever, includes TikTok, Discord, Telegram, Mastodon, and 15+ AI tools.",
-    url: 'https://socialmate.studio/vs/vista-social',
-  },
-  alternates: { canonical: 'https://socialmate.studio/vs/vista-social' },
-}
+
 
 const COMPARISON = [
   { feature: 'Starting price',           vistasoical: '$39/month (3 profiles)',     socialmate: '$0 — free forever'       },
