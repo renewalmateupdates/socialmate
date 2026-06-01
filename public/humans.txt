@@ -1,0 +1,43 @@
+/* TEAM */
+Founder & CEO: Joshua Bostic
+Email: socialmate.updates@gmail.com
+Twitter/X: @socialmatehq
+Location: Indiana, USA
+Company: Gilgamesh Enterprise LLC (Wyoming LLC)
+
+/* THANKS */
+Built with Claude Code by Anthropic
+Powered by Google Gemini, Supabase, Vercel, Inngest, Stripe, Resend
+
+/* SITE */
+Last updated: June 1, 2026
+Launch date: March 26, 2026
+Official Product Hunt launch: April 1, 2026
+Language: English (primary), + 8 locales (es, de, fr, pt, ru, zh, ja, ko)
+Standards: HTML5, CSS3, TypeScript
+Components: React 19, Tailwind CSS v4
+Framework: Next.js 15 (App Router)
+Database: Supabase (PostgreSQL + RLS)
+Auth: Supabase Auth
+Background jobs: Inngest
+Payments: Stripe
+AI: Google Gemini API (gemini-2.5-flash)
+Deployment: Vercel
+Analytics: Vercel Analytics + Google Analytics 4
+Email: Resend
+Storage: Supabase Storage
+
+/* TECHNOLOGY */
+- Next.js 15 / React 19 / TypeScript / Tailwind CSS v4
+- Supabase PostgreSQL with Row Level Security on every table
+- Inngest for background job scheduling and cron functions
+- Stripe for subscriptions, one-time payments, and Stripe Connect
+- Google Gemini API for all AI content generation
+- Vercel for hosting with auto-deploy from GitHub
+- Resend for transactional and marketing email delivery
+
+/* MISSION */
+Power to the people. Tear down gatekeeping walls. Build the door.
+What competitors charge $99/month for, we give for $5 — or free.
+
+/* humanstxt.org */
