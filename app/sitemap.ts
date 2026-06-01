@@ -552,6 +552,27 @@ const BLOG_SLUGS = [
   'evergreen-content-strategy-2026',
   'social-media-content-calendar-template-2026',
   'how-to-batch-create-content',
+  // Batch 18 — June 2026
+  'how-to-schedule-tiktok-posts-without-getting-banned-2026',
+  'best-free-linkedin-scheduler-creators-professionals-2026',
+  'discord-announcement-scheduling-why-bots-arent-enough',
+  'how-soma-works-ai-writes-your-social-posts',
+  'free-hootsuite-alternative-that-actually-works-2026',
+  'how-to-build-content-system-that-runs-on-autopilot',
+  'honest-guide-social-media-analytics-small-business',
+  'why-your-link-in-bio-page-is-losing-you-money',
+  'bluesky-vs-mastodon-vs-twitter-where-to-post-2026',
+  'how-to-schedule-linkedin-posts-for-maximum-reach',
+  '7-ways-ai-is-changing-social-media-management-2026',
+  '5-dollar-social-media-tool-replaces-99-dollar-subscription',
+  'how-to-grow-on-discord-without-spending-hours-moderating',
+  'what-is-sm-give-why-we-built-charity-into-pricing',
+  'telegram-channel-growth-beginners-complete-guide',
+  'creator-monetization-stack-tip-jars-fan-subs',
+  'building-in-public-60-days-of-socialmate',
+  'how-to-repurpose-one-post-across-7-platforms',
+  'complete-guide-social-media-scheduling-for-streamers',
+  'socialmate-quote-calculator-estimate-posts',
 ]
 
 export default function sitemap(): MetadataRoute.Sitemap {
@@ -709,6 +730,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/vs/talkwalker`,     lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
     { url: `${base}/vs/feedhive`,       lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/vs/postpickr`,      lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/mailchimp`,      lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/tiktok-native`,  lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/substack`,       lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
   ]
 
   const blogPosts: MetadataRoute.Sitemap = BLOG_SLUGS.map(slug => ({
