@@ -1,19 +1,10 @@
 'use client'
-﻿import type { Metadata } from 'next'
+
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 import { useI18n } from '@/contexts/I18nContext'
 
-export const metadata: Metadata = {
-  title: 'SocialMate vs TweetHunter (2026) — Full Comparison',
-  description: 'TweetHunter costs $49/month for X/Twitter-only scheduling. SocialMate schedules X, LinkedIn, TikTok, Bluesky, Discord, Telegram, and Mastodon — starting free.',
-  openGraph: {
-    title:       'SocialMate vs TweetHunter (2026)',
-    description: 'TweetHunter is $49/month for X/Twitter alone. SocialMate is free — and covers 7 platforms including X and LinkedIn.',
-    url:         'https://socialmate.studio/vs/tweethunter',
-  },
-  alternates: { canonical: 'https://socialmate.studio/vs/tweethunter' },
-}
+
 
 const COMPARISON = [
   { feature: 'Starting price',               competitor: '$49/month',                    socialmate: '$0 — free forever'       },

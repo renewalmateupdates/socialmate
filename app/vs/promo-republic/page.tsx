@@ -1,19 +1,10 @@
 'use client'
-﻿import type { Metadata } from 'next'
+
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 import { useI18n } from '@/contexts/I18nContext'
 
-export const metadata: Metadata = {
-  title: 'SocialMate vs PromoRepublic (2026) — Full Comparison',
-  description: 'PromoRepublic costs $49/month with no TikTok or LinkedIn free tier. SocialMate covers 7 platforms including TikTok and LinkedIn — starting free.',
-  openGraph: {
-    title:       'SocialMate vs PromoRepublic (2026)',
-    description: 'PromoRepublic is $49/month with no TikTok. SocialMate is free — 7 platforms, TikTok free, LinkedIn live.',
-    url:         'https://socialmate.studio/vs/promo-republic',
-  },
-  alternates: { canonical: 'https://socialmate.studio/vs/promo-republic' },
-}
+
 
 const COMPARISON = [
   { feature: 'Starting price',               competitor: '$49/month',                  socialmate: '$0 — free forever'       },

@@ -1,19 +1,10 @@
 'use client'
-﻿import type { Metadata } from 'next'
+
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 import { useI18n } from '@/contexts/I18nContext'
 
-export const metadata: Metadata = {
-  title: 'SocialMate vs Mention (2026) — Full Comparison',
-  description: 'Mention charges $41/month for social listening with no post scheduling. SocialMate gives you scheduling across 7 platforms, competitor tracking, and AI tools — starting free.',
-  openGraph: {
-    title:       'SocialMate vs Mention (2026)',
-    description: 'Mention is $41/month for listening only. SocialMate schedules, monitors, and creates content across 7 platforms — free to start.',
-    url:         'https://socialmate.studio/vs/mention',
-  },
-  alternates: { canonical: 'https://socialmate.studio/vs/mention' },
-}
+
 
 const COMPARISON = [
   { feature: 'Starting price',               mention: '$41/month',                   socialmate: '$0 — free forever'       },

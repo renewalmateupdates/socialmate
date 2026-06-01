@@ -1,19 +1,10 @@
 'use client'
-﻿import type { Metadata } from 'next'
+
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 import { useI18n } from '@/contexts/I18nContext'
 
-export const metadata: Metadata = {
-  title: 'SocialMate vs TweetDeck (2026) — Full Comparison',
-  description: 'TweetDeck is X/Twitter-only and requires a paid X subscription. SocialMate supports 7 platforms for free. See the full comparison.',
-  openGraph: {
-    title:       'SocialMate vs TweetDeck (2026)',
-    description: 'TweetDeck is locked to X/Twitter and requires a paid subscription. SocialMate is free with 7 platforms and 15+ AI tools.',
-    url:         'https://socialmate.studio/vs/tweetdeck',
-  },
-  alternates: { canonical: 'https://socialmate.studio/vs/tweetdeck' },
-}
+
 
 const COMPARISON = [
   { feature: 'Starting price',         tweetdeck: '$8/month (X Premium)',  socialmate: '$0 — free forever'       },
