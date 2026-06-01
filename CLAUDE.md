@@ -8,7 +8,7 @@
 ## Who I Am
 
 **Joshua Bostic** — Founder & CEO, Gilgamesh Enterprise LLC (Wyoming LLC).
-Solo bootstrapped builder. Working a Walmart deli job + part-time HR. Building SocialMate nights and weekends.
+Solo bootstrapped builder. Working a tree care job (left Walmart deli June 2026) + part-time HR. Building SocialMate nights and weekends.
 Vision: Creator OS — the home base for any creator, streamer, business, or person who wants to build online.
 Mission: Power to the people. Tear down gatekeeping walls. Build the door.
 
@@ -624,6 +624,14 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **AI rate limiting** — 10 AI requests per minute per user. Returns 429 with retry-after header. Prevents accidental API abuse.
 - **Blog batch 12** — 55 posts on creator growth, platform strategy, and community. SQL in `supabase/blog_batch_12.sql`.
 
+**June 1, 2026 (PRs #461 + #462):**
+- **Full public site i18n** — Every public-facing page now properly translates when a user switches language. 74 namespaces, 9 locales (en/es/de/fr/pt/ru/zh/ja/ko), 141 files using useI18n(). Pages wired: /pricing, /faq, /glossary, /features, all 15 /for/* audience pages, all 76 /vs/* comparison pages, /affiliates, /give, /enterprise, /community, /zenith, /discount, /challenge, /achievements, /wall-of-love, /tiktok, /monetize, /blog, /guides, /about.
+- **t() interpolation support** — `translate()` in `lib/i18n.ts` now accepts optional `params?: Record<string, string | number>` and replaces `{placeholder}` tokens. `t('glossary.results_count', { count: 5, search: 'hashtag' })` now works everywhere.
+- **metadata + use client fix** — All /for/* (15) and /vs/* (76) pages that needed `'use client'` for hooks got new `layout.tsx` files to hold the `metadata` export. Correct Next.js 15 pattern. Zero `'use client'` + `export const metadata` conflicts remaining.
+- **PR #461** — full i18n implementation. **PR #462** — cherry-picked vs layout fix that missed the merge window. Both on main, build green.
+- **Metrics as of June 1, 2026** — 881 visitors, 2,242 page views, MRR $0, 31 users, 700+ published posts.
+- **PH 60-day maker comment posted** — updated the April 1 listing with what shipped.
+
 **May 31, 2026 (PR #459):**
 - **FCP performance sweep** — Vercel Speed Insights audit done. Dashboard (67 RES, 3.23s FCP) and Onboarding (70 RES, 4.28s FCP) had no `loading.tsx` anywhere in the app — client pages painted nothing visible while JS bundle loaded. Added `app/dashboard/loading.tsx` and `app/onboarding/loading.tsx` (animated skeletons). Dashboard loading spinner was `border-black` — invisible on dark mode backgrounds (anti-flash script sets dark class before hydration), causing browser to measure 3s+ FCP on painted-but-invisible content. Fixed to `border-amber-500`. Blog `[slug]` revalidate bumped 3600→86400 — hourly ISR cache expiry caused international CDN nodes (China 5.98s, Argentina 4.02s, France 3.59s) to hit US East origin. Blog index `revalidate = 86400` added — was SSR on every request (500-row Supabase query per page load). PR merged.
 
@@ -738,6 +746,8 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **Product Hunt follow-up** — "We've shipped 50+ features since launch." Target: June 1, 2026.
 
 ## Confirmed Done (stop asking about these)
+
+- ✅ **Full public site i18n (June 1, PRs #461 + #462)** — 74 namespaces, 9 locales, 141 files wired, all /for/ and /vs/ pages have layout.tsx for metadata, t() supports interpolation, build green. Never ask to wire public pages with i18n again.
 
 - ✅ **FCP performance sweep (May 31, PR #459)** — `loading.tsx` added to dashboard + onboarding. Dashboard spinner fixed (border-black → border-amber-500, was invisible on dark mode). Blog revalidate 3600→86400. Blog index revalidate added. Merged. Never ask to add loading skeletons or fix blog revalidate again.
 

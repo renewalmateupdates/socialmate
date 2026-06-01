@@ -292,7 +292,7 @@ Live for Pro+ users. Tip jar, fan subscriptions, and public creator pages — al
 
 ## Language Support
 
-SocialMate is fully internationalized. The public landing page is available in 9 languages with complete translations for all sections including hero, platform list, AI tools, feature grid, comparison table, bio link, guides, and final CTA:
+SocialMate is fully internationalized across every public-facing page. Pricing, FAQ, glossary, features, all audience pages, all 75+ comparison pages, and all misc public pages translate when a user switches language. The full app interior also translates. 74 namespaces, 9 locales, all validated in sync at build time:
 
 - English: https://socialmate.studio
 - Spanish: https://socialmate.studio/es
@@ -304,7 +304,7 @@ SocialMate is fully internationalized. The public landing page is available in 9
 - Japanese: https://socialmate.studio/ja
 - Korean: https://socialmate.studio/ko
 
-The full app (dashboard, compose, analytics, SOMA, Enki, etc.) also translates to all 9 languages via a language switcher in the sidebar. All locale files are validated in sync at build time.
+The full app (dashboard, compose, analytics, SOMA, Enki, etc.) also translates to all 9 languages via a language switcher in the sidebar.
 
 ## Comparisons (SocialMate vs Competitors)
 

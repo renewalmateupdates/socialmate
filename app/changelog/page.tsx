@@ -21,6 +21,15 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'June 1, 2026',
+    version: 'Full Site i18n — 9 Languages, Every Public Page',
+    changes: [
+      { type: 'New',      text: 'Full i18n across every public-facing page — 74 namespaces, 9 locales (en/es/de/fr/pt/ru/zh/ja/ko). Pricing, FAQ, glossary, features, all 15 audience pages, all 75 comparison pages, and 10+ misc public pages now translate when you switch language. Content translates, not just the nav.' },
+      { type: 'Improved', text: 't() interpolation support — the translate function now accepts optional params so strings like "X results for {search}" work correctly in all 9 languages.' },
+      { type: 'Fixed',    text: 'metadata + use client conflict resolved across all /for/* and /vs/* pages — metadata moved to per-route layout.tsx files, the correct Next.js 15 pattern. Zero conflicts remaining.' },
+    ],
+  },
+  {
     date: 'May 31, 2026',
     version: 'FCP Performance Fix — Dashboard, Onboarding, Blog',
     changes: [
