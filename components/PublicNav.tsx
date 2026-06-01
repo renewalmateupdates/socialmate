@@ -72,10 +72,16 @@ export default function PublicNav() {
   const handleSetLocale = (code: string) => {
     setLocale(code as Parameters<typeof setLocale>[0])
     setLangOpen(false)
-    // Navigate to the locale landing page when on the root or a locale page
     const isOnLocalePage = PUBLIC_LOCALE_PATHS.has(pathname) || localeFromPath(pathname) !== null
-    if (isOnLocalePage) {
-      router.push(code === 'en' ? '/' : `/${code}`)
+    if (code === 'en') {
+      // Switching to English: navigate to root only if on a locale page
+      // (if already on /pricing etc. the content is already English — no nav needed)
+      if (isOnLocalePage) router.push('/')
+    } else {
+      // Switching to ANY non-English locale: always navigate to the locale landing page.
+      // Prevents mixed-language UX (translated nav + English body) on pages that don't
+      // have full i18n: /pricing, /features, /faq, /for/*, /vs/*, /blog, etc.
+      router.push(`/${code}`)
     }
   }
 
