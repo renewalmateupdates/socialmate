@@ -1,24 +1,8 @@
-import type { Metadata } from 'next'
+'use client'
+
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
-
-export const metadata: Metadata = {
-  title: 'Free Social Media Tools for Video Creators — SocialMate',
-  description: 'Schedule TikTok videos, repurpose YouTube clips, share Twitch highlights — all from one free dashboard. GIF export, script generator, and 7 live platforms.',
-  openGraph: {
-    title: 'Free Social Media Tools for Video Creators — SocialMate',
-    description: 'Schedule TikTok videos, repurpose YouTube clips, share Twitch highlights — all from one free dashboard. GIF export, AI script generator, and 7 live platforms.',
-    url: 'https://socialmate.studio/for/video-creators',
-    images: [{ url: 'https://socialmate.studio/og-image.png', width: 1270, height: 760, alt: 'SocialMate for Video Creators' }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Free Social Media Tools for Video Creators — SocialMate',
-    description: 'Schedule TikTok videos, repurpose YouTube clips, share Twitch highlights — free.',
-    images: ['https://socialmate.studio/og-image.png'],
-  },
-  alternates: { canonical: 'https://socialmate.studio/for/video-creators' },
-}
+import { useI18n } from '@/contexts/I18nContext'
 
 const LIVE_PLATFORMS = [
   { name: 'TikTok',     icon: '🎵', note: 'Live — free', highlight: true  },
@@ -174,6 +158,7 @@ const faqSchema = {
 }
 
 export default function VideoCreatorsPage() {
+  const { t } = useI18n()
   return (
     <PublicLayout>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
@@ -181,50 +166,48 @@ export default function VideoCreatorsPage() {
       {/* ─── HERO ─── */}
       <section className="bg-black text-white py-24 px-6 text-center">
         <div className="inline-flex items-center gap-2 bg-[#fe2c55]/10 border border-[#fe2c55]/30 rounded-full px-4 py-1.5 text-xs font-bold text-[#fe2c55] mb-6 uppercase tracking-widest">
-          TikTok Production API — Live May 2026
+          {t('for_video.api_badge')}
         </div>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-3xl mx-auto mb-6">
-          One Dashboard for Every<br />
-          <span className="text-[#fe2c55]">Video Platform</span>
+          {t('for_video.hero_title_1')}<br />
+          <span className="text-[#fe2c55]">{t('for_video.hero_title_2')}</span>
         </h1>
         <p className="text-gray-300 max-w-xl mx-auto text-base leading-relaxed mb-8">
-          Schedule TikTok videos, repurpose YouTube clips, and share Twitch highlights
-          to all 7 live platforms in one click. AI script generator, GIF export, and Clips Studio
-          — free on every plan.
+          {t('for_video.hero_desc')}
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
           <Link
             href="/signup"
             className="bg-[#fe2c55] hover:bg-[#fe2c55]/80 text-white font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center"
           >
-            Start free — no credit card →
+            {t('for_video.hero_cta_primary')}
           </Link>
           <Link
             href="/accounts"
             className="border border-gray-700 hover:border-gray-400 text-gray-300 hover:text-white font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center"
           >
-            Connect TikTok
+            {t('for_video.hero_cta_secondary')}
           </Link>
         </div>
-        <p className="text-gray-500 text-xs mt-4">Free forever · TikTok live · Twitch OAuth · YouTube via channel URL</p>
+        <p className="text-gray-500 text-xs mt-4">{t('for_video.hero_note')}</p>
       </section>
 
       {/* ─── PAIN POINTS ─── */}
       <section className="bg-gray-950 text-white py-20 px-6">
         <div className="max-w-4xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Sound familiar?</p>
+          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_video.pain_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
-            The video posting grind is killing your time
+            {t('for_video.pain_title')}
           </h2>
           <div className="space-y-6">
             {PAIN_POINTS.map((p, i) => (
               <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
                 <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-                  <p className="text-xs text-red-400 font-bold uppercase tracking-wide mb-2">The problem</p>
+                  <p className="text-xs text-red-400 font-bold uppercase tracking-wide mb-2">{t('for_video.pain_before_label')}</p>
                   <p className="text-sm text-gray-400 leading-relaxed">{p.icon} {p.problem}</p>
                 </div>
                 <div className="bg-[#fe2c55]/10 border border-[#fe2c55]/20 rounded-2xl p-5">
-                  <p className="text-xs text-[#fe2c55] font-bold uppercase tracking-wide mb-2">With SocialMate</p>
+                  <p className="text-xs text-[#fe2c55] font-bold uppercase tracking-wide mb-2">{t('for_video.pain_after_label')}</p>
                   <p className="text-sm text-white leading-relaxed">{p.solution}</p>
                 </div>
               </div>
@@ -236,12 +219,12 @@ export default function VideoCreatorsPage() {
       {/* ─── FEATURES ─── */}
       <section className="bg-black text-white py-20 px-6">
         <div className="max-w-5xl mx-auto">
-          <p className="text-center text-xs font-bold text-[#fe2c55] uppercase tracking-widest mb-3">What you get</p>
+          <p className="text-center text-xs font-bold text-[#fe2c55] uppercase tracking-widest mb-3">{t('for_video.features_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-3">
-            Built for video creators. Free to start.
+            {t('for_video.features_title')}
           </h2>
           <p className="text-center text-gray-400 text-sm mb-12 max-w-xl mx-auto">
-            TikTok scheduling, Clips Studio, GIF export, and AI scripts — all on the free plan.
+            {t('for_video.features_desc')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map((f, i) => (
@@ -256,7 +239,7 @@ export default function VideoCreatorsPage() {
                 <div className="flex items-start justify-between mb-3">
                   <span className="text-2xl">{f.icon}</span>
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${f.badgeBg}`}>
-                    {f.badge}
+                    {f.live ? t('for_video.badge_live') : t('for_video.badge_soon')}
                   </span>
                 </div>
                 <h3 className={`text-sm font-extrabold mb-2 ${f.live ? f.accent : 'text-gray-500'}`}>
@@ -272,9 +255,9 @@ export default function VideoCreatorsPage() {
       {/* ─── PLATFORM GRID ─── */}
       <section className="bg-gradient-to-b from-gray-950 to-black text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Where your videos land</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">7 live platforms. All free.</h2>
-          <p className="text-gray-400 text-sm mb-8">Schedule to these platforms right now — no paywall, no trial.</p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_video.platforms_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_video.platforms_title')}</h2>
+          <p className="text-gray-400 text-sm mb-8">{t('for_video.platforms_desc')}</p>
 
           <div className="flex flex-wrap justify-center gap-3 mb-12">
             {LIVE_PLATFORMS.map((p) => (
@@ -295,13 +278,13 @@ export default function VideoCreatorsPage() {
                       : 'bg-green-900 text-green-400'
                   }`}
                 >
-                  {p.highlight ? '✓ New' : '✓ Live'}
+                  {p.highlight ? t('for_video.platforms_new_badge') : t('for_video.platforms_live_badge')}
                 </span>
               </div>
             ))}
           </div>
 
-          <h3 className="text-base font-extrabold text-gray-400 mb-4">In the pipeline</h3>
+          <h3 className="text-base font-extrabold text-gray-400 mb-4">{t('for_video.pipeline_title')}</h3>
           <div className="flex flex-wrap justify-center gap-3">
             {COMING_PLATFORMS.map((p) => (
               <div
@@ -310,7 +293,7 @@ export default function VideoCreatorsPage() {
               >
                 <span className="text-lg">{p.icon}</span>
                 <span className="text-sm font-bold text-gray-400">{p.name}</span>
-                <span className="text-xs bg-gray-800 text-gray-500 px-2 py-0.5 rounded-full font-bold">Soon</span>
+                <span className="text-xs bg-gray-800 text-gray-500 px-2 py-0.5 rounded-full font-bold">{t('for_video.pipeline_badge')}</span>
               </div>
             ))}
           </div>
@@ -320,24 +303,24 @@ export default function VideoCreatorsPage() {
       {/* ─── HOW IT WORKS ─── */}
       <section className="bg-gray-950 text-white py-20 px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <p className="text-xs font-bold text-[#fe2c55] uppercase tracking-widest mb-3">3 steps</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-12">Schedule a TikTok in under a minute</h2>
+          <p className="text-xs font-bold text-[#fe2c55] uppercase tracking-widest mb-3">{t('for_video.how_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-12">{t('for_video.how_title')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
             {[
               {
                 step: '1',
-                title: 'Connect & Browse',
-                desc: 'Link your TikTok account at /accounts. Or paste a YouTube channel URL to browse videos instantly — no API key required.',
+                title: t('for_video.step1_title'),
+                desc: t('for_video.step1_desc'),
               },
               {
                 step: '2',
-                title: 'Write or Generate',
-                desc: 'Use the AI Script Generator for TikTok hooks and CTAs, or let the AI Caption Writer handle your social posts in one click.',
+                title: t('for_video.step2_title'),
+                desc: t('for_video.step2_desc'),
               },
               {
                 step: '3',
-                title: 'Schedule Everywhere',
-                desc: 'Choose your platforms, pick your time, and hit Schedule. TikTok, Bluesky, Discord, Telegram — all at once.',
+                title: t('for_video.step3_title'),
+                desc: t('for_video.step3_desc'),
               },
             ].map((s) => (
               <div key={s.step} className="bg-black/40 border border-[#fe2c55]/20 rounded-2xl p-6">
@@ -353,11 +336,11 @@ export default function VideoCreatorsPage() {
       {/* ─── PRICING ─── */}
       <section className="bg-black text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Pricing</p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_video.pricing_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">
-            What competitors charge $99 for, we give for $5.
+            {t('for_video.pricing_title')}
           </h2>
-          <p className="text-gray-400 text-sm mb-12">TikTok scheduling included on every plan, including free.</p>
+          <p className="text-gray-400 text-sm mb-12">{t('for_video.pricing_desc')}</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
             {PRICING.map((tier) => (
               <div
@@ -369,7 +352,7 @@ export default function VideoCreatorsPage() {
                 }`}
               >
                 {tier.highlight && (
-                  <p className="text-xs font-bold text-[#fe2c55] uppercase tracking-widest mb-3">Most popular</p>
+                  <p className="text-xs font-bold text-[#fe2c55] uppercase tracking-widest mb-3">{t('for_video.pricing_most_popular')}</p>
                 )}
                 <p className="text-sm font-extrabold mb-1">{tier.plan}</p>
                 <div className="flex items-end gap-1 mb-4">
@@ -379,9 +362,9 @@ export default function VideoCreatorsPage() {
                 <ul className="text-xs text-gray-400 space-y-2 mb-6 text-left">
                   <li>✓ {tier.tiktok}</li>
                   <li>✓ {tier.ai}</li>
-                  <li>✓ All 7 live platforms</li>
-                  <li>✓ AI Script + Caption Generator</li>
-                  <li>✓ Clips Studio (Twitch + YouTube)</li>
+                  <li>✓ {t('for_video.pricing_feature_platforms')}</li>
+                  <li>✓ {t('for_video.pricing_feature_ai')}</li>
+                  <li>✓ {t('for_video.pricing_feature_clips')}</li>
                 </ul>
                 <Link
                   href={tier.href}
@@ -396,15 +379,15 @@ export default function VideoCreatorsPage() {
               </div>
             ))}
           </div>
-          <p className="text-gray-500 text-xs">No credit card required for the free plan. Cancel anytime on paid plans.</p>
+          <p className="text-gray-500 text-xs">{t('for_video.pricing_note')}</p>
         </div>
       </section>
 
       {/* ─── FAQ ─── */}
       <section className="bg-gray-950 text-white py-20 px-6">
         <div className="max-w-3xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Questions</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">Video Creator FAQ</h2>
+          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_video.faq_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">{t('for_video.faq_title')}</h2>
           <div className="space-y-6">
             {FAQ.map((item, i) => (
               <div key={i} className="border-b border-gray-800 pb-6 last:border-0">
@@ -419,18 +402,18 @@ export default function VideoCreatorsPage() {
       {/* ─── BOTTOM CTA ─── */}
       <section className="bg-gradient-to-br from-[#fe2c55]/20 via-gray-950 to-black text-white py-20 px-6 text-center">
         <h2 className="text-2xl sm:text-3xl font-extrabold mb-4">
-          Your videos deserve more than one platform.
+          {t('for_video.bottom_title')}
         </h2>
         <p className="text-gray-400 text-sm mb-8 max-w-md mx-auto">
-          Schedule TikTok videos, repurpose clips, and grow your audience everywhere — free, today.
+          {t('for_video.bottom_desc')}
         </p>
         <Link
           href="/signup"
           className="inline-block bg-[#fe2c55] hover:bg-[#fe2c55]/80 text-white font-bold px-10 py-4 rounded-xl text-sm transition-all"
         >
-          Create free account →
+          {t('for_video.bottom_cta')}
         </Link>
-        <p className="text-gray-600 text-xs mt-4">No credit card · No trial · Free forever on the free plan</p>
+        <p className="text-gray-600 text-xs mt-4">{t('for_video.bottom_note')}</p>
       </section>
     </PublicLayout>
   )

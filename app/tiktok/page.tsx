@@ -1,75 +1,28 @@
-import type { Metadata } from 'next'
+'use client'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
-
-export const metadata: Metadata = {
-  title: 'TikTok Studio — Schedule & Edit TikTok Videos Free | SocialMate',
-  description: 'SocialMate\'s TikTok Studio lets you trim videos, apply filters, add captions, generate AI scripts, and schedule directly to TikTok — free on all plans. Production API approved.',
-  openGraph: {
-    title: 'TikTok Studio — Schedule & Edit TikTok Videos Free | SocialMate',
-    description: 'Schedule TikTok videos, apply filters, add captions, and generate AI scripts — all in one place. Production API approved. Free on all plans.',
-    url: 'https://socialmate.studio/tiktok',
-    images: [{ url: 'https://socialmate.studio/og-image.png', width: 1270, height: 760, alt: 'SocialMate TikTok Studio' }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'TikTok Studio — Schedule & Edit TikTok Videos Free | SocialMate',
-    description: 'Schedule TikTok videos automatically. Production API approved. Free on all plans — no per-post charges.',
-    images: ['https://socialmate.studio/og-image.png'],
-  },
-  alternates: { canonical: 'https://socialmate.studio/tiktok' },
-}
-
-const FEATURES = [
-  {
-    icon: '✂️',
-    title: 'Video Trimming',
-    description: 'Trim your videos to the perfect length right inside SocialMate. No external editor needed.',
-  },
-  {
-    icon: '🎨',
-    title: '8 Video Filters',
-    description: 'Apply cinematic CSS filters — Vivid, Matte, Warm, Cool, B&W, Fade, Dramatic, and Sharp — with a single click.',
-  },
-  {
-    icon: '💬',
-    title: 'Caption Overlay',
-    description: 'Burn captions directly onto your video before it goes live. Fully customizable text, position, and style.',
-  },
-  {
-    icon: '🖼️',
-    title: 'Thumbnail Capture',
-    description: 'Grab any frame from your video to use as your TikTok thumbnail. No extra tools.',
-  },
-  {
-    icon: '📤',
-    title: 'GIF Export',
-    description: 'Export a 5-second GIF preview of your video for use in posts, DMs, or marketing. Built in, no npm deps.',
-  },
-  {
-    icon: '🤖',
-    title: 'AI Script Generator',
-    description: 'Tell it your topic, video length, and tone — get a structured hook, body, and CTA in seconds. Powered by Gemini.',
-  },
-  {
-    icon: '📅',
-    title: 'Schedule to TikTok',
-    description: 'Pick your date and time, hit schedule. SocialMate publishes directly to your TikTok profile via the official Production API.',
-  },
-  {
-    icon: '🔁',
-    title: 'Post Everywhere at Once',
-    description: 'Schedule your video to TikTok and 6 other platforms simultaneously — Bluesky, Discord, Mastodon, LinkedIn, Telegram, X.',
-  },
-]
-
-const QUOTA = [
-  { plan: 'Free', price: '$0/mo', videos: '20 videos/mo', color: 'border-gray-700' },
-  { plan: 'Pro', price: '$5/mo', videos: '60 videos/mo', color: 'border-amber-500' },
-  { plan: 'Agency', price: '$20/mo', videos: '200 videos/mo', color: 'border-purple-500' },
-]
+import { useI18n } from '@/contexts/I18nContext'
 
 export default function TikTokStudioLandingPage() {
+  const { t } = useI18n()
+
+  const FEATURES = [
+    { icon: '✂️', title: t('tiktok_landing.feat1_title'), description: t('tiktok_landing.feat1_desc') },
+    { icon: '🎨', title: t('tiktok_landing.feat2_title'), description: t('tiktok_landing.feat2_desc') },
+    { icon: '💬', title: t('tiktok_landing.feat3_title'), description: t('tiktok_landing.feat3_desc') },
+    { icon: '🖼️', title: t('tiktok_landing.feat4_title'), description: t('tiktok_landing.feat4_desc') },
+    { icon: '📤', title: t('tiktok_landing.feat5_title'), description: t('tiktok_landing.feat5_desc') },
+    { icon: '🤖', title: t('tiktok_landing.feat6_title'), description: t('tiktok_landing.feat6_desc') },
+    { icon: '📅', title: t('tiktok_landing.feat7_title'), description: t('tiktok_landing.feat7_desc') },
+    { icon: '🔁', title: t('tiktok_landing.feat8_title'), description: t('tiktok_landing.feat8_desc') },
+  ]
+
+  const QUOTA = [
+    { plan: t('tiktok_landing.plan_free'), price: '$0/mo', videos: t('tiktok_landing.free_videos'), color: 'border-gray-700' },
+    { plan: t('tiktok_landing.plan_pro'), price: '$5/mo', videos: t('tiktok_landing.pro_videos'), color: 'border-amber-500' },
+    { plan: t('tiktok_landing.plan_agency'), price: '$20/mo', videos: t('tiktok_landing.agency_videos'), color: 'border-purple-500' },
+  ]
+
   return (
     <PublicLayout>
       {/* Hero */}
@@ -81,17 +34,17 @@ export default function TikTokStudioLandingPage() {
 
         <div className="relative max-w-3xl mx-auto">
           <div className="inline-flex items-center gap-2 bg-[#fe2c55]/10 border border-[#fe2c55]/30 text-[#fe2c55] text-xs font-semibold px-3 py-1 rounded-full mb-6">
-            ✅ TikTok Production API Approved
+            ✅ {t('tiktok_landing.api_approved_badge')}
           </div>
 
           <h1 className="text-4xl sm:text-5xl font-bold text-white mb-4 leading-tight">
             TikTok Studio
           </h1>
           <p className="text-xl text-gray-300 mb-3">
-            Edit, script, schedule, and publish TikTok videos — all in one place.
+            {t('tiktok_landing.hero_tagline')}
           </p>
           <p className="text-gray-500 text-sm mb-10">
-            Free on every plan. No per-post charges. Official Production API — not a workaround.
+            {t('tiktok_landing.hero_sub')}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -99,13 +52,13 @@ export default function TikTokStudioLandingPage() {
               href="/signup"
               className="bg-[#fe2c55] hover:bg-[#e0263c] text-white font-semibold px-8 py-3 rounded-lg transition-colors"
             >
-              Get started free →
+              {t('tiktok_landing.get_started_cta')}
             </Link>
             <Link
               href="/login?redirect=/tiktok/studio"
               className="border border-gray-700 hover:border-gray-500 text-gray-300 font-semibold px-8 py-3 rounded-lg transition-colors"
             >
-              Open TikTok Studio
+              {t('tiktok_landing.open_studio_cta')}
             </Link>
           </div>
         </div>
@@ -115,10 +68,10 @@ export default function TikTokStudioLandingPage() {
       <section className="bg-gray-900 py-16 px-4">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-2xl font-bold text-white text-center mb-3">
-            Everything you need to win on TikTok
+            {t('tiktok_landing.features_title')}
           </h2>
           <p className="text-gray-400 text-center mb-12 text-sm">
-            Built into your SocialMate dashboard. No extra subscriptions, no extra apps.
+            {t('tiktok_landing.features_desc')}
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -138,12 +91,10 @@ export default function TikTokStudioLandingPage() {
         <div className="max-w-3xl mx-auto text-center">
           <div className="text-4xl mb-4">🌐</div>
           <h2 className="text-2xl font-bold text-white mb-4">
-            Write once. Post everywhere.
+            {t('tiktok_landing.post_everywhere_title')}
           </h2>
           <p className="text-gray-400 mb-8 leading-relaxed">
-            SocialMate isn&apos;t just a TikTok tool. Schedule the same video to TikTok, Bluesky,
-            Discord, Mastodon, LinkedIn, Telegram, and X all at once — or customize the caption
-            per platform. One dashboard, 7 platforms, zero extra tools.
+            {t('tiktok_landing.post_everywhere_desc')}
           </p>
           <div className="flex flex-wrap justify-center gap-2 mb-8">
             {['TikTok', 'Bluesky', 'Discord', 'Mastodon', 'LinkedIn', 'Telegram', 'X/Twitter'].map((p) => (
@@ -159,10 +110,10 @@ export default function TikTokStudioLandingPage() {
       <section className="bg-gray-900 py-16 px-4">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-2xl font-bold text-white text-center mb-3">
-            TikTok scheduling is free
+            {t('tiktok_landing.pricing_title')}
           </h2>
           <p className="text-gray-400 text-center text-sm mb-10">
-            TikTok doesn&apos;t charge per post — so we don&apos;t either. Pick a plan for your posting volume.
+            {t('tiktok_landing.pricing_desc')}
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-10">
@@ -176,8 +127,7 @@ export default function TikTokStudioLandingPage() {
           </div>
 
           <div className="bg-gray-800 rounded-xl p-5 border border-gray-700 text-sm text-gray-400 text-center">
-            💡 TikTok&apos;s API has no per-post charge. Our only cost is storage egress (~$0.09/GB).
-            That savings goes straight to you — free on all plans.
+            💡 {t('tiktok_landing.pricing_note')}
           </div>
         </div>
       </section>
@@ -188,17 +138,16 @@ export default function TikTokStudioLandingPage() {
           <div className="bg-gradient-to-r from-[#fe2c55]/10 to-purple-900/20 border border-[#fe2c55]/20 rounded-2xl p-8 text-center">
             <div className="text-3xl mb-4">🤖</div>
             <h2 className="text-xl font-bold text-white mb-3">
-              Never stare at a blank script again
+              {t('tiktok_landing.script_title')}
             </h2>
             <p className="text-gray-400 text-sm leading-relaxed mb-6">
-              The TikTok Script Generator takes your topic, duration, and tone — and returns a
-              structured hook, body, and CTA in seconds. Powered by Gemini. 5 credits.
+              {t('tiktok_landing.script_desc')}
             </p>
             <Link
               href="/signup"
               className="inline-block bg-[#fe2c55] hover:bg-[#e0263c] text-white font-semibold px-6 py-2.5 rounded-lg transition-colors text-sm"
             >
-              Try it free →
+              {t('tiktok_landing.try_free_cta')}
             </Link>
           </div>
         </div>
@@ -208,23 +157,23 @@ export default function TikTokStudioLandingPage() {
       <section className="bg-gray-900 py-16 px-4 text-center">
         <div className="max-w-xl mx-auto">
           <h2 className="text-2xl font-bold text-white mb-4">
-            Ready to stop posting manually?
+            {t('tiktok_landing.final_cta_title')}
           </h2>
           <p className="text-gray-400 mb-8 text-sm">
-            Connect your TikTok account in under a minute. Free forever on the free plan.
+            {t('tiktok_landing.final_cta_desc')}
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/signup"
               className="bg-[#fe2c55] hover:bg-[#e0263c] text-white font-semibold px-8 py-3 rounded-lg transition-colors"
             >
-              Create free account →
+              {t('tiktok_landing.create_account_cta')}
             </Link>
             <Link
               href="/for/tiktok-creators"
               className="border border-gray-700 hover:border-gray-500 text-gray-300 font-semibold px-8 py-3 rounded-lg transition-colors"
             >
-              Learn more about TikTok scheduling
+              {t('tiktok_landing.learn_more_cta')}
             </Link>
           </div>
         </div>

@@ -1,13 +1,9 @@
+'use client'
 import Link from 'next/link'
-import { Metadata } from 'next'
 import PublicNav from '@/components/PublicNav'
 import PublicFooter from '@/components/PublicFooter'
 import FaqAccordion from './FaqAccordion'
-
-export const metadata: Metadata = {
-  title: 'FAQ — SocialMate',
-  description: 'Answers to common questions about SocialMate, SOMA, Enki, Studio Stax, pricing, and how everything works.',
-}
+import { useI18n } from '@/contexts/I18nContext'
 
 const sections = [
   {
@@ -208,6 +204,7 @@ const sections = [
 ]
 
 export default function FaqPage() {
+  const { t } = useI18n()
   return (
     <div className="min-h-screen bg-gray-950 text-white">
       <PublicNav />
@@ -215,9 +212,9 @@ export default function FaqPage() {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
 
         <div className="text-center mb-14">
-          <p className="text-xs font-bold uppercase tracking-widest text-amber-400 mb-3">Frequently Asked Questions</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-amber-400 mb-3">{t('faq.headline')}</p>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-white mb-4 leading-tight">
-            Everything you want to know.
+            {t('faq.subheadline')}
           </h1>
           <p className="text-gray-400 text-lg max-w-xl mx-auto">
             Straight answers. No marketing fluff. Click any section to expand or collapse it.

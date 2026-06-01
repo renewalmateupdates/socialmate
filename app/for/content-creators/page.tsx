@@ -1,24 +1,8 @@
-import type { Metadata } from 'next'
+'use client'
+
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
-
-export const metadata: Metadata = {
-  title: 'Social Media for Content Creators — SocialMate',
-  description: 'Manage all your social media from one place. Post to 7 platforms at once, use AI to write content faster, and never burn out from daily posting pressure — free forever or $5/month.',
-  openGraph: {
-    title: 'Social Media for Content Creators — SocialMate',
-    description: 'One dashboard for Bluesky, X, TikTok, LinkedIn, Discord, Telegram, and Mastodon. SOMA generates a week of content from your ideas automatically.',
-    url: 'https://socialmate.studio/for/content-creators',
-    images: [{ url: 'https://socialmate.studio/og-image.png', width: 1270, height: 760, alt: 'SocialMate for Content Creators' }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Social Media for Content Creators — SocialMate',
-    description: 'Manage 7 platforms from one dashboard. AI writes content in your voice. Free to start.',
-    images: ['https://socialmate.studio/og-image.png'],
-  },
-  alternates: { canonical: 'https://socialmate.studio/for/content-creators' },
-}
+import { useI18n } from '@/contexts/I18nContext'
 
 const LIVE_PLATFORMS = [
   { name: 'Bluesky',     icon: '🦋', note: 'Live' },
@@ -153,50 +137,49 @@ const FAQ = [
 ]
 
 export default function ContentCreatorsPage() {
+  const { t } = useI18n()
   return (
     <PublicLayout>
 
       {/* ─── HERO ─── */}
       <section className="bg-black text-white py-24 px-6 text-center">
-        <p className="text-xs font-bold text-amber-400 uppercase tracking-widest mb-4">Built for content creators</p>
+        <p className="text-xs font-bold text-amber-400 uppercase tracking-widest mb-4">{t('for_content.eyebrow')}</p>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-3xl mx-auto mb-6">
-          Manage all your social media<br />
-          <span className="text-amber-400">from one place.</span>
+          {t('for_content.hero_title_1')}<br />
+          <span className="text-amber-400">{t('for_content.hero_title_2')}</span>
         </h1>
         <p className="text-gray-300 max-w-xl mx-auto text-base leading-relaxed mb-8">
-          7 platforms. 1 dashboard. Post everywhere at once, use AI to write content faster,
-          and stop burning out from daily posting pressure.
-          What Hootsuite charges $99/month for, we give for $5 — or free.
+          {t('for_content.hero_desc')}
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
           <Link href="/signup"
             className="bg-amber-500 hover:bg-amber-400 text-black font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
-            Start free — no credit card →
+            {t('for_content.hero_cta_primary')}
           </Link>
           <Link href="/features"
             className="border border-gray-700 hover:border-gray-400 text-gray-300 hover:text-white font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
-            See all features
+            {t('for_content.hero_cta_secondary')}
           </Link>
         </div>
-        <p className="text-gray-500 text-xs mt-4">Free forever · 7 live platforms · No credit card required</p>
+        <p className="text-gray-500 text-xs mt-4">{t('for_content.hero_note')}</p>
       </section>
 
       {/* ─── PAIN POINTS ─── */}
       <section className="bg-gray-950 text-white py-20 px-6">
         <div className="max-w-4xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Sound familiar?</p>
+          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_content.pain_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
-            Managing 5+ platforms manually is<br />a full-time job you didn&apos;t sign up for.
+            {t('for_content.pain_title')}
           </h2>
           <div className="space-y-5">
             {PAIN_POINTS.map((p, i) => (
               <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
                 <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-                  <p className="text-xs text-red-400 font-bold uppercase tracking-wide mb-2">Right now</p>
+                  <p className="text-xs text-red-400 font-bold uppercase tracking-wide mb-2">{t('for_content.pain_before_label')}</p>
                   <p className="text-sm text-gray-400 leading-relaxed">{p.before}</p>
                 </div>
                 <div className="bg-amber-950/40 border border-amber-800/50 rounded-2xl p-5">
-                  <p className="text-xs text-amber-300 font-bold uppercase tracking-wide mb-2">With SocialMate</p>
+                  <p className="text-xs text-amber-300 font-bold uppercase tracking-wide mb-2">{t('for_content.pain_after_label')}</p>
                   <p className="text-sm text-white leading-relaxed">{p.icon} {p.after}</p>
                 </div>
               </div>
@@ -208,12 +191,12 @@ export default function ContentCreatorsPage() {
       {/* ─── FEATURES ─── */}
       <section className="bg-black text-white py-20 px-6">
         <div className="max-w-5xl mx-auto">
-          <p className="text-center text-xs font-bold text-amber-400 uppercase tracking-widest mb-3">What you get</p>
+          <p className="text-center text-xs font-bold text-amber-400 uppercase tracking-widest mb-3">{t('for_content.features_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-3">
-            Everything creators need. Nothing they don&apos;t.
+            {t('for_content.features_title')}
           </h2>
           <p className="text-center text-gray-400 text-sm mb-12 max-w-lg mx-auto">
-            Core tools are free. AI content automation unlocks at $5/month.
+            {t('for_content.features_desc')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map((f, i) => (
@@ -239,9 +222,9 @@ export default function ContentCreatorsPage() {
       {/* ─── PLATFORMS ─── */}
       <section className="bg-gray-950 text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Where your content lands</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">7 platforms live today</h2>
-          <p className="text-gray-400 text-sm mb-8">Schedule to all of them from a single compose window. For free.</p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_content.platforms_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_content.platforms_title')}</h2>
+          <p className="text-gray-400 text-sm mb-8">{t('for_content.platforms_desc')}</p>
 
           <div className="flex flex-wrap justify-center gap-3 mb-12">
             {LIVE_PLATFORMS.map((p) => (
@@ -249,12 +232,12 @@ export default function ContentCreatorsPage() {
                 className="flex items-center gap-2 bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5">
                 <span className="text-lg">{p.icon}</span>
                 <span className="text-sm font-bold">{p.name}</span>
-                <span className="text-xs bg-green-900 text-green-400 px-2 py-0.5 rounded-full font-bold">✓ Live</span>
+                <span className="text-xs bg-green-900 text-green-400 px-2 py-0.5 rounded-full font-bold">{t('for_content.platforms_live_badge')}</span>
               </div>
             ))}
           </div>
 
-          <h3 className="text-base font-extrabold text-gray-400 mb-4">In the pipeline</h3>
+          <h3 className="text-base font-extrabold text-gray-400 mb-4">{t('for_content.platforms_coming_title')}</h3>
           <p className="text-gray-500 text-xs mb-6 max-w-md mx-auto">
             Actively working through platform API applications. See the full{' '}
             <Link href="/roadmap" className="text-amber-400 hover:text-amber-300 underline">roadmap</Link>{' '}
@@ -266,7 +249,7 @@ export default function ContentCreatorsPage() {
                 className="flex items-center gap-2 bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 opacity-60">
                 <span className="text-lg">{p.icon}</span>
                 <span className="text-sm font-bold text-gray-400">{p.name}</span>
-                <span className="text-xs bg-gray-800 text-gray-500 px-2 py-0.5 rounded-full font-bold">Soon</span>
+                <span className="text-xs bg-gray-800 text-gray-500 px-2 py-0.5 rounded-full font-bold">{t('for_content.platforms_coming_badge')}</span>
               </div>
             ))}
           </div>
@@ -276,9 +259,9 @@ export default function ContentCreatorsPage() {
       {/* ─── COMPARISON ─── */}
       <section className="bg-black text-white py-20 px-6">
         <div className="max-w-3xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Pricing</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-3">What you might already be paying</h2>
-          <p className="text-center text-gray-400 text-sm mb-12">vs. what SocialMate costs.</p>
+          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_content.pricing_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-3">{t('for_content.pricing_title')}</h2>
+          <p className="text-center text-gray-400 text-sm mb-12">{t('for_content.pricing_desc')}</p>
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead>
@@ -312,8 +295,8 @@ export default function ContentCreatorsPage() {
       {/* ─── FAQ ─── */}
       <section className="bg-gray-950 text-white py-20 px-6">
         <div className="max-w-3xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Questions</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">Creator FAQ</h2>
+          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_content.faq_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">{t('for_content.faq_title')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {FAQ.map((item, i) => (
               <div key={i} className="border-b border-gray-900 pb-6 last:border-0">
@@ -328,17 +311,16 @@ export default function ContentCreatorsPage() {
       {/* ─── BOTTOM CTA ─── */}
       <section className="bg-gradient-to-b from-amber-950 to-black text-white py-20 px-6 text-center">
         <h2 className="text-2xl sm:text-3xl font-extrabold mb-4">
-          One dashboard. All your platforms.<br />Finally.
+          {t('for_content.bottom_title')}
         </h2>
         <p className="text-gray-400 text-sm mb-8 max-w-md mx-auto">
-          Free forever on the free plan. $5/month when you need the AI tools.
-          No credit card, no commitment.
+          {t('for_content.bottom_desc')}
         </p>
         <Link href="/signup"
           className="inline-block bg-amber-500 hover:bg-amber-400 text-black font-bold px-10 py-4 rounded-xl text-sm transition-all">
-          Create free account →
+          {t('for_content.bottom_cta')}
         </Link>
-        <p className="text-gray-600 text-xs mt-4">7 platforms · AI tools · Free forever on free plan</p>
+        <p className="text-gray-600 text-xs mt-4">{t('for_content.bottom_note')}</p>
       </section>
 
     </PublicLayout>

@@ -1,8 +1,10 @@
+'use client'
 import { Suspense } from 'react'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
 import GiveLiveCounter from './GiveLiveCounter'
 import GiveDonate from './GiveDonate'
+import { useI18n } from '@/contexts/I18nContext'
 
 // Amber/warm design tokens
 const amber   = '#F59E0B'
@@ -13,48 +15,41 @@ const surface2 = '#161616'
 const border  = '#222222'
 const muted   = '#6b7280'
 
-export const metadata = {
-  title: 'SM-Give · SocialMate',
-  description: 'SocialMate gives back. Every unclaimed affiliate contribution goes toward school supplies, baby essentials, and homeless care packages.',
-}
-
-const pillars = [
-  {
-    emoji: '🎒',
-    title: 'School Supply Bookbags',
-    subtitle: 'For underprivileged kids heading back to school',
-    description:
-      'Every child deserves to walk into their first day of school ready to learn — not worried about whether they have the tools they need. We pack quality backpacks with real school supplies: notebooks, pencils, folders, crayons, a ruler, scissors, and more. No cheap dollar-store fillers. We send these to underprivileged schools and community programs so kids can focus on what matters.',
-    color: '#3B82F6',
-    colorDim: 'rgba(59,130,246,0.12)',
-    colorBorder: 'rgba(59,130,246,0.25)',
-    impact: 'Every bag serves one child for a full school year',
-  },
-  {
-    emoji: '👶',
-    title: 'Diaper Bags for Struggling Parents',
-    subtitle: 'Priority given to single parents',
-    description:
-      'A new baby is overwhelming — and for struggling or single parents, it can feel impossible. We put together fully loaded diaper bags with quality essentials: diapers, wipes, rash cream, a few outfits (real clothes, not cheap onesies), swaddle blankets, pacifiers, and a simple care guide. Nobody should have to worry about their newborn going without. We prioritize single-parent households and families referred through local support programs.',
-    color: '#EC4899',
-    colorDim: 'rgba(236,72,153,0.12)',
-    colorBorder: 'rgba(236,72,153,0.25)',
-    impact: 'Each bag supports one family through the first weeks',
-  },
-  {
-    emoji: '🏠',
-    title: 'Homeless Care Packages',
-    subtitle: 'Dignity in every package',
-    description:
-      'A care package isn\'t just supplies — it\'s a reminder that someone sees you. Our packages include hygiene essentials (deodorant, toothbrush, toothpaste, soap, feminine products where needed), socks, a warm beanie, snacks, and a handwritten note. We partner with local shelters and outreach organizations to distribute directly to individuals experiencing homelessness. Every package is assembled with intention.',
-    color: '#10B981',
-    colorDim: 'rgba(16,185,129,0.12)',
-    colorBorder: 'rgba(16,185,129,0.25)',
-    impact: 'Each package serves one person, immediately',
-  },
-]
-
 export default function GivePage() {
+  const { t } = useI18n()
+
+  const pillars = [
+    {
+      emoji: '🎒',
+      title: t('give.pillar1_title'),
+      subtitle: t('give.pillar1_subtitle'),
+      description: t('give.pillar1_desc'),
+      color: '#3B82F6',
+      colorDim: 'rgba(59,130,246,0.12)',
+      colorBorder: 'rgba(59,130,246,0.25)',
+      impact: t('give.pillar1_impact'),
+    },
+    {
+      emoji: '👶',
+      title: t('give.pillar2_title'),
+      subtitle: t('give.pillar2_subtitle'),
+      description: t('give.pillar2_desc'),
+      color: '#EC4899',
+      colorDim: 'rgba(236,72,153,0.12)',
+      colorBorder: 'rgba(236,72,153,0.25)',
+      impact: t('give.pillar2_impact'),
+    },
+    {
+      emoji: '🏠',
+      title: t('give.pillar3_title'),
+      subtitle: t('give.pillar3_subtitle'),
+      description: t('give.pillar3_desc'),
+      color: '#10B981',
+      colorDim: 'rgba(16,185,129,0.12)',
+      colorBorder: 'rgba(16,185,129,0.25)',
+      impact: t('give.pillar3_impact'),
+    },
+  ]
   return (
     <div style={{ minHeight: '100vh', background: dark, fontFamily: 'inherit', display: 'flex', flexDirection: 'column' }}>
 
@@ -81,7 +76,7 @@ export default function GivePage() {
             }}>Give</span>
           </div>
         </Link>
-        <Link href="/" style={{ fontSize: 13, color: muted, textDecoration: 'none' }}>← Back to SocialMate</Link>
+        <Link href="/" style={{ fontSize: 13, color: muted, textDecoration: 'none' }}>← {t('give.back_link')}</Link>
       </header>
 
       {/* Hero */}
@@ -92,7 +87,7 @@ export default function GivePage() {
           borderRadius: 20, padding: '6px 16px', marginBottom: 28,
         }}>
           <span style={{ fontSize: 14 }}>❤️</span>
-          <span style={{ color: amber, fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>SocialMate Gives Back</span>
+          <span style={{ color: amber, fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t('give.badge')}</span>
         </div>
 
         <GiveLiveCounter />
@@ -101,23 +96,23 @@ export default function GivePage() {
           fontSize: 'clamp(36px, 6vw, 56px)', fontWeight: 900, color: '#f1f1f1',
           letterSpacing: '-0.03em', lineHeight: 1.1, margin: '0 0 20px',
         }}>
-          Built to grow.<br />
-          <span style={{ color: amber }}>Committed to give.</span>
+          {t('give.hero_title_line1')}<br />
+          <span style={{ color: amber }}>{t('give.hero_title_line2')}</span>
         </h1>
 
         <p style={{
           fontSize: 18, color: '#9ca3af', lineHeight: 1.7,
           margin: '0 auto 28px', maxWidth: 600,
         }}>
-          SocialMate isn&apos;t just a tool — it&apos;s a company built on purpose. We give back in three ways: a share of every subscription, a portion of every voluntary support donation, and all unclaimed affiliate contributions. Three causes, one commitment.
+          {t('give.hero_desc')}
         </p>
 
         {/* Give stats */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: 16, flexWrap: 'wrap', marginBottom: 32 }}>
           {[
-            { value: '2%', label: 'of every subscription', sub: 'after Stripe fees & taxes' },
-            { value: '50%', label: 'of support donations', sub: 'voluntary contributions' },
-            { value: '75%', label: 'of unclaimed affiliate', sub: 'commission proceeds' },
+            { value: '2%', label: t('give.stat1_label'), sub: t('give.stat1_sub') },
+            { value: '50%', label: t('give.stat2_label'), sub: t('give.stat2_sub') },
+            { value: '75%', label: t('give.stat3_label'), sub: t('give.stat3_sub') },
           ].map(stat => (
             <div key={stat.value} style={{
               background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)',
@@ -131,7 +126,7 @@ export default function GivePage() {
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
-          {['🎒 School Supplies', '👶 Baby Essentials', '🏠 Homeless Packages'].map(tag => (
+          {[t('give.tag1'), t('give.tag2'), t('give.tag3')].map(tag => (
             <span key={tag} style={{
               padding: '8px 16px',
               background: surface2, border: `1px solid ${border}`,
@@ -189,7 +184,7 @@ export default function GivePage() {
                     borderRadius: 8, padding: '6px 12px',
                   }}>
                     <span style={{ fontSize: 11, color: pillar.color, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                      Impact →
+                      {t('give.impact_label')} →
                     </span>
                     <span style={{ fontSize: 12, color: '#d1d5db' }}>{pillar.impact}</span>
                   </div>
@@ -210,10 +205,10 @@ export default function GivePage() {
         }}>
           <div style={{ textAlign: 'center', marginBottom: 40 }}>
             <h2 style={{ fontSize: 28, fontWeight: 800, color: '#f1f1f1', margin: '0 0 12px', letterSpacing: '-0.02em' }}>
-              Where the money actually goes
+              {t('give.flow_title')}
             </h2>
             <p style={{ fontSize: 15, color: '#9ca3af', margin: 0, lineHeight: 1.6, maxWidth: 540, marginLeft: 'auto', marginRight: 'auto' }}>
-              We believe in transparency. Here&apos;s exactly how unclaimed affiliate proceeds flow through SM-Give.
+              {t('give.flow_desc')}
             </p>
           </div>
 
@@ -221,23 +216,23 @@ export default function GivePage() {
             {[
               {
                 step: '01',
-                label: '2% from every subscription',
-                detail: 'Every paid SocialMate plan automatically allocates 2% of net revenue (after Stripe fees and applicable taxes) to SM-Give monthly.',
+                label: t('give.flow_step1_label'),
+                detail: t('give.flow_step1_detail'),
               },
               {
                 step: '02',
-                label: '50% from support donations',
-                detail: 'When someone voluntarily supports SocialMate via the story page, 50% of that contribution goes directly to SM-Give.',
+                label: t('give.flow_step2_label'),
+                detail: t('give.flow_step2_detail'),
               },
               {
                 step: '03',
-                label: 'Unclaimed affiliate proceeds',
-                detail: 'Affiliates who miss the payout deadline forfeit their balance. 75% of those unclaimed funds go to SM-Give.',
+                label: t('give.flow_step3_label'),
+                detail: t('give.flow_step3_detail'),
               },
               {
                 step: '04',
-                label: 'Packages assembled & distributed',
-                detail: 'Funds are pooled quarterly. We purchase supplies and distribute through shelters, schools, and community programs.',
+                label: t('give.flow_step4_label'),
+                detail: t('give.flow_step4_detail'),
               },
             ].map(item => (
               <div key={item.step} style={{
@@ -247,7 +242,7 @@ export default function GivePage() {
                 <div style={{
                   fontSize: 11, fontWeight: 800, color: amber,
                   textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 10,
-                }}>Step {item.step}</div>
+                }}>{t('give.step_label')} {item.step}</div>
                 <p style={{ fontSize: 14, fontWeight: 700, color: '#e5e7eb', margin: '0 0 8px', lineHeight: 1.4 }}>{item.label}</p>
                 <p style={{ fontSize: 13, color: muted, margin: 0, lineHeight: 1.6 }}>{item.detail}</p>
               </div>
@@ -262,10 +257,10 @@ export default function GivePage() {
             <span style={{ fontSize: 20, flexShrink: 0, marginTop: 2 }}>💡</span>
             <div>
               <p style={{ fontSize: 14, fontWeight: 700, color: '#f1f1f1', margin: '0 0 6px' }}>
-                Why 75%?
+                {t('give.why_75_title')}
               </p>
               <p style={{ fontSize: 13, color: muted, margin: 0, lineHeight: 1.7 }}>
-                The remaining 25% of unclaimed proceeds is retained to cover operational costs — hosting, payment processing, and program administration. We believe in being honest about what it takes to run this sustainably. The other 75% goes exactly where we say it does: directly to supplies and distribution.
+                {t('give.why_75_desc')}
               </p>
             </div>
           </div>
@@ -275,16 +270,16 @@ export default function GivePage() {
       {/* Values section */}
       <section style={{ maxWidth: 880, margin: '0 auto', padding: '0 24px 72px', width: '100%', textAlign: 'center' }}>
         <h2 style={{ fontSize: 24, fontWeight: 800, color: '#f1f1f1', margin: '0 0 12px', letterSpacing: '-0.02em' }}>
-          Why we do this
+          {t('give.why_title')}
         </h2>
         <p style={{
           fontSize: 16, color: '#9ca3af', lineHeight: 1.8,
           maxWidth: 620, margin: '0 auto 32px',
         }}>
-          SocialMate was built by someone who grew up understanding that not everyone starts at the same line. We didn&apos;t build this company to extract value — we built it to create it. For creators, for businesses, and for the communities around us.
+          {t('give.why_desc1')}
         </p>
         <p style={{ fontSize: 15, color: '#6b7280', lineHeight: 1.8, maxWidth: 560, margin: '0 auto' }}>
-          SM-Give isn&apos;t a marketing tactic. It&apos;s a commitment. As SocialMate grows, so does our capacity to give. Every subscriber, every referral, and every affiliate who uses this platform is part of something bigger than a social media scheduler.
+          {t('give.why_desc2')}
         </p>
       </section>
 
@@ -309,13 +304,13 @@ export default function GivePage() {
           }}>
             <div style={{ fontSize: 36, marginBottom: 12 }}>👑</div>
             <p style={{ fontSize: 11, fontWeight: 700, color: amber, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 12 }}>
-              Support through SocialMate
+              {t('give.support_badge')}
             </p>
             <h3 style={{ fontSize: 20, fontWeight: 800, color: '#f1f1f1', margin: '0 0 12px' }}>
-              Every subscription helps
+              {t('give.support_title')}
             </h3>
             <p style={{ fontSize: 14, color: muted, lineHeight: 1.7, marginBottom: 24 }}>
-              2% of every SocialMate subscription goes directly to SM-Give. The best long-term way to support this work is to use and share the platform.
+              {t('give.support_desc')}
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center' }}>
               <Link href="/signup" style={{
@@ -324,7 +319,7 @@ export default function GivePage() {
                 background: amber, color: '#000',
                 fontSize: 14, fontWeight: 800, textDecoration: 'none',
               }}>
-                Get Started Free →
+                {t('give.get_started_cta')}
               </Link>
               <Link href="/affiliates" style={{
                 display: 'inline-flex', alignItems: 'center', gap: 8,
@@ -332,7 +327,7 @@ export default function GivePage() {
                 background: surface, border: `1px solid ${border}`,
                 color: '#d1d5db', fontSize: 13, fontWeight: 700, textDecoration: 'none',
               }}>
-                Become an Affiliate
+                {t('give.become_affiliate_cta')}
               </Link>
             </div>
           </div>

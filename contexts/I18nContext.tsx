@@ -13,7 +13,7 @@ import { supabase } from '@/lib/supabase'
 interface I18nContextValue {
   locale: Locale
   setLocale: (locale: Locale) => void
-  t: (key: string) => string
+  t: (key: string, params?: Record<string, string | number>) => string
 }
 
 const I18nContext = createContext<I18nContextValue>({
@@ -75,7 +75,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     } catch {}
   }, [])
 
-  const t = useCallback((key: string) => translate(key, messages), [messages])
+  const t = useCallback((key: string, params?: Record<string, string | number>) => translate(key, messages, params), [messages])
 
   return (
     <I18nContext.Provider value={{ locale, setLocale, t }}>

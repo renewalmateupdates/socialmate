@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
+import { useI18n } from '@/contexts/I18nContext'
 
 const PLATFORM_LABELS: Record<string, string> = {
   bluesky: 'Bluesky',
@@ -36,6 +37,7 @@ interface Reply {
 }
 
 export default function AgoraPage() {
+  const { t } = useI18n()
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -164,8 +166,8 @@ export default function AgoraPage() {
 
   if (!user) return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-950 text-white gap-4">
-      <p className="text-xl font-bold">Sign in to join HESTIA</p>
-      <a href="/login?redirect=/community" className="px-6 py-3 bg-amber-500 text-black font-bold rounded-xl">Sign in</a>
+      <p className="text-xl font-bold">{t('community.sign_in_prompt')}</p>
+      <a href="/login?redirect=/community" className="px-6 py-3 bg-amber-500 text-black font-bold rounded-xl">{t('community.sign_in_btn')}</a>
     </div>
   )
 
@@ -181,7 +183,7 @@ export default function AgoraPage() {
             <span className="text-xs font-bold bg-amber-500/20 text-amber-400 px-2.5 py-1 rounded-full">Community</span>
           </div>
           <p className="text-gray-400 text-sm">
-            The creator commons. Share wins, ask questions, and connect with builders using SocialMate.
+            {t('community.tagline')}
           </p>
         </div>
 
@@ -189,10 +191,10 @@ export default function AgoraPage() {
         {!hasConnected ? (
           <div className="bg-gray-900 border border-amber-500/30 rounded-2xl p-8 text-center mb-8">
             <p className="text-2xl mb-3">🔌</p>
-            <p className="font-extrabold text-lg mb-2">Connect a platform to post</p>
-            <p className="text-gray-400 text-sm mb-5">Link at least one social account to join the conversation. This keeps HESTIA real.</p>
+            <p className="font-extrabold text-lg mb-2">{t('community.gate_title')}</p>
+            <p className="text-gray-400 text-sm mb-5">{t('community.gate_desc')}</p>
             <a href="/accounts" className="inline-flex items-center gap-2 px-6 py-3 bg-amber-500 text-black font-bold rounded-xl hover:bg-amber-400 transition-all text-sm">
-              Connect an account →
+              {t('community.gate_cta')}
             </a>
           </div>
         ) : (
@@ -202,7 +204,7 @@ export default function AgoraPage() {
               ref={textRef}
               value={draft}
               onChange={e => setDraft(e.target.value)}
-              placeholder="Share a win, ask a question, drop a tip..."
+              placeholder={t('community.compose_placeholder')}
               rows={3}
               maxLength={500}
               className="w-full bg-transparent text-sm text-white placeholder-gray-500 resize-none outline-none leading-relaxed"
@@ -228,7 +230,7 @@ export default function AgoraPage() {
                   disabled={posting || !draft.trim()}
                   className="px-5 py-2 bg-amber-500 text-black font-bold text-sm rounded-xl hover:bg-amber-400 disabled:opacity-40 transition-all"
                 >
-                  {posting ? 'Posting...' : 'Post'}
+                  {posting ? t('community.posting') : t('community.post_btn')}
                 </button>
               </div>
             </div>
@@ -254,8 +256,8 @@ export default function AgoraPage() {
         {filteredPosts.length === 0 ? (
           <div className="text-center py-16 text-gray-600">
             <p className="text-4xl mb-3">🏛️</p>
-            <p className="font-bold">No posts yet in {category === 'All' ? 'HESTIA' : category}</p>
-            <p className="text-sm mt-1">Be the first to post.</p>
+            <p className="font-bold">{t('community.empty_title')} {category === 'All' ? 'HESTIA' : category}</p>
+            <p className="text-sm mt-1">{t('community.empty_subtitle')}</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -310,7 +312,7 @@ export default function AgoraPage() {
                       onClick={() => toggleExpand(post.id)}
                       className="ml-auto text-xs text-gray-500 hover:text-gray-300 transition-all flex items-center gap-1"
                     >
-                      💬 {isExpanded ? 'Hide replies' : `Reply${postReplies.length > 0 ? ` (${postReplies.length})` : ''}`}
+                      💬 {isExpanded ? t('community.hide_replies') : `${t('community.reply_btn')}${postReplies.length > 0 ? ` (${postReplies.length})` : ''}`}
                     </button>
                   </div>
 
@@ -333,7 +335,7 @@ export default function AgoraPage() {
                           <input
                             value={replyDraft}
                             onChange={e => setReplyDraft(e.target.value)}
-                            placeholder="Write a reply..."
+                            placeholder={t('community.reply_placeholder')}
                             maxLength={280}
                             className="flex-1 bg-gray-800 text-xs text-white placeholder-gray-500 px-3 py-2 rounded-xl outline-none border border-gray-700 focus:border-amber-500/50"
                             onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitReply(post.id) } }}
@@ -342,7 +344,7 @@ export default function AgoraPage() {
                             onClick={() => submitReply(post.id)}
                             disabled={replyPosting || !replyDraft.trim()}
                             className="text-xs font-bold px-3 py-2 bg-amber-500 text-black rounded-xl hover:bg-amber-400 disabled:opacity-40 transition-all"
-                          >Send</button>
+                          >{t('community.send_btn')}</button>
                         </div>
                       )}
                     </div>

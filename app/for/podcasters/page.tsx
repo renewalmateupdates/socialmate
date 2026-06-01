@@ -1,24 +1,8 @@
-import type { Metadata } from 'next'
+'use client'
+
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
-
-export const metadata: Metadata = {
-  title: 'Social Media for Podcasters — SocialMate',
-  description: 'Stop promoting your podcast across 5 different apps. Schedule episode drops to all 7 platforms at once, generate AI captions for audiogram posts, and grow your listener community — free forever or $5/month.',
-  openGraph: {
-    title: 'Social Media for Podcasters — SocialMate',
-    description: 'Schedule podcast episode announcements to Bluesky, X, LinkedIn, Discord, Telegram, TikTok, and Mastodon in one click. SOMA generates your episode promos automatically.',
-    url: 'https://socialmate.studio/for/podcasters',
-    images: [{ url: 'https://socialmate.studio/og-image.png', width: 1270, height: 760, alt: 'SocialMate for Podcasters' }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Social Media for Podcasters — SocialMate',
-    description: 'Promote your podcast on 7 platforms at once. Free tools built for podcasters.',
-    images: ['https://socialmate.studio/og-image.png'],
-  },
-  alternates: { canonical: 'https://socialmate.studio/for/podcasters' },
-}
+import { useI18n } from '@/contexts/I18nContext'
 
 const LIVE_PLATFORMS = [
   { name: 'Bluesky',     icon: '🦋', note: 'Live' },
@@ -169,50 +153,49 @@ const FAQ = [
 ]
 
 export default function PodcastersPage() {
+  const { t } = useI18n()
   return (
     <PublicLayout>
 
       {/* ─── HERO ─── */}
       <section className="bg-black text-white py-24 px-6 text-center">
-        <p className="text-xs font-bold text-orange-400 uppercase tracking-widest mb-4">Built for podcasters</p>
+        <p className="text-xs font-bold text-orange-400 uppercase tracking-widest mb-4">{t('for_podcasters.eyebrow')}</p>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-3xl mx-auto mb-6">
-          Promote your podcast.<br />
-          <span className="text-orange-400">Everywhere. All at once.</span>
+          {t('for_podcasters.hero_title_1')}<br />
+          <span className="text-orange-400">{t('for_podcasters.hero_title_2')}</span>
         </h1>
         <p className="text-gray-300 max-w-xl mx-auto text-base leading-relaxed mb-8">
-          Stop switching between 5 apps every time you drop a new episode.
-          Schedule announcements to all 7 platforms in one shot — Bluesky, X, LinkedIn,
-          Discord, Telegram, TikTok, Mastodon. SOMA generates your promos automatically.
+          {t('for_podcasters.hero_desc')}
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
           <Link href="/signup"
             className="bg-orange-500 hover:bg-orange-400 text-white font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
-            Start free — no credit card →
+            {t('for_podcasters.hero_cta_primary')}
           </Link>
           <Link href="/soma"
             className="border border-gray-700 hover:border-gray-400 text-gray-300 hover:text-white font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
-            See SOMA
+            {t('for_podcasters.hero_cta_secondary')}
           </Link>
         </div>
-        <p className="text-gray-500 text-xs mt-4">Free forever · 7 live platforms · No credit card required</p>
+        <p className="text-gray-500 text-xs mt-4">{t('for_podcasters.hero_note')}</p>
       </section>
 
       {/* ─── PAIN POINTS ─── */}
       <section className="bg-gray-950 text-white py-20 px-6">
         <div className="max-w-4xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Sound familiar?</p>
+          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_podcasters.pain_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
-            You shouldn&apos;t spend more time promoting<br />than actually making your show.
+            {t('for_podcasters.pain_title')}
           </h2>
           <div className="space-y-6">
             {PAIN_POINTS.map((p, i) => (
               <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
                 <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-                  <p className="text-xs text-red-400 font-bold uppercase tracking-wide mb-2">Without SocialMate</p>
+                  <p className="text-xs text-red-400 font-bold uppercase tracking-wide mb-2">{t('for_podcasters.pain_before_label')}</p>
                   <p className="text-sm text-gray-400 leading-relaxed">{p.before}</p>
                 </div>
                 <div className="bg-orange-950/40 border border-orange-800/50 rounded-2xl p-5">
-                  <p className="text-xs text-orange-300 font-bold uppercase tracking-wide mb-2">With SocialMate</p>
+                  <p className="text-xs text-orange-300 font-bold uppercase tracking-wide mb-2">{t('for_podcasters.pain_after_label')}</p>
                   <p className="text-sm text-white leading-relaxed">{p.icon} {p.after}</p>
                 </div>
               </div>
@@ -224,12 +207,12 @@ export default function PodcastersPage() {
       {/* ─── FEATURES ─── */}
       <section className="bg-black text-white py-20 px-6">
         <div className="max-w-5xl mx-auto">
-          <p className="text-center text-xs font-bold text-orange-400 uppercase tracking-widest mb-3">What you get</p>
+          <p className="text-center text-xs font-bold text-orange-400 uppercase tracking-widest mb-3">{t('for_podcasters.features_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-3">
-            Everything a podcaster needs to grow.
+            {t('for_podcasters.features_title')}
           </h2>
           <p className="text-center text-gray-400 text-sm mb-12 max-w-xl mx-auto">
-            Core scheduling tools are free. AI-powered automation is on Pro.
+            {t('for_podcasters.features_desc')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map((f, i) => (
@@ -276,9 +259,9 @@ export default function PodcastersPage() {
       {/* ─── PLATFORMS ─── */}
       <section className="bg-black text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Where your episodes land</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">Live on 7 platforms today</h2>
-          <p className="text-gray-400 text-sm mb-8">Schedule to all of these from one compose window.</p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_podcasters.platforms_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_podcasters.platforms_title')}</h2>
+          <p className="text-gray-400 text-sm mb-8">{t('for_podcasters.platforms_desc')}</p>
 
           <div className="flex flex-wrap justify-center gap-3 mb-12">
             {LIVE_PLATFORMS.map((p) => (
@@ -286,19 +269,19 @@ export default function PodcastersPage() {
                 className="flex items-center gap-2 bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5">
                 <span className="text-lg">{p.icon}</span>
                 <span className="text-sm font-bold">{p.name}</span>
-                <span className="text-xs bg-green-900 text-green-400 px-2 py-0.5 rounded-full font-bold">✓ Live</span>
+                <span className="text-xs bg-green-900 text-green-400 px-2 py-0.5 rounded-full font-bold">{t('for_podcasters.platforms_live_badge')}</span>
               </div>
             ))}
           </div>
 
-          <h3 className="text-base font-extrabold text-gray-400 mb-4">Coming soon</h3>
+          <h3 className="text-base font-extrabold text-gray-400 mb-4">{t('for_podcasters.platforms_coming_title')}</h3>
           <div className="flex flex-wrap justify-center gap-3">
             {COMING_PLATFORMS.map((p) => (
               <div key={p.name}
                 className="flex items-center gap-2 bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 opacity-60">
                 <span className="text-lg">{p.icon}</span>
                 <span className="text-sm font-bold text-gray-400">{p.name}</span>
-                <span className="text-xs bg-gray-800 text-gray-500 px-2 py-0.5 rounded-full font-bold">Soon</span>
+                <span className="text-xs bg-gray-800 text-gray-500 px-2 py-0.5 rounded-full font-bold">{t('for_podcasters.platforms_coming_badge')}</span>
               </div>
             ))}
           </div>
@@ -329,9 +312,9 @@ export default function PodcastersPage() {
       {/* ─── PRICING ─── */}
       <section className="bg-black text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Pricing</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">What competitors charge $99 for, we give for $5.</h2>
-          <p className="text-gray-400 text-sm mb-12">Core scheduler is free. SOMA and Smart Queue unlock at Pro.</p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_podcasters.pricing_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_podcasters.pricing_title')}</h2>
+          <p className="text-gray-400 text-sm mb-12">{t('for_podcasters.pricing_desc')}</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
             {PRICING.map((tier) => (
               <div key={tier.plan}
@@ -340,7 +323,7 @@ export default function PodcastersPage() {
                   : 'bg-gray-900 border-gray-800'
                 }`}>
                 {tier.highlight && (
-                  <p className="text-xs font-bold text-orange-300 uppercase tracking-widest mb-3">Most popular</p>
+                  <p className="text-xs font-bold text-orange-300 uppercase tracking-widest mb-3">{t('for_podcasters.pricing_most_popular')}</p>
                 )}
                 <p className="text-sm font-extrabold mb-1">{tier.plan}</p>
                 <div className="flex items-end gap-1 mb-4">
@@ -364,15 +347,15 @@ export default function PodcastersPage() {
               </div>
             ))}
           </div>
-          <p className="text-gray-500 text-xs">No credit card required for the free plan. Cancel anytime on paid plans.</p>
+          <p className="text-gray-500 text-xs">{t('for_podcasters.pricing_note')}</p>
         </div>
       </section>
 
       {/* ─── FAQ ─── */}
       <section className="bg-gray-950 text-white py-20 px-6">
         <div className="max-w-3xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Questions</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">Podcaster FAQ</h2>
+          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_podcasters.faq_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">{t('for_podcasters.faq_title')}</h2>
           <div className="space-y-6">
             {FAQ.map((item, i) => (
               <div key={i} className="border-b border-gray-900 pb-6 last:border-0">
@@ -387,17 +370,16 @@ export default function PodcastersPage() {
       {/* ─── BOTTOM CTA ─── */}
       <section className="bg-gradient-to-br from-orange-950 via-gray-950 to-black text-white py-20 px-6 text-center">
         <h2 className="text-2xl sm:text-3xl font-extrabold mb-4">
-          Your podcast deserves more ears.
+          {t('for_podcasters.bottom_title')}
         </h2>
         <p className="text-gray-400 text-sm mb-8 max-w-md mx-auto">
-          Join SocialMate free and start scheduling episode announcements across all 7 platforms in minutes.
-          No credit card. No commitment.
+          {t('for_podcasters.bottom_desc')}
         </p>
         <Link href="/signup"
           className="inline-block bg-orange-500 hover:bg-orange-400 text-white font-bold px-10 py-4 rounded-xl text-sm transition-all">
-          Create free account →
+          {t('for_podcasters.bottom_cta')}
         </Link>
-        <p className="text-gray-600 text-xs mt-4">Free forever on the free plan · All 7 platforms · No credit card</p>
+        <p className="text-gray-600 text-xs mt-4">{t('for_podcasters.bottom_note')}</p>
       </section>
 
     </PublicLayout>

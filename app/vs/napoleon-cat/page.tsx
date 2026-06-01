@@ -1,6 +1,8 @@
+'use client'
 ﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
+import { useI18n } from '@/contexts/I18nContext'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs NapoleonCat (2026) — Full Comparison',
@@ -67,6 +69,7 @@ const faqSchema = {
 }
 
 export default function VsNapoleonCat() {
+  const { t } = useI18n()
   return (
     <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
@@ -97,13 +100,13 @@ export default function VsNapoleonCat() {
           <div className="hidden md:flex items-center gap-3 flex-shrink-0">
             <Link href="/give" className="text-sm font-semibold text-rose-400 hover:text-rose-300 transition-all">❤️ Give</Link>
             <Link href="/partners" className="text-sm font-semibold text-amber-500 hover:text-amber-400 transition-all">Partners</Link>
-            <Link href="/login" className="text-sm font-semibold text-gray-500 hover:text-black dark:hover:text-white transition-all">Sign in</Link>
+            <Link href="/login" className="text-sm font-semibold text-gray-500 hover:text-black dark:hover:text-white transition-all">{t('vs_shared.nav_sign_in')}</Link>
             <Link href="/signup" className="bg-black dark:bg-white text-white dark:text-black text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
-              Get started free →
+              {t('vs_shared.nav_get_started')}
             </Link>
           </div>
           <div className="flex md:hidden items-center gap-2">
-            <Link href="/login" className="text-sm font-semibold text-gray-500 hover:text-black dark:hover:text-white transition-all px-2 py-1">Sign in</Link>
+            <Link href="/login" className="text-sm font-semibold text-gray-500 hover:text-black dark:hover:text-white transition-all px-2 py-1">{t('vs_shared.nav_sign_in')}</Link>
           </div>
         </div>
       </header>
@@ -138,12 +141,12 @@ export default function VsNapoleonCat() {
         </div>
 
         <div className="mb-12">
-          <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-gray-100">Feature comparison</h2>
+          <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-gray-100">{t('vs_shared.feature_comparison')}</h2>
           <div className="overflow-x-auto"><div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-100 dark:border-gray-600 px-5 py-3">
-              <span className="text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wide">Feature</span>
+              <span className="text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wide">{t('vs_shared.table_feature')}</span>
               <span className="text-xs font-bold text-gray-400 uppercase tracking-wide text-center">NapoleonCat</span>
-              <span className="text-xs font-bold text-black dark:text-gray-100 uppercase tracking-wide text-center">SocialMate</span>
+              <span className="text-xs font-bold text-black dark:text-gray-100 uppercase tracking-wide text-center">{t('vs_shared.table_socialmate')}</span>
             </div>
             {COMPARISON.map((row, i) => (
               <div key={i} className={`grid grid-cols-3 px-5 py-3 items-center border-b border-gray-50 dark:border-gray-700 last:border-0 ${i % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50/30 dark:bg-gray-750'}`}>
@@ -170,7 +173,7 @@ export default function VsNapoleonCat() {
         </div>
 
         <div className="mb-12">
-          <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-gray-100">Frequently asked questions</h2>
+          <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-gray-100">{t('vs_shared.faq_heading')}</h2>
           <div className="space-y-4">
             {FAQ.map((faq, i) => (
               <div key={i} className="p-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl">
@@ -188,7 +191,7 @@ export default function VsNapoleonCat() {
           </p>
           <Link href="/signup"
             className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
-            Create free account →
+            {t('vs_shared.cta_create_free')}
           </Link>
         </div>
       </div>

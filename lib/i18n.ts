@@ -43,21 +43,29 @@ export async function loadMessages(locale: Locale): Promise<Messages> {
 }
 
 // Resolve a dot-separated key against a messages object, falling back to English.
-export function translate(key: string, messages: Messages): string {
+// Optional params replaces {placeholder} tokens in the result string.
+export function translate(key: string, messages: Messages, params?: Record<string, string | number>): string {
   const parts = key.split('.')
   let val: unknown = messages
   for (const p of parts) {
     val = (val as Record<string, unknown>)?.[p]
   }
+  let result: string
   if (typeof val !== 'string') {
     // Fall back to English default messages
     let fallback: unknown = en
     for (const p of parts) {
       fallback = (fallback as Record<string, unknown>)?.[p]
     }
-    return typeof fallback === 'string' ? fallback : key
+    result = typeof fallback === 'string' ? fallback : key
+  } else {
+    result = val
   }
-  return val
+  // Replace {param} placeholders when params are provided
+  if (params) {
+    result = result.replace(/\{(\w+)\}/g, (_, k) => String(params[k] ?? `{${k}}`))
+  }
+  return result
 }
 
 /** Read locale from URL path segment (e.g. /es/... → 'es'). Server + client safe. */

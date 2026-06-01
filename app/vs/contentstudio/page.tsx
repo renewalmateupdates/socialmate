@@ -1,6 +1,8 @@
+'use client'
 ﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import PublicFooter from '@/components/PublicFooter'
+import { useI18n } from '@/contexts/I18nContext'
 
 export const metadata: Metadata = {
   title: 'SocialMate vs ContentStudio (2026) — Full Comparison',
@@ -65,6 +67,7 @@ const faqSchema = {
 }
 
 export default function VsContentStudioPage() {
+  const { t } = useI18n()
   return (
     <div className="dark min-h-screen bg-gray-950">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
@@ -76,8 +79,8 @@ export default function VsContentStudioPage() {
             <span className="font-bold tracking-tight dark:text-white">SocialMate</span>
           </Link>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">Log in</Link>
-            <Link href="/signup" className="text-xs font-bold px-4 py-2 bg-black text-white rounded-xl hover:opacity-80 transition-all">Start free →</Link>
+            <Link href="/login" className="text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">{t('vs_shared.nav_login')}</Link>
+            <Link href="/signup" className="text-xs font-bold px-4 py-2 bg-black text-white rounded-xl hover:opacity-80 transition-all">{t('vs_shared.nav_start_free')}</Link>
           </div>
         </div>
       </nav>
@@ -97,10 +100,10 @@ export default function VsContentStudioPage() {
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-black text-white font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
-              Try SocialMate free →
+              {t('vs_shared.cta_try_free')}
             </Link>
             <Link href="/pricing" className="px-6 py-3 border border-gray-200 dark:border-gray-700 font-semibold rounded-2xl hover:border-gray-400 transition-all text-sm dark:text-gray-200">
-              See pricing
+              {t('vs_shared.cta_see_pricing')}
             </Link>
           </div>
         </div>
@@ -135,12 +138,12 @@ export default function VsContentStudioPage() {
 
         {/* COMPARISON TABLE */}
         <div className="mb-12">
-          <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">Feature comparison</h2>
+          <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">{t('vs_shared.feature_comparison')}</h2>
           <div className="overflow-x-auto"><div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
             <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-              <span>Feature</span>
+              <span>{t('vs_shared.table_feature')}</span>
               <span>ContentStudio</span>
-              <span>SocialMate</span>
+              <span>{t('vs_shared.table_socialmate')}</span>
             </div>
             {COMPARISON.map((row, i) => (
               <div key={i} className={`grid grid-cols-3 px-5 py-3.5 text-sm border-t border-gray-50 dark:border-gray-800 ${i % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50/50 dark:bg-gray-800/30'}`}>
@@ -192,7 +195,7 @@ export default function VsContentStudioPage() {
 
         {/* FAQ */}
         <div className="mb-12">
-          <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">Frequently asked questions</h2>
+          <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">{t('vs_shared.faq_heading')}</h2>
           <div className="space-y-4">
             {FAQ.map((faq, i) => (
               <div key={i} className="p-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl">
@@ -210,9 +213,9 @@ export default function VsContentStudioPage() {
             SocialMate is free forever — bulk scheduling, 15+ AI tools, 7 platforms, no complex setup. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
-            Create free account →
+            {t('vs_shared.cta_create_free')}
           </Link>
-          <p className="text-gray-600 text-xs mt-3">No card required · Free forever</p>
+          <p className="text-gray-600 text-xs mt-3">{t('vs_shared.cta_no_card')}</p>
         </div>
       </div>
       {/* FOOTER */}

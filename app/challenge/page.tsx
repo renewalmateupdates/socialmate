@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react'
 import { createBrowserClient } from '@supabase/ssr'
 import Link from 'next/link'
+import { useI18n } from '@/contexts/I18nContext'
 
 const CHALLENGE_DAYS = 30
 const CHALLENGE_REWARD = 50
@@ -11,6 +12,7 @@ function getDayKey(date: Date) {
 }
 
 export default function ChallengePage() {
+  const { t } = useI18n()
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -92,8 +94,8 @@ export default function ChallengePage() {
 
   if (!user) return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-950 text-white gap-4">
-      <p className="text-xl font-bold">Sign in to track your challenge</p>
-      <a href="/login?redirect=/challenge" className="px-6 py-3 bg-amber-500 text-black font-bold rounded-xl">Sign in</a>
+      <p className="text-xl font-bold">{t('challenge.sign_in_prompt')}</p>
+      <a href="/login?redirect=/challenge" className="px-6 py-3 bg-amber-500 text-black font-bold rounded-xl">{t('challenge.sign_in_btn')}</a>
     </div>
   )
 
@@ -104,9 +106,9 @@ export default function ChallengePage() {
         {/* Header */}
         <div className="text-center mb-10">
           <div className="text-5xl mb-4">🔥</div>
-          <h1 className="text-4xl font-extrabold tracking-tight mb-2">30-Day Creator Challenge</h1>
+          <h1 className="text-4xl font-extrabold tracking-tight mb-2">{t('challenge.title')}</h1>
           <p className="text-gray-400 text-base">
-            Post every day for 30 consecutive days. Earn <span className="text-amber-400 font-bold">{CHALLENGE_REWARD} bonus credits</span> when you complete it.
+            {t('challenge.subtitle_before')} <span className="text-amber-400 font-bold">{CHALLENGE_REWARD} {t('challenge.bonus_credits')}</span> {t('challenge.subtitle_after')}
           </p>
         </div>
 
@@ -115,10 +117,10 @@ export default function ChallengePage() {
           <div className={`rounded-2xl p-6 text-center mb-8 ${alreadyRewarded ? 'bg-emerald-900/30 border border-emerald-500/40' : 'bg-amber-500/20 border border-amber-500/40'}`}>
             <p className="text-2xl mb-1">{alreadyRewarded ? '✅' : '🎉'}</p>
             <p className="font-extrabold text-lg">
-              {alreadyRewarded ? `Challenge complete — ${CHALLENGE_REWARD} credits already awarded!` : `You did it! ${CHALLENGE_REWARD} credits incoming.`}
+              {alreadyRewarded ? `${t('challenge.complete_already')} ${CHALLENGE_REWARD} ${t('challenge.credits_awarded')}` : `${t('challenge.you_did_it')} ${CHALLENGE_REWARD} ${t('challenge.credits_incoming')}`}
             </p>
             {!alreadyRewarded && (
-              <p className="text-sm text-gray-400 mt-1">Credits will appear in your account within the next daily achievement check (11am UTC).</p>
+              <p className="text-sm text-gray-400 mt-1">{t('challenge.credits_timing')}</p>
             )}
           </div>
         )}
@@ -126,9 +128,9 @@ export default function ChallengePage() {
         {/* Stats bar */}
         <div className="grid grid-cols-3 gap-4 mb-8">
           {[
-            { label: 'Days Posted', value: completedCount, suffix: `/ ${CHALLENGE_DAYS}`, color: 'amber' },
-            { label: 'Current Streak', value: streak, suffix: ' days', color: 'orange' },
-            { label: 'Completion', value: pct, suffix: '%', color: isComplete ? 'emerald' : 'amber' },
+            { label: t('challenge.days_posted'), value: completedCount, suffix: `/ ${CHALLENGE_DAYS}`, color: 'amber' },
+            { label: t('challenge.current_streak'), value: streak, suffix: ` ${t('challenge.days_suffix')}`, color: 'orange' },
+            { label: t('challenge.completion'), value: pct, suffix: '%', color: isComplete ? 'emerald' : 'amber' },
           ].map(s => (
             <div key={s.label} className="bg-gray-900 border border-gray-800 rounded-2xl p-4 text-center">
               <p className={`text-3xl font-extrabold ${s.color === 'emerald' ? 'text-emerald-400' : 'text-amber-400'}`}>
@@ -142,7 +144,7 @@ export default function ChallengePage() {
         {/* Progress bar */}
         <div className="mb-8">
           <div className="flex justify-between text-xs text-gray-500 mb-2">
-            <span>Progress</span>
+            <span>{t('challenge.progress')}</span>
             <span>{completedCount}/{CHALLENGE_DAYS} days</span>
           </div>
           <div className="h-3 bg-gray-800 rounded-full overflow-hidden">
@@ -155,7 +157,7 @@ export default function ChallengePage() {
 
         {/* 30-day grid */}
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-8">
-          <p className="text-sm font-bold text-gray-400 mb-4">Last 30 days</p>
+          <p className="text-sm font-bold text-gray-400 mb-4">{t('challenge.last_30_days')}</p>
           <div className="grid grid-cols-10 gap-2">
             {days.map((d, i) => {
               const key = getDayKey(d)
@@ -179,21 +181,21 @@ export default function ChallengePage() {
             })}
           </div>
           <div className="flex items-center gap-4 mt-4 text-xs text-gray-500">
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 bg-amber-500 rounded inline-block" /> Posted</span>
-            <span className="flex items-center gap-1.5"><span className="w-3 h-3 bg-gray-800 rounded inline-block" /> No post</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 bg-amber-500 rounded inline-block" /> {t('challenge.legend_posted')}</span>
+            <span className="flex items-center gap-1.5"><span className="w-3 h-3 bg-gray-800 rounded inline-block" /> {t('challenge.legend_no_post')}</span>
           </div>
         </div>
 
         {/* Rules */}
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-8">
-          <p className="font-bold mb-3">How it works</p>
+          <p className="font-bold mb-3">{t('challenge.how_it_works')}</p>
           <ul className="space-y-2 text-sm text-gray-400">
             {[
-              'Schedule or publish at least 1 post per day for 30 consecutive days',
-              'Any platform counts — Bluesky, X, TikTok, Discord, Mastodon, Telegram',
-              'Posts must be scheduled or published (drafts don\'t count)',
-              `Complete all 30 days and earn ${CHALLENGE_REWARD} bonus credits, credited automatically`,
-              'Miss a day and the streak resets — but you can start again anytime',
+              t('challenge.rule1'),
+              t('challenge.rule2'),
+              t('challenge.rule3'),
+              t('challenge.rule4').replace('{credits}', String(CHALLENGE_REWARD)),
+              t('challenge.rule5'),
             ].map((rule, i) => (
               <li key={i} className="flex items-start gap-2">
                 <span className="text-amber-500 mt-0.5 flex-shrink-0">✦</span>
@@ -210,7 +212,7 @@ export default function ChallengePage() {
               href="/compose"
               className="inline-flex items-center gap-2 px-8 py-4 bg-amber-500 hover:bg-amber-400 text-black font-extrabold rounded-2xl transition-all text-base"
             >
-              ✏️ Post something now to start
+              ✏️ {t('challenge.cta_start')}
             </Link>
           </div>
         )}
@@ -220,7 +222,7 @@ export default function ChallengePage() {
               href="/compose"
               className="inline-flex items-center gap-2 px-8 py-4 bg-amber-500 hover:bg-amber-400 text-black font-extrabold rounded-2xl transition-all text-base"
             >
-              ✏️ Keep the streak going
+              ✏️ {t('challenge.cta_keep_going')}
             </Link>
           </div>
         )}

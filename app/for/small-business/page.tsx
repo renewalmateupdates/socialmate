@@ -1,24 +1,8 @@
-import type { Metadata } from 'next'
+'use client'
+
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
-
-export const metadata: Metadata = {
-  title: 'Free Social Media Scheduler for Small Business — SocialMate',
-  description: 'Small business social media scheduling that actually fits your budget. Schedule posts to 7 platforms, use 15+ AI tools, and grow your audience — free forever or $5/month Pro.',
-  openGraph: {
-    title: 'Free Social Media Scheduler for Small Business — SocialMate',
-    description: 'What Buffer and Hootsuite charge $99/month for, SocialMate gives for $5 — or free. Built for small business owners who wear every hat.',
-    url: 'https://socialmate.studio/for/small-business',
-    images: [{ url: 'https://socialmate.studio/og-image.png', width: 1270, height: 760, alt: 'SocialMate for Small Business' }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Free Social Media Scheduler for Small Business — SocialMate',
-    description: 'Schedule 7 platforms, 15+ AI tools, free forever. Built for small business.',
-    images: ['https://socialmate.studio/og-image.png'],
-  },
-  alternates: { canonical: 'https://socialmate.studio/for/small-business' },
-}
+import { useI18n } from '@/contexts/I18nContext'
 
 const PERSONAS = [
   { label: 'Restaurant owner',     icon: '🍕' },
@@ -181,20 +165,19 @@ const FAQ = [
 ]
 
 export default function SmallBusinessPage() {
+  const { t } = useI18n()
   return (
     <PublicLayout>
 
       {/* ─── HERO ─── */}
       <section className="bg-black text-white py-24 px-6 text-center">
-        <p className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-4">Built for small business</p>
+        <p className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-4">{t('for_small_biz.eyebrow')}</p>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-3xl mx-auto mb-6">
-          Social media scheduling<br />
-          <span className="text-blue-400">that fits a real budget.</span>
+          {t('for_small_biz.hero_title_1')}<br />
+          <span className="text-blue-400">{t('for_small_biz.hero_title_2')}</span>
         </h1>
         <p className="text-gray-300 max-w-xl mx-auto text-base leading-relaxed mb-6">
-          Schedule to 7 platforms, generate captions with AI, and keep a full content calendar —
-          free forever, or $5/month when you need more.
-          What Hootsuite charges $99 for, we give for $5.
+          {t('for_small_biz.hero_desc')}
         </p>
 
         {/* Persona pills */}
@@ -210,32 +193,32 @@ export default function SmallBusinessPage() {
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
           <Link href="/signup"
             className="bg-blue-500 hover:bg-blue-400 text-white font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
-            Start free — no credit card →
+            {t('for_small_biz.hero_cta_primary')}
           </Link>
           <Link href="/pricing"
             className="border border-gray-700 hover:border-gray-400 text-gray-300 hover:text-white font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
-            See pricing
+            {t('for_small_biz.hero_cta_secondary')}
           </Link>
         </div>
-        <p className="text-gray-500 text-xs mt-4">Free forever on the free plan · No credit card required</p>
+        <p className="text-gray-500 text-xs mt-4">{t('for_small_biz.hero_note')}</p>
       </section>
 
       {/* ─── PAIN POINTS ─── */}
       <section className="bg-gray-950 text-white py-20 px-6">
         <div className="max-w-4xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">You wear every hat</p>
+          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_small_biz.pain_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
-            Social media shouldn&apos;t take<br />3 hours out of your day.
+            {t('for_small_biz.pain_title_1')}<br />{t('for_small_biz.pain_title_2')}
           </h2>
           <div className="space-y-5">
             {PAIN_POINTS.map((p, i) => (
               <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
                 <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-                  <p className="text-xs text-red-400 font-bold uppercase tracking-wide mb-2">Right now</p>
+                  <p className="text-xs text-red-400 font-bold uppercase tracking-wide mb-2">{t('for_small_biz.pain_before_label')}</p>
                   <p className="text-sm text-gray-400 leading-relaxed">{p.before}</p>
                 </div>
                 <div className="bg-blue-950/40 border border-blue-800/50 rounded-2xl p-5">
-                  <p className="text-xs text-blue-300 font-bold uppercase tracking-wide mb-2">With SocialMate</p>
+                  <p className="text-xs text-blue-300 font-bold uppercase tracking-wide mb-2">{t('for_small_biz.pain_after_label')}</p>
                   <p className="text-sm text-white leading-relaxed">{p.icon} {p.after}</p>
                 </div>
               </div>
@@ -247,12 +230,12 @@ export default function SmallBusinessPage() {
       {/* ─── FEATURES ─── */}
       <section className="bg-black text-white py-20 px-6">
         <div className="max-w-5xl mx-auto">
-          <p className="text-center text-xs font-bold text-blue-400 uppercase tracking-widest mb-3">What you get</p>
+          <p className="text-center text-xs font-bold text-blue-400 uppercase tracking-widest mb-3">{t('for_small_biz.features_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-3">
-            The tools you actually need.
+            {t('for_small_biz.features_title')}
           </h2>
           <p className="text-center text-gray-400 text-sm mb-12 max-w-lg mx-auto">
-            Most features are free. No artificial limits designed to force upgrades.
+            {t('for_small_biz.features_desc')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map((f, i) => (
@@ -278,10 +261,10 @@ export default function SmallBusinessPage() {
       {/* ─── PRICING ─── */}
       <section className="bg-gray-950 text-white py-20 px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Pricing</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">No tricks. No tiers designed to confuse you.</h2>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_small_biz.pricing_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_small_biz.pricing_title')}</h2>
           <p className="text-gray-400 text-sm mb-12 max-w-lg mx-auto">
-            Free plan is real. Pro is $5. That&apos;s it.
+            {t('for_small_biz.pricing_desc')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-xl mx-auto mb-8">
             {PRICING.map((tier) => (
@@ -291,7 +274,7 @@ export default function SmallBusinessPage() {
                   : 'bg-gray-900 border-gray-800'
                 }`}>
                 {tier.highlight && (
-                  <p className="text-xs font-bold text-blue-300 uppercase tracking-widest mb-3">Most popular</p>
+                  <p className="text-xs font-bold text-blue-300 uppercase tracking-widest mb-3">{t('for_small_biz.pricing_most_popular')}</p>
                 )}
                 <p className="text-sm font-extrabold mb-1">{tier.plan}</p>
                 <div className="flex items-end gap-1 mb-4">
@@ -303,8 +286,8 @@ export default function SmallBusinessPage() {
                   <li>✓ {tier.posts}</li>
                   <li>✓ {tier.seats}</li>
                   <li>✓ {tier.window}</li>
-                  <li>✓ All 7 live platforms</li>
-                  <li>✓ Link in Bio page</li>
+                  <li>✓ {t('for_small_biz.pricing_feature_platforms')}</li>
+                  <li>✓ {t('for_small_biz.pricing_feature_bio')}</li>
                 </ul>
                 <Link href={tier.href}
                   className={`block text-center text-sm font-bold py-3 rounded-xl transition-all ${tier.highlight
@@ -319,15 +302,15 @@ export default function SmallBusinessPage() {
 
           {/* Comparison */}
           <div className="overflow-x-auto mt-12">
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">vs. what you might already be paying</p>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">{t('for_small_biz.pricing_comparison_eyebrow')}</p>
             <table className="w-full text-sm text-left">
               <thead>
                 <tr className="border-b border-gray-800 text-xs text-gray-500 uppercase tracking-wide">
-                  <th className="py-3 pr-4">Tool</th>
-                  <th className="py-3 pr-4">Monthly</th>
-                  <th className="py-3 pr-4">Platforms</th>
-                  <th className="py-3 pr-4">AI</th>
-                  <th className="py-3">Free tier</th>
+                  <th className="py-3 pr-4">{t('for_small_biz.pricing_comparison_col_tool')}</th>
+                  <th className="py-3 pr-4">{t('for_small_biz.pricing_comparison_col_monthly')}</th>
+                  <th className="py-3 pr-4">{t('for_small_biz.pricing_comparison_col_platforms')}</th>
+                  <th className="py-3 pr-4">{t('for_small_biz.pricing_comparison_col_ai')}</th>
+                  <th className="py-3">{t('for_small_biz.pricing_comparison_col_free')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -344,7 +327,7 @@ export default function SmallBusinessPage() {
                 ))}
               </tbody>
             </table>
-            <p className="text-xs text-gray-600 mt-3">Prices approximate as of April 2026.</p>
+            <p className="text-xs text-gray-600 mt-3">{t('for_small_biz.pricing_comparison_note')}</p>
           </div>
         </div>
       </section>
@@ -352,8 +335,8 @@ export default function SmallBusinessPage() {
       {/* ─── FAQ ─── */}
       <section className="bg-black text-white py-20 px-6">
         <div className="max-w-3xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Questions</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">Small business FAQ</h2>
+          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_small_biz.faq_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">{t('for_small_biz.faq_title')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {FAQ.map((item, i) => (
               <div key={i} className="border-b border-gray-900 pb-6 last:border-0">
@@ -368,17 +351,16 @@ export default function SmallBusinessPage() {
       {/* ─── BOTTOM CTA ─── */}
       <section className="bg-gradient-to-b from-blue-950 to-black text-white py-20 px-6 text-center">
         <h2 className="text-2xl sm:text-3xl font-extrabold mb-4">
-          Get your social media under control.<br />Today.
+          {t('for_small_biz.bottom_title_1')}<br />{t('for_small_biz.bottom_title_2')}
         </h2>
         <p className="text-gray-400 text-sm mb-8 max-w-md mx-auto">
-          Free forever on the free plan. $5/month if you need more.
-          No credit card, no commitment, no fluff.
+          {t('for_small_biz.bottom_desc')}
         </p>
         <Link href="/signup"
           className="inline-block bg-blue-500 hover:bg-blue-400 text-white font-bold px-10 py-4 rounded-xl text-sm transition-all">
-          Create free account →
+          {t('for_small_biz.bottom_cta')}
         </Link>
-        <p className="text-gray-600 text-xs mt-4">Joins thousands of creators and businesses already using SocialMate</p>
+        <p className="text-gray-600 text-xs mt-4">{t('for_small_biz.bottom_note')}</p>
       </section>
 
     </PublicLayout>

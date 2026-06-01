@@ -1,24 +1,8 @@
-import type { Metadata } from 'next'
+'use client'
+
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
-
-export const metadata: Metadata = {
-  title: 'Social Media for Real Estate Agents — SocialMate',
-  description: 'Free social media scheduler for real estate agents. Schedule listing announcements on LinkedIn, cross-post to 7 platforms, and let AI generate real estate content — free forever or $5/month.',
-  openGraph: {
-    title: 'Social Media for Real Estate Agents — SocialMate',
-    description: 'Schedule listing announcements, market updates, and client wins across LinkedIn and 6 more platforms. Real estate social media that runs on autopilot.',
-    url: 'https://socialmate.studio/for/real-estate',
-    images: [{ url: 'https://socialmate.studio/og-image.png', width: 1270, height: 760, alt: 'SocialMate for Real Estate Agents' }],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Social Media for Real Estate Agents — SocialMate',
-    description: 'Real estate social media scheduling. LinkedIn live. Free forever or $5/month.',
-    images: ['https://socialmate.studio/og-image.png'],
-  },
-  alternates: { canonical: 'https://socialmate.studio/for/real-estate' },
-}
+import { useI18n } from '@/contexts/I18nContext'
 
 const LIVE_PLATFORMS = [
   { name: 'LinkedIn',   icon: '💼', note: 'Live' },
@@ -171,6 +155,7 @@ const faqJsonLd = {
 }
 
 export default function RealEstatePage() {
+  const { t } = useI18n()
   return (
     <PublicLayout>
       <script
@@ -180,45 +165,43 @@ export default function RealEstatePage() {
 
       {/* ─── HERO ─── */}
       <section className="bg-black text-white py-24 px-6 text-center">
-        <p className="text-xs font-bold text-cyan-400 uppercase tracking-widest mb-4">Built for real estate agents</p>
+        <p className="text-xs font-bold text-cyan-400 uppercase tracking-widest mb-4">{t('for_real_estate.eyebrow')}</p>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-3xl mx-auto mb-6">
-          Stay top-of-mind.<br />
-          <span className="text-cyan-400">Without posting manually every day.</span>
+          {t('for_real_estate.hero_title_1')}<br />
+          <span className="text-cyan-400">{t('for_real_estate.hero_title_2')}</span>
         </h1>
         <p className="text-gray-300 max-w-xl mx-auto text-base leading-relaxed mb-8">
-          Schedule listing campaigns, market updates, and LinkedIn posts weeks in advance.
-          AI generates the captions. 7 platforms in one dashboard.
-          Free forever, or $5/month when you need more.
+          {t('for_real_estate.hero_desc')}
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
           <Link href="/signup"
             className="bg-cyan-500 hover:bg-cyan-400 text-white font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
-            Start free — no credit card →
+            {t('for_real_estate.hero_cta_primary')}
           </Link>
           <Link href="/pricing"
             className="border border-gray-700 hover:border-gray-400 text-gray-300 hover:text-white font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
-            See pricing
+            {t('for_real_estate.hero_cta_secondary')}
           </Link>
         </div>
-        <p className="text-gray-500 text-xs mt-4">Free forever · LinkedIn live · 7 platforms · No credit card required</p>
+        <p className="text-gray-500 text-xs mt-4">{t('for_real_estate.hero_note')}</p>
       </section>
 
       {/* ─── PAIN POINTS ─── */}
       <section className="bg-gray-950 text-white py-20 px-6">
         <div className="max-w-4xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">The real estate agent reality</p>
+          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_real_estate.pain_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
-            Referrals come from staying visible.<br />But who has time to post every day?
+            {t('for_real_estate.pain_title')}
           </h2>
           <div className="space-y-5">
             {PAIN_POINTS.map((p, i) => (
               <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
                 <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-                  <p className="text-xs text-red-400 font-bold uppercase tracking-wide mb-2">Right now</p>
+                  <p className="text-xs text-red-400 font-bold uppercase tracking-wide mb-2">{t('for_real_estate.pain_before_label')}</p>
                   <p className="text-sm text-gray-400 leading-relaxed">{p.before}</p>
                 </div>
                 <div className="bg-cyan-950/40 border border-cyan-800/50 rounded-2xl p-5">
-                  <p className="text-xs text-cyan-300 font-bold uppercase tracking-wide mb-2">With SocialMate</p>
+                  <p className="text-xs text-cyan-300 font-bold uppercase tracking-wide mb-2">{t('for_real_estate.pain_after_label')}</p>
                   <p className="text-sm text-white leading-relaxed">{p.icon} {p.after}</p>
                 </div>
               </div>
@@ -230,12 +213,12 @@ export default function RealEstatePage() {
       {/* ─── FEATURES ─── */}
       <section className="bg-black text-white py-20 px-6">
         <div className="max-w-5xl mx-auto">
-          <p className="text-center text-xs font-bold text-cyan-400 uppercase tracking-widest mb-3">What you get</p>
+          <p className="text-center text-xs font-bold text-cyan-400 uppercase tracking-widest mb-3">{t('for_real_estate.features_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-3">
-            How SocialMate helps real estate agents build a consistent presence.
+            {t('for_real_estate.features_title')}
           </h2>
           <p className="text-center text-gray-400 text-sm mb-12 max-w-xl mx-auto">
-            Most features are on the free plan. LinkedIn is live today.
+            {t('for_real_estate.features_desc')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map((f, i) => (
@@ -263,27 +246,27 @@ export default function RealEstatePage() {
       {/* ─── PLATFORMS ─── */}
       <section className="bg-gray-950 text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Where buyers and referral partners find you</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">7 platforms. One dashboard.</h2>
-          <p className="text-gray-400 text-sm mb-8">LinkedIn is live. Schedule to all 7 platforms right now, for free.</p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_real_estate.platforms_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_real_estate.platforms_title')}</h2>
+          <p className="text-gray-400 text-sm mb-8">{t('for_real_estate.platforms_desc')}</p>
           <div className="flex flex-wrap justify-center gap-3 mb-12">
             {LIVE_PLATFORMS.map((p) => (
               <div key={p.name}
                 className="flex items-center gap-2 bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5">
                 <span className="text-lg">{p.icon}</span>
                 <span className="text-sm font-bold">{p.name}</span>
-                <span className="text-xs bg-green-900 text-green-400 px-2 py-0.5 rounded-full font-bold">✓ Live</span>
+                <span className="text-xs bg-green-900 text-green-400 px-2 py-0.5 rounded-full font-bold">{t('for_real_estate.platforms_live_badge')}</span>
               </div>
             ))}
           </div>
-          <h3 className="text-base font-extrabold text-gray-400 mb-4">Coming soon</h3>
+          <h3 className="text-base font-extrabold text-gray-400 mb-4">{t('for_real_estate.platforms_coming_title')}</h3>
           <div className="flex flex-wrap justify-center gap-3">
             {COMING_PLATFORMS.map((p) => (
               <div key={p.name}
                 className="flex items-center gap-2 bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 opacity-60">
                 <span className="text-lg">{p.icon}</span>
                 <span className="text-sm font-bold text-gray-400">{p.name}</span>
-                <span className="text-xs bg-gray-800 text-gray-500 px-2 py-0.5 rounded-full font-bold">Soon</span>
+                <span className="text-xs bg-gray-800 text-gray-500 px-2 py-0.5 rounded-full font-bold">{t('for_real_estate.platforms_coming_badge')}</span>
               </div>
             ))}
           </div>
@@ -293,9 +276,9 @@ export default function RealEstatePage() {
       {/* ─── PRICING ─── */}
       <section className="bg-black text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Pricing</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">What your CRM charges just for email, we include with social scheduling.</h2>
-          <p className="text-gray-400 text-sm mb-12">Free plan is real. Pro is $5. Agency for teams and brokerages.</p>
+          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_real_estate.pricing_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_real_estate.pricing_title')}</h2>
+          <p className="text-gray-400 text-sm mb-12">{t('for_real_estate.pricing_desc')}</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
             {PRICING.map((tier) => (
               <div key={tier.plan}
@@ -304,7 +287,7 @@ export default function RealEstatePage() {
                   : 'bg-gray-900 border-gray-800'
                 }`}>
                 {tier.highlight && (
-                  <p className="text-xs font-bold text-cyan-300 uppercase tracking-widest mb-3">Most popular</p>
+                  <p className="text-xs font-bold text-cyan-300 uppercase tracking-widest mb-3">{t('for_real_estate.pricing_most_popular')}</p>
                 )}
                 <p className="text-sm font-extrabold mb-1">{tier.plan}</p>
                 <div className="flex items-end gap-1 mb-4">
@@ -326,15 +309,15 @@ export default function RealEstatePage() {
               </div>
             ))}
           </div>
-          <p className="text-gray-500 text-xs">No credit card required for the free plan. Cancel anytime on paid plans.</p>
+          <p className="text-gray-500 text-xs">{t('for_real_estate.pricing_note')}</p>
         </div>
       </section>
 
       {/* ─── FAQ ─── */}
       <section className="bg-gray-950 text-white py-20 px-6">
         <div className="max-w-3xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Questions</p>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">Real estate agent FAQ</h2>
+          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_real_estate.faq_eyebrow')}</p>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">{t('for_real_estate.faq_title')}</h2>
           <div className="space-y-6">
             {FAQ.map((item, i) => (
               <div key={i} className="border-b border-gray-800 pb-6 last:border-0">
@@ -349,16 +332,16 @@ export default function RealEstatePage() {
       {/* ─── BOTTOM CTA ─── */}
       <section className="bg-gradient-to-b from-cyan-950 to-black text-white py-20 px-6 text-center">
         <h2 className="text-2xl sm:text-3xl font-extrabold mb-4">
-          The next referral is looking at your feed right now.
+          {t('for_real_estate.bottom_title')}
         </h2>
         <p className="text-gray-400 text-sm mb-8 max-w-md mx-auto">
-          Start free. Schedule your first listing campaign in the next 20 minutes.
+          {t('for_real_estate.bottom_desc')}
         </p>
         <Link href="/signup"
           className="inline-block bg-cyan-500 hover:bg-cyan-400 text-white font-bold px-10 py-4 rounded-xl text-sm transition-all">
-          Create free account →
+          {t('for_real_estate.bottom_cta')}
         </Link>
-        <p className="text-gray-600 text-xs mt-4">No credit card · No trial · Free forever on the free plan</p>
+        <p className="text-gray-600 text-xs mt-4">{t('for_real_estate.bottom_note')}</p>
       </section>
 
     </PublicLayout>
