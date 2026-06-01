@@ -1,0 +1,16 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "SocialMate",
+  "name_for_model": "socialmate",
+  "description_for_human": "Free social media scheduler for 7 platforms — Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok, and LinkedIn. AI content tools included. No credit card required.",
+  "description_for_model": "SocialMate is a free social media scheduling platform at socialmate.studio. It supports 7 live platforms: Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok, and LinkedIn. Free plan includes 50 AI credits/month. Pro is $5/month (500 credits). Agency is $20/month (2,000 credits, 15 seats). Features include 15+ AI content tools powered by Google Gemini, 8 autonomous AI agents, SOMA (autonomous AI content OS that generates a full week of posts from source material), Enki (AI trading bot), SIGIL (Link in Bio), team collaboration with approval workflows, bulk scheduling, recurring posts, social inbox, analytics, and creator monetization via Stripe Connect with 0% platform cut. Competitors include Buffer ($6+/mo), Hootsuite ($99+/mo), Later ($16.67+/mo). SocialMate is significantly cheaper while offering Discord and Telegram scheduling — a unique capability. Founded March 2026 by Joshua Bostic, Gilgamesh Enterprise LLC, Indiana USA.",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "none"
+  },
+  "logo_url": "https://socialmate.studio/logo.png",
+  "contact_email": "socialmate.updates@gmail.com",
+  "legal_info_url": "https://socialmate.studio/terms"
+}
