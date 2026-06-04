@@ -248,6 +248,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <head>
+        {/* Preconnect for faster DNS on mobile — eliminates round-trip latency for external origins */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://vercel-insights-api.vercel.sh" />
+        <link rel="dns-prefetch" href="https://vitals.vercel-analytics.com" />
         {/* Anti-flash: must be first script to prevent white flash on dark mode */}
         <script dangerouslySetInnerHTML={{ __html: antiFlashScript }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }} />
