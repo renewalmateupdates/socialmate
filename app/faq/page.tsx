@@ -27,7 +27,7 @@ const sections = [
       },
       {
         q: 'Who built this?',
-        a: 'SocialMate was built by Joshua Bostic, a solo bootstrapped founder. He works a deli job and builds this nights and weekends. No VC funding, no team, no gatekeeping. The mission: power to the people.',
+        a: 'SocialMate was built by Joshua Bostic, a solo bootstrapped founder. No VC funding, no team, no gatekeeping — built nights and weekends while working a day job. The mission: power to the people.',
       },
       {
         q: 'Is SocialMate available on mobile?',

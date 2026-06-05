@@ -134,6 +134,47 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
   const [localSchedule, setLocalSchedule]     = useState<Record<string, PlatformSchedule>>({})
   const [savingSchedule, setSavingSchedule]   = useState(false)
 
+  // Platform editing
+  const [editingPlatforms, setEditingPlatforms]         = useState(false)
+  const [connectedPlatforms, setConnectedPlatforms]     = useState<string[]>([])
+  const [localPlatforms, setLocalPlatforms]             = useState<string[]>([])
+  const [savingPlatforms, setSavingPlatforms]           = useState(false)
+  const [loadingConnected, setLoadingConnected]         = useState(false)
+
+  async function openPlatformEditor() {
+    if (!project) return
+    setLocalPlatforms([...project.platforms])
+    setLoadingConnected(true)
+    try {
+      const res = await fetch('/api/accounts/connected')
+      const data = await res.json()
+      setConnectedPlatforms(Array.isArray(data.platforms) ? data.platforms : [])
+    } catch { setConnectedPlatforms([]) }
+    finally { setLoadingConnected(false) }
+    setEditingPlatforms(true)
+  }
+
+  async function savePlatforms() {
+    if (!project || localPlatforms.length === 0) return
+    setSavingPlatforms(true)
+    try {
+      // Build updated platform_schedule: keep existing entries, add defaults for new, drop removed
+      const existing = project.platform_schedule ?? {}
+      const maxPerDay = project.mode === 'full_send' ? 7 : project.mode === 'autopilot' ? 3 : 2
+      const newSchedule: Record<string, PlatformSchedule> = {}
+      for (const p of localPlatforms) {
+        newSchedule[p] = existing[p] ?? { posts_per_day: Math.min(1, maxPerDay), days: [0,1,2,3,4,5,6] }
+      }
+      await fetch(`/api/soma/projects/${projectId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ platforms: localPlatforms, platform_schedule: newSchedule }),
+      })
+      setProject(p => p ? { ...p, platforms: localPlatforms, platform_schedule: newSchedule } : p)
+      setEditingPlatforms(false)
+    } finally { setSavingPlatforms(false) }
+  }
+
   const [showFeedbackModal, setShowFeedbackModal] = useState(false)
   const [voiceProfile, setVoiceProfile]           = useState<{ tier: string; hasSummary: boolean } | null>(null)
   const [memory, setMemory]                       = useState<{ running_summary: string; topics_covered: string[]; angles_used: string[]; total_posts_generated: number } | null>(null)
@@ -561,15 +602,58 @@ export default function SomaProjectPage({ params }: { params: Promise<{ id: stri
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {/* Platforms */}
           <div className="rounded-xl border border-gray-800 bg-gray-900 px-4 py-3 col-span-2 sm:col-span-1">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-1.5">Platforms</p>
-            <div className="flex flex-wrap gap-1">
-              {project.platforms.map(p => (
-                <span key={p} className="text-xs font-semibold text-white flex items-center gap-1">
-                  <span>{PLATFORM_ICONS[p] ?? '📱'}</span>
-                  <span className="capitalize">{p}</span>
-                </span>
-              )).reduce((acc: React.ReactNode[], el, i) => i === 0 ? [el] : [...acc, <span key={`sep-${i}`} className="text-gray-600">·</span>, el], [])}
+            <div className="flex items-center justify-between mb-1.5">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-500">Platforms</p>
+              {!editingPlatforms ? (
+                <button onClick={openPlatformEditor} className="text-[11px] text-amber-400 hover:text-amber-300 font-semibold">Edit</button>
+              ) : (
+                <div className="flex gap-2">
+                  <button onClick={() => setEditingPlatforms(false)} className="text-[11px] text-gray-500 hover:text-gray-300">Cancel</button>
+                  <button
+                    onClick={savePlatforms}
+                    disabled={savingPlatforms || localPlatforms.length === 0}
+                    className="text-[11px] text-emerald-400 hover:text-emerald-300 font-semibold disabled:opacity-50"
+                  >
+                    {savingPlatforms ? 'Saving…' : 'Save'}
+                  </button>
+                </div>
+              )}
             </div>
+            {!editingPlatforms ? (
+              <div className="flex flex-wrap gap-1">
+                {project.platforms.map(p => (
+                  <span key={p} className="text-xs font-semibold text-white flex items-center gap-1">
+                    <span>{PLATFORM_ICONS[p] ?? '📱'}</span>
+                    <span className="capitalize">{p}</span>
+                  </span>
+                )).reduce((acc: React.ReactNode[], el, i) => i === 0 ? [el] : [...acc, <span key={`sep-${i}`} className="text-gray-600">·</span>, el], [])}
+              </div>
+            ) : loadingConnected ? (
+              <p className="text-[11px] text-gray-500">Loading connected platforms…</p>
+            ) : (
+              <div className="space-y-1 mt-1">
+                {connectedPlatforms.length === 0 ? (
+                  <p className="text-[11px] text-gray-500">No connected platforms found. <a href="/accounts" className="text-amber-400 hover:underline">Connect one →</a></p>
+                ) : connectedPlatforms.map(p => (
+                  <label key={p} className="flex items-center gap-2 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={localPlatforms.includes(p)}
+                      onChange={e => setLocalPlatforms(prev =>
+                        e.target.checked ? [...prev, p] : prev.filter(x => x !== p)
+                      )}
+                      className="accent-amber-500 w-3.5 h-3.5"
+                    />
+                    <span className="text-xs text-gray-300 group-hover:text-white capitalize flex items-center gap-1">
+                      <span>{PLATFORM_ICONS[p] ?? '📱'}</span>{p}
+                    </span>
+                  </label>
+                ))}
+                {localPlatforms.length === 0 && (
+                  <p className="text-[10px] text-red-400 mt-1">Select at least one platform</p>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Per-platform schedule */}

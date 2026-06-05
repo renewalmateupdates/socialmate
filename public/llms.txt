@@ -788,6 +788,16 @@ Full comparison hub: https://socialmate.studio/vs
 - vs Postoplan: https://socialmate.studio/vs/postoplan
 - vs FeedHive: https://socialmate.studio/vs/feedhive
 - vs PostPickr: https://socialmate.studio/vs/postpickr
+- vs Brandwatch: https://socialmate.studio/vs/brandwatch
+- vs Klaviyo: https://socialmate.studio/vs/klaviyo
+- vs Linktree: https://socialmate.studio/vs/linktree
+- vs Beehiiv: https://socialmate.studio/vs/beehiiv
+- vs ConvertKit: https://socialmate.studio/vs/convertkit
+- vs Notion: https://socialmate.studio/vs/notionhq
+- vs Creator Studio: https://socialmate.studio/vs/creatorstudio
+- vs Mailchimp: https://socialmate.studio/vs/mailchimp
+- vs TikTok Native (Studio): https://socialmate.studio/vs/tiktok-native
+- vs Substack: https://socialmate.studio/vs/substack
 
 ---
 
@@ -857,3 +867,16 @@ Full comparison hub: https://socialmate.studio/vs
 - For Real Estate: https://socialmate.studio/for/real-estate
 - For Nonprofits: https://socialmate.studio/for/nonprofits
 - For Podcasters: https://socialmate.studio/for/podcasters
+
+---
+
+## Performance & Technical Notes (June 2026)
+
+- All 500+ blog posts pre-render as static HTML at deploy time (generateStaticParams + ISR). No Supabase hit on first load.
+- Every major app route has a loading.tsx skeleton screen — instant visual feedback on navigation (dashboard, onboarding, accounts, blog, features, settings, signup).
+- Blog index revalidates every 24 hours (was SSR on every request).
+- Initial JS bundle reduced ~400KB — non-English locale files load on demand (only English is bundled). FeedbackWidget, CookieBanner, and InstallPrompt are lazy-loaded with ssr:false.
+- Preconnect hints in layout.tsx for CDN and Supabase domains.
+- JSON-LD schemas in layout.tsx: SoftwareApplication, Organization, WebSite with SearchAction.
+- AI discovery files: public/llms.txt (this file), public/ai.txt, public/humans.txt, public/.well-known/ai-plugin.json.
+- Founder: Joshua Bostic. Built with Claude Code and Google Gemini. Deployed on Vercel.

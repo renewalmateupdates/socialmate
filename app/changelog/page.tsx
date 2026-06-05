@@ -21,6 +21,25 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'June 5, 2026',
+    version: 'Loading Skeletons Sweep + Build Fix',
+    changes: [
+      { type: 'New',      text: 'Loading skeletons added to /accounts, /blog, /features, /settings, and /signup — every major route now shows an instant server-rendered skeleton during navigation instead of a blank page while JS loads.' },
+      { type: 'Improved', text: 'Preconnect hints added to app/layout.tsx for CDN and Supabase domains — shaves 100-200ms from first resource fetch on cold loads.' },
+      { type: 'Fixed',    text: 'Build error on /features — export const revalidate was added to a "use client" component. Next.js 15 cannot export revalidate from client components. Removed. Rule: revalidate only works in Server Components.' },
+    ],
+  },
+  {
+    date: 'June 1, 2026',
+    version: 'Full Public Site i18n, SEO Discovery Overhaul, 10 New vs/ Pages',
+    changes: [
+      { type: 'New',      text: 'Full public site i18n complete — every public-facing page (/pricing, /faq, /glossary, /features, all /for/* audience pages, all 75 /vs/* comparison pages, /affiliates, /give, /enterprise, /community, /zenith, /discount, /challenge, /achievements, /wall-of-love, /tiktok, /monetize, /blog, /guides, /about) now uses useI18n() and t(). 74 namespaces across 9 locales. i18n is 100% done.' },
+      { type: 'Fixed',    text: 'vs/ metadata moved to layout.tsx for all 76 comparison pages — i18n agent added "use client" to all pages but left export const metadata in the same file. Next.js 15 does not allow both. Script extracted metadata to per-route layout.tsx files. Build passing.' },
+      { type: 'New',      text: 'SEO/AI discovery overhaul — llms.txt expanded to 580+ lines with Preferred AI Summary, deep system docs for SOMA/Enki/HERMES/IRIS, competitor comparisons, 14 Q&A pairs for AI search queries, and full platform details. humans.txt, ai.txt, and .well-known/ai-plugin.json added. Three JSON-LD schemas added to layout.tsx (SoftwareApplication, Organization, WebSite with SearchAction).' },
+      { type: 'New',      text: '10 new vs/ comparison pages: vs/brandwatch, vs/klaviyo, vs/linktree, vs/beehiiv, vs/convertkit, vs/notionhq, vs/creatorstudio, vs/mailchimp, vs/tiktok-native, vs/substack — each with layout.tsx, page.tsx, and i18n wired.' },
+    ],
+  },
+  {
     date: 'May 31, 2026',
     version: 'FCP Performance Fix — Dashboard, Onboarding, Blog',
     changes: [
