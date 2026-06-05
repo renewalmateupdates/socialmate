@@ -4,6 +4,11 @@ import PublicNav from '@/components/PublicNav'
 import UserStatsCounter from '@/components/UserStatsCounter'
 import HeroLaunchBadge from '@/components/HeroLaunchBadge'
 
+// Cache the landing page at Vercel's CDN for 5 minutes.
+// Eliminates origin round-trips for most visitors — biggest FCP win,
+// especially for international users (China, India) hitting US East origin.
+export const revalidate = 300
+
 const PLATFORMS = [
   { name: 'Discord',     icon: '💬', status: 'live'    },
   { name: 'Bluesky',     icon: '🦋', status: 'live'    },
