@@ -8,9 +8,28 @@
 ## Who I Am
 
 **Joshua Bostic** — Founder & CEO, Gilgamesh Enterprise LLC (Wyoming LLC).
-Solo bootstrapped builder. Working a Walmart deli job + part-time HR. Building SocialMate nights and weekends.
+Solo bootstrapped builder. Quit the Walmart deli job as of June 2026 — now doing tree cutting/service work. Building SocialMate nights and weekends.
 Vision: Creator OS — the home base for any creator, streamer, business, or person who wants to build online.
 Mission: Power to the people. Tear down gatekeeping walls. Build the door.
+
+---
+
+## Hearthforge (Separate Venture)
+
+**Hearthforge** — 3D printing product company, separate from Gilgamesh Enterprise LLC.
+Co-founder: **Butch Chiappinelli** (handles manufacturing; owns a Bambu Lab X1 Carbon).
+Joshua handles web, software, and business side.
+
+**First product:** Modular desk rail system for streamers and content creators.
+- Horizontal rail clamps to back edge of a gaming desk
+- Accessories clip on at adjustable positions: mic holder, camera mount, headphone hook, Stream Deck stand, cable management clips
+- Design language: matte black, minimal, premium
+- C-clamps integrated into the rail as one printed piece; end caps still in design as of June 2026
+
+**Business model:** Sell STL files digitally + ship physical prints + eventual file subscriptions.
+**Entity:** No LLC yet. Will do joint LLC or DBA under Gilgamesh Enterprise LLC when revenue starts.
+**Logo:** Needed — icon mark + wordmark + embossable version for physical prints.
+**Do NOT make:** Anything water-inclusive (cookie cutters, plant pots) — micro holes trap moisture and mold.
 
 ---
 
@@ -379,6 +398,12 @@ These have burned us before — always apply:
 
 ## Known Issues / Bugs (fix these when touched)
 
+### Active — fix when touching the file
+
+- **`border-black` spinners throughout app — dark mode invisible.** 20+ pages use `animate-spin rounded-full border-b-2 border-black` without a `dark:border-white` variant. In dark mode the spinner is invisible against dark backgrounds. Dashboard fixed (PR #459). All others still need fixing. Files with big page-level spinners missing dark: fix: `ab-tests`, `accounts`, `achievements`, `ai-features`, `approvals`, `compose`, `competitor-tracking`, `content-gap`, `drafts`, `evergreen`, `invite`, `link-in-bio`, `onboarding`, `queue`, `reset-password`, `rss-import`, `settings`, `sm-pulse`, `sm-radar`, `workspaces/new`. Fix: add `dark:border-amber-500` or `dark:border-white` alongside existing `border-black`.
+- **Streak counts published posts only** — penalizes SOMA users who scheduled a week in one session. Streak should count SCHEDULED posts (scheduled_at date) not just published. Fix: in streak API route, count posts where `scheduled_at::date = target_date` OR `published_at::date = target_date`.
+- **Mobile: 2 fixed-bottom toasts missing safe-area** — `app/admin/white-label/page.tsx` and `app/hermes/campaigns/[id]/page.tsx` still use `fixed bottom-6 right-6` without `env(safe-area-inset-bottom)`. All 35 other pages were fixed in PR #261 but these two were missed.
+
 ## Audit Findings (April 19–20, 2026) — resolved
 
 - ✅ Broken `/affiliate` links in `/give` and `/referral` — now correctly point to `/affiliates` (PR #160)
@@ -461,7 +486,7 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
   - `/api/soma/projects/[id]/memory` route: GET (read memory) + DELETE (clear/reset).
   - SQL applied: `soma_project_memory` table with RLS.
 - **Feedback modal made on-demand** (PR #308) — Removed auto-popup after generate run (was firing before user could review posts). Now shown via "🎙️ Give feedback" button in generate result section. User-initiated only.
-- **Voice DNA interview completed by Joshua** — Full Advanced tier (40 questions) answered. Voice DNA summary active in SOMA. SOMA now knows: solo founder building in public, deli job worker, hip-hop + LoL + space culture, authentic hustle tone, "cooked/fire/slay" vocab, specific angles around bootstrapped building, creator tools, and inspiring others to start from nothing.
+- **Voice DNA interview completed by Joshua** — Full Advanced tier (40 questions) answered. Voice DNA summary active in SOMA. SOMA now knows: solo founder building in public, tree service worker (quit deli June 2026), hip-hop + LoL + space culture, authentic hustle tone, "cooked/fire/slay" vocab, specific angles around bootstrapped building, creator tools, and inspiring others to start from nothing. Note: if you submit updated CLAUDE.md to SOMA, it will regenerate the Voice DNA context.
 - **Google Play identity verified** — Google Play Console identity review approved (screenshot confirmed May 7). Next step when ready: play.google.com/console → Create app → Upload AAB v1.0.4 (GitHub Actions run #5 artifact) → Internal testing.
 - **LinkedIn post written** — Long-form SEO/GEO/AIO LinkedIn post about SOMA, Voice DNA, and the bootstrapped builder grind. Includes Marcus Aurelius quote opener. Ready to publish manually.
 

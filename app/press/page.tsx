@@ -45,7 +45,7 @@ export default function PressPage() {
           <p className="text-gray-300 max-w-xl mx-auto text-base leading-relaxed">
             SocialMate is a social media scheduler and Creator OS that gives creators
             what competitors charge $99/month for — at $5 or free. Built solo, bootstrapped,
-            while the founder worked a deli job at Walmart.
+            while the founder worked a day job and built nights and weekends.
           </p>
         </div>
       </section>
@@ -78,7 +78,7 @@ export default function PressPage() {
             8 AI agents, and 7 live platforms — starting at $0.
           </p>
           <p className="text-gray-400 text-sm">
-            The story: solo founder, bootstrapped, no VC, no co-founder, working a deli job while building.
+            The story: solo founder, bootstrapped, no VC, no co-founder, working day jobs while building nights and weekends.
             Built with Claude Code. Live in 60 days. Growing organically.
           </p>
         </div>
@@ -228,7 +228,7 @@ export default function PressPage() {
             <div className="space-y-3 text-gray-300 text-sm leading-relaxed">
               <p>
                 Joshua Bostic is the solo founder and CEO of Gilgamesh Enterprise LLC, the company behind
-                SocialMate. He built SocialMate while working full-time at Walmart in a deli job — coding
+                SocialMate. He built SocialMate while working day jobs — coding
                 nights and weekends with no external funding, no co-founder, and no engineering team.
               </p>
               <p>
