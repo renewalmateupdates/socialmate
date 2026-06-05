@@ -4,9 +4,6 @@ import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
 
-// Pure static content — cache at CDN for 24 hours
-export const revalidate = 86400
-
 const FEATURE_CATEGORIES = [
   {
     category: 'AI Tools',
