@@ -8,17 +8,21 @@
 ## Who I Am
 
 **Joshua Bostic** — Founder & CEO, Gilgamesh Enterprise LLC (Wyoming LLC).
-Solo bootstrapped builder. Quit the Walmart deli job as of June 2026 — now doing tree cutting/service work. Building SocialMate nights and weekends.
+Solo bootstrapped builder. Quit the Walmart deli job as of June 2026 — now doing tree cutting/service work (works with Ron, a tree service client he also built a demo website for). Building SocialMate nights and weekends.
+Also building a portfolio of local business websites as a side service (conversion-focused, mobile-first, flat-fee).
 Vision: Creator OS — the home base for any creator, streamer, business, or person who wants to build online.
 Mission: Power to the people. Tear down gatekeeping walls. Build the door.
 
 ---
 
-## Hearthforge (Separate Venture)
+## Hearthforge (Co-Founded Venture — Partnership with Butch Chiappinelli)
 
-**Hearthforge** — 3D printing product company, separate from Gilgamesh Enterprise LLC.
-Co-founder: **Butch Chiappinelli** (handles manufacturing; owns a Bambu Lab X1 Carbon).
+**Hearthforge** — 3D printing product company. Co-founded 50/50 with Butch Chiappinelli. Separate from Gilgamesh Enterprise LLC.
+Co-founder: **Butch Chiappinelli** (handles manufacturing + CAD design; owns a Bambu Lab X1 Carbon).
 Joshua handles web, software, and business side.
+**Domain:** hearth-forge.com (live on Vercel, GitHub: renewalmateupdates/hearthforge-web)
+
+**Logo:** Confirmed June 2026 — bold H letterform with flame integrated between the vertical pillars. Black/white. Designed by Butch. Embossable version for physical prints. Logo is `public/logo.png` in the repo.
 
 **First product:** Modular desk rail system for streamers and content creators.
 - Horizontal rail clamps to back edge of a gaming desk
@@ -28,8 +32,8 @@ Joshua handles web, software, and business side.
 
 **Business model:** Sell STL files digitally + ship physical prints + eventual file subscriptions.
 **Entity:** No LLC yet. Will do joint LLC or DBA under Gilgamesh Enterprise LLC when revenue starts.
-**Logo:** Needed — icon mark + wordmark + embossable version for physical prints.
 **Do NOT make:** Anything water-inclusive (cookie cutters, plant pots) — micro holes trap moisture and mold.
+**Important:** Always describe Hearthforge as a CO-FOUNDED PARTNERSHIP with Butch — never as Joshua's solo venture. Misrepresenting this would be misleading to Butch.
 
 ---
 
@@ -649,6 +653,16 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **AI rate limiting** — 10 AI requests per minute per user. Returns 429 with retry-after header. Prevents accidental API abuse.
 - **Blog batch 12** — 55 posts on creator growth, platform strategy, and community. SQL in `supabase/blog_batch_12.sql`.
 
+**June 6, 2026 (PRs #467–#468):**
+- **Gilgamesh Enterprise LLC website** — `gilgameshenterprise.com` migrated off Squarespace ($25/mo cancelled before June 10 charge). Rebuilt as Next.js on Vercel (free). Dark/gold design, professional holding company hub. Ventures listed: SocialMate, RenewalMate, Hearthforge (partnership noted), Gilgamesh's Guides. Logo pulled from Squarespace CDN and saved locally as `/public/logo.png`. GitHub: `renewalmateupdates/gilgameshenterprise`.
+- **RenewalMate website** — `renewalmate.com` rebuilt from scratch. CTO's NS1 nameservers replaced with GoDaddy defaults (taking back domain DNS control). New landing page: green rebrand, "Stop Bleeding Money on Bills You Forgot About" hero, waitlist email capture, mission section, feature grid, comparison to RocketMoney/Monarch. Backend app (`app.renewalmate.com`) was down — CTO appears to have abandoned it. GitHub: `renewalmateupdates/renewalmate`.
+- **Hearthforge website** — `hearth-forge.com` already live on Vercel. Butch's new logo (H+flame, black/white) integrated into nav, footer, and admin sidebar across all 3 component files. `llms.txt`, `robots.txt`, `humans.txt` added for SEO discoverability. GitHub: `renewalmateupdates/hearthforge-web`. Logo at `public/logo.png`.
+- **SOMA image bugs fixed (PR #468):**
+  1. Images were showing in queue but NOT posting to social profiles — root cause: `urls.regular` Unsplash images (1-3MB) exceed Bluesky's 1MB blob limit; uploads silently failed. Fixed by using `urls.small` (~400px, <500KB).
+  2. Same image repeated across a week's posts — root cause: module-level `imageCache` returned same photo for same keyword. Fixed: removed module-level cache; each run now passes a `usedUrls: Set<string>` and retries up to 3x with random seed to get unique photos.
+  3. TikTok failing through SOMA — root cause: no `case 'tiktok'` in `publishToAll`, hits `default` = instant fail. SOMA generates text posts; TikTok requires video. Fixed: skip TikTok in generate loop when no `include_video_url` on the project, with clear error message.
+- **SOMA platform editing** — project page now has Edit button on Platforms card. Opens checkboxes for connected platforms (fetches from `/api/accounts/connected`). Saving updates both `platforms` and `platform_schedule` (adds new platforms with defaults, removes deselected ones).
+
 **June 5, 2026 (PR #466):**
 - **FCP loading skeletons — extended sweep** — Added `loading.tsx` skeleton screens to 5 more high-traffic pages: `/accounts`, `/blog`, `/features`, `/settings`, `/signup`. Combined with PR #459 (dashboard + onboarding), every major app route now has an instant skeleton on navigation. Preconnect hints added to `app/layout.tsx` for CDN and Supabase domains — shaves 100–200ms from first resource fetch on cold loads.
 - **Build fix: invalid `revalidate` on `/features`** — `export const revalidate = 86400` was added to `app/features/page.tsx` which has `'use client'` — Next.js 15 treats `revalidate` exports on client components as a function reference, causing a prerender crash. Removed the export. Rule: `export const revalidate` only works in Server Components, never in `'use client'` files.
@@ -774,6 +788,10 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 ## Confirmed Done (stop asking about these)
 
+- ✅ **Gilgamesh Enterprise website live (June 6)** — gilgameshenterprise.com on Vercel, dark/gold, Squarespace cancelled. Never rebuild from scratch again.
+- ✅ **RenewalMate website live (June 6)** — renewalmate.com on Vercel, green rebrand, waitlist capture, DNS back under GoDaddy control. Never rebuild from scratch again.
+- ✅ **Hearthforge logo integrated (June 6)** — Butch's H+flame logo in nav/footer/admin. public/logo.png. Never rebuild logo integration.
+- ✅ **SOMA image dedup + size fix (June 6, PR #468)** — urls.small for Bluesky blob limit, usedUrls Set for dedup, TikTok skipped without video URL. Never ask to fix these image issues again.
 - ✅ **Loading skeletons — full sweep complete (June 5, PR #466)** — `loading.tsx` now exists on every major route: dashboard, onboarding (PR #459) + accounts, blog, features, settings, signup (PR #466). Preconnect hints in `layout.tsx`. All skeleton screens are done. Never ask to add more loading skeletons.
 - ✅ **Full public site i18n complete (June 1, PRs #461–#462)** — Every public page wired with `useI18n()`. 74 namespaces, 9 locales, `{param}` interpolation added. vs/ metadata moved to `layout.tsx` (76 files). i18n is 100% done — public site and app interior both complete. Never ask about unwired public pages.
 - ✅ **SEO/AI discovery overhaul (June 1, PR #463)** — llms.txt 580+ lines, humans.txt, ai.txt, ai-plugin.json, 3 JSON-LD schemas in layout.tsx. 7 new vs/ pages. Never ask to build this again.
