@@ -653,6 +653,17 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **AI rate limiting** — 10 AI requests per minute per user. Returns 429 with retry-after header. Prevents accidental API abuse.
 - **Blog batch 12** — 55 posts on creator growth, platform strategy, and community. SQL in `supabase/blog_batch_12.sql`.
 
+**June 7, 2026:**
+- **gilgameshenterprise.com — blog filtering + FAQ** — Blog page now has client-side category filter tabs (All / Business / Founder Story / Tech / etc.). FAQ page added at `/faq` — accordion layout, 3 sections: About GE, The Ventures, Philosophy. Nav updated to include FAQ link. Sitemap updated. Pushed to `renewalmateupdates/gilgameshenterprise`.
+- **renewalmate.com — blog filtering + FAQ + nav polish** — Blog page now has category filter tabs (All / Alternatives / Personal Finance / Tips / Privacy). FAQ page added at `/faq` — 4 sections: About RenewalMate, Features, vs. Competitors (RocketMoney / Monarch / Mint / YNAB), Privacy. Footer updated with FAQ + Blog links. Sitemap now includes all blog slugs. Pushed to `renewalmateupdates/renewalmate`.
+- **Hearthforge logo integrated** — Butch Chiappinelli's H+flame logo (PNG, black/white) saved to `public/logo.png` in `hearthforge-web` repo. Replaced Flame icon from lucide-react in PublicNav, PublicFooter, and AdminSidebar. `invert` CSS class renders it white on dark backgrounds. Merged `feat/full-polish` → `master`. Live on hearth-forge.com.
+- **Gilgamesh Enterprise — Hearthforge co-founder language** — Hearthforge venture card now explicitly states "Co-founded with Butch Chiappinelli" and lists role split (Joshua: web/business, Butch: manufacturing/CAD). Tag updated to "3D Products — Partnership". Badge changed from "Coming Soon" to "Live" with correct URL `hearth-forge.com`.
+- **GE logo saved locally** — Squarespace CDN URL for GCE logo replaced with locally-saved `/public/logo.png` — prevents image breaking when Squarespace hosting expires June 10.
+- **Hearthforge SEO files** — `public/llms.txt`, `public/robots.txt`, `public/humans.txt` added to hearthforge-web repo. Merged to master.
+- **Joshua's job updated** — Quit Walmart deli as of June 2026. Now works tree cutting/service with Ron (the same client he built a demo site for). CLAUDE.md "Who I Am" section updated.
+- **Mate series — 3 live sites** — gilgameshenterprise.com (dark/gold holding company), renewalmate.com (green fintech landing), hearth-forge.com (3D printing — partnership with Butch). All on Vercel free tier. Combined with socialmate.studio = 4 active domains in the Gilgamesh portfolio.
+- **Reddit posts drafted** — r/developers_hire update post (FOR HIRE, 3 new sites added to portfolio) and r/micro_saas update post (image bug root cause, 3 sites launched, MRR question). Both ready to post under u/InterestingRun7594.
+
 **June 6, 2026 (PRs #467–#468):**
 - **Gilgamesh Enterprise LLC website** — `gilgameshenterprise.com` migrated off Squarespace ($25/mo cancelled before June 10 charge). Rebuilt as Next.js on Vercel (free). Dark/gold design, professional holding company hub. Ventures listed: SocialMate, RenewalMate, Hearthforge (partnership noted), Gilgamesh's Guides. Logo pulled from Squarespace CDN and saved locally as `/public/logo.png`. GitHub: `renewalmateupdates/gilgameshenterprise`.
 - **RenewalMate website** — `renewalmate.com` rebuilt from scratch. CTO's NS1 nameservers replaced with GoDaddy defaults (taking back domain DNS control). New landing page: green rebrand, "Stop Bleeding Money on Bills You Forgot About" hero, waitlist email capture, mission section, feature grid, comparison to RocketMoney/Monarch. Backend app (`app.renewalmate.com`) was down — CTO appears to have abandoned it. GitHub: `renewalmateupdates/renewalmate`.
@@ -788,6 +799,9 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 ## Confirmed Done (stop asking about these)
 
+- ✅ **gilgameshenterprise.com blog + FAQ (June 7)** — Category filter tabs on blog (client-side). FAQ page at /faq with accordion. Nav updated with FAQ link. Sitemap updated. Never ask to add blog filtering or FAQ to GE site again.
+- ✅ **renewalmate.com blog + FAQ (June 7)** — Category filter tabs on blog. FAQ page at /faq (4 sections including vs. competitors). Nav updated. Sitemap includes all blog slugs. Never ask to add blog filtering or FAQ to RenewalMate again.
+- ✅ **Hearthforge co-founder language on GE site (June 7)** — GilgameshEnterprise venture card for Hearthforge now says "Co-founded with Butch Chiappinelli", lists role split, URL points to hearth-forge.com, badge is Live. Never misrepresent Hearthforge as Joshua's solo venture.
 - ✅ **Gilgamesh Enterprise website live (June 6)** — gilgameshenterprise.com on Vercel, dark/gold, Squarespace cancelled. Never rebuild from scratch again.
 - ✅ **RenewalMate website live (June 6)** — renewalmate.com on Vercel, green rebrand, waitlist capture, DNS back under GoDaddy control. Never rebuild from scratch again.
 - ✅ **Hearthforge logo integrated (June 6)** — Butch's H+flame logo in nav/footer/admin. public/logo.png. Never rebuild logo integration.
