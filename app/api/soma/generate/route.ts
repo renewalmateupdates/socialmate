@@ -49,14 +49,18 @@ export async function POST(req: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const body = await req.json()
-    const { ingestion_id, platforms } = body as { ingestion_id: string; platforms: string[] }
+    const { ingestion_id, platforms: rawPlatforms } = body as { ingestion_id: string; platforms: string[] }
 
     if (!ingestion_id) {
       return NextResponse.json({ error: 'ingestion_id is required' }, { status: 400 })
     }
-    if (!Array.isArray(platforms) || platforms.length === 0) {
+    if (!Array.isArray(rawPlatforms) || rawPlatforms.length === 0) {
       return NextResponse.json({ error: 'platforms must be a non-empty array' }, { status: 400 })
     }
+
+    // TikTok requires video content — SOMA generates text posts only.
+    // Filter TikTok out to prevent scheduled posts that will always fail on publish.
+    const platforms = rawPlatforms.filter((p: string) => p !== 'tiktok')
 
     // Get workspace
     const { data: workspace, error: wsError } = await supabase
