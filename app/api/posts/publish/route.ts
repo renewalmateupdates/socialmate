@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     // Inngest call — fetch post directly with service role
     const { data: post, error } = await getSupabaseAdmin()
       .from('posts')
-      .select('id, user_id, content, platforms, destinations, status, published_at, workspace_id')
+      .select('id, user_id, content, platforms, destinations, status, published_at, workspace_id, media_urls')
       .eq('id', postId)
       .single()
 
@@ -57,9 +57,13 @@ export async function POST(request: NextRequest) {
       accountWorkspaceId = wsInfo?.is_personal ? null : post.workspace_id
     }
 
+    // Build media URLs — filter out attribution strings (Unsplash credit lines, not image URLs)
+    const rawMediaUrls: string[] = Array.isArray(post.media_urls) ? post.media_urls : []
+    const imageMediaUrls = rawMediaUrls.filter((u: string) => u.startsWith('http') && !u.startsWith('Photo by'))
+
     // Actually publish to platforms
     const destinations = post.destinations || {}
-    const results = await publishToAll(userId, post.platforms, post.content, destinations, accountWorkspaceId, {})
+    const results = await publishToAll(userId, post.platforms, post.content, destinations, accountWorkspaceId, {}, imageMediaUrls)
     const allFailed  = results.every(r => !r.success)
     const someFailed = results.some(r => !r.success)
 
@@ -240,7 +244,7 @@ export async function POST(request: NextRequest) {
 
     const { data: post, error } = await supabase
       .from('posts')
-      .select('id, user_id, content, platforms, destinations, status, published_at, workspace_id')
+      .select('id, user_id, content, platforms, destinations, status, published_at, workspace_id, media_urls')
       .eq('id', postId)
       .eq('user_id', userId)
       .single()
@@ -264,8 +268,11 @@ export async function POST(request: NextRequest) {
       accountWorkspaceId = wsInfo?.is_personal ? null : post.workspace_id
     }
 
+    const rawMediaUrls2: string[] = Array.isArray(post.media_urls) ? post.media_urls : []
+    const imageMediaUrls2 = rawMediaUrls2.filter((u: string) => u.startsWith('http') && !u.startsWith('Photo by'))
+
     const destinations = post.destinations || {}
-    const results = await publishToAll(userId, post.platforms, post.content, destinations, accountWorkspaceId, {})
+    const results = await publishToAll(userId, post.platforms, post.content, destinations, accountWorkspaceId, {}, imageMediaUrls2)
     const allFailed  = results.every(r => !r.success)
     const someFailed = results.some(r => !r.success)
 
