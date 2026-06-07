@@ -31,43 +31,55 @@ function extractKeyword(content: string): string {
 }
 
 interface UnsplashResult { url: string; attribution: string }
-const imageCache = new Map<string, UnsplashResult>()
 
-async function fetchUnsplashImage(keyword: string): Promise<UnsplashResult | null> {
+// Fetch a unique Unsplash image. usedUrls tracks already-used photos within
+// this generation run so the same image never appears twice in one batch.
+// Uses urls.small (~400px) instead of urls.regular to stay under Bluesky's 1MB blob limit.
+async function fetchUnsplashImage(keyword: string, usedUrls: Set<string>): Promise<UnsplashResult | null> {
   const key = process.env.UNSPLASH_ACCESS_KEY
   if (!key) return null
-  if (imageCache.has(keyword)) return imageCache.get(keyword) ?? null
-  try {
-    const res = await fetch(
-      `https://api.unsplash.com/photos/random?query=${encodeURIComponent(keyword)}&orientation=landscape&client_id=${key}`,
-      { signal: AbortSignal.timeout(5000) }
-    )
-    if (!res.ok) return null
-    const data = await res.json() as {
-      urls?: { regular?: string }
-      user?: { name?: string; links?: { html?: string } }
-      links?: { download_location?: string }
-    }
-    const url = data?.urls?.regular
-    if (!url) return null
 
-    const photographerName = data?.user?.name ?? 'Unknown'
-    const photographerUrl  = data?.user?.links?.html ?? 'https://unsplash.com'
-    // Required by Unsplash API guidelines: trigger download tracking
-    const downloadLocation = data?.links?.download_location
-    if (downloadLocation) {
-      fetch(`${downloadLocation}?client_id=${key}`, { signal: AbortSignal.timeout(3000) }).catch(() => {})
-    }
+  // Try up to 3 times to get an image we haven't used yet
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      // Add a random seed on retries so Unsplash gives a different photo
+      const seed = attempt > 0 ? `&seed=${Date.now()}${attempt}` : ''
+      const res = await fetch(
+        `https://api.unsplash.com/photos/random?query=${encodeURIComponent(keyword)}&orientation=landscape&client_id=${key}${seed}`,
+        { signal: AbortSignal.timeout(5000) }
+      )
+      if (!res.ok) return null
+      const data = await res.json() as {
+        urls?: { small?: string; regular?: string }
+        user?: { name?: string; links?: { html?: string } }
+        links?: { download_location?: string }
+      }
+      // Use small (400px, ~200-400KB) to stay under Bluesky's 1MB blob limit
+      const url = data?.urls?.small ?? data?.urls?.regular
+      if (!url) return null
 
-    const result: UnsplashResult = {
-      url,
-      attribution: `Photo by ${photographerName} on Unsplash | ${photographerUrl}`,
+      // If this photo was already used in this batch, try again
+      if (usedUrls.has(url) && attempt < 2) continue
+
+      const photographerName = data?.user?.name ?? 'Unknown'
+      const photographerUrl  = data?.user?.links?.html ?? 'https://unsplash.com'
+      // Required by Unsplash API guidelines: trigger download tracking
+      const downloadLocation = data?.links?.download_location
+      if (downloadLocation) {
+        fetch(`${downloadLocation}?client_id=${key}`, { signal: AbortSignal.timeout(3000) }).catch(() => {})
+      }
+
+      const result: UnsplashResult = {
+        url,
+        attribution: `Photo by ${photographerName} on Unsplash | ${photographerUrl}`,
+      }
+      usedUrls.add(url)
+      return result
+    } catch {
+      return null
     }
-    imageCache.set(keyword, result)
-    return result
-  } catch {
-    return null
   }
+  return null
 }
 
 function parseGeminiJson(text: string): any {
@@ -239,8 +251,15 @@ Emotional tone: ${insights.emotional_tone ?? 'motivated'}${campaignBlock}`
     const allPostIds: string[] = []
     const platformErrors: Record<string, string> = {}
     const platformCounts: Record<string, number> = {}
+    // Track used Unsplash photo URLs across ALL platforms in this run to prevent duplicates
+    const usedImageUrls = new Set<string>()
 
     for (const platform of platforms) {
+      // TikTok requires video content — skip if no video URL is set on the project
+      if (platform === 'tiktok' && !includeVideoUrl) {
+        platformErrors['tiktok'] = 'TikTok skipped: no video URL set on this project. Add a video URL in project settings to post to TikTok.'
+        continue
+      }
       const cfg        = schedule[platform] ?? { posts_per_day: globalPpd, days: [0,1,2,3,4,5,6] }
       const ppd        = Math.min(Math.max(cfg.posts_per_day ?? 1, 1), maxPpd)
       const activeDows = Array.isArray(cfg.days) && cfg.days.length > 0 ? cfg.days : [0,1,2,3,4,5,6]
@@ -326,7 +345,7 @@ Rules:
           let mediaUrls: string[] | undefined
           if (project.include_media) {
             const keyword = extractKeyword(post.content ?? '')
-            const result  = await fetchUnsplashImage(keyword)
+            const result  = await fetchUnsplashImage(keyword, usedImageUrls)
             if (result) mediaUrls = [result.url, result.attribution]
           }
 
