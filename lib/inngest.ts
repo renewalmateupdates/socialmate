@@ -3975,7 +3975,8 @@ Rules:
 
           // Unsplash image helpers (inline, non-fatal) — only used when include_media is true
           interface AutopilotUnsplashResult { url: string; attribution: string }
-          const autopilotImageCache = new Map<string, AutopilotUnsplashResult>()
+          // Track URLs used in this run so we never attach the same image twice
+          const autopilotUsedImageUrls = new Set<string>()
           const autopilotStopWords = new Set(['the','a','an','is','are','was','were','be','been','have','has','had','do','does','did','will','would','could','should','to','of','in','for','on','with','at','by','from','as','it','its','this','that','and','or','but','if','you','we','your','our','my','not','just','so','up','out','down','what','how','when','where','who','why','all','can','get','let','than','then','one','more','some','here','there','i'])
 
           function autopilotExtractKeyword(content: string): string {
@@ -3987,34 +3988,43 @@ Rules:
           async function autopilotFetchUnsplashImage(keyword: string): Promise<AutopilotUnsplashResult | null> {
             const unsplashKey = process.env.UNSPLASH_ACCESS_KEY
             if (!unsplashKey) return null
-            if (autopilotImageCache.has(keyword)) return autopilotImageCache.get(keyword) ?? null
-            try {
-              const res = await fetch(
-                `https://api.unsplash.com/photos/random?query=${encodeURIComponent(keyword)}&orientation=landscape&client_id=${unsplashKey}`,
-                { signal: AbortSignal.timeout(5000) }
-              )
-              if (!res.ok) return null
-              const data = await res.json() as {
-                urls?: { regular?: string }
-                user?: { name?: string; links?: { html?: string } }
-                links?: { download_location?: string }
-              }
-              const url = data?.urls?.regular
-              if (!url) return null
-              const photographerName = data?.user?.name ?? 'Unknown'
-              const photographerUrl = data?.user?.links?.html ?? 'https://unsplash.com'
-              const downloadLocation = data?.links?.download_location
-              if (downloadLocation) {
-                fetch(`${downloadLocation}?client_id=${unsplashKey}`, { signal: AbortSignal.timeout(3000) }).catch(() => {})
-              }
-              const result: AutopilotUnsplashResult = {
-                url,
-                attribution: `Photo by ${photographerName} on Unsplash | ${photographerUrl}`,
-              }
-              autopilotImageCache.set(keyword, result)
-              return result
-            } catch { return null }
+            // Try up to 3 times to get a unique image
+            for (let attempt = 0; attempt < 3; attempt++) {
+              try {
+                const res = await fetch(
+                  `https://api.unsplash.com/photos/random?query=${encodeURIComponent(keyword)}&orientation=landscape&client_id=${unsplashKey}`,
+                  { signal: AbortSignal.timeout(5000) }
+                )
+                if (!res.ok) return null
+                const data = await res.json() as {
+                  id?: string
+                  urls?: { small?: string; regular?: string }
+                  user?: { name?: string; links?: { html?: string } }
+                  links?: { download_location?: string }
+                }
+                // Use small (~400px, <500KB) instead of regular (1-3MB) to stay under Bluesky's 1MB blob limit
+                const url = data?.urls?.small ?? data?.urls?.regular
+                if (!url) return null
+                // Skip if this exact image was already used in this generation run
+                if (autopilotUsedImageUrls.has(url)) continue
+                autopilotUsedImageUrls.add(url)
+                const photographerName = data?.user?.name ?? 'Unknown'
+                const photographerUrl = data?.user?.links?.html ?? 'https://unsplash.com'
+                const downloadLocation = data?.links?.download_location
+                if (downloadLocation) {
+                  fetch(`${downloadLocation}?client_id=${unsplashKey}`, { signal: AbortSignal.timeout(3000) }).catch(() => {})
+                }
+                return {
+                  url,
+                  attribution: `Photo by ${photographerName} on Unsplash | ${photographerUrl}`,
+                }
+              } catch { return null }
+            }
+            return null // all 3 attempts returned already-used images
           }
+
+          // Filter TikTok — SOMA generates text posts only, TikTok requires video
+          const somaPublishPlatforms = platforms.filter((p: string) => p !== 'tiktok')
 
           // Insert posts
           let postsCreated = 0
@@ -4035,11 +4045,13 @@ Rules:
               } catch { /* non-fatal — post still gets created without media */ }
             }
 
+            const postPlatforms = somaPublishPlatforms.length > 0 ? somaPublishPlatforms : [post.platform ?? platforms[0]]
+
             const { data: insertedPost, error: postErr } = await admin.from('posts').insert({
               user_id: project.user_id,
               workspace_id: project.workspace_id,
               content: post.content,
-              platforms: [post.platform ?? platforms[0]],
+              platforms: postPlatforms,
               status: postStatus,
               scheduled_at: base.toISOString(),
               metadata: { source: 'soma_autopilot', project_id: project.id, ingestion_id: ingestion.id, day: post.day, slot: post.slot, content_type: post.content_type },
