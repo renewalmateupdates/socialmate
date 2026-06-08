@@ -260,7 +260,61 @@ export default async function AdminOverviewPage() {
     }
   } catch { /* graceful fallback */ }
 
-  // ── 7. Recent signups ─────────────────────────────────────────────────
+  // ── 7. Signup attribution ─────────────────────────────────────────────
+  interface SourceCount { source: string; count: number }
+  let signupSources: SourceCount[] = []
+  let signupReferrers: SourceCount[] = []
+  let attributedCount = 0
+  let totalTracked = 0
+
+  try {
+    const { data: sourceRows } = await admin
+      .from('user_settings')
+      .select('signup_source, signup_medium, signup_campaign, signup_referrer')
+      .neq('user_id', adminUserId)
+
+    if (sourceRows) {
+      totalTracked = sourceRows.length
+      const sourceMap = new Map<string, number>()
+      const refMap = new Map<string, number>()
+
+      for (const row of sourceRows) {
+        const src = row.signup_source
+        const ref = row.signup_referrer
+
+        if (src) {
+          attributedCount++
+          const label = row.signup_campaign
+            ? `${src} / ${row.signup_campaign}`
+            : row.signup_medium
+            ? `${src} / ${row.signup_medium}`
+            : src
+          sourceMap.set(label, (sourceMap.get(label) ?? 0) + 1)
+        }
+
+        if (ref) {
+          try {
+            const host = new URL(ref).hostname.replace('www.', '')
+            refMap.set(host, (refMap.get(host) ?? 0) + 1)
+          } catch {
+            refMap.set(ref.slice(0, 40), (refMap.get(ref.slice(0, 40)) ?? 0) + 1)
+          }
+        }
+      }
+
+      signupSources = Array.from(sourceMap.entries())
+        .map(([source, count]) => ({ source, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10)
+
+      signupReferrers = Array.from(refMap.entries())
+        .map(([source, count]) => ({ source, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10)
+    }
+  } catch { /* graceful fallback */ }
+
+  // ── 8. Recent signups ─────────────────────────────────────────────────
   interface RecentUser {
     email: string
     plan: string
@@ -534,7 +588,74 @@ export default async function AdminOverviewPage() {
           </section>
         )}
 
-        {/* ── Section 6: Churn signals ─────────────────────────────────── */}
+        {/* ── Section 6: Signup Attribution ───────────────────────────── */}
+        <section>
+          <SectionLabel>Signup Attribution</SectionLabel>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* UTM Sources */}
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <div className="text-sm font-semibold text-gray-300">UTM Sources</div>
+                  <div className="text-xs text-gray-600 mt-0.5">
+                    {attributedCount} attributed / {totalTracked} tracked
+                    {totalTracked > 0 && <span className="ml-1 text-amber-600">({Math.round((attributedCount / totalTracked) * 100)}%)</span>}
+                  </div>
+                </div>
+              </div>
+              {signupSources.length === 0 ? (
+                <p className="text-xs text-gray-600">No UTM data yet — live for new signups.</p>
+              ) : (
+                <div className="space-y-2">
+                  {signupSources.map(({ source, count }) => {
+                    const pct = attributedCount > 0 ? Math.round((count / attributedCount) * 100) : 0
+                    return (
+                      <div key={source}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs text-gray-400 font-mono truncate max-w-[180px]">{source}</span>
+                          <span className="text-xs font-black text-amber-400 ml-2 shrink-0">{count}</span>
+                        </div>
+                        <div className="w-full bg-gray-800 rounded-full h-1.5 overflow-hidden">
+                          <div className="h-full rounded-full bg-amber-500/60" style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Referrers */}
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+              <div className="mb-4">
+                <div className="text-sm font-semibold text-gray-300">Referrer Domains</div>
+                <div className="text-xs text-gray-600 mt-0.5">page they came from before signing up</div>
+              </div>
+              {signupReferrers.length === 0 ? (
+                <p className="text-xs text-gray-600">No referrer data yet — live for new signups.</p>
+              ) : (
+                <div className="space-y-2">
+                  {signupReferrers.map(({ source, count }) => {
+                    const pct = signupReferrers[0]?.count > 0 ? Math.round((count / signupReferrers[0].count) * 100) : 0
+                    return (
+                      <div key={source}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs text-gray-400 font-mono truncate max-w-[180px]">{source}</span>
+                          <span className="text-xs font-black text-sky-400 ml-2 shrink-0">{count}</span>
+                        </div>
+                        <div className="w-full bg-gray-800 rounded-full h-1.5 overflow-hidden">
+                          <div className="h-full rounded-full bg-sky-500/60" style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* ── Section 7: Churn signals ─────────────────────────────────── */}
         <section>
           <SectionLabel>Churn Signals</SectionLabel>
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
@@ -565,7 +686,7 @@ export default async function AdminOverviewPage() {
           </div>
         </section>
 
-        {/* ── Section 6: Recent signups ────────────────────────────────── */}
+        {/* ── Section 8: Recent signups ────────────────────────────────── */}
         <section>
           <SectionLabel>Recent Signups</SectionLabel>
           {recentUsers.length === 0 ? (

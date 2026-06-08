@@ -26,22 +26,24 @@ export async function GET() {
   const since = new Date()
   since.setDate(since.getDate() - 364)
 
+  // Include scheduled posts so SOMA users who scheduled a full week in one session
+  // still get streak credit for those days (not just days with published posts).
   const { data: posts, error } = await admin
     .from('posts')
-    .select('published_at, platforms')
+    .select('published_at, scheduled_at, platforms')
     .eq('user_id', user.id)
-    .in('status', ['published', 'partial'])
-    .not('published_at', 'is', null)
-    .gte('published_at', since.toISOString())
-    .order('published_at', { ascending: true })
+    .in('status', ['published', 'partial', 'scheduled'])
+    .gte('scheduled_at', since.toISOString())
+    .order('scheduled_at', { ascending: true })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Count posts per calendar day (user's local date via UTC — good enough for this use case)
+  // Count posts per calendar day — prefer scheduled_at as the date anchor so SOMA users
+  // who bulk-schedule a week in one session see those days lit up immediately.
   const dayMap: Record<string, number> = {}
   for (const p of posts ?? []) {
-    const day = p.published_at.slice(0, 10) // YYYY-MM-DD
-    dayMap[day] = (dayMap[day] ?? 0) + 1
+    const day = (p.scheduled_at || p.published_at || '').slice(0, 10) // YYYY-MM-DD
+    if (day) dayMap[day] = (dayMap[day] ?? 0) + 1
   }
 
   // Calculate current streak (consecutive days going back from today)
