@@ -2,6 +2,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Toast from '@/components/Toast'
 
 type Campaign = {
   id: string
@@ -604,12 +605,7 @@ export default function CampaignDetailPage() {
         )}
       </div>
 
-      {/* Toast */}
-      {toast && (
-        <div className="fixed bottom-8 right-8 bg-gray-800 border border-gray-700 text-white text-sm font-semibold px-4 py-3 rounded-2xl shadow-2xl z-50 animate-fade-in">
-          {toast}
-        </div>
-      )}
+      <Toast message={toast ?? ''} />
     </div>
   )
 }

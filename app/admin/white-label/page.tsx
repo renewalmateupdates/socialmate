@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import Toast from '@/components/Toast'
 
 interface WLRequest {
   user_id: string
@@ -242,14 +243,7 @@ export default function AdminWhiteLabelPage() {
 
       </div>
 
-      {/* Toast */}
-      {toast && (
-        <div
-          className="fixed bottom-6 right-6 bg-gray-900 text-white text-sm font-medium px-4 py-3 rounded-2xl shadow-xl z-50 max-w-sm"
-          style={{ bottom: 'max(24px, env(safe-area-inset-bottom, 24px))' }}>
-          {toast}
-        </div>
-      )}
+      <Toast message={toast ?? ''} />
     </div>
   )
 }
