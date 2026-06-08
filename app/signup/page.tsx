@@ -36,6 +36,21 @@ function SignupForm() {
   useEffect(() => {
     const ref = searchParams.get('ref')
     if (ref) setRefCode(ref)
+
+    // Capture UTM params + page referrer as short-lived cookies for post-signup attribution.
+    // Auth callback reads these on new account creation and persists to user_settings.
+    const utmSource = searchParams.get('utm_source')
+    const utmMedium = searchParams.get('utm_medium')
+    const utmCampaign = searchParams.get('utm_campaign')
+    const referrer = typeof document !== 'undefined' ? document.referrer : ''
+    const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toUTCString()
+    if (utmSource) document.cookie = `sm_utm_source=${encodeURIComponent(utmSource)};path=/;expires=${expires};SameSite=Lax`
+    if (utmMedium) document.cookie = `sm_utm_medium=${encodeURIComponent(utmMedium)};path=/;expires=${expires};SameSite=Lax`
+    if (utmCampaign) document.cookie = `sm_utm_campaign=${encodeURIComponent(utmCampaign)};path=/;expires=${expires};SameSite=Lax`
+    // Only store external referrers (skip self-referrals from the same domain)
+    if (referrer && !referrer.includes('socialmate.studio')) {
+      document.cookie = `sm_referrer=${encodeURIComponent(referrer)};path=/;expires=${expires};SameSite=Lax`
+    }
   }, [searchParams])
 
   const handleGoogleSignup = async () => {
