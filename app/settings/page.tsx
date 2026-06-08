@@ -563,7 +563,7 @@ function SettingsInner() {
       <div className="min-h-dvh bg-theme flex">
         <Sidebar />
         <div className="md:ml-56 flex-1 flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-black dark:border-amber-500 border-t-transparent rounded-full animate-spin" />
         </div>
       </div>
     )
@@ -892,7 +892,7 @@ function SettingsInner() {
             <div className="space-y-4">
               {referralLoading ? (
                 <div className="flex items-center justify-center py-12">
-                  <div className="w-6 h-6 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                  <div className="w-6 h-6 border-2 border-black dark:border-amber-500 border-t-transparent rounded-full animate-spin" />
                 </div>
               ) : (
                 <>
@@ -2221,7 +2221,7 @@ export default function Settings() {
   return (
     <Suspense fallback={
       <div className="min-h-dvh bg-theme flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-black dark:border-amber-500 border-t-transparent rounded-full animate-spin" />
       </div>
     }>
       <SettingsInner />

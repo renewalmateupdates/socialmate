@@ -379,7 +379,7 @@ export default function LinkInBio() {
       <div className="min-h-dvh bg-theme flex">
         <Sidebar />
         <div className="md:ml-56 flex-1 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black dark:border-amber-500" />
         </div>
       </div>
     )

@@ -61,7 +61,7 @@ export default function EvergreenPage() {
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center bg-theme">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black dark:border-amber-500" />
       </div>
     )
   }

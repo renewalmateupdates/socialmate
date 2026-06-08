@@ -49,7 +49,7 @@ function InviteInner() {
       <div className="bg-surface rounded-2xl border border-theme p-8 max-w-md w-full text-center shadow-sm">
 
         {status === 'loading' && (
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto" />
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black dark:border-amber-500 mx-auto" />
         )}
 
         {status === 'ready' && (
@@ -75,7 +75,7 @@ function InviteInner() {
 
         {status === 'accepting' && (
           <>
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto mb-4" />
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black dark:border-amber-500 mx-auto mb-4" />
             <p className="text-gray-500 dark:text-gray-400 text-sm">Accepting invitation...</p>
           </>
         )}
@@ -107,7 +107,7 @@ export default function InvitePage() {
   return (
     <Suspense fallback={
       <div className="min-h-dvh bg-theme flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black dark:border-amber-500" />
       </div>
     }>
       <InviteInner />
