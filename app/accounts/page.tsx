@@ -663,7 +663,7 @@ export default function Accounts() {
   return (
     <Suspense fallback={
       <div className="min-h-dvh bg-theme flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black" />
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black dark:border-amber-500" />
       </div>
     }>
       <AccountsInner />

@@ -108,7 +108,7 @@ export default function AchievementsPage() {
     <div className="min-h-dvh bg-theme flex">
       <Sidebar />
       <div className="flex-1 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-black dark:border-amber-500 border-t-transparent rounded-full animate-spin" />
       </div>
     </div>
   )

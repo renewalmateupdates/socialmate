@@ -68,7 +68,7 @@ export default function ResetPassword() {
           {/* R2: still checking session */}
           {sessionChecking && (
             <div className="bg-surface border border-theme rounded-3xl p-10 text-center">
-              <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+              <div className="w-8 h-8 border-2 border-black dark:border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
               <p className="text-sm text-gray-400 dark:text-gray-500">Verifying your reset link...</p>
             </div>
           )}
