@@ -130,6 +130,36 @@ export async function GET(request: NextRequest) {
       } catch (err) {
         console.error('Welcome email error:', err)
       }
+
+      // UTM / referrer attribution — read cookies set by signup page, persist on first sign-in only
+      if (Date.now() - new Date(session.user.created_at).getTime() < 60_000) {
+        try {
+          const utmSource = cookieStore.get('sm_utm_source')?.value
+          const utmMedium = cookieStore.get('sm_utm_medium')?.value
+          const utmCampaign = cookieStore.get('sm_utm_campaign')?.value
+          const smReferrer = cookieStore.get('sm_referrer')?.value
+
+          if (utmSource || utmMedium || utmCampaign || smReferrer) {
+            await adminSupabase
+              .from('user_settings')
+              .upsert({
+                user_id: session.user.id,
+                ...(utmSource   && { signup_source:   decodeURIComponent(utmSource)   }),
+                ...(utmMedium   && { signup_medium:   decodeURIComponent(utmMedium)   }),
+                ...(utmCampaign && { signup_campaign: decodeURIComponent(utmCampaign) }),
+                ...(smReferrer  && { signup_referrer: decodeURIComponent(smReferrer)  }),
+              }, { onConflict: 'user_id' })
+          }
+
+          // Clean up attribution cookies regardless
+          cookieStore.delete('sm_utm_source')
+          cookieStore.delete('sm_utm_medium')
+          cookieStore.delete('sm_utm_campaign')
+          cookieStore.delete('sm_referrer')
+        } catch (err) {
+          console.error('UTM attribution error:', err)
+        }
+      }
  
       const { data: profile } = await supabase
         .from('profiles')
