@@ -907,10 +907,10 @@
     }
   },
   "app_bio_public": {
-    "not_found": "Page not found",
-    "not_found_sub": "This profile doesn't exist or has been removed.",
-    "no_links": "No links yet",
-    "made_with": "Made with SocialMate"
+    "not_found": "Página não encontrada",
+    "not_found_sub": "Este perfil não existe ou foi removido.",
+    "no_links": "Nenhum link ainda",
+    "made_with": "Feito com SocialMate"
   },
   "app_analytics": {
     "title": "Análises",
@@ -990,48 +990,48 @@
     "integrations": "🔗 Integrations"
   },
   "app_streak": {
-    "title": "Posting Streak",
-    "current_streak": "Current streak",
-    "longest_streak": "Longest streak",
-    "total_posts": "Total posts",
-    "active_days": "Active days",
-    "days": "days",
-    "no_streak": "No streak yet",
-    "start_streak": "Post today to start your streak!",
-    "keep_going": "Keep it going!",
-    "streak_broken": "Streak broken"
+    "title": "Sequência de postagens",
+    "current_streak": "Sequência atual",
+    "longest_streak": "Maior sequência",
+    "total_posts": "Total de postagens",
+    "active_days": "Dias ativos",
+    "days": "dias",
+    "no_streak": "Nenhuma sequência ainda",
+    "start_streak": "Poste hoje para começar sua sequência!",
+    "keep_going": "Continue assim!",
+    "streak_broken": "Sequência quebrada"
   },
   "app_links": {
-    "title": "Link Shortener",
-    "create_link": "Create short link",
-    "your_links": "Your links",
-    "no_links": "No short links yet",
-    "no_links_sub": "Create your first short link",
-    "copy_link": "Copy link",
-    "delete_link": "Delete link",
-    "clicks": "clicks",
-    "created": "Created",
-    "original_url": "Original URL",
-    "short_url": "Short URL"
+    "title": "Encurtador de links",
+    "create_link": "Criar link curto",
+    "your_links": "Seus links",
+    "no_links": "Nenhum link curto ainda",
+    "no_links_sub": "Crie seu primeiro link curto",
+    "copy_link": "Copiar link",
+    "delete_link": "Excluir link",
+    "clicks": "cliques",
+    "created": "Criado",
+    "original_url": "URL original",
+    "short_url": "URL curta"
   },
   "app_activity": {
-    "title": "Activity",
-    "no_activity": "No activity yet",
-    "no_activity_sub": "Workspace events will appear here",
-    "recent_activity": "Recent Activity",
-    "just_now": "just now",
-    "view_all": "View all"
+    "title": "Atividade",
+    "no_activity": "Nenhuma atividade ainda",
+    "no_activity_sub": "Os eventos do workspace aparecerão aqui",
+    "recent_activity": "Atividade recente",
+    "just_now": "agora mesmo",
+    "view_all": "Ver tudo"
   },
   "app_media": {
-    "title": "Media Library",
-    "upload": "Upload files",
-    "no_media": "No media files yet",
-    "no_media_sub": "Upload images, videos and files",
-    "file_size": "File size",
-    "uploaded_at": "Uploaded",
-    "copy_url": "Copy URL",
-    "delete_file": "Delete file",
-    "uploading": "Uploading…"
+    "title": "Biblioteca de mídia",
+    "upload": "Enviar arquivos",
+    "no_media": "Nenhum arquivo de mídia ainda",
+    "no_media_sub": "Envie imagens, vídeos e arquivos",
+    "file_size": "Tamanho do arquivo",
+    "uploaded_at": "Enviado",
+    "copy_url": "Copiar URL",
+    "delete_file": "Excluir arquivo",
+    "uploading": "Enviando…"
   },
   "app_ai_features": {
     "title": "AI Features",
@@ -1062,15 +1062,15 @@
     "copy": "Copy"
   },
   "app_agents": {
-    "title": "Agents",
-    "subtitle": "Autonomous tools that work while you sleep. Each agent handles a specific job — from outreach to intel — so you can focus on creating.",
-    "legend_free": "Free — no credits required",
-    "legend_credits": "Credits-based",
-    "legend_coming_soon": "Coming soon",
-    "section_live": "Live Now",
-    "section_coming": "Coming Soon",
-    "launch_agent": "Launch Agent →",
-    "coming_soon": "Coming Soon"
+    "title": "Agentes",
+    "subtitle": "Ferramentas autônomas que trabalham enquanto você dorme. Cada agente cuida de um trabalho específico — do alcance à inteligência — para que você possa se concentrar em criar.",
+    "legend_free": "Grátis — sem créditos",
+    "legend_credits": "Baseado em créditos",
+    "legend_coming_soon": "Em breve",
+    "section_live": "Disponível agora",
+    "section_coming": "Em breve",
+    "launch_agent": "Iniciar agente →",
+    "coming_soon": "Em breve"
   },
   "app_soma_landing": {
     "title": "SOMA Content Intelligence",
@@ -1650,17 +1650,17 @@
     "failed_load": "Failed to load doctrines"
   },
   "app_settings_scheduling_tab": {
-    "title": "⏰ Scheduling Window",
-    "desc": "Posts auto-scheduled via Smart Queue will only land within this window. Times are in your local timezone.",
-    "start_time": "Start time",
-    "end_time": "End time",
-    "dnd_title": "🔕 Do Not Disturb",
-    "dnd_desc": "Mute all app notifications during these hours",
-    "dnd_start": "DND start",
-    "dnd_end": "DND end",
-    "save": "Save",
-    "saving": "Saving...",
-    "saved": "Saved ✓"
+    "title": "⏰ Janela de agendamento",
+    "desc": "As postagens agendadas automaticamente via Smart Queue serão publicadas apenas nesta janela. Os horários são no seu fuso horário local.",
+    "start_time": "Hora de início",
+    "end_time": "Hora de término",
+    "dnd_title": "🔕 Não perturbar",
+    "dnd_desc": "Silenciar todas as notificações do app durante essas horas",
+    "dnd_start": "Início do DND",
+    "dnd_end": "Fim do DND",
+    "save": "Salvar",
+    "saving": "Salvando...",
+    "saved": "Salvo ✓"
   },
   "app_soma_weekly": {
     "title": "⚡ This Week's Ingestion",
