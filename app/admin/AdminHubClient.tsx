@@ -21,6 +21,7 @@ const NAV_CARDS = [
   { emoji: '🔒', label: 'Account Jail',   sub: 'Cooling-period platform accounts', href: '/admin/platform-jail'  },
   { emoji: '🏷️', label: 'White Label',    sub: 'Review & approve white label requests', href: '/admin/white-label' },
   { emoji: '🌈', label: 'IRIS Dispatch',  sub: 'Send biweekly build-in-public newsletter', href: '/admin/iris' },
+  { emoji: '🔴', label: 'Failure Log',   sub: 'Post failures with per-platform errors',   href: '/admin/failure-log' },
 ]
 
 export default function AdminHubClient() {
