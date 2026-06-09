@@ -18,27 +18,51 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  const days = parseInt(req.nextUrl.searchParams.get('days') ?? '7', 10)
   const since = new Date()
+  since.setDate(since.getDate() - Math.min(days, 30))
   since.setHours(0, 0, 0, 0)
 
   const { data: posts } = await getSupabaseAdmin()
     .from('posts')
-    .select('id, status, platforms, platform_post_ids, scheduled_at, content, user_id')
+    .select('id, status, platforms, platform_post_ids, platform_errors, scheduled_at, content, user_id')
     .in('status', ['partial', 'failed'])
     .gte('scheduled_at', since.toISOString())
-    .order('scheduled_at', { ascending: true })
-    .limit(20)
+    .order('scheduled_at', { ascending: false })
+    .limit(50)
 
-  const summary = (posts ?? []).map(p => ({
-    id: p.id,
-    status: p.status,
-    scheduled_at: p.scheduled_at,
-    platforms: p.platforms,
-    platform_post_ids: p.platform_post_ids,
-    succeeded: Object.keys(p.platform_post_ids ?? {}).join(', ') || 'none',
-    failed: (p.platforms ?? []).filter((pl: string) => !p.platform_post_ids?.[pl]).join(', ') || 'none',
-    preview: (p.content ?? '').slice(0, 60),
-  }))
+  const summary = (posts ?? []).map(p => {
+    const failedPlatforms = (p.platforms ?? []).filter((pl: string) => !p.platform_post_ids?.[pl])
+    const errors: Record<string, string> = {}
+    for (const pl of failedPlatforms) {
+      errors[pl] = p.platform_errors?.[pl] ?? 'No error message recorded'
+    }
+    return {
+      id: p.id,
+      status: p.status,
+      scheduled_at: p.scheduled_at,
+      platforms: p.platforms,
+      succeeded: Object.keys(p.platform_post_ids ?? {}).join(', ') || 'none',
+      failed: failedPlatforms.join(', ') || 'none',
+      errors,
+      preview: (p.content ?? '').slice(0, 80),
+    }
+  })
 
-  return NextResponse.json({ count: summary.length, posts: summary })
+  // Aggregate error messages by platform for a quick summary
+  const errorSummary: Record<string, Record<string, number>> = {}
+  for (const p of summary) {
+    for (const [pl, msg] of Object.entries(p.errors)) {
+      if (!errorSummary[pl]) errorSummary[pl] = {}
+      const key = (msg as string).slice(0, 80)
+      errorSummary[pl][key] = (errorSummary[pl][key] ?? 0) + 1
+    }
+  }
+
+  return NextResponse.json({
+    since: since.toISOString(),
+    count: summary.length,
+    error_summary: errorSummary,
+    posts: summary,
+  })
 }
