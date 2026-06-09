@@ -173,16 +173,23 @@ export async function publishToTwitter(
     ? content.slice(0, MAX_TWEET_LENGTH - 1) + '…'
     : content
 
-  // Refresh token if expired or expiring within 5 minutes
+  // Refresh token if expired or expiring within 5 minutes.
+  // Also refresh proactively if expires_at is null — means we don't know the expiry,
+  // and Twitter OAuth2 tokens DO expire (~2h). Better to refresh than hit a silent 401.
   let accessToken = account.access_token
   const expiresAt = account.expires_at ? new Date(account.expires_at) : null
   const fiveMinFromNow = new Date(Date.now() + 5 * 60 * 1000)
 
-  if (account.refresh_token && expiresAt && expiresAt < fiveMinFromNow) {
+  const shouldRefresh =
+    account.refresh_token &&
+    (expiresAt === null || expiresAt < fiveMinFromNow)
+
+  if (shouldRefresh) {
     try {
-      accessToken = await refreshTwitterToken(account.refresh_token, account.id)
+      accessToken = await refreshTwitterToken(account.refresh_token!, account.id)
     } catch (e) {
-      throw new Error('X session expired. Please reconnect your X account in Accounts → X.')
+      // Refresh failed — try with the existing access token; will surface a 401 below if truly expired
+      console.warn('[Twitter] Proactive token refresh failed, attempting with stored token:', e)
     }
   }
 
@@ -236,6 +243,29 @@ export async function publishToTwitter(
     },
     body: JSON.stringify(tweetBody),
   })
+
+  if (!res.ok && res.status === 401 && account.refresh_token && !shouldRefresh) {
+    // Token was not refreshed above (had a valid-looking expiry) but got 401 anyway.
+    // Attempt one token refresh and retry the post.
+    try {
+      accessToken = await refreshTwitterToken(account.refresh_token, account.id)
+      const retryRes = await fetch('https://api.twitter.com/2/tweets', {
+        method: 'POST',
+        headers: {
+          Authorization:  `Bearer ${accessToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(tweetBody),
+      })
+      if (retryRes.ok) {
+        const { data } = await retryRes.json()
+        console.log(`[Twitter] Published tweet (after token retry): ${data.id}`)
+        return data.id
+      }
+    } catch {
+      // Refresh+retry also failed — fall through to the normal error handling
+    }
+  }
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))

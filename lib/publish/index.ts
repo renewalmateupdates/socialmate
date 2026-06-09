@@ -62,6 +62,11 @@ export async function publishToAll(
         case 'twitter':
           postId = await publishToTwitter(userId, content, workspaceId, selectedAccountIds['twitter'], media)
           break
+        case 'tiktok':
+          throw new Error(
+            'TikTok only supports video posts — text scheduling is not available for TikTok. ' +
+            'Use TikTok Studio (/tiktok/studio) to upload and schedule videos directly.'
+          )
         default:
           results.push({
             platform,
