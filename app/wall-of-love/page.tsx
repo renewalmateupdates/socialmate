@@ -47,21 +47,21 @@ export default function WallOfLove() {
 
         {hasTestimonials ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-16">
-            {TESTIMONIALS.map((t, i) => (
+            {TESTIMONIALS.map((testimonial, i) => (
               <div key={i} className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6 flex flex-col gap-4">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-xl flex-shrink-0">
-                    {t.avatar}
+                    {testimonial.avatar}
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{t.name}</p>
-                    {t.role && <p className="text-xs text-gray-400 dark:text-gray-500">{t.role}</p>}
-                    {t.handle && (
-                      <p className="text-xs text-gray-400 dark:text-gray-500">{t.handle} · {t.platform}</p>
+                    <p className="text-sm font-bold text-gray-900 dark:text-gray-100">{testimonial.name}</p>
+                    {testimonial.role && <p className="text-xs text-gray-400 dark:text-gray-500">{testimonial.role}</p>}
+                    {testimonial.handle && (
+                      <p className="text-xs text-gray-400 dark:text-gray-500">{testimonial.handle} · {testimonial.platform}</p>
                     )}
                   </div>
                 </div>
-                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">&ldquo;{t.quote}&rdquo;</p>
+                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">&ldquo;{testimonial.quote}&rdquo;</p>
                 <div className="text-amber-400 text-sm tracking-wider">{STAR.repeat(5)}</div>
               </div>
             ))}

@@ -530,25 +530,25 @@ export default function GlossaryPage() {
     const q = search.trim().toLowerCase()
     if (!q) return TERMS
     return TERMS.filter(
-      (t) =>
-        t.term.toLowerCase().includes(q) ||
-        t.definition.toLowerCase().includes(q),
+      (term) =>
+        term.term.toLowerCase().includes(q) ||
+        term.definition.toLowerCase().includes(q),
     )
   }, [search])
 
-  const visibleLetters = useMemo(() => new Set(filtered.map((t) => t.letter)), [filtered])
+  const visibleLetters = useMemo(() => new Set(filtered.map((term) => term.letter)), [filtered])
 
   // Group filtered terms by letter
   const grouped = useMemo(() => {
     const map: Record<string, typeof TERMS> = {}
-    for (const t of filtered) {
-      if (!map[t.letter]) map[t.letter] = []
-      map[t.letter].push(t)
+    for (const term of filtered) {
+      if (!map[term.letter]) map[term.letter] = []
+      map[term.letter].push(term)
     }
     return map
   }, [filtered])
 
-  const presentLetters = Array.from(new Set(filtered.map((t) => t.letter))).sort()
+  const presentLetters = Array.from(new Set(filtered.map((term) => term.letter))).sort()
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white">
