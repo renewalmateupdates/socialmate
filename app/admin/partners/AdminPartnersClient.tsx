@@ -139,6 +139,7 @@ export default function AdminPartnersClient() {
     setSelected(a)
     setWarnResult(null)
     setAllPromosResult(null)
+    setConfirmRemove(false)
   }
 
   // Invite form
@@ -149,6 +150,9 @@ export default function AdminPartnersClient() {
   // Action
   const [actionLoading, setActionLoading] = useState(false)
   const [actionNote, setActionNote]       = useState('')
+  const [confirmRemove, setConfirmRemove] = useState(false)
+  const [removeLoading, setRemoveLoading] = useState(false)
+  const [deletingFeedbackId, setDeletingFeedbackId] = useState<string | null>(null)
 
   // Launch email
   const [launchEmailSending, setLaunchEmailSending] = useState(false)
@@ -256,6 +260,21 @@ export default function AdminPartnersClient() {
     })
     if (res.ok) { setSelected(null); setActionNote(''); await fetchAll() }
     setActionLoading(false)
+  }
+
+  async function removeAffiliate(id: string) {
+    setRemoveLoading(true)
+    const res = await fetch(`/api/partners/stats?id=${id}`, { method: 'DELETE' })
+    if (res.ok) { setSelected(null); setConfirmRemove(false); await fetchAll() }
+    else { alert('Failed to remove affiliate — check console'); }
+    setRemoveLoading(false)
+  }
+
+  async function deleteFeedback(id: string) {
+    setDeletingFeedbackId(id)
+    await fetch(`/api/feedback?id=${id}`, { method: 'DELETE' })
+    setFeedback(prev => prev.filter(f => f.id !== id))
+    setDeletingFeedbackId(null)
   }
 
   async function approvePayout(id: string) {
@@ -702,9 +721,25 @@ export default function AdminPartnersClient() {
                             <span style={{ fontSize: 12, color: muted }}>from {item.email}</span>
                           )}
                         </div>
-                        <span style={{ fontSize: 11, color: '#4b5563' }}>
-                          {new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                        </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <span style={{ fontSize: 11, color: '#4b5563' }}>
+                            {new Date(item.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                          <button
+                            onClick={() => deleteFeedback(item.id)}
+                            disabled={deletingFeedbackId === item.id}
+                            title="Delete feedback"
+                            style={{
+                              background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)',
+                              color: '#ef4444', borderRadius: 6, padding: '3px 8px',
+                              fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                              opacity: deletingFeedbackId === item.id ? 0.5 : 1,
+                              fontFamily: 'inherit',
+                            }}
+                          >
+                            {deletingFeedbackId === item.id ? '…' : '🗑'}
+                          </button>
+                        </div>
                       </div>
                       <p style={{ fontSize: 13, color: '#d1d5db', margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{item.message}</p>
                     </div>
@@ -976,6 +1011,54 @@ export default function AdminPartnersClient() {
                 >
                   {selected.status === 'terminated' ? 'Account Deactivated' : 'Deactivate Account'}
                 </button>
+
+                {/* ── Permanent Remove ── */}
+                {!confirmRemove ? (
+                  <button
+                    onClick={() => setConfirmRemove(true)}
+                    style={{
+                      width: '100%', padding: '9px', borderRadius: 8,
+                      border: '1px solid rgba(239,68,68,0.3)', background: 'transparent',
+                      color: '#ef4444', fontSize: 12, fontWeight: 700,
+                      cursor: 'pointer', fontFamily: 'inherit', opacity: 0.7,
+                    }}
+                  >
+                    🗑 Remove Entirely
+                  </button>
+                ) : (
+                  <div style={{ border: '1px solid rgba(239,68,68,0.4)', borderRadius: 8, padding: 12 }}>
+                    <p style={{ margin: '0 0 10px', fontSize: 12, color: '#f87171', fontWeight: 600, lineHeight: 1.5 }}>
+                      Permanently delete {selected.full_name || selected.email}? This removes them from the partner list and wipes all related promo codes, conversions, and payouts. Cannot be undone.
+                    </p>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button
+                        onClick={() => removeAffiliate(selected.id)}
+                        disabled={removeLoading}
+                        style={{
+                          flex: 1, padding: '8px', borderRadius: 8, border: 'none',
+                          background: '#ef4444', color: '#fff',
+                          fontSize: 12, fontWeight: 700,
+                          cursor: removeLoading ? 'not-allowed' : 'pointer',
+                          opacity: removeLoading ? 0.6 : 1,
+                          fontFamily: 'inherit',
+                        }}
+                      >
+                        {removeLoading ? 'Removing...' : 'Yes, Delete Permanently'}
+                      </button>
+                      <button
+                        onClick={() => setConfirmRemove(false)}
+                        style={{
+                          padding: '8px 14px', borderRadius: 8, border: `1px solid ${border}`,
+                          background: 'transparent', color: muted,
+                          fontSize: 12, fontWeight: 700,
+                          cursor: 'pointer', fontFamily: 'inherit',
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
