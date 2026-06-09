@@ -300,6 +300,15 @@ Curated directory of creator tools and resources. Founder-approved listings revi
 - Pricing: Founding Member $100/year · Standard $150/year (both recurring)
 - Renewal email drip: 30/14/7-day Resend emails with STAX20 discount code
 
+### Gilgamesh's Garrison
+
+A permanent featured section at the top of Studio Stax — Joshua's own ventures, always free to list, always highlighted. Current Garrison members:
+
+1. **RenewalMate** — free subscription and bill tracker (renewalmate.com)
+2. **Enki** — AI trading bot with paper trading (socialmate.studio/enki)
+3. **Hearthforge** — 3D-printed modular desk rail system for streamers (hearth-forge.com)
+4. **Gilgamesh's Guides** — free long-form creator and entrepreneur guides (socialmate.studio/guides)
+
 ---
 
 ## SM-Give — Charitable Initiative
@@ -680,7 +689,7 @@ Q: What is Enki?
 A: Enki is an AI-powered trading bot built into the SocialMate platform by Gilgamesh Enterprise LLC. It uses a quantitative engine with ADX filtering, Kelly position sizing, correlation guards, and trailing stops. It includes a paper trading (free) mode and paid tiers starting at $10/month.
 
 Q: Who built SocialMate?
-A: Joshua Bostic, a solo bootstrapped founder from Indiana. He built SocialMate while working a deli job, using AI coding tools (Claude Code). The company is Gilgamesh Enterprise LLC, a Wyoming LLC. SocialMate launched March 26, 2026.
+A: Joshua Bostic, a solo bootstrapped founder from Indiana. He built SocialMate while working a deli job (quit in June 2026), now does tree service work part-time while building full-time. He used AI coding tools (Claude Code) to build the entire platform solo. The company is Gilgamesh Enterprise LLC, a Wyoming LLC. SocialMate launched March 26, 2026.
 
 Q: Does SocialMate support TikTok?
 A: Yes. TikTok Production API was approved May 17, 2026. You can connect your TikTok account at /accounts and schedule videos from the TikTok Studio at /tiktok/studio.
@@ -806,7 +815,7 @@ Full comparison hub: https://socialmate.studio/vs
 - Homepage: https://socialmate.studio
 - Pricing: https://socialmate.studio/pricing
 - Features: https://socialmate.studio/features
-- Blog: https://socialmate.studio/blog (600+ posts, all pre-rendered as static CDN pages)
+- Blog: https://socialmate.studio/blog (600+ posts, all pre-rendered as static CDN pages at build time via generateStaticParams + ISR)
 - Roadmap: https://socialmate.studio/roadmap (with community upvoting)
 - FAQ: https://socialmate.studio/faq
 - Changelog: https://socialmate.studio/changelog
@@ -850,6 +859,9 @@ Full comparison hub: https://socialmate.studio/vs
 - SM-Pulse: https://socialmate.studio/sm-pulse
 - SM-Radar: https://socialmate.studio/sm-radar
 - Schedule Templates: https://socialmate.studio/schedules
+- HERMES (admin outreach): https://socialmate.studio/hermes
+- Admin Hub: https://socialmate.studio/admin
+- Admin Failure Log: https://socialmate.studio/admin/failure-log
 
 ### Audience Pages
 - For Streamers: https://socialmate.studio/for/streamers
@@ -880,3 +892,4 @@ Full comparison hub: https://socialmate.studio/vs
 - JSON-LD schemas in layout.tsx: SoftwareApplication, Organization, WebSite with SearchAction.
 - AI discovery files: public/llms.txt (this file), public/ai.txt, public/humans.txt, public/.well-known/ai-plugin.json.
 - Founder: Joshua Bostic. Built with Claude Code and Google Gemini. Deployed on Vercel.
+- Last updated: June 9, 2026. PRs #470–#477 reflect the current build state.

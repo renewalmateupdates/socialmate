@@ -21,6 +21,17 @@ interface ChangelogEntry {
 
 const CHANGELOG: ChangelogEntry[] = [
   {
+    date: 'June 9, 2026',
+    version: 'Admin: Remove Entirely, Feedback Delete, Failure Log, Garrison',
+    changes: [
+      { type: 'New',      text: 'Admin Failure Log at /admin/failure-log — view all failed and partial posts with per-platform error messages, day filter (1/7/14/30 days), platform filter pills, and error summary grouped by message. Expandable per-post detail shows the exact error string stored in platform_errors JSONB.' },
+      { type: 'New',      text: 'Affiliates: Remove Entirely — the /admin/partners side drawer now has a permanent delete option with two-step confirm. Cascades through promo codes, conversions, payouts, and notifications before deleting the profile row.' },
+      { type: 'New',      text: 'Feedback delete — 🗑 button added to every feedback card in the /admin/partners Feedback tab. Removes the row instantly from local state without a page reload.' },
+      { type: 'Fixed',    text: 'Studio Stax ISR cache lowered from 60 minutes to 60 seconds — deleted or suspended listings now disappear from the public directory within 60 seconds instead of up to an hour.' },
+      { type: 'New',      text: "Gilgamesh's Garrison expanded — Hearthforge (3D-printed desk rail system) and Gilgamesh's Guides (free creator guides) added to the permanent featured section at the top of Studio Stax. Garrison now shows 4 entries: RenewalMate · Enki · Hearthforge · Gilgamesh's Guides." },
+    ],
+  },
+  {
     date: 'June 5, 2026',
     version: 'Loading Skeletons Sweep + Build Fix',
     changes: [
