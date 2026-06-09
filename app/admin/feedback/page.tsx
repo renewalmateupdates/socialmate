@@ -34,6 +34,8 @@ export default function AdminFeedbackPage() {
   const [replyMessage, setReplyMessage] = useState('')
   const [replyLoading, setReplyLoading] = useState(false)
   const [replySuccess, setReplySuccess] = useState(false)
+  const [deleteLoading, setDeleteLoading] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
 
   function showToast(msg: string, ok = true) {
@@ -60,6 +62,23 @@ export default function AdminFeedbackPage() {
   }
 
   useEffect(() => { load() }, [])
+
+  async function handleDelete(id: string) {
+    setDeleteLoading(true)
+    try {
+      const res = await fetch(`/api/feedback?id=${id}`, { method: 'DELETE' })
+      if (res.ok) {
+        showToast('Feedback deleted')
+        setSelected(null)
+        setConfirmDelete(false)
+        await load()
+      } else {
+        showToast('Failed to delete', false)
+      }
+    } finally {
+      setDeleteLoading(false)
+    }
+  }
 
   async function handleReply() {
     if (!selected || !replyMessage.trim()) return
@@ -194,7 +213,7 @@ export default function AdminFeedbackPage() {
           <div className="space-y-3">
             {filtered.map(item => (
               <div key={item.id}
-                onClick={() => { setSelected(item); setReplyMessage(''); setReplySuccess(false) }}
+                onClick={() => { setSelected(item); setReplyMessage(''); setReplySuccess(false); setConfirmDelete(false) }}
                 className={`bg-surface border border-theme rounded-2xl p-5 cursor-pointer hover:border-gray-300 dark:hover:border-gray-600 transition-all ${item.replied_at ? 'opacity-60' : ''}`}>
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
@@ -276,6 +295,35 @@ export default function AdminFeedbackPage() {
                   </button>
                 </div>
               )}
+
+              {/* Delete section */}
+              <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+                {!confirmDelete ? (
+                  <button
+                    onClick={() => setConfirmDelete(true)}
+                    disabled={deleteLoading}
+                    className="w-full text-xs font-semibold text-red-500 dark:text-red-400 py-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 transition-all">
+                    Delete this feedback
+                  </button>
+                ) : (
+                  <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-3 space-y-2">
+                    <p className="text-xs font-bold text-red-700 dark:text-red-400 text-center">Permanently delete this feedback?</p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setConfirmDelete(false)}
+                        className="flex-1 text-xs font-semibold py-2 rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 transition-all">
+                        Cancel
+                      </button>
+                      <button
+                        onClick={() => handleDelete(selected.id)}
+                        disabled={deleteLoading}
+                        className="flex-1 text-xs font-bold py-2 rounded-xl bg-red-600 text-white hover:bg-red-700 transition-all disabled:opacity-60">
+                        {deleteLoading ? 'Deleting…' : 'Yes, delete'}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

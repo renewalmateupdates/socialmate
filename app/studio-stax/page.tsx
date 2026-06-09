@@ -39,7 +39,7 @@ export const metadata = {
   description: 'Founder-approved tools for creators, builders, and communities. Ranked by generosity, not budget.',
 }
 
-export const revalidate = 3600
+export const revalidate = 60
 
 export default async function StudioStaxPage() {
   const supabase = createClient(

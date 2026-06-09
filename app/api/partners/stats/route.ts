@@ -148,6 +148,36 @@ export async function GET(req: NextRequest) {
   })
 }
 
+// ── DELETE — admin permanently remove an affiliate ───────────────────────
+
+export async function DELETE(req: NextRequest) {
+  const { data: { user } } = await getAuthedUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const adminEmail = process.env.ADMIN_EMAIL
+  if (adminEmail && user.email !== adminEmail) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
+
+  const { searchParams } = new URL(req.url)
+  const id = searchParams.get('id')
+  if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })
+
+  const db = getAdminSupabase()
+
+  // Delete related records first (in case no cascade)
+  await db.from('affiliate_promo_codes').delete().eq('affiliate_id', id)
+  await db.from('affiliate_conversions').delete().eq('affiliate_id', id)
+  await db.from('affiliate_payouts').delete().eq('affiliate_id', id)
+  await db.from('affiliate_notifications').delete().eq('affiliate_id', id)
+
+  // Delete the profile itself
+  const { error } = await db.from('affiliate_profiles').delete().eq('id', id)
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  return NextResponse.json({ success: true })
+}
+
 // ── PATCH — admin update affiliate status ─────────────────────────────────
 
 export async function PATCH(req: NextRequest) {

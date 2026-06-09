@@ -22,6 +22,24 @@ export async function GET(_req: NextRequest) {
   return NextResponse.json({ feedback: items ?? [] })
 }
 
+// ── DELETE — admin delete a feedback item ─────────────────────────────────
+export async function DELETE(req: NextRequest) {
+  const admin = await requireAdmin()
+  if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+  const { searchParams } = new URL(req.url)
+  const id = searchParams.get('id')
+  if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 })
+
+  const { error } = await getSupabaseAdmin()
+    .from('feedback')
+    .delete()
+    .eq('id', id)
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ success: true })
+}
+
 // ── POST — submit feedback ─────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   const cookieStore = await cookies()
