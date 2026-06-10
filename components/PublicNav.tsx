@@ -44,6 +44,7 @@ const PRODUCTS = [
   { label: '◆ Enki',           href: '/enki'         },
   { label: '💜 Monetize',      href: '/monetize'     },
   { label: '🎵 TikTok Studio', href: '/tiktok'       },
+  { label: '👕 Merch',         href: '/merch'        },
 ]
 
 type DropdownKey = 'audiences' | 'products' | 'resources'
