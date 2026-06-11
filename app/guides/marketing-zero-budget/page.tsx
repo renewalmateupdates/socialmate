@@ -37,6 +37,7 @@ const CHAPTERS = [
   { id: 'ch6',      label: '6. The Demo Video Method' },
   { id: 'ch7',      label: '7. Turning Attention Into Customers' },
   { id: 'ch8',      label: '8. Consistency Is the Strategy' },
+  { id: 'ch9',      label: '9. AI Discoverability — The New SEO' },
   { id: 'epilogue', label: 'Epilogue' },
 ]
 
@@ -55,7 +56,7 @@ export default function MarketingZeroBudgetPage() {
               <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-amber-400">
                 Vol. 2
               </span>
-              <span className="text-xs text-gray-600">20 min read</span>
+              <span className="text-xs text-gray-600">25 min read</span>
             </div>
             <h1 className="mb-3 text-4xl font-black leading-tight text-white md:text-5xl">
               Marketing on Zero Budget
@@ -587,6 +588,159 @@ export default function MarketingZeroBudgetPage() {
                 </p>
                 <p className="leading-relaxed text-gray-300">
                   The numbers will show up eventually. They always do for the people who don&apos;t quit.
+                </p>
+              </section>
+
+              {/* CHAPTER 9 */}
+              <section id="ch9" className="mb-16 scroll-mt-8">
+                <h2 className="mb-2 text-2xl font-black text-white border-b border-[#1f1f1f] pb-4">
+                  Chapter 9: AI Discoverability — The New SEO
+                </h2>
+                <p className="mb-4 text-sm italic text-gray-600 border-b border-[#1f1f1f] pb-4">
+                  How to get found when people stop Googling and start asking ChatGPT.
+                </p>
+
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  For twenty years, &quot;getting found&quot; meant ranking on Google. That still
+                  matters, and it isn&apos;t going away. But there&apos;s a second discovery channel
+                  opening up right now, and almost nobody is optimizing for it yet.
+                </p>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  More and more, people don&apos;t search &quot;Hootsuite alternative&quot; in Google. They
+                  open ChatGPT, Perplexity, or Gemini and type &quot;what&apos;s a free alternative to
+                  Hootsuite&quot; or &quot;what tool should I use to schedule posts across platforms.&quot;
+                  These AI tools answer by reading the web themselves, forming a summary, and
+                  recommending products directly. If your site isn&apos;t structured in a way these
+                  tools can understand, you&apos;re invisible in that conversation, even if you&apos;d
+                  be the perfect answer.
+                </p>
+
+                <Callout>
+                  Think of it this way: Google SEO gets you a link in a list of ten blue links.
+                  AI discoverability gets you mentioned by name as the answer, with no
+                  competitors shown next to you. That&apos;s a much bigger prize, and right now
+                  the bar to compete for it is almost nonexistent.
+                </Callout>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">The &quot;hidden files&quot; stack</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  There&apos;s a small set of plain text and JSON files that live quietly at the
+                  root of every website. Search engines and AI crawlers check for them. Most
+                  founders have never heard of half of these. Here&apos;s the full list, and what
+                  each one does:
+                </p>
+
+                <ul className="mb-6 space-y-3 text-gray-300 pl-4">
+                  <li className="flex gap-3">
+                    <span className="text-amber-500 shrink-0 mt-1">▸</span>
+                    <span>
+                      <strong className="text-white">/robots.txt</strong> — the classic crawler
+                      rules file. Most sites already have this. It tells bots what they&apos;re
+                      allowed to crawl. If you don&apos;t have one, start here, it&apos;s the most
+                      basic signal that your site is intentional.
+                    </span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-amber-500 shrink-0 mt-1">▸</span>
+                    <span>
+                      <strong className="text-white">/sitemap.xml</strong> — a list of every
+                      page on your site. Helps search engines and AI crawlers find your
+                      content instead of guessing at your link structure. If you&apos;re on a
+                      framework like Next.js, this can usually be generated automatically.
+                    </span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-amber-500 shrink-0 mt-1">▸</span>
+                    <span>
+                      <strong className="text-white">/llms.txt</strong> — this is the new one.
+                      It&apos;s an emerging convention: a plain text file at your site root that
+                      summarizes, in plain language, what your product is, what your key pages
+                      are, and the facts an AI should know when someone asks about you. Some AI
+                      tools are starting to read these directly. Think of it as a cheat sheet
+                      you hand an AI assistant before it answers a question about your brand.
+                    </span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-amber-500 shrink-0 mt-1">▸</span>
+                    <span>
+                      <strong className="text-white">/humans.txt</strong> — credits, team, and
+                      tech stack info. Originally a transparency gesture from one developer to
+                      another. Now sometimes picked up by AI summarizers when they want to
+                      describe who&apos;s behind a product.
+                    </span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-amber-500 shrink-0 mt-1">▸</span>
+                    <span>
+                      <strong className="text-white">/ai.txt</strong> — a short policy file
+                      that states how AI crawlers may use your content. It&apos;s a way of saying
+                      &quot;yes, you can read this and use it to answer questions, here&apos;s how I&apos;d
+                      like to be credited.&quot;
+                    </span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-amber-500 shrink-0 mt-1">▸</span>
+                    <span>
+                      <strong className="text-white">/.well-known/ai-plugin.json</strong> — this
+                      format started as a manifest for ChatGPT plugins, but it&apos;s still useful
+                      today as a structured, machine-readable &quot;here&apos;s exactly what we are and
+                      what we do&quot; file.
+                    </span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-amber-500 shrink-0 mt-1">▸</span>
+                    <span>
+                      <strong className="text-white">Structured data (JSON-LD schemas)</strong> —
+                      this is the most &quot;official&quot; piece of the stack. Adding{' '}
+                      <code className="text-amber-400">Organization</code>,{' '}
+                      <code className="text-amber-400">SoftwareApplication</code>, and{' '}
+                      <code className="text-amber-400">WebSite</code> (with a{' '}
+                      <code className="text-amber-400">SearchAction</code>) schema as a{' '}
+                      <code className="text-amber-400">&lt;script type=&quot;application/ld+json&quot;&gt;</code>{' '}
+                      block in your page head gives both Google and AI tools a structured,
+                      unambiguous description of who you are, what your product does, and how
+                      to search your site. Both Google and AI assistants parse this format.
+                    </span>
+                  </li>
+                </ul>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">How to actually do this in an afternoon</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  Every single one of these is a static text or JSON file you write once and
+                  drop into your <code className="text-amber-400">/public</code> folder (or a{' '}
+                  <code className="text-amber-400">.well-known</code> subfolder for the plugin
+                  manifest), plus a few JSON-LD script tags in your site&apos;s layout file. No
+                  paid tools. No agency. No API keys. You can write all seven in one sitting:
+                </p>
+                <ol className="mb-6 list-decimal pl-6 space-y-2 text-gray-300">
+                  <li>List your key pages, your pricing, your platforms, and 5–10 facts about your product in plain English. That&apos;s your llms.txt content.</li>
+                  <li>Add a short team/stack paragraph for humans.txt.</li>
+                  <li>Write a two-line policy for ai.txt (e.g. &quot;AI crawlers may read and summarize this content with attribution to [your site]&quot;).</li>
+                  <li>Fill out the ai-plugin.json manifest with your name, description, and site URL.</li>
+                  <li>Add Organization, SoftwareApplication, and WebSite JSON-LD blocks to your layout.</li>
+                  <li>Confirm robots.txt and sitemap.xml exist and are current.</li>
+                </ol>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  Update these whenever you ship something major, the same way you&apos;d update
+                  your &quot;About&quot; page. That&apos;s it. That&apos;s the whole project.
+                </p>
+
+                <Callout>
+                  Honest caveat: nobody, including the AI companies themselves, can tell you
+                  exactly how much weight any individual assistant gives these files today.
+                  It&apos;s evolving fast and the rules aren&apos;t fully written yet. But the cost is
+                  basically zero, an afternoon of writing, and the downside is also zero.
+                  Worst case, you&apos;ve written a clean, accurate one-page fact sheet about your
+                  business that you can also hand to a journalist, an investor, or a new hire.
+                </Callout>
+
+                <p className="leading-relaxed text-gray-300">
+                  This is one of the highest-leverage-per-hour zero-budget tasks on this
+                  entire list, precisely because almost nobody is doing it yet. While
+                  everyone else is fighting over Google rankings, you can quietly become the
+                  answer when someone asks an AI assistant what tool solves their problem.
+                  Go write your llms.txt. It costs you an afternoon and might be the cheapest
+                  marketing channel you ever build.
                 </p>
               </section>
 

@@ -39,6 +39,7 @@ const CHAPTERS = [
   { id: 'ch5',       label: '5. LLC vs. S-Corp' },
   { id: 'ch6',       label: '6. Banking' },
   { id: 'ch7',       label: '7. Insurance' },
+  { id: 'ch8',       label: '8. Partnerships & JVs Without Lawyers' },
   { id: 'resources', label: 'All Resources' },
 ]
 
@@ -57,7 +58,7 @@ export default function BusinessCreditLegalGuidePage() {
               <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-amber-400">
                 Vol. 3
               </span>
-              <span className="text-xs text-gray-600">40 min read</span>
+              <span className="text-xs text-gray-600">45 min read</span>
             </div>
             <h1 className="mb-3 text-4xl font-black leading-tight text-white md:text-5xl">
               Business Credit, Legal Foundations & Tax Breaks
@@ -673,6 +674,76 @@ export default function BusinessCreditLegalGuidePage() {
                   <li><a href="https://www.hiscox.com" target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:underline">Hiscox</a> — popular for professional services</li>
                   <li><a href="https://www.thehartford.com" target="_blank" rel="noopener noreferrer" className="text-amber-400 hover:underline">The Hartford</a> — established carrier for small business</li>
                 </ul>
+              </section>
+
+              {/* Chapter 8 */}
+              <section id="ch8" className="mb-16">
+                <div className="flex items-center gap-3 mb-6">
+                  <span className="text-xs font-bold uppercase tracking-widest text-amber-400 border border-amber-500/30 rounded-full px-3 py-1">Chapter 8</span>
+                </div>
+                <h2 className="text-2xl font-black text-white mb-4">Partnerships & Joint Ventures Without Lawyers</h2>
+
+                <h3 className="text-lg font-bold text-amber-400 mt-8 mb-3">The Reality Nobody Plans For</h3>
+                <p className="text-gray-300 leading-relaxed mb-4">
+                  At some point, almost every solo founder ends up teaming up with someone else on a separate project. Maybe you build software and a friend handles manufacturing, design, or sales. Maybe it's a side venture that has nothing to do with your main business. You don't need a lawyer on day one to do this responsibly. What you need is clarity, in writing, before any money or product changes hands.
+                </p>
+                <p className="text-gray-300 leading-relaxed mb-4">
+                  Most people skip this step because it feels awkward. You're excited, you trust each other, and "we'll figure it out" feels good in the moment. But "we'll figure it out" is exactly how friendships and partnerships fall apart later. Writing it down isn't a sign of distrust — it's the thing that lets you trust each other for years instead of months.
+                </p>
+
+                <h3 className="text-lg font-bold text-amber-400 mt-8 mb-3">Real Example: A Co-Founded Venture</h3>
+                <p className="text-gray-300 leading-relaxed mb-4">
+                  I'm part of a 50/50 partnership on a separate venture, a physical product company. One partner handles the physical side, manufacturing and design. I handle the web, software, and business operations side. There's no formal joint LLC yet, it's still early. But a few principles made it work from day one:
+                </p>
+                <ul className="text-gray-300 space-y-2 mb-4 list-disc list-inside">
+                  <li><strong className="text-white">The equity split was agreed on and written down</strong> — 50/50, in plain language, even if it started as just an email or a shared doc. It doesn't need to be notarized to count as evidence of intent.</li>
+                  <li><strong className="text-white">Roles were explicitly divided</strong> so there's no ambiguity about who decides what. If a manufacturing decision comes up, that partner owns it. If it's a web or business decision, I own it. Shared decisions are flagged as shared.</li>
+                  <li><strong className="text-white">Public-facing materials always describe it accurately</strong> — websites, marketing, social posts. It's a co-founded partnership, never framed as one person's solo venture. Misrepresenting a co-founded venture as solo work isn't just bad branding, it's a trust violation with your own partner.</li>
+                </ul>
+                <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-6">
+                  <p className="text-amber-300 text-sm font-semibold mb-1">Why this matters more than it seems</p>
+                  <p className="text-gray-400 text-sm">If your partner ever sees your site, your pitch deck, or a press mention and their name or role isn't there, that's a crack in the foundation. It costs nothing to give credit accurately, and it costs everything if you don't.</p>
+                </div>
+
+                <h3 className="text-lg font-bold text-amber-400 mt-8 mb-3">DBA vs. Joint LLC, Explained Simply</h3>
+                <div className="grid md:grid-cols-2 gap-4 mb-6">
+                  <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-4">
+                    <p className="text-white font-bold text-sm mb-2">DBA (Doing Business As)</p>
+                    <p className="text-gray-400 text-sm">A "fictitious name" filing that lets you operate under a brand name without forming a new legal entity. Cheap (often $10–$100), fast (days, not weeks). But it offers <strong className="text-gray-200">zero liability separation</strong> — the venture's debts and risks are still yours and your partner's personally.</p>
+                  </div>
+                  <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-4">
+                    <p className="text-white font-bold text-sm mb-2">Joint LLC (Multi-Member)</p>
+                    <p className="text-gray-400 text-sm">A separate legal entity owned by both partners under an operating agreement. More setup and cost, similar to forming any LLC. But it <strong className="text-gray-200">separates the venture's liabilities</strong> from each partner's personal assets and other businesses.</p>
+                  </div>
+                </div>
+                <div className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-4 mb-6">
+                  <p className="text-gray-400 text-sm"><span className="text-white font-semibold">Rule of thumb:</span> If the venture is just an idea or side project with no real revenue or risk yet, a DBA — or even a handshake plus a written agreement — is fine for now. Once it starts generating real revenue, holding inventory, signing contracts, or carrying any liability risk (especially a physical product that could injure someone), form the joint LLC.</p>
+                </div>
+
+                <h3 className="text-lg font-bold text-amber-400 mt-8 mb-3">What a Simple Partnership Agreement Should Cover</h3>
+                <p className="text-gray-300 leading-relaxed mb-4">
+                  Even before a lawyer is involved, write down the answers to these. A shared Google Doc both partners sign or explicitly agree to in writing is a real document — courts and mediators have honored less.
+                </p>
+                <ul className="text-gray-300 space-y-2 mb-4 list-disc list-inside">
+                  <li><strong className="text-white">Equity split</strong> — and how it could change. If one partner needs to earn into their share over time, spell out the vesting schedule now, not after a disagreement.</li>
+                  <li><strong className="text-white">Role definitions</strong> — who decides what day-to-day, and which decisions require both partners' sign-off (spending above a threshold, bringing on a new partner, taking on debt).</li>
+                  <li><strong className="text-white">IP and asset ownership</strong> — who owns the designs, the code, the trademarks, and the brand name if the partnership ends. Get this in writing before there's anything valuable to fight over.</li>
+                  <li><strong className="text-white">Profit/revenue split and expense handling</strong> — how money in and money out actually flows, and who covers what costs.</li>
+                  <li><strong className="text-white">Exit clause</strong> — what happens if one partner wants out, becomes unable to contribute, or passes away. Decide this while you're both calm and aligned, not in the middle of a falling-out.</li>
+                </ul>
+
+                <h3 className="text-lg font-bold text-amber-400 mt-8 mb-3">When to Actually Pay a Lawyer</h3>
+                <p className="text-gray-300 leading-relaxed mb-4">
+                  Once a joint venture starts generating meaningful revenue, takes on outside investment, hires employees, or you're forming the actual joint LLC's operating agreement, get a real operating agreement reviewed by a lawyer. This is typically a few hundred dollars, one time, not an ongoing retainer.
+                </p>
+                <p className="text-gray-300 leading-relaxed mb-4">
+                  Don't let "I can't afford a lawyer yet" be the reason you never write anything down. The written-down part is free, and it matters more than the lawyer review for the first year or two. A lawyer cleans up and formalizes an agreement that already exists in spirit. They can't create alignment that was never there to begin with.
+                </p>
+
+                <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
+                  <p className="text-amber-300 text-sm font-semibold mb-1">The bottom line</p>
+                  <p className="text-gray-400 text-sm">You don't need a lawyer to start a partnership the right way. You need an honest conversation, a written agreement, and the integrity to represent your partner accurately everywhere your venture shows up.</p>
+                </div>
               </section>
 
               {/* Resources */}

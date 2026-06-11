@@ -36,6 +36,7 @@ const CHAPTERS = [
   { id: 'ch5', label: '5. Creator Tools Worth the Cost' },
   { id: 'ch6', label: '6. Collaborations, Sponsorships, and Brand Deals' },
   { id: 'ch7', label: '7. Building a Team When You\'re Ready to Scale' },
+  { id: 'ch8', label: '8. Letting AI Agents Run Parts of Your Business' },
 ]
 
 export default function ContentCreatorBusinessPage() {
@@ -56,7 +57,7 @@ export default function ContentCreatorBusinessPage() {
               <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-amber-400">
                 Vol. 9
               </span>
-              <span className="text-xs text-gray-600">30 min read</span>
+              <span className="text-xs text-gray-600">35 min read</span>
             </div>
             <h1 className="mb-3 text-4xl font-black leading-tight text-white md:text-5xl">
               The Content Creator&apos;s Business Guide
@@ -368,6 +369,65 @@ export default function ContentCreatorBusinessPage() {
                 <p className="leading-relaxed text-gray-300">
                   You don&apos;t have to build a team to succeed. Plenty of solo creators do remarkable things with AI tools and smart systems. But when the moment comes where growth requires more capacity than you can personally provide — the willingness to bring someone in and trust them with part of your brand is what separates creators who plateau from those who break through.
                 </p>
+              </section>
+
+              {/* CHAPTER 8 */}
+              <section id="ch8" className="mb-16 scroll-mt-8">
+                <h2 className="mb-2 text-2xl font-black text-white border-b border-[#1f1f1f] pb-4">
+                  Chapter 8: Letting AI Agents Run Parts of Your Business
+                </h2>
+                <p className="mb-4 text-sm italic text-gray-600 border-b border-[#1f1f1f] pb-4">
+                  Before you hire a human, there&apos;s a layer of recurring work AI can already handle for you.
+                </p>
+
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  In the last chapter, I talked about building a team when you&apos;re ready to scale. That&apos;s about hiring humans, and it&apos;s a real milestone. But there&apos;s a step before that, and a lot of solo creators skip right past it. Before you hire anyone, take a hard look at the recurring, low-judgment tasks running your business already, and see how many of them AI automation can handle today.
+                </p>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  I&apos;m talking about things like newsletters, client reporting, content repurposing, and inbox triage. None of these require your unique creative judgment every single time they happen. They follow the same shape week after week. That makes them perfect candidates for automation, and it means you can buy back hours without spending a dollar on payroll.
+                </p>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">Newsletter automation</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  Writing a weekly recap email by hand is one of the most common things creators let slide, and then feel guilty about for months. Instead, an automated draft can be generated on a schedule from your recent activity: posts you published, milestones you hit, what&apos;s coming up. You review it, edit anything that doesn&apos;t sound like you, and hit send.
+                </p>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  Start in draft mode. The AI writes, you approve. Full autopilot, where the AI sends without you ever seeing it, is something you earn over time, if you ever want it at all. There&apos;s no rule that says you have to give up the review step. Plenty of creators run draft mode forever and that&apos;s the right call.
+                </p>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">Client reporting</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  If you manage social accounts, content, or campaigns for clients, you know the dread of building a report every month. A recurring automated report, what was published, what&apos;s scheduled, an engagement summary, sent on a set schedule (every Monday morning, for example), replaces hours of manual report-building.
+                </p>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  This doesn&apos;t make you look less professional. It makes you look more professional. Clients don&apos;t care whether a human or a tool assembled the numbers. They care that the report shows up consistently, on time, every single week. Consistency is the thing that builds client trust, and automation is how you guarantee it never slips.
+                </p>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">Content repurposing</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  One piece of content, a long post, a video transcript, a blog post, can become a thread, an email, a LinkedIn post, and a short hook for a different platform. The format-conversion work is exactly the kind of thing AI is good at: take this idea, reshape it for this audience, this length, this tone.
+                </p>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  The creative idea is still yours. The original insight, the story, the hot take, that came from you and nobody else. What gets automated is the repackaging labor: rewriting the same idea five different ways for five different platforms. That repackaging used to eat an entire afternoon. Now it&apos;s a few minutes of review.
+                </p>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">The principle: automate the recurring, keep the judgment</h3>
+                <ul className="mb-6 space-y-3 text-gray-300">
+                  <li className="flex gap-3"><span className="mt-1 text-amber-500 shrink-0">▸</span><span><strong className="text-white">Same shape every time it happens?</strong> A weekly report, a format conversion, a routine check-in email. That&apos;s a candidate for automation.</span></li>
+                  <li className="flex gap-3"><span className="mt-1 text-amber-500 shrink-0">▸</span><span><strong className="text-white">Requires a new judgment call each time?</strong> Which brand deals to take, what your hot take on a topic actually is, how to handle a sensitive client conversation. That stays with you.</span></li>
+                </ul>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  Run every recurring task in your business through that test. You&apos;ll be surprised how much of what feels like &quot;running the business&quot; is actually the first kind of task, not the second.
+                </p>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">Trust incrementally</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  Start every automation in draft or review mode. Watch what it produces. Once you&apos;ve reviewed enough outputs and they&apos;re consistently good, consider letting lower-stakes automations, like a draft newsletter, run with less oversight. Some things should never run fully unattended: anything client-facing or anything touching money should always have a human checkpoint before it goes out.
+                </p>
+
+                <Callout>
+                  Automation doesn&apos;t replace you. It buys back the hours you were spending on tasks that didn&apos;t need you, so you can spend them on the parts of the business only you can do.
+                </Callout>
               </section>
 
               {/* Joshua's Note */}

@@ -37,6 +37,7 @@ const CHAPTERS = [
   { id: 'ch6', label: '6. Consistency vs. Virality' },
   { id: 'ch7', label: '7. Building a Community, Not Just a Following' },
   { id: 'ch8', label: '8. Turning Your Brand Into Opportunity' },
+  { id: 'ch9', label: '9. Finding Your Voice With AI (Without Sounding Like AI)' },
 ]
 
 export default function BuildYourBrandPage() {
@@ -57,7 +58,7 @@ export default function BuildYourBrandPage() {
               <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-amber-400">
                 Vol. 7
               </span>
-              <span className="text-xs text-gray-600">35 min read</span>
+              <span className="text-xs text-gray-600">40 min read</span>
             </div>
             <h1 className="mb-3 text-4xl font-black leading-tight text-white md:text-5xl">
               Build Your Brand from Zero
@@ -397,6 +398,63 @@ export default function BuildYourBrandPage() {
                 <p className="leading-relaxed text-gray-300">
                   When you&apos;re ready to monetize, SocialMate&apos;s Creator Hub gives you tip jars and fan subscriptions out of the box — free on Pro. No platform cut. Build the audience first. The revenue will follow if the trust is real.
                 </p>
+              </section>
+
+              {/* CHAPTER 9 */}
+              <section id="ch9" className="mb-16 scroll-mt-8">
+                <h2 className="mb-2 text-2xl font-black text-white border-b border-[#1f1f1f] pb-4">
+                  Chapter 9: Finding Your Voice With AI (Without Sounding Like AI)
+                </h2>
+                <p className="mb-4 text-sm italic text-gray-600 border-b border-[#1f1f1f] pb-4">
+                  AI writing tools are everywhere now. Here&apos;s how to use them without becoming everyone else.
+                </p>
+
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  AI writing tools are everywhere now, and most AI-generated content has a recognizable voice. You know it when you see it. &quot;In today&apos;s fast-paced world...&quot; A wall of hedging. An em dash doing way too much work. A close that sounds like a LinkedIn motivational poster no matter what the topic was. None of it is wrong, exactly. It&apos;s just generic. And generic is the opposite of everything we just spent eight chapters building.
+                </p>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  If your audience can tell a post is AI-written, it undermines the authenticity that&apos;s the entire point of a personal brand. People followed you for your perspective, not for a well-organized summary of the topic. The moment your content starts sounding like it could&apos;ve come from anyone&apos;s AI tool, you&apos;ve traded your most valuable asset for a faster first draft.
+                </p>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  But throwing out AI tools entirely throws away a real productivity unlock. The blank page is the hardest part of content creation for most people, and AI is genuinely good at getting you past it. The fix isn&apos;t &quot;don&apos;t use AI.&quot; The fix is &quot;make AI sound like you.&quot;
+                </p>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">Build a voice brief before you write a single prompt</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  Before you use any AI tool to help write content, spend 30 to 60 minutes documenting your actual voice in writing. This becomes a reusable brief you paste into every AI writing session from now on. It&apos;s the single highest-leverage thing you can do to make AI output sound like you instead of like itself.
+                </p>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  Your voice brief should cover:
+                </p>
+                <ul className="mb-6 list-disc pl-6 space-y-2 text-gray-300">
+                  <li><strong className="text-white">Your niche and audience.</strong> Who you&apos;re talking to and what they actually care about, in plain language.</li>
+                  <li><strong className="text-white">Your tone.</strong> Formal vs. casual, serious vs. playful, direct vs. nuanced. Pick where you fall and say it explicitly.</li>
+                  <li><strong className="text-white">Words and phrases you actually use.</strong> Your real vocabulary, including slang or niche terms specific to your space.</li>
+                  <li><strong className="text-white">Words and phrases you&apos;d never say.</strong> This is just as important as the last one. It&apos;s how you filter out generic AI-isms before they ever show up.</li>
+                  <li><strong className="text-white">Your story and background, in your own words.</strong> AI can&apos;t invent your lived experience, but it can help you articulate it once you&apos;ve told it the real version.</li>
+                  <li><strong className="text-white">Your stance on things.</strong> What do you believe that not everyone agrees with? Generic content has no point of view. Yours should.</li>
+                </ul>
+
+                <Callout>
+                  This is exactly what SOMA&apos;s Voice DNA Builder does in a structured 40-question interview, but you can build a rougher version of the same thing yourself in an hour with a notes app and some honesty. The format doesn&apos;t matter. The specificity does.
+                </Callout>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">Use the brief, every time</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  Paste your voice brief at the start of any AI writing session, alongside whatever specific content you&apos;re asking for. The output won&apos;t be perfect on the first try. It almost never is. But it&apos;ll be dramatically closer to &quot;you&quot; than a cold prompt that just describes the topic. The brief is doing the work of context that a cold prompt can&apos;t provide.
+                </p>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">The feedback loop most people skip</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  Here&apos;s the part that actually compounds. After you publish AI-assisted content, take a minute to note what felt off, what landed, and what you ended up rewriting before posting. Then add those notes back into your voice brief. Maybe you keep cutting a phrase the AI loves. Maybe a certain framing always needs softening, or a certain topic always needs more edge than the AI gives it by default.
+                </p>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  Over time, the brief gets sharper and the AI output needs less editing. Treat your voice brief as a living document, not a one-time setup. The version you write in an hour today should look different in three months, because you&apos;ll have fed it real feedback from real posts.
+                </p>
+
+                <Callout>
+                  Your voice is the asset. AI is just faster typing once it actually knows what your voice sounds like. Build the brief, feed it back, and let the gap between &quot;AI draft&quot; and &quot;your final post&quot; get smaller every time you publish.
+                </Callout>
               </section>
 
               {/* Joshua's Note */}
