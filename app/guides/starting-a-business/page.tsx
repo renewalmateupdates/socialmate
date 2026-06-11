@@ -38,6 +38,7 @@ const CHAPTERS = [
   { id: 'ch6', label: '6. When Your Co-Founder Walks Away' },
   { id: 'ch7', label: '7. What the Streets Teach You About Business' },
   { id: 'ch8', label: '8. Building Through Loss' },
+  { id: 'ch9', label: '9. Building a Portfolio, Not Just a Product' },
   { id: 'epilogue', label: 'Epilogue' },
   { id: 'joshua-note', label: "A Note from Joshua" },
 ]
@@ -60,7 +61,7 @@ export default function StartingABusinessGuidePage() {
               <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-amber-400">
                 Vol. 1
               </span>
-              <span className="text-xs text-gray-600">25 min read</span>
+              <span className="text-xs text-gray-600">30 min read</span>
             </div>
             <h1 className="mb-3 text-4xl font-black leading-tight text-white md:text-5xl">
               Starting a Business From Scratch
@@ -770,6 +771,114 @@ export default function StartingABusinessGuidePage() {
                 <p className="leading-relaxed text-gray-300">
                   That&apos;s the only engine that runs long enough to finish.
                 </p>
+              </section>
+
+              {/* CHAPTER 9 */}
+              <section id="ch9" className="mb-16 scroll-mt-8">
+                <h2 className="mb-2 text-2xl font-black text-white border-b border-[#1f1f1f] pb-4">
+                  Chapter 9: Building a Portfolio, Not Just a Product
+                </h2>
+                <p className="mb-4 text-sm italic text-gray-600 border-b border-[#1f1f1f] pb-4">
+                  Why one bet is fragile, and how a few small real things protect the big one.
+                </p>
+
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  SocialMate is the big bet. It&apos;s the thing I think about when I wake up and
+                  the thing I&apos;m still tweaking when I go to sleep. But it is not the only thing
+                  running in my world right now, and that&apos;s on purpose. Not because I had some
+                  grand five-year plan when I started. Because opportunities kept showing up, and
+                  I needed somewhere to put them.
+                </p>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">One product is fragile, a portfolio is resilient</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  If SocialMate is the only thing I have, then every bad month, every slow growth
+                  stretch, every &quot;is this ever going to work&quot; spiral hits 100% of my income and
+                  100% of my identity at the same time. That&apos;s a lot of pressure to put on one
+                  product that&apos;s still finding its footing.
+                </p>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  So along the way I formed <strong className="text-white">Gilgamesh Enterprise LLC</strong>, a Wyoming
+                  LLC (same $150-or-so setup I walked you through in Chapter 3), as a holding
+                  company. An umbrella that can sit over multiple ventures. I didn&apos;t form it
+                  because I had a master plan for what would go under it. I formed it because
+                  things kept showing up that needed a home, and I&apos;d rather build the structure
+                  once than scramble to build it later under pressure.
+                </p>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">Co-founded ventures done right</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  One of the things under that umbrella is <strong className="text-white">Hearthforge</strong>, a
+                  3D-printing product company I co-founded 50/50 with a partner, Butch. He owns
+                  the manufacturing side: CAD design, the printer, the physical product. I own the
+                  web, software, and business side. Neither of us could do what the other does as
+                  well, and together it&apos;s a real product line.
+                </p>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  Here&apos;s the lesson that matters more than the venture itself: when you co-found
+                  something, say so. Everywhere. On the website, in casual conversation, in your
+                  own head when you&apos;re writing marketing copy at midnight and it would be easier
+                  to just say &quot;I built this.&quot; If you let your own platforms imply a partnership
+                  is a solo project, even by accident, even informally, that&apos;s not just sloppy
+                  marketing. That&apos;s a trust issue with the person who showed up to build it with
+                  you. Protect that trust like it&apos;s the asset it is, because it is.
+                </p>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">Bridge income from skills you already have</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  The same skills that power SocialMate (Next.js, Vercel, AI-assisted
+                  development) are skills other people will pay for right now, today, before
+                  SocialMate has found product-market fit. So I also build local-business
+                  websites: landing pages, conversion-focused, mobile-first, flat fee. Real
+                  client work, not a side hustle in theory.
+                </p>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  Real numbers, based on an actual live client site: a baseline small-business
+                  site runs <strong className="text-white">$2,800–$3,500</strong>. By vertical, it shifts: medical and
+                  dental practices run <strong className="text-white">$3,500–$7,000+</strong> (more pages, more
+                  compliance, higher stakes for the client). Trades, plumbers, electricians, tree
+                  service, run <strong className="text-white">$1,800–$3,500</strong>. Small retail, bakeries, local
+                  restaurants run <strong className="text-white">$1,500–$3,000</strong>. On top of any of those, recurring
+                  hosting, maintenance, and content updates run <strong className="text-white">$50–$150/month</strong>.
+                </p>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  This isn&apos;t a distraction from the main thing. It&apos;s fuel for it. It pays bills
+                  while SocialMate grows, and every site I build sharpens the same muscles
+                  (design, deployment, client communication, AI-assisted speed) that make
+                  SocialMate better too.
+                </p>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">Literal bridge income matters too</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  I left a stable deli job for tree cutting and tree service work. On paper that
+                  might look like a step sideways, or even backward. In practice, it&apos;s flexible
+                  hours that don&apos;t compete with my nights-and-weekends build schedule, and it
+                  pays the bills while SocialMate isn&apos;t there yet on its own.
+                </p>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  The point isn&apos;t that tree work is glamorous or related to software. It isn&apos;t.
+                  The point is that your &quot;day job&quot; income, whatever it is, doesn&apos;t need to be
+                  impressive or industry-adjacent. It needs two things: it needs to be flexible
+                  enough to leave room for your real work, and it needs to not crush your soul so
+                  badly that you have nothing left when you get home. That&apos;s the whole bar.
+                </p>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">The throughline: this is risk management</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  None of this is &quot;spreading yourself thin.&quot; It&apos;s the opposite. A holding
+                  company, a co-founded product line, client work, and flexible trade work, all
+                  sitting alongside the main SaaS bet, mean that no single failure ends me. If a
+                  month is slow for SocialMate, client work covers it. If client work is slow,
+                  tree service covers it. If one venture under Gilgamesh Enterprise stalls, the
+                  others keep moving. Each piece can fund or feed the others, and the big bet
+                  gets to keep being a long-term bet instead of an emergency.
+                </p>
+
+                <Callout>
+                  A portfolio of small, real things beats one big fragile thing. Build your main
+                  bet like it matters, because it does, but don&apos;t make it the only thing
+                  standing between you and rent.
+                </Callout>
               </section>
 
               {/* EPILOGUE */}

@@ -37,6 +37,7 @@ const CHAPTERS = [
   { id: 'ch6', label: '6. AI for Analytics and Strategy' },
   { id: 'ch7', label: '7. The AI Stack That Costs Almost Nothing' },
   { id: 'ch8', label: "8. The Human Thing AI Can't Replace" },
+  { id: 'ch9', label: '9. Making Sure AI Tools Can Find and Recommend You' },
 ]
 
 export default function AIToolsForCreatorsPage() {
@@ -57,7 +58,7 @@ export default function AIToolsForCreatorsPage() {
               <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-amber-400">
                 Vol. 10
               </span>
-              <span className="text-xs text-gray-600">35 min read</span>
+              <span className="text-xs text-gray-600">40 min read</span>
             </div>
             <h1 className="mb-3 text-4xl font-black leading-tight text-white md:text-5xl">
               AI Tools for Creators
@@ -403,6 +404,57 @@ export default function AIToolsForCreatorsPage() {
                 </p>
                 <p className="leading-relaxed text-gray-300">
                   Build the AI stack. Use every tool that gives you leverage. Schedule your content, automate your distribution, let agents handle the repetitive work. Then take the time you saved and put it back into the thing that only you can do: showing up as yourself, telling true stories, and giving people a reason to care. That combination — human creativity, machine leverage — is the creator edge of 2026 and beyond.
+                </p>
+              </section>
+
+              {/* CHAPTER 9 */}
+              <section id="ch9" className="mb-16 scroll-mt-8">
+                <h2 className="mb-2 text-2xl font-black text-white border-b border-[#1f1f1f] pb-4">
+                  Chapter 9: Making Sure AI Tools Can Find and Recommend You
+                </h2>
+                <p className="mb-4 text-sm italic text-gray-600 border-b border-[#1f1f1f] pb-4">
+                  Being good isn&apos;t enough if the AI someone just asked has never heard of you.
+                </p>
+
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  There&apos;s a new discovery channel that most creators aren&apos;t thinking about yet. People are asking ChatGPT, Perplexity, and Gemini things like &quot;who are some good [your niche] creators to follow&quot; or &quot;recommend me a newsletter about [your topic].&quot; These assistants answer based on what they can find and confidently summarize about you. If an AI has never &quot;read&quot; anything clear about who you are, it can&apos;t recommend you, no matter how good your actual content is.
+                </p>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  This isn&apos;t a replacement for everything else in this guide. It&apos;s the last layer. Good content is still the foundation. This chapter is about making sure the work you&apos;re already doing is legible to the new layer of AI-powered discovery, the same way good SEO never replaced good writing, it just made good writing findable.
+                </p>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">Have a real About page</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  Whether it&apos;s on your personal site, your link-in-bio, or a pinned post, write an About section that clearly states who you are, what you make content about, where people can find you, and what makes your perspective different. Write it for a person reading it AND for a machine summarizing it later. Plain, factual, specific. &quot;I write about [topic] for [audience], focused on [your angle], and post on [platforms]&quot; will get summarized accurately. A vague mission statement won&apos;t.
+                </p>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">Use structured data if your tools support it</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  If you have a personal site or a link-in-bio page, structured data (specifically Person schema: your name, bio, and links to your profiles) helps AI tools and search engines understand exactly who you are and where to find you. You don&apos;t need to write any code yourself. Many link-in-bio and personal site builders add this automatically behind the scenes. Check whether yours does. If you&apos;re using SocialMate&apos;s SIGIL link-in-bio, this is one less thing you have to think about.
+                </p>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">Keep your bio consistent everywhere</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  AI tools cross-reference. When the facts about you (your niche, your handle, your focus, your platforms) say the same thing on X, LinkedIn, your website, and everywhere else, it&apos;s much easier for an AI to confidently summarize who you are and recommend you. When your bios contradict each other or are wildly different in tone and content from platform to platform, the AI has a harder time forming a clear picture, and an unclear picture doesn&apos;t get recommended.
+                </p>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">An &quot;about me for AI&quot; page costs nothing</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  If you have a personal site, you can add a simple plain-text page (similar in spirit to an llms.txt file, the kind of thing AI crawlers look for) that just lays out: your name, your niche, your platforms, your most important content or links, and two or three sentences on what you&apos;re known for. It takes about 20 minutes to write and costs nothing to host. It&apos;s not for human visitors. It&apos;s a clean, unambiguous summary sitting there for any AI tool that comes looking.
+                </p>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">FAQ-style content does double duty</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  A simple FAQ section or pinned post answering questions like &quot;what is this account about,&quot; &quot;what topics do you cover,&quot; and &quot;where can people find your [thing]&quot; reads naturally to a human scrolling your profile, and it&apos;s exactly the format AI tools extract well when they&apos;re forming an answer to someone&apos;s question. One piece of content, two audiences.
+                </p>
+
+                <Callout>
+                  Being good isn&apos;t enough if nothing can find you, including the AI someone just asked for a recommendation. A clear About page, a consistent bio across platforms, and a simple FAQ cost almost nothing and make sure the work you&apos;re already doing actually gets seen.
+                </Callout>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">A checklist for one sitting</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  Write or update your About page. Make sure your bio says the same thing across every platform you&apos;re on. Add an FAQ section if you don&apos;t have one. And if you have a personal site, add a short plain-text &quot;about for AI&quot; page. None of this takes more than an afternoon, and it&apos;s the kind of work that just sits there quietly working for you from then on.
                 </p>
               </section>
 

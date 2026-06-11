@@ -40,6 +40,7 @@ const CHAPTERS = [
   { id: 'ch6',       label: '6. Brand Deals' },
   { id: 'ch7',       label: '7. Affiliate Marketing' },
   { id: 'ch8',       label: '8. Stack to $5K/Month' },
+  { id: 'ch9',       label: '9. Beyond Tips — Your Creator Toolkit' },
   { id: 'resources', label: 'All Resources' },
 ]
 
@@ -58,7 +59,7 @@ export default function CreatorMonetizationGuidePage() {
               <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-amber-400">
                 Vol. 5
               </span>
-              <span className="text-xs text-gray-600">40 min read</span>
+              <span className="text-xs text-gray-600">45 min read</span>
             </div>
             <h1 className="mb-3 text-4xl font-black leading-tight text-white md:text-5xl">
               Creator Monetization — How to Actually Get Paid
@@ -622,6 +623,86 @@ export default function CreatorMonetizationGuidePage() {
                   <p className="text-sm text-gray-500">
                     The creator who knows their audience deeply will always outmonetize the creator chasing trends. Find one person you&apos;re talking to. Know what keeps them up at night. Solve it. Charge for it. That&apos;s the whole business.
                   </p>
+                </div>
+              </section>
+
+              {/* Chapter 9 */}
+              <section id="ch9" className="mb-16">
+                <h2 className="text-3xl font-black text-white mb-6">Chapter 9: Beyond Tips — Building Your Creator Toolkit</h2>
+
+                <p className="text-gray-300 leading-relaxed mb-6">
+                  Everything so far has been about the streams themselves: tips, subscriptions, products, deals, affiliates. This last chapter is about the boring infrastructure underneath all of it. Money follows attention, and attention compounds through small pieces of plumbing most creators skip entirely.
+                </p>
+
+                <p className="text-gray-300 leading-relaxed mb-6">
+                  None of what&apos;s in this chapter pays you directly. But it&apos;s the difference between a casual visitor and a fan, and between a fan and a payer. Skip it and every stream in this guide converts worse than it should.
+                </p>
+
+                <h3 className="text-xl font-bold text-white mb-4">Link-in-bio with click analytics</h3>
+
+                <p className="text-gray-300 leading-relaxed mb-6">
+                  A single link-in-bio page is table stakes now. Almost every creator has one. The upgrade most creators miss is per-link click tracking and a QR code.
+                </p>
+
+                <p className="text-gray-300 leading-relaxed mb-6">
+                  Knowing which links actually get clicked, your shop, your latest video, your tip jar, tells you what your audience actually wants from you, not what you assume they want. A QR code on your bio page also bridges offline to online: a sticker on your laptop, a slide at the end of a stream, a business card at a meetup. People scan, they land on your page, and now they&apos;re in your funnel.
+                </p>
+
+                <h3 className="text-xl font-bold text-white mb-4">Shareable creator presence cards</h3>
+
+                <p className="text-gray-300 leading-relaxed mb-6">
+                  A single page that shows your platforms, follower and post counts, current streak, and top content, designed to be screenshotted and shared, becomes a social-proof asset. Drop it in DMs, pin it in your bio, attach it to a brand pitch. It&apos;s the &quot;show, don&apos;t tell&quot; version of your media kit, always up to date because it pulls live numbers instead of a static PDF you forget to update.
+                </p>
+
+                <h3 className="text-xl font-bold text-white mb-4">Embeddable badges as a growth loop</h3>
+
+                <p className="text-gray-300 leading-relaxed mb-6">
+                  A small &quot;Built with X&quot; or &quot;Powered by X&quot; badge that creators can embed on their own site or profile is free distribution for whoever built the tool. The lesson generalizes for you too: anything that lets your audience visibly associate with your brand, merch, badges, shoutouts, turns fans into a distribution channel. People want to repost the things that make them look like an early supporter or part of something. Give them an easy way to do it.
+                </p>
+
+                <h3 className="text-xl font-bold text-white mb-4">Gamification as a monetization lever, not a vanity feature</h3>
+
+                <p className="text-gray-300 leading-relaxed mb-6">
+                  A 30-day posting streak isn&apos;t just a fun stat. Consistency is the single biggest predictor of audience growth, and audience growth is the top of every monetization funnel in this guide, tips, subscriptions, brand deals, and products all start with someone seeing your content regularly enough to trust you.
+                </p>
+
+                <p className="text-gray-300 leading-relaxed mb-6">
+                  Tools that reward consistency, streak counters, milestone badges, &quot;30-day challenge&quot; structures, exist because they directly drive the behavior that makes everything else in this guide possible. If a tool makes it easier for you to show up every day, that&apos;s not a gimmick. That&apos;s the foundation.
+                </p>
+
+                <div className="not-prose rounded-2xl border border-[#2a2a2a] bg-[#111111] p-6 mb-8">
+                  <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">The infrastructure layer (free or near-free)</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {[
+                      'Link-in-bio page with per-link click tracking',
+                      'QR code for offline-to-online bridges',
+                      'Shareable presence/media kit card',
+                      'Embeddable "supporter" or brand badge',
+                      'Posting streak tracker',
+                      'Achievement / milestone badges',
+                      '30-day content challenge structure',
+                      'Scheduling + analytics in one place',
+                    ].map((item) => (
+                      <div key={item} className="flex items-center gap-2 text-sm text-gray-400">
+                        <span className="text-emerald-500">✓</span> {item}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <h3 className="text-xl font-bold text-white mb-4">Tying it together</h3>
+
+                <p className="text-gray-300 leading-relaxed mb-6">
+                  None of these tools generate revenue directly. They generate the consistency, social proof, and discoverability that make tip jars, fan subscriptions, and brand deals actually convert. Treat your &quot;creator OS&quot;, scheduling, analytics, link-in-bio, gamification, as infrastructure, the same way a store owner treats their storefront, lighting, and signage as infrastructure for the sales that happen at the register.
+                </p>
+
+                <p className="text-gray-300 leading-relaxed mb-6">
+                  I built SocialMate&apos;s SIGIL link-in-bio, ZENITH presence card, badge embed, and streak/achievement system because I needed all of this myself and couldn&apos;t justify paying for five separate tools. Whatever toolkit you use, the principle holds: invest in the boring plumbing first, and the streams in this guide will convert at a higher rate than they would on their own.
+                </p>
+
+                <div className="not-prose rounded-2xl border border-amber-500/20 bg-amber-500/5 p-6">
+                  <p className="text-sm font-bold text-amber-400 mb-2">The takeaway</p>
+                  <p className="text-sm text-gray-400">A tip jar with no traffic, no tracking, and no consistency behind it earns nothing. The same tip jar behind a bio link people actually click, a presence that&apos;s actively shared, and a creator who shows up every day earns real money. Build the infrastructure first. The income streams take care of themselves.</p>
                 </div>
               </section>
 

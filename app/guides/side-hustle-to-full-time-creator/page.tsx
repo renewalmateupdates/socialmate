@@ -37,6 +37,7 @@ const CHAPTERS = [
   { id: 'ch6', label: '6. The Mental Game of Building in Public' },
   { id: 'ch7', label: '7. Building Systems So the Business Runs Without You' },
   { id: 'ch8', label: '8. What Full-Time Actually Looks Like' },
+  { id: 'ch9', label: '9. The Bridge Income Strategy' },
 ]
 
 export default function SideHustleToFullTimePage() {
@@ -57,7 +58,7 @@ export default function SideHustleToFullTimePage() {
               <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-amber-400">
                 Vol. 8
               </span>
-              <span className="text-xs text-gray-600">35 min read</span>
+              <span className="text-xs text-gray-600">40 min read</span>
             </div>
             <h1 className="mb-3 text-4xl font-black leading-tight text-white md:text-5xl">
               From Side Hustle to Full-Time Creator
@@ -401,6 +402,66 @@ export default function SideHustleToFullTimePage() {
                 <p className="leading-relaxed text-gray-300">
                   I&apos;ll get there. So will you, if you do the work. Not the fantasy version of it — the real work: showing up consistently, building the systems, earning the audience, stacking the revenue. One shift at a time. One post at a time. One product at a time. The door is open. You just have to keep walking toward it.
                 </p>
+              </section>
+
+              {/* CHAPTER 9 */}
+              <section id="ch9" className="mb-16 scroll-mt-8">
+                <h2 className="mb-2 text-2xl font-black text-white border-b border-[#1f1f1f] pb-4">
+                  Chapter 9: The Bridge Income Strategy
+                </h2>
+                <p className="mb-4 text-sm italic text-gray-600 border-b border-[#1f1f1f] pb-4">
+                  An honest update from where I&apos;m at right now, and a framework for the gap between &quot;not yet&quot; and &quot;full-time.&quot;
+                </p>
+
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  Time for an update, because this guide is supposed to be honest and things changed. As of June 2026, I left the deli job. Not because SocialMate replaced the income, it hasn&apos;t yet, but because I set up something I want to call bridge income. I now do tree cutting and service work with a local operator named Ron, the same guy I built a demo website for. The hours are flexible, the pay is fair for the work, and most importantly, it doesn&apos;t eat into my nights and weekends, which is when SocialMate actually gets built.
+                </p>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  I want to walk through this because it&apos;s a real option that most career advice skips entirely. Most advice treats &quot;your job&quot; and &quot;your project&quot; as two permanently separate tracks that never touch. The bridge framing is different. It&apos;s a deliberate, temporary, reviewable arrangement whose only purpose is buying you time for the real bet.
+                </p>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">What makes good bridge income</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  Not every job or gig works as a bridge. Here&apos;s the criteria I used when I was thinking through what to do after the deli job:
+                </p>
+                <ul className="mb-6 space-y-3 text-gray-300">
+                  <li className="flex gap-3">
+                    <span className="mt-1 text-amber-500 shrink-0">▸</span>
+                    <span><strong className="text-white">Flexible scheduling.</strong> You need hours that don&apos;t collide with your peak creative or building time. If your bridge work eats the exact hours you&apos;d otherwise be shipping code or writing posts, it&apos;s not a bridge, it&apos;s a replacement that pays worse.</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="mt-1 text-amber-500 shrink-0">▸</span>
+                    <span><strong className="text-white">Different mental energy than your main project.</strong> Tree work is physical. Building SocialMate is mentally demanding, decisions, debugging, design, copy. Those two don&apos;t compete for the same fuel. Physical work can actually be a good complement to creative or technical work, it gives your brain a break instead of draining the same tank twice in one day.</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="mt-1 text-amber-500 shrink-0">▸</span>
+                    <span><strong className="text-white">Pays reasonably for the hours.</strong> It doesn&apos;t have to be aligned with your passion or your niche. It just has to cover real bills without you needing to stretch it across every waking hour. The job&apos;s purpose is income, not identity.</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="mt-1 text-amber-500 shrink-0">▸</span>
+                    <span><strong className="text-white">Has a natural exit.</strong> You&apos;re not building a career in it. There&apos;s no ladder you&apos;re climbing, no five-year plan inside the bridge work itself. It exists to be left. That&apos;s not a knock on the work, it&apos;s just not the destination.</span>
+                  </li>
+                </ul>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">The math of a bridge</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  Here&apos;s how to actually run the numbers. Say your monthly bills, rent, food, insurance, the basics, add up to a fixed number. If your bridge work covers that number at 20-25 hours a week, you&apos;ve just freed up the rest of your waking hours, evenings and weekends, for the project that actually matters. The bridge isn&apos;t supposed to feel exciting. It&apos;s not supposed to be your identity or your story. Its entire job is to remove the financial pressure that makes people either quit their real project too early, or say yes to client work and side gigs that slowly pull them away from the thing they actually set out to build.
+                </p>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  When the bridge is doing its job, the math is simple: bills covered, fewer hours than a full-time job, and your best hours protected for the main bet. If any of those three breaks, the bridge isn&apos;t working and it&apos;s worth reconsidering.
+                </p>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">The trap to avoid</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  Here&apos;s the honest danger. A good bridge can become comfortable. The bills are covered, the work is fine, the pressure is gone, and slowly the urgency on your main project softens too. The whole point of bridge income is that it&apos;s temporary by design. If you stop treating it that way, it quietly becomes the new floor instead of the thing that was supposed to launch you past it.
+                </p>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  The fix is a real review point. Set one, every 3-6 months, and actually sit down and ask: is the main project&apos;s revenue closing the gap? If yes, keep going, the timeline is working. If not, is the bridge still sustainable as-is, or do you need a different bridge, fewer hours, different work, something that frees up more time? Don&apos;t let the review point slide. That&apos;s the difference between a bridge and a permanent detour.
+                </p>
+
+                <Callout>
+                  The bridge gets you across. It&apos;s not where you live. Set it up honestly, name it for what it is even if just to yourself, and keep your eyes on the other side.
+                </Callout>
               </section>
 
               {/* Joshua's Note */}

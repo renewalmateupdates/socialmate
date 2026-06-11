@@ -37,6 +37,7 @@ const CHAPTERS = [
   { id: 'ch6', label: '6. How to Get Your First 100 Followers Without Ads' },
   { id: 'ch7', label: '7. Understanding What\'s Working (Basic Analytics)' },
   { id: 'ch8', label: '8. What Happens After Day 30' },
+  { id: 'ch9', label: '9. Automating Your First 30 Days (Without Faking It)' },
 ]
 
 export default function First30DaysSocialMediaPage() {
@@ -57,7 +58,7 @@ export default function First30DaysSocialMediaPage() {
               <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-amber-400">
                 Vol. 6
               </span>
-              <span className="text-xs text-gray-600">30 min read</span>
+              <span className="text-xs text-gray-600">35 min read</span>
             </div>
             <h1 className="mb-3 text-4xl font-black leading-tight text-white md:text-5xl">
               Your First 30 Days on Social Media
@@ -436,6 +437,96 @@ export default function First30DaysSocialMediaPage() {
                 <p className="leading-relaxed text-gray-300">
                   Write down those answers. They&apos;re the seeds of your next month&apos;s content. They&apos;re proof that you&apos;ve learned something. And they&apos;re evidence that the version of you that finishes Day 30 is different from the one who started Day 1. That difference compounds every 30 days you keep going. Don&apos;t stop now.
                 </p>
+              </section>
+
+              {/* CHAPTER 9 */}
+              <section id="ch9" className="mb-16 scroll-mt-8">
+                <h2 className="mb-2 text-2xl font-black text-white border-b border-[#1f1f1f] pb-4">
+                  Chapter 9: Automating Your First 30 Days (Without Faking It)
+                </h2>
+                <p className="mb-4 text-sm italic text-gray-600 border-b border-[#1f1f1f] pb-4">
+                  How to use scheduling to protect your streak on the days you don&apos;t feel like showing up.
+                </p>
+
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  Chapter 5 told you to post consistently. Here&apos;s the part nobody warns you about: somewhere around Day 18, you&apos;re going to be tired. Or busy. Or just not in the mood. Life will happen — work, family, a bad day — and the decision to post will suddenly feel optional. This is exactly the moment most people break their streak and never quite get it back.
+                </p>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  Scheduling tools exist for this exact moment. Not to make your content feel robotic or automated, but to remove &quot;do I feel like doing this right now&quot; from the equation entirely. The post is already written. It&apos;s already good. It just goes out at the right time whether you&apos;re sitting at your laptop or not.
+                </p>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">What to automate, and what to never automate</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  There&apos;s a line here, and it matters. Automate the wrong things and your presence disappears. Automate the right things and you free up the time and energy to actually be present.
+                </p>
+                <ul className="mb-6 space-y-3 text-gray-300">
+                  <li className="flex gap-3">
+                    <span className="mt-1 text-amber-500 shrink-0">▸</span>
+                    <span><strong className="text-white">Automate the timing.</strong> Write your content in a batch, then schedule it to go out at consistent times. The words are 100% yours. Only the &quot;hit publish&quot; moment is automated.</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="mt-1 text-amber-500 shrink-0">▸</span>
+                    <span><strong className="text-white">Automate cross-posting.</strong> Take the same core idea and put it on multiple platforms with light per-platform tweaks. One thought, multiple formats, one scheduling session.</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="mt-1 text-amber-500 shrink-0">▸</span>
+                    <span><strong className="text-white">Automate evergreen recycling.</strong> Re-surface your high-performing posts later, after the people who already saw them have moved on and a new wave of followers hasn&apos;t.</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="mt-1 text-red-400 shrink-0">▸</span>
+                    <span><strong className="text-white">Never automate replies, comments, and DMs.</strong> The algorithm rewards presence, not just output. So does your audience. Someone who comments on your post and gets nothing back learns not to bother next time. Scheduling buys you the consistency in output so you have the time and energy left over for the engagement that actually builds relationships.</span>
+                  </li>
+                </ul>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">Batch creation as a 30-day strategy</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  Instead of facing &quot;what do I post today&quot; every single morning, set aside one session a week — Sunday afternoon works for a lot of people — and write 5-7 posts in one sitting. You&apos;re already in the headspace. Use it. Then schedule those posts across the week at consistent times.
+                </p>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  This single change removes the #1 reason people break a streak: decision fatigue. There&apos;s no daily question to answer. The work is already done. All that&apos;s left is showing up to engage with whoever responds.
+                </p>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">Cross-posting without sounding copy-pasted</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  The core idea can be identical across platforms. The format shouldn&apos;t be. A long-form thought might work as a full post on LinkedIn, Bluesky, or Mastodon, but the same idea on X/Twitter needs to be punchier, tighter, broken down. Most scheduling tools let you customize the text per platform before it goes out — use that. A few minutes of tweaking is the difference between content that feels native to each platform and content that screams &quot;this was blasted everywhere at once.&quot;
+                </p>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">Evergreen recycling, explained simply</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  Your best post from week 1 is brand new to anyone who starts following you in week 3. They never saw it. Re-sharing high-performing content later, with a small tweak to keep it relevant, isn&apos;t lazy — it&apos;s how creators with thousands of posts in their archive maintain a consistent feed without writing everything fresh forever. Your best ideas deserve more than one airing.
+                </p>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">Your Day 1-30 automation setup checklist</h3>
+                <ul className="mb-6 space-y-3 text-gray-300">
+                  <li className="flex gap-3">
+                    <span className="mt-1 text-amber-500 shrink-0">▸</span>
+                    <span>Pick a free scheduler that supports your platform(s). SocialMate&apos;s free plan covers Bluesky, Mastodon, Discord, and Telegram out of the box.</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="mt-1 text-amber-500 shrink-0">▸</span>
+                    <span>Connect 1-2 platforms to start. Don&apos;t overextend — this ties back to the One-Platform Rule from Chapter 2.</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="mt-1 text-amber-500 shrink-0">▸</span>
+                    <span>Batch-write your first week of posts in one sitting before you schedule anything.</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="mt-1 text-amber-500 shrink-0">▸</span>
+                    <span>Schedule at your audience&apos;s likely active times. Morning and evening commute slots are a safe default if you don&apos;t have data yet.</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="mt-1 text-amber-500 shrink-0">▸</span>
+                    <span>Keep a running idea bank (from Chapter 5) so your batch days are fast and you&apos;re never starting from zero.</span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="mt-1 text-amber-500 shrink-0">▸</span>
+                    <span>Review what&apos;s working at Day 15 and Day 30, using the three signals from Chapter 7, and adjust your next batch accordingly.</span>
+                  </li>
+                </ul>
+
+                <Callout>
+                  Scheduling protects your streak. It doesn&apos;t replace your presence. Automate the output so you never miss a day, and spend the time you save actually talking to the people who show up for you.
+                </Callout>
               </section>
 
               {/* Joshua's Note */}

@@ -39,6 +39,7 @@ const CHAPTERS = [
   { id: 'ch5',       label: '5. When It Breaks' },
   { id: 'ch6',       label: '6. Going Live' },
   { id: 'ch7',       label: '7. The Mindset' },
+  { id: 'ch8',       label: '8. Scaling Past One Feature' },
   { id: 'resources', label: 'All Resources' },
 ]
 
@@ -57,7 +58,7 @@ export default function VibeCodingGuidePage() {
               <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-bold uppercase tracking-widest text-amber-400">
                 Vol. 4
               </span>
-              <span className="text-xs text-gray-600">35 min read</span>
+              <span className="text-xs text-gray-600">40 min read</span>
             </div>
             <h1 className="mb-3 text-4xl font-black leading-tight text-white md:text-5xl">
               Vibe Coding — Building Software with AI
@@ -527,6 +528,136 @@ export default function VibeCodingGuidePage() {
                 <div className="mt-10 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-6">
                   <p className="text-white font-black text-lg mb-2">You don't need a CS degree. You need a clear vision and the will to iterate.</p>
                   <p className="text-gray-400 text-sm">That's the whole unlock. The rest is just building.</p>
+                </div>
+              </section>
+
+              {/* Chapter 8 */}
+              <section id="ch8" className="mb-16">
+                <div className="flex items-center gap-3 mb-6">
+                  <span className="text-xs font-bold uppercase tracking-widest text-amber-400 border border-amber-500/30 rounded-full px-3 py-1">Chapter 8</span>
+                </div>
+                <h2 className="text-2xl font-black text-white mb-4">Scaling Past One Feature — Agents, Crons, and Memory</h2>
+
+                <h3 className="text-lg font-bold text-amber-400 mt-8 mb-3">From One Prompt to a System</h3>
+                <p className="text-gray-300 leading-relaxed mb-4">
+                  When you're starting out, vibe coding looks like this: one prompt, one feature, one file, you watching every line scroll by. That's the right way to learn, and it works fine for the first few months.
+                </p>
+                <p className="text-gray-300 leading-relaxed mb-4">
+                  But as your product grows, you start needing things that run without you. Things that fire while you're asleep, while you're at work, while you're doing literally anything else. Daily digests. Weekly reports. Recurring content generation. Cleanup jobs. The product needs to keep moving even when you're not at the keyboard — and you need to be able to work on more than one thing at a time. This chapter is about what changes when you cross that line.
+                </p>
+
+                <h3 className="text-lg font-bold text-amber-400 mt-8 mb-3">Background Agents — Working in Parallel</h3>
+                <p className="text-gray-300 leading-relaxed mb-4">
+                  Modern AI coding tools (Claude Code is the one I use) can spin up sub-agents — separate workers that go research or implement an isolated piece of work while you keep building on the main thread. You're not waiting around for one task to finish before starting the next. You're running two or three lanes at once.
+                </p>
+
+                <div className="grid md:grid-cols-2 gap-4 mb-8">
+                  <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-5">
+                    <p className="text-green-400 font-bold text-sm mb-3">✓ Good for background agents</p>
+                    <ul className="text-gray-400 text-sm space-y-2">
+                      <li>"Add this feature across all 10 of these similar files"</li>
+                      <li>"Find every place this pattern is used and summarize it"</li>
+                      <li>An isolated bug fix that doesn't touch what you're working on</li>
+                      <li>Large-scale content or data tasks (writing 30 blog posts, generating SQL inserts)</li>
+                      <li>Research tasks where you just need an answer, not a conversation</li>
+                    </ul>
+                  </div>
+                  <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-5">
+                    <p className="text-red-400 font-bold text-sm mb-3">✗ Don't hand off to an agent</p>
+                    <ul className="text-gray-400 text-sm space-y-2">
+                      <li>Anything where you need tight context continuity with what you're doing right now</li>
+                      <li>Decisions that require your judgment — pricing, architecture direction, what ships and what doesn't</li>
+                      <li>Work that touches the same files as your current session at the same time</li>
+                      <li>Anything you can't review carefully when it comes back</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <p className="text-gray-300 leading-relaxed">
+                  Think of it like delegating to a capable junior who's great at execution but needs clear scope. Give the agent a self-contained task with enough context to act without you, let it run, and review the result before it merges into your main work. The win isn't that the agent is smarter than you — it's that your time stops being the bottleneck for everything.
+                </p>
+
+                <h3 className="text-lg font-bold text-amber-400 mt-8 mb-3">Cron Jobs — Things That Happen Without a Click</h3>
+                <p className="text-gray-300 leading-relaxed mb-4">
+                  Once your product has real users, a lot of the most valuable things it does shouldn't require anyone to click a button. A weekly digest email. A daily check for stuck jobs. A recurring content generation run. These need to happen on a schedule, reliably, whether or not you're awake.
+                </p>
+                <p className="text-gray-300 leading-relaxed mb-4">
+                  I use Inngest for this (it's in the stack from Chapter 2, free tier covers a generous number of runs). The pattern is simple:
+                </p>
+                <div className="space-y-3 mb-8">
+                  {[
+                    { step: '1. Write the function', desc: 'A normal function that does one job — send an email, check a table, generate content. Same code you\'d write for an API route.' },
+                    { step: '2. Register it with a cron schedule', desc: 'Tell the platform when to run it: "every day at 6am UTC", "every Monday at 9am", "every 15 minutes". Cron syntax, no servers to manage.' },
+                    { step: '3. Add an idempotency guard', desc: 'This is the part people skip and regret. If the job fires twice (it will, eventually — retries, overlaps, edge cases), it must not double-send, double-post, or double-charge. Check a "already done" flag before doing the work.' },
+                    { step: '4. Let the platform handle reliability', desc: 'Retries, failure logs, observability — that\'s what you\'re paying the free tier for. Your job is the function. The platform\'s job is making sure it actually runs.' },
+                  ].map(item => (
+                    <div key={item.step} className="flex gap-4">
+                      <div className="w-2 h-2 rounded-full bg-amber-400 mt-2 shrink-0" />
+                      <div>
+                        <p className="text-white font-semibold text-sm mb-1">{item.step}</p>
+                        <p className="text-gray-400 text-sm">{item.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className="text-gray-300 leading-relaxed mb-4">
+                  SocialMate now runs more than 8 of these automated "agents" on schedules — newsletters, client reports, inbox replies, trend analysis, repurposing old content, and more. Each one is its own small function with its own cron line. None of them require me to be online for the product to keep working for users.
+                </p>
+
+                <h3 className="text-lg font-bold text-amber-400 mt-8 mb-3">CLAUDE.md — Your Project's Living Memory</h3>
+                <p className="text-gray-300 leading-relaxed mb-4">
+                  Here's the problem nobody warns you about: as your project grows past a handful of features, you start re-explaining your whole product every session. What's the tech stack again? What bug did we already fix in this file? What did we decide about pricing? The AI doesn't remember last week's session, and re-explaining everything burns time and tokens.
+                </p>
+                <p className="text-gray-300 leading-relaxed mb-4">
+                  The fix is one markdown file in your repo root that the AI reads automatically every session. As your project grows, this file becomes your single source of truth:
+                </p>
+                <ul className="text-gray-300 space-y-2 mb-4 list-disc list-inside">
+                  <li><strong className="text-white">Tech stack and key decisions</strong> — so the AI doesn't suggest swapping something you deliberately chose</li>
+                  <li><strong className="text-white">Known gotchas</strong> — framework-specific bugs you've already hit and fixed, so they don't get reintroduced</li>
+                  <li><strong className="text-white">Coding rules</strong> — your conventions, what not to touch, how to handle payments/auth/etc.</li>
+                  <li><strong className="text-white">What's been built</strong> — a running log so the AI knows what already exists</li>
+                  <li><strong className="text-white">A "Confirmed Done — stop asking about this" list</strong> — closed loops the AI shouldn't keep resurfacing</li>
+                </ul>
+                <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-6">
+                  <p className="text-amber-300 text-sm font-semibold mb-1">Why this matters more than it seems</p>
+                  <p className="text-gray-400 text-sm">Without a living memory doc, every session starts from zero. The AI re-suggests fixes you already shipped, re-explains patterns you already established, and you spend the first ten minutes of every session just getting it back up to speed. With one, every session starts already caught up — and that compounds across hundreds of sessions.</p>
+                </div>
+
+                <h3 className="text-lg font-bold text-amber-400 mt-8 mb-3">What Scale Actually Looks Like for One Person</h3>
+                <p className="text-gray-300 leading-relaxed mb-4">
+                  Here's a real number, no exaggeration: 400+ pull requests merged in about two and a half months. Solo. Nights and weekends, around a full-time job. Using exactly the workflow in this chapter — background agents for parallel research and builds, cron-based automation for everything recurring, and a living memory doc to maintain context across hundreds of sessions.
+                </p>
+                <p className="text-gray-300 leading-relaxed">
+                  The throughline is this: the AI models didn't get dramatically smarter overnight between when I started and now. The <em>workflow</em> scaled. One person with good systems can operate like a small team — not because the AI replaced the team, but because the AI plus the right systems removed the serial bottleneck that used to require more humans.
+                </p>
+
+                <h3 className="text-lg font-bold text-amber-400 mt-8 mb-3">Solo Without Systems vs. Solo With Systems</h3>
+                <div className="grid md:grid-cols-2 gap-4 mb-8">
+                  <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-5">
+                    <p className="text-red-400 font-bold text-sm mb-3">✗ What fails at scale</p>
+                    <ul className="text-gray-400 text-sm space-y-2">
+                      <li>Re-explaining your whole project context every session</li>
+                      <li>Manually doing recurring tasks (sending the digest, checking for stuck jobs)</li>
+                      <li>One person doing everything serially, one task at a time</li>
+                      <li>Re-litigating decisions you already made weeks ago</li>
+                      <li>Losing track of what's already shipped vs. still pending</li>
+                    </ul>
+                  </div>
+                  <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-5">
+                    <p className="text-green-400 font-bold text-sm mb-3">✓ What works at scale</p>
+                    <ul className="text-gray-400 text-sm space-y-2">
+                      <li>CLAUDE.md (or your tool's equivalent) as persistent memory</li>
+                      <li>Cron automation handling recurring work without you</li>
+                      <li>Background agents running parallel research and builds</li>
+                      <li>A "Confirmed Done" list so closed loops stay closed</li>
+                      <li>You spending your time on judgment calls, not repetition</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="mt-10 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-6">
+                  <p className="text-white font-black text-lg mb-2">You don't scale by working more hours. You scale by building systems that work when you're not.</p>
+                  <p className="text-gray-400 text-sm">Memory, automation, and parallel work are how one builder starts operating like a team.</p>
                 </div>
               </section>
 
