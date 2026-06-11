@@ -31,6 +31,7 @@ const AUDIENCE_HREFS = [
 const RESOURCE_HREFS = [
   { key: 'resources_items.blog',      href: '/blog'      },
   { key: 'resources_items.guides',    href: '/guides'    },
+  { key: 'resources_items.grants',    href: '/grants'    },
   { key: 'resources_items.faq',       href: '/faq'       },
   { key: 'resources_items.changelog', href: '/changelog' },
   { key: 'resources_items.about',     href: '/about'     },
