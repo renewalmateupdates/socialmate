@@ -734,6 +734,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/vs/mailchimp`,      lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/vs/tiktok-native`,  lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     { url: `${base}/vs/substack`,       lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/brandwatch`,     lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/klaviyo`,        lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/linktree`,       lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/beehiiv`,        lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/convertkit`,     lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/notionhq`,       lastModified: now, changeFrequency: 'monthly', priority: 0.7 },
+    { url: `${base}/vs/creatorstudio`,  lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/discord-bots`,   lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${base}/vs/tiktok-scheduler`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
   ]
 
   const blogPosts: MetadataRoute.Sitemap = BLOG_SLUGS.map(slug => ({
