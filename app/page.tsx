@@ -131,10 +131,12 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
       {/* HERO */}
       <section className="relative max-w-5xl mx-auto px-6 pt-24 pb-20 text-center overflow-hidden">
         {/* Background depth glow */}
+        {/* Radial gradients instead of blur() filters — same soft-glow look without
+            forcing a full-area blur compositing pass on first paint (cheaper FCP) */}
         <div className="absolute inset-0 -z-10 pointer-events-none">
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full bg-amber-500/8 blur-[130px]" />
-          <div className="absolute top-1/3 left-1/4 w-[350px] h-[350px] rounded-full bg-purple-600/8 blur-[100px]" />
-          <div className="absolute top-1/4 right-1/4 w-[300px] h-[300px] rounded-full bg-blue-600/6 blur-[100px]" />
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full" style={{ background: 'radial-gradient(closest-side, rgba(245,158,11,0.08), transparent 70%)' }} />
+          <div className="absolute top-1/3 left-1/4 w-[350px] h-[350px] rounded-full" style={{ background: 'radial-gradient(closest-side, rgba(147,51,234,0.08), transparent 70%)' }} />
+          <div className="absolute top-1/4 right-1/4 w-[300px] h-[300px] rounded-full" style={{ background: 'radial-gradient(closest-side, rgba(37,99,235,0.06), transparent 70%)' }} />
         </div>
 
         <HeroLaunchBadge />
