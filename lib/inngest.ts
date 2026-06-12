@@ -804,7 +804,7 @@ export const evergreenRecycler = inngest.createFunction(
 // welcome messages + assigns auto-roles.
 export const discordWelcomePoller = inngest.createFunction(
   { id: 'discord-welcome-poller', name: 'Discord Welcome Message Poller', retries: 2 },
-  { cron: '*/5 * * * *' },
+  { cron: '*/15 * * * *' },
   async ({ step }) => {
     // Fetch all enabled welcome configs
     const configs = await step.run('fetch-welcome-configs', async () => {
@@ -2427,13 +2427,14 @@ function enkiSignalLabel(signal: { confidence: number; side: string; signals?: s
   return `${sigList} (conf ${signal.confidence}/10)`
 }
 
-// ─── Enki Cloud Runner Scan — every 5 minutes (Cloud Runner subscribers only) ──
-// Identical logic to enkiPaperTradingScan but runs 3× more often and only
-// processes users who have cloud_runner = true. This is the paid differentiator:
-// faster signal response, more trades caught on shorter-lived momentum moves.
+// ─── Enki Cloud Runner Scan — hourly (Cloud Runner subscribers only) ──
+// Identical logic to enkiPaperTradingScan but only processes users who have
+// cloud_runner = true. This is the paid differentiator: faster signal response,
+// more trades caught on shorter-lived momentum moves. Runs hourly until there
+// are paying subscribers — bump back to */5 when cloud_runner adoption picks up.
 export const enkiCloudRunnerScan = inngest.createFunction(
   { id: 'enki-cloud-runner-scan', name: 'Enki Cloud Runner Scan', retries: 1 },
-  { cron: '*/5 * * * *' },
+  { cron: '0 * * * *' },
   async ({ step }) => {
     const activeUsers = await step.run('fetch-cloud-runner-users', async () => {
       const db = getSupabaseAdmin()
