@@ -264,6 +264,7 @@ export default async function AdminOverviewPage() {
   interface SourceCount { source: string; count: number }
   let signupSources: SourceCount[] = []
   let signupReferrers: SourceCount[] = []
+  let blogAttribution: SourceCount[] = []
   let attributedCount = 0
   let totalTracked = 0
 
@@ -277,6 +278,7 @@ export default async function AdminOverviewPage() {
       totalTracked = sourceRows.length
       const sourceMap = new Map<string, number>()
       const refMap = new Map<string, number>()
+      const blogMap = new Map<string, number>()
 
       for (const row of sourceRows) {
         const src = row.signup_source
@@ -294,8 +296,14 @@ export default async function AdminOverviewPage() {
 
         if (ref) {
           try {
-            const host = new URL(ref).hostname.replace('www.', '')
+            const url = new URL(ref)
+            const host = url.hostname.replace('www.', '')
             refMap.set(host, (refMap.get(host) ?? 0) + 1)
+
+            const blogMatch = url.pathname.match(/^\/blog\/([^/]+)/)
+            if (blogMatch && host.includes('socialmate.studio')) {
+              blogMap.set(blogMatch[1], (blogMap.get(blogMatch[1]) ?? 0) + 1)
+            }
           } catch {
             refMap.set(ref.slice(0, 40), (refMap.get(ref.slice(0, 40)) ?? 0) + 1)
           }
@@ -308,6 +316,11 @@ export default async function AdminOverviewPage() {
         .slice(0, 10)
 
       signupReferrers = Array.from(refMap.entries())
+        .map(([source, count]) => ({ source, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10)
+
+      blogAttribution = Array.from(blogMap.entries())
         .map(([source, count]) => ({ source, count }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 10)
@@ -591,7 +604,7 @@ export default async function AdminOverviewPage() {
         {/* ── Section 6: Signup Attribution ───────────────────────────── */}
         <section>
           <SectionLabel>Signup Attribution</SectionLabel>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {/* UTM Sources */}
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
               <div className="flex items-center justify-between mb-4">
@@ -645,6 +658,41 @@ export default async function AdminOverviewPage() {
                         </div>
                         <div className="w-full bg-gray-800 rounded-full h-1.5 overflow-hidden">
                           <div className="h-full rounded-full bg-sky-500/60" style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Blog Posts → Signups */}
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+              <div className="mb-4">
+                <div className="text-sm font-semibold text-gray-300">Blog Posts → Signups</div>
+                <div className="text-xs text-gray-600 mt-0.5">signups whose last referrer was a blog post</div>
+              </div>
+              {blogAttribution.length === 0 ? (
+                <p className="text-xs text-gray-600">No blog attribution data yet — live for new signups.</p>
+              ) : (
+                <div className="space-y-2">
+                  {blogAttribution.map(({ source, count }) => {
+                    const pct = blogAttribution[0]?.count > 0 ? Math.round((count / blogAttribution[0].count) * 100) : 0
+                    return (
+                      <div key={source}>
+                        <div className="flex items-center justify-between mb-1">
+                          <a
+                            href={`/blog/${source}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-gray-400 font-mono truncate max-w-[180px] hover:text-emerald-400 hover:underline"
+                          >
+                            {source}
+                          </a>
+                          <span className="text-xs font-black text-emerald-400 ml-2 shrink-0">{count}</span>
+                        </div>
+                        <div className="w-full bg-gray-800 rounded-full h-1.5 overflow-hidden">
+                          <div className="h-full rounded-full bg-emerald-500/60" style={{ width: `${pct}%` }} />
                         </div>
                       </div>
                     )
