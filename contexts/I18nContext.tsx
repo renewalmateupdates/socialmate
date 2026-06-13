@@ -39,7 +39,16 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       loadMessages(locale).then(setMessages)
     }
 
-    // Also sync with DB preference for logged-in users (non-blocking)
+    // Also sync with DB preference for logged-in users (non-blocking).
+    // A locale already saved on this device (localStorage) reflects the user's
+    // most recent choice (e.g. switched language on the public site right before
+    // logging in) and takes priority over a possibly-stale DB value. In that
+    // case, push the local choice up to the DB instead of pulling the DB down.
+    let hasLocalPref = false
+    try {
+      hasLocalPref = !!localStorage.getItem('sm_locale')
+    } catch {}
+
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) return
       supabase
@@ -48,8 +57,18 @@ export function I18nProvider({ children }: { children: ReactNode }) {
         .eq('user_id', user.id)
         .maybeSingle()
         .then(({ data }) => {
-          if (data?.locale && data.locale !== locale) {
-            const dbLocale = data.locale as Locale
+          if (!data?.locale) return
+          const dbLocale = data.locale as Locale
+          if (dbLocale === locale) return
+
+          if (hasLocalPref) {
+            // Local choice wins — sync it up to the DB (non-fatal)
+            supabase
+              .from('user_settings')
+              .upsert({ user_id: user.id, locale }, { onConflict: 'user_id' })
+              .then(() => {})
+          } else {
+            // No local preference yet (fresh device) — adopt the DB value
             setLocaleState(dbLocale)
             persistLocale(dbLocale)
             loadMessages(dbLocale).then(setMessages)
