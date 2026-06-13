@@ -9,6 +9,7 @@ import DashboardTour from '@/components/DashboardTour'
 import DidYouKnow from '@/components/DidYouKnow'
 import DashboardWidgets from '@/components/DashboardWidgets'
 import WelcomeOfferBanner from '@/components/WelcomeOfferBanner'
+import WhatsNewBanner from '@/components/WhatsNewBanner'
 import { useWorkspace, PLAN_CONFIG } from '@/contexts/WorkspaceContext'
 import { useI18n } from '@/contexts/I18nContext'
 import {
@@ -464,6 +465,9 @@ function DashboardInner() {
               </div>
             </div>
           )}
+
+          {/* WHAT'S NEW BANNER — dismissible, reappears when LATEST.id changes */}
+          <WhatsNewBanner />
 
           {/* WELCOME OFFER BANNER — free users, account 14+ days old */}
           {user && plan === 'free' && (
