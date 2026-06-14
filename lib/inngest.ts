@@ -4,6 +4,7 @@ import { Resend } from 'resend'
 import { createDecipheriv } from 'crypto'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { SOMA_COSTS } from '@/lib/soma-costs'
+import { buildIrisEmailHtml } from '@/lib/iris-email'
 import {
   getRecentMembers,
   sendChannelMessage,
@@ -5180,14 +5181,13 @@ export const comebackEmails = inngest.createFunction(
   }
 )
 
-// ─── IRIS Weekly Draft Generator — Sunday 8pm UTC ─────────────────────────────
-// Auto-generates an IRIS Dispatch draft via Gemini and emails it to the admin
-// for review before manually sending. Admin reviews at /admin/iris.
-export const irisDraftGenerator = inngest.createFunction(
-  { id: 'iris-draft-generator', name: 'IRIS Weekly Draft Generator', retries: 1 },
+// ─── IRIS Auto-Dispatch — Sunday 8pm UTC ──────────────────────────────────────
+// Fully automated: generates the newsletter via Gemini AND sends it to all
+// opted-in users via Resend. No admin review step — Joshua just gets an FYI.
+export const irisAutoDispatch = inngest.createFunction(
+  { id: 'iris-auto-dispatch', name: 'IRIS Auto-Dispatch', retries: 1 },
   { cron: '0 20 * * 0' },
   async ({ step }) => {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
     const minus7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
 
     const weekData = await step.run('gather-week-data', async () => {
@@ -5217,7 +5217,8 @@ Platform stats this week:
 - TikTok posts: ${weekData.tiktokPosts}
 - Recent blog posts: ${weekData.recentBlogs.join(', ')}
 
-Write a complete newsletter draft with these sections:
+Write a complete newsletter with these fields:
+- subject: punchy email subject line (no emoji spam, 1 emoji max)
 - intro: 2-3 sentences, punchy opener that feels personal (NOT "Hey creators!" — more like a friend writing to you)
 - creator_tip: One high-value actionable tip for growing on social media
 - what_shipped: 3-4 bullet points of recent SocialMate features/improvements (draw from: SOMA, AI agents, TikTok live, Creator Monetization Hub, calendar, analytics, etc.)
@@ -5225,7 +5226,7 @@ Write a complete newsletter draft with these sections:
 - whats_next: 2-3 sentences teasing what's coming (vague but exciting — chrome extension, loyalty badges, community features, etc.)
 - closing: 1-2 sentence personal sign-off from Joshua
 
-Return ONLY valid JSON (no markdown, no code blocks): {"intro":"...","creator_tip":"...","what_shipped":"...","real_numbers":"...","whats_next":"...","closing":"..."}`)
+Return ONLY valid JSON (no markdown, no code blocks): {"subject":"...","intro":"...","creator_tip":"...","what_shipped":"...","real_numbers":"...","whats_next":"...","closing":"..."}`)
 
       const text = result.response.text().trim()
       const jsonMatch = text.match(/\{[\s\S]*\}/)
@@ -5235,45 +5236,93 @@ Return ONLY valid JSON (no markdown, no code blocks): {"intro":"...","creator_ti
 
     if (!draft) return { success: false, reason: 'generation_failed' }
 
-    // Email admin the full draft for review
-    await step.run('notify-admin', async () => {
-      await getResend().emails.send({
-        from: 'SocialMate System <joshua@socialmate.studio>',
-        to: 'socialmatehq@gmail.com',
-        subject: `📨 IRIS Dispatch draft ready — ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`,
-        html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:32px 24px;background:#f9fafb;">
-          <h2 style="color:#111;margin:0 0 8px;">IRIS Dispatch — Weekly Draft Ready</h2>
-          <p style="color:#6b7280;font-size:14px;margin:0 0 24px;">Generated Sunday auto-draft. Review, edit, and send at <a href="${appUrl}/admin/iris">/admin/iris</a>.</p>
-          <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:24px;margin-bottom:16px;">
-            <h3 style="color:#374151;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">INTRO</h3>
-            <p style="color:#111;font-size:14px;line-height:1.7;margin:0;">${draft.intro}</p>
-          </div>
-          <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:24px;margin-bottom:16px;">
-            <h3 style="color:#374151;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">CREATOR TIP</h3>
-            <p style="color:#111;font-size:14px;line-height:1.7;margin:0;">${draft.creator_tip}</p>
-          </div>
-          <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:24px;margin-bottom:16px;">
-            <h3 style="color:#374151;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">WHAT SHIPPED</h3>
-            <p style="color:#111;font-size:14px;line-height:1.7;margin:0;">${draft.what_shipped}</p>
-          </div>
-          <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:24px;margin-bottom:16px;">
-            <h3 style="color:#374151;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">REAL NUMBERS</h3>
-            <p style="color:#111;font-size:14px;line-height:1.7;margin:0;">${draft.real_numbers}</p>
-          </div>
-          <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:24px;margin-bottom:16px;">
-            <h3 style="color:#374151;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">WHAT'S NEXT</h3>
-            <p style="color:#111;font-size:14px;line-height:1.7;margin:0;">${draft.whats_next}</p>
-          </div>
-          <div style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:24px;">
-            <h3 style="color:#374151;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin:0 0 12px;">CLOSING</h3>
-            <p style="color:#111;font-size:14px;line-height:1.7;margin:0;">${draft.closing}</p>
-          </div>
-          <p style="color:#9ca3af;font-size:12px;margin-top:24px;text-align:center;"><a href="${appUrl}/admin/iris">Open IRIS compose →</a></p>
-        </div>`,
+    const result = await step.run('send-dispatch', async () => {
+      const db = getSupabaseAdmin()
+
+      const { count } = await db.from('iris_dispatches').select('*', { count: 'exact', head: true })
+      const edition = (count ?? 0) + 1
+
+      const whatShipped = [draft.what_shipped, draft.creator_tip ? `\n\n💡 Creator tip: ${draft.creator_tip}` : ''].join('')
+
+      const bodyHtml = buildIrisEmailHtml({
+        edition,
+        subject: draft.subject,
+        intro: draft.intro,
+        whatShipped,
+        realNumbers: draft.real_numbers ?? '',
+        whatsNext: draft.whats_next ?? '',
+        closing: draft.closing ?? '',
       })
+
+      const { data: optins } = await db.from('user_settings').select('user_id').eq('iris_opt_in', true)
+      const optedInIds = new Set((optins ?? []).map((r: { user_id: string }) => r.user_id))
+
+      const { data: { users: authUsers } } = await db.auth.admin.listUsers({ perPage: 1000 })
+      const emails = authUsers
+        .filter(u => u.email && optedInIds.has(u.id))
+        .map(u => u.email!)
+
+      if (emails.length === 0) return { success: false as const, reason: 'no_recipients', edition: 0, sent: 0, total: 0 }
+
+      await db.from('iris_dispatches').insert({
+        edition,
+        subject: draft.subject,
+        intro: draft.intro,
+        what_shipped: whatShipped,
+        real_numbers: draft.real_numbers ?? null,
+        whats_next: draft.whats_next ?? null,
+        closing: draft.closing ?? null,
+        body_html: bodyHtml,
+        recipient_count: emails.length,
+      })
+
+      const resend = getResend()
+      let sent = 0
+      const CHUNK = 100
+      for (let i = 0; i < emails.length; i += CHUNK) {
+        const chunk = emails.slice(i, i + CHUNK)
+        try {
+          await resend.batch.send(chunk.map(to => ({
+            from: 'Joshua @ SocialMate <noreply@socialmate.studio>',
+            to,
+            subject: draft.subject,
+            html: buildIrisEmailHtml({
+              edition,
+              subject: draft.subject,
+              intro: draft.intro,
+              whatShipped,
+              realNumbers: draft.real_numbers ?? '',
+              whatsNext: draft.whats_next ?? '',
+              closing: draft.closing ?? '',
+              recipientEmail: to,
+            }),
+          })))
+          sent += chunk.length
+        } catch (err) {
+          console.error('IRIS auto-dispatch batch send error:', err)
+        }
+      }
+
+      return { success: true as const, edition, sent, total: emails.length }
     })
 
-    return { success: true, sections: Object.keys(draft) }
+    // Lightweight FYI to admin — no action needed, just visibility
+    if (result.success) {
+      await step.run('notify-admin', async () => {
+        await getResend().emails.send({
+          from: 'SocialMate System <joshua@socialmate.studio>',
+          to: 'socialmatehq@gmail.com',
+          subject: `✅ IRIS Dispatch #${result.edition} sent automatically — ${draft.subject}`,
+          html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:32px 24px;background:#f9fafb;">
+            <h2 style="color:#111;margin:0 0 8px;">IRIS Dispatch #${result.edition} sent</h2>
+            <p style="color:#6b7280;font-size:14px;margin:0 0 16px;">Sent automatically to ${result.sent}/${result.total} opted-in subscribers. No action needed.</p>
+            <p style="color:#374151;font-size:14px;"><strong>Subject:</strong> ${draft.subject}</p>
+          </div>`,
+        })
+      })
+    }
+
+    return { ...result, subject: draft.subject }
   }
 )
 
