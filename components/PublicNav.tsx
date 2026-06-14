@@ -162,7 +162,7 @@ export default function PublicNav() {
           <div className="relative" ref={langRef}>
             <button
               onClick={() => setLangOpen(p => !p)}
-              className="flex items-center justify-center w-8 h-8 rounded-lg text-base bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
+              className="flex items-center justify-center w-8 h-8 rounded-lg text-base text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all"
               aria-label="Change language"
               title="Change language"
             >
