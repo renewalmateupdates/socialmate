@@ -26,7 +26,7 @@ import {
   monthlyCreditsResetEmail,
   studioStaxQuarterlyBlog,
   comebackEmails,
-  irisDraftGenerator,
+  irisAutoDispatch,
   adminHealthAlert,
   checkAchievements,
 } from '@/lib/inngest'
@@ -66,7 +66,7 @@ export const { GET, POST, PUT } = serve({
     monthlyCreditsResetEmail,
     studioStaxQuarterlyBlog,
     comebackEmails,
-    irisDraftGenerator,
+    irisAutoDispatch,
     adminHealthAlert,
     checkAchievements,
     hermesFollowUpCron,
