@@ -8,7 +8,7 @@ INSERT INTO blog_posts (slug, title, excerpt, content, category, author, publish
 
 There is something deeply ironic about paying $5–$10/month to track your subscriptions. You''re adding a subscription to manage your subscriptions. The problem compounds itself.
 
-RenewalMate breaks this cycle. It''s a recurring expense tracker that is completely free — no premium tier, no credit card, no catch. Here''s what it actually does and whether it''s worth using.
+RenewalMate breaks this cycle. It''s a recurring expense tracker where manual tracking is completely free — no credit card, no catch, no premium tier required for the core experience. (An optional paid tier, RenewalMate Plus, exists for bank sync and AI insights, but it''s never required.) Here''s what it actually does and whether it''s worth using.
 
 ## What RenewalMate Tracks
 
@@ -33,15 +33,15 @@ Specifically, it''s for:
 
 ## What It Doesn''t Do
 
-RenewalMate doesn''t connect to your bank. It doesn''t automatically detect subscriptions. It doesn''t have a mobile app (web only, mobile-optimized). These are deliberate design choices, not oversights — connecting to financial data adds complexity, cost, and privacy risk that conflicts with the free-forever model.
+By default, RenewalMate doesn''t connect to your bank or automatically detect subscriptions, and it doesn''t have a mobile app (web only, mobile-optimized). Manual entry is the deliberate default — connecting to financial data adds complexity and cost, which is why it''s offered as an optional paid tier rather than bundled into the free plan.
 
-If you want automatic detection from bank data, tools like Rocket Money or Truebill do that — but they charge for it and require financial account access.
+If you want automatic detection from bank data, tools like Rocket Money or Truebill do that — or RenewalMate Plus, RenewalMate''s own optional paid tier, which adds Plaid bank sync and Gemini-powered AI insights.
 
-## The Free Forever Model
+## The Free-First Model
 
-RenewalMate is built by Gilgamesh Enterprise LLC — the same team behind SocialMate. The philosophy is the same: tools this simple shouldn''t cost money. Infrastructure costs for a manual entry tracker are minimal, and the goal is to build trust, not extract revenue from a utility tool.
+RenewalMate is built by Gilgamesh Enterprise LLC — the same team behind SocialMate. The philosophy is the same: tools this simple shouldn''t cost money to use at a basic level. Infrastructure costs for a manual entry tracker are minimal, so manual tracking stays free.
 
-There are no plans to add a paid tier. Free forever means exactly that.
+Manual tracking is and always will be free — no credit card, no expiry. RenewalMate Plus is an optional paid tier for people who want bank sync and AI insights, but the core experience never requires it.
 
 ## Bottom Line
 
@@ -142,17 +142,17 @@ Here''s an honest comparison of the major players.
 
 ## RenewalMate
 
-**Price:** Free forever — no premium tier
+**Price:** Free forever for manual tracking (optional paid Plus tier for bank sync + AI insights)
 **Approach:** Manual entry, privacy-first, web-based
-**Strengths:** Completely free, no bank connection required, clean dashboard, no upsell
-**Weaknesses:** Manual entry only (no automatic detection), web only (no dedicated mobile app, though mobile-optimized)
+**Strengths:** Manual tracking is completely free, no bank connection required by default, clean dashboard
+**Weaknesses:** Manual entry only (no automatic detection on the free plan), web only (no dedicated mobile app, though mobile-optimized)
 **Best for:** Anyone who wants a private, free tool to see all their subscriptions without connecting financial accounts
 
 ## Which Should You Use?
 
 **If you want automatic detection and don''t mind bank access:** Rocket Money free tier
 **If you want a full personal finance tool:** Copilot (if you''re on iOS and willing to pay)
-**If you want completely free, private, no bank connection:** RenewalMate
+**If you want free manual tracking, private, with no bank connection required:** RenewalMate
 
 The case for RenewalMate is simple: if the only thing you want is to see your subscriptions in one place and get renewal reminders, you don''t need to pay for it or hand over your bank credentials to get it.',
 'RenewalMate', 'Joshua Bostic', '2026-04-07 11:00:00+00'),
@@ -269,7 +269,7 @@ RenewalMate and Rocket Money (formerly Truebill) solve the same problem — trac
 
 Rocket Money connects to your financial accounts, automatically detects subscriptions, and offers premium features like bill negotiation. It''s powerful and it costs money.
 
-RenewalMate is manual entry, completely free, and requires no financial account access. It''s simple and private.
+RenewalMate is manual entry by default, free, and requires no financial account access unless you opt into the paid Plus tier. It''s simple and private.
 
 The right choice depends on what you actually need.
 
@@ -287,7 +287,7 @@ Rocket Money pulls data from your bank and credit card accounts via Plaid, the f
 
 RenewalMate is manual. You add your subscriptions yourself. It shows you totals, upcoming renewals, and a clean dashboard.
 
-**The strengths:** Free forever. No bank connection. No financial credentials. No premium tier to upsell. The data lives in your RenewalMate account, not shared with financial data aggregators.
+**The strengths:** Manual tracking is free forever. No bank connection or financial credentials required by default. An optional paid Plus tier exists for bank sync, but it''s never required. The data lives in your RenewalMate account, not shared with financial data aggregators.
 
 **The trade-off:** You have to enter things yourself. Automatic detection doesn''t exist. If you''re thorough in the initial audit, this takes 20–30 minutes once. After that, it''s one entry per new subscription.
 
@@ -300,7 +300,7 @@ RenewalMate is manual. You add your subscriptions yourself. It shows you totals,
 - You don''t mind paying for the service
 
 **Choose RenewalMate if:**
-- You want something completely free
+- You want manual tracking that''s completely free, with no required upgrades
 - You prefer not to connect financial accounts
 - Your needs are tracking and renewal reminders, not automation
 - Privacy matters to you
