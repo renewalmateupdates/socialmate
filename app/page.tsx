@@ -143,7 +143,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
 
         {/* Badge */}
         <div className="inline-flex items-center gap-2 bg-amber-500/15 border border-amber-500/30 text-white text-xs font-bold px-4 py-2 rounded-full mb-8">
-          🌱 Free forever · No credit card required · 7 live platforms · 15+ AI tools
+          🌱 Free plan, no card required · Pro from $5/mo · 7 live platforms · 15+ AI tools
         </div>
 
         {/* Headline */}
@@ -183,7 +183,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
             See pricing →
           </Link>
         </div>
-        <p className="text-xs text-gray-500">No card required · Free forever · Setup in 60 seconds</p>
+        <p className="text-xs text-gray-500">No card required · Free plan never expires · Setup in 60 seconds</p>
 
         {/* STATS */}
         <div className="grid grid-cols-3 gap-4 sm:gap-8 mt-14 max-w-xl mx-auto">
@@ -759,7 +759,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         <div className="max-w-3xl mx-auto px-6 text-center">
           <h2 className="text-4xl font-extrabold tracking-tight mb-4">Ready to get started?</h2>
           <p className="text-gray-400 mb-8 text-sm max-w-lg mx-auto">
-            Free forever. No card required. 50 AI credits per month, included free. Set up in 60 seconds.
+            Free plan, no card required. 50 AI credits per month, included free. Upgrade to Pro anytime for $5/month. Set up in 60 seconds.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/signup"
