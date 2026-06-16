@@ -368,7 +368,7 @@ function AccountsInner() {
           </div>
 
           {/* FIRST-TIME EMPTY STATE */}
-          {!loading && accounts.length === 0 && (
+          {accounts.length === 0 && (
             <div className="mb-8 bg-gradient-to-r from-black to-gray-800 rounded-2xl p-6 text-white">
               <div className="flex items-start gap-4">
                 <span className="text-3xl flex-shrink-0">🔌</span>
