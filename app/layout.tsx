@@ -10,7 +10,7 @@ import GoogleAnalytics from '@/components/GoogleAnalytics'
 // ssr:false dynamic imports must live in a 'use client' module — see LazyClientComponents
 import LazyClientComponents from '@/components/LazyClientComponents'
 
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' })
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
 

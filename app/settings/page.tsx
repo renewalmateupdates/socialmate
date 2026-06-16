@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState, Suspense } from 'react'
+import { useEffect, useState, useRef, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
@@ -119,6 +119,7 @@ function SettingsInner() {
   const [referralHistory, setReferralHistory] = useState<any[]>([])
   const [referralLoading, setReferralLoading] = useState(false)
 
+  const mfaCheckedRef = useRef(false)
   const [mfaEnabled, setMfaEnabled]     = useState(false)
   const [mfaFactorId, setMfaFactorId]   = useState<string | null>(null)
   const [mfaStep, setMfaStep]           = useState<'idle' | 'enroll' | 'disable_confirm'>('idle')
@@ -199,12 +200,23 @@ function SettingsInner() {
       if (!user) { router.push('/login'); return }
       setUserEmail(user.email || '')
       setUserId(user.id)
+      if (searchParams.get('white_label') === 'activated') setWlActivated(true)
+      // Show page immediately — settings fill in as data arrives
+      setAuthLoading(false)
 
-      const { data: settings } = await supabase
-        .from('user_settings')
-        .select('referral_code, white_label_active, white_label_tier, white_label_status, white_label_brand_name, white_label_logo_url, white_label_custom_domain, white_label_brand_color, white_label_remove_branding, notification_prefs, credit_source_preference, iris_opt_in, default_platforms, scheduling_window_start, scheduling_window_end, dnd_enabled, dnd_start, dnd_end')
-        .eq('user_id', user.id)
-        .single()
+      // Fetch user_settings + profile in parallel (was 3 sequential round-trips)
+      const [{ data: settings }, { data: profile }] = await Promise.all([
+        supabase
+          .from('user_settings')
+          .select('referral_code, white_label_active, white_label_tier, white_label_status, white_label_brand_name, white_label_logo_url, white_label_custom_domain, white_label_brand_color, white_label_remove_branding, notification_prefs, credit_source_preference, iris_opt_in, default_platforms, scheduling_window_start, scheduling_window_end, dnd_enabled, dnd_start, dnd_end')
+          .eq('user_id', user.id)
+          .single(),
+        supabase
+          .from('profiles')
+          .select('display_name, username, bio')
+          .eq('id', user.id)
+          .single(),
+      ])
 
       if (settings) {
         if (settings.referral_code) setReferralCode(settings.referral_code)
@@ -238,27 +250,24 @@ function SettingsInner() {
         }
       }
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('display_name, username, bio')
-        .eq('id', user.id)
-        .single()
       if (profile) {
         setDisplayName(profile.display_name || '')
         setUsername(profile.username || '')
         setBio(profile.bio || '')
       }
-
-      const { data: factors } = await supabase.auth.mfa.listFactors()
-      const totpFactor = factors?.totp?.find((f: any) => f.status === 'verified')
-      if (totpFactor) { setMfaEnabled(true); setMfaFactorId(totpFactor.id) }
-
-      if (searchParams.get('white_label') === 'activated') setWlActivated(true)
-
-      setAuthLoading(false)
     }
     init()
   }, [router, searchParams])
+
+  // Lazy-load MFA only when Security tab is first opened
+  useEffect(() => {
+    if (activeTab !== 'Security' || !userId || mfaCheckedRef.current) return
+    mfaCheckedRef.current = true
+    supabase.auth.mfa.listFactors().then(({ data: factors }) => {
+      const totpFactor = factors?.totp?.find((f: any) => f.status === 'verified')
+      if (totpFactor) { setMfaEnabled(true); setMfaFactorId(totpFactor.id) }
+    })
+  }, [activeTab, userId])
 
   useEffect(() => {
     if (activeTab !== 'Referrals' || !userId) return

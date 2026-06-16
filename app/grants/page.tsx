@@ -198,11 +198,16 @@ export default function GrantsPage() {
           </button>
         </div>
 
-        {/* Results */}
+        {/* Results — min-h reserves space during initial auto-search to prevent CLS */}
+        <div className="min-h-[240px]">
         {error && (
           <div className="text-center py-12 text-gray-400">
             Couldn&apos;t reach grants.gov right now. Try again in a moment.
           </div>
+        )}
+
+        {loading && !hasSearched && (
+          <div className="text-center py-12 text-gray-500 text-sm">Searching grants…</div>
         )}
 
         {!error && hasSearched && (
@@ -248,6 +253,7 @@ export default function GrantsPage() {
             )}
           </>
         )}
+        </div>
 
         {/* Disclaimer */}
         <div className="mt-12 text-center text-xs text-gray-600 max-w-xl mx-auto leading-relaxed">
