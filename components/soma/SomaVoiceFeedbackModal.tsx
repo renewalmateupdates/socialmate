@@ -191,24 +191,6 @@ export default function SomaVoiceFeedbackModal({ projectId, generationCount, onC
                 <span className="text-purple-400 mr-1">{qi + 1}.</span> {q.text}
               </p>
 
-              {q.type === 'rating' && (
-                <div className="flex gap-2">
-                  {[1, 2, 3, 4, 5].map(n => (
-                    <button
-                      key={n}
-                      onClick={() => handleRating(q.key, n)}
-                      className={`flex-1 py-2 rounded-lg border text-sm font-semibold transition-all ${
-                        responses[q.key] === String(n)
-                          ? 'border-purple-500 bg-purple-950/40 text-purple-300'
-                          : 'border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-300'
-                      }`}
-                    >
-                      {'⭐'.repeat(n)}
-                    </button>
-                  ))}
-                </div>
-              )}
-
               {q.type === 'single' && (
                 <div className="flex flex-col gap-2">
                   {q.options!.map(opt => (
