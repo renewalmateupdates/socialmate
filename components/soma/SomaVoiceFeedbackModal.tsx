@@ -4,27 +4,88 @@ import { useState } from 'react'
 // Rotating question pool — SOMA picks 3 each time to keep it fresh
 const QUESTION_POOL = [
   {
-    key: 'voice_match',
-    text: 'How well did these posts match YOUR voice?',
-    type: 'rating' as const,
+    key: 'core_belief',
+    text: 'What\'s one belief or value that shapes everything you post — even when you don\'t say it directly?',
+    type: 'text' as const,
+    placeholder: 'e.g. "I believe anyone can build if they have the right tools. Everything I post comes back to that."',
   },
   {
-    key: 'more_of',
-    text: 'What type of content do you want more of next week?',
+    key: 'who_youre_speaking_to',
+    text: 'Who are you actually speaking to when you post? Describe them like a real person.',
+    type: 'text' as const,
+    placeholder: 'e.g. "Someone working a 9-5 who wants to build something but has no idea where to start"',
+  },
+  {
+    key: 'emotional_response',
+    text: 'What\'s the emotional response you want people to feel after reading your posts?',
     type: 'single' as const,
-    options: ['Mindset & motivation', 'Personal story / behind the scenes', 'Hard lessons & failures', 'Wins & progress', 'Educational / value drops', 'Hot takes & opinions', 'Questions that spark discussion'],
+    options: ['Inspired to take action', 'Understood / seen', 'Smarter than before', 'Challenged / provoked', 'Connected to your story', 'Entertained'],
+  },
+  {
+    key: 'off_brand_language',
+    text: 'What phrases, words, or vibes would feel completely off-brand for you?',
+    type: 'text' as const,
+    placeholder: 'e.g. "Hustle porn, corporate jargon, anything that sounds fake or performative"',
+  },
+  {
+    key: 'honest_contrast',
+    text: 'What tension or contrast in your life right now is the most honest story you could tell?',
+    type: 'text' as const,
+    placeholder: 'e.g. "Building a SaaS while doing physical labor. The gap between where I am and where I\'m going."',
+  },
+  {
+    key: 'content_goal',
+    text: 'Right now, what\'s your primary goal with your content?',
+    type: 'single' as const,
+    options: ['Build an audience from scratch', 'Convert followers to customers', 'Attract collaborators or cofounders', 'Establish thought leadership', 'Stay consistent and visible', 'Grow community around my brand'],
+  },
+  {
+    key: 'fired_up_topic',
+    text: 'What topic or angle are you most fired up about right now — even if you haven\'t posted about it yet?',
+    type: 'text' as const,
+    placeholder: 'e.g. "The unfair advantage AI gives solo founders. The lie that you need a team to build something real."',
+  },
+  {
+    key: 'style_inspiration',
+    text: 'Is there a creator, thinker, or voice whose content style you\'d want SOMA to draw from?',
+    type: 'text' as const,
+    placeholder: 'e.g. "Nipsey Hussle\'s cadence, Naval\'s depth, James Baldwin\'s directness"',
+  },
+  {
+    key: 'hidden_context',
+    text: 'What\'s something happening in your life right now that most of your followers don\'t know about?',
+    type: 'text' as const,
+    placeholder: 'e.g. "Lost a client this week. About to make a big pivot. Quietly building something new."',
+  },
+  {
+    key: 'vulnerability_level',
+    text: 'How vulnerable do you want to get in your content this week?',
+    type: 'single' as const,
+    options: ['Keep it professional — product focus', 'Hint at the journey without oversharing', 'Raw and real — share the struggle', 'All in — nothing off limits'],
+  },
+  {
+    key: 'contrarian_take',
+    text: 'What\'s a contrarian belief you hold that most people in your space would push back on?',
+    type: 'text' as const,
+    placeholder: 'e.g. "You don\'t need investors. Most advice from successful people is survivorship bias."',
+  },
+  {
+    key: 'one_thing_to_nail',
+    text: 'If SOMA could only nail ONE thing about your voice in the next batch, what would it be?',
+    type: 'text' as const,
+    placeholder: 'e.g. "Sound like I\'m talking to a friend, not pitching to strangers. Confident but never arrogant."',
   },
   {
     key: 'missed_mark',
-    text: 'Did any post miss the mark or not sound like you?',
+    text: 'Did any post this batch miss the mark or not sound like you?',
     type: 'text' as const,
-    placeholder: 'Tell SOMA what felt off — it won\'t make that mistake again.',
+    placeholder: 'Tell SOMA what felt off — it won\'t repeat that mistake.',
   },
   {
     key: 'whats_happening',
     text: 'What\'s happening in your world right now that SOMA should weave into next week?',
     type: 'text' as const,
-    placeholder: 'e.g. "Launched a new feature, had a rough week at work, hit a milestone"',
+    placeholder: 'e.g. "Launched a new feature, had a rough week, hit a milestone, made a hard decision"',
   },
   {
     key: 'tone_check',
@@ -33,21 +94,10 @@ const QUESTION_POOL = [
     options: ['Too formal — loosen up', 'Too casual — dial it back', 'Just right', 'Too generic — more personality'],
   },
   {
-    key: 'overall_rating',
-    text: 'How would you rate this batch overall?',
-    type: 'rating' as const,
-  },
-  {
     key: 'go_deeper',
     text: 'What topic do you want SOMA to go deeper on?',
     type: 'text' as const,
-    placeholder: 'e.g. "The bootstrapped founder grind, business credit, my tech stack"',
-  },
-  {
-    key: 'favorite_angle',
-    text: 'Which angle resonated most with your audience?',
-    type: 'single' as const,
-    options: ['Personal vulnerability', 'Actionable tips', 'Contrarian take', 'Progress update', 'Motivational push', 'Not sure yet'],
+    placeholder: 'e.g. "The bootstrapped founder grind, business credit, the realities of solo building"',
   },
 ]
 

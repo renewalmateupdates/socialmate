@@ -47,19 +47,13 @@ const MODE_COLORS = {
 const LOADING_QUOTES = [
   // Marcus Aurelius
   '"Waste no more time arguing what a good person should be. Be one." — Marcus Aurelius',
-  '"You have power over your mind, not outside events. Realize this, and you will find strength." — Marcus Aurelius',
   '"The impediment to action advances action. What stands in the way becomes the way." — Marcus Aurelius',
-  '"Do not indulge in dreams of what you do not have, but count the blessings you actually possess." — Marcus Aurelius',
-  '"It is not death that a man should fear, but he should fear never beginning to live." — Marcus Aurelius',
+  '"You have power over your mind, not outside events. Realize this, and you will find strength." — Marcus Aurelius',
   // Seneca
   '"Luck is what happens when preparation meets opportunity." — Seneca',
-  '"It is not that I am brave, but that I choose which fears to obey." — Seneca',
   '"Begin at once to live, and count each separate day as a separate life." — Seneca',
-  '"The whole future lies in uncertainty: live immediately." — Seneca',
-  '"No man was ever wise by chance." — Seneca',
   // Epictetus
   '"Make the best use of what is in your power, and take the rest as it happens." — Epictetus',
-  '"He is a wise man who does not grieve for the things which he has not, but rejoices for those which he has." — Epictetus',
   '"First say to yourself what you would be; and then do what you have to do." — Epictetus',
   // Heraclitus
   '"No man ever steps in the same river twice, for it is not the same river and he is not the same man." — Heraclitus',
@@ -77,7 +71,6 @@ const LOADING_QUOTES = [
   // Sun Tzu
   '"In the midst of chaos, there is also opportunity." — Sun Tzu',
   '"Victorious warriors win first and then go to war. Defeated warriors go to war first and then seek to win." — Sun Tzu',
-  '"The supreme art of war is to subdue the enemy without fighting." — Sun Tzu',
   // Aristotle / Plato
   '"We are what we repeatedly do. Excellence, then, is not an act, but a habit." — Aristotle',
   '"The roots of education are bitter, but the fruit is sweet." — Aristotle',
@@ -88,6 +81,74 @@ const LOADING_QUOTES = [
   // Gilgamesh (fitting for the brand)
   '"When the gods created humanity, they kept immortality for themselves. But they gave us something else — the will to build." — The Epic of Gilgamesh',
   '"Only the gods live forever. As for us men, our days are numbered. What we do with them is the monument we leave." — The Epic of Gilgamesh',
+  // Kobe Bryant
+  '"Greatness is a lot of small things done well." — Kobe Bryant',
+  '"Everything negative — pressure, challenges — is all an opportunity for me to rise." — Kobe Bryant',
+  '"If you\'re afraid to fail, then you\'re probably going to fail." — Kobe Bryant',
+  // Jay-Z
+  '"I\'m not a businessman, I\'m a business, man." — Jay-Z',
+  '"The genius thing we did was, we didn\'t give up." — Jay-Z',
+  // Nipsey Hussle
+  '"The marathon continues." — Nipsey Hussle',
+  '"Invest in yourself. The returns are infinite." — Nipsey Hussle',
+  // Steve Jobs
+  '"The only way to do great work is to love what you do." — Steve Jobs',
+  '"Your time is limited, so don\'t waste it living someone else\'s life." — Steve Jobs',
+  '"Stay hungry, stay foolish." — Steve Jobs',
+  // Albert Einstein
+  '"Imagination is more important than knowledge." — Albert Einstein',
+  '"In the middle of difficulty lies opportunity." — Albert Einstein',
+  '"A person who never made a mistake never tried anything new." — Albert Einstein',
+  // Carl Sagan
+  '"The cosmos is within us. We are made of star-stuff." — Carl Sagan',
+  '"Somewhere, something incredible is waiting to be known." — Carl Sagan',
+  // Frederick Douglass
+  '"If there is no struggle, there is no progress." — Frederick Douglass',
+  '"Once you learn to read, you will be forever free." — Frederick Douglass',
+  '"It is easier to build strong children than to repair broken men." — Frederick Douglass',
+  // Martin Luther King Jr.
+  '"The time is always right to do what is right." — Martin Luther King Jr.',
+  '"If you can\'t fly then run, if you can\'t run then walk, if you can\'t walk then crawl, but keep moving forward." — Martin Luther King Jr.',
+  '"Intelligence plus character — that is the goal of true education." — Martin Luther King Jr.',
+  // Maya Angelou
+  '"You can\'t use up creativity. The more you use, the more you have." — Maya Angelou',
+  '"Nothing will work unless you do." — Maya Angelou',
+  '"We may encounter many defeats but we must not be defeated." — Maya Angelou',
+  // James Baldwin
+  '"Not everything that is faced can be changed, but nothing can be changed until it is faced." — James Baldwin',
+  '"You have to decide who you are and force the world to deal with you, not with its idea of you." — James Baldwin',
+  // Nikola Tesla
+  '"The present is theirs; the future, for which I really worked, is mine." — Nikola Tesla',
+  '"If you want to find the secrets of the universe, think in terms of energy, frequency, and vibration." — Nikola Tesla',
+  // Richard Feynman
+  '"The first principle is that you must not fool yourself — and you are the easiest person to fool." — Richard Feynman',
+  '"Study hard what interests you the most in the most undisciplined, irreverent, and original manner possible." — Richard Feynman',
+  // Rumi
+  '"What you seek is seeking you." — Rumi',
+  '"The wound is the place where the light enters you." — Rumi',
+  '"Out beyond ideas of wrongdoing and rightdoing, there is a field. I\'ll meet you there." — Rumi',
+  // Ralph Waldo Emerson
+  '"Do not go where the path may lead, go instead where there is no path and leave a trail." — Ralph Waldo Emerson',
+  '"What lies behind us and what lies before us are tiny matters compared to what lies within us." — Ralph Waldo Emerson',
+  // Theodore Roosevelt
+  '"Do what you can, with what you have, where you are." — Theodore Roosevelt',
+  '"The credit belongs to the man who is actually in the arena, whose face is marred by dust and sweat and blood." — Theodore Roosevelt',
+  // Benjamin Franklin
+  '"An investment in knowledge pays the best interest." — Benjamin Franklin',
+  '"Energy and persistence conquer all things." — Benjamin Franklin',
+  // Leonardo da Vinci
+  '"Simplicity is the ultimate sophistication." — Leonardo da Vinci',
+  '"Learning never exhausts the mind." — Leonardo da Vinci',
+  '"It had long since come to my attention that people of accomplishment rarely sat back and let things happen to them." — Leonardo da Vinci',
+  // Alan Watts
+  '"The only way to make sense out of change is to plunge into it, move with it, and join the dance." — Alan Watts',
+  '"Muddy water is best cleared by leaving it alone." — Alan Watts',
+  // W.E.B. Du Bois
+  '"The cost of liberty is less than the price of repression." — W.E.B. Du Bois',
+  '"Education is that whole system of human training within and without the school house walls." — W.E.B. Du Bois',
+  // Winston Churchill
+  '"Success is not final, failure is not fatal: it is the courage to continue that counts." — Winston Churchill',
+  '"We make a living by what we get, but we make a life by what we give." — Winston Churchill',
 ]
 
 const RUN_CAPS = { safe: 4, autopilot: 8, full_send: 12 }
