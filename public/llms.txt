@@ -872,7 +872,7 @@ Full comparison hub: https://socialmate.studio/vs
 
 ## Performance & Technical Notes (June 2026)
 
-- All 500+ blog posts pre-render as static HTML at deploy time (generateStaticParams + ISR). No Supabase hit on first load.
+- All 570+ blog posts pre-render as static HTML at deploy time (generateStaticParams + ISR). No Supabase hit on first load.
 - Every major app route has a loading.tsx skeleton screen — instant visual feedback on navigation (dashboard, onboarding, accounts, blog, features, settings, signup).
 - Blog index revalidates every 24 hours (was SSR on every request).
 - Initial JS bundle reduced ~400KB — non-English locale files load on demand (only English is bundled). FeedbackWidget, CookieBanner, and InstallPrompt are lazy-loaded with ssr:false.

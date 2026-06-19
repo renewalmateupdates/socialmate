@@ -652,6 +652,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/sm-pulse`,           lastModified: now, changeFrequency: 'weekly',  priority: 0.6 },
     { url: `${base}/sm-radar`,           lastModified: now, changeFrequency: 'weekly',  priority: 0.6 },
     { url: `${base}/enterprise`,         lastModified: now, changeFrequency: 'monthly', priority: 0.9 },
+    { url: `${base}/soma`,               lastModified: now, changeFrequency: 'weekly',  priority: 0.9 },
+    { url: `${base}/agents`,             lastModified: now, changeFrequency: 'weekly',  priority: 0.8 },
+    { url: `${base}/ai-features`,        lastModified: now, changeFrequency: 'weekly',  priority: 0.8 },
+    { url: `${base}/enki/truth`,         lastModified: now, changeFrequency: 'weekly',  priority: 0.7 },
+    { url: `${base}/enki/doctrines`,     lastModified: now, changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${base}/monetize/hub`,       lastModified: now, changeFrequency: 'weekly',  priority: 0.7 },
+    { url: `${base}/tiktok/studio`,      lastModified: now, changeFrequency: 'weekly',  priority: 0.8 },
   ]
 
   const comparisons: MetadataRoute.Sitemap = [
