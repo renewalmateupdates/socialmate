@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     .from('user_settings')
     .select('user_id')
     .eq('referral_code', refCode)
-    .single()
+    .maybeSingle()
 
   if (!settings) return NextResponse.json({ isAffiliate: false })
 
@@ -26,7 +26,7 @@ export async function GET(req: NextRequest) {
     .select('status')
     .eq('user_id', settings.user_id)
     .eq('status', 'active')
-    .single()
+    .maybeSingle()
 
   return NextResponse.json({ isAffiliate: !!affiliate })
 }

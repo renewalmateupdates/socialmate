@@ -9,6 +9,11 @@ function getResend() {
 }
 
 export async function POST(request: NextRequest) {
+  const internalKey = request.headers.get('x-internal-key')
+  if (!internalKey || internalKey !== process.env.CRON_SECRET) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const { postId, errorMessage } = await request.json()
   if (!postId) return NextResponse.json({ error: 'postId required' }, { status: 400 })
 

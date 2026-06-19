@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
     .from('coupons')
     .select('id, code, discount_type, discount_value, max_redemptions, current_redemptions, expires_at, active')
     .ilike('code', code.trim())
-    .single()
+    .maybeSingle()
 
   if (error || !coupon) return NextResponse.json({ valid: false, error: 'Code not found' })
   if (!coupon.active) return NextResponse.json({ valid: false, error: 'Code is no longer active' })

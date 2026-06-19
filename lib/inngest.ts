@@ -193,7 +193,7 @@ export const publishScheduledPost = inngest.createFunction(
           // Platform publish genuinely failed — safe to mark as failed in DB.
           await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/posts/fail`, {
             method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json', 'x-internal-key': process.env.CRON_SECRET || '' },
             body:    JSON.stringify({ postId }),
           }).catch(err => console.error('[Inngest] Failed to mark post as failed:', err))
           console.error(`[Inngest] Publish failed for post ${postId}: ${errMsg}`)
