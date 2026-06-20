@@ -38,6 +38,7 @@ const CHAPTERS = [
   { id: 'ch7',      label: '7. Turning Attention Into Customers' },
   { id: 'ch8',      label: '8. Consistency Is the Strategy' },
   { id: 'ch9',      label: '9. AI Discoverability — The New SEO' },
+  { id: 'ch10',     label: '10. Google Search Console — Tell Google You Exist' },
   { id: 'epilogue', label: 'Epilogue' },
 ]
 
@@ -741,6 +742,138 @@ export default function MarketingZeroBudgetPage() {
                   answer when someone asks an AI assistant what tool solves their problem.
                   Go write your llms.txt. It costs you an afternoon and might be the cheapest
                   marketing channel you ever build.
+                </p>
+              </section>
+
+              {/* CHAPTER 10 */}
+              <section id="ch10" className="mb-16 scroll-mt-8">
+                <h2 className="mb-2 text-2xl font-black text-white border-b border-[#1f1f1f] pb-4">
+                  Chapter 10: Google Search Console — Tell Google You Exist
+                </h2>
+                <p className="mb-4 text-sm italic text-gray-600 border-b border-[#1f1f1f] pb-4">
+                  The free five-minute setup that most business owners never do.
+                </p>
+
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  You built the website. You wrote the pages. You hit publish. And now you&apos;re
+                  waiting for Google to find you. Here&apos;s what nobody tells you: Google doesn&apos;t
+                  automatically know your site exists. It finds sites by crawling links from
+                  other sites. If nobody is linking to you yet — which is true for literally
+                  every new site — you could wait months before Google stumbles across your pages.
+                </p>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  Google Search Console is how you skip that line. It&apos;s a free tool from Google
+                  that lets you say &quot;hey, I own this site, here are all my pages, come look.&quot;
+                  Once you do that, Google crawls your site within 24–72 hours instead of
+                  whenever it gets around to it. And it gives you a direct line back — you can
+                  see exactly which of your pages are indexed, which aren&apos;t, and why.
+                </p>
+
+                <Callout>
+                  Google Search Console is free. Takes about five minutes per site. There is
+                  no version of running a business online where you should skip this step. It
+                  should be on every new site checklist, right after &quot;buy the domain.&quot;
+                </Callout>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">Before vs. after — what actually changes</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  Before Search Console: Google discovers you by accident. Maybe a friend links
+                  to your site on Reddit. Maybe a directory picks you up. Maybe nothing. You have
+                  zero visibility into what Google sees — no idea if your pages are indexed, no
+                  idea what searches you&apos;re showing up for, no alerts if something breaks.
+                </p>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  After Search Console: Google knows you exist. You&apos;ve handed it a map of every
+                  page. It starts crawling immediately. You can see how many pages are indexed,
+                  watch your impressions climb over the following weeks, see which search queries
+                  are pulling people to your site, and get notified if a page suddenly becomes
+                  uncrawlable. You&apos;re in the room instead of waiting outside.
+                </p>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">How to set it up — the full walkthrough</h3>
+                <ol className="mb-6 list-decimal pl-6 space-y-4 text-gray-300">
+                  <li>
+                    Go to <strong className="text-white">search.google.com/search-console</strong> and sign
+                    in with your Google account.
+                  </li>
+                  <li>
+                    Click <strong className="text-white">&quot;Add property.&quot;</strong> You&apos;ll see two options:
+                    Domain and URL prefix. Choose <strong className="text-white">Domain</strong> — it covers
+                    your entire site across all subdomains and both http/https. Type just the
+                    domain with no prefix, like <code className="text-amber-400">yourbusiness.com</code>.
+                  </li>
+                  <li>
+                    Google gives you a <strong className="text-white">TXT verification record</strong> —
+                    a string of letters and numbers that looks like{' '}
+                    <code className="text-amber-400">google-site-verification=abc123xyz</code>. Copy it.
+                  </li>
+                  <li>
+                    Go to wherever your domain is registered (Porkbun, GoDaddy, Squarespace,
+                    Namecheap — wherever you bought it). Find DNS settings for that domain. Add
+                    a new record: Type <strong className="text-white">TXT</strong>, Host{' '}
+                    <strong className="text-white">@</strong> (or leave blank — same thing), Value is
+                    the code Google gave you. Save it.
+                  </li>
+                  <li>
+                    Go back to Search Console and click <strong className="text-white">Verify</strong>.
+                    It usually works within a few minutes. Sometimes takes up to an hour if
+                    your registrar is slow to propagate.
+                  </li>
+                  <li>
+                    Once verified, go to <strong className="text-white">Sitemaps</strong> in the left
+                    sidebar. Type <code className="text-amber-400">sitemap.xml</code> in the field
+                    (just the path — not the full URL with your domain). Hit Submit.
+                  </li>
+                </ol>
+
+                <Callout>
+                  Common mistake: people type the full URL like{' '}
+                  <code className="text-amber-400">https://yourbusiness.com/sitemap.xml</code> into
+                  the sitemap field. That will fail with &quot;invalid sitemap address.&quot; The field
+                  already knows your domain — just type <code className="text-amber-400">sitemap.xml</code>.
+                </Callout>
+
+                <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">What to watch after you submit</h3>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  Don&apos;t expect instant results. Google needs time to crawl. But here&apos;s what
+                  you&apos;ll see over the next few weeks in your Search Console dashboard:
+                </p>
+                <ul className="mb-6 space-y-3 text-gray-300 pl-4">
+                  <li className="flex gap-3">
+                    <span className="text-amber-500 shrink-0 mt-1">▸</span>
+                    <span>
+                      <strong className="text-white">Coverage report</strong> — shows how many of
+                      your pages Google has indexed. If it&apos;s zero after a week, something is
+                      blocking the crawler (check your robots.txt).
+                    </span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-amber-500 shrink-0 mt-1">▸</span>
+                    <span>
+                      <strong className="text-white">Performance report</strong> — after 2–4 weeks
+                      you&apos;ll start seeing impressions (how many times you appeared in search
+                      results) and clicks. This is how you find out what people are actually
+                      searching when they find your site.
+                    </span>
+                  </li>
+                  <li className="flex gap-3">
+                    <span className="text-amber-500 shrink-0 mt-1">▸</span>
+                    <span>
+                      <strong className="text-white">Crawl errors</strong> — if any of your pages
+                      return 404s or server errors, Google flags them here. Fix them and request
+                      a re-crawl directly from the tool.
+                    </span>
+                  </li>
+                </ul>
+                <p className="mb-4 leading-relaxed text-gray-300">
+                  Do this for every site you run. Every business you start. Every client site
+                  you build. It&apos;s five minutes of work per site and it&apos;s the difference between
+                  being on the map and hoping Google eventually notices you exist. Most business
+                  owners never do this. Most business owners also wonder why Google isn&apos;t
+                  sending them traffic.
+                </p>
+                <p className="leading-relaxed text-gray-300">
+                  Now you know. Go do it.
                 </p>
               </section>
 
