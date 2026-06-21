@@ -1,9 +1,7 @@
 import Link from 'next/link'
-import dynamic from 'next/dynamic'
 import ReferralBanner from '@/app/components/ReferralBanner'
 import PublicNav from '@/components/PublicNav'
-
-const UserStatsCounter = dynamic(() => import('@/components/UserStatsCounter'), { ssr: false })
+import LazyUserStatsCounter from '@/components/LazyUserStatsCounter'
 
 // Cache landing page at CDN for 1 hour — content rarely changes between deploys.
 // Eliminates origin round-trips for most visitors, especially international (China, India).
@@ -199,7 +197,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
 
         {/* Live user stats */}
         <div className="mt-6">
-          <UserStatsCounter />
+          <LazyUserStatsCounter />
         </div>
 
         {/* Founder card — kept but smaller / lower */}
