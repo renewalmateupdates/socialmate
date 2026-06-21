@@ -1,13 +1,13 @@
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import ReferralBanner from '@/app/components/ReferralBanner'
 import PublicNav from '@/components/PublicNav'
-import UserStatsCounter from '@/components/UserStatsCounter'
-import HeroLaunchBadge from '@/components/HeroLaunchBadge'
 
-// Cache the landing page at Vercel's CDN for 5 minutes.
-// Eliminates origin round-trips for most visitors — biggest FCP win,
-// especially for international users (China, India) hitting US East origin.
-export const revalidate = 300
+const UserStatsCounter = dynamic(() => import('@/components/UserStatsCounter'), { ssr: false })
+
+// Cache landing page at CDN for 1 hour — content rarely changes between deploys.
+// Eliminates origin round-trips for most visitors, especially international (China, India).
+export const revalidate = 3600
 
 const PLATFORMS = [
   { name: 'Discord',     icon: '💬', status: 'live'    },
@@ -138,8 +138,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
           <div className="absolute top-1/3 left-1/4 w-[350px] h-[350px] rounded-full" style={{ background: 'radial-gradient(closest-side, rgba(147,51,234,0.08), transparent 70%)' }} />
           <div className="absolute top-1/4 right-1/4 w-[300px] h-[300px] rounded-full" style={{ background: 'radial-gradient(closest-side, rgba(37,99,235,0.06), transparent 70%)' }} />
         </div>
-
-        <HeroLaunchBadge />
 
         {/* Badge */}
         <div className="inline-flex items-center gap-2 bg-amber-500/15 border border-amber-500/30 text-white text-xs font-bold px-4 py-2 rounded-full mb-8">
