@@ -423,6 +423,7 @@ function SidebarContent({
   }, [pathname])
 
   const handleSignOut = async () => {
+    if (!window.confirm('Sign out of SocialMate?')) return
     await supabase.auth.signOut()
     router.push('/')
   }
