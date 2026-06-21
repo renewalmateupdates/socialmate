@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import ReferralBanner from '@/app/components/ReferralBanner'
 import PublicNav from '@/components/PublicNav'
-import UserStatsCounter from '@/components/UserStatsCounter'
+import LazyUserStatsCounter from '@/components/LazyUserStatsCounter'
 import HeroLaunchBadge from '@/components/HeroLaunchBadge'
 
 // Cache the landing page at Vercel's CDN for 5 minutes.
@@ -201,7 +201,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
 
         {/* Live user stats */}
         <div className="mt-6">
-          <UserStatsCounter />
+          <LazyUserStatsCounter />
         </div>
 
         {/* Founder card — kept but smaller / lower */}
