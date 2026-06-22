@@ -79,18 +79,63 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to save feedback' }, { status: 500 })
   }
 
-  // Email notification to you
-  await getResend().emails.send({
-    from: 'SocialMate <hello@socialmate.studio>',
-    to: 'renewalmate.updates@gmail.com',
-    subject: `[${type.toUpperCase()}] New feedback from ${user?.email ?? 'anonymous'}`,
-    html: `
-      <p><strong>Type:</strong> ${type}</p>
-      <p><strong>From:</strong> ${user?.email ?? 'Not logged in'}</p>
-      <p><strong>Message:</strong></p>
-      <p>${message.trim()}</p>
-    `,
-  })
+  // Email + push notification — non-fatal, never block the user response
+  try {
+    await getResend().emails.send({
+      from: 'SocialMate <hello@socialmate.studio>',
+      to: 'renewalmate.updates@gmail.com',
+      subject: `[${type.toUpperCase()}] New feedback from ${user?.email ?? 'anonymous'}`,
+      html: `
+        <p><strong>Type:</strong> ${type}</p>
+        <p><strong>From:</strong> ${user?.email ?? 'Not logged in'}</p>
+        <p><strong>Message:</strong></p>
+        <blockquote style="border-left:3px solid #f59e0b;padding-left:12px;margin:12px 0;color:#374151">${message.trim()}</blockquote>
+        <p><a href="https://socialmate.studio/admin/feedback">View in Admin</a></p>
+      `,
+    })
+  } catch (emailErr) {
+    console.error('Feedback email notification failed:', emailErr)
+  }
+
+  // Push notification to admin push subscriptions
+  try {
+    const { data: adminSettings } = await getSupabaseAdmin()
+      .from('user_settings')
+      .select('user_id')
+      .eq('is_admin', true)
+      .limit(5)
+
+    const adminIds = (adminSettings ?? []).map((s: { user_id: string }) => s.user_id)
+    if (adminIds.length > 0) {
+      const { data: subs } = await getSupabaseAdmin()
+        .from('push_subscriptions')
+        .select('subscription')
+        .in('user_id', adminIds)
+
+      if (subs && subs.length > 0) {
+        const webpush = await import('web-push')
+        webpush.setVapidDetails(
+          'mailto:socialmatehq@gmail.com',
+          process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+          process.env.VAPID_PRIVATE_KEY!
+        )
+        await Promise.allSettled(
+          subs.map((s: { subscription: string }) =>
+            webpush.sendNotification(
+              JSON.parse(s.subscription as string),
+              JSON.stringify({
+                title: `New ${type} feedback`,
+                body: message.trim().slice(0, 100),
+                url: '/admin/feedback',
+              })
+            )
+          )
+        )
+      }
+    }
+  } catch (pushErr) {
+    console.error('Feedback push notification failed:', pushErr)
+  }
 
   return NextResponse.json({ success: true })
 }
