@@ -40,6 +40,7 @@ export async function POST(req: NextRequest) {
     await getResend().emails.send({
       from: 'SocialMate <hello@socialmate.studio>',
       to: item.email,
+      reply_to: 'socialmatehq@gmail.com',
       subject: 'Re: Your SocialMate Feedback',
       html: `
         <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 32px; color: #111;">
