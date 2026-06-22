@@ -176,7 +176,7 @@ function OnboardingInner() {
       onboarding_completed: true,
     }).eq('id', user.id)
 
-    const platforms = selectedPlatform ? [selectedPlatform] : []
+    const platforms = (selectedPlatform && connectionDetected) ? [selectedPlatform] : []
     const upsertPayload: Record<string, any> = {
       user_id: user.id,
       display_name: displayName,
