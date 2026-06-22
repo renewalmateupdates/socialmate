@@ -58,9 +58,9 @@ export async function GET(req: NextRequest) {
       .select('user_id, platform')
       .in('user_id', userIds.length ? userIds : ['none']),
     db.from('posts')
-      .select('user_id')
+      .select('user_id, status, platforms')
       .in('user_id', userIds.length ? userIds : ['none'])
-      .eq('status', 'published'),
+      .limit(10000),
     db.from('affiliate_profiles')
       .select('user_id, status')
       .in('user_id', userIds.length ? userIds : ['none']),
@@ -77,10 +77,33 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  const postCountMap: Record<string, number> = {}
+  type PostStats = { published: number; failed: number; partial: number; scheduled: number }
+  type PlatformStats = Record<string, { published: number; failed: number }>
+
+  const postStatsMap: Record<string, PostStats> = {}
+  const platformStatsMap: Record<string, PlatformStats> = {}
+  const postCountMap: Record<string, number> = {} // kept for backwards compat
+
   if (postsRes.status === 'fulfilled') {
     for (const p of postsRes.value.data ?? []) {
-      postCountMap[p.user_id] = (postCountMap[p.user_id] || 0) + 1
+      const uid = p.user_id
+      if (!postStatsMap[uid]) postStatsMap[uid] = { published: 0, failed: 0, partial: 0, scheduled: 0 }
+      if (!platformStatsMap[uid]) platformStatsMap[uid] = {}
+
+      const s = p.status as string
+      if (s === 'published') { postStatsMap[uid].published++; postCountMap[uid] = (postCountMap[uid] || 0) + 1 }
+      else if (s === 'failed') postStatsMap[uid].failed++
+      else if (s === 'partial') postStatsMap[uid].partial++
+      else if (s === 'scheduled') postStatsMap[uid].scheduled++
+
+      const platforms = p.platforms as string[] | null
+      if (Array.isArray(platforms)) {
+        for (const platform of platforms) {
+          if (!platformStatsMap[uid][platform]) platformStatsMap[uid][platform] = { published: 0, failed: 0 }
+          if (s === 'published') platformStatsMap[uid][platform].published++
+          else if (s === 'failed' || s === 'partial') platformStatsMap[uid][platform].failed++
+        }
+      }
     }
   }
 
@@ -104,6 +127,8 @@ export async function GET(req: NextRequest) {
     ...u,
     connected_platforms: accountMap[u.user_id] ?? [],
     posts_count:         postCountMap[u.user_id] ?? 0,
+    post_stats:          postStatsMap[u.user_id] ?? { published: 0, failed: 0, partial: 0, scheduled: 0 },
+    platform_stats:      platformStatsMap[u.user_id] ?? {},
     affiliate_status:    affiliateMap[u.user_id] ?? null,
     is_stax:             staxSet.has(u.user_id),
   }))
