@@ -2,6 +2,9 @@
 import { useEffect, useState, useCallback, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
+interface PostStats { published: number; failed: number; partial: number; scheduled: number }
+interface PlatformStat { published: number; failed: number }
+
 interface AdminUser {
   user_id: string
   email: string
@@ -12,6 +15,8 @@ interface AdminUser {
   is_admin: boolean | null
   connected_platforms: string[]
   posts_count: number
+  post_stats: PostStats
+  platform_stats: Record<string, PlatformStat>
   affiliate_status: string | null
   is_stax: boolean
 }
@@ -174,14 +179,40 @@ function AdminUsersInner() {
                           )}
                         </div>
                       </td>
-                      <td className="px-5 py-3 text-gray-600 dark:text-gray-400">{u.posts_count}</td>
+                      <td className="px-5 py-3">
+                        <div className="flex items-center gap-2 text-xs">
+                          <span className="text-gray-700 dark:text-gray-300 font-medium">
+                            {u.post_stats?.published ?? u.posts_count} pub
+                          </span>
+                          {(u.post_stats?.failed ?? 0) + (u.post_stats?.partial ?? 0) > 0 && (
+                            <span className="text-red-500 font-medium">
+                              · {(u.post_stats.failed) + (u.post_stats.partial)} ✗
+                            </span>
+                          )}
+                          {(u.post_stats?.scheduled ?? 0) > 0 && (
+                            <span className="text-amber-500">
+                              · {u.post_stats.scheduled} ⏳
+                            </span>
+                          )}
+                        </div>
+                      </td>
                       <td className="px-5 py-3">
                         <div className="flex flex-wrap gap-1">
                           {u.connected_platforms.length === 0
                             ? <span className="text-gray-400 text-xs">none</span>
-                            : u.connected_platforms.map(p => (
-                                <span key={p} className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 px-1.5 py-0.5 rounded-md">{p}</span>
-                              ))
+                            : u.connected_platforms.map(p => {
+                                const ps = u.platform_stats?.[p]
+                                return (
+                                  <span key={p} className={`text-xs px-1.5 py-0.5 rounded-md flex items-center gap-1 ${
+                                    ps?.failed
+                                      ? 'bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400'
+                                      : 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
+                                  }`}>
+                                    {p}
+                                    {ps && <span className="opacity-70">({ps.published}{ps.failed ? ` · ${ps.failed}✗` : ''})</span>}
+                                  </span>
+                                )
+                              })
                           }
                         </div>
                       </td>
@@ -240,11 +271,43 @@ function AdminUsersInner() {
                     {!selected.affiliate_status && !selected.is_stax && <span className="text-gray-400">none</span>}
                   </div>
                 </Row>
-                <Row label="Posts published">{selected.posts_count}</Row>
-                <Row label="Connected platforms">
+                <Row label="Posts">
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    <span className="text-gray-700 dark:text-gray-300">{selected.post_stats?.published ?? selected.posts_count} published</span>
+                    {(selected.post_stats?.failed ?? 0) > 0 && <span className="text-red-500">{selected.post_stats.failed} failed</span>}
+                    {(selected.post_stats?.partial ?? 0) > 0 && <span className="text-orange-500">{selected.post_stats.partial} partial</span>}
+                    {(selected.post_stats?.scheduled ?? 0) > 0 && <span className="text-amber-500">{selected.post_stats.scheduled} scheduled</span>}
+                  </div>
+                </Row>
+                <Row label="Platforms">
                   {selected.connected_platforms.length === 0
                     ? <span className="text-gray-400">none</span>
-                    : selected.connected_platforms.join(', ')}
+                    : (
+                      <div className="flex flex-col gap-1.5 w-full">
+                        {selected.connected_platforms.map(p => {
+                          const ps = selected.platform_stats?.[p]
+                          return (
+                            <div key={p} className="flex items-center gap-2 text-xs">
+                              <span className="w-20 text-gray-500 dark:text-gray-400 capitalize">{p}</span>
+                              <span className="text-gray-700 dark:text-gray-300">{ps?.published ?? 0} pub</span>
+                              {(ps?.failed ?? 0) > 0 && <span className="text-red-500">{ps!.failed} ✗</span>}
+                            </div>
+                          )
+                        })}
+                        {Object.entries(selected.platform_stats ?? {})
+                          .filter(([p]) => !selected.connected_platforms.includes(p))
+                          .map(([p, ps]) => (
+                            <div key={p} className="flex items-center gap-2 text-xs opacity-50">
+                              <span className="w-20 text-gray-500 dark:text-gray-400 capitalize">{p}</span>
+                              <span className="text-gray-700 dark:text-gray-300">{ps.published} pub</span>
+                              {ps.failed > 0 && <span className="text-red-500">{ps.failed} ✗</span>}
+                              <span className="text-gray-400">(disconnected)</span>
+                            </div>
+                          ))
+                        }
+                      </div>
+                    )
+                  }
                 </Row>
                 <Row label="Joined">{new Date(selected.created_at).toLocaleString()}</Row>
                 <Row label="Last active">{selected.last_active ? new Date(selected.last_active).toLocaleString() : '—'}</Row>
