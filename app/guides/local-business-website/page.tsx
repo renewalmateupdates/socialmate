@@ -72,7 +72,7 @@ export default function LocalBusinessWebsiteGuidePage() {
             <div className="flex flex-wrap items-center gap-4">
               <span className="text-sm text-gray-600">50 min read</span>
               <span className="text-gray-700">·</span>
-              <GuidePDFDownload />
+              <GuidePDFDownload title="Local Business Websites — Gilgamesh's Guide Vol. 11" />
             </div>
           </div>
         </header>
