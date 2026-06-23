@@ -221,6 +221,28 @@ const GUIDES = [
     readTime: '40 min read',
     tags: ['AI Tools', 'Productivity', 'Creator Stack', '2026'],
   },
+  {
+    number: 'Vol. 11',
+    title: 'Local Business Websites',
+    subtitle: 'Build It, Price It, Sell It — and Hand It Off Clean',
+    description:
+      "The no-BS playbook for building local business websites that actually convert: what every page needs, Google Business Profile setup, how to price your work ($1,500–$7,000 by vertical), getting your first client without a portfolio, and handing off clean so they own everything.",
+    href: '/guides/local-business-website',
+    available: true,
+    chapters: [
+      'Who Actually Needs a Website (And Who Wastes Money)',
+      'What Makes a Local Site Actually Work',
+      "The Tech Stack That Won't Break in a Year",
+      'What Goes on Every Page',
+      'Contact Forms, Maps, and Getting Found on Google',
+      'Google Business Profile — Do This Before the Website',
+      'Getting Your First Client (Without a Portfolio)',
+      'Pricing Your Work',
+      'The Handoff — Clients Who Own Their Site',
+    ],
+    readTime: '50 min read',
+    tags: ['Web Development', 'Freelance', 'Local SEO', 'Clients'],
+  },
 ]
 
 export default function GuidesHubPage() {
