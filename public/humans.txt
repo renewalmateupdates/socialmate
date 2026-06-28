@@ -10,7 +10,7 @@ Built with Claude Code by Anthropic
 Powered by Google Gemini, Supabase, Vercel, Inngest, Stripe, Resend
 
 /* SITE */
-Last updated: June 1, 2026
+Last updated: June 27, 2026
 Launch date: March 26, 2026
 Official Product Hunt launch: April 1, 2026
 Language: English (primary), + 8 locales (es, de, fr, pt, ru, zh, ja, ko)
