@@ -396,7 +396,7 @@ Free long-form guides for entrepreneurs, creators, and self-starters by founder 
 - Guides hub: https://socialmate.studio/guides
 - All guides include email capture, PDF download (native print dialog with watermark, no external service)
 
-### Available Volumes (11 guides, all free)
+### Available Volumes (14 guides, all free)
 - Vol. 1 — Starting a Business From Scratch: https://socialmate.studio/guides/starting-a-business
   - Business structure, LLC formation, EIN, bank accounts, licensing, first steps
 - Vol. 2 — Marketing on Zero Budget: https://socialmate.studio/guides/marketing-zero-budget
@@ -419,6 +419,12 @@ Free long-form guides for entrepreneurs, creators, and self-starters by founder 
   - Full AI stack: ideation, writing, visuals, video, scheduling, analytics, the human thing AI can't replace
 - Vol. 11 — Local Business Websites: https://socialmate.studio/guides/local-business-website
   - Tech stack, page structure, Google Business Profile, getting your first client, pricing by vertical, the handoff
+- Vol. 12 — Email List Building From Zero: https://socialmate.studio/guides/email-list-building
+  - Why social followers are rented and email is owned, lead magnets, free tools, welcome sequences, opt-in forms, consistency system
+- Vol. 13 — SEO for Normal People: https://socialmate.studio/guides/seo-for-beginners
+  - Free keyword research, Google Search Console setup, on-page basics, blog as 5-year assets, backlinks, when to hire
+- Vol. 14 — Reddit Marketing Without Getting Banned: https://socialmate.studio/guides/reddit-marketing
+  - Reddit culture, karma building, subreddit research, give-first rule, spotting AI writing, disclosure, long-term compound presence
 
 ---
 
