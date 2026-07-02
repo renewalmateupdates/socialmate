@@ -411,6 +411,43 @@ export default async function AdminOverviewPage() {
     if (data) funnelRetained = new Set(data.map(r => r.user_id)).size
   } catch { /* graceful fallback */ }
 
+  // ── 9. Power users (most active by login count) ───────────────────────
+  interface PowerUser { user_id: string; email: string; login_count: number; last_active: string | null; posts_count: number }
+  let powerUsers: PowerUser[] = []
+
+  try {
+    const { data: pwSettings } = await admin
+      .from('user_settings')
+      .select('user_id, login_count, last_active')
+      .neq('user_id', adminUserId)
+      .gt('login_count', 0)
+      .order('login_count', { ascending: false })
+      .limit(10)
+
+    if (pwSettings && pwSettings.length > 0) {
+      const pwIds = pwSettings.map(s => s.user_id)
+      const { data: { users: authUsers } } = await admin.auth.admin.listUsers({ perPage: 1000 })
+      const emailMap = new Map((authUsers ?? []).map(u => [u.id, u.email ?? '']))
+
+      const postCountMap = new Map<string, number>()
+      const { data: postRows } = await admin
+        .from('posts')
+        .select('user_id, status')
+        .in('user_id', pwIds)
+      for (const p of postRows ?? []) {
+        if (p.status === 'published') postCountMap.set(p.user_id, (postCountMap.get(p.user_id) ?? 0) + 1)
+      }
+
+      powerUsers = pwSettings.map(s => ({
+        user_id:     s.user_id,
+        email:       emailMap.get(s.user_id) ?? '(unknown)',
+        login_count: s.login_count ?? 0,
+        last_active: s.last_active ?? null,
+        posts_count: postCountMap.get(s.user_id) ?? 0,
+      }))
+    }
+  } catch { /* graceful fallback */ }
+
   // ── render ─────────────────────────────────────────────────────────────
   const PLAN_BADGE: Record<string, string> = {
     free:          'bg-gray-700 text-gray-400',
@@ -732,6 +769,52 @@ export default async function AdminOverviewPage() {
               <p className="text-sm text-emerald-500 font-medium">All clear — no at-risk users detected.</p>
             ) : null}
           </div>
+        </section>
+
+        {/* ── Section 9: Power Users ───────────────────────────────────── */}
+        <section>
+          <SectionLabel>Power Users — Reach Out</SectionLabel>
+          <p className="text-xs text-gray-600 mb-3">Most active by login count. These are your best candidates for a 15-min feedback call.</p>
+          {powerUsers.length === 0 ? (
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 text-center text-gray-600 text-sm">
+              No login data yet — will populate after users sign in with tracking enabled.
+            </div>
+          ) : (
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-gray-800 bg-gray-800/40">
+                    <th className="text-left px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-widest">Email</th>
+                    <th className="text-right px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-widest">Logins</th>
+                    <th className="text-right px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-widest">Posts</th>
+                    <th className="text-left px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-widest">Last Active</th>
+                    <th className="text-right px-5 py-3 text-xs font-bold text-gray-500 uppercase tracking-widest">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {powerUsers.map((u, i) => (
+                    <tr key={u.user_id}
+                      className={`hover:bg-gray-800/30 transition-colors ${i < powerUsers.length - 1 ? 'border-b border-gray-800/60' : ''}`}>
+                      <td className="px-5 py-3">
+                        <span className="text-gray-300 font-mono text-xs truncate block max-w-[240px]">{u.email}</span>
+                      </td>
+                      <td className="px-5 py-3 text-right">
+                        <span className="text-amber-400 font-bold text-sm">{u.login_count}</span>
+                      </td>
+                      <td className="px-5 py-3 text-right text-gray-400 font-semibold">{u.posts_count}</td>
+                      <td className="px-5 py-3 text-gray-500 text-xs whitespace-nowrap">{fmtDate(u.last_active)}</td>
+                      <td className="px-5 py-3 text-right">
+                        <a href={`mailto:${u.email}?subject=Quick question about SocialMate&body=Hey! I noticed you've been using SocialMate a lot — I'd love to hear what's working and what's not. Any chance you'd be down for a quick 15-minute call? I'll give you 6 months of Pro free just for your time. — Joshua`}
+                          className="text-xs font-semibold text-amber-500 hover:text-amber-400 transition-colors">
+                          Email →
+                        </a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </section>
 
         {/* ── Section 8: Recent signups ────────────────────────────────── */}

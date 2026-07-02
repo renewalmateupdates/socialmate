@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
+import BehaviorSurvey from '@/components/BehaviorSurvey'
 import DashboardTour from '@/components/DashboardTour'
 import DidYouKnow from '@/components/DidYouKnow'
 import DashboardWidgets from '@/components/DashboardWidgets'
@@ -986,6 +987,7 @@ function DashboardInner() {
           </div>
         </div>
       </main>
+      <BehaviorSurvey />
     </div>
   )
 }
