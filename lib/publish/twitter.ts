@@ -269,17 +269,23 @@ export async function publishToTwitter(
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
-    console.error('[Twitter] Post failed:', err)
+    console.error('[Twitter] Post failed:', JSON.stringify(err))
 
     if (res.status === 401) {
       throw new Error('X token expired. Please reconnect your X account in Accounts → X.')
     }
     if (res.status === 403) {
-      const detail = err?.detail || ''
-      if (detail.includes('duplicate')) {
+      const detail = err?.detail || err?.errors?.[0]?.message || ''
+      if (detail.toLowerCase().includes('duplicate')) {
         throw new Error('X rejected this post as a duplicate. Please change the text slightly.')
       }
-      throw new Error(`X API permission denied. Check your app's tweet.write scope.`)
+      // Surface the actual Twitter error so it appears in the failure log
+      const twitterMsg = detail || `${err?.title || 'unknown'} (type: ${err?.type || 'unknown'})`
+      throw new Error(
+        `X API 403: ${twitterMsg}. ` +
+        `Fix: go to developer.twitter.com → your app → Settings → "Read and Write" permissions, ` +
+        `then users must reconnect their X account.`
+      )
     }
     if (res.status === 429) {
       throw new Error('X posting rate limit reached. Please wait and try again.')
