@@ -135,7 +135,7 @@ These have burned us before — always apply:
 
 ---
 
-## What's Been Built (as of May 21, 2026)
+## What's Been Built (as of July 7, 2026)
 
 **Core:**
 - Post scheduling (Now + future via Inngest), drafts, queue, calendar, bulk scheduling
@@ -404,7 +404,7 @@ These have burned us before — always apply:
 
 ### Active — fix when touching the file
 
-No open known bugs as of June 8, 2026. All previously tracked issues resolved:
+No open known bugs as of July 7, 2026 (full sweep: tsc clean, all 9 locales in sync, all 175 static sitemap routes have pages). All previously tracked issues resolved:
 - ✅ Dark mode spinners — `dark:border-amber-500` added to all 20 pages (PR #472, June 8)
 - ✅ Streak counts scheduled posts — `api/streak` now includes `scheduled` status + uses `scheduled_at` (PR #471, June 8)
 - ✅ Toast safe-area — `admin/white-label` and `hermes/campaigns/[id]` now use shared `<Toast>` component (PR #471, June 8)
@@ -678,6 +678,15 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **3D printing venture name change pending** — Joshua considering a name change away from "Hearthforge." Do not use the name in public-facing posts or marketing until a new name is confirmed. Refer to as "3D printing side project" or "co-founded 3D printing venture with Butch" in the meantime.
 - **Analytics snapshot (June 19, 2026):** 1,126 visitors (+101%), 2,199 page views (+7%), 80% bounce rate (+12%). Top referrers: Bing (92), DDG (39), Vercel (29), Google (20), ChatGPT (17), t.co (15). Countries: USA 27%, Singapore 21%, China 18%, India 6%. 40 users, 850+ posts published, $0 MRR. ChatGPT appearing as referral source for first time — llms.txt/AI discoverability work paying off.
 - **Reddit posts drafted** — New posts for r/buildinpublic, r/micro_saas, r/saasbuild (5 days since last posts). Angle: code audit week, zero-auth endpoint found + fixed, silent data loss bug found + fixed, ChatGPT referral traffic, 40 users / $0 MRR / still solo.
+
+**June 23 – July 7, 2026 (PRs #505–#511):**
+- **Vol. 11 guide build fix (PR #505, June 23)** — `/guides/local-business-website` was missing the required `title` prop on `<GuidePDFDownload />`, failing `next build`. Hotfixed same day.
+- **Crawler files refresh (PR #506, June 28)** — `llms.txt`, `humans.txt`, `ai.txt` updated with June 2026 stats.
+- **Twitter 403 error detail (PR #507, July 2)** — X publish failures now surface the actual API error message in 403 responses instead of a generic error, so partial-post breakdowns show the real reason.
+- **Gilgamesh's Guides Vols 12–14 (PR #508, July 2)** — Email List Building, SEO for Normal People, Reddit Marketing. 14 guides total, all in sitemap.
+- **User behavior tracking (PRs #509–#510, July 2–7)** — Login tracking: `login_count` + `last_active` on `user_settings`, incremented on every sign-in in `auth/callback` via `increment_login_count` RPC with direct-upsert fallback. **BehaviorSurvey modal** on dashboard: asks "What keeps you coming back?" (6 preset reasons) + optional "what would make you recommend us" — shows on 3rd login session and every 10th after, 45s delay, once ever after submit/dismiss (localStorage). `POST /api/survey` (user-authed) + `GET` (admin) → `user_survey_responses` table. **Power Users section** on `/admin/overview`: top 10 by login count with posts, last active, and a one-click mailto offering 6 months Pro for a 15-min feedback call. PR #510 fixed 4 bugs found in a sweep of the branch.
+- **July 7 sweep (PR #511)** — Three missing `/vs/` pages committed: `vs/creatorstudio`, `vs/discord-bots`, `vs/tiktok-scheduler` were referenced in the deployed sitemap + llms.txt but their page files were never committed — all three were 404ing in production (creatorstudio had only its layout.tsx tracked). Bare `/refer` removed from sitemap (only `/refer/[code]` exists). Login tracking fallback fixed: supabase `.rpc()` returns errors instead of throwing, so the catch-based fallback could never fire — now checks the returned error. Full sitemap audit: all 175 static routes verified to have pages.
+- **SQL to verify in Supabase (behavior tracking — no migration file in repo):** `user_settings.login_count INTEGER DEFAULT 0` + `user_settings.last_active TIMESTAMPTZ`, `user_survey_responses` table (id, user_id, question_key, answer, created_at + RLS), and `increment_login_count(p_user_id UUID)` RPC (atomic upsert). The auth-callback fallback works without the RPC, but the RPC is atomic.
 
 **June 22–23, 2026 (PRs #499–#504):**
 - **Admin user post stats (PR #499)** — `/admin/users` posts column now shows "N pub · N ✗ · N ⏳" breakdown + per-platform tags with failure counts. `/api/admin/users` fetches all posts (limit 10000) and builds `postStatsMap` + `platformStatsMap` per user.
