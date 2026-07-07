@@ -20,6 +20,8 @@ export default function BehaviorSurvey() {
   const [done, setDone]         = useState(false)
 
   useEffect(() => {
+    let timerId: ReturnType<typeof setTimeout>
+
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (!user) return
       setUserId(user.id)
@@ -27,15 +29,22 @@ export default function BehaviorSurvey() {
       const dismissedKey = `sm_survey_done_${user.id}`
       if (localStorage.getItem(dismissedKey)) return
 
+      // One increment per browser session (sessionStorage clears on tab close)
+      const sessionKey = `sm_session_counted_${user.id}`
+      if (sessionStorage.getItem(sessionKey)) return
+      sessionStorage.setItem(sessionKey, '1')
+
       const countKey = `sm_sessions_${user.id}`
       const count = parseInt(localStorage.getItem(countKey) ?? '0', 10) + 1
       localStorage.setItem(countKey, String(count))
 
-      // Show on 3rd session and every 10 after if not answered
-      if (count === 3 || (count > 3 && count % 10 === 0)) {
-        setTimeout(() => setShow(true), 45_000)
+      // Show on 3rd login session and every 10 after (13, 23, 33...)
+      if (count === 3 || (count > 3 && (count - 3) % 10 === 0)) {
+        timerId = setTimeout(() => setShow(true), 45_000)
       }
     })
+
+    return () => clearTimeout(timerId)
   }, [])
 
   const dismiss = () => {
