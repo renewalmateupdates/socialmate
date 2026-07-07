@@ -213,8 +213,8 @@ export default async function AdminOverviewPage() {
       const ownerIds = paidWorkspaces.map(w => w.owner_id)
 
       // Get owner emails from auth
-      const { data: { users: authUsers } } = await admin.auth.admin.listUsers({ perPage: 1000 })
-      const emailMap = new Map((authUsers ?? []).map(u => [u.id, u.email ?? '']))
+      const { data: listData } = await admin.auth.admin.listUsers({ perPage: 1000 })
+      const emailMap = new Map((listData?.users ?? []).map(u => [u.id, u.email ?? '']))
 
       // For each, check their last post
       const atRisk: string[] = []
@@ -348,8 +348,8 @@ export default async function AdminOverviewPage() {
     if (recentWorkspaces && recentWorkspaces.length > 0) {
       const ownerIds = recentWorkspaces.map(w => w.owner_id)
 
-      const { data: { users: authUsers } } = await admin.auth.admin.listUsers({ perPage: 1000 })
-      const emailMap = new Map((authUsers ?? []).map(u => [u.id, u.email ?? '']))
+      const { data: listData } = await admin.auth.admin.listUsers({ perPage: 1000 })
+      const emailMap = new Map((listData?.users ?? []).map(u => [u.id, u.email ?? '']))
 
       // Batch post counts
       const postCountMap = new Map<string, number>()
@@ -426,8 +426,8 @@ export default async function AdminOverviewPage() {
 
     if (pwSettings && pwSettings.length > 0) {
       const pwIds = pwSettings.map(s => s.user_id)
-      const { data: { users: authUsers } } = await admin.auth.admin.listUsers({ perPage: 1000 })
-      const emailMap = new Map((authUsers ?? []).map(u => [u.id, u.email ?? '']))
+      const { data: listData } = await admin.auth.admin.listUsers({ perPage: 1000 })
+      const emailMap = new Map((listData?.users ?? []).map(u => [u.id, u.email ?? '']))
 
       const postCountMap = new Map<string, number>()
       const { data: postRows } = await admin
