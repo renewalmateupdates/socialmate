@@ -133,25 +133,25 @@ export async function GET(request: NextRequest) {
 
       // Login tracking — increment login_count and update last_active on every sign-in
       try {
-        await adminSupabase.rpc('increment_login_count', { p_user_id: session.user.id })
-      } catch {
-        // Fallback if RPC doesn't exist yet — direct upsert
-        try {
+        const { error: rpcError } = await adminSupabase.rpc('increment_login_count', { p_user_id: session.user.id })
+        if (rpcError) {
+          // Fallback if RPC doesn't exist yet — direct upsert
           const { data: current } = await adminSupabase
             .from('user_settings')
             .select('login_count')
             .eq('user_id', session.user.id)
             .maybeSingle()
-          await adminSupabase
+          const { error: upsertError } = await adminSupabase
             .from('user_settings')
             .upsert({
               user_id: session.user.id,
               login_count: (current?.login_count ?? 0) + 1,
               last_active: new Date().toISOString(),
             }, { onConflict: 'user_id' })
-        } catch (trackErr) {
-          console.error('Login tracking error:', trackErr)
+          if (upsertError) console.error('Login tracking error:', upsertError)
         }
+      } catch (trackErr) {
+        console.error('Login tracking error:', trackErr)
       }
 
       // UTM / referrer attribution — read cookies set by signup page, persist on first sign-in only
