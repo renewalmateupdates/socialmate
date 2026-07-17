@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import SuspenseFallback from '@/components/SuspenseFallback'
 import { supabase } from '@/lib/supabase'
 
 const gold   = '#F59E0B'
@@ -388,7 +389,7 @@ function OnboardingInner() {
 
 export default function OnboardingPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<SuspenseFallback />}>
       <OnboardingInner />
     </Suspense>
   )

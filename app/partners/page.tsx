@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import SuspenseFallback from '@/components/SuspenseFallback'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
 
@@ -437,7 +438,7 @@ function PartnersLoginInner() {
 
 export default function PartnersPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<SuspenseFallback />}>
       <PartnersLoginInner />
     </Suspense>
   )
