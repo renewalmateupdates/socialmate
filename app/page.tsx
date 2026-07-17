@@ -5,6 +5,7 @@ import LazyUserStatsCounter from '@/components/LazyUserStatsCounter'
 import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
 import HeroMockup from '@/components/landing/HeroMockup'
 import Reveal from '@/components/landing/Reveal'
+import AmbientBackground from '@/components/landing/AmbientBackground'
 import {
   PenLine, Hash, RefreshCw, TrendingUp, MessagesSquare, Recycle, Zap, Flame,
   Radar, Search, CalendarDays, ImagePlus, CalendarClock, Bot, BarChart3, Link2,
@@ -130,7 +131,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
   const planned = PLATFORMS.filter(p => p.status === 'planned')
 
   return (
-    <div className="dark min-h-screen bg-gray-950">
+    <div className="dark relative min-h-screen bg-gray-950">
+      <AmbientBackground />
 
       {refCode && <ReferralBanner refCode={refCode} />}
 
@@ -228,7 +230,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
       </section>
 
       {/* FREE TIER CALLOUT */}
-      <section className="bg-black text-white py-16">
+      <section className="bg-black/30 text-white py-16">
         <div className="max-w-5xl mx-auto px-6">
           <Reveal><div className="text-center mb-10">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Free plan — no catch</p>
@@ -268,7 +270,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
       </section>
 
       {/* PLATFORMS */}
-      <section id="platforms" className="border-t border-gray-100 dark:border-gray-800 py-16 bg-gray-50 dark:bg-gray-900">
+      <section id="platforms" className="border-t border-gray-100 dark:border-gray-800 py-16 bg-white/[0.02]">
         <div className="max-w-5xl mx-auto px-6">
           <Reveal><div className="text-center mb-10">
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Platform support</p>
@@ -468,7 +470,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
       </section>
 
       {/* FEATURE GRID */}
-      <section className="py-20 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
+      <section className="py-20 bg-white/[0.02] border-t border-gray-100 dark:border-gray-800">
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-12">
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Full feature set</p>
@@ -490,7 +492,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
       </section>
 
       {/* COMPARISON */}
-      <section className="py-20 bg-white dark:bg-gray-950">
+      <section className="py-20 bg-transparent">
         <div className="max-w-4xl mx-auto px-6">
           <div className="text-center mb-12">
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">How we compare</p>
@@ -543,7 +545,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
       </section>
 
       {/* LINK IN BIO */}
-      <section className="py-20 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
+      <section className="py-20 bg-white/[0.02] border-t border-gray-100 dark:border-gray-800">
         <div className="max-w-5xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div>
@@ -600,7 +602,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
       </section>
 
       {/* HOW WE STAY FREE */}
-      <section className="py-20 bg-white dark:bg-gray-950">
+      <section className="py-20 bg-transparent">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">Built to last</p>
           <h2 className="text-3xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">
@@ -653,7 +655,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
       </section>
 
       {/* FREE GUIDES CTA */}
-      <section className="py-20 bg-[#0a0a0a] border-t border-gray-900">
+      <section className="py-20 bg-black/40 border-t border-gray-900">
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold px-4 py-2 rounded-full mb-6">
@@ -724,7 +726,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
       </section>
 
       {/* STORY */}
-      <section className="py-20 bg-gray-50 dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
+      <section className="py-20 bg-white/[0.02] border-t border-gray-100 dark:border-gray-800">
         <div className="max-w-3xl mx-auto px-6 text-center">
           <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">Why we built this</p>
           <h2 className="text-3xl font-extrabold tracking-tight mb-6 text-gray-900 dark:text-gray-100">
@@ -750,7 +752,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
       </section>
 
       {/* SM-GIVE */}
-      <section className="py-16 bg-white dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800">
+      <section className="py-16 bg-transparent border-t border-gray-100 dark:border-gray-800">
         <div className="max-w-4xl mx-auto px-6">
           <div className="bg-gray-950 dark:bg-gray-900 rounded-2xl px-5 sm:px-8 py-8 sm:py-10 flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="flex-1">
@@ -791,7 +793,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
       </section>
 
       {/* FINAL CTA */}
-      <section className="py-20 bg-black text-white">
+      <section className="py-20 bg-black/40 text-white">
         <div className="max-w-3xl mx-auto px-6 text-center">
           <h2 className="text-4xl font-extrabold tracking-tight mb-4">Ready to get started?</h2>
           <p className="text-gray-400 mb-8 text-sm max-w-lg mx-auto">
