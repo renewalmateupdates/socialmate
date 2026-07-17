@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
+import SuspenseFallback from '@/components/SuspenseFallback'
 import { Suspense } from 'react'
 import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
@@ -662,7 +663,7 @@ function DiscordHubInner() {
 
 export default function DiscordHubPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<SuspenseFallback />}>
       <DiscordHubInner />
     </Suspense>
   )

@@ -43,6 +43,9 @@ function AdminUsersInner() {
   const [forbidden, setForbidden] = useState(false)
   const [search, setSearch] = useState('')
   const [planFilter, setPlanFilter] = useState(searchParams.get('plan') || '')
+  // Cap initial render — a 2,000-row table in one commit tanks INP. More
+  // rows load on demand; search/plan filters reset the window.
+  const [rowLimit, setRowLimit] = useState(150)
   const [selected, setSelected] = useState<AdminUser | null>(null)
 
   const load = useCallback(async () => {
@@ -60,6 +63,7 @@ function AdminUsersInner() {
     } finally {
       setLoading(false)
     }
+    setRowLimit(150)
   }, [search, planFilter])
 
   useEffect(() => { load() }, [load])
@@ -140,7 +144,7 @@ function AdminUsersInner() {
                   </tr>
                 </thead>
                 <tbody>
-                  {users.map((u, i) => (
+                  {users.slice(0, rowLimit).map((u, i) => (
                     <tr key={u.user_id}
                       onClick={() => setSelected(u)}
                       className={`cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors ${
@@ -226,6 +230,16 @@ function AdminUsersInner() {
                   ))}
                 </tbody>
               </table>
+              {users.length > rowLimit && (
+                <div className="p-4 text-center border-t border-theme">
+                  <button
+                    onClick={() => setRowLimit(l => l + 300)}
+                    className="text-sm font-semibold text-amber-600 dark:text-amber-400 hover:text-amber-500 transition-colors"
+                  >
+                    Show more ({users.length - rowLimit} remaining)
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}

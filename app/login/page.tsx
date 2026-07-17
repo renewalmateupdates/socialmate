@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { isDisposableEmail } from '@/lib/disposable-email-domains'
 import { useI18n } from '@/contexts/I18nContext'
+import LoginSkeleton from './LoginSkeleton'
 
 function LoginInner() {
   const { t } = useI18n()
@@ -366,7 +367,12 @@ function LoginInner() {
 
 export default function Login() {
   return (
-    <Suspense>
+    // The fallback matters: LoginInner uses useSearchParams(), which opts this
+    // page out of static prerendering. With an empty fallback the server sent
+    // BLANK HTML for /login and nothing painted until the JS bundle hydrated —
+    // a 20s white screen on slow mobile networks (Speed Insights RES 33).
+    // A static skeleton fallback prerenders into the HTML and paints instantly.
+    <Suspense fallback={<LoginSkeleton />}>
       <LoginInner />
     </Suspense>
   )
