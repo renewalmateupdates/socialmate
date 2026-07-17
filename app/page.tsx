@@ -131,7 +131,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
   const planned = PLATFORMS.filter(p => p.status === 'planned')
 
   return (
-    <div className="dark relative min-h-screen bg-gray-950">
+    <div className="dark relative isolate min-h-screen bg-gray-950">
       <AmbientBackground />
 
       {refCode && <ReferralBanner refCode={refCode} />}
