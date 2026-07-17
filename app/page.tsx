@@ -2,6 +2,17 @@ import Link from 'next/link'
 import ReferralBanner from '@/app/components/ReferralBanner'
 import PublicNav from '@/components/PublicNav'
 import LazyUserStatsCounter from '@/components/LazyUserStatsCounter'
+import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
+import HeroMockup from '@/components/landing/HeroMockup'
+import Reveal from '@/components/landing/Reveal'
+import {
+  PenLine, Hash, RefreshCw, TrendingUp, MessagesSquare, Recycle, Zap, Flame,
+  Radar, Search, CalendarDays, ImagePlus, CalendarClock, Bot, BarChart3, Link2,
+  Users, Building2, Rss, Telescope, HardDrive, FileText, Sparkles, Clapperboard,
+  BadgeCheck, Lock, ShieldCheck, BookOpen, Heart, Backpack, Baby, Home as HomeIcon,
+  Globe, Mail, Check,
+  type LucideIcon,
+} from 'lucide-react'
 
 // Cache landing page at CDN for 1 hour — content rarely changes between deploys.
 // Eliminates origin round-trips for most visitors, especially international (China, India).
@@ -26,64 +37,64 @@ const PLATFORMS = [
   { name: 'BeReal',      icon: '📷', status: 'planned' },
 ]
 
-const AI_TOOLS = [
-  { name: 'Caption Generator',    emoji: '✍️',  credits: '5 credits',    proOnly: false },
-  { name: 'Hashtag Generator',    emoji: '#️⃣', credits: '5 credits',    proOnly: false },
-  { name: 'Post Rewriter',        emoji: '🔁',  credits: '5 credits',    proOnly: false },
-  { name: 'Viral Hook Generator', emoji: '🎣',  credits: '5 credits',    proOnly: false },
-  { name: 'Thread Generator',     emoji: '🧵',  credits: '10 credits',   proOnly: false },
-  { name: 'Content Repurposer',   emoji: '♻️',  credits: '10 credits',   proOnly: false },
-  { name: 'Post Score',           emoji: '⚡',  credits: '5 credits',    proOnly: false },
-  { name: 'SM-Pulse',             emoji: '🔥',  credits: '20 credits',   proOnly: false },
-  { name: 'SM-Radar',             emoji: '📡',  credits: '20 credits',   proOnly: false },
-  { name: 'Content Gap Detector', emoji: '🕳️', credits: '10 credits',   proOnly: false },
-  { name: 'AI Content Calendar',  emoji: '📅',  credits: '25 cr · Pro+', proOnly: true  },
-  { name: 'AI Image Generation',  emoji: '🎨',  credits: '25 cr · Pro+', proOnly: true  },
+const AI_TOOLS: { name: string; icon: LucideIcon; credits: string; proOnly: boolean }[] = [
+  { name: 'Caption Generator',    icon: PenLine,        credits: '5 credits',    proOnly: false },
+  { name: 'Hashtag Generator',    icon: Hash,           credits: '5 credits',    proOnly: false },
+  { name: 'Post Rewriter',        icon: RefreshCw,      credits: '5 credits',    proOnly: false },
+  { name: 'Viral Hook Generator', icon: TrendingUp,     credits: '5 credits',    proOnly: false },
+  { name: 'Thread Generator',     icon: MessagesSquare, credits: '10 credits',   proOnly: false },
+  { name: 'Content Repurposer',   icon: Recycle,        credits: '10 credits',   proOnly: false },
+  { name: 'Post Score',           icon: Zap,            credits: '5 credits',    proOnly: false },
+  { name: 'SM-Pulse',             icon: Flame,          credits: '20 credits',   proOnly: false },
+  { name: 'SM-Radar',             icon: Radar,          credits: '20 credits',   proOnly: false },
+  { name: 'Content Gap Detector', icon: Search,         credits: '10 credits',   proOnly: false },
+  { name: 'AI Content Calendar',  icon: CalendarDays,   credits: '25 cr · Pro+', proOnly: true  },
+  { name: 'AI Image Generation',  icon: ImagePlus,      credits: '25 cr · Pro+', proOnly: true  },
 ]
 
-const FEATURES = [
+const FEATURES: { icon: LucideIcon; title: string; desc: string }[] = [
   {
-    icon: '📅',
+    icon: CalendarClock,
     title: 'Smart Scheduling',
     desc: 'Schedule across 7 social platforms, with Twitch and YouTube clips support built in. Bulk upload, automated queues, and platform-specific character limit enforcement included.',
   },
   {
-    icon: '🤖',
+    icon: Bot,
     title: '15+ AI Tools Built In',
     desc: 'Generate captions, hashtags, viral hooks, full threads, content calendars, and post scores — all powered by Google Gemini.',
   },
   {
-    icon: '📊',
+    icon: BarChart3,
     title: 'Real Analytics',
     desc: 'Posting streaks, platform breakdown, best days and times, consistency scores, and engagement tracking. No inflated numbers.',
   },
   {
-    icon: '🔗',
+    icon: Link2,
     title: 'Link in Bio Builder',
     desc: 'A fully-featured bio link page built right in. Custom themes, button styles, social icons, and a public URL — free on every plan.',
   },
   {
-    icon: '👥',
+    icon: Users,
     title: 'Team Collaboration',
     desc: 'Invite team members, assign roles, manage access, and run content approval workflows. Free plan includes 2 seats.',
   },
   {
-    icon: '🏢',
+    icon: Building2,
     title: 'Client Workspaces',
     desc: 'Pro includes 1 client workspace. Agency includes 10 — each fully isolated with their own accounts, posts, analytics, and team.',
   },
   {
-    icon: '♻️',
+    icon: Recycle,
     title: 'Evergreen Recycling',
     desc: 'Mark your best posts as evergreen and they automatically re-queue when your schedule runs empty. Set it once.',
   },
   {
-    icon: '📡',
+    icon: Rss,
     title: 'RSS / Blog Import',
     desc: 'Pull posts from any RSS or Atom feed and turn them into scheduled social posts in one click. Works with any blog or podcast.',
   },
   {
-    icon: '🔭',
+    icon: Telescope,
     title: 'Competitor Tracking',
     desc: 'Track up to 3 competitor accounts on every plan including free. Know what they\'re posting before you do.',
   },
@@ -139,7 +150,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
 
         {/* Badge */}
         <div className="inline-flex items-center gap-2 bg-amber-500/15 border border-amber-500/30 text-white text-xs font-bold px-4 py-2 rounded-full mb-8">
-          🌱 Free plan, no card required · Pro from $5/mo · 7 live platforms · 15+ AI tools
+          <Sparkles className="w-3.5 h-3.5 text-amber-400" strokeWidth={2.5} />
+          Free plan, no card required · Pro from $5/mo · 7 live platforms · 15+ AI tools
         </div>
 
         {/* Headline */}
@@ -159,7 +171,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
           {live.map(p => (
             <div key={p.name}
               className="flex items-center gap-1.5 bg-gray-800/80 border border-gray-700/60 text-gray-200 text-xs font-semibold px-3 py-1.5 rounded-xl backdrop-blur-sm hover:border-gray-500 transition-colors">
-              <span>{p.icon}</span>
+              {hasPlatformIcon(p.name) ? <PlatformIcon name={p.name} size={13} /> : <span>{p.icon}</span>}
               <span>{p.name}</span>
             </div>
           ))}
@@ -180,6 +192,9 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
           </Link>
         </div>
         <p className="text-xs text-gray-500">No card required · Free plan never expires · Setup in 60 seconds</p>
+
+        {/* Product mockup — the compose-once-publish-everywhere loop, animated */}
+        <HeroMockup />
 
         {/* STATS */}
         <div className="grid grid-cols-3 gap-4 sm:gap-8 mt-14 max-w-xl mx-auto">
@@ -203,7 +218,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         {/* Founder card — kept but smaller / lower */}
         <div className="mt-10 max-w-sm mx-auto bg-gray-900/60 border border-gray-800 rounded-2xl px-5 py-3.5 text-left backdrop-blur-sm">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-sm flex-shrink-0">👤</div>
+            <div className="w-8 h-8 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-[10px] font-extrabold text-amber-400 flex-shrink-0">JB</div>
             <div>
               <p className="text-xs font-bold text-gray-200">Built solo by Joshua Bostic</p>
               <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">Bootstrapped. No VC. No $99/month trap.</p>
@@ -215,7 +230,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
       {/* FREE TIER CALLOUT */}
       <section className="bg-black text-white py-16">
         <div className="max-w-5xl mx-auto px-6">
-          <div className="text-center mb-10">
+          <Reveal><div className="text-center mb-10">
             <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Free plan — no catch</p>
             <h2 className="text-3xl font-extrabold tracking-tight mb-3">
               Most tools charge for this.<br className="hidden md:block" /> We don't.
@@ -224,25 +239,25 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
               SocialMate's free plan is designed to be genuinely useful — not a crippled demo.
               Here's exactly what you get at $0/month, forever.
             </p>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            {[
-              { icon: '🤖', value: '50',      label: 'AI credits / month'           },
-              { icon: '📅', value: '2 weeks', label: 'Scheduling window'            },
-              { icon: '👥', value: '2',        label: 'Team seats included'         },
-              { icon: '💾', value: '1 GB',     label: 'Media storage'               },
-              { icon: '📝', value: '100',      label: 'Posts / month'               },
-              { icon: '📊', value: '30 days',  label: 'Analytics history'           },
-              { icon: '🔗', value: 'Free',     label: 'Link in Bio page'            },
-              { icon: '🔭', value: '3',        label: 'Competitor accounts tracked' },
-            ].map(stat => (
-              <div key={stat.label} className="bg-white/10 rounded-2xl p-4 text-center">
-                <div className="text-2xl mb-1">{stat.icon}</div>
+          </div></Reveal>
+          <Reveal delay={80}><div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+            {([
+              { icon: Bot,          value: '50',      label: 'AI credits / month'           },
+              { icon: CalendarDays, value: '2 weeks', label: 'Scheduling window'            },
+              { icon: Users,        value: '2',        label: 'Team seats included'         },
+              { icon: HardDrive,    value: '1 GB',     label: 'Media storage'               },
+              { icon: FileText,     value: '100',      label: 'Posts / month'               },
+              { icon: BarChart3,    value: '30 days',  label: 'Analytics history'           },
+              { icon: Link2,        value: 'Free',     label: 'Link in Bio page'            },
+              { icon: Telescope,    value: '3',        label: 'Competitor accounts tracked' },
+            ] as { icon: LucideIcon; value: string; label: string }[]).map(stat => (
+              <div key={stat.label} className="lm-card bg-white/10 rounded-2xl p-4 text-center hover:bg-white/15">
+                <stat.icon className="w-5 h-5 text-amber-400 mx-auto mb-2" strokeWidth={2} />
                 <p className="text-lg font-extrabold">{stat.value}</p>
                 <p className="text-xs text-gray-400 mt-0.5">{stat.label}</p>
               </div>
             ))}
-          </div>
+          </div></Reveal>
           <div className="text-center">
             <Link href="/signup"
               className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
@@ -255,45 +270,45 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
       {/* PLATFORMS */}
       <section id="platforms" className="border-t border-gray-100 dark:border-gray-800 py-16 bg-gray-50 dark:bg-gray-900">
         <div className="max-w-5xl mx-auto px-6">
-          <div className="text-center mb-10">
+          <Reveal><div className="text-center mb-10">
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Platform support</p>
             <h2 className="text-3xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">7 social platforms live. Twitch &amp; YouTube clips built in.</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 max-w-lg mx-auto">
               Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok, and LinkedIn live now. Twitch clips and YouTube videos schedulable directly inside SocialMate. Reddit and more on the roadmap.
             </p>
-          </div>
+          </div></Reveal>
           <div className="space-y-6">
             <div>
-              <p className="text-xs font-bold text-green-600 uppercase tracking-widest mb-3 text-center">✅ Live now</p>
+              <p className="text-xs font-bold text-green-600 uppercase tracking-widest mb-3 text-center">Live now</p>
               <div className="flex flex-wrap justify-center gap-3">
                 {live.map(p => (
                   <div key={p.name}
                     className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border-2 border-green-200 dark:border-green-800 rounded-xl text-sm font-bold text-gray-800 dark:text-gray-200">
-                    <span>{p.icon}</span>{p.name}
+                    {hasPlatformIcon(p.name) ? <PlatformIcon name={p.name} size={15} /> : <span>{p.icon}</span>}{p.name}
                     <span className="text-xs font-bold text-green-600 bg-green-50 dark:bg-green-950 px-1.5 py-0.5 rounded-full">Live</span>
                   </div>
                 ))}
               </div>
             </div>
             <div>
-              <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-3 text-center">🔜 Coming very soon</p>
+              <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-3 text-center">Coming very soon</p>
               <div className="flex flex-wrap justify-center gap-3">
                 {soon.map(p => (
                   <div key={p.name}
                     className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-blue-100 dark:border-blue-900 rounded-xl text-sm font-semibold text-gray-600 dark:text-gray-400">
-                    <span>{p.icon}</span>{p.name}
+                    {hasPlatformIcon(p.name) ? <PlatformIcon name={p.name} size={15} /> : <span>{p.icon}</span>}{p.name}
                     <span className="text-xs font-bold text-blue-500 bg-blue-50 dark:bg-blue-950 px-1.5 py-0.5 rounded-full">Soon</span>
                   </div>
                 ))}
               </div>
             </div>
             <div>
-              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 text-center">📋 Planned</p>
+              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 text-center">Planned</p>
               <div className="flex flex-wrap justify-center gap-3">
                 {planned.map(p => (
                   <div key={p.name}
                     className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-400 dark:text-gray-500">
-                    <span>{p.icon}</span>{p.name}
+                    {hasPlatformIcon(p.name) ? <PlatformIcon name={p.name} size={15} className="opacity-60 saturate-50" /> : <span>{p.icon}</span>}{p.name}
                   </div>
                 ))}
               </div>
@@ -307,7 +322,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-14">
             <div className="inline-flex items-center gap-2 bg-purple-900/60 border border-purple-700/50 text-purple-300 text-xs font-bold px-4 py-2 rounded-full mb-6">
-              🎬 Built for streamers &amp; content creators
+              <Clapperboard className="w-3.5 h-3.5" strokeWidth={2.5} />
+              Built for streamers &amp; content creators
             </div>
             <h2 className="text-3xl font-extrabold tracking-tight mb-4">
               From clip to scheduled post.<br className="hidden sm:block" /> No extra tabs.
@@ -320,32 +336,38 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
           </div>
 
           {/* Three feature cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-purple-500/40 transition-all">
-              <div className="text-3xl mb-3">🟣</div>
+          <Reveal><div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
+            <div className="lm-card bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-purple-500/40">
+              <div className="w-11 h-11 rounded-xl bg-purple-500/15 border border-purple-500/25 flex items-center justify-center mb-4">
+                <svg viewBox="0 0 24 24" width={20} height={20} fill="#A970FF" aria-hidden="true"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/></svg>
+              </div>
               <h3 className="font-bold text-base mb-2">Twitch Clips</h3>
               <p className="text-sm text-gray-400 leading-relaxed">
                 Connect your Twitch account and your top clips appear in a thumbnail grid —
                 view counts, duration, everything. Hit Schedule and you&apos;re done.
               </p>
             </div>
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-red-500/40 transition-all">
-              <div className="text-3xl mb-3">▶️</div>
+            <div className="lm-card bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-red-500/40">
+              <div className="w-11 h-11 rounded-xl bg-red-500/15 border border-red-500/25 flex items-center justify-center mb-4">
+                <PlatformIcon name="YouTube" size={20} />
+              </div>
               <h3 className="font-bold text-base mb-2">YouTube Videos</h3>
               <p className="text-sm text-gray-400 leading-relaxed">
                 Paste your channel URL — that&apos;s it. No API key, no approval process, no
                 developer account. Your latest public videos load instantly and are ready to schedule.
               </p>
             </div>
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-blue-500/40 transition-all">
-              <div className="text-3xl mb-3">🔍</div>
+            <div className="lm-card bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-blue-500/40">
+              <div className="w-11 h-11 rounded-xl bg-blue-500/15 border border-blue-500/25 flex items-center justify-center mb-4">
+                <Search className="w-5 h-5 text-blue-400" strokeWidth={2.2} />
+              </div>
               <h3 className="font-bold text-base mb-2">Search Any Channel</h3>
               <p className="text-sm text-gray-400 leading-relaxed">
                 You don&apos;t even need to own the channel. Search any Twitch streamer&apos;s top clips
                 and schedule them directly — perfect for clippers and fan accounts.
               </p>
             </div>
-          </div>
+          </div></Reveal>
 
           {/* Workflow steps */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-12 text-center">
@@ -389,21 +411,23 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
               no separate AI subscription, no hidden costs. Credits exist to keep the service sustainable for everyone.
             </p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+          <Reveal><div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
             {AI_TOOLS.map(tool => (
               <div key={tool.name}
-                className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-4 text-center hover:border-gray-300 dark:hover:border-gray-500 transition-all relative">
+                className="lm-card bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-4 text-center hover:border-amber-500/40 hover:shadow-xl hover:shadow-amber-500/5 relative">
                 {tool.proOnly && (
                   <span className="absolute top-2 right-2 text-xs font-bold bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 px-1.5 py-0.5 rounded-full">
                     Pro+
                   </span>
                 )}
-                <div className="text-2xl mb-2">{tool.emoji}</div>
+                <div className="w-9 h-9 mx-auto rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-2.5">
+                  <tool.icon className="w-4 h-4 text-amber-500" strokeWidth={2.2} />
+                </div>
                 <p className="text-xs font-bold leading-snug mb-1 text-gray-900 dark:text-gray-100">{tool.name}</p>
                 <p className="text-xs text-gray-400 dark:text-gray-500">{tool.credits}</p>
               </div>
             ))}
-          </div>
+          </div></Reveal>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
             <div className="bg-black rounded-2xl p-6 text-white">
@@ -451,15 +475,17 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
             <h2 className="text-3xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">Everything you need to grow</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400">Every feature that matters. Most of them free.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <Reveal><div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {FEATURES.map((f, i) => (
-              <div key={i} className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 hover:border-gray-300 dark:hover:border-gray-500 transition-all">
-                <div className="text-3xl mb-3">{f.icon}</div>
+              <div key={i} className="lm-card bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 hover:border-amber-500/40 hover:shadow-xl hover:shadow-amber-500/5">
+                <div className="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-4">
+                  <f.icon className="w-5 h-5 text-amber-500" strokeWidth={2} />
+                </div>
                 <h3 className="text-sm font-extrabold mb-2 text-gray-900 dark:text-gray-100">{f.title}</h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{f.desc}</p>
               </div>
             ))}
-          </div>
+          </div></Reveal>
         </div>
       </section>
 
@@ -540,7 +566,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
                   'Remove SocialMate branding on Pro+',
                 ].map(f => (
                   <div key={f} className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
-                    <span className="text-green-500 font-bold flex-shrink-0">✓</span>{f}
+                    <Check className="w-3.5 h-3.5 text-green-500 flex-shrink-0" strokeWidth={3} />{f}
                   </div>
                 ))}
               </div>
@@ -551,13 +577,18 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
             </div>
             <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-sm">
               <div className="bg-gray-900 rounded-xl p-6 text-white text-center">
-                <div className="w-14 h-14 rounded-full bg-gray-600 flex items-center justify-center text-2xl mx-auto mb-3">👤</div>
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-sm font-extrabold text-black mx-auto mb-3">YN</div>
                 <p className="font-bold text-sm mb-1">Your Name</p>
                 <p className="text-xs text-gray-400 mb-4">Your bio goes here</p>
                 <div className="space-y-2">
-                  {['🌐  My Website', '📝  Latest Post', '📬  Contact Me'].map(link => (
-                    <div key={link} className="bg-white text-gray-900 text-xs font-bold py-2 px-4 rounded-lg">
-                      {link}
+                  {([
+                    { icon: Globe,    label: 'My Website' },
+                    { icon: FileText, label: 'Latest Post' },
+                    { icon: Mail,     label: 'Contact Me' },
+                  ] as { icon: LucideIcon; label: string }[]).map(link => (
+                    <div key={link.label} className="bg-white text-gray-900 text-xs font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2">
+                      <link.icon className="w-3.5 h-3.5" strokeWidth={2.4} />
+                      {link.label}
                     </div>
                   ))}
                 </div>
@@ -581,32 +612,34 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
 
           {/* NO-ADS BADGE */}
           <div className="inline-flex items-center gap-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl px-5 py-3 mb-12">
-            <span className="text-base">🚫</span>
+            <ShieldCheck className="w-5 h-5 text-green-500 flex-shrink-0" strokeWidth={2.2} />
             <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
               No ads in your feed. No data selling. Just clean tools that actually work — we suggest, never spam.
             </span>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-10">
-            {[
+            {([
               {
-                icon: '🆓',
+                icon: BadgeCheck,
                 title: 'Genuinely generous free tier',
                 desc: 'Scheduling, bulk upload, analytics, link in bio, competitor tracking, 2 team seats, and 50 AI credits per month — all at $0. No hidden paywalls on the basics.',
               },
               {
-                icon: '⚡',
+                icon: Zap,
                 title: 'Credits only gate AI costs',
                 desc: "AI generation uses real compute — we use credits to keep that sustainable, not as a lever to squeeze upgrades. The credit system lets the free tier thrive.",
               },
               {
-                icon: '🔒',
+                icon: Lock,
                 title: 'No bait-and-switch',
                 desc: 'Free means free. The free plan is not a trial, not a countdown, and not designed to frustrate you into upgrading. What you see is what you get.',
               },
-            ].map((card, i) => (
-              <div key={i} className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 text-left hover:border-gray-300 dark:hover:border-gray-500 transition-all">
-                <div className="text-2xl mb-3">{card.icon}</div>
+            ] as { icon: LucideIcon; title: string; desc: string }[]).map((card, i) => (
+              <div key={i} className="lm-card bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 text-left hover:border-amber-500/40 hover:shadow-xl hover:shadow-amber-500/5">
+                <div className="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-4">
+                  <card.icon className="w-5 h-5 text-amber-500" strokeWidth={2} />
+                </div>
                 <h3 className="text-sm font-extrabold mb-2 text-gray-900 dark:text-gray-100">{card.title}</h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{card.desc}</p>
               </div>
@@ -624,7 +657,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         <div className="max-w-5xl mx-auto px-6">
           <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold px-4 py-2 rounded-full mb-6">
-              📚 Free forever · No signup required
+              <BookOpen className="w-3.5 h-3.5" strokeWidth={2.5} />
+              Free forever · No signup required
             </div>
             <h2 className="text-3xl font-extrabold tracking-tight mb-3 text-white">
               Gilgamesh&apos;s Guides — the free playbooks
@@ -665,7 +699,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
                 available: true,
               },
             ].map(g => (
-              <div key={g.vol} className="rounded-2xl border border-[#1f1f1f] bg-[#111111] p-6 flex flex-col">
+              <div key={g.vol} className="lm-card rounded-2xl border border-[#1f1f1f] bg-[#111111] p-6 flex flex-col hover:border-amber-500/30">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-xs font-bold text-amber-400">{g.vol}</span>
                   {g.available
@@ -721,7 +755,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
           <div className="bg-gray-950 dark:bg-gray-900 rounded-2xl px-5 sm:px-8 py-8 sm:py-10 flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-3">
-                <span className="text-lg">❤️</span>
+                <Heart className="w-4 h-4 text-rose-400 fill-rose-400/30" strokeWidth={2.2} />
                 <span className="text-xs font-bold text-amber-400 uppercase tracking-widest">SM-Give Initiative</span>
               </div>
               <h2 className="text-xl font-extrabold text-white mb-3 tracking-tight">
@@ -733,11 +767,17 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
               </p>
             </div>
             <div className="flex flex-col items-center gap-3 flex-shrink-0">
-              <div className="flex flex-wrap justify-center gap-4">
-                {['🎒 School Supplies', '👶 Baby Essentials', '🏠 Homeless Care'].map(tag => (
-                  <div key={tag} className="text-center">
-                    <div className="text-xl mb-1">{tag.split(' ')[0]}</div>
-                    <div className="text-xs text-gray-500 font-medium leading-tight">{tag.slice(3)}</div>
+              <div className="flex flex-wrap justify-center gap-5">
+                {([
+                  { icon: Backpack, label: 'School Supplies' },
+                  { icon: Baby,     label: 'Baby Essentials' },
+                  { icon: HomeIcon, label: 'Homeless Care' },
+                ] as { icon: LucideIcon; label: string }[]).map(tag => (
+                  <div key={tag.label} className="text-center">
+                    <div className="w-10 h-10 mx-auto rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-1.5">
+                      <tag.icon className="w-5 h-5 text-amber-400" strokeWidth={2} />
+                    </div>
+                    <div className="text-xs text-gray-500 font-medium leading-tight">{tag.label}</div>
                   </div>
                 ))}
               </div>
@@ -805,7 +845,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
                 {[['Our Story','/story'],['Blog','/blog'],['Merch','/merch'],['Affiliates','/affiliates'],['Referral','/referral']].map(([label,href])=>(
                   <li key={href}><Link href={href} className="text-sm text-gray-400 hover:text-white transition-colors">{label}</Link></li>
                 ))}
-                <li><a href="https://discord.gg/2se6FGrbRU" target="_blank" rel="noopener noreferrer" className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors">💬 Discord Community</a></li>
+                <li><a href="https://discord.gg/2se6FGrbRU" target="_blank" rel="noopener noreferrer" className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors inline-flex items-center gap-1.5"><PlatformIcon name="Discord" size={13} mono /> Discord Community</a></li>
               </ul>
             </div>
             <div>
@@ -813,7 +853,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
               <ul className="space-y-2">
                 <li><Link href="/privacy" className="text-sm text-gray-400 hover:text-white transition-colors">Privacy</Link></li>
                 <li><Link href="/terms" className="text-sm text-gray-400 hover:text-white transition-colors">Terms</Link></li>
-                <li><Link href="/give" className="text-sm text-rose-400 hover:text-rose-300 font-medium transition-colors">❤️ SM-Give</Link></li>
+                <li><Link href="/give" className="text-sm text-rose-400 hover:text-rose-300 font-medium transition-colors inline-flex items-center gap-1.5"><Heart className="w-3.5 h-3.5 fill-rose-400/30" strokeWidth={2.2} /> SM-Give</Link></li>
               </ul>
             </div>
           </div>

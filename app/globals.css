@@ -522,3 +522,52 @@ body {
   body { background: white !important; color: black !important; }
   a { color: inherit !important; text-decoration: none !important; }
 }
+
+/* ── Landing mockup + motion (premium pass, July 2026) ─────────────────────
+   All animation is CSS-only so it costs zero JS and is disabled wholesale
+   for prefers-reduced-motion users. */
+@keyframes lm-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+@keyframes lm-pop {
+  0%   { opacity: 0; transform: scale(0.85) translateY(4px); }
+  70%  { opacity: 1; transform: scale(1.04); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes lm-slide {
+  from { opacity: 0; transform: translateX(10px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes lm-toast-in {
+  0%, 55% { opacity: 0; transform: translateY(12px) scale(0.95); }
+  70%     { opacity: 1; transform: translateY(0) scale(1.02); }
+  75%, 100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes lm-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.lm-chip, .lm-queue-item, .lm-toast { opacity: 1; }
+.lm-caret {
+  display: inline-block; width: 2px; height: 0.9em;
+  background: #f59e0b; margin-left: 2px; vertical-align: text-bottom;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .lm-float      { animation: lm-float 7s ease-in-out infinite; }
+  .lm-chip       { opacity: 0; animation: lm-pop 0.5s cubic-bezier(0.16,1,0.3,1) forwards; }
+  .lm-queue-item { opacity: 0; animation: lm-slide 0.55s cubic-bezier(0.16,1,0.3,1) forwards; }
+  .lm-toast      { opacity: 0; animation: lm-toast-in 3.2s cubic-bezier(0.16,1,0.3,1) 1 forwards; animation-delay: 0.4s; }
+  .lm-caret      { animation: lm-blink 1.1s step-end infinite; }
+}
+
+/* Card hover lift used across landing sections */
+.lm-card {
+  transition: transform 0.35s cubic-bezier(0.16,1,0.3,1),
+              border-color 0.35s ease, box-shadow 0.35s ease;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lm-card:hover { transform: translateY(-4px); }
+}
