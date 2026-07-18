@@ -4,6 +4,7 @@ import PublicNav from '@/components/PublicNav'
 import LazyUserStatsCounter from '@/components/LazyUserStatsCounter'
 import PlatformIcon from '@/components/landing/PlatformIcon'
 import HeroLoop from '@/components/landing/HeroLoop'
+import EmberField from '@/components/landing/EmberField'
 import Reveal from '@/components/landing/Reveal'
 import { Section, Eyebrow, Display, Body, Button, Card } from '@/components/instrument/primitives'
 import {
@@ -119,7 +120,12 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
   const refCode = params?.ref || ''
 
   return (
-    <div className="dark min-h-screen bg-void font-body text-ink-body">
+    <div className="dark relative min-h-screen bg-void font-body text-ink-body">
+      {/* Shared Gilgamesh signature. Sits at z-0 behind everything; content is
+          lifted to z-10 so the embers read as atmosphere, never as foreground. */}
+      <EmberField />
+
+      <div className="relative z-10">
       {refCode && <ReferralBanner refCode={refCode} />}
 
       <PublicNav />
@@ -457,6 +463,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
           </div>
         </div>
       </footer>
+      </div>
     </div>
   )
 }

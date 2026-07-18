@@ -43,7 +43,10 @@ export function Section({
       id={id}
       className={[
         'py-section',
-        tone === 'raised' ? 'bg-panel' : 'bg-void',
+        // `base` is transparent, not bg-void, so the ember field behind the page
+        // shows through it. `raised` stays opaque and occludes the embers, which
+        // gives the alternating sections a depth rhythm instead of a flat wash.
+        tone === 'raised' ? 'bg-panel' : 'bg-transparent',
         divide ? 'border-t border-edge' : '',
         className,
       ].filter(Boolean).join(' ')}
@@ -158,8 +161,12 @@ export function Button({
   const base =
     'tap inline-flex items-center justify-center gap-2 rounded-xl font-body font-medium text-small'
   const variants = {
-    // Amber is the primary brand voice. void-on-amber measures 9.54:1.
-    primary: 'bg-amber text-void px-6 py-3.5 hover:bg-amber/90 font-semibold',
+    // Gold gradient rather than a flat fill — GE's signature treatment, and the
+    // thing that reads as "premium" rather than "a yellow button". Runs bright
+    // (#EAC020) to base gold (#D4A017); void text clears AA against both ends.
+    primary:
+      'bg-gradient-to-b from-amber-bright to-amber text-void px-6 py-3.5 font-semibold ' +
+      'hover:from-amber-bright hover:to-amber-bright',
     secondary: 'border border-edge-lit text-ink-high px-6 py-3.5 hover:border-ink-muted hover:bg-panel',
     quiet: 'text-ink-muted hover:text-ink-high px-2 py-2',
   }

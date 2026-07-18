@@ -40,12 +40,11 @@ const RESOURCE_HREFS = [
 
 // Products use brand names — no translation needed for the names themselves
 const PRODUCTS = [
-  { label: '🗂️ Studio Stax',   href: '/studio-stax' },
-  { label: '⚡ SOMA',          href: '/soma'         },
-  { label: '◆ Enki',           href: '/enki'         },
-  { label: '💜 Monetize',      href: '/monetize'     },
-  { label: '🎵 TikTok Studio', href: '/tiktok'       },
-  { label: '👕 Merch',         href: '/merch'        },
+  { label: 'Studio Stax',   href: '/studio-stax' },
+  { label: 'SOMA',          href: '/soma'        },
+  { label: 'Monetize',      href: '/monetize'    },
+  { label: 'TikTok Studio', href: '/tiktok'      },
+  { label: 'Merch',         href: '/merch'       },
 ]
 
 type DropdownKey = 'audiences' | 'products' | 'resources'
@@ -333,13 +332,11 @@ export default function PublicNav() {
               <div className="pt-2 border-t border-edge mt-2">
                 <p className="px-4 py-1.5 font-mono text-eyebrow uppercase text-ink-faint">{t('nav.products_label')}</p>
                 {[
-                  { label: '🗂️ Studio Stax',    href: '/studio-stax'    },
-                  { label: '⚡ SOMA',           href: '/soma'          },
-                  { label: '◆ Enki',            href: '/enki'          },
-                  { label: '💜 Monetize',       href: '/monetize'      },
-                  { label: '🎵 TikTok Studio',  href: '/tiktok' },
-                  { label: '⚡ HERMES',         href: '/hermes'        },
-                  { label: '🏢 Enterprise',     href: '/enterprise'    },
+                  { label: 'Studio Stax',   href: '/studio-stax' },
+                  { label: 'SOMA',          href: '/soma'        },
+                  { label: 'Monetize',      href: '/monetize'    },
+                  { label: 'TikTok Studio', href: '/tiktok'      },
+                  { label: 'Enterprise',    href: '/enterprise'  },
                 ].map(link => (
                   <Link key={link.href} href={link.href}
                     onClick={() => setOpen(false)}
