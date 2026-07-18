@@ -8,7 +8,7 @@ import { useI18n } from '@/contexts/I18nContext'
 
 const COMPARISON = [
   { feature: 'Starting price',          metricool: '$22/month (Starter)',    socialmate: '$0 — free forever'       },
-  { feature: 'Free plan post limit',    metricool: '50 posts/month',         socialmate: 'Unlimited'               },
+  { feature: 'Free plan post limit',    metricool: '50 posts/month',         socialmate: '100 / month'               },
   { feature: 'Free plan brands',        metricool: '1 brand',                socialmate: 'Multiple workspaces'     },
   { feature: 'Pricing model',           metricool: 'Per brand',              socialmate: 'Flat rate'               },
   { feature: 'Platforms supported',     metricool: '12+',                    socialmate: '16 (growing)'            },

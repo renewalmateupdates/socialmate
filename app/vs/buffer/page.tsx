@@ -9,7 +9,7 @@ import { useI18n } from '@/contexts/I18nContext'
 const COMPARISON = [
   { feature: 'Starting price',          buffer: '$6/month (Essentials)',     socialmate: '$0 — free forever'       },
   { feature: 'Free plan channels',      buffer: '3 channels',                socialmate: 'No hard cap'             },
-  { feature: 'Free plan queue limit',   buffer: '10 posts per channel',      socialmate: 'Unlimited'               },
+  { feature: 'Free plan queue limit',   buffer: '10 posts per channel',      socialmate: '100 / month'               },
   { feature: 'Bulk scheduling',         buffer: '❌ Not available',           socialmate: '✅ Free'                  },
   { feature: 'Analytics',              buffer: 'Paid add-on',               socialmate: '✅ Built-in free'         },
   { feature: 'Engagement / Reply inbox', buffer: 'Paid add-on',             socialmate: '✅ Included'              },

@@ -9,7 +9,7 @@ import { useI18n } from '@/contexts/I18nContext'
 const COMPARISON = [
   { feature: 'Starting price',           publer: '$12/month (Professional)',  socialmate: '$0 — free forever'       },
   { feature: 'Free plan accounts',        publer: '3 social accounts',         socialmate: 'Multiple per platform'   },
-  { feature: 'Free plan post limit',      publer: '10 posts per account',      socialmate: 'Unlimited'               },
+  { feature: 'Free plan post limit',      publer: '10 posts per account',      socialmate: '100 / month'               },
   { feature: 'Pricing model',             publer: 'Per workspace',             socialmate: 'Flat rate'               },
   { feature: 'Platforms supported',       publer: '12+',                       socialmate: '16 (growing)'            },
   { feature: 'TikTok scheduling',          publer: '✅ (paid plans)',             socialmate: '✅ Free'                  },

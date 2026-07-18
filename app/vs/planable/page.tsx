@@ -8,7 +8,7 @@ import { useI18n } from '@/contexts/I18nContext'
 
 const COMPARISON = [
   { feature: 'Starting price',            planable: '$11/month per workspace',  socialmate: '$0 — free forever'       },
-  { feature: 'Free plan',                 planable: '50 posts LIFETIME total',  socialmate: 'Unlimited forever'       },
+  { feature: 'Free plan',                 planable: '50 posts LIFETIME total',  socialmate: '100 / month free'       },
   { feature: 'Post limits',               planable: '50 posts then forced pay', socialmate: 'None'                    },
   { feature: 'Pricing model',             planable: 'Per workspace',            socialmate: 'Flat rate'               },
   { feature: 'Platforms supported',       planable: '8+',                       socialmate: '16 (growing)'            },
@@ -161,7 +161,7 @@ export default function VsPlanablePage() {
               {
                 n: '2',
                 title: 'Per-workspace billing punishes agency growth',
-                desc: "Planable charges $11/month per workspace. Manage 10 clients and you're paying $110/month. SocialMate Agency is $20/month flat for unlimited workspaces. As your client roster grows, your bill stays the same.",
+                desc: "Planable charges $11/month per workspace. Manage 10 clients and you're paying $110/month. SocialMate Agency is $20/month flat for 5 client workspaces. As your client roster grows, your bill stays the same.",
               },
               {
                 n: '3',

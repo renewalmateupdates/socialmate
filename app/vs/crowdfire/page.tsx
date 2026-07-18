@@ -10,7 +10,7 @@ const COMPARISON = [
   { feature: 'Starting price',              crowdfire: '$0 (very limited) / $7.48 Plus', socialmate: '$0 — free forever'        },
   { feature: 'Free plan post limit',        crowdfire: '10 posts/month hard cap',         socialmate: '100 posts / month'          },
   { feature: 'Free plan accounts',          crowdfire: '1 social account only',           socialmate: 'Multiple accounts'        },
-  { feature: 'Scheduled posts (free)',       crowdfire: '10/month maximum',               socialmate: 'Unlimited'                },
+  { feature: 'Scheduled posts (free)',       crowdfire: '10/month maximum',               socialmate: '100 / month'                },
   { feature: 'Content curation',            crowdfire: '✅ (free tier)',                  socialmate: 'RSS import (free)'        },
   { feature: 'Analytics (free)',            crowdfire: '❌ Locked to paid',              socialmate: '✅ Free (30 days)'        },
   { feature: 'Discord support',             crowdfire: '❌',                              socialmate: '✅'                       },

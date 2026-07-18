@@ -10,7 +10,7 @@ const COMPARISON = [
   { feature: 'Starting price',          later: '$18/month (Starter)',        socialmate: '$0 — free forever'       },
   { feature: 'Free plan platforms',     later: 'Instagram only',             socialmate: '7 platforms'            },
   { feature: 'Free plan profiles',      later: '1 profile',                  socialmate: 'Multiple'                },
-  { feature: 'Free plan post limit',    later: '30 posts/month',             socialmate: 'Unlimited'               },
+  { feature: 'Free plan post limit',    later: '30 posts/month',             socialmate: '100 / month'               },
   { feature: 'Discord support',         later: '❌',                          socialmate: '✅'                      },
   { feature: 'Telegram support',        later: '❌',                          socialmate: '✅'                      },
   { feature: 'Mastodon support',        later: '❌',                          socialmate: '✅'                      },

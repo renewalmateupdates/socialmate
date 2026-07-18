@@ -9,7 +9,7 @@ import { useI18n } from '@/contexts/I18nContext'
 const COMPARISON = [
   { feature: 'Starting price',         hootsuite: '$99/month',            socialmate: '$0 — free forever'       },
   { feature: 'Free plan',              hootsuite: '❌ No free plan',       socialmate: '✅ Genuinely free'        },
-  { feature: 'Posts per month (free)', hootsuite: '—',                     socialmate: 'Unlimited'                },
+  { feature: 'Posts per month (free)', hootsuite: '—',                     socialmate: '100 / month'                },
   { feature: 'Platforms',              hootsuite: '20+ (paid)',            socialmate: '7 live (free)'               },
   { feature: 'Team seats',             hootsuite: '1 user on Standard',   socialmate: '2 seats free'            },
   { feature: 'AI writing tools',       hootsuite: 'OwlyWriter AI (paid)', socialmate: '15+ tools free'           },

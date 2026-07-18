@@ -22,7 +22,7 @@ const COMPARISON = [
   { feature: 'Competitor tracking',         mailchimp: '❌',                           socialmate: '✅ Free (3 accounts)'     },
   { feature: 'RSS / blog import',           mailchimp: '✅ (RSS campaigns)',          socialmate: '✅ Free'                   },
   { feature: 'Team seats (free plan)',       mailchimp: '1',                           socialmate: '2'                        },
-  { feature: 'Free plan posts',             mailchimp: '❌ No social scheduling free', socialmate: 'Unlimited'                },
+  { feature: 'Free plan posts',             mailchimp: '❌ No social scheduling free', socialmate: '100 / month'                },
 ]
 
 const FAQ = [

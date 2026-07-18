@@ -167,7 +167,7 @@ export default function VsSocialChampPage() {
               {
                 n: '4',
                 title: 'Free plan actually works for real scheduling',
-                desc: "Social Champ's free plan is very limited. SocialMate's free plan includes 50 AI credits/month, unlimited post scheduling, bulk scheduler, link in bio, competitor tracking, and 2 team seats — everything a solo creator needs to run a real content operation.",
+                desc: "Social Champ's free plan is very limited. SocialMate's free plan includes 50 AI credits/month, 100 posts a month, bulk scheduler, link in bio, competitor tracking, and 2 team seats — everything a solo creator needs to run a real content operation.",
               },
             ].map((r) => (
               <div key={r.n} className="flex gap-4 p-5 bg-panel border border-edge rounded-2xl hover:border-edge transition-all">
