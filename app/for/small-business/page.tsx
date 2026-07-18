@@ -113,7 +113,7 @@ const PRICING = [
     price:   '$5',
     period:  '/month',
     credits: '500 AI credits/mo',
-    posts:   'Unlimited posts',
+    posts:   '100 posts / month',
     seats:   '5 seats',
     window:  'Unlimited schedule window',
     highlight: true,
@@ -170,13 +170,13 @@ export default function SmallBusinessPage() {
     <PublicLayout>
 
       {/* ─── HERO ─── */}
-      <section className="bg-black text-white py-24 px-6 text-center">
-        <p className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-4">{t('for_small_biz.eyebrow')}</p>
+      <section className="bg-void text-ink-high py-24 px-6 text-center">
+        <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-4">{t('for_small_biz.eyebrow')}</p>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-3xl mx-auto mb-6">
           {t('for_small_biz.hero_title_1')}<br />
-          <span className="text-blue-400">{t('for_small_biz.hero_title_2')}</span>
+          <span className="text-ink-muted">{t('for_small_biz.hero_title_2')}</span>
         </h1>
-        <p className="text-gray-300 max-w-xl mx-auto text-base leading-relaxed mb-6">
+        <p className="text-ink-body max-w-xl mx-auto text-base leading-relaxed mb-6">
           {t('for_small_biz.hero_desc')}
         </p>
 
@@ -184,7 +184,7 @@ export default function SmallBusinessPage() {
         <div className="flex flex-wrap justify-center gap-2 mb-8 max-w-2xl mx-auto">
           {PERSONAS.map((p) => (
             <span key={p.label}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-900 border border-gray-800 rounded-full text-xs text-gray-300 font-medium">
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-panel border border-edge rounded-full text-xs text-ink-body font-medium">
               {p.icon} {p.label}
             </span>
           ))}
@@ -192,34 +192,34 @@ export default function SmallBusinessPage() {
 
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
           <Link href="/signup"
-            className="bg-blue-500 hover:bg-blue-400 text-white font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
+            className="bg-raised hover:bg-raised text-ink-high font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
             {t('for_small_biz.hero_cta_primary')}
           </Link>
           <Link href="/pricing"
-            className="border border-gray-700 hover:border-gray-400 text-gray-300 hover:text-white font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
+            className="border border-edge hover:border-edge text-ink-body hover:text-ink-high font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
             {t('for_small_biz.hero_cta_secondary')}
           </Link>
         </div>
-        <p className="text-gray-500 text-xs mt-4">{t('for_small_biz.hero_note')}</p>
+        <p className="text-ink-muted text-xs mt-4">{t('for_small_biz.hero_note')}</p>
       </section>
 
       {/* ─── PAIN POINTS ─── */}
-      <section className="bg-gray-950 text-white py-20 px-6">
+      <section className="bg-panel text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_small_biz.pain_eyebrow')}</p>
+          <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_small_biz.pain_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
             {t('for_small_biz.pain_title_1')}<br />{t('for_small_biz.pain_title_2')}
           </h2>
           <div className="space-y-5">
             {PAIN_POINTS.map((p, i) => (
               <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
-                <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-                  <p className="text-xs text-red-400 font-bold uppercase tracking-wide mb-2">{t('for_small_biz.pain_before_label')}</p>
-                  <p className="text-sm text-gray-400 leading-relaxed">{p.before}</p>
+                <div className="bg-panel border border-edge rounded-2xl p-5">
+                  <p className="text-xs text-alert font-bold uppercase tracking-wide mb-2">{t('for_small_biz.pain_before_label')}</p>
+                  <p className="text-sm text-ink-body leading-relaxed">{p.before}</p>
                 </div>
-                <div className="bg-blue-950/40 border border-blue-800/50 rounded-2xl p-5">
-                  <p className="text-xs text-blue-300 font-bold uppercase tracking-wide mb-2">{t('for_small_biz.pain_after_label')}</p>
-                  <p className="text-sm text-white leading-relaxed">{p.icon} {p.after}</p>
+                <div className="bg-raised border border-edge-lit rounded-2xl p-5">
+                  <p className="text-xs text-ink-muted font-bold uppercase tracking-wide mb-2">{t('for_small_biz.pain_after_label')}</p>
+                  <p className="text-sm text-ink-high leading-relaxed">{p.icon} {p.after}</p>
                 </div>
               </div>
             ))}
@@ -228,30 +228,30 @@ export default function SmallBusinessPage() {
       </section>
 
       {/* ─── FEATURES ─── */}
-      <section className="bg-black text-white py-20 px-6">
+      <section className="bg-void text-ink-high py-20 px-6">
         <div className="max-w-5xl mx-auto">
-          <p className="text-center text-xs font-bold text-blue-400 uppercase tracking-widest mb-3">{t('for_small_biz.features_eyebrow')}</p>
+          <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_small_biz.features_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-3">
             {t('for_small_biz.features_title')}
           </h2>
-          <p className="text-center text-gray-400 text-sm mb-12 max-w-lg mx-auto">
+          <p className="text-center text-ink-body text-sm mb-12 max-w-lg mx-auto">
             {t('for_small_biz.features_desc')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map((f, i) => (
-              <div key={i} className="bg-gray-950 border border-gray-800 rounded-2xl p-5">
+              <div key={i} className="bg-panel border border-edge rounded-2xl p-5">
                 <div className="flex items-start justify-between mb-3">
                   <span className="text-2xl">{f.icon}</span>
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
                     f.badge === 'Free'
-                      ? 'bg-green-900/50 text-green-400'
-                      : 'bg-yellow-900/50 text-yellow-300'
+                      ? 'bg-jade/10 text-jade'
+                      : 'bg-amber/10 text-amber'
                   }`}>
                     {f.badge}
                   </span>
                 </div>
                 <h3 className="text-sm font-extrabold mb-2">{f.title}</h3>
-                <p className="text-xs text-gray-400 leading-relaxed">{f.desc}</p>
+                <p className="text-xs text-ink-body leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -259,29 +259,29 @@ export default function SmallBusinessPage() {
       </section>
 
       {/* ─── PRICING ─── */}
-      <section className="bg-gray-950 text-white py-20 px-6">
+      <section className="bg-panel text-ink-high py-20 px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_small_biz.pricing_eyebrow')}</p>
+          <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_small_biz.pricing_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_small_biz.pricing_title')}</h2>
-          <p className="text-gray-400 text-sm mb-12 max-w-lg mx-auto">
+          <p className="text-ink-body text-sm mb-12 max-w-lg mx-auto">
             {t('for_small_biz.pricing_desc')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 max-w-xl mx-auto mb-8">
             {PRICING.map((tier) => (
               <div key={tier.plan}
                 className={`rounded-2xl p-6 border text-left ${tier.highlight
-                  ? 'bg-blue-950/40 border-blue-700 ring-1 ring-blue-500'
-                  : 'bg-gray-900 border-gray-800'
+                  ? 'bg-raised border-edge-lit ring-1 ring-edge-lit'
+                  : 'bg-panel border-edge'
                 }`}>
                 {tier.highlight && (
-                  <p className="text-xs font-bold text-blue-300 uppercase tracking-widest mb-3">{t('for_small_biz.pricing_most_popular')}</p>
+                  <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_small_biz.pricing_most_popular')}</p>
                 )}
                 <p className="text-sm font-extrabold mb-1">{tier.plan}</p>
                 <div className="flex items-end gap-1 mb-4">
                   <span className="text-3xl font-black">{tier.price}</span>
-                  <span className="text-gray-400 text-sm mb-1">{tier.period}</span>
+                  <span className="text-ink-body text-sm mb-1">{tier.period}</span>
                 </div>
-                <ul className="text-xs text-gray-400 space-y-2 mb-6">
+                <ul className="text-xs text-ink-body space-y-2 mb-6">
                   <li>✓ {tier.credits}</li>
                   <li>✓ {tier.posts}</li>
                   <li>✓ {tier.seats}</li>
@@ -291,8 +291,8 @@ export default function SmallBusinessPage() {
                 </ul>
                 <Link href={tier.href}
                   className={`block text-center text-sm font-bold py-3 rounded-xl transition-all ${tier.highlight
-                    ? 'bg-blue-500 hover:bg-blue-400 text-white'
-                    : 'bg-white text-black hover:opacity-80'
+                    ? 'bg-raised hover:bg-raised text-ink-high'
+                    : 'bg-panel text-ink-high hover:opacity-80'
                   }`}>
                   {tier.cta} →
                 </Link>
@@ -302,10 +302,10 @@ export default function SmallBusinessPage() {
 
           {/* Comparison */}
           <div className="overflow-x-auto mt-12">
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">{t('for_small_biz.pricing_comparison_eyebrow')}</p>
+            <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-4">{t('for_small_biz.pricing_comparison_eyebrow')}</p>
             <table className="w-full text-sm text-left">
               <thead>
-                <tr className="border-b border-gray-800 text-xs text-gray-500 uppercase tracking-wide">
+                <tr className="border-b border-edge text-xs text-ink-muted uppercase tracking-wide">
                   <th className="py-3 pr-4">{t('for_small_biz.pricing_comparison_col_tool')}</th>
                   <th className="py-3 pr-4">{t('for_small_biz.pricing_comparison_col_monthly')}</th>
                   <th className="py-3 pr-4">{t('for_small_biz.pricing_comparison_col_platforms')}</th>
@@ -315,33 +315,33 @@ export default function SmallBusinessPage() {
               </thead>
               <tbody>
                 {COMPARISON.map((row, i) => (
-                  <tr key={i} className={`border-b border-gray-900 ${row.highlight ? 'bg-blue-950/20' : ''}`}>
-                    <td className={`py-3 pr-4 font-bold ${row.highlight ? 'text-blue-300' : 'text-gray-300'}`}>
+                  <tr key={i} className={`border-b border-edge ${row.highlight ? 'bg-raised' : ''}`}>
+                    <td className={`py-3 pr-4 font-bold ${row.highlight ? 'text-ink-muted' : 'text-ink-body'}`}>
                       {row.tool} {row.highlight && '←'}
                     </td>
-                    <td className={`py-3 pr-4 ${row.highlight ? 'text-blue-300 font-extrabold' : 'text-gray-400'}`}>{row.price}</td>
-                    <td className={`py-3 pr-4 ${row.highlight ? 'text-white font-bold' : 'text-gray-400'}`}>{row.platforms}</td>
-                    <td className={`py-3 pr-4 ${row.highlight ? 'text-white font-bold' : 'text-gray-400'}`}>{row.ai}</td>
-                    <td className={`py-3 ${row.highlight ? 'text-white font-bold' : 'text-gray-400'}`}>{row.free}</td>
+                    <td className={`py-3 pr-4 ${row.highlight ? 'text-ink-muted font-extrabold' : 'text-ink-body'}`}>{row.price}</td>
+                    <td className={`py-3 pr-4 ${row.highlight ? 'text-ink-high font-bold' : 'text-ink-body'}`}>{row.platforms}</td>
+                    <td className={`py-3 pr-4 ${row.highlight ? 'text-ink-high font-bold' : 'text-ink-body'}`}>{row.ai}</td>
+                    <td className={`py-3 ${row.highlight ? 'text-ink-high font-bold' : 'text-ink-body'}`}>{row.free}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            <p className="text-xs text-gray-600 mt-3">{t('for_small_biz.pricing_comparison_note')}</p>
+            <p className="text-xs text-ink-muted mt-3">{t('for_small_biz.pricing_comparison_note')}</p>
           </div>
         </div>
       </section>
 
       {/* ─── FAQ ─── */}
-      <section className="bg-black text-white py-20 px-6">
+      <section className="bg-void text-ink-high py-20 px-6">
         <div className="max-w-3xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_small_biz.faq_eyebrow')}</p>
+          <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_small_biz.faq_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">{t('for_small_biz.faq_title')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {FAQ.map((item, i) => (
-              <div key={i} className="border-b border-gray-900 pb-6 last:border-0">
+              <div key={i} className="border-b border-edge pb-6 last:border-0">
                 <h3 className="text-sm font-extrabold mb-2">{item.q}</h3>
-                <p className="text-sm text-gray-400 leading-relaxed">{item.a}</p>
+                <p className="text-sm text-ink-body leading-relaxed">{item.a}</p>
               </div>
             ))}
           </div>
@@ -349,18 +349,18 @@ export default function SmallBusinessPage() {
       </section>
 
       {/* ─── BOTTOM CTA ─── */}
-      <section className="bg-gradient-to-b from-blue-950 to-black text-white py-20 px-6 text-center">
+      <section className="bg-gradient-to-b from-blue-950 to-black text-ink-high py-20 px-6 text-center">
         <h2 className="text-2xl sm:text-3xl font-extrabold mb-4">
           {t('for_small_biz.bottom_title_1')}<br />{t('for_small_biz.bottom_title_2')}
         </h2>
-        <p className="text-gray-400 text-sm mb-8 max-w-md mx-auto">
+        <p className="text-ink-body text-sm mb-8 max-w-md mx-auto">
           {t('for_small_biz.bottom_desc')}
         </p>
         <Link href="/signup"
-          className="inline-block bg-blue-500 hover:bg-blue-400 text-white font-bold px-10 py-4 rounded-xl text-sm transition-all">
+          className="inline-block bg-raised hover:bg-raised text-ink-high font-bold px-10 py-4 rounded-xl text-sm transition-all">
           {t('for_small_biz.bottom_cta')}
         </Link>
-        <p className="text-gray-600 text-xs mt-4">{t('for_small_biz.bottom_note')}</p>
+        <p className="text-ink-muted text-xs mt-4">{t('for_small_biz.bottom_note')}</p>
       </section>
 
     </PublicLayout>

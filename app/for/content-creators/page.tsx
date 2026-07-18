@@ -142,45 +142,45 @@ export default function ContentCreatorsPage() {
     <PublicLayout>
 
       {/* ─── HERO ─── */}
-      <section className="bg-black text-white py-24 px-6 text-center">
-        <p className="text-xs font-bold text-amber-400 uppercase tracking-widest mb-4">{t('for_content.eyebrow')}</p>
+      <section className="bg-void text-ink-high py-24 px-6 text-center">
+        <p className="text-xs font-bold text-amber uppercase tracking-widest mb-4">{t('for_content.eyebrow')}</p>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-3xl mx-auto mb-6">
           {t('for_content.hero_title_1')}<br />
-          <span className="text-amber-400">{t('for_content.hero_title_2')}</span>
+          <span className="text-amber">{t('for_content.hero_title_2')}</span>
         </h1>
-        <p className="text-gray-300 max-w-xl mx-auto text-base leading-relaxed mb-8">
+        <p className="text-ink-body max-w-xl mx-auto text-base leading-relaxed mb-8">
           {t('for_content.hero_desc')}
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
           <Link href="/signup"
-            className="bg-amber-500 hover:bg-amber-400 text-black font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
+            className="bg-amber/10 hover:bg-amber/10 text-ink-high font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
             {t('for_content.hero_cta_primary')}
           </Link>
           <Link href="/features"
-            className="border border-gray-700 hover:border-gray-400 text-gray-300 hover:text-white font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
+            className="border border-edge hover:border-edge text-ink-body hover:text-ink-high font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
             {t('for_content.hero_cta_secondary')}
           </Link>
         </div>
-        <p className="text-gray-500 text-xs mt-4">{t('for_content.hero_note')}</p>
+        <p className="text-ink-muted text-xs mt-4">{t('for_content.hero_note')}</p>
       </section>
 
       {/* ─── PAIN POINTS ─── */}
-      <section className="bg-gray-950 text-white py-20 px-6">
+      <section className="bg-panel text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_content.pain_eyebrow')}</p>
+          <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_content.pain_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
             {t('for_content.pain_title')}
           </h2>
           <div className="space-y-5">
             {PAIN_POINTS.map((p, i) => (
               <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
-                <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-                  <p className="text-xs text-red-400 font-bold uppercase tracking-wide mb-2">{t('for_content.pain_before_label')}</p>
-                  <p className="text-sm text-gray-400 leading-relaxed">{p.before}</p>
+                <div className="bg-panel border border-edge rounded-2xl p-5">
+                  <p className="text-xs text-alert font-bold uppercase tracking-wide mb-2">{t('for_content.pain_before_label')}</p>
+                  <p className="text-sm text-ink-body leading-relaxed">{p.before}</p>
                 </div>
-                <div className="bg-amber-950/40 border border-amber-800/50 rounded-2xl p-5">
-                  <p className="text-xs text-amber-300 font-bold uppercase tracking-wide mb-2">{t('for_content.pain_after_label')}</p>
-                  <p className="text-sm text-white leading-relaxed">{p.icon} {p.after}</p>
+                <div className="bg-amber/10 border border-amber rounded-2xl p-5">
+                  <p className="text-xs text-amber font-bold uppercase tracking-wide mb-2">{t('for_content.pain_after_label')}</p>
+                  <p className="text-sm text-ink-high leading-relaxed">{p.icon} {p.after}</p>
                 </div>
               </div>
             ))}
@@ -189,30 +189,30 @@ export default function ContentCreatorsPage() {
       </section>
 
       {/* ─── FEATURES ─── */}
-      <section className="bg-black text-white py-20 px-6">
+      <section className="bg-void text-ink-high py-20 px-6">
         <div className="max-w-5xl mx-auto">
-          <p className="text-center text-xs font-bold text-amber-400 uppercase tracking-widest mb-3">{t('for_content.features_eyebrow')}</p>
+          <p className="text-center text-xs font-bold text-amber uppercase tracking-widest mb-3">{t('for_content.features_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-3">
             {t('for_content.features_title')}
           </h2>
-          <p className="text-center text-gray-400 text-sm mb-12 max-w-lg mx-auto">
+          <p className="text-center text-ink-body text-sm mb-12 max-w-lg mx-auto">
             {t('for_content.features_desc')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map((f, i) => (
-              <div key={i} className="bg-gray-950 border border-gray-800 rounded-2xl p-5">
+              <div key={i} className="bg-panel border border-edge rounded-2xl p-5">
                 <div className="flex items-start justify-between mb-3">
                   <span className="text-2xl">{f.icon}</span>
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
                     f.badge === 'Free'
-                      ? 'bg-green-900/50 text-green-400'
-                      : 'bg-amber-900/50 text-amber-300'
+                      ? 'bg-jade/10 text-jade'
+                      : 'bg-amber/10 text-amber'
                   }`}>
                     {f.badge}
                   </span>
                 </div>
                 <h3 className="text-sm font-extrabold mb-2">{f.title}</h3>
-                <p className="text-xs text-gray-400 leading-relaxed">{f.desc}</p>
+                <p className="text-xs text-ink-body leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -220,36 +220,36 @@ export default function ContentCreatorsPage() {
       </section>
 
       {/* ─── PLATFORMS ─── */}
-      <section className="bg-gray-950 text-white py-20 px-6">
+      <section className="bg-panel text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_content.platforms_eyebrow')}</p>
+          <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_content.platforms_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_content.platforms_title')}</h2>
-          <p className="text-gray-400 text-sm mb-8">{t('for_content.platforms_desc')}</p>
+          <p className="text-ink-body text-sm mb-8">{t('for_content.platforms_desc')}</p>
 
           <div className="flex flex-wrap justify-center gap-3 mb-12">
             {LIVE_PLATFORMS.map((p) => (
               <div key={p.name}
-                className="flex items-center gap-2 bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5">
+                className="flex items-center gap-2 bg-panel border border-edge rounded-xl px-4 py-2.5">
                 <span className="text-lg">{p.icon}</span>
                 <span className="text-sm font-bold">{p.name}</span>
-                <span className="text-xs bg-green-900 text-green-400 px-2 py-0.5 rounded-full font-bold">{t('for_content.platforms_live_badge')}</span>
+                <span className="text-xs bg-jade/10 text-jade px-2 py-0.5 rounded-full font-bold">{t('for_content.platforms_live_badge')}</span>
               </div>
             ))}
           </div>
 
-          <h3 className="text-base font-extrabold text-gray-400 mb-4">{t('for_content.platforms_coming_title')}</h3>
-          <p className="text-gray-500 text-xs mb-6 max-w-md mx-auto">
+          <h3 className="text-base font-extrabold text-ink-body mb-4">{t('for_content.platforms_coming_title')}</h3>
+          <p className="text-ink-muted text-xs mb-6 max-w-md mx-auto">
             Actively working through platform API applications. See the full{' '}
-            <Link href="/roadmap" className="text-amber-400 hover:text-amber-300 underline">roadmap</Link>{' '}
+            <Link href="/roadmap" className="text-amber hover:text-amber underline">roadmap</Link>{' '}
             for honest ETAs.
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             {COMING_PLATFORMS.map((p) => (
               <div key={p.name}
-                className="flex items-center gap-2 bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 opacity-60">
+                className="flex items-center gap-2 bg-panel border border-edge rounded-xl px-4 py-2.5 opacity-60">
                 <span className="text-lg">{p.icon}</span>
-                <span className="text-sm font-bold text-gray-400">{p.name}</span>
-                <span className="text-xs bg-gray-800 text-gray-500 px-2 py-0.5 rounded-full font-bold">{t('for_content.platforms_coming_badge')}</span>
+                <span className="text-sm font-bold text-ink-body">{p.name}</span>
+                <span className="text-xs bg-raised text-ink-muted px-2 py-0.5 rounded-full font-bold">{t('for_content.platforms_coming_badge')}</span>
               </div>
             ))}
           </div>
@@ -257,15 +257,15 @@ export default function ContentCreatorsPage() {
       </section>
 
       {/* ─── COMPARISON ─── */}
-      <section className="bg-black text-white py-20 px-6">
+      <section className="bg-void text-ink-high py-20 px-6">
         <div className="max-w-3xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_content.pricing_eyebrow')}</p>
+          <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_content.pricing_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-3">{t('for_content.pricing_title')}</h2>
-          <p className="text-center text-gray-400 text-sm mb-12">{t('for_content.pricing_desc')}</p>
+          <p className="text-center text-ink-body text-sm mb-12">{t('for_content.pricing_desc')}</p>
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead>
-                <tr className="border-b border-gray-800 text-xs text-gray-500 uppercase tracking-wide">
+                <tr className="border-b border-edge text-xs text-ink-muted uppercase tracking-wide">
                   <th className="py-3 pr-4">Tool</th>
                   <th className="py-3 pr-4">Monthly</th>
                   <th className="py-3 pr-4">Platforms</th>
@@ -275,33 +275,33 @@ export default function ContentCreatorsPage() {
               </thead>
               <tbody>
                 {COMPARISON.map((row, i) => (
-                  <tr key={i} className={`border-b border-gray-900 ${row.highlight ? 'bg-amber-950/20' : ''}`}>
-                    <td className={`py-3 pr-4 font-bold ${row.highlight ? 'text-amber-300' : 'text-gray-300'}`}>
+                  <tr key={i} className={`border-b border-edge ${row.highlight ? 'bg-amber/10' : ''}`}>
+                    <td className={`py-3 pr-4 font-bold ${row.highlight ? 'text-amber' : 'text-ink-body'}`}>
                       {row.tool} {row.highlight && '←'}
                     </td>
-                    <td className={`py-3 pr-4 ${row.highlight ? 'text-amber-300 font-extrabold' : 'text-gray-400'}`}>{row.price}</td>
-                    <td className={`py-3 pr-4 ${row.highlight ? 'text-white font-bold' : 'text-gray-400'}`}>{row.platforms}</td>
-                    <td className={`py-3 pr-4 ${row.highlight ? 'text-white font-bold' : 'text-gray-400'}`}>{row.ai}</td>
-                    <td className={`py-3 ${row.highlight ? 'text-white font-bold' : 'text-gray-400'}`}>{row.free}</td>
+                    <td className={`py-3 pr-4 ${row.highlight ? 'text-amber font-extrabold' : 'text-ink-body'}`}>{row.price}</td>
+                    <td className={`py-3 pr-4 ${row.highlight ? 'text-ink-high font-bold' : 'text-ink-body'}`}>{row.platforms}</td>
+                    <td className={`py-3 pr-4 ${row.highlight ? 'text-ink-high font-bold' : 'text-ink-body'}`}>{row.ai}</td>
+                    <td className={`py-3 ${row.highlight ? 'text-ink-high font-bold' : 'text-ink-body'}`}>{row.free}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-            <p className="text-xs text-gray-600 mt-3">Prices approximate as of May 2026.</p>
+            <p className="text-xs text-ink-muted mt-3">Prices approximate as of May 2026.</p>
           </div>
         </div>
       </section>
 
       {/* ─── FAQ ─── */}
-      <section className="bg-gray-950 text-white py-20 px-6">
+      <section className="bg-panel text-ink-high py-20 px-6">
         <div className="max-w-3xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_content.faq_eyebrow')}</p>
+          <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_content.faq_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">{t('for_content.faq_title')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             {FAQ.map((item, i) => (
-              <div key={i} className="border-b border-gray-900 pb-6 last:border-0">
+              <div key={i} className="border-b border-edge pb-6 last:border-0">
                 <h3 className="text-sm font-extrabold mb-2">{item.q}</h3>
-                <p className="text-sm text-gray-400 leading-relaxed">{item.a}</p>
+                <p className="text-sm text-ink-body leading-relaxed">{item.a}</p>
               </div>
             ))}
           </div>
@@ -309,18 +309,18 @@ export default function ContentCreatorsPage() {
       </section>
 
       {/* ─── BOTTOM CTA ─── */}
-      <section className="bg-gradient-to-b from-amber-950 to-black text-white py-20 px-6 text-center">
+      <section className="bg-gradient-to-b from-amber-950 to-black text-ink-high py-20 px-6 text-center">
         <h2 className="text-2xl sm:text-3xl font-extrabold mb-4">
           {t('for_content.bottom_title')}
         </h2>
-        <p className="text-gray-400 text-sm mb-8 max-w-md mx-auto">
+        <p className="text-ink-body text-sm mb-8 max-w-md mx-auto">
           {t('for_content.bottom_desc')}
         </p>
         <Link href="/signup"
-          className="inline-block bg-amber-500 hover:bg-amber-400 text-black font-bold px-10 py-4 rounded-xl text-sm transition-all">
+          className="inline-block bg-amber/10 hover:bg-amber/10 text-ink-high font-bold px-10 py-4 rounded-xl text-sm transition-all">
           {t('for_content.bottom_cta')}
         </Link>
-        <p className="text-gray-600 text-xs mt-4">{t('for_content.bottom_note')}</p>
+        <p className="text-ink-muted text-xs mt-4">{t('for_content.bottom_note')}</p>
       </section>
 
     </PublicLayout>

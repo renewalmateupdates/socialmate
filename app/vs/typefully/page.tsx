@@ -9,7 +9,7 @@ import { useI18n } from '@/contexts/I18nContext'
 const COMPARISON = [
   { feature: 'Starting price',         typefully: '$12.50/month',           socialmate: '$0 — free forever'       },
   { feature: 'Free plan',              typefully: 'Limited free plan',      socialmate: '✅ Genuinely free'        },
-  { feature: 'Platforms supported',    typefully: 'X/Twitter, LinkedIn',    socialmate: '16 (free)'               },
+  { feature: 'Platforms supported',    typefully: 'X/Twitter, LinkedIn',    socialmate: '7 live (free)'               },
   { feature: 'Thread editor',          typefully: '✅ Best-in-class',       socialmate: '✅ Free'                  },
   { feature: 'Team seats',             typefully: '1 on Creator',           socialmate: '2 seats free'            },
   { feature: 'AI writing tools',       typefully: 'AI assist (paid)',       socialmate: '15+ tools free'           },
@@ -62,15 +62,15 @@ const faqSchema = {
 export default function VsTypefully() {
   const { t } = useI18n()
   return (
-    <div className="dark min-h-screen bg-gray-950">
+    <div className="dark min-h-screen bg-panel">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
-      <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-gray-800">
+      <header className="sticky top-0 z-50 bg-panel bg-panel backdrop-blur-sm border-b border-edge">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-2 flex-shrink-0">
             <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
-            <span className="font-bold text-base tracking-tight text-gray-900 dark:text-gray-100">
+            <span className="font-bold text-base tracking-tight text-ink-high">
               SocialMate
-              <span className="text-[10px] font-semibold bg-pink-500 text-white px-1.5 py-0.5 rounded-full align-super ml-1">Beta</span>
+              <span className="text-[10px] font-semibold bg-raised text-ink-high px-1.5 py-0.5 rounded-full align-super ml-1">Beta</span>
             </span>
           </Link>
           <nav className="hidden md:flex items-center gap-1 flex-1 justify-center">
@@ -83,21 +83,21 @@ export default function VsTypefully() {
               { label: 'Blog',        href: '/blog'        },
             ].map(l => (
               <Link key={l.label} href={l.href}
-                className="px-4 py-2 rounded-lg text-sm font-medium text-gray-500 hover:text-black dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800 transition-all">
+                className="px-4 py-2 rounded-lg text-sm font-medium text-ink-muted hover:text-ink-high dark:hover:text-ink-high hover:bg-raised dark:hover:bg-raised transition-all">
                 {l.label}
               </Link>
             ))}
           </nav>
           <div className="hidden md:flex items-center gap-3 flex-shrink-0">
-            <Link href="/give" className="text-sm font-semibold text-rose-400 hover:text-rose-300 transition-all">❤️ Give</Link>
-            <Link href="/partners" className="text-sm font-semibold text-amber-500 hover:text-amber-400 transition-all">Partners</Link>
-            <Link href="/login" className="text-sm font-semibold text-gray-500 hover:text-black dark:hover:text-white transition-all">{t('vs_shared.nav_sign_in')}</Link>
-            <Link href="/signup" className="bg-black dark:bg-white text-white dark:text-black text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
+            <Link href="/give" className="text-sm font-semibold text-alert hover:text-alert transition-all">❤️ Give</Link>
+            <Link href="/partners" className="text-sm font-semibold text-amber hover:text-amber transition-all">Partners</Link>
+            <Link href="/login" className="text-sm font-semibold text-ink-muted hover:text-ink-high dark:hover:text-ink-high transition-all">{t('vs_shared.nav_sign_in')}</Link>
+            <Link href="/signup" className="bg-void bg-panel text-ink-high text-sm font-bold px-4 py-2 rounded-xl hover:opacity-80 transition-all">
               {t('vs_shared.nav_get_started')}
             </Link>
           </div>
           <div className="flex md:hidden items-center gap-2">
-            <Link href="/login" className="text-sm font-semibold text-gray-500 hover:text-black dark:hover:text-white transition-all px-2 py-1">{t('vs_shared.nav_sign_in')}</Link>
+            <Link href="/login" className="text-sm font-semibold text-ink-muted hover:text-ink-high dark:hover:text-ink-high transition-all px-2 py-1">{t('vs_shared.nav_sign_in')}</Link>
           </div>
         </div>
       </header>
@@ -105,13 +105,13 @@ export default function VsTypefully() {
       <div className="max-w-4xl mx-auto px-6 py-16">
 
         <div className="text-center mb-14">
-          <div className="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-bold px-4 py-2 rounded-full mb-6">
+          <div className="inline-flex items-center gap-2 bg-raised border border-edge-lit text-ink-muted text-xs font-bold px-4 py-2 rounded-full mb-6">
             ✍️ Typefully is a thread-first editor — SocialMate covers 7 platforms for free
           </div>
-          <h1 className="text-4xl font-extrabold tracking-tight mb-4 dark:text-gray-100">
+          <h1 className="text-4xl font-extrabold tracking-tight mb-4 text-ink-high">
             SocialMate vs Typefully (2026)
           </h1>
-          <p className="text-gray-500 max-w-2xl mx-auto text-sm leading-relaxed">
+          <p className="text-ink-muted max-w-2xl mx-auto text-sm leading-relaxed">
             Typefully is beloved by X/Twitter writers for its focused, distraction-free thread editor.
             It&#39;s a beautiful product for a specific use case. But if you need multi-platform support,
             AI tools, and a genuinely free plan — SocialMate is the complete package.
@@ -119,69 +119,69 @@ export default function VsTypefully() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
-          <div className="border-2 border-indigo-200 bg-indigo-50 rounded-2xl p-6 text-center">
-            <p className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-2">Typefully</p>
-            <p className="text-3xl font-extrabold text-indigo-600 mb-1">$12.50/month</p>
-            <p className="text-xs text-indigo-400">X/Twitter + LinkedIn · Limited free plan</p>
+          <div className="border-2 border-edge-lit bg-raised rounded-2xl p-6 text-center">
+            <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-2">Typefully</p>
+            <p className="text-3xl font-extrabold text-ink-muted mb-1">$12.50/month</p>
+            <p className="text-xs text-ink-muted">X/Twitter + LinkedIn · Limited free plan</p>
           </div>
-          <div className="border-2 border-green-200 bg-green-50 rounded-2xl p-6 text-center">
-            <p className="text-xs font-bold text-green-600 uppercase tracking-widest mb-2">SocialMate</p>
-            <p className="text-3xl font-extrabold text-green-700 mb-1">$0/month</p>
-            <p className="text-xs text-green-600">7 platforms · 15+ AI tools · Free forever</p>
+          <div className="border-2 border-jade/40 bg-jade/10 rounded-2xl p-6 text-center">
+            <p className="text-xs font-bold text-jade uppercase tracking-widest mb-2">SocialMate</p>
+            <p className="text-3xl font-extrabold text-jade mb-1">$0/month</p>
+            <p className="text-xs text-jade">7 platforms · 15+ AI tools · Free forever</p>
           </div>
         </div>
 
         <div className="mb-12">
-          <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-gray-100">{t('vs_shared.feature_comparison')}</h2>
-          <div className="overflow-x-auto"><div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl overflow-hidden min-w-[480px]">
-            <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-700 border-b border-gray-100 dark:border-gray-600 px-5 py-3">
-              <span className="text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wide">Feature</span>
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-wide text-center">Typefully</span>
-              <span className="text-xs font-bold text-black dark:text-gray-100 uppercase tracking-wide text-center">SocialMate</span>
+          <h2 className="text-xl font-extrabold tracking-tight mb-6 text-ink-high">{t('vs_shared.feature_comparison')}</h2>
+          <div className="overflow-x-auto"><div className="bg-panel border border-edge border-edge rounded-2xl overflow-hidden min-w-[480px]">
+            <div className="grid grid-cols-3 bg-raised bg-raised border-b border-edge border-edge px-5 py-3">
+              <span className="text-xs font-bold text-ink-body uppercase tracking-wide">Feature</span>
+              <span className="text-xs font-bold text-ink-body uppercase tracking-wide text-center">Typefully</span>
+              <span className="text-xs font-bold text-ink-high uppercase tracking-wide text-center">SocialMate</span>
             </div>
             {COMPARISON.map((row, i) => (
-              <div key={i} className={`grid grid-cols-3 px-5 py-3 items-center border-b border-gray-50 dark:border-gray-700 last:border-0 ${i % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50/30 dark:bg-gray-750'}`}>
-                <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{row.feature}</span>
-                <span className="text-xs text-gray-400 dark:text-gray-500 text-center">{row.typefully}</span>
-                <span className="text-xs font-bold text-black dark:text-gray-100 text-center">{row.socialmate}</span>
+              <div key={i} className={`grid grid-cols-3 px-5 py-3 items-center border-b border-edge border-edge last:border-0 ${i % 2 === 0 ? 'bg-panel' : 'bg-raised bg-raised'}`}>
+                <span className="text-xs font-semibold text-ink-body">{row.feature}</span>
+                <span className="text-xs text-ink-muted text-center">{row.typefully}</span>
+                <span className="text-xs font-bold text-ink-high text-center">{row.socialmate}</span>
               </div>
             ))}
           </div>
           </div>
         </div>
 
-        <div className="mb-12 bg-gray-50 dark:bg-gray-800 rounded-2xl p-6">
-          <h2 className="text-xl font-extrabold tracking-tight mb-4 dark:text-gray-100">The honest take</h2>
-          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-3">
+        <div className="mb-12 bg-raised rounded-2xl p-6">
+          <h2 className="text-xl font-extrabold tracking-tight mb-4 text-ink-high">The honest take</h2>
+          <p className="text-sm text-ink-muted leading-relaxed mb-3">
             Typefully has one of the cleanest thread-writing experiences available. If you write multiple threads per week on X/Twitter and want a focused, distraction-free editor with great thread previews — Typefully genuinely excels at that.
           </p>
-          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-3">
+          <p className="text-sm text-ink-muted leading-relaxed mb-3">
             The limitation is scope. Typefully doesn&#39;t cover Bluesky, Mastodon, Discord, Telegram, or any of the 14+ other platforms that SocialMate supports. There are also no bulk scheduling, competitor tracking, hashtag manager, or RSS import features.
           </p>
-          <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+          <p className="text-sm text-ink-muted leading-relaxed">
             SocialMate is the better choice for creators who post across multiple channels or want AI tools built in. Typefully wins if X/Twitter thread writing is your singular focus and you want the best possible editor for that one workflow.
           </p>
         </div>
 
         <div className="mb-12">
-          <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-gray-100">{t('vs_shared.faq_heading')}</h2>
+          <h2 className="text-xl font-extrabold tracking-tight mb-6 text-ink-high">{t('vs_shared.faq_heading')}</h2>
           <div className="space-y-4">
             {FAQ.map((faq, i) => (
-              <div key={i} className="p-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl">
-                <p className="text-sm font-extrabold mb-2 dark:text-gray-100">{faq.q}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{faq.a}</p>
+              <div key={i} className="p-5 bg-panel border border-edge border-edge rounded-2xl">
+                <p className="text-sm font-extrabold mb-2 text-ink-high">{faq.q}</p>
+                <p className="text-xs text-ink-muted leading-relaxed">{faq.a}</p>
               </div>
             ))}
           </div>
         </div>
 
-        <div className="bg-black text-white rounded-2xl p-8 text-center">
-          <h2 className="text-2xl font-extrabold tracking-tight mb-3 dark:text-gray-100">Start for free today</h2>
-          <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
-            7 platforms, 15+ AI tools, unlimited posts, link in bio, competitor tracking — all free. No card required.
+        <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
+          <h2 className="text-2xl font-extrabold tracking-tight mb-3 text-ink-high">Start for free today</h2>
+          <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
+            7 platforms, 15+ AI tools, 100 posts/month, link in bio, competitor tracking — all free. No card required.
           </p>
           <Link href="/signup"
-            className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
+            className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}
           </Link>
         </div>

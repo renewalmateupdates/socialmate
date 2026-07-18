@@ -57,18 +57,18 @@ const faqSchema = {
 export default function VsRiplPage() {
   const { t } = useI18n()
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-screen bg-[#0a0a0a] text-ink-high">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
-      <nav className="border-b border-gray-800 bg-[#0a0a0a] sticky top-0 z-10">
+      <nav className="border-b border-edge bg-[#0a0a0a] sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
             <span className="font-bold tracking-tight">SocialMate</span>
           </Link>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="text-xs font-semibold text-gray-400 hover:text-white transition-colors">{t('vs_shared.nav_login')}</Link>
-            <Link href="/signup" className="text-xs font-bold px-4 py-2 bg-amber-400 text-black rounded-xl hover:bg-amber-300 transition-all">{t('vs_shared.nav_start_free')}</Link>
+            <Link href="/login" className="text-xs font-semibold text-ink-body hover:text-ink-high transition-colors">{t('vs_shared.nav_login')}</Link>
+            <Link href="/signup" className="text-xs font-bold px-4 py-2 bg-amber/10 text-ink-high rounded-xl hover:bg-amber/10 transition-all">{t('vs_shared.nav_start_free')}</Link>
           </div>
         </div>
       </nav>
@@ -77,20 +77,20 @@ export default function VsRiplPage() {
 
         {/* HERO */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 bg-amber-400/10 border border-amber-400/30 rounded-full px-4 py-1.5 text-xs font-bold text-amber-400 mb-4">
+          <div className="inline-flex items-center gap-2 bg-amber/10 border border-amber rounded-full px-4 py-1.5 text-xs font-bold text-amber mb-4">
             Updated May 2026
           </div>
           <h1 className="text-4xl font-extrabold tracking-tight mb-4">
             SocialMate vs Ripl
           </h1>
-          <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+          <p className="text-lg text-ink-body max-w-2xl mx-auto">
             Ripl creates animated video posts for small businesses. SocialMate is a full Creator OS — 7 platforms, 20+ AI tools, autonomous content, and a $0 free plan.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
-            <Link href="/signup" className="px-6 py-3 bg-amber-400 text-black font-bold rounded-2xl hover:bg-amber-300 transition-all text-sm">
+            <Link href="/signup" className="px-6 py-3 bg-amber/10 text-ink-high font-bold rounded-2xl hover:bg-amber/10 transition-all text-sm">
               {t('vs_shared.cta_try_free')}
             </Link>
-            <Link href="/pricing" className="px-6 py-3 border border-gray-700 font-semibold rounded-2xl hover:border-gray-500 transition-all text-sm text-gray-200">
+            <Link href="/pricing" className="px-6 py-3 border border-edge font-semibold rounded-2xl hover:border-edge transition-all text-sm text-ink-high">
               {t('vs_shared.cta_see_pricing')}
             </Link>
           </div>
@@ -98,10 +98,10 @@ export default function VsRiplPage() {
 
         {/* VERDICT CARDS */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
-          <div className="bg-gray-900 border-2 border-gray-700 rounded-2xl p-6">
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Ripl</p>
+          <div className="bg-panel border-2 border-edge rounded-2xl p-6">
+            <p className="text-xs font-bold text-ink-muted uppercase tracking-wide mb-2">Ripl</p>
             <p className="font-extrabold text-lg mb-2">Great animated video maker. Limited scheduling.</p>
-            <ul className="space-y-1 text-xs text-gray-400">
+            <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Branded animated video templates</li>
               <li>✅ Easy for non-designers</li>
               <li>❌ No Discord, Telegram, or Bluesky</li>
@@ -110,10 +110,10 @@ export default function VsRiplPage() {
               <li>❌ No bulk scheduling</li>
             </ul>
           </div>
-          <div className="bg-amber-400 text-black rounded-2xl p-6">
-            <p className="text-xs font-bold text-black/60 uppercase tracking-wide mb-2">SocialMate</p>
+          <div className="bg-amber/10 text-ink-high rounded-2xl p-6">
+            <p className="text-xs font-bold text-ink-high uppercase tracking-wide mb-2">SocialMate</p>
             <p className="font-extrabold text-lg mb-2">Full Creator OS. 7 platforms. Starts free.</p>
-            <ul className="space-y-1 text-xs text-black/80">
+            <ul className="space-y-1 text-xs text-ink-high">
               <li>✅ Bluesky, Discord, Telegram, Mastodon, X, TikTok</li>
               <li>✅ 20+ AI writing and content tools</li>
               <li>✅ SOMA: autonomous weekly content generation</li>
@@ -127,17 +127,17 @@ export default function VsRiplPage() {
         {/* COMPARISON TABLE */}
         <div className="mb-12">
           <h2 className="text-xl font-extrabold tracking-tight mb-6">{t('vs_shared.feature_comparison')}</h2>
-          <div className="overflow-x-auto"><div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
-            <div className="grid grid-cols-3 bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-400 uppercase tracking-wide">
+          <div className="overflow-x-auto"><div className="bg-panel border border-edge rounded-2xl overflow-hidden min-w-[480px]">
+            <div className="grid grid-cols-3 bg-raised px-5 py-3 text-xs font-extrabold text-ink-body uppercase tracking-wide">
               <span>{t('vs_shared.table_feature')}</span>
               <span>Ripl</span>
               <span>{t('vs_shared.table_socialmate')}</span>
             </div>
             {COMPARISON.map((row, i) => (
-              <div key={i} className={`grid grid-cols-3 px-5 py-3.5 text-sm border-t border-gray-800 ${i % 2 === 0 ? 'bg-gray-900' : 'bg-gray-800/30'}`}>
-                <span className="font-semibold text-gray-300 text-xs">{row.feature}</span>
-                <span className="text-xs text-gray-400">{row.ripl}</span>
-                <span className="text-xs font-semibold text-gray-100">{row.socialmate}</span>
+              <div key={i} className={`grid grid-cols-3 px-5 py-3.5 text-sm border-t border-edge ${i % 2 === 0 ? 'bg-panel' : 'bg-raised'}`}>
+                <span className="font-semibold text-ink-body text-xs">{row.feature}</span>
+                <span className="text-xs text-ink-body">{row.ripl}</span>
+                <span className="text-xs font-semibold text-ink-high">{row.socialmate}</span>
               </div>
             ))}
           </div>
@@ -170,11 +170,11 @@ export default function VsRiplPage() {
                 desc: "Many small businesses have active Discord servers or Telegram communities. Ripl cannot post to either. SocialMate supports both natively on the free plan, letting you reach your full audience without switching tools.",
               },
             ].map((r) => (
-              <div key={r.n} className="flex gap-4 p-5 bg-gray-900 border border-gray-800 rounded-2xl hover:border-gray-700 transition-all">
-                <div className="w-8 h-8 bg-amber-400 text-black rounded-full flex items-center justify-center text-sm font-extrabold flex-shrink-0">{r.n}</div>
+              <div key={r.n} className="flex gap-4 p-5 bg-panel border border-edge rounded-2xl hover:border-edge transition-all">
+                <div className="w-8 h-8 bg-amber/10 text-ink-high rounded-full flex items-center justify-center text-sm font-extrabold flex-shrink-0">{r.n}</div>
                 <div>
-                  <p className="text-sm font-extrabold mb-1 text-gray-100">{r.title}</p>
-                  <p className="text-xs text-gray-400 leading-relaxed">{r.desc}</p>
+                  <p className="text-sm font-extrabold mb-1 text-ink-high">{r.title}</p>
+                  <p className="text-xs text-ink-body leading-relaxed">{r.desc}</p>
                 </div>
               </div>
             ))}
@@ -186,24 +186,24 @@ export default function VsRiplPage() {
           <h2 className="text-xl font-extrabold tracking-tight mb-6">{t('vs_shared.faq_heading')}</h2>
           <div className="space-y-4">
             {FAQ.map((faq, i) => (
-              <div key={i} className="p-5 bg-gray-900 border border-gray-800 rounded-2xl">
-                <p className="text-sm font-extrabold mb-2 text-gray-100">{faq.q}</p>
-                <p className="text-xs text-gray-400 leading-relaxed">{faq.a}</p>
+              <div key={i} className="p-5 bg-panel border border-edge rounded-2xl">
+                <p className="text-sm font-extrabold mb-2 text-ink-high">{faq.q}</p>
+                <p className="text-xs text-ink-body leading-relaxed">{faq.a}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* CTA */}
-        <div className="bg-amber-400 text-black rounded-2xl p-8 text-center">
+        <div className="bg-amber/10 text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Need more than animated videos? Start free.</h2>
-          <p className="text-black/70 text-sm mb-6 max-w-lg mx-auto">
+          <p className="text-ink-high text-sm mb-6 max-w-lg mx-auto">
             SocialMate covers 7 platforms, gives you 20+ AI tools, and lets SOMA generate your content on autopilot. All starting at $0.
           </p>
-          <Link href="/signup" className="inline-block bg-black text-white font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm">
+          <Link href="/signup" className="inline-block bg-void text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm">
             {t('vs_shared.cta_create_free')}
           </Link>
-          <p className="text-black/50 text-xs mt-3">{t('vs_shared.cta_no_card')}</p>
+          <p className="text-ink-high text-xs mt-3">{t('vs_shared.cta_no_card')}</p>
         </div>
       </div>
       <PublicFooter />

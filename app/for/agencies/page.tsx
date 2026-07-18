@@ -171,45 +171,45 @@ export default function AgenciesPage() {
     <PublicLayout>
 
       {/* ─── HERO ─── */}
-      <section className="bg-black text-white py-24 px-6 text-center">
-        <p className="text-xs font-bold text-amber-400 uppercase tracking-widest mb-4">{t('for_agencies.eyebrow')}</p>
+      <section className="bg-void text-ink-high py-24 px-6 text-center">
+        <p className="text-xs font-bold text-amber uppercase tracking-widest mb-4">{t('for_agencies.eyebrow')}</p>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-3xl mx-auto mb-6">
           {t('for_agencies.hero_title_1')}<br />
-          <span className="text-amber-400">{t('for_agencies.hero_title_2')}</span>
+          <span className="text-amber">{t('for_agencies.hero_title_2')}</span>
         </h1>
-        <p className="text-gray-300 max-w-xl mx-auto text-base leading-relaxed mb-8">
+        <p className="text-ink-body max-w-xl mx-auto text-base leading-relaxed mb-8">
           {t('for_agencies.hero_desc')}
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
           <Link href="/signup"
-            className="bg-amber-400 hover:bg-amber-300 text-black font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
+            className="bg-amber/10 hover:bg-amber/10 text-ink-high font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
             {t('for_agencies.hero_cta_primary')}
           </Link>
           <Link href="/pricing"
-            className="border border-gray-700 hover:border-gray-400 text-gray-300 hover:text-white font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
+            className="border border-edge hover:border-edge text-ink-body hover:text-ink-high font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
             {t('for_agencies.hero_cta_secondary')}
           </Link>
         </div>
-        <p className="text-gray-500 text-xs mt-4">{t('for_agencies.hero_note')}</p>
+        <p className="text-ink-muted text-xs mt-4">{t('for_agencies.hero_note')}</p>
       </section>
 
       {/* ─── PAIN POINTS ─── */}
-      <section className="bg-gray-950 text-white py-20 px-6">
+      <section className="bg-panel text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_agencies.pain_eyebrow')}</p>
+          <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_agencies.pain_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
             {t('for_agencies.pain_title_1')}<br />{t('for_agencies.pain_title_2')}
           </h2>
           <div className="space-y-5">
             {PAIN_POINTS.map((p, i) => (
               <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
-                <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-                  <p className="text-xs text-red-400 font-bold uppercase tracking-wide mb-2">{t('for_agencies.pain_before_label')}</p>
-                  <p className="text-sm text-gray-400 leading-relaxed">{p.before}</p>
+                <div className="bg-panel border border-edge rounded-2xl p-5">
+                  <p className="text-xs text-alert font-bold uppercase tracking-wide mb-2">{t('for_agencies.pain_before_label')}</p>
+                  <p className="text-sm text-ink-body leading-relaxed">{p.before}</p>
                 </div>
-                <div className="bg-amber-950/40 border border-amber-800/50 rounded-2xl p-5">
-                  <p className="text-xs text-amber-300 font-bold uppercase tracking-wide mb-2">{t('for_agencies.pain_after_label')}</p>
-                  <p className="text-sm text-white leading-relaxed">{p.icon} {p.after}</p>
+                <div className="bg-amber/10 border border-amber rounded-2xl p-5">
+                  <p className="text-xs text-amber font-bold uppercase tracking-wide mb-2">{t('for_agencies.pain_after_label')}</p>
+                  <p className="text-sm text-ink-high leading-relaxed">{p.icon} {p.after}</p>
                 </div>
               </div>
             ))}
@@ -218,14 +218,14 @@ export default function AgenciesPage() {
       </section>
 
       {/* ─── COMPARISON TABLE ─── */}
-      <section className="bg-black text-white py-20 px-6">
+      <section className="bg-void text-ink-high py-20 px-6">
         <div className="max-w-3xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_agencies.comparison_eyebrow')}</p>
+          <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_agencies.comparison_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-10">{t('for_agencies.comparison_title')}</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-gray-800 text-xs text-gray-500 uppercase tracking-wide">
+                <tr className="border-b border-edge text-xs text-ink-muted uppercase tracking-wide">
                   <th className="text-left py-3 pr-4">{t('for_agencies.comparison_col_tool')}</th>
                   <th className="text-left py-3 pr-4">{t('for_agencies.comparison_col_cost')}</th>
                   <th className="text-left py-3 pr-4">{t('for_agencies.comparison_col_seats')}</th>
@@ -235,48 +235,48 @@ export default function AgenciesPage() {
               </thead>
               <tbody>
                 {COMPARISON.map((row, i) => (
-                  <tr key={i} className={`border-b border-gray-900 ${row.highlight ? 'bg-amber-950/20' : ''}`}>
-                    <td className={`py-3 pr-4 font-bold ${row.highlight ? 'text-amber-300' : 'text-gray-300'}`}>
+                  <tr key={i} className={`border-b border-edge ${row.highlight ? 'bg-amber/10' : ''}`}>
+                    <td className={`py-3 pr-4 font-bold ${row.highlight ? 'text-amber' : 'text-ink-body'}`}>
                       {row.tool} {row.highlight && '←'}
                     </td>
-                    <td className={`py-3 pr-4 ${row.highlight ? 'text-amber-300 font-extrabold' : 'text-gray-400'}`}>{row.price}</td>
-                    <td className={`py-3 pr-4 ${row.highlight ? 'text-white font-bold' : 'text-gray-400'}`}>{row.seats}</td>
-                    <td className={`py-3 pr-4 ${row.highlight ? 'text-white font-bold' : 'text-gray-400'}`}>{row.ai}</td>
-                    <td className={`py-3 ${row.highlight ? 'text-white font-bold' : 'text-gray-400'}`}>{row.wl}</td>
+                    <td className={`py-3 pr-4 ${row.highlight ? 'text-amber font-extrabold' : 'text-ink-body'}`}>{row.price}</td>
+                    <td className={`py-3 pr-4 ${row.highlight ? 'text-ink-high font-bold' : 'text-ink-body'}`}>{row.seats}</td>
+                    <td className={`py-3 pr-4 ${row.highlight ? 'text-ink-high font-bold' : 'text-ink-body'}`}>{row.ai}</td>
+                    <td className={`py-3 ${row.highlight ? 'text-ink-high font-bold' : 'text-ink-body'}`}>{row.wl}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <p className="text-xs text-gray-600 mt-4">{t('for_agencies.comparison_note')}</p>
+          <p className="text-xs text-ink-muted mt-4">{t('for_agencies.comparison_note')}</p>
         </div>
       </section>
 
       {/* ─── FEATURES ─── */}
-      <section className="bg-gray-950 text-white py-20 px-6">
+      <section className="bg-panel text-ink-high py-20 px-6">
         <div className="max-w-5xl mx-auto">
-          <p className="text-center text-xs font-bold text-amber-400 uppercase tracking-widest mb-3">{t('for_agencies.features_eyebrow')}</p>
+          <p className="text-center text-xs font-bold text-amber uppercase tracking-widest mb-3">{t('for_agencies.features_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-3">
             {t('for_agencies.features_title')}
           </h2>
-          <p className="text-center text-gray-400 text-sm mb-12 max-w-xl mx-auto">
+          <p className="text-center text-ink-body text-sm mb-12 max-w-xl mx-auto">
             {t('for_agencies.features_desc')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map((f, i) => (
-              <div key={i} className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+              <div key={i} className="bg-panel border border-edge rounded-2xl p-5">
                 <div className="flex items-start justify-between mb-3">
                   <span className="text-2xl">{f.icon}</span>
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${
-                    f.badge === 'Agency'   ? 'bg-amber-900/50 text-amber-300' :
-                    f.badge === 'Add-on'  ? 'bg-gray-800 text-gray-400' :
-                    'bg-green-900/50 text-green-400'
+                    f.badge === 'Agency'   ? 'bg-amber/10 text-amber' :
+                    f.badge === 'Add-on'  ? 'bg-raised text-ink-body' :
+                    'bg-jade/10 text-jade'
                   }`}>
                     {f.badge}
                   </span>
                 </div>
                 <h3 className="text-sm font-extrabold mb-2">{f.title}</h3>
-                <p className="text-xs text-gray-400 leading-relaxed">{f.desc}</p>
+                <p className="text-xs text-ink-body leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -284,65 +284,65 @@ export default function AgenciesPage() {
       </section>
 
       {/* ─── PRICING ─── */}
-      <section className="bg-black text-white py-20 px-6">
+      <section className="bg-void text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_agencies.pricing_eyebrow')}</p>
+          <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_agencies.pricing_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_agencies.pricing_title')}</h2>
-          <p className="text-gray-400 text-sm mb-12 max-w-xl mx-auto">
+          <p className="text-ink-body text-sm mb-12 max-w-xl mx-auto">
             {t('for_agencies.pricing_desc')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
             {PRICING.map((tier) => (
               <div key={tier.name}
                 className={`rounded-2xl p-6 border text-left ${tier.highlight
-                  ? 'bg-amber-950/40 border-amber-700 ring-1 ring-amber-500'
-                  : 'bg-gray-900 border-gray-800'
+                  ? 'bg-amber/10 border-amber ring-1 ring-amber'
+                  : 'bg-panel border-edge'
                 }`}>
                 {tier.highlight && (
-                  <p className="text-xs font-bold text-amber-300 uppercase tracking-widest mb-3">{t('for_agencies.pricing_start_here')}</p>
+                  <p className="text-xs font-bold text-amber uppercase tracking-widest mb-3">{t('for_agencies.pricing_start_here')}</p>
                 )}
                 <p className="text-sm font-extrabold mb-1">{tier.name}</p>
                 <div className="flex items-end gap-1 mb-4">
                   <span className="text-3xl font-black">{tier.price}</span>
-                  <span className="text-gray-400 text-sm mb-1">{tier.period}</span>
+                  <span className="text-ink-body text-sm mb-1">{tier.period}</span>
                 </div>
-                <p className="text-xs text-gray-500 mb-4">{tier.annual}</p>
-                <ul className="text-xs text-gray-400 space-y-2 mb-6">
+                <p className="text-xs text-ink-muted mb-4">{tier.annual}</p>
+                <ul className="text-xs text-ink-body space-y-2 mb-6">
                   <li>✓ {tier.credits}</li>
                   <li>✓ {tier.seats}</li>
                   <li>✓ {tier.workspaces}</li>
                 </ul>
                 <Link href={tier.href}
                   className={`block text-center text-sm font-bold py-3 rounded-xl transition-all ${tier.highlight
-                    ? 'bg-amber-400 hover:bg-amber-300 text-black'
-                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                    ? 'bg-amber/10 hover:bg-amber/10 text-ink-high'
+                    : 'bg-raised text-ink-body hover:bg-raised'
                   }`}>
                   {tier.cta} →
                 </Link>
               </div>
             ))}
           </div>
-          <p className="text-gray-500 text-xs">{t('for_agencies.pricing_need_more')} <Link href="/support" className="text-amber-400 hover:text-amber-300 underline">{t('for_agencies.pricing_contact')}</Link></p>
+          <p className="text-ink-muted text-xs">{t('for_agencies.pricing_need_more')} <Link href="/support" className="text-amber hover:text-amber underline">{t('for_agencies.pricing_contact')}</Link></p>
         </div>
       </section>
 
       {/* ─── WHITE LABEL CALLOUT ─── */}
-      <section className="bg-gradient-to-br from-amber-950 via-gray-950 to-black text-white py-20 px-6">
+      <section className="bg-gradient-to-br from-amber-950 via-gray-950 to-black text-ink-high py-20 px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <p className="text-xs font-bold text-amber-300 uppercase tracking-widest mb-3">{t('for_agencies.wl_eyebrow')}</p>
+          <p className="text-xs font-bold text-amber uppercase tracking-widest mb-3">{t('for_agencies.wl_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-4">
             {t('for_agencies.wl_title_1')}<br />{t('for_agencies.wl_title_2')}
           </h2>
-          <p className="text-gray-400 text-sm mb-8 max-w-xl mx-auto leading-relaxed">
+          <p className="text-ink-body text-sm mb-8 max-w-xl mx-auto leading-relaxed">
             {t('for_agencies.wl_desc')}
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link href="/pricing"
-              className="bg-amber-400 hover:bg-amber-300 text-black font-bold px-8 py-4 rounded-xl text-sm transition-all">
+              className="bg-amber/10 hover:bg-amber/10 text-ink-high font-bold px-8 py-4 rounded-xl text-sm transition-all">
               {t('for_agencies.wl_cta_primary')}
             </Link>
             <Link href="/signup"
-              className="border border-gray-700 hover:border-gray-400 text-gray-300 hover:text-white font-bold px-8 py-4 rounded-xl text-sm transition-all">
+              className="border border-edge hover:border-edge text-ink-body hover:text-ink-high font-bold px-8 py-4 rounded-xl text-sm transition-all">
               {t('for_agencies.wl_cta_secondary')}
             </Link>
           </div>
@@ -350,15 +350,15 @@ export default function AgenciesPage() {
       </section>
 
       {/* ─── FAQ ─── */}
-      <section className="bg-black text-white py-20 px-6">
+      <section className="bg-void text-ink-high py-20 px-6">
         <div className="max-w-3xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_agencies.faq_eyebrow')}</p>
+          <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_agencies.faq_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">{t('for_agencies.faq_title')}</h2>
           <div className="space-y-6">
             {FAQ.map((item, i) => (
-              <div key={i} className="border-b border-gray-900 pb-6 last:border-0">
+              <div key={i} className="border-b border-edge pb-6 last:border-0">
                 <h3 className="text-sm font-extrabold mb-2">{item.q}</h3>
-                <p className="text-sm text-gray-400 leading-relaxed">{item.a}</p>
+                <p className="text-sm text-ink-body leading-relaxed">{item.a}</p>
               </div>
             ))}
           </div>
@@ -366,18 +366,18 @@ export default function AgenciesPage() {
       </section>
 
       {/* ─── BOTTOM CTA ─── */}
-      <section className="bg-gray-950 text-white py-20 px-6 text-center">
+      <section className="bg-panel text-ink-high py-20 px-6 text-center">
         <h2 className="text-2xl sm:text-3xl font-extrabold mb-4">
           {t('for_agencies.bottom_title')}
         </h2>
-        <p className="text-gray-400 text-sm mb-8 max-w-md mx-auto">
+        <p className="text-ink-body text-sm mb-8 max-w-md mx-auto">
           {t('for_agencies.bottom_desc')}
         </p>
         <Link href="/signup"
-          className="inline-block bg-amber-400 hover:bg-amber-300 text-black font-bold px-10 py-4 rounded-xl text-sm transition-all">
+          className="inline-block bg-amber/10 hover:bg-amber/10 text-ink-high font-bold px-10 py-4 rounded-xl text-sm transition-all">
           {t('for_agencies.bottom_cta')}
         </Link>
-        <p className="text-gray-600 text-xs mt-4">{t('for_agencies.bottom_note')}</p>
+        <p className="text-ink-muted text-xs mt-4">{t('for_agencies.bottom_note')}</p>
       </section>
 
     </PublicLayout>

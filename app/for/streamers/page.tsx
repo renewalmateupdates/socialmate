@@ -173,45 +173,45 @@ export default function StreamersPage() {
     <PublicLayout>
 
       {/* ─── HERO ─── */}
-      <section className="bg-black text-white py-24 px-6 text-center">
-        <p className="text-xs font-bold text-purple-400 uppercase tracking-widest mb-4">{t('for_streamers.eyebrow')}</p>
+      <section className="bg-void text-ink-high py-24 px-6 text-center">
+        <p className="text-xs font-bold text-violet uppercase tracking-widest mb-4">{t('for_streamers.eyebrow')}</p>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-3xl mx-auto mb-6">
           {t('for_streamers.hero_title_1')}<br />
-          <span className="text-purple-400">{t('for_streamers.hero_title_2')}</span>
+          <span className="text-violet">{t('for_streamers.hero_title_2')}</span>
         </h1>
-        <p className="text-gray-300 max-w-xl mx-auto text-base leading-relaxed mb-8">
+        <p className="text-ink-body max-w-xl mx-auto text-base leading-relaxed mb-8">
           {t('for_streamers.hero_desc')}
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
           <Link href="/signup"
-            className="bg-purple-500 hover:bg-purple-400 text-white font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
+            className="bg-violet/10 hover:bg-violet/10 text-ink-high font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
             {t('for_streamers.hero_cta_primary')}
           </Link>
           <Link href="/clips"
-            className="border border-gray-700 hover:border-gray-400 text-gray-300 hover:text-white font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
+            className="border border-edge hover:border-edge text-ink-body hover:text-ink-high font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
             {t('for_streamers.hero_cta_secondary')}
           </Link>
         </div>
-        <p className="text-gray-500 text-xs mt-4">{t('for_streamers.hero_note')}</p>
+        <p className="text-ink-muted text-xs mt-4">{t('for_streamers.hero_note')}</p>
       </section>
 
       {/* ─── PAIN POINTS ─── */}
-      <section className="bg-gray-950 text-white py-20 px-6">
+      <section className="bg-panel text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_streamers.pain_eyebrow')}</p>
+          <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_streamers.pain_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
             {t('for_streamers.pain_title')}
           </h2>
           <div className="space-y-6">
             {PAIN_POINTS.map((p, i) => (
               <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
-                <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-                  <p className="text-xs text-red-400 font-bold uppercase tracking-wide mb-2">{t('for_streamers.pain_before_label')}</p>
-                  <p className="text-sm text-gray-400 leading-relaxed">{p.before}</p>
+                <div className="bg-panel border border-edge rounded-2xl p-5">
+                  <p className="text-xs text-alert font-bold uppercase tracking-wide mb-2">{t('for_streamers.pain_before_label')}</p>
+                  <p className="text-sm text-ink-body leading-relaxed">{p.before}</p>
                 </div>
-                <div className="bg-purple-950 border border-purple-800 rounded-2xl p-5">
-                  <p className="text-xs text-purple-300 font-bold uppercase tracking-wide mb-2">{t('for_streamers.pain_after_label')}</p>
-                  <p className="text-sm text-white leading-relaxed">{p.icon} {p.after}</p>
+                <div className="bg-violet/10 border border-violet/40 rounded-2xl p-5">
+                  <p className="text-xs text-violet font-bold uppercase tracking-wide mb-2">{t('for_streamers.pain_after_label')}</p>
+                  <p className="text-sm text-ink-high leading-relaxed">{p.icon} {p.after}</p>
                 </div>
               </div>
             ))}
@@ -220,33 +220,33 @@ export default function StreamersPage() {
       </section>
 
       {/* ─── FEATURES ─── */}
-      <section className="bg-black text-white py-20 px-6">
+      <section className="bg-void text-ink-high py-20 px-6">
         <div className="max-w-5xl mx-auto">
-          <p className="text-center text-xs font-bold text-purple-400 uppercase tracking-widest mb-3">{t('for_streamers.features_eyebrow')}</p>
+          <p className="text-center text-xs font-bold text-violet uppercase tracking-widest mb-3">{t('for_streamers.features_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-3">
             {t('for_streamers.features_title')}
           </h2>
-          <p className="text-center text-gray-400 text-sm mb-12 max-w-xl mx-auto">
+          <p className="text-center text-ink-body text-sm mb-12 max-w-xl mx-auto">
             {t('for_streamers.features_desc')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map((f, i) => (
               <div key={i}
                 className={`rounded-2xl p-5 border ${f.live
-                  ? 'bg-gray-950 border-gray-800'
-                  : 'bg-gray-950/40 border-gray-900 opacity-70'
+                  ? 'bg-panel border-edge'
+                  : 'bg-panel border-edge opacity-70'
                 }`}>
                 <div className="flex items-start justify-between mb-3">
                   <span className="text-2xl">{f.icon}</span>
                   <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${f.live
-                    ? 'bg-green-900 text-green-400'
-                    : 'bg-gray-800 text-gray-400'
+                    ? 'bg-jade/10 text-jade'
+                    : 'bg-raised text-ink-body'
                   }`}>
                     {f.live ? t('for_streamers.badge_live') : t('for_streamers.badge_soon')}
                   </span>
                 </div>
                 <h3 className="text-sm font-extrabold mb-2">{f.title}</h3>
-                <p className="text-xs text-gray-400 leading-relaxed">{f.desc}</p>
+                <p className="text-xs text-ink-body leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -254,9 +254,9 @@ export default function StreamersPage() {
       </section>
 
       {/* ─── HOW IT WORKS ─── */}
-      <section className="bg-gradient-to-b from-purple-950 to-gray-950 text-white py-20 px-6">
+      <section className="bg-gradient-to-b from-purple-950 to-gray-950 text-ink-high py-20 px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <p className="text-xs font-bold text-purple-300 uppercase tracking-widest mb-3">{t('for_streamers.how_eyebrow')}</p>
+          <p className="text-xs font-bold text-violet uppercase tracking-widest mb-3">{t('for_streamers.how_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-12">{t('for_streamers.how_title')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
             {[
@@ -264,10 +264,10 @@ export default function StreamersPage() {
               { step: '2', title: t('for_streamers.step2_title'), desc: t('for_streamers.step2_desc') },
               { step: '3', title: t('for_streamers.step3_title'), desc: t('for_streamers.step3_desc') },
             ].map((s) => (
-              <div key={s.step} className="bg-black/40 border border-purple-900/50 rounded-2xl p-6">
-                <div className="text-3xl font-black text-purple-400 mb-3">{s.step}</div>
+              <div key={s.step} className="bg-void border border-violet/40 rounded-2xl p-6">
+                <div className="text-3xl font-black text-violet mb-3">{s.step}</div>
                 <h3 className="text-sm font-extrabold mb-2">{s.title}</h3>
-                <p className="text-xs text-gray-400 leading-relaxed">{s.desc}</p>
+                <p className="text-xs text-ink-body leading-relaxed">{s.desc}</p>
               </div>
             ))}
           </div>
@@ -275,34 +275,34 @@ export default function StreamersPage() {
       </section>
 
       {/* ─── PLATFORMS ─── */}
-      <section className="bg-black text-white py-20 px-6">
+      <section className="bg-void text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_streamers.platforms_eyebrow')}</p>
+          <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_streamers.platforms_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_streamers.platforms_title')}</h2>
-          <p className="text-gray-400 text-sm mb-8">{t('for_streamers.platforms_desc')}</p>
+          <p className="text-ink-body text-sm mb-8">{t('for_streamers.platforms_desc')}</p>
 
           <div className="flex flex-wrap justify-center gap-3 mb-12">
             {LIVE_PLATFORMS.map((p) => (
               <div key={p.name}
-                className="flex items-center gap-2 bg-gray-900 border border-gray-700 rounded-xl px-4 py-2.5">
+                className="flex items-center gap-2 bg-panel border border-edge rounded-xl px-4 py-2.5">
                 <span className="text-lg">{p.icon}</span>
                 <span className="text-sm font-bold">{p.name}</span>
-                <span className="text-xs bg-green-900 text-green-400 px-2 py-0.5 rounded-full font-bold">{t('for_streamers.platforms_live_badge')}</span>
+                <span className="text-xs bg-jade/10 text-jade px-2 py-0.5 rounded-full font-bold">{t('for_streamers.platforms_live_badge')}</span>
               </div>
             ))}
           </div>
 
-          <h3 className="text-base font-extrabold text-gray-400 mb-4">{t('for_streamers.pipeline_title')}</h3>
-          <p className="text-gray-500 text-xs mb-6 max-w-md mx-auto">
-            {t('for_streamers.pipeline_desc')} <Link href="/roadmap" className="text-purple-400 hover:text-purple-300 underline">{t('for_streamers.pipeline_roadmap')}</Link> {t('for_streamers.pipeline_desc_end')}
+          <h3 className="text-base font-extrabold text-ink-body mb-4">{t('for_streamers.pipeline_title')}</h3>
+          <p className="text-ink-muted text-xs mb-6 max-w-md mx-auto">
+            {t('for_streamers.pipeline_desc')} <Link href="/roadmap" className="text-violet hover:text-violet underline">{t('for_streamers.pipeline_roadmap')}</Link> {t('for_streamers.pipeline_desc_end')}
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             {COMING_PLATFORMS.map((p) => (
               <div key={p.name}
-                className="flex items-center gap-2 bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 opacity-60">
+                className="flex items-center gap-2 bg-panel border border-edge rounded-xl px-4 py-2.5 opacity-60">
                 <span className="text-lg">{p.icon}</span>
-                <span className="text-sm font-bold text-gray-400">{p.name}</span>
-                <span className="text-xs bg-gray-800 text-gray-500 px-2 py-0.5 rounded-full font-bold">{t('for_streamers.pipeline_badge')}</span>
+                <span className="text-sm font-bold text-ink-body">{p.name}</span>
+                <span className="text-xs bg-raised text-ink-muted px-2 py-0.5 rounded-full font-bold">{t('for_streamers.pipeline_badge')}</span>
               </div>
             ))}
           </div>
@@ -310,27 +310,27 @@ export default function StreamersPage() {
       </section>
 
       {/* ─── PRICING ─── */}
-      <section className="bg-gray-950 text-white py-20 px-6">
+      <section className="bg-panel text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_streamers.pricing_eyebrow')}</p>
+          <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_streamers.pricing_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_streamers.pricing_title')}</h2>
-          <p className="text-gray-400 text-sm mb-12">{t('for_streamers.pricing_desc')}</p>
+          <p className="text-ink-body text-sm mb-12">{t('for_streamers.pricing_desc')}</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
             {PRICING.map((tier) => (
               <div key={tier.plan}
                 className={`rounded-2xl p-6 border ${tier.highlight
-                  ? 'bg-purple-950 border-purple-700 ring-1 ring-purple-500'
-                  : 'bg-gray-900 border-gray-800'
+                  ? 'bg-violet/10 border-violet/40 ring-1 ring-violet'
+                  : 'bg-panel border-edge'
                 }`}>
                 {tier.highlight && (
-                  <p className="text-xs font-bold text-purple-300 uppercase tracking-widest mb-3">{t('for_streamers.pricing_most_popular')}</p>
+                  <p className="text-xs font-bold text-violet uppercase tracking-widest mb-3">{t('for_streamers.pricing_most_popular')}</p>
                 )}
                 <p className="text-sm font-extrabold mb-1">{tier.plan}</p>
                 <div className="flex items-end gap-1 mb-4">
                   <span className="text-3xl font-black">{tier.price}</span>
-                  <span className="text-gray-400 text-sm mb-1">{tier.note}</span>
+                  <span className="text-ink-body text-sm mb-1">{tier.note}</span>
                 </div>
-                <ul className="text-xs text-gray-400 space-y-2 mb-6 text-left">
+                <ul className="text-xs text-ink-body space-y-2 mb-6 text-left">
                   <li>✓ {tier.credits}</li>
                   <li>✓ {tier.clips}</li>
                   <li>✓ {t('for_streamers.pricing_feature_platforms')}</li>
@@ -339,28 +339,28 @@ export default function StreamersPage() {
                 </ul>
                 <Link href={tier.href}
                   className={`block text-center text-sm font-bold py-3 rounded-xl transition-all ${tier.highlight
-                    ? 'bg-purple-500 hover:bg-purple-400 text-white'
-                    : 'bg-white text-black hover:opacity-80'
+                    ? 'bg-violet/10 hover:bg-violet/10 text-ink-high'
+                    : 'bg-panel text-ink-high hover:opacity-80'
                   }`}>
                   {tier.cta} →
                 </Link>
               </div>
             ))}
           </div>
-          <p className="text-gray-500 text-xs">{t('for_streamers.pricing_note')}</p>
+          <p className="text-ink-muted text-xs">{t('for_streamers.pricing_note')}</p>
         </div>
       </section>
 
       {/* ─── FAQ ─── */}
-      <section className="bg-black text-white py-20 px-6">
+      <section className="bg-void text-ink-high py-20 px-6">
         <div className="max-w-3xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_streamers.faq_eyebrow')}</p>
+          <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_streamers.faq_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">{t('for_streamers.faq_title')}</h2>
           <div className="space-y-6">
             {FAQ.map((item, i) => (
-              <div key={i} className="border-b border-gray-900 pb-6 last:border-0">
+              <div key={i} className="border-b border-edge pb-6 last:border-0">
                 <h3 className="text-sm font-extrabold mb-2">{item.q}</h3>
-                <p className="text-sm text-gray-400 leading-relaxed">{item.a}</p>
+                <p className="text-sm text-ink-body leading-relaxed">{item.a}</p>
               </div>
             ))}
           </div>
@@ -368,18 +368,18 @@ export default function StreamersPage() {
       </section>
 
       {/* ─── BOTTOM CTA ─── */}
-      <section className="bg-gradient-to-br from-purple-950 via-gray-950 to-black text-white py-20 px-6 text-center">
+      <section className="bg-gradient-to-br from-purple-950 via-gray-950 to-black text-ink-high py-20 px-6 text-center">
         <h2 className="text-2xl sm:text-3xl font-extrabold mb-4">
           {t('for_streamers.bottom_title')}
         </h2>
-        <p className="text-gray-400 text-sm mb-8 max-w-md mx-auto">
+        <p className="text-ink-body text-sm mb-8 max-w-md mx-auto">
           {t('for_streamers.bottom_desc')}
         </p>
         <Link href="/signup"
-          className="inline-block bg-purple-500 hover:bg-purple-400 text-white font-bold px-10 py-4 rounded-xl text-sm transition-all">
+          className="inline-block bg-violet/10 hover:bg-violet/10 text-ink-high font-bold px-10 py-4 rounded-xl text-sm transition-all">
           {t('for_streamers.bottom_cta')}
         </Link>
-        <p className="text-gray-600 text-xs mt-4">{t('for_streamers.bottom_note')}</p>
+        <p className="text-ink-muted text-xs mt-4">{t('for_streamers.bottom_note')}</p>
       </section>
 
     </PublicLayout>

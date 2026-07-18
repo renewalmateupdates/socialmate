@@ -152,7 +152,7 @@ const PRICING = [
     price:   '$5',
     period:  '/month',
     credits: '500 AI credits/mo',
-    posts:   'Unlimited posts',
+    posts:   '100 posts / month',
     seats:   '5 seats',
     highlight: true,
     cta:     'Go Pro',
@@ -163,7 +163,7 @@ const PRICING = [
     price:   '$20',
     period:  '/month',
     credits: '2,000 AI credits/mo',
-    posts:   'Unlimited posts',
+    posts:   '100 posts / month',
     seats:   '15 seats',
     highlight: false,
     cta:     'Go Agency',
@@ -220,51 +220,51 @@ export default function LinkedInCreatorsPage() {
       />
 
       {/* ─── HERO ─── */}
-      <section className="bg-black text-white py-24 px-6 text-center">
-        <p className="text-xs font-bold text-blue-400 uppercase tracking-widest mb-4">{t('for_linkedin.api_badge')}</p>
+      <section className="bg-void text-ink-high py-24 px-6 text-center">
+        <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-4">{t('for_linkedin.api_badge')}</p>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-3xl mx-auto mb-6">
           {t('for_linkedin.hero_title_1')}<br />
-          <span className="text-blue-400">{t('for_linkedin.hero_title_2')}</span>
+          <span className="text-ink-muted">{t('for_linkedin.hero_title_2')}</span>
         </h1>
-        <p className="text-gray-300 max-w-xl mx-auto text-base leading-relaxed mb-8">
+        <p className="text-ink-body max-w-xl mx-auto text-base leading-relaxed mb-8">
           {t('for_linkedin.hero_desc')}
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
           <Link
             href="/signup"
-            className="bg-blue-600 hover:bg-blue-500 text-white font-bold px-8 py-4 rounded-2xl transition-all text-base w-full sm:w-auto text-center"
+            className="bg-raised hover:bg-raised text-ink-high font-bold px-8 py-4 rounded-2xl transition-all text-base w-full sm:w-auto text-center"
           >
             {t('for_linkedin.hero_cta_primary')}
           </Link>
           <Link
             href="/accounts"
-            className="border border-white/20 text-white font-semibold px-6 py-4 rounded-2xl hover:bg-white/5 transition-all text-sm w-full sm:w-auto text-center"
+            className="border border-edge-lit text-ink-high font-semibold px-6 py-4 rounded-2xl hover:bg-panel transition-all text-sm w-full sm:w-auto text-center"
           >
             {t('for_linkedin.hero_cta_secondary')}
           </Link>
         </div>
-        <p className="text-gray-500 text-xs mt-4">{t('for_linkedin.hero_note')}</p>
+        <p className="text-ink-muted text-xs mt-4">{t('for_linkedin.hero_note')}</p>
       </section>
 
       {/* ─── BEFORE / AFTER ─── */}
-      <section className="bg-gray-950 text-white py-20 px-6">
+      <section className="bg-panel text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 text-center">{t('for_linkedin.pain_eyebrow')}</p>
+          <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3 text-center">{t('for_linkedin.pain_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
             {t('for_linkedin.pain_title')}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {PAIN_POINTS.map((p, i) => (
-              <div key={i} className="bg-white/5 border border-white/10 rounded-2xl p-6">
+              <div key={i} className="bg-panel border border-edge-lit rounded-2xl p-6">
                 <div className="text-2xl mb-4">{p.icon}</div>
                 <div className="space-y-3">
-                  <div className="bg-red-950/40 border border-red-900/30 rounded-xl p-3">
-                    <p className="text-xs font-bold text-red-400 uppercase tracking-widest mb-1">{t('for_linkedin.pain_before_label')}</p>
-                    <p className="text-sm text-gray-300">{p.before}</p>
+                  <div className="bg-alert/10 border border-alert/40 rounded-xl p-3">
+                    <p className="text-xs font-bold text-alert uppercase tracking-widest mb-1">{t('for_linkedin.pain_before_label')}</p>
+                    <p className="text-sm text-ink-body">{p.before}</p>
                   </div>
-                  <div className="bg-green-950/40 border border-green-900/30 rounded-xl p-3">
-                    <p className="text-xs font-bold text-green-400 uppercase tracking-widest mb-1">{t('for_linkedin.pain_after_label')}</p>
-                    <p className="text-sm text-gray-300">{p.after}</p>
+                  <div className="bg-jade/10 border border-jade/40 rounded-xl p-3">
+                    <p className="text-xs font-bold text-jade uppercase tracking-widest mb-1">{t('for_linkedin.pain_after_label')}</p>
+                    <p className="text-sm text-ink-body">{p.after}</p>
                   </div>
                 </div>
               </div>
@@ -274,27 +274,27 @@ export default function LinkedInCreatorsPage() {
       </section>
 
       {/* ─── FEATURES ─── */}
-      <section className="bg-gray-900 text-white py-20 px-6">
+      <section className="bg-panel text-ink-high py-20 px-6">
         <div className="max-w-5xl mx-auto">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 text-center">{t('for_linkedin.features_eyebrow')}</p>
+          <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3 text-center">{t('for_linkedin.features_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
             {t('for_linkedin.features_title')}
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {FEATURES.map((f) => (
-              <div key={f.title} className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:border-blue-500/40 transition-all">
+              <div key={f.title} className="bg-panel border border-edge-lit rounded-2xl p-5 hover:border-edge-lit transition-all">
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-2xl">{f.icon}</span>
                   <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
                     f.badge === 'Free'
-                      ? 'bg-green-950 text-green-400'
+                      ? 'bg-jade/10 text-jade'
                       : f.badge === 'Pro'
-                      ? 'bg-amber-950 text-amber-400'
-                      : 'bg-blue-950 text-blue-400'
+                      ? 'bg-amber/10 text-amber'
+                      : 'bg-raised text-ink-muted'
                   }`}>{f.badge}</span>
                 </div>
                 <h3 className="font-bold text-sm mb-2">{f.title}</h3>
-                <p className="text-xs text-gray-400 leading-relaxed">{f.desc}</p>
+                <p className="text-xs text-ink-body leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -302,25 +302,25 @@ export default function LinkedInCreatorsPage() {
       </section>
 
       {/* ─── PLATFORMS ─── */}
-      <section className="bg-[#0a0a0a] text-white py-20 px-6">
+      <section className="bg-[#0a0a0a] text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_linkedin.platforms_eyebrow')}</p>
+          <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_linkedin.platforms_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_linkedin.platforms_title')}</h2>
-          <p className="text-gray-400 text-sm mb-10">{t('for_linkedin.platforms_desc')}</p>
+          <p className="text-ink-body text-sm mb-10">{t('for_linkedin.platforms_desc')}</p>
           <div className="flex flex-wrap justify-center gap-3 mb-12">
             {LIVE_PLATFORMS.map((p) => (
               <div
                 key={p.name}
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-semibold ${
                   p.highlight
-                    ? 'bg-blue-950 border-blue-500 text-blue-300'
-                    : 'bg-white/5 border-white/10 text-gray-300'
+                    ? 'bg-raised border-edge-lit text-ink-muted'
+                    : 'bg-panel border-edge-lit text-ink-body'
                 }`}
               >
                 <span>{p.icon}</span>
                 <span>{p.name}</span>
                 <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${
-                  p.highlight ? 'bg-blue-500/20 text-blue-300' : 'bg-green-950 text-green-400'
+                  p.highlight ? 'bg-raised text-ink-muted' : 'bg-jade/10 text-jade'
                 }`}>{p.highlight ? t('for_linkedin.platforms_new_badge') : t('for_linkedin.platforms_live_badge')}</span>
               </div>
             ))}
@@ -329,33 +329,33 @@ export default function LinkedInCreatorsPage() {
       </section>
 
       {/* ─── COMPARISON ─── */}
-      <section className="bg-gray-950 text-white py-20 px-6">
+      <section className="bg-panel text-ink-high py-20 px-6">
         <div className="max-w-3xl mx-auto">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 text-center">{t('for_linkedin.comparison_eyebrow')}</p>
+          <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3 text-center">{t('for_linkedin.comparison_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-10">
             {t('for_linkedin.comparison_title')}
           </h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="border-b border-white/10">
-                  <th className="text-left py-3 pr-4 text-gray-400 font-semibold">{t('for_linkedin.comparison_col_tool')}</th>
-                  <th className="text-center py-3 px-3 text-gray-400 font-semibold">{t('for_linkedin.comparison_col_price')}</th>
-                  <th className="text-center py-3 px-3 text-gray-400 font-semibold">{t('for_linkedin.comparison_col_linkedin')}</th>
-                  <th className="text-center py-3 px-3 text-gray-400 font-semibold">{t('for_linkedin.comparison_col_platforms')}</th>
-                  <th className="text-center py-3 px-3 text-gray-400 font-semibold">{t('for_linkedin.comparison_col_ai')}</th>
+                <tr className="border-b border-edge-lit">
+                  <th className="text-left py-3 pr-4 text-ink-body font-semibold">{t('for_linkedin.comparison_col_tool')}</th>
+                  <th className="text-center py-3 px-3 text-ink-body font-semibold">{t('for_linkedin.comparison_col_price')}</th>
+                  <th className="text-center py-3 px-3 text-ink-body font-semibold">{t('for_linkedin.comparison_col_linkedin')}</th>
+                  <th className="text-center py-3 px-3 text-ink-body font-semibold">{t('for_linkedin.comparison_col_platforms')}</th>
+                  <th className="text-center py-3 px-3 text-ink-body font-semibold">{t('for_linkedin.comparison_col_ai')}</th>
                 </tr>
               </thead>
               <tbody>
                 {COMPARISON.map((row) => (
-                  <tr key={row.tool} className={`border-b border-white/5 ${row.highlight ? 'bg-blue-950/30' : ''}`}>
-                    <td className={`py-3 pr-4 font-semibold ${row.highlight ? 'text-blue-300' : 'text-white'}`}>
-                      {row.tool} {row.highlight && <span className="text-xs text-blue-400 ml-1">← you are here</span>}
+                  <tr key={row.tool} className={`border-b border-edge-lit ${row.highlight ? 'bg-raised' : ''}`}>
+                    <td className={`py-3 pr-4 font-semibold ${row.highlight ? 'text-ink-muted' : 'text-ink-high'}`}>
+                      {row.tool} {row.highlight && <span className="text-xs text-ink-muted ml-1">← you are here</span>}
                     </td>
-                    <td className="text-center py-3 px-3 text-gray-300">{row.price}</td>
-                    <td className="text-center py-3 px-3">{row.linkedin === '✓' ? <span className="text-green-400">✓</span> : <span className="text-red-400">✗</span>}</td>
-                    <td className="text-center py-3 px-3">{row.free === '✓' ? <span className="text-green-400">✓</span> : <span className="text-red-400">✗</span>}</td>
-                    <td className="text-center py-3 px-3 text-gray-300">{row.ai}</td>
+                    <td className="text-center py-3 px-3 text-ink-body">{row.price}</td>
+                    <td className="text-center py-3 px-3">{row.linkedin === '✓' ? <span className="text-jade">✓</span> : <span className="text-alert">✗</span>}</td>
+                    <td className="text-center py-3 px-3">{row.free === '✓' ? <span className="text-jade">✓</span> : <span className="text-alert">✗</span>}</td>
+                    <td className="text-center py-3 px-3 text-ink-body">{row.ai}</td>
                   </tr>
                 ))}
               </tbody>
@@ -365,22 +365,22 @@ export default function LinkedInCreatorsPage() {
       </section>
 
       {/* ─── PRICING ─── */}
-      <section className="bg-gray-900 text-white py-20 px-6">
+      <section className="bg-panel text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_linkedin.pricing_eyebrow')}</p>
+          <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_linkedin.pricing_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_linkedin.pricing_title')}</h2>
-          <p className="text-gray-400 text-sm mb-10">{t('for_linkedin.pricing_desc')}</p>
+          <p className="text-ink-body text-sm mb-10">{t('for_linkedin.pricing_desc')}</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
             {PRICING.map((tier) => (
               <div key={tier.plan} className={`rounded-2xl border p-6 text-left ${
                 tier.highlight
-                  ? 'bg-blue-950 border-blue-500'
-                  : 'bg-white/5 border-white/10'
+                  ? 'bg-raised border-edge-lit'
+                  : 'bg-panel border-edge-lit'
               }`}>
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">{tier.highlight ? t('for_linkedin.pricing_most_popular') : tier.plan}</p>
+                <p className="text-xs font-bold text-ink-body uppercase tracking-widest mb-1">{tier.highlight ? t('for_linkedin.pricing_most_popular') : tier.plan}</p>
                 <p className="text-3xl font-extrabold mb-0.5">{tier.price}</p>
-                <p className="text-xs text-gray-400 mb-4">{tier.period}</p>
-                <ul className="text-xs text-gray-300 space-y-2 mb-6">
+                <p className="text-xs text-ink-body mb-4">{tier.period}</p>
+                <ul className="text-xs text-ink-body space-y-2 mb-6">
                   <li>✓ {tier.credits}</li>
                   <li>✓ {tier.posts}</li>
                   <li>✓ {tier.seats}</li>
@@ -392,8 +392,8 @@ export default function LinkedInCreatorsPage() {
                   href={tier.href}
                   className={`block text-center text-sm font-bold py-3 px-4 rounded-xl transition-all ${
                     tier.highlight
-                      ? 'bg-blue-500 hover:bg-blue-400 text-white'
-                      : 'bg-white/10 hover:bg-white/20 text-white'
+                      ? 'bg-raised hover:bg-raised text-ink-high'
+                      : 'bg-panel hover:bg-panel text-ink-high'
                   }`}
                 >
                   {tier.cta}
@@ -405,15 +405,15 @@ export default function LinkedInCreatorsPage() {
       </section>
 
       {/* ─── FAQ ─── */}
-      <section className="bg-gray-950 text-white py-20 px-6">
+      <section className="bg-panel text-ink-high py-20 px-6">
         <div className="max-w-2xl mx-auto">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 text-center">{t('for_linkedin.faq_eyebrow')}</p>
+          <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3 text-center">{t('for_linkedin.faq_eyebrow')}</p>
           <h2 className="text-2xl font-extrabold text-center mb-10">{t('for_linkedin.faq_title')}</h2>
           <div className="space-y-4">
             {FAQ.map((item) => (
-              <div key={item.q} className="bg-white/5 border border-white/10 rounded-2xl p-5">
+              <div key={item.q} className="bg-panel border border-edge-lit rounded-2xl p-5">
                 <p className="font-bold text-sm mb-2">{item.q}</p>
-                <p className="text-xs text-gray-400 leading-relaxed">{item.a}</p>
+                <p className="text-xs text-ink-body leading-relaxed">{item.a}</p>
               </div>
             ))}
           </div>
@@ -421,20 +421,20 @@ export default function LinkedInCreatorsPage() {
       </section>
 
       {/* ─── CTA ─── */}
-      <section className="bg-black text-white py-20 px-6 text-center">
+      <section className="bg-void text-ink-high py-20 px-6 text-center">
         <h2 className="text-3xl sm:text-4xl font-extrabold mb-4">
           {t('for_linkedin.bottom_title')}
         </h2>
-        <p className="text-gray-400 text-base max-w-xl mx-auto mb-8">
+        <p className="text-ink-body text-base max-w-xl mx-auto mb-8">
           {t('for_linkedin.bottom_desc')}
         </p>
         <Link
           href="/signup"
-          className="inline-block bg-blue-600 hover:bg-blue-500 text-white font-bold px-10 py-4 rounded-2xl transition-all text-base"
+          className="inline-block bg-raised hover:bg-raised text-ink-high font-bold px-10 py-4 rounded-2xl transition-all text-base"
         >
           {t('for_linkedin.bottom_cta')}
         </Link>
-        <p className="text-gray-600 text-xs mt-4">{t('for_linkedin.bottom_note')}</p>
+        <p className="text-ink-muted text-xs mt-4">{t('for_linkedin.bottom_note')}</p>
       </section>
 
     </PublicLayout>
