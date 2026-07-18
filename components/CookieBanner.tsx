@@ -24,12 +24,12 @@ export default function CookieBanner() {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 p-4 sm:p-6" style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}>
-      <div className="max-w-4xl mx-auto bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+      <div className="max-w-4xl mx-auto bg-surface border border-edge rounded-2xl shadow-2xl shadow-black/50 p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
         <div className="flex-1 min-w-0">
           <p className="text-sm font-bold mb-1 dark:text-white">🍪 We use cookies</p>
           <p className="text-xs text-gray-400 dark:text-gray-500 leading-relaxed">
             We use essential cookies to keep you signed in and keep the app secure. No advertising cookies, no tracking pixels.{' '}
-            <Link href="/privacy" className="text-black dark:text-white font-semibold underline hover:no-underline">
+            <Link href="/privacy" className="text-ink-high font-medium underline hover:no-underline">
               Privacy Policy →
             </Link>
           </p>
@@ -37,13 +37,13 @@ export default function CookieBanner() {
         <div className="flex items-center gap-2 flex-shrink-0">
           <button
             onClick={decline}
-            className="px-4 py-2 text-xs font-semibold text-gray-500 hover:text-black border border-gray-200 hover:border-gray-400 rounded-xl transition-all"
+            className="tap px-4 py-2 text-small text-ink-muted hover:text-ink-high border border-edge hover:border-edge-lit rounded-xl"
           >
             Decline
           </button>
           <button
             onClick={accept}
-            className="px-4 py-2 text-xs font-bold bg-black text-white rounded-xl hover:opacity-80 transition-all"
+            className="tap px-4 py-2 text-small font-semibold bg-amber text-void rounded-xl hover:bg-amber/90"
           >
             Accept all
           </button>

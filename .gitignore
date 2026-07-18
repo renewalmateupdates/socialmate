@@ -49,3 +49,6 @@ android/.gradle
 android/app/release
 android/build
 android/local.properties
+
+# Hero recorder scratch frames (scripts/record-hero.mjs cleans these up)
+.hero-frames/

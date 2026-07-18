@@ -1,24 +1,29 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
+import type { ReactNode } from 'react'
 
-// Scroll-reveal wrapper — content fades/slides in the first time it enters the
-// viewport. Progressive enhancement done right for perf + SEO:
-//  - Server HTML renders children fully visible (no hidden content if JS is
-//    slow or off — this must never recreate the blank-page bug we just fixed).
-//  - On mount, elements still BELOW the fold get the hidden state and animate
-//    in when scrolled to. Elements already on screen never flicker.
-//  - prefers-reduced-motion disables the whole thing.
+/**
+ * One-shot scroll reveal. 16px translate, opacity, never re-triggers.
+ *
+ * Use this on TWO elements per page, not on everything. Scattered fade-ins on a
+ * dozen sections is the loudest tell there is, and if everything animates the
+ * animation stops meaning anything.
+ *
+ * Progressive enhancement, deliberately: the server renders children fully
+ * visible, and only elements still below the fold on mount get the hidden state.
+ * Content is never hidden behind JS that might not arrive, and elements already
+ * on screen never flicker.
+ */
 export default function Reveal({
   children,
-  delay = 0,
   className = '',
 }: {
-  children: React.ReactNode
-  delay?: number
+  children: ReactNode
   className?: string
 }) {
   const ref = useRef<HTMLDivElement>(null)
-  const [state, setState] = useState<'ssr' | 'hidden' | 'shown'>('ssr')
+  const [armed, setArmed] = useState(false)
+  const [shown, setShown] = useState(true)
 
   useEffect(() => {
     const el = ref.current
@@ -26,14 +31,15 @@ export default function Reveal({
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
     // Already visible on first paint? Leave it alone.
-    const rect = el.getBoundingClientRect()
-    if (rect.top < window.innerHeight * 0.92) return
+    if (el.getBoundingClientRect().top < window.innerHeight * 0.92) return
 
-    setState('hidden')
+    setArmed(true)
+    setShown(false)
+
     const io = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          setState('shown')
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShown(true)
           io.disconnect()
         }
       },
@@ -46,12 +52,8 @@ export default function Reveal({
   return (
     <div
       ref={ref}
-      className={className}
-      style={{
-        opacity: state === 'hidden' ? 0 : 1,
-        transform: state === 'hidden' ? 'translateY(24px)' : 'none',
-        transition: `opacity 700ms cubic-bezier(0.16,1,0.3,1) ${delay}ms, transform 700ms cubic-bezier(0.16,1,0.3,1) ${delay}ms`,
-      }}
+      className={`${armed ? 'reveal' : ''} ${className}`}
+      data-shown={shown ? 'true' : 'false'}
     >
       {children}
     </div>

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
+import { fontVars } from './fonts'
 import './globals.css'
 import { WorkspaceProvider } from '@/contexts/WorkspaceContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
@@ -9,8 +9,6 @@ import { SpeedInsights } from '@vercel/speed-insights/next'
 import GoogleAnalytics from '@/components/GoogleAnalytics'
 // ssr:false dynamic imports must live in a 'use client' module — see LazyClientComponents
 import LazyClientComponents from '@/components/LazyClientComponents'
-
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' })
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
 
@@ -222,13 +220,9 @@ const jsonLd = {
     'SM-Give — 2% of subscriptions to charitable causes',
     '9-language internationalization (en, es, de, fr, pt, ru, zh, ja, ko)',
   ],
-  aggregateRating: {
-    '@type': 'AggregateRating',
-    ratingValue: '4.8',
-    ratingCount: '30',
-    bestRating: '5',
-    worstRating: '1',
-  },
+  // No aggregateRating. We do not have a review system, so any rating here would be
+  // invented — and Google treats fabricated review markup as a structured-data violation.
+  // It goes back in when there are real reviews to count.
 }
 
 // Anti-flash: apply theme before React hydrates to prevent FOUC
@@ -246,11 +240,14 @@ const antiFlashScript = `
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    // suppressHydrationWarning is correct here, not a papering-over: the
+    // anti-flash script below deliberately sets class/data-theme on <html>
+    // before React hydrates, so the server and client markup are *supposed*
+    // to differ on this one element.
+    <html lang="en" suppressHydrationWarning>
       <head>
-        {/* Preconnect for faster DNS on mobile — eliminates round-trip latency for external origins */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Fonts are self-hosted via next/font/local (app/fonts.ts) — no font CDN to
+            preconnect to, and next/font emits its own <link rel=preload> for each face. */}
         <link rel="dns-prefetch" href="https://vercel-insights-api.vercel.sh" />
         <link rel="dns-prefetch" href="https://vitals.vercel-analytics.com" />
         {/* Anti-flash: must be first script to prevent white flash on dark mode */}
@@ -264,7 +261,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Pinterest domain verification */}
         <meta name="p:domain_verify" content="36117bcd9adbfb7d01695c4aa0266d3c" />
       </head>
-      <body className={`${inter.variable} ${inter.className}`}>
+      <body className={fontVars}>
         <ThemeProvider>
           <WorkspaceProvider>
             <I18nProvider>
