@@ -50,7 +50,7 @@ export default function InstallPrompt() {
 
   return (
     <div className="fixed left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-sm" style={{ bottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}>
-      <div className="bg-surface text-ink-high rounded-2xl shadow-2xl shadow-black/50 p-4 flex items-center gap-3 border border-edge">
+      <div className="bg-panel text-ink-high rounded-2xl shadow-2xl shadow-black/50 p-4 flex items-center gap-3 border border-edge">
         <img src="/icon-192.png" alt="SocialMate" className="w-10 h-10 rounded-xl flex-shrink-0" />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-bold leading-tight">Add SocialMate to Home Screen</p>

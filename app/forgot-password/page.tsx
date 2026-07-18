@@ -1,7 +1,9 @@
 'use client'
 import { useState } from 'react'
-import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
+import { supabase } from '@/lib/supabase'
+import AuthShell from '@/components/instrument/AuthShell'
+import { Label, Input, ErrorNote, Submit } from '@/components/instrument/form'
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('')
@@ -11,7 +13,7 @@ export default function ForgotPassword() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email.trim()) { setError('Enter your email'); return }
+    if (!email.trim()) { setError('Enter the email address on your account.'); return }
     setLoading(true)
     setError('')
     const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
@@ -22,77 +24,70 @@ export default function ForgotPassword() {
     setLoading(false)
   }
 
-  return (
-    <div className="min-h-dvh bg-theme flex flex-col">
-      <div className="border-b border-theme bg-surface px-8 py-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
-          <span className="font-bold text-base tracking-tight">SocialMate</span>
-        </Link>
-        <Link href="/login" className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-black transition-colors">
-          Back to sign in
-        </Link>
-      </div>
-
-      <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-md">
-          {sent ? (
-            <div className="bg-surface border border-theme rounded-3xl p-10 text-center">
-              <div className="text-6xl mb-6">📬</div>
-              <h1 className="text-2xl font-extrabold tracking-tight mb-3">Check your inbox</h1>
-              <p className="text-gray-400 dark:text-gray-500 text-sm mb-2">We sent a password reset link to</p>
-              <p className="font-bold text-sm mb-6">{email}</p>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mb-8">Click the link in the email to reset your password. Check your spam folder if you don't see it within a few minutes.</p>
-              <Link href="/login" className="block w-full py-3 bg-black text-white text-sm font-bold rounded-xl hover:opacity-80 transition-all text-center">
-                Back to Sign In →
-              </Link>
-            </div>
-          ) : (
-            <>
-              <div className="text-center mb-8">
-                <h1 className="text-3xl font-extrabold tracking-tight mb-2">Reset your password</h1>
-                <p className="text-gray-400 dark:text-gray-500 text-sm">Enter your email and we'll send you a reset link</p>
-              </div>
-              <div className="bg-surface border border-theme rounded-3xl p-8">
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">Email</label>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={e => setEmail(e.target.value)}
-                      placeholder="you@example.com"
-                      autoFocus
-                      className="w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-gray-400 transition-colors"
-                    />
-                  </div>
-                  {error && (
-                    <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3">
-                      <p className="text-xs font-semibold text-red-500">❌ {error}</p>
-                    </div>
-                  )}
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-3.5 bg-black text-white text-sm font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {loading ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Sending...
-                      </>
-                    ) : 'Send Reset Link →'}
-                  </button>
-                </form>
-              </div>
-              <p className="text-center text-xs text-gray-400 dark:text-gray-500 mt-4">
-                Remember your password?{' '}
-                <Link href="/login" className="font-bold text-black hover:underline">Sign in →</Link>
-              </p>
-            </>
-          )}
+  if (sent) {
+    return (
+      <AuthShell
+        headline="Check your inbox"
+        sub="If that address has an account, a reset link is on its way."
+        altHref="/login"
+        altLabel="Back to sign in"
+      >
+        <div className="rounded-2xl border border-edge bg-panel p-6">
+          <p className="font-mono text-eyebrow uppercase text-ink-muted">Sent to</p>
+          <p className="mt-2 font-mono text-mono text-ink-high">{email}</p>
+          <p className="mt-5 text-small leading-relaxed text-ink-muted">
+            The link opens a page where you can set a new password. It expires in an
+            hour. If it hasn&apos;t arrived in a few minutes, check your spam folder.
+          </p>
         </div>
-      </div>
-    </div>
+
+        <div className="mt-6">
+          <Link
+            href="/login"
+            className="tap flex w-full items-center justify-center rounded-xl bg-amber py-3.5 text-small font-semibold text-void transition-colors hover:bg-amber/90"
+          >
+            Back to sign in
+          </Link>
+        </div>
+      </AuthShell>
+    )
+  }
+
+  return (
+    <AuthShell
+      headline="Reset your password"
+      sub="We'll email you a link to set a new one."
+      altHref="/login"
+      altLabel="Back to sign in"
+    >
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div>
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            name="email"
+            autoComplete="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            autoFocus
+          />
+        </div>
+
+        {error && <ErrorNote>{error}</ErrorNote>}
+
+        <Submit loading={loading} loadingLabel="Sending">
+          Send reset link
+        </Submit>
+      </form>
+
+      <p className="mt-6 text-small text-ink-muted">
+        Remember it?{' '}
+        <Link href="/login" className="text-amber underline underline-offset-2 transition-colors hover:text-amber/80">
+          Sign in
+        </Link>
+      </p>
+    </AuthShell>
   )
 }

@@ -138,7 +138,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
             width and shoves the headline and buttons off a 360px screen. */}
         <div className="grid items-center gap-14 lg:grid-cols-[1.2fr_1fr] lg:gap-20">
           <div className="min-w-0">
-            <div className="inline-flex items-center gap-2.5 rounded-full border border-edge bg-surface px-3.5 py-1.5">
+            <div className="inline-flex items-center gap-2.5 rounded-full border border-edge bg-panel px-3.5 py-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-jade" aria-hidden="true" />
               <span className="font-mono text-eyebrow uppercase text-ink-muted">
                 7 platforms live
@@ -212,9 +212,12 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
               <span className="font-mono text-eyebrow uppercase text-jade">Live</span>
             </div>
           ))}
+          {/* No opacity-50 here. Dimming a whole row drags real, readable content
+              below AA — these rows were measuring ~3.1:1. The ink ramp already
+              makes them secondary without making them illegible. */}
           {SOON_PLATFORMS.map(p => (
-            <div key={p} className="flex items-center gap-3 border-b border-edge py-3.5 opacity-50">
-              <PlatformIcon name={p} size={17} mono />
+            <div key={p} className="flex items-center gap-3 border-b border-edge py-3.5">
+              <PlatformIcon name={p} size={17} mono className="opacity-60" />
               <span className="flex-1 text-small text-ink-muted">{p}</span>
               <span className="font-mono text-eyebrow uppercase text-ink-faint">Soon</span>
             </div>
@@ -239,7 +242,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         <Reveal>
           <div className="mt-12 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-edge bg-edge sm:grid-cols-3 lg:grid-cols-4">
             {AI_TOOLS.map(tool => (
-              <div key={tool.name} className="bg-surface p-5">
+              <div key={tool.name} className="bg-panel p-5">
                 <tool.icon className="h-4 w-4 text-violet" strokeWidth={2} aria-hidden="true" />
                 <p className="mt-4 text-small leading-snug text-ink-body">{tool.name}</p>
                 <p className="mt-1.5 font-mono text-eyebrow uppercase text-ink-faint">
@@ -342,7 +345,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
               <Link
                 key={g.vol}
                 href={g.href}
-                className="tap group flex items-baseline gap-5 bg-surface p-6 hover:bg-raised"
+                className="tap group flex items-baseline gap-5 bg-panel p-6 hover:bg-raised"
               >
                 <span className="font-mono text-mono text-ink-faint">{g.vol}</span>
                 <span className="flex-1 text-body text-ink-body group-hover:text-ink-high">
