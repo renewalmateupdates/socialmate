@@ -14,7 +14,6 @@ export default function PublicFooter() {
         { labelKey: 'footer.links.roadmap',       href: '/roadmap'   },
         { labelKey: 'footer.links.clips_studio',  href: '/clips'     },
         { labelKey: 'footer.links.soma',          href: '/soma'      },
-        { labelKey: 'footer.links.enki',          href: '/enki'      },
         { labelKey: 'footer.links.monetize',      href: '/monetize'  },
       ],
     },
