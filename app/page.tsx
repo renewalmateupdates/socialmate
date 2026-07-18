@@ -2,880 +2,458 @@ import Link from 'next/link'
 import ReferralBanner from '@/app/components/ReferralBanner'
 import PublicNav from '@/components/PublicNav'
 import LazyUserStatsCounter from '@/components/LazyUserStatsCounter'
-import PlatformIcon, { hasPlatformIcon } from '@/components/landing/PlatformIcon'
-import HeroMockup from '@/components/landing/HeroMockup'
+import PlatformIcon from '@/components/landing/PlatformIcon'
+import HeroLoop from '@/components/landing/HeroLoop'
 import Reveal from '@/components/landing/Reveal'
-import AmbientBackground from '@/components/landing/AmbientBackground'
+import { Section, Eyebrow, Display, Body, Button, Card } from '@/components/instrument/primitives'
 import {
   PenLine, Hash, RefreshCw, TrendingUp, MessagesSquare, Recycle, Zap, Flame,
   Radar, Search, CalendarDays, ImagePlus, CalendarClock, Bot, BarChart3, Link2,
-  Users, Building2, Rss, Telescope, HardDrive, FileText, Sparkles, Clapperboard,
-  BadgeCheck, Lock, ShieldCheck, BookOpen, Heart, Backpack, Baby, Home as HomeIcon,
-  Globe, Mail, Check,
+  Users, Building2, Rss, Telescope, Clapperboard, Check, Backpack, Baby,
+  Home as HomeIcon, Heart,
   type LucideIcon,
 } from 'lucide-react'
 
 // Cache landing page at CDN for 1 hour — content rarely changes between deploys.
-// Eliminates origin round-trips for most visitors, especially international (China, India).
 export const revalidate = 3600
 
-const PLATFORMS = [
-  { name: 'Discord',     icon: '💬', status: 'live'    },
-  { name: 'Bluesky',     icon: '🦋', status: 'live'    },
-  { name: 'Telegram',    icon: '✈️', status: 'live'    },
-  { name: 'Mastodon',    icon: '🐘', status: 'live'    },
-  { name: 'X / Twitter', icon: '🐦', status: 'live'    },
-  { name: 'LinkedIn',    icon: '💼', status: 'live'    },
-  { name: 'YouTube',     icon: '▶️', status: 'soon'    },
-  { name: 'Pinterest',   icon: '📌', status: 'soon'    },
-  { name: 'Reddit',      icon: '🤖', status: 'soon'    },
-  { name: 'TikTok',      icon: '🎵', status: 'live'    },
-  { name: 'Instagram',   icon: '📸', status: 'planned' },
-  { name: 'Facebook',    icon: '📘', status: 'planned' },
-  { name: 'Threads',     icon: '🧵', status: 'planned' },
-  { name: 'Snapchat',    icon: '👻', status: 'planned' },
-  { name: 'Lemon8',      icon: '🍋', status: 'planned' },
-  { name: 'BeReal',      icon: '📷', status: 'planned' },
-]
+/* ──────────────────────────────────────────────────────────────────────────────
+   COLOR IS A LANGUAGE ON THIS PAGE, NOT DECORATION.
 
-const AI_TOOLS: { name: string; icon: LucideIcon; credits: string; proOnly: boolean }[] = [
-  { name: 'Caption Generator',    icon: PenLine,        credits: '5 credits',    proOnly: false },
-  { name: 'Hashtag Generator',    icon: Hash,           credits: '5 credits',    proOnly: false },
-  { name: 'Post Rewriter',        icon: RefreshCw,      credits: '5 credits',    proOnly: false },
-  { name: 'Viral Hook Generator', icon: TrendingUp,     credits: '5 credits',    proOnly: false },
-  { name: 'Thread Generator',     icon: MessagesSquare, credits: '10 credits',   proOnly: false },
-  { name: 'Content Repurposer',   icon: Recycle,        credits: '10 credits',   proOnly: false },
-  { name: 'Post Score',           icon: Zap,            credits: '5 credits',    proOnly: false },
-  { name: 'SM-Pulse',             icon: Flame,          credits: '20 credits',   proOnly: false },
-  { name: 'SM-Radar',             icon: Radar,          credits: '20 credits',   proOnly: false },
-  { name: 'Content Gap Detector', icon: Search,         credits: '10 credits',   proOnly: false },
-  { name: 'AI Content Calendar',  icon: CalendarDays,   credits: '25 cr · Pro+', proOnly: true  },
-  { name: 'AI Image Generation',  icon: ImagePlus,      credits: '25 cr · Pro+', proOnly: true  },
+     amber  → queued · scheduled · in-flight · primary brand voice
+     violet → AI · SOMA · generation · credits
+     jade   → published · live · included · real
+
+   Anything that doesn't fit one of those three is neutral. That restriction is
+   the design: by the time a reader reaches the price beat we've taught them that
+   jade means shipped, without a word of explanation. Adding a fourth color, or
+   using jade because a section "needed some green," breaks the whole thing.
+   ────────────────────────────────────────────────────────────────────────────── */
+
+const LIVE_PLATFORMS = ['Bluesky', 'Discord', 'Telegram', 'Mastodon', 'X', 'TikTok', 'LinkedIn']
+const SOON_PLATFORMS = ['YouTube', 'Pinterest', 'Reddit']
+
+const AI_TOOLS: { name: string; icon: LucideIcon; credits: string }[] = [
+  { name: 'Caption Generator',    icon: PenLine,        credits: '5' },
+  { name: 'Hashtag Generator',    icon: Hash,           credits: '5' },
+  { name: 'Post Rewriter',        icon: RefreshCw,      credits: '5' },
+  { name: 'Viral Hook Generator', icon: TrendingUp,     credits: '5' },
+  { name: 'Thread Generator',     icon: MessagesSquare, credits: '10' },
+  { name: 'Content Repurposer',   icon: Recycle,        credits: '10' },
+  { name: 'Post Score',           icon: Zap,            credits: '5' },
+  { name: 'SM-Pulse',             icon: Flame,          credits: '20' },
+  { name: 'SM-Radar',             icon: Radar,          credits: '20' },
+  { name: 'Content Gap Detector', icon: Search,         credits: '10' },
+  { name: 'AI Content Calendar',  icon: CalendarDays,   credits: '25' },
+  { name: 'AI Image Generation',  icon: ImagePlus,      credits: '25' },
 ]
 
 const FEATURES: { icon: LucideIcon; title: string; desc: string }[] = [
   {
     icon: CalendarClock,
-    title: 'Smart Scheduling',
-    desc: 'Schedule across 7 social platforms, with Twitch and YouTube clips support built in. Bulk upload, automated queues, and platform-specific character limit enforcement included.',
-  },
-  {
-    icon: Bot,
-    title: '15+ AI Tools Built In',
-    desc: 'Generate captions, hashtags, viral hooks, full threads, content calendars, and post scores — all powered by Google Gemini.',
+    title: 'Scheduling',
+    desc: 'Seven platforms, bulk upload, automated queues, and per-platform character limits enforced before you hit send.',
   },
   {
     icon: BarChart3,
-    title: 'Real Analytics',
-    desc: 'Posting streaks, platform breakdown, best days and times, consistency scores, and engagement tracking. No inflated numbers.',
+    title: 'Analytics',
+    desc: 'Posting streaks, platform breakdown, best days and times, and engagement tracking. No inflated numbers.',
   },
   {
     icon: Link2,
-    title: 'Link in Bio Builder',
-    desc: 'A fully-featured bio link page built right in. Custom themes, button styles, social icons, and a public URL — free on every plan.',
+    title: 'SIGIL link in bio',
+    desc: 'A full bio link page with custom themes, button styles, and your own public URL. Free on every plan.',
+  },
+  {
+    icon: Clapperboard,
+    title: 'Clips Studio',
+    desc: 'Browse your Twitch clips and YouTube videos inside SocialMate and schedule them without downloading anything.',
   },
   {
     icon: Users,
-    title: 'Team Collaboration',
-    desc: 'Invite team members, assign roles, manage access, and run content approval workflows. Free plan includes 2 seats.',
+    title: 'Teams',
+    desc: 'Invite people, assign roles, and run approval workflows before anything goes out. Two seats on the free plan.',
   },
   {
     icon: Building2,
-    title: 'Client Workspaces',
-    desc: 'Pro includes 1 client workspace. Agency includes 10 — each fully isolated with their own accounts, posts, analytics, and team.',
+    title: 'Client workspaces',
+    desc: 'Fully isolated workspaces with their own accounts, posts, analytics, and team. Pro includes one, Agency includes five.',
   },
   {
     icon: Recycle,
-    title: 'Evergreen Recycling',
-    desc: 'Mark your best posts as evergreen and they automatically re-queue when your schedule runs empty. Set it once.',
+    title: 'Evergreen recycling',
+    desc: 'Mark your best posts as evergreen and they re-queue automatically when your schedule runs empty.',
   },
   {
     icon: Rss,
-    title: 'RSS / Blog Import',
-    desc: 'Pull posts from any RSS or Atom feed and turn them into scheduled social posts in one click. Works with any blog or podcast.',
+    title: 'RSS import',
+    desc: 'Pull from any RSS or Atom feed and turn posts into scheduled social posts. Works with any blog or podcast.',
   },
   {
     icon: Telescope,
-    title: 'Competitor Tracking',
-    desc: 'Track up to 3 competitor accounts on every plan including free. Know what they\'re posting before you do.',
+    title: 'Competitor tracking',
+    desc: 'Track up to three competitor accounts on every plan, including free. Know what they posted before you write.',
   },
 ]
 
-const COMPARISON = [
-  {
-    label: 'What you get',
-    industry: 'Typical tools',
-    socialmate: 'SocialMate',
-    header: true,
-  },
-  { label: 'Starting price',          industry: '$25–$99/month',        socialmate: '$0 — free forever'   },
-  { label: 'Free plan',               industry: '❌ Removed or crippled', socialmate: '✅ Genuinely free'  },
-  { label: 'AI writing tools',        industry: '1–2 basic',            socialmate: '15+ tools included'  },
-  { label: 'Bulk scheduling',         industry: 'Paid add-on',          socialmate: '✅ Free'              },
-  { label: 'Link in bio',             industry: 'Separate paid tool',   socialmate: '✅ Free on all plans' },
-  { label: 'Competitor tracking',     industry: 'Paid add-on',          socialmate: '✅ Free'              },
-  { label: 'Evergreen recycling',     industry: 'Paid add-on',          socialmate: '✅ Free'              },
-  { label: 'RSS import',              industry: '❌ Not included',       socialmate: '✅ Free'              },
-  { label: 'Team seats',              industry: 'Per seat fee',         socialmate: '2 seats free'        },
-  { label: 'Client workspaces',       industry: 'Enterprise only',      socialmate: 'From $5/mo'          },
-  { label: 'White label',             industry: 'Enterprise only',      socialmate: 'From $20/mo'         },
+const FREE_TIER = [
+  { value: '50',      label: 'AI credits per month' },
+  { value: '100',     label: 'Posts per month' },
+  { value: '2',       label: 'Team seats' },
+  { value: '3',       label: 'Competitor accounts' },
+  { value: '1 GB',    label: 'Media storage' },
+  { value: '30 days', label: 'Analytics history' },
+  { value: '2 weeks', label: 'Scheduling window' },
+  { value: 'Free',    label: 'SIGIL link in bio page' },
 ]
 
+const GUIDES = [
+  { vol: '01', title: 'Starting a Business From Scratch', href: '/guides/starting-a-business' },
+  { vol: '02', title: 'Marketing on Zero Budget',         href: '/guides/marketing-zero-budget' },
+  { vol: '03', title: 'Business Credit, Legal & Tax',     href: '/guides/business-credit-legal' },
+  { vol: '04', title: 'Vibe Coding with AI',              href: '/guides/vibe-coding-with-ai' },
+]
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ ref?: string }> }) {
   const params = await searchParams
   const refCode = params?.ref || ''
 
-  const live    = PLATFORMS.filter(p => p.status === 'live')
-  const soon    = PLATFORMS.filter(p => p.status === 'soon')
-  const planned = PLATFORMS.filter(p => p.status === 'planned')
-
   return (
-    <div className="dark relative isolate min-h-screen bg-gray-950">
-      <AmbientBackground />
-
+    <div className="dark min-h-screen bg-void font-body text-ink-body">
       {refCode && <ReferralBanner refCode={refCode} />}
 
-      {/* NAV */}
       <PublicNav />
 
-      {/* HERO */}
-      <section className="relative max-w-5xl mx-auto px-6 pt-24 pb-20 text-center overflow-hidden">
-        {/* Background depth glow */}
-        {/* Radial gradients instead of blur() filters — same soft-glow look without
-            forcing a full-area blur compositing pass on first paint (cheaper FCP) */}
-        <div className="absolute inset-0 -z-10 pointer-events-none">
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full" style={{ background: 'radial-gradient(closest-side, rgba(245,158,11,0.08), transparent 70%)' }} />
-          <div className="absolute top-1/3 left-1/4 w-[350px] h-[350px] rounded-full" style={{ background: 'radial-gradient(closest-side, rgba(147,51,234,0.08), transparent 70%)' }} />
-          <div className="absolute top-1/4 right-1/4 w-[300px] h-[300px] rounded-full" style={{ background: 'radial-gradient(closest-side, rgba(37,99,235,0.06), transparent 70%)' }} />
-        </div>
-
-        {/* Badge */}
-        <div className="inline-flex items-center gap-2 bg-amber-500/15 border border-amber-500/30 text-white text-xs font-bold px-4 py-2 rounded-full mb-8">
-          <Sparkles className="w-3.5 h-3.5 text-amber-400" strokeWidth={2.5} />
-          Free plan, no card required · Pro from $5/mo · 7 live platforms · 15+ AI tools
-        </div>
-
-        {/* Headline */}
-        <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight mb-6 leading-[1.08] text-white">
-          Post everywhere.<br />
-          <span className="bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 bg-clip-text text-transparent">
-            All at once.
-          </span>
-        </h1>
-
-        <p className="text-gray-400 text-lg max-w-xl mx-auto mb-10 leading-relaxed">
-          Schedule to 7 social platforms, write better content with 15+ AI tools, and track what&apos;s working — all free. Pro from $5/month.
-        </p>
-
-        {/* Platform pill icons */}
-        <div className="flex flex-wrap items-center justify-center gap-2 mb-10">
-          {live.map(p => (
-            <div key={p.name}
-              className="flex items-center gap-1.5 bg-gray-800/80 border border-gray-700/60 text-gray-200 text-xs font-semibold px-3 py-1.5 rounded-xl backdrop-blur-sm hover:border-gray-500 transition-colors">
-              {hasPlatformIcon(p.name) ? <PlatformIcon name={p.name} size={13} /> : <span>{p.icon}</span>}
-              <span>{p.name}</span>
+      {/* ══ HERO ═══════════════════════════════════════════════════════════
+          Split Console. Copy stays a tight readable column; the loop lives on
+          the right as the illuminated screen of the instrument. */}
+      {/* overflow-x-clip contains the decorative bloom behind the SOMA panel,
+          whose -inset-8 otherwise pushes the document 12px wider than a 360px
+          viewport. `clip` rather than `hidden`: it doesn't create a scroll
+          container, so it can't break sticky positioning. */}
+      <section className="mx-auto w-full max-w-7xl overflow-x-clip px-gutter pt-20 pb-section lg:pt-28">
+        {/* min-w-0 on both columns is load-bearing, not defensive. Grid children
+            default to min-width:auto, and the loop panel's prompt line is a fixed
+            37ch of nowrap mono — without this it sets the column's min-content
+            width and shoves the headline and buttons off a 360px screen. */}
+        <div className="grid items-center gap-14 lg:grid-cols-[1.2fr_1fr] lg:gap-20">
+          <div className="min-w-0">
+            <div className="inline-flex items-center gap-2.5 rounded-full border border-edge bg-surface px-3.5 py-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-jade" aria-hidden="true" />
+              <span className="font-mono text-eyebrow uppercase text-ink-muted">
+                7 platforms live
+              </span>
             </div>
-          ))}
-          <div className="flex items-center gap-1.5 bg-gray-800/40 border border-gray-700/40 text-gray-500 text-xs font-semibold px-3 py-1.5 rounded-xl">
-            + more coming
-          </div>
-        </div>
 
-        {/* CTAs */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-4">
-          <Link href="/signup"
-            className="bg-amber-500 hover:bg-amber-400 text-black font-bold px-8 py-4 rounded-2xl transition-all text-base w-full sm:w-auto text-center shadow-lg shadow-amber-500/25">
-            Create free account →
-          </Link>
-          <Link href="/pricing"
-            className="text-gray-400 font-semibold hover:text-white transition-all text-base">
-            See pricing →
-          </Link>
-        </div>
-        <p className="text-xs text-gray-500">No card required · Free plan never expires · Setup in 60 seconds</p>
+            {/* display-lg, not display-xl. In a split layout 76px forces this
+                headline onto four lines and it stops reading as confident and
+                starts reading as shouting. 56px on two lines is the composed
+                version, and restraint is the whole thesis. */}
+            <h1 className="mt-7 font-display text-display-lg text-balance text-ink-high">
+              Post everywhere.
+              <br />
+              Stop opening six tabs.
+            </h1>
 
-        {/* Product mockup — the compose-once-publish-everywhere loop, animated */}
-        <HeroMockup />
-
-        {/* STATS */}
-        <div className="grid grid-cols-3 gap-4 sm:gap-8 mt-14 max-w-xl mx-auto">
-          {[
-            { value: '7',   label: 'social platforms live' },
-            { value: '15+', label: 'AI tools included' },
-            { value: '$0',  label: 'to get started' },
-          ].map(stat => (
-            <div key={stat.label} className="text-center">
-              <p className="text-4xl font-extrabold tracking-tight text-white">{stat.value}</p>
-              <p className="text-xs text-gray-400 font-medium mt-1">{stat.label}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Live user stats */}
-        <div className="mt-6">
-          <LazyUserStatsCounter />
-        </div>
-
-        {/* Founder card — kept but smaller / lower */}
-        <div className="mt-10 max-w-sm mx-auto bg-gray-900/60 border border-gray-800 rounded-2xl px-5 py-3.5 text-left backdrop-blur-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-[10px] font-extrabold text-amber-400 flex-shrink-0">JB</div>
-            <div>
-              <p className="text-xs font-bold text-gray-200">Built solo by Joshua Bostic</p>
-              <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">Bootstrapped. No VC. No $99/month trap.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FREE TIER CALLOUT */}
-      <section className="bg-black/30 text-white py-16">
-        <div className="max-w-5xl mx-auto px-6">
-          <Reveal><div className="text-center mb-10">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Free plan — no catch</p>
-            <h2 className="text-3xl font-extrabold tracking-tight mb-3">
-              Most tools charge for this.<br className="hidden md:block" /> We don't.
-            </h2>
-            <p className="text-gray-400 text-sm max-w-xl mx-auto">
-              SocialMate's free plan is designed to be genuinely useful — not a crippled demo.
-              Here's exactly what you get at $0/month, forever.
+            {/* Chanel's rule: this used to name all seven platforms, which the
+                mono row directly below already answers. Saying it twice was the
+                accessory. This line does the job the list can't — what the thing
+                is for. */}
+            <p className="mt-6 max-w-lg text-body-lg text-pretty text-ink-muted">
+              One compose box, one schedule, and a queue that tells you what
+              actually went live.
             </p>
-          </div></Reveal>
-          <Reveal delay={80}><div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-            {([
-              { icon: Bot,          value: '50',      label: 'AI credits / month'           },
-              { icon: CalendarDays, value: '2 weeks', label: 'Scheduling window'            },
-              { icon: Users,        value: '2',        label: 'Team seats included'         },
-              { icon: HardDrive,    value: '1 GB',     label: 'Media storage'               },
-              { icon: FileText,     value: '100',      label: 'Posts / month'               },
-              { icon: BarChart3,    value: '30 days',  label: 'Analytics history'           },
-              { icon: Link2,        value: 'Free',     label: 'Link in Bio page'            },
-              { icon: Telescope,    value: '3',        label: 'Competitor accounts tracked' },
-            ] as { icon: LucideIcon; value: string; label: string }[]).map(stat => (
-              <div key={stat.label} className="lm-card bg-white/10 rounded-2xl p-4 text-center hover:bg-white/15">
-                <stat.icon className="w-5 h-5 text-amber-400 mx-auto mb-2" strokeWidth={2} />
-                <p className="text-lg font-extrabold">{stat.value}</p>
-                <p className="text-xs text-gray-400 mt-0.5">{stat.label}</p>
-              </div>
-            ))}
-          </div></Reveal>
-          <div className="text-center">
-            <Link href="/signup"
-              className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
-              Start free — no card needed →
-            </Link>
-          </div>
-        </div>
-      </section>
 
-      {/* PLATFORMS */}
-      <section id="platforms" className="border-t border-gray-100 dark:border-gray-800 py-16 bg-white/[0.02]">
-        <div className="max-w-5xl mx-auto px-6">
-          <Reveal><div className="text-center mb-10">
-            <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Platform support</p>
-            <h2 className="text-3xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">7 social platforms live. Twitch &amp; YouTube clips built in.</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-lg mx-auto">
-              Bluesky, Discord, Telegram, Mastodon, X/Twitter, TikTok, and LinkedIn live now. Twitch clips and YouTube videos schedulable directly inside SocialMate. Reddit and more on the roadmap.
+            <div className="mt-9 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
+              <Button href="/signup" variant="primary">Create free account</Button>
+              <Button href="/pricing" variant="secondary">See pricing</Button>
+            </div>
+
+            <p className="mt-5 font-mono text-eyebrow uppercase text-ink-faint">
+              No card required · Free plan never expires
             </p>
-          </div></Reveal>
-          <div className="space-y-6">
-            <div>
-              <p className="text-xs font-bold text-green-600 uppercase tracking-widest mb-3 text-center">Live now</p>
-              <div className="flex flex-wrap justify-center gap-3">
-                {live.map(p => (
-                  <div key={p.name}
-                    className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border-2 border-green-200 dark:border-green-800 rounded-xl text-sm font-bold text-gray-800 dark:text-gray-200">
-                    {hasPlatformIcon(p.name) ? <PlatformIcon name={p.name} size={15} /> : <span>{p.icon}</span>}{p.name}
-                    <span className="text-xs font-bold text-green-600 bg-green-50 dark:bg-green-950 px-1.5 py-0.5 rounded-full">Live</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div>
-              <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-3 text-center">Coming very soon</p>
-              <div className="flex flex-wrap justify-center gap-3">
-                {soon.map(p => (
-                  <div key={p.name}
-                    className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-blue-100 dark:border-blue-900 rounded-xl text-sm font-semibold text-gray-600 dark:text-gray-400">
-                    {hasPlatformIcon(p.name) ? <PlatformIcon name={p.name} size={15} /> : <span>{p.icon}</span>}{p.name}
-                    <span className="text-xs font-bold text-blue-500 bg-blue-50 dark:bg-blue-950 px-1.5 py-0.5 rounded-full">Soon</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div>
-              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3 text-center">Planned</p>
-              <div className="flex flex-wrap justify-center gap-3">
-                {planned.map(p => (
-                  <div key={p.name}
-                    className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl text-sm font-semibold text-gray-400 dark:text-gray-500">
-                    {hasPlatformIcon(p.name) ? <PlatformIcon name={p.name} size={15} className="opacity-60 saturate-50" /> : <span>{p.icon}</span>}{p.name}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* CLIPS STUDIO */}
-      <section className="py-20 bg-gradient-to-br from-purple-950 via-gray-950 to-black text-white">
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="text-center mb-14">
-            <div className="inline-flex items-center gap-2 bg-purple-900/60 border border-purple-700/50 text-purple-300 text-xs font-bold px-4 py-2 rounded-full mb-6">
-              <Clapperboard className="w-3.5 h-3.5" strokeWidth={2.5} />
-              Built for streamers &amp; content creators
-            </div>
-            <h2 className="text-3xl font-extrabold tracking-tight mb-4">
-              From clip to scheduled post.<br className="hidden sm:block" /> No extra tabs.
-            </h2>
-            <p className="text-gray-400 text-sm max-w-xl mx-auto leading-relaxed">
-              Browse your Twitch clips or YouTube videos directly inside SocialMate and
-              schedule them to 7 platforms in one click. No downloading. No app-switching.
-              No copy-pasting URLs into five different tabs.
-            </p>
-          </div>
-
-          {/* Three feature cards */}
-          <Reveal><div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-12">
-            <div className="lm-card bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-purple-500/40">
-              <div className="w-11 h-11 rounded-xl bg-purple-500/15 border border-purple-500/25 flex items-center justify-center mb-4">
-                <svg viewBox="0 0 24 24" width={20} height={20} fill="#A970FF" aria-hidden="true"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/></svg>
-              </div>
-              <h3 className="font-bold text-base mb-2">Twitch Clips</h3>
-              <p className="text-sm text-gray-400 leading-relaxed">
-                Connect your Twitch account and your top clips appear in a thumbnail grid —
-                view counts, duration, everything. Hit Schedule and you&apos;re done.
-              </p>
-            </div>
-            <div className="lm-card bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-red-500/40">
-              <div className="w-11 h-11 rounded-xl bg-red-500/15 border border-red-500/25 flex items-center justify-center mb-4">
-                <PlatformIcon name="YouTube" size={20} />
-              </div>
-              <h3 className="font-bold text-base mb-2">YouTube Videos</h3>
-              <p className="text-sm text-gray-400 leading-relaxed">
-                Paste your channel URL — that&apos;s it. No API key, no approval process, no
-                developer account. Your latest public videos load instantly and are ready to schedule.
-              </p>
-            </div>
-            <div className="lm-card bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-blue-500/40">
-              <div className="w-11 h-11 rounded-xl bg-blue-500/15 border border-blue-500/25 flex items-center justify-center mb-4">
-                <Search className="w-5 h-5 text-blue-400" strokeWidth={2.2} />
-              </div>
-              <h3 className="font-bold text-base mb-2">Search Any Channel</h3>
-              <p className="text-sm text-gray-400 leading-relaxed">
-                You don&apos;t even need to own the channel. Search any Twitch streamer&apos;s top clips
-                and schedule them directly — perfect for clippers and fan accounts.
-              </p>
-            </div>
-          </div></Reveal>
-
-          {/* Workflow steps */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 mb-12 text-center">
-            {[
-              { step: '1', label: 'Browse your clips' },
-              { step: '2', label: 'Pick one' },
-              { step: '3', label: 'Schedule to 7 platforms' },
-            ].map((item, i) => (
-              <div key={item.step} className="flex items-center gap-2 sm:gap-3">
-                <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5">
-                  <span className="text-xs font-bold text-purple-400">{item.step}</span>
-                  <span className="text-sm font-semibold text-white">{item.label}</span>
-                </div>
-                {i < 2 && (
-                  <span className="text-gray-600 text-lg hidden sm:block">→</span>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {/* CTA */}
-          <div className="text-center">
-            <Link
-              href="/signup"
-              className="inline-block bg-purple-600 hover:bg-purple-500 text-white font-bold px-8 py-3.5 rounded-2xl transition-all text-sm">
-              Try Clips Studio free →
-            </Link>
-            <p className="text-xs text-gray-600 mt-3">Free on all plans · Twitch OAuth · YouTube via channel URL</p>
-          </div>
-        </div>
-      </section>
-
-      {/* AI TOOLS */}
-      <section className="py-20">
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">AI-Powered</p>
-            <h2 className="text-3xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">15+ AI tools built in</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
-              Every tool runs on Google Gemini. 50 credits included free every month —
-              no separate AI subscription, no hidden costs. Credits exist to keep the service sustainable for everyone.
-            </p>
-          </div>
-          <Reveal><div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
-            {AI_TOOLS.map(tool => (
-              <div key={tool.name}
-                className="lm-card bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-4 text-center hover:border-amber-500/40 hover:shadow-xl hover:shadow-amber-500/5 relative">
-                {tool.proOnly && (
-                  <span className="absolute top-2 right-2 text-xs font-bold bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 px-1.5 py-0.5 rounded-full">
-                    Pro+
-                  </span>
-                )}
-                <div className="w-9 h-9 mx-auto rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-2.5">
-                  <tool.icon className="w-4 h-4 text-amber-500" strokeWidth={2.2} />
-                </div>
-                <p className="text-xs font-bold leading-snug mb-1 text-gray-900 dark:text-gray-100">{tool.name}</p>
-                <p className="text-xs text-gray-400 dark:text-gray-500">{tool.credits}</p>
-              </div>
-            ))}
-          </div></Reveal>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-            <div className="bg-black rounded-2xl p-6 text-white">
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <p className="font-extrabold text-lg">SM-Pulse</p>
-                  <p className="text-xs text-gray-400">Real-time trend intelligence</p>
-                </div>
-                <span className="text-xs font-bold px-2.5 py-1 bg-white/20 rounded-full flex-shrink-0">20 credits</span>
-              </div>
-              <p className="text-xs text-gray-400 leading-relaxed">
-                Scans Reddit and YouTube right now to surface trending topics, viral formats,
-                and engagement spikes in your niche — before you create your next post.
-              </p>
-            </div>
-            <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6">
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <p className="font-extrabold text-lg text-gray-900 dark:text-gray-100">SM-Radar</p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500">Personal growth intelligence</p>
-                </div>
-                <span className="text-xs font-bold px-2.5 py-1 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full flex-shrink-0">20 credits</span>
-              </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                Analyzes live Reddit and YouTube data to surface content gaps, competitor weaknesses,
-                and the single best content strategy for your niche this week.
-              </p>
-            </div>
-          </div>
-
-          <div className="text-center">
-            <Link href="/ai-features"
-              className="inline-block bg-black text-white font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all text-sm">
-              See all 15+ AI tools →
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* FEATURE GRID */}
-      <section className="py-20 bg-white/[0.02] border-t border-gray-100 dark:border-gray-800">
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Full feature set</p>
-            <h2 className="text-3xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">Everything you need to grow</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Every feature that matters. Most of them free.</p>
-          </div>
-          <Reveal><div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {FEATURES.map((f, i) => (
-              <div key={i} className="lm-card bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 hover:border-amber-500/40 hover:shadow-xl hover:shadow-amber-500/5">
-                <div className="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-4">
-                  <f.icon className="w-5 h-5 text-amber-500" strokeWidth={2} />
-                </div>
-                <h3 className="text-sm font-extrabold mb-2 text-gray-900 dark:text-gray-100">{f.title}</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{f.desc}</p>
-              </div>
-            ))}
-          </div></Reveal>
-        </div>
-      </section>
-
-      {/* COMPARISON */}
-      <section className="py-20 bg-transparent">
-        <div className="max-w-4xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">How we compare</p>
-            <h2 className="text-3xl font-extrabold tracking-tight mb-4 text-gray-900 dark:text-gray-100">
-              What you've been paying for<br className="hidden md:block" /> vs what you actually need
-            </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400 max-w-xl mx-auto">
-              Social media management tools removed their free plans, locked features behind enterprise tiers,
-              and kept raising prices. SocialMate went the other direction.
-            </p>
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl overflow-x-auto">
-            <div className="min-w-[420px]">
-              {/* TABLE HEADER */}
-              <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-100 dark:border-gray-700 px-4 md:px-6 py-4">
-                <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Feature</span>
-                <span className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide text-center">Typical tools</span>
-                <span className="text-xs font-bold text-black dark:text-white uppercase tracking-wide text-center">SocialMate</span>
-              </div>
-
-              {COMPARISON.filter(r => !r.header).map((row, i) => (
-                <div key={i} className={`grid grid-cols-3 px-4 md:px-6 py-3.5 items-center ${
-                  i % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50/50 dark:bg-gray-800/50'
-                } border-b border-gray-50 dark:border-gray-700 last:border-0`}>
-                  <span className="text-xs font-semibold text-gray-700 dark:text-gray-300">{row.label}</span>
-                  <span className="text-xs text-gray-400 dark:text-gray-500 text-center">{row.industry}</span>
-                  <span className="text-xs font-bold text-black dark:text-white text-center">{row.socialmate}</span>
-                </div>
+            {/* Platform marks render in mono, not brand colors. Logos are data;
+                color on this page is reserved for state. */}
+            <div className="mt-10 flex flex-wrap items-center gap-x-5 gap-y-3 border-t border-edge pt-7">
+              {LIVE_PLATFORMS.map(p => (
+                <span key={p} className="inline-flex items-center gap-2 text-ink-faint">
+                  <PlatformIcon name={p} size={15} mono />
+                  <span className="font-mono text-eyebrow uppercase">{p}</span>
+                </span>
               ))}
             </div>
           </div>
 
-          <div className="mt-8 bg-black rounded-2xl p-6 text-white text-center">
-            <p className="text-sm font-extrabold mb-1">
-              Everything above. Free to start. $5/month to grow.
-            </p>
-            <p className="text-xs text-gray-400 mb-1">
-              No per-seat fees. No feature gating for basics. No removed free plan.
-            </p>
-            <p className="text-xs text-amber-400 mb-5">
-              Features marked "✅ Free" are <strong>always free</strong>. AI tools use credits — free users get 50/month to keep infrastructure sustainable.
-            </p>
-            <Link href="/signup"
-              className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
-              Get started free →
-            </Link>
+          <div className="min-w-0">
+            <HeroLoop />
           </div>
         </div>
       </section>
 
-      {/* LINK IN BIO */}
-      <section className="py-20 bg-white/[0.02] border-t border-gray-100 dark:border-gray-800">
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div>
-              <span className="inline-block text-xs font-bold bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 px-3 py-1 rounded-full mb-4">
-                Free bio link builder
-              </span>
-              <h2 className="text-3xl font-extrabold tracking-tight mb-4 text-gray-900 dark:text-gray-100">
-                Link in Bio —<br />included free
-              </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-4">
-                Dedicated bio link tools charge $10–20/month for what SocialMate includes on every plan at no cost.
-                Build your page, add your links, and share one URL everywhere.
+      {/* ══ PLATFORMS ══════════════════════════════════════════════════════ */}
+      <Section id="platforms" tone="raised" divide>
+        <Eyebrow>Platform support</Eyebrow>
+        <Display size="md" className="mt-5 max-w-2xl">
+          Seven live. Including the ones nobody else schedules.
+        </Display>
+        <Body className="mt-5 max-w-xl text-ink-muted">
+          Discord and Telegram scheduling is genuinely rare. Bluesky and Mastodon are
+          first-class, not afterthoughts. Twitch clips and YouTube videos schedule
+          straight from inside the app.
+        </Body>
+
+        <div className="mt-12 grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3 lg:grid-cols-4">
+          {LIVE_PLATFORMS.map(p => (
+            <div key={p} className="flex items-center gap-3 border-b border-edge py-3.5">
+              <PlatformIcon name={p} size={17} mono />
+              <span className="flex-1 text-small text-ink-body">{p}</span>
+              {/* jade = live. Its only job on this page. */}
+              <span className="font-mono text-eyebrow uppercase text-jade">Live</span>
+            </div>
+          ))}
+          {SOON_PLATFORMS.map(p => (
+            <div key={p} className="flex items-center gap-3 border-b border-edge py-3.5 opacity-50">
+              <PlatformIcon name={p} size={17} mono />
+              <span className="flex-1 text-small text-ink-muted">{p}</span>
+              <span className="font-mono text-eyebrow uppercase text-ink-faint">Soon</span>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      {/* ══ SOMA / AI ══════════════════════════════════════════════════════
+          The only section allowed to be violet, because it is the only section
+          about machine intelligence. */}
+      <Section divide>
+        <Eyebrow tone="violet">SOMA · AI</Eyebrow>
+        <Display size="md" className="mt-5 max-w-2xl">
+          SOMA writes in your voice while you&apos;re asleep.
+        </Display>
+        <Body className="mt-5 max-w-xl text-ink-muted">
+          Answer a voice interview once and SOMA learns how you actually sound. Then it
+          drafts a week of posts, per platform, and puts them in your queue for review.
+          Fifteen more AI tools sit alongside it. Fifty credits a month, free.
+        </Body>
+
+        <Reveal>
+          <div className="mt-12 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-edge bg-edge sm:grid-cols-3 lg:grid-cols-4">
+            {AI_TOOLS.map(tool => (
+              <div key={tool.name} className="bg-surface p-5">
+                <tool.icon className="h-4 w-4 text-violet" strokeWidth={2} aria-hidden="true" />
+                <p className="mt-4 text-small leading-snug text-ink-body">{tool.name}</p>
+                <p className="mt-1.5 font-mono text-eyebrow uppercase text-ink-faint">
+                  {tool.credits} credits
+                </p>
+              </div>
+            ))}
+          </div>
+        </Reveal>
+
+        <div className="mt-10">
+          <Button href="/ai-features" variant="secondary">See every AI tool</Button>
+        </div>
+      </Section>
+
+      {/* ══ FEATURES ═══════════════════════════════════════════════════════ */}
+      <Section tone="raised" divide>
+        <Eyebrow>The rest of it</Eyebrow>
+        <Display size="md" className="mt-5 max-w-2xl">
+          Everything that usually costs extra.
+        </Display>
+
+        <div className="mt-12 grid gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+          {FEATURES.map(f => (
+            <div key={f.title}>
+              <f.icon className="h-4.5 w-4.5 text-ink-muted" strokeWidth={2} aria-hidden="true" />
+              <h3 className="mt-4 font-display text-title text-ink-high">{f.title}</h3>
+              <p className="mt-2.5 text-small leading-relaxed text-ink-muted">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      {/* ══ FREE TIER ══════════════════════════════════════════════════════
+          jade here means "included," which is the same promise as "live." */}
+      <Section divide>
+        <Eyebrow tone="jade">Included at $0</Eyebrow>
+        <Display size="md" className="mt-5 max-w-2xl">
+          The free plan is not a trial.
+        </Display>
+        <Body className="mt-5 max-w-xl text-ink-muted">
+          No countdown, no card, no feature you rely on disappearing in fourteen days.
+          Credits exist to cover the cost of AI compute, and nothing else is gated behind
+          them.
+        </Body>
+
+        <div className="mt-12 grid grid-cols-2 gap-x-8 gap-y-6 sm:grid-cols-4">
+          {FREE_TIER.map(item => (
+            <div key={item.label} className="border-t border-edge pt-4">
+              <p className="font-mono text-2xl font-semibold tracking-tight text-ink-high">
+                {item.value}
               </p>
-              <div className="space-y-2 mb-6">
-                {[
-                  'Custom themes and button styles',
-                  'Social profile icons and links',
-                  'Your own public URL — free',
-                  'Custom domain — earn free via referrals, or included on Pro+',
-                  'Remove SocialMate branding on Pro+',
-                ].map(f => (
-                  <div key={f} className="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-400">
-                    <Check className="w-3.5 h-3.5 text-green-500 flex-shrink-0" strokeWidth={3} />{f}
-                  </div>
-                ))}
-              </div>
-              <Link href="/signup"
-                className="inline-block bg-black text-white font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all text-sm">
-                Create your free bio page →
-              </Link>
+              <p className="mt-2 text-small leading-snug text-ink-muted">{item.label}</p>
             </div>
-            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 shadow-sm">
-              <div className="bg-gray-900 rounded-xl p-6 text-white text-center">
-                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-sm font-extrabold text-black mx-auto mb-3">YN</div>
-                <p className="font-bold text-sm mb-1">Your Name</p>
-                <p className="text-xs text-gray-400 mb-4">Your bio goes here</p>
-                <div className="space-y-2">
-                  {([
-                    { icon: Globe,    label: 'My Website' },
-                    { icon: FileText, label: 'Latest Post' },
-                    { icon: Mail,     label: 'Contact Me' },
-                  ] as { icon: LucideIcon; label: string }[]).map(link => (
-                    <div key={link.label} className="bg-white text-gray-900 text-xs font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2">
-                      <link.icon className="w-3.5 h-3.5" strokeWidth={2.4} />
-                      {link.label}
-                    </div>
-                  ))}
-                </div>
-                <p className="text-xs text-gray-600 mt-4">Made with SocialMate · Free</p>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
-      </section>
 
-      {/* HOW WE STAY FREE */}
-      <section className="py-20 bg-transparent">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">Built to last</p>
-          <h2 className="text-3xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">
-            Free should mean free.<br className="hidden md:block" /> Not a limited demo.
-          </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 max-w-2xl mx-auto mb-8 leading-relaxed">
-            SocialMate keeps infrastructure sustainable through a credit system — so we can give every free user tools that actually work without burning out. AI generation is the only thing credits gate, and free users get 50 every month. Everything else — scheduling, analytics, link in bio, bulk upload — is free, always.
-          </p>
+        <div className="mt-12 flex flex-wrap items-center gap-x-8 gap-y-3">
+          {['Scheduling', 'Bulk upload', 'Analytics', 'Link in bio', 'Competitor tracking'].map(x => (
+            <span key={x} className="inline-flex items-center gap-2 text-small text-ink-muted">
+              <Check className="h-3.5 w-3.5 text-jade" strokeWidth={3} aria-hidden="true" />
+              {x}
+            </span>
+          ))}
+        </div>
+      </Section>
 
-          {/* NO-ADS BADGE */}
-          <div className="inline-flex items-center gap-2.5 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl px-5 py-3 mb-12">
-            <ShieldCheck className="w-5 h-5 text-green-500 flex-shrink-0" strokeWidth={2.2} />
-            <span className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-              No ads in your feed. No data selling. Just clean tools that actually work — we suggest, never spam.
+      {/* ══ THE PRICE BEAT ═════════════════════════════════════════════════
+          The section with the least going on hits the hardest. No competitor is
+          named — the reader does the math themselves, and it lands ten times
+          harder because they did. */}
+      <Section width="narrow" divide className="text-center">
+        <Eyebrow>What it costs</Eyebrow>
+
+        <p className="mt-14 font-mono text-numeral text-ink-high">$5</p>
+        <p className="mt-6 text-body text-ink-muted">SocialMate Pro. Per month.</p>
+
+        <p className="mx-auto mt-20 max-w-md text-body-lg text-pretty text-ink-muted">
+          The going rate for this category is{' '}
+          <span className="font-mono text-ink-faint line-through">$99</span> a month.
+          We didn&apos;t remove features to get here.
+        </p>
+
+        <div className="mt-12 flex justify-center">
+          <Button href="/signup" variant="primary">Create free account</Button>
+        </div>
+      </Section>
+
+      {/* ══ GUIDES ═════════════════════════════════════════════════════════
+          Numbered markers are legitimate here: the volumes are a sequence. */}
+      <Section tone="raised" divide>
+        <Eyebrow>Gilgamesh&apos;s Guides</Eyebrow>
+        <Display size="md" className="mt-5 max-w-2xl">
+          Four playbooks. No email required.
+        </Display>
+
+        <Reveal>
+          <div className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-edge bg-edge sm:grid-cols-2">
+            {GUIDES.map(g => (
+              <Link
+                key={g.vol}
+                href={g.href}
+                className="tap group flex items-baseline gap-5 bg-surface p-6 hover:bg-raised"
+              >
+                <span className="font-mono text-mono text-ink-faint">{g.vol}</span>
+                <span className="flex-1 text-body text-ink-body group-hover:text-ink-high">
+                  {g.title}
+                </span>
+              </Link>
+            ))}
+          </div>
+        </Reveal>
+
+        <div className="mt-10">
+          <Button href="/guides" variant="secondary">Browse all guides</Button>
+        </div>
+      </Section>
+
+      {/* ══ SM-GIVE ════════════════════════════════════════════════════════ */}
+      <Section width="narrow" divide>
+        <Eyebrow>SM-Give</Eyebrow>
+        <Display size="md" className="mt-5">
+          Two percent of every subscription goes out the door.
+        </Display>
+        <Body className="mt-5 max-w-xl text-ink-muted">
+          School supply bookbags, baby essentials for struggling parents, and homeless care
+          packages. No corporate partners, no sponsors, no matching-gift press release.
+        </Body>
+
+        <div className="mt-10 flex flex-wrap gap-x-8 gap-y-4">
+          {([
+            { icon: Backpack, label: 'School supplies' },
+            { icon: Baby,     label: 'Baby essentials' },
+            { icon: HomeIcon, label: 'Homeless care' },
+          ] as { icon: LucideIcon; label: string }[]).map(tag => (
+            <span key={tag.label} className="inline-flex items-center gap-2.5 text-small text-ink-muted">
+              <tag.icon className="h-4 w-4 text-ink-faint" strokeWidth={2} aria-hidden="true" />
+              {tag.label}
+            </span>
+          ))}
+        </div>
+
+        <div className="mt-10">
+          <Button href="/give" variant="secondary">How SM-Give works</Button>
+        </div>
+      </Section>
+
+      {/* ══ FINAL CTA ══════════════════════════════════════════════════════ */}
+      <Section width="narrow" divide className="text-center">
+        <Display size="lg">Start posting everywhere.</Display>
+        <Body className="mx-auto mt-6 max-w-md text-ink-muted">
+          Free plan, no card, set up in about a minute. Upgrade to Pro for $5 whenever it
+          earns it.
+        </Body>
+        <div className="mt-10 flex justify-center">
+          <Button href="/signup" variant="primary">Create free account</Button>
+        </div>
+
+        {/* Real numbers, pulled live. Renders nothing at zero rather than
+            inventing social proof. */}
+        <div className="mt-14">
+          <LazyUserStatsCounter />
+        </div>
+      </Section>
+
+      {/* ══ FOOTER ═════════════════════════════════════════════════════════ */}
+      <footer className="border-t border-edge bg-void">
+        <div className="mx-auto w-full max-w-6xl px-gutter py-16">
+          <div className="mb-12 flex items-center gap-3">
+            <img src="/logo.png" alt="" className="h-7 w-7 rounded-lg" />
+            <span className="text-small font-medium text-ink-high">SocialMate</span>
+            <span className="font-mono text-eyebrow uppercase text-ink-faint">
+              Gilgamesh Enterprise LLC
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-10">
-            {([
-              {
-                icon: BadgeCheck,
-                title: 'Genuinely generous free tier',
-                desc: 'Scheduling, bulk upload, analytics, link in bio, competitor tracking, 2 team seats, and 50 AI credits per month — all at $0. No hidden paywalls on the basics.',
-              },
-              {
-                icon: Zap,
-                title: 'Credits only gate AI costs',
-                desc: "AI generation uses real compute — we use credits to keep that sustainable, not as a lever to squeeze upgrades. The credit system lets the free tier thrive.",
-              },
-              {
-                icon: Lock,
-                title: 'No bait-and-switch',
-                desc: 'Free means free. The free plan is not a trial, not a countdown, and not designed to frustrate you into upgrading. What you see is what you get.',
-              },
-            ] as { icon: LucideIcon; title: string; desc: string }[]).map((card, i) => (
-              <div key={i} className="lm-card bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 text-left hover:border-amber-500/40 hover:shadow-xl hover:shadow-amber-500/5">
-                <div className="w-11 h-11 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-4">
-                  <card.icon className="w-5 h-5 text-amber-500" strokeWidth={2} />
-                </div>
-                <h3 className="text-sm font-extrabold mb-2 text-gray-900 dark:text-gray-100">{card.title}</h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{card.desc}</p>
+          <div className="grid grid-cols-2 gap-10 sm:grid-cols-4">
+            {[
+              { head: 'Product',   links: [['Features','/features'],['Pricing','/pricing'],['Roadmap','/roadmap'],['Clips Studio','/clips']] },
+              { head: 'Solutions', links: [['For streamers','/for/streamers'],['For agencies','/for/agencies'],['For small business','/for/small-business'],['Studio Stax','/studio-stax']] },
+              { head: 'Company',   links: [['Our story','/story'],['Blog','/blog'],['Merch','/merch'],['Affiliates','/affiliates']] },
+              { head: 'Legal',     links: [['Privacy','/privacy'],['Terms','/terms'],['SM-Give','/give']] },
+            ].map(col => (
+              <div key={col.head}>
+                <p className="font-mono text-eyebrow uppercase text-ink-faint">{col.head}</p>
+                <ul className="mt-5 space-y-3">
+                  {col.links.map(([label, href]) => (
+                    <li key={href}>
+                      <Link href={href} className="text-small text-ink-muted transition-colors hover:text-ink-high">
+                        {label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               </div>
             ))}
           </div>
-          <Link href="/signup"
-            className="inline-block bg-black text-white font-bold px-8 py-4 rounded-2xl hover:opacity-80 transition-all">
-            Start free — no card needed →
-          </Link>
-        </div>
-      </section>
 
-      {/* FREE GUIDES CTA */}
-      <section className="py-20 bg-black/40 border-t border-gray-900">
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold px-4 py-2 rounded-full mb-6">
-              <BookOpen className="w-3.5 h-3.5" strokeWidth={2.5} />
-              Free forever · No signup required
-            </div>
-            <h2 className="text-3xl font-extrabold tracking-tight mb-3 text-white">
-              Gilgamesh&apos;s Guides — the free playbooks
-            </h2>
-            <p className="text-sm text-gray-400 max-w-xl mx-auto">
-              Real-talk guides on starting a business, marketing from zero, and building with AI.
-              Written by the solo founder who built SocialMate between deli shifts. No courses to buy. No email required.
+          <div className="mt-14 flex flex-wrap items-center justify-between gap-4 border-t border-edge pt-8">
+            <a
+              href="https://discord.gg/2se6FGrbRU"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-small text-ink-muted transition-colors hover:text-ink-high"
+            >
+              <PlatformIcon name="Discord" size={14} mono />
+              Discord community
+            </a>
+            <p className="font-mono text-eyebrow uppercase text-ink-faint">
+              © 2026 SocialMate
             </p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-10">
-            {[
-              {
-                vol: 'Vol. 1',
-                title: 'Starting a Business From Scratch',
-                desc: 'Wyoming LLC for $150, Reddit validation, free stack, first customers, and what nobody tells you about doing it alone.',
-                href: '/guides/starting-a-business',
-                available: true,
-              },
-              {
-                vol: 'Vol. 2',
-                title: 'Marketing on Zero Budget',
-                desc: 'Organic growth, content flywheels, community seeding, and how to turn every platform into a distribution channel.',
-                href: '/guides/marketing-zero-budget',
-                available: true,
-              },
-              {
-                vol: 'Vol. 3',
-                title: 'Business Credit, Legal & Tax',
-                desc: 'DUNS numbers, PAYDEX scores, every tax deduction explained, LLC vs S-Corp, banking setup, and insurance. All free.',
-                href: '/guides/business-credit-legal',
-                available: true,
-              },
-              {
-                vol: 'Vol. 4',
-                title: 'Vibe Coding with AI',
-                desc: 'How to ship production software with no CS degree using AI as your co-pilot. The real workflow, the real mistakes.',
-                href: '/guides/vibe-coding-with-ai',
-                available: true,
-              },
-            ].map(g => (
-              <div key={g.vol} className="lm-card rounded-2xl border border-[#1f1f1f] bg-[#111111] p-6 flex flex-col hover:border-amber-500/30">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2.5 py-0.5 text-xs font-bold text-amber-400">{g.vol}</span>
-                  {g.available
-                    ? <span className="rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 text-xs font-semibold text-emerald-400">Live</span>
-                    : <span className="rounded-full bg-gray-800 border border-gray-700 px-2.5 py-0.5 text-xs text-gray-500">Soon</span>
-                  }
-                </div>
-                <h3 className="font-bold text-white text-sm mb-2">{g.title}</h3>
-                <p className="text-xs text-gray-500 leading-relaxed flex-1">{g.desc}</p>
-                <Link href={g.href} className={`mt-4 inline-flex items-center gap-1 text-xs font-bold transition-colors ${g.available ? 'text-amber-400 hover:text-amber-300' : 'text-gray-600 cursor-default pointer-events-none'}`}>
-                  {g.available ? 'Read free →' : 'Coming soon'}
-                </Link>
-              </div>
-            ))}
-          </div>
-          <div className="text-center">
-            <Link href="/guides" className="inline-flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-7 py-3 text-sm font-bold text-amber-400 transition-colors hover:bg-amber-500/20">
-              Browse all guides →
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* STORY */}
-      <section className="py-20 bg-white/[0.02] border-t border-gray-100 dark:border-gray-800">
-        <div className="max-w-3xl mx-auto px-6 text-center">
-          <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">Why we built this</p>
-          <h2 className="text-3xl font-extrabold tracking-tight mb-6 text-gray-900 dark:text-gray-100">
-            Professional tools shouldn't require<br className="hidden md:block" /> a professional budget.
-          </h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed mb-8 max-w-xl mx-auto">
-            SocialMate is fully bootstrapped — built solo, across every role, with no investors and no safety net.
-            The belief driving it: creators and small businesses deserve tools that actually work
-            at a price that doesn't require a business budget to justify.
-            The platforms that charge $99/month know this. They just bet you won't look for a better option.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/story"
-              className="text-sm font-bold text-black dark:text-white underline hover:opacity-70 transition-all">
-              Read the full story →
-            </Link>
-            <Link href="/pricing"
-              className="text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-all">
-              See how pricing works →
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* SM-GIVE */}
-      <section className="py-16 bg-transparent border-t border-gray-100 dark:border-gray-800">
-        <div className="max-w-4xl mx-auto px-6">
-          <div className="bg-gray-950 dark:bg-gray-900 rounded-2xl px-5 sm:px-8 py-8 sm:py-10 flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-3">
-                <Heart className="w-4 h-4 text-rose-400 fill-rose-400/30" strokeWidth={2.2} />
-                <span className="text-xs font-bold text-amber-400 uppercase tracking-widest">SM-Give Initiative</span>
-              </div>
-              <h2 className="text-xl font-extrabold text-white mb-3 tracking-tight">
-                Every subscription supports something bigger.
-              </h2>
-              <p className="text-sm text-gray-400 leading-relaxed max-w-md">
-                2% of every SocialMate subscription goes directly to SM-Give — funding school supply bookbags,
-                baby essentials for struggling parents, and homeless care packages. No corporate partners. No sponsors. Just us.
-              </p>
-            </div>
-            <div className="flex flex-col items-center gap-3 flex-shrink-0">
-              <div className="flex flex-wrap justify-center gap-5">
-                {([
-                  { icon: Backpack, label: 'School Supplies' },
-                  { icon: Baby,     label: 'Baby Essentials' },
-                  { icon: HomeIcon, label: 'Homeless Care' },
-                ] as { icon: LucideIcon; label: string }[]).map(tag => (
-                  <div key={tag.label} className="text-center">
-                    <div className="w-10 h-10 mx-auto rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mb-1.5">
-                      <tag.icon className="w-5 h-5 text-amber-400" strokeWidth={2} />
-                    </div>
-                    <div className="text-xs text-gray-500 font-medium leading-tight">{tag.label}</div>
-                  </div>
-                ))}
-              </div>
-              <Link href="/give"
-                className="text-xs font-bold text-amber-400 hover:text-amber-300 transition-all border border-amber-400/30 hover:border-amber-400/60 px-5 py-2 rounded-xl mt-2">
-                Learn about SM-Give →
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* FINAL CTA */}
-      <section className="py-20 bg-black/40 text-white">
-        <div className="max-w-3xl mx-auto px-6 text-center">
-          <h2 className="text-4xl font-extrabold tracking-tight mb-4">Ready to get started?</h2>
-          <p className="text-gray-400 mb-8 text-sm max-w-lg mx-auto">
-            Free plan, no card required. 50 AI credits per month, included free. Upgrade to Pro anytime for $5/month. Set up in 60 seconds.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/signup"
-              className="bg-white text-black font-bold px-8 py-4 rounded-2xl hover:opacity-90 transition-all text-base w-full sm:w-auto text-center">
-              Create free account →
-            </Link>
-            <Link href="/pricing"
-              className="text-gray-400 font-semibold hover:text-white transition-all text-sm">
-              Compare plans →
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* FOOTER */}
-      <footer className="border-t border-gray-800 bg-black dark:bg-gray-950">
-        <div className="max-w-6xl mx-auto px-6 pt-10 pb-6">
-
-          {/* Top: logo + tagline */}
-          <div className="flex items-center gap-2 mb-8">
-            <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
-            <span className="text-sm font-bold text-white">SocialMate</span>
-            <span className="text-xs text-gray-500 ml-1">by Gilgamesh Enterprise LLC</span>
-          </div>
-
-          {/* Columns */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-10">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-gray-600 mb-3">Product</p>
-              <ul className="space-y-2">
-                {[['Features','/features'],['Pricing','/pricing'],['Roadmap','/roadmap'],['Clips Studio','/clips']].map(([label,href])=>(
-                  <li key={href}><Link href={href} className="text-sm text-gray-400 hover:text-white transition-colors">{label}</Link></li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-gray-600 mb-3">Solutions</p>
-              <ul className="space-y-2">
-                {[['For Streamers','/for/streamers'],['For Agencies','/for/agencies'],['For Small Business','/for/small-business'],['Studio Stax','/studio-stax']].map(([label,href])=>(
-                  <li key={href}><Link href={href} className="text-sm text-gray-400 hover:text-white transition-colors">{label}</Link></li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-gray-600 mb-3">Company</p>
-              <ul className="space-y-2">
-                {[['Our Story','/story'],['Blog','/blog'],['Merch','/merch'],['Affiliates','/affiliates'],['Referral','/referral']].map(([label,href])=>(
-                  <li key={href}><Link href={href} className="text-sm text-gray-400 hover:text-white transition-colors">{label}</Link></li>
-                ))}
-                <li><a href="https://discord.gg/2se6FGrbRU" target="_blank" rel="noopener noreferrer" className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors inline-flex items-center gap-1.5"><PlatformIcon name="Discord" size={13} mono /> Discord Community</a></li>
-              </ul>
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-gray-600 mb-3">Legal</p>
-              <ul className="space-y-2">
-                <li><Link href="/privacy" className="text-sm text-gray-400 hover:text-white transition-colors">Privacy</Link></li>
-                <li><Link href="/terms" className="text-sm text-gray-400 hover:text-white transition-colors">Terms</Link></li>
-                <li><Link href="/give" className="text-sm text-rose-400 hover:text-rose-300 font-medium transition-colors inline-flex items-center gap-1.5"><Heart className="w-3.5 h-3.5 fill-rose-400/30" strokeWidth={2.2} /> SM-Give</Link></li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Bottom bar */}
-          <div className="flex items-center justify-between flex-wrap gap-4 pt-6 border-t border-gray-800">
-            <a href="https://www.producthunt.com/posts/socialmate-2"
-              target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#FF6154] hover:bg-[#e5564a] text-white text-xs font-semibold rounded-lg transition-colors">
-              <svg width="14" height="14" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M13 0C5.82 0 0 5.82 0 13s5.82 13 13 13 13-5.82 13-13S20.18 0 13 0zm2.17 17.33H10.5V8.67h4.67c1.38 0 2.5 1.12 2.5 2.5v3.66c0 1.38-1.12 2.5-2.5 2.5z" fill="white"/>
-              </svg>
-              Featured on Product Hunt
-            </a>
-            <p className="text-xs text-gray-600">© 2026 SocialMate · All rights reserved</p>
-          </div>
-
         </div>
       </footer>
-
     </div>
   )
 }

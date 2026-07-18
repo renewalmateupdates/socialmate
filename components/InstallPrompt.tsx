@@ -50,22 +50,22 @@ export default function InstallPrompt() {
 
   return (
     <div className="fixed left-1/2 -translate-x-1/2 z-50 w-[calc(100%-2rem)] max-w-sm" style={{ bottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}>
-      <div className="bg-gray-900 text-white rounded-2xl shadow-2xl p-4 flex items-center gap-3 border border-white/10">
+      <div className="bg-surface text-ink-high rounded-2xl shadow-2xl shadow-black/50 p-4 flex items-center gap-3 border border-edge">
         <img src="/icon-192.png" alt="SocialMate" className="w-10 h-10 rounded-xl flex-shrink-0" />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-bold leading-tight">Add SocialMate to Home Screen</p>
-          <p className="text-xs text-gray-400 mt-0.5">Post from anywhere, instantly</p>
+          <p className="text-small text-ink-muted mt-0.5">Post from anywhere, instantly</p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <button
             onClick={dismiss}
-            className="text-gray-500 hover:text-gray-300 text-xs font-semibold px-2 py-1"
+            className="text-ink-muted hover:text-ink-high text-small px-2 py-1"
           >
             Not now
           </button>
           <button
             onClick={install}
-            className="bg-amber-400 hover:bg-amber-300 text-black text-xs font-black px-3 py-1.5 rounded-lg transition-all"
+            className="bg-amber hover:bg-amber/90 text-void text-small font-semibold px-3 py-1.5 rounded-lg transition-colors"
           >
             Install
           </button>
