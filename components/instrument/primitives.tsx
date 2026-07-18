@@ -43,7 +43,7 @@ export function Section({
       id={id}
       className={[
         'py-section',
-        tone === 'raised' ? 'bg-surface' : 'bg-void',
+        tone === 'raised' ? 'bg-panel' : 'bg-void',
         divide ? 'border-t border-edge' : '',
         className,
       ].filter(Boolean).join(' ')}
@@ -160,7 +160,7 @@ export function Button({
   const variants = {
     // Amber is the primary brand voice. void-on-amber measures 9.54:1.
     primary: 'bg-amber text-void px-6 py-3.5 hover:bg-amber/90 font-semibold',
-    secondary: 'border border-edge-lit text-ink-high px-6 py-3.5 hover:border-ink-muted hover:bg-surface',
+    secondary: 'border border-edge-lit text-ink-high px-6 py-3.5 hover:border-ink-muted hover:bg-panel',
     quiet: 'text-ink-muted hover:text-ink-high px-2 py-2',
   }
   const cls = `${base} ${variants[variant]} ${className}`
@@ -195,7 +195,7 @@ export function Card({
   return (
     <div
       className={[
-        'rounded-2xl border border-edge bg-surface p-6',
+        'rounded-2xl border border-edge bg-panel p-6',
         interactive ? 'tap hover:border-edge-lit hover:bg-raised' : '',
         className,
       ].filter(Boolean).join(' ')}

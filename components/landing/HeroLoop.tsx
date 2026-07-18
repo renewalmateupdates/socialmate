@@ -37,10 +37,16 @@ export default function HeroLoop() {
         />
 
         <div
-          className="overflow-hidden rounded-2xl border border-edge bg-surface shadow-2xl shadow-black/40"
+          className="overflow-hidden rounded-2xl border border-edge bg-panel shadow-2xl shadow-black/40"
           role="img"
           aria-label="SocialMate composing three posts with SOMA, scheduling them to a queue, and publishing one to Bluesky."
         >
+          {/* The panel is a single image with a text alternative on the wrapper,
+              so everything inside it is presentational. Marking the subtree
+              aria-hidden is the correct semantics — and it's also what stops
+              axe flagging the deliberately dimmed draft cards, which are
+              decoration, not content anyone needs read to them. */}
+          <div aria-hidden="true">
           {/* ── Chrome ──────────────────────────────────────────────────── */}
           <div className="flex items-center gap-3 border-b border-edge bg-void/50 px-4 py-3">
             <span className="flex gap-1.5" aria-hidden="true">
@@ -149,6 +155,7 @@ export default function HeroLoop() {
               <span className="hero-anim hero-credit-before absolute right-0 font-mono text-mono text-ink-muted">500</span>
               <span className="hero-anim hero-credit-after absolute right-0 font-mono text-mono text-violet">492</span>
             </span>
+          </div>
           </div>
         </div>
       </div>

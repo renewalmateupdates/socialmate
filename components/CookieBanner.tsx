@@ -24,10 +24,13 @@ export default function CookieBanner() {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 p-4 sm:p-6" style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))' }}>
-      <div className="max-w-4xl mx-auto bg-surface border border-edge rounded-2xl shadow-2xl shadow-black/50 p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+      <div className="max-w-4xl mx-auto bg-panel border border-edge rounded-2xl shadow-2xl shadow-black/50 p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold mb-1 dark:text-white">🍪 We use cookies</p>
-          <p className="text-xs text-gray-400 dark:text-gray-500 leading-relaxed">
+          {/* These widgets render from the root layout, OUTSIDE any page's `dark`
+              wrapper, so `dark:` variants never activate here and the light-mode
+              base classes were what actually shipped. Token classes only. */}
+          <p className="mb-1.5 font-mono text-eyebrow uppercase text-ink-muted">Cookies</p>
+          <p className="text-small leading-relaxed text-ink-body">
             We use essential cookies to keep you signed in and keep the app secure. No advertising cookies, no tracking pixels.{' '}
             <Link href="/privacy" className="text-ink-high font-medium underline hover:no-underline">
               Privacy Policy →

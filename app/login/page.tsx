@@ -6,6 +6,8 @@ import Link from 'next/link'
 import { isDisposableEmail } from '@/lib/disposable-email-domains'
 import { useI18n } from '@/contexts/I18nContext'
 import LoginSkeleton from './LoginSkeleton'
+import AuthShell from '@/components/instrument/AuthShell'
+import { Label, Input, ErrorNote, Submit } from '@/components/instrument/form'
 
 function LoginInner() {
   const { t } = useI18n()
@@ -122,20 +124,15 @@ function LoginInner() {
   // ── 2FA challenge screen ──
   if (mfaRequired) {
     return (
-      <div className="dark min-h-dvh bg-gray-950 flex flex-col">
-        <div className="border-b border-gray-800 bg-gray-900 px-8 py-4">
-          <Link href="/" className="flex items-center gap-2 w-fit">
-            <img src="/logo.png" alt="SocialMate" className="w-7 h-7 rounded-lg" />
-            <span className="font-bold text-base tracking-tight text-white">SocialMate</span>
-          </Link>
-        </div>
-        <div className="flex-1 flex items-center justify-center p-6">
-          <div className="bg-gray-900 border border-gray-700 rounded-3xl p-10 w-full max-w-md text-center">
-            <div className="text-5xl mb-5">🔐</div>
-            <h1 className="text-2xl font-extrabold tracking-tight mb-2 text-white">Two-factor authentication</h1>
-            <p className="text-gray-400 text-sm mb-8">Open your authenticator app and enter the 6-digit code.</p>
-
+      <AuthShell
+        headline="Two-factor authentication"
+        sub="Open your authenticator app and enter the six-digit code."
+      >
+        <div className="space-y-5">
+          <div>
+            <Label htmlFor="mfa">Code</Label>
             <input
+              id="mfa"
               type="text"
               inputMode="numeric"
               maxLength={6}
@@ -143,225 +140,195 @@ function LoginInner() {
               onChange={e => setMfaCode(e.target.value.replace(/\D/g, ''))}
               placeholder="000000"
               autoFocus
-              className="w-full px-4 py-4 text-2xl font-mono text-center tracking-widest border border-gray-700 bg-gray-800 text-gray-100 rounded-xl focus:outline-none focus:border-amber-500/50 transition-colors mb-4"
+              className="w-full rounded-xl border border-edge bg-void px-4 py-4 text-center font-mono text-2xl tracking-[0.4em] text-ink-high transition-colors placeholder:text-ink-faint focus:border-amber focus:outline-none"
             />
-
-            {error && (
-              <div className="bg-red-950/40 border border-red-800 rounded-xl px-4 py-3 mb-4">
-                <p className="text-xs font-semibold text-red-400">❌ {error}</p>
-              </div>
-            )}
-
-            <button
-              onClick={handleMfaVerify}
-              disabled={mfaLoading || mfaCode.length !== 6}
-              className="w-full py-3.5 bg-black text-white text-sm font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center justify-center gap-2 mb-4"
-            >
-              {mfaLoading ? (
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : 'Verify →'}
-            </button>
-
-            <button
-              onClick={() => { setMfaRequired(false); setMfaCode(''); setError('') }}
-              className="text-xs text-gray-500 hover:text-gray-300 transition-colors font-semibold"
-            >
-              ← Back to login
-            </button>
           </div>
+
+          {error && <ErrorNote>{error}</ErrorNote>}
+
+          <button
+            onClick={handleMfaVerify}
+            disabled={mfaLoading || mfaCode.length !== 6}
+            className="tap flex w-full items-center justify-center gap-2.5 rounded-xl bg-amber py-3.5 text-small font-semibold text-void transition-colors hover:bg-amber/90 disabled:opacity-50"
+          >
+            {mfaLoading && (
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-void/30 border-t-void" />
+            )}
+            Verify
+          </button>
+
+          <button
+            onClick={() => { setMfaRequired(false); setMfaCode(''); setError('') }}
+            className="text-small text-ink-muted transition-colors hover:text-ink-high"
+          >
+            Back to sign in
+          </button>
         </div>
-      </div>
+      </AuthShell>
     )
   }
 
   // ── Magic link sent screen ──
   if (magicSent) {
     return (
-      <div className="dark min-h-dvh bg-gray-950 flex flex-col">
-        <div className="border-b border-gray-800 bg-gray-900 px-8 py-4">
-          <Link href="/" className="flex items-center gap-2 w-fit">
-            <img src="/logo.png" alt="SocialMate" className="w-7 h-7 rounded-lg" />
-            <span className="font-bold text-base tracking-tight text-white">SocialMate</span>
-          </Link>
+      <AuthShell headline="Check your inbox" sub="We sent you a one-click sign-in link.">
+        <div className="rounded-2xl border border-edge bg-panel p-6">
+          <p className="font-mono text-eyebrow uppercase text-ink-muted">Sent to</p>
+          <p className="mt-2 font-mono text-mono text-ink-high">{email}</p>
+          <p className="mt-5 text-small leading-relaxed text-ink-muted">
+            Open the link on this device and you&apos;ll be signed in. No password needed.
+            If it hasn&apos;t arrived in a few minutes, check your spam folder.
+          </p>
         </div>
-        <div className="flex-1 flex items-center justify-center p-6">
-          <div className="bg-gray-900 border border-gray-700 rounded-3xl p-10 w-full max-w-md text-center">
-            <div className="text-6xl mb-6">📬</div>
-            <h1 className="text-2xl font-extrabold tracking-tight mb-3 text-white">Check your inbox</h1>
-            <p className="text-gray-400 text-sm mb-2">We sent a magic link to</p>
-            <p className="font-bold text-sm mb-6 text-white">{email}</p>
-            <p className="text-xs text-gray-500 mb-8">Click the link in the email to sign in instantly. No password needed.</p>
-            <button
-              onClick={() => { setMagicSent(false); setMode('password') }}
-              className="text-sm font-semibold text-gray-500 hover:text-gray-300 transition-colors"
-            >
-              ← Try a different method
-            </button>
-          </div>
-        </div>
-      </div>
+
+        <button
+          onClick={() => { setMagicSent(false); setMode('password') }}
+          className="mt-6 text-small text-ink-muted transition-colors hover:text-ink-high"
+        >
+          Use a password instead
+        </button>
+      </AuthShell>
     )
   }
 
   // ── Main login screen ──
   return (
-    <div className="dark min-h-dvh bg-gray-950 flex flex-col">
-      <div className="border-b border-gray-800 bg-gray-900 px-8 py-4 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <img src="/logo.png" alt="SocialMate" className="w-7 h-7 rounded-lg" />
-          <span className="font-bold text-base tracking-tight text-white">SocialMate</span>
-        </Link>
-        <Link href="/signup" className="text-sm font-semibold text-gray-400 hover:text-white transition-colors">
-          {t('login.no_account')} {t('login.sign_up')} →
-        </Link>
+    <AuthShell
+      headline={t('login.headline')}
+      sub={t('login.subheadline')}
+      altHref="/signup"
+      altLabel={t('login.sign_up')}
+    >
+      <button
+        onClick={handleGoogleLogin}
+        disabled={googleLoading}
+        className="tap flex w-full items-center justify-center gap-3 rounded-xl border border-edge py-3 text-small font-medium text-ink-body transition-colors hover:border-edge-lit hover:bg-panel disabled:opacity-50"
+      >
+        {googleLoading ? (
+          <span className="h-4 w-4 animate-spin rounded-full border-2 border-edge border-t-ink-muted" />
+        ) : (
+          <svg className="h-4 w-4" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+          </svg>
+        )}
+        {t('login.google_cta')}
+      </button>
+
+      <p className="mt-3 text-small leading-relaxed text-ink-faint">
+        Google may show an unfamiliar URL during sign-in. That&apos;s our auth provider,
+        not a third party.
+      </p>
+
+      <div className="my-7 flex items-center gap-4">
+        <span className="h-px flex-1 bg-edge" />
+        <span className="font-mono text-eyebrow uppercase text-ink-faint">{t('login.or')}</span>
+        <span className="h-px flex-1 bg-edge" />
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-md">
+      {/* Segmented control. Mono labels, no emoji — this is a control, not decoration. */}
+      <div className="mb-6 flex gap-1 rounded-xl border border-edge bg-panel p-1">
+        {([
+          { key: 'password', label: 'Password' },
+          { key: 'magic',    label: 'Magic link' },
+        ] as const).map(opt => (
+          <button
+            key={opt.key}
+            onClick={() => { setMode(opt.key); setError('') }}
+            aria-pressed={mode === opt.key}
+            className={`flex-1 rounded-lg py-2 font-mono text-eyebrow uppercase transition-colors ${
+              mode === opt.key
+                ? 'bg-raised text-ink-high'
+                : 'text-ink-muted hover:text-ink-high'
+            }`}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
 
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-extrabold tracking-tight mb-2 text-white">{t('login.headline')}</h1>
-            <p className="text-gray-400 text-sm">{t('login.subheadline')}</p>
-          </div>
-
-          <div className="bg-gray-900 border border-gray-700 rounded-3xl p-8">
-
-            {/* Google Button */}
-            <button
-              onClick={handleGoogleLogin}
-              disabled={googleLoading}
-              className="w-full flex items-center justify-center gap-3 py-3 border border-gray-700 rounded-xl text-sm font-semibold text-gray-200 hover:bg-gray-800 transition-all disabled:opacity-50 mb-5"
-            >
-              {googleLoading ? (
-                <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
-              ) : (
-                <svg className="w-4 h-4" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-              )}
-              {t('login.google_cta')}
-            </button>
-
-            {/* Google auth domain note */}
-            <p className="text-[11px] text-gray-500 text-center -mt-3 mb-4 leading-relaxed">
-              Google may show an unfamiliar URL during sign-in — that&apos;s our auth provider, not a third party.{' '}
-              <Link href="/give" className="underline hover:text-gray-400 transition-colors">Help us upgrade</Link>
-            </p>
-
-            {/* Divider */}
-            <div className="flex items-center gap-3 mb-5">
-              <div className="flex-1 h-px bg-gray-700" />
-              <span className="text-xs text-gray-500 font-medium">{t('login.or')}</span>
-              <div className="flex-1 h-px bg-gray-700" />
-            </div>
-
-            <div className="flex items-center gap-1 bg-gray-800 rounded-xl p-1 mb-6">
-              <button
-                onClick={() => { setMode('password'); setError('') }}
-                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${mode === 'password' ? 'bg-gray-700 text-gray-100 shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
-              >
-                🔑 Password
-              </button>
-              <button
-                onClick={() => { setMode('magic'); setError('') }}
-                className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${mode === 'magic' ? 'bg-gray-700 text-gray-100 shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
-              >
-                ✨ Magic Link
-              </button>
-            </div>
-
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">{t('login.email_label')}</label>
-                <input
-                  type="email"
-                  name="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                  autoFocus
-                  className="w-full px-4 py-3 text-base border border-gray-700 bg-gray-800 text-gray-100 rounded-xl focus:outline-none focus:border-amber-500/50 transition-colors placeholder:text-gray-600"
-                />
-              </div>
-
-              {mode === 'password' && (
-                <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{t('login.password_label')}</label>
-                    <Link href="/forgot-password" className="text-xs text-gray-500 hover:text-amber-400 transition-colors">
-                      {t('login.forgot_password')}
-                    </Link>
-                  </div>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      name="password"
-                      autoComplete="current-password"
-                      value={password}
-                      onChange={e => setPassword(e.target.value)}
-                      placeholder="Your password"
-                      className="w-full px-4 py-3 text-base border border-gray-700 bg-gray-800 text-gray-100 rounded-xl focus:outline-none focus:border-amber-500/50 transition-colors pr-12 placeholder:text-gray-600"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(p => !p)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors text-xs font-semibold"
-                    >
-                      {showPassword ? 'Hide' : 'Show'}
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {mode === 'magic' && (
-                <div className="bg-blue-950/30 border border-blue-800/50 rounded-xl p-3">
-                  <p className="text-xs text-blue-400 font-medium">We'll email you a one-click sign-in link. No password needed.</p>
-                </div>
-              )}
-
-              {error && (
-                <div className="bg-red-950/40 border border-red-800 rounded-xl px-4 py-3">
-                  <p className="text-xs font-semibold text-red-400">❌ {error}</p>
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3.5 bg-black text-white text-sm font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    {mode === 'magic' ? t('login.sending') : t('login.signing_in')}
-                  </>
-                ) : (
-                  mode === 'magic' ? t('login.send_magic_link') : t('login.sign_in_cta')
-                )}
-              </button>
-            </form>
-          </div>
-
-          <p className="text-center text-xs text-gray-500 mt-6">
-            {t('login.no_account')}{' '}
-            <Link href="/signup" className="font-bold text-amber-400 hover:text-amber-300 transition-colors">
-              {t('login.sign_up')} →
-            </Link>
-          </p>
-
-          <p className="text-center text-xs text-gray-700 mt-3">
-            {t('signup.tos_i_agree')}{' '}
-            <Link href="/terms" className="hover:text-gray-500 transition-colors">{t('signup.tos_terms')}</Link>
-            {' '}{t('signup.and')}{' '}
-            <Link href="/privacy" className="hover:text-gray-500 transition-colors">{t('signup.privacy')}</Link>
-          </p>
+      <form onSubmit={handleLogin} className="space-y-5">
+        <div>
+          <Label htmlFor="email">{t('login.email_label')}</Label>
+          <Input
+            id="email"
+            type="email"
+            name="email"
+            autoComplete="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            placeholder="you@example.com"
+            autoFocus
+          />
         </div>
-      </div>
-    </div>
+
+        {mode === 'password' && (
+          <div>
+            <div className="flex items-baseline justify-between">
+              <Label htmlFor="password">{t('login.password_label')}</Label>
+              <Link
+                href="/forgot-password"
+                className="text-small text-ink-muted transition-colors hover:text-ink-high"
+              >
+                {t('login.forgot_password')}
+              </Link>
+            </div>
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                placeholder="Your password"
+                className="pr-16"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(p => !p)}
+                className="absolute right-1 top-1/2 flex h-9 -translate-y-1/2 items-center rounded-lg px-3 font-mono text-eyebrow uppercase text-ink-muted transition-colors hover:text-ink-high"
+              >
+                {showPassword ? 'Hide' : 'Show'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {mode === 'magic' && (
+          <div className="rounded-xl border border-edge bg-panel px-4 py-3">
+            <p className="text-small text-ink-muted">
+              We&apos;ll email you a one-click sign-in link. No password needed.
+            </p>
+          </div>
+        )}
+
+        {error && <ErrorNote>{error}</ErrorNote>}
+
+        <Submit
+          loading={loading}
+          loadingLabel={mode === 'magic' ? t('login.sending') : t('login.signing_in')}
+        >
+          {mode === 'magic' ? t('login.send_magic_link') : t('login.sign_in_cta')}
+        </Submit>
+      </form>
+
+      <p className="mt-7 text-small text-ink-muted">
+        {t('login.no_account')}{' '}
+        <Link href="/signup" className="text-amber underline underline-offset-2 transition-colors hover:text-amber/80">
+          {t('login.sign_up')}
+        </Link>
+      </p>
+
+      <p className="mt-4 text-small text-ink-faint">
+        {t('signup.tos_i_agree')}{' '}
+        <Link href="/terms" className="underline transition-colors hover:text-ink-muted">{t('signup.tos_terms')}</Link>
+        {' '}{t('signup.and')}{' '}
+        <Link href="/privacy" className="underline transition-colors hover:text-ink-muted">{t('signup.privacy')}</Link>
+      </p>
+    </AuthShell>
   )
 }
 

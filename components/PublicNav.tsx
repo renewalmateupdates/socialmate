@@ -106,14 +106,14 @@ export default function PublicNav() {
     `px-3 py-2 rounded-lg text-sm font-medium transition-all ${
       pathname === href || pathname.startsWith(href + '/')
         ? 'text-ink-high bg-raised'
-        : 'text-ink-muted hover:text-ink-high hover:bg-surface'
+        : 'text-ink-muted hover:text-ink-high hover:bg-panel'
     }`
 
   const dropdownTriggerCls = (key: DropdownKey, links: { href: string }[]) =>
     `flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
       activeDropdown === key || links.some(l => pathname.startsWith(l.href))
         ? 'text-ink-high bg-raised'
-        : 'text-ink-muted hover:text-ink-high hover:bg-surface'
+        : 'text-ink-muted hover:text-ink-high hover:bg-panel'
     }`
 
   const chevron = (active: boolean) => (
@@ -125,14 +125,14 @@ export default function PublicNav() {
   )
 
   const dropdownPanel = (links: { label: string; href: string }[]) => (
-    <div className="absolute top-full left-0 mt-1 w-52 bg-surface border border-edge rounded-xl shadow-2xl shadow-black/50 py-1 z-50">
+    <div className="absolute top-full left-0 mt-1 w-52 bg-panel border border-edge rounded-xl shadow-2xl shadow-black/50 py-1 z-50">
       {links.map(link => (
         <Link key={link.href} href={link.href}
           onClick={() => setActiveDropdown(null)}
           className={`flex items-center px-4 py-2.5 text-sm font-medium transition-all ${
             pathname.startsWith(link.href)
               ? 'text-ink-high bg-raised'
-              : 'text-ink-muted hover:text-ink-high hover:bg-surface'
+              : 'text-ink-muted hover:text-ink-high hover:bg-panel'
           }`}>
           {link.label}
         </Link>
@@ -151,7 +151,7 @@ export default function PublicNav() {
         {/* Logo + language picker */}
         <div className="flex items-center gap-2 flex-shrink-0">
           <Link href="/" className="flex items-center gap-2">
-            <img src="/logo.png" alt={t('nav.logo_alt')} className="w-10 h-10 rounded-xl" />
+            <img src="/logo.png" alt="" className="w-10 h-10 rounded-xl" />
             <span className="font-display text-body font-medium tracking-tight text-ink-high hidden sm:inline">
               SocialMate
               <span className="ml-2 font-mono text-eyebrow uppercase text-ink-faint">{t('nav.beta')}</span>
@@ -162,20 +162,20 @@ export default function PublicNav() {
           <div className="relative" ref={langRef}>
             <button
               onClick={() => setLangOpen(p => !p)}
-              className="flex items-center justify-center w-8 h-8 rounded-lg font-mono text-eyebrow text-ink-muted bg-surface border border-edge hover:text-ink-high hover:border-edge-lit transition-colors"
+              className="flex items-center justify-center w-8 h-8 rounded-lg font-mono text-eyebrow text-ink-muted bg-panel border border-edge hover:text-ink-high hover:border-edge-lit transition-colors"
               aria-label="Change language"
               title="Change language"
             >
               {currentLocaleFlag}
             </button>
             {langOpen && (
-              <div className="absolute top-full left-0 mt-1.5 w-40 bg-surface border border-edge rounded-xl shadow-2xl shadow-black/50 py-1 z-50 max-h-72 overflow-y-auto">
+              <div className="absolute top-full left-0 mt-1.5 w-40 bg-panel border border-edge rounded-xl shadow-2xl shadow-black/50 py-1 z-50 max-h-72 overflow-y-auto">
                 {SUPPORTED_LOCALES.map(lang => (
                   <button key={lang.code} onClick={() => handleSetLocale(lang.code)}
                     className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm transition-all text-left ${
                       locale === lang.code
                         ? 'font-semibold text-ink-high bg-raised'
-                        : 'text-ink-muted hover:text-ink-high hover:bg-surface'
+                        : 'text-ink-muted hover:text-ink-high hover:bg-panel'
                     }`}>
                     <span>{lang.flag}</span>
                     <span>{lang.label}</span>
@@ -264,7 +264,7 @@ export default function PublicNav() {
           )}
           <button
             onClick={() => setOpen(true)}
-            className="w-11 h-11 rounded-xl flex flex-col items-center justify-center gap-[5px] hover:bg-surface transition-colors"
+            className="w-11 h-11 rounded-xl flex flex-col items-center justify-center gap-[5px] hover:bg-panel transition-colors"
             aria-label="Open menu">
             <span className="block w-5 h-0.5 bg-ink-muted rounded-full" />
             <span className="block w-5 h-0.5 bg-ink-muted rounded-full" />
@@ -283,7 +283,7 @@ export default function PublicNav() {
               <span className="font-display text-title text-ink-high">{t('nav.mobile_menu')}</span>
               <button
                 onClick={() => setOpen(false)}
-                className="w-11 h-11 rounded-xl flex items-center justify-center hover:bg-surface transition-colors text-ink-muted text-lg"
+                className="w-11 h-11 rounded-xl flex items-center justify-center hover:bg-panel transition-colors text-ink-muted text-lg"
                 aria-label="Close menu">
                 ✕
               </button>
@@ -300,7 +300,7 @@ export default function PublicNav() {
                   className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                     pathname === link.href
                       ? 'text-ink-high bg-raised font-medium'
-                      : 'text-ink-muted hover:text-ink-high hover:bg-surface'
+                      : 'text-ink-muted hover:text-ink-high hover:bg-panel'
                   }`}>
                   {link.label}
                 </Link>
@@ -322,7 +322,7 @@ export default function PublicNav() {
                     className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                       pathname.startsWith(link.href)
                         ? 'text-ink-high bg-raised font-medium'
-                        : 'text-ink-muted hover:text-ink-high hover:bg-surface'
+                        : 'text-ink-muted hover:text-ink-high hover:bg-panel'
                     }`}>
                     {link.label}
                   </Link>
@@ -346,7 +346,7 @@ export default function PublicNav() {
                     className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                       pathname.startsWith(link.href)
                         ? 'text-ink-high bg-raised font-medium'
-                        : 'text-ink-muted hover:text-ink-high hover:bg-surface'
+                        : 'text-ink-muted hover:text-ink-high hover:bg-panel'
                     }`}>
                     {link.label}
                   </Link>
@@ -369,7 +369,7 @@ export default function PublicNav() {
                     className={`flex items-center px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                       pathname.startsWith(link.href)
                         ? 'text-ink-high bg-raised font-medium'
-                        : 'text-ink-muted hover:text-ink-high hover:bg-surface'
+                        : 'text-ink-muted hover:text-ink-high hover:bg-panel'
                     }`}>
                     {link.label}
                   </Link>
@@ -387,7 +387,7 @@ export default function PublicNav() {
                   {t('nav.mobile_sm_give')}
                 </Link>
                 <Link href="/partners" onClick={() => setOpen(false)}
-                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-amber hover:bg-surface transition-all">
+                  className="flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold text-amber hover:bg-panel transition-all">
                   🤝 {t('nav.partners')}
                 </Link>
               </div>
@@ -401,7 +401,7 @@ export default function PublicNav() {
                       className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm transition-all ${
                         locale === lang.code
                           ? 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 font-semibold'
-                          : 'text-ink-muted hover:bg-surface'
+                          : 'text-ink-muted hover:bg-panel'
                       }`}>
                       <span>{lang.flag}</span>
                       <span>{lang.label}</span>

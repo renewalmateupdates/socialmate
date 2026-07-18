@@ -1,8 +1,10 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { supabase } from '@/lib/supabase'
+import AuthShell from '@/components/instrument/AuthShell'
+import { Label, Input, ErrorNote, Submit } from '@/components/instrument/form'
 
 export default function ResetPassword() {
   const [password, setPassword] = useState('')
@@ -11,26 +13,24 @@ export default function ResetPassword() {
   const [error, setError] = useState('')
   const [done, setDone] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  // R2: track whether a valid recovery session exists
+  // Track whether a valid recovery session exists
   const [sessionReady, setSessionReady] = useState(false)
   const [sessionChecking, setSessionChecking] = useState(true)
   const router = useRouter()
 
-  // R2: verify there's an active recovery session on mount
+  // Verify there's an active recovery session on mount
   useEffect(() => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession()
-      // Supabase sets the session type to 'recovery' when user arrives via reset link
-      if (session) {
-        setSessionReady(true)
-      }
+      // Supabase sets the session type to 'recovery' when the user arrives via the link
+      if (session) setSessionReady(true)
       setSessionChecking(false)
     }
     checkSession()
 
-    // Also listen for the PASSWORD_RECOVERY event in case the token
-    // is still being exchanged when the component mounts
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+    // Also listen for PASSWORD_RECOVERY in case the token is still being
+    // exchanged when the component mounts
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(event => {
       if (event === 'PASSWORD_RECOVERY') {
         setSessionReady(true)
         setSessionChecking(false)
@@ -38,13 +38,13 @@ export default function ResetPassword() {
     })
 
     return () => subscription.unsubscribe()
-  }, []) // R1: removed stale useEffect import issue — now actually used
+  }, [])
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!password) { setError('Enter a new password'); return }
-    if (password.length < 6) { setError('Password must be at least 6 characters'); return }
-    if (password !== confirmPassword) { setError('Passwords do not match'); return }
+    if (!password) { setError('Enter a new password.'); return }
+    if (password.length < 6) { setError('Passwords need to be at least 6 characters.'); return }
+    if (password !== confirmPassword) { setError("Those two passwords don't match."); return }
     setLoading(true)
     setError('')
     const { error } = await supabase.auth.updateUser({ password })
@@ -53,126 +53,98 @@ export default function ResetPassword() {
     setTimeout(() => router.push('/dashboard'), 2000)
   }
 
-  return (
-    <div className="min-h-dvh bg-theme flex flex-col">
-      <div className="border-b border-theme bg-surface px-8 py-4">
-        <Link href="/" className="flex items-center gap-2 w-fit">
-          <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
-          <span className="font-bold text-base tracking-tight">SocialMate</span>
-        </Link>
-      </div>
-
-      <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-md">
-
-          {/* R2: still checking session */}
-          {sessionChecking && (
-            <div className="bg-surface border border-theme rounded-3xl p-10 text-center">
-              <div className="w-8 h-8 border-2 border-black dark:border-amber-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-              <p className="text-sm text-gray-400 dark:text-gray-500">Verifying your reset link...</p>
-            </div>
-          )}
-
-          {/* R2: expired or missing session */}
-          {!sessionChecking && !sessionReady && !done && (
-            <div className="bg-surface border border-theme rounded-3xl p-10 text-center">
-              <div className="text-6xl mb-6">⚠️</div>
-              <h1 className="text-2xl font-extrabold tracking-tight mb-3">Link expired or invalid</h1>
-              <p className="text-gray-400 dark:text-gray-500 text-sm mb-6 leading-relaxed">
-                This password reset link has expired or already been used. Reset links are valid for 1 hour.
-              </p>
-              <Link href="/forgot-password"
-                className="block w-full py-3 bg-black text-white text-sm font-bold rounded-xl hover:opacity-80 transition-all text-center mb-3">
-                Request a new reset link →
-              </Link>
-              <Link href="/login"
-                className="block text-xs text-gray-400 hover:text-black transition-colors">
-                Back to sign in
-              </Link>
-            </div>
-          )}
-
-          {/* SUCCESS */}
-          {done && (
-            <div className="bg-surface border border-theme rounded-3xl p-10 text-center">
-              <div className="text-6xl mb-6">✅</div>
-              <h1 className="text-2xl font-extrabold tracking-tight mb-3">Password updated!</h1>
-              <p className="text-gray-400 dark:text-gray-500 text-sm">Redirecting you to the dashboard...</p>
-            </div>
-          )}
-
-          {/* FORM — only shown when session is valid */}
-          {!sessionChecking && sessionReady && !done && (
-            <>
-              <div className="text-center mb-8">
-                <h1 className="text-3xl font-extrabold tracking-tight mb-2">Choose a new password</h1>
-                <p className="text-gray-400 dark:text-gray-500 text-sm">Must be at least 6 characters</p>
-              </div>
-              <div className="bg-surface border border-theme rounded-3xl p-8">
-                <form onSubmit={handleReset} className="space-y-4">
-                  <div>
-                    <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">
-                      New Password
-                    </label>
-                    <div className="relative">
-                      <input
-                        type={showPassword ? 'text' : 'password'}
-                        value={password}
-                        onChange={e => setPassword(e.target.value)}
-                        placeholder="New password"
-                        autoFocus
-                        className="w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl focus:outline-none focus:border-gray-400 pr-12"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(p => !p)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-gray-500 hover:text-black font-semibold">
-                        {showPassword ? 'Hide' : 'Show'}
-                      </button>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-1.5">
-                      Confirm Password
-                    </label>
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      value={confirmPassword}
-                      onChange={e => setConfirmPassword(e.target.value)}
-                      placeholder="Same password again"
-                      className={`w-full px-4 py-3 text-sm border rounded-xl focus:outline-none transition-colors ${
-                        confirmPassword && confirmPassword !== password ? 'border-red-300' :
-                        confirmPassword && confirmPassword === password ? 'border-green-300' :
-                        'border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 focus:border-gray-400'
-                      }`}
-                    />
-                    {confirmPassword && confirmPassword === password && (
-                      <p className="text-xs text-green-500 font-semibold mt-1">✓ Passwords match</p>
-                    )}
-                  </div>
-                  {error && (
-                    <div className="bg-red-50 border border-red-100 rounded-xl px-4 py-3">
-                      <p className="text-xs font-semibold text-red-500">❌ {error}</p>
-                    </div>
-                  )}
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-3.5 bg-black text-white text-sm font-bold rounded-xl hover:opacity-80 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
-                    {loading ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        Updating...
-                      </>
-                    ) : 'Update Password →'}
-                  </button>
-                </form>
-              </div>
-            </>
-          )}
-
+  if (sessionChecking) {
+    return (
+      <AuthShell headline="Checking your link">
+        <div className="flex items-center gap-3 rounded-2xl border border-edge bg-panel px-5 py-4">
+          <span className="h-4 w-4 animate-spin rounded-full border-2 border-edge border-t-amber" />
+          <p className="text-small text-ink-muted">Verifying the reset link</p>
         </div>
-      </div>
-    </div>
+      </AuthShell>
+    )
+  }
+
+  if (!sessionReady && !done) {
+    return (
+      <AuthShell
+        headline="That link has expired"
+        sub="Reset links are good for one hour, and only once."
+        altHref="/login"
+        altLabel="Back to sign in"
+      >
+        <Link
+          href="/forgot-password"
+          className="tap flex w-full items-center justify-center rounded-xl bg-amber py-3.5 text-small font-semibold text-void transition-colors hover:bg-amber/90"
+        >
+          Send a new link
+        </Link>
+      </AuthShell>
+    )
+  }
+
+  if (done) {
+    return (
+      <AuthShell headline="Password updated" sub="Taking you to your dashboard.">
+        <div className="flex items-center gap-3 rounded-2xl border border-jade/40 bg-jade/10 px-5 py-4">
+          {/* jade, because something genuinely succeeded */}
+          <span className="h-1.5 w-1.5 rounded-full bg-jade" aria-hidden="true" />
+          <p className="font-mono text-eyebrow uppercase text-jade">Signed in</p>
+        </div>
+      </AuthShell>
+    )
+  }
+
+  return (
+    <AuthShell
+      headline="Set a new password"
+      sub="Pick something you haven't used before."
+      altHref="/login"
+      altLabel="Back to sign in"
+    >
+      <form onSubmit={handleReset} className="space-y-5">
+        <div>
+          <Label htmlFor="password">New password</Label>
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              name="new-password"
+              autoComplete="new-password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              placeholder="At least 6 characters"
+              autoFocus
+              className="pr-16"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(p => !p)}
+              className="absolute right-1 top-1/2 flex h-9 -translate-y-1/2 items-center rounded-lg px-3 font-mono text-eyebrow uppercase text-ink-muted transition-colors hover:text-ink-high"
+            >
+              {showPassword ? 'Hide' : 'Show'}
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <Label htmlFor="confirm">Confirm password</Label>
+          <Input
+            id="confirm"
+            type={showPassword ? 'text' : 'password'}
+            name="confirm-password"
+            autoComplete="new-password"
+            value={confirmPassword}
+            onChange={e => setConfirmPassword(e.target.value)}
+            placeholder="Type it again"
+          />
+        </div>
+
+        {error && <ErrorNote>{error}</ErrorNote>}
+
+        <Submit loading={loading} loadingLabel="Updating">
+          Update password
+        </Submit>
+      </form>
+    </AuthShell>
   )
 }

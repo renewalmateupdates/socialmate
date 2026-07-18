@@ -43,6 +43,22 @@ Rules that must hold:
 
 Break it once and this reads as a startup template with a palette applied.
 
+### The one documented exception: `alert`
+
+`--color-alert #FF6B5A` is **not** a fourth brand voice. The three voices describe
+*product state* — queued, generating, published. Failure is a separate functional
+axis that every form needs and none of the three can honestly carry: amber already
+means "waiting" and jade already means "succeeded", so reusing either to mean
+"this went wrong" would break the language the rest of the site is teaching.
+
+It's warm-shifted so it belongs to this palette rather than sitting on top of it,
+and it measures **7.02:1** on void. It appears on form errors and nowhere else.
+Never a section, never decoration.
+
+The password strength meter follows the same logic rather than inventing a
+yellow/blue scale: alert → alert/70 → ink-muted → jade. "Strong" is jade because
+jade already means *good, real, succeeded*.
+
 ### Measured contrast (not eyeballed)
 
 All against `--color-void #0D0B0A`:
@@ -234,6 +250,46 @@ Named `.mjs` rather than `.ts` so it runs on bare `node` with no ts-node/tsx ste
 
 ---
 
+## Auth carry-through
+
+Most sites cliff-drop from a composed landing page into a bootstrap form, and
+that drop is where trust dies — it's the first screen of the actual product, and
+it tells people the polish was marketing.
+
+`AuthShell` is a split layout: form on one side, a **quiet** fragment of the hero
+language on the other. Login, signup, forgot and reset all compose from it, and
+`components/instrument/form.tsx` holds the shared field primitives so a field only
+has to be got right once.
+
+The aside is deliberately restrained: no typing, no meter, no drafts. One row
+moves, slowly, on its own 9s clock (`--auth-dur`). Running the full 14s hero loop
+next to a password field would be showing off at the exact moment someone is
+trying to concentrate. It still teaches the same lesson — one row goes amber →
+jade while the others hold at amber.
+
+It's hidden below `lg`. On a phone the form should own the screen; a decorative
+panel above the fold would just push the fields down.
+
+`asideNote` swaps the closing line. Signup uses it for what you actually get at
+$0, with jade checks — the same jade the hero uses for *published*, here meaning
+*included*.
+
+### Skeletons have to match the shell
+
+`app/login/LoginSkeleton.tsx` and `app/signup/loading.tsx` mirror AuthShell's grid,
+header and field rhythm. The signup skeleton previously rendered its panel on the
+opposite side from the real page, so it traded a blank screen for a visible jump
+at hydration. A skeleton that doesn't match the layout isn't doing its job.
+
+### Cut from auth
+
+- **Emoji avatars** standing in as social proof on signup (`🧑‍💻 👩‍🎨 🧑‍🎤 👨‍💼`
+  behind "30+ creators"). Fictional faces implying real users is fake proof, and
+  emoji were the thing that made these pages read vibe-coded.
+- Emoji throughout: `🔑` / `✨` on the login mode tabs, `📬`, `🔐`, `❌`, `⚠️`.
+  The mode tabs are now a mono segmented control, which is what they always were.
+- A blue info box on the magic-link mode. Blue is not one of the three voices.
+
 ## Implementation traps
 
 ### Tailwind v4 tree-shakes custom `--font-*` theme keys
@@ -251,6 +307,44 @@ element before hydration, so adding a React-rendered className there causes a
 hydration mismatch. `<html>` carries `suppressHydrationWarning` for that script,
 which is correct rather than a papering-over: server and client are *supposed* to
 differ on that one element.
+
+### `bg-surface` was silently the wrong colour — use `bg-panel`
+
+The worst trap found so far, and it was invisible in screenshots.
+
+`globals.css` has a hand-written legacy utility, used by ~68 files across the app
+interior:
+
+```css
+.bg-surface { background-color: var(--surface); }
+```
+
+Tailwind v4 also generates `.bg-surface` from a `--color-surface` theme key. Same
+selector, and the legacy rule is declared **later** in the file, so it wins.
+
+The result: every instrument surface was rendering `var(--surface)` — **white**
+outside a `.dark` scope, and the legacy cool `#1a1d27` inside one — instead of the
+warm `#161311`. The entire warm-vs-cool thesis was quietly compromised, and it
+only surfaced because Lighthouse reported a background of `#ffffff` behind the
+cookie banner.
+
+The token is now `--color-panel` → **`bg-panel`**. Naming a token `--color-x` is
+not enough to avoid a collision; the generated *utility class name* has to be
+unique too. Check any new token against the hand-written utilities near the bottom
+of `globals.css` (`bg-theme`, `bg-surface`, `border-theme`, `text-muted`,
+`text-faint`, `bg-accent`, …).
+
+### `t()` returns the key when a translation is missing
+
+So `t('some.missing.key') || 'Fallback'` **never fires** — the `||` sees a
+non-empty string and the raw key renders into the page. `signup.have_account`
+shipped to screen this way. If a key might not exist, use a literal.
+
+### A JSX comment cannot go between attributes
+
+`<Foo bar="x" {/* why */} baz="y">` is a syntax error, and in dev the server
+quietly keeps serving the last good compile — so the page looks unchanged and you
+chase the wrong bug. Put the comment above the element.
 
 ### Token names are deliberately not `--surface` / `--border` / `--text-muted`
 Those already exist further down `globals.css` driving the app interior's 29
@@ -271,10 +365,56 @@ does the job the list can't: what the thing is for.
 
 ---
 
+## Measured: Lighthouse
+
+Run against a **production build** (`next build` + `next start`), desktop preset.
+
+| Route | Perf | A11y | Best practices | SEO | LCP | CLS | TBT |
+|---|---|---|---|---|---|---|---|
+| `/` | **100** | **100** | 96 | 100 | 0.8s | 0 | 0ms |
+| `/login` | 99 | **100** | 96 | 100 | 0.9s | 0 | 0ms |
+| `/signup` | 99 | **100** | 96 | 100 | 1.0s | 0 | 0ms |
+| `/forgot-password` | **100** | **100** | 96 | 100 | 0.8s | 0 | 0ms |
+
+Best practices is 96 everywhere because `next start` 404s
+`/_vercel/insights/script.js` and `/_vercel/speed-insights/script.js` — those only
+exist when deployed on Vercel. It's a local-testing artifact, not a defect, and
+there is nothing to fix.
+
+### What getting to 100 accessibility actually required
+
+None of these were cosmetic:
+
+- **`opacity-50` on the "coming soon" platform rows.** Dimming a whole row dragged
+  genuinely readable content to ~3.1:1. Fixed by removing the row opacity and
+  letting the ink ramp do the work (the icon keeps a light `opacity-60`).
+- **`ink-faint` at 3.29:1.** Raised to `#8A7F76` (5.03:1). See the token comment —
+  a tier that's illegal on text is a trap, not a design decision.
+- **Cross-fading status tags in the auth aside.** Two labels fading through each
+  other means both spend time at partial opacity, below AA. They now swap
+  discretely with `step-end`, which is the more honest instrument behaviour
+  anyway: a status doesn't fade, it changes.
+- **`alt="SocialMate"` on the logo** sitting next to the word "SocialMate".
+  Redundant to a screen reader — now `alt=""`, since the adjacent text names it.
+- **Inline links distinguished only by colour.** Amber-on-ink-muted is 1.51:1
+  against surrounding prose (3:1 required). They're underlined now.
+- **Show/Hide password button was 33.5×11px.** Below the 24×24 minimum; now a
+  36px-tall padded hit area with no visual change to the label.
+
+The hero panel and auth aside are `role="img"` with a text alternative and their
+subtrees are `aria-hidden` — correct semantics for a decorative composition that
+already has a description, not a way to dodge the checker.
+
 ## Still open
 
-- Pricing, features, about, and the auth screens are **not yet** on this system.
-  They still use the old palette and Inter-era type scale. Auth matters most: the
-  drop from a composed landing page into a bootstrap form is where trust dies.
+- **Pricing, features and about** are not yet on this system. They still use the
+  old palette and Inter-era type scale.
 - The `/vs/*` pages (~76) and `/for/*` pages are untouched.
-- Lighthouse has not been run against a production build yet.
+- **Lighthouse has not been run against a production build.** No numbers reported
+  yet, so treat the 95+/100 target as unverified.
+- `src/app/signup/page.tsx` is dead code — Next resolves the root `app/` directory
+  when it exists, so that file has never rendered. It's a duplicate signup page
+  that will drift.
+- The app interior (dashboard, settings, compose) still uses the old theme system.
+  That's intentional for now: it's a much larger surface and the sidebar themes
+  are load-bearing there.

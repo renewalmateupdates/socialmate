@@ -23,7 +23,7 @@
      Warm because amber vibrates against a warm base and goes flat against a
      cool one. Any warmer and it starts reading as espresso, not equipment. */
   --color-void:     #0D0B0A;
-  --color-surface:  #161311;
+  --color-panel:    #161311;
   --color-raised:   #1F1B18;
   --color-edge:     #2C2622;
   --color-edge-lit: #3D352F;
@@ -31,7 +31,12 @@
   /* ── Neutral ink ramp ─────────────────────────────────────────────────────
      Most of the site lives here. Accents are punctuation, not paragraphs.
      Ratios measured against --color-void, not eyeballed. */
-  --color-ink-faint: #6B625B; /*  3.29:1 — decorative ONLY. Never a label that carries meaning. */
+  /* Raised from #6B625B (3.29:1) after Lighthouse flagged it: in practice this
+     tier is used for eyebrows, footer headings, platform labels and status text —
+     all of which carry meaning — so a token that was illegal on text was just a
+     trap waiting to be stepped in. It is now legal everywhere it sits (5.03:1 on
+     void, 4.74:1 on panel) and still clearly quieter than ink-muted. */
+  --color-ink-faint: #8A7F76; /*  5.03:1 — AA. The quietest readable tier. */
   --color-ink-muted: #9A9089; /*  6.29:1 — AA at body size. */
   --color-ink-body:  #D6CFC7; /* 12.73:1 — AA. */
   --color-ink-high:  #F7F3EF; /* 17.79:1 — AA. Warm white, never #FFF. */
@@ -54,6 +59,15 @@
   --color-violet-deep: #6B42C4;
   --color-jade:        #4FD787; /* 10.66:1 AA */
   --color-jade-deep:   #2A9E5C;
+
+  /* ── The one documented exception ─────────────────────────────────────────
+     Alert is NOT a fourth brand voice. The three voices describe product state
+     (queued / generating / published); failure is a separate functional axis
+     that every form needs and none of the three can honestly carry — amber
+     already means "waiting" and jade already means "succeeded".
+     Warm-shifted so it belongs to this palette rather than sitting on top of it.
+     Errors are the only place it appears. Never decoration, never a section. */
+  --color-alert:       #FF6B5A;
 
   /* ── Faces ────────────────────────────────────────────────────────────────
      Source vars (--font-clash etc) are emitted by next/font/local in app/fonts.ts.
@@ -830,7 +844,7 @@ body {
   /* They settle back to a dim resting state rather than vanishing. Fading to 0
      left a six-second hole in the middle of the panel, and "spent drafts sitting
      quietly under the queue they became" is the truer story anyway. */
-  58%, 88%  { opacity: 0.22; transform: translateY(6px) scale(0.97); }
+  58%, 88%  { opacity: 0.4; transform: translateY(6px) scale(0.97); }
   94%, 100% { opacity: 0; transform: translateY(6px) scale(0.97); }
 }
 .hero-card { animation-name: hero-card; }
@@ -907,7 +921,7 @@ body {
   .hero-meter         { opacity: 0; }
   /* Resting state, not hidden — three empty boxes read as unfinished, and this
      is the composition a reduced-motion visitor gets as the whole design. */
-  .hero-card          { opacity: 0.22; }
+  .hero-card          { opacity: 0.4; }
   .hero-slot          { border-color: var(--color-amber); background-color: var(--glow-amber); }
   .hero-slot-label    { opacity: 1; }
   .hero-publish       { border-color: var(--color-jade); background-color: var(--glow-jade); }
@@ -915,6 +929,62 @@ body {
   .hero-queued-tag    { opacity: 0; }
   .hero-credit-before { opacity: 0; }
   .hero-credit-after  { opacity: 1; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   AUTH ASIDE — the quiet fragment
+   ──────────────────────────────────────────────────────────────────────────────
+   Most sites cliff-drop from a composed landing page into a bootstrap form, and
+   that drop is where trust dies. This carries the type, the color language and
+   the warm dark straight through to the first screen of the actual product.
+
+   Deliberately QUIET: no typing, no meter, no drafts. One row moves, slowly, on
+   its own 9s clock. Running the full hero loop next to a password field would be
+   showing off at the exact moment someone is trying to concentrate.
+   ══════════════════════════════════════════════════════════════════════════════ */
+.auth-clock { --auth-dur: 9s; }
+
+.auth-anim {
+  animation-duration: var(--auth-dur);
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+
+/* Amber → jade, held long at each end. The same lesson the hero teaches, at a
+   pace you can ignore while typing. */
+@keyframes auth-publish {
+  0%, 34%   { border-color: var(--color-amber); background-color: var(--glow-amber); }
+  42%, 82%  { border-color: var(--color-jade);  background-color: var(--glow-jade);  }
+  92%, 100% { border-color: var(--color-amber); background-color: var(--glow-amber); }
+}
+.auth-publish { animation-name: auth-publish; }
+
+/* The two status tags swap DISCRETELY rather than cross-fading. Two reasons:
+   a status doesn't fade, it changes — a hard flip is the more honest instrument
+   behaviour; and a cross-fade means both labels spend time at partial opacity,
+   where jade-on-panel drops below AA and any contrast checker sampling mid-fade
+   is right to complain. step-end keeps them fully visible or fully gone. */
+@keyframes auth-tag-queued {
+  0%   { opacity: 1; }
+  38%  { opacity: 0; }
+  92%  { opacity: 1; }
+  100% { opacity: 1; }
+}
+.auth-tag-queued { animation-name: auth-tag-queued; animation-timing-function: step-end; }
+
+@keyframes auth-tag-published {
+  0%   { opacity: 0; }
+  38%  { opacity: 1; }
+  92%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+.auth-tag-published { animation-name: auth-tag-published; animation-timing-function: step-end; }
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-anim         { animation: none !important; }
+  .auth-publish      { border-color: var(--color-jade); background-color: var(--glow-jade); }
+  .auth-tag-queued   { opacity: 0; }
+  .auth-tag-published{ opacity: 1; }
 }
 
 /* ── Scroll reveal ──────────────────────────────────────────────────────────
