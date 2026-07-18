@@ -53,18 +53,18 @@ const faqSchema = {
 export default function VsPlanlyPage() {
   const { t } = useI18n()
   return (
-    <div className="dark min-h-screen bg-gray-950">
+    <div className="dark min-h-screen bg-panel">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       {/* NAV */}
-      <nav className="border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-950 sticky top-0 z-10">
+      <nav className="border-b border-edge bg-panel bg-panel sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <img src="/logo.png" alt="SocialMate" className="w-8 h-8 rounded-xl" />
-            <span className="font-bold tracking-tight dark:text-white">SocialMate</span>
+            <span className="font-bold tracking-tight text-ink-high">SocialMate</span>
           </Link>
           <div className="flex items-center gap-3">
-            <Link href="/login" className="text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors">{t('vs_shared.nav_login')}</Link>
-            <Link href="/signup" className="text-xs font-bold px-4 py-2 bg-black text-white rounded-xl hover:opacity-80 transition-all">{t('vs_shared.nav_start_free')}</Link>
+            <Link href="/login" className="text-xs font-semibold text-ink-muted hover:text-ink-high dark:hover:text-ink-high transition-colors">{t('vs_shared.nav_login')}</Link>
+            <Link href="/signup" className="text-xs font-bold px-4 py-2 bg-void text-ink-high rounded-xl hover:opacity-80 transition-all">{t('vs_shared.nav_start_free')}</Link>
           </div>
         </div>
       </nav>
@@ -73,20 +73,20 @@ export default function VsPlanlyPage() {
 
         {/* HERO */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center gap-2 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-full px-4 py-1.5 text-xs font-bold text-blue-700 dark:text-blue-400 mb-4">
+          <div className="inline-flex items-center gap-2 bg-raised bg-raised border border-edge-lit border-edge-lit rounded-full px-4 py-1.5 text-xs font-bold text-ink-muted mb-4">
             Updated May 2026
           </div>
-          <h1 className="text-4xl font-extrabold tracking-tight mb-4 dark:text-white">
+          <h1 className="text-4xl font-extrabold tracking-tight mb-4 text-ink-high">
             SocialMate vs Planly
           </h1>
-          <p className="text-lg text-gray-500 dark:text-gray-400 max-w-2xl mx-auto">
+          <p className="text-lg text-ink-muted max-w-2xl mx-auto">
             Planly starts at $15/month and locks TikTok behind paid plans. SocialMate includes TikTok scheduling free — Production API approved — plus Discord, Telegram, and Mastodon that Planly doesn&apos;t support.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
-            <Link href="/signup" className="px-6 py-3 bg-black text-white font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
+            <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
               {t('vs_shared.cta_try_free')}
             </Link>
-            <Link href="/pricing" className="px-6 py-3 border border-gray-200 dark:border-gray-700 font-semibold rounded-2xl hover:border-gray-400 transition-all text-sm dark:text-gray-200">
+            <Link href="/pricing" className="px-6 py-3 border border-edge font-semibold rounded-2xl hover:border-edge transition-all text-sm text-ink-high">
               {t('vs_shared.cta_see_pricing')}
             </Link>
           </div>
@@ -94,10 +94,10 @@ export default function VsPlanlyPage() {
 
         {/* VERDICT BANNER */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
-          <div className="bg-white dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 rounded-2xl p-6">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Planly</p>
-            <p className="font-extrabold text-lg mb-2 dark:text-white">Good for TikTok — if you pay</p>
-            <ul className="space-y-1 text-xs text-gray-500 dark:text-gray-400">
+          <div className="bg-panel border-2 border-edge rounded-2xl p-6">
+            <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">Planly</p>
+            <p className="font-extrabold text-lg mb-2 text-ink-high">Good for TikTok — if you pay</p>
+            <ul className="space-y-1 text-xs text-ink-muted">
               <li>✅ Supports TikTok, Instagram, Facebook, Twitter, LinkedIn, Pinterest</li>
               <li>✅ Unlimited TikTok on paid plans</li>
               <li>❌ TikTok requires $15/month plan</li>
@@ -106,10 +106,10 @@ export default function VsPlanlyPage() {
               <li>❌ No bulk scheduling on free plan</li>
             </ul>
           </div>
-          <div className="bg-black text-white rounded-2xl p-6">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">SocialMate</p>
+          <div className="bg-void text-ink-high rounded-2xl p-6">
+            <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
             <p className="font-extrabold text-lg mb-2">TikTok free. 7 platforms. 15+ AI tools.</p>
-            <ul className="space-y-1 text-xs text-gray-300">
+            <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ TikTok scheduling free (Production API approved)</li>
               <li>✅ 20 TikTok videos/month on free plan</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
@@ -122,18 +122,18 @@ export default function VsPlanlyPage() {
 
         {/* COMPARISON TABLE */}
         <div className="mb-12">
-          <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">{t('vs_shared.feature_comparison')}</h2>
-          <div className="overflow-x-auto"><div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden min-w-[480px]">
-            <div className="grid grid-cols-3 bg-gray-50 dark:bg-gray-800 px-5 py-3 text-xs font-extrabold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+          <h2 className="text-xl font-extrabold tracking-tight mb-6 text-ink-high">{t('vs_shared.feature_comparison')}</h2>
+          <div className="overflow-x-auto"><div className="bg-panel border border-edge rounded-2xl overflow-hidden min-w-[480px]">
+            <div className="grid grid-cols-3 bg-raised px-5 py-3 text-xs font-extrabold text-ink-muted uppercase tracking-wide">
               <span>{t('vs_shared.table_feature')}</span>
               <span>Planly</span>
               <span>{t('vs_shared.table_socialmate')}</span>
             </div>
             {COMPARISON.map((row, i) => (
-              <div key={i} className={`grid grid-cols-3 px-5 py-3.5 text-sm border-t border-gray-50 dark:border-gray-800 ${i % 2 === 0 ? 'bg-white dark:bg-gray-900' : 'bg-gray-50/50 dark:bg-gray-800/30'}`}>
-                <span className="font-semibold text-gray-700 dark:text-gray-300 text-xs">{row.feature}</span>
-                <span className="text-xs text-gray-500 dark:text-gray-400">{row.planly}</span>
-                <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">{row.socialmate}</span>
+              <div key={i} className={`grid grid-cols-3 px-5 py-3.5 text-sm border-t border-edge border-edge ${i % 2 === 0 ? 'bg-panel' : 'bg-raised bg-raised'}`}>
+                <span className="font-semibold text-ink-body text-xs">{row.feature}</span>
+                <span className="text-xs text-ink-muted">{row.planly}</span>
+                <span className="text-xs font-semibold text-ink-high">{row.socialmate}</span>
               </div>
             ))}
           </div>
@@ -142,7 +142,7 @@ export default function VsPlanlyPage() {
 
         {/* WHY SWITCH */}
         <div className="mb-12">
-          <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">Why creators choose SocialMate over Planly</h2>
+          <h2 className="text-xl font-extrabold tracking-tight mb-6 text-ink-high">Why creators choose SocialMate over Planly</h2>
           <div className="space-y-4">
             {[
               {
@@ -166,11 +166,11 @@ export default function VsPlanlyPage() {
                 desc: 'SocialMate includes SOMA: an autonomous AI content system that ingests your source material, learns your brand voice, and generates a full week of platform-native posts on a schedule. Planly has no equivalent. For creators who want to batch content and let AI handle distribution, SOMA is a category-defining tool.',
               },
             ].map((r) => (
-              <div key={r.n} className="flex gap-4 p-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl hover:border-gray-300 dark:hover:border-gray-600 transition-all">
-                <div className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center text-sm font-extrabold flex-shrink-0">{r.n}</div>
+              <div key={r.n} className="flex gap-4 p-5 bg-panel border border-edge border-edge rounded-2xl hover:border-edge dark:hover:border-edge transition-all">
+                <div className="w-8 h-8 bg-void text-ink-high rounded-full flex items-center justify-center text-sm font-extrabold flex-shrink-0">{r.n}</div>
                 <div>
-                  <p className="text-sm font-extrabold mb-1 dark:text-gray-100">{r.title}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{r.desc}</p>
+                  <p className="text-sm font-extrabold mb-1 text-ink-high">{r.title}</p>
+                  <p className="text-xs text-ink-muted leading-relaxed">{r.desc}</p>
                 </div>
               </div>
             ))}
@@ -179,27 +179,27 @@ export default function VsPlanlyPage() {
 
         {/* FAQ */}
         <div className="mb-12">
-          <h2 className="text-xl font-extrabold tracking-tight mb-6 dark:text-white">{t('vs_shared.faq_heading')}</h2>
+          <h2 className="text-xl font-extrabold tracking-tight mb-6 text-ink-high">{t('vs_shared.faq_heading')}</h2>
           <div className="space-y-4">
             {FAQ.map((faq, i) => (
-              <div key={i} className="p-5 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl">
-                <p className="text-sm font-extrabold mb-2 dark:text-gray-100">{faq.q}</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{faq.a}</p>
+              <div key={i} className="p-5 bg-panel border border-edge border-edge rounded-2xl">
+                <p className="text-sm font-extrabold mb-2 text-ink-high">{faq.q}</p>
+                <p className="text-xs text-ink-muted leading-relaxed">{faq.a}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* CTA */}
-        <div className="bg-black text-white rounded-2xl p-8 text-center">
+        <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Free TikTok scheduling. 7 platforms. Zero cost to start.</h2>
-          <p className="text-gray-400 text-sm mb-6 max-w-lg mx-auto">
+          <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
             TikTok Production API approved. Schedule videos for free — plus Discord, Telegram, Mastodon, Bluesky, and X — all from one dashboard.
           </p>
-          <Link href="/signup" className="inline-block bg-white text-black font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
+          <Link href="/signup" className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}
           </Link>
-          <p className="text-gray-600 text-xs mt-3">No card required · TikTok free on all plans</p>
+          <p className="text-ink-muted text-xs mt-3">No card required · TikTok free on all plans</p>
         </div>
       </div>
       {/* FOOTER */}

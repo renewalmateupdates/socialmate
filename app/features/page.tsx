@@ -3,16 +3,18 @@ import { useState } from 'react'
 import Link from 'next/link'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
+import { BarChart3, Bot, Building2, CalendarClock, CalendarDays, CheckCircle2, Clock, FileDown, FileText, Flame, FolderOpen, Hash, History, ImagePlus, Inbox, Link2, MessagesSquare, Package, PenLine, Radar, Recycle, RefreshCw, Rss, Search, ShieldCheck, Tag, Tags, Telescope, TrendingUp, Users, Wrench, Zap } from 'lucide-react'
+import PlatformIcon from '@/components/landing/PlatformIcon'
 
 const FEATURE_CATEGORIES = [
   {
     category: 'AI Tools',
-    emoji: '🤖',
+    icon: Bot,
     desc: '15+ AI tools powered by Google Gemini. Credits included on every plan.',
     features: [
       {
         name: 'Caption Generator',
-        emoji: '✍️',
+        icon: PenLine,
         credits: '5 credits',
         proOnly: false,
         what: 'Generates platform-optimized captions based on your topic and tone.',
@@ -20,7 +22,7 @@ const FEATURE_CATEGORIES = [
       },
       {
         name: 'Hashtag Generator',
-        emoji: '#️⃣',
+        icon: Hash,
         credits: '5 credits',
         proOnly: false,
         what: 'Generates a set of relevant, high-performing hashtags for your post.',
@@ -28,7 +30,7 @@ const FEATURE_CATEGORIES = [
       },
       {
         name: 'Post Rewrite / Improver',
-        emoji: '🔁',
+        icon: RefreshCw,
         credits: '5 credits',
         proOnly: false,
         what: 'Takes your existing caption and makes it sharper, more engaging, and better structured.',
@@ -36,7 +38,7 @@ const FEATURE_CATEGORIES = [
       },
       {
         name: 'Viral Hook Generator',
-        emoji: '🎣',
+        icon: TrendingUp,
         credits: '5 credits',
         proOnly: false,
         what: 'Generates 3 scroll-stopping opening lines designed to drive clicks and engagement.',
@@ -44,7 +46,7 @@ const FEATURE_CATEGORIES = [
       },
       {
         name: 'Thread Generator',
-        emoji: '🧵',
+        icon: MessagesSquare,
         credits: '10 credits',
         proOnly: false,
         what: 'Turns a single topic or idea into a structured multi-part thread with a hook, supporting points, and a CTA.',
@@ -52,7 +54,7 @@ const FEATURE_CATEGORIES = [
       },
       {
         name: 'Content Repurposer',
-        emoji: '♻️',
+        icon: Recycle,
         credits: '10 credits',
         proOnly: false,
         what: 'Paste a blog post, transcript, or long caption and get platform-ready short-form content out the other side.',
@@ -60,7 +62,7 @@ const FEATURE_CATEGORIES = [
       },
       {
         name: 'Post Score',
-        emoji: '⚡',
+        icon: Zap,
         credits: '5 credits',
         proOnly: false,
         what: 'AI predicts how your post will perform before you publish — with a score out of 100, strengths, and improvements.',
@@ -68,7 +70,7 @@ const FEATURE_CATEGORIES = [
       },
       {
         name: 'AI Content Calendar',
-        emoji: '📅',
+        icon: CalendarDays,
         credits: '25 credits',
         proOnly: true,
         what: 'Generate a full 30-day content calendar based on your niche, platforms, and posting goals.',
@@ -76,7 +78,7 @@ const FEATURE_CATEGORIES = [
       },
       {
         name: 'AI Image Generation',
-        emoji: '🎨',
+        icon: ImagePlus,
         credits: '25 credits',
         proOnly: true,
         what: 'Generate custom images for your posts directly inside SocialMate.',
@@ -86,12 +88,12 @@ const FEATURE_CATEGORIES = [
   },
   {
     category: 'Growth Intelligence',
-    emoji: '📡',
+    icon: Radar,
     desc: 'Real data from Reddit and YouTube — trend scanning, growth analysis, and gap detection.',
     features: [
       {
         name: 'SM-Pulse',
-        emoji: '🔥',
+        icon: Flame,
         credits: '20 credits per scan',
         proOnly: false,
         what: 'Scans Reddit and YouTube in real time to surface what is trending in your niche right now.',
@@ -99,7 +101,7 @@ const FEATURE_CATEGORIES = [
       },
       {
         name: 'SM-Radar',
-        emoji: '📊',
+        icon: Radar,
         credits: '20 credits per report',
         proOnly: false,
         what: 'Analyzes real trending data to surface content gaps, competitor weaknesses, and your single best content strategy this week.',
@@ -107,7 +109,7 @@ const FEATURE_CATEGORIES = [
       },
       {
         name: 'Content Gap Detector',
-        emoji: '🕳️',
+        icon: Search,
         credits: '10 credits',
         proOnly: false,
         what: 'Spots underserved topics and missing content in your niche so you can create what nobody else is making.',
@@ -117,12 +119,12 @@ const FEATURE_CATEGORIES = [
   },
   {
     category: 'Scheduling & Automation',
-    emoji: '🗓️',
+    icon: CalendarClock,
     desc: 'Schedule across 7 live platforms from one place. Bulk upload, evergreen recycling, and automated queues.',
     features: [
       {
         name: 'Bulk Scheduler',
-        emoji: '📦',
+        icon: Package,
         credits: 'Free',
         proOnly: false,
         what: 'Schedule dozens of posts at once instead of one at a time.',
@@ -130,7 +132,7 @@ const FEATURE_CATEGORIES = [
       },
       {
         name: 'Evergreen Content Recycling',
-        emoji: '♻️',
+        icon: Recycle,
         credits: 'Free',
         proOnly: false,
         what: 'Mark your best posts as evergreen and they automatically re-queue when your schedule goes empty.',
@@ -138,7 +140,7 @@ const FEATURE_CATEGORIES = [
       },
       {
         name: 'RSS / Blog Import',
-        emoji: '📡',
+        icon: Rss,
         credits: 'Free',
         proOnly: false,
         what: 'Pull posts from any RSS or Atom feed and turn them into scheduled social posts in one click.',
@@ -146,7 +148,7 @@ const FEATURE_CATEGORIES = [
       },
       {
         name: 'Content Approval Workflows',
-        emoji: '✅',
+        icon: CheckCircle2,
         credits: 'Free',
         proOnly: true,
         what: 'Let team members submit posts for admin review before they go live.',
@@ -154,7 +156,7 @@ const FEATURE_CATEGORIES = [
       },
       {
         name: 'Best Time to Post',
-        emoji: '⏰',
+        icon: Clock,
         credits: 'Free',
         proOnly: false,
         what: 'See when your audience is most active so you can schedule posts for maximum reach.',
@@ -162,7 +164,7 @@ const FEATURE_CATEGORIES = [
       },
       {
         name: 'Platform Requirement Guard',
-        emoji: '🛡️',
+        icon: ShieldCheck,
         credits: 'Always free',
         proOnly: false,
         what: 'Automatically warns you if your post violates a platform\'s rules before it goes live.',
@@ -172,12 +174,12 @@ const FEATURE_CATEGORIES = [
   },
   {
     category: 'Creator Tools',
-    emoji: '🛠️',
+    icon: Wrench,
     desc: 'The tools that make your workflow faster — templates, media, hashtags, and your bio page.',
     features: [
       {
         name: 'Link in Bio Page',
-        emoji: '🔗',
+        icon: Link2,
         credits: 'Free',
         proOnly: false,
         what: 'A clean, shareable bio page that houses all your links — like Linktree, built into SocialMate at no cost.',
@@ -185,7 +187,7 @@ const FEATURE_CATEGORIES = [
       },
       {
         name: 'Post Template Library',
-        emoji: '📁',
+        icon: FileText,
         credits: 'Free',
         proOnly: false,
         what: 'Save your best post formats as reusable templates so you never start from scratch.',
@@ -193,7 +195,7 @@ const FEATURE_CATEGORIES = [
       },
       {
         name: 'Media Library',
-        emoji: '🗃️',
+        icon: FolderOpen,
         credits: 'Free',
         proOnly: false,
         what: 'Store and organize your images and videos inside SocialMate for quick access when scheduling.',
@@ -201,7 +203,7 @@ const FEATURE_CATEGORIES = [
       },
       {
         name: 'Hashtag Collections',
-        emoji: '🏷️',
+        icon: Tags,
         credits: 'Free',
         proOnly: false,
         what: 'Save groups of hashtags and apply them to posts with one click.',
@@ -211,12 +213,12 @@ const FEATURE_CATEGORIES = [
   },
   {
     category: 'Analytics',
-    emoji: '📊',
+    icon: BarChart3,
     desc: 'Real data from your posting activity — no fake metrics, no inflated numbers.',
     features: [
       {
         name: 'Analytics Dashboard',
-        emoji: '📈',
+        icon: BarChart3,
         credits: 'Free',
         proOnly: false,
         what: 'Track your posting activity, platform breakdown, streak, peak times, and consistency score — all in one place.',
@@ -224,7 +226,7 @@ const FEATURE_CATEGORIES = [
       },
       {
         name: 'Analytics History',
-        emoji: '🗂️',
+        icon: History,
         credits: 'Free / Credits',
         proOnly: false,
         what: '14-day and 30-day history free on all plans. 90-day free on Pro. 6-month free on Agency.',
@@ -232,7 +234,7 @@ const FEATURE_CATEGORIES = [
       },
       {
         name: 'PDF Analytics Reports',
-        emoji: '📄',
+        icon: FileDown,
         credits: 'Free',
         proOnly: true,
         what: 'Export a full analytics report as a PDF — post counts, engagement, platform breakdown, peak times, and more.',
@@ -242,12 +244,12 @@ const FEATURE_CATEGORIES = [
   },
   {
     category: 'Competitive Intelligence',
-    emoji: '🔭',
+    icon: Telescope,
     desc: 'Track competitors, monitor your inbox, and stay ahead of what\'s happening in your niche.',
     features: [
       {
         name: 'Competitor Tracking',
-        emoji: '🔭',
+        icon: Telescope,
         credits: 'Free',
         proOnly: false,
         what: 'Track up to 3 competitor accounts across platforms — available on every plan including free.',
@@ -255,7 +257,7 @@ const FEATURE_CATEGORIES = [
       },
       {
         name: 'Social Inbox',
-        emoji: '📬',
+        icon: Inbox,
         credits: 'Free',
         proOnly: false,
         what: 'Comments and mentions from all your connected platforms — in one unified inbox.',
@@ -265,12 +267,12 @@ const FEATURE_CATEGORIES = [
   },
   {
     category: 'Team & Agency',
-    emoji: '👥',
+    icon: Users,
     desc: 'Collaborate with your team, manage clients, and control access — all built in.',
     features: [
       {
         name: 'Team Management',
-        emoji: '👤',
+        icon: Users,
         credits: 'Free',
         proOnly: false,
         what: 'Invite team members, assign roles, and manage who can post, draft, or admin your account.',
@@ -278,7 +280,7 @@ const FEATURE_CATEGORIES = [
       },
       {
         name: 'Client Workspaces',
-        emoji: '🏢',
+        icon: Building2,
         credits: 'Free',
         proOnly: true,
         what: 'Separate workspaces for each client — fully isolated content, platforms, and settings.',
@@ -286,7 +288,7 @@ const FEATURE_CATEGORIES = [
       },
       {
         name: 'White Label',
-        emoji: '🏷️',
+        icon: Tag,
         credits: '+$20/mo or +$40/mo add-on',
         proOnly: true,
         what: 'Remove all SocialMate branding and replace it with your own logo, colors, and domain.',
@@ -325,36 +327,36 @@ export default function Features() {
 
         {/* HEADER */}
         <div className="mb-10">
-          <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">{t('features.eyebrow')}</p>
-          <h1 className="text-4xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">{t('features.hero_title')}</h1>
-          <p className="text-sm text-gray-500 dark:text-gray-400 max-w-2xl leading-relaxed">
+          <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('features.eyebrow')}</p>
+          <h1 className="text-4xl font-extrabold tracking-tight mb-3 text-ink-high">{t('features.hero_title')}</h1>
+          <p className="text-sm text-ink-muted max-w-2xl leading-relaxed">
             {t('features.hero_desc')}
           </p>
         </div>
 
         {/* CREDIT QUICK REFERENCE */}
-        <div className="bg-black text-white rounded-2xl p-6 mb-10">
+        <div className="bg-void text-ink-high rounded-2xl p-6 mb-10">
           <div className="flex items-start justify-between mb-4">
             <div>
-              <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">{t('features.credit_ref_eyebrow')}</p>
+              <p className="text-xs font-bold text-ink-body uppercase tracking-widest mb-1">{t('features.credit_ref_eyebrow')}</p>
               <p className="text-sm font-extrabold">{t('features.credit_ref_title')}</p>
             </div>
-            <Link href="/pricing" className="text-xs font-bold text-gray-400 hover:text-white transition-all flex-shrink-0">
+            <Link href="/pricing" className="text-xs font-bold text-ink-body hover:text-ink-high transition-all flex-shrink-0">
               {t('features.see_pricing')}
             </Link>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
             {CREDIT_SUMMARY.map(tool => (
-              <div key={tool.name} className="bg-white/10 rounded-xl p-2.5 text-center relative">
+              <div key={tool.name} className="bg-panel rounded-xl p-2.5 text-center relative">
                 {tool.proOnly && (
-                  <span className="absolute -top-1.5 -right-1.5 text-xs font-bold bg-purple-500 text-white px-1.5 py-0.5 rounded-full">Pro+</span>
+                  <span className="absolute -top-1.5 -right-1.5 text-xs font-bold bg-violet/10 text-ink-high px-1.5 py-0.5 rounded-full">Pro+</span>
                 )}
-                <p className="text-xs font-bold text-white leading-snug mb-1">{tool.name}</p>
-                <p className="text-xs text-gray-400 font-bold">{tool.cost}</p>
+                <p className="text-xs font-bold text-ink-high leading-snug mb-1">{tool.name}</p>
+                <p className="text-xs text-ink-body font-bold">{tool.cost}</p>
               </div>
             ))}
           </div>
-          <p className="text-xs text-gray-500 mt-4">{t('features.credits_bank_note')}</p>
+          <p className="text-xs text-ink-muted mt-4">{t('features.credits_bank_note')}</p>
         </div>
 
         {/* CATEGORY FILTER */}
@@ -363,8 +365,8 @@ export default function Features() {
             <button key={cat} onClick={() => setActiveCategory(cat)}
               className={`text-xs font-bold px-4 py-2 rounded-xl transition-all ${
                 activeCategory === cat
-                  ? 'bg-black dark:bg-white text-white dark:text-black'
-                  : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-gray-500'
+                  ? 'bg-void bg-panel text-ink-high text-ink-high'
+                  : 'bg-panel border border-edge text-ink-muted hover:border-edge dark:hover:border-edge'
               }`}>
               {cat}
             </button>
@@ -376,43 +378,43 @@ export default function Features() {
           <div key={section.category} className="mb-14">
             <div className="flex items-start justify-between mb-2">
               <div className="flex items-center gap-2">
-                <span className="text-xl">{section.emoji}</span>
-                <h2 className="text-base font-extrabold tracking-tight text-gray-900 dark:text-gray-100">{section.category}</h2>
+                <section.icon className="h-5 w-5 flex-shrink-0 text-ink-muted" strokeWidth={2} aria-hidden="true" />
+                <h2 className="text-base font-extrabold tracking-tight text-ink-high">{section.category}</h2>
               </div>
             </div>
             {section.desc && (
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-5 ml-8">{section.desc}</p>
+              <p className="text-xs text-ink-muted mb-5 ml-8">{section.desc}</p>
             )}
             <div className="grid grid-cols-1 gap-3">
               {section.features.map(f => (
                 <div key={f.name}
-                  className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-5 hover:border-gray-300 dark:hover:border-gray-500 transition-all">
+                  className="bg-panel border border-edge border-edge rounded-2xl p-5 hover:border-edge dark:hover:border-edge transition-all">
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xl">{f.emoji}</span>
-                      <h3 className="text-sm font-extrabold text-gray-900 dark:text-gray-100">{f.name}</h3>
+                      <f.icon className="h-4 w-4 flex-shrink-0 text-ink-muted" strokeWidth={2} aria-hidden="true" />
+                      <h3 className="text-sm font-extrabold text-ink-high">{f.name}</h3>
                       {f.proOnly && (
-                        <span className="text-xs font-bold px-2 py-0.5 bg-purple-50 dark:bg-purple-950 text-purple-600 dark:text-purple-400 rounded-full">Pro+</span>
+                        <span className="text-xs font-bold px-2 py-0.5 bg-violet/10 bg-violet/10 text-violet text-violet rounded-full">Pro+</span>
                       )}
                     </div>
                     <span className={`text-xs font-bold px-3 py-1 rounded-full flex-shrink-0 ${
                       f.credits === 'Free' || f.credits === 'Always free'
-                        ? 'bg-green-50 dark:bg-green-950 text-green-600 dark:text-green-400'
+                        ? 'bg-jade/10 bg-jade/10 text-jade text-jade'
                         : f.credits.includes('add-on')
-                        ? 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
-                        : 'bg-black dark:bg-white text-white dark:text-black'
+                        ? 'bg-raised text-ink-muted'
+                        : 'bg-void bg-panel text-ink-high text-ink-high'
                     }`}>
                       {f.credits}
                     </span>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">{t('features.what_it_does')}</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{f.what}</p>
+                      <p className="text-xs font-bold text-ink-muted uppercase tracking-wide mb-1">{t('features.what_it_does')}</p>
+                      <p className="text-xs text-ink-muted leading-relaxed">{f.what}</p>
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">{t('features.how_it_works')}</p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">{f.how}</p>
+                      <p className="text-xs font-bold text-ink-muted uppercase tracking-wide mb-1">{t('features.how_it_works')}</p>
+                      <p className="text-xs text-ink-muted leading-relaxed">{f.how}</p>
                     </div>
                   </div>
                 </div>
@@ -422,39 +424,39 @@ export default function Features() {
         ))}
 
         {/* PLATFORM NOTE */}
-        <div className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 mb-10">
+        <div className="bg-raised border border-edge border-edge rounded-2xl p-6 mb-10">
           <div className="flex items-start gap-4">
             <span className="text-3xl">📱</span>
             <div>
-              <h3 className="text-sm font-extrabold mb-1 text-gray-900 dark:text-gray-100">{t('features.platform_note_title')}</h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-3">
+              <h3 className="text-sm font-extrabold mb-1 text-ink-high">{t('features.platform_note_title')}</h3>
+              <p className="text-xs text-ink-muted leading-relaxed mb-3">
                 {t('features.platform_note_desc')}
               </p>
               <div className="flex flex-wrap gap-2">
                 {[
-                  { name: 'Discord',     icon: '💬', status: 'live'    },
-                  { name: 'Bluesky',     icon: '🦋', status: 'live'    },
-                  { name: 'Telegram',    icon: '✈️', status: 'live'    },
-                  { name: 'Mastodon',    icon: '🐘', status: 'live'    },
-                  { name: 'X / Twitter', icon: '🐦', status: 'live'    },
-                  { name: 'LinkedIn',  icon: '💼', status: 'live'    },
-                  { name: 'YouTube',   icon: '▶️', status: 'soon'    },
-                  { name: 'Pinterest', icon: '📌', status: 'soon'    },
-                  { name: 'Reddit',    icon: '🤖', status: 'soon'    },
-                  { name: 'Instagram', icon: '📸', status: 'planned' },
-                  { name: 'TikTok',    icon: '🎵', status: 'live'    },
-                  { name: 'Facebook',  icon: '📘', status: 'planned' },
-                  { name: 'Threads',   icon: '🧵', status: 'planned' },
+                  { name: 'Discord', status: 'live'    },
+                  { name: 'Bluesky', status: 'live'    },
+                  { name: 'Telegram', status: 'live'    },
+                  { name: 'Mastodon', status: 'live'    },
+                  { name: 'X / Twitter', status: 'live'    },
+                  { name: 'LinkedIn', status: 'live'    },
+                  { name: 'YouTube', status: 'soon'    },
+                  { name: 'Pinterest', status: 'soon'    },
+                  { name: 'Reddit', status: 'soon'    },
+                  { name: 'Instagram', status: 'planned' },
+                  { name: 'TikTok', status: 'live'    },
+                  { name: 'Facebook', status: 'planned' },
+                  { name: 'Threads', status: 'planned' },
                 ].map(p => (
                   <div key={p.name} className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${
-                    p.status === 'live'    ? 'bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800' :
-                    p.status === 'soon'    ? 'bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900' :
-                    'bg-white dark:bg-gray-700 text-gray-400 dark:text-gray-500 border border-gray-100 dark:border-gray-600'
+                    p.status === 'live'    ? 'bg-jade/10 bg-jade/10 text-jade text-jade border border-jade/40 border-jade/40' :
+                    p.status === 'soon'    ? 'bg-raised bg-raised text-ink-muted text-ink-muted border border-edge-lit border-edge-lit' :
+                    'bg-panel bg-raised text-ink-muted border border-edge border-edge'
                   }`}>
-                    <span>{p.icon}</span>
+                    <PlatformIcon name={p.name} size={13} mono />
                     <span>{p.name}</span>
                     {p.status === 'live' && <span className="font-bold">✓</span>}
-                    {p.status === 'soon' && <span className="text-blue-400 font-bold">{t('features.platform_soon')}</span>}
+                    {p.status === 'soon' && <span className="text-ink-muted font-bold">{t('features.platform_soon')}</span>}
                   </div>
                 ))}
               </div>
@@ -463,28 +465,28 @@ export default function Features() {
         </div>
 
         {/* SM-Give strip */}
-        <div className="border-t border-gray-100 dark:border-gray-800 mt-16 pt-10 pb-4">
+        <div className="border-t border-edge mt-16 pt-10 pb-4">
           <div className="max-w-4xl mx-auto px-6 text-center">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              ❤️ <span className="font-semibold text-gray-700 dark:text-gray-300">2% of every SocialMate subscription</span> goes to SM-Give — our charity initiative.{' '}
-              <a href="/give" className="text-amber-500 hover:text-amber-400 font-semibold transition-colors">{t('features.sm_give_link')}</a>
+            <p className="text-sm text-ink-muted">
+              <span className="font-semibold text-ink-body">2% of every SocialMate subscription</span> goes to SM-Give — our charity initiative.{' '}
+              <a href="/give" className="text-amber hover:text-amber font-semibold transition-colors">{t('features.sm_give_link')}</a>
             </p>
           </div>
         </div>
 
         {/* BOTTOM CTA */}
-        <div className="bg-black rounded-2xl p-8 text-center text-white">
+        <div className="bg-void rounded-2xl p-8 text-center text-ink-high">
           <h2 className="text-2xl font-extrabold mb-2">{t('features.cta_title')}</h2>
-          <p className="text-sm text-gray-400 mb-6 max-w-md mx-auto">
+          <p className="text-sm text-ink-body mb-6 max-w-md mx-auto">
             {t('features.cta_desc')}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link href="/signup"
-              className="bg-white text-black text-sm font-bold px-6 py-3 rounded-xl hover:opacity-90 transition-all w-full sm:w-auto text-center">
+              className="bg-panel text-ink-high text-sm font-bold px-6 py-3 rounded-xl hover:opacity-90 transition-all w-full sm:w-auto text-center">
               {t('features.cta_primary')}
             </Link>
             <Link href="/pricing"
-              className="border border-gray-600 text-white text-sm font-bold px-6 py-3 rounded-xl hover:border-gray-400 transition-all w-full sm:w-auto text-center">
+              className="border border-edge text-ink-high text-sm font-bold px-6 py-3 rounded-xl hover:border-edge transition-all w-full sm:w-auto text-center">
               {t('features.cta_secondary')}
             </Link>
           </div>

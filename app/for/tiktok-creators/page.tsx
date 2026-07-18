@@ -166,53 +166,53 @@ export default function TikTokCreatorsPage() {
       />
 
       {/* ─── HERO ─── */}
-      <section className="bg-[#0a0a0a] text-white py-24 px-6 text-center">
-        <div className="inline-flex items-center gap-2 bg-green-950 border border-green-700 rounded-full px-4 py-1.5 text-xs font-bold text-green-400 mb-6">
+      <section className="bg-[#0a0a0a] text-ink-high py-24 px-6 text-center">
+        <div className="inline-flex items-center gap-2 bg-jade/10 border border-jade/40 rounded-full px-4 py-1.5 text-xs font-bold text-jade mb-6">
           {t('for_tiktok.api_badge')}
         </div>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-3xl mx-auto mb-6">
           {t('for_tiktok.hero_title_1')}{' '}
           <span className="text-[#fe2c55]">{t('for_tiktok.hero_title_2')}</span>
         </h1>
-        <p className="text-gray-300 max-w-xl mx-auto text-base leading-relaxed mb-8">
+        <p className="text-ink-body max-w-xl mx-auto text-base leading-relaxed mb-8">
           {t('for_tiktok.hero_desc')}
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
           <Link
             href="/signup"
-            className="bg-[#fe2c55] hover:opacity-90 text-white font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center"
+            className="bg-[#fe2c55] hover:opacity-90 text-ink-high font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center"
           >
             {t('for_tiktok.hero_cta_primary')}
           </Link>
           <Link
             href="/pricing"
-            className="border border-gray-700 hover:border-gray-400 text-gray-300 hover:text-white font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center"
+            className="border border-edge hover:border-edge text-ink-body hover:text-ink-high font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center"
           >
             {t('for_tiktok.hero_cta_secondary')}
           </Link>
         </div>
-        <p className="text-gray-500 text-xs mt-4">
+        <p className="text-ink-muted text-xs mt-4">
           {t('for_tiktok.hero_note')}
         </p>
       </section>
 
       {/* ─── PAIN POINTS ─── */}
-      <section className="bg-gray-950 text-white py-20 px-6">
+      <section className="bg-panel text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_tiktok.pain_eyebrow')}</p>
+          <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_tiktok.pain_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
             {t('for_tiktok.pain_title')}
           </h2>
           <div className="space-y-6">
             {PAIN_POINTS.map((p, i) => (
               <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center">
-                <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-                  <p className="text-xs text-red-400 font-bold uppercase tracking-wide mb-2">{t('for_tiktok.pain_before_label')}</p>
-                  <p className="text-sm text-gray-400 leading-relaxed">{p.before}</p>
+                <div className="bg-panel border border-edge rounded-2xl p-5">
+                  <p className="text-xs text-alert font-bold uppercase tracking-wide mb-2">{t('for_tiktok.pain_before_label')}</p>
+                  <p className="text-sm text-ink-body leading-relaxed">{p.before}</p>
                 </div>
                 <div className="bg-[#fe2c55]/10 border border-[#fe2c55]/30 rounded-2xl p-5">
                   <p className="text-xs text-[#fe2c55] font-bold uppercase tracking-wide mb-2">{t('for_tiktok.pain_after_label')}</p>
-                  <p className="text-sm text-white leading-relaxed">{p.icon} {p.after}</p>
+                  <p className="text-sm text-ink-high leading-relaxed">{p.icon} {p.after}</p>
                 </div>
               </div>
             ))}
@@ -221,29 +221,29 @@ export default function TikTokCreatorsPage() {
       </section>
 
       {/* ─── FEATURES ─── */}
-      <section className="bg-[#0a0a0a] text-white py-20 px-6">
+      <section className="bg-[#0a0a0a] text-ink-high py-20 px-6">
         <div className="max-w-5xl mx-auto">
           <p className="text-center text-xs font-bold text-[#fe2c55] uppercase tracking-widest mb-3">{t('for_tiktok.features_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-3">
             {t('for_tiktok.features_title')}
           </h2>
-          <p className="text-center text-gray-400 text-sm mb-12 max-w-xl mx-auto">
+          <p className="text-center text-ink-body text-sm mb-12 max-w-xl mx-auto">
             {t('for_tiktok.features_desc')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {FEATURES.map((f, i) => (
               <div
                 key={i}
-                className="rounded-2xl p-5 border bg-gray-950 border-gray-800"
+                className="rounded-2xl p-5 border bg-panel border-edge"
               >
                 <div className="flex items-start justify-between mb-3">
                   <span className="text-2xl">{f.icon}</span>
-                  <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-green-900 text-green-400">
+                  <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-jade/10 text-jade">
                     {f.badge}
                   </span>
                 </div>
                 <h3 className="text-sm font-extrabold mb-2">{f.title}</h3>
-                <p className="text-xs text-gray-400 leading-relaxed">{f.desc}</p>
+                <p className="text-xs text-ink-body leading-relaxed">{f.desc}</p>
               </div>
             ))}
           </div>
@@ -251,25 +251,25 @@ export default function TikTokCreatorsPage() {
       </section>
 
       {/* ─── WHY FREE ─── */}
-      <section className="bg-gradient-to-b from-[#fe2c55]/10 to-gray-950 text-white py-20 px-6">
+      <section className="bg-gradient-to-b from-[#fe2c55]/10 to-gray-950 text-ink-high py-20 px-6">
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-xs font-bold text-[#fe2c55] uppercase tracking-widest mb-3">{t('for_tiktok.why_free_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-6">
             {t('for_tiktok.why_free_title')}
           </h2>
-          <p className="text-gray-300 text-sm leading-relaxed mb-8 max-w-2xl mx-auto">
+          <p className="text-ink-body text-sm leading-relaxed mb-8 max-w-2xl mx-auto">
             {t('for_tiktok.why_free_desc')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
             {[
-              { platform: 'TikTok', cost: '$0 per post', note: 'Free on all plans', color: 'text-green-400' },
-              { platform: 'Bluesky / Mastodon / Discord / Telegram', cost: '$0 per post', note: 'Open APIs — always free', color: 'text-green-400' },
-              { platform: 'X / Twitter', cost: '$0.01 per tweet', note: 'Pro+ required (API cost passed through)', color: 'text-amber-400' },
+              { platform: 'TikTok', cost: '$0 per post', note: 'Free on all plans', color: 'text-jade' },
+              { platform: 'Bluesky / Mastodon / Discord / Telegram', cost: '$0 per post', note: 'Open APIs — always free', color: 'text-jade' },
+              { platform: 'X / Twitter', cost: '$0.01 per tweet', note: 'Pro+ required (API cost passed through)', color: 'text-amber' },
             ].map((r, i) => (
-              <div key={i} className="bg-black/40 border border-gray-800 rounded-2xl p-5">
-                <p className="text-xs font-extrabold text-gray-300 mb-1">{r.platform}</p>
+              <div key={i} className="bg-void border border-edge rounded-2xl p-5">
+                <p className="text-xs font-extrabold text-ink-body mb-1">{r.platform}</p>
                 <p className={`text-lg font-black mb-1 ${r.color}`}>{r.cost}</p>
-                <p className="text-xs text-gray-500">{r.note}</p>
+                <p className="text-xs text-ink-muted">{r.note}</p>
               </div>
             ))}
           </div>
@@ -277,11 +277,11 @@ export default function TikTokCreatorsPage() {
       </section>
 
       {/* ─── PLATFORMS ─── */}
-      <section className="bg-[#0a0a0a] text-white py-20 px-6">
+      <section className="bg-[#0a0a0a] text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_tiktok.platforms_eyebrow')}</p>
+          <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_tiktok.platforms_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_tiktok.platforms_title')}</h2>
-          <p className="text-gray-400 text-sm mb-8">{t('for_tiktok.platforms_desc')}</p>
+          <p className="text-ink-body text-sm mb-8">{t('for_tiktok.platforms_desc')}</p>
 
           <div className="flex flex-wrap justify-center gap-3 mb-12">
             {LIVE_PLATFORMS.map((p) => (
@@ -290,13 +290,13 @@ export default function TikTokCreatorsPage() {
                 className={`flex items-center gap-2 rounded-xl px-4 py-2.5 border ${
                   p.highlight
                     ? 'bg-[#fe2c55]/10 border-[#fe2c55]/40'
-                    : 'bg-gray-900 border-gray-700'
+                    : 'bg-panel border-edge'
                 }`}
               >
                 <span className="text-lg">{p.icon}</span>
                 <span className="text-sm font-bold">{p.name}</span>
                 <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${
-                  p.highlight ? 'bg-[#fe2c55]/20 text-[#fe2c55]' : 'bg-green-900 text-green-400'
+                  p.highlight ? 'bg-[#fe2c55]/20 text-[#fe2c55]' : 'bg-jade/10 text-jade'
                 }`}>
                   {t('for_tiktok.platforms_live_badge')}
                 </span>
@@ -304,16 +304,16 @@ export default function TikTokCreatorsPage() {
             ))}
           </div>
 
-          <h3 className="text-base font-extrabold text-gray-400 mb-4">{t('for_tiktok.platforms_coming_title')}</h3>
+          <h3 className="text-base font-extrabold text-ink-body mb-4">{t('for_tiktok.platforms_coming_title')}</h3>
           <div className="flex flex-wrap justify-center gap-3">
             {COMING_PLATFORMS.map((p) => (
               <div
                 key={p.name}
-                className="flex items-center gap-2 bg-gray-950 border border-gray-800 rounded-xl px-4 py-2.5 opacity-60"
+                className="flex items-center gap-2 bg-panel border border-edge rounded-xl px-4 py-2.5 opacity-60"
               >
                 <span className="text-lg">{p.icon}</span>
-                <span className="text-sm font-bold text-gray-400">{p.name}</span>
-                <span className="text-xs bg-gray-800 text-gray-500 px-2 py-0.5 rounded-full font-bold">{t('for_tiktok.platforms_coming_badge')}</span>
+                <span className="text-sm font-bold text-ink-body">{p.name}</span>
+                <span className="text-xs bg-raised text-ink-muted px-2 py-0.5 rounded-full font-bold">{t('for_tiktok.platforms_coming_badge')}</span>
               </div>
             ))}
           </div>
@@ -321,13 +321,13 @@ export default function TikTokCreatorsPage() {
       </section>
 
       {/* ─── PRICING ─── */}
-      <section className="bg-gray-950 text-white py-20 px-6">
+      <section className="bg-panel text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
-          <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_tiktok.pricing_eyebrow')}</p>
+          <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_tiktok.pricing_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">
             {t('for_tiktok.pricing_title')}
           </h2>
-          <p className="text-gray-400 text-sm mb-12">
+          <p className="text-ink-body text-sm mb-12">
             {t('for_tiktok.pricing_desc')}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
@@ -337,7 +337,7 @@ export default function TikTokCreatorsPage() {
                 className={`rounded-2xl p-6 border ${
                   tier.highlight
                     ? 'bg-[#fe2c55]/10 border-[#fe2c55]/50 ring-1 ring-[#fe2c55]/30'
-                    : 'bg-gray-900 border-gray-800'
+                    : 'bg-panel border-edge'
                 }`}
               >
                 {tier.highlight && (
@@ -346,9 +346,9 @@ export default function TikTokCreatorsPage() {
                 <p className="text-sm font-extrabold mb-1">{tier.plan}</p>
                 <div className="flex items-end gap-1 mb-4">
                   <span className="text-3xl font-black">{tier.price}</span>
-                  <span className="text-gray-400 text-sm mb-1">{tier.note}</span>
+                  <span className="text-ink-body text-sm mb-1">{tier.note}</span>
                 </div>
-                <ul className="text-xs text-gray-400 space-y-2 mb-6 text-left">
+                <ul className="text-xs text-ink-body space-y-2 mb-6 text-left">
                   <li>✓ {tier.tiktok}</li>
                   <li>✓ {tier.credits}</li>
                   <li>✓ {t('for_tiktok.pricing_feature_platforms')}</li>
@@ -360,8 +360,8 @@ export default function TikTokCreatorsPage() {
                   href={tier.href}
                   className={`block text-center text-sm font-bold py-3 rounded-xl transition-all ${
                     tier.highlight
-                      ? 'bg-[#fe2c55] hover:opacity-90 text-white'
-                      : 'bg-white text-black hover:opacity-80'
+                      ? 'bg-[#fe2c55] hover:opacity-90 text-ink-high'
+                      : 'bg-panel text-ink-high hover:opacity-80'
                   }`}
                 >
                   {tier.cta} →
@@ -369,14 +369,14 @@ export default function TikTokCreatorsPage() {
               </div>
             ))}
           </div>
-          <p className="text-gray-500 text-xs">{t('for_tiktok.pricing_note')}</p>
+          <p className="text-ink-muted text-xs">{t('for_tiktok.pricing_note')}</p>
         </div>
       </section>
 
       {/* ─── FAQ ─── */}
-      <section className="bg-[#0a0a0a] text-white py-20 px-6">
+      <section className="bg-[#0a0a0a] text-ink-high py-20 px-6">
         <div className="max-w-3xl mx-auto">
-          <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">{t('for_tiktok.faq_eyebrow')}</p>
+          <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_tiktok.faq_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">{t('for_tiktok.faq_title')}</h2>
           <div className="space-y-6">
             {[
@@ -397,9 +397,9 @@ export default function TikTokCreatorsPage() {
                 a: "SocialMate uses TikTok's official Production-approved Content Posting API (FILE_UPLOAD method). When you schedule a video, SocialMate uploads it to secure storage and at your scheduled time, calls the TikTok API to publish directly to your profile. No manual posting, no third-party workarounds.",
               },
             ].map((item, i) => (
-              <div key={i} className="border-b border-gray-900 pb-6 last:border-0">
+              <div key={i} className="border-b border-edge pb-6 last:border-0">
                 <h3 className="text-sm font-extrabold mb-2">{item.q}</h3>
-                <p className="text-sm text-gray-400 leading-relaxed">{item.a}</p>
+                <p className="text-sm text-ink-body leading-relaxed">{item.a}</p>
               </div>
             ))}
           </div>
@@ -407,20 +407,20 @@ export default function TikTokCreatorsPage() {
       </section>
 
       {/* ─── BOTTOM CTA ─── */}
-      <section className="bg-gradient-to-br from-[#fe2c55]/20 via-gray-950 to-[#0a0a0a] text-white py-20 px-6 text-center">
+      <section className="bg-gradient-to-br from-[#fe2c55]/20 via-gray-950 to-[#0a0a0a] text-ink-high py-20 px-6 text-center">
         <h2 className="text-2xl sm:text-3xl font-extrabold mb-4">
           {t('for_tiktok.bottom_title')}
         </h2>
-        <p className="text-gray-400 text-sm mb-8 max-w-md mx-auto">
+        <p className="text-ink-body text-sm mb-8 max-w-md mx-auto">
           {t('for_tiktok.bottom_desc')}
         </p>
         <Link
           href="/signup"
-          className="inline-block bg-[#fe2c55] hover:opacity-90 text-white font-bold px-10 py-4 rounded-xl text-sm transition-all"
+          className="inline-block bg-[#fe2c55] hover:opacity-90 text-ink-high font-bold px-10 py-4 rounded-xl text-sm transition-all"
         >
           {t('for_tiktok.bottom_cta')}
         </Link>
-        <p className="text-gray-600 text-xs mt-4">{t('for_tiktok.bottom_note')}</p>
+        <p className="text-ink-muted text-xs mt-4">{t('for_tiktok.bottom_note')}</p>
       </section>
     </PublicLayout>
   )
