@@ -59,23 +59,26 @@ export default function EnterprisePage() {
 
   return (
     <PublicLayout>
-      <div className="dark min-h-screen bg-gray-950 text-white">
+      {/* No opaque background here — PublicLayout provides bg-void + the ember
+          field, and this page's translucent bg-white/5 cards let it show through.
+          Accents are amber to match the unified site palette. */}
+      <div className="text-ink-high">
 
         {/* HERO */}
         <div className="relative overflow-hidden">
           {/* Background glows */}
           <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
-            <div className="absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full bg-blue-600/10 blur-[120px]" />
-            <div className="absolute top-0 right-1/4 w-[400px] h-[400px] rounded-full bg-indigo-600/10 blur-[120px]" />
+            <div className="absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full bg-amber-600/10 blur-[120px]" />
+            <div className="absolute top-0 right-1/4 w-[400px] h-[400px] rounded-full bg-amber-600/10 blur-[120px]" />
           </div>
 
           <div className="relative max-w-4xl mx-auto px-6 pt-20 pb-16 text-center">
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-widest mb-6">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-bold uppercase tracking-widest mb-6">
               {t('enterprise.badge')}
             </span>
             <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-6 leading-tight">
               {t('enterprise.hero_title')}{' '}
-              <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-r from-amber-400 to-amber-400 bg-clip-text text-transparent">
                 {t('enterprise.hero_title_highlight')}
               </span>
             </h1>
@@ -84,7 +87,7 @@ export default function EnterprisePage() {
             </p>
             <a
               href="#contact"
-              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold px-8 py-4 rounded-2xl transition-all text-base shadow-lg shadow-blue-600/20"
+              className="inline-flex items-center gap-2 bg-amber-600 hover:bg-amber-500 text-void font-bold px-8 py-4 rounded-2xl transition-all text-base shadow-lg shadow-amber-600/20"
             >
               {t('enterprise.talk_cta')}
             </a>
@@ -122,7 +125,7 @@ export default function EnterprisePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {FEATURES.map(feature => (
               <div key={feature.title}
-                className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-blue-500/30 transition-all">
+                className="bg-white/5 border border-white/10 rounded-2xl p-6 hover:border-amber-500/30 transition-all">
                 <div className="flex items-start gap-4">
                   <span className="text-2xl flex-shrink-0">{feature.icon}</span>
                   <div>
@@ -137,11 +140,11 @@ export default function EnterprisePage() {
 
         {/* COMPARISON CALLOUT */}
         <div className="max-w-4xl mx-auto px-6 py-12">
-          <div className="bg-gradient-to-r from-blue-900/30 to-indigo-900/30 border border-blue-500/20 rounded-2xl p-8 text-center">
-            <p className="text-sm text-blue-400 font-bold uppercase tracking-widest mb-3">{t('enterprise.math_badge')}</p>
+          <div className="bg-gradient-to-r from-amber-900/30 to-amber-900/30 border border-amber-500/20 rounded-2xl p-8 text-center">
+            <p className="text-sm text-amber-400 font-bold uppercase tracking-widest mb-3">{t('enterprise.math_badge')}</p>
             <p className="text-2xl font-extrabold mb-4">
               {t('enterprise.math_line1')}<br />
-              <span className="text-blue-400">{t('enterprise.math_line2')}</span>
+              <span className="text-amber-400">{t('enterprise.math_line2')}</span>
             </p>
             <p className="text-gray-400 text-sm max-w-lg mx-auto">
               {t('enterprise.math_desc')}
@@ -182,7 +185,7 @@ export default function EnterprisePage() {
                     value={name}
                     onChange={e => setName(e.target.value)}
                     placeholder="Joshua Bostic"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors text-sm"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-amber-500 transition-colors text-sm"
                   />
                 </div>
                 <div>
@@ -195,7 +198,7 @@ export default function EnterprisePage() {
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     placeholder="you@yourcompany.com"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors text-sm"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-amber-500 transition-colors text-sm"
                   />
                 </div>
               </div>
@@ -210,7 +213,7 @@ export default function EnterprisePage() {
                     value={company}
                     onChange={e => setCompany(e.target.value)}
                     placeholder="Acme Agency"
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors text-sm"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-amber-500 transition-colors text-sm"
                   />
                 </div>
                 <div>
@@ -220,7 +223,7 @@ export default function EnterprisePage() {
                   <select
                     value={teamSize}
                     onChange={e => setTeamSize(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-blue-500 transition-colors text-sm appearance-none"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500 transition-colors text-sm appearance-none"
                     style={{ colorScheme: 'dark' }}
                   >
                     <option value="" className="bg-gray-900">{t('enterprise.select_size')}</option>
@@ -240,7 +243,7 @@ export default function EnterprisePage() {
                   value={message}
                   onChange={e => setMessage(e.target.value)}
                   placeholder={t('enterprise.message_placeholder')}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors text-sm resize-none leading-relaxed"
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-amber-500 transition-colors text-sm resize-none leading-relaxed"
                 />
               </div>
 
@@ -251,7 +254,7 @@ export default function EnterprisePage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white font-bold py-4 rounded-2xl transition-all text-base"
+                className="w-full bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-void font-bold py-4 rounded-2xl transition-all text-base"
               >
                 {submitting ? t('enterprise.sending') : t('enterprise.send_cta')}
               </button>

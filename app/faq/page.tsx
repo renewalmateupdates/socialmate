@@ -206,7 +206,7 @@ const sections = [
 export default function FaqPage() {
   const { t } = useI18n()
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <div className="min-h-screen bg-void text-white">
       <PublicNav />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-16 sm:py-24">
@@ -235,7 +235,7 @@ export default function FaqPage() {
             </a>
             <Link
               href="/blog"
-              className="px-6 py-3 rounded-xl border border-gray-700 text-gray-300 font-semibold text-sm hover:border-gray-500 transition-all"
+              className="px-6 py-3 rounded-xl border border-edge text-gray-300 font-semibold text-sm hover:border-gray-500 transition-all"
             >
               Read the Blog
             </Link>

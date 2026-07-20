@@ -164,7 +164,7 @@ export default function RestaurantsPage() {
       />
 
       {/* ─── HERO ─── */}
-      <section className="bg-void text-ink-high py-24 px-6 text-center">
+      <section className="text-ink-high py-24 px-6 text-center">
         <p className="text-xs font-bold text-amber uppercase tracking-widest mb-4">{t('for_restaurants.eyebrow')}</p>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-3xl mx-auto mb-6">
           {t('for_restaurants.hero_title_1')}<br />
@@ -187,7 +187,7 @@ export default function RestaurantsPage() {
       </section>
 
       {/* ─── PAIN POINTS ─── */}
-      <section className="bg-panel text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto">
           <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_restaurants.pain_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
@@ -211,7 +211,7 @@ export default function RestaurantsPage() {
       </section>
 
       {/* ─── FEATURES ─── */}
-      <section className="bg-void text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-5xl mx-auto">
           <p className="text-center text-xs font-bold text-amber uppercase tracking-widest mb-3">{t('for_restaurants.features_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-3">
@@ -242,7 +242,7 @@ export default function RestaurantsPage() {
       </section>
 
       {/* ─── PLATFORMS ─── */}
-      <section className="bg-panel text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_restaurants.platforms_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_restaurants.platforms_title')}</h2>
@@ -276,7 +276,7 @@ export default function RestaurantsPage() {
       </section>
 
       {/* ─── PRICING ─── */}
-      <section className="bg-void text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_restaurants.pricing_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_restaurants.pricing_title')}</h2>
@@ -316,7 +316,7 @@ export default function RestaurantsPage() {
       </section>
 
       {/* ─── FAQ ─── */}
-      <section className="bg-panel text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-3xl mx-auto">
           <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_restaurants.faq_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">{t('for_restaurants.faq_title')}</h2>

@@ -116,7 +116,7 @@ export default function StudioStaxApplyPage() {
           {/* Founding spots counter */}
           {pricing && (
             pricing.annual.foundingFull ? (
-              <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl px-5 py-4 text-sm text-gray-600 dark:text-gray-400 font-semibold">
+              <div className="bg-panel border border-edge rounded-2xl px-5 py-4 text-sm text-gray-600 dark:text-gray-400 font-semibold">
                 Founding spots full — Standard listing <span className="text-gray-900 dark:text-gray-100">$150/yr</span>
               </div>
             ) : (
@@ -138,7 +138,7 @@ export default function StudioStaxApplyPage() {
           <h2 className="text-lg font-extrabold tracking-tight text-gray-900 dark:text-gray-100">What we look for</h2>
 
           {/* Required */}
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-5">
+          <div className="bg-panel border border-edge rounded-2xl p-5">
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">Required</p>
             <ul className="space-y-2.5">
               {[
@@ -160,7 +160,7 @@ export default function StudioStaxApplyPage() {
           </div>
 
           {/* Good to have */}
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-5">
+          <div className="bg-panel border border-edge rounded-2xl p-5">
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">Good to have</p>
             <ul className="space-y-2.5">
               {[
@@ -168,7 +168,7 @@ export default function StudioStaxApplyPage() {
                 'Creator or small-business owned (not a major corporation)',
               ].map(item => (
                 <li key={item} className="flex items-start gap-2.5 text-sm text-gray-700 dark:text-gray-300">
-                  <span className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center justify-center">
+                  <span className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full bg-gray-100 dark:bg-gray-800 border border-edge flex items-center justify-center">
                     <span className="w-2 h-2 rounded-full border-2 border-gray-400 dark:border-gray-500" />
                   </span>
                   {item}
@@ -178,7 +178,7 @@ export default function StudioStaxApplyPage() {
           </div>
 
           {/* NSFW callout */}
-          <div className="bg-gray-50 dark:bg-gray-900/60 border border-gray-200 dark:border-gray-700 rounded-2xl p-5">
+          <div className="bg-panel/60 border border-edge rounded-2xl p-5">
             <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">Adult / NSFW content</p>
             <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
               Adult or NSFW content is allowed but <strong className="text-gray-800 dark:text-gray-200">must be disclosed in your application</strong>. NSFW listings are blurred in the public directory and labeled 18+. Undisclosed NSFW content will result in immediate removal.
@@ -192,50 +192,50 @@ export default function StudioStaxApplyPage() {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Your info */}
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6 space-y-4">
+          <div className="bg-panel border border-edge rounded-2xl p-6 space-y-4">
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Your Info</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Your Name *</label>
-                <input value={form.applicant_name} onChange={e => set('applicant_name', e.target.value)} placeholder="Joshua Bostic" className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 placeholder-gray-300 dark:placeholder-gray-600" />
+                <input value={form.applicant_name} onChange={e => set('applicant_name', e.target.value)} placeholder="Joshua Bostic" className="w-full px-3 py-2.5 rounded-xl border border-edge bg-panel text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 placeholder-gray-300 dark:placeholder-gray-600" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Email *</label>
-                <input type="email" value={form.applicant_email} onChange={e => set('applicant_email', e.target.value)} placeholder="you@yourtool.com" className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 placeholder-gray-300 dark:placeholder-gray-600" />
+                <input type="email" value={form.applicant_email} onChange={e => set('applicant_email', e.target.value)} placeholder="you@yourtool.com" className="w-full px-3 py-2.5 rounded-xl border border-edge bg-panel text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 placeholder-gray-300 dark:placeholder-gray-600" />
               </div>
             </div>
           </div>
 
           {/* Tool info */}
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6 space-y-4">
+          <div className="bg-panel border border-edge rounded-2xl p-6 space-y-4">
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Your Tool</p>
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Tool Name *</label>
-              <input value={form.name} onChange={e => set('name', e.target.value)} placeholder="SocialMate" className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 placeholder-gray-300 dark:placeholder-gray-600" />
+              <input value={form.name} onChange={e => set('name', e.target.value)} placeholder="SocialMate" className="w-full px-3 py-2.5 rounded-xl border border-edge bg-panel text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 placeholder-gray-300 dark:placeholder-gray-600" />
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Tagline * <span className="text-gray-400 font-normal">(max 80 chars)</span></label>
-              <input value={form.tagline} onChange={e => set('tagline', e.target.value.slice(0, 80))} placeholder="Schedule smarter. Start free." className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 placeholder-gray-300 dark:placeholder-gray-600" />
+              <input value={form.tagline} onChange={e => set('tagline', e.target.value.slice(0, 80))} placeholder="Schedule smarter. Start free." className="w-full px-3 py-2.5 rounded-xl border border-edge bg-panel text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 placeholder-gray-300 dark:placeholder-gray-600" />
               <p className="text-xs text-gray-400 mt-1 text-right">{form.tagline.length}/80</p>
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Description * <span className="text-gray-400 font-normal">(max 300 chars)</span></label>
-              <textarea value={form.description} onChange={e => set('description', e.target.value.slice(0, 300))} rows={3} placeholder="Tell creators what your tool does and why it matters..." className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 placeholder-gray-300 dark:placeholder-gray-600 resize-none" />
+              <textarea value={form.description} onChange={e => set('description', e.target.value.slice(0, 300))} rows={3} placeholder="Tell creators what your tool does and why it matters..." className="w-full px-3 py-2.5 rounded-xl border border-edge bg-panel text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 placeholder-gray-300 dark:placeholder-gray-600 resize-none" />
               <p className="text-xs text-gray-400 mt-1 text-right">{form.description.length}/300</p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Website URL *</label>
-                <input type="url" value={form.url} onChange={e => set('url', e.target.value)} placeholder="https://yourtool.com" className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 placeholder-gray-300 dark:placeholder-gray-600" />
+                <input type="url" value={form.url} onChange={e => set('url', e.target.value)} placeholder="https://yourtool.com" className="w-full px-3 py-2.5 rounded-xl border border-edge bg-panel text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 placeholder-gray-300 dark:placeholder-gray-600" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Logo URL <span className="text-gray-400 font-normal">(optional)</span></label>
-                <input type="url" value={form.logo_url} onChange={e => set('logo_url', e.target.value)} placeholder="https://yourtool.com/logo.png" className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 placeholder-gray-300 dark:placeholder-gray-600" />
+                <input type="url" value={form.logo_url} onChange={e => set('logo_url', e.target.value)} placeholder="https://yourtool.com/logo.png" className="w-full px-3 py-2.5 rounded-xl border border-edge bg-panel text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 placeholder-gray-300 dark:placeholder-gray-600" />
               </div>
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Category *</label>
-              <select value={form.category} onChange={e => set('category', e.target.value)} className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100">
+              <select value={form.category} onChange={e => set('category', e.target.value)} className="w-full px-3 py-2.5 rounded-xl border border-edge bg-panel text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100">
                 <option value="">Select a category...</option>
                 {CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
               </select>
@@ -243,16 +243,16 @@ export default function StudioStaxApplyPage() {
           </div>
 
           {/* Mission */}
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6 space-y-4">
+          <div className="bg-panel border border-edge rounded-2xl p-6 space-y-4">
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">The &quot;By the People&quot; Check</p>
             <p className="text-xs text-gray-400 dark:text-gray-500">We only list tools that empower creators — not exploit them. Tell us why yours qualifies.</p>
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Mission Statement <span className="text-gray-400 font-normal">(optional but strongly recommended)</span></label>
-              <textarea value={form.mission_statement} onChange={e => set('mission_statement', e.target.value)} rows={3} placeholder="What's your tool's philosophy? Why did you build it? Who does it serve?" className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 placeholder-gray-300 dark:placeholder-gray-600 resize-none" />
+              <textarea value={form.mission_statement} onChange={e => set('mission_statement', e.target.value)} rows={3} placeholder="What's your tool's philosophy? Why did you build it? Who does it serve?" className="w-full px-3 py-2.5 rounded-xl border border-edge bg-panel text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 placeholder-gray-300 dark:placeholder-gray-600 resize-none" />
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-700 dark:text-gray-300 mb-1.5">Why should you be listed? <span className="text-gray-400 font-normal">(optional)</span></label>
-              <textarea value={form.why_apply} onChange={e => set('why_apply', e.target.value)} rows={2} placeholder="Anything else you want Joshua to know..." className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 placeholder-gray-300 dark:placeholder-gray-600 resize-none" />
+              <textarea value={form.why_apply} onChange={e => set('why_apply', e.target.value)} rows={2} placeholder="Anything else you want Joshua to know..." className="w-full px-3 py-2.5 rounded-xl border border-edge bg-panel text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 placeholder-gray-300 dark:placeholder-gray-600 resize-none" />
             </div>
           </div>
 
@@ -269,7 +269,7 @@ export default function StudioStaxApplyPage() {
                     </p>
                   </div>
                   {!pricing.annual.foundingFull && (
-                    <span className="bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">Founding price</span>
+                    <span className="bg-amber-500 text-void text-[10px] font-bold px-2 py-0.5 rounded-full">Founding price</span>
                   )}
                 </div>
                 {pricing.annual.foundingFull ? (
@@ -293,7 +293,7 @@ export default function StudioStaxApplyPage() {
 
           {error && <p className="text-sm font-medium text-red-500">{error}</p>}
 
-          <button type="submit" disabled={loading} className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold py-4 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed text-sm">
+          <button type="submit" disabled={loading} className="w-full bg-amber text-void font-bold py-4 rounded-xl hover:opacity-80 transition-all disabled:opacity-40 disabled:cursor-not-allowed text-sm">
             {loading ? 'Submitting...' : 'Submit Application →'}
           </button>
         </form>

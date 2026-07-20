@@ -60,12 +60,12 @@ const MODES = [
     priceSub: '/month add-on',
     badge: 'Full Autonomous',
     badgeKey: 'app_soma_landing.full_autonomous',
-    cardBg: 'bg-purple-50 dark:bg-purple-950/20',
-    border: 'border-2 border-purple-500',
+    cardBg: 'bg-amber-50 dark:bg-amber-950/20',
+    border: 'border-2 border-amber-500',
     headerText: 'text-gray-900 dark:text-white',
     subText: 'text-gray-500 dark:text-gray-400',
-    badgeStyle: 'bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300',
-    ctaStyle: 'bg-purple-600 hover:bg-purple-700 text-white font-extrabold',
+    badgeStyle: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300',
+    ctaStyle: 'bg-amber-600 hover:bg-amber-700 text-void font-extrabold',
     ctaLabel: 'Upgrade to Full Send',
     ctaHref: '/soma/dashboard',
     desc: 'Drop your master doc and walk away. SOMA handles everything — platform-native posts, optimized schedules, zero friction, no approvals needed.',
@@ -84,12 +84,12 @@ const MODES = [
     priceSub: 'Contact us for pricing',
     badge: 'Enterprise',
     badgeKey: null,
-    cardBg: 'bg-blue-50 dark:bg-blue-950/20',
-    border: 'border-2 border-blue-500',
+    cardBg: 'bg-amber-50 dark:bg-amber-950/20',
+    border: 'border-2 border-amber-500',
     headerText: 'text-gray-900 dark:text-white',
     subText: 'text-gray-500 dark:text-gray-400',
-    badgeStyle: 'bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300',
-    ctaStyle: 'bg-blue-600 hover:bg-blue-700 text-white font-extrabold',
+    badgeStyle: 'bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300',
+    ctaStyle: 'bg-amber-600 hover:bg-amber-700 text-void font-extrabold',
     ctaLabel: 'Contact Us',
     ctaHref: '/enterprise',
     desc: 'Unlimited generation, custom integrations, dedicated onboarding, and SLA. For agencies and teams that need more than the standard tiers allow.',
@@ -149,14 +149,14 @@ export default function SomaLandingPage() {
 
         {/* ── HERO ── */}
         <section className="text-center mb-20">
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 text-xs font-bold mb-6 uppercase tracking-widest">
-            <span className="w-1.5 h-1.5 rounded-full bg-violet-500 animate-pulse" />
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-bold mb-6 uppercase tracking-widest">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
             {t('app_soma_landing.badge')}
           </span>
 
           <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50 mb-6 leading-tight">
             {t('app_soma_landing.hero_headline')}<br className="hidden sm:block" />{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-fuchsia-500">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-amber-500">
               {t('app_soma_landing.hero_emphasis')}
             </span>
           </h1>
@@ -168,13 +168,13 @@ export default function SomaLandingPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
             <Link
               href="/soma/dashboard"
-              className="bg-violet-600 hover:bg-violet-700 text-white font-bold px-8 py-3.5 rounded-2xl transition-all text-sm w-full sm:w-auto text-center"
+              className="bg-amber-600 hover:bg-amber-700 text-void font-bold px-8 py-3.5 rounded-2xl transition-all text-sm w-full sm:w-auto text-center"
             >
               {t('app_soma_landing.open_dashboard')}
             </Link>
             <a
               href="#how-it-works"
-              className="border-2 border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-bold px-8 py-3.5 rounded-2xl hover:border-violet-500 hover:text-violet-600 dark:hover:border-violet-500 dark:hover:text-violet-400 transition-all text-sm w-full sm:w-auto text-center"
+              className="border-2 border-gray-300 dark:border-edge text-gray-700 dark:text-gray-300 font-bold px-8 py-3.5 rounded-2xl hover:border-amber-500 hover:text-amber-600 dark:hover:border-amber-500 dark:hover:text-amber-400 transition-all text-sm w-full sm:w-auto text-center"
             >
               {t('app_soma_landing.see_how')}
             </a>
@@ -188,18 +188,18 @@ export default function SomaLandingPage() {
               t('app_soma_landing.trust_4'),
             ].map(item => (
               <span key={item} className="flex items-center gap-1.5">
-                <span className="text-violet-500">◆</span> {item}
+                <span className="text-amber-500">◆</span> {item}
               </span>
             ))}
           </div>
         </section>
 
         {/* ── STATS BAR ── */}
-        <section className="bg-black dark:bg-gray-950 border border-gray-800 rounded-2xl p-6 mb-20">
+        <section className="bg-transparent border border-edge rounded-2xl p-6 mb-20">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:divide-x divide-white/10">
             {STATS.map((stat, i) => (
               <div key={i} className="text-center py-2">
-                <p className="text-3xl font-extrabold text-violet-400 mb-1">{stat.value}</p>
+                <p className="text-3xl font-extrabold text-amber-400 mb-1">{stat.value}</p>
                 <p className="text-xs text-gray-400 font-semibold uppercase tracking-widest">{stat.label}</p>
               </div>
             ))}
@@ -209,7 +209,7 @@ export default function SomaLandingPage() {
         {/* ── HOW IT WORKS ── */}
         <section id="how-it-works" className="mb-20">
           <div className="text-center mb-12">
-            <p className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">{t('app_soma_landing.process_eyebrow')}</p>
+            <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-2">{t('app_soma_landing.process_eyebrow')}</p>
             <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
               {t('app_soma_landing.process_headline')}
             </h2>
@@ -219,9 +219,9 @@ export default function SomaLandingPage() {
             {STEPS.map((step, i) => (
               <div
                 key={i}
-                className="relative bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6"
+                className="relative bg-panel border border-edge rounded-2xl p-6"
               >
-                <div className="w-10 h-10 rounded-xl bg-violet-600 flex items-center justify-center mb-4">
+                <div className="w-10 h-10 rounded-xl bg-amber-600 flex items-center justify-center mb-4">
                   <span className="text-xs font-extrabold text-white">{step.number}</span>
                 </div>
                 <h3 className="text-sm font-extrabold text-gray-900 dark:text-gray-100 mb-2">{step.title}</h3>
@@ -237,7 +237,7 @@ export default function SomaLandingPage() {
         {/* ── THREE MODES ── */}
         <section id="modes" className="mb-20">
           <div className="text-center mb-12">
-            <p className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">{t('app_soma_landing.modes_eyebrow')}</p>
+            <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-2">{t('app_soma_landing.modes_eyebrow')}</p>
             <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
               {t('app_soma_landing.modes_headline')}
             </h2>
@@ -275,9 +275,9 @@ export default function SomaLandingPage() {
 
         {/* ── PLATFORM NATIVE ── */}
         <section id="platforms" className="mb-20">
-          <div className="bg-black dark:bg-gray-950 border border-gray-800 rounded-2xl overflow-hidden">
-            <div className="px-8 py-8 border-b border-gray-800">
-              <p className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">{t('app_soma_landing.platforms_eyebrow')}</p>
+          <div className="bg-transparent border border-edge rounded-2xl overflow-hidden">
+            <div className="px-8 py-8 border-b border-edge">
+              <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-2">{t('app_soma_landing.platforms_eyebrow')}</p>
               <h2 className="text-2xl font-extrabold text-white mb-2">{t('app_soma_landing.platforms_headline')}</h2>
               <p className="text-sm text-gray-400 max-w-xl">
                 {t('app_soma_landing.platforms_sub')}
@@ -285,8 +285,8 @@ export default function SomaLandingPage() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
               {PLATFORMS.map((p) => (
-                <div key={p.name} className="px-6 py-5 border-b border-r border-gray-800">
-                  <p className={`text-sm font-bold mb-1 flex items-center gap-2 ${p.live ? 'text-violet-400' : 'text-gray-600'}`}>
+                <div key={p.name} className="px-6 py-5 border-b border-r border-edge">
+                  <p className={`text-sm font-bold mb-1 flex items-center gap-2 ${p.live ? 'text-amber-400' : 'text-gray-600'}`}>
                     <span>{p.live ? '◆' : '○'}</span> {p.name}
                     {!p.live && <span className="text-[10px] font-semibold bg-gray-800 text-gray-500 px-1.5 py-0.5 rounded">{t('app_soma_landing.platform_soon_badge')}</span>}
                   </p>
@@ -294,9 +294,9 @@ export default function SomaLandingPage() {
                 </div>
               ))}
             </div>
-            <div className="px-8 py-4 border-t border-gray-800 bg-gray-900/40">
+            <div className="px-8 py-4 border-t border-edge bg-gray-900/40">
               <p className="text-xs text-gray-500">
-                <span className="text-violet-400 font-semibold">{t('app_soma_landing.platform_live_note')}</span>{t('app_soma_landing.platform_live_desc')}{' '}
+                <span className="text-amber-400 font-semibold">{t('app_soma_landing.platform_live_note')}</span>{t('app_soma_landing.platform_live_desc')}{' '}
                 <span className="text-gray-400 font-semibold">{t('app_soma_landing.platform_soon_note')}</span>{t('app_soma_landing.platform_soon_desc')}
               </p>
             </div>
@@ -306,7 +306,7 @@ export default function SomaLandingPage() {
         {/* ── PROJECTS (AGENCY) ── */}
         <section id="projects" className="mb-20">
           <div className="text-center mb-12">
-            <p className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">{t('app_soma_landing.projects_eyebrow')}</p>
+            <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-2">{t('app_soma_landing.projects_eyebrow')}</p>
             <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
               {t('app_soma_landing.projects_headline')}
             </h2>
@@ -320,7 +320,7 @@ export default function SomaLandingPage() {
               { icon: '🔄', title: 'Automatic Diffing', desc: 'SOMA auto-compares each new doc against the previous version. Drop in an update and the diff becomes the content.' },
               { icon: '🎯', title: 'Per-Project Settings', desc: 'Different clients post on different platforms at different frequencies. SOMA respects each project\'s settings independently.' },
             ].map(f => (
-              <div key={f.title} className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
+              <div key={f.title} className="bg-panel border border-edge rounded-2xl p-6">
                 <p className="text-2xl mb-3">{f.icon}</p>
                 <h3 className="text-sm font-extrabold text-gray-900 dark:text-gray-100 mb-2">{f.title}</h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{f.desc}</p>
@@ -332,7 +332,7 @@ export default function SomaLandingPage() {
         {/* ── PRICING ── */}
         <section id="pricing" className="mb-20">
           <div className="text-center mb-10">
-            <p className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">{t('app_soma_landing.pricing_eyebrow')}</p>
+            <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-2">{t('app_soma_landing.pricing_eyebrow')}</p>
             <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
               {t('app_soma_landing.pricing_headline')}
             </h2>
@@ -374,7 +374,7 @@ export default function SomaLandingPage() {
         {/* ── CREDIT COSTS ── */}
         <section id="credits" className="mb-20">
           <div className="text-center mb-10">
-            <p className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">{t('app_soma_landing.credits_eyebrow')}</p>
+            <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-2">{t('app_soma_landing.credits_eyebrow')}</p>
             <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
               {t('app_soma_landing.credits_headline')}
             </h2>
@@ -383,7 +383,7 @@ export default function SomaLandingPage() {
             </p>
           </div>
 
-          <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl overflow-hidden">
+          <div className="bg-panel border border-edge rounded-2xl overflow-hidden">
             <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-gray-100 dark:divide-gray-800">
               {[
                 { action: 'Ingest master doc', credits: 25, desc: 'AI reads your doc, extracts themes, diffs against last week', icon: '📥' },
@@ -396,7 +396,7 @@ export default function SomaLandingPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2 mb-1">
                       <p className="text-sm font-extrabold text-gray-900 dark:text-white">{item.action}</p>
-                      <span className="flex-shrink-0 text-sm font-extrabold text-violet-600 dark:text-violet-400 bg-violet-50 dark:bg-violet-950/40 px-2.5 py-0.5 rounded-full">
+                      <span className="flex-shrink-0 text-sm font-extrabold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/40 px-2.5 py-0.5 rounded-full">
                         {item.credits} cr
                       </span>
                     </div>
@@ -405,15 +405,15 @@ export default function SomaLandingPage() {
                 </div>
               ))}
             </div>
-            <div className="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-800">
+            <div className="px-6 py-4 bg-panel/50 border-t border-edge">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="text-xs text-gray-500 dark:text-gray-400">
                   <span className="font-semibold text-gray-700 dark:text-gray-300">{t('app_soma_landing.credits_full_run')}</span>
                   {' '}{t('app_soma_landing.credits_pro_covers')}
                 </div>
                 <div className="flex items-center gap-4 text-xs font-semibold flex-shrink-0">
-                  <span className="text-gray-500">{t('app_soma_landing.credits_packs_from')} <span className="text-violet-600 dark:text-violet-400">$1.99</span></span>
-                  <a href="/pricing" className="text-violet-600 dark:text-violet-400 hover:underline">{t('app_soma_landing.credits_see_plans')}</a>
+                  <span className="text-gray-500">{t('app_soma_landing.credits_packs_from')} <span className="text-amber-600 dark:text-amber-400">$1.99</span></span>
+                  <a href="/pricing" className="text-amber-600 dark:text-amber-400 hover:underline">{t('app_soma_landing.credits_see_plans')}</a>
                 </div>
               </div>
             </div>
@@ -423,14 +423,14 @@ export default function SomaLandingPage() {
         {/* ── FAQ ── */}
         <section id="faq" className="mb-20">
           <div className="text-center mb-10">
-            <p className="text-xs font-bold text-violet-500 uppercase tracking-widest mb-2">{t('app_soma_landing.faq_eyebrow')}</p>
+            <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-2">{t('app_soma_landing.faq_eyebrow')}</p>
             <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
               {t('app_soma_landing.faq_headline')}
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {FAQS.map(faq => (
-              <div key={faq.q} className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
+              <div key={faq.q} className="bg-panel border border-edge rounded-2xl p-6">
                 <h3 className="text-sm font-extrabold text-gray-900 dark:text-gray-100 mb-2">{faq.q}</h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{faq.a}</p>
               </div>
@@ -461,8 +461,8 @@ export default function SomaLandingPage() {
         </section>
 
         {/* ── BUILT BY ── */}
-        <section className="border-t border-gray-100 dark:border-gray-800 pt-12 text-center">
-          <div className="w-12 h-12 bg-violet-600 rounded-xl flex items-center justify-center text-white text-lg font-extrabold mx-auto mb-4">
+        <section className="border-t border-edge pt-12 text-center">
+          <div className="w-12 h-12 bg-amber-600 rounded-xl flex items-center justify-center text-void text-lg font-extrabold mx-auto mb-4">
             J
           </div>
           <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100 mb-1">
@@ -472,11 +472,11 @@ export default function SomaLandingPage() {
             {t('app_soma_landing.built_by_sub')}
           </p>
           <div className="flex items-center justify-center gap-4">
-            <Link href="/pricing" className="text-xs font-bold text-violet-500 hover:text-violet-400 transition-colors">
+            <Link href="/pricing" className="text-xs font-bold text-amber-500 hover:text-amber-400 transition-colors">
               {t('app_soma_landing.socialmate_plans')}
             </Link>
             <span className="text-gray-300 dark:text-gray-700">|</span>
-            <Link href="/enki" className="text-xs font-bold text-violet-500 hover:text-violet-400 transition-colors">
+            <Link href="/enki" className="text-xs font-bold text-amber-500 hover:text-amber-400 transition-colors">
               {t('app_soma_landing.enki_link')}
             </Link>
           </div>

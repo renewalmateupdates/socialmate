@@ -76,7 +76,7 @@ export default function MonetizeLandingPage() {
 
           <h1 className="text-5xl sm:text-6xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50 mb-6 leading-tight">
             {t('monetize_landing.hero_title')}<br className="hidden sm:block" />{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-fuchsia-500">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-amber-500">
               {t('monetize_landing.hero_title_highlight')}
             </span>
           </h1>
@@ -88,13 +88,13 @@ export default function MonetizeLandingPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
             <a
               href="/monetize/hub"
-              className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-8 py-3.5 rounded-2xl transition-all text-sm w-full sm:w-auto text-center"
+              className="bg-amber-600 hover:bg-amber-700 text-void font-bold px-8 py-3.5 rounded-2xl transition-all text-sm w-full sm:w-auto text-center"
             >
               {t('monetize_landing.open_hub_cta')}
             </a>
             <a
               href="#how-it-works"
-              className="border-2 border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 font-bold px-8 py-3.5 rounded-2xl hover:border-purple-500 hover:text-purple-600 dark:hover:border-purple-500 dark:hover:text-purple-400 transition-all text-sm w-full sm:w-auto text-center"
+              className="border-2 border-gray-300 dark:border-edge text-gray-700 dark:text-gray-300 font-bold px-8 py-3.5 rounded-2xl hover:border-amber-500 hover:text-amber-600 dark:hover:border-amber-500 dark:hover:text-amber-400 transition-all text-sm w-full sm:w-auto text-center"
             >
               {t('monetize_landing.see_how_cta')}
             </a>
@@ -108,14 +108,14 @@ export default function MonetizeLandingPage() {
               t('monetize_landing.proof4'),
             ].map(item => (
               <span key={item} className="flex items-center gap-1.5">
-                <span className="text-purple-500">◆</span> {item}
+                <span className="text-amber-500">◆</span> {item}
               </span>
             ))}
           </div>
         </section>
 
         {/* ── STATS BAR ── */}
-        <section className="bg-black dark:bg-gray-950 border border-gray-800 rounded-2xl p-6 mb-20">
+        <section className="bg-transparent border border-edge rounded-2xl p-6 mb-20">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:divide-x divide-white/10">
             {[
               { value: '0%',   label: t('monetize_landing.stat1_label') },
@@ -124,7 +124,7 @@ export default function MonetizeLandingPage() {
               { value: '100%', label: t('monetize_landing.stat4_label') },
             ].map((stat, i) => (
               <div key={i} className="text-center py-2">
-                <p className="text-3xl font-extrabold text-purple-400 mb-1">{stat.value}</p>
+                <p className="text-3xl font-extrabold text-amber-400 mb-1">{stat.value}</p>
                 <p className="text-xs text-gray-400 font-semibold uppercase tracking-widest">{stat.label}</p>
               </div>
             ))}
@@ -134,7 +134,7 @@ export default function MonetizeLandingPage() {
         {/* ── HOW IT WORKS ── */}
         <section id="how-it-works" className="mb-20">
           <div className="text-center mb-12">
-            <p className="text-xs font-bold text-purple-500 uppercase tracking-widest mb-2">{t('monetize_landing.features_badge')}</p>
+            <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-2">{t('monetize_landing.features_badge')}</p>
             <h2 className="text-3xl font-extrabold tracking-tight text-gray-900 dark:text-gray-50">
               {t('monetize_landing.features_title')}
             </h2>
@@ -147,18 +147,18 @@ export default function MonetizeLandingPage() {
             {FEATURES.map((feature, i) => (
               <div
                 key={i}
-                className="relative bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6 flex flex-col"
+                className="relative bg-panel border border-edge rounded-2xl p-6 flex flex-col"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-purple-600 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-amber-600 flex items-center justify-center">
                     <span className="text-xs font-extrabold text-white">{feature.number}</span>
                   </div>
                   <span className="text-2xl">{feature.icon}</span>
                 </div>
                 <h3 className="text-base font-extrabold text-gray-900 dark:text-gray-100 mb-2">{feature.title}</h3>
                 <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed flex-1 mb-4">{feature.desc}</p>
-                <div className="inline-flex items-center gap-1.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 text-xs font-bold px-3 py-1.5 rounded-full self-start">
-                  <span className="w-1 h-1 rounded-full bg-purple-500" />
+                <div className="inline-flex items-center gap-1.5 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-bold px-3 py-1.5 rounded-full self-start">
+                  <span className="w-1 h-1 rounded-full bg-amber-500" />
                   {feature.highlight}
                 </div>
                 {i < FEATURES.length - 1 && (
@@ -171,9 +171,9 @@ export default function MonetizeLandingPage() {
 
         {/* ── WHY SOCIALMATE ── */}
         <section id="why" className="mb-20">
-          <div className="bg-black dark:bg-gray-950 border border-gray-800 rounded-2xl overflow-hidden">
-            <div className="px-8 py-8 border-b border-gray-800">
-              <p className="text-xs font-bold text-purple-500 uppercase tracking-widest mb-2">{t('monetize_landing.why_badge')}</p>
+          <div className="bg-transparent border border-edge rounded-2xl overflow-hidden">
+            <div className="px-8 py-8 border-b border-edge">
+              <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-2">{t('monetize_landing.why_badge')}</p>
               <h2 className="text-2xl font-extrabold text-white mb-2">
                 {t('monetize_landing.why_title')}
               </h2>
@@ -186,7 +186,7 @@ export default function MonetizeLandingPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-800">
+                  <tr className="border-b border-edge">
                     <th className="text-left px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">{t('monetize_landing.table_platform')}</th>
                     <th className="text-left px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">{t('monetize_landing.table_cut')}</th>
                     <th className="text-left px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">{t('monetize_landing.table_notes')}</th>
@@ -196,15 +196,15 @@ export default function MonetizeLandingPage() {
                   {COMPARE.map((row) => (
                     <tr
                       key={row.platform}
-                      className={`border-b border-gray-800/50 ${row.highlight ? 'bg-purple-950/20' : ''}`}
+                      className={`border-b border-edge/50 ${row.highlight ? 'bg-amber-950/20' : ''}`}
                     >
-                      <td className={`px-6 py-4 font-bold ${row.highlight ? 'text-purple-400' : 'text-gray-300'}`}>
+                      <td className={`px-6 py-4 font-bold ${row.highlight ? 'text-amber-400' : 'text-gray-300'}`}>
                         {row.highlight && <span className="mr-2">◆</span>}{row.platform}
                       </td>
-                      <td className={`px-6 py-4 font-extrabold ${row.highlight ? 'text-purple-300' : 'text-gray-400'}`}>
+                      <td className={`px-6 py-4 font-extrabold ${row.highlight ? 'text-amber-300' : 'text-gray-400'}`}>
                         {row.cut}
                       </td>
-                      <td className={`px-6 py-4 text-xs ${row.highlight ? 'text-purple-400' : 'text-gray-500'}`}>
+                      <td className={`px-6 py-4 text-xs ${row.highlight ? 'text-amber-400' : 'text-gray-500'}`}>
                         {row.extra}
                       </td>
                     </tr>
@@ -233,11 +233,11 @@ export default function MonetizeLandingPage() {
 
         {/* ── WAITLIST ── */}
         <section id="waitlist" className="mb-20">
-          <div className="bg-gradient-to-br from-purple-950/40 to-fuchsia-950/30 border-2 border-purple-800/50 rounded-2xl p-10 text-center">
-            <div className="w-14 h-14 bg-purple-600 rounded-2xl flex items-center justify-center text-white text-2xl mx-auto mb-5">
+          <div className="bg-gradient-to-br from-amber-950/40 to-amber-950/30 border-2 border-amber-800/50 rounded-2xl p-10 text-center">
+            <div className="w-14 h-14 bg-amber-600 rounded-2xl flex items-center justify-center text-void text-2xl mx-auto mb-5">
               💜
             </div>
-            <p className="text-xs font-bold text-purple-400 uppercase tracking-widest mb-2">{t('monetize_landing.waitlist_badge')}</p>
+            <p className="text-xs font-bold text-amber-400 uppercase tracking-widest mb-2">{t('monetize_landing.waitlist_badge')}</p>
             <h2 className="text-3xl font-extrabold text-gray-900 dark:text-gray-50 mb-3">
               {t('monetize_landing.waitlist_title')}
             </h2>
@@ -246,7 +246,7 @@ export default function MonetizeLandingPage() {
             </p>
 
             {status === 'success' ? (
-              <div className="inline-flex items-center gap-2 bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 font-bold px-6 py-3.5 rounded-xl text-sm">
+              <div className="inline-flex items-center gap-2 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 font-bold px-6 py-3.5 rounded-xl text-sm">
                 <span className="text-lg">✓</span> {t('monetize_landing.waitlist_success')}
               </div>
             ) : (
@@ -258,12 +258,12 @@ export default function MonetizeLandingPage() {
                   placeholder="you@example.com"
                   required
                   disabled={status === 'loading'}
-                  className="flex-1 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent disabled:opacity-60"
+                  className="flex-1 px-4 py-3 rounded-xl border border-edge bg-panel text-gray-900 dark:text-gray-100 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:opacity-60"
                 />
                 <button
                   type="submit"
                   disabled={status === 'loading' || !email.trim()}
-                  className="bg-purple-600 hover:bg-purple-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold px-6 py-3 rounded-xl transition-all text-sm whitespace-nowrap"
+                  className="bg-amber-600 hover:bg-amber-700 disabled:opacity-60 disabled:cursor-not-allowed text-void font-bold px-6 py-3 rounded-xl transition-all text-sm whitespace-nowrap"
                 >
                   {status === 'loading' ? t('monetize_landing.joining') : t('monetize_landing.notify_cta')}
                 </button>
@@ -281,8 +281,8 @@ export default function MonetizeLandingPage() {
         </section>
 
         {/* ── BUILT BY ── */}
-        <section className="border-t border-gray-100 dark:border-gray-800 pt-12 text-center">
-          <div className="w-12 h-12 bg-purple-600 rounded-xl flex items-center justify-center text-white text-lg font-extrabold mx-auto mb-4">
+        <section className="border-t border-edge pt-12 text-center">
+          <div className="w-12 h-12 bg-amber-600 rounded-xl flex items-center justify-center text-void text-lg font-extrabold mx-auto mb-4">
             J
           </div>
           <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100 mb-1">
@@ -293,15 +293,15 @@ export default function MonetizeLandingPage() {
             that platforms charge 10%+ for — at prices that don&apos;t gatekeep.
           </p>
           <div className="flex items-center justify-center gap-4">
-            <Link href="/pricing" className="text-xs font-bold text-purple-500 hover:text-purple-400 transition-colors">
+            <Link href="/pricing" className="text-xs font-bold text-amber-500 hover:text-amber-400 transition-colors">
               SocialMate Plans →
             </Link>
             <span className="text-gray-300 dark:text-gray-700">|</span>
-            <Link href="/soma" className="text-xs font-bold text-purple-500 hover:text-purple-400 transition-colors">
+            <Link href="/soma" className="text-xs font-bold text-amber-500 hover:text-amber-400 transition-colors">
               SOMA AI Agent →
             </Link>
             <span className="text-gray-300 dark:text-gray-700">|</span>
-            <Link href="/enki" className="text-xs font-bold text-purple-500 hover:text-purple-400 transition-colors">
+            <Link href="/enki" className="text-xs font-bold text-amber-500 hover:text-amber-400 transition-colors">
               Enki Trading →
             </Link>
           </div>

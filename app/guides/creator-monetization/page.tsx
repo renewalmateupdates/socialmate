@@ -47,7 +47,7 @@ const CHAPTERS = [
 export default function CreatorMonetizationGuidePage() {
   return (
     <PublicLayout>
-      <div className="min-h-screen bg-[#0a0a0a] text-white">
+      <div className="min-h-screen bg-void text-white">
         {/* Hero */}
         <header className="border-b border-[#1f1f1f] px-6 py-16">
           <div className="mx-auto max-w-3xl">
@@ -173,9 +173,9 @@ export default function CreatorMonetizationGuidePage() {
                   <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">The Creator Stack (bottom to top)</p>
                   <div className="space-y-3">
                     {[
-                      { tier: '5 — Brand Deals', desc: 'Highest pay, most time, requires trust + audience', color: 'text-purple-400' },
+                      { tier: '5 — Brand Deals', desc: 'Highest pay, most time, requires trust + audience', color: 'text-amber-400' },
                       { tier: '4 — Digital Products / Courses', desc: 'One-time work, passive income forever', color: 'text-amber-400' },
-                      { tier: '3 — Fan Subscriptions', desc: 'Recurring monthly revenue, scales with loyalty', color: 'text-blue-400' },
+                      { tier: '3 — Fan Subscriptions', desc: 'Recurring monthly revenue, scales with loyalty', color: 'text-amber-400' },
                       { tier: '2 — Affiliate Marketing', desc: 'Passive from existing content, compounds over time', color: 'text-emerald-400' },
                       { tier: '1 — Tip Jar', desc: 'Zero friction, works from day one, any audience size', color: 'text-gray-300' },
                     ].map((item) => (

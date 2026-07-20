@@ -170,7 +170,7 @@ export default function SmallBusinessPage() {
     <PublicLayout>
 
       {/* ─── HERO ─── */}
-      <section className="bg-void text-ink-high py-24 px-6 text-center">
+      <section className="text-ink-high py-24 px-6 text-center">
         <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-4">{t('for_small_biz.eyebrow')}</p>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-3xl mx-auto mb-6">
           {t('for_small_biz.hero_title_1')}<br />
@@ -204,7 +204,7 @@ export default function SmallBusinessPage() {
       </section>
 
       {/* ─── PAIN POINTS ─── */}
-      <section className="bg-panel text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto">
           <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_small_biz.pain_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
@@ -228,7 +228,7 @@ export default function SmallBusinessPage() {
       </section>
 
       {/* ─── FEATURES ─── */}
-      <section className="bg-void text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-5xl mx-auto">
           <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_small_biz.features_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-3">
@@ -259,7 +259,7 @@ export default function SmallBusinessPage() {
       </section>
 
       {/* ─── PRICING ─── */}
-      <section className="bg-panel text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_small_biz.pricing_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_small_biz.pricing_title')}</h2>
@@ -333,7 +333,7 @@ export default function SmallBusinessPage() {
       </section>
 
       {/* ─── FAQ ─── */}
-      <section className="bg-void text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-3xl mx-auto">
           <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_small_biz.faq_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">{t('for_small_biz.faq_title')}</h2>
@@ -349,7 +349,7 @@ export default function SmallBusinessPage() {
       </section>
 
       {/* ─── BOTTOM CTA ─── */}
-      <section className="bg-gradient-to-b from-blue-950 to-black text-ink-high py-20 px-6 text-center">
+      <section className="bg-gradient-to-b from-amber-950 to-black text-ink-high py-20 px-6 text-center">
         <h2 className="text-2xl sm:text-3xl font-extrabold mb-4">
           {t('for_small_biz.bottom_title_1')}<br />{t('for_small_biz.bottom_title_2')}
         </h2>

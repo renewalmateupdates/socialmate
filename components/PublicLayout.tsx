@@ -1,5 +1,6 @@
 import PublicNav from './PublicNav'
 import PHLaunchBanner from './PHLaunchBanner'
+import EmberField from './landing/EmberField'
 import Link from 'next/link'
 
 type FooterLink = { label: string; href: string; rose?: boolean }
@@ -121,12 +122,17 @@ const SOCIALS = [
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="dark min-h-screen bg-gray-950">
+    // Warm void base + the shared Gilgamesh ember field, matching the landing
+    // page. EmberField is fixed at z-0 behind everything; content is lifted to
+    // z-10 so the embers read as atmosphere across every public page.
+    <div className="dark relative min-h-screen bg-void">
+      <EmberField />
+      <div className="relative z-10">
       <PHLaunchBanner />
       <PublicNav />
       <main>{children}</main>
 
-      <footer className="border-t border-gray-800 bg-gray-900 mt-16">
+      <footer className="border-t border-edge bg-void mt-16">
         <div className="max-w-6xl mx-auto px-6 pt-10 pb-6">
 
           {/* Top row: logo + socials */}
@@ -146,7 +152,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={s.label}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:text-white hover:bg-gray-800 transition-all"
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:text-white hover:bg-panel transition-all"
                 >
                   {s.icon}
                 </a>
@@ -182,7 +188,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
           </div>
 
           {/* Bottom row: badges + copyright */}
-          <div className="flex items-center justify-between flex-wrap gap-4 pt-6 border-t border-gray-800">
+          <div className="flex items-center justify-between flex-wrap gap-4 pt-6 border-t border-edge">
             <div className="flex items-center gap-4 flex-wrap">
               {/* Product Hunt badge */}
               <a href="https://www.producthunt.com/posts/socialmate-2"
@@ -201,6 +207,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
 
         </div>
       </footer>
+      </div>
     </div>
   )
 }

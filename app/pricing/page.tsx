@@ -413,7 +413,7 @@ export default function Pricing() {
             {(['monthly', 'annual'] as Interval[]).map(i => (
               <button key={i} onClick={() => setInterval(i)}
                 className={`px-5 py-2 rounded-xl text-sm font-bold transition-all ${
-                  interval === i ? 'bg-panel bg-raised text-ink-high shadow-sm' : 'text-ink-muted hover:text-ink-high dark:hover:text-ink-high'
+                  interval === i ? 'bg-panel text-ink-high shadow-sm' : 'text-ink-muted hover:text-ink-high'
                 }`}>
                 {i === 'monthly' ? t('pricing.interval_monthly') : (
                   <span className="flex items-center gap-2">
@@ -429,11 +429,11 @@ export default function Pricing() {
         {/* COUPON CODE */}
         <div className="flex flex-col items-center mb-10">
           {couponApplied ? (
-            <div className="flex items-center gap-3 px-4 py-2.5 bg-jade/10 bg-jade/10 border border-jade/40 border-jade/40 rounded-xl">
-              <span className="text-jade dark:text-jade text-sm font-bold">
+            <div className="flex items-center gap-3 px-4 py-2.5 bg-jade/10 border border-jade/40 rounded-xl">
+              <span className="text-jade text-sm font-bold">
                 {couponApplied.code} — {formatCouponDiscount(couponApplied)} applied
               </span>
-              <button onClick={removeCoupon} className="text-jade dark:text-jade hover:text-jade text-xs font-semibold">✕ Remove</button>
+              <button onClick={removeCoupon} className="text-jade hover:text-jade/80 text-xs font-semibold">✕ Remove</button>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-2">
@@ -448,7 +448,7 @@ export default function Pricing() {
                 <button
                   onClick={applyCoupon}
                   disabled={couponValidating || !couponInput.trim()}
-                  className="px-4 py-2 bg-raised hover:bg-raised dark:hover:bg-panel disabled:opacity-50 text-ink-body text-sm font-semibold rounded-xl transition-colors"
+                  className="px-4 py-2 bg-raised hover:bg-edge-lit disabled:opacity-50 text-ink-body text-sm font-semibold rounded-xl transition-colors"
                 >
                   {couponValidating ? t('pricing.coupon_applying') : t('pricing.coupon_apply')}
                 </button>
@@ -476,7 +476,7 @@ export default function Pricing() {
             <div className="flex items-center gap-2 flex-shrink-0">
               <button
                 onClick={applyWelcomeOffer}
-                className="text-xs font-bold px-3 py-1.5 bg-amber hover:bg-amber text-ink-high rounded-xl transition-all"
+                className="text-xs font-bold px-3 py-1.5 bg-amber hover:bg-amber-bright text-void rounded-xl transition-all"
               >
                 Claim offer →
               </button>
@@ -516,7 +516,7 @@ export default function Pricing() {
                   </p>
                   <button
                     onClick={() => { setCouponInput('BDAY31'); setCouponError(null) }}
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-amber hover:bg-amber text-ink-high text-xs font-bold rounded-xl transition-all">
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-amber hover:bg-amber-bright text-void text-xs font-bold rounded-xl transition-all">
                     Apply code BDAY31 →
                   </button>
                 </>
@@ -643,7 +643,7 @@ export default function Pricing() {
 
               <Link
                 href="/enterprise"
-                className="w-full text-center text-sm font-bold py-3 rounded-xl transition-all bg-raised hover:bg-raised text-ink-high">
+                className="w-full text-center text-sm font-bold py-3 rounded-xl transition-all bg-raised hover:bg-edge-lit text-ink-high">
                 Contact us →
               </Link>
             </div>
@@ -655,11 +655,11 @@ export default function Pricing() {
           <div className="flex items-center gap-1.5 text-xs text-ink-muted">
             <span>🔒</span><span>{t('pricing.trust_stripe')}</span>
           </div>
-          <div className="w-px h-3 bg-raised bg-raised hidden sm:block" />
+          <div className="w-px h-3 bg-raised hidden sm:block" />
           <div className="flex items-center gap-1.5 text-xs text-ink-muted">
             <span>↩️</span><span>{t('pricing.trust_cancel')}</span>
           </div>
-          <div className="w-px h-3 bg-raised bg-raised hidden sm:block" />
+          <div className="w-px h-3 bg-raised hidden sm:block" />
           <div className="flex items-center gap-1.5 text-xs text-ink-muted">
             <span>💳</span><span>{t('pricing.trust_no_cc')}</span>
           </div>
@@ -676,9 +676,9 @@ export default function Pricing() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {WHITE_LABEL_TIERS.map(wl => (
-              <div key={wl.name} className={`border-2 rounded-2xl p-5 ${wl.highlight ? 'border-black dark:border-white' : 'border-edge'}`}>
+              <div key={wl.name} className={`border-2 rounded-2xl p-5 ${wl.highlight ? 'border-amber' : 'border-edge'}`}>
                 {wl.highlight && (
-                  <span className="text-xs font-bold bg-black dark:bg-panel text-ink-high dark:text-ink-high px-2 py-0.5 rounded-full mb-3 inline-block">Best for agencies</span>
+                  <span className="text-xs font-bold bg-amber text-void px-2 py-0.5 rounded-full mb-3 inline-block">Best for agencies</span>
                 )}
                 <div className="flex items-start justify-between mb-4">
                   <div>
@@ -691,8 +691,8 @@ export default function Pricing() {
                     disabled={loading === wl.name}
                     className={`text-xs font-bold px-4 py-2 rounded-xl transition-all disabled:opacity-60 ${
                       wl.highlight
-                        ? 'bg-black dark:bg-panel text-ink-high dark:text-ink-high hover:opacity-80'
-                        : 'border border-edge text-ink-body hover:border-black dark:hover:border-white'
+                        ? 'bg-amber text-void hover:bg-amber-bright'
+                        : 'border border-edge text-ink-body hover:border-ink-muted'
                     }`}>
                     {loading === wl.name ? 'Loading...' : 'Add to plan →'}
                   </button>
@@ -746,7 +746,7 @@ export default function Pricing() {
         </div>
 
         {/* CREDIT PACKS */}
-        <div className="bg-black text-ink-high rounded-2xl p-6 mb-8">
+        <div className="bg-void text-ink-high rounded-2xl p-6 mb-8 border border-edge">
           <div className="flex items-start justify-between mb-5">
             <div>
               <h3 className="text-base font-extrabold mb-1">Need more credits?</h3>
@@ -762,10 +762,10 @@ export default function Pricing() {
             ].map((pack: any) => (
               <div key={pack.label} className={`bg-raised rounded-xl p-4 text-center relative ${pack.badge ? 'ring-1 ring-amber' : ''} ${pack.bestValue ? 'ring-1 ring-amber' : ''}`}>
                 {pack.badge && (
-                  <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-xs font-bold bg-amber text-ink-high px-2 py-0.5 rounded-full">Popular</span>
+                  <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-xs font-bold bg-amber text-void px-2 py-0.5 rounded-full">Popular</span>
                 )}
                 {pack.bestValue && (
-                  <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-xs font-bold bg-amber text-ink-high px-2 py-0.5 rounded-full">Best value</span>
+                  <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-xs font-bold bg-amber text-void px-2 py-0.5 rounded-full">Best value</span>
                 )}
                 <p className="text-sm font-extrabold mb-0.5">{pack.label}</p>
                 <p className="text-xs text-ink-muted mb-2">{pack.credits}</p>
@@ -800,7 +800,7 @@ export default function Pricing() {
             ].map(pack => (
               <div key={pack.label} className={`bg-panel hover:bg-raised transition-colors rounded-xl p-4 flex flex-col items-center text-center relative ${pack.badge === 'Popular' ? 'ring-1 ring-amber' : ''} ${pack.badge === 'Best value' ? 'ring-1 ring-amber' : ''}`}>
                 {pack.badge && (
-                  <span className={`absolute -top-2.5 left-1/2 -translate-x-1/2 text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap ${pack.badge === 'Best value' ? 'bg-amber text-ink-high' : 'bg-amber text-ink-high'}`}>
+                  <span className={`absolute -top-2.5 left-1/2 -translate-x-1/2 text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap ${pack.badge === 'Best value' ? 'bg-amber text-void' : 'bg-amber text-void'}`}>
                     {pack.badge}
                   </span>
                 )}
@@ -810,7 +810,7 @@ export default function Pricing() {
                 <p className="text-xl font-extrabold mb-3">{pack.price}</p>
                 <Link
                   href="/settings?tab=plan#x-booster"
-                  className="w-full text-center text-xs font-bold py-2 rounded-lg bg-raised hover:bg-panel/20 transition-colors text-ink-high">
+                  className="w-full text-center text-xs font-bold py-2 rounded-lg bg-raised hover:bg-edge-lit transition-colors text-ink-high">
                   Get {pack.label} →
                 </Link>
               </div>
@@ -832,7 +832,7 @@ export default function Pricing() {
           <div className="mb-5">
             <div className="flex items-center gap-2 mb-1">
               <h3 className="text-base font-extrabold">Studio Stax — Get Listed</h3>
-              <span className="text-xs font-bold px-2 py-0.5 bg-raised bg-raised text-ink-muted rounded-full">Directory</span>
+              <span className="text-xs font-bold px-2 py-0.5 bg-raised text-ink-muted rounded-full">Directory</span>
             </div>
             <p className="text-xs text-ink-muted max-w-xl leading-relaxed">
               Get your tool, product, or service in front of SocialMate&apos;s creator audience. Annual directory listing with analytics, SM-Give badge, and a dedicated listing page.
@@ -841,7 +841,7 @@ export default function Pricing() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
             {/* Founding Member */}
-            <div className="border-2 border-edge-lit dark:border-edge-lit rounded-2xl p-5 bg-raised bg-raised relative">
+            <div className="border-2 border-edge-lit rounded-2xl p-5 bg-raised relative">
               <span className="absolute -top-3 left-5 text-xs font-bold bg-raised text-ink-high px-3 py-0.5 rounded-full">First 100 spots only</span>
               <div className="flex items-start justify-between mb-4 mt-2">
                 <div>
@@ -919,7 +919,7 @@ export default function Pricing() {
           <div className="max-w-4xl mx-auto px-6 text-center">
             <p className="text-sm text-ink-muted">
               ❤️ <span className="font-semibold text-ink-body">2% of every SocialMate subscription</span> goes to SM-Give — our charity initiative.{' '}
-              <a href="/give" className="text-amber hover:text-amber font-semibold transition-colors">Learn about SM-Give →</a>
+              <a href="/give" className="text-amber hover:text-amber-bright font-semibold transition-colors">Learn about SM-Give →</a>
             </p>
           </div>
         </div>
@@ -930,11 +930,11 @@ export default function Pricing() {
           <p className="text-sm text-ink-muted mb-6">No card required. Free forever. 50 AI credits per month, included free.</p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/signup"
-              className="bg-black text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm w-full sm:w-auto text-center">
+              className="bg-amber text-void font-bold px-8 py-3.5 rounded-2xl hover:bg-amber-bright transition-all text-sm w-full sm:w-auto text-center">
               Create free account →
             </Link>
             <Link href="/features"
-              className="text-ink-muted font-semibold hover:text-ink-high dark:hover:text-ink-high transition-all text-sm">
+              className="text-ink-muted font-semibold hover:text-ink-high transition-all text-sm">
               See all features →
             </Link>
           </div>

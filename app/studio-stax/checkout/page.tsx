@@ -98,7 +98,7 @@ function CheckoutInner() {
       </div>
 
       {/* Listing preview */}
-      <div className="bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 mb-6">
+      <div className="bg-panel border border-edge rounded-2xl p-4 mb-6">
         <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">Your listing</p>
         <p className="font-extrabold text-gray-900 dark:text-gray-100">{data.listing.name}</p>
         <p className="text-sm text-gray-500 dark:text-gray-400">{data.listing.tagline}</p>
@@ -128,7 +128,7 @@ function CheckoutInner() {
       <div className={`rounded-2xl p-6 mb-6 border-2 ${
         isFoundingTier
           ? 'border-amber-400 bg-amber-50 dark:bg-amber-950/20'
-          : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900'
+          : 'border-edge bg-panel'
       }`}>
         <div className="flex items-start justify-between mb-3">
           <div>
@@ -139,7 +139,7 @@ function CheckoutInner() {
             </div>
           </div>
           {isFoundingTier && (
-            <span className="bg-amber-500 text-white text-xs font-bold px-3 py-1 rounded-full">Founder price</span>
+            <span className="bg-amber-500 text-void text-xs font-bold px-3 py-1 rounded-full">Founder price</span>
           )}
         </div>
 
@@ -163,7 +163,7 @@ function CheckoutInner() {
           </div>
         )}
 
-        <div className="pt-4 border-t border-gray-200 dark:border-gray-700 space-y-2">
+        <div className="pt-4 border-t border-edge space-y-2">
           {[
             'Listed for 12 months from purchase date',
             'SM-Give donation ranking — give more, rank higher',
@@ -187,7 +187,7 @@ function CheckoutInner() {
       <button
         onClick={handlePay}
         disabled={paying}
-        className="w-full bg-black dark:bg-white text-white dark:text-black font-bold py-4 rounded-2xl text-base hover:opacity-80 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+        className="w-full bg-amber text-void font-bold py-4 rounded-2xl text-base hover:opacity-80 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
         {paying ? 'Redirecting to payment...' : `Pay $${price} — Go live →`}
       </button>
 
@@ -195,7 +195,7 @@ function CheckoutInner() {
         Secure payment via Stripe · One-time annual payment · No subscription
       </p>
 
-      <div className="mt-8 border border-gray-100 dark:border-gray-800 rounded-2xl p-4">
+      <div className="mt-8 border border-edge rounded-2xl p-4">
         <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">From the SocialMate family</p>
         <p className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-1">Track subscriptions free with RenewalMate</p>
         <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Keep tabs on your Studio Stax renewal and all your tools automatically.</p>

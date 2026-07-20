@@ -105,7 +105,7 @@ function RenewInner() {
       <div className={`rounded-2xl p-4 mb-6 border ${
         isUrgent
           ? 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800'
-          : 'bg-gray-50 dark:bg-gray-900 border-gray-100 dark:border-gray-800'
+          : 'bg-panel border-edge'
       }`}>
         <p className={`text-sm font-semibold ${isUrgent ? 'text-red-700 dark:text-red-400' : 'text-gray-700 dark:text-gray-300'}`}>
           {isUrgent
@@ -115,7 +115,7 @@ function RenewInner() {
       </div>
 
       {/* Listing preview */}
-      <div className="bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-4 mb-6">
+      <div className="bg-panel border border-edge rounded-2xl p-4 mb-6">
         <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">Your listing</p>
         <p className="font-extrabold text-gray-900 dark:text-gray-100">{data.listing!.name}</p>
         <p className="text-sm text-gray-500 dark:text-gray-400">{data.listing!.tagline}</p>
@@ -160,7 +160,7 @@ function RenewInner() {
       <button
         onClick={handleRenew}
         disabled={paying}
-        className="w-full bg-black dark:bg-white text-white dark:text-black font-bold py-4 rounded-2xl text-base hover:opacity-80 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+        className="w-full bg-amber text-void font-bold py-4 rounded-2xl text-base hover:opacity-80 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
         {paying ? 'Redirecting to payment...' : `Renew for $${renewDollars} →`}
       </button>
 
@@ -168,7 +168,7 @@ function RenewInner() {
         Secure payment via Stripe · One-time annual renewal · No subscription
       </p>
 
-      <div className="mt-8 border border-gray-100 dark:border-gray-800 rounded-2xl p-4">
+      <div className="mt-8 border border-edge rounded-2xl p-4">
         <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">From the SocialMate family</p>
         <p className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-1">Track all your subscriptions free with RenewalMate</p>
         <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Never miss a renewal — RenewalMate tracks every tool automatically.</p>

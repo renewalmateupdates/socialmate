@@ -149,7 +149,7 @@ export default function BloggersPage() {
     <PublicLayout>
 
       {/* ─── HERO ─── */}
-      <section className="bg-void text-ink-high py-24 px-6 text-center">
+      <section className="text-ink-high py-24 px-6 text-center">
         <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-4">{t('for_bloggers.eyebrow')}</p>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-3xl mx-auto mb-6">
           {t('for_bloggers.hero_title_1')}<br />
@@ -172,7 +172,7 @@ export default function BloggersPage() {
       </section>
 
       {/* ─── PAIN POINTS ─── */}
-      <section className="bg-panel text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto">
           <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_bloggers.pain_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
@@ -196,9 +196,9 @@ export default function BloggersPage() {
       </section>
 
       {/* ─── RSS CALLOUT ─── */}
-      <section className="bg-void text-ink-high py-16 px-6">
+      <section className="text-ink-high py-16 px-6">
         <div className="max-w-3xl mx-auto">
-          <div className="bg-gradient-to-br from-indigo-950/60 to-gray-900 border border-edge-lit rounded-3xl p-8 sm:p-10">
+          <div className="bg-gradient-to-br from-amber-950/60 to-gray-900 border border-edge-lit rounded-3xl p-8 sm:p-10">
             <div className="flex flex-col sm:flex-row gap-8 items-center">
               <div className="text-center sm:text-left flex-1">
                 <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">RSS Import</p>
@@ -232,7 +232,7 @@ export default function BloggersPage() {
       </section>
 
       {/* ─── FEATURES ─── */}
-      <section className="bg-panel text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-5xl mx-auto">
           <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_bloggers.features_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-3">
@@ -263,7 +263,7 @@ export default function BloggersPage() {
       </section>
 
       {/* ─── PLATFORMS ─── */}
-      <section className="bg-void text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_bloggers.platforms_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_bloggers.platforms_title')}</h2>
@@ -295,7 +295,7 @@ export default function BloggersPage() {
       </section>
 
       {/* ─── PRICING ─── */}
-      <section className="bg-panel text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_bloggers.pricing_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_bloggers.pricing_title')}</h2>
@@ -338,7 +338,7 @@ export default function BloggersPage() {
       </section>
 
       {/* ─── FAQ ─── */}
-      <section className="bg-void text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-3xl mx-auto">
           <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_bloggers.faq_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">{t('for_bloggers.faq_title')}</h2>
@@ -354,7 +354,7 @@ export default function BloggersPage() {
       </section>
 
       {/* ─── BOTTOM CTA ─── */}
-      <section className="bg-gradient-to-br from-indigo-950 via-gray-950 to-black text-ink-high py-20 px-6 text-center">
+      <section className="bg-gradient-to-br from-amber-950 via-gray-950 to-black text-ink-high py-20 px-6 text-center">
         <h2 className="text-2xl sm:text-3xl font-extrabold mb-4">
           {t('for_bloggers.bottom_title')}
         </h2>

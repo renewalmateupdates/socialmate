@@ -9,7 +9,7 @@ export default function AboutPage() {
     <PublicLayout>
 
       {/* ─── HERO ─── */}
-      <section className="bg-black text-white py-24 px-6 text-center">
+      <section className="text-white py-24 px-6 text-center">
         <div className="max-w-3xl mx-auto">
           <img src="/logo.png" alt="SocialMate" className="w-20 h-20 rounded-3xl mx-auto mb-8" />
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight mb-6">
@@ -23,7 +23,7 @@ export default function AboutPage() {
       </section>
 
       {/* ─── ORIGIN STORY ─── */}
-      <section className="bg-gray-950 text-white py-20 px-6">
+      <section className="text-white py-20 px-6">
         <div className="max-w-2xl mx-auto">
           <p className="text-xs font-bold text-amber-400 uppercase tracking-widest mb-6">{t('about.origin_badge')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-8">
@@ -41,7 +41,7 @@ export default function AboutPage() {
       </section>
 
       {/* ─── MISSION ─── */}
-      <section className="bg-black text-white py-20 px-6">
+      <section className="text-white py-20 px-6">
         <div className="max-w-2xl mx-auto text-center">
           <p className="text-xs font-bold text-amber-400 uppercase tracking-widest mb-6">{t('about.mission_badge')}</p>
           <blockquote className="text-2xl sm:text-3xl font-extrabold leading-snug mb-6">
@@ -57,7 +57,7 @@ export default function AboutPage() {
       </section>
 
       {/* ─── EVERYTHING EVERYWHERE ─── */}
-      <section className="bg-gray-950 text-white py-20 px-6">
+      <section className="text-white py-20 px-6">
         <div className="max-w-3xl mx-auto">
           <div className="bg-gradient-to-br from-amber-950/50 to-gray-900 border border-amber-800/30 rounded-3xl p-8 sm:p-12 text-center">
             <p className="text-xs font-bold text-amber-400 uppercase tracking-widest mb-4">{t('about.vision_badge')}</p>
@@ -75,9 +75,9 @@ export default function AboutPage() {
       </section>
 
       {/* ─── SM-GIVE ─── */}
-      <section className="bg-black text-white py-20 px-6">
+      <section className="text-white py-20 px-6">
         <div className="max-w-2xl mx-auto">
-          <p className="text-xs font-bold text-rose-400 uppercase tracking-widest mb-6">SM-Give</p>
+          <p className="text-xs font-bold text-amber-400 uppercase tracking-widest mb-6">SM-Give</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-6">
             {t('about.give_title')}
           </h2>
@@ -88,17 +88,17 @@ export default function AboutPage() {
             {t('about.give_para2')}
           </p>
           <Link href="/give"
-            className="inline-block border border-rose-700 hover:bg-rose-950/40 text-rose-400 font-bold px-6 py-3 rounded-xl text-sm transition-all">
+            className="inline-block border border-amber-700 hover:bg-amber-950/40 text-amber-400 font-bold px-6 py-3 rounded-xl text-sm transition-all">
             ❤️ {t('about.give_cta')}
           </Link>
         </div>
       </section>
 
       {/* ─── FOUNDER ─── */}
-      <section className="bg-gray-950 text-white py-20 px-6">
+      <section className="text-white py-20 px-6">
         <div className="max-w-3xl mx-auto">
           <p className="text-xs font-bold text-amber-400 uppercase tracking-widest mb-8 text-center">{t('about.founder_badge')}</p>
-          <div className="bg-gray-900 border border-gray-800 rounded-3xl p-8 sm:p-10">
+          <div className="bg-panel border border-edge rounded-3xl p-8 sm:p-10">
             <div className="flex flex-col sm:flex-row gap-8 items-start">
               <div className="w-20 h-20 bg-amber-500 rounded-2xl flex items-center justify-center text-black font-black text-3xl flex-shrink-0">
                 J
@@ -118,7 +118,7 @@ export default function AboutPage() {
       </section>
 
       {/* ─── STATS ─── */}
-      <section className="bg-black text-white py-20 px-6">
+      <section className="text-white py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-10">{t('about.stats_badge')}</p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
@@ -128,7 +128,7 @@ export default function AboutPage() {
               { value: '8',    label: t('about.stat3_label') },
               { value: '$5',   label: t('about.stat4_label') },
             ].map((stat) => (
-              <div key={stat.label} className="bg-gray-950 border border-gray-800 rounded-2xl p-6">
+              <div key={stat.label} className="bg-panel border border-edge rounded-2xl p-6">
                 <p className="text-3xl font-black text-amber-400 mb-2">{stat.value}</p>
                 <p className="text-xs text-gray-400 font-medium">{stat.label}</p>
               </div>

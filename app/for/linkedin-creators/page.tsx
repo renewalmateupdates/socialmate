@@ -220,7 +220,7 @@ export default function LinkedInCreatorsPage() {
       />
 
       {/* ─── HERO ─── */}
-      <section className="bg-void text-ink-high py-24 px-6 text-center">
+      <section className="text-ink-high py-24 px-6 text-center">
         <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-4">{t('for_linkedin.api_badge')}</p>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-3xl mx-auto mb-6">
           {t('for_linkedin.hero_title_1')}<br />
@@ -247,7 +247,7 @@ export default function LinkedInCreatorsPage() {
       </section>
 
       {/* ─── BEFORE / AFTER ─── */}
-      <section className="bg-panel text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto">
           <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3 text-center">{t('for_linkedin.pain_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
@@ -274,7 +274,7 @@ export default function LinkedInCreatorsPage() {
       </section>
 
       {/* ─── FEATURES ─── */}
-      <section className="bg-panel text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-5xl mx-auto">
           <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3 text-center">{t('for_linkedin.features_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
@@ -329,7 +329,7 @@ export default function LinkedInCreatorsPage() {
       </section>
 
       {/* ─── COMPARISON ─── */}
-      <section className="bg-panel text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-3xl mx-auto">
           <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3 text-center">{t('for_linkedin.comparison_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-10">
@@ -365,7 +365,7 @@ export default function LinkedInCreatorsPage() {
       </section>
 
       {/* ─── PRICING ─── */}
-      <section className="bg-panel text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_linkedin.pricing_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_linkedin.pricing_title')}</h2>
@@ -405,7 +405,7 @@ export default function LinkedInCreatorsPage() {
       </section>
 
       {/* ─── FAQ ─── */}
-      <section className="bg-panel text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-2xl mx-auto">
           <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3 text-center">{t('for_linkedin.faq_eyebrow')}</p>
           <h2 className="text-2xl font-extrabold text-center mb-10">{t('for_linkedin.faq_title')}</h2>
@@ -421,7 +421,7 @@ export default function LinkedInCreatorsPage() {
       </section>
 
       {/* ─── CTA ─── */}
-      <section className="bg-void text-ink-high py-20 px-6 text-center">
+      <section className="text-ink-high py-20 px-6 text-center">
         <h2 className="text-3xl sm:text-4xl font-extrabold mb-4">
           {t('for_linkedin.bottom_title')}
         </h2>

@@ -46,7 +46,7 @@ const CHAPTERS = [
 export default function VibeCodingGuidePage() {
   return (
     <PublicLayout>
-      <div className="min-h-screen bg-[#0a0a0a] text-white">
+      <div className="min-h-screen bg-void text-white">
         {/* Hero */}
         <header className="border-b border-[#1f1f1f] px-6 py-16">
           <div className="mx-auto max-w-3xl">
@@ -706,7 +706,7 @@ export default function VibeCodingGuidePage() {
                   The tools exist. The knowledge exists. The only thing that was ever actually in the way was the belief that you needed permission. You don't.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  <Link href="/guides" className="px-6 py-3 rounded-xl border border-gray-700 text-gray-300 font-semibold text-sm hover:border-gray-500 transition-all">
+                  <Link href="/guides" className="px-6 py-3 rounded-xl border border-edge text-gray-300 font-semibold text-sm hover:border-gray-500 transition-all">
                     ← All Guides
                   </Link>
                   <Link href="/pricing" className="px-6 py-3 rounded-xl bg-amber-500 text-black font-extrabold text-sm hover:bg-amber-400 transition-all">

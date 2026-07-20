@@ -23,7 +23,7 @@ function SuccessInner() {
         Your listing is now active in the directory. Check your inbox — we sent you a confirmation with everything you need to know.
       </p>
 
-      <div className="bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-5 mb-8 text-left space-y-3">
+      <div className="bg-panel border border-edge rounded-2xl p-5 mb-8 text-left space-y-3">
         <p className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">What's next</p>
         <div className="flex items-start gap-3 text-sm text-gray-600 dark:text-gray-400">
           <span className="text-green-500 font-bold mt-0.5">1.</span>
@@ -47,11 +47,11 @@ function SuccessInner() {
 
       <div className="flex flex-col sm:flex-row gap-3 justify-center">
         <Link href="/studio-stax"
-          className="bg-black dark:bg-white text-white dark:text-black font-bold px-6 py-3 rounded-2xl text-sm hover:opacity-80 transition-all">
+          className="bg-amber text-void font-bold px-6 py-3 rounded-2xl text-sm hover:opacity-80 transition-all">
           View Studio Stax →
         </Link>
         <Link href="/give"
-          className="border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 font-bold px-6 py-3 rounded-2xl text-sm hover:border-gray-400 dark:hover:border-gray-500 transition-all">
+          className="border border-edge text-gray-600 dark:text-gray-400 font-bold px-6 py-3 rounded-2xl text-sm hover:border-gray-400 dark:hover:border-gray-500 transition-all">
           Donate to SM-Give
         </Link>
       </div>

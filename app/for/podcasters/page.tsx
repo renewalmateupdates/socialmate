@@ -158,7 +158,7 @@ export default function PodcastersPage() {
     <PublicLayout>
 
       {/* ─── HERO ─── */}
-      <section className="bg-void text-ink-high py-24 px-6 text-center">
+      <section className="text-ink-high py-24 px-6 text-center">
         <p className="text-xs font-bold text-amber uppercase tracking-widest mb-4">{t('for_podcasters.eyebrow')}</p>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-3xl mx-auto mb-6">
           {t('for_podcasters.hero_title_1')}<br />
@@ -181,7 +181,7 @@ export default function PodcastersPage() {
       </section>
 
       {/* ─── PAIN POINTS ─── */}
-      <section className="bg-panel text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto">
           <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_podcasters.pain_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
@@ -205,7 +205,7 @@ export default function PodcastersPage() {
       </section>
 
       {/* ─── FEATURES ─── */}
-      <section className="bg-void text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-5xl mx-auto">
           <p className="text-center text-xs font-bold text-amber uppercase tracking-widest mb-3">{t('for_podcasters.features_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-3">
@@ -257,7 +257,7 @@ export default function PodcastersPage() {
       </section>
 
       {/* ─── PLATFORMS ─── */}
-      <section className="bg-void text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_podcasters.platforms_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_podcasters.platforms_title')}</h2>
@@ -289,7 +289,7 @@ export default function PodcastersPage() {
       </section>
 
       {/* ─── SOMA CALLOUT ─── */}
-      <section className="bg-panel text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-3xl mx-auto">
           <div className="bg-gradient-to-br from-orange-950/60 to-gray-900 border border-amber rounded-3xl p-8 sm:p-10 text-center">
             <p className="text-xs font-bold text-amber uppercase tracking-widest mb-3">SOMA — AI Content OS</p>
@@ -310,7 +310,7 @@ export default function PodcastersPage() {
       </section>
 
       {/* ─── PRICING ─── */}
-      <section className="bg-void text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_podcasters.pricing_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_podcasters.pricing_title')}</h2>
@@ -352,7 +352,7 @@ export default function PodcastersPage() {
       </section>
 
       {/* ─── FAQ ─── */}
-      <section className="bg-panel text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-3xl mx-auto">
           <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_podcasters.faq_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">{t('for_podcasters.faq_title')}</h2>
