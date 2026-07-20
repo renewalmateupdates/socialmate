@@ -45,7 +45,7 @@ const CHAPTERS = [
 export default function SeoForBeginnersPage() {
   return (
     <PublicLayout>
-      <div className="min-h-screen bg-[#0a0a0a] text-white">
+      <div className="min-h-screen bg-void text-white">
         <header className="border-b border-[#1f1f1f] px-6 py-16">
           <div className="mx-auto max-w-3xl">
             <div className="mb-4 flex flex-wrap items-center gap-3">

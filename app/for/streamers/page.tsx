@@ -173,18 +173,18 @@ export default function StreamersPage() {
     <PublicLayout>
 
       {/* ─── HERO ─── */}
-      <section className="bg-void text-ink-high py-24 px-6 text-center">
-        <p className="text-xs font-bold text-violet uppercase tracking-widest mb-4">{t('for_streamers.eyebrow')}</p>
+      <section className="text-ink-high py-24 px-6 text-center">
+        <p className="text-xs font-bold text-amber uppercase tracking-widest mb-4">{t('for_streamers.eyebrow')}</p>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-3xl mx-auto mb-6">
           {t('for_streamers.hero_title_1')}<br />
-          <span className="text-violet">{t('for_streamers.hero_title_2')}</span>
+          <span className="text-amber">{t('for_streamers.hero_title_2')}</span>
         </h1>
         <p className="text-ink-body max-w-xl mx-auto text-base leading-relaxed mb-8">
           {t('for_streamers.hero_desc')}
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
           <Link href="/signup"
-            className="bg-violet/10 hover:bg-violet/10 text-ink-high font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
+            className="bg-amber/10 hover:bg-amber/10 text-ink-high font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
             {t('for_streamers.hero_cta_primary')}
           </Link>
           <Link href="/clips"
@@ -196,7 +196,7 @@ export default function StreamersPage() {
       </section>
 
       {/* ─── PAIN POINTS ─── */}
-      <section className="bg-panel text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto">
           <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_streamers.pain_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
@@ -209,8 +209,8 @@ export default function StreamersPage() {
                   <p className="text-xs text-alert font-bold uppercase tracking-wide mb-2">{t('for_streamers.pain_before_label')}</p>
                   <p className="text-sm text-ink-body leading-relaxed">{p.before}</p>
                 </div>
-                <div className="bg-violet/10 border border-violet/40 rounded-2xl p-5">
-                  <p className="text-xs text-violet font-bold uppercase tracking-wide mb-2">{t('for_streamers.pain_after_label')}</p>
+                <div className="bg-amber/10 border border-amber/40 rounded-2xl p-5">
+                  <p className="text-xs text-amber font-bold uppercase tracking-wide mb-2">{t('for_streamers.pain_after_label')}</p>
                   <p className="text-sm text-ink-high leading-relaxed">{p.icon} {p.after}</p>
                 </div>
               </div>
@@ -220,9 +220,9 @@ export default function StreamersPage() {
       </section>
 
       {/* ─── FEATURES ─── */}
-      <section className="bg-void text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-5xl mx-auto">
-          <p className="text-center text-xs font-bold text-violet uppercase tracking-widest mb-3">{t('for_streamers.features_eyebrow')}</p>
+          <p className="text-center text-xs font-bold text-amber uppercase tracking-widest mb-3">{t('for_streamers.features_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-3">
             {t('for_streamers.features_title')}
           </h2>
@@ -254,9 +254,9 @@ export default function StreamersPage() {
       </section>
 
       {/* ─── HOW IT WORKS ─── */}
-      <section className="bg-gradient-to-b from-purple-950 to-gray-950 text-ink-high py-20 px-6">
+      <section className="bg-gradient-to-b from-amber-950 to-gray-950 text-ink-high py-20 px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <p className="text-xs font-bold text-violet uppercase tracking-widest mb-3">{t('for_streamers.how_eyebrow')}</p>
+          <p className="text-xs font-bold text-amber uppercase tracking-widest mb-3">{t('for_streamers.how_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-12">{t('for_streamers.how_title')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
             {[
@@ -264,8 +264,8 @@ export default function StreamersPage() {
               { step: '2', title: t('for_streamers.step2_title'), desc: t('for_streamers.step2_desc') },
               { step: '3', title: t('for_streamers.step3_title'), desc: t('for_streamers.step3_desc') },
             ].map((s) => (
-              <div key={s.step} className="bg-void border border-violet/40 rounded-2xl p-6">
-                <div className="text-3xl font-black text-violet mb-3">{s.step}</div>
+              <div key={s.step} className="bg-void border border-amber/40 rounded-2xl p-6">
+                <div className="text-3xl font-black text-amber mb-3">{s.step}</div>
                 <h3 className="text-sm font-extrabold mb-2">{s.title}</h3>
                 <p className="text-xs text-ink-body leading-relaxed">{s.desc}</p>
               </div>
@@ -275,7 +275,7 @@ export default function StreamersPage() {
       </section>
 
       {/* ─── PLATFORMS ─── */}
-      <section className="bg-void text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_streamers.platforms_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_streamers.platforms_title')}</h2>
@@ -294,7 +294,7 @@ export default function StreamersPage() {
 
           <h3 className="text-base font-extrabold text-ink-body mb-4">{t('for_streamers.pipeline_title')}</h3>
           <p className="text-ink-muted text-xs mb-6 max-w-md mx-auto">
-            {t('for_streamers.pipeline_desc')} <Link href="/roadmap" className="text-violet hover:text-violet underline">{t('for_streamers.pipeline_roadmap')}</Link> {t('for_streamers.pipeline_desc_end')}
+            {t('for_streamers.pipeline_desc')} <Link href="/roadmap" className="text-amber hover:text-amber underline">{t('for_streamers.pipeline_roadmap')}</Link> {t('for_streamers.pipeline_desc_end')}
           </p>
           <div className="flex flex-wrap justify-center gap-3">
             {COMING_PLATFORMS.map((p) => (
@@ -310,7 +310,7 @@ export default function StreamersPage() {
       </section>
 
       {/* ─── PRICING ─── */}
-      <section className="bg-panel text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_streamers.pricing_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_streamers.pricing_title')}</h2>
@@ -319,11 +319,11 @@ export default function StreamersPage() {
             {PRICING.map((tier) => (
               <div key={tier.plan}
                 className={`rounded-2xl p-6 border ${tier.highlight
-                  ? 'bg-violet/10 border-violet/40 ring-1 ring-violet'
+                  ? 'bg-amber/10 border-amber/40 ring-1 ring-amber'
                   : 'bg-panel border-edge'
                 }`}>
                 {tier.highlight && (
-                  <p className="text-xs font-bold text-violet uppercase tracking-widest mb-3">{t('for_streamers.pricing_most_popular')}</p>
+                  <p className="text-xs font-bold text-amber uppercase tracking-widest mb-3">{t('for_streamers.pricing_most_popular')}</p>
                 )}
                 <p className="text-sm font-extrabold mb-1">{tier.plan}</p>
                 <div className="flex items-end gap-1 mb-4">
@@ -339,7 +339,7 @@ export default function StreamersPage() {
                 </ul>
                 <Link href={tier.href}
                   className={`block text-center text-sm font-bold py-3 rounded-xl transition-all ${tier.highlight
-                    ? 'bg-violet/10 hover:bg-violet/10 text-ink-high'
+                    ? 'bg-amber/10 hover:bg-amber/10 text-ink-high'
                     : 'bg-panel text-ink-high hover:opacity-80'
                   }`}>
                   {tier.cta} →
@@ -352,7 +352,7 @@ export default function StreamersPage() {
       </section>
 
       {/* ─── FAQ ─── */}
-      <section className="bg-void text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-3xl mx-auto">
           <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_streamers.faq_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">{t('for_streamers.faq_title')}</h2>
@@ -368,7 +368,7 @@ export default function StreamersPage() {
       </section>
 
       {/* ─── BOTTOM CTA ─── */}
-      <section className="bg-gradient-to-br from-purple-950 via-gray-950 to-black text-ink-high py-20 px-6 text-center">
+      <section className="bg-gradient-to-br from-amber-950 via-gray-950 to-black text-ink-high py-20 px-6 text-center">
         <h2 className="text-2xl sm:text-3xl font-extrabold mb-4">
           {t('for_streamers.bottom_title')}
         </h2>
@@ -376,7 +376,7 @@ export default function StreamersPage() {
           {t('for_streamers.bottom_desc')}
         </p>
         <Link href="/signup"
-          className="inline-block bg-violet/10 hover:bg-violet/10 text-ink-high font-bold px-10 py-4 rounded-xl text-sm transition-all">
+          className="inline-block bg-amber/10 hover:bg-amber/10 text-ink-high font-bold px-10 py-4 rounded-xl text-sm transition-all">
           {t('for_streamers.bottom_cta')}
         </Link>
         <p className="text-ink-muted text-xs mt-4">{t('for_streamers.bottom_note')}</p>

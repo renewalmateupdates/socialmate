@@ -156,7 +156,7 @@ export default function StudioStaxPortalPage() {
           </p>
           <Link
             href="/studio-stax/apply"
-            className="inline-flex items-center gap-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all text-sm">
+            className="inline-flex items-center gap-2 bg-amber text-void font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all text-sm">
             Apply for a Listing →
           </Link>
           <div className="mt-6">
@@ -178,11 +178,11 @@ export default function StudioStaxPortalPage() {
   const nextMilestone = Math.ceil((totalDonated + 1) / progressInterval) * progressInterval
 
   const statusColors: Record<string, string> = {
-    approved: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400',
+    approved: 'bg-amber-50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400',
     active:   'bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800 text-green-700 dark:text-green-400',
     pending:  'bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800 text-yellow-700 dark:text-yellow-400',
     expired:  'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800 text-red-700 dark:text-red-400',
-    rejected: 'bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400',
+    rejected: 'bg-panel border-edge text-gray-500 dark:text-gray-400',
   }
   const statusLabels: Record<string, string> = {
     approved: 'Approved — Payment Pending',
@@ -221,7 +221,7 @@ export default function StudioStaxPortalPage() {
             </div>
             {listing.logo_url ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={listing.logo_url} alt={listing.name} className="w-12 h-12 rounded-xl object-cover shrink-0 border border-gray-100 dark:border-gray-800" />
+              <img src={listing.logo_url} alt={listing.name} className="w-12 h-12 rounded-xl object-cover shrink-0 border border-edge" />
             ) : (
               <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-xl font-extrabold text-amber-600 shrink-0">
                 {listing.name.charAt(0)}
@@ -238,7 +238,7 @@ export default function StudioStaxPortalPage() {
               onClick={() => setActiveTab(tab.id)}
               className={`flex-1 min-w-max text-xs font-bold px-3 py-2 rounded-lg transition-all whitespace-nowrap ${
                 activeTab === tab.id
-                  ? 'bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 shadow-sm'
+                  ? 'bg-panel text-gray-900 dark:text-gray-100 shadow-sm'
                   : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
               }`}>
               {tab.label}
@@ -256,7 +256,7 @@ export default function StudioStaxPortalPage() {
             )}
 
             {/* Read-only info */}
-            <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6 space-y-4">
+            <div className="bg-panel border border-edge rounded-2xl p-6 space-y-4">
               <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Listing Details</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -281,7 +281,7 @@ export default function StudioStaxPortalPage() {
             </div>
 
             {/* Editable fields */}
-            <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6 space-y-4">
+            <div className="bg-panel border border-edge rounded-2xl p-6 space-y-4">
               <div className="flex items-center justify-between">
                 <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Editable Info</p>
                 {!editMode && (
@@ -303,7 +303,7 @@ export default function StudioStaxPortalPage() {
                       value={editDesc}
                       onChange={e => setEditDesc(e.target.value.slice(0, 300))}
                       rows={4}
-                      className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 placeholder-gray-300 dark:placeholder-gray-600 resize-none"
+                      className="w-full px-3 py-2.5 rounded-xl border border-edge bg-panel text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 placeholder-gray-300 dark:placeholder-gray-600 resize-none"
                     />
                     <p className="text-xs text-gray-400 mt-1 text-right">{editDesc.length}/300</p>
                   </div>
@@ -314,7 +314,7 @@ export default function StudioStaxPortalPage() {
                       value={editUrl}
                       onChange={e => setEditUrl(e.target.value)}
                       placeholder="https://yourtool.com"
-                      className="w-full px-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 placeholder-gray-300 dark:placeholder-gray-600"
+                      className="w-full px-3 py-2.5 rounded-xl border border-edge bg-panel text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-900 dark:focus:ring-gray-100 placeholder-gray-300 dark:placeholder-gray-600"
                     />
                   </div>
                   {editError && <p className="text-sm font-medium text-red-500">{editError}</p>}
@@ -322,7 +322,7 @@ export default function StudioStaxPortalPage() {
                     <button
                       onClick={handleSaveEdit}
                       disabled={editSaving}
-                      className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-sm font-bold px-5 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
+                      className="bg-amber text-void text-sm font-bold px-5 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
                       {editSaving ? 'Saving...' : 'Save Changes'}
                     </button>
                     <button
@@ -346,7 +346,7 @@ export default function StudioStaxPortalPage() {
                       href={listing.url ?? '#'}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-blue-600 dark:text-blue-400 hover:underline truncate block">
+                      className="text-sm text-amber-600 dark:text-amber-400 hover:underline truncate block">
                       {listing.url || '—'}
                     </a>
                   </div>
@@ -394,7 +394,7 @@ export default function StudioStaxPortalPage() {
                       { label: 'Last 30 days', data: analytics.last_30   },
                       { label: 'All time',     data: analytics.all_time  },
                     ] as const).map(({ label, data }) => (
-                      <div key={label} className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-5">
+                      <div key={label} className="bg-panel border border-edge rounded-2xl p-5">
                         <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-4">{label}</p>
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
@@ -403,9 +403,9 @@ export default function StudioStaxPortalPage() {
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="text-xs text-gray-500 dark:text-gray-400">Clicks</span>
-                            <span className="text-sm font-extrabold text-blue-600 dark:text-blue-400">{data.clicks.toLocaleString()}</span>
+                            <span className="text-sm font-extrabold text-amber-600 dark:text-amber-400">{data.clicks.toLocaleString()}</span>
                           </div>
-                          <div className="flex items-center justify-between border-t border-gray-100 dark:border-gray-800 pt-3">
+                          <div className="flex items-center justify-between border-t border-edge pt-3">
                             <span className="text-xs text-gray-500 dark:text-gray-400">CTR</span>
                             <span className="text-sm font-extrabold text-amber-600 dark:text-amber-400">{ctr(data)}{ctr(data) !== '—' ? '%' : ''}</span>
                           </div>
@@ -415,13 +415,13 @@ export default function StudioStaxPortalPage() {
                   </div>
 
                   {/* 7-day bar chart */}
-                  <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
+                  <div className="bg-panel border border-edge rounded-2xl p-6">
                     <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-6">Last 7 days</p>
 
                     {/* Legend */}
                     <div className="flex items-center gap-5 mb-5">
                       <div className="flex items-center gap-1.5">
-                        <div className="w-3 h-3 rounded-sm bg-blue-200 dark:bg-blue-800" />
+                        <div className="w-3 h-3 rounded-sm bg-amber-200 dark:bg-amber-800" />
                         <span className="text-xs text-gray-500 dark:text-gray-400">Views</span>
                       </div>
                       <div className="flex items-center gap-1.5">
@@ -436,7 +436,7 @@ export default function StudioStaxPortalPage() {
                           {/* Bars */}
                           <div className="flex-1 w-full flex items-end gap-0.5">
                             <div
-                              className="flex-1 bg-blue-200 dark:bg-blue-800 rounded-t transition-all"
+                              className="flex-1 bg-amber-200 dark:bg-amber-800 rounded-t transition-all"
                               style={{ height: `${Math.max((day.views / maxVal) * 100, day.views > 0 ? 4 : 0)}%` }}
                               title={`${day.views} views`}
                             />
@@ -469,7 +469,7 @@ export default function StudioStaxPortalPage() {
         {activeTab === 'rankings' && (
           <div className="space-y-5">
             {/* Rank card */}
-            <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
+            <div className="bg-panel border border-edge rounded-2xl p-6">
               <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-4">Your SM-Give Impact</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                 <div className="bg-green-50 dark:bg-green-950/30 border border-green-100 dark:border-green-900 rounded-xl p-4 text-center">
@@ -507,7 +507,7 @@ export default function StudioStaxPortalPage() {
             </div>
 
             {/* How ranking works */}
-            <div className="bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-5">
+            <div className="bg-panel border border-edge rounded-2xl p-5">
               <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-3">How rankings work</p>
               <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed mb-4">
                 Listings are ranked by total SM-Give donations within your category. The more you give, the higher you rank.
@@ -515,7 +515,7 @@ export default function StudioStaxPortalPage() {
               </p>
               <Link
                 href="/sm-give"
-                className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold px-5 py-2.5 rounded-xl transition-all text-sm">
+                className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-void font-bold px-5 py-2.5 rounded-xl transition-all text-sm">
                 Donate to SM-Give →
               </Link>
             </div>
@@ -526,7 +526,7 @@ export default function StudioStaxPortalPage() {
         {activeTab === 'status' && (
           <div className="space-y-5">
             {/* Status card */}
-            <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
+            <div className="bg-panel border border-edge rounded-2xl p-6">
               <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-4">Current Status</p>
               <div className={`inline-flex items-center gap-2 border rounded-xl px-4 py-2 text-sm font-bold mb-4 ${statusColors[listing.status] ?? statusColors.pending}`}>
                 {listing.status === 'active'   && '✅'}
@@ -563,7 +563,7 @@ export default function StudioStaxPortalPage() {
               )}
 
               {listing.plan_tier && (
-                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+                <div className="mt-4 pt-4 border-t border-edge">
                   <p className="text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">Plan Tier</p>
                   <span className={`inline-flex items-center text-xs font-bold px-3 py-1 rounded-full ${
                     listing.plan_tier === 'founding'
@@ -596,7 +596,7 @@ export default function StudioStaxPortalPage() {
                 </div>
                 <Link
                   href="/studio-stax/renew"
-                  className="inline-flex items-center gap-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all text-sm">
+                  className="inline-flex items-center gap-2 bg-amber text-void font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all text-sm">
                   Renew listing — $100/yr →
                 </Link>
                 <p className="text-xs text-amber-600 dark:text-amber-500 mt-3">
@@ -607,9 +607,9 @@ export default function StudioStaxPortalPage() {
 
             {/* Approved — waiting on payment */}
             {listing.status === 'approved' && (
-              <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-5">
-                <p className="text-sm font-bold text-blue-800 dark:text-blue-300 mb-1">Approved — payment link coming</p>
-                <p className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
+              <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-5">
+                <p className="text-sm font-bold text-amber-800 dark:text-amber-300 mb-1">Approved — payment link coming</p>
+                <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
                   Your application was approved! Joshua will send a payment link to your email shortly. Check your inbox (and spam folder).
                 </p>
               </div>
@@ -637,7 +637,7 @@ export default function StudioStaxPortalPage() {
 
             {/* Rejected info */}
             {listing.status === 'rejected' && (
-              <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5">
+              <div className="bg-panel border border-edge rounded-2xl p-5">
                 <p className="text-sm font-bold text-gray-700 dark:text-gray-300 mb-1">Application not approved</p>
                 <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
                   Your application wasn&apos;t approved this time. You&apos;re welcome to apply again with a different tool, or reach out to Joshua if you have questions.

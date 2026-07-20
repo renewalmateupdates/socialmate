@@ -48,7 +48,7 @@ export default function WallOfLove() {
         {hasTestimonials ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-16">
             {TESTIMONIALS.map((testimonial, i) => (
-              <div key={i} className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6 flex flex-col gap-4">
+              <div key={i} className="bg-panel border border-edge rounded-2xl p-6 flex flex-col gap-4">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-xl flex-shrink-0">
                     {testimonial.avatar}
@@ -90,7 +90,7 @@ export default function WallOfLove() {
         )}
 
         {/* CTA */}
-        <div className="bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-3xl p-8 text-center">
+        <div className="bg-panel border border-edge rounded-3xl p-8 text-center">
           <p className="text-base font-extrabold tracking-tight mb-2">{t('wall_of_love.cta_title')}</p>
           <p className="text-gray-400 dark:text-gray-500 text-sm mb-6 leading-relaxed">
             {t('wall_of_love.cta_desc')}
@@ -102,7 +102,7 @@ export default function WallOfLove() {
               {t('wall_of_love.send_testimonial_cta')}
             </a>
             <Link href="/signup"
-              className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-xl hover:border-gray-400 transition-all text-gray-600 dark:text-gray-400">
+              className="px-6 py-3 border border-edge text-sm font-semibold rounded-xl hover:border-gray-400 transition-all text-gray-600 dark:text-gray-400">
               {t('wall_of_love.try_free_cta')}
             </Link>
           </div>

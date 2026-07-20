@@ -335,7 +335,7 @@ export default function Features() {
         </div>
 
         {/* CREDIT QUICK REFERENCE */}
-        <div className="bg-void text-ink-high rounded-2xl p-6 mb-10">
+        <div className="bg-panel border border-edge text-ink-high rounded-2xl p-6 mb-10">
           <div className="flex items-start justify-between mb-4">
             <div>
               <p className="text-xs font-bold text-ink-body uppercase tracking-widest mb-1">{t('features.credit_ref_eyebrow')}</p>
@@ -347,7 +347,7 @@ export default function Features() {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
             {CREDIT_SUMMARY.map(tool => (
-              <div key={tool.name} className="bg-panel rounded-xl p-2.5 text-center relative">
+              <div key={tool.name} className="bg-raised rounded-xl p-2.5 text-center relative">
                 {tool.proOnly && (
                   <span className="absolute -top-1.5 -right-1.5 text-xs font-bold bg-violet/10 text-ink-high px-1.5 py-0.5 rounded-full">Pro+</span>
                 )}
@@ -365,8 +365,8 @@ export default function Features() {
             <button key={cat} onClick={() => setActiveCategory(cat)}
               className={`text-xs font-bold px-4 py-2 rounded-xl transition-all ${
                 activeCategory === cat
-                  ? 'bg-void bg-panel text-ink-high text-ink-high'
-                  : 'bg-panel border border-edge text-ink-muted hover:border-edge dark:hover:border-edge'
+                  ? 'bg-amber text-void'
+                  : 'bg-panel border border-edge text-ink-muted hover:border-edge-lit'
               }`}>
               {cat}
             </button>
@@ -388,21 +388,21 @@ export default function Features() {
             <div className="grid grid-cols-1 gap-3">
               {section.features.map(f => (
                 <div key={f.name}
-                  className="bg-panel border border-edge border-edge rounded-2xl p-5 hover:border-edge dark:hover:border-edge transition-all">
+                  className="bg-panel border border-edge rounded-2xl p-5 hover:border-edge-lit transition-all">
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <div className="flex items-center gap-2 flex-wrap">
                       <f.icon className="h-4 w-4 flex-shrink-0 text-ink-muted" strokeWidth={2} aria-hidden="true" />
                       <h3 className="text-sm font-extrabold text-ink-high">{f.name}</h3>
                       {f.proOnly && (
-                        <span className="text-xs font-bold px-2 py-0.5 bg-violet/10 bg-violet/10 text-violet text-violet rounded-full">Pro+</span>
+                        <span className="text-xs font-bold px-2 py-0.5 bg-violet/10 text-violet rounded-full">Pro+</span>
                       )}
                     </div>
                     <span className={`text-xs font-bold px-3 py-1 rounded-full flex-shrink-0 ${
                       f.credits === 'Free' || f.credits === 'Always free'
-                        ? 'bg-jade/10 bg-jade/10 text-jade text-jade'
+                        ? 'bg-jade/10 text-jade'
                         : f.credits.includes('add-on')
                         ? 'bg-raised text-ink-muted'
-                        : 'bg-void bg-panel text-ink-high text-ink-high'
+                        : 'bg-raised text-ink-high'
                     }`}>
                       {f.credits}
                     </span>
@@ -424,7 +424,7 @@ export default function Features() {
         ))}
 
         {/* PLATFORM NOTE */}
-        <div className="bg-raised border border-edge border-edge rounded-2xl p-6 mb-10">
+        <div className="bg-raised border border-edge rounded-2xl p-6 mb-10">
           <div className="flex items-start gap-4">
             <span className="text-3xl">📱</span>
             <div>
@@ -449,9 +449,9 @@ export default function Features() {
                   { name: 'Threads', status: 'planned' },
                 ].map(p => (
                   <div key={p.name} className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${
-                    p.status === 'live'    ? 'bg-jade/10 bg-jade/10 text-jade text-jade border border-jade/40 border-jade/40' :
-                    p.status === 'soon'    ? 'bg-raised bg-raised text-ink-muted text-ink-muted border border-edge-lit border-edge-lit' :
-                    'bg-panel bg-raised text-ink-muted border border-edge border-edge'
+                    p.status === 'live'    ? 'bg-jade/10 text-jade border border-jade/40' :
+                    p.status === 'soon'    ? 'bg-raised text-ink-muted border border-edge-lit' :
+                    'bg-panel text-ink-muted border border-edge'
                   }`}>
                     <PlatformIcon name={p.name} size={13} mono />
                     <span>{p.name}</span>
@@ -469,24 +469,24 @@ export default function Features() {
           <div className="max-w-4xl mx-auto px-6 text-center">
             <p className="text-sm text-ink-muted">
               <span className="font-semibold text-ink-body">2% of every SocialMate subscription</span> goes to SM-Give — our charity initiative.{' '}
-              <a href="/give" className="text-amber hover:text-amber font-semibold transition-colors">{t('features.sm_give_link')}</a>
+              <a href="/give" className="text-amber hover:text-amber-bright font-semibold transition-colors">{t('features.sm_give_link')}</a>
             </p>
           </div>
         </div>
 
         {/* BOTTOM CTA */}
-        <div className="bg-void rounded-2xl p-8 text-center text-ink-high">
+        <div className="bg-panel border border-edge rounded-2xl p-8 text-center text-ink-high">
           <h2 className="text-2xl font-extrabold mb-2">{t('features.cta_title')}</h2>
           <p className="text-sm text-ink-body mb-6 max-w-md mx-auto">
             {t('features.cta_desc')}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link href="/signup"
-              className="bg-panel text-ink-high text-sm font-bold px-6 py-3 rounded-xl hover:opacity-90 transition-all w-full sm:w-auto text-center">
+              className="bg-amber text-void text-sm font-bold px-6 py-3 rounded-xl hover:bg-amber-bright transition-all w-full sm:w-auto text-center">
               {t('features.cta_primary')}
             </Link>
             <Link href="/pricing"
-              className="border border-edge text-ink-high text-sm font-bold px-6 py-3 rounded-xl hover:border-edge transition-all w-full sm:w-auto text-center">
+              className="border border-edge-lit text-ink-high text-sm font-bold px-6 py-3 rounded-xl hover:border-ink-muted transition-all w-full sm:w-auto text-center">
               {t('features.cta_secondary')}
             </Link>
           </div>

@@ -198,7 +198,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
       </section>
 
       {/* ══ PLATFORMS ══════════════════════════════════════════════════════ */}
-      <Section id="platforms" tone="raised" divide>
+      <Section id="platforms" divide>
         <Eyebrow>Platform support</Eyebrow>
         <Display size="md" className="mt-5 max-w-2xl">
           Seven live. Including the ones nobody else schedules.
@@ -265,7 +265,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
       </Section>
 
       {/* ══ FEATURES ═══════════════════════════════════════════════════════ */}
-      <Section tone="raised" divide>
+      <Section divide>
         <Eyebrow>The rest of it</Eyebrow>
         <Display size="md" className="mt-5 max-w-2xl">
           Everything that usually costs extra.
@@ -339,7 +339,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
 
       {/* ══ GUIDES ═════════════════════════════════════════════════════════
           Numbered markers are legitimate here: the volumes are a sequence. */}
-      <Section tone="raised" divide>
+      <Section divide>
         <Eyebrow>Gilgamesh&apos;s Guides</Eyebrow>
         <Display size="md" className="mt-5 max-w-2xl">
           Four playbooks. No email required.

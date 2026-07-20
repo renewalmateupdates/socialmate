@@ -443,8 +443,8 @@ const CHANGELOG: ChangelogEntry[] = [
 ]
 
 const BADGE_STYLES: Record<BadgeType, string> = {
-  New:      'bg-purple-900/50 text-purple-300 border border-purple-700/50',
-  Improved: 'bg-blue-900/50 text-blue-300 border border-blue-700/50',
+  New:      'bg-amber-900/50 text-amber-300 border border-amber-700/50',
+  Improved: 'bg-amber-900/50 text-amber-300 border border-amber-700/50',
   Fixed:    'bg-green-900/50 text-green-300 border border-green-700/50',
 }
 
@@ -546,14 +546,14 @@ export default function ChangelogPage() {
                 href="https://bsky.app"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-purple-400 hover:text-purple-300 underline underline-offset-2 transition-colors"
+                className="text-amber-400 hover:text-amber-300 underline underline-offset-2 transition-colors"
               >
                 Bluesky
               </a>{' '}
               or{' '}
               <a
                 href="/gilgamesh"
-                className="text-purple-400 hover:text-purple-300 underline underline-offset-2 transition-colors"
+                className="text-amber-400 hover:text-amber-300 underline underline-offset-2 transition-colors"
               >
                 join the waitlist
               </a>{' '}

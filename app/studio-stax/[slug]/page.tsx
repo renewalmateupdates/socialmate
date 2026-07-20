@@ -114,7 +114,7 @@ export default async function ListingDetailPage({ params }: Props) {
         )}
 
         {/* Main card */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8">
+        <div className="bg-panel border border-edge rounded-2xl p-8">
           {/* Logo + Name */}
           <div className="flex items-start gap-5 mb-6">
             {listing.is_nsfw ? (
@@ -124,10 +124,10 @@ export default async function ListingDetailPage({ params }: Props) {
               <img
                 src={listing.logo_url}
                 alt={listing.name}
-                className="w-16 h-16 rounded-2xl object-cover shrink-0 border border-gray-700"
+                className="w-16 h-16 rounded-2xl object-cover shrink-0 border border-edge"
               />
             ) : (
-              <div className="w-16 h-16 rounded-2xl bg-gray-800 border border-gray-700 flex items-center justify-center text-2xl font-extrabold text-gray-400 shrink-0">
+              <div className="w-16 h-16 rounded-2xl bg-gray-800 border border-edge flex items-center justify-center text-2xl font-extrabold text-gray-400 shrink-0">
                 {listing.name.charAt(0)}
               </div>
             )}
@@ -143,7 +143,7 @@ export default async function ListingDetailPage({ params }: Props) {
           {/* Category badge */}
           {categoryLabel && (
             <div className="mb-6">
-              <span className="inline-block text-[11px] font-bold bg-gray-800 border border-gray-700 text-gray-300 px-3 py-1 rounded-full">
+              <span className="inline-block text-[11px] font-bold bg-gray-800 border border-edge text-gray-300 px-3 py-1 rounded-full">
                 {categoryLabel}
               </span>
             </div>
@@ -158,7 +158,7 @@ export default async function ListingDetailPage({ params }: Props) {
 
           {/* Mission statement */}
           {listing.mission_statement && (
-            <div className="bg-gray-800/60 border border-gray-700/50 rounded-xl p-5 mb-6">
+            <div className="bg-gray-800/60 border border-edge/50 rounded-xl p-5 mb-6">
               <p className="text-[10px] font-extrabold text-gray-500 uppercase tracking-widest mb-2">Mission</p>
               <p className="text-sm text-gray-300 leading-relaxed italic">&ldquo;{listing.mission_statement}&rdquo;</p>
             </div>

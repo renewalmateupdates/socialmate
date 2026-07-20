@@ -172,7 +172,7 @@ export default function TikTokCreatorsPage() {
         </div>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-3xl mx-auto mb-6">
           {t('for_tiktok.hero_title_1')}{' '}
-          <span className="text-[#fe2c55]">{t('for_tiktok.hero_title_2')}</span>
+          <span className="text-[#f59e0b]">{t('for_tiktok.hero_title_2')}</span>
         </h1>
         <p className="text-ink-body max-w-xl mx-auto text-base leading-relaxed mb-8">
           {t('for_tiktok.hero_desc')}
@@ -180,7 +180,7 @@ export default function TikTokCreatorsPage() {
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
           <Link
             href="/signup"
-            className="bg-[#fe2c55] hover:opacity-90 text-ink-high font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center"
+            className="bg-[#f59e0b] hover:opacity-90 text-ink-high font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center"
           >
             {t('for_tiktok.hero_cta_primary')}
           </Link>
@@ -197,7 +197,7 @@ export default function TikTokCreatorsPage() {
       </section>
 
       {/* ─── PAIN POINTS ─── */}
-      <section className="bg-panel text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto">
           <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_tiktok.pain_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
@@ -210,8 +210,8 @@ export default function TikTokCreatorsPage() {
                   <p className="text-xs text-alert font-bold uppercase tracking-wide mb-2">{t('for_tiktok.pain_before_label')}</p>
                   <p className="text-sm text-ink-body leading-relaxed">{p.before}</p>
                 </div>
-                <div className="bg-[#fe2c55]/10 border border-[#fe2c55]/30 rounded-2xl p-5">
-                  <p className="text-xs text-[#fe2c55] font-bold uppercase tracking-wide mb-2">{t('for_tiktok.pain_after_label')}</p>
+                <div className="bg-[#f59e0b]/10 border border-[#f59e0b]/30 rounded-2xl p-5">
+                  <p className="text-xs text-[#f59e0b] font-bold uppercase tracking-wide mb-2">{t('for_tiktok.pain_after_label')}</p>
                   <p className="text-sm text-ink-high leading-relaxed">{p.icon} {p.after}</p>
                 </div>
               </div>
@@ -223,7 +223,7 @@ export default function TikTokCreatorsPage() {
       {/* ─── FEATURES ─── */}
       <section className="bg-[#0a0a0a] text-ink-high py-20 px-6">
         <div className="max-w-5xl mx-auto">
-          <p className="text-center text-xs font-bold text-[#fe2c55] uppercase tracking-widest mb-3">{t('for_tiktok.features_eyebrow')}</p>
+          <p className="text-center text-xs font-bold text-[#f59e0b] uppercase tracking-widest mb-3">{t('for_tiktok.features_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-3">
             {t('for_tiktok.features_title')}
           </h2>
@@ -251,9 +251,9 @@ export default function TikTokCreatorsPage() {
       </section>
 
       {/* ─── WHY FREE ─── */}
-      <section className="bg-gradient-to-b from-[#fe2c55]/10 to-gray-950 text-ink-high py-20 px-6">
+      <section className="bg-gradient-to-b from-[#f59e0b]/10 to-gray-950 text-ink-high py-20 px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <p className="text-xs font-bold text-[#fe2c55] uppercase tracking-widest mb-3">{t('for_tiktok.why_free_eyebrow')}</p>
+          <p className="text-xs font-bold text-[#f59e0b] uppercase tracking-widest mb-3">{t('for_tiktok.why_free_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-6">
             {t('for_tiktok.why_free_title')}
           </h2>
@@ -289,14 +289,14 @@ export default function TikTokCreatorsPage() {
                 key={p.name}
                 className={`flex items-center gap-2 rounded-xl px-4 py-2.5 border ${
                   p.highlight
-                    ? 'bg-[#fe2c55]/10 border-[#fe2c55]/40'
+                    ? 'bg-[#f59e0b]/10 border-[#f59e0b]/40'
                     : 'bg-panel border-edge'
                 }`}
               >
                 <span className="text-lg">{p.icon}</span>
                 <span className="text-sm font-bold">{p.name}</span>
                 <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${
-                  p.highlight ? 'bg-[#fe2c55]/20 text-[#fe2c55]' : 'bg-jade/10 text-jade'
+                  p.highlight ? 'bg-[#f59e0b]/20 text-[#f59e0b]' : 'bg-jade/10 text-jade'
                 }`}>
                   {t('for_tiktok.platforms_live_badge')}
                 </span>
@@ -321,7 +321,7 @@ export default function TikTokCreatorsPage() {
       </section>
 
       {/* ─── PRICING ─── */}
-      <section className="bg-panel text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_tiktok.pricing_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">
@@ -336,12 +336,12 @@ export default function TikTokCreatorsPage() {
                 key={tier.plan}
                 className={`rounded-2xl p-6 border ${
                   tier.highlight
-                    ? 'bg-[#fe2c55]/10 border-[#fe2c55]/50 ring-1 ring-[#fe2c55]/30'
+                    ? 'bg-[#f59e0b]/10 border-[#f59e0b]/50 ring-1 ring-[#f59e0b]/30'
                     : 'bg-panel border-edge'
                 }`}
               >
                 {tier.highlight && (
-                  <p className="text-xs font-bold text-[#fe2c55] uppercase tracking-widest mb-3">{t('for_tiktok.pricing_most_popular')}</p>
+                  <p className="text-xs font-bold text-[#f59e0b] uppercase tracking-widest mb-3">{t('for_tiktok.pricing_most_popular')}</p>
                 )}
                 <p className="text-sm font-extrabold mb-1">{tier.plan}</p>
                 <div className="flex items-end gap-1 mb-4">
@@ -360,7 +360,7 @@ export default function TikTokCreatorsPage() {
                   href={tier.href}
                   className={`block text-center text-sm font-bold py-3 rounded-xl transition-all ${
                     tier.highlight
-                      ? 'bg-[#fe2c55] hover:opacity-90 text-ink-high'
+                      ? 'bg-[#f59e0b] hover:opacity-90 text-ink-high'
                       : 'bg-panel text-ink-high hover:opacity-80'
                   }`}
                 >
@@ -407,7 +407,7 @@ export default function TikTokCreatorsPage() {
       </section>
 
       {/* ─── BOTTOM CTA ─── */}
-      <section className="bg-gradient-to-br from-[#fe2c55]/20 via-gray-950 to-[#0a0a0a] text-ink-high py-20 px-6 text-center">
+      <section className="bg-gradient-to-br from-[#f59e0b]/20 via-gray-950 to-[#0a0a0a] text-ink-high py-20 px-6 text-center">
         <h2 className="text-2xl sm:text-3xl font-extrabold mb-4">
           {t('for_tiktok.bottom_title')}
         </h2>
@@ -416,7 +416,7 @@ export default function TikTokCreatorsPage() {
         </p>
         <Link
           href="/signup"
-          className="inline-block bg-[#fe2c55] hover:opacity-90 text-ink-high font-bold px-10 py-4 rounded-xl text-sm transition-all"
+          className="inline-block bg-[#f59e0b] hover:opacity-90 text-ink-high font-bold px-10 py-4 rounded-xl text-sm transition-all"
         >
           {t('for_tiktok.bottom_cta')}
         </Link>

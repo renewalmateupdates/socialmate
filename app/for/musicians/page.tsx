@@ -165,18 +165,18 @@ export default function MusiciansPage() {
       />
 
       {/* ─── HERO ─── */}
-      <section className="bg-void text-ink-high py-24 px-6 text-center">
-        <p className="text-xs font-bold text-violet uppercase tracking-widest mb-4">{t('for_musicians.eyebrow')}</p>
+      <section className="text-ink-high py-24 px-6 text-center">
+        <p className="text-xs font-bold text-amber uppercase tracking-widest mb-4">{t('for_musicians.eyebrow')}</p>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-3xl mx-auto mb-6">
           {t('for_musicians.hero_title_1')}<br />
-          <span className="text-violet">{t('for_musicians.hero_title_2')}</span>
+          <span className="text-amber">{t('for_musicians.hero_title_2')}</span>
         </h1>
         <p className="text-ink-body max-w-xl mx-auto text-base leading-relaxed mb-8">
           {t('for_musicians.hero_desc')}
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
           <Link href="/signup"
-            className="bg-violet/10 hover:bg-violet/10 text-ink-high font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
+            className="bg-amber/10 hover:bg-amber/10 text-ink-high font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center">
             {t('for_musicians.hero_cta_primary')}
           </Link>
           <Link href="/pricing"
@@ -188,7 +188,7 @@ export default function MusiciansPage() {
       </section>
 
       {/* ─── PAIN POINTS ─── */}
-      <section className="bg-panel text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto">
           <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_musicians.pain_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
@@ -201,8 +201,8 @@ export default function MusiciansPage() {
                   <p className="text-xs text-alert font-bold uppercase tracking-wide mb-2">{t('for_musicians.pain_before_label')}</p>
                   <p className="text-sm text-ink-body leading-relaxed">{p.before}</p>
                 </div>
-                <div className="bg-violet/10 border border-violet/40 rounded-2xl p-5">
-                  <p className="text-xs text-violet font-bold uppercase tracking-wide mb-2">{t('for_musicians.pain_after_label')}</p>
+                <div className="bg-amber/10 border border-amber/40 rounded-2xl p-5">
+                  <p className="text-xs text-amber font-bold uppercase tracking-wide mb-2">{t('for_musicians.pain_after_label')}</p>
                   <p className="text-sm text-ink-high leading-relaxed">{p.icon} {p.after}</p>
                 </div>
               </div>
@@ -212,9 +212,9 @@ export default function MusiciansPage() {
       </section>
 
       {/* ─── FEATURES ─── */}
-      <section className="bg-void text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-5xl mx-auto">
-          <p className="text-center text-xs font-bold text-violet uppercase tracking-widest mb-3">{t('for_musicians.features_eyebrow')}</p>
+          <p className="text-center text-xs font-bold text-amber uppercase tracking-widest mb-3">{t('for_musicians.features_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-3">
             {t('for_musicians.features_title')}
           </h2>
@@ -243,7 +243,7 @@ export default function MusiciansPage() {
       </section>
 
       {/* ─── PLATFORMS ─── */}
-      <section className="bg-panel text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_musicians.platforms_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_musicians.platforms_title')}</h2>
@@ -273,7 +273,7 @@ export default function MusiciansPage() {
       </section>
 
       {/* ─── PRICING ─── */}
-      <section className="bg-void text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_musicians.pricing_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">{t('for_musicians.pricing_title')}</h2>
@@ -282,11 +282,11 @@ export default function MusiciansPage() {
             {PRICING.map((tier) => (
               <div key={tier.plan}
                 className={`rounded-2xl p-6 border text-left ${tier.highlight
-                  ? 'bg-violet/10 border-violet/40 ring-1 ring-violet'
+                  ? 'bg-amber/10 border-amber/40 ring-1 ring-amber'
                   : 'bg-panel border-edge'
                 }`}>
                 {tier.highlight && (
-                  <p className="text-xs font-bold text-violet uppercase tracking-widest mb-3">{t('for_musicians.pricing_most_popular')}</p>
+                  <p className="text-xs font-bold text-amber uppercase tracking-widest mb-3">{t('for_musicians.pricing_most_popular')}</p>
                 )}
                 <p className="text-sm font-extrabold mb-1">{tier.plan}</p>
                 <div className="flex items-end gap-1 mb-4">
@@ -300,7 +300,7 @@ export default function MusiciansPage() {
                 </ul>
                 <Link href={tier.href}
                   className={`block text-center text-sm font-bold py-3 rounded-xl transition-all ${tier.highlight
-                    ? 'bg-violet/10 hover:bg-violet/10 text-ink-high'
+                    ? 'bg-amber/10 hover:bg-amber/10 text-ink-high'
                     : 'bg-panel text-ink-high hover:opacity-80'
                   }`}>
                   {tier.cta} →
@@ -313,7 +313,7 @@ export default function MusiciansPage() {
       </section>
 
       {/* ─── FAQ ─── */}
-      <section className="bg-panel text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-3xl mx-auto">
           <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_musicians.faq_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">{t('for_musicians.faq_title')}</h2>
@@ -329,7 +329,7 @@ export default function MusiciansPage() {
       </section>
 
       {/* ─── BOTTOM CTA ─── */}
-      <section className="bg-gradient-to-b from-purple-950 to-black text-ink-high py-20 px-6 text-center">
+      <section className="bg-gradient-to-b from-amber-950 to-black text-ink-high py-20 px-6 text-center">
         <h2 className="text-2xl sm:text-3xl font-extrabold mb-4">
           {t('for_musicians.bottom_title')}
         </h2>
@@ -337,7 +337,7 @@ export default function MusiciansPage() {
           {t('for_musicians.bottom_desc')}
         </p>
         <Link href="/signup"
-          className="inline-block bg-violet/10 hover:bg-violet/10 text-ink-high font-bold px-10 py-4 rounded-xl text-sm transition-all">
+          className="inline-block bg-amber/10 hover:bg-amber/10 text-ink-high font-bold px-10 py-4 rounded-xl text-sm transition-all">
           {t('for_musicians.bottom_cta')}
         </Link>
         <p className="text-ink-muted text-xs mt-4">{t('for_musicians.bottom_note')}</p>

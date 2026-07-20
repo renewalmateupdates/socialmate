@@ -78,7 +78,7 @@ export default function AffiliatesPage() {
 
         {/* Hero */}
         <div className="text-center mb-20">
-          <span className="inline-block text-xs font-bold tracking-widest text-violet-500 uppercase mb-4">{t('affiliates.badge')}</span>
+          <span className="inline-block text-xs font-bold tracking-widest text-amber-500 uppercase mb-4">{t('affiliates.badge')}</span>
           <h1 className="text-5xl font-extrabold tracking-tight mb-5 leading-tight">
             {t('affiliates.hero_title')}
           </h1>
@@ -88,13 +88,13 @@ export default function AffiliatesPage() {
           <div className="flex items-center justify-center gap-4 flex-wrap">
             <Link
               href="/partners"
-              className="px-7 py-3 bg-violet-600 hover:bg-violet-700 text-white font-bold rounded-2xl transition-colors text-sm"
+              className="px-7 py-3 bg-amber-600 hover:bg-amber-700 text-void font-bold rounded-2xl transition-colors text-sm"
             >
               {t('affiliates.apply_cta')}
             </Link>
             <Link
               href="/partners/dashboard"
-              className="px-7 py-3 border border-gray-200 dark:border-gray-700 hover:border-gray-400 text-gray-700 dark:text-gray-300 font-bold rounded-2xl transition-colors text-sm"
+              className="px-7 py-3 border border-edge hover:border-gray-400 text-gray-700 dark:text-gray-300 font-bold rounded-2xl transition-colors text-sm"
             >
               {t('affiliates.partner_login')}
             </Link>
@@ -108,12 +108,12 @@ export default function AffiliatesPage() {
               key={tier.label}
               className={`rounded-2xl p-6 border-2 ${
                 tier.highlight
-                  ? 'border-violet-500 bg-violet-50 dark:bg-violet-950/20'
-                  : 'border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900'
+                  ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/20'
+                  : 'border-edge bg-panel'
               }`}
             >
               {tier.highlight && (
-                <span className="inline-block text-xs font-bold bg-violet-600 text-white px-2 py-0.5 rounded-full mb-3">
+                <span className="inline-block text-xs font-bold bg-amber-600 text-void px-2 py-0.5 rounded-full mb-3">
                   {t('affiliates.elite_tier_badge')}
                 </span>
               )}
@@ -129,8 +129,8 @@ export default function AffiliatesPage() {
           <h2 className="text-2xl font-extrabold mb-8 text-center">{t('affiliates.how_it_works')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {STEPS.map(s => (
-              <div key={s.n} className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6">
-                <div className="w-9 h-9 bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 font-extrabold rounded-full flex items-center justify-center mb-4 text-sm">
+              <div key={s.n} className="bg-panel border border-edge rounded-2xl p-6">
+                <div className="w-9 h-9 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 font-extrabold rounded-full flex items-center justify-center mb-4 text-sm">
                   {s.n}
                 </div>
                 <p className="font-bold text-gray-900 dark:text-gray-100 mb-2">{s.title}</p>
@@ -141,7 +141,7 @@ export default function AffiliatesPage() {
         </div>
 
         {/* What you get */}
-        <div className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-8 mb-20">
+        <div className="bg-panel border border-edge rounded-2xl p-8 mb-20">
           <h2 className="text-xl font-extrabold mb-6">{t('affiliates.what_you_get')}</h2>
           <ul className="space-y-3">
             {BENEFITS.map((item, i) => (
@@ -158,7 +158,7 @@ export default function AffiliatesPage() {
           <h2 className="text-2xl font-extrabold mb-8 text-center">{t('affiliates.common_questions')}</h2>
           <div className="space-y-4">
             {FAQ.map(f => (
-              <div key={f.q} className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-5">
+              <div key={f.q} className="bg-panel border border-edge rounded-2xl p-5">
                 <p className="font-bold text-gray-900 dark:text-gray-100 mb-2 text-sm">{f.q}</p>
                 <p className="text-sm text-gray-500 leading-relaxed">{f.a}</p>
               </div>
@@ -167,14 +167,14 @@ export default function AffiliatesPage() {
         </div>
 
         {/* Bottom CTA */}
-        <div className="text-center bg-violet-600 rounded-3xl p-12">
+        <div className="text-center bg-amber-600 rounded-3xl p-12">
           <h2 className="text-3xl font-extrabold text-white mb-3">{t('affiliates.cta_title')}</h2>
-          <p className="text-violet-200 text-sm mb-8 max-w-md mx-auto">
+          <p className="text-amber-200 text-sm mb-8 max-w-md mx-auto">
             {t('affiliates.cta_desc')}
           </p>
           <Link
             href="/partners"
-            className="px-8 py-3.5 bg-white text-violet-700 font-extrabold rounded-2xl hover:opacity-90 transition-opacity text-sm"
+            className="px-8 py-3.5 bg-white text-amber-700 font-extrabold rounded-2xl hover:opacity-90 transition-opacity text-sm"
           >
             {t('affiliates.cta_button')}
           </Link>

@@ -45,8 +45,8 @@ const FEATURES = [
     icon:  '🎵',
     live:  true,
     badge: 'Live now',
-    accent: 'text-[#fe2c55]',
-    badgeBg: 'bg-alert/10 text-[#fe2c55]',
+    accent: 'text-[#f59e0b]',
+    badgeBg: 'bg-alert/10 text-[#f59e0b]',
   },
   {
     title: 'Clips Studio (Twitch + YouTube)',
@@ -54,7 +54,7 @@ const FEATURES = [
     icon:  '🎮',
     live:  true,
     badge: 'Live now',
-    accent: 'text-violet',
+    accent: 'text-amber',
     badgeBg: 'bg-jade/10 text-jade',
   },
   {
@@ -72,7 +72,7 @@ const FEATURES = [
     icon:  '🤖',
     live:  true,
     badge: 'Live now',
-    accent: 'text-[#fe2c55]',
+    accent: 'text-[#f59e0b]',
     badgeBg: 'bg-jade/10 text-jade',
   },
   {
@@ -164,13 +164,13 @@ export default function VideoCreatorsPage() {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
 
       {/* ─── HERO ─── */}
-      <section className="bg-void text-ink-high py-24 px-6 text-center">
-        <div className="inline-flex items-center gap-2 bg-[#fe2c55]/10 border border-[#fe2c55]/30 rounded-full px-4 py-1.5 text-xs font-bold text-[#fe2c55] mb-6 uppercase tracking-widest">
+      <section className="text-ink-high py-24 px-6 text-center">
+        <div className="inline-flex items-center gap-2 bg-[#f59e0b]/10 border border-[#f59e0b]/30 rounded-full px-4 py-1.5 text-xs font-bold text-[#f59e0b] mb-6 uppercase tracking-widest">
           {t('for_video.api_badge')}
         </div>
         <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight max-w-3xl mx-auto mb-6">
           {t('for_video.hero_title_1')}<br />
-          <span className="text-[#fe2c55]">{t('for_video.hero_title_2')}</span>
+          <span className="text-[#f59e0b]">{t('for_video.hero_title_2')}</span>
         </h1>
         <p className="text-ink-body max-w-xl mx-auto text-base leading-relaxed mb-8">
           {t('for_video.hero_desc')}
@@ -178,7 +178,7 @@ export default function VideoCreatorsPage() {
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
           <Link
             href="/signup"
-            className="bg-[#fe2c55] hover:bg-[#fe2c55]/80 text-ink-high font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center"
+            className="bg-[#f59e0b] hover:bg-[#f59e0b]/80 text-ink-high font-bold px-8 py-4 rounded-xl text-sm transition-all w-full sm:w-auto text-center"
           >
             {t('for_video.hero_cta_primary')}
           </Link>
@@ -193,7 +193,7 @@ export default function VideoCreatorsPage() {
       </section>
 
       {/* ─── PAIN POINTS ─── */}
-      <section className="bg-panel text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto">
           <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_video.pain_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">
@@ -206,8 +206,8 @@ export default function VideoCreatorsPage() {
                   <p className="text-xs text-alert font-bold uppercase tracking-wide mb-2">{t('for_video.pain_before_label')}</p>
                   <p className="text-sm text-ink-body leading-relaxed">{p.icon} {p.problem}</p>
                 </div>
-                <div className="bg-[#fe2c55]/10 border border-[#fe2c55]/20 rounded-2xl p-5">
-                  <p className="text-xs text-[#fe2c55] font-bold uppercase tracking-wide mb-2">{t('for_video.pain_after_label')}</p>
+                <div className="bg-[#f59e0b]/10 border border-[#f59e0b]/20 rounded-2xl p-5">
+                  <p className="text-xs text-[#f59e0b] font-bold uppercase tracking-wide mb-2">{t('for_video.pain_after_label')}</p>
                   <p className="text-sm text-ink-high leading-relaxed">{p.solution}</p>
                 </div>
               </div>
@@ -217,9 +217,9 @@ export default function VideoCreatorsPage() {
       </section>
 
       {/* ─── FEATURES ─── */}
-      <section className="bg-void text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-5xl mx-auto">
-          <p className="text-center text-xs font-bold text-[#fe2c55] uppercase tracking-widest mb-3">{t('for_video.features_eyebrow')}</p>
+          <p className="text-center text-xs font-bold text-[#f59e0b] uppercase tracking-widest mb-3">{t('for_video.features_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-3">
             {t('for_video.features_title')}
           </h2>
@@ -265,16 +265,16 @@ export default function VideoCreatorsPage() {
                 key={p.name}
                 className={`flex items-center gap-2 rounded-xl px-4 py-2.5 border ${
                   p.highlight
-                    ? 'bg-[#fe2c55]/10 border-[#fe2c55]/40'
+                    ? 'bg-[#f59e0b]/10 border-[#f59e0b]/40'
                     : 'bg-panel border-edge'
                 }`}
               >
                 <span className="text-lg">{p.icon}</span>
-                <span className={`text-sm font-bold ${p.highlight ? 'text-[#fe2c55]' : ''}`}>{p.name}</span>
+                <span className={`text-sm font-bold ${p.highlight ? 'text-[#f59e0b]' : ''}`}>{p.name}</span>
                 <span
                   className={`text-xs px-2 py-0.5 rounded-full font-bold ${
                     p.highlight
-                      ? 'bg-[#fe2c55]/20 text-[#fe2c55]'
+                      ? 'bg-[#f59e0b]/20 text-[#f59e0b]'
                       : 'bg-jade/10 text-jade'
                   }`}
                 >
@@ -301,9 +301,9 @@ export default function VideoCreatorsPage() {
       </section>
 
       {/* ─── HOW IT WORKS ─── */}
-      <section className="bg-panel text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-3xl mx-auto text-center">
-          <p className="text-xs font-bold text-[#fe2c55] uppercase tracking-widest mb-3">{t('for_video.how_eyebrow')}</p>
+          <p className="text-xs font-bold text-[#f59e0b] uppercase tracking-widest mb-3">{t('for_video.how_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-12">{t('for_video.how_title')}</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
             {[
@@ -323,8 +323,8 @@ export default function VideoCreatorsPage() {
                 desc: t('for_video.step3_desc'),
               },
             ].map((s) => (
-              <div key={s.step} className="bg-void border border-[#fe2c55]/20 rounded-2xl p-6">
-                <div className="text-3xl font-black text-[#fe2c55] mb-3">{s.step}</div>
+              <div key={s.step} className="bg-void border border-[#f59e0b]/20 rounded-2xl p-6">
+                <div className="text-3xl font-black text-[#f59e0b] mb-3">{s.step}</div>
                 <h3 className="text-sm font-extrabold mb-2">{s.title}</h3>
                 <p className="text-xs text-ink-body leading-relaxed">{s.desc}</p>
               </div>
@@ -334,7 +334,7 @@ export default function VideoCreatorsPage() {
       </section>
 
       {/* ─── PRICING ─── */}
-      <section className="bg-void text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_video.pricing_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-3">
@@ -347,12 +347,12 @@ export default function VideoCreatorsPage() {
                 key={tier.plan}
                 className={`rounded-2xl p-6 border ${
                   tier.highlight
-                    ? 'bg-[#fe2c55]/10 border-[#fe2c55]/40 ring-1 ring-[#fe2c55]/30'
+                    ? 'bg-[#f59e0b]/10 border-[#f59e0b]/40 ring-1 ring-[#f59e0b]/30'
                     : 'bg-panel border-edge'
                 }`}
               >
                 {tier.highlight && (
-                  <p className="text-xs font-bold text-[#fe2c55] uppercase tracking-widest mb-3">{t('for_video.pricing_most_popular')}</p>
+                  <p className="text-xs font-bold text-[#f59e0b] uppercase tracking-widest mb-3">{t('for_video.pricing_most_popular')}</p>
                 )}
                 <p className="text-sm font-extrabold mb-1">{tier.plan}</p>
                 <div className="flex items-end gap-1 mb-4">
@@ -370,7 +370,7 @@ export default function VideoCreatorsPage() {
                   href={tier.href}
                   className={`block text-center text-sm font-bold py-3 rounded-xl transition-all ${
                     tier.highlight
-                      ? 'bg-[#fe2c55] hover:bg-[#fe2c55]/80 text-ink-high'
+                      ? 'bg-[#f59e0b] hover:bg-[#f59e0b]/80 text-ink-high'
                       : 'bg-panel text-ink-high hover:opacity-80'
                   }`}
                 >
@@ -384,7 +384,7 @@ export default function VideoCreatorsPage() {
       </section>
 
       {/* ─── FAQ ─── */}
-      <section className="bg-panel text-ink-high py-20 px-6">
+      <section className="text-ink-high py-20 px-6">
         <div className="max-w-3xl mx-auto">
           <p className="text-center text-xs font-bold text-ink-muted uppercase tracking-widest mb-3">{t('for_video.faq_eyebrow')}</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-center mb-12">{t('for_video.faq_title')}</h2>
@@ -400,7 +400,7 @@ export default function VideoCreatorsPage() {
       </section>
 
       {/* ─── BOTTOM CTA ─── */}
-      <section className="bg-gradient-to-br from-[#fe2c55]/20 via-gray-950 to-black text-ink-high py-20 px-6 text-center">
+      <section className="bg-gradient-to-br from-[#f59e0b]/20 via-gray-950 to-black text-ink-high py-20 px-6 text-center">
         <h2 className="text-2xl sm:text-3xl font-extrabold mb-4">
           {t('for_video.bottom_title')}
         </h2>
@@ -409,7 +409,7 @@ export default function VideoCreatorsPage() {
         </p>
         <Link
           href="/signup"
-          className="inline-block bg-[#fe2c55] hover:bg-[#fe2c55]/80 text-ink-high font-bold px-10 py-4 rounded-xl text-sm transition-all"
+          className="inline-block bg-[#f59e0b] hover:bg-[#f59e0b]/80 text-ink-high font-bold px-10 py-4 rounded-xl text-sm transition-all"
         >
           {t('for_video.bottom_cta')}
         </Link>

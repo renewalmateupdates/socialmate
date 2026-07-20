@@ -174,7 +174,7 @@ const ROADMAP: RoadmapItem[] = [
 ]
 
 const STATUS_CONFIG = {
-  'in-progress': { label: 'In Progress', color: 'bg-blue-100 text-blue-700',    dot: 'bg-blue-500'   },
+  'in-progress': { label: 'In Progress', color: 'bg-amber-100 text-amber-700',    dot: 'bg-amber-500'   },
   'coming-soon': { label: 'Coming Soon', color: 'bg-yellow-100 text-yellow-700', dot: 'bg-yellow-500' },
   'planned':     { label: 'Planned',     color: 'bg-gray-100 text-gray-500',    dot: 'bg-gray-400'   },
   'shipped':     { label: 'Shipped ✅',  color: 'bg-green-100 text-green-700',  dot: 'bg-green-500'  },
@@ -223,7 +223,7 @@ export default function RoadmapClient() {
         </p>
 
         {/* Beta milestone */}
-        <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 max-w-2xl">
+        <div className="bg-panel border border-edge rounded-2xl p-5 max-w-2xl">
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Beta milestone — exit to v1.0</p>
             <span className="text-xs font-bold text-gray-500 dark:text-gray-400">Goal: 500 users</span>
@@ -264,7 +264,7 @@ export default function RoadmapClient() {
             </div>
             <div className="space-y-3">
               {items.map((item, i) => (
-                <div key={i} className="flex items-start gap-4 p-4 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl hover:border-gray-200 dark:hover:border-gray-600 transition-all">
+                <div key={i} className="flex items-start gap-4 p-4 bg-panel border border-edge dark:border-edge rounded-2xl hover:border-edge dark:hover:border-gray-600 transition-all">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">{item.title}</p>
@@ -280,7 +280,7 @@ export default function RoadmapClient() {
       })}
 
       {/* FEATURE REQUEST FORM */}
-      <div className="bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl p-6 mt-8">
+      <div className="bg-panel border border-edge dark:border-edge rounded-2xl p-6 mt-8">
         <h2 className="text-lg font-extrabold tracking-tight mb-2 text-gray-900 dark:text-gray-100">Request a feature</h2>
         <p className="text-xs text-gray-500 dark:text-gray-400 mb-5 leading-relaxed">
           Have an idea that's not on the roadmap? Tell us. We read every submission and it genuinely shapes what we build.
@@ -298,19 +298,19 @@ export default function RoadmapClient() {
               onChange={e => setFeedbackText(e.target.value)}
               placeholder="What should we build? Be specific — the more detail, the better."
               rows={4}
-              className="w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 rounded-xl resize-none focus:outline-none focus:border-gray-400 dark:focus:border-gray-400"
+              className="w-full px-4 py-3 text-sm border border-edge dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 rounded-xl resize-none focus:outline-none focus:border-gray-400 dark:focus:border-gray-400"
             />
             <input
               type="email"
               value={feedbackEmail}
               onChange={e => setFeedbackEmail(e.target.value)}
               placeholder="Your email (optional — we'll update you when it ships)"
-              className="w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 rounded-xl focus:outline-none focus:border-gray-400 dark:focus:border-gray-400"
+              className="w-full px-4 py-3 text-sm border border-edge dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400 rounded-xl focus:outline-none focus:border-gray-400 dark:focus:border-gray-400"
             />
             <button
               onClick={submitRequest}
               disabled={!feedbackText.trim() || sending}
-              className="bg-pink-500 text-white text-sm font-bold px-6 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
+              className="bg-amber-500 text-void text-sm font-bold px-6 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-40">
               {sending ? 'Sending...' : 'Submit idea →'}
             </button>
           </div>
@@ -318,7 +318,7 @@ export default function RoadmapClient() {
       </div>
 
       {/* SM-Give strip */}
-      <div className="border-t border-gray-100 dark:border-gray-800 mt-16 pt-10 pb-4 text-center">
+      <div className="border-t border-edge mt-16 pt-10 pb-4 text-center">
         <p className="text-sm text-gray-500 dark:text-gray-400">
           ❤️ <span className="font-semibold text-gray-700 dark:text-gray-300">2% of every SocialMate subscription</span> goes to SM-Give — our charity initiative.{' '}
           <a href="/give" className="text-amber-500 hover:text-amber-400 font-semibold transition-colors">Learn about SM-Give →</a>

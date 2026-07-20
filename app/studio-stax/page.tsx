@@ -118,14 +118,14 @@ export default async function StudioStaxPage() {
               <span className="font-normal text-amber-600 dark:text-amber-500">— $100/yr (then $150/yr)</span>
             </div>
           ) : (
-            <div className="inline-flex items-center gap-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full px-5 py-2 mt-6 text-sm font-semibold text-gray-600 dark:text-gray-400">
+            <div className="inline-flex items-center gap-2 bg-gray-100 dark:bg-gray-800 border border-edge rounded-full px-5 py-2 mt-6 text-sm font-semibold text-gray-600 dark:text-gray-400">
               🏅 {spotsUsed} Founding Members
             </div>
           )}
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6">
             <Link href="/studio-stax/apply"
-              className="inline-flex items-center gap-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all text-sm">
+              className="inline-flex items-center gap-2 bg-amber text-void font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all text-sm">
               Apply for a Listing →
             </Link>
             {!foundingFull ? (
@@ -145,7 +145,7 @@ export default async function StudioStaxPage() {
           <section className="mb-16">
             {/* Section header */}
             <div className="flex items-center gap-3 mb-6">
-              <div className="flex items-center gap-2 bg-purple-600 dark:bg-purple-700 text-white px-4 py-1.5 rounded-full">
+              <div className="flex items-center gap-2 bg-amber-600 dark:bg-amber-700 text-void px-4 py-1.5 rounded-full">
                 <span className="text-base">👑</span>
                 <span className="text-xs font-extrabold uppercase tracking-widest">Gilgamesh&apos;s Garrison</span>
               </div>
@@ -157,7 +157,7 @@ export default async function StudioStaxPage() {
                 <Link
                   key={listing.id}
                   href={`/studio-stax/${nameToSlug(listing.name)}`}
-                  className="group relative flex flex-col bg-white dark:bg-gray-900 border-2 border-purple-300 dark:border-purple-700 ring-1 ring-purple-200 dark:ring-purple-800 rounded-2xl p-6 hover:shadow-xl hover:border-purple-400 dark:hover:border-purple-500 transition-all overflow-hidden"
+                  className="group relative flex flex-col bg-panel border-2 border-amber-300 dark:border-amber-700 ring-1 ring-amber-200 dark:ring-amber-800 rounded-2xl p-6 hover:shadow-xl hover:border-amber-400 dark:hover:border-amber-500 transition-all overflow-hidden"
                 >
                   {/* NSFW badge */}
                   {listing.is_nsfw && (
@@ -173,7 +173,7 @@ export default async function StudioStaxPage() {
                         className={`w-12 h-12 rounded-xl object-cover shrink-0 transition-all duration-300 ${listing.is_nsfw ? 'blur-md group-hover:blur-none' : ''}`}
                       />
                     ) : (
-                      <div className="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center text-purple-700 dark:text-purple-300 font-extrabold text-lg shrink-0">
+                      <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-700 dark:text-amber-300 font-extrabold text-lg shrink-0">
                         {listing.name.charAt(0)}
                       </div>
                     )}
@@ -181,7 +181,7 @@ export default async function StudioStaxPage() {
                       <div className="flex items-center gap-2 flex-wrap mb-0.5">
                         <p className="font-extrabold text-base text-gray-900 dark:text-gray-100">{listing.name}</p>
                         {/* Founder's Pick badge */}
-                        <span className="inline-flex items-center gap-1 text-[10px] font-extrabold bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-full border border-purple-200 dark:border-purple-700 uppercase tracking-wider">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-extrabold bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-700 uppercase tracking-wider">
                           👑 Founder&apos;s Pick
                         </span>
                       </div>
@@ -208,7 +208,7 @@ export default async function StudioStaxPage() {
                   )}
 
                   {/* URL */}
-                  <div className="flex items-center gap-1.5 text-xs text-purple-600 dark:text-purple-400 font-semibold group-hover:underline">
+                  <div className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 font-semibold group-hover:underline">
                     <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                     </svg>
@@ -236,7 +236,7 @@ export default async function StudioStaxPage() {
                 <Link
                   key={listing.id}
                   href={`/studio-stax/${nameToSlug(listing.name)}`}
-                  className="group relative flex flex-col bg-white dark:bg-gray-900 border-2 border-yellow-400 dark:border-yellow-500 ring-1 ring-yellow-200 dark:ring-yellow-700 rounded-2xl p-6 hover:shadow-xl hover:border-yellow-500 dark:hover:border-yellow-400 transition-all overflow-hidden"
+                  className="group relative flex flex-col bg-panel border-2 border-yellow-400 dark:border-yellow-500 ring-1 ring-yellow-200 dark:ring-yellow-700 rounded-2xl p-6 hover:shadow-xl hover:border-yellow-500 dark:hover:border-yellow-400 transition-all overflow-hidden"
                 >
                   {/* Featured badge */}
                   <span className="absolute top-3 right-3 z-10 text-[10px] font-extrabold bg-yellow-400 text-black px-2 py-0.5 rounded-full select-none">⭐ Featured</span>
@@ -288,7 +288,7 @@ export default async function StudioStaxPage() {
         )}
 
         {/* How ranking works */}
-        <div className="bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl p-6 mb-14 flex flex-col md:flex-row items-start md:items-center gap-6">
+        <div className="bg-panel border border-edge rounded-2xl p-6 mb-14 flex flex-col md:flex-row items-start md:items-center gap-6">
           <div className="flex-1">
             <p className="text-sm font-bold text-gray-900 dark:text-gray-100 mb-1">How rankings work</p>
             <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
@@ -300,7 +300,7 @@ export default async function StudioStaxPage() {
             <div><p className="text-2xl font-extrabold text-gray-400">→</p></div>
             <div><p className="text-2xl font-extrabold text-green-500">📈</p><p className="text-xs text-gray-400 mt-1">Rank<br/>higher</p></div>
             <div><p className="text-2xl font-extrabold text-gray-400">→</p></div>
-            <div><p className="text-2xl font-extrabold text-blue-500">👀</p><p className="text-xs text-gray-400 mt-1">More<br/>exposure</p></div>
+            <div><p className="text-2xl font-extrabold text-amber-500">👀</p><p className="text-xs text-gray-400 mt-1">More<br/>exposure</p></div>
           </div>
         </div>
 
@@ -310,7 +310,7 @@ export default async function StudioStaxPage() {
             <div className="text-6xl mb-6">🌱</div>
             <h2 className="text-2xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">First listings coming soon</h2>
             <p className="text-gray-400 dark:text-gray-500 mb-8 max-w-md mx-auto text-sm">Be among the first 100 tools in Studio Stax. Apply now and lock in the $100/year founder price before it goes to $150.</p>
-            <Link href="/studio-stax/apply" className="inline-flex items-center gap-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all text-sm">
+            <Link href="/studio-stax/apply" className="inline-flex items-center gap-2 bg-amber text-void font-bold px-6 py-3 rounded-xl hover:opacity-80 transition-all text-sm">
               Apply Now →
             </Link>
           </div>
@@ -328,10 +328,10 @@ export default async function StudioStaxPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {items.map((listing, idx) => (
                       <Link key={listing.id} href={`/studio-stax/${nameToSlug(listing.name)}`}
-                        className={`group relative block bg-white dark:bg-gray-900 border rounded-2xl p-5 hover:shadow-lg transition-all overflow-hidden ${
+                        className={`group relative block bg-panel border rounded-2xl p-5 hover:shadow-lg transition-all overflow-hidden ${
                           idx === 0 ? 'border-amber-300 dark:border-amber-700 ring-1 ring-amber-200 dark:ring-amber-800' :
-                          idx === 1 ? 'border-gray-200 dark:border-gray-700' :
-                          'border-gray-100 dark:border-gray-800'
+                          idx === 1 ? 'border-edge' :
+                          'border-edge'
                         }`}>
                         {/* NSFW badge */}
                         {listing.is_nsfw && (
@@ -384,12 +384,12 @@ export default async function StudioStaxPage() {
         )}
 
         {/* Bottom CTA */}
-        <div className="mt-20 text-center border-t border-gray-100 dark:border-gray-800 pt-16">
+        <div className="mt-20 text-center border-t border-edge pt-16">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3 text-gray-900 dark:text-gray-100">Think your tool belongs here?</h2>
           <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-xl mx-auto">
             We only list tools built for the people — not VC-backed giants trying to squeeze every dollar out of creators. If that&apos;s you, apply.
           </p>
-          <Link href="/studio-stax/apply" className="inline-flex items-center gap-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold px-8 py-4 rounded-xl hover:opacity-80 transition-all text-sm">
+          <Link href="/studio-stax/apply" className="inline-flex items-center gap-2 bg-amber text-void font-bold px-8 py-4 rounded-xl hover:opacity-80 transition-all text-sm">
             Apply for a Listing →
           </Link>
         </div>

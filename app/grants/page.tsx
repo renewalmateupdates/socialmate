@@ -117,7 +117,7 @@ export default function GrantsPage() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-screen bg-void text-white">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -141,7 +141,7 @@ export default function GrantsPage() {
         </div>
 
         {/* Search + Filters */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 sm:p-6 mb-8 space-y-4">
+        <div className="bg-panel border border-edge rounded-2xl p-4 sm:p-6 mb-8 space-y-4">
           <div className="relative">
             <svg
               className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none"
@@ -159,7 +159,7 @@ export default function GrantsPage() {
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && runSearch()}
-              className="w-full pl-12 pr-4 py-3 rounded-xl bg-gray-950 border border-gray-800 text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/60 text-sm transition-colors"
+              className="w-full pl-12 pr-4 py-3 rounded-xl bg-panel border border-edge text-white placeholder-gray-500 focus:outline-none focus:border-amber-500/60 text-sm transition-colors"
             />
           </div>
 
@@ -167,7 +167,7 @@ export default function GrantsPage() {
             <select
               value={eligibility}
               onChange={(e) => setEligibility(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-gray-950 border border-gray-800 text-white text-sm focus:outline-none focus:border-amber-500/60 transition-colors"
+              className="w-full px-4 py-3 rounded-xl bg-panel border border-edge text-white text-sm focus:outline-none focus:border-amber-500/60 transition-colors"
             >
               {ELIGIBILITY_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -179,7 +179,7 @@ export default function GrantsPage() {
             <select
               value={fundingCategory}
               onChange={(e) => setFundingCategory(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl bg-gray-950 border border-gray-800 text-white text-sm focus:outline-none focus:border-amber-500/60 transition-colors"
+              className="w-full px-4 py-3 rounded-xl bg-panel border border-edge text-white text-sm focus:outline-none focus:border-amber-500/60 transition-colors"
             >
               {FUNDING_CATEGORY_OPTIONS.map((opt) => (
                 <option key={opt.value} value={opt.value}>
@@ -226,7 +226,7 @@ export default function GrantsPage() {
                   href={`https://www.grants.gov/search-results-detail/${hit.id}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block bg-gray-900 border border-gray-800 rounded-xl p-4 sm:p-5 hover:border-amber-500/40 transition-colors"
+                  className="block bg-panel border border-edge rounded-xl p-4 sm:p-5 hover:border-amber-500/40 transition-colors"
                 >
                   <div className="flex items-start justify-between gap-3 mb-2">
                     <h2 className="text-base sm:text-lg font-bold text-white leading-snug">

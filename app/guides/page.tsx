@@ -315,7 +315,7 @@ export default function GuidesHubPage() {
   const { t } = useI18n()
   return (
     <PublicLayout>
-      <main className="min-h-screen bg-[#0a0a0a] text-white">
+      <main className="min-h-screen bg-void text-white">
         {/* Hero */}
         <section className="border-b border-[#1f1f1f] px-6 py-20 text-center">
           <div className="mx-auto max-w-3xl">
@@ -374,7 +374,7 @@ export default function GuidesHubPage() {
                       {t('guides_landing.available_now')}
                     </span>
                   ) : (
-                    <span className="rounded-full bg-gray-800 px-3 py-1 text-xs font-semibold text-gray-500 border border-gray-700">
+                    <span className="rounded-full bg-gray-800 px-3 py-1 text-xs font-semibold text-gray-500 border border-edge">
                       {t('guides_landing.coming_soon')}
                     </span>
                   )}
@@ -462,7 +462,7 @@ export default function GuidesHubPage() {
                 </Link>
               </div>
               {/* Pay It Forward / donate */}
-              <div className="rounded-2xl border border-rose-500/20 bg-rose-500/5 p-7 text-center">
+              <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-7 text-center">
                 <div className="mb-3 text-3xl">❤️</div>
                 <h3 className="mb-2 text-lg font-extrabold text-white">{t('guides_landing.pay_forward_title')}</h3>
                 <p className="mb-6 text-sm leading-relaxed text-gray-400">
@@ -470,7 +470,7 @@ export default function GuidesHubPage() {
                 </p>
                 <Link
                   href="/give"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-rose-500/40 bg-rose-500/15 px-6 py-3 text-sm font-bold text-rose-400 transition-colors hover:bg-rose-500/25"
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-amber-500/40 bg-amber-500/15 px-6 py-3 text-sm font-bold text-amber-400 transition-colors hover:bg-amber-500/25"
                 >
                   {t('guides_landing.donate_cta')}
                 </Link>

@@ -46,7 +46,7 @@ const CHAPTERS = [
 export default function BusinessCreditLegalGuidePage() {
   return (
     <PublicLayout>
-      <div className="min-h-screen bg-[#0a0a0a] text-white">
+      <div className="min-h-screen bg-void text-white">
         {/* Hero */}
         <header className="border-b border-[#1f1f1f] px-6 py-16">
           <div className="mx-auto max-w-3xl">
@@ -791,7 +791,7 @@ export default function BusinessCreditLegalGuidePage() {
                   All of this knowledge was gated behind expensive accountants, lawyers, and $500 courses. Now it's free. Share it with someone who needs it.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                  <Link href="/guides" className="px-6 py-3 rounded-xl border border-gray-700 text-gray-300 font-semibold text-sm hover:border-gray-500 transition-all">
+                  <Link href="/guides" className="px-6 py-3 rounded-xl border border-edge text-gray-300 font-semibold text-sm hover:border-gray-500 transition-all">
                     ← All Guides
                   </Link>
                   <Link href="/pricing" className="px-6 py-3 rounded-xl bg-amber-500 text-black font-extrabold text-sm hover:bg-amber-400 transition-all">

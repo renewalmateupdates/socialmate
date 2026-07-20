@@ -34,7 +34,7 @@ export default function PressPage() {
     <PublicLayout>
 
       {/* ─── HERO ─── */}
-      <section className="bg-black text-white py-24 px-6 text-center">
+      <section className="text-white py-24 px-6 text-center">
         <div className="max-w-3xl mx-auto">
           <img src="/logo.png" alt="SocialMate" className="w-16 h-16 rounded-2xl mx-auto mb-6" />
           <p className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-4">Press &amp; Media</p>
@@ -51,12 +51,12 @@ export default function PressPage() {
       </section>
 
       {/* ─── KEY STATS ─── */}
-      <section className="bg-gray-950 text-white py-20 px-6">
+      <section className="text-white py-20 px-6">
         <div className="max-w-5xl mx-auto">
           <p className="text-center text-xs font-bold text-gray-500 uppercase tracking-widest mb-10">Key facts</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {STATS.map((stat, i) => (
-              <div key={i} className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+              <div key={i} className="bg-panel border border-edge rounded-2xl p-6">
                 <p className="text-3xl font-black text-amber-400 mb-1">{stat.value}</p>
                 <p className="text-sm font-extrabold mb-1">{stat.label}</p>
                 <p className="text-xs text-gray-500">{stat.note}</p>
@@ -67,7 +67,7 @@ export default function PressPage() {
       </section>
 
       {/* ─── TAGLINE / ANGLE ─── */}
-      <section className="bg-black text-white py-16 px-6">
+      <section className="text-white py-16 px-6">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-6">
             &ldquo;What competitors charge $99/month for,<br />we give for $5 — or free.&rdquo;
@@ -85,13 +85,13 @@ export default function PressPage() {
       </section>
 
       {/* ─── BRAND ASSETS ─── */}
-      <section className="bg-gray-950 text-white py-20 px-6">
+      <section className="text-white py-20 px-6">
         <div className="max-w-4xl mx-auto">
           <p className="text-xs font-bold text-amber-400 uppercase tracking-widest mb-8">Brand assets</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
             {/* Logo */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+            <div className="bg-panel border border-edge rounded-2xl p-6">
               <p className="text-sm font-extrabold mb-4">Logo</p>
               <div className="bg-black rounded-xl p-8 flex items-center justify-center mb-4">
                 <img src="/logo.png" alt="SocialMate Logo" className="w-24 h-24 rounded-3xl" />
@@ -104,7 +104,7 @@ export default function PressPage() {
             </div>
 
             {/* Brand colors */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+            <div className="bg-panel border border-edge rounded-2xl p-6">
               <p className="text-sm font-extrabold mb-4">Brand Colors</p>
               <div className="space-y-3">
                 <div className="flex items-center gap-4">
@@ -116,7 +116,7 @@ export default function PressPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl flex-shrink-0 border border-gray-700" style={{ backgroundColor: '#030712' }} />
+                  <div className="w-12 h-12 rounded-xl flex-shrink-0 border border-edge" style={{ backgroundColor: '#030712' }} />
                   <div>
                     <p className="text-sm font-bold">Dark Background</p>
                     <p className="text-xs text-gray-400 font-mono">#030712</p>
@@ -124,7 +124,7 @@ export default function PressPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-xl flex-shrink-0 border border-gray-700" style={{ backgroundColor: '#000000' }} />
+                  <div className="w-12 h-12 rounded-xl flex-shrink-0 border border-edge" style={{ backgroundColor: '#000000' }} />
                   <div>
                     <p className="text-sm font-bold">Pure Black</p>
                     <p className="text-xs text-gray-400 font-mono">#000000</p>
@@ -143,7 +143,7 @@ export default function PressPage() {
             </div>
 
             {/* Typography */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+            <div className="bg-panel border border-edge rounded-2xl p-6">
               <p className="text-sm font-extrabold mb-4">Typography</p>
               <p className="text-xs text-gray-400 mb-2">Font stack</p>
               <p className="text-sm font-mono text-gray-300 mb-4">
@@ -155,7 +155,7 @@ export default function PressPage() {
             </div>
 
             {/* Name guidelines */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+            <div className="bg-panel border border-edge rounded-2xl p-6">
               <p className="text-sm font-extrabold mb-4">Name &amp; Usage</p>
               <div className="space-y-2 text-xs text-gray-400">
                 <div className="flex items-center gap-2">
@@ -182,7 +182,7 @@ export default function PressPage() {
       </section>
 
       {/* ─── ABOUT THE COMPANY ─── */}
-      <section className="bg-black text-white py-20 px-6">
+      <section className="text-white py-20 px-6">
         <div className="max-w-3xl mx-auto">
           <p className="text-xs font-bold text-amber-400 uppercase tracking-widest mb-8">About the company</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
@@ -212,10 +212,10 @@ export default function PressPage() {
       </section>
 
       {/* ─── FOUNDER BIO ─── */}
-      <section className="bg-gray-950 text-white py-20 px-6">
+      <section className="text-white py-20 px-6">
         <div className="max-w-3xl mx-auto">
           <p className="text-xs font-bold text-amber-400 uppercase tracking-widest mb-8">Founder bio</p>
-          <div className="bg-gray-900 border border-gray-800 rounded-3xl p-8">
+          <div className="bg-panel border border-edge rounded-3xl p-8">
             <div className="flex items-start gap-6 mb-6">
               <div className="w-16 h-16 bg-amber-500 rounded-2xl flex items-center justify-center text-black font-black text-2xl flex-shrink-0">
                 J
@@ -247,7 +247,7 @@ export default function PressPage() {
       </section>
 
       {/* ─── PRESS CONTACT ─── */}
-      <section className="bg-black text-white py-20 px-6">
+      <section className="text-white py-20 px-6">
         <div className="max-w-3xl mx-auto text-center">
           <p className="text-xs font-bold text-amber-400 uppercase tracking-widest mb-6">Press contact</p>
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-4">

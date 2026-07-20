@@ -18,22 +18,22 @@ export default function TikTokStudioLandingPage() {
   ]
 
   const QUOTA = [
-    { plan: t('tiktok_landing.plan_free'), price: '$0/mo', videos: t('tiktok_landing.free_videos'), color: 'border-gray-700' },
+    { plan: t('tiktok_landing.plan_free'), price: '$0/mo', videos: t('tiktok_landing.free_videos'), color: 'border-edge' },
     { plan: t('tiktok_landing.plan_pro'), price: '$5/mo', videos: t('tiktok_landing.pro_videos'), color: 'border-amber-500' },
-    { plan: t('tiktok_landing.plan_agency'), price: '$20/mo', videos: t('tiktok_landing.agency_videos'), color: 'border-purple-500' },
+    { plan: t('tiktok_landing.plan_agency'), price: '$20/mo', videos: t('tiktok_landing.agency_videos'), color: 'border-amber-500' },
   ]
 
   return (
     <PublicLayout>
       {/* Hero */}
-      <section className="relative bg-gray-950 pt-20 pb-16 px-4 text-center overflow-hidden">
+      <section className="relative pt-20 pb-16 px-4 text-center overflow-hidden">
         {/* TikTok brand glow */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-[#fe2c55]/10 rounded-full blur-3xl" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-[#f59e0b]/10 rounded-full blur-3xl" />
         </div>
 
         <div className="relative max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 bg-[#fe2c55]/10 border border-[#fe2c55]/30 text-[#fe2c55] text-xs font-semibold px-3 py-1 rounded-full mb-6">
+          <div className="inline-flex items-center gap-2 bg-[#f59e0b]/10 border border-[#f59e0b]/30 text-[#f59e0b] text-xs font-semibold px-3 py-1 rounded-full mb-6">
             ✅ {t('tiktok_landing.api_approved_badge')}
           </div>
 
@@ -50,13 +50,13 @@ export default function TikTokStudioLandingPage() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/signup"
-              className="bg-[#fe2c55] hover:bg-[#e0263c] text-white font-semibold px-8 py-3 rounded-lg transition-colors"
+              className="bg-[#f59e0b] hover:bg-[#d97706] text-white font-semibold px-8 py-3 rounded-lg transition-colors"
             >
               {t('tiktok_landing.get_started_cta')}
             </Link>
             <Link
               href="/login?redirect=/tiktok/studio"
-              className="border border-gray-700 hover:border-gray-500 text-gray-300 font-semibold px-8 py-3 rounded-lg transition-colors"
+              className="border border-edge hover:border-gray-500 text-gray-300 font-semibold px-8 py-3 rounded-lg transition-colors"
             >
               {t('tiktok_landing.open_studio_cta')}
             </Link>
@@ -65,7 +65,7 @@ export default function TikTokStudioLandingPage() {
       </section>
 
       {/* Features grid */}
-      <section className="bg-gray-900 py-16 px-4">
+      <section className="py-16 px-4">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-2xl font-bold text-white text-center mb-3">
             {t('tiktok_landing.features_title')}
@@ -76,7 +76,7 @@ export default function TikTokStudioLandingPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {FEATURES.map((f) => (
-              <div key={f.title} className="bg-gray-800 rounded-xl p-5 border border-gray-700 hover:border-[#fe2c55]/40 transition-colors">
+              <div key={f.title} className="bg-gray-800 rounded-xl p-5 border border-edge hover:border-[#f59e0b]/40 transition-colors">
                 <div className="text-2xl mb-3">{f.icon}</div>
                 <h3 className="text-white font-semibold mb-2 text-sm">{f.title}</h3>
                 <p className="text-gray-400 text-xs leading-relaxed">{f.description}</p>
@@ -87,7 +87,7 @@ export default function TikTokStudioLandingPage() {
       </section>
 
       {/* Post everywhere CTA section */}
-      <section className="bg-gray-950 py-16 px-4">
+      <section className="py-16 px-4">
         <div className="max-w-3xl mx-auto text-center">
           <div className="text-4xl mb-4">🌐</div>
           <h2 className="text-2xl font-bold text-white mb-4">
@@ -98,7 +98,7 @@ export default function TikTokStudioLandingPage() {
           </p>
           <div className="flex flex-wrap justify-center gap-2 mb-8">
             {['TikTok', 'Bluesky', 'Discord', 'Mastodon', 'LinkedIn', 'Telegram', 'X/Twitter'].map((p) => (
-              <span key={p} className={`px-3 py-1 rounded-full text-xs font-medium border ${p === 'TikTok' ? 'bg-[#fe2c55]/10 border-[#fe2c55]/40 text-[#fe2c55]' : 'bg-gray-800 border-gray-700 text-gray-300'}`}>
+              <span key={p} className={`px-3 py-1 rounded-full text-xs font-medium border ${p === 'TikTok' ? 'bg-[#f59e0b]/10 border-[#f59e0b]/40 text-[#f59e0b]' : 'bg-gray-800 border-edge text-gray-300'}`}>
                 {p}
               </span>
             ))}
@@ -107,7 +107,7 @@ export default function TikTokStudioLandingPage() {
       </section>
 
       {/* Pricing / quota */}
-      <section className="bg-gray-900 py-16 px-4">
+      <section className="py-16 px-4">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-2xl font-bold text-white text-center mb-3">
             {t('tiktok_landing.pricing_title')}
@@ -121,21 +121,21 @@ export default function TikTokStudioLandingPage() {
               <div key={q.plan} className={`bg-gray-800 rounded-xl p-6 border-2 ${q.color} text-center`}>
                 <div className="text-white font-bold text-lg mb-1">{q.plan}</div>
                 <div className="text-gray-400 text-sm mb-3">{q.price}</div>
-                <div className="text-[#fe2c55] font-semibold text-sm">{q.videos}</div>
+                <div className="text-[#f59e0b] font-semibold text-sm">{q.videos}</div>
               </div>
             ))}
           </div>
 
-          <div className="bg-gray-800 rounded-xl p-5 border border-gray-700 text-sm text-gray-400 text-center">
+          <div className="bg-gray-800 rounded-xl p-5 border border-edge text-sm text-gray-400 text-center">
             💡 {t('tiktok_landing.pricing_note')}
           </div>
         </div>
       </section>
 
       {/* AI Script Generator callout */}
-      <section className="bg-gray-950 py-16 px-4">
+      <section className="py-16 px-4">
         <div className="max-w-3xl mx-auto">
-          <div className="bg-gradient-to-r from-[#fe2c55]/10 to-purple-900/20 border border-[#fe2c55]/20 rounded-2xl p-8 text-center">
+          <div className="bg-gradient-to-r from-[#f59e0b]/10 to-amber-900/20 border border-[#f59e0b]/20 rounded-2xl p-8 text-center">
             <div className="text-3xl mb-4">🤖</div>
             <h2 className="text-xl font-bold text-white mb-3">
               {t('tiktok_landing.script_title')}
@@ -145,7 +145,7 @@ export default function TikTokStudioLandingPage() {
             </p>
             <Link
               href="/signup"
-              className="inline-block bg-[#fe2c55] hover:bg-[#e0263c] text-white font-semibold px-6 py-2.5 rounded-lg transition-colors text-sm"
+              className="inline-block bg-[#f59e0b] hover:bg-[#d97706] text-white font-semibold px-6 py-2.5 rounded-lg transition-colors text-sm"
             >
               {t('tiktok_landing.try_free_cta')}
             </Link>
@@ -154,7 +154,7 @@ export default function TikTokStudioLandingPage() {
       </section>
 
       {/* Final CTA */}
-      <section className="bg-gray-900 py-16 px-4 text-center">
+      <section className="py-16 px-4 text-center">
         <div className="max-w-xl mx-auto">
           <h2 className="text-2xl font-bold text-white mb-4">
             {t('tiktok_landing.final_cta_title')}
@@ -165,13 +165,13 @@ export default function TikTokStudioLandingPage() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/signup"
-              className="bg-[#fe2c55] hover:bg-[#e0263c] text-white font-semibold px-8 py-3 rounded-lg transition-colors"
+              className="bg-[#f59e0b] hover:bg-[#d97706] text-white font-semibold px-8 py-3 rounded-lg transition-colors"
             >
               {t('tiktok_landing.create_account_cta')}
             </Link>
             <Link
               href="/for/tiktok-creators"
-              className="border border-gray-700 hover:border-gray-500 text-gray-300 font-semibold px-8 py-3 rounded-lg transition-colors"
+              className="border border-edge hover:border-gray-500 text-gray-300 font-semibold px-8 py-3 rounded-lg transition-colors"
             >
               {t('tiktok_landing.learn_more_cta')}
             </Link>

@@ -43,7 +43,7 @@ const CHAPTERS = [
 export default function AIToolsForCreatorsPage() {
   return (
     <PublicLayout>
-      <div className="min-h-screen bg-[#0a0a0a] text-white">
+      <div className="min-h-screen bg-void text-white">
         {/* Hero */}
         <header className="border-b border-[#1f1f1f] px-6 py-16">
           <div className="mx-auto max-w-3xl">
