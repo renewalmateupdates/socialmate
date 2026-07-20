@@ -30,11 +30,11 @@ const STEPS = [
 function generateStarterPosts(topic: string): string[] {
   const t = topic.trim() || 'my journey'
   return [
-    `Hot take: Most people approach ${t} completely wrong. Here's what actually works:\n\n[share your take]`,
-    `3 things I wish I knew when I started with ${t}:\n\n1. [lesson one]\n2. [lesson two]\n3. [lesson three]`,
-    `The biggest mistake I see people make with ${t}: [describe it].\n\nHere's what to do instead: [your solution]`,
-    `Quick ${t} tip for today:\n\n[your tip here]\n\nSave this for when you need it. 💡`,
-    `Real talk — ${t} is harder than people say. But here's the one thing that changed everything for me:\n\n[your insight]`,
+    `Hot take: most people overthink ${t}. The ones who win just start before they feel ready and adjust as they go. Consistency beats perfection every time.`,
+    `3 things I wish I knew starting out with ${t}:\n\n1. Show up on the days you don't feel like it.\n2. Don't compare your start to someone else's middle.\n3. Master the basics before chasing shortcuts.`,
+    `The biggest mistake I see people make with ${t}: waiting for the "right time" to begin. There isn't one. Start small, stay steady, and let momentum do the heavy lifting.`,
+    `Quick ${t} tip: pick one thing to improve this week and go deep on it instead of spreading yourself thin. Small, focused reps compound fast. Save this for when you need it. 💡`,
+    `Real talk — ${t} is harder than people make it look. The thing that changed everything for me? I stopped waiting to feel motivated and built a routine I could keep on my worst days.`,
   ]
 }
 
@@ -193,8 +193,11 @@ function OnboardingInner() {
 
     await supabase.from('user_settings').upsert(upsertPayload, { onConflict: 'user_id' })
 
+    // Only schedule starter posts when a platform is actually connected.
+    // Without a destination they can never publish — the scheduler would sweep
+    // them up and stamp them 'failed', polluting the failure log with dead posts.
     const postsToSave = starterPosts.filter(p => p.trim())
-    if (postsToSave.length > 0) {
+    if (postsToSave.length > 0 && platforms.length > 0) {
       const base = new Date(Date.now() + 2 * 60 * 60 * 1000) // start 2h from now
       await supabase.from('posts').insert(
         postsToSave.map((content, i) => ({
@@ -215,6 +218,9 @@ function OnboardingInner() {
   const platformData = LIVE_PLATFORMS.find(p => p.id === selectedPlatform)
   const charLimit = CHAR_LIMITS[selectedPlatform] ?? 300
   const isUpgraded = upgradedPlan !== 'free' || searchParams.get('upgraded') === 'true'
+  // Starter posts are only scheduled when a platform is actually connected —
+  // otherwise they have no destination and would just fail. Drives honest copy below.
+  const willScheduleStarterPosts = !!selectedPlatform && connectionDetected && starterPosts.some(p => p.trim())
 
   return (
     <div className="min-h-dvh bg-theme flex flex-col">
@@ -526,7 +532,9 @@ function OnboardingInner() {
                   </div>
 
                   <p className="text-xs text-center text-gray-400 dark:text-gray-500 mb-4">
-                    Replace [brackets] with your actual content — then we'll schedule all 5, spaced 30 min apart starting in 2 hours.
+                    {connectionDetected
+                      ? 'Edit any of these, then we\'ll schedule all 5, spaced 30 min apart starting 2 hours from now.'
+                      : 'Connect an account to put these on your calendar. Until then they\'re a starting point — edit and schedule them anytime from Compose.'}
                   </p>
 
                   <div className="flex gap-3">
@@ -562,7 +570,7 @@ function OnboardingInner() {
                 You're all set, {displayName || 'friend'}!
               </h2>
               <p className="text-gray-400 dark:text-gray-500 mb-6 text-sm">
-                {starterPosts.filter(p => p.trim()).length > 0
+                {willScheduleStarterPosts
                   ? `${starterPosts.filter(p => p.trim()).length} posts scheduled and on your calendar.`
                   : 'Your account is ready.'}
               </p>
@@ -631,9 +639,9 @@ function OnboardingInner() {
                 </Link>
               </div>
 
-              <Link href={starterPosts.filter(p => p.trim()).length > 0 ? '/calendar' : '/compose'}
+              <Link href={willScheduleStarterPosts ? '/calendar' : '/compose'}
                 className="flex items-center justify-center gap-2 w-full py-4 mb-3 bg-violet-600 hover:bg-violet-700 text-white text-sm font-extrabold rounded-2xl transition-all">
-                {starterPosts.filter(p => p.trim()).length > 0 ? '📅 View Your Scheduled Posts →' : '✏️ Write Your First Post →'}
+                {willScheduleStarterPosts ? '📅 View Your Scheduled Posts →' : '✏️ Write Your First Post →'}
               </Link>
 
               <button onClick={handleFinish} disabled={saving}
