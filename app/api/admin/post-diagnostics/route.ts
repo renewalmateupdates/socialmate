@@ -45,7 +45,9 @@ export async function GET(req: NextRequest) {
       succeeded: Object.keys(p.platform_post_ids ?? {}).join(', ') || 'none',
       failed: failedPlatforms.join(', ') || 'none',
       errors,
-      preview: (p.content ?? '').slice(0, 80),
+      // Array.from splits on full code points, so slicing never cuts an emoji
+      // surrogate pair in half (which would render as U+FFFD "�").
+      preview: Array.from((p.content ?? '') as string).slice(0, 80).join(''),
     }
   })
 
