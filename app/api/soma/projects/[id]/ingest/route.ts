@@ -53,7 +53,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }, { status: 400 })
 
     const admin = getSupabaseAdmin()
-    const apiKey = process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY
+    // Prefer GEMINI_API_KEY — the key the entire rest of the app uses and the
+    // one that's known good. GOOGLE_AI_API_KEY is only a fallback: a stale/invalid
+    // GOOGLE_AI_API_KEY in the environment was being picked first here and getting
+    // rejected by Google ("API key not valid"), which broke every SOMA run.
+    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY
     if (!apiKey) return NextResponse.json({ error: 'AI service not configured' }, { status: 500 })
 
     // Verify project belongs to user

@@ -146,7 +146,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     if (!ingestion_id) return NextResponse.json({ error: 'ingestion_id is required' }, { status: 400 })
 
     const admin = getSupabaseAdmin()
-    const apiKey = process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY
+    // Prefer GEMINI_API_KEY (the key the rest of the app uses and known good);
+    // GOOGLE_AI_API_KEY is only a fallback. A stale GOOGLE_AI_API_KEY picked first
+    // here was being rejected by Google and breaking generation.
+    const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_AI_API_KEY
     if (!apiKey) return NextResponse.json({ error: 'AI service not configured' }, { status: 500 })
 
     // Fetch project including per-platform schedule
