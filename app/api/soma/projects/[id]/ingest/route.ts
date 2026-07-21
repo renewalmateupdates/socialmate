@@ -117,17 +117,23 @@ Do NOT repeat or re-extract themes, wins, or angles that are already in SOMA's m
     const prevDoc       = (recentDocs ?? []).find(d => (d.content ?? '').trim() !== trimmedContent) ?? null
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    // responseMimeType JSON forces Gemini to return raw parseable JSON — no
-    // markdown fences, no preamble. Without it, a prompt this large occasionally
-    // came back prose-wrapped or empty, which threw in parseGeminiJson and
-    // surfaced to the user as "AI analysis failed. Please try again."
+    // responseMimeType JSON forces raw parseable JSON (no fences, no preamble).
+    // maxOutputTokens is set to the model max because gemini-2.5-flash spends
+    // "thinking" tokens out of the SAME output budget before it writes the
+    // answer — on a prompt this large a low cap gets fully consumed by thinking
+    // and the model returns MAX_TOKENS with no text at all. thinkingConfig
+    // disables that reasoning entirely (this is structured extraction, not a
+    // reasoning task) so the whole budget goes to the answer. thinkingConfig is
+    // cast because the installed SDK's types predate the field; the REST API
+    // honors it, and if it's ever dropped the high token cap still covers us.
     const model = genAI.getGenerativeModel({
       model: 'gemini-2.5-flash',
       generationConfig: {
         responseMimeType: 'application/json',
         temperature: 0.4,
-        maxOutputTokens: 8192,
-      },
+        maxOutputTokens: 65536,
+        thinkingConfig: { thinkingBudget: 0 },
+      } as any,
     })
 
     const prompt = prevDoc
@@ -194,9 +200,12 @@ Rules: Be specific. emotional_tone must be: high, reflective, grinding, or celeb
       }
       extracted_insights = parseGeminiJson(raw)
     } catch (aiErr: any) {
-      console.error('[SOMA Ingest] Gemini error:', aiErr?.message,
+      const detail = (aiErr?.message || 'unknown error').slice(0, 200)
+      console.error('[SOMA Ingest] Gemini error:', detail,
         '| docChars:', content.length, '| prevChars:', prevDoc?.content?.length ?? 0)
-      return NextResponse.json({ error: 'AI analysis failed. Please try again.' }, { status: 500 })
+      // Surface the real reason to the UI so a repeat failure is diagnosable
+      // on-screen instead of a generic "please try again".
+      return NextResponse.json({ error: `AI analysis failed: ${detail}` }, { status: 500 })
     }
 
     // Persist the new master doc version now that analysis has succeeded. Doing
