@@ -226,7 +226,7 @@ Example posts: ${Array.isArray(profile.voice_examples) ? (profile.voice_examples
     const maxPpd      = project.mode === 'full_send' ? 7 : project.mode === 'autopilot' ? 5 : 2
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+    const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
 
     const campaignTheme = (project as any).campaign_theme as string | null
     const campaignStart = (project as any).campaign_start as string | null

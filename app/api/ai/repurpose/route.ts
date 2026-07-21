@@ -138,7 +138,7 @@ export async function POST(req: NextRequest) {
     const prompt = `You are a content repurposing expert. ${formatInstruction} Return only the repurposed content, nothing else.\n\nContent:\n${content}`
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+    const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
 
     let text: string
     try {

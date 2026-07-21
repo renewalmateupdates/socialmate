@@ -76,7 +76,7 @@ closing: Keep it simple. "Until next time,\n- Joshua" is the default and is fine
 Return valid JSON only. No markdown fences. No extra keys. No explanations outside the JSON.`
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+    const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
 
     const result = await model.generateContent(prompt)
     const raw = result.response.text().trim()

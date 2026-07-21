@@ -63,7 +63,7 @@ export const newsletterAgent = inngest.createFunction(
           if (!apiKey) return
 
           const genAI = new GoogleGenerativeAI(apiKey)
-          const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+          const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
 
           const postBlock = posts.map((p: any, i: number) =>
             `${i + 1}. [${(p.platforms ?? []).join(', ')}] ${p.content}`
@@ -310,7 +310,7 @@ export const repurposeAgent = inngest.createFunction(
           if (!apiKey) return
 
           const genAI = new GoogleGenerativeAI(apiKey)
-          const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+          const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
 
           const formats: string[] = Array.isArray(cfg.formats) ? cfg.formats : ['thread', 'caption']
 
@@ -465,7 +465,7 @@ export const captionAgent = inngest.createFunction(
           if (!apiKey) return
 
           const genAI = new GoogleGenerativeAI(apiKey)
-          const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+          const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
 
           const maxDrafts = cfg.max_per_day ?? 3
           const platforms: string[] = Array.isArray(cfg.platforms) ? cfg.platforms : []
@@ -660,7 +660,7 @@ Return ONLY valid JSON array:
 [{"topic":"...","why_now":"...","angle":"...","sample_caption":"..."}]`
 
           const genAI = new GoogleGenerativeAI(apiKey)
-          const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+          const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
 
           const result = await model.generateContent(prompt)
           const text   = result.response.text().replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim()
@@ -784,7 +784,7 @@ export const inboxAgent = inngest.createFunction(
           if (!mentions.length) return
 
           const genAI = new GoogleGenerativeAI(apiKey)
-          const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+          const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
           const toneHint = cfg.tone_hint ? ` Tone: ${cfg.tone_hint}.` : ''
 
           for (const n of mentions.slice(0, 5)) {

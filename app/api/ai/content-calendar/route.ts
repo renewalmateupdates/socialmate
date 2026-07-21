@@ -156,7 +156,7 @@ Return a JSON array of exactly 30 objects. Each object must have these exact fie
 Return ONLY the JSON array. No markdown fences, no explanations, no extra text.`
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+    const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
 
     let calendar: CalendarDay[]
 

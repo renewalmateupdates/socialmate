@@ -3857,7 +3857,7 @@ export const somaAutopilotRun = inngest.createFunction(
         await step.run(`autopilot-project-${project.id}`, async () => {
           const admin = getSupabaseAdmin()
           const genAI = new GoogleGenerativeAI(apiKey)
-          const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+          const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
           const ws = (project as any).workspaces
 
           const platforms = (project.platforms as string[]) ?? ['bluesky']
@@ -4216,7 +4216,7 @@ export const somaFullSendDailyRun = inngest.createFunction(
         await step.run(`full-send-project-${project.id}`, async () => {
           const admin = getSupabaseAdmin()
           const genAI = new GoogleGenerativeAI(apiKey)
-          const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+          const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
 
           // Fetch project memory to avoid repetition
           const { data: memory } = await admin
@@ -5208,7 +5208,7 @@ export const irisAutoDispatch = inngest.createFunction(
 
     const draft = await step.run('generate-draft', async () => {
       const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+      const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
       const result = await model.generateContent(`You are writing the IRIS Dispatch — a biweekly creator newsletter from SocialMate. Write in Joshua's authentic voice: bootstrapped solo founder, genuinely cares about creators, no corporate fluff.
 
 Platform stats this week:
