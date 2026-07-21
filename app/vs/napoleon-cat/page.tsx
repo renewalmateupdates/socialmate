@@ -9,7 +9,7 @@ import { useI18n } from '@/contexts/I18nContext'
 const COMPARISON = [
   { feature: 'Starting price',         napoleoncat: '$32/month',             socialmate: '$0 — free forever'       },
   { feature: 'Free plan',              napoleoncat: '14-day trial only',     socialmate: '✅ Genuinely free'        },
-  { feature: 'Profiles on entry plan', napoleoncat: '3 profiles, 1 user',    socialmate: 'Unlimited profiles free' },
+  { feature: 'Profiles on entry plan', napoleoncat: '3 profiles, 1 user',    socialmate: '1 per platform, all 7 free' },
   { feature: 'Platforms supported',    napoleoncat: '7 (paid)',              socialmate: '7 live (free)'               },
   { feature: 'AI writing tools',       napoleoncat: 'AI Reply (paid)',       socialmate: '15+ tools free'           },
   { feature: 'Bulk scheduling',        napoleoncat: '✅',                    socialmate: '✅ Free'                  },
@@ -44,7 +44,7 @@ const FAQ = [
   },
   {
     q: 'Why is SocialMate a better value for small teams?',
-    a: 'At $32/month for just 3 profiles, NapoleonCat\'s entry tier is limiting and expensive for what you get. SocialMate gives you unlimited profiles, 7 platforms, AI tools, and analytics for $0. For growing teams, that difference compounds fast.',
+    a: 'At $32/month for just 3 profiles, NapoleonCat\'s entry tier is limiting and expensive for what you get. SocialMate gives you all 7 platforms, AI tools, and analytics for $0. For growing teams, that difference compounds fast.',
   },
 ]
 

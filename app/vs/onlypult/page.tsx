@@ -9,7 +9,7 @@ import { useI18n } from '@/contexts/I18nContext'
 const COMPARISON = [
   { feature: 'Starting price',         onlypult: '$25/month',               socialmate: '$0 — free forever'       },
   { feature: 'Free plan',              onlypult: '7-day trial only',        socialmate: '✅ Genuinely free'        },
-  { feature: 'Profiles on entry plan', onlypult: '3 profiles',              socialmate: 'Unlimited profiles free' },
+  { feature: 'Profiles on entry plan', onlypult: '3 profiles',              socialmate: '1 per platform, all 7 free' },
   { feature: 'Platforms supported',    onlypult: '12 (paid)',               socialmate: '7 live (free)'               },
   { feature: 'Team seats',             onlypult: '1 on Start plan',         socialmate: '2 seats free'            },
   { feature: 'AI writing tools',       onlypult: '❌ No AI tools',          socialmate: '15+ tools free'           },

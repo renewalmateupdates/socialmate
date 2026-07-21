@@ -9,7 +9,7 @@ import { useI18n } from '@/contexts/I18nContext'
 const COMPARISON = [
   { feature: 'Starting price',         smarterqueue: '$16.99/month',         socialmate: '$0 — free forever'       },
   { feature: 'Free plan',              smarterqueue: 'Free plan (1 profile)', socialmate: '✅ Genuinely free'        },
-  { feature: 'Profiles on free plan',  smarterqueue: '1 profile only',       socialmate: 'Unlimited profiles'      },
+  { feature: 'Profiles on free plan',  smarterqueue: '1 profile only',       socialmate: '1 per platform (7 total)' },
   { feature: 'Platforms supported',    smarterqueue: '7 (paid)',              socialmate: '7 live (free)'               },
   { feature: 'Team seats',             smarterqueue: '1 on Solo plan',        socialmate: '2 seats free'            },
   { feature: 'AI writing tools',       smarterqueue: '❌ No AI tools',        socialmate: '15+ tools free'           },
