@@ -1,4 +1,7 @@
 export const dynamic = 'force-dynamic'
+// The diff call sends two full master docs to Gemini; give it headroom past the
+// default serverless timeout so a slow analysis isn't killed mid-flight.
+export const maxDuration = 60
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
@@ -97,37 +100,35 @@ Total posts generated so far: ${memory.total_posts_generated ?? 0}
 Do NOT repeat or re-extract themes, wins, or angles that are already in SOMA's memory above.`
       : 'SOMA MEMORY: No previous content generated for this project yet — this is a fresh start.'
 
-    // Get latest existing doc for this project (for diffing)
-    const { data: prevDocs } = await admin
+    // Get recent docs for this project. We diff against the most recent doc whose
+    // content actually DIFFERS from what's being submitted — this skips orphan
+    // versions left behind by an earlier failed attempt (which saved this exact
+    // doc), so the diff never ends up comparing the doc against itself.
+    const trimmedContent = content.trim()
+    const { data: recentDocs } = await admin
       .from('soma_master_docs')
       .select('id, version, content')
       .eq('project_id', projectId)
       .order('version', { ascending: false })
-      .limit(1)
+      .limit(5)
 
-    const prevDoc = prevDocs?.[0] ?? null
-    const nextVersion = (prevDoc?.version ?? 0) + 1
-
-    // Save new master doc version
-    const { data: newDoc, error: docErr } = await admin
-      .from('soma_master_docs')
-      .insert({
-        project_id:   projectId,
-        workspace_id: project.workspace_id,
-        user_id:      user.id,
-        version:      nextVersion,
-        content:      content.trim(),
-        filename:     filename ?? null,
-        input_method: input_method ?? 'text',
-        source_url:   source_url ?? null,
-      })
-      .select('id, version')
-      .single()
-
-    if (docErr || !newDoc) return NextResponse.json({ error: 'Failed to save doc' }, { status: 500 })
+    const latestVersion = recentDocs?.[0]?.version ?? 0
+    const nextVersion   = latestVersion + 1
+    const prevDoc       = (recentDocs ?? []).find(d => (d.content ?? '').trim() !== trimmedContent) ?? null
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+    // responseMimeType JSON forces Gemini to return raw parseable JSON — no
+    // markdown fences, no preamble. Without it, a prompt this large occasionally
+    // came back prose-wrapped or empty, which threw in parseGeminiJson and
+    // surfaced to the user as "AI analysis failed. Please try again."
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-2.5-flash',
+      generationConfig: {
+        responseMimeType: 'application/json',
+        temperature: 0.4,
+        maxOutputTokens: 8192,
+      },
+    })
 
     const prompt = prevDoc
       ? `You are SOMA, a Self-Optimizing Media Agent acting as a professional social media manager.
@@ -185,11 +186,36 @@ Rules: Be specific. emotional_tone must be: high, reflective, grinding, or celeb
     let extracted_insights: any
     try {
       const result = await model.generateContent(prompt)
-      extracted_insights = parseGeminiJson(result.response.text())
+      const resp   = result.response
+      const raw    = resp.text()
+      if (!raw?.trim()) {
+        const reason = resp.candidates?.[0]?.finishReason ?? 'empty response'
+        throw new Error(`Gemini returned no text (finishReason: ${reason})`)
+      }
+      extracted_insights = parseGeminiJson(raw)
     } catch (aiErr: any) {
-      console.error('[SOMA Ingest] Gemini error:', aiErr?.message)
+      console.error('[SOMA Ingest] Gemini error:', aiErr?.message,
+        '| docChars:', content.length, '| prevChars:', prevDoc?.content?.length ?? 0)
       return NextResponse.json({ error: 'AI analysis failed. Please try again.' }, { status: 500 })
     }
+
+    // Persist the new master doc version now that analysis has succeeded. Doing
+    // this AFTER the AI call (rather than before) means a failed attempt never
+    // leaves an orphan version behind that would poison the next diff.
+    const { error: docErr } = await admin
+      .from('soma_master_docs')
+      .insert({
+        project_id:   projectId,
+        workspace_id: project.workspace_id,
+        user_id:      user.id,
+        version:      nextVersion,
+        content:      trimmedContent,
+        filename:     filename ?? null,
+        input_method: input_method ?? 'text',
+        source_url:   source_url ?? null,
+      })
+
+    if (docErr) return NextResponse.json({ error: 'Failed to save doc' }, { status: 500 })
 
     // Update SOMA's project memory with what was just ingested
     const newTopics = Array.from(new Set([
