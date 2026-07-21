@@ -135,7 +135,7 @@ These have burned us before — always apply:
 
 ---
 
-## What's Been Built (as of July 7, 2026)
+## What's Been Built (as of July 21, 2026)
 
 **Core:**
 - Post scheduling (Now + future via Inngest), drafts, queue, calendar, bulk scheduling
@@ -170,6 +170,7 @@ These have burned us before — always apply:
 - Footer "Affiliate" link updated to `/affiliates`
 
 **Enki — AI Trading Bot:**
+> ⚠️ **Status (July 2026): wound down as a public SocialMate product.** Enki was pulled from the Products dropdown, footer, and sitemap (PR #520). `/enki` is now a waitlist signup page (PR #503), and Enki is moving to its own standalone product off SocialMate. **Do NOT generate SocialMate marketing content that presents Enki as a current in-app feature.** The technical detail below is retained as build history only.
 - Full system live: dashboard, doctrines, trades ledger, settings, leaderboard
 - Tiers: Citizen (paper), Commander ($15/mo), Emperor ($29/mo), Cloud Runner ($10/mo)
 - Quant engine: ADX filter, TP Ladder (TP1/TP2 partial exits), Kelly position sizing, Correlation Guard (Pearson > 0.85 blocks), DCA averaging, Sharpe/Sortino tracking
@@ -679,6 +680,25 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **Analytics snapshot (June 19, 2026):** 1,126 visitors (+101%), 2,199 page views (+7%), 80% bounce rate (+12%). Top referrers: Bing (92), DDG (39), Vercel (29), Google (20), ChatGPT (17), t.co (15). Countries: USA 27%, Singapore 21%, China 18%, India 6%. 40 users, 850+ posts published, $0 MRR. ChatGPT appearing as referral source for first time — llms.txt/AI discoverability work paying off.
 - **Reddit posts drafted** — New posts for r/buildinpublic, r/micro_saas, r/saasbuild (5 days since last posts). Angle: code audit week, zero-auth endpoint found + fixed, silent data loss bug found + fixed, ChatGPT referral traffic, 40 users / $0 MRR / still solo.
 
+**July 13–21, 2026 — Warm "instrument" design-system rebuild (PRs #513–#524):**
+The entire public front end was rebuilt from the old `bg-gray-*` Tailwind look onto a single warm design system. Biggest visual change since launch. For SOMA, the story is "we rebuilt the whole front end this week into a premium, hand-designed system" — build-in-public gold.
+- **Mobile /login blank-HTML fix (PR #513, Jul 17)** — `/login` was shipping blank HTML on mobile. Added skeleton fallbacks + a `loading.tsx` sweep, capped admin INP.
+- **Premium landing overhaul (PR #514, Jul 17)** — Real brand icons (mono `PlatformIcon` marks + Lucide), an animated coded product mockup (`HeroLoop` — the "gif" on the hero), and motion. Emoji removed from the hero.
+- **Ambient background experiment (PRs #515–#516, Jul 17)** — Added then reworked a pulsing "aurora" background. Short-lived; replaced two days later by the ember field (see #517/#520).
+- **Warm instrument design system (PR #517, Jul 18)** — The core. New token layer in `app/globals.css` `@theme`: warm base `--color-void #0D0B0A`, `--color-panel`, `--color-raised`, `--color-edge(-lit)`, an AA-measured ink ramp (`ink-faint/muted/body/high`), and the three brand voices `amber` / `violet` / `jade`. Reusable primitives in `components/instrument/primitives.tsx` (`Section`, `Eyebrow`, `Display`, `Body`, `Mono`, `Button`, `Card`, `Readout`) so no page writes arbitrary values. Fonts: Clash Display (headlines) + Switzer (body). The #515 aurora blobs were deleted here (four `blur(80px)` gradients at 54vw — the loudest "AI-generated premium dark" tell).
+- **Auth carry-through + dead-code delete (PRs #518–#519, Jul 18)** — Login/signup/forgot/reset moved onto instrument; fixed a silent `bg-surface` token collision. Dead `src/app/signup/page.tsx` deleted (PR #518) — confirms the old `src/` tree is dead; `app/` is canonical.
+- **Invisible-text fix + GE gold + Enki wind-down (PR #520, Jul 18)** — Three things: (1) **Systemic invisible-text bug** — `body { color: var(--text) }` resolves once in light scope, and public pages force dark via a `.dark` class on a wrapper *div* not `<html>`, so any uncolored element (e.g. a `text-base font-extrabold` heading) inherited near-black on near-black (~1:1 contrast). Fixed by re-declaring `color: var(--text)` inside the `.dark` rule — one line at the source. (2) Gold set to GE's exact values `--color-amber #D4A017` / `--color-amber-bright #EAC020` with a gold-gradient CTA. **EmberField** ported from the GE site (28 seeded-PRNG dots, 1.5–4px, 10–22% opacity, drifting up; renders nothing under reduced motion). `Section tone="base"` is transparent so embers show through; `tone="raised"` stays opaque. (3) **Enki wind-down** — pulled from the Products dropdown, footer, and sitemap; `/enki` stays live as its waitlist page (PR #503), reachable by direct link, nothing deleted. HERMES removed from public mobile nav (admin-only). Nav emoji stripped.
+- **/pricing onto instrument (PR #521, Jul 18)**.
+- **/features + 88 /vs + 15 /for onto instrument (PR #522, Jul 18)** — 8,683 palette utilities migrated to tokens via committed `scripts/migrate-palette.py` (13 unit tests; the mapping is shade-aware because `dark:text-gray-100` is a near-white headline, not muted — the first run silently greyed out every `/vs` `<h1>`). 37 emoji → Lucide. Plus a **content-accuracy sweep** the migration surfaced: `/vs` pages overstated the free tier four ways — corrected to **100 posts/mo free** (not unlimited), **50 AI credits/mo grant** (75 is the bank cap, not the grant), **7 live platforms** (not 16), and **Pro = 1,000 posts/mo** (not unlimited). ~98 corrections across ~70 files, all verified against `app/pricing/page.tsx`. Competitor pricing claims deliberately left intact.
+- **Amber ember unification (PR #524, Jul 20)** — `PublicLayout` now renders `EmberField` on `bg-void`, so all ~57 pages that use it inherit the amber background from one change. The landing's three `tone="raised"` grey sections went transparent. Brand accents unified to amber (TikTok pink `#fe2c55`, Enterprise blue, SOMA/Monetize violet, `/for` gradients) while keeping jade for live/included. Fixed migration scars: black `/pricing` CTA, invisible `/features` filter active state, low-contrast badges, `bg-void`-on-`bg-void` invisible cards, no-op hovers, and duplicate conflicting classes (`bg-void bg-panel`, `text-ink-high text-ink-high`). 55 files.
+- **Design-system rules going forward (public surfaces):**
+  - Tokens only — never raw hex or `gray-*`/`bg-white` on public pages. Everything comes from `@theme` in `globals.css` (`bg-void`, `bg-panel`, `text-ink-*`, `text-amber/violet/jade`, `py-section`, `text-display-*`). If a token is missing, add it — don't inline a value.
+  - Color is a language: **amber** = queued/scheduled/primary brand, **violet** = AI/SOMA/credits, **jade** = live/published/included/free. No fourth color; don't reach for jade because a section "needed some green."
+  - `.dark` lives on a wrapper div, not `<html>` — that's why `globals.css` re-declares `color: var(--text)` inside the `.dark` rule. Don't remove it.
+  - `Section tone="base"` = transparent (embers show), `tone="raised"` = opaque. Public pages now favor `base` for the ember background.
+  - `src/` is dead — edit under `app/`.
+  - A script touching 100+ files must prove its mapping on examples first (see `scripts/migrate-palette.py` + its tests), not after.
+
 **June 23 – July 7, 2026 (PRs #505–#511):**
 - **Vol. 11 guide build fix (PR #505, June 23)** — `/guides/local-business-website` was missing the required `title` prop on `<GuidePDFDownload />`, failing `next build`. Hotfixed same day.
 - **Crawler files refresh (PR #506, June 28)** — `llms.txt`, `humans.txt`, `ai.txt` updated with June 2026 stats.
@@ -832,7 +852,9 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 - **Instagram / Facebook** — Both require Meta App Review (same process, can be one app). Harder than LinkedIn — Meta review is strict. Business account required, users need Business/Creator Instagram accounts. **Hard — plan for 4–8 week review timeline.**
 
-- **SOMA content run** — CLAUDE.md submitted to SOMA on May 28. Next run when ready.
+- **SOMA content run** — CLAUDE.md updated July 21 with the design-system rebuild (PRs #513–#524). Ready to resubmit for the next run.
+
+- **"Unlimited profiles" claim — needs a decision (from PR #522)** — 5 "unlimited profiles" claims remain on `/vs` pages, inside Pro-tier comparison rows. Free tier is 1 connected account per platform, so it's wrong there, but whether **Pro** is genuinely uncapped on connected accounts is an open question. Decide the real number/policy before correcting — don't invent one.
 
 - **Cofounder search** — Actively recruiting marketing cofounder via Reddit/LinkedIn. ~10% sweat equity over 24-month vest, 2-week trial, real contract.
 
@@ -1061,10 +1083,10 @@ When SOMA generates content from this document, follow these behavioral rules on
 - Not every post needs to be an update. Some of the best content is timeless brand-building, not changelog announcements
 - Use Project Memory to avoid repeating the same angles regardless of whether a diff was submitted
 
-**Media (current limitation — feature in progress):**
-- SOMA does not yet auto-attach images or GIFs to posts
-- Roadmap: toggle on SOMA projects to pull non-copyrighted images from Unsplash API and GIFs from GIPHY free tier, matched to post content
-- Video content attachment planned for future milestone
+**Media (Unsplash images — LIVE since May 2026, PRs #433–#440):**
+- SOMA **can** auto-attach non-copyrighted Unsplash images to posts. Each project has an `include_media` toggle; when on, SOMA extracts a keyword from the post, pulls a matched Unsplash image (deduped per run, sized under Bluesky's 1MB blob limit via `urls.small`), and attaches it with photographer attribution. Works in manual generate, the Autopilot Monday cron, and the Full Send daily cron.
+- Also live: `include_video_url` per project (PR #442) — attach one video URL, injected into the Gemini prompt.
+- Still on the roadmap: GIF auto-attach (GIPHY free tier) and true generated/native video content.
 
 ---
 
