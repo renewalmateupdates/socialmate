@@ -145,7 +145,7 @@ export default function VsVistaSocialPage() {
               {
                 n: '1',
                 title: '$39/month is a high floor for a scheduling tool',
-                desc: "Vista Social's entry plan is $39/month for 3 profiles. That is more than 7× the cost of SocialMate Pro ($5/month), which gives you unlimited profiles on 7 platforms. For creators, small businesses, and solo founders watching every dollar, $39/month before you've validated your content ROI is difficult to justify.",
+                desc: "Vista Social's entry plan is $39/month for 3 profiles. That is more than 7× the cost of SocialMate Pro ($5/month), which connects up to 3 accounts on each of its 7 platforms. For creators, small businesses, and solo founders watching every dollar, $39/month before you've validated your content ROI is difficult to justify.",
               },
               {
                 n: '2',
