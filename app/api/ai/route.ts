@@ -316,7 +316,7 @@ Apply these guidelines to all content you generate.
     } catch { /* non-fatal — proceed without brand voice */ }
 
     const genAI  = new GoogleGenerativeAI(apiKey)
-    const model  = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+    const model  = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
     const basePrompt = buildPrompt(tool, content, platform || 'general', trendingContext)
     const prompt = brandVoicePrefix ? `${brandVoicePrefix}${basePrompt}` : basePrompt
 

@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
     if (apiKey) {
       try {
         const genAI = new GoogleGenerativeAI(apiKey)
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+        const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
 
         const prompt = `You are building a voice profile for an AI content agent. Based on these personality interview answers, write a concise 150-200 word Voice DNA summary that can be injected into any content generation prompt. The summary should describe HOW this person sounds, WHAT they talk about, WHO they talk to, and WHAT to absolutely avoid. Write it as a clear instruction set for an AI writing in their voice.
 

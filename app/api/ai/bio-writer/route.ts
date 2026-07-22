@@ -159,7 +159,7 @@ ${keywordsLine}
 Return ONLY the bio text. No quotes around it. No explanations. No prefix like "Bio:" — just the raw bio text. Keep it within ${charLimit} characters.`
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+    const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
 
     let bio: string
     try {

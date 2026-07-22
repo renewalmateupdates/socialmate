@@ -145,7 +145,7 @@ Score labels: 0-49 = "Needs Work", 50-69 = "Getting There", 70-84 = "Strong", 85
 Return ONLY the JSON. No markdown fences, no explanations.`
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+    const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
 
     let score: number
     let scoreLabel: string

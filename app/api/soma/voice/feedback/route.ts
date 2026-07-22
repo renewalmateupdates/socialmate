@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
       try {
         const { GoogleGenerativeAI } = await import('@google/generative-ai')
         const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY!)
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+        const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
 
         const { data: existingProfile } = await admin
           .from('soma_identity_profiles')

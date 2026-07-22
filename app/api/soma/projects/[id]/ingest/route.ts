@@ -121,23 +121,17 @@ Do NOT repeat or re-extract themes, wins, or angles that are already in SOMA's m
     const prevDoc       = (recentDocs ?? []).find(d => (d.content ?? '').trim() !== trimmedContent) ?? null
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    // responseMimeType JSON forces raw parseable JSON (no fences, no preamble).
-    // maxOutputTokens is set to the model max because gemini-2.5-flash spends
-    // "thinking" tokens out of the SAME output budget before it writes the
-    // answer — on a prompt this large a low cap gets fully consumed by thinking
-    // and the model returns MAX_TOKENS with no text at all. thinkingConfig
-    // disables that reasoning entirely (this is structured extraction, not a
-    // reasoning task) so the whole budget goes to the answer. thinkingConfig is
-    // cast because the installed SDK's types predate the field; the REST API
-    // honors it, and if it's ever dropped the high token cap still covers us.
+    // responseMimeType JSON forces raw parseable JSON (no fences, no preamble),
+    // which is what parseGeminiJson expects. The gemini-2.5-era temperature and
+    // thinkingConfig were dropped: gemini-3 deprecates the sampling params and
+    // controls reasoning differently, and the real cause of the earlier failures
+    // was a dead API key + a retired model, not a thinking budget.
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3.6-flash',
       generationConfig: {
         responseMimeType: 'application/json',
-        temperature: 0.4,
         maxOutputTokens: 65536,
-        thinkingConfig: { thinkingBudget: 0 },
-      } as any,
+      },
     })
 
     const prompt = prevDoc

@@ -47,7 +47,7 @@ ${!isEmail ? `- body must be under ${charLimit} characters.` : ''}
 
   try {
     const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY!)
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+    const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
     const result = await model.generateContent(prompt)
     const raw = result.response.text().trim()
     const jsonStr = raw.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim()
@@ -220,7 +220,7 @@ export const hermesAutoDiscoverCron = inngest.createFunction(
         const newPeople = found.filter(p => !existingEmails.has(p.email))
 
         const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY!)
-        const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+        const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
 
         for (const person of newPeople) {
           const prompt = `Write a short cold email intro from Joshua Bostic, founder of SocialMate (socialmate.studio). Goal: ${campaign.goal ?? 'get featured in their newsletter/blog'}. Prospect: ${person.name}${person.company ? `, runs "${person.company}"` : ''}. Keep it 3-4 sentences, human, no buzzwords. Output JSON: {"subject":"...","body":"..."}`
