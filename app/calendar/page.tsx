@@ -391,12 +391,15 @@ export default function CalendarPage() {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/login'); return }
     // select('*') avoids silent failures when a column in an explicit list doesn't exist in the DB.
-    // No date filter — fetch all user posts so any month is navigable without a re-fetch.
+    // No date filter (filtering this query on a date column has silently dropped SOMA posts before).
+    // Order DESC so the limit keeps the NEWEST posts: with 1000+ published posts an ascending order
+    // filled the 1000 cap with old months and dropped upcoming scheduled posts, which made the
+    // current/next month look empty and forced an auto-jump back to the oldest month.
     let query = supabase
       .from('posts')
       .select('*')
       .eq('user_id', user.id)
-      .order('scheduled_at', { ascending: true, nullsFirst: false })
+      .order('scheduled_at', { ascending: false, nullsFirst: false })
       .limit(1000)
     if (activeWorkspace && !activeWorkspace.is_personal) {
       query = query.eq('workspace_id', activeWorkspace.id)
@@ -413,7 +416,9 @@ export default function CalendarPage() {
     if (!wsLoading) fetchPosts()
   }, [fetchPosts, wsLoading])
 
-  // Auto-navigate to the month containing the first scheduled post when current month is empty
+  // Auto-navigate to the most recent post's month when the current month is empty.
+  // Posts are ordered newest-first, so posts.find(...) below lands on the latest activity
+  // rather than the oldest — never jumps back to an ancient month with the current month full.
   useEffect(() => {
     if (loading || posts.length === 0) return
     const monthStart = new Date(currentYear, currentMonth, 1)
