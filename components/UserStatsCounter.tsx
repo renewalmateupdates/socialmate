@@ -23,32 +23,33 @@ export default function UserStatsCounter() {
 
   if (!stats || stats.total === 0) return null
 
+  // Aggregate only — never a plan-by-plan breakdown. Surfacing "0 Pro" publicly
+  // undercuts the pitch. Posts published is the momentum number; total accounts
+  // is the community number. Both are real, pulled live from the DB.
+  const items: { value: string; label: string; live?: boolean }[] = []
+  if (stats.posts_published > 0) {
+    items.push({ value: stats.posts_published.toLocaleString(), label: 'posts published', live: true })
+  }
+  items.push({
+    value: stats.total.toLocaleString(),
+    label: stats.total === 1 ? 'creator building' : 'creators building',
+  })
+
   return (
-    <div className="flex flex-wrap items-center justify-center gap-3 text-sm">
-      {stats.posts_published > 0 && (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-50 dark:bg-green-900/20 font-semibold text-green-700 dark:text-green-400">
-          <span className="w-2 h-2 rounded-full bg-green-500 inline-block animate-pulse" />
-          {stats.posts_published.toLocaleString()} posts published
-        </span>
-      )}
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 font-semibold text-gray-700 dark:text-gray-200">
-        <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" />
-        {stats.free.toLocaleString()} Free
-      </span>
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-yellow-50 dark:bg-yellow-900/20 font-semibold text-yellow-700 dark:text-yellow-400">
-        <span className="w-2 h-2 rounded-full bg-yellow-400 inline-block" />
-        {stats.pro.toLocaleString()} Pro
-      </span>
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 dark:bg-purple-900/20 font-semibold text-purple-700 dark:text-purple-400">
-        <span className="w-2 h-2 rounded-full bg-purple-500 inline-block" />
-        {stats.agency.toLocaleString()} Agency
-      </span>
-      {stats.white_label > 0 && (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 font-semibold text-blue-700 dark:text-blue-400">
-          <span className="w-2 h-2 rounded-full bg-blue-500 inline-block" />
-          {stats.white_label.toLocaleString()} White Label
-        </span>
-      )}
+    <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
+      {items.map(item => (
+        <div key={item.label} className="inline-flex items-center gap-2.5">
+          {item.live && (
+            <span className="h-1.5 w-1.5 rounded-full bg-jade animate-pulse" aria-hidden="true" />
+          )}
+          <span className="font-mono text-body-lg font-semibold tracking-tight text-ink-high">
+            {item.value}
+          </span>
+          <span className="font-mono text-eyebrow uppercase tracking-wide text-ink-faint">
+            {item.label}
+          </span>
+        </div>
+      ))}
     </div>
   )
 }

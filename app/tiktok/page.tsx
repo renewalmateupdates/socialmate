@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import { Sparkles } from 'lucide-react'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
 
@@ -20,7 +21,7 @@ export default function TikTokStudioLandingPage() {
   const QUOTA = [
     { plan: t('tiktok_landing.plan_free'), price: '$0/mo', videos: t('tiktok_landing.free_videos'), color: 'border-edge' },
     { plan: t('tiktok_landing.plan_pro'), price: '$5/mo', videos: t('tiktok_landing.pro_videos'), color: 'border-amber-500' },
-    { plan: t('tiktok_landing.plan_agency'), price: '$20/mo', videos: t('tiktok_landing.agency_videos'), color: 'border-amber-500' },
+    { plan: t('tiktok_landing.plan_agency'), price: '$20/mo', videos: t('tiktok_landing.agency_videos'), color: 'border-edge' },
   ]
 
   return (
@@ -136,7 +137,7 @@ export default function TikTokStudioLandingPage() {
       <section className="py-16 px-4">
         <div className="max-w-3xl mx-auto">
           <div className="bg-gradient-to-r from-[#f59e0b]/10 to-amber-900/20 border border-[#f59e0b]/20 rounded-2xl p-8 text-center">
-            <div className="text-3xl mb-4">🤖</div>
+            <Sparkles className="w-8 h-8 text-[#f59e0b] mx-auto mb-4" strokeWidth={2} aria-hidden="true" />
             <h2 className="text-xl font-bold text-white mb-3">
               {t('tiktok_landing.script_title')}
             </h2>

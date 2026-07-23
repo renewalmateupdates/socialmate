@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import ReferralBanner from '@/app/components/ReferralBanner'
 import PublicNav from '@/components/PublicNav'
+import PublicFooter from '@/components/PublicFooter'
 import LazyUserStatsCounter from '@/components/LazyUserStatsCounter'
 import PlatformIcon from '@/components/landing/PlatformIcon'
 import HeroLoop from '@/components/landing/HeroLoop'
@@ -197,6 +198,13 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         </div>
       </section>
 
+      {/* ══ LIVE PROOF ═════════════════════════════════════════════════════
+          Real, DB-backed numbers sit high on the page as social proof. Renders
+          nothing at zero rather than inventing it. */}
+      <div className="mx-auto w-full max-w-7xl px-gutter pb-section">
+        <LazyUserStatsCounter />
+      </div>
+
       {/* ══ PLATFORMS ══════════════════════════════════════════════════════ */}
       <Section id="platforms" divide>
         <Eyebrow>Platform support</Eyebrow>
@@ -323,14 +331,31 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
       <Section width="narrow" divide className="text-center">
         <Eyebrow>What it costs</Eyebrow>
 
-        <p className="mt-14 font-mono text-numeral text-ink-high">$5</p>
+        {/* The number is the section. Amber is the primary brand voice, and a
+            soft bloom behind it makes the price read as the headline it is. */}
+        <div className="relative mt-14 flex justify-center">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute top-1/2 left-1/2 -z-10 h-48 w-48 -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber/20 blur-[80px]"
+          />
+          <p className="font-mono text-numeral leading-none">
+            <span className="bg-gradient-to-b from-amber-bright to-amber bg-clip-text text-transparent">
+              $5
+            </span>
+          </p>
+        </div>
         <p className="mt-6 text-body text-ink-muted">SocialMate Pro. Per month.</p>
 
-        <p className="mx-auto mt-20 max-w-md text-body-lg text-pretty text-ink-muted">
-          The going rate for this category is{' '}
-          <span className="font-mono text-ink-faint line-through">$99</span> a month.
-          We didn&apos;t remove features to get here.
-        </p>
+        <div className="mt-16 flex flex-col items-center gap-5">
+          <span className="inline-flex items-center gap-2 rounded-full border border-amber/30 bg-amber/10 px-3.5 py-1.5 font-mono text-eyebrow uppercase text-amber">
+            Roughly one-twentieth of the going rate
+          </span>
+          <p className="mx-auto max-w-md text-body-lg text-pretty text-ink-muted">
+            The rest of the category runs{' '}
+            <span className="font-mono text-ink-faint line-through">$99</span> a month.
+            We didn&apos;t remove features to get here.
+          </p>
+        </div>
 
         <div className="mt-12 flex justify-center">
           <Button href="/signup" variant="primary">Create free account</Button>
@@ -406,63 +431,13 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
         <div className="mt-10 flex justify-center">
           <Button href="/signup" variant="primary">Create free account</Button>
         </div>
-
-        {/* Real numbers, pulled live. Renders nothing at zero rather than
-            inventing social proof. */}
-        <div className="mt-14">
-          <LazyUserStatsCounter />
-        </div>
       </Section>
 
-      {/* ══ FOOTER ═════════════════════════════════════════════════════════ */}
-      <footer className="border-t border-edge bg-void">
-        <div className="mx-auto w-full max-w-6xl px-gutter py-16">
-          <div className="mb-12 flex items-center gap-3">
-            <img src="/logo.png" alt="" className="h-7 w-7 rounded-lg" />
-            <span className="text-small font-medium text-ink-high">SocialMate</span>
-            <span className="font-mono text-eyebrow uppercase text-ink-faint">
-              Gilgamesh Enterprise LLC
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-10 sm:grid-cols-4">
-            {[
-              { head: 'Product',   links: [['Features','/features'],['Pricing','/pricing'],['Roadmap','/roadmap'],['Clips Studio','/clips']] },
-              { head: 'Solutions', links: [['For streamers','/for/streamers'],['For agencies','/for/agencies'],['For small business','/for/small-business'],['Studio Stax','/studio-stax']] },
-              { head: 'Company',   links: [['Our story','/story'],['Blog','/blog'],['Merch','/merch'],['Affiliates','/affiliates']] },
-              { head: 'Legal',     links: [['Privacy','/privacy'],['Terms','/terms'],['SM-Give','/give']] },
-            ].map(col => (
-              <div key={col.head}>
-                <p className="font-mono text-eyebrow uppercase text-ink-faint">{col.head}</p>
-                <ul className="mt-5 space-y-3">
-                  {col.links.map(([label, href]) => (
-                    <li key={href}>
-                      <Link href={href} className="text-small text-ink-muted transition-colors hover:text-ink-high">
-                        {label}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-14 flex flex-wrap items-center justify-between gap-4 border-t border-edge pt-8">
-            <a
-              href="https://discord.gg/2se6FGrbRU"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-small text-ink-muted transition-colors hover:text-ink-high"
-            >
-              <PlatformIcon name="Discord" size={14} mono />
-              Discord community
-            </a>
-            <p className="font-mono text-eyebrow uppercase text-ink-faint">
-              © 2026 SocialMate
-            </p>
-          </div>
-        </div>
-      </footer>
+      {/* ══ FOOTER ═════════════════════════════════════════════════════════
+          Shared instrument footer — identical to every other public page. The
+          empty className drops the default mt-16 since the Section above already
+          sets the rhythm. */}
+      <PublicFooter className="" />
       </div>
     </div>
   )
