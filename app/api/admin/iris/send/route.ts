@@ -44,11 +44,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ html: bodyHtml, edition })
   }
 
-  // Fetch all opted-in user IDs
+  // Fetch all opted-in user IDs. Opted in BY DEFAULT: include true AND null —
+  // .eq('iris_opt_in', true) silently drops legacy rows whose flag was never set.
+  // Only an explicit false opts out.
   const { data: optins } = await admin
     .from('user_settings')
     .select('user_id')
-    .eq('iris_opt_in', true)
+    .or('iris_opt_in.eq.true,iris_opt_in.is.null')
 
   const optedInIds = new Set((optins ?? []).map((r: { user_id: string }) => r.user_id))
 
