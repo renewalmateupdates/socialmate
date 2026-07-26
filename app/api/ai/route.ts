@@ -5,6 +5,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { notifyLowCredits } from '@/lib/notify-low-credits'
+import { deductAiCredits, refundAiCredits } from '@/lib/ai-credits'
 
 // Per-user rate limit: 10 requests/minute per serverless instance
 const rlMap = new Map<string, number[]>()
@@ -186,101 +187,38 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unknown tool' }, { status: 400 })
     }
 
-    // Server-side credit check and atomic deduction
-    const { data: settings, error: settingsError } = await supabase
+    // Pro+ gate for the score tool — needs the plan only.
+    const { data: settings } = await supabase
       .from('user_settings')
-      .select('ai_credits_remaining, monthly_credits_remaining, earned_credits, paid_credits, credit_source_preference, plan')
+      .select('plan')
       .eq('user_id', user.id)
-      .single()
+      .maybeSingle()
 
-    if (settingsError || !settings) {
-      return NextResponse.json({ error: 'Could not load account settings' }, { status: 500 })
-    }
-
-    // Pro+ gate for score tool
     const PRO_ONLY_TOOLS = new Set(['score'])
-    const userPlan = (settings.plan ?? 'free') as string
-    const normalizedPlan = userPlan.replace('_annual', '')
+    const normalizedPlan = ((settings?.plan ?? 'free') as string).replace('_annual', '')
     if (PRO_ONLY_TOOLS.has(tool) && normalizedPlan === 'free') {
       return NextResponse.json({ error: 'pro_required', message: 'Post Score is a Pro+ feature. Upgrade to unlock it.' }, { status: 403 })
     }
 
-    const creditPref = settings.credit_source_preference || 'monthly_first'
-
-    // Three-bucket credit system: monthly + earned + paid
-    const monthlyCredits = settings.monthly_credits_remaining ?? settings.ai_credits_remaining ?? 0
-    const earnedCredits  = settings.earned_credits ?? 0
-    const paidCredits    = settings.paid_credits ?? 0
-    const totalCredits   = monthlyCredits + earnedCredits + paidCredits
-
-    if (totalCredits < creditCost) {
-      return NextResponse.json({
-        error: `Not enough credits. This tool costs ${creditCost} and you have ${totalCredits} remaining.`,
-        creditsRequired: creditCost,
-        creditsRemaining: totalCredits,
-      }, { status: 402 })
+    // Atomic three-pool deduction — row-locked RPC, no double-spend under concurrency.
+    const deduct = await deductAiCredits(supabase, user.id, creditCost)
+    if (!deduct.ok) {
+      if (deduct.reason === 'insufficient') {
+        return NextResponse.json({
+          error: `Not enough credits. This tool costs ${creditCost} and you have ${deduct.total} remaining.`,
+          creditsRequired: creditCost,
+          creditsRemaining: deduct.total,
+        }, { status: 402 })
+      }
+      return NextResponse.json({ error: 'Could not load account settings' }, { status: 500 })
     }
-
-    // Deduct based on preference order — three-pool system
-    let remaining = creditCost
-    let monthlyDeduct = 0
-    let earnedDeduct  = 0
-    let paidDeduct    = 0
-
-    const takeFrom = (available: number): number => {
-      const take = Math.min(remaining, available)
-      remaining -= take
-      return take
-    }
-
-    if (creditPref === 'earned_first') {
-      earnedDeduct  = takeFrom(earnedCredits)
-      monthlyDeduct = takeFrom(monthlyCredits)
-      paidDeduct    = takeFrom(paidCredits)
-    } else if (creditPref === 'paid_first') {
-      paidDeduct    = takeFrom(paidCredits)
-      monthlyDeduct = takeFrom(monthlyCredits)
-      earnedDeduct  = takeFrom(earnedCredits)
-    } else {
-      // monthly_first (default)
-      monthlyDeduct = takeFrom(monthlyCredits)
-      earnedDeduct  = takeFrom(earnedCredits)
-      paidDeduct    = takeFrom(paidCredits)
-    }
-
-    const newMonthly = monthlyCredits - monthlyDeduct
-    const newEarned  = earnedCredits  - earnedDeduct
-    const newPaid    = paidCredits    - paidDeduct
-    const newLegacy  = Math.max(0, (settings.ai_credits_remaining ?? 0) - creditCost)
-
-    const updatePayload: Record<string, number> = {
-      ai_credits_remaining: newLegacy,
-    }
-    if (settings.monthly_credits_remaining !== null && settings.monthly_credits_remaining !== undefined) {
-      updatePayload.monthly_credits_remaining = newMonthly
-    }
-    if (earnedDeduct > 0) updatePayload.earned_credits = newEarned
-    if (paidDeduct   > 0) updatePayload.paid_credits   = newPaid
-
-    const { error: deductError } = await supabase
-      .from('user_settings')
-      .update(updatePayload)
-      .eq('user_id', user.id)
-
-    if (deductError) {
-      return NextResponse.json({ error: 'Failed to deduct credits — please try again' }, { status: 500 })
-    }
+    const newMonthly = deduct.newMonthly
+    const newEarned  = deduct.newEarned
+    const newPaid    = deduct.newPaid
 
     const apiKey = process.env.GEMINI_API_KEY
     if (!apiKey) {
-      // Refund credits if AI isn't configured
-      const refundPayload: Record<string, number> = { ai_credits_remaining: settings.ai_credits_remaining ?? 0 }
-      if (settings.monthly_credits_remaining !== null && settings.monthly_credits_remaining !== undefined) {
-        refundPayload.monthly_credits_remaining = monthlyCredits
-      }
-      if (earnedDeduct > 0) refundPayload.earned_credits = earnedCredits
-      if (paidDeduct   > 0) refundPayload.paid_credits   = paidCredits
-      await supabase.from('user_settings').update(refundPayload).eq('user_id', user.id)
+      await refundAiCredits(supabase, user.id, deduct) // AI not configured — give it back
       return NextResponse.json({ error: 'AI not configured' }, { status: 500 })
     }
 
@@ -325,14 +263,7 @@ Apply these guidelines to all content you generate.
       const result = await model.generateContent(prompt)
       text = result.response.text()
     } catch (aiErr: any) {
-      // Refund credits on any Gemini failure
-      const refundPayload: Record<string, number> = { ai_credits_remaining: settings.ai_credits_remaining ?? 0 }
-      if (settings.monthly_credits_remaining !== null && settings.monthly_credits_remaining !== undefined) {
-        refundPayload.monthly_credits_remaining = monthlyCredits
-      }
-      if (earnedDeduct > 0) refundPayload.earned_credits = earnedCredits
-      if (paidDeduct   > 0) refundPayload.paid_credits   = paidCredits
-      await supabase.from('user_settings').update(refundPayload).eq('user_id', user.id)
+      await refundAiCredits(supabase, user.id, deduct) // Gemini failed — give credits back
 
       const isRateLimit =
         aiErr?.status === 429 ||
