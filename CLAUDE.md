@@ -405,7 +405,7 @@ These have burned us before — always apply:
 
 ### Active — fix when touching the file
 
-No open known bugs as of July 7, 2026 (full sweep: tsc clean, all 9 locales in sync, all 175 static sitemap routes have pages). All previously tracked issues resolved:
+No open known bugs as of July 26, 2026 (full audit sweep: tsc clean, admin stats/publish/credits/webhook reviewed — see July 26 entry below). Note: the old **"`posts.created_at` may be NULL for SOMA posts"** gotcha is now RESOLVED at the DB layer (PR #534 added a `DEFAULT now()` + backfilled NULLs), so `created_at`-based filters no longer silently drop SOMA posts. All previously tracked issues resolved:
 - ✅ Dark mode spinners — `dark:border-amber-500` added to all 20 pages (PR #472, June 8)
 - ✅ Streak counts scheduled posts — `api/streak` now includes `scheduled` status + uses `scheduled_at` (PR #471, June 8)
 - ✅ Toast safe-area — `admin/white-label` and `hermes/campaigns/[id]` now use shared `<Toast>` component (PR #471, June 8)
@@ -679,6 +679,15 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **3D printing venture name change pending** — Joshua considering a name change away from "Hearthforge." Do not use the name in public-facing posts or marketing until a new name is confirmed. Refer to as "3D printing side project" or "co-founded 3D printing venture with Butch" in the meantime.
 - **Analytics snapshot (June 19, 2026):** 1,126 visitors (+101%), 2,199 page views (+7%), 80% bounce rate (+12%). Top referrers: Bing (92), DDG (39), Vercel (29), Google (20), ChatGPT (17), t.co (15). Countries: USA 27%, Singapore 21%, China 18%, India 6%. 40 users, 850+ posts published, $0 MRR. ChatGPT appearing as referral source for first time — llms.txt/AI discoverability work paying off.
 - **Reddit posts drafted** — New posts for r/buildinpublic, r/micro_saas, r/saasbuild (5 days since last posts). Angle: code audit week, zero-auth endpoint found + fixed, silent data loss bug found + fixed, ChatGPT referral traffic, 40 users / $0 MRR / still solo.
+
+**July 26, 2026 — Admin/stats + credit + webhook audit sweep (PRs #533–#535):**
+Full code-level sweep of SocialMate. Trigger: admin "Posts Today" read 0 while posts were publishing. Found and fixed four things; verified AI models, cron registration, publish pipeline, and route auth are all healthy.
+- **Admin "Posts Today" undercount (PR #533)** — `api/admin/stats` and `api/admin/platform-stats` counted published posts by `created_at` instead of `published_at`. Scheduled/SOMA posts are created days before they publish, so they never showed. Both now filter on `published_at` (matches the Overview 24h panel). `published_at` is stamped on every publish path.
+- **`posts.created_at` NULL — ROOT CAUSE FIXED (PR #534)** — the `posts` table was missing `DEFAULT now()` on `created_at` (every other table had it); SOMA inserts omit the column, so those rows were NULL and any `.gte('created_at', …)` filter silently dropped them. Migration `20260726000001_posts_created_at_default.sql`: `ALTER TABLE posts ALTER COLUMN created_at SET DEFAULT now();` + backfill `COALESCE(scheduled_at, published_at, now())` for existing NULLs. **This resolves the long-standing "created_at may be NULL for SOMA posts" gotcha at the DB layer** — the monthly post-limit quota, dashboard "This Week", and streaks no longer undercount. SQL run in Supabase + confirmed.
+- **Atomic AI credit deduction (PR #535)** — all 7 AI routes did a read-modify-write on credits (SELECT balances → compute split → UPDATE), which could double-spend under concurrent requests. Replaced with a shared `lib/ai-credits.ts` helper backed by row-locked Postgres RPCs `deduct_ai_credits` / `refund_ai_credits` (migration `20260726000002_atomic_ai_credits.sql`, SECURITY INVOKER so RLS scopes to the caller). The RPC mirrors the exact three-pool preference logic it replaced; also de-duped ~600 lines of copy-pasted deduction across the 7 routes. SQL run in Supabase + confirmed.
+- **Webhook Enki dead-path (PR #535)** — the Enki `customer.subscription.updated` handler was unreachable: the main-plan block above did `if (!plan) return`, and Enki subs have `plan = null`. Wrapped the plan work in `if (plan) { … }` so non-plan subs fall through. Plan/white-label behavior unchanged. (Low impact — Enki is wound down — but no longer dead code.)
+- **Verified healthy, no changes needed:** all 29 Gemini call sites on `gemini-3.6-flash`; all Inngest crons registered (27 core + 6 agents + 2 HERMES); publish pipeline idempotency (`platform_post_ids` written before status, retried status writes, `publishedOk` semantics); route auth (the 21 unguarded mutation routes are all public by design); webhook idempotency (`processed_events`); `tsc --noEmit` clean.
+- **Left alone (external):** X/Twitter 403 in the failure log is X rejecting the write at the account/app level (access tier / `tweet.write` scope), not a code bug — the publisher already surfaces the real error. Ignore per Joshua.
 
 **July 13–21, 2026 — Warm "instrument" design-system rebuild (PRs #513–#524):**
 The entire public front end was rebuilt from the old `bg-gray-*` Tailwind look onto a single warm design system. Biggest visual change since launch. For SOMA, the story is "we rebuilt the whole front end this week into a premium, hand-designed system" — build-in-public gold.
@@ -1147,7 +1156,7 @@ When SOMA generates content from this document, follow these behavioral rules on
 - Stripe webhook handler — live payments depend on it. The coupon affiliate commission block (added April 2026) is the only intentional addition; don't touch the rest
 - RLS policies — they're in place for security, don't remove or bypass
 - Inngest publish jobs — idempotency guards are critical, don't remove them
-- The three-pool credit system logic — complex, tested, working
+- The three-pool credit system logic — complex, tested, working. As of July 26, 2026 (PR #535) deduction is atomic via the `deduct_ai_credits` / `refund_ai_credits` Postgres RPCs (`lib/ai-credits.ts`); keep the pool/preference math in sync with the RPC if you ever change either
 - Any env vars — don't suggest hardcoding these
 
 ---
