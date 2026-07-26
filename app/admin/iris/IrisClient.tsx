@@ -216,7 +216,7 @@ export default function IrisClient({ recipientCount, dispatches, nextEdition }: 
               value={whatShipped}
               onChange={e => setWhatShipped(e.target.value)}
               rows={5}
-              placeholder="• IRIS newsletter — this one! biweekly build-in-public dispatch&#10;• SOMA Voice DNA — 40-question interview, AI now sounds like me&#10;• 62 new blog posts for SEO..."
+              placeholder="• IRIS newsletter — this one! weekly build-in-public dispatch&#10;• SOMA Voice DNA — 40-question interview, AI now sounds like me&#10;• 62 new blog posts for SEO..."
               className={TA_CLASS}
             />
           </div>

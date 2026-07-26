@@ -1273,9 +1273,9 @@ export const onboardingSequence = inngest.createFunction(
 
             <!-- IRIS Newsletter mention -->
             <div style="background:#111111;border:1px solid #222222;border-radius:12px;padding:16px 20px;margin-bottom:28px;">
-              <p style="font-size:12px;font-weight:700;color:#71717a;text-transform:uppercase;letter-spacing:1px;margin:0 0 8px;">📨 IRIS Dispatch — our biweekly newsletter</p>
+              <p style="font-size:12px;font-weight:700;color:#71717a;text-transform:uppercase;letter-spacing:1px;margin:0 0 8px;">📨 IRIS Dispatch — our weekly newsletter</p>
               <p style="font-size:13px;color:#a1a1aa;line-height:1.6;margin:0 0 10px;">
-                Every two weeks I send out the IRIS Dispatch — creator tips, product updates, and what we're shipping next. You're opted in by default. Manage it anytime in settings.
+                Every week I send out the IRIS Dispatch — creator tips, product updates, and what we're shipping next. You're opted in by default. Manage it anytime in settings.
               </p>
               <a href="${appUrl}/settings" style="font-size:13px;color:#7C3AED;font-weight:600;text-decoration:none;">Newsletter preferences →</a>
             </div>
@@ -5209,7 +5209,7 @@ export const irisAutoDispatch = inngest.createFunction(
     const draft = await step.run('generate-draft', async () => {
       const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
       const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
-      const result = await model.generateContent(`You are writing the IRIS Dispatch — a biweekly creator newsletter from SocialMate. Write in Joshua's authentic voice: bootstrapped solo founder, genuinely cares about creators, no corporate fluff.
+      const result = await model.generateContent(`You are writing the IRIS Dispatch — a weekly creator newsletter from SocialMate. Write in Joshua's authentic voice: bootstrapped solo founder, genuinely cares about creators, no corporate fluff.
 
 Platform stats this week:
 - New signups: ${weekData.newSignups}
@@ -5254,7 +5254,10 @@ Return ONLY valid JSON (no markdown, no code blocks): {"subject":"...","intro":"
         closing: draft.closing ?? '',
       })
 
-      const { data: optins } = await db.from('user_settings').select('user_id').eq('iris_opt_in', true)
+      // Opted in BY DEFAULT: include true AND null. .eq('iris_opt_in', true) silently
+      // dropped legacy rows whose flag was never set (NULL), so opted-in-by-default users
+      // (incl. the admin account) never received it. Only an explicit false opts out.
+      const { data: optins } = await db.from('user_settings').select('user_id').or('iris_opt_in.eq.true,iris_opt_in.is.null')
       const optedInIds = new Set((optins ?? []).map((r: { user_id: string }) => r.user_id))
 
       const { data: { users: authUsers } } = await db.auth.admin.listUsers({ perPage: 1000 })
