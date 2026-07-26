@@ -1090,44 +1090,46 @@ const creditsToSet = alreadyOnPlan
       return NextResponse.json({ received: true })
     }
 
-    if (!plan) return NextResponse.json({ received: true })
+    // A non-plan subscription (e.g. Enki) must NOT return here — it falls through
+    // to the Enki subscription.updated handler below, which is otherwise unreachable.
+    if (plan) {
+      const { data: current } = await supabase
+        .from('user_settings')
+        .select('user_id, plan, ai_credits_remaining')
+        .eq('stripe_subscription_id', subscription.id)
+        .single()
 
-    const { data: current } = await supabase
-      .from('user_settings')
-      .select('user_id, plan, ai_credits_remaining')
-      .eq('stripe_subscription_id', subscription.id)
-      .single()
-
-    const planChanged    = current?.plan !== plan
-    // Do NOT include white_label_active — that is controlled exclusively by admin approval flow
-    const updatePayload: Record<string, any> = {
-      plan,
-      plan_expires_at: safeDate((subscription as any).current_period_end),
-    }
-
-    if (planChanged) {
-      // subscription.updated fires after checkout.session.completed on upgrades
-      // At this point credits may already be correct from checkout handler — don't overwrite
-      // unless this is a direct subscription modification (not via checkout)
-      const creditsToSet = resolveCreditsOnPlanChange(
-        current?.plan ?? null,
+      const planChanged    = current?.plan !== plan
+      // Do NOT include white_label_active — that is controlled exclusively by admin approval flow
+      const updatePayload: Record<string, any> = {
         plan,
-        current?.ai_credits_remaining ?? 0
-      )
-      updatePayload.ai_credits_remaining      = creditsToSet
-      updatePayload.monthly_credits_remaining = creditsToSet
-      updatePayload.ai_credits_total          = PLAN_CREDITS[plan] ?? 100
-      updatePayload.ai_credits_reset_at       = new Date().toISOString()
-    }
-    // No plan change = renewal, don't touch credits
+        plan_expires_at: safeDate((subscription as any).current_period_end),
+      }
 
-    await supabase
-      .from('user_settings')
-      .update(updatePayload)
-      .eq('stripe_subscription_id', subscription.id)
+      if (planChanged) {
+        // subscription.updated fires after checkout.session.completed on upgrades
+        // At this point credits may already be correct from checkout handler — don't overwrite
+        // unless this is a direct subscription modification (not via checkout)
+        const creditsToSet = resolveCreditsOnPlanChange(
+          current?.plan ?? null,
+          plan,
+          current?.ai_credits_remaining ?? 0
+        )
+        updatePayload.ai_credits_remaining      = creditsToSet
+        updatePayload.monthly_credits_remaining = creditsToSet
+        updatePayload.ai_credits_total          = PLAN_CREDITS[plan] ?? 100
+        updatePayload.ai_credits_reset_at       = new Date().toISOString()
+      }
+      // No plan change = renewal, don't touch credits
 
-    if (current?.user_id) {
-      await processAffiliateCommission(supabase, current.user_id, plan, false)
+      await supabase
+        .from('user_settings')
+        .update(updatePayload)
+        .eq('stripe_subscription_id', subscription.id)
+
+      if (current?.user_id) {
+        await processAffiliateCommission(supabase, current.user_id, plan, false)
+      }
     }
   }
 
