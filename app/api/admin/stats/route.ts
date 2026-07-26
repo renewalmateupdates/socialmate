@@ -9,7 +9,11 @@ export async function GET() {
 
   const db = getSupabaseAdmin()
 
-  // Today start (UTC)
+  // Today start (UTC). "Posts today" means posts that PUBLISHED today, so it must
+  // filter on published_at — not created_at. Scheduled/SOMA/recurring posts are
+  // created days earlier (and SOMA rows can have a NULL created_at, which .gte()
+  // silently drops), so a created_at filter undercounts to zero. published_at is
+  // stamped on every publish path and matches the Overview's 24h panel.
   const todayStart = new Date()
   todayStart.setUTCHours(0, 0, 0, 0)
 
@@ -21,7 +25,7 @@ export async function GET() {
   ] = await Promise.allSettled([
     db.from('user_settings').select('user_id', { count: 'exact', head: true }),
     db.from('posts').select('id', { count: 'exact', head: true })
-      .gte('created_at', todayStart.toISOString())
+      .gte('published_at', todayStart.toISOString())
       .eq('status', 'published'),
     db.from('affiliate_profiles').select('id', { count: 'exact', head: true })
       .eq('status', 'active'),

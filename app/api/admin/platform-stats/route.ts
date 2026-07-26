@@ -14,10 +14,12 @@ export async function GET() {
   const weekStart  = new Date(now); weekStart.setUTCDate(now.getUTCDate() - 7); weekStart.setUTCHours(0, 0, 0, 0)
   const monthStart = new Date(now); monthStart.setUTCDate(1); monthStart.setUTCHours(0, 0, 0, 0)
 
-  // Fetch all published posts with platforms, user_id, created_at
+  // Fetch all published/failed posts with platforms, user_id, and published_at.
+  // Time-range counts key off published_at (when it went live), not created_at:
+  // scheduled/SOMA posts are created days earlier and would undercount otherwise.
   const { data: posts, error } = await db
     .from('posts')
-    .select('user_id, platforms, status, created_at')
+    .select('user_id, platforms, status, created_at, published_at')
     .in('status', ['published', 'failed'])
     .order('created_at', { ascending: false })
     .limit(5000)
@@ -37,11 +39,13 @@ export async function GET() {
     }
   }
 
-  // Time-range counts (published only)
+  // Time-range counts (published only), keyed off published_at.
   const published = allPosts.filter(p => p.status === 'published')
-  const postsToday = published.filter(p => new Date(p.created_at) >= todayStart).length
-  const postsWeek  = published.filter(p => new Date(p.created_at) >= weekStart).length
-  const postsMonth = published.filter(p => new Date(p.created_at) >= monthStart).length
+  const publishedOn = (p: { published_at: string | null }, since: Date) =>
+    !!p.published_at && new Date(p.published_at) >= since
+  const postsToday = published.filter(p => publishedOn(p, todayStart)).length
+  const postsWeek  = published.filter(p => publishedOn(p, weekStart)).length
+  const postsMonth = published.filter(p => publishedOn(p, monthStart)).length
 
   // Top posting users
   const userCount: Record<string, number> = {}
