@@ -348,7 +348,7 @@ function OnboardingInner() {
                   {irisOptIn && <span className="text-white text-[9px] font-black">✓</span>}
                 </div>
                 <p className="text-xs text-gray-600 dark:text-gray-400">
-                  <span className="font-bold text-gray-800 dark:text-gray-200">📬 IRIS Dispatch</span> — biweekly build-in-public newsletter. No spam.
+                  <span className="font-bold text-gray-800 dark:text-gray-200">📬 IRIS Dispatch</span> — weekly build-in-public newsletter. No spam.
                 </p>
               </button>
 

@@ -207,7 +207,7 @@ const CHANGELOG: ChangelogEntry[] = [
     date: 'May 14, 2026',
     version: 'Admin Insights + Growth Infrastructure',
     changes: [
-      { type: 'New',      text: 'IRIS Dispatch — biweekly build-in-public newsletter. Admin compose UI at /admin/iris with live preview, recipient count, send history. Subscribers manage opt-in in Settings → Notifications. One-click unsubscribe in every email.' },
+      { type: 'New',      text: 'IRIS Dispatch — weekly build-in-public newsletter. Admin compose UI at /admin/iris with live preview, recipient count, send history. Subscribers manage opt-in in Settings → Notifications. One-click unsubscribe in every email.' },
       { type: 'New',      text: 'Monthly credits reset email — automatic Resend email on the 1st of each month reminding users their credits refreshed. Free users get a soft Pro upgrade nudge.' },
       { type: 'New',      text: 'Admin God Mode improvements — stat cards are now clickable (drill into filtered user lists). Platform distribution section shows connected account counts per platform across all real users.' },
       { type: 'New',      text: 'Open Graph metadata for link-in-bio and creator pages — each public bio and creator page now generates its own og:title, og:description, and twitter card. Blog posts now include og:image.' },
