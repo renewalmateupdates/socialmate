@@ -23,11 +23,14 @@ export default async function IrisPage() {
 
   const admin = getSupabaseAdmin()
 
-  // Opted-in recipient count
+  // Opted-in recipient count. IRIS is opted-in BY DEFAULT, so legacy rows whose
+  // flag was never set (NULL) still receive the dispatch. Match the send route +
+  // cron (include true AND null); only an explicit false opts out. Using
+  // .eq('iris_opt_in', true) here undercounted and disagreed with what actually sent.
   const { count: optinCount } = await admin
     .from('user_settings')
     .select('*', { count: 'exact', head: true })
-    .eq('iris_opt_in', true)
+    .or('iris_opt_in.eq.true,iris_opt_in.is.null')
 
   // Recent dispatches
   const { data: dispatches } = await admin

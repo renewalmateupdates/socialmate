@@ -303,7 +303,7 @@ function SignupForm() {
             className="mt-0.5 h-4 w-4 flex-shrink-0 rounded border-edge bg-void accent-[var(--color-amber)]"
           />
           <span className="text-small leading-relaxed text-ink-muted">
-            Send me <span className="text-ink-body">IRIS Dispatch</span>, the biweekly
+            Send me <span className="text-ink-body">IRIS Dispatch</span>, the weekly
             build-in-public newsletter. Unsubscribe anytime.
           </span>
         </label>

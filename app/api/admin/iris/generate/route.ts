@@ -35,7 +35,7 @@ export async function POST(req: Request) {
       ? `\n\nPREVIOUS SUBJECT LINES TO AVOID REPEATING:\n${prevSubjects.map(s => `- ${s}`).join('\n')}`
       : ''
 
-    const prompt = `You are writing the IRIS Dispatch, a biweekly build-in-public newsletter from SocialMate written by Joshua Bostic — a solo bootstrapped founder who builds nights and weekends while working a deli job at Walmart. Joshua is 30 (turning 31 soon), self-taught, based in the US, and deeply authentic. He is not corporate. He writes like a real person.
+    const prompt = `You are writing the IRIS Dispatch, a weekly build-in-public newsletter from SocialMate written by Joshua Bostic — a solo bootstrapped founder who builds nights and weekends while working a deli job at Walmart. Joshua is 30 (turning 31 soon), self-taught, based in the US, and deeply authentic. He is not corporate. He writes like a real person.
 
 TONE RULES:
 - No em dashes (—). Use commas, periods, or line breaks instead.
