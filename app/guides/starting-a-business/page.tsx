@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Starting a Business From Scratch — Gilgamesh's Guide Vol. 1",
     description:
-      "Real talk from a bootstrapped solo founder who works a deli job and builds software at night. Everything they charge $500 courses for — free.",
+      "Real talk from a bootstrapped solo founder who builds software at night. Everything they charge $500 courses for — free.",
     type: 'article',
   },
 }
@@ -160,7 +160,7 @@ export default function StartingABusinessGuidePage() {
                   Everything in here is real. The numbers are real. The mistakes are real. The
                   wins are hard-earned and small at first. I&apos;m not writing this from the other
                   side of a billion-dollar exit. I&apos;m writing it from the middle — still building,
-                  still grinding, still clocking in to my deli job on the days when the SaaS
+                  still grinding, still doing tree service work on the days when the SaaS
                   revenue isn&apos;t there yet.
                 </p>
               </section>

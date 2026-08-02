@@ -71,7 +71,7 @@ const QUESTIONS: Question[] = [
     key: 'your_story',
     text: 'In one sentence — what\'s your story? (Who are you and what are you building?)',
     type: 'text',
-    placeholder: 'e.g. "I work a deli job and build a SaaS nights and weekends because I believe everyone deserves the tools the pros use."',
+    placeholder: 'e.g. "I do tree service work by day and build a SaaS nights and weekends because I believe everyone deserves the tools the pros use."',
     tier: 'foundation',
   },
   {
@@ -122,7 +122,7 @@ const QUESTIONS: Question[] = [
     key: 'differentiator',
     text: 'What separates you from everyone else doing what you do?',
     type: 'text',
-    placeholder: 'e.g. "I\'m actually doing it while broke. No $10k course. Just code, sweat, and a deli apron."',
+    placeholder: 'e.g. "I\'m actually doing it while broke. No $10k course. Just code, sweat, and stolen hours."',
     tier: 'deep_dive',
   },
   {
@@ -143,7 +143,7 @@ const QUESTIONS: Question[] = [
     key: 'building_toward',
     text: 'What are you building toward? Be specific.',
     type: 'text',
-    placeholder: 'e.g. "2,000 paying users by end of 2026, quit the deli job, help other founders do the same"',
+    placeholder: 'e.g. "2,000 paying users by end of 2026, go full-time on the SaaS, help other founders do the same"',
     tier: 'deep_dive',
   },
   {

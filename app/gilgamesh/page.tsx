@@ -335,7 +335,7 @@ export default function GilgameshGuidePage() {
               </p>
               <h3 style={{ fontSize: 20, fontWeight: 800, marginBottom: 10 }}>Joshua Bostic</h3>
               <p style={{ fontSize: 14, color: '#d1d5db', lineHeight: 1.75, marginBottom: 16 }}>
-                Founder of SocialMate and Gilgamesh Enterprise LLC. Works a deli job.
+                Founder of SocialMate and Gilgamesh Enterprise LLC.
                 Builds at night. Started with nothing and is figuring it out publicly.
                 These guides are what he wishes he'd had.
               </p>
