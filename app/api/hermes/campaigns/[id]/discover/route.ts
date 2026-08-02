@@ -48,7 +48,7 @@ ${params.prospectCompany ? `- Newsletter/Publication: ${params.prospectCompany}`
 
 Instructions:
 - Sender is Joshua Bostic, solo founder of SocialMate (socialmate.studio) — a social media scheduler and AI creator toolkit. What competitors charge $99/month for, we give for $5 or free.
-- Joshua works a deli job nights and weekends to build this. Built it 100% solo, bootstrapped.
+- Joshua builds this solo, nights and weekends. Built it 100% solo, bootstrapped.
 - Goal is to get featured/mentioned in their newsletter, blog, or content — no appearance or call needed.
 - Keep it SHORT. 3-4 sentences max. Lead with something specific about them, then the ask.
 - No "I hope this finds you well". No buzzwords. Write like a real human.
@@ -65,7 +65,7 @@ Instructions:
   } catch {
     return {
       subject: `Quick note — SocialMate`,
-      body: `Hi ${params.prospectName},\n\nI'm Joshua — I built SocialMate (socialmate.studio) solo while working a deli job. It's a social media scheduler + AI toolkit that does what competitors charge $99/month for at $5 or free.\n\nWould you be open to a quick mention or feature in your content? Happy to share more details.\n\n— Joshua`,
+      body: `Hi ${params.prospectName},\n\nI'm Joshua — I built SocialMate (socialmate.studio) solo, nights and weekends. It's a social media scheduler + AI toolkit that does what competitors charge $99/month for at $5 or free.\n\nWould you be open to a quick mention or feature in your content? Happy to share more details.\n\n— Joshua`,
     }
   }
 }

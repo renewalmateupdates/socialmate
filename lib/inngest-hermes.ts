@@ -226,7 +226,7 @@ export const hermesAutoDiscoverCron = inngest.createFunction(
           const prompt = `Write a short cold email intro from Joshua Bostic, founder of SocialMate (socialmate.studio). Goal: ${campaign.goal ?? 'get featured in their newsletter/blog'}. Prospect: ${person.name}${person.company ? `, runs "${person.company}"` : ''}. Keep it 3-4 sentences, human, no buzzwords. Output JSON: {"subject":"...","body":"..."}`
 
           let subject = `Quick note — SocialMate`
-          let body    = `Hi ${person.name},\n\nI built SocialMate (socialmate.studio) solo — a social media scheduler + AI toolkit for $5/mo vs competitors at $99. I work a deli job nights and weekends to build this.\n\nWould you consider a mention or feature in your content?\n\n— Joshua`
+          let body    = `Hi ${person.name},\n\nI built SocialMate (socialmate.studio) solo — a social media scheduler + AI toolkit for $5/mo vs competitors at $99. I build this solo, nights and weekends.\n\nWould you consider a mention or feature in your content?\n\n— Joshua`
 
           try {
             const result = await model.generateContent(prompt)

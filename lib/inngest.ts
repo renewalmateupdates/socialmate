@@ -1024,7 +1024,7 @@ export const onboardingSequence = inngest.createFunction(
 
             <!-- Personal note -->
             <p style="font-size:13px;color:#71717a;line-height:1.7;margin:0;">
-              <strong style="color:#a1a1aa;">P.S.</strong> I built SocialMate solo between deli shifts. If you ever have feedback, a feature request, or just want to say hi — reply to this email. I read every message.
+              <strong style="color:#a1a1aa;">P.S.</strong> I built SocialMate solo, nights and weekends. If you ever have feedback, a feature request, or just want to say hi — reply to this email. I read every message.
             </p>
             <p style="font-size:13px;color:#71717a;margin:12px 0 0;">— Joshua, Founder of SocialMate</p>
 
