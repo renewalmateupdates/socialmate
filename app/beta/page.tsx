@@ -161,7 +161,7 @@ export default function BetaPage() {
         {/* Built by Joshua */}
         <div className="border-t border-gray-800 pt-8 text-center">
           <p className="text-xs text-gray-500 leading-relaxed">
-            Built solo by <span className="text-gray-300 font-semibold">Joshua Bostic</span> — founder of Gilgamesh Enterprise LLC, working a deli job nights and weekends to build this.{' '}
+            Built solo by <span className="text-gray-300 font-semibold">Joshua Bostic</span> — founder of Gilgamesh Enterprise LLC, building this nights and weekends.{' '}
             <Link href="/story" className="text-amber-400 hover:text-amber-300 underline underline-offset-2">Read the story →</Link>
           </p>
         </div>

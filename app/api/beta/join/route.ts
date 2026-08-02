@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
             </div>
 
             <p style="font-size: 13px; color: #aaa; line-height: 1.7; margin: 0;">
-              I'm Joshua — I built SocialMate solo while working a deli job. Every tester gets us one step closer to public launch. Seriously means a lot. 🙏
+              I'm Joshua — I built SocialMate solo, nights and weekends. Every tester gets us one step closer to public launch. Seriously means a lot. 🙏
             </p>
           </div>
 
