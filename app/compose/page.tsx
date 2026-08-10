@@ -197,7 +197,20 @@ function ComposeInner() {
   const [activeAiTool, setActiveAiTool] = useState<string | null>(null)
   const [aiLoading, setAiLoading] = useState(false)
   const [aiError, setAiError] = useState('')
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null)
+  // This month's post quota, for the "running low" banner. Null until loaded or
+  // if the request fails — compose must never block on it.
+  const [postUsage, setPostUsage] = useState<{
+    plan: string; used: number; limit: number; remaining: number
+  } | null>(null)
+
+  // `action` turns a dead-end error into a way forward. Hitting a plan limit is
+  // the moment someone is most likely to upgrade, and the API already sends the
+  // upgrade line — before this it was thrown away and the user just saw red.
+  const [toast, setToast] = useState<{
+    message: string
+    type: 'success' | 'error' | 'info'
+    action?: { label: string; href: string }
+  } | null>(null)
   const [templateBanner, setTemplateBanner] = useState<string | null>(null)
   const [scheduleError, setScheduleError] = useState('')
   // Recurring post state
@@ -316,6 +329,14 @@ function ComposeInner() {
     if (!sessionStorage.getItem('sm_posting_disclaimer_dismissed')) {
       setShowPostingDisclaimer(true)
     }
+  }, [])
+
+  // This month's post quota. Non-fatal: a failure just means no banner.
+  useEffect(() => {
+    fetch('/api/posts/usage')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d && typeof d.limit === 'number') setPostUsage(d) })
+      .catch(() => {})
   }, [])
 
   // Fetch brand voice for badge
@@ -616,9 +637,27 @@ function ComposeInner() {
     }
   }
 
-  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'success') => {
-    setToast({ message, type })
-    setTimeout(() => setToast(null), 4000)
+  const showToast = (
+    message: string,
+    type: 'success' | 'error' | 'info' = 'success',
+    action?: { label: string; href: string },
+  ) => {
+    setToast({ message, type, action })
+    // 4s is enough to read a confirmation but not enough to decide to click
+    // something. Give an actionable toast room to actually be acted on.
+    setTimeout(() => setToast(null), action ? 12000 : 4000)
+  }
+
+  // Every failed write goes through here, so a plan limit reads the same
+  // everywhere instead of depending on which handler caught it. The API sends
+  // `upgrade` + `upgradeHref` on quota rejections (lib/post-limits.ts); a plain
+  // error just shows its message as before.
+  const showApiError = (data: { error?: string; upgrade?: string | null; upgradeHref?: string }) => {
+    if (data?.upgrade) {
+      showToast(data.upgrade, 'info', { label: 'See plans', href: data.upgradeHref || '/pricing' })
+      return
+    }
+    showToast(data?.error || 'Something went wrong', 'error')
   }
 
   const togglePlatform = (id: string) => {
@@ -1251,7 +1290,7 @@ function ComposeInner() {
       })
 
       const data = await res.json()
-      if (!res.ok) { showToast(data.error || 'Something went wrong', 'error'); return }
+      if (!res.ok) { showApiError(data); return }
 
       if (scheduledAt) {
         showToast('Post scheduled successfully! ✓')
@@ -1309,7 +1348,7 @@ function ComposeInner() {
         }),
       })
       const data = await res.json()
-      if (!res.ok) { showToast(data.error || 'Failed to submit for approval', 'error'); return }
+      if (!res.ok) { showApiError({ error: 'Failed to submit for approval', ...data }); return }
 
       showToast('Submitted for review ✓')
       setContent('')
@@ -1342,7 +1381,7 @@ function ComposeInner() {
         }),
       })
       const data = await res.json()
-      if (!res.ok) { showToast(data.error || 'Failed to save draft', 'error'); return }
+      if (!res.ok) { showApiError({ error: 'Failed to save draft', ...data }); return }
       setCurrentDraftId(data.postId)
       showToast('Saved to drafts ✓')
     } catch {
@@ -1532,6 +1571,27 @@ function ComposeInner() {
                 cta="Get Pro — $5/mo"
                 href="/pricing"
                 dismissKey="nudge_compose_credits"
+              />
+            </div>
+          )}
+
+          {/* POST QUOTA NUDGE — the monthly cap used to be invisible until you
+              hit it mid-post and got a red error. Surface the boundary while
+              there's still room to plan around it. Same banner as credits, and
+              dismissible for the month. */}
+          {!loading && postUsage && postUsage.limit > 0 && postUsage.remaining <= 10 && (
+            <div className="mb-4">
+              <UpgradeNudge
+                variant="banner"
+                title={postUsage.remaining === 0 ? 'Monthly post limit reached' : 'Running low on posts'}
+                description={
+                  postUsage.remaining === 0
+                    ? `You've used all ${postUsage.limit.toLocaleString()} posts this month. Your quota resets on the 1st.`
+                    : `${postUsage.remaining} of ${postUsage.limit.toLocaleString()} posts left this month`
+                }
+                cta={postUsage.plan === 'free' ? 'Get Pro — $5/mo' : 'See plans'}
+                href="/pricing"
+                dismissKey="nudge_compose_posts"
               />
             </div>
           )}
@@ -3116,12 +3176,31 @@ function ComposeInner() {
       </div>
 
       {toast && (
-        <div style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className={`fixed right-6 text-white text-xs font-bold px-4 py-3 rounded-xl shadow-lg z-50 ${
+        <div style={{ bottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }} className={`fixed right-6 flex items-center gap-3 text-white text-xs font-bold px-4 py-3 rounded-xl shadow-lg z-50 ${
           toast.type === 'error' ? 'bg-red-500' :
           toast.type === 'info'  ? 'bg-blue-600' :
           'bg-black'
         }`}>
-          {toast.message}
+          <span>{toast.message}</span>
+          {toast.action && (
+            <>
+              <Link
+                href={toast.action.href}
+                className="shrink-0 rounded-lg bg-white/20 px-2.5 py-1 font-extrabold hover:bg-white/30 transition"
+              >
+                {toast.action.label}
+              </Link>
+              {/* Dismissible, never sticky — an upgrade prompt you can't close
+                  is the kind that trains people to ignore them. */}
+              <button
+                onClick={() => setToast(null)}
+                aria-label="Dismiss"
+                className="shrink-0 text-white/70 hover:text-white transition"
+              >
+                ✕
+              </button>
+            </>
+          )}
         </div>
       )}
 
