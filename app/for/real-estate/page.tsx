@@ -132,7 +132,7 @@ const FAQ = [
   },
   {
     q: 'Can I schedule listing posts weeks in advance?',
-    a: "Yes. Pro and Agency plans have unlimited scheduling windows. Free plan has a 2-week window. Build your listing campaigns upfront and they post automatically at the times you set.",
+    a: "Yes. Pro schedules a month out and Agency three months. Free plan has a 2-week window. Build your listing campaigns upfront and they post automatically at the times you set.",
   },
   {
     q: 'Will SOMA AI write real estate content that doesn\'t sound generic?',

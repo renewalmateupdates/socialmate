@@ -147,7 +147,7 @@ export default function VsBeehiivPage() {
               {
                 n: '2',
                 title: 'beehiiv at $42/month vs SocialMate at $0',
-                desc: "beehiiv's Scale plan costs $42/month. SocialMate's free plan covers unlimited posting across 7 platforms, 50 AI credits/month, bulk scheduling, and link in bio. If you are just getting started, start with what is free.",
+                desc: "beehiiv's Scale plan costs $42/month. SocialMate's free plan covers 100 posts a month across 7 platforms, 50 AI credits/month, bulk scheduling, and link in bio. If you are just getting started, start with what is free.",
               },
               {
                 n: '3',

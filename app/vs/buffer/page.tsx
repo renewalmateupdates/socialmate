@@ -9,7 +9,7 @@ import { useI18n } from '@/contexts/I18nContext'
 const COMPARISON = [
   { feature: 'Starting price',          buffer: '$6/month (Essentials)',     socialmate: '$0 — free forever'       },
   { feature: 'Free plan channels',      buffer: '3 channels',                socialmate: 'No hard cap'             },
-  { feature: 'Free plan queue limit',   buffer: '10 posts per channel',      socialmate: 'Unlimited'               },
+  { feature: 'Free plan queue limit',   buffer: '10 posts per channel',      socialmate: '100 posts / month'               },
   { feature: 'Bulk scheduling',         buffer: '❌ Not available',           socialmate: '✅ Free'                  },
   { feature: 'Analytics',              buffer: 'Paid add-on',               socialmate: '✅ Built-in free'         },
   { feature: 'Engagement / Reply inbox', buffer: 'Paid add-on',             socialmate: '✅ Included'              },
@@ -118,7 +118,7 @@ export default function VsBufferPage() {
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
             <p className="font-extrabold text-lg mb-2">Everything in one. No add-ons. No caps.</p>
             <ul className="space-y-1 text-xs text-ink-body">
-              <li>✅ Unlimited posts, no queue cap</li>
+              <li>✅ 100 posts / month, no per-channel cap</li>
               <li>✅ Bulk scheduling free</li>
               <li>✅ Analytics built in — no add-on</li>
               <li>✅ 15+ AI tools on free tier</li>

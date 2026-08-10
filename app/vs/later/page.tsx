@@ -10,7 +10,7 @@ const COMPARISON = [
   { feature: 'Starting price',          later: '$18/month (Starter)',        socialmate: '$0 — free forever'       },
   { feature: 'Free plan platforms',     later: 'Instagram only',             socialmate: '7 platforms'            },
   { feature: 'Free plan profiles',      later: '1 profile',                  socialmate: 'Multiple'                },
-  { feature: 'Free plan post limit',    later: '30 posts/month',             socialmate: 'Unlimited'               },
+  { feature: 'Free plan post limit',    later: '30 posts/month',             socialmate: '100 posts / month'               },
   { feature: 'Discord support',         later: '❌',                          socialmate: '✅'                      },
   { feature: 'Telegram support',        later: '❌',                          socialmate: '✅'                      },
   { feature: 'Mastodon support',        later: '❌',                          socialmate: '✅'                      },
@@ -121,7 +121,7 @@ export default function VsLaterPage() {
               <li>✅ 7 platforms on free plan</li>
               <li>✅ TikTok live — free for all users</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
-              <li>✅ Unlimited posts, no monthly cap</li>
+              <li>✅ 100 posts / month on the free plan</li>
               <li>✅ Bulk scheduling free</li>
               <li>✅ 15+ AI tools included free</li>
               <li>✅ No credit card required</li>
@@ -203,7 +203,7 @@ export default function VsLaterPage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Not just an Instagram tool.</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            SocialMate covers 7 platforms — including Discord, Bluesky, Telegram, and Mastodon. Unlimited posts. 15+ AI tools. Free forever.
+            SocialMate covers 7 platforms — including Discord, Bluesky, Telegram, and Mastodon. 100 posts a month. 15+ AI tools. Free forever.
           </p>
           <Link href="/signup" className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

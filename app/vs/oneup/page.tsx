@@ -48,7 +48,7 @@ const FAQ = [
   },
   {
     q: 'Is $18/month for OneUp worth it compared to SocialMate free?',
-    a: "OneUp's $18/month plan gives you unlimited posts, recurring schedules, and CSV bulk upload. SocialMate's free plan gives you the same core scheduling features plus 15+ AI tools, Discord/Telegram/Bluesky support, and a full link-in-bio page (SIGIL). For $5/month, SocialMate Pro adds 500 AI credits/month, 5 seats, SOMA access, and 8 autonomous agents. The value comparison strongly favors SocialMate at every price point.",
+    a: "OneUp's $18/month plan gives you unlimited posts, recurring schedules, and CSV bulk upload. SocialMate's free plan gives you the same core scheduling features at 100 posts a month plus 15+ AI tools, Discord/Telegram/Bluesky support, and a full link-in-bio page (SIGIL). For $5/month, SocialMate Pro adds 500 AI credits/month, 5 seats, SOMA access, and 8 autonomous agents. The value comparison strongly favors SocialMate at every price point.",
   },
 ]
 

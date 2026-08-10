@@ -10,7 +10,7 @@ const COMPARISON = [
   { feature: 'Starting price',              crowdfire: '$0 (very limited) / $7.48 Plus', socialmate: '$0 — free forever'        },
   { feature: 'Free plan post limit',        crowdfire: '10 posts/month hard cap',         socialmate: '100 posts / month'          },
   { feature: 'Free plan accounts',          crowdfire: '1 social account only',           socialmate: 'Multiple accounts'        },
-  { feature: 'Scheduled posts (free)',       crowdfire: '10/month maximum',               socialmate: 'Unlimited'                },
+  { feature: 'Scheduled posts (free)',       crowdfire: '10/month maximum',               socialmate: '100 posts / month'                },
   { feature: 'Content curation',            crowdfire: '✅ (free tier)',                  socialmate: 'RSS import (free)'        },
   { feature: 'Analytics (free)',            crowdfire: '❌ Locked to paid',              socialmate: '✅ Free (30 days)'        },
   { feature: 'Discord support',             crowdfire: '❌',                              socialmate: '✅'                       },
@@ -116,7 +116,7 @@ export default function VsCrowdfirePage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">Unlimited posts. 7 platforms. $0.</p>
+            <p className="font-extrabold text-lg mb-2">100 posts / month. 7 platforms. $0.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Free forever — no post cap</li>
               <li>✅ Analytics included free (30 days)</li>

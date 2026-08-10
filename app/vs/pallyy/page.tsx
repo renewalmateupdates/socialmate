@@ -116,7 +116,7 @@ export default function VsPallyyPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">Unlimited posts. Flat pricing. $0.</p>
+            <p className="font-extrabold text-lg mb-2">100 posts / month. Flat pricing. $0.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Free forever — no post cap</li>
               <li>✅ 15+ AI tools on free tier</li>

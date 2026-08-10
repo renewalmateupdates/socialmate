@@ -8,7 +8,7 @@ import { useI18n } from '@/contexts/I18nContext'
 
 const COMPARISON = [
   { feature: 'Starting price',          metricool: '$22/month (Starter)',    socialmate: '$0 — free forever'       },
-  { feature: 'Free plan post limit',    metricool: '50 posts/month',         socialmate: 'Unlimited'               },
+  { feature: 'Free plan post limit',    metricool: '50 posts/month',         socialmate: '100 posts / month'               },
   { feature: 'Free plan brands',        metricool: '1 brand',                socialmate: 'Multiple workspaces'     },
   { feature: 'Pricing model',           metricool: 'Per brand',              socialmate: 'Flat rate'               },
   { feature: 'Platforms supported',     metricool: '12+',                    socialmate: '16 (growing)'            },
@@ -116,9 +116,9 @@ export default function VsMetricoolPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">Unlimited posts. 15+ AI tools. $0.</p>
+            <p className="font-extrabold text-lg mb-2">100 posts / month. 15+ AI tools. $0.</p>
             <ul className="space-y-1 text-xs text-ink-body">
-              <li>✅ Unlimited posts, no cap</li>
+              <li>✅ 100 posts / month, double Metricool's free cap</li>
               <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
               <li>✅ Bulk scheduling free</li>

@@ -115,7 +115,7 @@ export default function VsPostPlannerPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">Unlimited posts. All platforms. $0.</p>
+            <p className="font-extrabold text-lg mb-2">100 posts / month. All platforms. $0.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Free forever — no post cap</li>
               <li>✅ 15+ AI tools on free tier</li>
@@ -165,7 +165,7 @@ export default function VsPostPlannerPage() {
               {
                 n: '3',
                 title: 'Content discovery is only valuable if you can actually post what you find',
-                desc: "Post Planner's content curation feature is genuinely useful — but limited posting caps mean you hit your limit quickly. SocialMate gives you RSS import for automated content sharing alongside unlimited original posts.",
+                desc: "Post Planner's content curation feature is genuinely useful — but limited posting caps mean you hit your limit quickly. SocialMate gives you RSS import for automated content sharing alongside 100 original posts a month on the free plan.",
               },
               {
                 n: '4',

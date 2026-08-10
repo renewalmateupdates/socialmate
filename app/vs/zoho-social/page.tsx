@@ -43,7 +43,7 @@ const FAQ = [
   },
   {
     q: 'Is SocialMate actually free with no catch?',
-    a: 'Yes. The free tier includes unlimited post scheduling, 50 AI credits per month, bulk scheduling, link in bio, hashtag manager, competitor tracking, RSS import, and evergreen recycling. No credit card required, no 15-day countdown.',
+    a: 'Yes. The free tier includes 100 posts a month, 50 AI credits per month, bulk scheduling, link in bio, hashtag manager, competitor tracking, RSS import, and evergreen recycling. No credit card required, no 15-day countdown.',
   },
 ]
 
