@@ -4,12 +4,8 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { postLimitFor, postsUsedThisMonth, postLimitReachedBody } from '@/lib/post-limits'
 
-const PLAN_POST_LIMITS: Record<string, number> = {
-  free:   100,
-  pro:    1000,
-  agency: 5000,
-}
 
 export async function POST(request: NextRequest) {
   const cookieStore = await cookies()
@@ -149,27 +145,8 @@ export async function POST(request: NextRequest) {
       .single()
 
     const plan = settings?.plan || 'free'
-    const limit = PLAN_POST_LIMITS[plan] ?? 100
-
-    const startOfMonth = new Date()
-    startOfMonth.setDate(1)
-    startOfMonth.setHours(0, 0, 0, 0)
-
-    const { count } = await supabase
-      .from('posts')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .gte('created_at', startOfMonth.toISOString())
-
-    if ((count ?? 0) >= limit) {
-      return NextResponse.json({
-        error: 'Monthly post limit reached',
-        limit,
-        plan,
-        upgrade: plan === 'free'
-          ? 'Upgrade to Pro for 1,000 posts/month'
-          : 'Upgrade to Agency for 5,000 posts/month',
-      }, { status: 403 })
+    if (await postsUsedThisMonth(supabase, user.id) >= postLimitFor(plan)) {
+      return NextResponse.json(postLimitReachedBody(plan), { status: 403 })
     }
 
     const insertPayload: Record<string, unknown> = {
