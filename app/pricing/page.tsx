@@ -78,8 +78,8 @@ const PLANS = [
       { label: '10 GB media storage'                                           },
       { label: '1-month scheduling window'                                     },
       { label: '90-day analytics history'                                      },
-      { label: 'AI Content Calendar',              note: '25 credits'         },
-      { label: 'AI Image Generation',              note: '25 credits'         },
+      { label: 'AI Content Calendar',              note: '5 credits'          },
+      { label: 'AI Image Generation',              note: 'coming soon'        },
       { label: 'Custom domain for Link in Bio'                                 },
       { label: 'Referral & affiliate program'                                  },
       { label: 'White Label add-on available',     note: '+$20/mo or +$40/mo' },
@@ -615,15 +615,15 @@ export default function Pricing() {
               <div className="flex items-end gap-1 mb-2">
                 <span className="text-4xl font-extrabold text-ink-high">Custom</span>
               </div>
-              <p className="text-xs leading-relaxed text-ink-muted">For agencies and enterprises that need unlimited scale, custom terms, and a real SLA.</p>
+              <p className="text-xs leading-relaxed text-ink-muted">For agencies and enterprises that need custom scale, custom terms, and a real SLA.</p>
             </div>
 
             <div className="px-6 py-5 flex-1 flex flex-col">
               <ul className="space-y-2.5 flex-1 mb-6">
                 {[
                   { label: 'Everything in Agency' },
-                  { label: 'Unlimited seats' },
-                  { label: 'Unlimited client workspaces' },
+                  { label: 'Custom seat count' },
+                  { label: 'Custom client workspaces' },
                   { label: 'Custom credit allocation' },
                   { label: 'Dedicated onboarding' },
                   { label: 'SLA guarantee', note: '99.9% uptime' },

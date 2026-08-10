@@ -10,7 +10,7 @@ const COMPARISON = [
   { feature: 'Starting price',               competitor: '$49/month',                    socialmate: '$0 — free forever'       },
   { feature: 'Platforms supported',           competitor: 'X / Twitter only',             socialmate: '7 platforms'             },
   { feature: 'Free plan',                    competitor: '❌ No free plan',               socialmate: '✅ 50 credits/month'     },
-  { feature: 'X / Twitter scheduling',        competitor: '✅',                            socialmate: '✅ Free (5 tweets/mo)'   },
+  { feature: 'X / Twitter scheduling',        competitor: '✅',                            socialmate: '✅ (Pro+, 150/mo)'      },
   { feature: 'LinkedIn scheduling',           competitor: '❌',                            socialmate: '✅ Free'                  },
   { feature: 'TikTok scheduling',             competitor: '❌',                            socialmate: '✅ Free (20 videos/mo)'  },
   { feature: 'Bluesky scheduling',            competitor: '❌',                            socialmate: '✅ Free'                  },

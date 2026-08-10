@@ -99,7 +99,10 @@ export async function publishToTwitter(
   // ─── Per-workspace X quota enforcement ──────────────────────────────────
   // Free tier API cap: 1,500 tweets/month per app (write).
   // Per-workspace monthly limits:
-  //   Free   → 28   · Pro → 150   · Agency → 400
+  //   Free → 0 (X posting is Pro+; X bills us $0.01/tweet)
+  //   Pro  → 150 · Agency → 400
+  // Keep this comment and the constant below in step — a stale copy of these
+  // numbers here is where the wrong figures on /settings and /support came from.
   const TWITTER_QUOTA: Record<string, number> = { free: 0, pro: 150, agency: 400 }
 
   // Fetch workspace plan — use owner_id fallback when workspaceId is null (personal workspace)

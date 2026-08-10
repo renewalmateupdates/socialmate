@@ -122,11 +122,11 @@ export default function VsPostPickrPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">7 platforms. 12 AI tools. $0.</p>
+            <p className="font-extrabold text-lg mb-2">7 platforms. 15+ AI tools. $0.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Free forever — no trial countdown</li>
               <li>✅ TikTok + LinkedIn + Discord + Telegram</li>
-              <li>✅ 12 AI tools on free tier</li>
+              <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Bulk scheduling and evergreen recycling free</li>
               <li>✅ Link in bio and competitor tracking</li>
               <li>✅ No credit card required</li>
@@ -205,7 +205,7 @@ export default function VsPostPickrPage() {
 
         {/* CTA */}
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
-          <h2 className="text-2xl font-extrabold tracking-tight mb-3">7 platforms, 12 AI tools, starts free — no PostPickr fees</h2>
+          <h2 className="text-2xl font-extrabold tracking-tight mb-3">7 platforms, 15+ AI tools, starts free — no PostPickr fees</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
             SocialMate is free forever — TikTok, LinkedIn, Discord, Telegram, Bluesky, Mastodon, X/Twitter. No credit card required.
           </p>

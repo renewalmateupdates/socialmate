@@ -139,7 +139,7 @@ const ROADMAP: RoadmapItem[] = [
   { title: 'Dark mode',                  desc: 'Full dark mode across all pages with Tailwind dark: variants, system preference detection, and Supabase sync.',  status: 'shipped',      category: 'Design'        },
   { title: 'Mobile layout',             desc: 'Fully responsive across all pages — hamburger nav, proper touch targets (44×44px), iPhone notch safe area, mobile-optimized compose.', status: 'shipped', category: 'Mobile' },
   { title: 'Bulk Scheduler',            desc: 'CSV upload with PapaParse, row validation, preview table with inline editing, per-platform char limits, and batch scheduling.',  status: 'shipped', category: 'Scheduling' },
-  { title: 'AI Image Generation',        desc: 'Generate on-brand social images from your post content using Gemini Imagen. Pro+ feature, 25 credits.',          status: 'shipped',      category: 'AI'            },
+  { title: 'AI Image Generation',        desc: 'Generate on-brand social images from your post content using Gemini Imagen. Pro+ feature, 25 credits.',          status: 'in-progress',  category: 'AI'            },
   { title: 'Bluesky publishing',         desc: 'Full AT Protocol integration with token refresh and post URI tracking.',                                         status: 'shipped',      category: 'Platforms'     },
   { title: 'Discord publishing',         desc: 'Webhook-based posting to Discord channels. Multiple destination support.',                                       status: 'shipped',      category: 'Platforms'     },
   { title: 'Telegram publishing',        desc: 'Bot token + chat ID based posting. HTML parse mode support.',                                                    status: 'shipped',      category: 'Platforms'     },

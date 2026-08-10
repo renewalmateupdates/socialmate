@@ -29,6 +29,14 @@ const CREDIT_COSTS: Record<string, number> = {
   pulse:       20,
   radar:       20,
   content_gap: 10,
+  // NOT REACHABLE from any caller, and both were quoted as gospel on /pricing
+  // while being wrong. Kept only so a future wiring has a number to start from.
+  //   calendar — the live feature is app/api/ai/content-calendar/route.ts, which
+  //              charges 5. Nothing sends tool:'calendar'.
+  //   image    — there is no image generation yet: no route, no handler case
+  //              below, nothing in compose. /pricing said "25 credits" for a
+  //              feature that does not exist.
+  // Wire the handler and a caller before advertising either number again.
   calendar:    25,
   image:       25,
   score:       5,
