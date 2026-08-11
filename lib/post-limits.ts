@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { normalizePlan } from './plan'
 
 // Monthly post quota — the single source of truth for how many posts a plan
 // gets, how the month is counted, and what we tell someone who runs out.
@@ -23,8 +24,26 @@ export const PLAN_SCHEDULE_WEEKS: Record<string, number> = {
   agency: 12,
 }
 
+// Every helper here normalises its own argument. Callers pass whatever is in
+// user_settings.plan, which is the billing SKU ('pro_annual'), and these tables
+// are keyed by tier. Normalising at the boundary rather than at each call site
+// means a new caller cannot reintroduce the bug by forgetting — which is
+// exactly what happened between PR #543 and #545.
 export function postLimitFor(plan: string): number {
-  return PLAN_POST_LIMITS[plan] ?? PLAN_POST_LIMITS.free
+  return PLAN_POST_LIMITS[normalizePlan(plan)] ?? PLAN_POST_LIMITS.free
+}
+
+// How far ahead this plan may schedule, and the phrase for it. Derived from one
+// table so the number enforced and the number quoted cannot disagree.
+export function scheduleWeeksFor(plan: string): number {
+  return PLAN_SCHEDULE_WEEKS[normalizePlan(plan)] ?? PLAN_SCHEDULE_WEEKS.free
+}
+
+export function scheduleWindowLabel(plan: string): string {
+  const weeks = scheduleWeeksFor(plan)
+  if (weeks <= 2)  return '2 weeks'
+  if (weeks <= 4)  return '1 month'
+  return `${Math.round(weeks / 4)} months`
 }
 
 // Start of the current calendar month, in server-local time. The quota resets
@@ -57,8 +76,9 @@ export async function postsUsedThisMonth(
 // The line shown to someone who just hit the wall. Kept here so the message and
 // the number it quotes can never disagree.
 export function upgradeCopyFor(plan: string): string | null {
-  if (plan === 'agency') return null
-  return plan === 'free'
+  const tier = normalizePlan(plan)
+  if (tier === 'agency') return null
+  return tier === 'free'
     ? `Upgrade to Pro for ${PLAN_POST_LIMITS.pro.toLocaleString()} posts/month`
     : `Upgrade to Agency for ${PLAN_POST_LIMITS.agency.toLocaleString()} posts/month`
 }
@@ -70,7 +90,8 @@ export function postLimitReachedBody(plan: string) {
   return {
     error:   'Monthly post limit reached',
     limit:   postLimitFor(plan),
-    plan,
+    // Report the tier, not the billing SKU, so `plan` and `limit` always agree.
+    plan:    normalizePlan(plan),
     upgrade: upgradeCopyFor(plan),
     // Where the UI should send them. Explicit so every caller sends the same
     // place and no screen has to invent its own upgrade route.
