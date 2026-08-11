@@ -7,7 +7,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { publishToAll } from '@/lib/publish'
 import { inngest } from '@/lib/inngest'
 import {
-  PLAN_SCHEDULE_WEEKS, postLimitFor, postsUsedThisMonth, postLimitReachedBody,
+  scheduleWeeksFor, scheduleWindowLabel, postLimitFor, postsUsedThisMonth, postLimitReachedBody,
 } from '@/lib/post-limits'
 
 
@@ -107,7 +107,7 @@ export async function POST(request: NextRequest) {
     if (scheduledAt) {
       const scheduleDate  = new Date(scheduledAt)
       const now           = new Date()
-      const scheduleWeeks = PLAN_SCHEDULE_WEEKS[plan] ?? 2
+      const scheduleWeeks = scheduleWeeksFor(plan)
       const maxDate       = new Date(now.getTime() + scheduleWeeks * 7 * 24 * 60 * 60 * 1000)
 
       if (scheduleDate <= now) {
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
       }
 
       if (scheduleDate > maxDate) {
-        const label = plan === 'free' ? '2 weeks' : plan === 'pro' ? '1 month' : '3 months'
+        const label = scheduleWindowLabel(plan)
         return NextResponse.json({
           error: `Your ${plan} plan can only schedule up to ${label} in advance`,
           upgrade: plan !== 'agency',

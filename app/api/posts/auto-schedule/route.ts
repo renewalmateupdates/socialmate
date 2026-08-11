@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
+import { normalizePlan } from '@/lib/plan'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
@@ -153,7 +154,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Fetch existing scheduled posts to know which slots are taken
-  const horizonDays = plan === 'agency' ? 30 : 14
+  const horizonDays = normalizePlan(plan) === 'agency' ? 30 : 14
   const horizonDate = new Date()
   horizonDate.setDate(horizonDate.getDate() + horizonDays)
 

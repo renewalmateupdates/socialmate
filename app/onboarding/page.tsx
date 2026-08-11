@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState, useRef, Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
+import { normalizePlan } from '@/lib/plan'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 
@@ -88,7 +89,10 @@ function OnboardingInner() {
         .single()
 
       if (settings?.plan && settings.plan !== 'free') {
-        setUpgradedPlan(settings.plan as 'pro' | 'agency')
+        // Was `as 'pro' | 'agency'`, which is false for an annual subscriber —
+        // the runtime value is 'pro_annual'. Nothing downstream depended on it,
+        // but the cast invited the next reader to compare it against 'pro'.
+        setUpgradedPlan(normalizePlan(settings.plan))
       }
 
       const upgraded = searchParams.get('upgraded')

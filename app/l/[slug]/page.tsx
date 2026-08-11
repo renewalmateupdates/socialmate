@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { notFound } from 'next/navigation'
 import React from 'react'
+import { normalizePlan } from '@/lib/plan'
 import BioLinkButton from './BioLinkButton'
 
 function getSupabase() {
@@ -98,7 +99,7 @@ export default async function BioPage({ params }: { params: Promise<{ slug: stri
     .eq('user_id', p.user_id)
     .single()
 
-  const isPaid = settings?.plan === 'pro' || settings?.plan === 'agency'
+  const isPaid = normalizePlan(settings?.plan) !== 'free'
 
   return React.createElement(
     'div',
