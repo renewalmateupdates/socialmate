@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
+import { normalizePlan } from '@/lib/plan'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 
 const PLAN_CREDITS: Record<string, number> = {
@@ -37,7 +38,8 @@ export async function GET(req: NextRequest) {
   let resetCount = 0
 
   for (const user of users || []) {
-    const plan        = user.plan || 'free'
+    // Normalise first: 'pro_annual' is not a key in these tables.
+    const plan        = normalizePlan(user.plan)
     const monthly     = PLAN_CREDITS[plan] ?? 50
     const bankCap     = PLAN_BANK[plan]    ?? 75
     const current     = user.ai_credits_remaining ?? 0

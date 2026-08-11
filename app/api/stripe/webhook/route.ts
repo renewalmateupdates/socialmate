@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
+import { normalizePlan } from '@/lib/plan'
 import { stripe } from '@/lib/stripe'
 import { createClient } from '@supabase/supabase-js'
 import Stripe from 'stripe'
@@ -121,10 +122,14 @@ function resolveCreditsOnPlanChange(
   newPlan: string,
   currentCredits: number
 ): number {
-  const newPlanCredits = PLAN_CREDITS[newPlan] ?? 50
+  // These arrive as billing SKUs ('pro_annual'), the tables and the comparisons
+  // below are keyed by tier. Normalise before either is used.
+  const from = normalizePlan(currentPlan)
+  const to   = normalizePlan(newPlan)
+  const newPlanCredits = PLAN_CREDITS[to] ?? 50
   const isUpgrade = (
-    (currentPlan === 'free'  && (newPlan === 'pro' || newPlan === 'agency')) ||
-    (currentPlan === 'pro'   && newPlan === 'agency')
+    (from === 'free' && (to === 'pro' || to === 'agency')) ||
+    (from === 'pro'  && to === 'agency')
   )
   // On upgrade: keep whatever is higher (banked credits vs new plan amount)
   // On downgrade/same: use new plan amount (can't keep agency credits on free)
@@ -960,10 +965,10 @@ export async function POST(req: NextRequest) {
 // Only set credits if this is a genuinely new subscription (no prior plan or different plan)
 const alreadyOnPlan = existingSettings?.plan === plan
 const creditsToSet = alreadyOnPlan
-  ? (existingSettings?.ai_credits_remaining ?? PLAN_CREDITS[plan] ?? 100)
+  ? (existingSettings?.ai_credits_remaining ?? PLAN_CREDITS[normalizePlan(plan)] ?? 100)
   : existingSettings
     ? resolveCreditsOnPlanChange(existingSettings.plan, plan, existingSettings.ai_credits_remaining ?? 0)
-    : PLAN_CREDITS[plan] ?? 100
+    : PLAN_CREDITS[normalizePlan(plan)] ?? 100
 
     // Do NOT set white_label_active here — it is controlled exclusively by the admin approval flow.
     // White label is purchased via a separate checkout (type='white_label') and goes through pending → active.
@@ -975,7 +980,7 @@ const creditsToSet = alreadyOnPlan
       plan_expires_at:            safeDate((subscription as any).current_period_end),
       ai_credits_remaining:       creditsToSet,
       monthly_credits_remaining:  creditsToSet,
-      ai_credits_total:           PLAN_CREDITS[plan] ?? 100,
+      ai_credits_total:           PLAN_CREDITS[normalizePlan(plan)] ?? 100,
       ai_credits_reset_at:        new Date().toISOString(),
     }, { onConflict: 'user_id' })
 
@@ -1117,7 +1122,7 @@ const creditsToSet = alreadyOnPlan
         )
         updatePayload.ai_credits_remaining      = creditsToSet
         updatePayload.monthly_credits_remaining = creditsToSet
-        updatePayload.ai_credits_total          = PLAN_CREDITS[plan] ?? 100
+        updatePayload.ai_credits_total          = PLAN_CREDITS[normalizePlan(plan)] ?? 100
         updatePayload.ai_credits_reset_at       = new Date().toISOString()
       }
       // No plan change = renewal, don't touch credits
