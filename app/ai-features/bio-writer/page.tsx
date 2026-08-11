@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
+import OutOfCreditsNotice from '@/components/OutOfCreditsNotice'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 
 type Platform = 'twitter' | 'linkedin' | 'instagram' | 'tiktok' | 'bluesky' | 'general'
@@ -50,7 +51,7 @@ export default function BioWriterPage() {
     setError('')
     if (!name.trim()) { setError('Enter your name first.'); return }
     if (!niche.trim()) { setError('Describe what you do.'); return }
-    if (credits < 5) { setError('Not enough credits. You need 5 credits.'); return }
+    if (credits < 5) return  // button is disabled; OutOfCreditsNotice explains
 
     setGenerating(true)
     setBio(null)
@@ -227,7 +228,7 @@ export default function BioWriterPage() {
 
               <button
                 onClick={generate}
-                disabled={generating || !name.trim() || !niche.trim()}
+                disabled={generating || !name.trim() || !niche.trim() || credits < 5}
                 className="w-full bg-amber-400 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-black text-sm font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
               >
                 {generating ? (
@@ -240,6 +241,9 @@ export default function BioWriterPage() {
                 )}
               </button>
 
+              {credits < 5 && (
+                <OutOfCreditsNotice needed={5} remaining={credits} action="write a bio" />
+              )}
               {error && (
                 <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2">
                   <p className="text-xs text-red-600 dark:text-red-400">{error}</p>

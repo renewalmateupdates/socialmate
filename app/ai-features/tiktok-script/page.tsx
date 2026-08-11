@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
+import OutOfCreditsNotice from '@/components/OutOfCreditsNotice'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 
 type Script = {
@@ -35,7 +36,7 @@ export default function TikTokScriptPage() {
   async function generate() {
     setError('')
     if (!topic.trim()) { setError('Enter a topic first.'); return }
-    if (credits < 5) { setError('Not enough credits. You need 5 credits.'); return }
+    if (credits < 5) return  // button is disabled; OutOfCreditsNotice explains
 
     setGenerating(true)
     setScript(null)
@@ -166,7 +167,7 @@ export default function TikTokScriptPage() {
 
               <button
                 onClick={generate}
-                disabled={generating || !topic.trim()}
+                disabled={generating || !topic.trim() || credits < 5}
                 className="w-full bg-amber-400 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-black text-sm font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
               >
                 {generating ? (
@@ -179,6 +180,9 @@ export default function TikTokScriptPage() {
                 )}
               </button>
 
+              {credits < 5 && (
+                <OutOfCreditsNotice needed={5} remaining={credits} action="generate a script" />
+              )}
               {error && (
                 <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2">
                   <p className="text-xs text-red-600 dark:text-red-400">{error}</p>

@@ -40,7 +40,13 @@ export default function SMPulsePage() {
         body: JSON.stringify({ tool: 'pulse', content: nicheVal, platform: 'general' }),
       })
       const data = await res.json()
-      if (!res.ok || data.error) { setError('Scan failed. Please try again.'); setScanning(false); return }
+      if (!res.ok || data.error) {
+        // Surface what the server actually said. A 402 for credits told the user
+        // to "try again", which can never succeed and hides the real reason.
+        setError(data.error || 'Scan failed. Please try again.')
+        setScanning(false)
+        return
+      }
       setResult(data.result)
       setCredits(typeof data.creditsRemaining === 'number' ? data.creditsRemaining : credits - CREDIT_COST)
       setLastScanned('Just now')
