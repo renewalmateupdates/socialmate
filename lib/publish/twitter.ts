@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { normalizePlan } from '@/lib/plan'
 
 // X (Twitter) API v2
 // Required env vars: TWITTER_CLIENT_ID, TWITTER_CLIENT_SECRET
@@ -123,7 +124,7 @@ export async function publishToTwitter(
       .maybeSingle()
     wsData = data
   }
-  const plan = (wsData?.plan as string | null) ?? 'free'
+  const plan = normalizePlan(wsData?.plan as string | null)
   const monthlyLimit = TWITTER_QUOTA[plan] ?? TWITTER_QUOTA.free
 
   // Count tweets published this calendar month

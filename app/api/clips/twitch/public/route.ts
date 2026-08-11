@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
+import { normalizePlan } from '@/lib/plan'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
@@ -60,7 +61,7 @@ export async function GET(request: NextRequest) {
     .select('plan')
     .eq('user_id', user.id)
     .single()
-  const plan = settings?.plan ?? 'free'
+  const plan = normalizePlan(settings?.plan)
   const limit = QUOTA[plan]
 
   if (limit !== null) {

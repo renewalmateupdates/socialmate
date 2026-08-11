@@ -3,6 +3,7 @@ export const revalidate = 300 // 5 minutes cache
 
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { normalizePlan } from '@/lib/plan'
 
 export async function GET() {
   const supabase = getSupabaseAdmin()
@@ -25,8 +26,11 @@ export async function GET() {
   }
 
   for (const row of settingsData) {
-    if (row.plan === 'agency') stats.agency++
-    else if (row.plan === 'pro') stats.pro++
+    // Bucket by tier, not by billing SKU — an exact-string match counted every
+    // annual subscriber as a free user.
+    const tier = normalizePlan(row.plan)
+    if (tier === 'agency') stats.agency++
+    else if (tier === 'pro') stats.pro++
     else stats.free++
 
     if (row.white_label_tier) stats.white_label++

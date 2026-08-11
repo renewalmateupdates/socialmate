@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
+import { normalizePlan } from '@/lib/plan'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
@@ -39,7 +40,7 @@ export async function GET() {
     .eq('user_id', user.id)
     .maybeSingle()
 
-  const plan = ws?.plan ?? 'free'
+  const plan = normalizePlan(ws?.plan)
   const limits: Record<string, number> = { free: 0, pro: 150, agency: 400 }
 
   // Admin has no quota cap — return a high ceiling so UI shows unlimited

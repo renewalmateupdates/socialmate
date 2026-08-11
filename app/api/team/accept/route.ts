@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { normalizePlan } from '@/lib/plan'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { logActivity } from '@/lib/workspace-activity'
 import { Resend } from 'resend'
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
     .eq('user_id', invite.owner_id)
     .single()
 
-  const plan      = ownerSettings?.plan || 'free'
+  const plan      = normalizePlan(ownerSettings?.plan)
   const seatLimit = PLAN_SEAT_LIMITS[plan] ?? 2
 
   const { count: memberCount } = await adminSupabase
