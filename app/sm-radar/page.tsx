@@ -39,7 +39,12 @@ export default function SMRadarPage() {
         body: JSON.stringify({ tool: 'radar', content: nicheVal, platform: 'general' }),
       })
       const data = await res.json()
-      if (!res.ok || data.error) { setError('Report generation failed. Please try again.'); setGenerating(false); return }
+      if (!res.ok || data.error) {
+        // Surface what the server actually said — see /sm-pulse.
+        setError(data.error || 'Report generation failed. Please try again.')
+        setGenerating(false)
+        return
+      }
       setResult(data.result)
       setCredits(typeof data.creditsRemaining === 'number' ? data.creditsRemaining : credits - CREDIT_COST)
     } catch {

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Sidebar from '@/components/Sidebar'
 import Link from 'next/link'
+import OutOfCreditsNotice from '@/components/OutOfCreditsNotice'
 import { useWorkspace } from '@/contexts/WorkspaceContext'
 
 type Tone = 'Educational' | 'Inspirational' | 'Entertaining' | 'Promotional' | 'Mixed'
@@ -81,7 +82,7 @@ export default function ContentCalendarPage() {
     if (!niche.trim()) { setError('Enter your niche first.'); return }
     if (selectedPlatforms.length === 0) { setError('Select at least one platform.'); return }
     if (goals.length === 0) { setError('Select at least one goal.'); return }
-    if (credits < 5) { setError('Not enough credits. You need 5 credits.'); return }
+    if (credits < 5) return  // button is disabled; OutOfCreditsNotice explains
 
     setGenerating(true)
     setCalendar(null)
@@ -258,7 +259,7 @@ export default function ContentCalendarPage() {
 
               <button
                 onClick={generate}
-                disabled={generating || !niche.trim() || selectedPlatforms.length === 0}
+                disabled={generating || !niche.trim() || selectedPlatforms.length === 0 || credits < 5}
                 className="w-full bg-amber-400 hover:bg-amber-500 disabled:opacity-40 disabled:cursor-not-allowed text-black text-sm font-bold py-3 rounded-xl transition-all flex items-center justify-center gap-2"
               >
                 {generating ? (
@@ -271,6 +272,9 @@ export default function ContentCalendarPage() {
                 )}
               </button>
 
+              {credits < 5 && (
+                <OutOfCreditsNotice needed={5} remaining={credits} action="generate a calendar" />
+              )}
               {error && (
                 <div className="bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800 rounded-xl px-3 py-2">
                   <p className="text-xs text-red-600 dark:text-red-400">{error}</p>
