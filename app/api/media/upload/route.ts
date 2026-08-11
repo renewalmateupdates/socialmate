@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { isFeatureEnabled, featurePausedMessage } from '@/lib/feature-flag-check'
 
 const ALLOWED_TYPES = [
   'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp',
@@ -11,6 +12,11 @@ const ALLOWED_TYPES = [
 const MAX_SIZE = 50 * 1024 * 1024 // 50MB
 
 export async function POST(request: NextRequest) {
+  // Storage and egress are the cost here, so this switch stops uploads at the
+  // door rather than after the bytes have already been paid for.
+  if (!(await isFeatureEnabled('media_upload'))) {
+    return NextResponse.json({ error: featurePausedMessage('Media upload') }, { status: 503 })
+  }
   const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

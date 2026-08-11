@@ -5,6 +5,12 @@ import { useRouter } from 'next/navigation'
 interface FeatureFlag {
   flag: string
   enabled: boolean
+  // From the registry in lib/feature-flags.ts, not the DB row.
+  label?: string
+  whenOff?: string
+  // False when no row exists yet — the switch has never been touched, and the
+  // feature is live because the readers fail open.
+  configured?: boolean
   description?: string | null
   updated_at?: string | null
   updated_by?: string | null
@@ -133,8 +139,8 @@ export default function FeatureFlagsPage() {
         {flags.length === 0 ? (
           <div className="bg-surface border border-theme rounded-2xl p-12 text-center">
             <div className="text-4xl mb-3">🚩</div>
-            <p className="text-sm font-bold mb-1">No feature flags found</p>
-            <p className="text-xs text-gray-400">Add rows to the feature_flags table to manage them here.</p>
+            <p className="text-sm font-bold mb-1">Couldn't load feature flags</p>
+            <p className="text-xs text-gray-400">The switches are defined in code, so an empty list means the request failed. Try reloading.</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -146,7 +152,8 @@ export default function FeatureFlagsPage() {
                   className="bg-surface border border-theme rounded-2xl px-5 py-4 flex items-center gap-4 hover:border-gray-300 dark:hover:border-gray-600 transition-all">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-mono text-sm font-semibold text-gray-900 dark:text-gray-100">{f.flag}</span>
+                      <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">{f.label || f.flag}</span>
+                      <span className="font-mono text-[11px] text-gray-400 dark:text-gray-500">{f.flag}</span>
                       <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                         f.enabled
                           ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
@@ -155,8 +162,11 @@ export default function FeatureFlagsPage() {
                         {f.enabled ? 'enabled' : 'disabled'}
                       </span>
                     </div>
-                    {f.description && (
-                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{f.description}</p>
+                    {(f.whenOff || f.description) && (
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                        {f.enabled ? <span className="font-semibold">Turning this off: </span> : <span className="font-semibold text-amber-600 dark:text-amber-500">Currently paused. </span>}
+                        {f.whenOff || f.description}
+                      </p>
                     )}
                     {f.updated_by && (
                       <p className="text-xs text-gray-300 dark:text-gray-600 mt-0.5">
