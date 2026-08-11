@@ -27,7 +27,7 @@ const FAQS = [
   },
   {
     q: "What's X/Twitter pay-per-use?",
-    a: "X/Twitter uses a pay-per-use model at $0.01 per tweet due to X's API pricing. Monthly tweet quotas also apply: 50 tweets/month on Free, 200 on Pro, and 500 on Agency. This is separate from your AI credits.",
+    a: "X/Twitter uses a pay-per-use model at $0.01 per tweet due to X's API pricing. X posting is available on Pro and Agency only. Pro includes 150 tweets/month and Agency 400. This is separate from your AI credits.",
   },
   {
     q: 'How does billing work?',

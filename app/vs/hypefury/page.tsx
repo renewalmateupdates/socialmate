@@ -10,7 +10,7 @@ const COMPARISON = [
   { feature: 'Starting price',         hypefury: '$19/month',               socialmate: '$0 — free forever'       },
   { feature: 'Free plan',              hypefury: '7-day trial only',        socialmate: '✅ Genuinely free'        },
   { feature: 'Platforms supported',    hypefury: 'X, LinkedIn, Instagram',  socialmate: '7 live (free)'               },
-  { feature: 'X/Twitter threads',      hypefury: '✅ Core feature',         socialmate: '✅ Free'                  },
+  { feature: 'X/Twitter threads',      hypefury: '✅ Core feature',         socialmate: '✅ (Pro+)'                },
   { feature: 'Team seats',             hypefury: '1 on Standard',           socialmate: '2 seats free'            },
   { feature: 'AI writing tools',       hypefury: 'AI ghostwriter (paid)',   socialmate: '15+ tools free'           },
   { feature: 'Auto-retweet',           hypefury: '✅',                      socialmate: '❌'                       },
@@ -36,7 +36,7 @@ const FAQ = [
   },
   {
     q: 'Does SocialMate support X/Twitter threads?',
-    a: 'Yes — SocialMate supports X/Twitter thread scheduling. You can write, schedule, and publish multi-tweet threads. Free plan includes 50 tweets/month, Pro includes 200, and Agency includes 500.',
+    a: 'Yes — SocialMate supports X/Twitter thread scheduling. You can write, schedule, and publish multi-tweet threads. X posting is Pro and Agency only, because X bills us $0.01 per tweet. Pro includes 150 tweets/month and Agency 400.',
   },
   {
     q: 'Does SocialMate have auto-retweet?',

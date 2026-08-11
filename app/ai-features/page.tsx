@@ -261,11 +261,11 @@ const AI_TOOLS = [
   {
     emoji: '🎨',
     label: 'AI Image Generation',
-    credits: '25 credits',
+    credits: 'Coming soon',
     what: 'Generate custom images for your posts directly inside SocialMate.',
-    how: 'Powered by Google Gemini image models. Generated images can be added directly to your scheduled post.',
-    href: '/compose',
-    available: true,
+    how: 'In build. Will run on Google Gemini image models, with generated images attachable to a scheduled post. Follow along on the roadmap.',
+    href: '/roadmap',
+    available: false,
     proOnly: true,
   },
 ]

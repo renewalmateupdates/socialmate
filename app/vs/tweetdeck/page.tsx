@@ -40,7 +40,7 @@ const FAQ = [
   },
   {
     q: 'Is SocialMate good for X/Twitter power users?',
-    a: 'Yes. SocialMate supports X/Twitter scheduling, thread support, and per-tweet quota management. The Free plan includes 50 tweets/month, Pro bumps that to 200, and Agency to 500.',
+    a: 'Yes. SocialMate supports X/Twitter scheduling, thread support, and per-tweet quota management. X posting is Pro and Agency only, because X bills us $0.01 per tweet. Pro includes 150 tweets/month and Agency 400.',
   },
   {
     q: 'What does TweetDeck do better than SocialMate?',

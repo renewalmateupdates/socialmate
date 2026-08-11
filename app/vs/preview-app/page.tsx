@@ -13,7 +13,7 @@ const COMPARISON = [
   { feature: 'Bluesky support',             preview: '❌',                         socialmate: '✅'                          },
   { feature: 'Discord scheduling',          preview: '❌',                         socialmate: '✅ Free'                     },
   { feature: 'Telegram scheduling',         preview: '❌',                         socialmate: '✅ Free'                     },
-  { feature: 'X/Twitter scheduling',        preview: '❌',                         socialmate: '✅'                          },
+  { feature: 'X/Twitter scheduling',        preview: '❌',                         socialmate: '✅ (Pro+)'                          },
   { feature: 'AI writing tools',            preview: 'Basic caption suggestions', socialmate: '20+ social-specific tools'  },
   { feature: 'Autonomous content (SOMA)',   preview: '❌',                         socialmate: '✅ (Autopilot/Full Send)'    },
   { feature: 'Trading bot (Enki)',          preview: '❌',                         socialmate: '✅ Free paper trading'       },

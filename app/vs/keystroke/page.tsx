@@ -15,7 +15,7 @@ const COMPARISON = [
   { feature: 'Telegram scheduling',           keystroke: '❌',                         socialmate: '✅ Free'                  },
   { feature: 'Bluesky scheduling',            keystroke: '❌',                         socialmate: '✅ Free'                  },
   { feature: 'TikTok scheduling',             keystroke: '❌',                         socialmate: '✅ Free (20 videos/mo)'  },
-  { feature: 'X / Twitter scheduling',        keystroke: '❌',                         socialmate: '✅ Free'                  },
+  { feature: 'X / Twitter scheduling',        keystroke: '❌',                         socialmate: '✅ (Pro+)'                },
   { feature: 'Mastodon scheduling',           keystroke: '❌',                         socialmate: '✅ Free'                  },
   { feature: 'AI writing tools',              keystroke: '✅ (basic)',                 socialmate: '15+ tools free'           },
   { feature: 'Autonomous content system',     keystroke: '❌',                         socialmate: '✅ SOMA — learns your voice' },

@@ -674,7 +674,7 @@ function SettingsInner() {
                 <UpgradeNudge
                   variant="banner"
                   title="You're on the Free plan"
-                  description="50 credits · 28 tweets · 2 seats. Pro unlocks 500 credits, 150 tweets, and 5 seats."
+                  description="50 credits · 2 seats · no X posting. Pro unlocks 500 credits, 150 tweets/month, and 5 seats."
                   cta="Upgrade to Pro — $5/mo"
                   href="/pricing"
                 />

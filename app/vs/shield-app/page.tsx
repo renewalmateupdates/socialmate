@@ -12,7 +12,7 @@ const COMPARISON = [
   { feature: 'LinkedIn analytics',           shield: '✅ Deep LinkedIn metrics',   socialmate: '✅ Cross-platform'       },
   { feature: 'LinkedIn scheduling',          shield: '❌',                         socialmate: '✅ Free'                  },
   { feature: 'Bluesky scheduling',           shield: '❌',                         socialmate: '✅ Free'                  },
-  { feature: 'X / Twitter scheduling',       shield: '❌',                         socialmate: '✅ Free'                  },
+  { feature: 'X / Twitter scheduling',       shield: '❌',                         socialmate: '✅ (Pro+)'                },
   { feature: 'TikTok scheduling',            shield: '❌',                         socialmate: '✅ Free (20 videos/mo)'  },
   { feature: 'Discord + Telegram',           shield: '❌',                         socialmate: '✅ Free'                  },
   { feature: 'AI writing tools',             shield: '❌',                         socialmate: '15+ tools free'           },

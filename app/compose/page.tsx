@@ -40,7 +40,7 @@ const AI_TOOLS = [
   { id: 'rewrite',   label: 'Rewrite',   emoji: '🔁',  credits: 5,  desc: 'Rewrite your post to be punchier'       },
   { id: 'hook',      label: 'Hook',      emoji: '🎣',  credits: 5,  desc: 'Generate 3 viral opening hooks'         },
   { id: 'thread',    label: 'Thread',    emoji: '🧵',  credits: 10, desc: 'Turn your idea into a full thread'      },
-  { id: 'repurpose', label: 'Repurpose', emoji: '♻️',  credits: 5,  desc: 'Reshape long content for this platform' },
+  { id: 'repurpose', label: 'Repurpose', emoji: '♻️',  credits: 10, desc: 'Reshape long content for this platform' },
 ]
 
 const SCORE_CREDIT_COST = 5

@@ -310,7 +310,7 @@ const CREDIT_SUMMARY = [
   { name: 'SM-Radar',             cost: '20 cr', proOnly: false },
   { name: 'Content Gap',          cost: '10 cr', proOnly: false },
   { name: 'AI Content Calendar',  cost: '25 cr', proOnly: true  },
-  { name: 'AI Image Generation',  cost: '25 cr', proOnly: true  },
+  { name: 'AI Image Generation',  cost: 'Soon',  proOnly: true  },
 ]
 
 export default function Features() {

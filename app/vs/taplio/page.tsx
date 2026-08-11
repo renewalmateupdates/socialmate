@@ -12,7 +12,7 @@ const COMPARISON = [
   { feature: 'Free plan',                    taplio: '❌ No free plan',            socialmate: '✅ 50 credits/month'     },
   { feature: 'LinkedIn scheduling',           taplio: '✅',                         socialmate: '✅ Free'                  },
   { feature: 'Bluesky scheduling',            taplio: '❌',                         socialmate: '✅ Free'                  },
-  { feature: 'X / Twitter scheduling',        taplio: '❌',                         socialmate: '✅ Free'                  },
+  { feature: 'X / Twitter scheduling',        taplio: '❌',                         socialmate: '✅ (Pro+)'                },
   { feature: 'TikTok scheduling',             taplio: '❌',                         socialmate: '✅ Free (20 videos/mo)'  },
   { feature: 'Discord + Telegram',            taplio: '❌',                         socialmate: '✅ Free'                  },
   { feature: 'Mastodon',                      taplio: '❌',                         socialmate: '✅ Free'                  },
