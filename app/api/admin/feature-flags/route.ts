@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { requireAdmin } from '@/lib/admin-auth'
+import { mergeFlagState } from '@/lib/feature-flags'
 
 // GET /api/admin/feature-flags — list all flags
 export async function GET(_request: NextRequest) {
@@ -14,7 +15,9 @@ export async function GET(_request: NextRequest) {
     .order('flag')
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ flags: data })
+  // Merged against the registry so every switch the code honours is listed,
+  // including ones that have never been toggled and so have no row yet.
+  return NextResponse.json({ flags: mergeFlagState(data) })
 }
 
 // PATCH /api/admin/feature-flags — toggle a flag
@@ -29,10 +32,17 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: 'flag and enabled are required' }, { status: 400 })
   }
 
+  // Upsert, not update: the first time a flag is switched off there is no row
+  // to update, and an UPDATE matching nothing succeeds while changing nothing —
+  // the toggle would appear to work and the feature would stay live.
   const { data, error } = await getSupabaseAdmin()
     .from('feature_flags')
-    .update({ enabled, updated_at: new Date().toISOString(), updated_by: admin.email || admin.id })
-    .eq('flag', flag)
+    .upsert({
+      flag,
+      enabled,
+      updated_at: new Date().toISOString(),
+      updated_by: admin.email || admin.id,
+    }, { onConflict: 'flag' })
     .select()
     .single()
 

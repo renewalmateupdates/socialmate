@@ -11,10 +11,14 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { isFeatureEnabled, featurePausedMessage } from '@/lib/feature-flag-check'
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const webpush = require('web-push')
 
 export async function POST(request: NextRequest) {
+  if (!(await isFeatureEnabled('push_notifications'))) {
+    return NextResponse.json({ error: featurePausedMessage('Push notifications') }, { status: 503 })
+  }
   // Protect this endpoint — callable with either the internal secret or the Inngest CRON_SECRET
   const secret = request.headers.get('x-internal-secret')
   const internalKey = request.headers.get('x-internal-key')

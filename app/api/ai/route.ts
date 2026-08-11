@@ -6,6 +6,7 @@ import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { notifyLowCredits } from '@/lib/notify-low-credits'
 import { deductAiCredits, refundAiCredits } from '@/lib/ai-credits'
+import { isFeatureEnabled, featurePausedMessage } from '@/lib/feature-flag-check'
 
 // Per-user rate limit: 10 requests/minute per serverless instance
 const rlMap = new Map<string, number[]>()
@@ -193,6 +194,19 @@ export async function POST(req: NextRequest) {
     const creditCost = CREDIT_COSTS[tool]
     if (creditCost === undefined) {
       return NextResponse.json({ error: 'Unknown tool' }, { status: 400 })
+    }
+
+    // Kill switches, checked before any credit is deducted so a paused tool can
+    // never charge for work it will not do. These are the levers for a Gemini
+    // cost spike; each maps to a row in feature_flags.
+    const TOOL_FLAGS: Record<string, { flag: string; label: string }> = {
+      caption: { flag: 'ai_caption_generation', label: 'AI caption generation' },
+      pulse:   { flag: 'ai_pulse',              label: 'SM-Pulse' },
+      radar:   { flag: 'ai_radar',              label: 'SM-Radar' },
+    }
+    const gate = TOOL_FLAGS[tool]
+    if (gate && !(await isFeatureEnabled(gate.flag))) {
+      return NextResponse.json({ error: featurePausedMessage(gate.label) }, { status: 503 })
     }
 
     // Pro+ gate for the score tool — needs the plan only.
