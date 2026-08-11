@@ -96,6 +96,10 @@ function getTightestPlatformName(platforms: string[]): string {
 
 export default function BulkScheduler() {
   const [user, setUser] = useState<any>(null)
+  // Set when the monthly post quota rejects a row mid-run. Bulk scheduling is
+  // the fastest way to reach that wall, so it needs a way forward rather than
+  // a row full of red.
+  const [quotaWall, setQuotaWall] = useState<{ error: string; upgrade?: string | null; upgradeHref?: string } | null>(null)
   const { plan, activeWorkspace } = useWorkspace()
   const planConfig = PLAN_CONFIG[plan as keyof typeof PLAN_CONFIG]
   const maxRows    = PLAN_MAX_ROWS[plan] ?? 10
@@ -294,10 +298,22 @@ export default function BulkScheduler() {
     if (valid.length === 0) { showToast('Add content to at least one post', 'error'); return }
 
     setSaving(true)
+    setQuotaWall(null)
     let saved = 0
+    let wall: { error: string; upgrade?: string | null; upgradeHref?: string } | null = null
     const updatedPosts = [...posts]
 
     for (const post of valid) {
+      const idx = updatedPosts.findIndex(p => p.id === post.id)
+
+      // Once the monthly quota has rejected one row, every remaining row will be
+      // rejected too. Firing 40 more requests to be told the same thing wastes
+      // the user's time and our rate limit — mark them and stop.
+      if (wall) {
+        updatedPosts[idx] = { ...updatedPosts[idx], status: 'error', error: wall.error }
+        continue
+      }
+
       const scheduledAt = new Date(`${post.date}T${post.time}:00`).toISOString()
       const res = await fetch('/api/posts/create', {
         method:  'POST',
@@ -310,9 +326,10 @@ export default function BulkScheduler() {
           mediaUrls:   post.mediaUrl ? [post.mediaUrl] : undefined,
         }),
       })
-      const idx = updatedPosts.findIndex(p => p.id === post.id)
       if (!res.ok) {
         const err = await res.json().catch(() => ({}))
+        // A plan limit is not a per-row failure, it is a stop condition.
+        if (res.status === 403 && err.upgrade) wall = err
         updatedPosts[idx] = { ...updatedPosts[idx], status: 'error', error: err.error || 'Failed to save' }
       } else {
         updatedPosts[idx] = { ...updatedPosts[idx], status: 'saved' }
@@ -321,8 +338,19 @@ export default function BulkScheduler() {
     }
 
     setPosts(updatedPosts)
+    setQuotaWall(wall)
     setSaving(false)
-    if (saved > 0) showToast(`${saved} post${saved !== 1 ? 's' : ''} scheduled!`, 'success')
+
+    // Report both halves. Announcing "12 posts scheduled!" in green while 38 rows
+    // sit there failed is how a partial run reads as a success.
+    const failed = valid.length - saved
+    if (saved > 0 && failed === 0) {
+      showToast(`${saved} post${saved !== 1 ? 's' : ''} scheduled!`, 'success')
+    } else if (saved > 0) {
+      showToast(`${saved} scheduled, ${failed} failed`, 'error')
+    } else {
+      showToast('Nothing was scheduled', 'error')
+    }
   }
 
   const clearSaved = () => {
@@ -453,7 +481,28 @@ export default function BulkScheduler() {
               errorPosts > 0 ? 'bg-red-50 border border-red-100' : 'bg-green-50 border border-green-100'
             }`}>
               {savedPosts > 0 && <span className="text-green-700">✅ {savedPosts} post{savedPosts !== 1 ? 's' : ''} scheduled</span>}
-              {errorPosts > 0 && <span className="text-red-600">❌ {errorPosts} failed — check content and try again</span>}
+              {errorPosts > 0 && (
+                <span className="text-red-600">
+                  ❌ {errorPosts} failed{quotaWall ? '' : ' — check content and try again'}
+                </span>
+              )}
+            </div>
+          )}
+
+          {/* Plan limit reached mid-run. "Check content and try again" is the
+              wrong advice here — nothing about the content is the problem, and
+              retrying cannot work until the quota resets or the plan changes. */}
+          {quotaWall && (
+            <div className="mb-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-2xl px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3">
+              <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 flex-1">
+                {quotaWall.error}. {quotaWall.upgrade ?? ''} The remaining rows are still here — nothing was lost.
+              </p>
+              <Link
+                href={quotaWall.upgradeHref || '/pricing'}
+                className="self-start sm:self-auto flex-shrink-0 text-xs font-bold px-3 py-1.5 bg-amber-500 text-black rounded-xl hover:opacity-80 transition-all"
+              >
+                See plans →
+              </Link>
             </div>
           )}
 
