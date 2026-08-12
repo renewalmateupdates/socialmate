@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { recordAgentRun } from '@/lib/usage'
 
 export async function GET(req: NextRequest) {
   try {
@@ -119,6 +120,7 @@ export async function GET(req: NextRequest) {
       insights.push('No competitors tracked yet. Add some in Competitor Tracking to unlock deeper intel.')
     }
 
+    recordAgentRun(supabase, user.id, 'growth-scout', { competitors: competitorCount })
     return NextResponse.json({
       competitors:           competitors ?? [],
       competitor_frequency:  competitorFrequency,

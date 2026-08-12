@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import { recordAgentRun } from '@/lib/usage'
 
 const CREDIT_COST = 5
 
@@ -124,6 +125,7 @@ Return ONLY valid JSON:
       credits_used: CREDIT_COST,
     })
 
+    recordAgentRun(supabase, user.id, 'email-outreach', { credits: CREDIT_COST })
     return NextResponse.json({ subject: parsed.subject, body: parsed.body })
   } catch (err) {
     console.error('[agents/email-outreach]', err)

@@ -2,6 +2,7 @@ import { inngest } from '@/lib/inngest'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { Resend } from 'resend'
 import { GoogleGenerativeAI } from '@google/generative-ai'
+import { recordAgentRun } from './usage'
 
 function getResend() { return new Resend(process.env.RESEND_API_KEY) }
 
@@ -131,6 +132,7 @@ Return ONLY valid JSON:
             drafted++
           }
         })
+        recordAgentRun(admin, cfg.user_id, 'newsletter')
       } catch (err: any) {
         console.error(`[NewsletterAgent] workspace ${cfg.workspace_id}:`, err?.message)
       }
@@ -244,6 +246,7 @@ export const clientReportAgent = inngest.createFunction(
 
           sent++
         })
+        recordAgentRun(admin, cfg.user_id, 'client-report')
       } catch (err: any) {
         console.error(`[ClientReportAgent] workspace ${cfg.workspace_id}:`, err?.message)
       }
@@ -364,6 +367,7 @@ export const repurposeAgent = inngest.createFunction(
 
           processed++
         })
+        recordAgentRun(admin, cfg.user_id, 'repurpose')
       } catch (err: any) {
         console.error(`[RepurposeAgent] workspace ${cfg.workspace_id}:`, err?.message)
       }
@@ -559,6 +563,7 @@ Return ONLY the post text, nothing else.`
 
           processed++
         })
+        recordAgentRun(admin, cfg.user_id, 'caption')
       } catch (err: any) {
         console.error(`[CaptionAgent] workspace ${cfg.workspace_id}:`, err?.message)
       }
@@ -692,6 +697,7 @@ Return ONLY valid JSON array:
 
           processed++
         })
+        recordAgentRun(admin, cfg.user_id, 'trend-scout')
       } catch (err: any) {
         console.error(`[TrendScoutAgent] workspace ${cfg.workspace_id}:`, err?.message)
       }
@@ -871,6 +877,7 @@ Return ONLY the reply text, nothing else.`
 
           processed++
         })
+        recordAgentRun(admin, cfg.user_id, 'inbox')
       } catch (err: any) {
         console.error(`[InboxAgent] workspace ${cfg.workspace_id}:`, err?.message)
       }
