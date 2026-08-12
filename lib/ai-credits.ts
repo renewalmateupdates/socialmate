@@ -18,7 +18,11 @@ export type DeductResult =
 export async function deductAiCredits(
   supabase: SupabaseClient,
   userId: string,
-  cost: number
+  cost: number,
+  // Which tool spent the credits. Every AI route funnels through this function,
+  // so it is the one place that can answer "which tools do people actually use"
+  // without instrumenting seven routes separately and forgetting the eighth.
+  tool?: string
 ): Promise<DeductResult> {
   const { data, error } = await supabase.rpc('deduct_ai_credits', {
     p_user_id: userId,
@@ -28,6 +32,28 @@ export async function deductAiCredits(
   if (!data.ok) {
     return { ok: false, reason: (data.reason ?? 'error') as 'insufficient' | 'no_settings', total: data.total ?? 0 }
   }
+
+  // Fire and forget. Usage analytics must never fail a paid AI call or slow it
+  // down — the credits are already spent by the time we get here.
+  if (tool) {
+    void supabase
+      .from('usage_events')
+      .insert({
+        user_id:    userId,
+        event_type: 'ai_credit',
+        metadata:   {
+          tool,
+          cost,
+          monthly: data.monthly_deduct ?? 0,
+          earned:  data.earned_deduct ?? 0,
+          paid:    data.paid_deduct ?? 0,
+        },
+      })
+      .then(({ error: logErr }: { error: { message: string } | null }) => {
+        if (logErr) console.warn('[usage_events] ai_credit insert failed (non-fatal):', logErr.message)
+      })
+  }
+
   return {
     ok: true,
     monthly: data.monthly_deduct ?? 0,

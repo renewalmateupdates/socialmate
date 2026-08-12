@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Radar, Users, HandCoins, Store, Crown, MessageSquare, Flag, BarChart3,
-  Lock, Tag, Send, AlertTriangle, Ticket, Share2, ArrowLeft,
+  Lock, Tag, Send, AlertTriangle, Ticket, Share2, ArrowLeft, Activity,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -32,6 +32,7 @@ const NAV_CARDS: { icon: LucideIcon; label: string; sub: string; href: string }[
   { icon: Tag,           label: 'White Label',       sub: 'Review & approve white label requests',      href: '/admin/white-label'    },
   { icon: Send,          label: 'IRIS Dispatch',     sub: 'Send weekly build-in-public newsletter',     href: '/admin/iris'           },
   { icon: AlertTriangle, label: 'Failure Log',       sub: 'Post failures with per-platform errors',     href: '/admin/failure-log'    },
+  { icon: Activity,      label: 'Usage & Errors',    sub: 'AI tools, agents & grouped publish errors',  href: '/admin/usage'          },
 ]
 
 export default function AdminHubClient() {

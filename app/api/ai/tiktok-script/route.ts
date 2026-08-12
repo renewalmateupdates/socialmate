@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Atomic three-pool deduction — row-locked RPC, no double-spend under concurrency.
-    const deduct = await deductAiCredits(supabase, user.id, CREDIT_COST)
+    const deduct = await deductAiCredits(supabase, user.id, CREDIT_COST, 'tiktok-script')
     if (!deduct.ok) {
       if (deduct.reason === 'insufficient') {
         return NextResponse.json({
