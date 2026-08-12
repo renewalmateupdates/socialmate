@@ -61,6 +61,23 @@ export function startOfCurrentMonth(): Date {
 // added DEFAULT now() to the column and backfilled the NULLs left by SOMA
 // inserts. Before it, a NULL created_at silently escaped this filter and the
 // quota undercounted.
+// Statuses that consume quota. A draft is private, unpublished, and costs
+// nothing to hold, so it does not count — someone who writes 100 drafts and
+// publishes none should not be locked out of publishing. The quota exists to
+// bound what actually goes out.
+//
+// pending_approval counts: it is queued work awaiting a yes, and letting it
+// through free would make the approval queue a way around the cap.
+const QUOTA_STATUSES = ['scheduled', 'published', 'partial', 'failed', 'pending_approval']
+
+// Whether creating a post in this status should be gated by the quota. Kept
+// beside QUOTA_STATUSES so the check and the count can never disagree — gating
+// on one set while counting another is how a cap starts rejecting people for
+// rows it never counted.
+export function countsAgainstQuota(status: string): boolean {
+  return QUOTA_STATUSES.includes(status)
+}
+
 export async function postsUsedThisMonth(
   supabase: SupabaseClient,
   userId: string,
@@ -69,6 +86,7 @@ export async function postsUsedThisMonth(
     .from('posts')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', userId)
+    .in('status', QUOTA_STATUSES)
     .gte('created_at', startOfCurrentMonth().toISOString())
   return count ?? 0
 }

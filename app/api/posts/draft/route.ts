@@ -4,7 +4,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-import { postLimitFor, postsUsedThisMonth, postLimitReachedBody } from '@/lib/post-limits'
+import { postLimitFor, postsUsedThisMonth, postLimitReachedBody, countsAgainstQuota } from '@/lib/post-limits'
 
 
 export async function POST(request: NextRequest) {
@@ -145,7 +145,11 @@ export async function POST(request: NextRequest) {
       .single()
 
     const plan = settings?.plan || 'free'
-    if (await postsUsedThisMonth(supabase, user.id) >= postLimitFor(plan)) {
+    // Saving a draft is free — it is private and nothing goes out — so the
+    // quota is only enforced for statuses that actually consume it. Submitting
+    // for approval does, otherwise the approval queue becomes a way past the cap.
+    if (countsAgainstQuota(insertStatus)
+        && await postsUsedThisMonth(supabase, user.id) >= postLimitFor(plan)) {
       return NextResponse.json(postLimitReachedBody(plan), { status: 403 })
     }
 
