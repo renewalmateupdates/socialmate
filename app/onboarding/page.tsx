@@ -60,11 +60,15 @@ function OnboardingInner() {
   const [couponApplied, setCouponApplied] = useState<{ id: string; code: string; discount_type: string; discount_value: number } | null>(null)
   const [couponError, setCouponError] = useState<string | null>(null)
   const [connectionDetected, setConnectionDetected] = useState(false)
+  const [checkingConnection, setCheckingConnection] = useState(false)
+  const [pollExpired, setPollExpired] = useState(false)
+  const [checkMissed, setCheckMissed] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'error' | 'info' } | null>(null)
   const [quickMode, setQuickMode] = useState(false)
   const [referralCode, setReferralCode] = useState<string | null>(null)
   const [onboardingGoal, setOnboardingGoal] = useState<string | null>(null)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const checkConnectionRef = useRef<(() => Promise<boolean>) | null>(null)
 
   const showToast = (message: string, type: 'error' | 'info' = 'error') => {
     setToast({ message, type })
@@ -105,26 +109,62 @@ function OnboardingInner() {
     init()
   }, [router, searchParams])
 
-  // Poll for connected account while on step 3
+  // Poll for connected account while on step 3.
+  //
+  // This used to give up after 90 seconds, which is shorter than the task takes.
+  // Connecting means leaving for another tab, finding your platform among seven,
+  // and completing OAuth - and for Bluesky, generating an app password on a
+  // different service entirely. Three minutes is normal. People were coming back
+  // having genuinely connected, to a tab that had stopped listening and offered
+  // no way to say so, where the widest button on screen was "Skip for now".
+  //
+  // 38 of 72 accounts finished onboarding; 12 ever connected anything.
+  //
+  // Three changes: the window is long enough to finish in, returning to the tab
+  // re-checks immediately (which is the actual moment of truth), and there is a
+  // manual check for when both of those somehow miss.
   useEffect(() => {
     if (step !== 3 || !selectedPlatform) return
+    let stopped = false
+
     const check = async () => {
+      if (stopped) return false
       try {
         const res = await fetch('/api/accounts/connected')
-        if (!res.ok) return
+        if (!res.ok) return false
         const data = await res.json()
         if ((data.platforms as string[]).includes(selectedPlatform)) {
+          stopped = true
           setConnectionDetected(true)
+          setCheckingConnection(false)
           if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null }
           setTimeout(() => setStep(quickMode ? 5 : 4), 1500)
+          return true
         }
       } catch {}
+      return false
     }
+    checkConnectionRef.current = check
+
     pollRef.current = setInterval(check, 3000)
+    // Coming back to this tab is the moment they have just finished, so check
+    // then rather than waiting up to 3s for the next tick.
+    const onFocus = () => { void check() }
+    window.addEventListener('focus', onFocus)
+    document.addEventListener('visibilitychange', onFocus)
+
     const timeout = setTimeout(() => {
       if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null }
-    }, 90000)
-    return () => { clearInterval(pollRef.current!); clearTimeout(timeout) }
+      setPollExpired(true)
+    }, 10 * 60 * 1000)
+
+    return () => {
+      stopped = true
+      clearInterval(pollRef.current!)
+      clearTimeout(timeout)
+      window.removeEventListener('focus', onFocus)
+      document.removeEventListener('visibilitychange', onFocus)
+    }
   }, [step, selectedPlatform])
 
   async function applyCoupon() {
@@ -439,17 +479,46 @@ function OnboardingInner() {
                     className="flex items-center justify-center gap-2 w-full py-4 mb-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all">
                     🔗 Connect {platformData?.label} →
                   </a>
-                  <p className="text-xs text-center text-gray-400 dark:text-gray-500 mb-6">
+                  <p className="text-xs text-center text-gray-400 dark:text-gray-500 mb-4">
                     Opens accounts page in a new tab · come back here after connecting
                   </p>
 
-                  <div className="flex gap-3">
+                  {/* The escape hatch for when polling and the focus check both
+                      miss. Without it, someone who has genuinely connected has
+                      no way to tell us so, and Skip is their only live control. */}
+                  <button
+                    onClick={async () => {
+                      setCheckingConnection(true)
+                      setCheckMissed(false)
+                      const found = await checkConnectionRef.current?.()
+                      setCheckingConnection(false)
+                      if (!found) setCheckMissed(true)
+                    }}
+                    disabled={checkingConnection}
+                    className="w-full py-3 mb-2 border border-gray-300 dark:border-gray-600 text-sm font-bold rounded-2xl hover:border-gray-500 transition-all disabled:opacity-60">
+                    {checkingConnection ? 'Checking…' : "I've connected — check now"}
+                  </button>
+
+                  {checkMissed && (
+                    <p className="text-xs text-center text-amber-600 dark:text-amber-500 mb-3">
+                      Still not seeing it. Finish connecting in the other tab, then check again.
+                    </p>
+                  )}
+                  {pollExpired && !checkMissed && (
+                    <p className="text-xs text-center text-gray-400 dark:text-gray-500 mb-3">
+                      Taking a while? Hit check above once you&apos;re done — we&apos;ll pick it up.
+                    </p>
+                  )}
+
+                  <div className="flex gap-3 mt-4">
                     <button onClick={() => setStep(2)}
                       className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
                       ← Back
                     </button>
+                    {/* Was flex-1, which made Skip the widest control on the
+                        screen at the exact step we need people not to skip. */}
                     <button onClick={() => setStep(quickMode ? 5 : 4)}
-                      className="flex-1 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all text-gray-500 dark:text-gray-400">
+                      className="px-6 py-3 text-sm font-semibold text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-all">
                       Skip for now →
                     </button>
                   </div>
