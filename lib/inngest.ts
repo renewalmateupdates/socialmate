@@ -5,6 +5,7 @@ import { createDecipheriv } from 'crypto'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { SOMA_COSTS } from '@/lib/soma-costs'
 import { buildIrisEmailHtml } from '@/lib/iris-email'
+import { lifecycleEmail, getActivationState } from '@/lib/lifecycle-emails'
 import {
   getRecentMembers,
   sendChannelMessage,
@@ -1040,30 +1041,47 @@ export const onboardingSequence = inngest.createFunction(
     // ── Day 1: First Post Nudge (only if no posts yet) ─────────────────────────
     await step.run('send-day1-nudge', async () => {
       const db = getSupabaseAdmin()
-      // Check if user has published or scheduled anything yet
-      const { data: profile } = await db
+      // Check if user has published or scheduled anything yet.
+      //
+      // This selected 'user_id' until Aug 2026. profiles is keyed on 'id' (it
+      // mirrors auth.users.id) and has no user_id column, so the query returned
+      // a 400, `profile` came back null, and the guard below swallowed it — the
+      // day 1 nudge never sent to anyone, silently, for as long as it existed.
+      // Same failure mode as the calendar bug: an explicit column list against a
+      // column that isn't there errors rather than returning empty.
+      const { data: profile, error: profileErr } = await db
         .from('profiles')
-        .select('user_id')
+        .select('id')
         .eq('email', email)
-        .single()
-      if (!profile?.user_id) return
+        .maybeSingle()
+      if (profileErr) {
+        console.warn('[onboarding] day1 profile lookup failed:', profileErr.message)
+        return
+      }
+      if (!profile?.id) return
 
       const { count } = await db
         .from('posts')
         .select('id', { count: 'exact', head: true })
-        .eq('user_id', profile.user_id)
+        .eq('user_id', profile.id)
         .in('status', ['scheduled', 'published'])
 
       if ((count ?? 0) > 0) return // already activated — skip nudge
 
-      // Send in-app notification
-      await db.from('notifications').insert({
-        user_id: profile.user_id,
+      // Send in-app notification.
+      //
+      // Was inserting `body` and `href`; the table has neither (it is
+      // user_id/type/title/message/data/is_read, per app/api/notifications).
+      // Postgres rejects the whole row on an unknown column, so this insert
+      // failed every time it ran. Widespread — see the notifications sweep.
+      const { error: notifErr } = await db.from('notifications').insert({
+        user_id: profile.id,
         type:    'activation',
         title:   'Your first post is waiting',
-        body:    "You set up your account — now let's get something scheduled. It takes less than a minute.",
-        href:    '/compose',
+        message: "You set up your account. Now let's get something scheduled, it takes less than a minute.",
+        data:    { href: '/compose' },
       })
+      if (notifErr) console.warn('[onboarding] day1 notification insert failed:', notifErr.message)
 
       // Send email nudge
       await getResend().emails.send({
@@ -1103,7 +1121,37 @@ export const onboardingSequence = inngest.createFunction(
     await step.sleep('wait-3-days', '52h')
 
     // ── Email 2 — Day 3: AI Tools Showcase ────────────────────────────────────
+    // Branches on real state. Pitching the AI toolkit to someone who has not
+    // connected a single account is selling the second step to a person still
+    // stuck on the first, and it reads like we are not paying attention.
     await step.run('send-day3-email', async () => {
+      const state = await getActivationState(email)
+      if (state.userId && !state.hasConnected) {
+        await getResend().emails.send({
+          from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
+          to: email,
+          subject: 'One connection away',
+          html: lifecycleEmail({
+            headline: `${name}, everything is set up except the one part that matters.`,
+            paragraphs: [
+              'Your account is ready, but there is no platform connected to it yet, so there is nowhere for a post to go. That is the whole blocker, and it takes about thirty seconds to clear.',
+              'Bluesky, Mastodon, Discord and Telegram connect instantly and are free forever. No approval queue, no review process, no card.',
+            ],
+            panel: {
+              label: 'Connect one, then the rest gets easy',
+              lines: [
+                'Bluesky or Mastodon if you want the fastest path',
+                'Discord or Telegram to post straight into your community',
+                'X, TikTok and LinkedIn are there when you want them',
+              ],
+            },
+            ctaLabel: 'Connect a platform',
+            ctaHref: `${appUrl}/accounts`,
+          }),
+        })
+        return
+      }
+
       await getResend().emails.send({
         from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
         to: email,
@@ -1206,7 +1254,31 @@ export const onboardingSequence = inngest.createFunction(
     await step.sleep('wait-4-more-days', '4d')
 
     // ── Email 3 — Day 7: Personal note + soft upgrade nudge ───────────────────
+    // Last touch of the signup drip. If they still have not connected anything,
+    // a soft upgrade nudge is the wrong ask — nothing has been delivered yet to
+    // upgrade from. Ask what got in the way instead.
     await step.run('send-day7-email', async () => {
+      const state = await getActivationState(email)
+      if (state.userId && !state.hasConnected) {
+        await getResend().emails.send({
+          from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
+          to: email,
+          subject: 'Did something get in the way?',
+          html: lifecycleEmail({
+            headline: 'A week in, and I want to know what stopped you.',
+            paragraphs: [
+              `You signed up a week ago, ${name}, and nothing is connected yet. I am not going to pretend that is a coincidence, and I would rather ask than guess.`,
+              'If the connect flow broke, if the platform you actually wanted is not live yet, or if this simply was not what you expected, reply and tell me. I read every reply myself and it goes straight into what I build next.',
+              'If you would rather just get going, the button below is the whole remaining setup.',
+            ],
+            ctaLabel: 'Connect a platform',
+            ctaHref: `${appUrl}/accounts`,
+            footnote: 'This is the last email in your setup series.',
+          }),
+        })
+        return
+      }
+
       await getResend().emails.send({
         from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
         to: email,
@@ -5097,7 +5169,7 @@ export const comebackEmails = inngest.createFunction(
               ${emailLogo}
               <h1 style="font-size:24px;font-weight:800;color:#ffffff;margin:0 0 16px;letter-spacing:-0.5px;">It's been a week.</h1>
               <p style="font-size:15px;color:#a1a1aa;line-height:1.7;margin:0 0 16px;">
-                You signed up for SocialMate, connected your accounts, and then... life happened. We get it.
+                You signed up for SocialMate and then... life happened. We get it.
               </p>
               <p style="font-size:15px;color:#a1a1aa;line-height:1.7;margin:0 0 24px;">
                 Here's the thing — scheduling your content takes 5 minutes a week with SocialMate. The AI tools do most of the heavy lifting. You just show up and pick what to post.
