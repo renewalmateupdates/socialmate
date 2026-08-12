@@ -95,7 +95,7 @@ const PRICING = [
   },
   {
     plan:    'Pro',
-    price:   '$5',
+    price:   '$8',
     period:  '/month',
     highlight: true,
     cta:     'Go Pro',
@@ -110,7 +110,7 @@ const PRICING = [
   },
   {
     plan:    'Agency',
-    price:   '$20',
+    price:   '$29',
     period:  '/month',
     highlight: false,
     cta:     'Go Agency',

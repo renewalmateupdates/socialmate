@@ -144,7 +144,7 @@ const ROADMAP: RoadmapItem[] = [
   { title: 'Discord publishing',         desc: 'Webhook-based posting to Discord channels. Multiple destination support.',                                       status: 'shipped',      category: 'Platforms'     },
   { title: 'Telegram publishing',        desc: 'Bot token + chat ID based posting. HTML parse mode support.',                                                    status: 'shipped',      category: 'Platforms'     },
   { title: 'Mastodon publishing',        desc: 'Per-instance OAuth with token exchange. Supports any Mastodon instance.',                                        status: 'shipped',      category: 'Platforms'     },
-  { title: 'Stripe billing',             desc: 'Free, Pro ($5/mo), and Agency ($20/mo) plans with annual options, white label add-ons, and credit pack purchases.', status: 'shipped', category: 'Platform' },
+  { title: 'Stripe billing',             desc: 'Free, Pro ($8/mo), and Agency ($29/mo) plans with annual options, white label add-ons, and credit pack purchases.', status: 'shipped', category: 'Platform' },
   { title: 'Affiliate & partner program', desc: 'Full affiliate portal with application flow, 30% recurring commissions (40% after 100 referrals), admin activity dashboard, and warning email system.', status: 'shipped', category: 'Growth' },
   { title: 'Collapsible sidebar',        desc: 'Every sidebar section is collapsible and drag-to-reorder. 29 color themes, dark mode toggle — all persisted per user.',  status: 'shipped', category: 'Design' },
   { title: 'Queue drag-to-reorder',      desc: 'Drag posts within a day group to reorder them. Scheduled times redistribute automatically to match the new order.',  status: 'shipped', category: 'Scheduling' },

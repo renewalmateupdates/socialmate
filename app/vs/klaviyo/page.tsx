@@ -112,7 +112,7 @@ export default function VsKlaviyoPage() {
               <li>✅ Discord, Telegram, Bluesky, TikTok, LinkedIn</li>
               <li>✅ Bulk scheduling, competitor tracking, SIGIL</li>
               <li>✅ No credit card required</li>
-              <li>✅ Pro plan is $5/month, not $45</li>
+              <li>✅ Pro plan is $8/month, not $45</li>
             </ul>
           </div>
         </div>
@@ -147,7 +147,7 @@ export default function VsKlaviyoPage() {
               {
                 n: '2',
                 title: 'SocialMate is 9x cheaper than Klaviyo at the entry level',
-                desc: "Klaviyo's starting plan is $45/month for 500 contacts. SocialMate's Pro plan is $5/month for 1,000 posts/month across 7 platforms. If budget is a concern, the math is clear.",
+                desc: "Klaviyo's starting plan is $45/month for 500 contacts. SocialMate's Pro plan is $8/month for 1,000 posts/month across 7 platforms. If budget is a concern, the math is clear.",
               },
               {
                 n: '3',

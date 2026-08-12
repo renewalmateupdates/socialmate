@@ -1568,7 +1568,7 @@ function ComposeInner() {
                 variant="banner"
                 title="Running low on credits"
                 description={`${credits} credit${credits !== 1 ? 's' : ''} left this month`}
-                cta="Get Pro — $5/mo"
+                cta="Get Pro — $8/mo"
                 href="/pricing"
                 dismissKey="nudge_compose_credits"
               />
@@ -1589,7 +1589,7 @@ function ComposeInner() {
                     ? `You've used all ${postUsage.limit.toLocaleString()} posts this month. Your quota resets on the 1st.`
                     : `${postUsage.remaining} of ${postUsage.limit.toLocaleString()} posts left this month`
                 }
-                cta={postUsage.plan === 'free' ? 'Get Pro — $5/mo' : 'See plans'}
+                cta={postUsage.plan === 'free' ? 'Get Pro — $8/mo' : 'See plans'}
                 href="/pricing"
                 dismissKey="nudge_compose_posts"
               />
@@ -1607,7 +1607,7 @@ function ComposeInner() {
                     if (p.id === 'twitter' && plan === 'free') {
                       return (
                         <Link key={p.id} href="/pricing"
-                          title="X/Twitter requires Pro — $5/month or grab an X Booster pack"
+                          title="X/Twitter requires Pro — $8/month or grab an X Booster pack"
                           className="flex items-center gap-1.5 px-3 py-2.5 min-h-[44px] rounded-xl text-xs font-bold border border-dashed border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 hover:border-amber-300 hover:text-amber-500 transition-all">
                           <span>{p.icon}</span>{p.name}
                           <span className="text-[10px] font-extrabold text-amber-500 bg-amber-50 dark:bg-amber-950/40 px-1.5 py-0.5 rounded-full ml-0.5">Pro</span>

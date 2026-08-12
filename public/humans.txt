@@ -38,6 +38,6 @@ Storage: Supabase Storage
 
 /* MISSION */
 Power to the people. Tear down gatekeeping walls. Build the door.
-What competitors charge $99/month for, we give for $5 — or free.
+What competitors charge $99/month for, we give for $8 — or free.
 
 /* humanstxt.org */

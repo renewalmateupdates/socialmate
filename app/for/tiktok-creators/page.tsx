@@ -21,7 +21,7 @@ const faqSchema = {
       name: 'What is the TikTok video limit per month?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Free plan: 20 TikTok videos per month. Pro ($5/month): 60 videos per month. Agency ($20/month): 200 videos per month. These are generous limits based on realistic posting schedules. The cost to us is only Supabase storage egress (~$0.09/GB), not a per-post API charge.',
+        text: 'Free plan: 20 TikTok videos per month. Pro ($8/month): 60 videos per month. Agency ($29/month): 200 videos per month. These are generous limits based on realistic posting schedules. The cost to us is only Supabase storage egress (~$0.09/GB), not a per-post API charge.',
       },
     },
     {
@@ -136,7 +136,7 @@ const PRICING = [
   },
   {
     plan:     'Pro',
-    price:    '$5',
+    price:    '$8',
     note:     '/month',
     tiktok:   '60 TikTok videos/month',
     credits:  '500 AI credits/month',
@@ -146,7 +146,7 @@ const PRICING = [
   },
   {
     plan:     'Agency',
-    price:    '$20',
+    price:    '$29',
     note:     '/month',
     tiktok:   '200 TikTok videos/month',
     credits:  '2,000 AI credits/month',
@@ -386,7 +386,7 @@ export default function TikTokCreatorsPage() {
               },
               {
                 q: 'What is the TikTok video limit per month?',
-                a: 'Free plan: 20 TikTok videos per month. Pro ($5/month): 60 videos per month. Agency ($20/month): 200 videos per month. These are generous limits based on realistic posting schedules. The cost to us is only Supabase storage egress (~$0.09/GB), not a per-post API charge.',
+                a: 'Free plan: 20 TikTok videos per month. Pro ($8/month): 60 videos per month. Agency ($29/month): 200 videos per month. These are generous limits based on realistic posting schedules. The cost to us is only Supabase storage egress (~$0.09/GB), not a per-post API charge.',
               },
               {
                 q: 'Do I need a TikTok Pro or Business account?',

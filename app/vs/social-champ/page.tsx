@@ -8,7 +8,7 @@ import { useI18n } from '@/contexts/I18nContext'
 
 const COMPARISON = [
   { feature: 'Starting price',              champ: '$29/mo (Champion)',           socialmate: '$0 — free forever'          },
-  { feature: 'Pro plan',                    champ: '$29/mo',                      socialmate: '$5/mo'                      },
+  { feature: 'Pro plan',                    champ: '$29/mo',                      socialmate: '$8/mo'                      },
   { feature: 'TikTok scheduling',           champ: '✅',                          socialmate: '✅ Full (Production API)'    },
   { feature: 'Bluesky support',             champ: '❌',                          socialmate: '✅'                          },
   { feature: 'Discord scheduling',          champ: '❌',                          socialmate: '✅ Free'                     },
@@ -28,7 +28,7 @@ const COMPARISON = [
 const FAQ = [
   {
     q: "What is Social Champ?",
-    a: "Social Champ is a social media scheduling tool often marketed as a cheaper alternative to Buffer and Hootsuite. It supports several mainstream platforms and has basic AI features. However, its Champion plan starts at $29/month — nearly 6x more expensive than SocialMate Pro at $5/month.",
+    a: "Social Champ is a social media scheduling tool often marketed as a cheaper alternative to Buffer and Hootsuite. It supports several mainstream platforms and has basic AI features. However, its Champion plan starts at $29/month — nearly 6x more expensive than SocialMate Pro at $8/month.",
   },
   {
     q: "Does Social Champ support Discord or Telegram?",
@@ -40,7 +40,7 @@ const FAQ = [
   },
   {
     q: "How is SocialMate cheaper than Social Champ?",
-    a: "SocialMate is free to start and $5/month for Pro. Social Champ's entry paid plan is $29/month. SocialMate at $5/month includes more platforms (Discord, Telegram, Bluesky), 20+ AI tools, SOMA autonomous content system, and an Enki trading bot — none of which Social Champ offers.",
+    a: "SocialMate is free to start and $8/month for Pro. Social Champ's entry paid plan is $29/month. SocialMate at $8/month includes more platforms (Discord, Telegram, Bluesky), 20+ AI tools, SOMA autonomous content system, and an Enki trading bot — none of which Social Champ offers.",
   },
 ]
 
@@ -84,7 +84,7 @@ export default function VsSocialChampPage() {
             SocialMate vs Social Champ
           </h1>
           <p className="text-lg text-ink-body max-w-2xl mx-auto">
-            Social Champ starts at $29/month and still lacks Discord, Telegram, and Bluesky. SocialMate Pro is $5/month and covers all three — plus SOMA, Enki, and 20+ AI tools.
+            Social Champ starts at $29/month and still lacks Discord, Telegram, and Bluesky. SocialMate Pro is $8/month and covers all three — plus SOMA, Enki, and 20+ AI tools.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-amber/10 text-ink-high font-bold rounded-2xl hover:bg-amber/10 transition-all text-sm">
@@ -118,7 +118,7 @@ export default function VsSocialChampPage() {
               <li>✅ 20+ AI content and writing tools</li>
               <li>✅ SOMA: autonomous weekly content generation</li>
               <li>✅ Enki: paper + live trading bot</li>
-              <li>✅ Pro plan: $5/month</li>
+              <li>✅ Pro plan: $8/month</li>
               <li>✅ Free plan with full scheduling</li>
             </ul>
           </div>
@@ -152,7 +152,7 @@ export default function VsSocialChampPage() {
               {
                 n: '1',
                 title: "Social Champ is 6x more expensive than SocialMate Pro",
-                desc: "Social Champ's Champion plan is $29/month. SocialMate Pro is $5/month. Both include bulk scheduling and analytics. SocialMate adds Discord, Telegram, Bluesky, 20+ AI tools, SOMA, and Enki — none of which Social Champ has.",
+                desc: "Social Champ's Champion plan is $29/month. SocialMate Pro is $8/month. Both include bulk scheduling and analytics. SocialMate adds Discord, Telegram, Bluesky, 20+ AI tools, SOMA, and Enki — none of which Social Champ has.",
               },
               {
                 n: '2',
@@ -167,7 +167,7 @@ export default function VsSocialChampPage() {
               {
                 n: '4',
                 title: 'Free plan actually works for real scheduling',
-                desc: "Social Champ's free plan is very limited. SocialMate's free plan includes 50 AI credits/month, 100 posts a month, bulk scheduler, link in bio, competitor tracking, and 2 team seats — everything a solo creator needs to run a real content operation.",
+                desc: "Social Champ's free plan is very limited. SocialMate's free plan includes 50 AI credits/month, 250 posts a month, bulk scheduler, link in bio, competitor tracking, and 2 team seats — everything a solo creator needs to run a real content operation.",
               },
             ].map((r) => (
               <div key={r.n} className="flex gap-4 p-5 bg-panel border border-edge rounded-2xl hover:border-edge transition-all">
@@ -198,7 +198,7 @@ export default function VsSocialChampPage() {
         <div className="bg-amber/10 text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Pay 6x less. Get more platforms. More AI.</h2>
           <p className="text-ink-high text-sm mb-6 max-w-lg mx-auto">
-            SocialMate Pro is $5/month. Discord, Telegram, Bluesky, TikTok, Mastodon, X — plus 20+ AI tools and SOMA autonomous content.
+            SocialMate Pro is $8/month. Discord, Telegram, Bluesky, TikTok, Mastodon, X — plus 20+ AI tools and SOMA autonomous content.
           </p>
           <Link href="/signup" className="inline-block bg-void text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

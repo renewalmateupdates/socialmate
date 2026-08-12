@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
                 <p style="margin:0 0 12px;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#F59E0B;">Quick tips to get started</p>
                 <ul style="margin:0;padding:0 0 0 16px;color:#9ca3af;font-size:13px;line-height:1.8;">
                   <li>Share your referral link on social media, in your newsletter, or with your community</li>
-                  <li>Let people know SocialMate is $5/mo — far cheaper than any competitor</li>
+                  <li>Let people know SocialMate is $8/mo — far cheaper than any competitor</li>
                   <li>Use your promo codes to give your audience a discount (increases conversions)</li>
                   <li>Add your link to your YouTube description, bio, or website footer</li>
                 </ul>

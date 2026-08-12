@@ -141,7 +141,7 @@ const PRICING = [
     price:   '$0',
     period:  'forever',
     credits: '50 AI credits/mo',
-    posts:   '100 posts/month',
+    posts:   '250 posts/month',
     seats:   '2 seats',
     highlight: false,
     cta:     'Start free — no card',
@@ -149,10 +149,10 @@ const PRICING = [
   },
   {
     plan:    'Pro',
-    price:   '$5',
+    price:   '$8',
     period:  '/month',
     credits: '500 AI credits/mo',
-    posts:   '100 posts / month',
+    posts:   '1,000 posts / month',
     seats:   '5 seats',
     highlight: true,
     cta:     'Go Pro',
@@ -160,10 +160,10 @@ const PRICING = [
   },
   {
     plan:    'Agency',
-    price:   '$20',
+    price:   '$29',
     period:  '/month',
     credits: '2,000 AI credits/mo',
-    posts:   '100 posts / month',
+    posts:   '5,000 posts / month',
     seats:   '15 seats',
     highlight: false,
     cta:     'Go Agency',
@@ -176,7 +176,7 @@ const COMPARISON = [
   { tool: 'Buffer',           price: '$18/mo',  linkedin: '✓', free: '✗', ai: 'Limited'  },
   { tool: 'Later',            price: '$25/mo',  linkedin: '✗', free: '✗', ai: 'Limited'  },
   { tool: 'Publer',           price: '$12/mo',  linkedin: '✓', free: '✗', ai: 'Limited'  },
-  { tool: 'SocialMate',       price: '$0–$5/mo',linkedin: '✓', free: '✓', ai: '15+ tools', highlight: true },
+  { tool: 'SocialMate',       price: '$0–$8/mo',linkedin: '✓', free: '✓', ai: '15+ tools', highlight: true },
 ]
 
 const FAQ = [

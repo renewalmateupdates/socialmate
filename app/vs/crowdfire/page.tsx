@@ -8,9 +8,9 @@ import { useI18n } from '@/contexts/I18nContext'
 
 const COMPARISON = [
   { feature: 'Starting price',              crowdfire: '$0 (very limited) / $7.48 Plus', socialmate: '$0 — free forever'        },
-  { feature: 'Free plan post limit',        crowdfire: '10 posts/month hard cap',         socialmate: '100 posts / month'          },
+  { feature: 'Free plan post limit',        crowdfire: '10 posts/month hard cap',         socialmate: '250 posts / month'          },
   { feature: 'Free plan accounts',          crowdfire: '1 social account only',           socialmate: 'Multiple accounts'        },
-  { feature: 'Scheduled posts (free)',       crowdfire: '10/month maximum',               socialmate: '100 posts / month'                },
+  { feature: 'Scheduled posts (free)',       crowdfire: '10/month maximum',               socialmate: '250 posts / month'                },
   { feature: 'Content curation',            crowdfire: '✅ (free tier)',                  socialmate: 'RSS import (free)'        },
   { feature: 'Analytics (free)',            crowdfire: '❌ Locked to paid',              socialmate: '✅ Free (30 days)'        },
   { feature: 'Discord support',             crowdfire: '❌',                              socialmate: '✅'                       },
@@ -88,7 +88,7 @@ export default function VsCrowdfirePage() {
             SocialMate vs Crowdfire
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            Crowdfire free plan caps at 10 posts/month across 1 account. SocialMate is free forever with 100 posts a month and no card.
+            Crowdfire free plan caps at 10 posts/month across 1 account. SocialMate is free forever with 250 posts a month and no card.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -116,7 +116,7 @@ export default function VsCrowdfirePage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">100 posts / month. 7 platforms. $0.</p>
+            <p className="font-extrabold text-lg mb-2">250 posts / month. 7 platforms. $0.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Free forever — no post cap</li>
               <li>✅ Analytics included free (30 days)</li>
@@ -202,7 +202,7 @@ export default function VsCrowdfirePage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">No 10-post cap here — start free today</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is free forever — 100 posts/month, bulk scheduling, 15+ AI tools, analytics included, 7 platforms. No credit card required.
+            SocialMate is free forever — 250 posts/month, bulk scheduling, 15+ AI tools, analytics included, 7 platforms. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

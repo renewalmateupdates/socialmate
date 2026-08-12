@@ -24,7 +24,7 @@ const COMPARISON = [
   { feature: 'Bluesky / Mastodon',     onlypult: '❌',                      socialmate: '✅'                       },
   { feature: 'Discord / Telegram',     onlypult: '❌',                      socialmate: '✅'                       },
   { feature: 'GIF export',             onlypult: '❌',                      socialmate: '✅'                       },
-  { feature: 'Client workspaces',      onlypult: 'Agency plan ($97/mo)',    socialmate: 'Pro+: from $5/mo'        },
+  { feature: 'Client workspaces',      onlypult: 'Agency plan ($97/mo)',    socialmate: 'Pro+: from $8/mo'        },
   { feature: 'Hashtag manager',        onlypult: '❌',                      socialmate: '✅ Free'                  },
 ]
 
@@ -43,7 +43,7 @@ const FAQ = [
   },
   {
     q: 'How does Onlypult compare for agencies?',
-    a: 'Onlypult\'s Agency plan at $97/month supports multiple accounts and users. SocialMate\'s Agency plan is $20/month with client workspaces, 15 team seats, and 2,000 AI credits. The value difference is significant.',
+    a: 'Onlypult\'s Agency plan at $97/month supports multiple accounts and users. SocialMate\'s Agency plan is $29/month with client workspaces, 15 team seats, and 2,000 AI credits. The value difference is significant.',
   },
   {
     q: 'Why should I choose SocialMate over Onlypult?',
@@ -181,7 +181,7 @@ export default function VsOnlypult() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3 text-ink-high">Start for free today</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            7 platforms, 15+ AI tools, 100 posts/month, link in bio, competitor tracking — all free. No card required.
+            7 platforms, 15+ AI tools, 250 posts/month, link in bio, competitor tracking — all free. No card required.
           </p>
           <Link href="/signup"
             className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">

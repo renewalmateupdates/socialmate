@@ -24,7 +24,7 @@ const STATS = [
   { value: '7',    label: 'Live platforms',                  note: 'Bluesky, X, TikTok, LinkedIn, Discord, Telegram, Mastodon' },
   { value: '480+', label: 'Published blog posts',           note: 'SEO-targeted content library' },
   { value: '8',    label: 'Autonomous AI agents',           note: 'Newsletter, repurpose, caption, outreach, and more' },
-  { value: '$5',   label: 'Pro plan — per month',           note: 'What competitors charge $99 for' },
+  { value: '$8',   label: 'Pro plan — per month',           note: 'What competitors charge $99 for' },
   { value: '$0',   label: 'Free plan — forever',            note: '50 AI credits, all 7 platforms, no credit card' },
   { value: '20+',  label: 'Built-in AI tools',              note: 'Caption, hook, thread, hashtag, repurpose, score, and more' },
 ]
@@ -70,7 +70,7 @@ export default function PressPage() {
       <section className="text-white py-16 px-6">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-2xl sm:text-3xl font-extrabold mb-6">
-            &ldquo;What competitors charge $99/month for,<br />we give for $5 — or free.&rdquo;
+            &ldquo;What competitors charge $99/month for,<br />we give for $8 — or free.&rdquo;
           </h2>
           <p className="text-gray-300 text-base leading-relaxed mb-6">
             That&apos;s the pitch. And it&apos;s real. SocialMate is a full-featured social media scheduler

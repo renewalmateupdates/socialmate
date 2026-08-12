@@ -23,7 +23,7 @@ const COMPARISON = [
   { feature: 'Evergreen recycling',     feedhive: 'Paid plans',                 socialmate: '✅ Free'                  },
   { feature: 'Competitor tracking',     feedhive: '❌',                          socialmate: '✅ Free (3 accounts)'    },
   { feature: 'Team seats',              feedhive: '1 user on Creator',          socialmate: '2 seats free'             },
-  { feature: 'Client workspaces',       feedhive: 'Higher tier required',       socialmate: 'Pro+: from $5/mo'         },
+  { feature: 'Client workspaces',       feedhive: 'Higher tier required',       socialmate: 'Pro+: from $8/mo'         },
   { feature: 'White label',             feedhive: '❌',                          socialmate: '✅ Add-on available'      },
 ]
 
@@ -42,7 +42,7 @@ const FAQ = [
   },
   {
     q: 'Is SocialMate actually free with no catch?',
-    a: 'Yes. The free tier includes 100 posts/month, 50 AI credits per month, bulk scheduling, SIGIL (link in bio), hashtag manager, competitor tracking (3 accounts), RSS import, and evergreen recycling. No credit card required and no trial countdown.',
+    a: 'Yes. The free tier includes 250 posts/month, 50 AI credits per month, bulk scheduling, SIGIL (link in bio), hashtag manager, competitor tracking (3 accounts), RSS import, and evergreen recycling. No credit card required and no trial countdown.',
   },
 ]
 
@@ -169,7 +169,7 @@ export default function VsFeedHivePage() {
               {
                 n: '4',
                 title: 'Flat pricing beats per-feature upgrades',
-                desc: "FeedHive's feature gates push you toward higher tiers as you grow. SocialMate Pro is $5/month — flat — with 15+ AI tools, 7 platforms, SOMA, team seats, and client workspaces. The Agency plan is $20/month. What competitors charge $99/month for, we give for $5.",
+                desc: "FeedHive's feature gates push you toward higher tiers as you grow. SocialMate Pro is $8/month — flat — with 15+ AI tools, 7 platforms, SOMA, team seats, and client workspaces. The Agency plan is $29/month. What competitors charge $99/month for, we give for $8.",
               },
             ].map((r) => (
               <div key={r.n} className="flex gap-4 p-5 bg-panel border border-edge border-edge rounded-2xl hover:border-edge dark:hover:border-edge transition-all">

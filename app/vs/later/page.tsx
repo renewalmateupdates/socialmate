@@ -10,7 +10,7 @@ const COMPARISON = [
   { feature: 'Starting price',          later: '$18/month (Starter)',        socialmate: '$0 — free forever'       },
   { feature: 'Free plan platforms',     later: 'Instagram only',             socialmate: '7 platforms'            },
   { feature: 'Free plan profiles',      later: '1 profile',                  socialmate: 'Multiple'                },
-  { feature: 'Free plan post limit',    later: '30 posts/month',             socialmate: '100 posts / month'               },
+  { feature: 'Free plan post limit',    later: '30 posts/month',             socialmate: '250 posts / month'               },
   { feature: 'Discord support',         later: '❌',                          socialmate: '✅'                      },
   { feature: 'Telegram support',        later: '❌',                          socialmate: '✅'                      },
   { feature: 'Mastodon support',        later: '❌',                          socialmate: '✅'                      },
@@ -25,7 +25,7 @@ const COMPARISON = [
   { feature: 'RSS import',              later: '❌',                          socialmate: '✅ Free'                  },
   { feature: 'Evergreen recycling',     later: '❌',                          socialmate: '✅ Free'                  },
   { feature: 'Team seats (free)',        later: '1',                          socialmate: '2'                       },
-  { feature: 'Client workspaces',       later: 'Agency plan only',           socialmate: 'Pro+: from $5/mo'        },
+  { feature: 'Client workspaces',       later: 'Agency plan only',           socialmate: 'Pro+: from $8/mo'        },
 ]
 
 const FAQ = [
@@ -43,7 +43,7 @@ const FAQ = [
   },
   {
     q: 'Is SocialMate actually free with no catch?',
-    a: 'Yes. Free tier includes 100 posts/month, 50 AI credits/month, bulk scheduling, link in bio, hashtag manager, competitor tracking, RSS import, and evergreen recycling. No credit card required and no platform restrictions.',
+    a: 'Yes. Free tier includes 250 posts/month, 50 AI credits/month, bulk scheduling, link in bio, hashtag manager, competitor tracking, RSS import, and evergreen recycling. No credit card required and no platform restrictions.',
   },
 ]
 
@@ -121,7 +121,7 @@ export default function VsLaterPage() {
               <li>✅ 7 platforms on free plan</li>
               <li>✅ TikTok live — free for all users</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
-              <li>✅ 100 posts / month on the free plan</li>
+              <li>✅ 250 posts / month on the free plan</li>
               <li>✅ Bulk scheduling free</li>
               <li>✅ 15+ AI tools included free</li>
               <li>✅ No credit card required</li>
@@ -203,7 +203,7 @@ export default function VsLaterPage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Not just an Instagram tool.</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            SocialMate covers 7 platforms — including Discord, Bluesky, Telegram, and Mastodon. 100 posts a month. 15+ AI tools. Free forever.
+            SocialMate covers 7 platforms — including Discord, Bluesky, Telegram, and Mastodon. 250 posts a month. 15+ AI tools. Free forever.
           </p>
           <Link href="/signup" className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

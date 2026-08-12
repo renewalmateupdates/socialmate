@@ -126,7 +126,7 @@ export default function VsTalkwalkerPage() {
               <li>✅ 15+ AI tools on free tier</li>
               <li>✅ SOMA autonomous content agent</li>
               <li>✅ SM Radar: AI content intelligence report</li>
-              <li>✅ Pro plan for $5/month total</li>
+              <li>✅ Pro plan for $8/month total</li>
               <li>✅ No credit card required to start</li>
             </ul>
           </div>
@@ -165,7 +165,7 @@ export default function VsTalkwalkerPage() {
               {
                 n: '2',
                 title: '$9,600+/year vs. $0 for creator-scale monitoring',
-                desc: "Talkwalker's entry pricing starts at roughly $800/month for enterprise teams. SocialMate's free plan includes competitor tracking with engagement alerts, SM Radar (AI content intelligence), and SM Pulse (niche trend scan) — covering the core monitoring use cases creators actually need. Pro is $5/month. The ROI comparison isn't close.",
+                desc: "Talkwalker's entry pricing starts at roughly $800/month for enterprise teams. SocialMate's free plan includes competitor tracking with engagement alerts, SM Radar (AI content intelligence), and SM Pulse (niche trend scan) — covering the core monitoring use cases creators actually need. Pro is $8/month. The ROI comparison isn't close.",
               },
               {
                 n: '3',
@@ -208,7 +208,7 @@ export default function VsTalkwalkerPage() {
           <h2 className="text-3xl font-extrabold mb-4">Stop listening. Start creating. Free.</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
             SocialMate schedules to 7 platforms, tracks competitors, and uses AI to generate what to post next.
-            Start free. Pro is $5/month.
+            Start free. Pro is $8/month.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
             Start free — no credit card →

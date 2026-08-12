@@ -155,7 +155,7 @@ export default function VsStatusbrewPage() {
               {
                 n: '1',
                 title: '$69/month for a single user — before adding a second seat',
-                desc: "Statusbrew's starter Lite plan costs $69/month for just one user. Adding a second team member means upgrading. SocialMate's free plan includes 2 team seats, and the Pro plan at $5/month covers more accounts with 500 AI credits.",
+                desc: "Statusbrew's starter Lite plan costs $69/month for just one user. Adding a second team member means upgrading. SocialMate's free plan includes 2 team seats, and the Pro plan at $8/month covers more accounts with 500 AI credits.",
               },
               {
                 n: '2',

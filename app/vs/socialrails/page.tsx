@@ -24,7 +24,7 @@ const COMPARISON = [
   { feature: 'Competitor tracking',         socialrails: '❌',                        socialmate: '✅ Free (3 accounts)'     },
   { feature: 'Analytics',                   socialrails: 'Basic',                    socialmate: '30-day history free'      },
   { feature: 'Team seats (starter)',        socialrails: '0',                        socialmate: '2 users free'             },
-  { feature: 'Client workspaces',           socialrails: 'Higher tiers',             socialmate: 'Pro+: from $5/mo'        },
+  { feature: 'Client workspaces',           socialrails: 'Higher tiers',             socialmate: 'Pro+: from $8/mo'        },
 ]
 
 const FAQ = [
@@ -42,7 +42,7 @@ const FAQ = [
   },
   {
     q: 'Is SocialMate genuinely free or does it get limited quickly?',
-    a: 'The free tier is designed to be fully usable without upgrading. It includes 100 posts a month, 50 AI credits/month, bulk scheduling, link in bio, hashtag manager, competitor tracking (3 accounts), RSS import, and evergreen recycling. No credit card required.',
+    a: 'The free tier is designed to be fully usable without upgrading. It includes 250 posts a month, 50 AI credits/month, bulk scheduling, link in bio, hashtag manager, competitor tracking (3 accounts), RSS import, and evergreen recycling. No credit card required.',
   },
 ]
 

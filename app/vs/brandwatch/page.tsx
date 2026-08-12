@@ -152,7 +152,7 @@ export default function VsBrandwatchPage() {
               {
                 n: '2',
                 title: 'The price is enterprise-only',
-                desc: 'Brandwatch is built for Fortune 500 brands with dedicated social listening teams. For creators, solopreneurs, and small businesses, the ROI simply does not add up. SocialMate\'s Pro plan is $5/month.',
+                desc: 'Brandwatch is built for Fortune 500 brands with dedicated social listening teams. For creators, solopreneurs, and small businesses, the ROI simply does not add up. SocialMate\'s Pro plan is $8/month.',
               },
               {
                 n: '3',

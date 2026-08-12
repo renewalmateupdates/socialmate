@@ -148,7 +148,7 @@ export default function VsPlanlyPage() {
               {
                 n: '1',
                 title: 'TikTok should not require a $15/month plan',
-                desc: "Planly locks TikTok behind its paid tier. SocialMate's TikTok Production API is approved and live — free for all users. 20 videos per month on the free plan, 60 on Pro ($5/month). For a daily TikTok posting schedule, you don't need to pay $15/month before you've made a single dollar.",
+                desc: "Planly locks TikTok behind its paid tier. SocialMate's TikTok Production API is approved and live — free for all users. 20 videos per month on the free plan, 60 on Pro ($8/month). For a daily TikTok posting schedule, you don't need to pay $15/month before you've made a single dollar.",
               },
               {
                 n: '2',

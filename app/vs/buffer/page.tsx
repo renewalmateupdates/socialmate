@@ -9,7 +9,7 @@ import { useI18n } from '@/contexts/I18nContext'
 const COMPARISON = [
   { feature: 'Starting price',          buffer: '$6/month (Essentials)',     socialmate: '$0 — free forever'       },
   { feature: 'Free plan channels',      buffer: '3 channels',                socialmate: 'No hard cap'             },
-  { feature: 'Free plan queue limit',   buffer: '10 posts per channel',      socialmate: '100 posts / month'               },
+  { feature: 'Free plan queue limit',   buffer: '10 posts per channel',      socialmate: '250 posts / month'               },
   { feature: 'Bulk scheduling',         buffer: '❌ Not available',           socialmate: '✅ Free'                  },
   { feature: 'Analytics',              buffer: 'Paid add-on',               socialmate: '✅ Built-in free'         },
   { feature: 'Engagement / Reply inbox', buffer: 'Paid add-on',             socialmate: '✅ Included'              },
@@ -25,7 +25,7 @@ const COMPARISON = [
   { feature: 'RSS import',              buffer: '❌',                         socialmate: '✅ Free'                  },
   { feature: 'Evergreen recycling',     buffer: '❌',                         socialmate: '✅ Free'                  },
   { feature: 'Team seats (free)',        buffer: '1',                         socialmate: '2'                       },
-  { feature: 'Client workspaces',       buffer: 'Not available',             socialmate: 'Pro+: from $5/mo'        },
+  { feature: 'Client workspaces',       buffer: 'Not available',             socialmate: 'Pro+: from $8/mo'        },
 ]
 
 const FAQ = [
@@ -43,7 +43,7 @@ const FAQ = [
   },
   {
     q: 'Is SocialMate actually free with no catch?',
-    a: 'Yes. Free tier includes 100 posts/month, 50 AI credits/month, bulk scheduling, link in bio, hashtag manager, competitor tracking, RSS import, and evergreen recycling. No credit card required.',
+    a: 'Yes. Free tier includes 250 posts/month, 50 AI credits/month, bulk scheduling, link in bio, hashtag manager, competitor tracking, RSS import, and evergreen recycling. No credit card required.',
   },
 ]
 
@@ -118,7 +118,7 @@ export default function VsBufferPage() {
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
             <p className="font-extrabold text-lg mb-2">Everything in one. No add-ons. No caps.</p>
             <ul className="space-y-1 text-xs text-ink-body">
-              <li>✅ 100 posts / month, no per-channel cap</li>
+              <li>✅ 250 posts / month, no per-channel cap</li>
               <li>✅ Bulk scheduling free</li>
               <li>✅ Analytics built in — no add-on</li>
               <li>✅ 15+ AI tools on free tier</li>
@@ -202,7 +202,7 @@ export default function VsBufferPage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Done working around Buffer&apos;s limits?</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            SocialMate gives you 100 posts/month, bulk scheduling, 15+ AI tools, 7 platforms — completely free to start. No credit card required.
+            SocialMate gives you 250 posts/month, bulk scheduling, 15+ AI tools, 7 platforms — completely free to start. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

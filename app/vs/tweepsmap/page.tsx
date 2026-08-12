@@ -37,7 +37,7 @@ const FAQ = [
   },
   {
     q: 'Why pay for Tweepsmap analytics alone when scheduling costs extra?',
-    a: 'Tweepsmap is analytics-only — you still need Buffer, Hootsuite, or another scheduler on top of it. That\'s two subscriptions, two logins, two tools to manage. SocialMate combines scheduling across 7 platforms and multi-platform analytics in one dashboard for free. Pro is $5/month for advanced features.',
+    a: 'Tweepsmap is analytics-only — you still need Buffer, Hootsuite, or another scheduler on top of it. That\'s two subscriptions, two logins, two tools to manage. SocialMate combines scheduling across 7 platforms and multi-platform analytics in one dashboard for free. Pro is $8/month for advanced features.',
   },
   {
     q: 'Does SocialMate show best posting times for X/Twitter?',
@@ -122,7 +122,7 @@ export default function VsTweepsmapPage() {
               <li>✅ Schedule across X, TikTok, LinkedIn, Bluesky, Discord, Telegram, Mastodon</li>
               <li>✅ Best-times heatmap per platform</li>
               <li>✅ Post performance tracking built in</li>
-              <li>✅ Pro plan for $5/month total</li>
+              <li>✅ Pro plan for $8/month total</li>
               <li>✅ No second tool needed</li>
               <li>✅ No credit card required to start</li>
             </ul>
@@ -162,7 +162,7 @@ export default function VsTweepsmapPage() {
               {
                 n: '2',
                 title: 'One tool instead of two subscriptions',
-                desc: 'Tweepsmap for analytics + another scheduler for posting = two monthly bills, two logins, two workflows. SocialMate replaces both for $5/month Pro. Your entire posting workflow — compose, schedule, analyze, optimize — lives in one place.',
+                desc: 'Tweepsmap for analytics + another scheduler for posting = two monthly bills, two logins, two workflows. SocialMate replaces both for $8/month Pro. Your entire posting workflow — compose, schedule, analyze, optimize — lives in one place.',
               },
               {
                 n: '3',
@@ -205,7 +205,7 @@ export default function VsTweepsmapPage() {
           <h2 className="text-3xl font-extrabold mb-4">Stop paying for analytics without scheduling</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
             SocialMate gives you post scheduling and engagement analytics across 7 platforms.
-            Free plan available. Pro is $5/month — one tool, not two.
+            Free plan available. Pro is $8/month — one tool, not two.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
             Start free — no credit card →

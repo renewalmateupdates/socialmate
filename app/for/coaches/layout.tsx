@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Social Media for Coaches & Consultants — SocialMate',
-  description: 'Stop losing clients to coaches with worse credentials but better social media. Schedule a week of posts in 30 minutes, let AI write thought leadership content, and stay visible on LinkedIn — free or $5/month.',
+  description: 'Stop losing clients to coaches with worse credentials but better social media. Schedule a week of posts in 30 minutes, let AI write thought leadership content, and stay visible on LinkedIn — free or $8/month.',
   openGraph: {
     title: 'Social Media for Coaches & Consultants — SocialMate',
     description: 'Schedule posts to LinkedIn, X, Bluesky, Discord, and more in 30 minutes a week. SOMA generates coaching content in your voice automatically.',

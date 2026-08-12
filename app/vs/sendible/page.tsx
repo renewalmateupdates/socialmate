@@ -24,7 +24,7 @@ const COMPARISON = [
   { feature: 'Competitor tracking',     sendible: 'Higher tiers',             socialmate: '✅ Free (3 accounts)'    },
   { feature: 'RSS import',              sendible: '✅ Paid plans',             socialmate: '✅ Free'                  },
   { feature: 'Evergreen recycling',     sendible: '✅ Paid plans',             socialmate: '✅ Free'                  },
-  { feature: 'Client workspaces',       sendible: 'White-label ($199+/mo)',   socialmate: 'Pro+: from $5/mo'        },
+  { feature: 'Client workspaces',       sendible: 'White-label ($199+/mo)',   socialmate: 'Pro+: from $8/mo'        },
 ]
 
 const FAQ = [
@@ -42,7 +42,7 @@ const FAQ = [
   },
   {
     q: 'Is SocialMate actually free with no catch?',
-    a: 'Yes. Free tier includes 100 posts/month, 50 AI credits/month, bulk scheduling, link in bio, hashtag manager, competitor tracking, RSS import, and evergreen recycling. No credit card required and no free trial countdown.',
+    a: 'Yes. Free tier includes 250 posts/month, 50 AI credits/month, bulk scheduling, link in bio, hashtag manager, competitor tracking, RSS import, and evergreen recycling. No credit card required and no free trial countdown.',
   },
 ]
 

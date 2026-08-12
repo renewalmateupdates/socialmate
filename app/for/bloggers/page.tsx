@@ -107,7 +107,7 @@ const PRICING = [
   },
   {
     plan:    'Pro',
-    price:   '$5',
+    price:   '$8',
     period:  '/month',
     credits: '500 AI credits/mo',
     cta:     'Go Pro',

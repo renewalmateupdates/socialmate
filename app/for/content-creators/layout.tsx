@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Social Media for Content Creators — SocialMate',
-  description: 'Manage all your social media from one place. Post to 7 platforms at once, use AI to write content faster, and never burn out from daily posting pressure — free forever or $5/month.',
+  description: 'Manage all your social media from one place. Post to 7 platforms at once, use AI to write content faster, and never burn out from daily posting pressure — free forever or $8/month.',
   openGraph: {
     title: 'Social Media for Content Creators — SocialMate',
     description: 'One dashboard for Bluesky, X, TikTok, LinkedIn, Discord, Telegram, and Mastodon. SOMA generates a week of content from your ideas automatically.',

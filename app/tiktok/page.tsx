@@ -20,8 +20,8 @@ export default function TikTokStudioLandingPage() {
 
   const QUOTA = [
     { plan: t('tiktok_landing.plan_free'), price: '$0/mo', videos: t('tiktok_landing.free_videos'), color: 'border-edge' },
-    { plan: t('tiktok_landing.plan_pro'), price: '$5/mo', videos: t('tiktok_landing.pro_videos'), color: 'border-amber-500' },
-    { plan: t('tiktok_landing.plan_agency'), price: '$20/mo', videos: t('tiktok_landing.agency_videos'), color: 'border-edge' },
+    { plan: t('tiktok_landing.plan_pro'), price: '$8/mo', videos: t('tiktok_landing.pro_videos'), color: 'border-amber-500' },
+    { plan: t('tiktok_landing.plan_agency'), price: '$29/mo', videos: t('tiktok_landing.agency_videos'), color: 'border-edge' },
   ]
 
   return (

@@ -47,7 +47,7 @@ ${params.prospectCompany ? `- Newsletter/Publication: ${params.prospectCompany}`
 - Type: ${sourceLabel}
 
 Instructions:
-- Sender is Joshua Bostic, solo founder of SocialMate (socialmate.studio) — a social media scheduler and AI creator toolkit. What competitors charge $99/month for, we give for $5 or free.
+- Sender is Joshua Bostic, solo founder of SocialMate (socialmate.studio) — a social media scheduler and AI creator toolkit. What competitors charge $99/month for, we give for $8 or free.
 - Joshua builds this solo, nights and weekends. Built it 100% solo, bootstrapped.
 - Goal is to get featured/mentioned in their newsletter, blog, or content — no appearance or call needed.
 - Keep it SHORT. 3-4 sentences max. Lead with something specific about them, then the ask.

@@ -37,11 +37,11 @@ const FAQ = [
   },
   {
     q: 'When does HubSpot Social make sense vs SocialMate?',
-    a: 'HubSpot Social makes sense if you\'re already paying for HubSpot CRM and want social scheduling that integrates directly with your contact database, deal pipeline, and marketing automation. If your primary need is social scheduling and AI content tools, paying $800+/month for that use case is not cost-effective. SocialMate covers the social scheduling job for $5/month.',
+    a: 'HubSpot Social makes sense if you\'re already paying for HubSpot CRM and want social scheduling that integrates directly with your contact database, deal pipeline, and marketing automation. If your primary need is social scheduling and AI content tools, paying $800+/month for that use case is not cost-effective. SocialMate covers the social scheduling job for $8/month.',
   },
   {
     q: 'Can SocialMate serve agency and team use cases at lower cost than HubSpot?',
-    a: 'SocialMate\'s Agency plan ($20/month) includes 5 client workspaces, 15 team seats, 2,000 AI credits/month, and white label options. For agencies managing client social media, SocialMate delivers the core scheduling + AI workflow at $20/month vs HubSpot\'s enterprise-tier pricing. The tradeoff: no CRM or marketing automation. Pure social scheduling.',
+    a: 'SocialMate\'s Agency plan ($29/month) includes 5 client workspaces, 15 team seats, 2,000 AI credits/month, and white label options. For agencies managing client social media, SocialMate delivers the core scheduling + AI workflow at $29/month vs HubSpot\'s enterprise-tier pricing. The tradeoff: no CRM or marketing automation. Pure social scheduling.',
   },
   {
     q: 'What social platforms does HubSpot support vs SocialMate?',
@@ -89,7 +89,7 @@ export default function VsHubSpotSocialPage() {
             SocialMate vs HubSpot Social
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            HubSpot social scheduling is buried inside an $800+/month marketing platform. SocialMate delivers social scheduling across 7 platforms for $5/month — or completely free.
+            HubSpot social scheduling is buried inside an $800+/month marketing platform. SocialMate delivers social scheduling across 7 platforms for $8/month — or completely free.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -117,13 +117,13 @@ export default function VsHubSpotSocialPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">Social-first. 7 platforms. $5/month.</p>
+            <p className="font-extrabold text-lg mb-2">Social-first. 7 platforms. $8/month.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Built exclusively for social scheduling</li>
               <li>✅ TikTok free — HubSpot has none</li>
               <li>✅ X + LinkedIn + Bluesky + Discord + Telegram + Mastodon</li>
               <li>✅ 15+ AI tools free</li>
-              <li>✅ Pro $5/month — 160x cheaper than HubSpot</li>
+              <li>✅ Pro $8/month — 160x cheaper than HubSpot</li>
               <li>✅ No credit card required to start</li>
             </ul>
           </div>
@@ -167,7 +167,7 @@ export default function VsHubSpotSocialPage() {
               {
                 n: '3',
                 title: '160x cheaper at the Pro tier',
-                desc: 'HubSpot Marketing Hub Starter: $800+/month. SocialMate Pro: $5/month. Same core social scheduling result. Different scope — HubSpot is a full marketing suite; SocialMate is a focused social scheduler with AI tools. If social scheduling is the job, don\'t pay enterprise pricing for it.',
+                desc: 'HubSpot Marketing Hub Starter: $800+/month. SocialMate Pro: $8/month. Same core social scheduling result. Different scope — HubSpot is a full marketing suite; SocialMate is a focused social scheduler with AI tools. If social scheduling is the job, don\'t pay enterprise pricing for it.',
               },
               {
                 n: '4',
@@ -205,7 +205,7 @@ export default function VsHubSpotSocialPage() {
           <h2 className="text-3xl font-extrabold mb-4">Get the scheduling. Skip the $800/month bill.</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
             SocialMate schedules 7 platforms including TikTok and LinkedIn.
-            Free plan available. Pro is $5/month — not $800.
+            Free plan available. Pro is $8/month — not $800.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
             Start free — no credit card →

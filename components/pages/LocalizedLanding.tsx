@@ -90,8 +90,8 @@ const COMPARISON_ROWS = [
   { rowKey: 'comparison.rows.evergreen',         industry: 'Paid add-on',           socialmate: '✅ Free'              },
   { rowKey: 'comparison.rows.rss',               industry: '❌ Not included',        socialmate: '✅ Free'              },
   { rowKey: 'comparison.rows.team_seats',        industry: 'Per seat fee',          socialmate: '2 seats free'        },
-  { rowKey: 'comparison.rows.client_workspaces', industry: 'Enterprise only',       socialmate: 'From $5/mo'          },
-  { rowKey: 'comparison.rows.white_label',       industry: 'Enterprise only',       socialmate: 'From $20/mo'         },
+  { rowKey: 'comparison.rows.client_workspaces', industry: 'Enterprise only',       socialmate: 'From $8/mo'          },
+  { rowKey: 'comparison.rows.white_label',       industry: 'Enterprise only',       socialmate: 'From $29/mo'         },
 ]
 
 export function generateLocaleMetadata(locale: string): Metadata {

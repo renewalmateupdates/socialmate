@@ -21,7 +21,7 @@ const COMPARISON = [
   { feature: 'RSS import',             hopperhq: '❌',                       socialmate: '✅ Free'                  },
   { feature: 'Bluesky / Mastodon',     hopperhq: '❌',                       socialmate: '✅'                       },
   { feature: 'Discord / Telegram',     hopperhq: '❌',                       socialmate: '✅'                       },
-  { feature: 'Client workspaces',      hopperhq: 'Extra cost per client',    socialmate: 'Pro+: from $5/mo'        },
+  { feature: 'Client workspaces',      hopperhq: 'Extra cost per client',    socialmate: 'Pro+: from $8/mo'        },
   { feature: 'Hashtag manager',        hopperhq: '❌',                       socialmate: '✅ Free'                  },
 ]
 
@@ -40,7 +40,7 @@ const FAQ = [
   },
   {
     q: 'How does Hopper HQ pricing scale for agencies?',
-    a: 'Hopper HQ pricing is per-social-set, which means agency costs scale significantly with each client. Managing 10 clients could mean $190+/month just for access. SocialMate\'s Agency plan at $20/month supports up to 5 client workspaces flat.',
+    a: 'Hopper HQ pricing is per-social-set, which means agency costs scale significantly with each client. Managing 10 clients could mean $190+/month just for access. SocialMate\'s Agency plan at $29/month supports up to 5 client workspaces flat.',
   },
   {
     q: 'What does SocialMate offer that Hopper HQ doesn\'t?',
@@ -178,7 +178,7 @@ export default function VsHopperHq() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3 text-ink-high">Start for free today</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            7 platforms, 15+ AI tools, 100 posts/month, link in bio, competitor tracking — all free. No card required.
+            7 platforms, 15+ AI tools, 250 posts/month, link in bio, competitor tracking — all free. No card required.
           </p>
           <Link href="/signup"
             className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">

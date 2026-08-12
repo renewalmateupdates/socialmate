@@ -7,7 +7,7 @@ import { useI18n } from '@/contexts/I18nContext'
 const PAIN_POINTS = [
   {
     before: 'Pay $299+/month for Sprout Social. Hope the client doesn\'t notice you\'re reselling it.',
-    after:  'Pay $20/month for SocialMate Agency. White label it. Your brand, your price.',
+    after:  'Pay $29/month for SocialMate Agency. White label it. Your brand, your price.',
     icon: '💸',
   },
   {
@@ -87,9 +87,9 @@ const FEATURES = [
 const PRICING = [
   {
     name:    'Agency',
-    price:   '$20',
+    price:   '$29',
     period:  '/month',
-    annual:  '$209/year (save $31)',
+    annual:  '$290/year (save $58)',
     credits: '2,000 AI credits/mo',
     seats:   '15 team seats',
     workspaces: '5 client workspaces',
@@ -127,7 +127,7 @@ const COMPARISON = [
   { tool: 'Sprout Social', price: '$249–$799/mo', seats: '1–5', ai: 'Add-on',    wl: '✗' },
   { tool: 'Hootsuite',     price: '$99–$739/mo',  seats: '1–5', ai: 'Add-on',    wl: '✗' },
   { tool: 'Sendible',      price: '$89–$299/mo',  seats: '3–7', ai: 'Limited',   wl: 'Paid' },
-  { tool: 'SocialMate',    price: '$20/mo',        seats: '15',  ai: '2,000 cr',  wl: '+$20', highlight: true },
+  { tool: 'SocialMate',    price: '$29/mo',        seats: '15',  ai: '2,000 cr',  wl: '+$20', highlight: true },
 ]
 
 const FAQ = [
@@ -153,7 +153,7 @@ const FAQ = [
   },
   {
     q: 'Is there a setup fee or long-term contract?',
-    a: 'No setup fee, no contract. Month-to-month on the Agency plan ($20/mo) or save $31 with annual ($209/yr). Cancel anytime.',
+    a: 'No setup fee, no contract. Month-to-month on the Agency plan ($29/mo) or save $58 with annual ($290/yr). Cancel anytime.',
   },
   {
     q: 'Do the 15 seats include client seats?',

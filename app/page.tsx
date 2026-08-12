@@ -425,7 +425,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
       <Section width="narrow" divide className="text-center">
         <Display size="lg">Start posting everywhere.</Display>
         <Body className="mx-auto mt-6 max-w-md text-ink-muted">
-          Free plan, no card, set up in about a minute. Upgrade to Pro for $5 whenever it
+          Free plan, no card, set up in about a minute. Upgrade to Pro for $8 whenever it
           earns it.
         </Body>
         <div className="mt-10 flex justify-center">

@@ -96,7 +96,7 @@ const PRICING = [
   },
   {
     plan:    'Pro',
-    price:   '$5',
+    price:   '$8',
     period:  '/month',
     highlight: true,
     cta:     'Go Pro',
@@ -111,7 +111,7 @@ const PRICING = [
   },
   {
     plan:    'Agency',
-    price:   '$20',
+    price:   '$29',
     period:  '/month',
     highlight: false,
     cta:     'Go Agency',
@@ -141,7 +141,7 @@ const FAQ = [
   },
   {
     q: 'Can I manage social media for my fitness studio and clients?',
-    a: 'The Agency plan ($20/mo) gives you 5 client workspaces, 15 seats, and 2,000 AI credits. Perfect if you run a gym or manage socials for multiple coaches.',
+    a: 'The Agency plan ($29/mo) gives you 5 client workspaces, 15 seats, and 2,000 AI credits. Perfect if you run a gym or manage socials for multiple coaches.',
   },
 ]
 

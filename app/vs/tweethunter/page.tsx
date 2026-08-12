@@ -124,7 +124,7 @@ export default function VsTweetHunterPage() {
               <li>✅ X + LinkedIn + TikTok + Bluesky + Discord + Telegram + Mastodon</li>
               <li>✅ Thread builder across multiple platforms</li>
               <li>✅ 15+ AI tools on free tier</li>
-              <li>✅ Pro plan for $5/month total</li>
+              <li>✅ Pro plan for $8/month total</li>
               <li>✅ SOMA AI content system built in</li>
               <li>✅ No credit card required to start</li>
             </ul>
@@ -159,7 +159,7 @@ export default function VsTweetHunterPage() {
               {
                 n: '1',
                 title: '$49/month for one platform is hard to justify',
-                desc: 'TweetHunter\'s entry price is $49/month — nearly $600/year — locked to X/Twitter alone. SocialMate schedules X posts free, and for $5/month you unlock Pro features across 7 platforms. If you post anywhere besides X, TweetHunter forces you to pay for a second tool on top.',
+                desc: 'TweetHunter\'s entry price is $49/month — nearly $600/year — locked to X/Twitter alone. SocialMate schedules X posts free, and for $8/month you unlock Pro features across 7 platforms. If you post anywhere besides X, TweetHunter forces you to pay for a second tool on top.',
               },
               {
                 n: '2',
@@ -207,7 +207,7 @@ export default function VsTweetHunterPage() {
           <h2 className="text-3xl font-extrabold mb-4">Schedule X posts — and 6 more platforms</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
             SocialMate posts to X/Twitter via the official API. Schedule threads, set post times, recycle evergreen content.
-            When you&apos;re ready to go further, Pro is $5/month for all 7 platforms.
+            When you&apos;re ready to go further, Pro is $8/month for all 7 platforms.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
             Start free — no credit card →

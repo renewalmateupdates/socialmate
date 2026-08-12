@@ -229,7 +229,7 @@ export default function ABTestsPage() {
                 <a
                   href="/pricing"
                   className="inline-flex items-center gap-1.5 text-xs font-bold px-4 py-2.5 bg-amber-400 hover:bg-amber-500 text-black rounded-xl transition-all">
-                  Upgrade to Pro — $5/mo
+                  Upgrade to Pro — $8/mo
                 </a>
               </div>
             )}

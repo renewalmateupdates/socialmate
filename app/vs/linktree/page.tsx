@@ -5,7 +5,7 @@ import PublicFooter from '@/components/PublicFooter'
 import { useI18n } from '@/contexts/I18nContext'
 
 const COMPARISON = [
-  { feature: 'Starting price',           linktree: '$5/month (Pro)',              socialmate: '$0 — free forever'        },
+  { feature: 'Starting price',           linktree: '$8/month (Pro)',              socialmate: '$0 — free forever'        },
   { feature: 'Link in bio page',         linktree: '✅ Core feature',             socialmate: '✅ SIGIL — free'           },
   { feature: 'Custom domain',            linktree: '$9/month (Premium)',          socialmate: 'White Label Pro plan'     },
   { feature: 'Analytics on links',       linktree: 'Paid (Pro+)',                 socialmate: '✅ Free with QR code'     },
@@ -25,7 +25,7 @@ const COMPARISON = [
 const FAQ = [
   {
     q: "Why would I pay Linktree when SocialMate's SIGIL is free?",
-    a: "Linktree's free plan is barebones — no analytics, limited links, Linktree branding on your page. Their Pro plan ($5/month) removes the branding and adds analytics. SocialMate's SIGIL link in bio is completely free, includes click analytics and a QR code, and lives alongside a full post scheduler, 15+ AI tools, and 7-platform support. You get more for less.",
+    a: "Linktree's free plan is barebones — no analytics, limited links, Linktree branding on your page. Their Pro plan ($8/month) removes the branding and adds analytics. SocialMate's SIGIL link in bio is completely free, includes click analytics and a QR code, and lives alongside a full post scheduler, 15+ AI tools, and 7-platform support. You get more for less.",
   },
   {
     q: 'What is SIGIL?',
@@ -141,7 +141,7 @@ export default function VsLinktreePage() {
             {[
               {
                 n: '1',
-                title: 'SIGIL is free. Linktree Pro is $5/month.',
+                title: 'SIGIL is free. Linktree Pro is $8/month.',
                 desc: "Linktree's free plan shows their branding on your page and hides analytics behind a paywall. SocialMate's SIGIL is free, no branding, click analytics included, QR code included. The value math is obvious.",
               },
               {

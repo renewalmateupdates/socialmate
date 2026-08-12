@@ -62,7 +62,7 @@ const TERMS: { letter: string; term: string; definition: string; related?: strin
     letter: 'B',
     term: 'Buffer',
     definition:
-      'A social media scheduling tool and one of the most recognized names in the space. Buffer popularized the concept of scheduling queues and post analytics for small businesses and creators. SocialMate offers similar scheduling capabilities at a fraction of the cost — Pro starts at $5/month.',
+      'A social media scheduling tool and one of the most recognized names in the space. Buffer popularized the concept of scheduling queues and post analytics for small businesses and creators. SocialMate offers similar scheduling capabilities at a fraction of the cost — Pro starts at $8/month.',
     related: ['Scheduling Tool', 'Post Scheduling', 'Auto-scheduling'],
   },
   // C
@@ -350,7 +350,7 @@ const TERMS: { letter: string; term: string; definition: string; related?: strin
     letter: 'S',
     term: 'Scheduling Tool',
     definition:
-      'Software that lets you plan, compose, and automatically publish social media posts in advance without manual action at post time. Scheduling tools range from simple queue managers to full-featured platforms with analytics, team collaboration, and AI content generation. SocialMate offers all of these starting at $5/month.',
+      'Software that lets you plan, compose, and automatically publish social media posts in advance without manual action at post time. Scheduling tools range from simple queue managers to full-featured platforms with analytics, team collaboration, and AI content generation. SocialMate offers all of these starting at $8/month.',
     related: ['Post Scheduling', 'Auto-scheduling', 'Content Calendar'],
   },
   {

@@ -8,7 +8,7 @@ import { useI18n } from '@/contexts/I18nContext'
 
 const COMPARISON = [
   { feature: 'Starting price',            planable: '$11/month per workspace',  socialmate: '$0 — free forever'       },
-  { feature: 'Free plan',                 planable: '50 posts LIFETIME total',  socialmate: '100 posts / month'       },
+  { feature: 'Free plan',                 planable: '50 posts LIFETIME total',  socialmate: '250 posts / month'       },
   { feature: 'Post limits',               planable: '50 posts then forced pay', socialmate: 'None'                    },
   { feature: 'Pricing model',             planable: 'Per workspace',            socialmate: 'Flat rate'               },
   { feature: 'Platforms supported',       planable: '8+',                       socialmate: '16 (growing)'            },
@@ -25,7 +25,7 @@ const COMPARISON = [
   { feature: 'Competitor tracking',       planable: '❌',                        socialmate: '✅ Free (3 accounts)'    },
   { feature: 'Hashtag manager',           planable: '❌',                        socialmate: '✅ Free'                  },
   { feature: 'Team seats (free)',          planable: '1',                        socialmate: '2'                       },
-  { feature: 'Client workspaces',         planable: '$11+/workspace/month',     socialmate: 'Pro+: from $5/mo'        },
+  { feature: 'Client workspaces',         planable: '$11+/workspace/month',     socialmate: 'Pro+: from $8/mo'        },
 ]
 
 const FAQ = [
@@ -43,7 +43,7 @@ const FAQ = [
   },
   {
     q: 'How many workspaces does SocialMate include?',
-    a: 'The free plan includes a personal workspace. Pro ($5/month) adds a client workspace. Agency ($20/month) includes 5. Planable charges $11/workspace/month. If you manage 5 clients, Planable costs $55/month. On SocialMate Agency, it is $20 flat for all of them.',
+    a: 'The free plan includes a personal workspace. Pro ($8/month) adds a client workspace. Agency ($29/month) includes 5. Planable charges $11/workspace/month. If you manage 5 clients, Planable costs $55/month. On SocialMate Agency, it is $29 flat for all of them.',
   },
 ]
 
@@ -116,10 +116,10 @@ export default function VsPlanablePage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">100 posts / month. All platforms. $0.</p>
+            <p className="font-extrabold text-lg mb-2">250 posts / month. All platforms. $0.</p>
             <ul className="space-y-1 text-xs text-ink-body">
-              <li>✅ 100 posts every month, no lifetime cap</li>
-              <li>✅ Flat-rate workspaces ($20/mo for 5 clients)</li>
+              <li>✅ 250 posts every month, no lifetime cap</li>
+              <li>✅ Flat-rate workspaces ($29/mo for 5 clients)</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
               <li>✅ 15+ AI tools on free tier</li>
               <li>✅ RSS import, evergreen, link in bio — all free</li>
@@ -161,7 +161,7 @@ export default function VsPlanablePage() {
               {
                 n: '2',
                 title: 'Per-workspace billing punishes agency growth',
-                desc: "Planable charges $11/month per workspace. Manage 5 clients and you're paying $55/month. SocialMate Agency is $20/month flat for 5 client workspaces, with more on request.",
+                desc: "Planable charges $11/month per workspace. Manage 5 clients and you're paying $55/month. SocialMate Agency is $29/month flat for 5 client workspaces, with more on request.",
               },
               {
                 n: '3',
@@ -202,7 +202,7 @@ export default function VsPlanablePage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">50 posts is not enough. SocialMate is.</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            100 posts a month, 15+ AI tools, 7 platforms — free forever. No lifetime caps, no credit card required.
+            250 posts a month, 15+ AI tools, 7 platforms — free forever. No lifetime caps, no credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

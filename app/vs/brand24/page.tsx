@@ -39,7 +39,7 @@ const FAQ = [
   },
   {
     q: 'Why does SocialMate cost less than Brand24 if it does more?',
-    a: "Brand24 is priced for marketing teams and PR agencies who need comprehensive brand monitoring. $79/month for monitoring alone reflects that enterprise positioning. SocialMate is built for individual creators, small businesses, and agencies who need scheduling + AI tools + basic monitoring — priced at $0 to start and $5/month for Pro. Different markets, different pricing models.",
+    a: "Brand24 is priced for marketing teams and PR agencies who need comprehensive brand monitoring. $79/month for monitoring alone reflects that enterprise positioning. SocialMate is built for individual creators, small businesses, and agencies who need scheduling + AI tools + basic monitoring — priced at $0 to start and $8/month for Pro. Different markets, different pricing models.",
   },
   {
     q: 'Does SocialMate have social listening features?',
@@ -125,7 +125,7 @@ export default function VsBrand24Page() {
               <li>✅ Competitor tracking + post alerts</li>
               <li>✅ 15+ AI tools including SM Pulse + SM Radar</li>
               <li>✅ SOMA autonomous content generation</li>
-              <li>✅ Pro plan for $5/month total</li>
+              <li>✅ Pro plan for $8/month total</li>
               <li>✅ No credit card required to start</li>
             </ul>
           </div>
@@ -164,7 +164,7 @@ export default function VsBrand24Page() {
               {
                 n: '2',
                 title: '$79/month for monitoring vs. $0 for everything',
-                desc: "Brand24's lowest plan is $79/month for just monitoring. SocialMate's free plan includes scheduling to 7 platforms, 15+ AI tools, competitor tracking, and a link-in-bio page. Pro is $5/month. You're comparing $79/month for one narrow function against $5/month for a full creator platform.",
+                desc: "Brand24's lowest plan is $79/month for just monitoring. SocialMate's free plan includes scheduling to 7 platforms, 15+ AI tools, competitor tracking, and a link-in-bio page. Pro is $8/month. You're comparing $79/month for one narrow function against $5/month for a full creator platform.",
               },
               {
                 n: '3',
@@ -207,7 +207,7 @@ export default function VsBrand24Page() {
           <h2 className="text-3xl font-extrabold mb-4">Schedule, create, and monitor — free</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
             SocialMate schedules posts to 7 platforms, tracks competitors, and uses AI to generate what to post next.
-            Start free. Pro is $5/month.
+            Start free. Pro is $8/month.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
             Start free — no credit card →

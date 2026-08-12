@@ -112,7 +112,7 @@ const PRICING = [
   },
   {
     plan:    'Pro',
-    price:   '$5',
+    price:   '$8',
     note:    '/month',
     credits: '500 AI credits/mo',
     clips:   'Twitch + YouTube clips',
@@ -122,7 +122,7 @@ const PRICING = [
   },
   {
     plan:    'Agency',
-    price:   '$20',
+    price:   '$29',
     note:    '/month',
     credits: '2,000 AI credits/mo',
     clips:   'Twitch + YouTube clips',

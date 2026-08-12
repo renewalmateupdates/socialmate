@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Social Media for Podcasters — SocialMate',
-  description: 'Stop promoting your podcast across 5 different apps. Schedule episode drops to all 7 platforms at once, generate AI captions for audiogram posts, and grow your listener community — free forever or $5/month.',
+  description: 'Stop promoting your podcast across 5 different apps. Schedule episode drops to all 7 platforms at once, generate AI captions for audiogram posts, and grow your listener community — free forever or $8/month.',
   openGraph: {
     title: 'Social Media for Podcasters — SocialMate',
     description: 'Schedule podcast episode announcements to Bluesky, X, LinkedIn, Discord, Telegram, TikTok, and Mastodon in one click. SOMA generates your episode promos automatically.',

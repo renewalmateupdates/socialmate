@@ -2,10 +2,10 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Free Social Media Scheduler for Small Business — SocialMate',
-  description: 'Small business social media scheduling that actually fits your budget. Schedule posts to 7 platforms, use 15+ AI tools, and grow your audience — free forever or $5/month Pro.',
+  description: 'Small business social media scheduling that actually fits your budget. Schedule posts to 7 platforms, use 15+ AI tools, and grow your audience — free forever or $8/month Pro.',
   openGraph: {
     title: 'Free Social Media Scheduler for Small Business — SocialMate',
-    description: 'What Buffer and Hootsuite charge $99/month for, SocialMate gives for $5 — or free. Built for small business owners who wear every hat.',
+    description: 'What Buffer and Hootsuite charge $99/month for, SocialMate gives for $8 — or free. Built for small business owners who wear every hat.',
     url: 'https://socialmate.studio/for/small-business',
     images: [{ url: 'https://socialmate.studio/og-image.png', width: 1270, height: 760, alt: 'SocialMate for Small Business' }],
   },

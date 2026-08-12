@@ -120,7 +120,7 @@ All of it is included. Most of it is free.
 
 SocialMate is fully bootstrapped. There are no investors, no venture funding, no board to answer to.
 
-The Pro plan ($5/month) and Agency plan ($20/month) pay for infrastructure and development. Users who find enough value to upgrade are the ones who make the free tier possible for everyone else. That's the model.
+The Pro plan ($8/month) and Agency plan ($29/month) pay for infrastructure and development. Users who find enough value to upgrade are the ones who make the free tier possible for everyone else. That's the model.
 
 It works as long as we build something people find genuinely useful at the free tier and genuinely worth paying for at the paid tiers. We think we can do that.
 
@@ -188,7 +188,7 @@ Being honest about limitations matters. Here's what free users don't get:
 - White label options
 - Posts beyond 100/month
 
-If you need those things, the Pro plan is $5/month and covers most of them. But for individual users, small businesses, and early-stage creators, the free tier covers a lot of ground.
+If you need those things, the Pro plan is $8/month and covers most of them. But for individual users, small businesses, and early-stage creators, the free tier covers a lot of ground.
 
 ## How to Get Started
 
@@ -344,7 +344,7 @@ SocialMate was built on the premise that the per-channel, per-seat model is the 
 
 The free plan includes all 16 supported platforms — Instagram, X/Twitter, LinkedIn, TikTok, Facebook, Threads, Pinterest, YouTube, Snapchat, Bluesky, Reddit, Discord, Telegram, Mastodon, Lemon8, and BeReal. Connecting your Instagram account and your TikTok account doesn't cost more than connecting just Instagram. The platform count doesn't drive the pricing.
 
-Team seats follow the same logic. The free plan includes 2 team members. The Pro plan ($5/month flat, not per channel) includes 5. Agency ($20/month) includes unlimited. You're not paying per person.
+Team seats follow the same logic. The free plan includes 2 team members. The Pro plan ($8/month flat, not per channel) includes 5. Agency ($29/month) includes unlimited. You're not paying per person.
 
 ## What This Actually Costs You Compared
 
@@ -356,7 +356,7 @@ Hootsuite Standard: $99/month for up to 10 accounts, 1 user. Add a second user a
 
 SocialMate: $0/month. All 7 platforms, both team members, bulk scheduler, analytics, link in bio, hashtag collections, AI credits — included.
 
-The $5/month Pro plan would cover 5 accounts per platform and 5 team members. The $20/month Agency plan covers 10 accounts per platform and unlimited team members.
+The $8/month Pro plan would cover 5 accounts per platform and 5 team members. The $29/month Agency plan covers 10 accounts per platform and unlimited team members.
 
 ## What We're Not Saying
 
@@ -709,13 +709,13 @@ Check your analytics once per week — not daily. What got engagement? What got 
 SocialMate's free plan covers most of what a small business needs:
 
 - 4 live platforms (Bluesky, Discord, Telegram, Mastodon) — more platforms shipping throughout 2026
-- 100 posts per month
+- 250 posts per month
 - Bulk scheduler
 - 50 AI credits/month for captions and hashtags
 - 2 team seats
 - Analytics for the last 30 days
 
-If you need more — more posts, more platforms, more team members — the Pro plan is $5/month. That's less than a cup of coffee.
+If you need more — more posts, more platforms, more team members — the Pro plan is $8/month. That's less than a cup of coffee.
 
 There's no credit card required for the free plan. No trial period. No "free for 14 days, then $99/month."
 
@@ -756,7 +756,7 @@ This guide covers tools that are either completely free or have free tiers that 
 
 **SocialMate (free plan)**
 Best for: multi-platform scheduling without per-channel fees.
-Free tier includes: Bluesky, Discord, Telegram, Mastodon, 100 posts/month, bulk scheduler, 50 AI credits, 2 team seats, analytics, link-in-bio page.
+Free tier includes: Bluesky, Discord, Telegram, Mastodon, 250 posts/month, bulk scheduler, 50 AI credits, 2 team seats, analytics, link-in-bio page.
 Why it stands out: Most schedulers charge per connected account. SocialMate charges nothing on the free plan regardless of how many accounts you connect.
 Link: socialmate.studio
 
@@ -829,7 +829,7 @@ For a creator starting with no budget:
 4. **Google Trends** — content idea research (free)
 5. **Native analytics** — platform-specific data (free)
 
-That's a complete toolkit at $0/month. The only thing you'd need to upgrade for is either more volume (more posts, more platforms, longer scheduling windows) or more team seats — both of which are available on SocialMate's $5/month Pro plan when you're ready.
+That's a complete toolkit at $0/month. The only thing you'd need to upgrade for is either more volume (more posts, more platforms, longer scheduling windows) or more team seats — both of which are available on SocialMate's $8/month Pro plan when you're ready.
     `,
   },
   'how-to-grow-bluesky-following': {
@@ -993,7 +993,7 @@ SM-Give is SocialMate's built-in giving program. It's not a marketing campaign. 
 
 Three things happen automatically:
 
-**2% of every subscription** goes directly to SM-Give. Every paid plan — Pro at $5/month, Agency at $20/month — contributes a slice to the program monthly, after Stripe fees and applicable taxes.
+**2% of every subscription** goes directly to SM-Give. Every paid plan — Pro at $8/month, Agency at $29/month — contributes a slice to the program monthly, after Stripe fees and applicable taxes.
 
 **50% of every voluntary support donation** on the Story page goes directly to SM-Give. If someone believes in what we're building and chips in, half of that goes to something even more tangible.
 
@@ -2016,7 +2016,7 @@ SocialMate supports draft review links and team collaboration — clients can vi
 
 The tool cost has to fit your margins. If you're charging $300/month per client and your scheduling tool costs $100/month for multi-client access, you're spending 33% of revenue on a tool. That's too much.
 
-SocialMate's Agency plan is $20/month and supports up to 10 client workspaces with unlimited team members. At $2/month per client for 10 clients, that's a reasonable cost of goods for a managed social service.
+SocialMate's Agency plan is $29/month and supports up to 10 client workspaces with unlimited team members. At $2/month per client for 10 clients, that's a reasonable cost of goods for a managed social service.
 
 At 5 clients, it's $4/month per client. Still reasonable. Compare this to tools that charge per connected account — at $6/account, 5 clients with 4 accounts each is $120/month just for scheduling.
 

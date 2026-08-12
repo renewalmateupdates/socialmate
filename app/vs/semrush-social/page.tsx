@@ -38,7 +38,7 @@ const FAQ = [
   },
   {
     q: 'When does SEMrush Social make sense vs SocialMate?',
-    a: 'SEMrush Social makes sense if you\'re already paying for SEMrush for SEO purposes and want your social scheduling in the same platform. The integration between keyword research, competitive analysis, and social content can be valuable for content marketers. If your primary need is social scheduling and you don\'t use SEMrush for SEO, SocialMate at $5/month is the clear choice.',
+    a: 'SEMrush Social makes sense if you\'re already paying for SEMrush for SEO purposes and want your social scheduling in the same platform. The integration between keyword research, competitive analysis, and social content can be valuable for content marketers. If your primary need is social scheduling and you don\'t use SEMrush for SEO, SocialMate at $8/month is the clear choice.',
   },
   {
     q: 'Can SocialMate compete with SEMrush\'s AI content tools?',
@@ -90,7 +90,7 @@ export default function VsSEMrushSocialPage() {
             SocialMate vs SEMrush Social
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            SEMrush Social requires a $130+/month SEMrush subscription. SocialMate is a standalone social scheduler for 7 platforms — $5/month Pro or completely free.
+            SEMrush Social requires a $130+/month SEMrush subscription. SocialMate is a standalone social scheduler for 7 platforms — $8/month Pro or completely free.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -124,7 +124,7 @@ export default function VsSEMrushSocialPage() {
               <li>✅ TikTok free — SEMrush has none</li>
               <li>✅ X + LinkedIn + Bluesky + Discord + Telegram + Mastodon</li>
               <li>✅ 15+ AI tools free</li>
-              <li>✅ Pro $5/month — 96% cheaper than SEMrush entry</li>
+              <li>✅ Pro $8/month — 96% cheaper than SEMrush entry</li>
               <li>✅ No credit card required to start</li>
             </ul>
           </div>
@@ -158,7 +158,7 @@ export default function VsSEMrushSocialPage() {
               {
                 n: '1',
                 title: 'Don\'t pay for an SEO platform to get social scheduling',
-                desc: 'SEMrush is a best-in-class SEO tool. But if you only need social scheduling, you\'re paying $130+/month for keyword research, site audit, competitor analysis, and backlink tracking — features you may never use — just to access the social tab. SocialMate is purpose-built for social scheduling at $5/month.',
+                desc: 'SEMrush is a best-in-class SEO tool. But if you only need social scheduling, you\'re paying $130+/month for keyword research, site audit, competitor analysis, and backlink tracking — features you may never use — just to access the social tab. SocialMate is purpose-built for social scheduling at $8/month.',
               },
               {
                 n: '2',
@@ -206,7 +206,7 @@ export default function VsSEMrushSocialPage() {
           <h2 className="text-3xl font-extrabold mb-4">7 platforms. $5/month. No SEMrush required.</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
             SocialMate is a standalone social scheduler with TikTok, LinkedIn, Discord, and more.
-            Free plan available. Pro is $5/month.
+            Free plan available. Pro is $8/month.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
             Start free — no credit card →

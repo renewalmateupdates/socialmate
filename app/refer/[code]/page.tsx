@@ -67,7 +67,7 @@ export async function generateMetadata(
   return {
     title: `${name} invites you to SocialMate`,
     description:
-      'What competitors charge $99/mo for, we give for $5. Schedule to 7 platforms, 15+ AI tools, and analytics — free forever or Pro from $5/mo.',
+      'What competitors charge $99/mo for, we give for $8. Schedule to 7 platforms, 15+ AI tools, and analytics — free forever or Pro from $8/mo.',
   }
 }
 
@@ -153,7 +153,7 @@ export default async function ReferPage(
             What competitors charge{' '}
             <span className="line-through text-gray-500">$99/mo</span> for,
             we give for{' '}
-            <span className="font-bold text-white">$5</span>.
+            <span className="font-bold text-white">$8</span>.
           </p>
         </div>
 
@@ -176,9 +176,9 @@ export default async function ReferPage(
           <div className="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-center sm:text-left">
             <PricePill label="Free" sub="forever" color="text-emerald-400" />
             <Divider />
-            <PricePill label="Pro" sub="$5 / mo" color="text-violet-400" />
+            <PricePill label="Pro" sub="$8 / mo" color="text-violet-400" />
             <Divider />
-            <PricePill label="Agency" sub="$20 / mo" color="text-amber-400" />
+            <PricePill label="Agency" sub="$29 / mo" color="text-amber-400" />
           </div>
         </div>
 

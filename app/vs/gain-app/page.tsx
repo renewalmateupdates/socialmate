@@ -8,7 +8,7 @@ import { useI18n } from '@/contexts/I18nContext'
 
 const COMPARISON = [
   { feature: 'Starting price',              gain: '$99/mo',                      socialmate: '$0 — free forever'          },
-  { feature: 'Agency plan',                 gain: '$99/mo+',                     socialmate: '$20/mo'                     },
+  { feature: 'Agency plan',                 gain: '$99/mo+',                     socialmate: '$29/mo'                     },
   { feature: 'Primary focus',               gain: 'Client approval workflows',   socialmate: '6-platform Creator OS'      },
   { feature: 'TikTok scheduling',           gain: '✅',                          socialmate: '✅ Full (Production API)'    },
   { feature: 'Bluesky support',             gain: '❌',                          socialmate: '✅'                          },
@@ -22,7 +22,7 @@ const COMPARISON = [
   { feature: 'Analytics dashboard',         gain: '✅',                          socialmate: '✅ Full analytics + Content DNA' },
   { feature: 'Free plan available',         gain: '❌',                          socialmate: '✅ Full scheduling + AI'     },
   { feature: 'No per-channel fees',         gain: '✅',                          socialmate: '✅'                          },
-  { feature: 'Client workspaces',           gain: '✅',                          socialmate: '✅ Agency plan $20/mo'       },
+  { feature: 'Client workspaces',           gain: '✅',                          socialmate: '✅ Agency plan $29/mo'       },
 ]
 
 const FAQ = [
@@ -36,7 +36,7 @@ const FAQ = [
   },
   {
     q: "How much cheaper is SocialMate Agency than Gain?",
-    a: "SocialMate's Agency plan is $20/month. Gain starts at $99/month — that is 5x more expensive. SocialMate Agency includes 5 client workspaces, 15 seats, 2,000 AI credits/month, approval workflows, Discord/Telegram/Bluesky scheduling, and SOMA autonomous content. Gain has none of the platform breadth or AI tools.",
+    a: "SocialMate's Agency plan is $29/month. Gain starts at $99/month — that is 5x more expensive. SocialMate Agency includes 5 client workspaces, 15 seats, 2,000 AI credits/month, approval workflows, Discord/Telegram/Bluesky scheduling, and SOMA autonomous content. Gain has none of the platform breadth or AI tools.",
   },
   {
     q: "Does Gain support Discord, Telegram, or Bluesky?",
@@ -84,7 +84,7 @@ export default function VsGainAppPage() {
             SocialMate vs Gain
           </h1>
           <p className="text-lg text-ink-body max-w-2xl mx-auto">
-            Gain charges $99/month for client approval workflows. SocialMate&apos;s Agency plan is $20/month — and includes approvals, 7 platforms, 20+ AI tools, SOMA, and Enki.
+            Gain charges $99/month for client approval workflows. SocialMate&apos;s Agency plan is $29/month — and includes approvals, 7 platforms, 20+ AI tools, SOMA, and Enki.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-amber/10 text-ink-high font-bold rounded-2xl hover:bg-amber/10 transition-all text-sm">
@@ -118,7 +118,7 @@ export default function VsGainAppPage() {
               <li>✅ 7 platforms including Discord + Telegram</li>
               <li>✅ 20+ AI content and writing tools</li>
               <li>✅ SOMA: autonomous weekly content generation</li>
-              <li>✅ Agency plan: $20/month</li>
+              <li>✅ Agency plan: $29/month</li>
               <li>✅ Free plan available</li>
             </ul>
           </div>
@@ -152,7 +152,7 @@ export default function VsGainAppPage() {
               {
                 n: '1',
                 title: "Gain is 5x more expensive than SocialMate Agency",
-                desc: "Gain starts at $99/month. SocialMate's Agency plan is $20/month and includes 5 client workspaces, 15 seats, 2,000 AI credits/month, client approval workflows, Discord/Telegram scheduling, and SOMA. You get more features at a fraction of the price.",
+                desc: "Gain starts at $99/month. SocialMate's Agency plan is $29/month and includes 5 client workspaces, 15 seats, 2,000 AI credits/month, client approval workflows, Discord/Telegram scheduling, and SOMA. You get more features at a fraction of the price.",
               },
               {
                 n: '2',
@@ -196,7 +196,7 @@ export default function VsGainAppPage() {
 
         {/* CTA */}
         <div className="bg-amber/10 text-ink-high rounded-2xl p-8 text-center">
-          <h2 className="text-2xl font-extrabold tracking-tight mb-3">Agency tools at $20/mo — not $99/mo</h2>
+          <h2 className="text-2xl font-extrabold tracking-tight mb-3">Agency tools at $29/mo — not $99/mo</h2>
           <p className="text-ink-high text-sm mb-6 max-w-lg mx-auto">
             SocialMate Agency includes client workspaces, approval workflows, 7 platforms, 20+ AI tools, and SOMA. Everything Gain does — plus much more — at $20/month.
           </p>

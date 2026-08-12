@@ -20,7 +20,7 @@ const COMPARISON = [
   { feature: 'Bulk scheduling',              competitor: '✅ (paid)',                  socialmate: '✅ Free'                  },
   { feature: 'RSS / blog import',             competitor: '❌',                          socialmate: '✅ Free'                  },
   { feature: 'Evergreen recycling',           competitor: '❌',                          socialmate: '✅ Free'                  },
-  { feature: 'White label',                   competitor: '✅ (enterprise pricing)',     socialmate: '✅ $20–$40/month'        },
+  { feature: 'White label',                   competitor: '✅ (enterprise pricing)',     socialmate: '✅ $29–$40/month'        },
   { feature: 'Link in bio',                   competitor: '❌',                          socialmate: '✅ Built in free'         },
   { feature: 'Analytics',                     competitor: '✅ Paid',                    socialmate: '✅ Multi-platform free'  },
   { feature: 'Team collaboration',            competitor: '$79+/month',                 socialmate: 'Free (2 seats)'          },
@@ -30,7 +30,7 @@ const COMPARISON = [
 const FAQ = [
   {
     q: 'What is PromoRepublic and who uses it?',
-    a: 'PromoRepublic is a social media scheduling and content marketing platform targeting franchises, agencies, and multi-location businesses. It has a large template library and white-label features for agencies. At $49/month minimum (enterprise plans go much higher), it\'s positioned as a business-tier tool. SocialMate undercuts it significantly at $5/month Pro with more platform coverage.',
+    a: 'PromoRepublic is a social media scheduling and content marketing platform targeting franchises, agencies, and multi-location businesses. It has a large template library and white-label features for agencies. At $49/month minimum (enterprise plans go much higher), it\'s positioned as a business-tier tool. SocialMate undercuts it significantly at $8/month Pro with more platform coverage.',
   },
   {
     q: 'Does PromoRepublic support TikTok?',
@@ -38,7 +38,7 @@ const FAQ = [
   },
   {
     q: 'Can SocialMate serve agency use cases like PromoRepublic?',
-    a: 'SocialMate\'s Agency plan ($20/month) includes client workspaces, 15 team seats, 2,000 AI credits/month, and white label options ($20–$40/month add-on). For agencies managing multiple client accounts across 7 platforms including TikTok and LinkedIn, SocialMate delivers enterprise-adjacent features at a fraction of PromoRepublic\'s pricing.',
+    a: 'SocialMate\'s Agency plan ($29/month) includes client workspaces, 15 team seats, 2,000 AI credits/month, and white label options ($20–$40/month add-on). For agencies managing multiple client accounts across 7 platforms including TikTok and LinkedIn, SocialMate delivers enterprise-adjacent features at a fraction of PromoRepublic\'s pricing.',
   },
   {
     q: 'How does SocialMate\'s content creation compare to PromoRepublic\'s template library?',
@@ -90,7 +90,7 @@ export default function VsPromoRepublicPage() {
             SocialMate vs PromoRepublic
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            PromoRepublic charges $49/month with no TikTok support. SocialMate covers TikTok, LinkedIn, and 5 more platforms — free to start, $5/month Pro.
+            PromoRepublic charges $49/month with no TikTok support. SocialMate covers TikTok, LinkedIn, and 5 more platforms — free to start, $8/month Pro.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -163,7 +163,7 @@ export default function VsPromoRepublicPage() {
               {
                 n: '2',
                 title: '10x cheaper at the Pro tier',
-                desc: 'PromoRepublic starts at $49/month — nearly $600/year. SocialMate Pro is $5/month — $60/year for 7 platforms including TikTok and LinkedIn. That\'s a $540/year saving for more platform coverage. Agency plan is $20/month with client workspaces and white label.',
+                desc: 'PromoRepublic starts at $49/month — nearly $600/year. SocialMate Pro is $8/month — $60/year for 7 platforms including TikTok and LinkedIn. That\'s a $540/year saving for more platform coverage. Agency plan is $29/month with client workspaces and white label.',
               },
               {
                 n: '3',
@@ -206,7 +206,7 @@ export default function VsPromoRepublicPage() {
           <h2 className="text-3xl font-extrabold mb-4">More platforms. Way less cost.</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
             SocialMate covers TikTok, LinkedIn, X, Bluesky, Discord, Telegram, and Mastodon.
-            Free plan available. Pro is $5/month. Agency is $20/month.
+            Free plan available. Pro is $8/month. Agency is $29/month.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
             Start free — no credit card →

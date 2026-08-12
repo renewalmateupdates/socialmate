@@ -26,7 +26,7 @@ const COMPARISON = [
   { feature: 'GIF export',             skedsocial: '❌',                     socialmate: '✅'                       },
   { feature: 'Bluesky / Mastodon',     skedsocial: '❌',                     socialmate: '✅'                       },
   { feature: 'Discord / Telegram',     skedsocial: '❌',                     socialmate: '✅'                       },
-  { feature: 'Client workspaces',      skedsocial: 'Agency plan only',       socialmate: 'Pro+: from $5/mo'        },
+  { feature: 'Client workspaces',      skedsocial: 'Agency plan only',       socialmate: 'Pro+: from $8/mo'        },
 ]
 
 const FAQ = [
@@ -40,7 +40,7 @@ const FAQ = [
   },
   {
     q: 'How does Sked Social compare for agencies?',
-    a: 'Sked Social\'s agency plan has collaboration features and client management, but the pricing is significantly higher than SocialMate. SocialMate\'s Agency plan at $20/month covers client workspaces and 15 team seats — a fraction of Sked\'s comparable tier.',
+    a: 'Sked Social\'s agency plan has collaboration features and client management, but the pricing is significantly higher than SocialMate. SocialMate\'s Agency plan at $29/month covers client workspaces and 15 team seats — a fraction of Sked\'s comparable tier.',
   },
   {
     q: 'Is Sked Social good for TikTok?',
@@ -190,7 +190,7 @@ export default function VsSkedSocial() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3 text-ink-high">Start for free today</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            7 platforms, 15+ AI tools, 100 posts/month, link in bio, competitor tracking — all free. No card required.
+            7 platforms, 15+ AI tools, 250 posts/month, link in bio, competitor tracking — all free. No card required.
           </p>
           <Link href="/signup"
             className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">

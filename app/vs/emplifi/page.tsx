@@ -123,7 +123,7 @@ export default function VsEmplifPage() {
               <li>✅ Discord + Telegram + Bluesky + TikTok + LinkedIn + X + Mastodon</li>
               <li>✅ 15+ AI tools on free tier</li>
               <li>✅ SOMA autonomous content agent</li>
-              <li>✅ Pro plan for $5/month total</li>
+              <li>✅ Pro plan for $8/month total</li>
               <li>✅ 8 autonomous AI agents</li>
               <li>✅ Ready in minutes — no demo required</li>
             </ul>
@@ -168,12 +168,12 @@ export default function VsEmplifPage() {
               {
                 n: '3',
                 title: 'SOMA generates content autonomously — Emplifi cannot',
-                desc: "Emplifi has publishing tools and some AI content features. SocialMate's SOMA goes further: it ingests your brand context, analyzes what you've already posted (via Project Memory), and autonomously generates a full week of platform-native content. You define the parameters once. SOMA runs perpetually. No enterprise tool does this for $5/month.",
+                desc: "Emplifi has publishing tools and some AI content features. SocialMate's SOMA goes further: it ingests your brand context, analyzes what you've already posted (via Project Memory), and autonomously generates a full week of platform-native content. You define the parameters once. SOMA runs perpetually. No enterprise tool does this for $8/month.",
               },
               {
                 n: '4',
-                title: '$200+/month vs. $5/month for equivalent creator workflows',
-                desc: "Emplifi's pricing is calibrated for budgets with dedicated social media line items. SocialMate's Pro plan at $5/month covers 7 platforms, 500 AI credits, SOMA access, 8 AI agents, and 5 team seats. The creator-focused feature set at SocialMate is deeper than what Emplifi provides for creators — at 1/40th the price.",
+                title: '$200+/month vs. $8/month for equivalent creator workflows',
+                desc: "Emplifi's pricing is calibrated for budgets with dedicated social media line items. SocialMate's Pro plan at $8/month covers 7 platforms, 500 AI credits, SOMA access, 8 AI agents, and 5 team seats. The creator-focused feature set at SocialMate is deeper than what Emplifi provides for creators — at 1/40th the price.",
               },
             ].map((r) => (
               <div key={r.n} className="flex gap-4 p-5 bg-panel border border-edge border-edge rounded-2xl hover:border-edge dark:hover:border-edge transition-all">

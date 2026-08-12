@@ -96,7 +96,7 @@ const PRICING = [
   },
   {
     plan:    'Pro',
-    price:   '$5',
+    price:   '$8',
     period:  '/month',
     highlight: true,
     cta:     'Go Pro',
@@ -111,7 +111,7 @@ const PRICING = [
   },
   {
     plan:    'Agency',
-    price:   '$20',
+    price:   '$29',
     period:  '/month',
     highlight: false,
     cta:     'Go Agency',
@@ -141,7 +141,7 @@ const FAQ = [
   },
   {
     q: 'I manage multiple artists — is there a plan for that?',
-    a: 'The Agency plan ($20/mo) gives you 5 client workspaces, 15 seats, and client approval workflows. Manage each artist in a separate workspace with their own scheduling calendar.',
+    a: 'The Agency plan ($29/mo) gives you 5 client workspaces, 15 seats, and client approval workflows. Manage each artist in a separate workspace with their own scheduling calendar.',
   },
 ]
 

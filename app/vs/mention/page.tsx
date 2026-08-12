@@ -125,7 +125,7 @@ export default function VsMentionPage() {
               <li>✅ Competitor tracking + engagement alerts</li>
               <li>✅ SM Radar: AI content intelligence report</li>
               <li>✅ 15+ AI tools + SOMA autonomous content</li>
-              <li>✅ Pro plan for $5/month total</li>
+              <li>✅ Pro plan for $8/month total</li>
               <li>✅ No credit card required to start</li>
             </ul>
           </div>
@@ -164,7 +164,7 @@ export default function VsMentionPage() {
               {
                 n: '2',
                 title: '$41/month for monitoring vs. $0 for everything',
-                desc: "Mention's lowest plan is $41/month for one user, one brand. SocialMate's free plan includes scheduling to 7 platforms, competitor tracking with alerts, AI content intelligence (SM Radar), and 15+ AI tools. Pro is $5/month. The cost comparison at every tier strongly favors SocialMate.",
+                desc: "Mention's lowest plan is $41/month for one user, one brand. SocialMate's free plan includes scheduling to 7 platforms, competitor tracking with alerts, AI content intelligence (SM Radar), and 15+ AI tools. Pro is $8/month. The cost comparison at every tier strongly favors SocialMate.",
               },
               {
                 n: '3',
@@ -207,7 +207,7 @@ export default function VsMentionPage() {
           <h2 className="text-3xl font-extrabold mb-4">Stop monitoring. Start publishing. Free.</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
             SocialMate schedules posts to 7 platforms, tracks competitors, and uses AI to generate what to post next.
-            Start free. Pro is $5/month.
+            Start free. Pro is $8/month.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
             Start free — no credit card →

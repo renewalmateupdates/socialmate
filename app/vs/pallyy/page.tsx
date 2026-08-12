@@ -8,7 +8,7 @@ import { useI18n } from '@/contexts/I18nContext'
 
 const COMPARISON = [
   { feature: 'Starting price',              pallyy: '$0 (limited) / $18/month per set', socialmate: '$0 — free forever'        },
-  { feature: 'Free plan post limit',        pallyy: '15 posts/month hard cap',           socialmate: '100 posts / month'          },
+  { feature: 'Free plan post limit',        pallyy: '15 posts/month hard cap',           socialmate: '250 posts / month'          },
   { feature: 'Pricing model',               pallyy: 'Per social set',                    socialmate: 'Flat rate'                },
   { feature: 'Multi-brand cost',            pallyy: '$18 × number of brands',            socialmate: 'Included free'            },
   { feature: 'Link in bio (free)',          pallyy: '❌ Paid only',                       socialmate: '✅ Free'                  },
@@ -88,7 +88,7 @@ export default function VsPallyyPage() {
             SocialMate vs Pallyy
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            Pallyy caps free users at 15 posts/month and charges $18/month per social set. SocialMate is free forever with 100 posts a month and flat pricing.
+            Pallyy caps free users at 15 posts/month and charges $18/month per social set. SocialMate is free forever with 250 posts a month and flat pricing.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -116,7 +116,7 @@ export default function VsPallyyPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">100 posts / month. Flat pricing. $0.</p>
+            <p className="font-extrabold text-lg mb-2">250 posts / month. Flat pricing. $0.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Free forever — no post cap</li>
               <li>✅ 15+ AI tools on free tier</li>
@@ -202,7 +202,7 @@ export default function VsPallyyPage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">No 15-post cap. No per-brand fees. Start free.</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is free forever — 100 posts/month, link in bio, bulk scheduling, 15+ AI tools, 7 platforms. No credit card required.
+            SocialMate is free forever — 250 posts/month, link in bio, bulk scheduling, 15+ AI tools, 7 platforms. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

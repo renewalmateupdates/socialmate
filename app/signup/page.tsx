@@ -11,7 +11,7 @@ import { Label, Input, ErrorNote, Submit } from '@/components/instrument/form'
 
 const PERKS = [
   '7 live platforms — more coming',
-  '100 posts/month free forever',
+  '250 posts/month free forever',
   'Bulk scheduler and calendar',
   'SIGIL link in bio builder',
   'Team collaboration (2 seats)',

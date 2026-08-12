@@ -8,7 +8,7 @@ import { useI18n } from '@/contexts/I18nContext'
 
 const COMPARISON = [
   { feature: 'Starting price',              kontentino: '$99/mo',                socialmate: '$0 — free forever'          },
-  { feature: 'Agency plan',                 kontentino: '$99/mo+',               socialmate: '$20/mo'                     },
+  { feature: 'Agency plan',                 kontentino: '$99/mo+',               socialmate: '$29/mo'                     },
   { feature: 'Primary focus',               kontentino: 'Enterprise collaboration', socialmate: '6-platform Creator OS'   },
   { feature: 'TikTok scheduling',           kontentino: '✅',                    socialmate: '✅ Full (Production API)'    },
   { feature: 'Bluesky support',             kontentino: '❌',                    socialmate: '✅'                          },
@@ -22,7 +22,7 @@ const COMPARISON = [
   { feature: 'Analytics dashboard',         kontentino: '✅',                    socialmate: '✅ Full analytics + Content DNA' },
   { feature: 'Free plan available',         kontentino: '❌',                    socialmate: '✅ Full scheduling + AI'     },
   { feature: 'No per-channel fees',         kontentino: '✅',                    socialmate: '✅'                          },
-  { feature: 'Client workspaces',           kontentino: '✅',                    socialmate: '✅ Agency plan $20/mo'       },
+  { feature: 'Client workspaces',           kontentino: '✅',                    socialmate: '✅ Agency plan $29/mo'       },
 ]
 
 const FAQ = [
@@ -32,7 +32,7 @@ const FAQ = [
   },
   {
     q: "How does SocialMate Agency compare to Kontentino for agencies?",
-    a: "SocialMate Agency is $20/month vs Kontentino at $99/month — 5x cheaper. Both offer client approval workflows and team collaboration. SocialMate adds Discord, Telegram, Bluesky, 20+ AI tools, and SOMA autonomous content — none of which Kontentino provides.",
+    a: "SocialMate Agency is $29/month vs Kontentino at $99/month — 5x cheaper. Both offer client approval workflows and team collaboration. SocialMate adds Discord, Telegram, Bluesky, 20+ AI tools, and SOMA autonomous content — none of which Kontentino provides.",
   },
   {
     q: "Does Kontentino support Discord, Telegram, or Bluesky?",
@@ -40,7 +40,7 @@ const FAQ = [
   },
   {
     q: "Is SocialMate suitable for enterprise agency use?",
-    a: "SocialMate's Agency plan at $20/month supports 15 seats, 5 client workspaces, 2,000 AI credits/month, approval workflows, and 7 live platforms. For bootstrapped or growing agencies, it provides enterprise-level workflows at a fraction of the cost. Larger enterprises needing SOC2 compliance or dedicated account managers should evaluate accordingly.",
+    a: "SocialMate's Agency plan at $29/month supports 15 seats, 5 client workspaces, 2,000 AI credits/month, approval workflows, and 7 live platforms. For bootstrapped or growing agencies, it provides enterprise-level workflows at a fraction of the cost. Larger enterprises needing SOC2 compliance or dedicated account managers should evaluate accordingly.",
   },
 ]
 
@@ -84,7 +84,7 @@ export default function VsKontentinoPage() {
             SocialMate vs Kontentino
           </h1>
           <p className="text-lg text-ink-body max-w-2xl mx-auto">
-            Kontentino is an enterprise collaboration tool at $99/month. SocialMate Agency is $20/month — same approval workflows, more platforms, 20+ AI tools, and SOMA autonomous content.
+            Kontentino is an enterprise collaboration tool at $99/month. SocialMate Agency is $29/month — same approval workflows, more platforms, 20+ AI tools, and SOMA autonomous content.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-amber/10 text-ink-high font-bold rounded-2xl hover:bg-amber/10 transition-all text-sm">
@@ -118,7 +118,7 @@ export default function VsKontentinoPage() {
               <li>✅ 7 platforms including Discord + Telegram + Bluesky</li>
               <li>✅ 20+ AI content tools</li>
               <li>✅ SOMA: autonomous weekly content generation</li>
-              <li>✅ Agency plan: $20/month</li>
+              <li>✅ Agency plan: $29/month</li>
               <li>✅ Free plan available</li>
             </ul>
           </div>
@@ -152,7 +152,7 @@ export default function VsKontentinoPage() {
               {
                 n: '1',
                 title: "Kontentino costs 5x more than SocialMate Agency",
-                desc: "Kontentino starts at $99/month. SocialMate Agency is $20/month — that is $79/month saved, every month. Both include client approval workflows. SocialMate adds 7 platforms, 20+ AI tools, SOMA, and Enki that Kontentino does not have at any price.",
+                desc: "Kontentino starts at $99/month. SocialMate Agency is $29/month — that is $79/month saved, every month. Both include client approval workflows. SocialMate adds 7 platforms, 20+ AI tools, SOMA, and Enki that Kontentino does not have at any price.",
               },
               {
                 n: '2',
@@ -196,7 +196,7 @@ export default function VsKontentinoPage() {
 
         {/* CTA */}
         <div className="bg-amber/10 text-ink-high rounded-2xl p-8 text-center">
-          <h2 className="text-2xl font-extrabold tracking-tight mb-3">Agency-grade tools at $20/month — not $99</h2>
+          <h2 className="text-2xl font-extrabold tracking-tight mb-3">Agency-grade tools at $29/month — not $99</h2>
           <p className="text-ink-high text-sm mb-6 max-w-lg mx-auto">
             SocialMate Agency: 5 client workspaces, 15 seats, approval workflows, 7 platforms, 20+ AI tools, SOMA autonomous content — all for $20/month.
           </p>

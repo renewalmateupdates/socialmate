@@ -36,7 +36,7 @@ const FAQ = [
   },
   {
     q: "What does Canva not support that SocialMate does?",
-    a: "Canva does not support Discord, Telegram, or Bluesky scheduling. It has no autonomous content system, no trading bot, no social inbox for replies, no bulk scheduling via CSV, and no per-post performance alerts. SocialMate covers all of these on the free plan or Pro at $5/month.",
+    a: "Canva does not support Discord, Telegram, or Bluesky scheduling. It has no autonomous content system, no trading bot, no social inbox for replies, no bulk scheduling via CSV, and no per-post performance alerts. SocialMate covers all of these on the free plan or Pro at $8/month.",
   },
   {
     q: "Do I need Canva if I use SocialMate?",
@@ -167,7 +167,7 @@ export default function VsCanvaPage() {
               {
                 n: '4',
                 title: 'SocialMate Pro is 3x cheaper than Canva Pro',
-                desc: "Canva Pro costs $15/month. SocialMate Pro costs $5/month — and includes features Canva does not have at any price: SOMA autonomous content, Enki trading bot, social inbox, posting streaks, and full analytics.",
+                desc: "Canva Pro costs $15/month. SocialMate Pro costs $8/month — and includes features Canva does not have at any price: SOMA autonomous content, Enki trading bot, social inbox, posting streaks, and full analytics.",
               },
             ].map((r) => (
               <div key={r.n} className="flex gap-4 p-5 bg-panel border border-edge rounded-2xl hover:border-edge transition-all">
