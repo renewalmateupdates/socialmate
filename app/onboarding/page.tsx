@@ -17,8 +17,8 @@ const CHAR_LIMITS: Record<string, number> = {
   bluesky: 300, mastodon: 500, discord: 2000, telegram: 4096, twitter: 280,
 }
 
-const STRIPE_PRO_PRICE_ID    = 'price_1T9S2v7OMwDowUuULHznqUD5'
-const STRIPE_AGENCY_PRICE_ID = 'price_1TFMHp7OMwDowUuUgeLAeJNY'
+const STRIPE_PRO_PRICE_ID    = 'price_1U3jSI7OMwDowUuUm0oMEpiT'
+const STRIPE_AGENCY_PRICE_ID = 'price_1U3jSJ7OMwDowUuUjK3igDLr'
 
 const STEPS = [
   { id: 1, label: 'Welcome'  },

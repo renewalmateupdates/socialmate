@@ -6,10 +6,26 @@ import { createClient } from '@supabase/supabase-js'
 import Stripe from 'stripe'
 import { Resend } from 'resend'
 
-const STRIPE_PRO_PRICE_ID               = 'price_1T9S2v7OMwDowUuULHznqUD5'
-const STRIPE_AGENCY_PRICE_ID            = 'price_1TFMHp7OMwDowUuUgeLAeJNY'
-const STRIPE_PRO_ANNUAL_PRICE_ID        = 'price_1TFMHx7OMwDowUuUl9PqWxMs'
-const STRIPE_AGENCY_ANNUAL_PRICE_ID     = 'price_1TFMI07OMwDowUuUoHfKJEpo'
+// Aug 2026 pricing: Pro $5 -> $8, Agency $20 -> $29, annual moved to two months
+// free. New prices were created against the same Stripe products, so reporting
+// stays continuous.
+//
+// The old IDs stay mapped on purpose. This table is what turns a Stripe event
+// back into a plan, and it has to keep answering for any subscription that
+// exists at the old price — a checkout opened before the deploy, a legacy
+// subscription, a manually created one. Dropping a row here would silently
+// leave a paying customer on the free tier, so old IDs are retired from the
+// checkout side only (pricing/onboarding/settings/sidebar) and never from here.
+const STRIPE_PRO_PRICE_ID               = 'price_1U3jSI7OMwDowUuUm0oMEpiT'
+const STRIPE_AGENCY_PRICE_ID            = 'price_1U3jSJ7OMwDowUuUjK3igDLr'
+const STRIPE_PRO_ANNUAL_PRICE_ID        = 'price_1U3jSJ7OMwDowUuUO3utSP0R'
+const STRIPE_AGENCY_ANNUAL_PRICE_ID     = 'price_1U3jSJ7OMwDowUuUTMLaC9Fu'
+
+const STRIPE_PRO_PRICE_ID_LEGACY           = 'price_1T9S2v7OMwDowUuULHznqUD5'
+const STRIPE_AGENCY_PRICE_ID_LEGACY        = 'price_1TFMHp7OMwDowUuUgeLAeJNY'
+const STRIPE_PRO_ANNUAL_PRICE_ID_LEGACY    = 'price_1TFMHx7OMwDowUuUl9PqWxMs'
+const STRIPE_AGENCY_ANNUAL_PRICE_ID_LEGACY = 'price_1TFMI07OMwDowUuUoHfKJEpo'
+
 const STRIPE_WHITE_LABEL_BASIC_PRICE_ID = 'price_1TFMHt7OMwDowUuU56Fzw4fE'
 const STRIPE_WHITE_LABEL_PRO_PRICE_ID   = 'price_1TFMIG7OMwDowUuUcjNNGB0Q'
 
@@ -25,13 +41,21 @@ const PLAN_PRICES = new Set([
   STRIPE_AGENCY_PRICE_ID,
   STRIPE_PRO_ANNUAL_PRICE_ID,
   STRIPE_AGENCY_ANNUAL_PRICE_ID,
+  STRIPE_PRO_PRICE_ID_LEGACY,
+  STRIPE_AGENCY_PRICE_ID_LEGACY,
+  STRIPE_PRO_ANNUAL_PRICE_ID_LEGACY,
+  STRIPE_AGENCY_ANNUAL_PRICE_ID_LEGACY,
 ])
 
 const PRICE_TO_PLAN: Record<string, string> = {
-  [STRIPE_PRO_PRICE_ID]:           'pro',
-  [STRIPE_AGENCY_PRICE_ID]:        'agency',
-  [STRIPE_PRO_ANNUAL_PRICE_ID]:    'pro',
-  [STRIPE_AGENCY_ANNUAL_PRICE_ID]: 'agency',
+  [STRIPE_PRO_PRICE_ID]:                  'pro',
+  [STRIPE_AGENCY_PRICE_ID]:               'agency',
+  [STRIPE_PRO_ANNUAL_PRICE_ID]:           'pro',
+  [STRIPE_AGENCY_ANNUAL_PRICE_ID]:        'agency',
+  [STRIPE_PRO_PRICE_ID_LEGACY]:           'pro',
+  [STRIPE_AGENCY_PRICE_ID_LEGACY]:        'agency',
+  [STRIPE_PRO_ANNUAL_PRICE_ID_LEGACY]:    'pro',
+  [STRIPE_AGENCY_ANNUAL_PRICE_ID_LEGACY]: 'agency',
 }
 
 // ── Enki price IDs ────────────────────────────────────────────────────────────
