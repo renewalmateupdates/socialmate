@@ -1,6 +1,11 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import {
+  Radar, Users, HandCoins, Store, Crown, MessageSquare, Flag, BarChart3,
+  Lock, Tag, Send, AlertTriangle, Ticket, Share2, ArrowLeft,
+  type LucideIcon,
+} from 'lucide-react'
 
 interface HubStats {
   total_users: number
@@ -9,19 +14,24 @@ interface HubStats {
   stax_listings: number
 }
 
-const NAV_CARDS = [
-  { emoji: '🛸', label: 'God Mode Overview', sub: 'Full metrics — users, revenue, churn', href: '/admin/overview'      },
-  { emoji: '👥', label: 'Users',          sub: 'Manage all accounts',           href: '/admin/users'          },
-  { emoji: '💰', label: 'Partner Admin',   sub: 'Affiliates, payouts & invites', href: '/admin/partners'       },
-  { emoji: '🏪', label: 'Studio Stax',    sub: 'Listings & approvals',          href: '/admin/studio-stax'    },
-  { emoji: '👑', label: 'Invites & VIP',  sub: 'Invite partners · VIP codes',   href: '/admin/invites'        },
-  { emoji: '💬', label: 'Feedback',       sub: 'Bug reports & suggestions',     href: '/admin/feedback'       },
-  { emoji: '🚩', label: 'Feature Flags',  sub: 'Enable / disable features',     href: '/admin/feature-flags'  },
-  { emoji: '📊', label: 'Platform Stats', sub: 'Posts by platform & trends',    href: '/admin/platform-stats' },
-  { emoji: '🔒', label: 'Account Jail',   sub: 'Cooling-period platform accounts', href: '/admin/platform-jail'  },
-  { emoji: '🏷️', label: 'White Label',    sub: 'Review & approve white label requests', href: '/admin/white-label' },
-  { emoji: '🌈', label: 'IRIS Dispatch',  sub: 'Send weekly build-in-public newsletter', href: '/admin/iris' },
-  { emoji: '🔴', label: 'Failure Log',   sub: 'Post failures with per-platform errors',   href: '/admin/failure-log' },
+// Emoji were the loudest "built by an AI in an afternoon" tell on this screen,
+// and this is the one page the founder looks at every day. Lucide marks match
+// the public site (PR #522 did the same swap there).
+const NAV_CARDS: { icon: LucideIcon; label: string; sub: string; href: string }[] = [
+  { icon: Radar,         label: 'God Mode Overview', sub: 'Full metrics — users, revenue, churn',       href: '/admin/overview'       },
+  { icon: Users,         label: 'Users',             sub: 'Manage all accounts',                        href: '/admin/users'          },
+  { icon: HandCoins,     label: 'Partner Admin',     sub: 'Affiliates, payouts & invites',              href: '/admin/partners'       },
+  { icon: Share2,        label: 'Affiliates',        sub: 'Payout management',                          href: '/admin/affiliates'     },
+  { icon: Ticket,        label: 'Coupons',           sub: 'Create & manage discount codes',             href: '/admin/coupons'        },
+  { icon: Store,         label: 'Studio Stax',       sub: 'Listings & approvals',                       href: '/admin/studio-stax'    },
+  { icon: Crown,         label: 'Invites & VIP',     sub: 'Invite partners · VIP codes',                href: '/admin/invites'        },
+  { icon: MessageSquare, label: 'Feedback',          sub: 'Bug reports & suggestions',                  href: '/admin/feedback'       },
+  { icon: Flag,          label: 'Feature Flags',     sub: 'Enable / disable features',                  href: '/admin/feature-flags'  },
+  { icon: BarChart3,     label: 'Platform Stats',    sub: 'Posts by platform & trends',                 href: '/admin/platform-stats' },
+  { icon: Lock,          label: 'Account Jail',      sub: 'Cooling-period platform accounts',           href: '/admin/platform-jail'  },
+  { icon: Tag,           label: 'White Label',       sub: 'Review & approve white label requests',      href: '/admin/white-label'    },
+  { icon: Send,          label: 'IRIS Dispatch',     sub: 'Send weekly build-in-public newsletter',     href: '/admin/iris'           },
+  { icon: AlertTriangle, label: 'Failure Log',       sub: 'Post failures with per-platform errors',     href: '/admin/failure-log'    },
 ]
 
 export default function AdminHubClient() {
@@ -40,57 +50,77 @@ export default function AdminHubClient() {
       .finally(() => setStatsLoading(false))
   }, [])
 
+  // Colour is a language here, same as the public site: amber is the brand and
+  // anything money-shaped, jade is live activity. Nothing gets a colour just to
+  // look varied.
   const STAT_CARDS = [
-    { label: 'Total Users',       value: stats?.total_users      ?? '—', color: 'text-blue-600 dark:text-blue-400',   sub: 'registered accounts'    },
-    { label: 'Posts Today',       value: stats?.posts_today      ?? '—', color: 'text-green-600 dark:text-green-400', sub: 'published today'         },
-    { label: 'Active Affiliates', value: stats?.active_affiliates ?? '—', color: 'text-purple-600 dark:text-purple-400', sub: 'earning commissions'  },
-    { label: 'Stax Listings',     value: stats?.stax_listings    ?? '—', color: 'text-amber-600 dark:text-amber-400', sub: 'live in directory'       },
+    { label: 'Total Users',       value: stats?.total_users       ?? '—', tone: 'text-amber',        sub: 'registered accounts' },
+    { label: 'Posts Today',       value: stats?.posts_today       ?? '—', tone: 'text-jade',         sub: 'published today'     },
+    { label: 'Active Affiliates', value: stats?.active_affiliates ?? '—', tone: 'text-amber',        sub: 'earning commissions' },
+    { label: 'Stax Listings',     value: stats?.stax_listings     ?? '—', tone: 'text-ink-high',     sub: 'live in directory'   },
   ]
 
   return (
-    <div className="min-h-dvh bg-theme p-6 md:p-8">
-      <div className="max-w-5xl mx-auto">
+    <div className="dark min-h-dvh bg-void">
+      {/* A single hairline of gold across the top — the cheapest way to make a
+          utility screen feel deliberate rather than scaffolded. */}
+      <div className="h-px w-full bg-gradient-to-r from-transparent via-amber to-transparent opacity-60" />
+
+      <div className="max-w-6xl mx-auto px-6 py-10 md:px-8 md:py-14">
 
         {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
+        <div className="mb-10 flex items-start justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Admin Hub</h1>
-            <p className="text-gray-500 dark:text-gray-400 text-sm mt-0.5">SocialMate command center</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber mb-2">
+              Command Center
+            </p>
+            <h1 className="font-display text-4xl md:text-5xl font-semibold text-ink-high tracking-tight">
+              Admin Hub
+            </h1>
           </div>
-          <button onClick={() => router.push('/dashboard')}
-            className="text-sm text-gray-400 hover:text-black dark:hover:text-white transition-colors">
-            ← Dashboard
+          <button
+            onClick={() => router.push('/dashboard')}
+            className="shrink-0 inline-flex items-center gap-1.5 rounded-full border border-edge px-4 py-2 text-sm text-ink-muted hover:text-ink-high hover:border-edge-lit transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Dashboard
           </button>
         </div>
 
-        {/* Live Stats Bar */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          {STAT_CARDS.map((c, i) => (
-            <div key={i} className="bg-surface border border-theme rounded-2xl p-5">
-              <div className={`text-3xl font-black mb-1 ${c.color} ${statsLoading ? 'opacity-40' : ''}`}>
-                {statsLoading ? '…' : c.value}
+        {/* Live stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+          {STAT_CARDS.map((c) => (
+            <div
+              key={c.label}
+              className="rounded-2xl border border-edge bg-panel p-5 transition-colors hover:border-edge-lit"
+            >
+              <div className={`font-display text-4xl font-semibold tracking-tight mb-1 ${c.tone} ${statsLoading ? 'opacity-30' : ''}`}>
+                {statsLoading ? '—' : c.value}
               </div>
-              <div className="text-sm font-semibold text-gray-700 dark:text-gray-300">{c.label}</div>
-              <div className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{c.sub}</div>
+              <div className="text-sm font-medium text-ink-body">{c.label}</div>
+              <div className="text-xs text-ink-faint mt-0.5">{c.sub}</div>
             </div>
           ))}
         </div>
 
-        {/* Navigation Grid */}
-        <div className="mb-4">
-          <h2 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">Sections</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {NAV_CARDS.map(card => (
-              <a key={card.href} href={card.href}
-                className="bg-surface border border-theme rounded-2xl p-5 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-sm transition-all block group">
-                <div className="text-2xl mb-2">{card.emoji}</div>
-                <div className="font-semibold text-gray-900 dark:text-gray-100 text-sm group-hover:text-black dark:group-hover:text-white transition-colors">
-                  {card.label}
-                </div>
-                <div className="text-xs text-gray-400 dark:text-gray-500 mt-1">{card.sub}</div>
-              </a>
-            ))}
-          </div>
+        {/* Sections */}
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-ink-faint mb-4">
+          Sections
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {NAV_CARDS.map(({ icon: Icon, label, sub, href }) => (
+            <a
+              key={href}
+              href={href}
+              className="group relative overflow-hidden rounded-2xl border border-edge bg-panel p-5 transition-all hover:border-amber/45 hover:bg-raised"
+            >
+              <span className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-edge bg-raised text-amber transition-colors group-hover:border-amber/40">
+                <Icon className="h-5 w-5" strokeWidth={1.75} />
+              </span>
+              <div className="text-sm font-semibold text-ink-high">{label}</div>
+              <div className="mt-1 text-xs leading-relaxed text-ink-muted">{sub}</div>
+            </a>
+          ))}
         </div>
 
       </div>
