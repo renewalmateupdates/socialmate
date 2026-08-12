@@ -35,7 +35,7 @@ const FAQ = [
   },
   {
     q: 'What does SocialMate have that Postoplan does not?',
-    a: "SocialMate adds Discord and Telegram scheduling (Postoplan can't reach community platforms), 15+ AI tools (Postoplan has zero AI writing), SOMA autonomous content generation, 8 AI agents that run on autopilot, evergreen recycling, RSS import, and a link-in-bio page (SIGIL). On pricing, SocialMate Pro at $5/month does more than Postoplan's paid plans at nearly 4x the price.",
+    a: "SocialMate adds Discord and Telegram scheduling (Postoplan can't reach community platforms), 15+ AI tools (Postoplan has zero AI writing), SOMA autonomous content generation, 8 AI agents that run on autopilot, evergreen recycling, RSS import, and a link-in-bio page (SIGIL). On pricing, SocialMate Pro at $8/month does more than Postoplan's paid plans at nearly 4x the price.",
   },
   {
     q: 'Does Postoplan have a free plan?',
@@ -124,7 +124,7 @@ export default function VsPostoplanPage() {
               <li>✅ Discord + Telegram + Bluesky + TikTok + LinkedIn + X + Mastodon</li>
               <li>✅ 15+ AI tools on free tier</li>
               <li>✅ SOMA autonomous content agent</li>
-              <li>✅ Pro plan for $5/month total</li>
+              <li>✅ Pro plan for $8/month total</li>
               <li>✅ 8 autonomous AI agents</li>
               <li>✅ No credit card required to start</li>
             </ul>
@@ -174,7 +174,7 @@ export default function VsPostoplanPage() {
               {
                 n: '4',
                 title: '$19/month for less vs. $5/month for more',
-                desc: "Postoplan's paid plan starts at $19/month with limited AI and no community platform support. SocialMate Pro is $5/month and includes 500 AI credits, SOMA access, 5 team seats, and 8 autonomous agents. At every price point, SocialMate delivers more value.",
+                desc: "Postoplan's paid plan starts at $19/month with limited AI and no community platform support. SocialMate Pro is $8/month and includes 500 AI credits, SOMA access, 5 team seats, and 8 autonomous agents. At every price point, SocialMate delivers more value.",
               },
             ].map((r) => (
               <div key={r.n} className="flex gap-4 p-5 bg-panel border border-edge border-edge rounded-2xl hover:border-edge dark:hover:border-edge transition-all">
@@ -207,7 +207,7 @@ export default function VsPostoplanPage() {
           <h2 className="text-3xl font-extrabold mb-4">Switch from Postoplan today</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
             SocialMate covers 7 platforms including Discord and Telegram — with 15+ AI tools and SOMA built in.
-            Start free. Pro is $5/month.
+            Start free. Pro is $8/month.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
             Start free — no credit card →

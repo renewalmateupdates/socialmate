@@ -124,7 +124,7 @@ export default function VsKhorosPage() {
               <li>✅ 15+ AI tools on free tier</li>
               <li>✅ SOMA autonomous content agent</li>
               <li>✅ HESTIA community tab</li>
-              <li>✅ Pro plan for $5/month total</li>
+              <li>✅ Pro plan for $8/month total</li>
               <li>✅ No demo required — ready in minutes</li>
             </ul>
           </div>
@@ -158,7 +158,7 @@ export default function VsKhorosPage() {
               {
                 n: '1',
                 title: "Khoros is not designed for creators or small teams",
-                desc: "Khoros is built for large enterprises: multi-team workflows, custom SLAs, enterprise security compliance, dedicated account managers, and procurement processes. If you're a creator, freelancer, small business, or lean agency, you don't need any of that — and you'd pay thousands per month for features you'll never touch. SocialMate is self-serve, starts free, and scales to $20/month max.",
+                desc: "Khoros is built for large enterprises: multi-team workflows, custom SLAs, enterprise security compliance, dedicated account managers, and procurement processes. If you're a creator, freelancer, small business, or lean agency, you don't need any of that — and you'd pay thousands per month for features you'll never touch. SocialMate is self-serve, starts free, and scales to $29/month max.",
               },
               {
                 n: '2',
@@ -173,7 +173,7 @@ export default function VsKhorosPage() {
               {
                 n: '4',
                 title: 'No demo. No contract. Start in minutes.',
-                desc: "Khoros requires a sales demo, an enterprise evaluation, and a signed contract before you can post a single tweet through their platform. SocialMate requires a 30-second signup and an email confirmation. Free forever, no credit card. When you're ready for Pro, it's $5/month with one click.",
+                desc: "Khoros requires a sales demo, an enterprise evaluation, and a signed contract before you can post a single tweet through their platform. SocialMate requires a 30-second signup and an email confirmation. Free forever, no credit card. When you're ready for Pro, it's $8/month with one click.",
               },
             ].map((r) => (
               <div key={r.n} className="flex gap-4 p-5 bg-panel border border-edge border-edge rounded-2xl hover:border-edge dark:hover:border-edge transition-all">
@@ -206,7 +206,7 @@ export default function VsKhorosPage() {
           <h2 className="text-3xl font-extrabold mb-4">No demo. No contract. Just free.</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
             SocialMate is self-serve, free to start, and ready in minutes.
-            7 platforms, 15+ AI tools, SOMA. Pro is $5/month.
+            7 platforms, 15+ AI tools, SOMA. Pro is $8/month.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
             Start free — no credit card →

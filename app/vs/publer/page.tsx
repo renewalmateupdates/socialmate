@@ -9,7 +9,7 @@ import { useI18n } from '@/contexts/I18nContext'
 const COMPARISON = [
   { feature: 'Starting price',           publer: '$12/month (Professional)',  socialmate: '$0 — free forever'       },
   { feature: 'Free plan accounts',        publer: '3 social accounts',         socialmate: 'Multiple per platform'   },
-  { feature: 'Free plan post limit',      publer: '10 posts per account',      socialmate: '100 posts / month'               },
+  { feature: 'Free plan post limit',      publer: '10 posts per account',      socialmate: '250 posts / month'               },
   { feature: 'Pricing model',             publer: 'Per workspace',             socialmate: 'Flat rate'               },
   { feature: 'Platforms supported',       publer: '12+',                       socialmate: '16 (growing)'            },
   { feature: 'TikTok scheduling',          publer: '✅ (paid plans)',             socialmate: '✅ Free'                  },
@@ -26,7 +26,7 @@ const COMPARISON = [
   { feature: 'Hashtag manager',           publer: 'Limited free',              socialmate: '✅ Free'                  },
   { feature: 'Competitor tracking',       publer: '❌',                         socialmate: '✅ Free (3 accounts)'    },
   { feature: 'Team seats (free)',          publer: '1',                         socialmate: '2'                       },
-  { feature: 'Client workspaces',         publer: '$24+/month',                socialmate: 'Pro+: from $5/mo'        },
+  { feature: 'Client workspaces',         publer: '$24+/month',                socialmate: 'Pro+: from $8/mo'        },
 ]
 
 const FAQ = [
@@ -117,7 +117,7 @@ export default function VsPublerPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">100 posts / month. 15+ AI tools. Free.</p>
+            <p className="font-extrabold text-lg mb-2">250 posts / month. 15+ AI tools. Free.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ 100 scheduled posts / month</li>
               <li>✅ 15+ AI tools on free tier</li>
@@ -203,7 +203,7 @@ export default function VsPublerPage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Ready to stop counting posts?</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            100 posts a month, 15+ AI tools, 7 platforms. SocialMate is free forever — no credit card required.
+            250 posts a month, 15+ AI tools, 7 platforms. SocialMate is free forever — no credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

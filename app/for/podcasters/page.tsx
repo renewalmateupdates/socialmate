@@ -107,7 +107,7 @@ const PRICING = [
   },
   {
     plan:    'Pro',
-    price:   '$5',
+    price:   '$8',
     note:    '/month',
     credits: '500 AI credits/mo',
     cta:     'Go Pro',
@@ -116,7 +116,7 @@ const PRICING = [
   },
   {
     plan:    'Agency',
-    price:   '$20',
+    price:   '$29',
     note:    '/month',
     credits: '2,000 AI credits/mo',
     cta:     'Go Agency',
@@ -148,7 +148,7 @@ const FAQ = [
   },
   {
     q: 'How much does it cost?',
-    a: 'Free forever on the free plan (50 AI credits, all 7 platforms, full scheduler). Pro is $5/month (500 AI credits, SOMA access, Smart Queue, A/B testing). No credit card required to start.',
+    a: 'Free forever on the free plan (50 AI credits, all 7 platforms, full scheduler). Pro is $8/month (500 AI credits, SOMA access, Smart Queue, A/B testing). No credit card required to start.',
   },
 ]
 

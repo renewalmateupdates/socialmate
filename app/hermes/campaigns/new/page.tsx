@@ -88,7 +88,7 @@ export default function NewCampaignPage() {
             <input
               value={goal}
               onChange={e => setGoal(e.target.value)}
-              placeholder="e.g. Get social media agencies on Agency plan ($20/mo)"
+              placeholder="e.g. Get social media agencies on Agency plan ($29/mo)"
               className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-400 transition-colors"
             />
           </div>

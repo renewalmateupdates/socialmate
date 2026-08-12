@@ -23,7 +23,7 @@ const PAIN_POINTS = [
   },
   {
     before: 'Pay $99/month for Hootsuite and use 10% of the features.',
-    after:  'Get the same result for $5/month. Or free.',
+    after:  'Get the same result for $8/month. Or free.',
     icon: '💸',
   },
   {
@@ -101,7 +101,7 @@ const PRICING = [
     price:   '$0',
     period:  'forever',
     credits: '50 AI credits/mo',
-    posts:   '100 posts/month',
+    posts:   '250 posts/month',
     seats:   '2 seats',
     window:  '2-week schedule window',
     highlight: false,
@@ -110,7 +110,7 @@ const PRICING = [
   },
   {
     plan:    'Pro',
-    price:   '$5',
+    price:   '$8',
     period:  '/month',
     credits: '500 AI credits/mo',
     posts:   '1,000 posts / month',
@@ -126,13 +126,13 @@ const COMPARISON = [
   { tool: 'Hootsuite Pro',   price: '$99/mo',  platforms: 10,  ai: 'Add-on', free: '✗' },
   { tool: 'Buffer Essentials', price: '$18/mo', platforms: 3,   ai: 'Limited', free: '✗' },
   { tool: 'Later Starter',   price: '$18/mo',  platforms: 1,   ai: 'Limited', free: '✗' },
-  { tool: 'SocialMate Pro',  price: '$5/mo',   platforms: 6,   ai: '500 cr',  free: '50cr', highlight: true },
+  { tool: 'SocialMate Pro',  price: '$8/mo',   platforms: 6,   ai: '500 cr',  free: '50cr', highlight: true },
 ]
 
 const FAQ = [
   {
     q: 'Is the free plan actually useful, or is it a bait-and-switch?',
-    a: 'Genuinely useful. 50 AI credits, 100 posts/month, 7 live platforms, link in bio, post calendar, drafts, and queue. We didn\'t gut the free plan to force upgrades. You\'ll outgrow it eventually, but it\'s not a demo.',
+    a: 'Genuinely useful. 50 AI credits, 250 posts/month, 7 live platforms, link in bio, post calendar, drafts, and queue. We didn\'t gut the free plan to force upgrades. You\'ll outgrow it eventually, but it\'s not a demo.',
   },
   {
     q: 'Do I need a credit card to start?',

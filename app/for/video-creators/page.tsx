@@ -108,7 +108,7 @@ const PRICING = [
   },
   {
     plan:      'Pro',
-    price:     '$5',
+    price:     '$8',
     note:      '/month',
     tiktok:    '60 TikTok videos/mo',
     ai:        '500 AI credits/mo',
@@ -118,7 +118,7 @@ const PRICING = [
   },
   {
     plan:      'Agency',
-    price:     '$20',
+    price:     '$29',
     note:      '/month',
     tiktok:    '200 TikTok videos/mo',
     ai:        '2,000 AI credits/mo',

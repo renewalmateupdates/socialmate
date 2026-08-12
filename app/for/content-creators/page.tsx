@@ -106,7 +106,7 @@ const COMPARISON = [
   { tool: 'Hootsuite Pro',      price: '$99/mo',  platforms: 10, ai: 'Add-on',  free: '✗' },
   { tool: 'Buffer Essentials',  price: '$18/mo',  platforms: 3,  ai: 'Limited', free: '✗' },
   { tool: 'Later Starter',      price: '$18/mo',  platforms: 1,  ai: 'Limited', free: '✗' },
-  { tool: 'SocialMate Pro',     price: '$5/mo',   platforms: 7,  ai: '500 cr',  free: '50cr', highlight: true },
+  { tool: 'SocialMate Pro',     price: '$8/mo',   platforms: 7,  ai: '500 cr',  free: '50cr', highlight: true },
 ]
 
 const FAQ = [

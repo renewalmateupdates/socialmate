@@ -47,7 +47,7 @@ const FAQ = [
   },
   {
     q: 'How does SocialMate\'s pricing compare to SocialOomph?',
-    a: 'SocialOomph starts at $15/month with no free plan. SocialMate has a genuine free tier (50 credits/month across all 7 platforms) and Pro is $5/month. SocialMate is cheaper at every tier while covering dramatically more platforms and including AI tools that SocialOomph doesn\'t have at any price.',
+    a: 'SocialOomph starts at $15/month with no free plan. SocialMate has a genuine free tier (50 credits/month across all 7 platforms) and Pro is $8/month. SocialMate is cheaper at every tier while covering dramatically more platforms and including AI tools that SocialOomph doesn\'t have at any price.',
   },
 ]
 
@@ -124,7 +124,7 @@ export default function VsSocialOomphPage() {
               <li>✅ TikTok + LinkedIn + X + Bluesky + Discord + Telegram + Mastodon</li>
               <li>✅ 15+ AI tools free — SocialOomph has zero</li>
               <li>✅ SOMA autonomous content system</li>
-              <li>✅ Pro plan for $5/month — cheaper than SocialOomph</li>
+              <li>✅ Pro plan for $8/month — cheaper than SocialOomph</li>
               <li>✅ Modern mobile-ready UI</li>
               <li>✅ No credit card required to start</li>
             </ul>
@@ -169,7 +169,7 @@ export default function VsSocialOomphPage() {
               {
                 n: '3',
                 title: 'Cheaper and more modern at every tier',
-                desc: 'SocialOomph starts at $15/month with no free plan and a dated interface. SocialMate has a genuine free tier and Pro costs $5/month — cheaper than SocialOomph\'s entry price with far more platform coverage, AI tools, and a modern mobile-ready UI.',
+                desc: 'SocialOomph starts at $15/month with no free plan and a dated interface. SocialMate has a genuine free tier and Pro costs $8/month — cheaper than SocialOomph\'s entry price with far more platform coverage, AI tools, and a modern mobile-ready UI.',
               },
               {
                 n: '4',
@@ -207,7 +207,7 @@ export default function VsSocialOomphPage() {
           <h2 className="text-3xl font-extrabold mb-4">Upgrade from SocialOomph for free</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
             SocialMate is free to start. 7 platforms, 15+ AI tools, SOMA content system.
-            Pro is $5/month — less than SocialOomph&apos;s entry price.
+            Pro is $8/month — less than SocialOomph&apos;s entry price.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
             Start free — no credit card →

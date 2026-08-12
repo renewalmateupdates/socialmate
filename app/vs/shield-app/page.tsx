@@ -39,7 +39,7 @@ const FAQ = [
   },
   {
     q: 'Why would I pay for Shield if it can\'t schedule posts?',
-    a: 'Shield fills a specific analytics gap: LinkedIn\'s native analytics only retains 60 days of data. Shield stores your full history. If you\'re a LinkedIn-first creator who needs historical post performance, Shield adds value alongside your scheduler. But at $8+/month on top of a scheduling tool, the combined cost exceeds SocialMate Pro ($5/month) which does both.',
+    a: 'Shield fills a specific analytics gap: LinkedIn\'s native analytics only retains 60 days of data. Shield stores your full history. If you\'re a LinkedIn-first creator who needs historical post performance, Shield adds value alongside your scheduler. But at $8+/month on top of a scheduling tool, the combined cost exceeds SocialMate Pro ($8/month) which does both.',
   },
   {
     q: 'What LinkedIn analytics does SocialMate show?',
@@ -126,7 +126,7 @@ export default function VsShieldAppPage() {
               <li>✅ Bluesky, X, TikTok, Discord, Telegram, Mastodon</li>
               <li>✅ 12 AI writing tools free</li>
               <li>✅ No separate analytics tool needed</li>
-              <li>✅ Pro plan $5/month for everything</li>
+              <li>✅ Pro plan $8/month for everything</li>
             </ul>
           </div>
         </div>
@@ -164,7 +164,7 @@ export default function VsShieldAppPage() {
               {
                 n: '2',
                 title: 'You\'re paying $8+/month on top of your scheduler',
-                desc: 'Most Shield users also pay for Buffer, Publer, or another scheduling tool. Combined, that\'s $20–$50+/month for what SocialMate does for $5. If you\'re not at a scale where granular LinkedIn SSI tracking changes your strategy, SocialMate\'s Content DNA dashboard is the better economics.',
+                desc: 'Most Shield users also pay for Buffer, Publer, or another scheduling tool. Combined, that\'s $20–$50+/month for what SocialMate does for $8. If you\'re not at a scale where granular LinkedIn SSI tracking changes your strategy, SocialMate\'s Content DNA dashboard is the better economics.',
               },
               {
                 n: '3',

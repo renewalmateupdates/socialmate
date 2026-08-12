@@ -8,7 +8,7 @@ import { useI18n } from '@/contexts/I18nContext'
 
 const COMPARISON = [
   { feature: 'Starting price',            postplanner: '$9/month (Starter)',       socialmate: '$0 — free forever'       },
-  { feature: 'Free plan',                 postplanner: '✅ (10 posts/month cap)',   socialmate: '✅ 100 posts/month free' },
+  { feature: 'Free plan',                 postplanner: '✅ (10 posts/month cap)',   socialmate: '✅ 250 posts/month free' },
   { feature: 'Free plan post limit',      postplanner: '10 posts/month',           socialmate: 'No limit'                },
   { feature: 'Social accounts (free)',    postplanner: '3 accounts',               socialmate: 'No hard cap (free tier)' },
   { feature: 'Bulk scheduling',           postplanner: 'Paid plans',               socialmate: '✅ Free'                 },
@@ -87,7 +87,7 @@ export default function VsPostPlannerPage() {
             SocialMate vs Post Planner
           </h1>
           <p className="text-lg text-ink-muted max-w-2xl mx-auto">
-            Post Planner has a free plan — but 10 posts per month is barely a schedule. SocialMate is free forever with 100 posts a month and no card.
+            Post Planner has a free plan — but 10 posts per month is barely a schedule. SocialMate is free forever with 250 posts a month and no card.
           </p>
           <div className="flex items-center justify-center gap-4 mt-6">
             <Link href="/signup" className="px-6 py-3 bg-void text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
@@ -115,7 +115,7 @@ export default function VsPostPlannerPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">100 posts / month. All platforms. $0.</p>
+            <p className="font-extrabold text-lg mb-2">250 posts / month. All platforms. $0.</p>
             <ul className="space-y-1 text-xs text-ink-body">
               <li>✅ Free forever — no post cap</li>
               <li>✅ 15+ AI tools on free tier</li>
@@ -201,7 +201,7 @@ export default function VsPostPlannerPage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">No 10-post cap — start free today</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is free forever — 100 posts/month, bulk scheduling, 15+ AI tools, 7 platforms. No credit card required.
+            SocialMate is free forever — 250 posts/month, bulk scheduling, 15+ AI tools, 7 platforms. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

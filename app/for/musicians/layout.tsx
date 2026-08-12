@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Social Media for Musicians & Independent Artists — SocialMate',
-    description: 'Schedule music content to 7 platforms. Free forever or $5/month.',
+    description: 'Schedule music content to 7 platforms. Free forever or $8/month.',
     images: ['https://socialmate.studio/og-image.png'],
   },
   alternates: { canonical: 'https://socialmate.studio/for/musicians' },

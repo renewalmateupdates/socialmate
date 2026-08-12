@@ -24,7 +24,7 @@ const COMPARISON = [
   { feature: 'Hashtag manager',         sprout: '✅ Paid plans',               socialmate: '✅ Free'                  },
   { feature: 'Competitor tracking',     sprout: 'Advanced ($499+/mo)',        socialmate: '✅ Free (3 accounts)'    },
   { feature: 'RSS import',              sprout: '❌',                          socialmate: '✅ Free'                  },
-  { feature: 'Client workspaces',       sprout: 'Agency plan required',       socialmate: 'Pro+: from $5/mo'        },
+  { feature: 'Client workspaces',       sprout: 'Agency plan required',       socialmate: 'Pro+: from $8/mo'        },
 ]
 
 const FAQ = [
@@ -42,7 +42,7 @@ const FAQ = [
   },
   {
     q: 'Is SocialMate actually free with no catch?',
-    a: 'Yes. The free tier includes 100 posts/month, 50 AI credits per month, bulk scheduling, link in bio, hashtag manager, competitor tracking (3 accounts), RSS import, and evergreen recycling. No credit card required and no trial countdown.',
+    a: 'Yes. The free tier includes 250 posts/month, 50 AI credits per month, bulk scheduling, link in bio, hashtag manager, competitor tracking (3 accounts), RSS import, and evergreen recycling. No credit card required and no trial countdown.',
   },
 ]
 

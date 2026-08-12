@@ -314,7 +314,7 @@ export default function First30DaysSocialMediaPage() {
 
                 <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">Use scheduling tools</h3>
                 <p className="mb-4 leading-relaxed text-gray-300">
-                  I built SocialMate specifically for this reason. Write your posts once, schedule them for the optimal times, and let the tool do the rest. The free plan handles Bluesky, Mastodon, Discord, and Telegram. Pro ($5/month) adds X/Twitter, TikTok, and LinkedIn. Scheduling removes the daily friction of &quot;did I post today?&quot; and &quot;when should I post?&quot; — both of which eat creative energy that should go toward making better content.
+                  I built SocialMate specifically for this reason. Write your posts once, schedule them for the optimal times, and let the tool do the rest. The free plan handles Bluesky, Mastodon, Discord, and Telegram. Pro ($8/month) adds X/Twitter, TikTok, and LinkedIn. Scheduling removes the daily friction of &quot;did I post today?&quot; and &quot;when should I post?&quot; — both of which eat creative energy that should go toward making better content.
                 </p>
 
                 <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">Keep an idea bank</h3>

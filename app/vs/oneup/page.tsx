@@ -48,7 +48,7 @@ const FAQ = [
   },
   {
     q: 'Is $18/month for OneUp worth it compared to SocialMate free?',
-    a: "OneUp's $18/month plan gives you unlimited posts, recurring schedules, and CSV bulk upload. SocialMate's free plan gives you the same core scheduling features at 100 posts a month plus 15+ AI tools, Discord/Telegram/Bluesky support, and a full link-in-bio page (SIGIL). For $5/month, SocialMate Pro adds 500 AI credits/month, 5 seats, SOMA access, and 8 autonomous agents. The value comparison strongly favors SocialMate at every price point.",
+    a: "OneUp's $18/month plan gives you unlimited posts, recurring schedules, and CSV bulk upload. SocialMate's free plan gives you the same core scheduling features at 250 posts a month plus 15+ AI tools, Discord/Telegram/Bluesky support, and a full link-in-bio page (SIGIL). For $8/month, SocialMate Pro adds 500 AI credits/month, 5 seats, SOMA access, and 8 autonomous agents. The value comparison strongly favors SocialMate at every price point.",
   },
 ]
 
@@ -125,7 +125,7 @@ export default function VsOneUpPage() {
               <li>✅ Discord + Telegram + Bluesky + TikTok + LinkedIn + X + Mastodon</li>
               <li>✅ 15+ AI tools on free tier</li>
               <li>✅ SOMA autonomous content agent</li>
-              <li>✅ Pro plan for $5/month total</li>
+              <li>✅ Pro plan for $8/month total</li>
               <li>✅ Evergreen recycling + recurring posts free</li>
               <li>✅ No credit card required to start</li>
             </ul>
@@ -208,7 +208,7 @@ export default function VsOneUpPage() {
           <h2 className="text-3xl font-extrabold mb-4">More platforms. More AI. Free.</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
             SocialMate has everything OneUp offers — plus 15+ AI tools, Discord, Telegram, Bluesky, and SOMA.
-            Start free. Pro is $5/month.
+            Start free. Pro is $8/month.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
             Start free — no credit card →

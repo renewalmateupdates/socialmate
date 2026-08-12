@@ -146,7 +146,7 @@ export default function BetaPage() {
         <div className="text-center mb-8">
           <p className="text-sm text-gray-500 mb-3">New to SocialMate?</p>
           <p className="text-gray-300 text-sm leading-relaxed max-w-lg mx-auto mb-4">
-            SocialMate is a social media scheduler and AI creator toolkit — what competitors charge $99/month for, we give for $5 or free. Schedule posts to Bluesky, Discord, Telegram, Mastodon, and X from one place.
+            SocialMate is a social media scheduler and AI creator toolkit — what competitors charge $99/month for, we give for $8 or free. Schedule posts to Bluesky, Discord, Telegram, Mastodon, and X from one place.
           </p>
           <div className="flex items-center justify-center gap-4">
             <Link href="/" className="text-xs text-amber-400 hover:text-amber-300 font-semibold underline underline-offset-2">

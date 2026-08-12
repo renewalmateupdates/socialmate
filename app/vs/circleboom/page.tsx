@@ -47,7 +47,7 @@ const FAQ = [
   },
   {
     q: 'How does SocialMate\'s pricing compare to Circleboom?',
-    a: 'Circleboom starts at $24.99/month with no free plan. SocialMate has a genuine free tier with 50 credits/month and schedules across 7 platforms. Pro is $5/month — 80% less than Circleboom\'s entry price for significantly more platform coverage including TikTok, Discord, and Telegram.',
+    a: 'Circleboom starts at $24.99/month with no free plan. SocialMate has a genuine free tier with 50 credits/month and schedules across 7 platforms. Pro is $8/month — 80% less than Circleboom\'s entry price for significantly more platform coverage including TikTok, Discord, and Telegram.',
   },
 ]
 
@@ -124,7 +124,7 @@ export default function VsCircleboomPage() {
               <li>✅ X + LinkedIn + TikTok + Bluesky + Discord + Telegram + Mastodon</li>
               <li>✅ TikTok free (20 videos/mo) — Circleboom has none</li>
               <li>✅ Discord + Telegram — unique in the market</li>
-              <li>✅ Pro plan for $5/month total</li>
+              <li>✅ Pro plan for $8/month total</li>
               <li>✅ 15+ AI tools free</li>
               <li>✅ No credit card required to start</li>
             </ul>
@@ -169,7 +169,7 @@ export default function VsCircleboomPage() {
               {
                 n: '3',
                 title: '80% cheaper for more platform coverage',
-                desc: 'Circleboom starts at $24.99/month with no free plan. SocialMate\'s Pro plan is $5/month — covering 7 platforms vs Circleboom\'s mix. The free tier gives you 50 credits/month at zero cost. You pay 5x less and get more platforms.',
+                desc: 'Circleboom starts at $24.99/month with no free plan. SocialMate\'s Pro plan is $8/month — covering 7 platforms vs Circleboom\'s mix. The free tier gives you 50 credits/month at zero cost. You pay 5x less and get more platforms.',
               },
               {
                 n: '4',
@@ -207,7 +207,7 @@ export default function VsCircleboomPage() {
           <h2 className="text-3xl font-extrabold mb-4">Schedule all 7 platforms free</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
             SocialMate covers X, LinkedIn, TikTok, Bluesky, Discord, Telegram, and Mastodon.
-            Free plan available. Pro is $5/month — 80% less than Circleboom.
+            Free plan available. Pro is $8/month — 80% less than Circleboom.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
             Start free — no credit card →

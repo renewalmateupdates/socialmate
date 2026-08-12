@@ -21,7 +21,7 @@ const COMPARISON = [
   { feature: 'RSS import',             oktopost: '✅',                       socialmate: '✅ Free'                  },
   { feature: 'Bluesky / Mastodon',     oktopost: '❌',                       socialmate: '✅'                       },
   { feature: 'Discord / Telegram',     oktopost: '❌',                       socialmate: '✅'                       },
-  { feature: 'Client workspaces',      oktopost: 'Enterprise only',          socialmate: 'Pro+: from $5/mo'        },
+  { feature: 'Client workspaces',      oktopost: 'Enterprise only',          socialmate: 'Pro+: from $8/mo'        },
   { feature: 'Salesforce integration', oktopost: '✅',                       socialmate: '❌'                       },
 ]
 
@@ -159,7 +159,7 @@ export default function VsOktopost() {
             SocialMate targets creators, small businesses, and lean agencies who need to publish great content across multiple platforms without spending a fortune.
           </p>
           <p className="text-sm text-ink-muted leading-relaxed">
-            If you searched &#34;Oktopost alternative&#34; because $500/month felt steep, SocialMate is the answer. Start free and scale to $20/month for an Agency account.
+            If you searched &#34;Oktopost alternative&#34; because $500/month felt steep, SocialMate is the answer. Start free and scale to $29/month for an Agency account.
           </p>
         </div>
 
@@ -178,7 +178,7 @@ export default function VsOktopost() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3 text-ink-high">Start for free today</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            7 platforms, 15+ AI tools, 100 posts/month, link in bio, competitor tracking — all free. No card required.
+            7 platforms, 15+ AI tools, 250 posts/month, link in bio, competitor tracking — all free. No card required.
           </p>
           <Link href="/signup"
             className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">

@@ -122,7 +122,7 @@ export default function VsAudiensePage() {
               <li>✅ Schedule across X, TikTok, LinkedIn, Bluesky, Discord, Telegram, Mastodon</li>
               <li>✅ Content performance analytics built in</li>
               <li>✅ Best-times heatmap per platform</li>
-              <li>✅ Pro plan for $5/month — no second tool needed</li>
+              <li>✅ Pro plan for $8/month — no second tool needed</li>
               <li>✅ 15+ AI tools free</li>
               <li>✅ No credit card required to start</li>
             </ul>
@@ -157,7 +157,7 @@ export default function VsAudiensePage() {
               {
                 n: '1',
                 title: '$79/month for a tool that can\'t post is hard to justify',
-                desc: 'Audiense provides rich audience insights — but no scheduling. You\'re paying $79+/month for research, then spending more on a separate publisher. SocialMate combines scheduling + analytics for free, with Pro at $5/month. For creators and small businesses, that\'s a $940+/year saving while gaining scheduling capabilities Audiense will never have.',
+                desc: 'Audiense provides rich audience insights — but no scheduling. You\'re paying $79+/month for research, then spending more on a separate publisher. SocialMate combines scheduling + analytics for free, with Pro at $8/month. For creators and small businesses, that\'s a $940+/year saving while gaining scheduling capabilities Audiense will never have.',
               },
               {
                 n: '2',
@@ -205,7 +205,7 @@ export default function VsAudiensePage() {
           <h2 className="text-3xl font-extrabold mb-4">Schedule + analyze across 7 platforms</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
             SocialMate gives you scheduling and performance analytics in one platform.
-            Free plan available. Pro is $5/month — no separate analytics tool needed.
+            Free plan available. Pro is $8/month — no separate analytics tool needed.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
             Start free — no credit card →

@@ -36,7 +36,7 @@ const FAQ = [
   },
   {
     q: "Is SocialMate cheaper than Preview App?",
-    a: "SocialMate is free to start. Preview App's Pro plan starts at $8/month. SocialMate Pro is $5/month and includes far more platforms, 20+ AI tools, autonomous content generation (SOMA), analytics, and a social inbox — none of which Preview App offers.",
+    a: "SocialMate is free to start. Preview App's Pro plan starts at $8/month. SocialMate Pro is $8/month and includes far more platforms, 20+ AI tools, autonomous content generation (SOMA), analytics, and a social inbox — none of which Preview App offers.",
   },
   {
     q: "What makes SocialMate a better choice for most creators?",
@@ -157,7 +157,7 @@ export default function VsPreviewAppPage() {
               {
                 n: '2',
                 title: "SocialMate is cheaper — and does far more",
-                desc: "Preview App Pro starts at $8/month. SocialMate is free to start and $5/month for Pro — which includes more platforms, 20+ AI tools, autonomous content generation (SOMA), full analytics, and a social inbox. Preview App has none of these.",
+                desc: "Preview App Pro starts at $8/month. SocialMate is free to start and $8/month for Pro — which includes more platforms, 20+ AI tools, autonomous content generation (SOMA), full analytics, and a social inbox. Preview App has none of these.",
               },
               {
                 n: '3',

@@ -22,7 +22,7 @@ const COMPARISON = [
   { feature: 'RSS / blog import',             competitor: '❌',                           socialmate: '✅ Free'                  },
   { feature: 'Evergreen recycling',           competitor: '❌',                           socialmate: '✅ Free'                  },
   { feature: 'Link in bio',                   competitor: '✅ Later\'s strong suit',      socialmate: '✅ Built in free'         },
-  { feature: 'Pro plan price',               competitor: '$18/month',                   socialmate: '$5/month'                },
+  { feature: 'Pro plan price',               competitor: '$18/month',                   socialmate: '$8/month'                },
   { feature: 'Team collaboration',            competitor: '$40+/month',                  socialmate: 'Free (2 seats)'          },
   { feature: 'Creator Monetization Hub',      competitor: '❌',                           socialmate: '✅ Tip jar + fan subs'   },
 ]
@@ -45,8 +45,8 @@ const FAQ = [
     a: "Later is known for its visual Instagram planning grid — drag-and-drop visual content calendar optimized for Instagram. If Instagram grid aesthetics are central to your workflow, Later's visual planner is a genuine differentiator. SocialMate doesn't replicate that specific Instagram-first visual planner. For cross-platform scheduling, AI content generation, and platforms Later ignores (TikTok free, Discord, Telegram, Bluesky), SocialMate leads.",
   },
   {
-    q: 'How does SocialMate\'s $5/month Pro compare to Later\'s $18/month plan?',
-    a: "SocialMate Pro ($5/month) gives you 500 AI credits/month, 5 seats, and full access across all 7 platforms. Later's entry paid plan ($18/month) upgrades your posting limit and unlocks analytics. SocialMate is 72% cheaper at the Pro tier while offering more platform coverage (TikTok, Discord, Telegram, Bluesky, Mastodon) and a more capable AI system.",
+    q: 'How does SocialMate\'s $8/month Pro compare to Later\'s $18/month plan?',
+    a: "SocialMate Pro ($8/month) gives you 500 AI credits/month, 5 seats, and full access across all 7 platforms. Later's entry paid plan ($18/month) upgrades your posting limit and unlocks analytics. SocialMate is 72% cheaper at the Pro tier while offering more platform coverage (TikTok, Discord, Telegram, Bluesky, Mastodon) and a more capable AI system.",
   },
 ]
 
@@ -206,7 +206,7 @@ export default function VsLaterFreePage() {
           <h2 className="text-3xl font-extrabold mb-4">50 credits. 7 platforms. 15+ AI tools. Free.</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
             SocialMate&apos;s free plan includes TikTok, LinkedIn, Bluesky, Discord, Telegram, Mastodon, and X.
-            When you&apos;re ready to scale, Pro is $5/month — not $18.
+            When you&apos;re ready to scale, Pro is $8/month — not $18.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
             Start free — no credit card →

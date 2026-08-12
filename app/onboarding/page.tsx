@@ -593,7 +593,7 @@ function OnboardingInner() {
               {!isUpgraded && (
                 <div className="border-2 border-amber-400 bg-amber-50 dark:bg-amber-950/20 rounded-2xl p-5 mb-5 text-left">
                   <div className="mb-3">
-                    <p className="text-sm font-extrabold text-amber-800 dark:text-amber-300">⚡ Upgrade to Pro — $5/month</p>
+                    <p className="text-sm font-extrabold text-amber-800 dark:text-amber-300">⚡ Upgrade to Pro — $8/month</p>
                     <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">500 AI credits · 5 connected accounts · Smart Queue · Brand Voice AI</p>
                   </div>
                   <div className="mb-3">

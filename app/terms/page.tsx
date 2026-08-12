@@ -108,8 +108,8 @@ export default function TermsOfService() {
             <p className="mb-2">SocialMate offers the following subscription tiers, billed through Stripe:</p>
             <ul className="list-disc pl-5 space-y-2 mb-4">
               <li><span className="font-semibold">Free Plan:</span> No charge, subject to usage and feature limits as described on our pricing page.</li>
-              <li><span className="font-semibold">Pro Plan:</span> $5/month or $55/year, billed in advance.</li>
-              <li><span className="font-semibold">Agency Plan:</span> $20/month or $209/year, billed in advance.</li>
+              <li><span className="font-semibold">Pro Plan:</span> $8/month or $80/year, billed in advance.</li>
+              <li><span className="font-semibold">Agency Plan:</span> $29/month or $290/year, billed in advance.</li>
               <li><span className="font-semibold">White Label Basic:</span> Additional monthly fee, billed in advance.</li>
               <li><span className="font-semibold">White Label Pro:</span> Additional monthly fee, billed in advance.</li>
               <li><span className="font-semibold">AI Credit Packs:</span> One-time purchases (100, 300, 750, or 2,000 credits), non-refundable.</li>

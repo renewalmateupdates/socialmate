@@ -30,7 +30,7 @@ const COMPARISON = [
 const FAQ = [
   {
     q: 'What is Postly and how does it compare to SocialMate?',
-    a: 'Postly is a social media scheduling tool targeting small businesses and marketing teams. It supports Facebook, Instagram, Twitter, LinkedIn, Reddit, and has limited TikTok functionality. At $18/month minimum with no free plan, it\'s positioned as a budget-friendly scheduler. SocialMate undercuts it on price ($5/month Pro vs $18/month) while offering more platform coverage and a genuine free tier.',
+    a: 'Postly is a social media scheduling tool targeting small businesses and marketing teams. It supports Facebook, Instagram, Twitter, LinkedIn, Reddit, and has limited TikTok functionality. At $18/month minimum with no free plan, it\'s positioned as a budget-friendly scheduler. SocialMate undercuts it on price ($8/month Pro vs $18/month) while offering more platform coverage and a genuine free tier.',
   },
   {
     q: 'Does Postly support TikTok properly?',
@@ -42,7 +42,7 @@ const FAQ = [
   },
   {
     q: 'How does SocialMate\'s free plan compare to Postly\'s pricing?',
-    a: 'Postly has no free plan — you start at $18/month. SocialMate gives you 50 credits/month free, scheduling across all 7 platforms with no credit card required. Pro is $5/month, Agency is $20/month. You get more platforms and pay less at every tier.',
+    a: 'Postly has no free plan — you start at $18/month. SocialMate gives you 50 credits/month free, scheduling across all 7 platforms with no credit card required. Pro is $8/month, Agency is $29/month. You get more platforms and pay less at every tier.',
   },
   {
     q: 'Does SocialMate have bulk scheduling like Postly?',
@@ -123,7 +123,7 @@ export default function VsPostlyPage() {
               <li>✅ TikTok direct publish (Production API — approved May 2026)</li>
               <li>✅ X + LinkedIn + Bluesky + Discord + Telegram + Mastodon</li>
               <li>✅ 15+ AI tools on free tier</li>
-              <li>✅ Pro plan for $5/month — 72% less than Postly</li>
+              <li>✅ Pro plan for $8/month — 72% less than Postly</li>
               <li>✅ SOMA AI content system</li>
               <li>✅ No credit card required to start</li>
             </ul>
@@ -163,7 +163,7 @@ export default function VsPostlyPage() {
               {
                 n: '2',
                 title: 'Free tier that actually works',
-                desc: 'Postly has no free plan. SocialMate gives you 50 credits/month free across all 7 platforms — enough to test the tool thoroughly, build habits, and schedule real content before committing to paid. Pro is $5/month when you\'re ready to scale.',
+                desc: 'Postly has no free plan. SocialMate gives you 50 credits/month free across all 7 platforms — enough to test the tool thoroughly, build habits, and schedule real content before committing to paid. Pro is $8/month when you\'re ready to scale.',
               },
               {
                 n: '3',
@@ -206,7 +206,7 @@ export default function VsPostlyPage() {
           <h2 className="text-3xl font-extrabold mb-4">Schedule TikTok + 6 more platforms</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
             SocialMate uses TikTok&apos;s official Production API for direct video publishing. No reminders, no manual steps.
-            Free plan available. Pro is $5/month.
+            Free plan available. Pro is $8/month.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
             Start free — no credit card →

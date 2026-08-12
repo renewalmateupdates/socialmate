@@ -26,7 +26,7 @@ const COMPARISON = [
   { feature: 'Hashtag manager',           postpickr: 'Basic',                    socialmate: '✅ Free'                  },
   { feature: 'Competitor tracking',       postpickr: '❌',                        socialmate: '✅ Free (3 accounts)'    },
   { feature: 'Team seats',                postpickr: '1 user on starter',        socialmate: '2 users free'            },
-  { feature: 'Client workspaces',         postpickr: 'Higher tiers only',        socialmate: 'Agency: from $20/mo'     },
+  { feature: 'Client workspaces',         postpickr: 'Higher tiers only',        socialmate: 'Agency: from $29/mo'     },
   { feature: 'Analytics',                 postpickr: 'Basic stats',              socialmate: '✅ Built-in free'         },
   { feature: 'SOMA (AI content system)',  postpickr: '❌',                        socialmate: '✅ Included'             },
 ]
@@ -42,7 +42,7 @@ const FAQ = [
   },
   {
     q: 'Does SocialMate have a free plan compared to PostPickr?',
-    a: 'Yes. SocialMate has a genuinely free plan with no trial expiry — includes 100 posts/month, 50 AI credits/month, bulk scheduling, link in bio, evergreen recycling, hashtag manager, and competitor tracking. PostPickr has no permanent free plan.',
+    a: 'Yes. SocialMate has a genuinely free plan with no trial expiry — includes 250 posts/month, 50 AI credits/month, bulk scheduling, link in bio, evergreen recycling, hashtag manager, and competitor tracking. PostPickr has no permanent free plan.',
   },
   {
     q: 'What platforms does SocialMate support that PostPickr does not?',
@@ -50,7 +50,7 @@ const FAQ = [
   },
   {
     q: 'How does SocialMate compare on pricing?',
-    a: 'PostPickr starts at €8/month (~$9) with no free plan. SocialMate is free forever with a Pro plan at $5/month and Agency at $20/month. SocialMate Pro is actually cheaper than PostPickr\'s entry plan while offering significantly more platforms and AI tools.',
+    a: 'PostPickr starts at €8/month (~$9) with no free plan. SocialMate is free forever with a Pro plan at $8/month and Agency at $29/month. SocialMate Pro is actually cheaper than PostPickr\'s entry plan while offering significantly more platforms and AI tools.',
   },
 ]
 
@@ -166,12 +166,12 @@ export default function VsPostPickrPage() {
               {
                 n: '2',
                 title: 'You should not pay to try a scheduling tool',
-                desc: 'PostPickr has no free plan. After the trial, you either pay or lose access. SocialMate has no trial countdown — the free tier is permanent. You get 100 posts/month, 50 AI credits/month, and full scheduling features without ever entering a credit card.',
+                desc: 'PostPickr has no free plan. After the trial, you either pay or lose access. SocialMate has no trial countdown — the free tier is permanent. You get 250 posts/month, 50 AI credits/month, and full scheduling features without ever entering a credit card.',
               },
               {
                 n: '3',
                 title: 'SocialMate Pro costs less than PostPickr\'s starter plan',
-                desc: 'PostPickr\'s entry plan is €8/month (~$9 USD). SocialMate Pro is $5/month and includes 500 AI credits, 5 team seats, Smart Queue, Brand Voice, and A/B testing. For less money, SocialMate delivers significantly more value — and the free plan already covers most use cases.',
+                desc: 'PostPickr\'s entry plan is €8/month (~$9 USD). SocialMate Pro is $8/month and includes 500 AI credits, 5 team seats, Smart Queue, Brand Voice, and A/B testing. For less money, SocialMate delivers significantly more value — and the free plan already covers most use cases.',
               },
               {
                 n: '4',

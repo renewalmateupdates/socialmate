@@ -353,7 +353,7 @@ export default function AIToolsForCreatorsPage() {
 
                 <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">Scheduling and distribution with AI</h3>
                 <p className="mb-4 leading-relaxed text-gray-300">
-                  SocialMate — free for open platforms (Bluesky, Mastodon, Discord, Telegram), $5/month Pro for all 7 platforms including X/Twitter, TikTok, and LinkedIn. AI caption generation, hashtag suggestions, smart queue scheduling, content repurposing, post scoring, Voice DNA via SOMA, and 8 autonomous agents. This is what I built because the alternatives charge $99/month for the same things.
+                  SocialMate — free for open platforms (Bluesky, Mastodon, Discord, Telegram), $8/month Pro for all 7 platforms including X/Twitter, TikTok, and LinkedIn. AI caption generation, hashtag suggestions, smart queue scheduling, content repurposing, post scoring, Voice DNA via SOMA, and 8 autonomous agents. This is what I built because the alternatives charge $99/month for the same things.
                 </p>
 
                 <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">AI image generation</h3>
@@ -368,7 +368,7 @@ export default function AIToolsForCreatorsPage() {
 
                 <h3 className="mb-3 mt-8 text-lg font-bold text-amber-400">The total</h3>
                 <p className="mb-4 leading-relaxed text-gray-300">
-                  Claude Pro ($20) + SocialMate Pro ($5) + one image generator ($0-$10) + CapCut (free) = $25-$35/month for a genuinely professional AI creator stack. A year of this costs less than a single month of some legacy scheduling tools. The barrier is not money. It&apos;s just the willingness to learn.
+                  Claude Pro ($20) + SocialMate Pro ($8) + one image generator ($0-$10) + CapCut (free) = $25-$35/month for a genuinely professional AI creator stack. A year of this costs less than a single month of some legacy scheduling tools. The barrier is not money. It&apos;s just the willingness to learn.
                 </p>
 
                 <Callout>
@@ -471,7 +471,7 @@ export default function AIToolsForCreatorsPage() {
                     If you&apos;re still on the fence about going deeper with AI tools: start with one thing. Pick the part of your workflow that costs the most time and find an AI tool that addresses it. Give it a month. The learning curve is real but short. The leverage is real and lasting.
                   </p>
                   <p className="mb-4 leading-relaxed text-gray-300">
-                    SocialMate was built for exactly this: a creator OS with AI woven into every part of the workflow, at a price that doesn&apos;t require you to be making money before you can afford it. Free plan to start. Pro for $5/month. Because the tools that change your life shouldn&apos;t cost what they charge elsewhere.
+                    SocialMate was built for exactly this: a creator OS with AI woven into every part of the workflow, at a price that doesn&apos;t require you to be making money before you can afford it. Free plan to start. Pro for $8/month. Because the tools that change your life shouldn&apos;t cost what they charge elsewhere.
                   </p>
                   <p className="leading-relaxed text-gray-300">
                     Find me at <strong className="text-amber-400">@socialmatehq</strong>. Tell me what&apos;s working and what isn&apos;t. I&apos;m building this with you.

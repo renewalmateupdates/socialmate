@@ -1227,7 +1227,7 @@ export const onboardingSequence = inngest.createFunction(
             <!-- Credits note -->
             <div style="background:#1a0a2e;border:1px solid #2d1b69;border-radius:12px;padding:16px 20px;margin-bottom:28px;">
               <p style="font-size:13px;color:#c4b5fd;margin:0;line-height:1.6;">
-                Each tool costs <strong style="color:#ffffff;">1–5 credits</strong>. Free plan gives you <strong style="color:#ffffff;">50 credits/month</strong> — enough to create a solid week of content. On Pro ($5/mo) you get <strong style="color:#ffffff;">500 credits</strong>. Most users build 3–4 months of posts in one sitting.
+                Each tool costs <strong style="color:#ffffff;">1–5 credits</strong>. Free plan gives you <strong style="color:#ffffff;">50 credits/month</strong> — enough to create a solid week of content. On Pro ($8/mo) you get <strong style="color:#ffffff;">500 credits</strong>. Most users build 3–4 months of posts in one sitting.
               </p>
             </div>
 
@@ -1313,7 +1313,7 @@ export const onboardingSequence = inngest.createFunction(
 
             <!-- Pro features -->
             <div style="background:#111111;border:1px solid #222222;border-radius:14px;padding:24px;margin-bottom:28px;">
-              <p style="font-size:12px;font-weight:700;color:#71717a;text-transform:uppercase;letter-spacing:1px;margin:0 0 16px;">Pro Plan — $5/month</p>
+              <p style="font-size:12px;font-weight:700;color:#71717a;text-transform:uppercase;letter-spacing:1px;margin:0 0 16px;">Pro Plan — $8/month</p>
 
               <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px;">
                 <span style="color:#7C3AED;font-weight:700;font-size:15px;flex-shrink:0;">✓</span>
@@ -4976,7 +4976,7 @@ export const monthlyCreditsResetEmail = inngest.createFunction(
               <div style="font-size:13px;font-weight:700;color:#92400e;margin-bottom:8px;">💡 Want 10× more credits?</div>
               <div style="font-size:13px;color:#78350f;line-height:1.6;">Upgrade to Pro for <strong>500 credits/month</strong> — plus unlimited scheduling, 5 team seats, and priority support. Just $5/month.</div>
               <div style="margin-top:12px;text-align:center;">
-                <a href="${appUrl}/pricing" style="display:inline-block;background:#d97706;color:#ffffff;padding:10px 24px;border-radius:999px;font-size:13px;font-weight:700;text-decoration:none;">Upgrade to Pro — $5/mo →</a>
+                <a href="${appUrl}/pricing" style="display:inline-block;background:#d97706;color:#ffffff;padding:10px 24px;border-radius:999px;font-size:13px;font-weight:700;text-decoration:none;">Upgrade to Pro — $8/mo →</a>
               </div>
             </div>` : ''}
             <div style="border-top:1px solid #f3f4f6;padding-top:20px;text-align:center;">

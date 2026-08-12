@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Social Media for Bloggers — SocialMate',
-  description: 'You wrote the post. Now promote it on 7 platforms without the manual work. RSS import turns your blog into scheduled social posts automatically. Free forever or $5/month.',
+  description: 'You wrote the post. Now promote it on 7 platforms without the manual work. RSS import turns your blog into scheduled social posts automatically. Free forever or $8/month.',
   openGraph: {
     title: 'Social Media for Bloggers — SocialMate',
     description: 'RSS import turns your blog into social media posts automatically. Schedule promotion across Bluesky, X, LinkedIn, TikTok, Discord, Telegram, and Mastodon in one click.',

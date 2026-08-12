@@ -728,7 +728,7 @@ function SidebarContent({
                     onClick={() => { setWsOpen(false); router.push('/settings/plan') }}
                     className="w-full text-left px-3 py-2 text-xs font-semibold text-purple-400 hover:text-purple-300 transition-colors"
                     style={{ borderTop: '1px solid var(--border)' }}>
-                    🚀 Upgrade to Agency — $20/mo
+                    🚀 Upgrade to Agency — $29/mo
                   </button>
                 )}
               </div>
@@ -953,7 +953,7 @@ function SidebarContent({
           {plan === 'free' && (
             <button onClick={() => handleCheckout(STRIPE_PRO_PRICE_ID)} disabled={checkoutLoading}
               className="w-full text-center bg-black dark:bg-white text-white dark:text-black text-xs font-bold px-4 py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
-              {checkoutLoading ? 'Loading...' : '⚡ Upgrade to Pro — $5/mo'}
+              {checkoutLoading ? 'Loading...' : '⚡ Upgrade to Pro — $8/mo'}
             </button>
           )}
           {plan === 'pro' && (

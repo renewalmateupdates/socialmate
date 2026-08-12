@@ -21,8 +21,8 @@ const COMPARISON = [
   { feature: 'Analytics',             eclincher: 'Basic (paid)',           socialmate: '✅ Free'                  },
   { feature: 'Bluesky / Mastodon',     eclincher: '❌',                     socialmate: '✅'                       },
   { feature: 'Discord / Telegram',     eclincher: '❌',                     socialmate: '✅'                       },
-  { feature: 'Client workspaces',      eclincher: 'Agency plan ($425/mo)', socialmate: 'Pro+: from $5/mo'        },
-  { feature: 'White label',            eclincher: 'Agency plan only',       socialmate: '$20/mo add-on'           },
+  { feature: 'Client workspaces',      eclincher: 'Agency plan ($425/mo)', socialmate: 'Pro+: from $8/mo'        },
+  { feature: 'White label',            eclincher: 'Agency plan only',       socialmate: '$29/mo add-on'           },
 ]
 
 const FAQ = [
@@ -40,7 +40,7 @@ const FAQ = [
   },
   {
     q: 'Is eClincher good for agencies?',
-    a: 'eClincher has an agency plan with white label and client management. However, at $425/month it\'s a significant commitment. SocialMate\'s Agency plan is $20/month with client workspaces, and white label starts at $20/month as an add-on.',
+    a: 'eClincher has an agency plan with white label and client management. However, at $425/month it\'s a significant commitment. SocialMate\'s Agency plan is $29/month with client workspaces, and white label starts at $20/month as an add-on.',
   },
   {
     q: 'Why is SocialMate so much cheaper than eClincher?',
@@ -178,7 +178,7 @@ export default function VsEclincher() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3 text-ink-high">Start for free today</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            7 platforms, 15+ AI tools, 100 posts/month, link in bio, competitor tracking — all free. No card required.
+            7 platforms, 15+ AI tools, 250 posts/month, link in bio, competitor tracking — all free. No card required.
           </p>
           <Link href="/signup"
             className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">

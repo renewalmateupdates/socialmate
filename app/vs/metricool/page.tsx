@@ -8,7 +8,7 @@ import { useI18n } from '@/contexts/I18nContext'
 
 const COMPARISON = [
   { feature: 'Starting price',          metricool: '$22/month (Starter)',    socialmate: '$0 — free forever'       },
-  { feature: 'Free plan post limit',    metricool: '50 posts/month',         socialmate: '100 posts / month'               },
+  { feature: 'Free plan post limit',    metricool: '50 posts/month',         socialmate: '250 posts / month'               },
   { feature: 'Free plan brands',        metricool: '1 brand',                socialmate: 'Multiple workspaces'     },
   { feature: 'Pricing model',           metricool: 'Per brand',              socialmate: 'Flat rate'               },
   { feature: 'Platforms supported',     metricool: '12+',                    socialmate: '16 (growing)'            },
@@ -25,7 +25,7 @@ const COMPARISON = [
   { feature: 'RSS import',              metricool: 'Paid plans',             socialmate: '✅ Free'                  },
   { feature: 'Evergreen recycling',     metricool: '❌',                      socialmate: '✅ Free'                  },
   { feature: 'Team seats (free)',        metricool: '1',                      socialmate: '2'                       },
-  { feature: 'Client workspaces',       metricool: 'Agency plan ($83+/mo)', socialmate: 'Pro+: from $5/mo'        },
+  { feature: 'Client workspaces',       metricool: 'Agency plan ($83+/mo)', socialmate: 'Pro+: from $8/mo'        },
 ]
 
 const FAQ = [
@@ -43,7 +43,7 @@ const FAQ = [
   },
   {
     q: 'Is SocialMate actually free with no catch?',
-    a: 'Yes. Free tier includes 100 posts/month, 50 AI credits/month, bulk scheduling, link in bio, hashtag manager, competitor tracking, RSS import, and evergreen recycling. No credit card required.',
+    a: 'Yes. Free tier includes 250 posts/month, 50 AI credits/month, bulk scheduling, link in bio, hashtag manager, competitor tracking, RSS import, and evergreen recycling. No credit card required.',
   },
 ]
 
@@ -116,9 +116,9 @@ export default function VsMetricoolPage() {
           </div>
           <div className="bg-void text-ink-high rounded-2xl p-6">
             <p className="text-xs font-bold text-ink-body uppercase tracking-wide mb-2">SocialMate</p>
-            <p className="font-extrabold text-lg mb-2">100 posts / month. 15+ AI tools. $0.</p>
+            <p className="font-extrabold text-lg mb-2">250 posts / month. 15+ AI tools. $0.</p>
             <ul className="space-y-1 text-xs text-ink-body">
-              <li>✅ 100 posts / month, double Metricool's free cap</li>
+              <li>✅ 250 posts / month, double Metricool's free cap</li>
               <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Discord, Telegram, Mastodon, Bluesky</li>
               <li>✅ Bulk scheduling free</li>
@@ -202,7 +202,7 @@ export default function VsMetricoolPage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Done hitting the 50-post cap?</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            SocialMate gives you 100 posts/month, 15+ AI tools, 7 platforms — completely free to start. No credit card required.
+            SocialMate gives you 250 posts/month, 15+ AI tools, 7 platforms — completely free to start. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

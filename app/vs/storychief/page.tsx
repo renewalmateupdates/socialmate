@@ -24,7 +24,7 @@ const COMPARISON = [
   { feature: 'Evergreen recycling',           storychief: '❌',                         socialmate: '✅ Free'                  },
   { feature: 'Link in bio (SIGIL)',           storychief: '❌',                         socialmate: '✅ Built in free'         },
   { feature: 'Team collaboration',            storychief: '✅ (paid, $99+)',            socialmate: 'Free (2 seats)'          },
-  { feature: 'Client workspaces',             storychief: '✅ ($99+)',                  socialmate: '✅ Agency $20/month'     },
+  { feature: 'Client workspaces',             storychief: '✅ ($99+)',                  socialmate: '✅ Agency $29/month'     },
   { feature: 'Creator Monetization Hub',      storychief: '❌',                         socialmate: '✅ Tip jar + fan subs'   },
   { feature: 'SM-Give charity program',       storychief: '❌',                         socialmate: '✅ 2% of revenue donated' },
 ]
@@ -125,7 +125,7 @@ export default function VsStoryChiefPage() {
               <li>✅ Discord + Telegram + Bluesky + TikTok + LinkedIn + X + Mastodon</li>
               <li>✅ 15+ AI tools on free tier</li>
               <li>✅ SOMA autonomous content agent learns your voice</li>
-              <li>✅ Pro plan for $5/month total</li>
+              <li>✅ Pro plan for $8/month total</li>
               <li>✅ 8 autonomous AI agents</li>
               <li>✅ No credit card required to start</li>
             </ul>
@@ -208,7 +208,7 @@ export default function VsStoryChiefPage() {
           <h2 className="text-3xl font-extrabold mb-4">Schedule to 7 platforms free</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
             SocialMate connects to Discord, Telegram, Bluesky, TikTok, LinkedIn, X, and Mastodon.
-            Start for free. When you&apos;re ready for AI agents and SOMA, Pro is $5/month.
+            Start for free. When you&apos;re ready for AI agents and SOMA, Pro is $8/month.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
             Start free — no credit card →

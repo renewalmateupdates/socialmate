@@ -8,7 +8,7 @@ import { useI18n } from '@/contexts/I18nContext'
 
 const COMPARISON = [
   { feature: 'Starting price',            recurpost: '$25/month (Personal)',       socialmate: '$0 — free forever'       },
-  { feature: 'Free plan',                 recurpost: '✅ (100 posts lifetime cap)', socialmate: '✅ 100 posts/month free' },
+  { feature: 'Free plan',                 recurpost: '✅ (100 posts lifetime cap)', socialmate: '✅ 250 posts/month free' },
   { feature: 'Free plan post limit',      recurpost: '100 posts — lifetime',       socialmate: 'No limit ever'           },
   { feature: 'Social accounts (free)',    recurpost: '3 accounts',                 socialmate: 'No hard cap (free tier)' },
   { feature: 'Bulk scheduling',           recurpost: 'Paid plans',                 socialmate: '✅ Free'                 },
@@ -201,7 +201,7 @@ export default function VsRecurPostPage() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">No lifetime caps — start free today</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            SocialMate is free forever — 100 posts/month, evergreen recycling, 15+ AI tools, 7 platforms. No credit card required.
+            SocialMate is free forever — 250 posts/month, evergreen recycling, 15+ AI tools, 7 platforms. No credit card required.
           </p>
           <Link href="/signup" className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

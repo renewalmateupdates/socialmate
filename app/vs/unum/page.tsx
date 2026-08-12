@@ -36,7 +36,7 @@ const FAQ = [
   },
   {
     q: "Is SocialMate more expensive than Unum?",
-    a: "No. SocialMate is free to start. Unum Pro starts at $8/month. SocialMate Pro is $5/month — cheaper than Unum — and includes more platforms, 20+ AI tools, autonomous content generation (SOMA), a trading bot (Enki), full analytics, and a social inbox. None of these are available in Unum.",
+    a: "No. SocialMate is free to start. Unum Pro starts at $8/month. SocialMate Pro is $8/month — cheaper than Unum — and includes more platforms, 20+ AI tools, autonomous content generation (SOMA), a trading bot (Enki), full analytics, and a social inbox. None of these are available in Unum.",
   },
   {
     q: "Can SocialMate plan Instagram visuals like Unum?",
@@ -119,7 +119,7 @@ export default function VsUnumPage() {
               <li>✅ SOMA: autonomous weekly content generation</li>
               <li>✅ Enki: autonomous trading bot</li>
               <li>✅ Full analytics + social inbox</li>
-              <li>✅ Free forever — Pro $5/month</li>
+              <li>✅ Free forever — Pro $8/month</li>
             </ul>
           </div>
         </div>
@@ -152,7 +152,7 @@ export default function VsUnumPage() {
               {
                 n: '1',
                 title: 'SocialMate is cheaper than Unum and covers 3x more platforms',
-                desc: "Unum Pro is $8/month. SocialMate Pro is $5/month — and covers Bluesky, Discord, Telegram, Mastodon, X, and TikTok. You get more platforms at a lower price, with 20+ AI tools that Unum does not have.",
+                desc: "Unum Pro is $8/month. SocialMate Pro is $8/month — and covers Bluesky, Discord, Telegram, Mastodon, X, and TikTok. You get more platforms at a lower price, with 20+ AI tools that Unum does not have.",
               },
               {
                 n: '2',

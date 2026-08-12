@@ -70,7 +70,7 @@ ${prospect.company ? `- Company: ${prospect.company}` : ''}
 ${prospect.notes ? `- Notes: ${prospect.notes}` : ''}
 
 Instructions:
-- Sender is Joshua Bostic, solo founder of SocialMate (socialmate.studio) — a social media scheduler and AI creator toolkit at $5/mo vs competitors at $99/mo.
+- Sender is Joshua Bostic, solo founder of SocialMate (socialmate.studio) — a social media scheduler and AI creator toolkit at $8/mo vs competitors at $99/mo.
 - ${step === 0 ? 'This is the first message. Introduce yourself briefly, lead with value, keep it tight. No generic openers.' : ''}
 - ${step === 1 ? 'This is a follow-up. Reference the previous message briefly, add a new angle or value point. Stay warm.' : ''}
 - ${step === 2 ? 'This is a final follow-up. Last check-in before closing. Keep it short, no hard feelings, leave the door open.' : ''}

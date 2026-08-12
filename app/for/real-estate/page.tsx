@@ -95,7 +95,7 @@ const PRICING = [
   },
   {
     plan:    'Pro',
-    price:   '$5',
+    price:   '$8',
     period:  '/month',
     highlight: true,
     cta:     'Go Pro',
@@ -110,7 +110,7 @@ const PRICING = [
   },
   {
     plan:    'Agency',
-    price:   '$20',
+    price:   '$29',
     period:  '/month',
     highlight: false,
     cta:     'Go Agency',
@@ -140,7 +140,7 @@ const FAQ = [
   },
   {
     q: 'I\'m a team leader — can I manage multiple agents\' social media?',
-    a: "The Agency plan ($20/mo) gives you 5 client workspaces and 15 seats. Each agent gets their own workspace with a separate content calendar. You review and approve content before it goes live.",
+    a: "The Agency plan ($29/mo) gives you 5 client workspaces and 15 seats. Each agent gets their own workspace with a separate content calendar. You review and approve content before it goes live.",
   },
 ]
 

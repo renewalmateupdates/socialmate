@@ -44,7 +44,7 @@ const FAQ = [
   },
   {
     q: 'How many TikTok videos can I schedule free?',
-    a: "SocialMate's free plan includes 20 TikTok videos per month. Pro ($5/month) allows 60/month. Agency ($20/month) allows 200/month. TikTok's API has no per-post charge — the cost is only Supabase storage and egress, which SocialMate absorbs.",
+    a: "SocialMate's free plan includes 20 TikTok videos per month. Pro ($8/month) allows 60/month. Agency ($29/month) allows 200/month. TikTok's API has no per-post charge — the cost is only Supabase storage and egress, which SocialMate absorbs.",
   },
 ]
 

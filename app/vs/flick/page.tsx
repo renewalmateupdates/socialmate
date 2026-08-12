@@ -36,7 +36,7 @@ const FAQ = [
   },
   {
     q: 'Is SocialMate better than Flick for TikTok?',
-    a: "For most creators, yes. SocialMate includes TikTok scheduling on the free plan using the officially approved Production API — 20 videos per month free, 60 on Pro ($5/month). Flick requires a paid plan (~$18/month) for TikTok access. SocialMate also includes a TikTok Script Generator (AI-powered hooks, body, CTA formatted for TikTok) that Flick does not have. Where Flick has an edge: its hashtag research is more detailed and its Instagram-focused analytics are strong. If TikTok + open-web platforms are your priority, SocialMate is the better fit at a lower price.",
+    a: "For most creators, yes. SocialMate includes TikTok scheduling on the free plan using the officially approved Production API — 20 videos per month free, 60 on Pro ($8/month). Flick requires a paid plan (~$18/month) for TikTok access. SocialMate also includes a TikTok Script Generator (AI-powered hooks, body, CTA formatted for TikTok) that Flick does not have. Where Flick has an edge: its hashtag research is more detailed and its Instagram-focused analytics are strong. If TikTok + open-web platforms are your priority, SocialMate is the better fit at a lower price.",
   },
 ]
 
@@ -148,7 +148,7 @@ export default function VsFlickPage() {
               {
                 n: '1',
                 title: 'TikTok free vs TikTok behind ~$18/month',
-                desc: "Flick requires a paid plan to access TikTok scheduling. SocialMate includes TikTok on the free plan — 20 videos per month using the officially approved Production API. For a creator posting once per day, that is free. Upgrading to Pro ($5/month) unlocks 60 videos per month. Either way, you are not paying $18/month just to reach TikTok.",
+                desc: "Flick requires a paid plan to access TikTok scheduling. SocialMate includes TikTok on the free plan — 20 videos per month using the officially approved Production API. For a creator posting once per day, that is free. Upgrading to Pro ($8/month) unlocks 60 videos per month. Either way, you are not paying $18/month just to reach TikTok.",
               },
               {
                 n: '2',
@@ -163,7 +163,7 @@ export default function VsFlickPage() {
               {
                 n: '4',
                 title: 'A 14-day trial is not a free plan',
-                desc: 'Flick gives you 14 days to try the product before the clock runs out. SocialMate has a permanent free plan with no expiry. You can test your content strategy, grow your audience, and prove ROI before spending a single dollar. When you are ready to upgrade, Pro is $5/month — not $18.',
+                desc: 'Flick gives you 14 days to try the product before the clock runs out. SocialMate has a permanent free plan with no expiry. You can test your content strategy, grow your audience, and prove ROI before spending a single dollar. When you are ready to upgrade, Pro is $8/month — not $18.',
               },
             ].map((r) => (
               <div key={r.n} className="flex gap-4 p-5 bg-panel border border-edge border-edge rounded-2xl hover:border-edge dark:hover:border-edge transition-all">

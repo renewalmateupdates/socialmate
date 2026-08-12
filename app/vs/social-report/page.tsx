@@ -47,7 +47,7 @@ const FAQ = [
   },
   {
     q: 'Is $49/month for Social Report worth it?',
-    a: "Social Report at $49/month offers solid multi-platform scheduling and analytics for agencies. But for creators and small businesses, $49/month for a tool with no AI writing and no Discord/Telegram support is hard to justify. SocialMate's free plan does more for creators, and Pro at $5/month includes SOMA, 500 AI credits, and 8 agents — at 1/10th of Social Report's entry price.",
+    a: "Social Report at $49/month offers solid multi-platform scheduling and analytics for agencies. But for creators and small businesses, $49/month for a tool with no AI writing and no Discord/Telegram support is hard to justify. SocialMate's free plan does more for creators, and Pro at $8/month includes SOMA, 500 AI credits, and 8 agents — at 1/10th of Social Report's entry price.",
   },
 ]
 
@@ -125,7 +125,7 @@ export default function VsSocialReportPage() {
               <li>✅ 15+ AI tools on free tier</li>
               <li>✅ SOMA autonomous content agent</li>
               <li>✅ Client Report Agent for agencies</li>
-              <li>✅ Pro plan for $5/month total</li>
+              <li>✅ Pro plan for $8/month total</li>
               <li>✅ No credit card required to start</li>
             </ul>
           </div>
@@ -169,7 +169,7 @@ export default function VsSocialReportPage() {
               {
                 n: '3',
                 title: 'Client reports without the $99/month agency plan',
-                desc: "Social Report's team and client reporting features are gated behind their $99/month plan. SocialMate's Client Report Agent (Agency plan, $20/month) generates automated weekly HTML reports for clients — posts published, scheduled ahead, active platforms — and emails them to your CC list every Monday. One-fifth the price of Social Report's agency tier.",
+                desc: "Social Report's team and client reporting features are gated behind their $99/month plan. SocialMate's Client Report Agent (Agency plan, $29/month) generates automated weekly HTML reports for clients — posts published, scheduled ahead, active platforms — and emails them to your CC list every Monday. One-fifth the price of Social Report's agency tier.",
               },
               {
                 n: '4',
@@ -207,7 +207,7 @@ export default function VsSocialReportPage() {
           <h2 className="text-3xl font-extrabold mb-4">Switch from Social Report today</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
             SocialMate covers 7 platforms including Discord and Telegram — with 15+ AI tools and SOMA built in.
-            Start free. Pro is $5/month.
+            Start free. Pro is $8/month.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
             Start free — no credit card →

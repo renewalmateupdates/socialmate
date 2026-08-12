@@ -124,7 +124,7 @@ export default function VsTaplioPage() {
               <li>✅ LinkedIn + Bluesky + X + TikTok + Discord + Telegram + Mastodon</li>
               <li>✅ 15+ AI tools on free tier</li>
               <li>✅ Bulk scheduling and RSS import free</li>
-              <li>✅ Pro plan for $5/month total</li>
+              <li>✅ Pro plan for $8/month total</li>
               <li>✅ Creator Monetization Hub built in</li>
               <li>✅ No credit card required to start</li>
             </ul>
@@ -159,7 +159,7 @@ export default function VsTaplioPage() {
               {
                 n: '1',
                 title: '$39/month for one platform is hard to justify',
-                desc: 'Taplio\'s entry price is $39/month. That\'s $468/year to schedule posts on LinkedIn. SocialMate schedules LinkedIn posts free, and for $5/month you get Pro features across 7 platforms including LinkedIn. If you post anywhere besides LinkedIn, Taplio forces you to pay for a second tool.',
+                desc: 'Taplio\'s entry price is $39/month. That\'s $468/year to schedule posts on LinkedIn. SocialMate schedules LinkedIn posts free, and for $8/month you get Pro features across 7 platforms including LinkedIn. If you post anywhere besides LinkedIn, Taplio forces you to pay for a second tool.',
               },
               {
                 n: '2',
@@ -174,7 +174,7 @@ export default function VsTaplioPage() {
               {
                 n: '4',
                 title: 'SOMA handles your LinkedIn content strategy end-to-end',
-                desc: 'SocialMate\'s SOMA AI system generates a full week of content across all connected platforms including LinkedIn. You define your voice, your topics, your posting cadence — SOMA writes and schedules everything. No other tool does this for $5/month across 7 platforms.',
+                desc: 'SocialMate\'s SOMA AI system generates a full week of content across all connected platforms including LinkedIn. You define your voice, your topics, your posting cadence — SOMA writes and schedules everything. No other tool does this for $8/month across 7 platforms.',
               },
             ].map((r) => (
               <div key={r.n} className="flex gap-4 p-5 bg-panel border border-edge border-edge rounded-2xl hover:border-edge dark:hover:border-edge transition-all">
@@ -207,7 +207,7 @@ export default function VsTaplioPage() {
           <h2 className="text-3xl font-extrabold mb-4">Schedule LinkedIn posts free</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
             SocialMate connects to LinkedIn via official OAuth. Post now or schedule for later — free on every plan.
-            When you&apos;re ready to go further, Pro is $5/month for 7 platforms.
+            When you&apos;re ready to go further, Pro is $8/month for 7 platforms.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
             Start free — no credit card →

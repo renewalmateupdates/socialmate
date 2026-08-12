@@ -9,7 +9,7 @@ import { useI18n } from '@/contexts/I18nContext'
 const COMPARISON = [
   { feature: 'Starting price',         hootsuite: '$99/month',            socialmate: '$0 — free forever'       },
   { feature: 'Free plan',              hootsuite: '❌ No free plan',       socialmate: '✅ Genuinely free'        },
-  { feature: 'Posts per month (free)', hootsuite: '—',                     socialmate: '100 posts / month'                },
+  { feature: 'Posts per month (free)', hootsuite: '—',                     socialmate: '250 posts / month'                },
   { feature: 'Platforms',              hootsuite: '20+ (paid)',            socialmate: '7 live (free)'               },
   { feature: 'Team seats',             hootsuite: '1 user on Standard',   socialmate: '2 seats free'            },
   { feature: 'AI writing tools',       hootsuite: 'OwlyWriter AI (paid)', socialmate: '15+ tools free'           },
@@ -20,7 +20,7 @@ const COMPARISON = [
   { feature: 'Evergreen recycling',    hootsuite: '❌',                    socialmate: '✅ Free'                  },
   { feature: 'RSS import',             hootsuite: '❌',                    socialmate: '✅ Free'                  },
   { feature: 'Hashtag manager',        hootsuite: '❌',                    socialmate: '✅ Free'                  },
-  { feature: 'Client workspaces',      hootsuite: 'Enterprise only',      socialmate: 'Pro+: from $5/mo'        },
+  { feature: 'Client workspaces',      hootsuite: 'Enterprise only',      socialmate: 'Pro+: from $8/mo'        },
   { feature: 'Mastodon/Bluesky',       hootsuite: '❌',                    socialmate: '✅'                       },
   { feature: 'Discord/Telegram',       hootsuite: '❌',                    socialmate: '✅'                       },
   { feature: 'Analytics (30 days)',    hootsuite: 'Basic on paid plans',  socialmate: '✅ Free'                  },
@@ -179,7 +179,7 @@ export default function VsHootsuite() {
         <div className="bg-void text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3 text-ink-high">Start for free today</h2>
           <p className="text-ink-body text-sm mb-6 max-w-lg mx-auto">
-            7 platforms, 15+ AI tools, 100 posts/month, link in bio, competitor tracking — all free. No card required.
+            7 platforms, 15+ AI tools, 250 posts/month, link in bio, competitor tracking — all free. No card required.
           </p>
           <Link href="/signup"
             className="inline-block bg-panel text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-90 transition-all text-sm">

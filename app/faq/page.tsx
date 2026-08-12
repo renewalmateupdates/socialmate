@@ -11,7 +11,7 @@ const sections = [
     faqs: [
       {
         q: 'What is SocialMate?',
-        a: 'SocialMate is a Creator OS — a multi-platform social media scheduler and AI-powered toolkit built for creators, agencies, and businesses who want to build an online presence without paying $99/month for the privilege. We charge $5/month for Pro. Free plan available, no credit card required.',
+        a: 'SocialMate is a Creator OS — a multi-platform social media scheduler and AI-powered toolkit built for creators, agencies, and businesses who want to build an online presence without paying $99/month for the privilege. We charge $8/month for Pro. Free plan available, no credit card required.',
       },
       {
         q: 'What platforms does SocialMate support?',
@@ -147,11 +147,11 @@ const sections = [
     title: 'Billing & Plans',
     faqs: [
       {
-        q: 'What\'s included in Pro ($5/month)?',
+        q: 'What\'s included in Pro ($8/month)?',
         a: '500 AI credits/month, 5 seats, all scheduling features, 15+ AI tools, Link in Bio, competitor tracking, evergreen recycling, smart queue, brand voice, analytics dashboard, push notifications, and 1 SOMA project (with Autopilot add-on).',
       },
       {
-        q: 'What\'s included in Agency ($20/month)?',
+        q: 'What\'s included in Agency ($29/month)?',
         a: 'Everything in Pro, plus 2,000 credits/month, 15 seats, 5 client workspaces, 10 SOMA projects, all 8 AI agents, and priority support.',
       },
       {
@@ -168,7 +168,7 @@ const sections = [
       },
       {
         q: 'Are there annual plan discounts?',
-        a: 'Yes. Pro Annual is $55/year (save ~8% vs monthly). Agency Annual is $209/year. Both include the same features as the monthly equivalents. You can switch from monthly to annual in Settings → Plan.',
+        a: 'Yes. Pro Annual is $80/year (save ~8% vs monthly). Agency Annual is $290/year. Both include the same features as the monthly equivalents. You can switch from monthly to annual in Settings → Plan.',
       },
       {
         q: 'What\'s SM-Give?',

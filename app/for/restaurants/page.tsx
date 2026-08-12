@@ -95,7 +95,7 @@ const PRICING = [
   },
   {
     plan:    'Pro',
-    price:   '$5',
+    price:   '$8',
     period:  '/month',
     highlight: true,
     cta:     'Go Pro',
@@ -110,7 +110,7 @@ const PRICING = [
   },
   {
     plan:    'Agency',
-    price:   '$20',
+    price:   '$29',
     period:  '/month',
     highlight: false,
     cta:     'Go Agency',
@@ -140,7 +140,7 @@ const FAQ = [
   },
   {
     q: 'I run multiple locations — do you have a plan for that?',
-    a: "The Agency plan ($20/mo) gives you 5 client workspaces, 15 seats, and client approval workflows. Manage each location in its own workspace with separate content calendars.",
+    a: "The Agency plan ($29/mo) gives you 5 client workspaces, 15 seats, and client approval workflows. Manage each location in its own workspace with separate content calendars.",
   },
 ]
 

@@ -125,7 +125,7 @@ export default function VsPostBeyondPage() {
               <li>✅ 15+ AI tools on free tier</li>
               <li>✅ SOMA autonomous content agent</li>
               <li>✅ Team approval workflows free</li>
-              <li>✅ Pro plan for $5/month total</li>
+              <li>✅ Pro plan for $8/month total</li>
               <li>✅ No credit card required to start</li>
             </ul>
           </div>
@@ -207,7 +207,7 @@ export default function VsPostBeyondPage() {
           <h2 className="text-3xl font-extrabold mb-4">Schedule posts. Generate content. Free.</h2>
           <p className="text-ink-body mb-6 max-w-lg mx-auto text-sm">
             SocialMate is a full creator OS. 7 platforms, 15+ AI tools, SOMA, and 8 agents — all for $0 to start.
-            Pro is $5/month.
+            Pro is $8/month.
           </p>
           <Link href="/signup" className="inline-block px-8 py-3 bg-panel text-ink-high font-bold rounded-2xl hover:opacity-80 transition-all text-sm">
             Start free — no credit card →
