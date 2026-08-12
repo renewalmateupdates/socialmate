@@ -6,6 +6,7 @@ import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { notifyLowCredits } from '@/lib/notify-low-credits'
 import { deductAiCredits, refundAiCredits } from '@/lib/ai-credits'
+import { normalizePlan } from '@/lib/plan'
 import { isFeatureEnabled, featurePausedMessage } from '@/lib/feature-flag-check'
 
 // Per-user rate limit: 10 requests/minute per serverless instance
@@ -217,13 +218,13 @@ export async function POST(req: NextRequest) {
       .maybeSingle()
 
     const PRO_ONLY_TOOLS = new Set(['score'])
-    const normalizedPlan = ((settings?.plan ?? 'free') as string).replace('_annual', '')
+    const normalizedPlan = normalizePlan(settings?.plan as string | null)
     if (PRO_ONLY_TOOLS.has(tool) && normalizedPlan === 'free') {
       return NextResponse.json({ error: 'pro_required', message: 'Post Score is a Pro+ feature. Upgrade to unlock it.' }, { status: 403 })
     }
 
     // Atomic three-pool deduction — row-locked RPC, no double-spend under concurrency.
-    const deduct = await deductAiCredits(supabase, user.id, creditCost)
+    const deduct = await deductAiCredits(supabase, user.id, creditCost, tool)
     if (!deduct.ok) {
       if (deduct.reason === 'insufficient') {
         return NextResponse.json({

@@ -49,7 +49,7 @@ export async function POST(req: NextRequest) {
 
     // Server-side credit check and atomic deduction — three-pool system
     // Atomic three-pool deduction — row-locked RPC, no double-spend under concurrency.
-    const deduct = await deductAiCredits(supabase, user.id, CREDIT_COST)
+    const deduct = await deductAiCredits(supabase, user.id, CREDIT_COST, 'repurpose')
     if (!deduct.ok) {
       if (deduct.reason === 'insufficient') {
         return NextResponse.json({

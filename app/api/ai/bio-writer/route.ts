@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
 
     // Three-pool credit deduction — copied exactly from hashtags route
     // Atomic three-pool deduction — row-locked RPC, no double-spend under concurrency.
-    const deduct = await deductAiCredits(supabase, user.id, CREDIT_COST)
+    const deduct = await deductAiCredits(supabase, user.id, CREDIT_COST, 'bio-writer')
     if (!deduct.ok) {
       if (deduct.reason === 'insufficient') {
         return NextResponse.json({
