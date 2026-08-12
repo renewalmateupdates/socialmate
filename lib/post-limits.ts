@@ -12,7 +12,7 @@ import { normalizePlan } from './plan'
 // These numbers must match app/pricing/page.tsx. PR #542 corrected 34 public
 // pages that had drifted from them.
 export const PLAN_POST_LIMITS: Record<string, number> = {
-  free:   100,
+  free:   250,
   pro:    1000,
   agency: 5000,
 }

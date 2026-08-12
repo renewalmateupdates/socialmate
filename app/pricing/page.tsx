@@ -4,15 +4,16 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
+import { FlipCard } from '@/components/pricing/FlipCard'
 
 const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000
 const LS_WELCOME_FIRST_SHOWN = 'welcome_offer_first_shown'
 const LS_WELCOME_DISMISSED = 'welcome_offer_dismissed'
 
-const STRIPE_PRO_PRICE_ID               = 'price_1T9S2v7OMwDowUuULHznqUD5'
-const STRIPE_AGENCY_PRICE_ID            = 'price_1TFMHp7OMwDowUuUgeLAeJNY'
-const STRIPE_PRO_ANNUAL_PRICE_ID        = 'price_1TFMHx7OMwDowUuUl9PqWxMs'
-const STRIPE_AGENCY_ANNUAL_PRICE_ID     = 'price_1TFMI07OMwDowUuUoHfKJEpo'
+const STRIPE_PRO_PRICE_ID               = 'price_1U3jSI7OMwDowUuUm0oMEpiT'
+const STRIPE_AGENCY_PRICE_ID            = 'price_1U3jSJ7OMwDowUuUjK3igDLr'
+const STRIPE_PRO_ANNUAL_PRICE_ID        = 'price_1U3jSJ7OMwDowUuUO3utSP0R'
+const STRIPE_AGENCY_ANNUAL_PRICE_ID     = 'price_1U3jSJ7OMwDowUuUTMLaC9Fu'
 const STRIPE_WHITE_LABEL_BASIC_PRICE_ID = 'price_1TFMHt7OMwDowUuU56Fzw4fE'
 const STRIPE_WHITE_LABEL_PRO_PRICE_ID   = 'price_1TFMIG7OMwDowUuUcjNNGB0Q'
 
@@ -36,7 +37,7 @@ const PLANS = [
       { label: '7 live platforms now',             note: '3 more coming soon' },
       { label: '1 connected account per platform'                              },
       { label: '2 team seats'                                                  },
-      { label: '100 posts / month'                                             },
+      { label: '250 posts / month'                                             },
       { label: '50 AI credits / month',            note: 'banks up to 75'     },
       { label: '1 GB media storage'                                            },
       { label: '2-week scheduling window'                                      },
@@ -54,13 +55,29 @@ const PLANS = [
     monthlyPriceId: null,
     annualPriceId: null,
     ctaStyle: 'border border-edge-lit text-ink-high hover:border-ink-muted hover:bg-raised',
+    // Nothing sits below Free, so its back face cannot show a delta. It answers
+    // the question people actually have about a free tier instead, which is
+    // what the catch is.
+    flipLabel: "What's actually free? →",
+    backTitle: 'Free, with no asterisk',
+    backIntro: 'No trial clock, no card on file, no feature that quietly stops working.',
+    unlocks: [
+      { label: '7 live platforms, including Discord and Telegram' },
+      { label: '250 posts every month' },
+      { label: '50 AI credits every month, banking up to 75' },
+      { label: 'Link in Bio page' },
+      { label: 'Bulk scheduler and post templates' },
+      { label: 'Competitor tracking on up to 3 accounts' },
+      { label: 'Evergreen recycling and RSS import' },
+      { label: 'No credit card, now or later' },
+    ],
   },
   {
     name: 'Pro',
-    monthlyPrice: 5,
-    annualPrice: 55,
-    annualMonthly: 4.58,
-    annualSaving: 5,
+    monthlyPrice: 8,
+    annualPrice: 80,
+    annualMonthly: 6.67,
+    annualSaving: 16,
     description: 'For creators and small businesses who want to grow faster.',
     badge: 'Most Popular',
     badgeStyle: 'border border-amber/40 bg-amber/10 text-amber',
@@ -90,13 +107,27 @@ const PLANS = [
     monthlyPriceId: STRIPE_PRO_PRICE_ID,
     annualPriceId: STRIPE_PRO_ANNUAL_PRICE_ID,
     ctaStyle: 'bg-gradient-to-b from-amber-bright to-amber text-void hover:from-amber-bright hover:to-amber-bright',
+    flipLabel: 'What Pro adds over Free →',
+    backTitle: 'What you get that Free does not',
+    unlocks: [
+      { label: '5 connected accounts per platform', from: '1' },
+      { label: '1,000 posts / month',               from: '250' },
+      { label: '500 AI credits / month',            from: '50' },
+      { label: '5 team seats',                      from: '2' },
+      { label: '1 client workspace',                from: 'none' },
+      { label: '1-month scheduling window',         from: '2 weeks' },
+      { label: '90-day analytics history',          from: '30 days' },
+      { label: '10 GB media storage',               from: '1 GB' },
+      { label: 'Custom domain for Link in Bio' },
+      { label: 'AI Content Calendar and priority support' },
+    ],
   },
   {
     name: 'Agency',
-    monthlyPrice: 20,
-    annualPrice: 209,
-    annualMonthly: 17.42,
-    annualSaving: 31,
+    monthlyPrice: 29,
+    annualPrice: 290,
+    annualMonthly: 24.17,
+    annualSaving: 58,
     description: 'For agencies and power users managing multiple brands.',
     badge: 'Power Users',
     badgeStyle: 'border border-edge-lit bg-raised text-ink-muted',
@@ -124,6 +155,20 @@ const PLANS = [
     monthlyPriceId: STRIPE_AGENCY_PRICE_ID,
     annualPriceId: STRIPE_AGENCY_ANNUAL_PRICE_ID,
     ctaStyle: 'border border-edge-lit text-ink-high hover:border-ink-muted hover:bg-raised',
+    flipLabel: 'What Agency adds over Pro →',
+    backTitle: 'What you get that Pro does not',
+    unlocks: [
+      { label: '10 connected accounts per platform', from: '5' },
+      { label: '5,000 posts / month',                from: '1,000' },
+      { label: '2,000 AI credits / month',           from: '500' },
+      { label: '15 team seats',                      from: '5' },
+      { label: '5 client workspaces',                from: '1' },
+      { label: '3-month scheduling window',          from: '1 month' },
+      { label: '6-month analytics history',          from: '90 days' },
+      { label: '50 GB media storage',                from: '10 GB' },
+      { label: 'PDF analytics reports for clients' },
+      { label: 'Content approval workflows and dedicated support' },
+    ],
   },
 ]
 
@@ -539,7 +584,14 @@ export default function Pricing() {
           {PLANS.map(plan => {
             const priceId = annual ? plan.annualPriceId : plan.monthlyPriceId
             return (
-              <div key={plan.name} className={`${plan.cardBg} ${plan.color} rounded-2xl overflow-hidden flex flex-col`}>
+              <FlipCard
+                key={plan.name}
+                flipLabel={plan.flipLabel}
+                backTitle={plan.backTitle}
+                backIntro={'backIntro' in plan ? plan.backIntro : undefined}
+                unlocks={plan.unlocks}
+                front={
+              <div className={`${plan.cardBg} ${plan.color} rounded-2xl overflow-hidden flex flex-col h-full`}>
                 <div className="px-6 py-6">
                   <div className="flex items-center justify-between mb-3">
                     <h2 className={`text-lg font-extrabold ${plan.headerText}`}>{plan.name}</h2>
@@ -600,11 +652,28 @@ export default function Pricing() {
                   ) : null}
                 </div>
               </div>
+                }
+              />
             )
           })}
 
           {/* Enterprise card */}
-          <div className="bg-panel border border-edge-lit rounded-2xl overflow-hidden flex flex-col relative">
+          <FlipCard
+            flipLabel="What Enterprise adds over Agency →"
+            backTitle="What you get that Agency does not"
+            backIntro="Everything below is set with you, not picked from a list."
+            unlocks={[
+              { label: 'Seat count set to your team',        from: '15' },
+              { label: 'Client workspaces set to your book', from: '5' },
+              { label: 'Credit allocation set to your usage', from: '2,000 / month' },
+              { label: 'White Label Pro included',           from: '+$40/mo add-on' },
+              { label: 'Priority support under 4 hours' },
+              { label: '99.9% uptime SLA, contractual' },
+              { label: 'Dedicated onboarding' },
+              { label: 'Custom contract and invoicing' },
+            ]}
+            front={
+          <div className="bg-panel border border-edge-lit rounded-2xl overflow-hidden flex flex-col relative h-full">
             {/* Top glow */}
             <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-edge-lit to-transparent" />
             <div className="px-6 py-6">
@@ -648,6 +717,8 @@ export default function Pricing() {
               </Link>
             </div>
           </div>
+            }
+          />
         </div>
 
         {/* SECURE CHECKOUT BADGE */}

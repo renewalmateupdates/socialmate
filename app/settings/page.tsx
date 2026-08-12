@@ -10,8 +10,8 @@ import UpgradeNudge from '@/components/UpgradeNudge'
 import { useI18n } from '@/contexts/I18nContext'
 import { SUPPORTED_LOCALES } from '@/lib/i18n'
 
-const STRIPE_PRO_PRICE_ID    = 'price_1T9S2v7OMwDowUuULHznqUD5'
-const STRIPE_AGENCY_PRICE_ID = 'price_1TFMHp7OMwDowUuUgeLAeJNY'
+const STRIPE_PRO_PRICE_ID    = 'price_1U3jSI7OMwDowUuUm0oMEpiT'
+const STRIPE_AGENCY_PRICE_ID = 'price_1U3jSJ7OMwDowUuUjK3igDLr'
 
 const ALL_TABS    = ['Profile', 'Plan', 'Referrals', 'Notifications', 'Scheduling', 'Language', 'Security', 'White Label', 'Appearance', 'Brand Voice', 'Integrations']
 const FREE_TABS   = ['Profile', 'Plan', 'Notifications', 'Scheduling', 'Language', 'Security', 'Appearance', 'Integrations']
