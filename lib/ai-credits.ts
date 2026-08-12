@@ -1,4 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { recordUsage } from './usage'
 
 // Atomic three-pool AI credit deduction. Replaces the read-modify-write that was
 // copy-pasted across every AI route (which could double-spend under concurrent
@@ -33,25 +34,16 @@ export async function deductAiCredits(
     return { ok: false, reason: (data.reason ?? 'error') as 'insufficient' | 'no_settings', total: data.total ?? 0 }
   }
 
-  // Fire and forget. Usage analytics must never fail a paid AI call or slow it
-  // down — the credits are already spent by the time we get here.
+  // Fire and forget — see lib/usage.ts. The credits are already spent by the
+  // time we get here, so analytics must not be able to fail the call.
   if (tool) {
-    void supabase
-      .from('usage_events')
-      .insert({
-        user_id:    userId,
-        event_type: 'ai_credit',
-        metadata:   {
-          tool,
-          cost,
-          monthly: data.monthly_deduct ?? 0,
-          earned:  data.earned_deduct ?? 0,
-          paid:    data.paid_deduct ?? 0,
-        },
-      })
-      .then(({ error: logErr }: { error: { message: string } | null }) => {
-        if (logErr) console.warn('[usage_events] ai_credit insert failed (non-fatal):', logErr.message)
-      })
+    recordUsage(supabase, userId, 'ai_credit', {
+      tool,
+      cost,
+      monthly: data.monthly_deduct ?? 0,
+      earned:  data.earned_deduct ?? 0,
+      paid:    data.paid_deduct ?? 0,
+    })
   }
 
   return {
