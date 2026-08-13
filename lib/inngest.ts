@@ -203,10 +203,11 @@ export const publishScheduledPost = inngest.createFunction(
             getSupabaseAdmin()
               .from('notifications')
               .insert({
-                user_id:    innerPostCheck.user_id,
-                type:       'post_failed',
-                message:    `A scheduled post failed to publish. Check your connected accounts.`,
-                action_url: '/queue',
+                user_id: innerPostCheck.user_id,
+                type:    'post_failed',
+                title:   'A scheduled post failed',
+                message: `A scheduled post failed to publish. Check your connected accounts.`,
+                data:    { href: '/queue' },
               })
               .then(({ error }) => { if (error) console.warn('[notifications] insert failed:', error.message) })
           }
@@ -287,12 +288,13 @@ export const publishScheduledPost = inngest.createFunction(
         getSupabaseAdmin()
           .from('notifications')
           .insert({
-            user_id:    innerPostCheck.user_id,
-            type:       'post_published',
-            message:    platformList
+            user_id: innerPostCheck.user_id,
+            type:    'post_published',
+            title:   'Post published',
+            message: platformList
               ? `Post published successfully to ${platformList}.`
               : 'Post published successfully.',
-            action_url: '/queue',
+            data:    { href: '/queue' },
           })
           .then(({ error }) => { if (error) console.warn('[notifications] insert failed:', error.message) })
         // Browser push notification — non-fatal, best-effort
@@ -942,12 +944,15 @@ export const sendNotification = inngest.createFunction(
       const { error } = await getSupabaseAdmin()
         .from('notifications')
         .insert({
+          // title has its own column and is NOT NULL. It used to be folded into
+          // message "for display compat", alongside an action_url column that
+          // does not exist — so this insert threw on every single call and the
+          // step retried until it gave up.
           user_id,
           type,
-          // title is stored as the leading portion of message for display compat
-          message: title ? `${title}: ${body}` : body,
-          action_url: link ?? null,
-          read: false,
+          title: title || 'Notification',
+          message: body,
+          ...(link ? { data: { href: link } } : {}),
         })
       if (error) {
         console.error('[sendNotification] Insert failed:', error.message)
@@ -2736,10 +2741,11 @@ export const competitorAlerts = inngest.createFunction(
             // In-app notification (fire-and-forget)
             db.from('notifications')
               .insert({
-                user_id:    comp.user_id,
-                type:       'competitor_post',
-                message:    `${displayHandle} just posted on ${platformLabel}. Check their latest content.`,
-                action_url: url,
+                user_id: comp.user_id,
+                type:    'competitor_post',
+                title:   `${displayHandle} just posted`,
+                message: `${displayHandle} just posted on ${platformLabel}. Check their latest content.`,
+                data:    { href: url },
               })
               .then(({ error: insertErr }) => {
                 if (insertErr) console.warn('[CompetitorAlerts] notifications insert failed:', insertErr.message)
@@ -4640,19 +4646,13 @@ export const postPerformanceAlerts = inngest.createFunction(
       return data ?? []
     })
 
-    // ── 4. Fetch already-sent post_performance notifications ──────────────
+    // Step 4 used to live here: a second dedup query selecting `action_url`, a
+    // column that does not exist. It returned a 400, so `data` was null and the
+    // result was always []. Its own comment conceded the post id is stored in
+    // `message` instead — which is what step 6 below actually reads. Nothing
+    // referenced it. Removed rather than repaired, since the working dedup is
+    // twenty lines further down.
     const recentPostIds = recentPosts.map((p: any) => p.id as string)
-    const alreadyAlerted = await step.run('fetch-already-alerted', async () => {
-      const { data } = await admin
-        .from('notifications')
-        .select('action_url')
-        .in('user_id', userIds)
-        .eq('type', 'post_performance')
-
-      // action_url is '/analytics' — we store post id in message for dedup instead
-      // We actually embed post id in message; fetch all and parse
-      return (data ?? []).map((n: any) => n.action_url as string)
-    })
 
     // ── 5. Fetch notification_prefs for all affected users ────────────────
     const userPrefs = await step.run('fetch-user-prefs', async () => {
@@ -4744,11 +4744,11 @@ export const postPerformanceAlerts = inngest.createFunction(
           await admin
             .from('notifications')
             .insert({
-              user_id:    post.user_id,
-              type:       'post_performance',
+              user_id: post.user_id,
+              type:    'post_performance',
               title,
               message,
-              action_url: '/analytics',
+              data:    { href: '/analytics' },
             })
             .then(({ error }: { error: any }) => {
               if (error) console.warn('[PostPerformanceAlerts] notifications insert failed:', error.message)

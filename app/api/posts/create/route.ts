@@ -195,7 +195,7 @@ export async function POST(request: NextRequest) {
             type:    'first_post',
             title:   '🎉 First post scheduled!',
             message: 'Your first post is on the calendar. Check your schedule to see it go live.',
-            data:    { action_url: '/calendar' },
+            data:    { href: '/calendar' },
             is_read: false,
           })
 

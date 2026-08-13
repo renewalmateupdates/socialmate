@@ -36,7 +36,7 @@ export async function notifyLowCredits(
       type: 'low_credits',
       title: 'Running low on credits',
       message: `You have ${creditsRemaining} credit${creditsRemaining !== 1 ? 's' : ''} left. They reset monthly, or grab a credit pack anytime.`,
-      data: { action_url: '/settings?tab=plan' },
+      data: { href: '/settings?tab=plan' },
       is_read: false,
     })
   } catch (err) {

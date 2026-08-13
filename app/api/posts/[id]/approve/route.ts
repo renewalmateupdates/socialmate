@@ -99,7 +99,7 @@ export async function PATCH(
         title:      'Post approved ✓',
         message:    `Your post was approved and ${newStatus === 'scheduled' ? 'scheduled' : 'moved to drafts'}: "${preview}"`,
         is_read:    false,
-        data:       { action_url: newStatus === 'scheduled' ? '/queue' : '/drafts', post_id: post.id },
+        data:       { href: newStatus === 'scheduled' ? '/queue' : '/drafts', post_id: post.id },
         created_at: new Date().toISOString(),
       })
     } catch (err) {

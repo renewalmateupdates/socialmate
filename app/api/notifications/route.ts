@@ -40,7 +40,10 @@ export async function GET() {
     id:         n.id,
     type:       n.type,
     message:    n.title ? `${n.title}: ${n.message}` : (n.message ?? ''),
-    action_url: n.data?.action_url ?? null,
+    // Writers standardised on data.href (lib/notify.ts). action_url is the
+    // older spelling, still read so notifications written before the switch
+    // keep their links.
+    action_url: n.data?.href ?? n.data?.action_url ?? null,
     read:       n.is_read ?? false,
     created_at: n.created_at,
   }))
