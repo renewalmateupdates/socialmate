@@ -86,6 +86,10 @@ function LoginInner() {
           setLoading(false)
           return
         }
+        // Password sign-in never reaches app/auth/callback, which is where
+        // login tracking lives, so it has to be recorded here. Fire and forget:
+        // analytics must not delay or block getting into the app.
+        void fetch('/api/auth/track-login', { method: 'POST' }).catch(() => {})
         router.push(redirectTo)
       }
     } catch {
@@ -118,6 +122,9 @@ function LoginInner() {
       return
     }
 
+    // The 2FA path returns early above the password path's tracking call, so it
+    // needs its own — otherwise enabling 2FA would quietly stop counting you.
+    void fetch('/api/auth/track-login', { method: 'POST' }).catch(() => {})
     router.push(redirectTo)
   }
 

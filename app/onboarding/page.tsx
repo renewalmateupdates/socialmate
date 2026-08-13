@@ -221,10 +221,17 @@ function OnboardingInner() {
     }).eq('id', user.id)
 
     const platforms = (selectedPlatform && connectionDetected) ? [selectedPlatform] : []
+    // `use_case` was in this payload and has never existed on user_settings.
+    // Nothing reads it either. `default_platforms` also did not exist until the
+    // 20260812 migration — it had been created on `workspaces` by mistake.
+    //
+    // Either one made Postgres reject the entire upsert, so this write has been
+    // failing for every user since it was written: no onboarding_goal (null for
+    // all 73 accounts), no display_name, no iris_opt_in, and no +50 completion
+    // credits. The error was discarded, so it never surfaced.
     const upsertPayload: Record<string, any> = {
       user_id: user.id,
       display_name: displayName,
-      use_case: 'creator',
       default_platforms: platforms,
       onboarding_completed: true,
       iris_opt_in: irisOptIn,
@@ -235,7 +242,14 @@ function OnboardingInner() {
       upsertPayload.ai_credits_remaining = (currentSettings?.ai_credits_remaining ?? 50) + 50
     }
 
-    await supabase.from('user_settings').upsert(upsertPayload, { onConflict: 'user_id' })
+    const { error: settingsErr } = await supabase
+      .from('user_settings')
+      .upsert(upsertPayload, { onConflict: 'user_id' })
+    if (settingsErr) {
+      // Never silently again. This is the write that grants the completion
+      // credits, so a failure here is worth seeing.
+      console.error('[onboarding] settings upsert failed:', settingsErr.message)
+    }
 
     // Only schedule starter posts when a platform is actually connected.
     // Without a destination they can never publish — the scheduler would sweep
