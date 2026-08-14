@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
             title:      'New Studio Stax Application',
             message:    `${name} (${applicant_name}) applied for a listing.`,
             is_read:    false,
-            data:       JSON.stringify({ action_url: '/admin/studio-stax', listing_id: newListing?.id }),
+            data:       { href: '/admin/studio-stax', listing_id: newListing?.id },
           })
         }
       } catch (notifErr) {

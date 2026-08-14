@@ -96,7 +96,7 @@ export async function PATCH(
         title:      'Post returned for edits',
         message,
         is_read:    false,
-        data:       { action_url: '/drafts', post_id: post.id },
+        data:       { href: '/drafts', post_id: post.id },
         created_at: new Date().toISOString(),
       })
     } catch (err) {

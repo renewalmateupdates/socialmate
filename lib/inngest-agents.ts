@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { Resend } from 'resend'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { recordAgentRun } from './usage'
+import { createNotification } from './notify'
 
 function getResend() { return new Resend(process.env.RESEND_API_KEY) }
 
@@ -354,13 +355,12 @@ export const repurposeAgent = inngest.createFunction(
           // Notify owner that new drafts are ready
           if (cfg.mode === 'draft') {
             try {
-              await admin.from('notifications').insert({
-                user_id:    cfg.user_id,
-                type:       'repurpose_ready',
-                title:      '♻️ Repurposed drafts ready',
-                body:       `${formats.length} new draft${formats.length > 1 ? 's' : ''} generated from your best post this week.`,
-                action_url: '/drafts',
-                read:       false,
+              await createNotification(admin, {
+                userId:  cfg.user_id,
+                type:    'repurpose_ready',
+                title:   '♻️ Repurposed drafts ready',
+                message: `${formats.length} new draft${formats.length > 1 ? 's' : ''} generated from your best post this week.`,
+                href:    '/drafts',
               })
             } catch {}
           }
@@ -550,13 +550,12 @@ Return ONLY the post text, nothing else.`
 
           if (draftsThisRun > 0 && cfg.mode === 'draft') {
             try {
-              await admin.from('notifications').insert({
-                user_id:    cfg.user_id,
-                type:       'caption_drafts_ready',
-                title:      '✍️ Caption drafts ready',
-                body:       `${draftsThisRun} new post draft${draftsThisRun > 1 ? 's' : ''} generated from your RSS feeds.`,
-                action_url: '/drafts',
-                read:       false,
+              await createNotification(admin, {
+                userId:  cfg.user_id,
+                type:    'caption_drafts_ready',
+                title:   '✍️ Caption drafts ready',
+                message: `${draftsThisRun} new post draft${draftsThisRun > 1 ? 's' : ''} generated from your RSS feeds.`,
+                href:    '/drafts',
               })
             } catch {}
           }
@@ -685,13 +684,12 @@ Return ONLY valid JSON array:
             .eq('workspace_id', cfg.workspace_id)
 
           try {
-            await admin.from('notifications').insert({
-              user_id:    cfg.user_id,
-              type:       'trend_scout_ready',
-              title:      '📈 Today\'s trends are in',
-              body:       `${trends.length} content angles identified for today. Post while they\'re hot.`,
-              action_url: '/agents/trend-scout',
-              read:       false,
+            await createNotification(admin, {
+              userId:  cfg.user_id,
+              type:    'trend_scout_ready',
+              title:   '📈 Today\'s trends are in',
+              message: `${trends.length} content angles identified for today. Post while they\'re hot.`,
+              href:    '/agents/trend-scout',
             })
           } catch {}
 
@@ -864,13 +862,12 @@ Return ONLY the reply text, nothing else.`
 
           if (drafted > 0) {
             try {
-              await admin.from('notifications').insert({
-                user_id:    cfg.user_id,
-                type:       'inbox_replies_ready',
-                title:      '💬 Reply drafts ready',
-                body:       `${drafted} reply suggestion${drafted > 1 ? 's' : ''} waiting for your review.`,
-                action_url: '/agents/inbox-agent',
-                read:       false,
+              await createNotification(admin, {
+                userId:  cfg.user_id,
+                type:    'inbox_replies_ready',
+                title:   '💬 Reply drafts ready',
+                message: `${drafted} reply suggestion${drafted > 1 ? 's' : ''} waiting for your review.`,
+                href:    '/agents/inbox-agent',
               })
             } catch {}
           }

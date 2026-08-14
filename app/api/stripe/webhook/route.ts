@@ -99,9 +99,16 @@ const PLAN_CREDITS: Record<string, number> = {
   agency: 2000,
 }
 
+// Drives affiliate commission (see processAffiliateConversion below), so these
+// have to track the real prices. Missed by the Aug 2026 rollout: left at 5/20
+// they would have paid 30% of the old price, short-changing every affiliate by
+// a third on Pro and by a quarter on Agency.
+//
+// Known approximation, unchanged here: `plan` arrives normalised, so an annual
+// subscriber is valued at the monthly figure rather than the annual one.
 const PLAN_MONTHLY_VALUE: Record<string, number> = {
-  pro:    5.00,
-  agency: 20.00,
+  pro:    8.00,
+  agency: 29.00,
 }
 
 // Stacking credit model: every 5 paying referrals = +100 bonus credits
@@ -215,7 +222,7 @@ async function processReferralCredits(
             title: '🎉 Referral reward earned!',
             message: 'Someone you referred just upgraded. 25 bonus credits added to your account.',
             is_read: false,
-            data: { action_url: '/settings?tab=referrals' },
+            data: { href: '/settings?tab=referrals' },
           })
         } catch (notifErr) {
           console.warn('[Referral] Notification insert failed (non-fatal):', notifErr)

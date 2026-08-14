@@ -1,0 +1,34 @@
+-- notifications.type: drop the CHECK constraint.
+--
+-- `notifications_type_check` allowed exactly three values:
+--
+--     post_published, post_failed, system
+--
+-- The application sends at least eighteen. Every other insert was rejected with
+-- 23514, and since every caller discarded its error, the failures were silent.
+-- Together with the phantom `body` / `action_url` columns fixed in the same PR,
+-- this is why the notifications table is empty and the sidebar bell has always
+-- read zero.
+--
+-- Verified against production by attempting an insert for each type the code
+-- sends: 3 accepted, 30 rejected.
+--
+-- Dropped rather than widened, for two reasons.
+--
+-- First, a fixed list cannot be correct here. `type` is also supplied at
+-- runtime through the generic `notification/send` Inngest event, whose callers
+-- pass their own labels ('soma_autopilot', 'streak_at_risk', and others added
+-- whenever a feature ships). Any enumeration goes stale the next time someone
+-- adds a notification, and it fails in the worst possible way: silently, months
+-- later, with no error surfaced to anyone.
+--
+-- Second, nothing depends on the value being constrained. `type` is a
+-- descriptive label used to pick an icon, and the UI already handles unknown
+-- values — app/notifications/page.tsx falls back with
+-- `TYPE_CONFIG[n.type] || TYPE_CONFIG.system`. A bad label renders a generic
+-- icon; it does not corrupt anything.
+--
+-- A constraint whose violation is invisible, and whose enforcement protects
+-- nothing, is a liability. Application code owns this vocabulary now.
+
+ALTER TABLE notifications DROP CONSTRAINT IF EXISTS notifications_type_check;
