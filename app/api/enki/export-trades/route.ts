@@ -25,16 +25,17 @@ export async function GET() {
 
   const { data: trades, error } = await supabase
     .from('enki_trades')
-    .select('id, symbol, side, qty, price, status, pnl, created_at')
+    .select('id, symbol, side, qty, price, status, created_at')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  const headers = ['id', 'symbol', 'side', 'qty', 'price', 'status', 'pnl', 'created_at']
+  // No pnl column on enki_trades — P&L is computed FIFO at read time,
+  // and selecting it here 400'd the export into a 500 for every user.
+  const headers = ['id', 'symbol', 'side', 'qty', 'price', 'status', 'created_at']
 
   const rows = (trades ?? []).map((t: any) => {
-    const pnl = t.pnl !== null && t.pnl !== undefined ? Number(t.pnl).toFixed(4) : ''
     return [
       t.id,
       t.symbol,
@@ -42,7 +43,6 @@ export async function GET() {
       Number(t.qty).toFixed(4),
       Number(t.price).toFixed(4),
       t.status,
-      pnl,
       t.created_at,
     ]
       .map((v) => `"${String(v).replace(/"/g, '""')}"`)

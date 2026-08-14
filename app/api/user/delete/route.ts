@@ -37,11 +37,14 @@ export async function POST(req: NextRequest) {
 
   try {
     // 1. Cancel any active Stripe subscription
+    // Stripe ids live on user_settings, not profiles. Reading them from
+    // profiles returned a 400, so `profile` was null and the cancel below was
+    // skipped — a deleted account could leave a live subscription billing.
     const { data: profile } = await admin
-      .from('profiles')
+      .from('user_settings')
       .select('stripe_customer_id, stripe_subscription_id')
-      .eq('id', userId)
-      .single()
+      .eq('user_id', userId)
+      .maybeSingle()
 
     if (profile?.stripe_subscription_id) {
       try {
@@ -59,8 +62,10 @@ export async function POST(req: NextRequest) {
     // Posts
     await admin.from('posts').delete().eq('user_id', userId)
 
-    // Remove user from other workspaces' team_members
-    await admin.from('team_members').delete().eq('user_id', userId)
+    // Remove user from other people's teams. team_members is keyed by
+    // owner_id / member_id — it has no user_id column, so this delete matched
+    // nothing and the user stayed on every team they had joined.
+    await admin.from('team_members').delete().eq('member_id', userId)
 
     // Delete workspaces owned by this user (and their team_members via cascade or explicit)
     const { data: ownedWorkspaces } = await admin
@@ -70,7 +75,9 @@ export async function POST(req: NextRequest) {
 
     if (ownedWorkspaces && ownedWorkspaces.length > 0) {
       const wsIds = ownedWorkspaces.map((w: any) => w.id)
-      await admin.from('team_members').delete().in('workspace_id', wsIds)
+      // team_members has no workspace_id either; membership hangs off the
+      // owner. Deleting by owner_id removes everyone this user had invited.
+      await admin.from('team_members').delete().eq('owner_id', userId)
       await admin.from('workspaces').delete().in('id', wsIds)
     }
 
@@ -80,11 +87,11 @@ export async function POST(req: NextRequest) {
     // Media files — delete from storage bucket then from table
     const { data: mediaFiles } = await admin
       .from('media_files')
-      .select('storage_path')
+      .select('file_path')
       .eq('user_id', userId)
 
     if (mediaFiles && mediaFiles.length > 0) {
-      const paths = mediaFiles.map((f: any) => f.storage_path).filter(Boolean)
+      const paths = mediaFiles.map((f: any) => f.file_path).filter(Boolean)
       if (paths.length > 0) {
         await admin.storage.from('media').remove(paths)
       }
@@ -101,16 +108,31 @@ export async function POST(req: NextRequest) {
     await admin.from('hashtag_collections').delete().eq('user_id', userId)
     await admin.from('competitor_accounts').delete().eq('user_id', userId)
 
-    // Affiliate / referral
-    await admin.from('affiliate_conversions').delete().eq('user_id', userId)
-    await admin.from('affiliate_notifications').delete().eq('user_id', userId)
-    await admin.from('affiliate_payouts').delete().eq('user_id', userId)
-    await admin.from('affiliate_promo_codes').delete().eq('user_id', userId)
-    await admin.from('affiliate_tax_forms').delete().eq('user_id', userId)
+    // Affiliate / referral.
+    //
+    // These five tables are keyed by affiliate_id, which points at
+    // affiliate_profiles.id — none of them has a user_id column. Deleting by
+    // user_id matched nothing, so an erased account left its whole affiliate
+    // trail behind: conversions, payouts, promo codes and tax forms, the last
+    // of which holds a legal name and the last four of a tax id.
+    const { data: affProfile } = await admin
+      .from('affiliate_profiles')
+      .select('id')
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    if (affProfile?.id) {
+      const affId = affProfile.id
+      await admin.from('affiliate_conversions').delete().eq('affiliate_id', affId)
+      await admin.from('affiliate_notifications').delete().eq('affiliate_id', affId)
+      await admin.from('affiliate_payouts').delete().eq('affiliate_id', affId)
+      await admin.from('affiliate_promo_codes').delete().eq('affiliate_id', affId)
+      await admin.from('affiliate_tax_forms').delete().eq('affiliate_id', affId)
+    }
     await admin.from('affiliate_profiles').delete().eq('user_id', userId)
     await admin.from('affiliates').delete().eq('user_id', userId)
     await admin.from('referral_conversions').delete().eq('referred_user_id', userId)
-    await admin.from('invite_tokens').delete().eq('user_id', userId)
+    await admin.from('invite_tokens').delete().eq('owner_id', userId)
 
     // Notifications / settings
     await admin.from('notifications').delete().eq('user_id', userId)

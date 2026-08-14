@@ -455,7 +455,7 @@ async function handleFirstPostCredits(userId: string) {
     if (count === 1) {
       const { data: userSettings } = await getSupabaseAdmin()
         .from('user_settings')
-        .select('ai_credits_remaining, referred_by')
+        .select('ai_credits_remaining')
         .eq('user_id', userId)
         .single()
 
@@ -465,18 +465,28 @@ async function handleFirstPostCredits(userId: string) {
           .update({ ai_credits_remaining: (userSettings.ai_credits_remaining ?? 0) + 10 })
           .eq('user_id', userId)
 
-        if (userSettings.referred_by) {
+        // referred_by is a profiles column, not a user_settings one. It used
+        // to be selected above, which 400'd the whole query — so userSettings
+        // was null, this block never ran, and no referrer has ever been paid
+        // the 10-credit first-post bonus.
+        const { data: refProfile } = await getSupabaseAdmin()
+          .from('profiles')
+          .select('referred_by')
+          .eq('id', userId)
+          .maybeSingle()
+
+        if (refProfile?.referred_by) {
           const { data: referrerSettings } = await getSupabaseAdmin()
             .from('user_settings')
             .select('ai_credits_remaining')
-            .eq('user_id', userSettings.referred_by)
+            .eq('user_id', refProfile.referred_by)
             .single()
 
           if (referrerSettings) {
             await getSupabaseAdmin()
               .from('user_settings')
               .update({ ai_credits_remaining: (referrerSettings.ai_credits_remaining ?? 0) + 10 })
-              .eq('user_id', userSettings.referred_by)
+              .eq('user_id', refProfile.referred_by)
           }
         }
       }

@@ -23,7 +23,7 @@ export async function GET() {
   const admin = getSupabaseAdmin()
   const { data: ingestion } = await admin
     .from('soma_weekly_ingestion')
-    .select('id, week_label, key_themes, post_count, created_at')
+    .select('id, week_label, extracted_insights, generated_posts_count, created_at')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
     .limit(1)

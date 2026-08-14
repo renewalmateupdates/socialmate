@@ -42,7 +42,6 @@ export async function POST(request: NextRequest) {
         endpoint: subscription.endpoint,
         p256dh: subscription.keys.p256dh,
         auth_key: subscription.keys.auth,
-        updated_at: new Date().toISOString(),
       },
       { onConflict: 'endpoint' }
     )

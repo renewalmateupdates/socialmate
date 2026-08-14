@@ -47,13 +47,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params
   const { data } = await getSupabase()
     .from('bio_pages')
-    .select('name, bio')
+    .select('display_name, bio')
     .eq('slug', slug)
     .single()
   if (!data) return { title: 'Not Found' }
   return {
-    title: data.name,
-    description: data.bio || `${data.name}'s link in bio`,
+    title: data.display_name,
+    description: data.bio || `${data.display_name}'s link in bio`,
   }
 }
 

@@ -125,6 +125,63 @@ KEY = re.compile(r'''(?m)^\s{2,}(?:['"])?([A-Za-z_][A-Za-z0-9_]*)(?:['"])?\s*:''
 CHAIN_STEP = re.compile(r'\s*\.\s*([A-Za-z_][A-Za-z0-9_]*)\s*\(')
 
 
+def top_level_keys(body):
+    """[(offset, key)] for keys at depth 1 of the object literal `body`.
+
+    Only the outermost keys are columns. Anything nested is the *contents* of a
+    jsonb column, and reporting those produces confident nonsense: the analytics
+    syncs write
+
+        .update({ bluesky_stats: { likes, reposts, replies, fetched_at } })
+
+    which is one real column, and a flat scan reports it as four phantom ones.
+    Same for `data: { href }` on notifications and `metadata: { day, slot }` on
+    SOMA posts. Eight of the findings in the first full run were this.
+    """
+    out = []
+    depth = 0
+    i, n = 0, len(body)
+    quote = None
+    while i < n:
+        ch = body[i]
+        if quote:
+            if ch == '\\':
+                i += 2
+                continue
+            if ch == quote:
+                quote = None
+        elif ch in '"\'`':
+            quote = ch
+        elif ch in '{[(':
+            depth += 1
+        elif ch in '}])':
+            depth -= 1
+        elif depth == 1:
+            km = KEY_AT.match(body, i)
+            # A key is only a key if the nearest non-space character behind it
+            # opened the object or ended the previous entry. Without this,
+            # `paused ? null : x` reads `null:` as a column named "null", and
+            # ternaries inside payloads are common.
+            if km and _opens_entry(body, i):
+                out.append((km.start(1), km.group(1)))
+                i = km.end()
+                continue
+        i += 1
+    return out
+
+
+# A single `key:` occurrence, anchored where the scanner currently sits.
+KEY_AT = re.compile(r'''\s*(?:['"])?([A-Za-z_][A-Za-z0-9_]*)(?:['"])?\s*:''')
+
+
+def _opens_entry(body, i):
+    """True if position `i` starts a fresh entry in an object literal."""
+    j = i - 1
+    while j >= 0 and body[j] in ' \t\r\n':
+        j -= 1
+    return j < 0 or body[j] in '{,'
+
+
 def chain_extent(text, start):
     """End index of the .a().b().c() chain beginning at `start`.
 
@@ -182,10 +239,9 @@ def scan_file(path, rel, schema, findings):
             body = chain[brace:end]
             if '...' in body:
                 continue  # spread: keys are not statically visible
-            for km in KEY.finditer(body):
-                c = km.group(1)
+            for off, c in top_level_keys(body):
                 if c not in cols:
-                    findings.append((rel, line_of(m.end() + brace + km.start()),
+                    findings.append((rel, line_of(m.end() + brace + off),
                                      table, c, verb))
 
         for fm in re.finditer(

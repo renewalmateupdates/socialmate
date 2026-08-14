@@ -131,7 +131,7 @@ export default function Hashtags() {
     if (editingId) {
       const { data, error } = await supabase
         .from('hashtag_collections')
-        .update({ name: name.trim(), tags: parsed, updated_at: new Date().toISOString() })
+        .update({ name: name.trim(), hashtags: parsed, updated_at: new Date().toISOString() })
         .eq('id', editingId)
         .select()
         .single()
@@ -140,7 +140,7 @@ export default function Hashtags() {
     } else {
       const { data, error } = await supabase
         .from('hashtag_collections')
-        .insert({ user_id: userId, name: name.trim(), tags: parsed })
+        .insert({ user_id: userId, name: name.trim(), hashtags: parsed })
         .select()
         .single()
       if (error) { showToast('Failed to save', 'error'); setSaving(false); return }
@@ -154,7 +154,7 @@ export default function Hashtags() {
   const handleEdit = (col: any) => {
     setEditingId(col.id)
     setName(col.name)
-    setTags((col.tags || []).join(' '))
+    setTags((col.hashtags || []).join(' '))
     setShowForm(true)
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
@@ -169,7 +169,7 @@ export default function Hashtags() {
   }
 
   const handleCopy = (col: any) => {
-    navigator.clipboard.writeText((col.tags || []).join(' '))
+    navigator.clipboard.writeText((col.hashtags || []).join(' '))
     setCopied(col.id)
     setTimeout(() => setCopied(null), 2000)
   }
@@ -181,7 +181,7 @@ export default function Hashtags() {
     setTags('')
   }
 
-  const totalTags = collections.reduce((sum, c) => sum + (c.tags?.length || 0), 0)
+  const totalTags = collections.reduce((sum, c) => sum + (c.hashtags?.length || 0), 0)
   const tagCount = tags.split(/[\s,]+/).filter(t => t.trim().length > 0).length
 
   return (
@@ -394,7 +394,7 @@ export default function Hashtags() {
                     <div className="flex items-start justify-between gap-3 mb-3">
                       <div className="min-w-0">
                         <p className="text-sm font-extrabold truncate">{col.name}</p>
-                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{(col.tags || []).length} hashtags</p>
+                        <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{(col.hashtags || []).length} hashtags</p>
                       </div>
 
                       {/* ACTIONS — always visible */}
@@ -422,15 +422,15 @@ export default function Hashtags() {
 
                     {/* TAGS */}
                     <div className="flex flex-wrap gap-1.5">
-                      {(col.tags || []).slice(0, 20).map((tag: string) => (
+                      {(col.hashtags || []).slice(0, 20).map((tag: string) => (
                         <span key={tag}
                           className="text-xs font-semibold bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded-lg">
                           {tag}
                         </span>
                       ))}
-                      {(col.tags || []).length > 20 && (
+                      {(col.hashtags || []).length > 20 && (
                         <span className="text-xs text-gray-400 dark:text-gray-500 px-2 py-0.5">
-                          +{col.tags.length - 20} more
+                          +{col.hashtags.length - 20} more
                         </span>
                       )}
                     </div>
