@@ -25,8 +25,8 @@ export async function GET(req: NextRequest) {
     // Fetch competitor accounts for this workspace
     const { data: competitors } = await admin
       .from('competitor_accounts')
-      .select('id, username, platform, last_checked_at')
-      .eq('workspace_id', workspaceId)
+      .select('id, handle, platform, last_checked_at')
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(10)
 
@@ -56,7 +56,7 @@ export async function GET(req: NextRequest) {
       const posts = (competitorPosts ?? []).filter(p => p.competitor_id === c.id)
       const totalEngagement = posts.reduce((sum, p) => sum + (p.engagement ?? 0), 0)
       competitorFrequency[c.id] = {
-        username:       c.username,
+        username:       c.handle,
         platform:       c.platform,
         post_count:     posts.length,
         avg_engagement: posts.length > 0 ? Math.round(totalEngagement / posts.length) : 0,
@@ -70,7 +70,7 @@ export async function GET(req: NextRequest) {
       .map(p => {
         const comp = (competitors ?? []).find(c => c.id === p.competitor_id)
         return {
-          username:   comp?.username ?? 'unknown',
+          username:   comp?.handle ?? 'unknown',
           platform:   p.platform,
           content:    p.content?.slice(0, 200) ?? '',
           posted_at:  p.posted_at,

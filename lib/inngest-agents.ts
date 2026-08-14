@@ -615,8 +615,8 @@ export const trendScoutAgent = inngest.createFunction(
           // Fetch competitor accounts + recent posts
           const { data: competitors } = await admin
             .from('competitor_accounts')
-            .select('id, username, platform')
-            .eq('workspace_id', cfg.workspace_id)
+            .select('id, handle, platform')
+            .eq('user_id', cfg.user_id)
 
           const competitorIds = (competitors ?? []).map((c: any) => c.id)
           let postBlock = ''
