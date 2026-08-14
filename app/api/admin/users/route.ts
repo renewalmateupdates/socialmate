@@ -51,6 +51,7 @@ export async function GET(req: NextRequest) {
   merged.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
   const userIds = merged.map(u => u.user_id)
+  const emails  = merged.map(u => u.email).filter(Boolean)
 
   // Connected accounts, post counts, affiliate profiles, stax listings — all in parallel
   const [accountsRes, postsRes, affiliateRes, staxRes] = await Promise.allSettled([
@@ -64,9 +65,12 @@ export async function GET(req: NextRequest) {
     db.from('affiliate_profiles')
       .select('user_id, status')
       .in('user_id', userIds.length ? userIds : ['none']),
+    // curated_listings has no user_id — applications are matched by the email
+    // the applicant typed. Selecting user_id 400'd, so the listings column on
+    // /admin/users has always been empty.
     db.from('curated_listings')
-      .select('user_id, status')
-      .in('user_id', userIds.length ? userIds : ['none']),
+      .select('applicant_email, status')
+      .in('applicant_email', emails.length ? emails : ['none']),
   ])
 
   const accountMap: Record<string, string[]> = {}
@@ -119,7 +123,7 @@ export async function GET(req: NextRequest) {
   const staxSet = new Set<string>()
   if (staxRes.status === 'fulfilled') {
     for (const s of staxRes.value.data ?? []) {
-      if (s.status === 'approved') staxSet.add(s.user_id)
+      if (s.status === 'approved') staxSet.add(s.applicant_email)
     }
   }
 
@@ -130,7 +134,7 @@ export async function GET(req: NextRequest) {
     post_stats:          postStatsMap[u.user_id] ?? { published: 0, failed: 0, partial: 0, scheduled: 0 },
     platform_stats:      platformStatsMap[u.user_id] ?? {},
     affiliate_status:    affiliateMap[u.user_id] ?? null,
-    is_stax:             staxSet.has(u.user_id),
+    is_stax:             staxSet.has(u.email),
   }))
 
   return NextResponse.json({ users: enriched })

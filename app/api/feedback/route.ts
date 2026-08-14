@@ -109,7 +109,7 @@ export async function POST(req: NextRequest) {
     if (adminIds.length > 0) {
       const { data: subs } = await getSupabaseAdmin()
         .from('push_subscriptions')
-        .select('subscription')
+        .select('endpoint, p256dh, auth_key')
         .in('user_id', adminIds)
 
       if (subs && subs.length > 0) {
@@ -120,9 +120,13 @@ export async function POST(req: NextRequest) {
           process.env.VAPID_PRIVATE_KEY!
         )
         await Promise.allSettled(
-          subs.map((s: { subscription: string }) =>
+          // There is no `subscription` column; the row IS the subscription,
+          // split across endpoint / p256dh / auth_key. Selecting a column that
+          // does not exist 400'd, so `subs` was null and admins have never been
+          // pushed a feedback notification.
+          subs.map((s: { endpoint: string; p256dh: string; auth_key: string }) =>
             webpush.sendNotification(
-              JSON.parse(s.subscription as string),
+              { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth_key } },
               JSON.stringify({
                 title: `New ${type} feedback`,
                 body: message.trim().slice(0, 100),

@@ -130,7 +130,7 @@ export default function AffiliatePage() {
       // Load referral conversions
       const { data: convRows } = await supabase
         .from('referral_conversions')
-        .select('id, status, total_earned, converted_at, payout_amount, payout_status, payout_date')
+        .select('id, status, total_earned, monthly_commission, converted_at')
         .eq('affiliate_user_id', user.id)
         .order('converted_at', { ascending: false })
 

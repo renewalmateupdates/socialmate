@@ -43,7 +43,7 @@ async function getAffiliateByCode(code: string): Promise<AffiliateInfo | null> {
   // 3. Fetch display info from affiliate_profiles (may not exist — non-fatal)
   const { data: profile } = await db
     .from('affiliate_profiles')
-    .select('full_name, avatar_url')
+    .select('full_name')
     .eq('user_id', settings.user_id)
     .maybeSingle()
 
@@ -52,7 +52,8 @@ async function getAffiliateByCode(code: string): Promise<AffiliateInfo | null> {
   return {
     code: upperCode,
     displayName,
-    avatarUrl: profile?.avatar_url ?? null,
+    // affiliate_profiles has no avatar_url column; there is no avatar to show.
+    avatarUrl: null as string | null,
   }
 }
 

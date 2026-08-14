@@ -37,12 +37,12 @@ export async function GET() {
       .order('scheduled_at', { ascending: true }),
     supabase
       .from('user_settings')
-      .select('plan, credits_monthly, credits_earned, credits_paid')
+      .select('plan, monthly_credits_remaining, earned_credits, paid_credits')
       .eq('user_id', user.id)
       .single(),
     supabase
       .from('workspace_activity')
-      .select('id, event_type, actor_email, description, created_at')
+      .select('id, action, actor_email, entity_type, metadata, created_at')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .limit(5),
@@ -104,9 +104,9 @@ export async function GET() {
     }))
 
   // ── Credits ──────────────────────────────────────────────────────────────────
-  const monthly = settings?.credits_monthly ?? 0
-  const earned  = settings?.credits_earned ?? 0
-  const paid    = settings?.credits_paid ?? 0
+  const monthly = settings?.monthly_credits_remaining ?? 0
+  const earned  = settings?.earned_credits ?? 0
+  const paid    = settings?.paid_credits ?? 0
   const remaining = monthly + earned + paid
 
   const nextReset = new Date(now.getFullYear(), now.getMonth() + 1, 1)
@@ -115,9 +115,9 @@ export async function GET() {
   // ── Recent activity ──────────────────────────────────────────────────────────
   const recent_activity = (activityResult.data ?? []).map((a: any) => ({
     id:          a.id,
-    event_type:  a.event_type,
+    event_type:  a.action,
     actor_email: a.actor_email,
-    description: a.description,
+    description: a.entity_type ?? '',
     created_at:  a.created_at,
   }))
 
