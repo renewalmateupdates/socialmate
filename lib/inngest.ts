@@ -3970,10 +3970,17 @@ export const somaAutopilotRun = inngest.createFunction(
             rawInput = lines || 'No prior content. Generate fresh content for a creator building their online presence.'
           }
 
-          // Fetch voice profile
+          // Fetch voice profile.
+          //
+          // personality_summary added: it is the Voice DNA block written from
+          // the personality interview, and it is the single most specific thing
+          // we know about how this creator sounds. The structured jsonb below
+          // describes tone in the abstract; the summary is written as direct
+          // instruction. Autopilot was reading the former and ignoring the
+          // latter.
           const { data: profile } = await admin
             .from('soma_identity_profiles')
-            .select('tone_profile, writing_style_rules, behavioral_traits, voice_examples')
+            .select('tone_profile, writing_style_rules, behavioral_traits, voice_examples, personality_summary')
             .eq('workspace_id', project.workspace_id)
             .maybeSingle()
 
@@ -3982,7 +3989,8 @@ export const somaAutopilotRun = inngest.createFunction(
 Tone: ${JSON.stringify(profile.tone_profile)}
 Style: ${JSON.stringify(profile.writing_style_rules)}
 Personality: ${JSON.stringify(profile.behavioral_traits)}
-Example posts: ${Array.isArray(profile.voice_examples) ? (profile.voice_examples as string[]).join(' | ') : 'none'}`
+Example posts: ${Array.isArray(profile.voice_examples) ? (profile.voice_examples as string[]).join(' | ') : 'none'}${
+  profile.personality_summary ? `\n\nCREATOR VOICE DNA:\n${profile.personality_summary}` : ''}`
             : 'No voice profile — use authentic, direct tone.'
 
           // Ingest: extract insights (diff if we have prev doc)
@@ -4233,7 +4241,7 @@ export const somaFullSendDailyRun = inngest.createFunction(
       const { data: projects, error } = await admin
         .from('soma_projects')
         .select(`
-          id, workspace_id, user_id, name, platforms, posts_per_day, content_window_days, mode, runs_this_month, paused, include_media,
+          id, workspace_id, user_id, name, description, campaign_theme, platforms, posts_per_day, content_window_days, mode, runs_this_month, paused, include_media,
           workspaces!inner(id, owner_id, soma_credits_monthly, soma_credits_used, soma_credits_purchased, soma_autopilot_enabled, soma_full_send_enabled)
         `)
         .eq('mode', 'full_send')
@@ -4312,10 +4320,24 @@ export const somaFullSendDailyRun = inngest.createFunction(
           const platforms: string[] = Array.from(project.platforms ?? [])
           if (!platforms.length) return
 
-          // Fetch identity/voice for this user
+          // Fetch identity/voice for this user.
+          //
+          // This asked for brand_name, niche, target_audience and tone. None of
+          // those columns exist — the table stores structured jsonb. Four
+          // phantom names 400'd the whole select, so `identity` was null, and
+          // the four lines below silently fell back to hardcoded defaults
+          // ("SocialMate", "creator tools") for every project on Full Send.
+          //
+          // The expensive part of that: personality_summary, the only column in
+          // the list that is real, is the Voice DNA block built from the 40
+          // question interview. It was dragged down with the others, so Full
+          // Send has been generating with no voice profile at all.
+          //
+          // Same columns the Autopilot run reads, plus personality_summary,
+          // which Autopilot omits.
           const { data: identity } = await admin
             .from('soma_identity_profiles')
-            .select('brand_name, niche, target_audience, tone, personality_summary')
+            .select('tone_profile, writing_style_rules, behavioral_traits, voice_examples, personality_summary')
             .eq('user_id', project.user_id)
             .maybeSingle()
 
@@ -4323,12 +4345,26 @@ export const somaFullSendDailyRun = inngest.createFunction(
             ? `\n\nCREATOR VOICE DNA:\n${identity.personality_summary}`
             : ''
 
+          // Brand and niche were never on the identity profile. The project
+          // itself is where that context actually lives.
+          const toneLine = identity?.tone_profile
+            ? JSON.stringify(identity.tone_profile)
+            : 'professional and motivational'
+          const styleBlock = [
+            identity?.writing_style_rules && `Style rules: ${JSON.stringify(identity.writing_style_rules)}`,
+            identity?.behavioral_traits   && `Personality: ${JSON.stringify(identity.behavioral_traits)}`,
+            Array.isArray(identity?.voice_examples) && identity.voice_examples.length
+              ? `Example posts: ${(identity.voice_examples as string[]).join(' | ')}`
+              : null,
+          ].filter(Boolean).join('\n')
+
           const prompt = `You are a social media content strategist. Generate ${MAX_PPD} posts for each of these platforms: ${platforms.join(', ')}.
 
-Brand: ${identity?.brand_name || 'SocialMate'}
-Niche: ${identity?.niche || 'creator tools'}
-Audience: ${identity?.target_audience || 'creators and businesses'}
-Tone: ${identity?.tone || 'professional and motivational'}
+Project: ${project.name}
+${project.description ? `About: ${project.description}` : ''}
+${project.campaign_theme ? `Campaign theme: ${project.campaign_theme}` : ''}
+Tone: ${toneLine}
+${styleBlock}
 ${voiceBlock}
 ${memoryBlock}
 
