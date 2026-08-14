@@ -356,7 +356,7 @@ Hootsuite Standard: $99/month for up to 10 accounts, 1 user. Add a second user a
 
 SocialMate: $0/month. All 7 platforms, both team members, bulk scheduler, analytics, link in bio, hashtag collections, AI credits — included.
 
-The $8/month Pro plan would cover 5 accounts per platform and 5 team members. The $29/month Agency plan covers 10 accounts per platform and unlimited team members.
+The $8/month Pro plan would cover 5 accounts per platform and 5 team members. The $29/month Agency plan covers 10 accounts per platform and 15 team members.
 
 ## What We're Not Saying
 
@@ -1169,7 +1169,7 @@ If you're growing a specific niche (dev, design, writing), check when the active
 
 ## The Free Part
 
-SocialMate's free plan includes Mastodon scheduling with a 2-week scheduling window and unlimited scheduled posts. You don't need a paid plan to maintain a consistent Mastodon presence.
+SocialMate's free plan includes Mastodon scheduling with a 2-week scheduling window and 250 scheduled posts a month. You don't need a paid plan to maintain a consistent Mastodon presence.
 
 If you want to schedule further ahead (up to 3 months on the Agency plan), that's available on Pro and above — but for most Mastodon creators, two weeks is plenty.
     `,
@@ -1896,7 +1896,7 @@ Ideas are the most common stall point. When the well runs dry:
 
 Scheduling is the mechanical backbone of consistency. Without it, you're relying on motivation, which is unreliable. With it, consistency becomes structural — it happens automatically whether you feel like it or not.
 
-SocialMate's free plan includes unlimited scheduled posts, a bulk scheduler for loading multiple posts at once, and a calendar view for visualizing your schedule. Set up the system once. Show up to your Monday batching session each week. Everything else runs itself.
+SocialMate's free plan includes 250 scheduled posts a month, a bulk scheduler for loading multiple posts at once, and a calendar view for visualizing your schedule. Set up the system once. Show up to your Monday batching session each week. Everything else runs itself.
 
 Consistency compounds. The accounts that grow aren't posting better content — they're posting more reliably. Give the algorithm and your audience the consistency to work with.
 
@@ -2016,7 +2016,7 @@ SocialMate supports draft review links and team collaboration — clients can vi
 
 The tool cost has to fit your margins. If you're charging $300/month per client and your scheduling tool costs $100/month for multi-client access, you're spending 33% of revenue on a tool. That's too much.
 
-SocialMate's Agency plan is $29/month and supports up to 10 client workspaces with unlimited team members. At $2/month per client for 10 clients, that's a reasonable cost of goods for a managed social service.
+SocialMate's Agency plan is $29/month and supports up to 5 client workspaces with 15 team members. At $2/month per client for 10 clients, that's a reasonable cost of goods for a managed social service.
 
 At 5 clients, it's $4/month per client. Still reasonable. Compare this to tools that charge per connected account — at $6/account, 5 clients with 4 accounts each is $120/month just for scheduling.
 
