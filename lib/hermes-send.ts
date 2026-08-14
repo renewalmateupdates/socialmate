@@ -133,7 +133,7 @@ export async function sendHermesMastodon(params: {
 
   const { data: account } = await supabase
     .from('connected_accounts')
-    .select('access_token, platform_user_id, instance_url')
+    .select('access_token, platform_user_id')
     .eq('user_id', params.userId)
     .eq('platform', 'mastodon')
     .order('created_at', { ascending: false })
@@ -142,7 +142,10 @@ export async function sendHermesMastodon(params: {
 
   if (!account) return { ok: false, error: 'No Mastodon account connected' }
 
-  let instanceHost = account.instance_url || ''
+  // From platform_user_id ("userid@instance.tld"). There is no instance_url
+  // column; selecting one 400'd the query, so `account` was null and this DM
+  // path returned "No Mastodon account connected" even when one was.
+  let instanceHost = ''
   if (!instanceHost && account.platform_user_id?.includes('@')) {
     const parts = account.platform_user_id.split('@')
     instanceHost = `https://${parts[parts.length - 1]}`

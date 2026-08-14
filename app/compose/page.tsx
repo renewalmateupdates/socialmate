@@ -510,7 +510,7 @@ function ComposeInner() {
             )
             if (validPlatforms.length > 0) setSelectedPlatforms(validPlatforms)
           }
-          setTemplateBanner(`Template "${data.title}" loaded.`)
+          setTemplateBanner(`Template "${data.name}" loaded.`)
         }
       }
       loadTemplate()
@@ -1128,8 +1128,7 @@ function ComposeInner() {
       if (!user) { setTemplateSaveMsg({ text: 'Not signed in', ok: false }); return }
       const { error } = await supabase.from('post_templates').insert({
         user_id: user.id,
-        workspace_id: activeWorkspace?.is_personal ? null : (activeWorkspace?.id ?? null),
-        title: templateTitle.trim(),
+        name: templateTitle.trim(),
         content: currentContent,
         category: templateCategory,
         platforms: selectedPlatforms,

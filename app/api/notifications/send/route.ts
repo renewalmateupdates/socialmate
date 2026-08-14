@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
   // Fetch push subscription for the user
   const { data: sub, error: fetchError } = await getSupabaseAdmin()
     .from('push_subscriptions')
-    .select('endpoint, p256dh, auth')
+    .select('endpoint, p256dh, auth_key')
     .eq('user_id', user_id)
     .maybeSingle()
 
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     endpoint: sub.endpoint,
     keys: {
       p256dh: sub.p256dh,
-      auth: sub.auth,
+      auth: sub.auth_key,
     },
   }
 

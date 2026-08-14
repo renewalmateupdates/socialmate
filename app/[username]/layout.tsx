@@ -15,13 +15,13 @@ export async function generateMetadata(
 
   const { data } = await supabase
     .from('link_in_bio')
-    .select('display_name, bio, slug')
+    .select('title, bio, slug')
     .eq('slug', username)
     .single()
 
   if (!data) return {}
 
-  const name = data.display_name || username
+  const name = data.title || username
   const title = `${name} — Link in Bio`
   const description = data.bio
     ? `${data.bio} — Built with SocialMate`

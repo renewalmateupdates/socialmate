@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
 
   const { data: sub } = await getSupabaseAdmin()
     .from('push_subscriptions')
-    .select('endpoint, p256dh, auth')
+    .select('endpoint, p256dh, auth_key')
     .eq('user_id', user.id)
     .maybeSingle()
 
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
 
   const pushSubscription = {
     endpoint: sub.endpoint,
-    keys: { p256dh: sub.p256dh, auth: sub.auth },
+    keys: { p256dh: sub.p256dh, auth: sub.auth_key },
   }
 
   const payload = JSON.stringify({

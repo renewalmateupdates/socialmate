@@ -25,7 +25,7 @@ export async function PATCH(
 
   const { data: post } = await getSupabaseAdmin()
     .from('posts')
-    .select('id, is_evergreen, user_id, status')
+    .select('id, evergreen, user_id, status')
     .eq('id', id)
     .single()
 
@@ -34,7 +34,7 @@ export async function PATCH(
   }
 
   // Only published posts can be marked evergreen
-  if (!post.is_evergreen && post.status !== 'published') {
+  if (!post.evergreen && post.status !== 'published') {
     return NextResponse.json(
       { error: 'Only published posts can be marked as evergreen' },
       { status: 400 }
@@ -43,9 +43,9 @@ export async function PATCH(
 
   const { data: updated, error } = await getSupabaseAdmin()
     .from('posts')
-    .update({ is_evergreen: !post.is_evergreen })
+    .update({ evergreen: !post.evergreen })
     .eq('id', id)
-    .select('id, is_evergreen')
+    .select('id, evergreen')
     .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

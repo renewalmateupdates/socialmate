@@ -624,10 +624,10 @@ export const trendScoutAgent = inngest.createFunction(
           if (competitorIds.length > 0) {
             const { data: posts } = await admin
               .from('competitor_posts')
-              .select('content, platform, engagement_score')
+              .select('content, platform, engagement')
               .in('competitor_id', competitorIds)
               .gte('posted_at', since48h.toISOString())
-              .order('engagement_score', { ascending: false })
+              .order('engagement', { ascending: false })
               .limit(30)
 
             postBlock = (posts ?? [])
