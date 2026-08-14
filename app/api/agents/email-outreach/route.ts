@@ -5,6 +5,7 @@ import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { recordAgentRun } from '@/lib/usage'
+import { deductAiCredits, refundAiCredits } from '@/lib/ai-credits'
 
 const CREDIT_COST = 5
 
@@ -26,23 +27,25 @@ export async function POST(req: NextRequest) {
 
     const admin = getSupabaseAdmin()
 
-    // Credits check
-    const { data: workspace } = await admin
-      .from('workspaces')
-      .select('id, credits_monthly, credits_used, credits_earned, credits_purchased')
-      .eq('id', workspace_id)
-      .single()
-
-    if (!workspace) return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
-
-    const monthly   = workspace.credits_monthly ?? 0
-    const used      = workspace.credits_used ?? 0
-    const earned    = workspace.credits_earned ?? 0
-    const purchased = workspace.credits_purchased ?? 0
-    const remaining = Math.max(0, monthly - used) + earned + purchased
-
-    if (remaining < CREDIT_COST) {
-      return NextResponse.json({ error: 'insufficient_credits' }, { status: 402 })
+    // Credits.
+    //
+    // This read four columns off `workspaces` — credits_monthly, credits_used,
+    // credits_earned, credits_purchased. None of them exist. Workspaces carries
+    // soma_credits_*; the three-pool AI balance lives on user_settings. So the
+    // select 400'd, `workspace` was null, and the next line returned 404. This
+    // agent has never generated a single email.
+    //
+    // It was also a hand-rolled fourth copy of the pool arithmetic that PR #535
+    // centralised into lib/ai-credits.ts precisely because copies drift. Now it
+    // uses the same atomic RPC as the other seven AI routes, which also means
+    // the spend shows up in /admin/usage instead of being invisible.
+    //
+    // Deducted before the Gemini call so an empty balance cannot burn a
+    // generation, and refunded below if the model fails.
+    const deducted = await deductAiCredits(supabase, user.id, CREDIT_COST, 'email_outreach')
+    if (!deducted.ok) {
+      const status = deducted.reason === 'insufficient' ? 402 : 500
+      return NextResponse.json({ error: deducted.reason === 'insufficient' ? 'insufficient_credits' : 'credit_error' }, { status })
     }
 
     const apiKey = process.env.GOOGLE_AI_API_KEY || process.env.GEMINI_API_KEY
@@ -91,32 +94,28 @@ Return ONLY valid JSON:
 
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
-    const result = await model.generateContent(prompt)
-    const text   = result.response.text().replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim()
-    const parsed = JSON.parse(text)
+
+    // Credits are already spent, so any failure past this point refunds them
+    // rather than charging for nothing.
+    let parsed: { subject?: string; body?: string }
+    try {
+      const result = await model.generateContent(prompt)
+      const text   = result.response.text().replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim()
+      parsed = JSON.parse(text)
+    } catch (genErr) {
+      await refundAiCredits(supabase, user.id, { monthly: deducted.monthly, earned: deducted.earned, paid: deducted.paid })
+      console.error('[EmailOutreach] generation failed, credits refunded:', genErr)
+      return NextResponse.json({ error: 'AI generation failed' }, { status: 502 })
+    }
 
     if (!parsed.subject || !parsed.body) {
+      await refundAiCredits(supabase, user.id, { monthly: deducted.monthly, earned: deducted.earned, paid: deducted.paid })
       return NextResponse.json({ error: 'AI returned invalid response' }, { status: 500 })
     }
 
-    // Deduct credits (monthly first, then earned, then purchased)
-    const monthlyAvail = Math.max(0, monthly - used)
-    const newUsed      = monthlyAvail >= CREDIT_COST ? used + CREDIT_COST : monthly
-    const afterMonthly = monthlyAvail >= CREDIT_COST ? 0 : CREDIT_COST - monthlyAvail
-    const earnedAfter  = afterMonthly > 0 ? Math.max(0, earned - afterMonthly) : earned
-    const purchAfter   = afterMonthly > 0 && afterMonthly > earned
-      ? Math.max(0, purchased - (afterMonthly - earned))
-      : purchased
-
-    await admin.from('workspaces').update({
-      credits_used:      newUsed,
-      credits_earned:    earnedAfter,
-      credits_purchased: purchAfter,
-    }).eq('id', workspace.id)
-
     // Save draft
     await admin.from('agent_email_drafts').insert({
-      workspace_id: workspace.id,
+      workspace_id: workspace_id ?? null,
       user_id:      user.id,
       target_name,
       goal,
