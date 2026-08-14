@@ -44,7 +44,7 @@ Live at: **socialmate.studio**
 Soft launched: March 26, 2026. Official Product Hunt launch: April 1, 2026. 100% bootstrapped.
 GitHub: github.com/renewalmateupdates/socialmate
 
-**The pitch:** What competitors charge $99/month for, we give for $5 — or free.
+**The pitch:** What competitors charge $99/month for, we give for $8 — or free.
 
 ---
 
@@ -88,13 +88,27 @@ These have burned us before — always apply:
 
 ## Pricing & Plans
 
-| Plan | Price | Credits/mo | Seats | Client Workspaces |
-|---|---|---|---|---|
-| Free | $0 | 50 | 2 | 0 |
-| Pro | $5/mo | 500 | 5 | 0 |
-| Agency | $20/mo | 2,000 | 15 | 5 |
-| Pro Annual | $55/yr | 500 | 5 | 0 |
-| Agency Annual | $209/yr | 2,000 | 15 | 5 |
+**Repriced August 12, 2026** (PRs #555–#557). Pro $5 → $8, Agency $20 → $29,
+annual moved to two months free, free post cap 100 → 250. Done with **zero active
+subscribers**, so there was no grandfathering, no migration and no angry emails.
+That window closes permanently the day someone subscribes.
+
+| Plan | Price | Posts/mo | Credits/mo | Seats | Client Workspaces | Accounts per platform |
+|---|---|---|---|---|---|---|
+| Free | $0 | 250 | 50 | 2 | 0 | 1 |
+| Pro | $8/mo | 1,000 | 500 | 5 | 0 | 5 |
+| Agency | $29/mo | 5,000 | 2,000 | 15 | 5 | 10 |
+| Pro Annual | $80/yr | 1,000 | 500 | 5 | 0 | 5 |
+| Agency Annual | $290/yr | 5,000 | 2,000 | 15 | 5 | 10 |
+| Enterprise | custom | — | — | unlimited | — | — |
+
+**These numbers are the source of truth.** `lib/post-limits.ts` and
+`app/pricing/page.tsx` must agree with them and with each other. Claims that
+drifted from this table have caused two separate corrections (PR #522, PR #556).
+
+**Never say "unlimited"** about posts, seats or connected accounts. Every tier is
+capped, the caps are above, and four blog posts had to be corrected in August for
+claiming otherwise. Enterprise seats are the single exception.
 
 **Add-ons:**
 - White Label Basic: $20/mo (custom logo/colors/branding)
@@ -135,7 +149,7 @@ These have burned us before — always apply:
 
 ---
 
-## What's Been Built (as of July 21, 2026)
+## What's Been Built (as of August 13, 2026)
 
 **Core:**
 - Post scheduling (Now + future via Inngest), drafts, queue, calendar, bulk scheduling
@@ -403,9 +417,37 @@ These have burned us before — always apply:
 
 ## Known Issues / Bugs (fix these when touched)
 
+### THE failure mode of this codebase — read this before writing a query
+
+**A query naming a column the table does not have returns an error and null
+data, not empty data.** Every caller that writes `const { data } = await ...`
+throws the error away, so the feature just quietly does nothing. Forever.
+
+The August 12–13 sweep found **nine separate instances**, each of which had
+silently disabled a shipped, advertised feature — some since launch. It is by a
+wide margin the most expensive bug class in this project, and it is invisible
+without deliberately looking.
+
+Rules that follow from it:
+
+- `scripts/audit-schema-drift.py` compares every column named in the code against
+  the live schema. **Run it before shipping anything that touches the DB.** It is
+  depth-aware (nested jsonb keys are not columns) and knows about ternaries.
+- Never discard a Supabase error. Destructure `{ data, error }` and at minimum
+  `console.warn` it. Fire-and-forget writes still log — see `lib/usage.ts`.
+- Prefer `select('*')` when you do not control the schema. The May calendar
+  outage was an explicit column list naming a `tags` column that did not exist.
+- `.maybeSingle()` for optional lookups. `.single()` errors on zero rows.
+- Verify a new insert shape against production before shipping: post it with a
+  deliberately fake `user_id`. `23503` (foreign key) means every column was
+  accepted. `PGRST204` or `42703` means a phantom column. `23514` means a CHECK
+  constraint rejected a value — that is a separate gate, and it is how the
+  notifications table stayed empty even after its columns were right.
+
 ### Active — fix when touching the file
 
-No open known bugs as of July 26, 2026 (full audit sweep: tsc clean, admin stats/publish/credits/webhook reviewed — see July 26 entry below). Note: the old **"`posts.created_at` may be NULL for SOMA posts"** gotcha is now RESOLVED at the DB layer (PR #534 added a `DEFAULT now()` + backfilled NULLs), so `created_at`-based filters no longer silently drop SOMA posts. All previously tracked issues resolved:
+No open known bugs as of August 13, 2026. The schema-drift audit is clean.
+Previously tracked issues, all resolved:
 - ✅ Dark mode spinners — `dark:border-amber-500` added to all 20 pages (PR #472, June 8)
 - ✅ Streak counts scheduled posts — `api/streak` now includes `scheduled` status + uses `scheduled_at` (PR #471, June 8)
 - ✅ Toast safe-area — `admin/white-label` and `hermes/campaigns/[id]` now use shared `<Toast>` component (PR #471, June 8)
@@ -534,7 +576,7 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 **May 12, 2026 — Growth & Marketing:**
 - **AlternativeTo** — SocialMate submitted, pending 24hr approval. Alternatives added: Buffer, Hootsuite, Later, SocialBee, Publer.
 - **Reddit** — u/CaptainNo3491 suspended (appeal submitted). New account: u/InterestingRun7594 (display: SocialMate). Pinned post written. r/cofounderhunt post written. Karma building in progress.
-- **Competitor research** — Full pricing audit of 20 competitors completed. Key gaps: Instagram/Facebook/LinkedIn (blocked on API). Key edges: Discord/Telegram scheduling (unique), SOMA Voice DNA, Enki, 8 agents at $5/mo, SM-Give, creator monetization.
+- **Competitor research** — Full pricing audit of 20 competitors completed. Key gaps: Instagram/Facebook/LinkedIn (blocked on API). Key edges: Discord/Telegram scheduling (unique), SOMA Voice DNA, Enki, 8 agents at $8/mo, SM-Give, creator monetization.
 - **LinkedIn** — Multiple posts written including build-in-public update, cofounder search angle.
 - **Cofounder search** — Actively recruiting marketing cofounder via Reddit/LinkedIn. Offering ~10% sweat equity over 24-month vest, 2-week trial, real contract.
 
@@ -679,6 +721,59 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 - **3D printing venture name change pending** — Joshua considering a name change away from "Hearthforge." Do not use the name in public-facing posts or marketing until a new name is confirmed. Refer to as "3D printing side project" or "co-founded 3D printing venture with Butch" in the meantime.
 - **Analytics snapshot (June 19, 2026):** 1,126 visitors (+101%), 2,199 page views (+7%), 80% bounce rate (+12%). Top referrers: Bing (92), DDG (39), Vercel (29), Google (20), ChatGPT (17), t.co (15). Countries: USA 27%, Singapore 21%, China 18%, India 6%. 40 users, 850+ posts published, $0 MRR. ChatGPT appearing as referral source for first time — llms.txt/AI discoverability work paying off.
 - **Reddit posts drafted** — New posts for r/buildinpublic, r/micro_saas, r/saasbuild (5 days since last posts). Angle: code audit week, zero-auth endpoint found + fixed, silent data loss bug found + fixed, ChatGPT referral traffic, 40 users / $0 MRR / still solo.
+
+**August 12–13, 2026 — Repricing, and the week we found out half the product never ran (PRs #554–#565):**
+
+The single biggest correctness sweep in the project's history. Twelve PRs. The
+theme: a large share of what SocialMate advertises had **never executed once**,
+because a query named a column that did not exist, the error was discarded, and
+the feature returned a plausible-looking empty result instead of failing loudly.
+
+**Pricing rollout (#555–#557).** Pro $5 → $8, Agency $20 → $29, annual to two
+months free, free cap 100 → 250 posts. New Stripe prices created against the
+existing products so reporting stays continuous; old IDs retired from checkout
+but kept in the webhook map forever. Compare-flip pricing cards: each tier flips
+to show what it unlocks over the tier below. Public copy migrated by
+`scripts/migrate-pricing-copy.py` — adjacency-based with 51 test cases, because
+`$5` and `$20` are also White Label, SOMA Full Send, credit packs, donations and
+competitor prices, and a blind replace corrupts all of them. Blog rows in
+Supabase migrated by the same tested transform, with derived arithmetic
+("$5/month is $60/year", the whole BDAY31 table) recomputed by hand.
+
+**Features that had never worked, now fixed:**
+
+| Feature | Why it never ran |
+|---|---|
+| Day-1 activation email | `profiles.user_id` — the table is keyed `id` |
+| All in-app notifications | Phantom columns **and** a CHECK allowing 3 of 18 `type` values |
+| Email Outreach agent | Read credits off `workspaces`; returned 404 to every request ever |
+| Growth Scout | `competitor_accounts.username` (it is `handle`) + a `workspace_id` filter on a table with no such column |
+| Evergreen recycling | `is_evergreen`; the column is `evergreen`. Daily cron a no-op since written |
+| Push notifications | `auth` vs `auth_key` |
+| Save-as-template | `title` vs `name`, plus a phantom `workspace_id` |
+| SOMA Voice DNA | 1,160 chars of interview output never reached the prompt; Full Send ran on hardcoded defaults |
+| `POST /api/posts/create` | `tags` / `poll_data` rejected the row |
+| Account deletion | Four steps silently skipped, including affiliate tax forms holding legal name + tax id |
+| Referrer 10-credit bonus | `referred_by` read from the wrong table; never paid to anyone |
+| Admin feedback push | Selected a `subscription` column; the row *is* the subscription |
+| Enki trade export | Selected `enki_trades.pnl`; P&L is computed FIFO at read time |
+
+**`scripts/audit-schema-drift.py` (#560).** Compares every column named anywhere
+in the code against the live PostgREST schema. Found 44; 16 were its own false
+positives from descending into nested jsonb, fixed in #565 by making key
+extraction depth-aware. **Run it before shipping DB work.**
+
+**Onboarding connect step (#558).** The poll gave up after 90 seconds — shorter
+than the task takes, since connecting means leaving for another tab and, for
+Bluesky, generating an app password on a different service. People came back
+having genuinely connected, to a tab that had stopped listening and whose widest
+button was "Skip for now". Window widened, refocus re-checks immediately, manual
+check added.
+
+**Activation reality, measured:** 74 non-admin accounts. 62 never connected a
+platform. 11 connected but never posted. **One has ever published.** 1,038
+published posts, 0 active subscriptions, $0 MRR. Nobody is declining to pay $8 —
+almost nobody gets far enough to have an opinion about the price.
 
 **July 26, 2026 — Admin/stats + credit + webhook audit sweep (PRs #533–#535):**
 Full code-level sweep of SocialMate. Trigger: admin "Posts Today" read 0 while posts were publishing. Found and fixed four things; verified AI models, cron registration, publish pipeline, and route auth are all healthy.
@@ -861,9 +956,14 @@ The entire public front end was rebuilt from the old `bg-gray-*` Tailwind look o
 
 - **Instagram / Facebook** — Both require Meta App Review (same process, can be one app). Harder than LinkedIn — Meta review is strict. Business account required, users need Business/Creator Instagram accounts. **Hard — plan for 4–8 week review timeline.**
 
-- **SOMA content run** — CLAUDE.md updated July 21 with the design-system rebuild (PRs #513–#524). Ready to resubmit for the next run.
+- **SOMA content run** — CLAUDE.md updated August 13 with the repricing and the
+  correctness sweep (PRs #554–#565). Ready to resubmit.
 
-- **"Unlimited profiles" claim — needs a decision (from PR #522)** — 5 "unlimited profiles" claims remain on `/vs` pages, inside Pro-tier comparison rows. Free tier is 1 connected account per platform, so it's wrong there, but whether **Pro** is genuinely uncapped on connected accounts is an open question. Decide the real number/policy before correcting — don't invent one.
+- **Activation is the whole problem.** 62 of 74 accounts never connected a
+  platform; one person has ever published. A one-shot reactivation route for that
+  segment is live at `POST /api/admin/reactivate` (`GET` previews the audience
+  without sending). Not fired yet. Everything else on this list is smaller than
+  this.
 
 - **Cofounder search** — Actively recruiting marketing cofounder via Reddit/LinkedIn. ~10% sweat equity over 24-month vest, 2-week trial, real contract.
 
@@ -892,6 +992,11 @@ The entire public front end was rebuilt from the old `bg-gray-*` Tailwind look o
 
 ## Confirmed Done (stop asking about these)
 
+- ✅ **Aug 2026 repricing (Aug 12, PRs #555–#557)** — Pro $8, Agency $29, annual two months free, free cap 250 posts. New Stripe prices live, legacy IDs kept in the webhook. Compare-flip cards shipped. Public copy, all `/vs` and `/for` pages, and 32 Supabase blog rows migrated. Never quote $5 or $20 for a plan again.
+- ✅ **Schema drift sweep (Aug 12–13, PRs #560–#565)** — 44 findings triaged to 23 real, all fixed. `scripts/audit-schema-drift.py` is clean. Never re-run this from scratch; run the script instead.
+- ✅ **"Unlimited" claims corrected (Aug 13)** — Free is 250 posts/mo, Agency is 15 seats and 5 client workspaces. Four blog posts said "unlimited team members" / "unlimited scheduled posts" / "10 client workspaces"; all corrected in file and DB. The old "unlimited profiles on /vs" open question is closed: the real numbers are 1 / 5 / 10 connected accounts per platform, they are on the pricing page, and nothing is unlimited except Enterprise seats.
+- ✅ **Notifications table (Aug 13, PR #561)** — Columns fixed, `notifications_type_check` dropped, `lib/notify.ts` is the one writer. Table has rows for the first time. Never hand-roll a notification insert again.
+- ✅ **Blog pricing rewrite (Aug 13)** — 32 Supabase rows updated across three passes, including titles and derived arithmetic on the BDAY31 and "$X/month is $Y/year" posts. Backups in the session scratchpad. Never re-run the blog price sweep.
 - ✅ **gilgameshenterprise.com blog + FAQ (June 7)** — Category filter tabs on blog (client-side). FAQ page at /faq with accordion. Nav updated with FAQ link. Sitemap updated. Never ask to add blog filtering or FAQ to GE site again.
 - ✅ **renewalmate.com blog + FAQ (June 7)** — Category filter tabs on blog. FAQ page at /faq (4 sections including vs. competitors). Nav updated. Sitemap includes all blog slugs. Never ask to add blog filtering or FAQ to RenewalMate again.
 - ✅ **Hearthforge co-founder language on GE site (June 7)** — GilgameshEnterprise venture card for Hearthforge now says "Co-founded with Butch Chiappinelli", lists role split, URL points to hearth-forge.com, badge is Live. Never misrepresent Hearthforge as Joshua's solo venture.
@@ -1110,18 +1215,44 @@ When SOMA generates content from this document, follow these behavioral rules on
 - **Commit frequently** with descriptive messages
 - **One branch + one PR per fix** — never accumulate changes from multiple fixes onto one branch
 - **Always open a PR after pushing** — push + PR is one step, always provide the direct PR link
+- **Never discard a Supabase error.** `const { data } = await ...` is how nine
+  shipped features silently did nothing for months. Destructure `error` and log it
+- **Run `python scripts/audit-schema-drift.py`** before shipping anything that
+  touches the database. It compares every column the code names against the live
+  schema
 - **Update CLAUDE.md** every time a significant feature ships
 
 ---
 
 ## Stripe Live Price IDs (DO NOT GUESS THESE)
 
+**Current (created Aug 12, 2026 — use these):**
+
 | Product | Price ID | Amount |
 |---|---|---|
-| Pro Monthly | price_1T9S2v7OMwDowUuULHznqUD5 | $5.00/mo |
-| Agency Monthly | price_1TFMHp7OMwDowUuUgeLAeJNY | $20.00/mo |
-| Pro Annual | price_1TFMHx7OMwDowUuUl9PqWxMs | $55.00/yr |
-| Agency Annual | price_1TFMI07OMwDowUuUoHfKJEpo | $209.00/yr |
+| Pro Monthly | price_1U3jSI7OMwDowUuUm0oMEpiT | $8.00/mo |
+| Agency Monthly | price_1U3jSJ7OMwDowUuUjK3igDLr | $29.00/mo |
+| Pro Annual | price_1U3jSJ7OMwDowUuUO3utSP0R | $80.00/yr |
+| Agency Annual | price_1U3jSJ7OMwDowUuUTMLaC9Fu | $290.00/yr |
+
+**Legacy (retired from checkout, still mapped in the webhook — do not delete):**
+
+| Product | Price ID | Amount |
+|---|---|---|
+| Pro Monthly (old) | price_1T9S2v7OMwDowUuULHznqUD5 | $5.00/mo |
+| Agency Monthly (old) | price_1TFMHp7OMwDowUuUgeLAeJNY | $20.00/mo |
+| Pro Annual (old) | price_1TFMHx7OMwDowUuUl9PqWxMs | $55.00/yr |
+| Agency Annual (old) | price_1TFMI07OMwDowUuUoHfKJEpo | $209.00/yr |
+
+The legacy IDs stay in `PRICE_TO_PLAN` in the Stripe webhook forever. That table
+turns a Stripe event back into a plan; dropping a row would silently drop a
+paying customer to free. They are removed from the checkout side only
+(pricing / onboarding / settings / sidebar).
+
+**Unchanged by the repricing:** White Label ($20 / $40), all credit packs, all
+donation tiers, X Boosters, SOMA Autopilot ($10) and Full Send ($20), Studio
+Stax, and every Enki tier. When correcting pricing copy, these are the decoys
+that make a blind find-and-replace dangerous.
 | White Label Basic | price_1TFMHt7OMwDowUuU56Fzw4fE | $20.00/mo |
 | White Label Pro | price_1TFMIG7OMwDowUuUcjNNGB0Q | $40.00/mo |
 | Credits Starter (100cr) | price_1TFMI47OMwDowUuUhTrbe3oq | $1.99 |
