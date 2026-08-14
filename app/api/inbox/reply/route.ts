@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
   // ── Fetch connected account ──────────────────────────────────────────────────
   const { data: account, error: accountError } = await getSupabaseAdmin()
     .from('connected_accounts')
-    .select('access_token, refresh_token, platform_user_id, instance_url')
+    .select('access_token, refresh_token, platform_user_id')
     .eq('user_id', user.id)
     .eq('platform', platform)
     .order('created_at', { ascending: false })
@@ -186,10 +186,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Derive instance from platform_user_id ("userid@instance.tld") or instance_url column
-    let instanceHost =
-      account.instance_url ||
-      ''
+    // Derive the instance from platform_user_id ("userid@instance.tld"), which
+    // the Mastodon callback builds as `${user.id}@${instance}`. There is no
+    // instance_url column — selecting one 400'd the whole query, so `account`
+    // came back null and this derivation was never reached.
+    let instanceHost = ''
 
     if (!instanceHost && account.platform_user_id?.includes('@')) {
       const parts = account.platform_user_id.split('@')

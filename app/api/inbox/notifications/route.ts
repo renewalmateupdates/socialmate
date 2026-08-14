@@ -142,7 +142,7 @@ export async function POST(req: NextRequest) {
 
   const { data: accounts } = await getSupabaseAdmin()
     .from('connected_accounts')
-    .select('platform, access_token, refresh_token, platform_user_id, instance_url')
+    .select('platform, access_token, refresh_token, platform_user_id')
     .eq('user_id', user.id)
     .in('platform', ['bluesky', 'mastodon'])
 

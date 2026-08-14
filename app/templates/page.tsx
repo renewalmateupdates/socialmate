@@ -264,7 +264,7 @@ export default function Templates() {
     setSaving(true)
     const payload = {
       user_id: userId,
-      title: title.trim(),
+      name: title.trim(),
       content: content.trim(),
       category,
       platforms,
@@ -297,7 +297,7 @@ export default function Templates() {
 
   const handleEdit = (t: any) => {
     setEditingId(t.id)
-    setTitle(t.title)
+    setTitle(t.name)
     setContent(t.content)
     setCategory(t.category || 'Other')
     setPlatforms(t.platforms || [])
@@ -327,7 +327,7 @@ export default function Templates() {
       .from('post_templates')
       .insert({
         user_id: userId,
-        title: starter.title,
+        name: starter.title,
         content: starter.content,
         category: starter.category,
         platforms: starter.platforms,
@@ -352,7 +352,7 @@ export default function Templates() {
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase()
       result = result.filter(t =>
-        t.title.toLowerCase().includes(q) ||
+        t.name.toLowerCase().includes(q) ||
         t.content.toLowerCase().includes(q) ||
         (t.category || '').toLowerCase().includes(q)
       )
@@ -530,7 +530,7 @@ export default function Templates() {
 
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <div className="flex items-center gap-2 flex-wrap min-w-0">
-                        <p className="text-sm font-extrabold truncate">{t.title}</p>
+                        <p className="text-sm font-extrabold truncate">{t.name}</p>
                         <span className="text-xs font-semibold bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full flex-shrink-0">
                           {t.category || 'Other'}
                         </span>
@@ -580,7 +580,7 @@ export default function Templates() {
                     {isConfirming && (
                       <div className="mt-3 pt-3 border-t border-theme flex flex-col sm:flex-row sm:items-center gap-2">
                         <p className="text-xs text-red-600 font-semibold flex-1">
-                          Permanently delete "{t.title}"? This cannot be undone.
+                          Permanently delete "{t.name}"? This cannot be undone.
                         </p>
                         <div className="flex items-center gap-2 flex-shrink-0">
                           <button onClick={() => handleDelete(t.id)} disabled={deleting === t.id}

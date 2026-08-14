@@ -283,7 +283,7 @@ export async function GET(request: NextRequest) {
 
   const { data: accounts } = await getSupabaseAdmin()
     .from('connected_accounts')
-    .select('platform, access_token, refresh_token, platform_user_id, instance_url, metadata')
+    .select('platform, access_token, refresh_token, platform_user_id, metadata')
     .eq('user_id', user.id)
     .in('platform', wantedPlatforms)
 

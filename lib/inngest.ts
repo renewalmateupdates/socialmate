@@ -703,7 +703,7 @@ export const evergreenRecycler = inngest.createFunction(
       const { data: candidates } = await db
         .from('posts')
         .select('user_id, workspace_id')
-        .eq('is_evergreen', true)
+        .eq('evergreen', true)
 
       if (!candidates?.length) return { recycled: 0, checked: 0 }
 
@@ -733,7 +733,7 @@ export const evergreenRecycler = inngest.createFunction(
           .from('posts')
           .select('id, content, platforms, destinations, evergreen_queue_count, workspace_id')
           .eq('user_id', user_id)
-          .eq('is_evergreen', true)
+          .eq('evergreen', true)
           .eq('status', 'published')
 
         if (workspace_id) {
@@ -767,7 +767,7 @@ export const evergreenRecycler = inngest.createFunction(
             destinations: post.destinations,
             status: 'scheduled',
             scheduled_at: scheduledAt.toISOString(),
-            is_evergreen: false,
+            evergreen: false,
           })
           .select('id')
           .single()
@@ -4375,7 +4375,7 @@ Generate exactly ${MAX_PPD} posts per platform.`
             // Update run counter
             await admin.from('soma_projects').update({
               runs_this_month: (project.runs_this_month ?? 0) + 1,
-              last_run_at: new Date().toISOString(),
+              last_generated_at: new Date().toISOString(),
             }).eq('id', project.id)
           }
 

@@ -74,12 +74,12 @@ export default function Search() {
         .ilike('content', `%${q}%`)
         .limit(10),
       supabase.from('post_templates')
-        .select('id, title, content')
+        .select('id, name, content')
         .eq('user_id', userId)
-        .or(`title.ilike.%${q}%,content.ilike.%${q}%`)
+        .or(`name.ilike.%${q}%,content.ilike.%${q}%`)
         .limit(5),
       supabase.from('hashtag_collections')
-        .select('id, name, tags')
+        .select('id, name, hashtags')
         .eq('user_id', userId)
         .ilike('name', `%${q}%`)
         .limit(5),
@@ -100,7 +100,7 @@ export default function Search() {
       all.push({
         id: t.id,
         type: 'template',
-        title: t.title,
+        title: t.name,
         subtitle: t.content?.slice(0, 80) || '',
         href: `/compose?template=${t.id}`,
       })
@@ -111,7 +111,7 @@ export default function Search() {
         id: h.id,
         type: 'hashtag',
         title: h.name,
-        subtitle: `${(h.tags || []).length} hashtags`,
+        subtitle: `${(h.hashtags || []).length} hashtags`,
         href: `/hashtags`,
       })
     })

@@ -34,10 +34,10 @@ export async function GET(req: NextRequest) {
     const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
     const { data: competitorPosts } = await admin
       .from('competitor_posts')
-      .select('id, competitor_id, content, platform, posted_at, engagement_score')
+      .select('id, competitor_id, content, platform, posted_at, engagement')
       .in('competitor_id', (competitors ?? []).map(c => c.id))
       .gte('posted_at', since)
-      .order('engagement_score', { ascending: false })
+      .order('engagement', { ascending: false })
       .limit(50)
 
     // Your own posting stats (last 30 days)
@@ -54,7 +54,7 @@ export async function GET(req: NextRequest) {
     const competitorFrequency: Record<string, { username: string; platform: string; post_count: number; avg_engagement: number }> = {}
     for (const c of competitors ?? []) {
       const posts = (competitorPosts ?? []).filter(p => p.competitor_id === c.id)
-      const totalEngagement = posts.reduce((sum, p) => sum + (p.engagement_score ?? 0), 0)
+      const totalEngagement = posts.reduce((sum, p) => sum + (p.engagement ?? 0), 0)
       competitorFrequency[c.id] = {
         username:       c.username,
         platform:       c.platform,
@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
 
     // Top performing competitor posts
     const topPosts = (competitorPosts ?? [])
-      .sort((a, b) => (b.engagement_score ?? 0) - (a.engagement_score ?? 0))
+      .sort((a, b) => (b.engagement ?? 0) - (a.engagement ?? 0))
       .slice(0, 5)
       .map(p => {
         const comp = (competitors ?? []).find(c => c.id === p.competitor_id)
@@ -74,7 +74,7 @@ export async function GET(req: NextRequest) {
           platform:   p.platform,
           content:    p.content?.slice(0, 200) ?? '',
           posted_at:  p.posted_at,
-          engagement: p.engagement_score ?? 0,
+          engagement: p.engagement ?? 0,
         }
       })
 
