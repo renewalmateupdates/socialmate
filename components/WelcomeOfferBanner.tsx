@@ -1,5 +1,7 @@
 'use client'
 import { useState, useEffect } from 'react'
+import { Gift, X } from 'lucide-react'
+import { useI18n } from '@/contexts/I18nContext'
 
 const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000
 const LS_FIRST_SHOWN_KEY = 'welcome_offer_first_shown'
@@ -16,6 +18,7 @@ interface Props {
 export default function WelcomeOfferBanner({ createdAt, plan, onApplyOffer }: Props) {
   const [visible, setVisible] = useState(false)
   const [daysLeft, setDaysLeft] = useState(14)
+  const { t } = useI18n()
 
   useEffect(() => {
     if (plan !== 'free') return
@@ -52,32 +55,39 @@ export default function WelcomeOfferBanner({ createdAt, plan, onApplyOffer }: Pr
   if (!visible) return null
 
   return (
-    <div className="relative flex items-start gap-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-300 dark:border-amber-700 rounded-2xl px-5 py-4 mb-6">
-      <span className="text-2xl flex-shrink-0">🎁</span>
+    <div className="relative flex items-start gap-3.5 bg-amber/[0.07] border border-amber/30 rounded-2xl px-5 py-4 mb-4">
+      <div className="w-8 h-8 rounded-lg bg-amber/15 border border-amber/30 flex items-center justify-center flex-shrink-0">
+        <Gift className="w-4 h-4 text-amber-ink" />
+      </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-extrabold text-amber-800 dark:text-amber-300 leading-tight">
-          Welcome offer — 50% off your first month
+        <p className="text-sm font-semibold text-theme leading-tight">
+          {t('app_dashboard.welcome_offer_title')}
         </p>
-        <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
-          Expires in <span className="font-bold">{daysLeft} day{daysLeft !== 1 ? 's' : ''}</span> · Code:{' '}
-          <span className="font-mono font-bold">WELCOME50</span>
+        <p className="text-xs text-app-muted mt-1">
+          {t('app_dashboard.welcome_offer_expires')}{' '}
+          <span className="font-mono tabular-nums text-amber-ink font-semibold">
+            {daysLeft} {daysLeft === 1 ? t('app_dashboard.w_day') : t('app_dashboard.w_days')}
+          </span>
+          {' · '}
+          {t('app_dashboard.welcome_offer_code')}{' '}
+          <span className="font-mono font-semibold text-amber-ink">WELCOME50</span>
         </p>
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
         {onApplyOffer && (
           <button
             onClick={onApplyOffer}
-            className="text-xs font-bold px-3 py-1.5 bg-amber-400 hover:bg-amber-500 text-black rounded-xl transition-all"
+            className="text-[11px] font-bold px-3.5 py-2 bg-gradient-to-b from-amber-bright to-amber text-void rounded-xl hover:from-amber-bright hover:to-amber-bright transition-all whitespace-nowrap"
           >
-            Claim offer →
+            {t('app_dashboard.welcome_offer_cta')} →
           </button>
         )}
         <button
           onClick={dismiss}
-          className="text-amber-500/60 hover:text-amber-700 transition-colors text-sm w-6 h-6 flex items-center justify-center"
-          aria-label="Dismiss"
+          className="w-7 h-7 flex items-center justify-center rounded-lg text-app-faint hover:text-theme hover:bg-app-fill transition-all"
+          aria-label={t('app_common.close')}
         >
-          ✕
+          <X className="w-3.5 h-3.5" />
         </button>
       </div>
     </div>

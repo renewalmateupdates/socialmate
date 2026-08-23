@@ -25,6 +25,8 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { Activity, BarChart3, Beaker, Bell, Bot, Building2, CalendarClock, CalendarDays, CalendarRange, Circle, CircleCheck, Clapperboard, Clock, Dna, FileText, Flame, FlaskConical, FolderOpen, Gamepad2, Gem, Gift, Handshake, Hash, Heart, Images, Inbox, LayoutDashboard, Link2, ListOrdered, Map, MapPin, MessageCircle, MessagesSquare, Music2, PenLine, Plug, Puzzle, Radar, Recycle, Rss, Satellite, Scissors, Search, Send, Settings, Sparkles, Target, Telescope, Timer, Trophy, Users, Wallet, Wand2, Zap } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 const COLLAPSED_KEY         = 'sidebar_collapsed_sections'
 const ORDER_KEY             = 'sidebar_section_order'
@@ -51,82 +53,140 @@ function getStoredOrder(defaultOrder: string[]): string[] {
 const STRIPE_PRO_PRICE_ID    = 'price_1U3jSI7OMwDowUuUm0oMEpiT'
 const STRIPE_AGENCY_PRICE_ID = 'price_1U3jSJ7OMwDowUuUjK3igDLr'
 
+/* Lucide marks keyed by href. Keyed by href rather than label because two
+   entries are both labelled "Schedules". */
+const NAV_ICONS: Record<string, LucideIcon> = {
+  '/bulk-scheduler': CalendarRange,
+  '/calendar': CalendarDays,
+  '/clips': Clapperboard,
+  '/compose': PenLine,
+  '/create': Wand2,
+  '/dashboard': LayoutDashboard,
+  '/drafts': FolderOpen,
+  '/hashtag-collections': Hash,
+  '/link-in-bio': Link2,
+  '/links': Scissors,
+  '/media': Images,
+  '/queue': ListOrdered,
+  '/schedule-templates': Clock,
+  '/templates': FileText,
+  '/tiktok/studio': Music2,
+  '/ab-tests': FlaskConical,
+  '/analytics': BarChart3,
+  '/best-times': Timer,
+  '/analytics/dna': Dna,
+  '/streak': Flame,
+  '/achievements': Trophy,
+  '/challenge': Target,
+  '/zenith': Gem,
+  '/agents': Bot,
+  '/community': MessagesSquare,
+  '/ai-features': Sparkles,
+  '/competitor-tracking': Telescope,
+  '/content-gap': Puzzle,
+  '/monetize/hub': Wallet,
+  '/hermes/dashboard': Send,
+  '/inbox': Inbox,
+  '/partners': Handshake,
+  '/affiliate': Gift,
+  '/roadmap': Map,
+  '/sm-pulse': Radar,
+  '/sm-radar': Satellite,
+  '/soma/dashboard': Zap,
+  '/accounts': Plug,
+  '/activity': Activity,
+  '/approvals': CircleCheck,
+  '/accounts/destinations': MapPin,
+  'https://discord.gg/2se6FGrbRU': MessageCircle,
+  '/discord': Gamepad2,
+  '/enki/dashboard': Beaker,
+  '/evergreen': Recycle,
+  '/rss-import': Rss,
+  '/schedules': CalendarClock,
+  '/team': Users,
+  '/notifications': Bell,
+  '/story': Heart,
+  '/search': Search,
+  '/settings': Settings,
+  '/workspaces': Building2,
+}
+
 const NAV_BASE = [
   {
     section: 'Content',
     items: [
-      { icon: '📆', label: 'Bulk Scheduler', href: '/bulk-scheduler' },
-      { icon: '📅', label: 'Calendar',       href: '/calendar'       },
-      { icon: '🎬', label: 'Clips',          href: '/clips'          },
-      { icon: '✏️', label: 'Compose',        href: '/compose'        },
-      { icon: '✦',  label: 'Creator Studio', href: '/create'         },
-      { icon: '🏠', label: 'Dashboard',      href: '/dashboard'      },
-      { icon: '📂', label: 'Drafts',         href: '/drafts'         },
-      { icon: '#️⃣', label: 'Hashtags',       href: '/hashtag-collections' },
-      { icon: '🔗', label: 'SIGIL',          href: '/link-in-bio'    },
-      { icon: '✂️', label: 'Link Shortener', href: '/links'          },
-      { icon: '🖼️', label: 'Media Library',  href: '/media'          },
-      { icon: '⏳', label: 'Queue',          href: '/queue'          },
-      { icon: '🕐', label: 'Schedules',      href: '/schedule-templates' },
-      { icon: '📝', label: 'Templates',      href: '/templates'      },
-      { icon: '🎵', label: 'TikTok Studio',  href: '/tiktok/studio'  },
+      { label: 'Bulk Scheduler', href: '/bulk-scheduler' },
+      { label: 'Calendar',       href: '/calendar'       },
+      { label: 'Clips',          href: '/clips'          },
+      { label: 'Compose',        href: '/compose'        },
+      { label: 'Creator Studio', href: '/create'         },
+      { label: 'Dashboard',      href: '/dashboard'      },
+      { label: 'Drafts',         href: '/drafts'         },
+      { label: 'Hashtags',       href: '/hashtag-collections' },
+      { label: 'SIGIL',          href: '/link-in-bio'    },
+      { label: 'Link Shortener', href: '/links'          },
+      { label: 'Media Library',  href: '/media'          },
+      { label: 'Queue',          href: '/queue'          },
+      { label: 'Schedules',      href: '/schedule-templates' },
+      { label: 'Templates',      href: '/templates'      },
+      { label: 'TikTok Studio',  href: '/tiktok/studio'  },
     ],
   },
   {
     section: 'Insights',
     items: [
-      { icon: '🧪', label: 'A/B Tests',   href: '/ab-tests'     },
-      { icon: '📊', label: 'Analytics',   href: '/analytics'    },
-      { icon: '🔍', label: 'Best Times',  href: '/best-times'   },
-      { icon: '🧬', label: 'Content DNA', href: '/analytics/dna' },
-      { icon: '🔥', label: 'Streak',      href: '/streak'       },
+      { label: 'A/B Tests',   href: '/ab-tests'     },
+      { label: 'Analytics',   href: '/analytics'    },
+      { label: 'Best Times',  href: '/best-times'   },
+      { label: 'Content DNA', href: '/analytics/dna' },
+      { label: 'Streak',      href: '/streak'       },
     ],
   },
   {
     section: 'Grow',
     items: [
-      { icon: '🏆', label: 'Achievements',  href: '/achievements'        },
-      { icon: '🔥', label: 'Challenge',     href: '/challenge'           },
-      { icon: '✦',  label: 'ZENITH',        href: '/zenith'              },
-      { icon: '🤖', label: 'Agents',       href: '/agents'              },
-      { icon: '🔥', label: 'HESTIA',         href: '/community'           },
-      { icon: '✨', label: 'AI Features',  href: '/ai-features'         },
-      { icon: '🔭', label: 'Competitors',  href: '/competitor-tracking' },
-      { icon: '🕳️', label: 'Content Gaps', href: '/content-gap'         },
-      { icon: '💸', label: 'Creator Hub',  href: '/monetize/hub'        },
-      { icon: '⚡', label: 'HERMES',       href: '/hermes/dashboard'    },
-      { icon: '📬', label: 'Inbox',        href: '/inbox'               },
-      { icon: '🤝', label: 'Partners',     href: '/partners'            },
-      { icon: '🎁', label: 'Referrals',    href: '/affiliate'           },
-      { icon: '🗺️', label: 'Roadmap',      href: '/roadmap'             },
-      { icon: '🔥', label: 'SM-Pulse',     href: '/sm-pulse'            },
-      { icon: '📡', label: 'SM-Radar',     href: '/sm-radar'            },
-      { icon: '⚡', label: 'SOMA',         href: '/soma/dashboard'      },
+      { label: 'Achievements',  href: '/achievements'        },
+      { label: 'Challenge',     href: '/challenge'           },
+      { label: 'ZENITH',        href: '/zenith'              },
+      { label: 'Agents',       href: '/agents'              },
+      { label: 'HESTIA',         href: '/community'           },
+      { label: 'AI Features',  href: '/ai-features'         },
+      { label: 'Competitors',  href: '/competitor-tracking' },
+      { label: 'Content Gaps', href: '/content-gap'         },
+      { label: 'Creator Hub',  href: '/monetize/hub'        },
+      { label: 'HERMES',       href: '/hermes/dashboard'    },
+      { label: 'Inbox',        href: '/inbox'               },
+      { label: 'Partners',     href: '/partners'            },
+      { label: 'Referrals',    href: '/affiliate'           },
+      { label: 'Roadmap',      href: '/roadmap'             },
+      { label: 'SM-Pulse',     href: '/sm-pulse'            },
+      { label: 'SM-Radar',     href: '/sm-radar'            },
+      { label: 'SOMA',         href: '/soma/dashboard'      },
     ],
   },
   {
     section: 'Manage',
     items: [
-      { icon: '🔗', label: 'Accounts',     href: '/accounts'              },
-      { icon: '📋', label: 'Activity',     href: '/activity'              },
-      { icon: '✅', label: 'Approvals',    href: '/approvals'             },
-      { icon: '📍', label: 'Destinations', href: '/accounts/destinations' },
-      { icon: '💬', label: 'Community',     href: 'https://discord.gg/2se6FGrbRU', newTab: true },
-      { icon: '🎮', label: 'Discord Hub',  href: '/discord'               },
-      { icon: '⚗️', label: 'Enki',         href: '/enki/dashboard'        },
-      { icon: '♻️', label: 'Evergreen',    href: '/evergreen'             },
-      { icon: '📡', label: 'RSS Import',   href: '/rss-import'            },
-      { icon: '📋', label: 'Schedules',    href: '/schedules'             },
-      { icon: '👥', label: 'Team',         href: '/team'                  },
+      { label: 'Accounts',     href: '/accounts'              },
+      { label: 'Activity',     href: '/activity'              },
+      { label: 'Approvals',    href: '/approvals'             },
+      { label: 'Destinations', href: '/accounts/destinations' },
+      { label: 'Community',     href: 'https://discord.gg/2se6FGrbRU', newTab: true },
+      { label: 'Discord Hub',  href: '/discord'               },
+      { label: 'Enki',         href: '/enki/dashboard'        },
+      { label: 'Evergreen',    href: '/evergreen'             },
+      { label: 'RSS Import',   href: '/rss-import'            },
+      { label: 'Schedules',    href: '/schedules'             },
+      { label: 'Team',         href: '/team'                  },
     ],
   },
   {
     section: 'Account',
     items: [
-      { icon: '🔔', label: 'Notifications', href: '/notifications'         },
-      { icon: '💛', label: 'Our Story',     href: '/story', newTab: true   },
-      { icon: '🔎', label: 'Search',        href: '/search'                },
-      { icon: '⚙️', label: 'Settings',      href: '/settings'              },
+      { label: 'Notifications', href: '/notifications'         },
+      { label: 'Our Story',     href: '/story', newTab: true   },
+      { label: 'Search',        href: '/search'                },
+      { label: 'Settings',      href: '/settings'              },
     ],
   },
 ]
@@ -459,7 +519,7 @@ function SidebarContent({
         return {
           ...group,
           items: [
-            { icon: '🏢', label: 'Workspaces', href: '/workspaces' },
+            { label: 'Workspaces', href: '/workspaces' },
             ...group.items,
           ],
         }
@@ -760,7 +820,8 @@ function SidebarContent({
                     outlineOffset: active ? '1px' : undefined,
                   }}
                 >
-                  <span>{item.icon}</span>
+                  {(() => { const Icon = NAV_ICONS[item.href] ?? Circle
+                    return <Icon className="w-[18px] h-[18px]" strokeWidth={1.75} /> })()}
                 </Link>
               )
             })}
@@ -795,7 +856,8 @@ function SidebarContent({
                             borderLeft:  active ? '3px solid var(--sidebar-accent)' : '3px solid transparent',
                             paddingLeft: active ? '10px' : '12px',
                           }}>
-                          <span>{item.icon}</span>
+                          {(() => { const Icon = NAV_ICONS[item.href] ?? Circle
+                            return <Icon className="w-4 h-4 flex-shrink-0" strokeWidth={1.75} /> })()}
                           <span className="flex-1">{NAV_LABEL[item.label] ?? item.label}{isAdminUser && item.href === '/partners' ? ' ⚙️' : ''}</span>
                           {item.href === '/ai-features' && !loading && (
                             <span className={`text-xs font-bold px-1.5 py-0.5 rounded-full ${
