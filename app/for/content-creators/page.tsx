@@ -40,7 +40,7 @@ const PAIN_POINTS = [
   },
   {
     before: 'Hootsuite wants $99/month. Buffer wants $18. You have 5 platforms and a $0 budget.',
-    after:  'Get the same scheduling power for $5/month — or completely free.',
+    after:  'Get the same scheduling power for $8/month — or completely free.',
     icon:   '💸',
   },
 ]

@@ -593,9 +593,9 @@ export default function AffiliatePage() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {[
-                  { label: 'At 10 users ($20/mo plan)', value: '~$60/mo' },
-                  { label: 'At 20 users ($20/mo plan)', value: '~$120/mo' },
-                  { label: 'At 100 users ($20/mo plan)', value: '~$800/mo' },
+                  { label: 'At 10 users ($29/mo plan)', value: '~$87/mo' },
+                  { label: 'At 20 users ($29/mo plan)', value: '~$174/mo' },
+                  { label: 'At 100 users ($29/mo plan)', value: '~$1,160/mo' },
                 ].map(ex => (
                   <div key={ex.label} className="bg-gray-50 dark:bg-gray-800 rounded-xl p-3 border border-theme text-center">
                     <p className="text-sm font-extrabold text-gray-900 dark:text-gray-100">{ex.value}</p>
