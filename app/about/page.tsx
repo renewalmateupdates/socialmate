@@ -126,7 +126,7 @@ export default function AboutPage() {
               { value: '7',    label: t('about.stat1_label') },
               { value: '670+', label: t('about.stat2_label') },
               { value: '8',    label: t('about.stat3_label') },
-              { value: '$5',   label: t('about.stat4_label') },
+              { value: '$8',   label: t('about.stat4_label') },
             ].map((stat) => (
               <div key={stat.label} className="bg-panel border border-edge rounded-2xl p-6">
                 <p className="text-3xl font-black text-amber-400 mb-2">{stat.value}</p>

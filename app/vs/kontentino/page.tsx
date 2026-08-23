@@ -198,7 +198,7 @@ export default function VsKontentinoPage() {
         <div className="bg-amber/10 text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Agency-grade tools at $29/month — not $99</h2>
           <p className="text-ink-high text-sm mb-6 max-w-lg mx-auto">
-            SocialMate Agency: 5 client workspaces, 15 seats, approval workflows, 7 platforms, 20+ AI tools, SOMA autonomous content — all for $20/month.
+            SocialMate Agency: 5 client workspaces, 15 seats, approval workflows, 7 platforms, 20+ AI tools, SOMA autonomous content — all for $29/month.
           </p>
           <Link href="/signup" className="inline-block bg-void text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

@@ -340,7 +340,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
           />
           <p className="font-mono text-numeral leading-none">
             <span className="bg-gradient-to-b from-amber-bright to-amber bg-clip-text text-transparent">
-              $5
+              $8
             </span>
           </p>
         </div>
@@ -348,7 +348,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ r
 
         <div className="mt-16 flex flex-col items-center gap-5">
           <span className="inline-flex items-center gap-2 rounded-full border border-amber/30 bg-amber/10 px-3.5 py-1.5 font-mono text-eyebrow uppercase text-amber">
-            Roughly one-twentieth of the going rate
+            Roughly one-twelfth of the going rate
           </span>
           <p className="mx-auto max-w-md text-body-lg text-pretty text-ink-muted">
             The rest of the category runs{' '}
