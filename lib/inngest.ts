@@ -25,6 +25,7 @@ import {
   truthCalcCorrelation,
   type TruthSignal, type TruthStrategy,
 } from '@/lib/enki/truth-mode'
+import { runCapReached, nextRunCount } from '@/lib/soma-runs'
 
 // ── Enki AES-256-CBC decrypt helper ───────────────────────────────────────────
 // Mirrors the encrypt/decrypt in app/api/enki/brokers/alpaca/route.ts
@@ -3741,6 +3742,16 @@ export const resetSomaCredits = inngest.createFunction(
         }
       }
 
+      // Belt and braces. The run cap no longer depends on this firing —
+      // lib/soma-runs.ts derives the period from last_generated_at — but
+      // zeroing the column keeps the number shown in the UI honest on the 1st
+      // for projects that have not generated yet this month.
+      const { error: runsErr } = await admin
+        .from('soma_projects')
+        .update({ runs_this_month: 0 })
+        .gt('runs_this_month', 0)
+      if (runsErr) console.error('[ResetSomaCredits] runs_this_month reset failed:', runsErr.message)
+
       console.log(`[ResetSomaCredits] Reset ${resetCount} workspaces`)
       return { reset: resetCount }
     })
@@ -3887,9 +3898,10 @@ export const somaAutopilotRun = inngest.createFunction(
         // Skip paused projects
         if (p.paused) return false
         const remaining = Math.max(0, (ws.soma_credits_monthly ?? 0) - (ws.soma_credits_used ?? 0)) + (ws.soma_credits_purchased ?? 0)
-        // Run cap check
+        // Run cap check — see lib/soma-runs.ts. The stored counter reads as
+        // zero once the month rolls over, which is the reset.
         const runCap = p.mode === 'full_send' ? 12 : 8
-        if ((p.runs_this_month ?? 0) >= runCap) return false
+        if (runCapReached(p, runCap)) return false
         return remaining >= GENERATE_COST
       })
     })
@@ -4155,7 +4167,7 @@ Rules:
 
           // Update project runs
           await admin.from('soma_projects')
-            .update({ runs_this_month: (project.runs_this_month ?? 0) + 1, last_generated_at: now.toISOString() })
+            .update({ runs_this_month: nextRunCount(project), last_generated_at: now.toISOString() })
             .eq('id', project.id)
 
           // Deduct credits
@@ -4258,7 +4270,7 @@ export const somaFullSendDailyRun = inngest.createFunction(
         if (p.paused) return false
         const remaining = Math.max(0, (ws.soma_credits_monthly ?? 0) - (ws.soma_credits_used ?? 0)) + (ws.soma_credits_purchased ?? 0)
         // Full Send run cap: 30 per month (daily = ~30/mo)
-        if ((p.runs_this_month ?? 0) >= 30) return false
+        if (runCapReached(p, 30)) return false
         return remaining >= GENERATE_COST
       })
     })
@@ -4410,7 +4422,7 @@ Generate exactly ${MAX_PPD} posts per platform.`
 
             // Update run counter
             await admin.from('soma_projects').update({
-              runs_this_month: (project.runs_this_month ?? 0) + 1,
+              runs_this_month: nextRunCount(project),
               last_generated_at: new Date().toISOString(),
             }).eq('id', project.id)
           }
