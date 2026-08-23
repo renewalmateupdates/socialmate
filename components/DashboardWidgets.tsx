@@ -1,14 +1,22 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import PlatformIcon from '@/components/landing/PlatformIcon'
+import { useI18n } from '@/contexts/I18nContext'
+import { localeToBCP47 } from '@/lib/i18n'
+import { Check, Flame, Inbox, Moon, Settings2, X } from 'lucide-react'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
 type WidgetId = 'recent-activity' | 'credits-remaining' | 'top-platform' | 'streak-widget' | 'upcoming-posts'
 
+type T = (key: string, params?: Record<string, string | number>) => string
+
 type WidgetDef = {
   id: WidgetId
-  title: string
+  /** i18n key, resolved at render — NOT a baked English string, which is what
+      left the widget titles untranslated while the greeting above them wasn't. */
+  titleKey: string
   defaultVisible: boolean
 }
 
@@ -23,153 +31,163 @@ type WidgetData = {
 // ── Config ───────────────────────────────────────────────────────────────────
 
 const WIDGET_DEFS: WidgetDef[] = [
-  { id: 'recent-activity',   title: 'Recent Activity',    defaultVisible: true  },
-  { id: 'credits-remaining', title: 'Credits Remaining',  defaultVisible: true  },
-  { id: 'top-platform',      title: 'Top Platform',       defaultVisible: true  },
-  { id: 'streak-widget',     title: 'Posting Streak',     defaultVisible: false },
-  { id: 'upcoming-posts',    title: 'Upcoming Posts',     defaultVisible: false },
+  { id: 'recent-activity',   titleKey: 'app_dashboard.w_recent_activity',   defaultVisible: true  },
+  { id: 'credits-remaining', titleKey: 'app_dashboard.w_credits_remaining', defaultVisible: true  },
+  { id: 'top-platform',      titleKey: 'app_dashboard.w_top_platform',      defaultVisible: true  },
+  { id: 'streak-widget',     titleKey: 'app_dashboard.w_streak',            defaultVisible: false },
+  { id: 'upcoming-posts',    titleKey: 'app_dashboard.w_upcoming',          defaultVisible: false },
 ]
 
 const LS_KEY = 'dashboard_card_config'
 
-const PLATFORM_ICONS: Record<string, string> = {
-  discord: '💬', bluesky: '🦋', telegram: '✈️', mastodon: '🐘',
-  linkedin: '💼', youtube: '▶️', pinterest: '📌', reddit: '🤖',
-  instagram: '📸', tiktok: '🎵', twitter: '🐦', facebook: '📘',
-}
+// `twitter` is the stored platform value; PlatformIcon indexes that mark as `x`.
+const ICON_KEY: Record<string, string> = { twitter: 'x' }
 
-function relativeTime(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime()
+function relativeTime(dateStr: string, t: T): string {
+  const diff  = Date.now() - new Date(dateStr).getTime()
   const mins  = Math.floor(diff / 60000)
   const hours = Math.floor(diff / 3600000)
   const days  = Math.floor(diff / 86400000)
-  if (mins < 2)   return 'just now'
-  if (mins < 60)  return `${mins}m ago`
-  if (hours < 24) return `${hours}h ago`
-  return `${days}d ago`
+  if (mins < 2)   return t('app_dashboard.time_just_now')
+  if (mins < 60)  return t('app_dashboard.time_m_ago', { n: mins })
+  if (hours < 24) return t('app_dashboard.time_h_ago', { n: hours })
+  return t('app_dashboard.time_d_ago', { n: days })
+}
+
+// ── Shared chrome — same primitives the dashboard page uses ──────────────────
+
+function Label({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  return (
+    <span className={`font-mono text-[10px] uppercase tracking-[0.16em] text-app-muted ${className}`}>
+      {children}
+    </span>
+  )
+}
+
+function Readout({ value, className = '' }: { value: string | number; className?: string }) {
+  return <span className={`font-mono tabular-nums ${className}`}>{value}</span>
 }
 
 // ── Individual widget cards ──────────────────────────────────────────────────
 
-function RecentActivityCard({ data }: { data: WidgetData['recent_activity'] }) {
+function RecentActivityCard({ data, t }: { data: WidgetData['recent_activity']; t: T }) {
   if (!data.length) {
-    return (
-      <div className="text-center py-6">
-        <p className="text-sm text-gray-400 dark:text-gray-500">No activity yet — your workspace events will appear here.</p>
-      </div>
-    )
+    return <p className="text-xs text-app-faint py-4">{t('app_dashboard.w_no_activity')}</p>
   }
   return (
-    <div className="space-y-2">
+    <div className="space-y-2.5">
       {data.map(event => (
         <div key={event.id} className="flex items-start gap-2.5">
-          <div className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600 flex-shrink-0 mt-1.5" />
+          <div className="w-1 h-1 rounded-full bg-amber/60 flex-shrink-0 mt-2" />
           <div className="flex-1 min-w-0">
-            <p className="text-xs text-gray-700 dark:text-gray-300 line-clamp-1">{event.description}</p>
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{relativeTime(event.created_at)}</p>
+            <p className="text-xs text-app-ink line-clamp-1">{event.description}</p>
+            <Readout value={relativeTime(event.created_at, t)} className="text-[10px] text-app-faint mt-0.5 block" />
           </div>
         </div>
       ))}
-      <Link href="/activity" className="text-xs text-gray-400 hover:text-black dark:hover:text-white transition-colors mt-1 inline-block">
-        View all →
+      <Link href="/activity" className="text-[11px] text-app-muted hover:text-theme transition-colors mt-1 inline-block">
+        {t('app_common.view_all')} →
       </Link>
     </div>
   )
 }
 
-function CreditsRemainingCard({ data }: { data: WidgetData['credits'] }) {
+function CreditsRemainingCard({ data, t }: { data: WidgetData['credits']; t: T }) {
   return (
     <div>
-      <div className="flex items-end gap-1 mb-2">
-        <span className="text-4xl font-extrabold text-gray-900 dark:text-white leading-none">
-          {data.remaining.toLocaleString()}
-        </span>
-        <span className="text-sm text-gray-400 dark:text-gray-500 mb-0.5">credits</span>
+      <div className="flex items-end gap-1.5 mb-2">
+        <Readout value={data.remaining.toLocaleString()} className="text-4xl font-semibold text-theme leading-none" />
+        <span className="text-xs text-app-faint mb-1">{t('app_dashboard.w_credits')}</span>
       </div>
-      <p className="text-xs text-gray-400 dark:text-gray-500">
-        Monthly reset in{' '}
-        <span className="font-semibold text-gray-600 dark:text-gray-300">{data.days_until_reset} day{data.days_until_reset !== 1 ? 's' : ''}</span>
+      <p className="text-[11px] text-app-faint">
+        {t('app_dashboard.w_reset_in')}{' '}
+        <Readout value={data.days_until_reset} className="text-app-ink font-semibold" />{' '}
+        {data.days_until_reset === 1 ? t('app_dashboard.w_day') : t('app_dashboard.w_days')}
       </p>
-      <Link href="/settings?tab=Plan" className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline mt-2 inline-block">
-        Get more credits →
+      <Link href="/settings?tab=Plan" className="text-[11px] font-semibold text-violet-ink hover:underline mt-2.5 inline-block">
+        {t('app_dashboard.get_more_credits')} →
       </Link>
     </div>
   )
 }
 
-function TopPlatformCard({ data }: { data: WidgetData['top_platform'] }) {
+function TopPlatformCard({ data, t }: { data: WidgetData['top_platform']; t: T }) {
   if (!data) {
-    return (
-      <div className="text-center py-4">
-        <p className="text-sm text-gray-400 dark:text-gray-500">Schedule posts to see your top platform this month.</p>
-      </div>
-    )
+    return <p className="text-xs text-app-faint py-4">{t('app_dashboard.w_no_top_platform')}</p>
   }
-  const icon = PLATFORM_ICONS[data.platform] ?? '📱'
   const name = data.platform.charAt(0).toUpperCase() + data.platform.slice(1)
   return (
-    <div className="flex items-center gap-4">
-      <span className="text-4xl">{icon}</span>
-      <div>
-        <p className="text-lg font-extrabold text-gray-900 dark:text-white">{name}</p>
-        <p className="text-xs text-gray-400 dark:text-gray-500">
-          {data.count} post{data.count !== 1 ? 's' : ''} scheduled this month
+    <div className="flex items-center gap-3.5">
+      <div className="w-11 h-11 rounded-xl bg-app-raised border border-theme flex items-center justify-center flex-shrink-0">
+        <PlatformIcon name={ICON_KEY[data.platform] ?? data.platform} size={20} mono className="text-theme" />
+      </div>
+      <div className="min-w-0">
+        <p className="text-base font-semibold text-theme">{name}</p>
+        <p className="text-[11px] text-app-faint">
+          {t('app_dashboard.w_posts_this_month', { count: data.count })}
         </p>
       </div>
     </div>
   )
 }
 
-function StreakWidgetCard({ data }: { data: number }) {
+function StreakWidgetCard({ data, t }: { data: number; t: T }) {
   return (
-    <div className="flex items-center gap-3">
-      <span className="text-4xl">{data > 0 ? '🔥' : '💤'}</span>
-      <div>
-        <p className="text-3xl font-extrabold text-orange-500 leading-none">{data}</p>
-        <p className="text-xs text-gray-400 dark:text-gray-500">day{data !== 1 ? 's' : ''} streak</p>
+    <div className="flex items-center gap-3.5">
+      <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 border ${
+        data > 0 ? 'bg-amber/12 border-amber/30' : 'bg-app-raised border-theme'
+      }`}>
+        {data > 0 ? <Flame className="w-5 h-5 text-amber-ink" /> : <Moon className="w-5 h-5 text-app-faint" />}
       </div>
-      <Link href="/streak" className="ml-auto text-xs text-gray-400 hover:text-black dark:hover:text-white transition-colors">
-        View →
+      <div>
+        <Readout value={data} className={`text-3xl font-semibold leading-none ${data > 0 ? 'text-amber-ink' : 'text-app-faint'}`} />
+        <Label className="block mt-1">
+          {data === 1 ? t('app_dashboard.streak_unit_one') : t('app_dashboard.streak_unit_other')}
+        </Label>
+      </div>
+      <Link href="/streak" className="ml-auto text-[11px] text-app-muted hover:text-theme transition-colors">
+        {t('app_dashboard.w_view')} →
       </Link>
     </div>
   )
 }
 
-function UpcomingPostsCard({ data }: { data: WidgetData['upcoming'] }) {
+function UpcomingPostsCard({ data, t, bcp47 }: { data: WidgetData['upcoming']; t: T; bcp47: string }) {
   if (!data.length) {
     return (
-      <div className="text-center py-4">
-        <p className="text-sm text-gray-400 dark:text-gray-500">No upcoming posts.</p>
-        <Link href="/compose" className="text-xs font-bold text-black dark:text-white mt-1 inline-block hover:underline">
-          Schedule one →
+      <div className="py-3">
+        <p className="text-xs text-app-faint">{t('app_dashboard.w_no_upcoming')}</p>
+        <Link href="/compose" className="text-[11px] font-semibold text-amber-ink mt-1.5 inline-block hover:opacity-80">
+          {t('app_dashboard.w_schedule_one')} →
         </Link>
       </div>
     )
   }
   return (
-    <div className="space-y-2">
+    <div className="space-y-1.5">
       {data.map(post => {
         const d = new Date(post.scheduled_at)
-        const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' at ' +
-          d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+        const label =
+          new Intl.DateTimeFormat(bcp47, { month: 'short', day: 'numeric' }).format(d) + ' · ' +
+          new Intl.DateTimeFormat(bcp47, { hour: 'numeric', minute: '2-digit' }).format(d)
         return (
-          <div key={post.id} className="flex items-start gap-2.5 p-2.5 bg-gray-50 dark:bg-gray-800 rounded-xl">
-            <div className="flex gap-0.5 flex-shrink-0 mt-0.5">
+          <div key={post.id} className="flex items-start gap-2.5 p-2.5 bg-app-raised border border-theme rounded-xl">
+            <div className="flex gap-1 flex-shrink-0 mt-0.5">
               {(post.platforms ?? []).slice(0, 2).map(p => (
-                <span key={p} className="text-xs">{PLATFORM_ICONS[p] ?? '📱'}</span>
+                <PlatformIcon key={p} name={ICON_KEY[p] ?? p} size={11} mono className="text-app-faint" />
               ))}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 line-clamp-1">
-                {post.content || '(no content)'}
+              <p className="text-xs text-app-ink line-clamp-1">
+                {post.content || t('app_dashboard.w_no_content')}
               </p>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{label}</p>
+              <Readout value={label} className="text-[10px] text-app-faint mt-0.5 block" />
             </div>
           </div>
         )
       })}
-      <Link href="/queue" className="text-xs text-gray-400 hover:text-black dark:hover:text-white transition-colors mt-1 inline-block">
-        View all →
+      <Link href="/queue" className="text-[11px] text-app-muted hover:text-theme transition-colors mt-1 inline-block">
+        {t('app_common.view_all')} →
       </Link>
     </div>
   )
@@ -181,47 +199,43 @@ function CustomizePanel({
   visible,
   onToggle,
   onClose,
+  t,
 }: {
   visible: WidgetId[]
   onToggle: (id: WidgetId) => void
   onClose: () => void
+  t: T
 }) {
   return (
-    <div className="absolute right-0 top-full mt-2 z-50 w-56 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-xl p-4">
+    <div className="absolute right-0 top-full mt-2 z-50 w-60 bg-surface border border-theme-md rounded-2xl shadow-2xl p-4">
       <div className="flex items-center justify-between mb-3">
-        <p className="text-xs font-extrabold text-gray-700 dark:text-gray-200 uppercase tracking-widest">Widgets</p>
+        <Label>{t('app_dashboard.widgets')}</Label>
         <button
           onClick={onClose}
-          className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-sm"
-          aria-label="Close"
-        >×</button>
+          className="w-6 h-6 flex items-center justify-center text-app-faint hover:text-theme transition-colors rounded-lg hover:bg-app-fill"
+          aria-label={t('app_common.close')}
+        ><X className="w-3 h-3" /></button>
       </div>
-      <div className="space-y-1">
+      <div className="space-y-0.5">
         {WIDGET_DEFS.map(def => {
           const isVisible = visible.includes(def.id)
           return (
-            <label
+            <button
               key={def.id}
-              className="flex items-center gap-2.5 cursor-pointer p-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+              type="button"
+              onClick={() => onToggle(def.id)}
+              aria-pressed={isVisible}
+              className="w-full flex items-center gap-2.5 p-2 rounded-lg hover:bg-app-raised transition-colors text-left"
             >
-              <div
-                className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                  isVisible
-                    ? 'bg-black dark:bg-white border-black dark:border-white'
-                    : 'border-gray-300 dark:border-gray-600'
+              <span
+                className={`w-4 h-4 rounded-[5px] border flex items-center justify-center flex-shrink-0 transition-all ${
+                  isVisible ? 'bg-amber border-amber' : 'border-theme-md'
                 }`}
-                onClick={() => onToggle(def.id)}
               >
-                {isVisible && (
-                  <svg viewBox="0 0 10 8" className="w-2.5 h-2 text-white dark:text-black" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M1 4l2.5 2.5L9 1" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                )}
-              </div>
-              <span className="text-xs font-semibold text-gray-700 dark:text-gray-300 select-none" onClick={() => onToggle(def.id)}>
-                {def.title}
+                {isVisible && <Check className="w-2.5 h-2.5 text-void" strokeWidth={3.5} />}
               </span>
-            </label>
+              <span className="text-xs font-medium text-app-ink select-none">{t(def.titleKey)}</span>
+            </button>
           )
         })}
       </div>
@@ -237,6 +251,8 @@ export default function DashboardWidgets() {
   const [panelOpen, setPanelOpen]           = useState(false)
   const [widgetData, setWidgetData]         = useState<WidgetData | null>(null)
   const [loading, setLoading]               = useState(true)
+  const { t, locale } = useI18n()
+  const bcp47 = localeToBCP47(locale)
 
   // Initialise from localStorage
   useEffect(() => {
@@ -285,66 +301,66 @@ export default function DashboardWidgets() {
 
   if (!mounted) return null
 
-  // Nothing visible and no customize button needed if all hidden — still render the button
   const hasVisibleWidgets = visibleWidgets.length > 0
 
   return (
-    <div className="mb-6">
+    <div className="mb-7">
       {/* Section header with Customize button */}
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-xs font-extrabold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-          Dashboard Widgets
-        </h2>
+        <Label>{t('app_dashboard.widgets_title')}</Label>
         <div className="relative" data-customize-panel>
           <button
             onClick={() => setPanelOpen(p => !p)}
-            className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 dark:text-gray-400 hover:text-black dark:hover:text-white bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 px-3 py-1.5 rounded-xl transition-all"
-            aria-label="Customize dashboard"
+            className="flex items-center gap-1.5 text-[11px] font-semibold text-app-muted hover:text-theme border border-theme hover:border-theme-md px-3 py-1.5 rounded-xl transition-all"
+            aria-label={t('app_dashboard.customize')}
+            aria-expanded={panelOpen}
           >
-            <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
-              <path fillRule="evenodd" d="M7.84 1.804A1 1 0 018.82 1h2.36a1 1 0 01.98.804l.331 1.652a6.993 6.993 0 011.929 1.115l1.598-.54a1 1 0 011.186.447l1.18 2.044a1 1 0 01-.205 1.251l-1.267 1.113a7.047 7.047 0 010 2.228l1.267 1.113a1 1 0 01.206 1.25l-1.18 2.045a1 1 0 01-1.187.447l-1.598-.54a6.993 6.993 0 01-1.929 1.115l-.33 1.652a1 1 0 01-.98.804H8.82a1 1 0 01-.98-.804l-.331-1.652a6.993 6.993 0 01-1.929-1.115l-1.598.54a1 1 0 01-1.186-.447l-1.18-2.044a1 1 0 01.205-1.251l1.267-1.114a7.05 7.05 0 010-2.227L1.821 7.773a1 1 0 01-.206-1.25l1.18-2.045a1 1 0 011.187-.447l1.598.54A6.993 6.993 0 017.51 3.456l.33-1.652zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
-            </svg>
-            Customize
+            <Settings2 className="w-3.5 h-3.5" />
+            {t('app_dashboard.customize')}
           </button>
           {panelOpen && (
             <CustomizePanel
               visible={visibleWidgets}
               onToggle={toggleWidget}
               onClose={() => setPanelOpen(false)}
+              t={t}
             />
           )}
         </div>
       </div>
 
       {/* Widget grid — only renders visible widgets */}
-      {hasVisibleWidgets && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {hasVisibleWidgets ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {WIDGET_DEFS.filter(def => visibleWidgets.includes(def.id)).map(def => (
             <div
               key={def.id}
-              className="bg-surface border border-theme rounded-2xl p-4"
+              className="bg-surface border border-theme rounded-2xl p-5"
             >
-              <h3 className="text-xs font-extrabold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-3">
-                {def.title}
-              </h3>
+              <Label className="block mb-3.5">{t(def.titleKey)}</Label>
               {loading ? (
                 <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 rounded-full border-2 border-gray-200 dark:border-gray-700 border-t-gray-500 animate-spin" />
-                  <span className="text-xs text-gray-400">Loading…</span>
+                  <div className="w-3.5 h-3.5 rounded-full border-2 border-app-fill border-t-amber animate-spin" />
+                  <span className="text-xs text-app-faint">{t('app_common.loading')}</span>
                 </div>
               ) : widgetData ? (
                 <>
-                  {def.id === 'recent-activity'   && <RecentActivityCard data={widgetData.recent_activity} />}
-                  {def.id === 'credits-remaining'  && <CreditsRemainingCard data={widgetData.credits} />}
-                  {def.id === 'top-platform'       && <TopPlatformCard data={widgetData.top_platform} />}
-                  {def.id === 'streak-widget'      && <StreakWidgetCard data={widgetData.streak} />}
-                  {def.id === 'upcoming-posts'     && <UpcomingPostsCard data={widgetData.upcoming} />}
+                  {def.id === 'recent-activity'   && <RecentActivityCard  data={widgetData.recent_activity} t={t} />}
+                  {def.id === 'credits-remaining' && <CreditsRemainingCard data={widgetData.credits}        t={t} />}
+                  {def.id === 'top-platform'      && <TopPlatformCard      data={widgetData.top_platform}   t={t} />}
+                  {def.id === 'streak-widget'     && <StreakWidgetCard     data={widgetData.streak}         t={t} />}
+                  {def.id === 'upcoming-posts'    && <UpcomingPostsCard    data={widgetData.upcoming}       t={t} bcp47={bcp47} />}
                 </>
               ) : (
-                <p className="text-xs text-gray-400 dark:text-gray-500">Unable to load widget data.</p>
+                <p className="text-xs text-app-faint">{t('app_dashboard.w_unable_load')}</p>
               )}
             </div>
           ))}
+        </div>
+      ) : (
+        <div className="bg-surface border border-theme border-dashed rounded-2xl p-6 text-center">
+          <Inbox className="w-6 h-6 text-app-ghost mx-auto mb-2.5" strokeWidth={1.5} />
+          <p className="text-xs text-app-faint">{t('app_dashboard.w_none_visible')}</p>
         </div>
       )}
     </div>

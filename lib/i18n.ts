@@ -91,3 +91,26 @@ export function detectLocale(): Locale {
   } catch {}
   return 'en'
 }
+
+/**
+ * Map a SocialMate locale to a BCP-47 tag for Intl.
+ *
+ * Dates, times and weekday names used to be formatted with a hardcoded 'en-US'
+ * and hardcoded ['Sun','Mon',...] arrays, so a German user got a translated
+ * greeting above an English calendar. Anything rendering a date in the app
+ * should format it through this.
+ */
+export function localeToBCP47(locale: Locale): string {
+  const map: Record<Locale, string> = {
+    en: 'en-US',
+    es: 'es-ES',
+    de: 'de-DE',
+    fr: 'fr-FR',
+    pt: 'pt-BR',
+    ru: 'ru-RU',
+    zh: 'zh-CN',
+    ja: 'ja-JP',
+    ko: 'ko-KR',
+  }
+  return map[locale] ?? 'en-US'
+}

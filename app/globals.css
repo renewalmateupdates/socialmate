@@ -41,6 +41,32 @@
   --color-ink-body:  #D6CFC7; /* 12.73:1 — AA. */
   --color-ink-high:  #F7F3EF; /* 17.79:1 — AA. Warm white, never #FFF. */
 
+  /* ── Warm grey ramp — the app interior's lever ────────────────────────────
+     Tailwind's default `gray` is blue-shifted (gray-800 is rgb(31,41,55) — a
+     genuinely blue colour). That is invisible on a blue-black background and
+     glaringly obvious on this warm one: every `dark:bg-gray-800` card would sit
+     on --color-void like a cold blue patch stuck to warm metal.
+
+     The app interior is ~150 pages written against gray-*. Rewriting them all is
+     not on. Redefining the ramp is: Tailwind v4 resolves `bg-gray-800` through
+     these variables, so overriding them here warms every page in the product at
+     once, with no file edits and nothing to keep in sync.
+
+     The dark end is deliberately pinned to the instrument tokens — gray-950 is
+     panel, gray-900 is raised, gray-800 is edge — so a page using gray-* and a
+     page using the tokens land on exactly the same surfaces. */
+  --color-gray-50:  #FAF8F6;
+  --color-gray-100: #F2EEEA;
+  --color-gray-200: #E4DED8;
+  --color-gray-300: #CFC7BF;
+  --color-gray-400: #A79D94;
+  --color-gray-500: #857A71;
+  --color-gray-600: #6B6057;
+  --color-gray-700: #453D37;
+  --color-gray-800: #2C2622; /* = --color-edge   */
+  --color-gray-900: #1F1B18; /* = --color-raised */
+  --color-gray-950: #161311; /* = --color-panel  */
+
   /* ── The three voices ─────────────────────────────────────────────────────
      Each carries ONE fixed meaning, on every page, without exception.
      If a section wants color and none of these fits semantically, it gets
@@ -64,6 +90,18 @@
   --color-violet:      #9D6BFF; /*  5.59:1 AA */
   --color-violet-deep: #6B42C4;
   --color-jade:        #4FD787; /* 10.66:1 AA */
+
+  /* ── Accent INK — the same three voices, but legible as text ──────────────
+     A fill and a label cannot share one value across two themes. #D4A017 on
+     the void measures 8.27:1 and on white measures 2.3:1, which is illegal for
+     text. So: `bg-amber` stays bright gold in both themes (a gold chip on white
+     looks right), while `text-amber-ink` darkens in light scope. Overrides live
+     in `:root:not(.dark)` further down.
+
+     Light values measured on #FFF: gold 5.71:1, violet 7.34:1, jade 4.86:1. */
+  --color-amber-ink:  #D4A017;
+  --color-violet-ink: #9D6BFF;
+  --color-jade-ink:   #4FD787;
   --color-jade-deep:   #2A9E5C;
 
   /* ── The one documented exception ─────────────────────────────────────────
@@ -167,18 +205,22 @@
 
 /* ── THEME VARIABLES ─────────────────────────────────────── */
 :root {
-  --bg:           #f9fafb;
-  --surface:      #ffffff;
-  --border:       #f3f4f6;
-  --border-mid:   #e5e7eb;
-  --text:         #111827;
-  --text-muted:   #6b7280;
-  --text-faint:   #9ca3af;
+  /* Warmed alongside the dark scope so light mode belongs to the same system.
+     Same relationships as before, hue-shifted off blue-grey — a cool #6b7280
+     label on a warm #FAF8F6 card is the light-mode version of the exact
+     mismatch the warm grey ramp above exists to fix. */
+  --bg:           #FAF8F6;
+  --surface:      #FFFFFF;
+  --border:       #EDE9E5;
+  --border-mid:   #DDD7D1;
+  --text:         #1F1B18;
+  --text-muted:   #6E645C;
+  --text-faint:   #948A81;
   --accent:       #000000;
   --accent-fg:    #ffffff;
   --accent-color: #EC4899;
-  --background:   #f9fafb;
-  --foreground:   #111827;
+  --background:   #FAF8F6;
+  --foreground:   #1F1B18;
 
   /* Sidebar theme vars — default (white sidebar) */
   --sidebar-bg:     #ffffff;
@@ -188,6 +230,24 @@
   --sidebar-border: #f3f4f6;
   --sidebar-active: #f9fafb;
   --sidebar-accent: #000000;
+
+  /* Interior surfaces, one step in from --surface. `raised` is a panel inside a
+     panel, `fill` is a control or hover state, `bar` is a chart bar. `ink` is
+     body copy one notch softer than --text; `ghost` is the quietest decorative
+     tier and is never load-bearing. */
+  --raised: #F4F2F0;
+  --fill:   #E8E4E0;
+  --bar:    #D6D0C9;
+  --ink:    #3A332E;
+  --ghost:  #B8B0A8;
+}
+
+/* Light scope only. `:root:not(.dark)` (0,2,0) outranks the `:root` that
+   @theme emits, and cannot match a page whose <html> carries .dark. */
+:root:not(.dark) {
+  --color-amber-ink:  #8A6508;
+  --color-violet-ink: #5B32B0;
+  --color-jade-ink:   #157A42;
 }
 
 /* Dark mode — base content area */
@@ -208,24 +268,41 @@
      subtree inherits the light value. One line, fixes every public page. */
   color: var(--text);
 
-  --bg:         #0f1117;
-  --surface:    #1a1d27;
-  --border:     #2a2d3a;
-  --border-mid: #3a3d4a;
-  --text:       #f1f5f9;
-  --text-muted: #94a3b8;
-  --text-faint: #64748b;
-  --background: #0f1117;
-  --foreground: #f1f5f9;
+  /* Warmed to the instrument palette (July 2026 design system) so the product
+     interior and the public site are the same object. These were cool slate
+     (#0f1117 / #1a1d27 / slate ink); the values below are void / panel / edge
+     and the measured ink ramp, identical to @theme above. Every page that uses
+     bg-theme / bg-surface / border-theme inherits it with no edit. */
+  --bg:         #0D0B0A; /* = --color-void     */
+  --surface:    #161311; /* = --color-panel    */
+  --border:     #2C2622; /* = --color-edge     */
+  --border-mid: #3D352F; /* = --color-edge-lit */
+  --text:       #F7F3EF; /* = --color-ink-high */
+  --text-muted: #9A9089; /* = --color-ink-muted */
+  --text-faint: #8A7F76; /* = --color-ink-faint */
+  --background: #0D0B0A;
+  --foreground: #F7F3EF;
 
   /* Default dark sidebar */
-  --sidebar-bg:     #13151f;
-  --sidebar-fg:     #f1f5f9;
-  --sidebar-muted:  #94a3b8;
-  --sidebar-faint:  #64748b;
-  --sidebar-border: #2a2d3a;
-  --sidebar-active: #0f1117;
-  --sidebar-accent: #f1f5f9;
+  --sidebar-bg:     #121010;
+  --sidebar-fg:     #F7F3EF;
+  --sidebar-muted:  #9A9089;
+  --sidebar-faint:  #8A7F76;
+  --sidebar-border: #2C2622;
+  --sidebar-active: #1F1B18;
+  --sidebar-accent: #D4A017;
+
+  --raised: #1F1B18; /* = --color-raised */
+  --fill:   #2C2622; /* = --color-edge   */
+  --bar:    #453D37;
+  --ink:    #D6CFC7; /* = --color-ink-body */
+  --ghost:  #5C534C;
+
+  /* Re-asserted, not inherited: public pages force dark with .dark on a wrapper
+     DIV, so without this they would pick up the light inks from :root. */
+  --color-amber-ink:  #D4A017;
+  --color-violet-ink: #9D6BFF;
+  --color-jade-ink:   #4FD787;
 }
 
 /* ── SIDEBAR COLOR THEMES ──────────────────────────────────── */
@@ -688,11 +765,25 @@ body {
 }
 
 /* ── Utility classes using CSS vars (use these in components) */
-.bg-theme        { background-color: var(--bg); }
-.bg-surface      { background-color: var(--surface); }
-.border-theme    { border-color: var(--border); }
-.border-theme-md { border-color: var(--border-mid); }
-.text-theme      { color: var(--text); }
+/* @utility, not a plain class: Tailwind only generates variants for utilities
+   it has been told about, so as bare CSS `hover:border-theme-md` compiled to
+   nothing at all. */
+@utility bg-theme        { background-color: var(--bg); }
+@utility bg-surface      { background-color: var(--surface); }
+@utility border-theme    { border-color: var(--border); }
+@utility border-theme-md { border-color: var(--border-mid); }
+@utility text-theme      { color: var(--text); }
+
+/* Interior surfaces + ink. Prefixed `app-` because bg-raised / text-muted are
+   already taken by the @theme tokens the public pages use. */
+@utility bg-app-raised   { background-color: var(--raised); }
+@utility bg-app-fill     { background-color: var(--fill); }
+@utility bg-app-bar      { background-color: var(--bar); }
+@utility text-app-ink    { color: var(--ink); }
+@utility text-app-muted  { color: var(--text-muted); }
+@utility text-app-faint  { color: var(--text-faint); }
+@utility text-app-ghost  { color: var(--ghost); }
+@utility border-app-fill { border-color: var(--fill); }
 .text-muted      { color: var(--text-muted); }
 .text-faint      { color: var(--text-faint); }
 .bg-sidebar      { background-color: var(--sidebar-bg); }
