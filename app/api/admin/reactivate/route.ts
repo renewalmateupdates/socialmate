@@ -27,6 +27,27 @@ const MIN_AGE_DAYS = 14
 
 interface Target { id: string; email: string; name: string; ageDays: number }
 
+// The honest version of this email is also the strongest one. They did not fail
+// to set it up; the setup step gave up on them after 90 seconds while they were
+// still in the other tab finishing.
+//
+// Extracted so the ?to= dry run renders exactly what the real send renders. Two
+// copies of this string would diverge the first time one of them was edited.
+function reactivationHtml(name: string): string {
+  return lifecycleEmail({
+    headline: `${name}, that was our fault.`,
+    paragraphs: [
+      'You signed up for SocialMate and never got a platform connected. I went looking for why, and it turns out the setup step was broken.',
+      'It sent you off to another tab to connect your account, then stopped listening after ninety seconds. If you took longer than that, and almost everyone does, you came back to a page that had quietly given up, with no way to tell it you were done.',
+      'That is fixed now. It waits properly, notices the moment you come back, and there is a button to make it check. Connecting takes about thirty seconds on Bluesky, Mastodon, Discord or Telegram, none of which need approval or a card.',
+      'If you would rather tell me what else was wrong, reply to this. It goes to me and I read all of them.',
+    ],
+    ctaLabel: 'Connect a platform',
+    ctaHref: `${APP_URL}/accounts`,
+    footnote: 'One-off note about a bug that affected your account. You will not get a series of these.',
+  })
+}
+
 async function audience(): Promise<{ targets: Target[]; alreadySent: number; tooNew: number }> {
   const admin = getSupabaseAdmin()
   const adminEmail = (process.env.ADMIN_EMAIL || 'socialmatehq@gmail.com').toLowerCase()
@@ -76,33 +97,39 @@ export async function GET() {
   })
 }
 
-export async function POST() {
+export async function POST(req: Request) {
   if (!await requireAdmin()) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
+  const resendClient = new Resend(process.env.RESEND_API_KEY)
+
+  // ── Dry run ───────────────────────────────────────────────────────────────
+  // ?to=you@example.com sends one copy and records nothing. Use this before the
+  // real send; there is no second attempt at the real one.
+  const testTo = new URL(req.url).searchParams.get('to')
+  if (testTo) {
+    try {
+      await resendClient.emails.send({
+        from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
+        to: testTo,
+        subject: '[TEST] That was our fault, and it is fixed',
+        html: reactivationHtml(testTo.split('@')[0]),
+      })
+      return NextResponse.json({ test: true, sentTo: testTo, recorded: false })
+    } catch (e: any) {
+      return NextResponse.json({ test: true, error: e?.message ?? 'send failed' }, { status: 500 })
+    }
+  }
 
   const { targets } = await audience()
   if (targets.length === 0) return NextResponse.json({ sent: 0, note: 'nobody eligible' })
 
   const admin  = getSupabaseAdmin()
-  const resend = new Resend(process.env.RESEND_API_KEY)
+  const resend = resendClient
   let sent = 0
   const failed: string[] = []
 
   for (const t of targets) {
-    // The honest version of this email is also the strongest one. They did not
-    // fail to set it up; the setup step gave up on them after 90 seconds while
-    // they were still in the other tab finishing.
-    const html = lifecycleEmail({
-      headline: `${t.name}, that was our fault.`,
-      paragraphs: [
-        'You signed up for SocialMate and never got a platform connected. I went looking for why, and it turns out the setup step was broken.',
-        'It sent you off to another tab to connect your account, then stopped listening after ninety seconds. If you took longer than that, and almost everyone does, you came back to a page that had quietly given up, with no way to tell it you were done.',
-        'That is fixed now. It waits properly, notices the moment you come back, and there is a button to make it check. Connecting takes about thirty seconds on Bluesky, Mastodon, Discord or Telegram, none of which need approval or a card.',
-        'If you would rather tell me what else was wrong, reply to this. It goes to me and I read all of them.',
-      ],
-      ctaLabel: 'Connect a platform',
-      ctaHref: `${APP_URL}/accounts`,
-      footnote: 'One-off note about a bug that affected your account. You will not get a series of these.',
-    })
+    const html = reactivationHtml(t.name)
 
     try {
       await resend.emails.send({
