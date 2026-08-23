@@ -7,6 +7,7 @@ import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { SOMA_COSTS } from '@/lib/soma-costs'
 import { inngest } from '@/lib/inngest'
 import { Resend } from 'resend'
+import { runCapForMode, runCapReached, nextRunCount } from '@/lib/soma-runs'
 
 const GENERATE_COST = SOMA_COSTS.generate_week // 75
 
@@ -178,9 +179,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     if (remaining < GENERATE_COST) return NextResponse.json({ error: 'insufficient_soma_credits' }, { status: 402 })
 
-    // Run cap check
-    const runCap = project.mode === 'full_send' ? 12 : project.mode === 'autopilot' ? 8 : 4
-    if ((project.runs_this_month ?? 0) >= runCap) {
+    // Run cap check. runCapReached reads the stored counter as zero when the
+    // last generation predates this month, which is what makes the monthly
+    // reset happen at all — nothing else in the system ever cleared it.
+    const runCap = runCapForMode(project.mode)
+    if (runCapReached(project, runCap)) {
       return NextResponse.json({ error: 'monthly_run_cap_reached', cap: runCap }, { status: 429 })
     }
 
@@ -386,7 +389,9 @@ Rules:
     // Update ingestion + project
     await admin.from('soma_weekly_ingestion').update({ generated_posts_count: postsCreated }).eq('id', ingestion_id)
     await admin.from('soma_projects').update({
-      runs_this_month: (project.runs_this_month ?? 0) + 1,
+      // nextRunCount rolls over to 1 on the first run of a new month rather
+      // than adding to last month's total, so the stored value converges.
+      runs_this_month: nextRunCount(project),
       last_generated_at: new Date().toISOString(),
     }).eq('id', projectId)
 
