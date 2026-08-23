@@ -2,9 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
-  Radar, Users, HandCoins, Store, Crown, MessageSquare, Flag, BarChart3,
-  Lock, Tag, Send, AlertTriangle, Ticket, Share2, ArrowLeft, Activity,
-  type LucideIcon,
+  Activity, AlertTriangle, ArrowLeft, BarChart3, Crown, Filter, Flag, HandCoins, Lock, MessageSquare, Radar, Send, Share2, Store, Tag, Ticket, Users, type LucideIcon,
 } from 'lucide-react'
 
 interface HubStats {
@@ -18,6 +16,7 @@ interface HubStats {
 // and this is the one page the founder looks at every day. Lucide marks match
 // the public site (PR #522 did the same swap there).
 const NAV_CARDS: { icon: LucideIcon; label: string; sub: string; href: string }[] = [
+  { icon: Filter,        label: 'Funnel',            sub: 'Signup → connect → publish → paid',          href: '/admin/funnel'         },
   { icon: Radar,         label: 'God Mode Overview', sub: 'Full metrics — users, revenue, churn',       href: '/admin/overview'       },
   { icon: Users,         label: 'Users',             sub: 'Manage all accounts',                        href: '/admin/users'          },
   { icon: HandCoins,     label: 'Partner Admin',     sub: 'Affiliates, payouts & invites',              href: '/admin/partners'       },

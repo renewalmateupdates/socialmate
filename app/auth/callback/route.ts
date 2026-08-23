@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 import { createServerClient } from '@supabase/ssr'
+import { recordFunnel } from '@/lib/usage'
 import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
@@ -103,6 +104,15 @@ export async function GET(request: NextRequest) {
           .single()
 
         const alreadySent = emailFlagRow?.welcome_email_sent === true
+
+        // The one moment we can tell a new account from a returning one.
+        // Guarded by !alreadySent so a re-auth inside the 60s window
+        // cannot record a second signup for the same person.
+        if (isNewAccount && !alreadySent) {
+          recordFunnel(adminSupabase, session.user.id, 'signup_completed', {
+            provider: session.user.app_metadata?.provider ?? 'email',
+          })
+        }
 
         if (email && isNewAccount && !alreadySent) {
           await adminSupabase
