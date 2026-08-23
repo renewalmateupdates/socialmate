@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: 'Press kit, brand assets, founder bio, and media contact for SocialMate. Building something worth writing about.',
   openGraph: {
     title: 'Press & Media — SocialMate',
-    description: 'Press kit for SocialMate — the Creator OS that gives creators what competitors charge $99/month for, at $5 or free.',
+    description: 'Press kit for SocialMate — the Creator OS that gives creators what competitors charge $99/month for, at $8 or free.',
     url: 'https://socialmate.studio/press',
     images: [{ url: 'https://socialmate.studio/og-image.png', width: 1270, height: 760, alt: 'SocialMate Press' }],
   },
@@ -44,7 +44,7 @@ export default function PressPage() {
           </h1>
           <p className="text-gray-300 max-w-xl mx-auto text-base leading-relaxed">
             SocialMate is a social media scheduler and Creator OS that gives creators
-            what competitors charge $99/month for — at $5 or free. Built solo, bootstrapped,
+            what competitors charge $99/month for — at $8 or free. Built solo, bootstrapped,
             while the founder worked a day job and built nights and weekends.
           </p>
         </div>

@@ -198,7 +198,7 @@ export default function VsGainAppPage() {
         <div className="bg-amber/10 text-ink-high rounded-2xl p-8 text-center">
           <h2 className="text-2xl font-extrabold tracking-tight mb-3">Agency tools at $29/mo — not $99/mo</h2>
           <p className="text-ink-high text-sm mb-6 max-w-lg mx-auto">
-            SocialMate Agency includes client workspaces, approval workflows, 7 platforms, 20+ AI tools, and SOMA. Everything Gain does — plus much more — at $20/month.
+            SocialMate Agency includes client workspaces, approval workflows, 7 platforms, 20+ AI tools, and SOMA. Everything Gain does — plus much more — at $29/month.
           </p>
           <Link href="/signup" className="inline-block bg-void text-ink-high font-bold px-8 py-3.5 rounded-2xl hover:opacity-80 transition-all text-sm">
             {t('vs_shared.cta_create_free')}

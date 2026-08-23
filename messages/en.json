@@ -409,7 +409,7 @@
   "affiliates": {
     "badge": "Partner Program",
     "hero_title": "Earn 30% recurring. Every month. No cap.",
-    "hero_desc": "SocialMate gives creators what Buffer charges $18/mo for — starting at $5. That story sells itself. You share it, we pay you 30% of everything your referrals pay, forever.",
+    "hero_desc": "SocialMate gives creators what Buffer charges $18/mo for — starting at $8. That story sells itself. You share it, we pay you 30% of everything your referrals pay, forever.",
     "apply_cta": "Apply now — it's free",
     "partner_login": "Partner login",
     "elite_tier_badge": "Elite Tier",
@@ -1981,8 +1981,8 @@
   "for_agencies": {
     "eyebrow": "Built for agencies",
     "hero_title_1": "Stop overpaying for agency tools.",
-    "hero_title_2": "Manage every client for $20/month.",
-    "hero_desc": "Client workspaces. 15 team seats. 2,000 AI credits. White label optional. Everything you charge clients $500/month to manage — for $20.",
+    "hero_title_2": "Manage every client for $29/month.",
+    "hero_desc": "Client workspaces. 15 team seats. 2,000 AI credits. White label optional. Everything you charge clients $500/month to manage — for $29.",
     "hero_cta_primary": "Start Agency plan — $29/month →",
     "hero_cta_secondary": "See full pricing",
     "hero_note": "No contract · No setup fee · Cancel anytime",
@@ -2616,7 +2616,7 @@
     "or_email": "Or email directly:",
     "not_ready_before": "Not ready for Enterprise? Our",
     "agency_plan_link": "Agency plan",
-    "not_ready_after": "at $20/month covers most growing teams.",
+    "not_ready_after": "at $29/month covers most growing teams.",
     "agency_seats": "15 team seats",
     "agency_workspaces": "5 client workspaces",
     "agency_credits": "2,000 AI credits/mo"

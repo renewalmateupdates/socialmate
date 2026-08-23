@@ -65,7 +65,7 @@ Instructions:
   } catch {
     return {
       subject: `Quick note — SocialMate`,
-      body: `Hi ${params.prospectName},\n\nI'm Joshua — I built SocialMate (socialmate.studio) solo, nights and weekends. It's a social media scheduler + AI toolkit that does what competitors charge $99/month for at $5 or free.\n\nWould you be open to a quick mention or feature in your content? Happy to share more details.\n\n— Joshua`,
+      body: `Hi ${params.prospectName},\n\nI'm Joshua — I built SocialMate (socialmate.studio) solo, nights and weekends. It's a social media scheduler + AI toolkit that does what competitors charge $99/month for at $8 or free.\n\nWould you be open to a quick mention or feature in your content? Happy to share more details.\n\n— Joshua`,
     }
   }
 }
