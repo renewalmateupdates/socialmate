@@ -35,7 +35,8 @@ interface Target { id: string; email: string; name: string; ageDays: number }
 // copies of this string would diverge the first time one of them was edited.
 function reactivationHtml(name: string): string {
   return lifecycleEmail({
-    headline: `${name}, that was our fault.`,
+    // Reads fine either way; the nameless version is the stronger opener.
+    headline: name ? `${name}, that was our fault.` : 'That was our fault.',
     paragraphs: [
       'You signed up for SocialMate and never got a platform connected. I went looking for why, and it turns out the setup step was broken.',
       'It sent you off to another tab to connect your account, then stopped listening after ninety seconds. If you took longer than that, and almost everyone does, you came back to a page that had quietly given up, with no way to tell it you were done.',
@@ -78,7 +79,11 @@ async function audience(): Promise<{ targets: Target[]; alreadySent: number; too
     targets.push({
       id: u.id,
       email: u.email,
-      name: (u.user_metadata?.full_name as string | undefined)?.split(' ')[0] || u.email.split('@')[0],
+      // Deliberately blank rather than falling back to the email prefix.
+      // 18 of the 60 have no full_name, and prefixes like "hajero1488" or
+      // "sdknight2019" in the headline read as an obvious mail merge — which
+      // undercuts an email whose whole premise is that someone looked into it.
+      name: (u.user_metadata?.full_name as string | undefined)?.split(' ')[0]?.trim() || '',
       ageDays,
     })
   }
