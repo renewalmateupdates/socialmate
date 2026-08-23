@@ -672,7 +672,11 @@ fetch('/api/admin/rescue-scheduled', {method:'POST'}).then(r=>r.json()).then(d=>
 
 **May 19, 2026 (PRs #385–#388):**
 - **Activation funnel** — First-use tracking: onboarding completion %, platform connected, first post published. Dashboard shows activation progress for new users. GA4 events fire on key milestones.
-- **GA4 integration** — Google Analytics 4 wired in. Events: `onboarding_complete`, `platform_connected`, `post_published`, `upgrade_clicked`, `ai_tool_used`. `NEXT_PUBLIC_GA4_ID` env var.
+- **GA4 integration** — ⚠️ **This entry was wrong for three months.** The component was
+  mounted and sent page views; none of the five named events ever existed in the
+  codebase, and the component reads `NEXT_PUBLIC_GA_MEASUREMENT_ID`, not the
+  `NEXT_PUBLIC_GA4_ID` documented here — so if Vercel was set from these docs, GA was
+  off entirely. Corrected Aug 23; see the funnel instrumentation entry below.
 - **Calendar retry button** — Failed posts in calendar now have a "Retry" button that re-fires the Inngest publish job for failed platforms only.
 - **Comeback emails** — `comebackEmails` Inngest cron fires weekly for users who haven't posted in 7+ days. Personalized Resend email with their last post + streak. Non-fatal.
 - **IRIS auto-draft cron** — Inngest function that generates a weekly IRIS Dispatch draft automatically (admin-only). Admin reviews before sending.
@@ -948,6 +952,54 @@ The entire public front end was rebuilt from the old `bg-gray-*` Tailwind look o
 
 ---
 
+**August 23, 2026 — Funnel instrumentation, and the pricing the August sweep missed (PRs #567–#569):**
+
+The theme of the day: two things had been recorded as done and were not.
+
+- **Nothing was counting (PR #569).** Ten separate questions about activation had
+  the answer "no way to tell" because GA4 had five documented events and zero real
+  ones. Now instrumented end to end: `lib/analytics.ts` (`track` / `trackOnce`)
+  writes to **both** GA4 and a first-party sink at `POST /api/track`, because a
+  third of this audience blocks analytics and the numbers that matter have to join
+  against our own tables. Server-side steps go through `recordFunnel()` in
+  `lib/usage.ts`. Storage reuses `usage_events` — right shape already, no migration.
+  Steps: signup viewed/started/completed · onboarding started/step/skipped/completed ·
+  **connect screen viewed / clicked / succeeded / failed** · compose opened ·
+  post scheduled/published · upgrade viewed/clicked · checkout started · blog CTA.
+  The eight OAuth callbacks are instrumented at a single point — they all redirect
+  to `/accounts` with `?success=<platform>_connected` or `?error=<platform>_<reason>`.
+- **`/admin/funnel`** — the payoff. Ground truth (accounts → connected → published →
+  paying, computed from the tables, true back to March) sits above recorded steps
+  (from `usage_events`, only from today). Shows connect intent vs outcome per
+  platform, failure reasons, and onboarding drop-off by step.
+- **Blog CTA (PR #569).** The blog is the front door — 2,623 visitors, 215 of whom
+  reached the homepage and 43 the signup page — and its only CTA sat below ~1,500
+  words and 26 competitor links at an 88% bounce. `BlogInlineCTA` now splices a
+  tracked CTA a third of the way in, snapped to the nearest heading. The footer CTA
+  is attributed too, so inline vs footer is measurable.
+- **The August repricing was half-finished (PR #568).** `scripts/migrate-pricing-copy.py`
+  ran over English source only. The landing page still opened with **$5**; 105 values
+  across all eight non-English locales still said Pro $5 / Agency $20; press and
+  `/for/agencies` metadata still quoted the old price. Worse, nine blog rows had
+  their labels updated but not the arithmetic derived from them — the affiliate posts
+  were computing `100 Agency subscribers ($29/mo): 100 × $20 × 40%`, understating
+  affiliate earnings by 30–45% for eleven days. All corrected; originals backed up.
+- **About page.** Claimed "thousands of people are using" (it is ~90), "480+ blog
+  posts" (674), and listed Enki as live. Rewritten in all nine locales around a claim
+  that is both true and stronger: over 1,000 posts published.
+
+**Rules that follow:**
+
+- **A funnel step that is not in `FUNNEL_EVENTS` is not recorded.** `/api/track`
+  validates against the same list and logs a warning on anything else, so a typo
+  fails loudly instead of writing a step nobody will query.
+- **Never trust a "shipped" line in this file without grepping for it.** Two entries
+  in this document were false today. That is the second time; the August sweep found
+  nine.
+- **Derived arithmetic moves with the number it was derived from.** "One-twentieth of
+  the going rate", "$80/year = $4.58/month", `100 × $20 × 40%` — every one of these
+  survived a price migration that updated the price beside it.
+
 ## Pending / In Progress
 
 - **Google Play — closed testing** — Cooking slowly. v1.0.7 (versionCode 3) uploaded, 1 tester opted in. Passive CTA on signup page. *Do not revisit until June 2026.*
@@ -1036,7 +1088,10 @@ The entire public front end was rebuilt from the old `bg-gray-*` Tailwind look o
 - ✅ **Scheduling Window + DND (May 19)** — Settings → Scheduling tab. Smart Queue respects window. Never build again.
 - ✅ **Goal-based onboarding (May 19)** — Step 1 asks primary goal. Saved to user_settings.onboarding_goal. Never build again.
 - ✅ **Loyalty achievement system (May 19)** — `achievementCheckerCron` Inngest daily. Credits for milestones. Never build again.
-- ✅ **GA4 integration (May 19)** — NEXT_PUBLIC_GA4_ID env var. Key events fire on publish/upgrade/AI use. Never build again.
+- ❌ **GA4 integration (May 19)** — *Was never true.* No `gtag('event')` call existed
+  anywhere. Superseded by the funnel instrumentation of Aug 23. Left here as a
+  correction rather than deleted, because "marked done, never ran" is this project's
+  most expensive recurring failure and this is a clean example of it.
 - ✅ **Roadmap voting (May 19)** — Users can upvote roadmap items on /roadmap. Never build again.
 - ✅ **Comeback emails (May 19)** — Weekly cron for users inactive 7+ days. Never build again.
 - ✅ **Blog batch 12 — 55 posts (May 20)** — creator growth, platform strategy, community. SQL: blog_batch_12.sql. Never ask to write these again.

@@ -10,6 +10,7 @@ import { useI18n } from '@/contexts/I18nContext'
 import BlueskyConnectModal from '@/components/BlueskyConnectModal'
 import TelegramConnectModal from '@/components/TelegramConnectModal'
 import MastodonConnectModal from '@/components/MastodonConnectModal'
+import { track, trackOnce } from '@/lib/analytics'
 
 function SkeletonBox({ className }: { className?: string }) {
   return <div className={`bg-gray-100 dark:bg-gray-800 rounded-xl animate-pulse ${className}`} />
@@ -181,6 +182,15 @@ function AccountsInner() {
   useEffect(() => {
     const success = searchParams.get('success')
     const error = searchParams.get('error')
+    // Every OAuth callback redirects back here as `<platform>_connected` or
+    // `<platform>_<reason>`, so both outcomes can be recorded in one place
+    // instead of editing eight server routes.
+    if (success?.endsWith('_connected')) {
+      track('connect_succeeded', { platform: success.replace(/_connected$/, '') })
+    } else if (error) {
+      const [platform, ...rest] = error.split('_')
+      track('connect_failed', { platform, reason: rest.join('_') || error })
+    }
     if (success === 'discord_connected')   showToast('Discord connected successfully!', 'success')
     if (success === 'mastodon_connected')  showToast('Mastodon connected successfully!', 'success')
     if (success === 'pinterest_connected') showToast('Pinterest connected successfully!', 'success')
@@ -227,6 +237,11 @@ function AccountsInner() {
     const getData = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
+      // Repeatable, plus a once-ever variant: "how many accounts ever reached
+      // this screen" and "how often do they come back" are different questions
+      // and both matter here.
+      track('connect_screen_viewed')
+      trackOnce('connect_screen_viewed')
       let q = supabase
         .from('connected_accounts')
         .select('*')
@@ -279,8 +294,12 @@ function AccountsInner() {
   }
 
   const handleConnect = (platform: string) => {
+    track('connect_clicked', { platform })
     const platformAccounts = accounts.filter(a => a.platform === platform)
     if (platformAccounts.length >= accountsPerPlatform) {
+      // Hitting the per-platform cap is a real drop reason and looks identical
+      // to abandoning unless it is recorded separately.
+      track('connect_failed', { platform, reason: 'plan_limit' })
       showToast(`Your ${planConfig.label} plan allows ${accountsPerPlatform} account${accountsPerPlatform !== 1 ? 's' : ''} per platform`, 'error')
       return
     }
@@ -299,12 +318,14 @@ function AccountsInner() {
   }
 
   const handleBlueskySuccess = async () => {
+    track('connect_succeeded', { platform: 'bluesky' })
     setShowBlueskyModal(false)
     showToast('Bluesky connected successfully!', 'success')
     await refreshAccounts()
   }
 
   const handleTelegramSuccess = async () => {
+    track('connect_succeeded', { platform: 'telegram' })
     setShowTelegramModal(false)
     showToast('Telegram bot connected successfully!', 'success')
     await refreshAccounts()

@@ -40,3 +40,22 @@ export function recordAgentRun(
 ): void {
   recordUsage(supabase, userId, 'agent_run', { agent, ...metadata })
 }
+
+// A funnel step recorded from the server, where there is no browser to run
+// lib/analytics.ts.
+//
+// Two call sites need this: the auth callback, which is the only place that
+// knows an account is brand new, and the publish pipeline, which runs in
+// Inngest long after the tab that scheduled the post has closed. Everything
+// else should go through track() on the client so it reaches GA4 too.
+//
+// The `funnel_` prefix matches what /api/track writes, so /admin/funnel reads
+// one consistent namespace regardless of which side recorded the step.
+export function recordFunnel(
+  supabase: SupabaseClient,
+  userId: string,
+  event: string,
+  metadata: Record<string, unknown> = {},
+): void {
+  recordUsage(supabase, userId, `funnel_${event}`, metadata)
+}

@@ -10,6 +10,7 @@ import PostImageExporter from '@/components/PostImageExporter'
 import PageTour from '@/components/PageTour'
 import { useI18n } from '@/contexts/I18nContext'
 import UnsplashCredit from '@/components/UnsplashCredit'
+import { track, trackOnce } from '@/lib/analytics'
 
 const PLATFORMS = [
   { id: 'discord',   name: 'Discord',   icon: '💬', limit: 2000,  live: true  },
@@ -169,6 +170,10 @@ function ComposeInner() {
   const router = useRouter()
   const { credits, setCredits, applyCredits, plan, activeWorkspace } = useWorkspace()
   const { t } = useI18n()
+
+  // Reaching Compose at all is the step after connecting. Eleven accounts
+  // connected a platform and never posted; this is where that shows up.
+  useEffect(() => { track('compose_opened'); trackOnce('compose_opened') }, [])
 
   const [loading, setLoading] = useState(true)
   const [userRole, setUserRole] = useState<'owner' | 'admin' | 'editor' | 'viewer' | 'client' | null>(null)
@@ -1258,6 +1263,10 @@ function ComposeInner() {
   }
 
   const handlePublish = async () => {
+    track('post_scheduled', {
+      platforms: selectedPlatforms.join(','),
+      count: selectedPlatforms.length,
+    })
     if (!content.trim() || charOver || selectedPlatforms.length === 0 || !!scheduleError || mediaStillUploading) return
     setPublishing(true)
     setPublishResults(null)

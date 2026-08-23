@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Check } from 'lucide-react'
+import { track, trackOnce } from '@/lib/analytics'
 import { isDisposableEmail } from '@/lib/disposable-email-domains'
 import { useI18n } from '@/contexts/I18nContext'
 import AuthShell from '@/components/instrument/AuthShell'
@@ -73,7 +74,11 @@ function SignupForm() {
     }
   }, [searchParams])
 
+  // Arrival. Anonymous, so GA4 only.
+  useEffect(() => { track('signup_viewed'); trackOnce('signup_viewed') }, [])
+
   const handleGoogleSignup = async () => {
+    track('signup_started', { method: 'google' })
     if (!tosAccepted) { setError('Accept the Terms and Privacy Policy to continue.'); return }
     setGoogleLoading(true)
     setError('')
@@ -108,6 +113,7 @@ function SignupForm() {
   const strength = passwordStrength(password)
 
   const handleSignup = async (e: React.FormEvent) => {
+    track('signup_started', { method: 'email' })
     e.preventDefault()
     setError('')
     if (!tosAccepted) { setError('Accept the Terms and Privacy Policy to continue.'); return }

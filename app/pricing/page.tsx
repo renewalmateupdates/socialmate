@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import PublicLayout from '@/components/PublicLayout'
 import { useI18n } from '@/contexts/I18nContext'
 import { FlipCard } from '@/components/pricing/FlipCard'
+import { track, trackOnce } from '@/lib/analytics'
 
 const FOURTEEN_DAYS_MS = 14 * 24 * 60 * 60 * 1000
 const LS_WELCOME_FIRST_SHOWN = 'welcome_offer_first_shown'
@@ -257,6 +258,10 @@ interface AppliedCoupon {
 export default function Pricing() {
   const { t } = useI18n()
   const [interval, setInterval] = useState<Interval>('monthly')
+  // Reaching /pricing at all is a step nothing was counting. Paired with
+  // checkout_started below, it separates "nobody looks" from "they look and
+  // do not click", which are different problems with different fixes.
+  useEffect(() => { track('upgrade_viewed'); trackOnce('upgrade_viewed') }, [])
   const [loading, setLoading]   = useState<string | null>(null)
   const router = useRouter()
 
@@ -389,6 +394,7 @@ export default function Pricing() {
   }
 
   const handleCheckout = async (priceId: string, planName: string) => {
+    track('checkout_started', { plan: planName })
     setLoading(planName)
     try {
       const res = await fetch('/api/stripe/checkout', {

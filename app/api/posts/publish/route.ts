@@ -8,6 +8,7 @@ import { inngest } from '@/lib/inngest'
 import { Resend } from 'resend'
 import { logActivity } from '@/lib/workspace-activity'
 import { dispatchWebhook } from '@/lib/webhooks'
+import { recordFunnel } from '@/lib/usage'
 
 let _resend: Resend | null = null
 function getResend() {
@@ -113,6 +114,13 @@ export async function POST(request: NextRequest) {
         .eq('id', postId)
       if (!error) {
         statusError = null
+        if (!allFailed) {
+          recordFunnel(getSupabaseAdmin(), post.user_id, 'post_published', {
+            platforms: (post.platforms ?? []).join(','),
+            count: (post.platforms ?? []).length,
+            source: 'scheduled',
+          })
+        }
         console.log(`[STATUS-UPDATE] Status set → ${finalStatusInngest} for post ${postId} (attempt ${attempt})`)
         break
       }

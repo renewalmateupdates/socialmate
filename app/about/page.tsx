@@ -124,7 +124,7 @@ export default function AboutPage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
             {[
               { value: '7',    label: t('about.stat1_label') },
-              { value: '480+', label: t('about.stat2_label') },
+              { value: '670+', label: t('about.stat2_label') },
               { value: '8',    label: t('about.stat3_label') },
               { value: '$8',   label: t('about.stat4_label') },
             ].map((stat) => (

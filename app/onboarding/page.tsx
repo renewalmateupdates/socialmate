@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase'
 import { normalizePlan } from '@/lib/plan'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { track } from '@/lib/analytics'
 
 const LIVE_PLATFORMS = [
   { id: 'bluesky',  label: 'Bluesky',     icon: '🦋', desc: 'Decentralized social — great for builders & creators', badge: '✨ Easiest to start' },
@@ -45,6 +46,9 @@ function OnboardingInner() {
 
   const [user, setUser] = useState<any>(null)
   const [step, setStep] = useState(1)
+  // Where people fall out of the flow. Fires on every step change, so the
+  // shape of the drop-off is visible rather than just the endpoints.
+  useEffect(() => { track('onboarding_step', { step }) }, [step])
   const [displayName, setDisplayName] = useState('')
   const [irisOptIn, setIrisOptIn] = useState(true)
   const [selectedPlatform, setSelectedPlatform] = useState('')
@@ -207,6 +211,10 @@ function OnboardingInner() {
     if (hasFinished) return
     setHasFinished(true)
     setSaving(true)
+    track('onboarding_completed', {
+      platform: selectedPlatform || 'none',
+      connected: !!connectionDetected,
+    })
 
     const { data: currentSettings } = await supabase
       .from('user_settings')
@@ -293,6 +301,7 @@ function OnboardingInner() {
           <span className="text-xs text-gray-400 dark:text-gray-500 font-semibold">Step {step} of {STEPS.length}</span>
           <button
             onClick={async () => {
+              track('onboarding_skipped', { step })
               if (user) await supabase.from('profiles').update({ onboarding_completed: true }).eq('id', user.id)
               router.push('/dashboard')
             }}

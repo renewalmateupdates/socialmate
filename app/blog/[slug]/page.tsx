@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import BlogInlineCTA from '@/components/BlogInlineCTA'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import PublicFooter from '@/components/PublicFooter'
 
@@ -4423,7 +4424,7 @@ function linkifyText(text: string): React.ReactNode {
   return parts.length === 1 && typeof parts[0] === 'string' ? parts[0] : <>{parts}</>
 }
 
-function renderContent(content: string) {
+function renderContent(content: string, slug?: string) {
   const lines = content.trim().split('\n')
   const elements: React.ReactNode[] = []
   let key = 0
@@ -4458,6 +4459,21 @@ function renderContent(content: string) {
       )
     }
   }
+  // Drop the CTA roughly a third of the way in, snapped to the nearest
+  // heading so it never lands mid-sentence. Below a certain length there is no
+  // sensible midpoint, so short posts keep the footer CTA only.
+  if (slug && elements.length > 24) {
+    const target = Math.floor(elements.length / 3)
+    let at = elements.length
+    for (let i = target; i < elements.length; i++) {
+      const el = elements[i] as { type?: unknown }
+      if (el && typeof el === 'object' && el.type === 'h2') { at = i; break }
+    }
+    if (at < elements.length) {
+      elements.splice(at, 0, <BlogInlineCTA key="inline-cta" slug={slug} />)
+    }
+  }
+
   return elements
 }
 
@@ -4592,7 +4608,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
         </div>
 
         <div className="space-y-2 mb-16">
-          {renderContent(post.content)}
+          {renderContent(post.content, slug)}
         </div>
 
         <div className="bg-amber-500 text-gray-950 rounded-3xl p-8 text-center mb-16">
@@ -4600,9 +4616,7 @@ export default async function BlogPost({ params }: { params: Promise<{ slug: str
           <p className="text-gray-950/70 text-sm mb-6 max-w-md mx-auto">
             Schedule to 7 platforms, get 15+ AI tools, and grow your audience — all for free. No credit card required.
           </p>
-          <Link href="/signup" className="inline-block bg-gray-950 text-white text-sm font-bold px-8 py-4 rounded-2xl hover:opacity-90 transition-all">
-            Create free account →
-          </Link>
+          <BlogInlineCTA slug={slug} position="footer" />
           <p className="text-gray-950/50 text-xs mt-3">7 platforms · 15+ AI tools · Free forever</p>
         </div>
 
