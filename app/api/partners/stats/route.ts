@@ -41,13 +41,13 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = new URL(req.url)
   const isAdmin    = searchParams.get('admin') === 'true'
-  const adminEmail = process.env.ADMIN_EMAIL
+  const adminEmail = process.env.ADMIN_EMAIL || 'socialmatehq@gmail.com'
 
   const db = getAdminSupabase()
 
   // ── Admin view: all affiliates + revenue summary ──────────────────────
   if (isAdmin) {
-    if (adminEmail && user.email !== adminEmail) {
+    if (user.email !== adminEmail) {
       return NextResponse.json({ forbidden: true }, { status: 403 })
     }
 
@@ -84,7 +84,7 @@ export async function GET(req: NextRequest) {
   }
 
   // ── Admin shortcut: return isAdmin flag so partner portal can redirect ──
-  if (adminEmail && user.email === adminEmail) {
+  if (user.email === adminEmail) {
     return NextResponse.json({ isAdmin: true, profile: null })
   }
 
@@ -154,8 +154,8 @@ export async function DELETE(req: NextRequest) {
   const { data: { user } } = await getAuthedUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const adminEmail = process.env.ADMIN_EMAIL
-  if (adminEmail && user.email !== adminEmail) {
+  const adminEmail = process.env.ADMIN_EMAIL || 'socialmatehq@gmail.com'
+  if (user.email !== adminEmail) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
@@ -184,8 +184,8 @@ export async function PATCH(req: NextRequest) {
   const { data: { user } } = await getAuthedUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const adminEmail = process.env.ADMIN_EMAIL
-  if (adminEmail && user.email !== adminEmail) {
+  const adminEmail = process.env.ADMIN_EMAIL || 'socialmatehq@gmail.com'
+  if (user.email !== adminEmail) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
@@ -249,8 +249,8 @@ export async function POST(req: NextRequest) {
   const { data: { user } } = await getAuthedUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const adminEmail = process.env.ADMIN_EMAIL
-  if (adminEmail && user.email !== adminEmail) {
+  const adminEmail = process.env.ADMIN_EMAIL || 'socialmatehq@gmail.com'
+  if (user.email !== adminEmail) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 

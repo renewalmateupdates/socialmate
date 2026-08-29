@@ -42,12 +42,12 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = new URL(req.url)
   const isAdmin    = searchParams.get('admin') === 'true'
-  const adminEmail = process.env.ADMIN_EMAIL
+  const adminEmail = process.env.ADMIN_EMAIL || 'socialmatehq@gmail.com'
 
   const db = getAdminSupabase()
 
   if (isAdmin) {
-    if (adminEmail && user.email !== adminEmail) {
+    if (user.email !== adminEmail) {
       return NextResponse.json({ forbidden: true }, { status: 403 })
     }
 
@@ -153,7 +153,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Notify admin
-  const adminEmail = process.env.ADMIN_EMAIL
+  const adminEmail = process.env.ADMIN_EMAIL || 'socialmatehq@gmail.com'
   if (adminEmail) {
     await getResend().emails.send({
       from: 'SocialMate Partners <hello@socialmate.studio>',
@@ -172,8 +172,8 @@ export async function PATCH(req: NextRequest) {
   const { data: { user } } = await getAuthedUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const adminEmail = process.env.ADMIN_EMAIL
-  if (adminEmail && user.email !== adminEmail) {
+  const adminEmail = process.env.ADMIN_EMAIL || 'socialmatehq@gmail.com'
+  if (user.email !== adminEmail) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
