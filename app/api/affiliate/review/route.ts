@@ -34,7 +34,12 @@ export async function POST(req: NextRequest) {
 
   const { affiliate_id, action, rejection_reason } = await req.json()
 
-  if (!affiliate_id || !['approve', 'reject'].includes(action)) {
+  // approve/reject act on a pending application. suspend/reactivate act on one
+  // that is already live — without them the only way to cut an active affiliate
+  // was raw SQL against production, which is how one stayed 'active' in the
+  // table for four months after being cut.
+  const ACTIONS = ['approve', 'reject', 'suspend', 'reactivate']
+  if (!affiliate_id || !ACTIONS.includes(action)) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
   }
 
@@ -48,6 +53,40 @@ export async function POST(req: NextRequest) {
 
   if (fetchError || !affiliate) {
     return NextResponse.json({ error: 'Affiliate not found' }, { status: 404 })
+  }
+
+  // ── Suspend / reactivate ────────────────────────────────────────────────
+  // Everything downstream gates on status === 'active': the Stripe webhook's
+  // commission handler, /api/affiliate/check-code, and the /refer/[code]
+  // landing page all bail out on anything else. So flipping the status is the
+  // whole cut — no other table needs touching.
+  //
+  // Deliberately left alone: referral_conversions rows and unpaid_earnings.
+  // That is money already earned before the cut, and erasing it to tidy the
+  // row would quietly delete a payout obligation. Suspension stops the meter;
+  // it does not claw back.
+  //
+  // Also deliberately silent — no email. Approve and reject notify because the
+  // person is waiting on an answer they asked for. A suspension is a business
+  // decision whose wording is the founder's to choose, not a template's.
+  if (action === 'suspend' || action === 'reactivate') {
+    const nextStatus = action === 'suspend' ? 'suspended' : 'active'
+
+    const { error } = await adminSupabase
+      .from('affiliates')
+      .update({
+        status:      nextStatus,
+        reviewed_at: new Date().toISOString(),
+        reviewed_by: user.email,
+        // The table has one free-text field for review notes. On reactivate we
+        // clear it so a stale suspension reason doesn't sit on a live account.
+        rejection_reason: action === 'suspend' ? (rejection_reason || null) : null,
+      })
+      .eq('id', affiliate_id)
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    return NextResponse.json({ success: true, action: `${action}d`, status: nextStatus })
   }
 
   const { data: authUser } = await adminSupabase.auth.admin.getUserById(affiliate.user_id)

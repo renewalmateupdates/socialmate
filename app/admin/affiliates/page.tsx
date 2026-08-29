@@ -12,8 +12,6 @@ interface AffiliateRow {
   commission_rate: number
   active_referral_count: number
   total_earnings: number
-  available_balance_cents?: number
-  paid_out_cents?: number
   applied_at: string
   reviewed_at: string | null
   rejection_reason: string | null
@@ -31,6 +29,8 @@ interface AffiliateRow {
   why_good_fit: string
 }
 
+type AffiliateAction = 'approve' | 'reject' | 'suspend' | 'reactivate'
+
 const STATUS_BADGE: Record<string, string> = {
   pending_review: 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400',
   active:         'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
@@ -44,11 +44,10 @@ export default function AdminAffiliatesPage() {
   const [affiliates, setAffiliates] = useState<AffiliateRow[]>([])
   const [loading, setLoading] = useState(true)
   const [forbidden, setForbidden] = useState(false)
-  const [filter, setFilter] = useState<'all' | 'pending_review' | 'active' | 'rejected'>('pending_review')
+  const [filter, setFilter] = useState<'all' | 'pending_review' | 'active' | 'suspended' | 'rejected'>('pending_review')
   const [selected, setSelected] = useState<AffiliateRow | null>(null)
   const [rejectionReason, setRejectionReason] = useState('')
   const [actionLoading, setActionLoading] = useState(false)
-  const [markPaidLoading, setMarkPaidLoading] = useState<string | null>(null)
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
 
   function showToast(msg: string, ok = true) {
@@ -73,7 +72,14 @@ export default function AdminAffiliatesPage() {
 
   useEffect(() => { load() }, [])
 
-  async function handleAction(action: 'approve' | 'reject') {
+  const ACTION_TOAST: Record<AffiliateAction, string> = {
+    approve:    'Approved',
+    reject:     'Rejected',
+    suspend:    'Suspended — referral link and commissions are off',
+    reactivate: 'Reactivated',
+  }
+
+  async function handleAction(action: AffiliateAction) {
     if (!selected) return
     setActionLoading(true)
     try {
@@ -84,7 +90,7 @@ export default function AdminAffiliatesPage() {
       })
       const json = await res.json()
       if (json.success) {
-        showToast(action === 'approve' ? 'Approved!' : 'Rejected')
+        showToast(ACTION_TOAST[action])
         setSelected(null); setRejectionReason('')
         await load()
       } else {
@@ -95,34 +101,14 @@ export default function AdminAffiliatesPage() {
     }
   }
 
-  async function handleMarkPaid(affiliateId: string) {
-    setMarkPaidLoading(affiliateId)
-    try {
-      const res = await fetch('/api/affiliate/review', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ affiliate_id: affiliateId, action: 'mark_paid' }),
-      })
-      const json = await res.json()
-      if (json.success) { showToast('Marked as paid'); await load() }
-      else showToast(json.error || 'Failed to mark paid', false)
-    } finally {
-      setMarkPaidLoading(null)
-    }
-  }
-
   const filtered = filter === 'all' ? affiliates : affiliates.filter(a => a.status === filter)
   const counts = {
     all: affiliates.length,
     pending_review: affiliates.filter(a => a.status === 'pending_review').length,
     active: affiliates.filter(a => a.status === 'active').length,
+    suspended: affiliates.filter(a => a.status === 'suspended').length,
     rejected: affiliates.filter(a => a.status === 'rejected').length,
   }
-
-  // Total pending payouts (available balance across active affiliates)
-  const totalPendingCents = affiliates
-    .filter(a => a.status === 'active')
-    .reduce((sum, a) => sum + (a.available_balance_cents ?? 0), 0)
 
   if (forbidden) return (
     <div className="min-h-dvh bg-theme flex items-center justify-center">
@@ -142,7 +128,10 @@ export default function AdminAffiliatesPage() {
         <div className="mb-6 flex items-center justify-between flex-wrap gap-3">
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Affiliates</h1>
-            <p className="text-gray-500 dark:text-gray-400 text-sm mt-0.5">Applications, payouts, and commissions</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm mt-0.5">
+              Applications and access. Payouts live in{' '}
+              <a href="/admin/partners" className="underline hover:text-gray-700 dark:hover:text-gray-200">Partners</a>.
+            </p>
           </div>
           <button onClick={() => router.push('/admin')}
             className="text-sm text-gray-400 hover:text-black dark:hover:text-white transition-colors">
@@ -150,22 +139,9 @@ export default function AdminAffiliatesPage() {
           </button>
         </div>
 
-        {/* Pending payout total */}
-        {totalPendingCents > 0 && (
-          <div className="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl px-5 py-4 flex items-center justify-between">
-            <div>
-              <div className="text-sm font-bold text-amber-700 dark:text-amber-400">Total pending payouts</div>
-              <div className="text-xs text-amber-600 dark:text-amber-500 mt-0.5">Across all active affiliates with available balance</div>
-            </div>
-            <div className="text-2xl font-black text-amber-700 dark:text-amber-400">
-              ${(totalPendingCents / 100).toFixed(2)}
-            </div>
-          </div>
-        )}
-
         {/* Filter tabs */}
         <div className="flex gap-2 mb-5 flex-wrap">
-          {(['pending_review', 'active', 'rejected', 'all'] as const).map(f => (
+          {(['pending_review', 'active', 'suspended', 'rejected', 'all'] as const).map(f => (
             <button key={f} onClick={() => setFilter(f)}
               className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
                 filter === f ? 'bg-black dark:bg-white text-white dark:text-black' : 'bg-surface text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:border-gray-400'
@@ -214,13 +190,10 @@ export default function AdminAffiliatesPage() {
                         {aff.active_referral_count} refs · ${(aff.total_earnings ?? 0).toFixed(2)} earned
                       </div>
                     )}
-                    {aff.status === 'active' && (aff.available_balance_cents ?? 0) > 0 && (
-                      <button
-                        onClick={() => handleMarkPaid(aff.id)}
-                        disabled={markPaidLoading === aff.id}
-                        className="block text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800 px-3 py-1 rounded-lg font-semibold hover:bg-amber-200 dark:hover:bg-amber-900/50 transition-colors disabled:opacity-60">
-                        {markPaidLoading === aff.id ? 'Saving…' : `Mark paid ($${((aff.available_balance_cents ?? 0) / 100).toFixed(2)})`}
-                      </button>
+                    {aff.status === 'suspended' && (
+                      <div className="text-xs font-semibold text-orange-600 dark:text-orange-400">
+                        Referral link off
+                      </div>
                     )}
                   </div>
                 </div>
@@ -285,7 +258,9 @@ export default function AdminAffiliatesPage() {
                 </InfoRow>
                 {selected.rejection_reason && (
                   <div className="bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-xl p-3">
-                    <div className="text-xs font-semibold text-red-400 uppercase tracking-widest mb-1">Rejection reason</div>
+                    <div className="text-xs font-semibold text-red-400 uppercase tracking-widest mb-1">
+                      {selected.status === 'suspended' ? 'Suspension reason' : 'Rejection reason'}
+                    </div>
                     <div className="text-red-700 dark:text-red-400">{selected.rejection_reason}</div>
                   </div>
                 )}
@@ -312,14 +287,45 @@ export default function AdminAffiliatesPage() {
                   </div>
                 </div>
               )}
-              {selected.status === 'active' && (
-                <div className="mt-4 pt-4 border-t border-theme flex gap-4 text-sm text-gray-500 dark:text-gray-400">
-                  <span>{selected.active_referral_count} referrals</span>
-                  <span>${(selected.total_earnings ?? 0).toFixed(2)} total earned</span>
-                  {(selected.available_balance_cents ?? 0) > 0 && (
-                    <span className="text-amber-600 dark:text-amber-400 font-semibold">
-                      ${((selected.available_balance_cents ?? 0) / 100).toFixed(2)} pending
-                    </span>
+              {(selected.status === 'active' || selected.status === 'suspended') && (
+                <div className="mt-6 space-y-3 border-t border-theme pt-5">
+                  <div className="flex gap-4 text-sm text-gray-500 dark:text-gray-400">
+                    <span>{selected.active_referral_count} referrals</span>
+                    <span>${(selected.total_earnings ?? 0).toFixed(2)} total earned</span>
+                  </div>
+
+                  {selected.status === 'active' ? (
+                    <>
+                      <textarea
+                        placeholder="Reason for suspending (optional, internal only)"
+                        value={rejectionReason}
+                        onChange={e => setRejectionReason(e.target.value)}
+                        rows={2}
+                        className="w-full border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-xl px-3 py-2 text-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:border-gray-400 resize-none"
+                      />
+                      <button onClick={() => handleAction('suspend')} disabled={actionLoading}
+                        className="w-full bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 border border-orange-200 dark:border-orange-800 text-sm font-semibold py-2.5 rounded-xl hover:bg-orange-100 dark:hover:bg-orange-900/40 transition-all disabled:opacity-60">
+                        {actionLoading ? 'Processing…' : 'Suspend affiliate'}
+                      </button>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 leading-relaxed">
+                        Stops their referral link, blocks new commissions, and removes them
+                        from the partner leaderboard. Earnings already accrued are kept —
+                        settle those in{' '}
+                        <a href="/admin/partners" className="underline hover:text-gray-600 dark:hover:text-gray-300">
+                          Partners
+                        </a>. No email is sent.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <button onClick={() => handleAction('reactivate')} disabled={actionLoading}
+                        className="w-full bg-black dark:bg-white text-white dark:text-black text-sm font-semibold py-2.5 rounded-xl hover:opacity-80 transition-all disabled:opacity-60">
+                        {actionLoading ? 'Processing…' : 'Reactivate affiliate'}
+                      </button>
+                      <p className="text-xs text-gray-400 dark:text-gray-500">
+                        Turns their referral link and commission accrual back on.
+                      </p>
+                    </>
                   )}
                 </div>
               )}
