@@ -2912,5 +2912,125 @@
     "thanks": "Danke — das hilft wirklich.",
     "thanks_sub": "Geht direkt an Joshua.",
     "title": "Kurze Frage"
+  },
+  "landing": {
+    "hero": {
+      "badge": "7 Plattformen live",
+      "headline_1": "Überall posten.",
+      "headline_2": "Schluss mit sechs Tabs.",
+      "sub": "Ein Eingabefeld, ein Zeitplan und eine Warteschlange, die dir sagt, was wirklich online gegangen ist.",
+      "cta_primary": "Kostenloses Konto erstellen",
+      "cta_secondary": "Preise ansehen",
+      "no_card": "Keine Karte nötig · Der kostenlose Plan läuft nie ab"
+    },
+    "platforms": {
+      "eyebrow": "Unterstützte Plattformen",
+      "headline": "Sieben live. Auch die, die sonst niemand plant.",
+      "body": "Discord und Telegram zu planen ist wirklich selten. Bluesky und Mastodon sind vollwertig und kein Nachgedanke. Twitch-Clips und YouTube-Videos planst du direkt in der App.",
+      "live": "Live",
+      "soon": "Bald"
+    },
+    "soma": {
+      "headline": "SOMA schreibt in deiner Stimme, während du schläfst.",
+      "body": "Beantworte einmal ein Stimm-Interview, und SOMA lernt, wie du wirklich klingst. Danach entwirft es eine Woche voller Beiträge, pro Plattform, und legt sie dir zur Prüfung in die Warteschlange. Daneben stehen fünfzehn weitere KI-Werkzeuge. Fünfzig Credits im Monat, kostenlos.",
+      "credits": "Credits",
+      "cta": "Alle KI-Werkzeuge ansehen"
+    },
+    "features": {
+      "eyebrow": "Der ganze Rest",
+      "headline": "Alles, was sonst extra kostet.",
+      "items": {
+        "scheduling": {
+          "title": "Planung",
+          "desc": "Sieben Plattformen, Massen-Upload, automatische Warteschlangen und Zeichenlimits pro Plattform, geprüft bevor du sendest."
+        },
+        "analytics": {
+          "title": "Analysen",
+          "desc": "Posting-Serien, Aufschlüsselung nach Plattform, beste Tage und Zeiten und Interaktions-Tracking. Keine geschönten Zahlen."
+        },
+        "sigil": {
+          "title": "SIGIL Link in Bio",
+          "desc": "Eine vollwertige Bio-Link-Seite mit eigenen Themes, Button-Stilen und deiner eigenen öffentlichen URL. In jedem Plan kostenlos."
+        },
+        "clips": {
+          "title": "Clips Studio",
+          "desc": "Durchsuche deine Twitch-Clips und YouTube-Videos in SocialMate und plane sie, ohne etwas herunterzuladen."
+        },
+        "teams": {
+          "title": "Teams",
+          "desc": "Lade Leute ein, vergib Rollen und nutze Freigabe-Workflows, bevor etwas rausgeht. Zwei Plätze im kostenlosen Plan."
+        },
+        "workspaces": {
+          "title": "Kunden-Workspaces",
+          "desc": "Vollständig getrennte Workspaces mit eigenen Konten, Beiträgen, Analysen und Team. Pro enthält einen, Agency fünf."
+        },
+        "evergreen": {
+          "title": "Evergreen-Recycling",
+          "desc": "Markiere deine besten Beiträge als Evergreen — sie kommen automatisch zurück in die Warteschlange, wenn dein Plan leer läuft."
+        },
+        "rss": {
+          "title": "RSS-Import",
+          "desc": "Zieh jeden RSS- oder Atom-Feed rein und mach daraus geplante Social-Beiträge. Funktioniert mit jedem Blog und Podcast."
+        },
+        "competitors": {
+          "title": "Wettbewerbsbeobachtung",
+          "desc": "Verfolge bis zu drei Konkurrenzkonten in jedem Plan, auch im kostenlosen. Wisse, was sie gepostet haben, bevor du schreibst."
+        }
+      }
+    },
+    "free": {
+      "eyebrow": "Für $0 enthalten",
+      "headline": "Der kostenlose Plan ist keine Testphase.",
+      "body": "Kein Countdown, keine Karte, keine Funktion, auf die du dich verlässt und die nach vierzehn Tagen verschwindet. Credits decken die Kosten der KI-Rechenleistung — sonst steckt nichts dahinter.",
+      "items": {
+        "credits": "KI-Credits pro Monat",
+        "posts": "Beiträge pro Monat",
+        "seats": "Team-Plätze",
+        "competitors": "Konkurrenzkonten",
+        "storage": "Medienspeicher",
+        "storage_value": "1 GB",
+        "analytics": "Analyse-Verlauf",
+        "analytics_value": "30 Tage",
+        "window": "Planungszeitraum",
+        "window_value": "2 Wochen",
+        "sigil": "SIGIL Bio-Link-Seite",
+        "sigil_value": "Gratis"
+      },
+      "checks": {
+        "scheduling": "Planung",
+        "bulk": "Massen-Upload",
+        "analytics": "Analysen",
+        "bio": "Link in Bio",
+        "competitors": "Wettbewerbsbeobachtung"
+      }
+    },
+    "price": {
+      "eyebrow": "Was es kostet",
+      "plan_line": "SocialMate Pro. Pro Monat.",
+      "badge": "Ungefähr ein Zwölftel des üblichen Preises",
+      "body_before": "Der Rest der Branche verlangt",
+      "body_after": "im Monat. Und wir haben dafür keine Funktionen gestrichen."
+    },
+    "guides": {
+      "eyebrow": "Gilgamesh’s Guides",
+      "headline": "Vier Playbooks. Ohne E-Mail-Adresse.",
+      "vol1": "Ein Unternehmen von null aufbauen",
+      "vol2": "Marketing mit null Budget",
+      "vol3": "Firmenkredit, Recht und Steuern",
+      "vol4": "Vibe Coding mit KI",
+      "cta": "Alle Guides ansehen"
+    },
+    "give": {
+      "headline": "Zwei Prozent jedes Abos gehen nach draußen.",
+      "body": "Schulranzen mit Material, Babyausstattung für Eltern in Not und Hilfspakete für Obdachlose. Keine Konzernpartner, keine Sponsoren, keine Pressemitteilung.",
+      "school": "Schulmaterial",
+      "baby": "Babyausstattung",
+      "homeless": "Obdachlosenhilfe",
+      "cta": "So funktioniert SM-Give"
+    },
+    "final": {
+      "headline": "Fang an, überall zu posten.",
+      "body": "Kostenloser Plan, keine Karte, in etwa einer Minute eingerichtet. Wechsle für $8 zu Pro, sobald es sich lohnt."
+    }
   }
 }

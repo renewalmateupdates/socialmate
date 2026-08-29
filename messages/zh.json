@@ -2912,5 +2912,125 @@
     "thanks": "谢谢 — 这真的很有帮助。",
     "thanks_sub": "会直接发给 Joshua。",
     "title": "一个小问题"
+  },
+  "landing": {
+    "hero": {
+      "badge": "7 个平台已上线",
+      "headline_1": "一次发布到所有平台。",
+      "headline_2": "不用再开六个标签页。",
+      "sub": "一个编辑框、一份排程，还有一个会告诉你哪些内容真正发出去了的队列。",
+      "cta_primary": "免费创建账号",
+      "cta_secondary": "查看价格",
+      "no_card": "无需信用卡 · 免费版永不过期"
+    },
+    "platforms": {
+      "eyebrow": "支持的平台",
+      "headline": "七个已上线，包括别人都不支持排程的那几个。",
+      "body": "能给 Discord 和 Telegram 排程的工具确实少见。Bluesky 和 Mastodon 在这里是一等公民，不是顺手加的。Twitch 剪辑和 YouTube 视频可以直接在应用内排程。",
+      "live": "已上线",
+      "soon": "即将推出"
+    },
+    "soma": {
+      "headline": "你睡觉的时候，SOMA 用你的语气写作。",
+      "body": "只需完成一次语音访谈，SOMA 就能学会你真实的表达方式。之后它会按平台分别起草一周的内容，放进你的队列等你审阅。旁边还有另外十五个 AI 工具。每月五十个额度，免费。",
+      "credits": "额度",
+      "cta": "查看全部 AI 工具"
+    },
+    "features": {
+      "eyebrow": "其余的一切",
+      "headline": "那些通常要另外收费的功能。",
+      "items": {
+        "scheduling": {
+          "title": "内容排程",
+          "desc": "七个平台、批量上传、自动队列，以及在你点击发送之前就按平台校验的字数限制。"
+        },
+        "analytics": {
+          "title": "数据分析",
+          "desc": "连续发布记录、平台分布、最佳日期与时段，以及互动追踪。没有注水的数字。"
+        },
+        "sigil": {
+          "title": "SIGIL 主页链接",
+          "desc": "一个完整的链接页面，支持自定义主题、按钮样式和你自己的公开网址。所有套餐均免费。"
+        },
+        "clips": {
+          "title": "Clips Studio",
+          "desc": "在 SocialMate 里浏览你的 Twitch 剪辑和 YouTube 视频，无需下载即可排程。"
+        },
+        "teams": {
+          "title": "团队协作",
+          "desc": "邀请成员、分配角色，并在内容发出前走审批流程。免费版包含两个席位。"
+        },
+        "workspaces": {
+          "title": "客户工作区",
+          "desc": "完全隔离的工作区，拥有各自的账号、内容、分析和团队。Pro 含一个，Agency 含五个。"
+        },
+        "evergreen": {
+          "title": "常青内容循环",
+          "desc": "把最好的内容标记为常青，排程空档时它们会自动重新排入队列。"
+        },
+        "rss": {
+          "title": "RSS 导入",
+          "desc": "接入任意 RSS 或 Atom 订阅源，把文章变成已排程的社交内容。适用于任何博客或播客。"
+        },
+        "competitors": {
+          "title": "竞品追踪",
+          "desc": "所有套餐（含免费版）都可追踪最多三个竞品账号。动笔之前，先知道他们发了什么。"
+        }
+      }
+    },
+    "free": {
+      "eyebrow": "$0 即包含",
+      "headline": "免费版不是试用。",
+      "body": "没有倒计时，不用绑卡，也不会在十四天后收走你依赖的功能。额度只是用来覆盖 AI 计算成本，除此之外没有任何东西被锁在它后面。",
+      "items": {
+        "credits": "每月 AI 额度",
+        "posts": "每月发布数",
+        "seats": "团队席位",
+        "competitors": "竞品账号",
+        "storage": "媒体存储空间",
+        "storage_value": "1 GB",
+        "analytics": "分析数据保留",
+        "analytics_value": "30 天",
+        "window": "可排程时间范围",
+        "window_value": "2 周",
+        "sigil": "SIGIL 主页链接页",
+        "sigil_value": "免费"
+      },
+      "checks": {
+        "scheduling": "内容排程",
+        "bulk": "批量上传",
+        "analytics": "数据分析",
+        "bio": "主页链接",
+        "competitors": "竞品追踪"
+      }
+    },
+    "price": {
+      "eyebrow": "价格是多少",
+      "plan_line": "SocialMate Pro，每月。",
+      "badge": "大约是行业价格的十二分之一",
+      "body_before": "这个品类的其他产品要收",
+      "body_after": "一个月。而我们没有靠砍功能做到这个价。"
+    },
+    "guides": {
+      "eyebrow": "Gilgamesh’s Guides",
+      "headline": "四本实战手册。不用留邮箱。",
+      "vol1": "从零开始创业",
+      "vol2": "零预算做营销",
+      "vol3": "企业信用、法务与税务",
+      "vol4": "用 AI 做 Vibe Coding",
+      "cta": "浏览全部指南"
+    },
+    "give": {
+      "headline": "每一笔订阅的百分之二都会捐出去。",
+      "body": "装满文具的书包、给困难家庭的婴儿必需品，以及给无家可归者的关怀包。没有企业合作方，没有赞助商，也没有新闻稿。",
+      "school": "学习用品",
+      "baby": "婴儿必需品",
+      "homeless": "无家可归者关怀",
+      "cta": "了解 SM-Give"
+    },
+    "final": {
+      "headline": "开始发布到所有平台。",
+      "body": "免费版，无需绑卡，大约一分钟就能设置好。等它值得的时候，再用 $8 升级到 Pro。"
+    }
   }
 }

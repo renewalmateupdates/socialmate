@@ -2912,5 +2912,125 @@
     "thanks": "Obrigado — isso ajuda de verdade.",
     "thanks_sub": "Vai direto para o Joshua.",
     "title": "Uma pergunta rápida"
+  },
+  "landing": {
+    "hero": {
+      "badge": "7 plataformas no ar",
+      "headline_1": "Publique em todo lugar.",
+      "headline_2": "Chega de abrir seis abas.",
+      "sub": "Um único campo de escrita, um único calendário e uma fila que mostra o que realmente foi publicado.",
+      "cta_primary": "Criar conta grátis",
+      "cta_secondary": "Ver preços",
+      "no_card": "Sem cartão · O plano gratuito nunca expira"
+    },
+    "platforms": {
+      "eyebrow": "Plataformas suportadas",
+      "headline": "Sete no ar. Incluindo as que mais ninguém agenda.",
+      "body": "Agendar no Discord e no Telegram é algo genuinamente raro. Bluesky e Mastodon são cidadãos de primeira classe, não um detalhe. Clipes da Twitch e vídeos do YouTube você agenda de dentro do app.",
+      "live": "No ar",
+      "soon": "Em breve"
+    },
+    "soma": {
+      "headline": "O SOMA escreve com a sua voz enquanto você dorme.",
+      "body": "Responda uma entrevista de voz uma vez e o SOMA aprende como você realmente soa. Depois ele escreve uma semana de publicações, por plataforma, e deixa tudo na sua fila para revisão. Ao lado dele há mais quinze ferramentas de IA. Cinquenta créditos por mês, de graça.",
+      "credits": "créditos",
+      "cta": "Ver todas as ferramentas de IA"
+    },
+    "features": {
+      "eyebrow": "Todo o resto",
+      "headline": "Tudo aquilo que normalmente custa à parte.",
+      "items": {
+        "scheduling": {
+          "title": "Agendamento",
+          "desc": "Sete plataformas, upload em massa, filas automáticas e limites de caracteres por plataforma verificados antes de enviar."
+        },
+        "analytics": {
+          "title": "Análises",
+          "desc": "Sequências de publicação, divisão por plataforma, melhores dias e horários e acompanhamento de engajamento. Sem números inflados."
+        },
+        "sigil": {
+          "title": "SIGIL link na bio",
+          "desc": "Uma página de links completa com temas personalizados, estilos de botão e a sua própria URL pública. Grátis em todos os planos."
+        },
+        "clips": {
+          "title": "Clips Studio",
+          "desc": "Navegue pelos seus clipes da Twitch e vídeos do YouTube dentro do SocialMate e agende sem baixar nada."
+        },
+        "teams": {
+          "title": "Equipes",
+          "desc": "Convide pessoas, defina funções e use fluxos de aprovação antes de qualquer coisa sair. Dois assentos no plano gratuito."
+        },
+        "workspaces": {
+          "title": "Espaços de clientes",
+          "desc": "Espaços totalmente isolados com contas, publicações, análises e equipe próprias. Pro inclui um; Agency, cinco."
+        },
+        "evergreen": {
+          "title": "Reciclagem evergreen",
+          "desc": "Marque suas melhores publicações como evergreen e elas voltam para a fila sozinhas quando o calendário esvazia."
+        },
+        "rss": {
+          "title": "Importação RSS",
+          "desc": "Puxe de qualquer feed RSS ou Atom e transforme em publicações agendadas. Funciona com qualquer blog ou podcast."
+        },
+        "competitors": {
+          "title": "Monitoramento de concorrentes",
+          "desc": "Acompanhe até três contas concorrentes em todos os planos, inclusive no gratuito. Saiba o que postaram antes de escrever."
+        }
+      }
+    },
+    "free": {
+      "eyebrow": "Incluído por $0",
+      "headline": "O plano gratuito não é um teste.",
+      "body": "Sem contagem regressiva, sem cartão e sem aquele recurso essencial sumindo em catorze dias. Os créditos existem para cobrir o custo de processamento de IA — e nada mais depende deles.",
+      "items": {
+        "credits": "créditos de IA por mês",
+        "posts": "publicações por mês",
+        "seats": "assentos de equipe",
+        "competitors": "contas concorrentes",
+        "storage": "armazenamento de mídia",
+        "storage_value": "1 GB",
+        "analytics": "histórico de análises",
+        "analytics_value": "30 dias",
+        "window": "janela de agendamento",
+        "window_value": "2 semanas",
+        "sigil": "página SIGIL de link na bio",
+        "sigil_value": "Grátis"
+      },
+      "checks": {
+        "scheduling": "Agendamento",
+        "bulk": "Upload em massa",
+        "analytics": "Análises",
+        "bio": "Link na bio",
+        "competitors": "Monitoramento de concorrentes"
+      }
+    },
+    "price": {
+      "eyebrow": "Quanto custa",
+      "plan_line": "SocialMate Pro. Por mês.",
+      "badge": "Cerca de um doze avos do preço praticado",
+      "body_before": "O resto do setor cobra",
+      "body_after": "por mês. E não tiramos nenhum recurso para chegar aqui."
+    },
+    "guides": {
+      "eyebrow": "Gilgamesh’s Guides",
+      "headline": "Quatro manuais. Sem pedir seu e-mail.",
+      "vol1": "Começar um negócio do zero",
+      "vol2": "Marketing com orçamento zero",
+      "vol3": "Crédito empresarial, jurídico e impostos",
+      "vol4": "Vibe coding com IA",
+      "cta": "Ver todos os guias"
+    },
+    "give": {
+      "headline": "Dois por cento de cada assinatura vai para fora.",
+      "body": "Mochilas com material escolar, itens essenciais para bebês de pais em dificuldade e kits de apoio para pessoas em situação de rua. Sem parceiros corporativos, sem patrocinadores, sem nota à imprensa.",
+      "school": "Material escolar",
+      "baby": "Itens para bebês",
+      "homeless": "Apoio a pessoas em situação de rua",
+      "cta": "Como funciona o SM-Give"
+    },
+    "final": {
+      "headline": "Comece a publicar em todo lugar.",
+      "body": "Plano gratuito, sem cartão, pronto em cerca de um minuto. Migre para o Pro por $8 quando ele merecer."
+    }
   }
 }

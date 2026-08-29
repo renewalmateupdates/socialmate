@@ -2912,5 +2912,125 @@
     "thanks": "Thanks — this genuinely helps.",
     "thanks_sub": "Goes straight to Joshua.",
     "title": "Quick question"
+  },
+  "landing": {
+    "hero": {
+      "badge": "7 platforms live",
+      "headline_1": "Post everywhere.",
+      "headline_2": "Stop opening six tabs.",
+      "sub": "One compose box, one schedule, and a queue that tells you what actually went live.",
+      "cta_primary": "Create free account",
+      "cta_secondary": "See pricing",
+      "no_card": "No card required · Free plan never expires"
+    },
+    "platforms": {
+      "eyebrow": "Platform support",
+      "headline": "Seven live. Including the ones nobody else schedules.",
+      "body": "Discord and Telegram scheduling is genuinely rare. Bluesky and Mastodon are first-class, not afterthoughts. Twitch clips and YouTube videos schedule straight from inside the app.",
+      "live": "Live",
+      "soon": "Soon"
+    },
+    "soma": {
+      "headline": "SOMA writes in your voice while you’re asleep.",
+      "body": "Answer a voice interview once and SOMA learns how you actually sound. Then it drafts a week of posts, per platform, and puts them in your queue for review. Fifteen more AI tools sit alongside it. Fifty credits a month, free.",
+      "credits": "credits",
+      "cta": "See every AI tool"
+    },
+    "features": {
+      "eyebrow": "The rest of it",
+      "headline": "Everything that usually costs extra.",
+      "items": {
+        "scheduling": {
+          "title": "Scheduling",
+          "desc": "Seven platforms, bulk upload, automated queues, and per-platform character limits enforced before you hit send."
+        },
+        "analytics": {
+          "title": "Analytics",
+          "desc": "Posting streaks, platform breakdown, best days and times, and engagement tracking. No inflated numbers."
+        },
+        "sigil": {
+          "title": "SIGIL link in bio",
+          "desc": "A full bio link page with custom themes, button styles, and your own public URL. Free on every plan."
+        },
+        "clips": {
+          "title": "Clips Studio",
+          "desc": "Browse your Twitch clips and YouTube videos inside SocialMate and schedule them without downloading anything."
+        },
+        "teams": {
+          "title": "Teams",
+          "desc": "Invite people, assign roles, and run approval workflows before anything goes out. Two seats on the free plan."
+        },
+        "workspaces": {
+          "title": "Client workspaces",
+          "desc": "Fully isolated workspaces with their own accounts, posts, analytics, and team. Pro includes one, Agency includes five."
+        },
+        "evergreen": {
+          "title": "Evergreen recycling",
+          "desc": "Mark your best posts as evergreen and they re-queue automatically when your schedule runs empty."
+        },
+        "rss": {
+          "title": "RSS import",
+          "desc": "Pull from any RSS or Atom feed and turn posts into scheduled social posts. Works with any blog or podcast."
+        },
+        "competitors": {
+          "title": "Competitor tracking",
+          "desc": "Track up to three competitor accounts on every plan, including free. Know what they posted before you write."
+        }
+      }
+    },
+    "free": {
+      "eyebrow": "Included at $0",
+      "headline": "The free plan is not a trial.",
+      "body": "No countdown, no card, no feature you rely on disappearing in fourteen days. Credits exist to cover the cost of AI compute, and nothing else is gated behind them.",
+      "items": {
+        "credits": "AI credits per month",
+        "posts": "Posts per month",
+        "seats": "Team seats",
+        "competitors": "Competitor accounts",
+        "storage": "Media storage",
+        "storage_value": "1 GB",
+        "analytics": "Analytics history",
+        "analytics_value": "30 days",
+        "window": "Scheduling window",
+        "window_value": "2 weeks",
+        "sigil": "SIGIL link in bio page",
+        "sigil_value": "Free"
+      },
+      "checks": {
+        "scheduling": "Scheduling",
+        "bulk": "Bulk upload",
+        "analytics": "Analytics",
+        "bio": "Link in bio",
+        "competitors": "Competitor tracking"
+      }
+    },
+    "price": {
+      "eyebrow": "What it costs",
+      "plan_line": "SocialMate Pro. Per month.",
+      "badge": "Roughly one-twelfth of the going rate",
+      "body_before": "The rest of the category runs",
+      "body_after": "a month. We didn’t remove features to get here."
+    },
+    "guides": {
+      "eyebrow": "Gilgamesh’s Guides",
+      "headline": "Four playbooks. No email required.",
+      "vol1": "Starting a Business From Scratch",
+      "vol2": "Marketing on Zero Budget",
+      "vol3": "Business Credit, Legal & Tax",
+      "vol4": "Vibe Coding with AI",
+      "cta": "Browse all guides"
+    },
+    "give": {
+      "headline": "Two percent of every subscription goes out the door.",
+      "body": "School supply bookbags, baby essentials for struggling parents, and homeless care packages. No corporate partners, no sponsors, no matching-gift press release.",
+      "school": "School supplies",
+      "baby": "Baby essentials",
+      "homeless": "Homeless care",
+      "cta": "How SM-Give works"
+    },
+    "final": {
+      "headline": "Start posting everywhere.",
+      "body": "Free plan, no card, set up in about a minute. Upgrade to Pro for $8 whenever it earns it."
+    }
   }
 }
