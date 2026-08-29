@@ -6,6 +6,7 @@ import { publishToYouTube }   from './youtube'
 import { publishToLinkedIn }  from './linkedin'
 import { publishToPinterest } from './pinterest'
 import { publishToTwitter }   from './twitter'
+import { isRetryablePublishError } from './retry'
 
 export type PublishResult = {
   platform:  string
@@ -14,6 +15,13 @@ export type PublishResult = {
   error?:    string
   /** Human-readable error suitable for displaying in the UI */
   userError?: string
+  /**
+   * The platform refused right now, not forever — a rate limit, an upstream 5xx,
+   * X's "credits depleted". The caller may reschedule rather than burning the
+   * post. Absent or false means the failure is the post's own fault and will
+   * fail again identically.
+   */
+  retryable?: boolean
 }
 
 // destinations: map of platform → destination ID from post_destinations table
@@ -85,6 +93,7 @@ export async function publishToAll(
         success:   false,
         error:     message,
         userError: message,
+        retryable: isRetryablePublishError(err),
       })
     }
   }

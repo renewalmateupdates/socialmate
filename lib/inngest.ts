@@ -134,7 +134,7 @@ export const publishScheduledPost = inngest.createFunction(
       // transient error, this guard prevents the post from being sent twice.
       const { data: innerPostCheck } = await getSupabaseAdmin()
         .from('posts')
-        .select('user_id, workspace_id, status, published_at, platform_post_ids, platforms, content, media_urls, destinations, scheduled_at, is_recurring, recurrence_rule, recurrence_end_date, recurrence_parent_id')
+        .select('user_id, workspace_id, status, published_at, platform_post_ids, platforms, content, media_urls, destinations, scheduled_at, is_recurring, recurrence_rule, recurrence_end_date, recurrence_parent_id, metadata')
         .eq('id', postId)
         .single()
 
@@ -220,6 +220,18 @@ export const publishScheduledPost = inngest.createFunction(
         throw new Error(`Publish failed: ${errMsg}`)
       }
 
+      // A transient platform failure comes back as status 'retrying': the publish
+      // route left the post 'scheduled', pushed scheduled_at forward and emitted
+      // a fresh post/scheduled event. This run is done; the requeued one takes
+      // over. Nothing below should treat it as a publish.
+      if (data.status === 'retrying') {
+        console.log(
+          `[Inngest] Post ${postId} deferred after a transient failure ` +
+          `(attempt ${data.attempt}) — requeued for ${data.retryAt}`
+        )
+        return { requeued: true, attempt: data.attempt, retryAt: data.retryAt }
+      }
+
       console.log(`[Inngest] Successfully published post ${postId}:`, {
         status:    data.status,
         platforms: data.results?.map((r: any) => `${r.platform}:${r.success ? 'ok' : 'fail'}`),
@@ -235,8 +247,14 @@ export const publishScheduledPost = inngest.createFunction(
         (data.status === 'published' || data.status === 'partial')
       ) {
         try {
+          // A retried post has had scheduled_at pushed forward by the backoff.
+          // Stepping the recurrence from that would drift the whole series, so
+          // use the slot it was originally scheduled for when one was recorded.
+          const seriesAnchor =
+            (innerPostCheck.metadata as Record<string, unknown> | null)?.original_scheduled_at
+            ?? innerPostCheck.scheduled_at
           const nextAt = computeNextOccurrence(
-            new Date(innerPostCheck.scheduled_at),
+            new Date(seriesAnchor as string),
             innerPostCheck.recurrence_rule,
           )
           const endDate = innerPostCheck.recurrence_end_date
