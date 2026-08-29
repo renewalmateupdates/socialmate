@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
+import { checkAccountSlot } from '@/lib/account-limits'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -80,6 +81,17 @@ export async function GET(request: NextRequest) {
     .eq('platform', 'linkedin')
     .eq('platform_user_id', platform_user_id)
     .single()
+
+  // Plan cap on connected accounts per platform. Reconnecting an account this
+  // workspace already holds is a token refresh, not a new slot, so it passes.
+  if (!existing) {
+    const slot = await checkAccountSlot(user.id, 'linkedin', null, platform_user_id)
+    if (!slot.allowed) {
+      return NextResponse.redirect(
+        `${appUrl}/accounts?error=linkedin_plan_limit&limit=${slot.limit}&plan=${slot.plan}`
+      )
+    }
+  }
 
   if (existing) {
     await supabase

@@ -27,3 +27,32 @@ export function normalizePlan(raw: string | null | undefined): PlanTier {
   if (raw === 'pro' || raw === 'agency') return raw
   return 'free'
 }
+
+// ─── Plan-keyed limits ──────────────────────────────────────────────────────
+//
+// These live here, in a dependency-free module, because both the browser and
+// server routes need them. contexts/WorkspaceContext.tsx is 'use client', so
+// anything defined there is unreachable from an OAuth callback — which is
+// exactly how the connected-account cap came to be enforced only in the
+// accounts page UI while every callback wrote whatever it was handed.
+//
+// Add a limit here and import it. Do not re-declare one next to its consumer.
+
+// Connected accounts allowed per platform, per workspace. Matches /pricing.
+export const PLAN_ACCOUNTS_PER_PLATFORM: Record<PlanTier, number> = {
+  free:   1,
+  pro:    5,
+  agency: 10,
+}
+
+// Monthly post quota. Also re-exported from lib/post-limits.ts, which owns the
+// counting and the messaging built on top of it.
+export const PLAN_POST_LIMITS: Record<PlanTier, number> = {
+  free:   250,
+  pro:    1000,
+  agency: 5000,
+}
+
+export function accountsPerPlatformFor(plan: string | null | undefined): number {
+  return PLAN_ACCOUNTS_PER_PLATFORM[normalizePlan(plan)]
+}

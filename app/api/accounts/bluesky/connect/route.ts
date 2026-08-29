@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { checkAccountSlot } from '@/lib/account-limits'
 
 export async function POST(request: NextRequest) {
   const cookieStore = await cookies()
@@ -108,6 +109,18 @@ export async function POST(request: NextRequest) {
   }
 
   const { data: existing } = await existingQuery.maybeSingle()
+
+  // Plan cap on connected accounts per platform. Reconnecting an account this
+  // workspace already holds is a token refresh, not a new slot, so it passes.
+  if (!existing) {
+    const slot = await checkAccountSlot(user.id, 'bluesky', workspaceId ?? null, did)
+    if (!slot.allowed) {
+      return NextResponse.json({
+        error: `Your ${slot.plan} plan allows ${slot.limit} bluesky account${slot.limit === 1 ? '' : 's'}. Disconnect one first, or upgrade.`,
+        code:  'plan_limit',
+      }, { status: 403 })
+    }
+  }
 
   if (existing) {
     await supabase

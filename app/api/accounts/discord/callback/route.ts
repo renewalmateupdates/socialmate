@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
+import { checkAccountSlot } from '@/lib/account-limits'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -84,13 +85,27 @@ export async function GET(request: NextRequest) {
     .eq('platform_user_id', discordUser.id)
     .single()
 
+  // Read once, above the cap check: this decides which workspace the row
+  // lands in, so the cap has to be counted against the same one.
+  const pendingWorkspaceId = cookieStore.get('pending_workspace_id')?.value ?? null
+
+  // Plan cap on connected accounts per platform. Reconnecting an account this
+  // workspace already holds is a token refresh, not a new slot, so it passes.
+  if (!existing) {
+    const slot = await checkAccountSlot(user.id, 'discord', pendingWorkspaceId || null, discordUser.id)
+    if (!slot.allowed) {
+      return NextResponse.redirect(
+        `${appUrl}/accounts?error=discord_plan_limit&limit=${slot.limit}&plan=${slot.plan}`
+      )
+    }
+  }
+
   if (existing) {
     await supabase
       .from('connected_accounts')
       .update({ access_token, refresh_token, expires_at, scope })
       .eq('id', existing.id)
   } else {
-    const pendingWorkspaceId = cookieStore.get('pending_workspace_id')?.value ?? null
     const { error: dbError } = await supabase
       .from('connected_accounts')
       .insert({

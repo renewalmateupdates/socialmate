@@ -1,15 +1,19 @@
 'use client'
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
 import { supabase } from '@/lib/supabase'
+import {
+  normalizePlan as normalizePlanShared,
+  PLAN_ACCOUNTS_PER_PLATFORM,
+  PLAN_POST_LIMITS,
+  type PlanTier,
+} from '@/lib/plan'
 
-export type Plan = 'free' | 'pro' | 'agency'
-
-function normalizePlan(raw: string | null | undefined): Plan {
-  if (raw === 'pro_annual')    return 'pro'
-  if (raw === 'agency_annual') return 'agency'
-  if (raw === 'pro' || raw === 'agency') return raw
-  return 'free'
-}
+// One mapping, one set of numbers. lib/plan.ts has no dependencies, so a server
+// route and this client context can both import it — which is the whole point:
+// the connected-account cap used to be declared only here, in a 'use client'
+// file, so no OAuth callback could enforce it.
+export type Plan = PlanTier
+const normalizePlan = normalizePlanShared
 
 export const PLATFORMS_TOTAL = 16
 
@@ -28,8 +32,8 @@ export const PLAN_CONFIG: Record<Plan, {
     credits: 50,
     creditBank: 75,
     seats: 2,
-    accountsPerPlatform: 1,
-    maxPosts: 100,
+    accountsPerPlatform: PLAN_ACCOUNTS_PER_PLATFORM.free,
+    maxPosts: PLAN_POST_LIMITS.free,
     scheduleWeeks: 2,
     clientWorkspaces: 0,
   },
@@ -38,8 +42,8 @@ export const PLAN_CONFIG: Record<Plan, {
     credits: 500,
     creditBank: 750,
     seats: 5,
-    accountsPerPlatform: 5,
-    maxPosts: 1000,
+    accountsPerPlatform: PLAN_ACCOUNTS_PER_PLATFORM.pro,
+    maxPosts: PLAN_POST_LIMITS.pro,
     scheduleWeeks: 4,
     clientWorkspaces: 1,
   },
@@ -48,8 +52,8 @@ export const PLAN_CONFIG: Record<Plan, {
     credits: 2000,
     creditBank: 3000,
     seats: 15,
-    accountsPerPlatform: 10,
-    maxPosts: 5000,
+    accountsPerPlatform: PLAN_ACCOUNTS_PER_PLATFORM.agency,
+    maxPosts: PLAN_POST_LIMITS.agency,
     scheduleWeeks: 12,
     clientWorkspaces: 5,
   },
