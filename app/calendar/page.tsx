@@ -32,6 +32,17 @@ interface Post {
   platform_errors?: Record<string, string> | null
   tags?: string[] | null
   media_urls?: string[] | null
+  metadata?: Record<string, unknown> | null
+}
+
+// A post the publisher deferred after a transient platform failure: still
+// 'scheduled', but carrying the errors from the attempt that did not land.
+// Without this it looks identical to a post that has simply not fired yet,
+// which is how ten silently-dropped X posts went unnoticed for five days.
+function retryAttempt(post: Post): number {
+  if (post.status !== 'scheduled') return 0
+  if (!post.platform_errors || Object.keys(post.platform_errors).length === 0) return 0
+  return Number(post.metadata?.publish_attempts ?? 0)
 }
 
 const PLATFORM_ICONS: Record<string, string> = {
@@ -442,6 +453,25 @@ export default function CalendarPage() {
     return acc
   }, {})
 
+  // Within a day, read top-to-bottom in time order.
+  //
+  // The fetch above is ordered DESC on purpose — the 1000-row limit has to keep
+  // the newest posts — but that order carried straight through to the day panel,
+  // so a day listed 11pm first and 9am last. Read as a timeline (which is what a
+  // list under a date looks like), that inverts the story: a failure late in the
+  // evening appears above the successes that came hours before it, and the day
+  // reads as "it broke, then recovered" when it was the other way round. That
+  // exact misreading is what prompted this fix.
+  //
+  // Sorting here rather than in the query keeps the DESC limit semantics intact.
+  Object.values(postMap).forEach(list =>
+    list.sort((a, b) => {
+      const ta = new Date(a.scheduled_at || a.created_at).getTime()
+      const tb = new Date(b.scheduled_at || b.created_at).getTime()
+      return ta - tb
+    })
+  )
+
   const monthStart    = new Date(currentYear, currentMonth, 1)
   const monthEnd      = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59)
   const monthHasPosts = posts.some(post => {
@@ -720,8 +750,14 @@ export default function CalendarPage() {
                           )}
                         </div>
                         <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                          <span className={`text-xs font-bold px-2.5 py-1 rounded-full capitalize ${STATUS_BADGE[post.status] ?? STATUS_BADGE.draft}`}>
-                            {post.status === 'partial' ? 'Partial' : post.status}
+                          <span className={`text-xs font-bold px-2.5 py-1 rounded-full capitalize ${
+                            retryAttempt(post) > 0
+                              ? 'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+                              : STATUS_BADGE[post.status] ?? STATUS_BADGE.draft
+                          }`}>
+                            {retryAttempt(post) > 0
+                              ? `Retrying (${retryAttempt(post)})`
+                              : post.status === 'partial' ? 'Partial' : post.status}
                           </span>
                           {(post.status === 'partial' || post.status === 'failed') ? (
                             <button

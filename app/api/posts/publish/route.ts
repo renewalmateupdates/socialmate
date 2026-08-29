@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { publishToAll } from '@/lib/publish'
+import { MAX_PUBLISH_ATTEMPTS, retryDelayMs } from '@/lib/publish/retry'
 import { inngest } from '@/lib/inngest'
 import { Resend } from 'resend'
 import { logActivity } from '@/lib/workspace-activity'
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
     // Inngest call — fetch post directly with service role
     const { data: post, error } = await getSupabaseAdmin()
       .from('posts')
-      .select('id, user_id, content, platforms, destinations, status, published_at, workspace_id, media_urls')
+      .select('id, user_id, content, platforms, destinations, status, published_at, workspace_id, media_urls, scheduled_at, metadata')
       .eq('id', postId)
       .single()
 
@@ -74,6 +75,70 @@ export async function POST(request: NextRequest) {
       if (r.success && r.postId) platformPostIds[r.platform] = r.postId
       if (!r.success && r.error) platformErrors[r.platform] = r.error
     })
+
+    // ── Transient failure: reschedule instead of burning the post ───────────
+    //
+    // Scoped deliberately to the all-failed case. If even one platform
+    // succeeded the post is 'partial', platform_post_ids is non-empty, and
+    // re-running publishToAll would re-send to the platforms that already
+    // worked. Partials keep the existing manual Retry button, which re-fires
+    // only the failed platforms.
+    //
+    // Safe against double-posting: allFailed means platform_post_ids is empty
+    // and status stays 'scheduled', so the guards at the top of the Inngest
+    // function behave exactly as they do for a first attempt.
+    const priorAttempts = Number(
+      (post.metadata as Record<string, unknown> | null)?.publish_attempts ?? 0
+    )
+    const attemptsNow = priorAttempts + 1
+
+    if (
+      allFailed &&
+      results.every(r => r.retryable) &&
+      attemptsNow < MAX_PUBLISH_ATTEMPTS
+    ) {
+      const retryAt = new Date(Date.now() + retryDelayMs(attemptsNow))
+
+      const { error: requeueError } = await getSupabaseAdmin()
+        .from('posts')
+        .update({
+          status:          'scheduled',
+          scheduled_at:    retryAt.toISOString(),
+          platform_errors: platformErrors,
+          metadata: {
+            ...((post.metadata as Record<string, unknown> | null) ?? {}),
+            publish_attempts:   attemptsNow,
+            last_publish_error: Object.values(platformErrors)[0] ?? null,
+            original_scheduled_at:
+              (post.metadata as Record<string, unknown> | null)?.original_scheduled_at
+              ?? post.scheduled_at,
+          },
+        })
+        .eq('id', postId)
+        .eq('status', 'scheduled')   // only requeue if nothing else claimed it
+
+      if (requeueError) {
+        // Could not requeue — fall through and mark failed rather than leaving
+        // the post in a state nothing will ever pick up again.
+        console.error('[PUBLISH-RETRY] requeue failed, falling through to failed:', requeueError.message)
+      } else {
+        await inngest.send({
+          name: 'post/scheduled',
+          data: { postId, scheduledAt: retryAt.toISOString() },
+        }).catch(err => console.error('[PUBLISH-RETRY] inngest.send failed:', err))
+
+        console.log(
+          `[PUBLISH-RETRY] Post ${postId} hit a transient failure ` +
+          `(attempt ${attemptsNow}/${MAX_PUBLISH_ATTEMPTS}) — requeued for ${retryAt.toISOString()}`
+        )
+        return NextResponse.json({
+          status:   'retrying',
+          attempt:  attemptsNow,
+          retryAt:  retryAt.toISOString(),
+          errors:   platformErrors,
+        })
+      }
+    }
 
     const finalStatusInngest = allFailed ? 'failed' : someFailed ? 'partial' : 'published'
     console.log('[STATUS-UPDATE] Setting post', postId, '→', finalStatusInngest)

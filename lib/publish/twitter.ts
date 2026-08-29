@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { normalizePlan } from '@/lib/plan'
+import { RetryablePublishError } from './retry'
 
 // X (Twitter) API v2
 // Required env vars: TWITTER_CLIENT_ID, TWITTER_CLIENT_SECRET
@@ -292,9 +293,31 @@ export async function publishToTwitter(
       )
     }
     if (res.status === 429) {
-      throw new Error('X posting rate limit reached. Please wait and try again.')
+      throw new RetryablePublishError(
+        'X rate limit reached. The post will be retried automatically.'
+      )
     }
+
     const detail = err?.detail || err?.errors?.[0]?.message || `HTTP ${res.status}`
+
+    // "credits depleted" is X's app-level write budget, not ours and not this
+    // user's quota — which is why it lands between two successful posts on the
+    // same account minutes apart. Nothing in SocialMate can fix it and there is
+    // nothing for the user to do, so say that plainly instead of showing them a
+    // raw API string that reads like they ran out of AI credits.
+    if (/credits? depleted|usage ?cap/i.test(detail)) {
+      throw new RetryablePublishError(
+        'X is temporarily refusing new posts from SocialMate (API write credits ' +
+        'exhausted on their side). This is not your account or your plan — the ' +
+        'post will be retried automatically.'
+      )
+    }
+
+    // Upstream is broken rather than refusing: worth another attempt.
+    if (res.status >= 500) {
+      throw new RetryablePublishError(`X is having problems (HTTP ${res.status}). Retrying automatically.`)
+    }
+
     throw new Error(`X post failed: ${detail}`)
   }
 
