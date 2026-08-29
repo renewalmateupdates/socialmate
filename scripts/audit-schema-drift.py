@@ -81,7 +81,16 @@ def iter_files():
 
 
 def balanced(text, open_at):
-    """Index just past the bracket opened at `open_at`, or None."""
+    """Index just past the bracket opened at `open_at`, or None.
+
+    Comments are skipped before quote tracking, and that ordering is the whole
+    point. An apostrophe inside a `//` comment — "doesn't", "won't", any
+    possessive — used to open a string literal that never closed, so the scan
+    ran past the end of the call and attributed the next query's columns to this
+    table. That produced two confident false positives on a route whose only
+    sin was a comment containing the word "doesn't", and a guard that reports
+    imaginary bugs is one people stop reading.
+    """
     pairs = {'(': ')', '{': '}'}
     close = pairs[text[open_at]]
     depth, i, n = 0, open_at, len(text)
@@ -94,6 +103,15 @@ def balanced(text, open_at):
                 continue
             if c == quote:
                 quote = None
+        # Comments only start outside a string, so this sits in the else-branch.
+        elif c == '/' and i + 1 < n and text[i + 1] == '/':
+            nl = text.find('\n', i)
+            i = n if nl == -1 else nl
+            continue
+        elif c == '/' and i + 1 < n and text[i + 1] == '*':
+            end = text.find('*/', i + 2)
+            i = n if end == -1 else end + 2
+            continue
         elif c in '"\'`':
             quote = c
         elif c == text[open_at]:
@@ -205,7 +223,17 @@ def chain_extent(text, start):
         pos = close
 
 
-def scan_file(path, rel, schema, findings):
+# Names that reach .from() but are not PostgREST tables. supabase.storage
+# .from('media') is a bucket; the regex cannot see the `.storage` in front of it,
+# and the bucket genuinely exists. Anything added here needs justifying, because
+# the point of the missing-table check is that a name it cannot resolve is a bug
+# until proven otherwise.
+NOT_TABLES = {
+    'media',   # storage bucket, verified 2026-08-28
+}
+
+
+def scan_file(path, rel, schema, findings, missing_tables):
     try:
         src = open(path, encoding='utf-8').read()
     except Exception:
@@ -218,7 +246,17 @@ def scan_file(path, rel, schema, findings):
         table = m.group(1)
         cols = schema.get(table)
         if cols is None:
-            continue  # not a table PostgREST exposes (rpc, view, typo in table name)
+            # This branch used to just `continue`, and that blind spot hid four
+            # dead features for months. A table PostgREST does not expose is
+            # either missing from the database entirely or misspelled here.
+            # Both mean every query against it returns an error and null data,
+            # and every caller that discards the error goes quietly dead —
+            # the exact failure mode this script exists to catch. A missing
+            # table is strictly worse than a missing column, and it was the one
+            # thing the script could not see.
+            if table not in NOT_TABLES:
+                missing_tables.setdefault(table, []).append((rel, line_of(m.start())))
+            continue
         chain = src[m.end():chain_extent(src, m.end())]
 
         sm = SELECT_STR.search(chain)
@@ -261,10 +299,11 @@ def main():
     print('live schema: %d tables\n' % len(schema))
 
     findings = []
+    missing_tables = {}
     n = 0
     for path, rel in iter_files():
         n += 1
-        scan_file(path, rel, schema, findings)
+        scan_file(path, rel, schema, findings, missing_tables)
 
     # De-duplicate: the same bad column on the same line reported once.
     seen, uniq = set(), []
@@ -275,9 +314,28 @@ def main():
         uniq.append(f)
 
     print('scanned %d files' % n)
+
+    # Missing tables are reported first and outrank phantom columns: a phantom
+    # column breaks one query, a missing table breaks every query in a feature.
+    if missing_tables:
+        total = sum(len(v) for v in missing_tables.values())
+        print('\nMISSING TABLES: %d named in code, absent from the database (%d call sites)\n'
+              % (len(missing_tables), total))
+        for table, sites in sorted(missing_tables.items(), key=lambda kv: -len(kv[1])):
+            near = sorted(schema, key=lambda t: -_sim(t, table))[:3]
+            print('  %s   (%d site%s)' % (table, len(sites), '' if len(sites) == 1 else 's'))
+            print('      closest real tables: %s' % ', '.join(near))
+            for rel, line in sites[:6]:
+                print('      %s:%d' % (rel, line))
+            if len(sites) > 6:
+                print('      ... and %d more' % (len(sites) - 6))
+            print()
+
     if not uniq:
-        print('no phantom columns found')
-        return 0
+        if not missing_tables:
+            print('no phantom columns found')
+            return 0
+        return 1 if a.strict else 0
 
     by_table = {}
     for rel, line, table, col, kind in uniq:
