@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { checkAccountSlot } from '@/lib/account-limits'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -125,6 +126,17 @@ export async function GET(request: NextRequest) {
     .eq('platform', 'discord')
     .eq('platform_user_id', platformAccountId)
     .maybeSingle()
+
+  // Plan cap on connected accounts per platform. Reconnecting an account this
+  // workspace already holds is a token refresh, not a new slot, so it passes.
+  if (!existing) {
+    const slot = await checkAccountSlot(user.id, 'discord', null, platformAccountId)
+    if (!slot.allowed) {
+      return NextResponse.redirect(
+        `${appUrl}/accounts?error=discord_plan_limit&limit=${slot.limit}&plan=${slot.plan}`
+      )
+    }
+  }
 
   if (existing) {
     // Update with fresh token + metadata

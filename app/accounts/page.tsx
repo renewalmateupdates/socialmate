@@ -191,9 +191,24 @@ function AccountsInner() {
       const [platform, ...rest] = error.split('_')
       track('connect_failed', { platform, reason: rest.join('_') || error })
     }
+    // The cap is now enforced server-side in every connect callback, so a user
+    // can arrive back here having been refused. One handler covers all
+    // platforms: the callbacks all redirect as `<platform>_plan_limit`.
+    if (error?.endsWith('_plan_limit')) {
+      const platform = error.replace(/_plan_limit$/, '')
+      const limit    = Number(searchParams.get('limit') || 0)
+      const planName = searchParams.get('plan') || 'current'
+      const label    = PLATFORM_META[platform]?.label ?? platform
+      showToast(
+        `Your ${planName} plan allows ${limit} ${label} account${limit === 1 ? '' : 's'}. ` +
+        `Disconnect one first, or upgrade for more.`,
+        'error'
+      )
+    }
     if (success === 'discord_connected')   showToast('Discord connected successfully!', 'success')
     if (success === 'mastodon_connected')  showToast('Mastodon connected successfully!', 'success')
     if (success === 'pinterest_connected') showToast('Pinterest connected successfully!', 'success')
+    if (success === 'tiktok_connected')    showToast('TikTok connected successfully!', 'success')
     if (success === 'linkedin_connected')  showToast('LinkedIn connected successfully!', 'success')
     if (success === 'twitter_connected')   showToast('X (Twitter) connected successfully!', 'success')
     if (success === 'youtube_connected')   showToast('YouTube connected successfully!', 'success')

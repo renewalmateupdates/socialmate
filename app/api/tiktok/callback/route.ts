@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { checkAccountSlot } from '@/lib/account-limits'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
@@ -69,6 +70,13 @@ export async function GET(request: NextRequest) {
     displayName = userData?.data?.user?.display_name || 'TikTok Account'
     avatarUrl   = userData?.data?.user?.avatar_url   || null
     username    = userData?.data?.user?.username      || null
+  } else {
+    // Swallowed silently before this. Every TikTok row in production is named
+    // the literal placeholder "TikTok Account", which means this call has been
+    // failing for everyone and nobody could see why — two accounts on the same
+    // workspace are indistinguishable in the UI. Log the reason.
+    const detail = await userRes.text().catch(() => '')
+    console.warn(`[TikTok OAuth] user/info failed (${userRes.status}):`, detail.slice(0, 300))
   }
 
   const account_name = username ? `@${username}` : displayName
@@ -124,6 +132,21 @@ export async function GET(request: NextRequest) {
     .eq('platform_user_id', platformUserId)
     .maybeSingle()
 
+  // Plan cap. Reconnects of an account already held pass through; only a NEW
+  // open_id consumes a slot. This callback in particular never had a cap and
+  // never returned the user to /accounts, so the page's own client-side check
+  // never saw the connection either — which is how a free workspace ended up
+  // with two TikTok accounts.
+  if (!existing) {
+    const slot = await checkAccountSlot(user.id, 'tiktok', null, platformUserId)
+    if (!slot.allowed) {
+      cookieStore.delete('tiktok_oauth_state')
+      return NextResponse.redirect(
+        `${appUrl}/accounts?error=tiktok_plan_limit&limit=${slot.limit}&plan=${slot.plan}`
+      )
+    }
+  }
+
   if (existing) {
     await getSupabaseAdmin()
       .from('connected_accounts')
@@ -168,5 +191,11 @@ export async function GET(request: NextRequest) {
 
   cookieStore.delete('tiktok_oauth_state')
 
-  return NextResponse.redirect(`${appUrl}/tiktok/studio?connected=1`)
+  // Land on /accounts, not straight into the studio. Every other callback
+  // returns here with ?success=<platform>_connected, and app/accounts/page.tsx
+  // is the one place connect outcomes are recorded for /admin/funnel. Skipping
+  // it meant TikTok connects — successes and failures both — were invisible in
+  // the funnel that exists to explain why 62 of 74 accounts never connect
+  // anything. The studio is one click away from the TikTok card.
+  return NextResponse.redirect(`${appUrl}/accounts?success=tiktok_connected`)
 }
