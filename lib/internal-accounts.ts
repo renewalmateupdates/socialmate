@@ -21,10 +21,12 @@ export const INTERNAL_EMAILS: string[] = [
   'gilgameshenterprisellc@gmail.com', // Mate Suite ops account
   'renewalmate.updates@gmail.com',    // Mate Suite ops account
   'googlereview@socialmate.studio',   // created for store review
-  // Shares the founder's surname and was created the same day as
-  // renewalmate.updates. Almost certainly a family test account — but if it is
-  // a real person, delete this line, because it is currently hiding them.
-  'nichole_bostic@yahoo.com',
+  // Deliberately NOT here: nichole_bostic@yahoo.com. Confirmed Aug 30 to be
+  // the founder's mother, who signed up when he showed her the product. A real
+  // person on someone else's account is not an internal account, and listing
+  // her here would hide a genuine signup. She counts as external, and her
+  // record is a fair data point: 0 logins, onboarding never completed, nothing
+  // connected. She did not stall at the connect step. She never came back.
 ]
 
 const set = new Set(INTERNAL_EMAILS.map(e => e.toLowerCase()))
