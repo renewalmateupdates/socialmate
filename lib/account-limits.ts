@@ -1,5 +1,5 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-import { normalizePlan, accountsPerPlatformFor, type PlanTier } from '@/lib/plan'
+import { resolveWorkspacePlan, PLAN_ACCOUNTS_PER_PLATFORM, type PlanTier } from '@/lib/plan'
 
 // Server-side enforcement of the connected-accounts-per-platform cap.
 //
@@ -43,31 +43,13 @@ export async function checkAccountSlot(
 ): Promise<SlotCheck> {
   const db = getSupabaseAdmin()
 
-  // Resolve the plan off the workspace that will own the row. Mirrors the
-  // lookup in lib/publish/twitter.ts: a null workspaceId is the personal
-  // workspace, which is found by owner + is_personal, not by id.
-  let planRaw: string | null = null
-  if (workspaceId) {
-    const { data, error } = await db
-      .from('workspaces')
-      .select('plan')
-      .eq('id', workspaceId)
-      .maybeSingle()
-    if (error) console.warn('[account-limits] workspace plan lookup failed:', error.message)
-    planRaw = data?.plan ?? null
-  } else {
-    const { data, error } = await db
-      .from('workspaces')
-      .select('plan')
-      .eq('owner_id', userId)
-      .eq('is_personal', true)
-      .maybeSingle()
-    if (error) console.warn('[account-limits] personal plan lookup failed:', error.message)
-    planRaw = data?.plan ?? null
-  }
-
-  const plan  = normalizePlan(planRaw)
-  const limit = accountsPerPlatformFor(planRaw)
+  // Resolve through lib/plan.ts, which falls back to user_settings.plan when
+  // the workspace has none. This function read workspaces.plan directly when it
+  // shipped, and workspaces.plan was NULL for 83 of 86 rows — so the first
+  // paying subscriber bought Pro Annual and was refused their second Mastodon
+  // account four times in the following hour by this exact check.
+  const plan  = await resolveWorkspacePlan(db, userId, workspaceId)
+  const limit = PLAN_ACCOUNTS_PER_PLATFORM[plan]
 
   let query = db
     .from('connected_accounts')

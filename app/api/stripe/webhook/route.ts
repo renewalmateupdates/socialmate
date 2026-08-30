@@ -167,6 +167,40 @@ function resolveCreditsOnPlanChange(
   return isUpgrade ? Math.max(currentCredits, newPlanCredits) : newPlanCredits
 }
 
+// Keep workspaces.plan in step with user_settings.plan.
+//
+// Every plan-gated feature that is NOT credits or post count reads
+// workspaces.plan: the connected-account cap, the X quota, all eight agents,
+// Smart Queue, SOMA, Creator monetization. Nothing ever wrote it. On
+// 2026-08-29 it was NULL for 83 of 86 rows, so the first paying subscriber
+// bought Pro Annual and then hit the FREE tier's one-account-per-platform cap
+// four times within the hour, because the cap read a column the webhook had
+// never touched.
+//
+// Applied to every workspace the user owns, personal and client alike: an
+// Agency plan is what pays for its client workspaces, so they inherit it.
+//
+// Non-fatal on purpose. If this write fails the subscription is still recorded
+// in user_settings, and lib/plan.ts resolveWorkspacePlan() falls back to it.
+// Losing the plan entirely because a secondary write failed would be worse
+// than the drift this fixes.
+async function syncWorkspacePlan(
+  supabase: ReturnType<typeof getSupabase>,
+  userId: string | null | undefined,
+  plan: string,
+) {
+  if (!userId) return
+  const { error } = await supabase
+    .from('workspaces')
+    .update({ plan })
+    .eq('owner_id', userId)
+  if (error) {
+    console.error(`[plan-sync] workspaces.plan -> ${plan} failed for ${userId}:`, error.message)
+  } else {
+    console.log(`[plan-sync] workspaces.plan -> ${plan} for ${userId}`)
+  }
+}
+
 async function processReferralCredits(
   supabase: ReturnType<typeof getSupabase>,
   referredUserId: string,
@@ -1015,6 +1049,8 @@ const creditsToSet = alreadyOnPlan
       ai_credits_reset_at:        new Date().toISOString(),
     }, { onConflict: 'user_id' })
 
+    await syncWorkspacePlan(supabase, userId, plan)
+
     // SM-Give: record 2% of subscription payment
     try {
       const grossCents = session.amount_total ?? 0
@@ -1163,6 +1199,8 @@ const creditsToSet = alreadyOnPlan
         .update(updatePayload)
         .eq('stripe_subscription_id', subscription.id)
 
+      await syncWorkspacePlan(supabase, current?.user_id, plan)
+
       if (current?.user_id) {
         await processAffiliateCommission(supabase, current.user_id, plan, false)
       }
@@ -1270,6 +1308,10 @@ const creditsToSet = alreadyOnPlan
         ai_credits_reset_at:       new Date().toISOString(),
       })
       .eq('stripe_subscription_id', subscription.id)
+
+    // Downgrade the workspaces too, or a cancelled subscriber keeps every
+    // workspace-gated paid feature forever.
+    await syncWorkspacePlan(supabase, userSettings?.user_id, 'free')
 
     if (userSettings?.user_id) {
       await handleAffiliateChurn(supabase, userSettings.user_id)

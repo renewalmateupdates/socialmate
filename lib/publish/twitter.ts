@@ -1,5 +1,5 @@
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
-import { normalizePlan } from '@/lib/plan'
+import { resolveWorkspacePlan } from '@/lib/plan'
 import { RetryablePublishError } from './retry'
 
 // X (Twitter) API v2
@@ -107,25 +107,11 @@ export async function publishToTwitter(
   // numbers here is where the wrong figures on /settings and /support came from.
   const TWITTER_QUOTA: Record<string, number> = { free: 0, pro: 150, agency: 400 }
 
-  // Fetch workspace plan — use owner_id fallback when workspaceId is null (personal workspace)
-  let wsData: { plan: string | null } | null = null
-  if (workspaceId) {
-    const { data } = await getSupabaseAdmin()
-      .from('workspaces')
-      .select('plan')
-      .eq('id', workspaceId)
-      .maybeSingle()
-    wsData = data
-  } else {
-    const { data } = await getSupabaseAdmin()
-      .from('workspaces')
-      .select('plan')
-      .eq('owner_id', userId)
-      .eq('is_personal', true)
-      .maybeSingle()
-    wsData = data
-  }
-  const plan = normalizePlan(wsData?.plan as string | null)
+  // Resolved through lib/plan.ts so a paying subscriber is not read as free.
+  // Free is 0 tweets a month, so the drift between workspaces.plan and
+  // user_settings.plan did not merely under-serve Pro subscribers here — it
+  // blocked X posting for them outright.
+  const plan = await resolveWorkspacePlan(getSupabaseAdmin(), userId, workspaceId ?? null)
   const monthlyLimit = TWITTER_QUOTA[plan] ?? TWITTER_QUOTA.free
 
   // Count tweets published this calendar month
