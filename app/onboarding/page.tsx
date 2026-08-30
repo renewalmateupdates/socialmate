@@ -5,17 +5,66 @@ import { normalizePlan } from '@/lib/plan'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { track } from '@/lib/analytics'
+import BlueskyConnectModal from '@/components/BlueskyConnectModal'
+import TelegramConnectModal from '@/components/TelegramConnectModal'
+import MastodonConnectModal from '@/components/MastodonConnectModal'
 
-const LIVE_PLATFORMS = [
-  { id: 'bluesky',  label: 'Bluesky',     icon: '🦋', desc: 'Decentralized social — great for builders & creators', badge: '✨ Easiest to start' },
-  { id: 'mastodon', label: 'Mastodon',     icon: '🐘', desc: 'Federated network — engaged, ad-free community',       badge: null },
-  { id: 'discord',  label: 'Discord',      icon: '💬', desc: 'Post announcements to your server channels',           badge: null },
-  { id: 'telegram', label: 'Telegram',     icon: '✈️', desc: 'Broadcast to your Telegram channel or group',          badge: null },
-  { id: 'twitter',  label: 'X / Twitter',  icon: '🐦', desc: '280 characters — $0.01/tweet on free plan',           badge: null },
+// How a platform is actually connected, which is the thing that decides whether
+// someone finishes onboarding:
+//
+//   oauth  - one button, a consent screen, done. Nothing to prepare.
+//   modal  - a short form here, but you need a value from somewhere else first.
+//   invite - you must administer a Discord server and invite a bot to it.
+//
+// Ordered easiest-first, and honest about what each one costs you up front.
+// TikTok and LinkedIn were missing from this list entirely, which meant the two
+// genuine two-click connects were not offered at all, while Bluesky - which
+// requires generating an app password on a different website - was badged
+// "Easiest to start". Every one of the three signups on Aug 29 reached the
+// connect step and none of them connected anything.
+type ConnectKind = 'oauth' | 'modal' | 'invite'
+
+const LIVE_PLATFORMS: {
+  id: string; label: string; icon: string; desc: string
+  connect: ConnectKind; needs: string | null; badge: string | null
+}[] = [
+  { id: 'tiktok',   label: 'TikTok',      icon: '🎵', desc: 'Schedule videos straight to your account',
+    connect: 'oauth',  needs: null,                          badge: '⚡ 2 clicks' },
+  { id: 'linkedin', label: 'LinkedIn',    icon: '💼', desc: 'Post to your personal profile',
+    connect: 'oauth',  needs: null,                          badge: '⚡ 2 clicks' },
+  { id: 'twitter',  label: 'X / Twitter', icon: '🐦', desc: '280 characters — 5 free posts a month, then $0.01 each',
+    connect: 'oauth',  needs: null,                          badge: '⚡ 2 clicks' },
+  { id: 'bluesky',  label: 'Bluesky',     icon: '🦋', desc: 'Decentralized social — great for builders & creators',
+    connect: 'modal',  needs: 'an app password from bsky.app', badge: null },
+  { id: 'mastodon', label: 'Mastodon',    icon: '🐘', desc: 'Federated network — engaged, ad-free community',
+    connect: 'modal',  needs: 'your instance address',         badge: null },
+  { id: 'telegram', label: 'Telegram',    icon: '✈️', desc: 'Broadcast to your Telegram channel or group',
+    connect: 'modal',  needs: 'a bot token from @BotFather',   badge: null },
+  { id: 'discord',  label: 'Discord',     icon: '💬', desc: 'Post announcements to your server channels',
+    connect: 'invite', needs: 'a server you administer',       badge: null },
 ]
+
+const TWO_CLICK   = LIVE_PLATFORMS.filter(p => p.connect === 'oauth')
+const NEEDS_SETUP = LIVE_PLATFORMS.filter(p => p.connect !== 'oauth')
+
+// Where each OAuth platform's consent flow starts. Same routes /accounts uses.
+const OAUTH_ROUTES: Record<string, string> = {
+  tiktok:   '/api/tiktok/auth',
+  linkedin: '/api/accounts/linkedin/connect',
+  twitter:  '/api/accounts/twitter/connect',
+}
+
+// Send people straight to the thing they need rather than making them find it.
+// "Needs an app password" is only useful if you also say where app passwords
+// live, and that page is four levels into Bluesky's settings.
+const NEEDS_LINKS: Record<string, { href: string; label: string }> = {
+  bluesky:  { href: 'https://bsky.app/settings/app-passwords', label: 'Create one on Bluesky' },
+  telegram: { href: 'https://t.me/BotFather',                  label: 'Open @BotFather' },
+}
 
 const CHAR_LIMITS: Record<string, number> = {
   bluesky: 300, mastodon: 500, discord: 2000, telegram: 4096, twitter: 280,
+  tiktok: 2200, linkedin: 3000,
 }
 
 const STRIPE_PRO_PRICE_ID    = 'price_1U3jSI7OMwDowUuUm0oMEpiT'
@@ -64,6 +113,10 @@ function OnboardingInner() {
   const [couponApplied, setCouponApplied] = useState<{ id: string; code: string; discount_type: string; discount_value: number } | null>(null)
   const [couponError, setCouponError] = useState<string | null>(null)
   const [connectionDetected, setConnectionDetected] = useState(false)
+  // Which connect form is open inline. The three form-based platforms already
+  // have self-contained modal components on /accounts; onboarding mounts the
+  // same ones rather than shipping people over there to find them.
+  const [inlineModal, setInlineModal] = useState<string | null>(null)
   const [checkingConnection, setCheckingConnection] = useState(false)
   const [pollExpired, setPollExpired] = useState(false)
   const [checkMissed, setCheckMissed] = useState(false)
@@ -282,6 +335,34 @@ function OnboardingInner() {
 
   const progress = ((step - 1) / (STEPS.length - 1)) * 100
   const platformData = LIVE_PLATFORMS.find(p => p.id === selectedPlatform)
+
+  // Start the connect for whatever they picked, from here.
+  //
+  // The form platforms open inline. The OAuth ones have to leave for a consent
+  // screen - that part is unavoidable - but they open in a new tab so this page
+  // survives, and the existing poll picks the connection up on return. What
+  // does not happen any more is dumping someone on /accounts to re-find their
+  // platform among seven cards with no memory of what they just chose.
+  const startConnect = () => {
+    if (!platformData) return
+    track('connect_clicked', { platform: platformData.id })
+
+    if (platformData.connect === 'modal') { setInlineModal(platformData.id); return }
+
+    const href = platformData.connect === 'invite'
+      ? '/api/accounts/discord/connect'
+      : OAUTH_ROUTES[platformData.id]
+    if (href) window.open(href, '_blank', 'noopener,noreferrer')
+  }
+
+  // A form modal reporting success is a connection we know about immediately,
+  // so skip waiting for the next poll tick.
+  const onInlineConnected = (platform: string) => {
+    track('connect_succeeded', { platform })
+    setInlineModal(null)
+    setConnectionDetected(true)
+    setTimeout(() => setStep(quickMode ? 5 : 4), 1200)
+  }
   const charLimit = CHAR_LIMITS[selectedPlatform] ?? 300
   const isUpgraded = upgradedPlan !== 'free' || searchParams.get('upgraded') === 'true'
   // Starter posts are only scheduled when a platform is actually connected —
@@ -446,26 +527,42 @@ function OnboardingInner() {
                 <p className="text-gray-400 dark:text-gray-500 text-sm">Pick one to start — you can connect more later from Settings.</p>
               </div>
 
-              <div className="space-y-3 mb-8">
-                {LIVE_PLATFORMS.map(p => (
-                  <button
-                    key={p.id}
-                    onClick={() => { setSelectedPlatform(p.id); setStep(3) }}
-                    className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-gray-100 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-500 text-left transition-all group">
-                    <span className="text-2xl flex-shrink-0">{p.icon}</span>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="text-sm font-bold">{p.label}</p>
-                        {p.badge && (
-                          <span className="text-[10px] font-extrabold px-1.5 py-0.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 rounded-full leading-none flex-shrink-0">{p.badge}</span>
-                        )}
-                      </div>
-                      <p className="text-xs text-gray-400 dark:text-gray-500">{p.desc}</p>
-                    </div>
-                    <span className="text-gray-300 dark:text-gray-600 group-hover:text-black dark:group-hover:text-white transition-colors text-sm font-bold flex-shrink-0">→</span>
-                  </button>
-                ))}
-              </div>
+              {/* Two groups, because "which platform" and "how much work is
+                  this about to be" are the same question at this step, and
+                  hiding the second half is what loses people one screen later. */}
+              {([
+                { title: 'Connects in two clicks', items: TWO_CLICK   },
+                { title: 'Needs one thing first',  items: NEEDS_SETUP },
+              ]).map(group => (
+                <div key={group.title} className="mb-6">
+                  <p className="text-[11px] font-extrabold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2 px-1">
+                    {group.title}
+                  </p>
+                  <div className="space-y-3">
+                    {group.items.map(p => (
+                      <button
+                        key={p.id}
+                        onClick={() => { setSelectedPlatform(p.id); setStep(3) }}
+                        className="w-full flex items-center gap-4 p-4 rounded-2xl border-2 border-gray-100 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-500 text-left transition-all group">
+                        <span className="text-2xl flex-shrink-0">{p.icon}</span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="text-sm font-bold">{p.label}</p>
+                            {p.badge && (
+                              <span className="text-[10px] font-extrabold px-1.5 py-0.5 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-400 rounded-full leading-none flex-shrink-0">{p.badge}</span>
+                            )}
+                          </div>
+                          <p className="text-xs text-gray-400 dark:text-gray-500">{p.desc}</p>
+                          {p.needs && (
+                            <p className="text-xs text-amber-600 dark:text-amber-500 mt-0.5">Needs {p.needs}</p>
+                          )}
+                        </div>
+                        <span className="text-gray-300 dark:text-gray-600 group-hover:text-black dark:group-hover:text-white transition-colors text-sm font-bold flex-shrink-0">→</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
 
               <button onClick={() => setStep(1)}
                 className="w-full py-2.5 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all text-gray-500 dark:text-gray-400">
@@ -495,15 +592,37 @@ function OnboardingInner() {
                 </div>
               ) : (
                 <>
-                  <a
-                    href="/accounts"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  {/* What this platform needs, said before they click, with a
+                      direct link to go get it. Previously this step sent people
+                      to /accounts in a new tab with no indication of which of
+                      the seven platforms they had just chosen, and no mention
+                      that Bluesky wants a credential from another website. */}
+                  {platformData?.needs && (
+                    <div className="mb-4 p-4 rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50">
+                      <p className="text-xs font-bold text-amber-800 dark:text-amber-300 mb-1">
+                        First you need {platformData.needs}
+                      </p>
+                      {NEEDS_LINKS[selectedPlatform] && (
+                        <a
+                          href={NEEDS_LINKS[selectedPlatform].href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs font-semibold text-amber-700 dark:text-amber-400 underline underline-offset-2">
+                          {NEEDS_LINKS[selectedPlatform].label} →
+                        </a>
+                      )}
+                    </div>
+                  )}
+
+                  <button
+                    onClick={startConnect}
                     className="flex items-center justify-center gap-2 w-full py-4 mb-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all">
-                    🔗 Connect {platformData?.label} →
-                  </a>
+                    {platformData?.icon} Connect {platformData?.label}
+                  </button>
                   <p className="text-xs text-center text-gray-400 dark:text-gray-500 mb-4">
-                    Opens accounts page in a new tab · come back here after connecting
+                    {platformData?.connect === 'modal'
+                      ? 'Opens right here — you will not lose this page'
+                      : 'Opens a consent screen · we detect it automatically when you come back'}
                   </p>
 
                   {/* The escape hatch for when polling and the focus check both
@@ -761,6 +880,26 @@ function OnboardingInner() {
           }`}>
           {toast.type === 'info' ? '💡' : '❌'} {toast.message}
         </div>
+      )}
+
+      {/* The same connect forms /accounts uses, mounted here so connecting
+          never requires leaving onboarding. Mastodon has no onSuccess because
+          its flow redirects out to the user's instance for OAuth; the step 3
+          poll catches that one on return, same as the OAuth platforms. */}
+      {inlineModal === 'bluesky' && (
+        <BlueskyConnectModal
+          onSuccess={() => onInlineConnected('bluesky')}
+          onClose={() => setInlineModal(null)}
+        />
+      )}
+      {inlineModal === 'telegram' && (
+        <TelegramConnectModal
+          onSuccess={() => onInlineConnected('telegram')}
+          onClose={() => setInlineModal(null)}
+        />
+      )}
+      {inlineModal === 'mastodon' && (
+        <MastodonConnectModal onClose={() => setInlineModal(null)} />
       )}
     </div>
   )
