@@ -10,6 +10,7 @@ import { Resend } from 'resend'
 import { logActivity } from '@/lib/workspace-activity'
 import { dispatchWebhook } from '@/lib/webhooks'
 import { recordFunnel } from '@/lib/usage'
+import { REPLY_TO } from '@/lib/mail'
 
 let _resend: Resend | null = null
 function getResend() {
@@ -242,6 +243,7 @@ export async function POST(request: NextRequest) {
 
             await getResend().emails.send({
               from: 'SocialMate <notifications@socialmate.studio>',
+              replyTo: REPLY_TO,
               to: authUser.user.email,
               subject: `Your post is live ✓`,
               html: `
@@ -430,6 +432,7 @@ export async function POST(request: NextRequest) {
 
             await getResend().emails.send({
               from: 'SocialMate <notifications@socialmate.studio>',
+              replyTo: REPLY_TO,
               to: authUser.user.email,
               subject: `Your post is live ✓`,
               html: `

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin-auth'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { Resend } from 'resend'
+import { REPLY_TO } from '@/lib/mail'
 
 // GET — list all white label requests (pending, active, rejected)
 export async function GET(req: NextRequest) {
@@ -82,6 +83,7 @@ export async function POST(req: NextRequest) {
         const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
         await resend.emails.send({
           from: 'SocialMate <hello@socialmate.studio>',
+          replyTo: REPLY_TO,
           to:   userEmail,
           subject: 'Your White Label is approved and active',
           html: `<!DOCTYPE html>
@@ -143,6 +145,7 @@ export async function POST(req: NextRequest) {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
       await resend.emails.send({
         from: 'SocialMate <hello@socialmate.studio>',
+        replyTo: REPLY_TO,
         to:   userEmail,
         subject: 'About your White Label request',
         html: `<!DOCTYPE html>

@@ -4,6 +4,7 @@ import { Resend } from 'resend'
 import crypto from 'crypto'
 import { requireAdmin } from '@/lib/admin-auth'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { REPLY_TO } from '@/lib/mail'
 
 function getAdminSupabase() {
   return getSupabaseAdmin()
@@ -80,6 +81,7 @@ export async function PATCH(req: NextRequest) {
       const resend = new Resend(process.env.RESEND_API_KEY)
       resend.emails.send({
         from: 'SocialMate <noreply@socialmate.studio>',
+        replyTo: REPLY_TO,
         to: listing.applicant_email,
         subject: `🎉 You got a free Studio Stax listing — ${listing.name}!`,
         html: `<!DOCTYPE html>
@@ -165,6 +167,7 @@ export async function PATCH(req: NextRequest) {
       const resend = new Resend(process.env.RESEND_API_KEY)
       await resend.emails.send({
         from: 'SocialMate <hello@socialmate.studio>',
+        replyTo: REPLY_TO,
         to:   listing.applicant_email,
         subject: `Your Studio Stax application for "${listing.name}" was approved 🎉`,
         html: `<!DOCTYPE html>

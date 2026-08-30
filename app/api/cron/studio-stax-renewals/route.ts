@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { Resend } from 'resend'
+import { REPLY_TO } from '@/lib/mail'
 
 function getResend() { return new Resend(process.env.RESEND_API_KEY) }
 const FROM = 'SocialMate <hello@socialmate.studio>'
@@ -194,6 +195,7 @@ export async function GET(req: NextRequest) {
     try {
       await getResend().emails.send({
         from: FROM, to: slot.buyer_email, subject,
+        replyTo: REPLY_TO,
         html: renewalEmail({ name: slot.buyer_name, toolName, daysLeft: days, expiresAt: slot.expires_at, renewalLink, renewalPrice: renewal, tier: tierLabel }),
       })
       const updateField = days <= 7 ? 'renewal_email_7_sent' : days <= 14 ? 'renewal_email_14_sent' : 'renewal_email_30_sent'
@@ -244,6 +246,7 @@ export async function GET(req: NextRequest) {
         try {
           await getResend().emails.send({
             from: FROM,
+            replyTo: REPLY_TO,
             to:   stdSlot.buyer_email,
             subject: `🎉 A founding spot just opened in Studio Stax — it's yours`,
             html: reclaimEmail({ name: stdSlot.buyer_name, toolName, offerLink: `${appUrl}/studio-stax/renew?token=${reclaimToken}` }),

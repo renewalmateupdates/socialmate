@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
+import { REPLY_TO } from '@/lib/mail'
 
 function getAdminSupabase() {
   return createClient(
@@ -71,6 +72,7 @@ export async function POST(req: NextRequest) {
     const whyExcerpt = why_apply ? why_apply.slice(0, 200) + (why_apply.length > 200 ? '…' : '') : null
     resend.emails.send({
       from: 'SocialMate <noreply@socialmate.studio>',
+      replyTo: REPLY_TO,
       to: adminEmail,
       subject: `🏪 New Studio Stax Application — ${name}`,
       html: `<!DOCTYPE html>

@@ -5,6 +5,7 @@ import { createServerClient } from '@supabase/ssr'
 import { Resend } from 'resend'
 import { requireAdmin } from '@/lib/admin-auth'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { REPLY_TO } from '@/lib/mail'
 function getResend() { return new Resend(process.env.RESEND_API_KEY!) }
 
 // ── GET — admin fetch all feedback ─────────────────────────────────────────
@@ -83,6 +84,7 @@ export async function POST(req: NextRequest) {
   try {
     await getResend().emails.send({
       from: 'SocialMate <hello@socialmate.studio>',
+      replyTo: REPLY_TO,
       to: 'renewalmate.updates@gmail.com',
       subject: `[${type.toUpperCase()}] New feedback from ${user?.email ?? 'anonymous'}`,
       html: `

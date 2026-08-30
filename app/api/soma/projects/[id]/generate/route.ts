@@ -8,6 +8,7 @@ import { SOMA_COSTS } from '@/lib/soma-costs'
 import { inngest } from '@/lib/inngest'
 import { Resend } from 'resend'
 import { runCapForMode, runCapReached, nextRunCount } from '@/lib/soma-runs'
+import { REPLY_TO } from '@/lib/mail'
 
 const GENERATE_COST = SOMA_COSTS.generate_week // 75
 
@@ -435,6 +436,7 @@ Rules:
 
         await resend.emails.send({
           from:    'SOMA <soma@socialmate.studio>',
+          replyTo: REPLY_TO,
           to:      user.email,
           subject,
           html: `<p style="font-family:sans-serif;color:#e5e7eb;background:#0f0f0f;padding:32px;border-radius:8px;">

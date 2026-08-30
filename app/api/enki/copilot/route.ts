@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { Resend } from 'resend'
+import { REPLY_TO } from '@/lib/mail'
 
 function getSupabase() {
   return createServerClient(
@@ -132,6 +133,7 @@ export async function POST(req: NextRequest) {
     const resend = new Resend(process.env.RESEND_API_KEY)
     await resend.emails.send({
       from: 'Enki by SocialMate <noreply@socialmate.studio>',
+      replyTo: REPLY_TO,
       to: email,
       subject: `You've been invited to co-pilot an Enki account`,
       html: `<!DOCTYPE html>

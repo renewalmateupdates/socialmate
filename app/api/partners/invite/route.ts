@@ -5,6 +5,7 @@ import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { Resend } from 'resend'
 import { affiliateInviteEmail } from '@/lib/emails/affiliateEmails'
+import { REPLY_TO } from '@/lib/mail'
 
 function getResend() { return new Resend(process.env.RESEND_API_KEY!) }
 
@@ -93,6 +94,7 @@ export async function POST(req: NextRequest) {
 
   await getResend().emails.send({
     from: 'SocialMate Partners <hello@socialmate.studio>',
+    replyTo: REPLY_TO,
     to: email.trim(),
     subject: `You're invited to the SocialMate Partner Program`,
     html: affiliateInviteEmail({ email: email.trim(), acceptUrl, declineUrl, expiresAt }),

@@ -6,6 +6,7 @@ import { cookies } from 'next/headers'
 import { Resend } from 'resend'
 import { affiliateWelcomeEmail } from '@/lib/emails/affiliateEmails'
 import Stripe from 'stripe'
+import { REPLY_TO } from '@/lib/mail'
 
 function getResend() { return new Resend(process.env.RESEND_API_KEY!) }
 
@@ -198,6 +199,7 @@ export async function POST(req: NextRequest) {
       const referralLink = `${appUrl}/?aff=${profile.id.slice(0, 8)}`
       await getResend().emails.send({
         from: 'SocialMate Partners <hello@socialmate.studio>',
+        replyTo: REPLY_TO,
         to: user.email,
         subject: "Welcome to the SocialMate Partner Program — you're active!",
         html: affiliateWelcomeEmail({ email: user.email, referralLink }),

@@ -5,6 +5,7 @@ import { stripe } from '@/lib/stripe'
 import { createClient } from '@supabase/supabase-js'
 import Stripe from 'stripe'
 import { Resend } from 'resend'
+import { REPLY_TO } from '@/lib/mail'
 
 // Aug 2026 pricing: Pro $5 -> $8, Agency $20 -> $29, annual moved to two months
 // free. New prices were created against the same Stripe products, so reporting
@@ -500,6 +501,7 @@ export async function POST(req: NextRequest) {
             const renewalPrice = Math.round(paidCents * 0.80 / 100)
             await resend.emails.send({
               from:    'SocialMate <hello@socialmate.studio>',
+              replyTo: REPLY_TO,
               to:      listing.applicant_email,
               subject: isRenewal ? `✅ ${listing.name} renewed in Studio Stax` : `🎉 ${listing.name} is now live in Studio Stax`,
               html: `<!DOCTYPE html>
@@ -790,6 +792,7 @@ export async function POST(req: NextRequest) {
         const userEmail = authUser?.user?.email ?? userId
         await resend.emails.send({
           from: 'SocialMate <hello@socialmate.studio>',
+          replyTo: REPLY_TO,
           to:   'socialmatehq@gmail.com',
           subject: `New White Label Request — ${whiteLabelTier} — ${userEmail}`,
           html: `<p>New White Label <strong>${whiteLabelTier}</strong> request from <strong>${userEmail}</strong>.</p>

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { Resend } from 'resend'
 import { w9AlertEmail } from '@/lib/emails/affiliateEmails'
+import { REPLY_TO } from '@/lib/mail'
 
 function getResend() { return new Resend(process.env.RESEND_API_KEY!) }
 
@@ -94,6 +95,7 @@ export async function GET(req: NextRequest) {
       try {
         await getResend().emails.send({
           from: 'SocialMate Partners <hello@socialmate.studio>',
+          replyTo: REPLY_TO,
           to: affiliate.email,
           subject: `⚠️ W-9 Required — Day ${alertDay} of 60 — Action needed`,
           html: w9AlertEmail({

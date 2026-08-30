@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
+import { REPLY_TO } from '@/lib/mail'
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,6 +16,9 @@ export async function POST(req: NextRequest) {
     // Notify admin — fire and forget
     resend.emails.send({
       from:    'SocialMate <noreply@socialmate.studio>',
+      // replyTo is set to the applicant's address at the end of this object —
+      // this is the notification telling us someone applied, so replying should
+      // reach them, not us.
       to:      process.env.ADMIN_EMAIL || 'socialmatehq@gmail.com',
       subject: `💰 New Partner Application — ${email}`,
       html: `<!DOCTYPE html>
@@ -65,6 +69,7 @@ export async function POST(req: NextRequest) {
     // Confirm to applicant
     await resend.emails.send({
       from:    'SocialMate <hello@socialmate.studio>',
+      replyTo: REPLY_TO,
       to:      email,
       subject: 'We received your partner application',
       html: `

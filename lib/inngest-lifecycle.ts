@@ -2,6 +2,7 @@ import { inngest } from '@/lib/inngest'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { Resend } from 'resend'
 import { lifecycleEmail } from '@/lib/lifecycle-emails'
+import { REPLY_TO } from '@/lib/mail'
 
 function getResend() { return new Resend(process.env.RESEND_API_KEY) }
 
@@ -142,6 +143,7 @@ export const stoppedPostingEmails = inngest.createFunction(
         try {
           await resend.emails.send({
             from: FROM,
+            replyTo: REPLY_TO,
             to: t.email,
             subject: t.step === 'nudge'
               ? 'Your queue is empty'

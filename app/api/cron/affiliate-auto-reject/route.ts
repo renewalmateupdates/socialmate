@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
+import { REPLY_TO } from '@/lib/mail'
 function getResend() { return new Resend(process.env.RESEND_API_KEY!) }
 
 function getAdminSupabase() {
@@ -87,6 +88,7 @@ export async function GET(req: NextRequest) {
     if (email) {
       await getResend().emails.send({
         from: 'SocialMate <hello@socialmate.studio>',
+        replyTo: REPLY_TO,
         to: email,
         subject: 'Your SocialMate Affiliate Application',
         html: `

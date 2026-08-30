@@ -4,6 +4,7 @@ import { Resend } from 'resend'
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { recordAgentRun } from './usage'
 import { createNotification } from './notify'
+import { REPLY_TO } from '@/lib/mail'
 
 function getResend() { return new Resend(process.env.RESEND_API_KEY) }
 
@@ -114,6 +115,7 @@ Return ONLY valid JSON:
             for (const email of cfg.subscriber_emails) {
               await resend.emails.send({
                 from: 'Newsletter <newsletter@socialmate.studio>',
+                replyTo: REPLY_TO,
                 to: email, subject, html: parsed.html,
               }).catch((e: any) => console.error('[NewsletterAgent] send failed:', e))
             }
@@ -121,6 +123,7 @@ Return ONLY valid JSON:
           } else {
             await getResend().emails.send({
               from:    'SOMA <soma@socialmate.studio>',
+              replyTo: REPLY_TO,
               to:      userEmail,
               subject: `Your newsletter draft is ready`,
               html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;">
@@ -235,6 +238,7 @@ export const clientReportAgent = inngest.createFunction(
           for (const email of recipients) {
             await getResend().emails.send({
               from:    'SocialMate Reports <reports@socialmate.studio>',
+              replyTo: REPLY_TO,
               to:      email,
               subject: `Weekly Report: ${ws.name} — ${weekStr}`,
               html,
