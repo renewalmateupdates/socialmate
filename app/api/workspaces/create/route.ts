@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { resolveWorkspacePlan } from '@/lib/plan'
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,12 +33,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Client name is required' }, { status: 400 })
     }
 
+    // A client workspace is only creatable on a paid plan and is paid for by the
+    // owner's subscription, so it inherits that plan at creation. Without this it
+    // is born with plan = NULL, and the ~16 places that read workspaces.plan
+    // directly would treat an Agency customer's client workspace as free — the
+    // same drift that left the first paying subscriber on free-tier limits.
+    const ownerPlan = await resolveWorkspacePlan(getSupabaseAdmin(), user.id, null)
+
     // Use admin client to bypass RLS for workspace creation
     console.log('[WORKSPACE-CREATE] Attempting insert:', { owner_id: user.id, name: name.trim(), is_personal: false })
     const { data, error } = await getSupabaseAdmin()
       .from('workspaces')
       .insert({
         owner_id:          user.id,
+        plan:              ownerPlan,
         name:              name.trim(),
         client_name:       clientName?.trim() || name.trim(),
         industry:          industry  || null,
