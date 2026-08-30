@@ -74,19 +74,40 @@ const STEPS = [
   { id: 1, label: 'Welcome'  },
   { id: 2, label: 'Platform' },
   { id: 3, label: 'Connect'  },
-  { id: 4, label: '5 Posts'  },
+  { id: 4, label: 'First post' },
   { id: 5, label: "You're in!" },
 ]
 
-function generateStarterPosts(topic: string): string[] {
+// One post, not five.
+//
+// Onboarding asked people to review and schedule five posts before they had
+// published anything at all. That is a lot of commitment to ask for from
+// someone still deciding whether the product works. One post they can actually
+// put on a calendar and watch go out is the whole point of the step.
+//
+// Random rather than fixed, so "Rewrite it" gives a genuinely different angle.
+function generateStarterPost(topic: string): string {
   const t = topic.trim() || 'my journey'
-  return [
+  const options = [
     `Hot take: most people overthink ${t}. The ones who win just start before they feel ready and adjust as they go. Consistency beats perfection every time.`,
-    `3 things I wish I knew starting out with ${t}:\n\n1. Show up on the days you don't feel like it.\n2. Don't compare your start to someone else's middle.\n3. Master the basics before chasing shortcuts.`,
+    `3 things I wish I knew starting out with ${t}:
+
+1. Show up on the days you don't feel like it.
+2. Don't compare your start to someone else's middle.
+3. Master the basics before chasing shortcuts.`,
     `The biggest mistake I see people make with ${t}: waiting for the "right time" to begin. There isn't one. Start small, stay steady, and let momentum do the heavy lifting.`,
-    `Quick ${t} tip: pick one thing to improve this week and go deep on it instead of spreading yourself thin. Small, focused reps compound fast. Save this for when you need it. 💡`,
-    `Real talk — ${t} is harder than people make it look. The thing that changed everything for me? I stopped waiting to feel motivated and built a routine I could keep on my worst days.`,
+    `Quick ${t} tip: pick one thing to improve this week and go deep on it instead of spreading yourself thin. Small, focused reps compound fast. Save this for when you need it.`,
+    `Real talk: ${t} is harder than people make it look. The thing that changed everything for me? I stopped waiting to feel motivated and built a routine I could keep on my worst days.`,
   ]
+  return options[Math.floor(Math.random() * options.length)]
+}
+
+// Default the picker to tomorrow at 09:00 local. Far enough away to feel
+// deliberate, close enough that they see it happen.
+function defaultSchedule(): { date: string; time: string } {
+  const d = new Date(Date.now() + 24 * 60 * 60 * 1000)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return { date: `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`, time: '09:00' }
 }
 
 function OnboardingInner() {
@@ -102,8 +123,14 @@ function OnboardingInner() {
   const [irisOptIn, setIrisOptIn] = useState(true)
   const [selectedPlatform, setSelectedPlatform] = useState('')
   const [topic, setTopic] = useState('')
-  const [starterPosts, setStarterPosts] = useState<string[]>([])
+  const [starterPost, setStarterPost] = useState('')
   const [postsGenerated, setPostsGenerated] = useState(false)
+  const [scheduleDate, setScheduleDate] = useState(defaultSchedule().date)
+  const [scheduleTime, setScheduleTime] = useState(defaultSchedule().time)
+  // What actually happened when we tried to save. Step 5 reads this instead of
+  // asserting success, because it used to claim "5 posts scheduled" after an
+  // insert that never ran.
+  const [saveResult, setSaveResult] = useState<{ kind: 'scheduled' | 'draft' | 'none' | 'error'; detail?: string } | null>(null)
   const [saving, setSaving] = useState(false)
   const [hasFinished, setHasFinished] = useState(false)
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null)
@@ -312,21 +339,51 @@ function OnboardingInner() {
       console.error('[onboarding] settings upsert failed:', settingsErr.message)
     }
 
-    // Only schedule starter posts when a platform is actually connected.
-    // Without a destination they can never publish — the scheduler would sweep
-    // them up and stamp them 'failed', polluting the failure log with dead posts.
-    const postsToSave = starterPosts.filter(p => p.trim())
-    if (postsToSave.length > 0 && platforms.length > 0) {
-      const base = new Date(Date.now() + 2 * 60 * 60 * 1000) // start 2h from now
-      await supabase.from('posts').insert(
-        postsToSave.map((content, i) => ({
-          user_id: user.id,
-          content: content.trim(),
-          platforms,
-          status: 'scheduled',
-          scheduled_at: new Date(base.getTime() + i * 30 * 60 * 1000).toISOString(),
-        }))
-      )
+    // Save the starter post.
+    //
+    // This block used to be `if (posts.length && platforms.length)` around an
+    // insert whose error was discarded — and step 5 announced "5 posts
+    // scheduled and on your calendar" regardless. With no platform connected,
+    // `platforms` is [] and the insert simply never ran, so the flow's final
+    // screen was congratulating people for nothing. Verified against production:
+    // a full run through onboarding wrote zero rows.
+    //
+    // Two changes. A post with nowhere to go is saved as a draft rather than
+    // discarded, so the work survives and shows up in /drafts. And whatever
+    // happens is recorded in saveResult, which step 5 reports honestly.
+    const content = starterPost.trim()
+    if (!content) {
+      setSaveResult({ kind: 'none' })
+    } else {
+      // Local date+time from the picker -> instant. Constructing from parts
+      // avoids the Safari/Firefox disagreement over bare "YYYY-MM-DD HH:MM".
+      const [y, mo, d] = scheduleDate.split('-').map(Number)
+      const [hh, mm]   = scheduleTime.split(':').map(Number)
+      const when = new Date(y, (mo ?? 1) - 1, d ?? 1, hh ?? 9, mm ?? 0)
+      const valid = !Number.isNaN(when.getTime())
+
+      const connected = platforms.length > 0
+      const { error: postErr } = await supabase.from('posts').insert({
+        user_id: user.id,
+        content,
+        platforms,
+        status: connected ? 'scheduled' : 'draft',
+        // A draft has no destination, so a scheduled_at on it would only invite
+        // the scheduler to sweep it up and stamp it failed.
+        scheduled_at: connected && valid ? when.toISOString() : null,
+      })
+
+      if (postErr) {
+        console.error('[onboarding] starter post insert failed:', postErr.message)
+        setSaveResult({ kind: 'error', detail: postErr.message })
+      } else {
+        setSaveResult({
+          kind: connected ? 'scheduled' : 'draft',
+          detail: connected && valid
+            ? when.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+            : undefined,
+        })
+      }
     }
 
     setSaving(false)
@@ -367,7 +424,12 @@ function OnboardingInner() {
   const isUpgraded = upgradedPlan !== 'free' || searchParams.get('upgraded') === 'true'
   // Starter posts are only scheduled when a platform is actually connected —
   // otherwise they have no destination and would just fail. Drives honest copy below.
-  const willScheduleStarterPosts = !!selectedPlatform && connectionDetected && starterPosts.some(p => p.trim())
+  // Read from what the save actually returned, not from what we intended to do.
+  // The old version derived this from component state and step 5 announced
+  // success on the strength of it, while the insert it was describing had been
+  // skipped entirely.
+  const didSchedule = saveResult?.kind === 'scheduled'
+  const didDraft    = saveResult?.kind === 'draft'
 
   return (
     <div className="min-h-dvh bg-theme flex flex-col">
@@ -672,14 +734,14 @@ function OnboardingInner() {
             </div>
           )}
 
-          {/* ── STEP 4 — STARTER POSTS ── */}
+          {/* ── STEP 4 — FIRST POST ── */}
           {step === 4 && (
             <div className="bg-surface border border-theme rounded-3xl p-8 md:p-10">
               <div className="text-center mb-6">
                 <div className="text-5xl mb-4">✏️</div>
-                <h2 className="text-2xl font-extrabold tracking-tight mb-2">Let's schedule your first 5 posts</h2>
+                <h2 className="text-2xl font-extrabold tracking-tight mb-2">Schedule your first post</h2>
                 <p className="text-gray-400 dark:text-gray-500 text-sm">
-                  Tell us what you post about — we'll generate 5 posts and put them on your calendar, starting 2 hours from now.
+                  Tell us what you post about and we&apos;ll write one for you. Pick when it goes out.
                 </p>
               </div>
 
@@ -693,13 +755,13 @@ function OnboardingInner() {
                       type="text"
                       value={topic}
                       onChange={e => setTopic(e.target.value)}
-                      onKeyDown={e => e.key === 'Enter' && topic.trim() && (setStarterPosts(generateStarterPosts(topic)), setPostsGenerated(true))}
+                      onKeyDown={e => e.key === 'Enter' && topic.trim() && (setStarterPost(generateStarterPost(topic)), setPostsGenerated(true))}
                       placeholder="e.g. fitness tips, my SaaS startup, photography, cooking"
                       className="w-full px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-2xl focus:outline-none focus:border-black transition-all"
                       autoFocus
                     />
                     <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">
-                      Be specific — "vegan meal prep for busy parents" beats "food"
+                      Be specific — &quot;vegan meal prep for busy parents&quot; beats &quot;food&quot;
                     </p>
                   </div>
 
@@ -709,59 +771,88 @@ function OnboardingInner() {
                       ← Back
                     </button>
                     <button
-                      onClick={() => { setStarterPosts(generateStarterPosts(topic)); setPostsGenerated(true) }}
+                      onClick={() => { setStarterPost(generateStarterPost(topic)); setPostsGenerated(true) }}
                       disabled={!topic.trim()}
                       className="flex-1 py-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all disabled:opacity-40">
-                      Generate 5 Posts →
+                      Write my first post →
                     </button>
                   </div>
 
                   <button onClick={() => setStep(5)}
                     className="w-full text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors py-2">
-                    Skip — I'll write my own posts later
+                    Skip — I&apos;ll write my own later
                   </button>
                 </>
               ) : (
                 <>
-                  <div className="space-y-4 mb-5">
-                    {starterPosts.map((post, i) => (
-                      <div key={i} className="border border-gray-200 dark:border-gray-700 rounded-2xl p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs font-bold text-gray-400 dark:text-gray-500">Post {i + 1} of 5</span>
-                          <span className={`text-xs font-semibold ${post.length > charLimit ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
-                            {post.length} / {charLimit}
-                          </span>
-                        </div>
-                        <textarea
-                          value={post}
-                          onChange={e => {
-                            const updated = [...starterPosts]
-                            updated[i] = e.target.value
-                            setStarterPosts(updated)
-                          }}
-                          rows={4}
-                          className="w-full text-sm text-gray-800 dark:text-gray-200 bg-transparent resize-none outline-none leading-relaxed"
+                  <div className="border border-gray-200 dark:border-gray-700 rounded-2xl p-4 mb-5">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-bold text-gray-400 dark:text-gray-500">Your first post</span>
+                      <span className={`text-xs font-semibold ${starterPost.length > charLimit ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`}>
+                        {starterPost.length} / {charLimit}
+                      </span>
+                    </div>
+                    <textarea
+                      value={starterPost}
+                      onChange={e => setStarterPost(e.target.value)}
+                      rows={5}
+                      className="w-full text-sm text-gray-800 dark:text-gray-200 bg-transparent resize-none outline-none leading-relaxed"
+                    />
+                  </div>
+
+                  {/* When it goes out. Previously this was implicit — five posts,
+                      30 minutes apart, starting two hours from now, with no say
+                      in it. Picking a day and a time is the thing people came to
+                      this product to do. */}
+                  {connectionDetected ? (
+                    <div className="mb-5">
+                      <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide block mb-2">
+                        When should it go out?
+                      </label>
+                      <div className="flex gap-3">
+                        <input
+                          type="date"
+                          value={scheduleDate}
+                          onChange={e => setScheduleDate(e.target.value)}
+                          className="flex-1 px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-2xl focus:outline-none focus:border-black transition-all"
+                        />
+                        <input
+                          type="time"
+                          value={scheduleTime}
+                          onChange={e => setScheduleTime(e.target.value)}
+                          className="w-36 px-4 py-3 text-sm border border-gray-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-2xl focus:outline-none focus:border-black transition-all"
                         />
                       </div>
-                    ))}
-                  </div>
+                      <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">
+                        Goes to {platformData?.label} in your local time. Change it anytime from the calendar.
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-center text-amber-600 dark:text-amber-500 mb-5">
+                      No account connected yet, so we&apos;ll save this as a draft. Connect a platform
+                      and you can schedule it from Drafts in one click.
+                    </p>
+                  )}
 
-                  <p className="text-xs text-center text-gray-400 dark:text-gray-500 mb-4">
-                    {connectionDetected
-                      ? 'Edit any of these, then we\'ll schedule all 5, spaced 30 min apart starting 2 hours from now.'
-                      : 'Connect an account to put these on your calendar. Until then they\'re a starting point — edit and schedule them anytime from Compose.'}
-                  </p>
-
-                  <div className="flex gap-3">
+                  <div className="flex gap-3 mb-3">
                     <button onClick={() => setPostsGenerated(false)}
                       className="px-6 py-3 border border-gray-200 dark:border-gray-700 text-sm font-semibold rounded-2xl hover:border-gray-400 transition-all">
-                      ← Redo
+                      ← Rewrite
                     </button>
                     <button onClick={() => setStep(5)}
-                      className="flex-1 py-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all">
-                      Schedule all 5 →
+                      disabled={!starterPost.trim()}
+                      className="flex-1 py-3 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all disabled:opacity-40">
+                      {connectionDetected ? 'Schedule it →' : 'Save as draft →'}
                     </button>
                   </div>
+
+                  {/* Skip stayed available on the input screen but vanished the
+                      moment a post was generated, so the only ways out were
+                      Redo or commit. */}
+                  <button onClick={() => { setStarterPost(''); setStep(5) }}
+                    className="w-full text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors py-2">
+                    Skip — I&apos;ll do this later
+                  </button>
                 </>
               )}
             </div>
@@ -785,9 +876,13 @@ function OnboardingInner() {
                 You're all set, {displayName || 'friend'}!
               </h2>
               <p className="text-gray-400 dark:text-gray-500 mb-6 text-sm">
-                {willScheduleStarterPosts
-                  ? `${starterPosts.filter(p => p.trim()).length} posts scheduled and on your calendar.`
-                  : 'Your account is ready.'}
+                {didSchedule
+                  ? `Your first post is scheduled for ${saveResult?.detail ?? 'the time you picked'}.`
+                  : didDraft
+                    ? 'Your first post is saved in Drafts. Connect a platform and you can schedule it in one click.'
+                    : saveResult?.kind === 'error'
+                      ? 'Your account is ready, but we could not save that post. Nothing was lost — write it again from Compose.'
+                      : 'Your account is ready.'}
               </p>
 
               <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-2xl p-5 mb-5 text-left">
@@ -854,9 +949,9 @@ function OnboardingInner() {
                 </Link>
               </div>
 
-              <Link href={willScheduleStarterPosts ? '/calendar' : '/compose'}
+              <Link href={didSchedule ? '/calendar' : didDraft ? '/drafts' : '/compose'}
                 className="flex items-center justify-center gap-2 w-full py-4 mb-3 bg-violet-600 hover:bg-violet-700 text-white text-sm font-extrabold rounded-2xl transition-all">
-                {willScheduleStarterPosts ? '📅 View Your Scheduled Posts →' : '✏️ Write Your First Post →'}
+                {didSchedule ? '📅 View Your Scheduled Post →' : didDraft ? '📄 Open Your Draft →' : '✏️ Write Your First Post →'}
               </Link>
 
               <button onClick={handleFinish} disabled={saving}
