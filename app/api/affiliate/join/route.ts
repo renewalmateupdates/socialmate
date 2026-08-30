@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
+import { REPLY_TO } from '@/lib/mail'
 
 function audienceSizeQualifies(size: string | null | undefined): boolean {
   if (!size) return false
@@ -133,6 +134,7 @@ export async function POST(req: Request) {
     const adminEmail = process.env.ADMIN_EMAIL || 'socialmatehq@gmail.com'
     await resend.emails.send({
       from: 'SocialMate <hello@socialmate.studio>',
+      replyTo: REPLY_TO,
       to: adminEmail,
       subject: `✅ New affiliate application meets minimum requirements — ${full_name}`,
       html: `

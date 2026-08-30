@@ -4,6 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { Resend } from 'resend'
+import { REPLY_TO } from '@/lib/mail'
 
 export async function POST(req: NextRequest) {
   // Admin auth check
@@ -38,6 +39,7 @@ export async function POST(req: NextRequest) {
     try {
       await resend.emails.send({
         from: 'Joshua @ SocialMate <hello@socialmate.studio>',
+        replyTo: REPLY_TO,
         to: u.email,
         subject: '🚀 SocialMate is officially live — and we\'re on Product Hunt today',
         html: generateLaunchEmail(greeting),

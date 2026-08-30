@@ -5,6 +5,7 @@ import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { Resend } from 'resend'
 import { w9SubmittedEmail } from '@/lib/emails/affiliateEmails'
+import { REPLY_TO } from '@/lib/mail'
 
 function getResend() { return new Resend(process.env.RESEND_API_KEY!) }
 
@@ -121,6 +122,7 @@ export async function POST(req: NextRequest) {
   if (user.email) {
     await getResend().emails.send({
       from: 'SocialMate Partners <hello@socialmate.studio>',
+      replyTo: REPLY_TO,
       to: user.email,
       subject: 'W-9 received — your payouts are clear',
       html: w9SubmittedEmail({ email: user.email }),
@@ -132,6 +134,7 @@ export async function POST(req: NextRequest) {
   if (adminEmail) {
     await getResend().emails.send({
       from: 'SocialMate Partners <hello@socialmate.studio>',
+      replyTo: REPLY_TO,
       to: adminEmail,
       subject: `[Partners] W-9 submitted by ${user.email}`,
       html: `<p>${user.email} has submitted their W-9. <a href="${process.env.NEXT_PUBLIC_APP_URL}/admin/partners">Review in Admin Panel</a>.</p>`,

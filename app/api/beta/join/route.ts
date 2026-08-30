@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
+import { REPLY_TO } from '@/lib/mail'
 
 const PLAY_STORE_OPT_IN = 'https://play.google.com/apps/testing/studio.socialmate.app'
 
@@ -33,6 +34,7 @@ export async function POST(req: NextRequest) {
     const resend = new Resend(process.env.RESEND_API_KEY!)
     await resend.emails.send({
       from: 'Joshua @ SocialMate <hello@socialmate.studio>',
+      replyTo: REPLY_TO,
       to: [email],
       subject: "Your SocialMate Android beta invite 🚀",
       html: `

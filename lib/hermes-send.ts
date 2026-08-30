@@ -1,5 +1,6 @@
 import { Resend } from 'resend'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { REPLY_TO } from '@/lib/mail'
 
 export type HermesChannel = 'email' | 'bluesky' | 'mastodon'
 
@@ -16,6 +17,7 @@ export async function sendHermesEmail(params: {
   try {
     await resend.emails.send({
       from: `${params.fromName ?? 'Joshua @ SocialMate'} <hello@socialmate.studio>`,
+      replyTo: REPLY_TO,
       to: [params.to],
       subject: params.subject,
       html: `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:560px;margin:0 auto;color:#111;line-height:1.6">${params.body.replace(/\n/g, '<br/>')}</div>`,

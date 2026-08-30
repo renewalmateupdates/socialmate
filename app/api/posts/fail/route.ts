@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { Resend } from 'resend'
+import { REPLY_TO } from '@/lib/mail'
 
 let _resend: Resend | null = null
 function getResend() {
@@ -53,6 +54,7 @@ export async function POST(request: NextRequest) {
           const errMsg = errorMessage || 'Unknown error'
           await getResend().emails.send({
             from: 'SocialMate <notifications@socialmate.studio>',
+            replyTo: REPLY_TO,
             to: email,
             subject: 'Your post failed to publish — action needed',
             html: `

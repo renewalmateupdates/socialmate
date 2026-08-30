@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { Resend } from 'resend'
+import { REPLY_TO } from '@/lib/mail'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -35,6 +36,7 @@ export async function POST(req: NextRequest) {
     try {
       await resend.emails.send({
         from: 'SocialMate <noreply@socialmate.studio>',
+        replyTo: REPLY_TO,
         to: 'socialmatehq@gmail.com',
         subject: `Enterprise Inquiry — ${company || name}`,
         html: `

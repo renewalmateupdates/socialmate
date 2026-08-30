@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { affiliateDeclineBummerEmail } from '@/lib/emails/affiliateEmails'
+import { REPLY_TO } from '@/lib/mail'
 
 function getResend() { return new Resend(process.env.RESEND_API_KEY!) }
 
@@ -60,6 +61,7 @@ export async function GET(req: NextRequest) {
     // Send bummer email
     await getResend().emails.send({
       from: 'SocialMate Partners <hello@socialmate.studio>',
+      replyTo: REPLY_TO,
       to: invite.email,
       subject: 'No worries — door is always open',
       html: affiliateDeclineBummerEmail({ email: invite.email }),

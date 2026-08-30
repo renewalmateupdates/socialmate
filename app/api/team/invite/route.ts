@@ -8,6 +8,7 @@ import { logActivity } from '@/lib/workspace-activity'
 import { Resend } from 'resend'
 function getResend() { return new Resend(process.env.RESEND_API_KEY!) }
 import crypto from 'crypto'
+import { REPLY_TO } from '@/lib/mail'
 
 
 
@@ -157,6 +158,7 @@ export async function POST(request: NextRequest) {
 
   const { error: emailError } = await getResend().emails.send({
     from:    'SocialMate <hello@socialmate.studio>',
+    replyTo: REPLY_TO,
     to:      email.trim(),
     subject: `${inviterName} invited you to join SocialMate`,
     html: `

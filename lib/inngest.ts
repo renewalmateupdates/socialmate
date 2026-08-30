@@ -26,6 +26,7 @@ import {
   type TruthSignal, type TruthStrategy,
 } from '@/lib/enki/truth-mode'
 import { runCapReached, nextRunCount } from '@/lib/soma-runs'
+import { REPLY_TO } from '@/lib/mail'
 
 // ── Enki AES-256-CBC decrypt helper ───────────────────────────────────────────
 // Mirrors the encrypt/decrypt in app/api/enki/brokers/alpaca/route.ts
@@ -579,6 +580,7 @@ export const weeklyDigest = inngest.createFunction(
 
             await resend.emails.send({
               from: 'SocialMate <hello@socialmate.studio>',
+              replyTo: REPLY_TO,
               to: email,
               subject,
               html,
@@ -998,6 +1000,7 @@ export const onboardingSequence = inngest.createFunction(
     await step.run('send-welcome-email', async () => {
       await getResend().emails.send({
         from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
+        replyTo: REPLY_TO,
         to: email,
         subject: 'Welcome to SocialMate 👋',
         html: `
@@ -1110,6 +1113,7 @@ export const onboardingSequence = inngest.createFunction(
       // Send email nudge
       await getResend().emails.send({
         from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
+        replyTo: REPLY_TO,
         to: email,
         subject: 'One post. That\'s all it takes.',
         html: `
@@ -1153,6 +1157,7 @@ export const onboardingSequence = inngest.createFunction(
       if (state.userId && !state.hasConnected) {
         await getResend().emails.send({
           from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
+          replyTo: REPLY_TO,
           to: email,
           subject: 'One connection away',
           html: lifecycleEmail({
@@ -1178,6 +1183,7 @@ export const onboardingSequence = inngest.createFunction(
 
       await getResend().emails.send({
         from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
+        replyTo: REPLY_TO,
         to: email,
         subject: 'Are you using SocialMate\'s AI tools yet?',
         html: `
@@ -1286,6 +1292,7 @@ export const onboardingSequence = inngest.createFunction(
       if (state.userId && !state.hasConnected) {
         await getResend().emails.send({
           from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
+          replyTo: REPLY_TO,
           to: email,
           subject: 'Did something get in the way?',
           html: lifecycleEmail({
@@ -1305,6 +1312,7 @@ export const onboardingSequence = inngest.createFunction(
 
       await getResend().emails.send({
         from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
+        replyTo: REPLY_TO,
         to: email,
         subject: 'A week in — how\'s it going?',
         html: `
@@ -3565,6 +3573,7 @@ export const studioStaxRenewalEmails = inngest.createFunction(
         try {
           await resend.emails.send({
             from:    'SocialMate <noreply@socialmate.studio>',
+            replyTo: REPLY_TO,
             to:      email,
             subject,
             html,
@@ -4220,6 +4229,7 @@ Rules:
               const extraCount = postsCreated - previewPosts.length
               await getResend().emails.send({
                 from: 'SOMA <soma@socialmate.studio>',
+                replyTo: REPLY_TO,
                 to: ownerEmail,
                 subject: `⚡ SOMA scheduled ${postsCreated} posts for "${project.name}"`,
                 html: `<div style="background:#0f0f0f;font-family:sans-serif;padding:32px;max-width:520px;margin:0 auto;border-radius:16px;">
@@ -4610,6 +4620,7 @@ export const enkiWeeklySummary = inngest.createFunction(
 
           await getResend().emails.send({
             from: 'Enki by SocialMate <hello@socialmate.studio>',
+            replyTo: REPLY_TO,
             to: email,
             subject,
             html: `<div style="background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:32px;max-width:520px;margin:0 auto;border-radius:16px;">
@@ -5059,6 +5070,7 @@ export const monthlyCreditsResetEmail = inngest.createFunction(
       try {
         await resend.emails.send({
           from: 'SocialMate <noreply@socialmate.studio>',
+          replyTo: REPLY_TO,
           to: u.email,
           subject: `Your ${credits} SocialMate credits just reset — ${month}`,
           html,
@@ -5229,6 +5241,7 @@ export const comebackEmails = inngest.createFunction(
         try {
           await resend.emails.send({
             from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
+            replyTo: REPLY_TO,
             to: u.email,
             subject: `${u.name}, your content isn't going to post itself`,
             html: `<div style="background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:580px;margin:0 auto;padding:40px 24px;color:#ffffff;">
@@ -5261,6 +5274,7 @@ export const comebackEmails = inngest.createFunction(
         try {
           await resend.emails.send({
             from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
+            replyTo: REPLY_TO,
             to: u.email,
             subject: 'Still here if you need us',
             html: `<div style="background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:580px;margin:0 auto;padding:40px 24px;color:#ffffff;">
@@ -5293,6 +5307,7 @@ export const comebackEmails = inngest.createFunction(
         try {
           await resend.emails.send({
             from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
+            replyTo: REPLY_TO,
             to: u.email,
             subject: 'One last note from me (for real)',
             html: `<div style="background:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:580px;margin:0 auto;padding:40px 24px;color:#ffffff;">
@@ -5425,6 +5440,7 @@ Return ONLY valid JSON (no markdown, no code blocks): {"subject":"...","intro":"
         try {
           await resend.batch.send(chunk.map(to => ({
             from: 'Joshua @ SocialMate <noreply@socialmate.studio>',
+            replyTo: REPLY_TO,
             to,
             subject: draft.subject,
             html: buildIrisEmailHtml({
@@ -5452,6 +5468,7 @@ Return ONLY valid JSON (no markdown, no code blocks): {"subject":"...","intro":"
       await step.run('notify-admin', async () => {
         await getResend().emails.send({
           from: 'SocialMate System <joshua@socialmate.studio>',
+          replyTo: REPLY_TO,
           to: 'socialmatehq@gmail.com',
           subject: `✅ IRIS Dispatch #${result.edition} sent automatically — ${draft.subject}`,
           html: `<div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:32px 24px;background:#f9fafb;">
@@ -5493,6 +5510,7 @@ export const adminHealthAlert = inngest.createFunction(
     await step.run('send-alert', async () => {
       await getResend().emails.send({
         from: 'SocialMate System <joshua@socialmate.studio>',
+        replyTo: REPLY_TO,
         to: 'socialmatehq@gmail.com',
         subject: `⚠️ ${failures} post failures in the last 4h`,
         html: `<div style="font-family:sans-serif;max-width:500px;margin:0 auto;padding:24px;">
