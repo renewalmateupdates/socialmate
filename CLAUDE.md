@@ -432,7 +432,23 @@ Rules that follow from it:
 
 - `scripts/audit-schema-drift.py` compares every column named in the code against
   the live schema. **Run it before shipping anything that touches the DB.** It is
-  depth-aware (nested jsonb keys are not columns) and knows about ternaries.
+  depth-aware (nested jsonb keys are not columns), knows about ternaries, and as
+  of Aug 30 also reports **missing tables** — it used to skip any table it could
+  not resolve, which is how four features with no backing table hid for months.
+  `scripts/test-audit-schema-drift.py` covers its text scanning; run it if you
+  touch the script.
+- `scripts/audit-dead-features.py` catches the half that only fails at runtime.
+  It probes every `onConflict` target against the live database, because Postgres
+  raises `42P10` unless a unique index covers exactly those columns — an upsert
+  with no matching index fails for every user, forever, and is invisible until
+  someone performs that exact action. Zero-write by construction.
+- **One fact, one place.** Three separate bugs in three days came from the same
+  shape: the same fact stored in two tables, one written and the other read.
+  `affiliates.status` vs `affiliate_profiles.status` (PR #573),
+  `user_settings.plan` vs `workspaces.plan` (PR #579, cost the first paying
+  customer their whole first hour), `team_members` vs `workspace_members`
+  (PR #581). Before adding a column that duplicates state, don't. Read the plan
+  through `resolveWorkspacePlan()` in `lib/plan.ts`, never off either table.
 - Never discard a Supabase error. Destructure `{ data, error }` and at minimum
   `console.warn` it. Fire-and-forget writes still log — see `lib/usage.ts`.
 - Prefer `select('*')` when you do not control the schema. The May calendar
@@ -446,7 +462,17 @@ Rules that follow from it:
 
 ### Active — fix when touching the file
 
-No open known bugs as of August 13, 2026. The schema-drift audit is clean.
+No open known bugs as of August 30, 2026. Both audits are clean once the two
+unique indexes from PR #582 are applied.
+
+**Run this SQL if `audit-dead-features.py` still reports 42P10:**
+```sql
+CREATE UNIQUE INDEX IF NOT EXISTS push_subscriptions_endpoint_key
+  ON push_subscriptions (endpoint);
+CREATE UNIQUE INDEX IF NOT EXISTS competitor_posts_competitor_url_key
+  ON competitor_posts (competitor_id, post_url);
+```
+
 Previously tracked issues, all resolved:
 - ✅ Dark mode spinners — `dark:border-amber-500` added to all 20 pages (PR #472, June 8)
 - ✅ Streak counts scheduled posts — `api/streak` now includes `scheduled` status + uses `scheduled_at` (PR #471, June 8)
@@ -1000,6 +1026,65 @@ The theme of the day: two things had been recorded as done and were not.
   the going rate", "$80/year = $4.58/month", `100 × $20 × 40%` — every one of these
   survived a price migration that updated the price beside it.
 
+**August 28–30, 2026 — The first paying customer, and the week the audits grew teeth (PRs #573–#582):**
+
+The funnel shipped on Aug 23 recorded its first real data, and the first thing it
+showed was a person paying and then being refused what they paid for.
+
+**SocialMate has a paying customer.** `pixelkittehfurever@gmail.com`, Pro Annual,
+$55.20 with BDAY31, subscription `sub_1U9e3p7OMwDowUuUiVdlYIMK`, 29 Aug. First
+revenue since launch.
+
+**And the app enforced them as free for their entire first session.** The plan is
+stored twice: the Stripe webhook writes `user_settings.plan`, while ~20
+enforcement sites read `workspaces.plan`, which was NULL for 83 of 86 rows and had
+only ever been set by hand in SQL. Forty minutes after paying they hit the free
+tier's one-account-per-platform cap four times trying to add a second Mastodon
+account, bounced between /compose and /accounts for another forty minutes,
+scheduled one post, and cancelled 68 minutes after paying. Apology letter sent
+29 Aug from `joshua@socialmate.studio` with 2,000 permanent credits attached;
+replies go to socialmatehq@gmail.com.
+
+| PR | What was broken |
+|---|---|
+| #573 | No control anywhere could remove an active affiliate. Also: dead "Mark paid" button, and `app/api/partners/*` admin guards that failed **open** when `ADMIN_EMAIL` was unset, including the Stripe payout route |
+| #574 | The per-platform account cap existed only in the accounts-page click handler. A free workspace had two TikTok accounts. TikTok's callback also bypassed the funnel entirely |
+| #575 | A transient X failure permanently killed a post. Ten posts dropped in five days to "credits depleted", which is X's app-level budget, not the user's quota |
+| #576 | `/es /de /fr /pt /ru /zh /ja /ko` still served the pre-July design. Two landing pages existed; the July rebuild only touched one |
+| #577 | Four tables the code writes to did not exist. Guide email capture 500'd since May, Clips Studio never worked, the funnel recorded nothing, `/api/admin/reactivate` could not see who it had already emailed |
+| #578 | `/tiktok/studio` had no `loading.tsx` and awaits auth server-side |
+| #579 | **The paid plan never reached the code that enforces limits** |
+| #580 | A workspace created *after* subscribing was still born on free |
+| #581 | Activity feed read `workspace_members`, which nothing writes |
+| #582 | Two upserts that could never succeed: push notifications and competitor tracking |
+
+**Nobody has ever received a push notification from SocialMate.** `push_subscriptions`
+upserts on `endpoint` with no unique index on it, so every subscribe has raised
+42P10 since April. Same shape for `competitor_posts`, which is why Growth Scout,
+Trend Scout and `competitorAlerts` have always had an empty table to read.
+
+**Activation, measured 29 Aug (admin excluded):** 99 accounts, 17 connected a
+platform, 7 created a post, **1 has ever published**. 82 never connected anything.
+Two weeks earlier it was 74 / 62-never-connected / 1 publisher. The needle has not
+moved.
+
+**Performance:** RES 95 desktop and mobile, CLS 0. Investigated and *rejected*
+deferring `PostImageExporter`/`PageTour` — measured at 3–5 kB against a 950 kB
+baseline. The one real lever left is that `messages/en.json` (138 kB) ships on
+every page including `/login`; `app_*` is 41% of it and public pages never touch
+it. Not done: splitting it means a missed key renders as a raw key path, and some
+call sites build keys dynamically.
+
+**Rules that follow:**
+
+- **Verify a "shipped" feature by exercising it, not by reading the changelog.**
+  Five separate never-ran discoveries in three days. Every one had the same cause:
+  nobody had performed the action.
+- **A guard with a blind spot is worse than no guard**, because it is trusted.
+  `audit-schema-drift.py` silently skipped tables it could not resolve, and had two
+  false positives from an apostrophe inside a `//` comment. Both fixed; it now has
+  tests.
+
 ## Pending / In Progress
 
 - **Google Play — closed testing** — Cooking slowly. v1.0.7 (versionCode 3) uploaded, 1 tester opted in. Passive CTA on signup page. *Do not revisit until June 2026.*
@@ -1008,14 +1093,27 @@ The theme of the day: two things had been recorded as done and were not.
 
 - **Instagram / Facebook** — Both require Meta App Review (same process, can be one app). Harder than LinkedIn — Meta review is strict. Business account required, users need Business/Creator Instagram accounts. **Hard — plan for 4–8 week review timeline.**
 
-- **SOMA content run** — CLAUDE.md updated August 13 with the repricing and the
-  correctness sweep (PRs #554–#565). Ready to resubmit.
+- **SOMA content run** — CLAUDE.md updated August 30 with the first paying
+  customer and the audit work (PRs #573–#582). Ready to resubmit. Good material:
+  the funnel catching a real bug within a day of going live.
 
-- **Activation is the whole problem.** 62 of 74 accounts never connected a
-  platform; one person has ever published. A one-shot reactivation route for that
-  segment is live at `POST /api/admin/reactivate` (`GET` previews the audience
-  without sending). Not fired yet. Everything else on this list is smaller than
-  this.
+- **Activation is the whole problem.** Measured 29 Aug, admin excluded: 99
+  accounts, 17 connected a platform, 7 created a post, **1 has ever published**.
+  82 never connected anything. Two weeks earlier: 74 accounts, 62 never connected,
+  1 publisher. More signups, same one publisher.
+  A one-shot reactivation route is live at `POST /api/admin/reactivate` (`GET`
+  previews without sending). **Still not fired** — and note it was unsafe to fire
+  before PR #577, because its idempotency guard reads `usage_events`, which did
+  not exist, so everyone looked un-emailed. Safe now.
+  The funnel has recorded since 28 Aug; `/admin/funnel` will show whether those 82
+  click connect and fail or never click at all. Everything else here is smaller
+  than this.
+
+- **First paying customer, and the follow-up.** `pixelkittehfurever@gmail.com`,
+  Pro Annual, 29 Aug. Cancelled 68 minutes in after the plan bug (PR #579) left
+  them on free limits. Apology sent 29 Aug with 2,000 permanent credits. **Watch
+  socialmatehq@gmail.com for a reply** — that is the first real user interview
+  available, from the one person who cared enough to pay.
 
 - **Cofounder search** — Actively recruiting marketing cofounder via Reddit/LinkedIn. ~10% sweat equity over 24-month vest, 2-week trial, real contract.
 
