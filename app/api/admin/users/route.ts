@@ -2,6 +2,10 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { requireAdmin } from '@/lib/admin-auth'
+import { normalizePlan } from '@/lib/plan'
+import { isInternalEmail } from '@/lib/internal-accounts'
+
+const POSTS_CAP = 20000
 
 export async function GET(req: NextRequest) {
   const admin = await requireAdmin()
@@ -19,26 +23,60 @@ export async function GET(req: NextRequest) {
   const authUsers = authData?.users ?? []
 
   // Secondary: user_settings for plan/display_name/is_admin
-  const { data: settings } = await db
+  const { data: settings, error: settingsErr } = await db
     .from('user_settings')
-    .select('user_id, plan, last_active, display_name, is_admin')
+    .select('user_id, plan, last_active, display_name, is_admin, login_count, onboarding_completed')
     .limit(2000)
+  if (settingsErr) console.warn('[admin/users] user_settings:', settingsErr.message)
 
   const settingsMap: Record<string, typeof settings extends (infer T)[] | null ? T : never> = {}
   for (const s of settings ?? []) {
     settingsMap[s.user_id] = s
   }
 
-  // Merge — auth is the source of truth
-  let merged = authUsers.map(u => ({
-    user_id:      u.id,
-    email:        u.email ?? '',
-    created_at:   u.created_at,
-    plan:         settingsMap[u.id]?.plan ?? 'free',
-    last_active:  settingsMap[u.id]?.last_active ?? null,
-    display_name: settingsMap[u.id]?.display_name ?? null,
-    is_admin:     settingsMap[u.id]?.is_admin ?? false,
-  }))
+  // The plan the app actually enforces.
+  //
+  // This used to read user_settings.plan alone. That is the exact split that
+  // left the first paying customer on free limits for their whole session: the
+  // Stripe webhook writes user_settings.plan, while ~20 enforcement sites read
+  // workspaces.plan. resolveWorkspacePlan() is the correct reader but it is one
+  // query per user, which is 100+ round trips for a list. So fetch every
+  // workspace once and apply the same precedence in memory: a personal
+  // workspace's own plan wins, then user_settings, then free.
+  const { data: allWorkspaces, error: wsErr } = await db
+    .from('workspaces')
+    .select('owner_id, plan, is_personal')
+    .limit(5000)
+  if (wsErr) console.warn('[admin/users] workspaces:', wsErr.message)
+
+  const wsPlanMap: Record<string, string> = {}
+  for (const w of allWorkspaces ?? []) {
+    if (!w.is_personal || !w.plan) continue
+    wsPlanMap[w.owner_id] = w.plan
+  }
+
+  // Merge — auth is the source of truth for identity
+  let merged = authUsers.map(u => {
+    const settingsPlan = settingsMap[u.id]?.plan ?? null
+    const wsPlan       = wsPlanMap[u.id] ?? null
+    return {
+      user_id:      u.id,
+      email:        u.email ?? '',
+      created_at:   u.created_at,
+      plan:         normalizePlan(wsPlan ?? settingsPlan),
+      // Surfaced so the one bug class that has cost this project three outages
+      // is visible in the list rather than only after someone complains.
+      plan_disagrees: !!settingsPlan && !!wsPlan && normalizePlan(settingsPlan) !== normalizePlan(wsPlan),
+      last_active:  settingsMap[u.id]?.last_active ?? null,
+      display_name: settingsMap[u.id]?.display_name ?? null,
+      is_admin:     settingsMap[u.id]?.is_admin ?? false,
+      // Ours, not a customer. Five of these were being counted in every
+      // activation number this project has quoted since March.
+      is_internal:  isInternalEmail(u.email),
+      login_count:  settingsMap[u.id]?.login_count ?? 0,
+      onboarding_completed: settingsMap[u.id]?.onboarding_completed ?? false,
+    }
+  })
 
   // Apply filters
   if (search) {
@@ -58,10 +96,15 @@ export async function GET(req: NextRequest) {
     db.from('connected_accounts')
       .select('user_id, platform')
       .in('user_id', userIds.length ? userIds : ['none']),
+    // POSTS_CAP is a real ceiling, not a page size. At 1,636 rows today there
+    // is headroom, but one admin account generates ~30/day, so this will be
+    // reached. Crossing it silently would understate every user's post count
+    // with no indication anything was dropped, which is precisely the failure
+    // shape this codebase keeps paying for — so the response says when it hits.
     db.from('posts')
       .select('user_id, status, platforms')
       .in('user_id', userIds.length ? userIds : ['none'])
-      .limit(10000),
+      .limit(POSTS_CAP),
     db.from('affiliate_profiles')
       .select('user_id, status')
       .in('user_id', userIds.length ? userIds : ['none']),
@@ -137,5 +180,17 @@ export async function GET(req: NextRequest) {
     is_stax:             staxSet.has(u.email),
   }))
 
-  return NextResponse.json({ users: enriched })
+  const postRowsRead = postsRes.status === 'fulfilled' ? (postsRes.value.data?.length ?? 0) : 0
+
+  return NextResponse.json({
+    users: enriched,
+    meta: {
+      // Every hard ceiling in this route, reported rather than hidden. If any
+      // of these flips true the numbers above are understated.
+      postsTruncated: postRowsRead >= POSTS_CAP,
+      authTruncated:  authUsers.length >= 1000,
+      settingsTruncated: (settings?.length ?? 0) >= 2000,
+      postRowsRead,
+    },
+  })
 }

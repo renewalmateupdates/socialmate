@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/admin-auth'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
+import { internalIdsFrom } from '@/lib/internal-accounts'
 
 /**
  * The funnel, counted.
@@ -31,7 +32,7 @@ export async function GET(req: NextRequest) {
 
   // ── Ground truth ─────────────────────────────────────────────────────────
   const [profilesRes, accountsRes, postsRes, workspacesRes] = await Promise.all([
-    db.from('profiles').select('id, created_at'),
+    db.from('profiles').select('id, created_at, email'),
     db.from('connected_accounts').select('user_id, platform'),
     db.from('posts').select('user_id, status, published_at'),
     db.from('workspaces').select('owner_id, plan').neq('plan', 'free'),
@@ -48,8 +49,15 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  const adminEmailId = admin.id
-  const profiles = (profilesRes.data ?? []).filter(p => p.id !== adminEmailId)
+  // Exclude every account of ours, not just the admin one.
+  //
+  // This previously filtered only `admin.id`, which left four other internal
+  // accounts in the numbers — including the one that made "1 user has ever
+  // published" true. With all five out, no external user has ever published.
+  const allProfiles = profilesRes.data ?? []
+  const internalIds = internalIdsFrom(allProfiles)
+  internalIds.add(admin.id)
+  const profiles = allProfiles.filter(p => !internalIds.has(p.id))
   const accounts = accountsRes.data ?? []
   const posts    = postsRes.data ?? []
 
@@ -146,6 +154,9 @@ export async function GET(req: NextRequest) {
       paying,
       neverConnected: totalAccounts - connected,
       connectedNeverPublished: connected - published,
+      // Stated explicitly so nobody re-derives an activation rate that quietly
+      // counts our own accounts as customers.
+      internalExcluded: internalIds.size,
     },
     platformCounts: Object.entries(platformCounts)
       .map(([platform, count]) => ({ platform, count }))
