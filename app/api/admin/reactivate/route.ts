@@ -3,6 +3,7 @@ import { Resend } from 'resend'
 import { requireAdmin } from '@/lib/admin-auth'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { lifecycleEmail } from '@/lib/lifecycle-emails'
+import { isInternalEmail } from '@/lib/internal-accounts'
 
 // One-shot reactivation for accounts that signed up and never connected a
 // platform.
@@ -27,9 +28,24 @@ const MIN_AGE_DAYS = 14
 
 interface Target { id: string; email: string; name: string; ageDays: number }
 
-// The honest version of this email is also the strongest one. They did not fail
-// to set it up; the setup step gave up on them after 90 seconds while they were
-// still in the other tab finishing.
+// The honest version of this email is also the strongest one.
+//
+// This copy was rewritten on Aug 30 because the previous version described the
+// wrong bug. It blamed the 90-second connect poll (PR #558) and told people to
+// go connect Bluesky, Mastodon, Discord or Telegram because those "take about
+// thirty seconds".
+//
+// The funnel then recorded what actually happens. People do not time out at the
+// connect step — they never click connect at all. One signup visited the connect
+// screen three separate times across 25 minutes and clicked nothing. And those
+// four platforms are the *hardest* four: they need an app password from another
+// website, an instance address, a bot token, or a Discord server you administer.
+// The only two that connect in a couple of clicks, TikTok and LinkedIn, were not
+// even offered in onboarding (PR #587).
+//
+// So the old copy pointed a one-shot cold list at the worst possible path while
+// apologising for something that was not the problem. There is exactly one
+// attempt at this audience; it has to describe the real thing.
 //
 // Extracted so the ?to= dry run renders exactly what the real send renders. Two
 // copies of this string would diverge the first time one of them was edited.
@@ -38,20 +54,22 @@ function reactivationHtml(name: string): string {
     // Reads fine either way; the nameless version is the stronger opener.
     headline: name ? `${name}, that was our fault.` : 'That was our fault.',
     paragraphs: [
-      'You signed up for SocialMate and never got a platform connected. I went looking for why, and it turns out the setup step was broken.',
-      'It sent you off to another tab to connect your account, then stopped listening after ninety seconds. If you took longer than that, and almost everyone does, you came back to a page that had quietly given up, with no way to tell it you were done.',
-      'That is fixed now. It waits properly, notices the moment you come back, and there is a button to make it check. Connecting takes about thirty seconds on Bluesky, Mastodon, Discord or Telegram, none of which need approval or a card.',
-      'If you would rather tell me what else was wrong, reply to this. It goes to me and I read all of them.',
+      'You signed up for SocialMate and never got a platform connected. I went looking for why, and the setup step was the problem, not you.',
+      'Two things were wrong with it. It sent you off to a separate page that listed every platform and had no memory of the one you had just picked, so you had to find it again yourself. And the two platforms that connect in a couple of clicks, TikTok and LinkedIn, were not even on the list you chose from.',
+      'Both are fixed. Connecting now happens on the same screen instead of shipping you somewhere else, and the quick options are actually offered. Bluesky, Mastodon, Telegram and Discord are all still there, and setup now tells you up front what each one needs rather than letting you find out halfway through.',
+      'If you would rather just tell me what else was wrong with it, reply to this. It comes straight to me and I read all of them.',
     ],
-    ctaLabel: 'Connect a platform',
-    ctaHref: `${APP_URL}/accounts`,
+    ctaLabel: 'Pick up where you left off',
+    // Onboarding, not /accounts. The fix is in the onboarding connect step;
+    // /accounts is the page that was never the problem, and dropping someone
+    // there is the exact handoff this email is apologising for.
+    ctaHref: `${APP_URL}/onboarding`,
     footnote: 'One-off note about a bug that affected your account. You will not get a series of these.',
   })
 }
 
 async function audience(): Promise<{ targets: Target[]; alreadySent: number; tooNew: number }> {
   const admin = getSupabaseAdmin()
-  const adminEmail = (process.env.ADMIN_EMAIL || 'socialmatehq@gmail.com').toLowerCase()
 
   const [{ data: authData }, connected, published, sent] = await Promise.all([
     admin.auth.admin.listUsers({ perPage: 1000 }),
@@ -69,7 +87,10 @@ async function audience(): Promise<{ targets: Target[]; alreadySent: number; too
   let alreadySent = 0, tooNew = 0
 
   for (const u of authData?.users ?? []) {
-    if (!u.email || u.email.toLowerCase() === adminEmail) continue
+    // All five of our own accounts, not just the admin one. Three of them have
+    // never connected a platform, so filtering on ADMIN_EMAIL alone meant this
+    // one-shot send would have gone to Joshua three times.
+    if (!u.email || isInternalEmail(u.email)) continue
     if (hasConnected.has(u.id) || hasPublished.has(u.id)) continue
     if (hasBeenSent.has(u.id)) { alreadySent++; continue }
 
