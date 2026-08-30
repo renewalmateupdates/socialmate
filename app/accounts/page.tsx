@@ -1,5 +1,5 @@
 'use client'
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
@@ -248,15 +248,31 @@ function AccountsInner() {
     if (error === 'db_error')                      showToast('Something went wrong saving your account', 'error')
   }, [searchParams])
 
+  // Record the view exactly once per mount.
+  //
+  // This used to live inside the data effect below, which depends on
+  // `activeWorkspace`. That resolves from null to a value on first load, so the
+  // effect re-ran and every single visit was recorded as two views (three on a
+  // first-ever visit, counting the once-only variant). The distinct-user counts
+  // on /admin/funnel were unaffected — they dedupe by user_id — but the raw
+  // fire counts, which exist to answer "how often do they come back", were
+  // roughly double. A ref rather than an empty dep array, because the router
+  // guard below still needs the real deps.
+  const viewTracked = useRef(false)
+  useEffect(() => {
+    if (viewTracked.current) return
+    viewTracked.current = true
+    // Repeatable, plus a once-ever variant: "how many accounts ever reached
+    // this screen" and "how often do they come back" are different questions
+    // and both matter here.
+    track('connect_screen_viewed')
+    trackOnce('connect_screen_viewed')
+  }, [])
+
   useEffect(() => {
     const getData = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
-      // Repeatable, plus a once-ever variant: "how many accounts ever reached
-      // this screen" and "how often do they come back" are different questions
-      // and both matter here.
-      track('connect_screen_viewed')
-      trackOnce('connect_screen_viewed')
       let q = supabase
         .from('connected_accounts')
         .select('*')

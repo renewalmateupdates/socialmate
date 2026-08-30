@@ -118,12 +118,21 @@ export async function GET(req: NextRequest) {
     .sort((a, b) => b.clicked - a.clicked)
 
   // Onboarding drop-off by step number.
-  const onboardingSteps: Record<string, number> = {}
+  //
+  // Distinct users per step, not raw fires — same rule as every other count
+  // here, and it matters more at this step than anywhere else. Someone stuck at
+  // the connect step bounces: one real session went 1 → 2 → 1 → 2 → 3 → 2,
+  // which as raw fires reads as heavy engagement with step 2 when it is
+  // actually one confused person walking backwards out of step 3.
+  const onboardingUsers: Record<string, Set<string>> = {}
   for (const e of events) {
     if (e.event_type !== 'funnel_onboarding_step') continue
     const step = String(e.metadata?.step ?? '?')
-    onboardingSteps[step] = (onboardingSteps[step] ?? 0) + 1
+    ;(onboardingUsers[step] ??= new Set()).add(e.user_id)
   }
+  const onboardingSteps: Record<string, number> = Object.fromEntries(
+    Object.entries(onboardingUsers).map(([step, users]) => [step, users.size])
+  )
 
   return NextResponse.json({
     windowDays: days,
