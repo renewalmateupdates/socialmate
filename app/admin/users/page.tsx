@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState, useCallback, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 
 interface PostStats { published: number; failed: number; partial: number; scheduled: number }
 interface PlatformStat { published: number; failed: number }
@@ -19,7 +20,33 @@ interface AdminUser {
   platform_stats: Record<string, PlatformStat>
   affiliate_status: string | null
   is_stax: boolean
+  plan_disagrees?: boolean
+  is_internal?: boolean
+  login_count?: number
+  onboarding_completed?: boolean
 }
+
+type Meta = { postsTruncated: boolean; authTruncated: boolean; settingsTruncated: boolean }
+
+// Sorting newest-first hid the only users worth looking at. 82 of 104 accounts
+// have never connected anything, so the newest 15 rows are reliably all zeros
+// and the table reads as though nobody uses the product at all.
+type SortKey = 'joined' | 'published' | 'active' | 'logins'
+const SORTS: { key: SortKey; label: string }[] = [
+  { key: 'joined',    label: 'Newest' },
+  { key: 'published', label: 'Most published' },
+  { key: 'active',    label: 'Last active' },
+  { key: 'logins',    label: 'Most logins' },
+]
+
+type Segment = 'all' | 'external' | 'connected' | 'published' | 'never_connected'
+const SEGMENTS: { key: Segment; label: string }[] = [
+  { key: 'all',             label: 'Everyone' },
+  { key: 'external',        label: 'External only' },
+  { key: 'connected',       label: 'Connected a platform' },
+  { key: 'published',       label: 'Ever published' },
+  { key: 'never_connected', label: 'Never connected' },
+]
 
 const PLAN_BADGE: Record<string, string> = {
   free:   'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400',
@@ -47,6 +74,9 @@ function AdminUsersInner() {
   // rows load on demand; search/plan filters reset the window.
   const [rowLimit, setRowLimit] = useState(150)
   const [selected, setSelected] = useState<AdminUser | null>(null)
+  const [sortKey, setSortKey] = useState<SortKey>('joined')
+  const [segment, setSegment] = useState<Segment>('all')
+  const [meta, setMeta] = useState<Meta | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -58,6 +88,7 @@ function AdminUsersInner() {
       if (res.status === 403) { setForbidden(true); return }
       const json = await res.json()
       setUsers(json.users || [])
+      setMeta(json.meta ?? null)
     } catch {
       console.error('Failed to load users')
     } finally {
@@ -67,6 +98,35 @@ function AdminUsersInner() {
   }, [search, planFilter])
 
   useEffect(() => { load() }, [load])
+
+  // Segment then sort, client-side. The route already returns every user, and
+  // at ~100 accounts this is free; it also keeps the counts on the segment
+  // chips honest because they are computed from the same array being rendered.
+  const segmentCounts: Record<Segment, number> = {
+    all:             users.length,
+    external:        users.filter(u => !u.is_internal).length,
+    connected:       users.filter(u => u.connected_platforms.length > 0).length,
+    published:       users.filter(u => (u.post_stats?.published ?? 0) > 0).length,
+    never_connected: users.filter(u => u.connected_platforms.length === 0).length,
+  }
+
+  const visible = users
+    .filter(u => {
+      if (segment === 'external')        return !u.is_internal
+      if (segment === 'connected')       return u.connected_platforms.length > 0
+      if (segment === 'published')       return (u.post_stats?.published ?? 0) > 0
+      if (segment === 'never_connected') return u.connected_platforms.length === 0
+      return true
+    })
+    .slice()
+    .sort((a, b) => {
+      if (sortKey === 'published') return (b.post_stats?.published ?? 0) - (a.post_stats?.published ?? 0)
+      if (sortKey === 'logins')    return (b.login_count ?? 0) - (a.login_count ?? 0)
+      if (sortKey === 'active') {
+        return new Date(b.last_active ?? 0).getTime() - new Date(a.last_active ?? 0).getTime()
+      }
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    })
 
   if (forbidden) return (
     <div className="min-h-dvh bg-theme flex items-center justify-center">
@@ -91,7 +151,7 @@ function AdminUsersInner() {
           <div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Users</h1>
             <p className="text-gray-500 dark:text-gray-400 text-sm mt-0.5">
-              {loading ? 'Loading…' : `${users.length} users`}
+              {loading ? 'Loading…' : `${visible.length} of ${users.length} users`}
             </p>
           </div>
           <button onClick={() => router.push('/admin')}
@@ -123,10 +183,53 @@ function AdminUsersInner() {
           </div>
         </div>
 
+        {/* Segments and sort. Without these the table is 104 rows ordered by
+            signup date, where the newest 15 are all zeros and the handful of
+            people who actually used the product are somewhere in the middle. */}
+        <div className="flex gap-3 mb-3 flex-wrap items-center">
+          <div className="flex gap-1 flex-wrap">
+            {SEGMENTS.map(s => (
+              <button key={s.key} onClick={() => { setSegment(s.key); setRowLimit(150) }}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  segment === s.key
+                    ? 'bg-black dark:bg-white text-white dark:text-black'
+                    : 'bg-surface text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:border-gray-400'
+                }`}>
+                {s.label} <span className="opacity-60">{segmentCounts[s.key]}</span>
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-1 flex-wrap ml-auto">
+            <span className="text-xs text-gray-400 self-center mr-1">Sort</span>
+            {SORTS.map(s => (
+              <button key={s.key} onClick={() => setSortKey(s.key)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  sortKey === s.key
+                    ? 'bg-black dark:bg-white text-white dark:text-black'
+                    : 'bg-surface text-gray-500 dark:text-gray-400 border border-gray-200 dark:border-gray-700 hover:border-gray-400'
+                }`}>
+                {s.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* A hit ceiling understates every number on this page, so it says so. */}
+        {meta && (meta.postsTruncated || meta.authTruncated || meta.settingsTruncated) && (
+          <div className="mb-4 p-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-800">
+            <p className="text-xs font-bold text-amber-800 dark:text-amber-300">
+              Row limit reached{' '}
+              {[meta.authTruncated && 'users', meta.postsTruncated && 'posts', meta.settingsTruncated && 'settings']
+                .filter(Boolean).join(', ')}
+              . Counts below are understated.
+            </p>
+          </div>
+        )}
+
         {/* Table */}
         {loading ? (
           <div className="text-center py-20 text-gray-400 text-sm">Loading users…</div>
-        ) : users.length === 0 ? (
+        ) : visible.length === 0 ? (
           <div className="text-center py-20 text-gray-400 text-sm">No users found.</div>
         ) : (
           <div className="bg-surface border border-theme rounded-2xl overflow-hidden">
@@ -144,18 +247,37 @@ function AdminUsersInner() {
                   </tr>
                 </thead>
                 <tbody>
-                  {users.slice(0, rowLimit).map((u, i) => (
+                  {visible.slice(0, rowLimit).map((u, i) => (
                     <tr key={u.user_id}
                       onClick={() => setSelected(u)}
                       className={`cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/40 transition-colors ${
-                        i < users.length - 1 ? 'border-b border-theme' : ''
+                        i < visible.length - 1 ? 'border-b border-theme' : ''
                       }`}>
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-2">
                           <span className="text-gray-900 dark:text-gray-100 font-medium truncate max-w-[220px]">{u.email}</span>
                           {u.is_admin && <span className="text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-1.5 py-0.5 rounded-full font-semibold">admin</span>}
+                          {u.is_internal && (
+                            <span title="One of our own accounts, not a customer"
+                              className="text-xs bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-1.5 py-0.5 rounded-full font-semibold whitespace-nowrap">
+                              internal
+                            </span>
+                          )}
+                          {u.plan_disagrees && (
+                            <span title="user_settings.plan and workspaces.plan disagree"
+                              className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-1.5 py-0.5 rounded-full font-semibold whitespace-nowrap">
+                              plan split
+                            </span>
+                          )}
                         </div>
                         {u.display_name && <div className="text-xs text-gray-400 mt-0.5">{u.display_name}</div>}
+                        {/* stopPropagation so the row's quick-peek drawer does
+                            not also fire on the way to the full page. */}
+                        <Link href={`/admin/users/${u.user_id}`}
+                          onClick={e => e.stopPropagation()}
+                          className="text-xs text-blue-500 hover:underline mt-0.5 inline-block">
+                          Full detail →
+                        </Link>
                       </td>
                       <td className="px-5 py-3">
                         <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${PLAN_BADGE[u.plan ?? 'free'] || PLAN_BADGE.free}`}>
@@ -230,13 +352,13 @@ function AdminUsersInner() {
                   ))}
                 </tbody>
               </table>
-              {users.length > rowLimit && (
+              {visible.length > rowLimit && (
                 <div className="p-4 text-center border-t border-theme">
                   <button
                     onClick={() => setRowLimit(l => l + 300)}
                     className="text-sm font-semibold text-amber-600 dark:text-amber-400 hover:text-amber-500 transition-colors"
                   >
-                    Show more ({users.length - rowLimit} remaining)
+                    Show more ({visible.length - rowLimit} remaining)
                   </button>
                 </div>
               )}
