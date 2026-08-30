@@ -21,6 +21,19 @@ import { isInternalEmail } from '@/lib/internal-accounts'
 // POST cannot double-send. There is exactly one shot at a cold list; spending it
 // twice would spend it badly.
 
+// Sixty-one sequential Resend round trips do not fit in Vercel's default 10s
+// route budget. Without this the send truncates partway through with no error
+// the caller ever sees — it just returns fewer than it should, or nothing.
+// 60 is the ceiling on Hobby and well within Pro's, so it is safe either way.
+export const maxDuration = 60
+
+// Resend's free tier allows 2 requests/second. A tight await loop clears that
+// easily and starts collecting 429s, which land in `failed` rather than being
+// sent. 400ms keeps us under the limit with room, and 61 sends still finish in
+// well under the budget above.
+const SEND_INTERVAL_MS = 400
+const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
+
 const EVENT = 'reactivation_email'
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://socialmate.studio'
 // Below this, the signup drip still owns them and is now working.
@@ -154,7 +167,11 @@ export async function POST(req: Request) {
   let sent = 0
   const failed: string[] = []
 
-  for (const t of targets) {
+  // Indexed loop, not `.entries()` — that returns an iterator, and this repo
+  // compiles below es2015 downlevel, so for..of over it fails the build.
+  for (let i = 0; i < targets.length; i++) {
+    const t = targets[i]
+    if (i > 0) await sleep(SEND_INTERVAL_MS)
     const html = reactivationHtml(t.name)
 
     try {
@@ -178,5 +195,17 @@ export async function POST(req: Request) {
     }
   }
 
-  return NextResponse.json({ sent, failed: failed.length, failedEmails: failed.slice(0, 10) })
+  // Say what is left. Anyone who failed, or who never got reached because the
+  // function ran out of budget, was never recorded and is still eligible — so
+  // a plain re-POST picks up exactly the remainder and re-sends to nobody.
+  const remaining = targets.length - sent
+  return NextResponse.json({
+    sent,
+    failed: failed.length,
+    failedEmails: failed.slice(0, 10),
+    remaining,
+    note: remaining > 0
+      ? `${remaining} not sent. They were not recorded, so POST again to retry only those.`
+      : 'All eligible targets sent.',
+  })
 }
