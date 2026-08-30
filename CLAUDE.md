@@ -462,8 +462,15 @@ Rules that follow from it:
 
 ### Active — fix when touching the file
 
-No open known bugs as of August 30, 2026. Both audits are clean once the two
-unique indexes from PR #582 are applied.
+No open known bugs as of August 30, 2026 (evening). Both audits are clean, and
+`audit-schema-drift.py` + `audit-dead-features.py` were both re-run after the
+#585–#595 sweep: no phantom columns, all 35 upsert targets indexed.
+
+**Both audits were clean on the morning of Aug 30 and five never-ran features
+were found anyway.** The audits catch phantom columns and impossible upserts.
+They cannot catch a function nothing calls (#594), a field that is out of API
+scope (#585), a column the app writes but never reads (#595), or a reply-to
+that was never set (#591). For that, walk the product.
 
 **Run this SQL if `audit-dead-features.py` still reports 42P10:**
 ```sql
@@ -1064,9 +1071,13 @@ upserts on `endpoint` with no unique index on it, so every subscribe has raised
 Trend Scout and `competitorAlerts` have always had an empty table to read.
 
 **Activation, measured 29 Aug (admin excluded):** 99 accounts, 17 connected a
-platform, 7 created a post, **1 has ever published**. 82 never connected anything.
-Two weeks earlier it was 74 / 62-never-connected / 1 publisher. The needle has not
-moved.
+platform, 7 created a post, 1 has ever published. 82 never connected anything.
+
+> ⚠️ **That "1 publisher" was wrong.** It excluded the admin account but not the
+> other three internal ones, and the publisher was
+> `gilgameshenterprisellc@gmail.com` — Joshua's own. Corrected 30 Aug: **no
+> external user has ever published.** See the Aug 30 entry below and
+> `lib/internal-accounts.ts`. Do not quote the numbers in this paragraph.
 
 **Performance:** RES 95 desktop and mobile, CLS 0. Investigated and *rejected*
 deferring `PostImageExporter`/`PageTour` — measured at 3–5 kB against a 950 kB
@@ -1085,6 +1096,64 @@ call sites build keys dynamically.
   false positives from an apostrophe inside a `//` comment. Both fixed; it now has
   tests.
 
+**August 30, 2026 — The day the onboarding turned out to save nothing (PRs #585–#595):**
+
+Eleven PRs. The theme, again, is that a large share of what SocialMate advertises
+had **never executed once**. Four of the five findings below were surfaced by
+walking the product, not by reading it.
+
+**The measurement itself was wrong.** `/admin/funnel` excluded only the admin
+account, but there are **four** internal accounts. The "1 user has ever
+published" figure quoted since March was `gilgameshenterprisellc@gmail.com` —
+Joshua's own Mate Suite account, 7 Bluesky posts over 4 days in March, then
+nothing. **No external user has ever published a post.** Zero, not one. That is a
+different problem, and it should drive what gets built.
+`lib/internal-accounts.ts` is now the single list, used by the funnel ground
+truth, the reactivation audience and an "internal" badge on `/admin/users`.
+`nichole_bostic@yahoo.com` is deliberately **not** on it — confirmed to be
+Joshua's mother, a real external signup.
+
+| PR | What had never run |
+|---|---|
+| #585 | TikTok's `user/info` call requested `username`, a `user.info.profile` field the app has never held. TikTok 400s the whole request when one field is out of scope, so **every** TikTok account in production is named the literal placeholder "TikTok Account" |
+| #586 | `connect_screen_viewed` fired twice per visit from inside an effect keyed on `activeWorkspace`; onboarding step tallies counted fires, not people |
+| #587 | Onboarding never offered TikTok or LinkedIn — the only two platforms that connect in pure two-click OAuth — while Bluesky, which needs an app password from another website, was badged "Easiest to start". Step 3 also shipped people to `/accounts` in a new tab with no memory of the platform they had just picked |
+| #591, #593 | **Every reply anyone has ever sent went nowhere.** `socialmate.studio` has no mailbox (MX → Resend inbound, no handler). 53 send sites, two of which set `replyTo`. `lib/mail.ts` is now the one sender; 62 `replyTo` added across 33 files |
+| #594 | **`handleFinish` was wired to the button nobody presses.** It is the only thing that writes the profile name, `onboarding_completed`, the goal, the +50 credits, the starter post and the funnel event — and the primary CTA above it is a plain `<Link>`. Measured: `onboarding_completed` true for **5 of 103**, `onboarding_goal` set on **2** |
+| #595 | The 50 completion credits went to `ai_credits_remaining`, a legacy fallback the RPC only reads when `monthly_credits_remaining` is NULL. Every new signup has it set, so the bonus was never displayed and never spendable |
+
+**The reactivation send finally fired.** 62 people who signed up and never
+connected, median account age 79 days, all 62 delivered with zero bounces. The
+copy had to be rewritten first (#589): it apologised for the 90-second connect
+poll, which the funnel had since disproved, and told people to connect Bluesky,
+Mastodon, Discord or Telegram "in about thirty seconds" — the four hardest.
+#590 added `maxDuration` and a 400ms throttle, because 61 sequential Resend
+calls do not fit in Vercel's 10s default and the send would have truncated
+silently.
+
+**`/admin/users/[id]`** now exists — plan resolved through `resolveWorkspacePlan`
+with both raw values beside it, attribution, credits, posts by status and
+platform, publish failures with their real error, and the full funnel timeline
+for one person. Diagnosing an account used to mean running Python against
+production by hand.
+
+**Credit backfill run.** 94 accounts that reached the end of onboarding before
+#594 were each granted the 50 they were owed, into `earned_credits`, guarded by
+an `onboarding_bonus_backfill` marker in `usage_events` so a re-run is a no-op.
+
+**Rules that follow:**
+
+- **A dead code path hides every bug downstream of it.** #595 was completely
+  inert while `handleFinish` never ran; #594 made it live within the hour.
+  Fixing a path that never executed does not just restore it, it activates
+  everything behind it. Re-test after un-breaking something.
+- **Walk the flow. Then query the database.** #592 fixed the starter-post insert
+  correctly and the post still did not save, because the insert lived inside a
+  function nothing called. Two full walkthroughs and a production query found
+  what the diff could not.
+- **Never quote an activation number that counts our own accounts.** Four of
+  them exist. Use `lib/internal-accounts.ts`.
+
 ## Pending / In Progress
 
 - **Google Play — closed testing** — Cooking slowly. v1.0.7 (versionCode 3) uploaded, 1 tester opted in. Passive CTA on signup page. *Do not revisit until June 2026.*
@@ -1093,18 +1162,24 @@ call sites build keys dynamically.
 
 - **Instagram / Facebook** — Both require Meta App Review (same process, can be one app). Harder than LinkedIn — Meta review is strict. Business account required, users need Business/Creator Instagram accounts. **Hard — plan for 4–8 week review timeline.**
 
-- **SOMA content run** — CLAUDE.md updated August 30 with the first paying
-  customer and the audit work (PRs #573–#582). Ready to resubmit. Good material:
-  the funnel catching a real bug within a day of going live.
+- **SOMA content run** — CLAUDE.md updated August 30 (evening) with PRs
+  #585–#595. Ready to resubmit. Strongest material: the activation number was
+  wrong for five months because it counted our own accounts, and the onboarding
+  flow was saving nothing at all. Both found by walking the product, not reading
+  it. Lead with the measurement error; the bug fixes are the supporting detail.
 
-- **Activation is the whole problem.** Measured 29 Aug, admin excluded: 99
-  accounts, 17 connected a platform, 7 created a post, **1 has ever published**.
-  82 never connected anything. Two weeks earlier: 74 accounts, 62 never connected,
-  1 publisher. More signups, same one publisher.
-  A one-shot reactivation route is live at `POST /api/admin/reactivate` (`GET`
-  previews without sending). **Still not fired** — and note it was unsafe to fire
-  before PR #577, because its idempotency guard reads `usage_events`, which did
-  not exist, so everyone looked un-emailed. Safe now.
+- **Activation is the whole problem.** Measured 30 Aug with **all four internal
+  accounts excluded**: 103 accounts, 18 connected a platform, **0 external users
+  have ever published**. The "1 publisher" quoted since March was Joshua's own
+  `gilgameshenterprisellc@gmail.com`. See [[lib/internal-accounts.ts]].
+  The reason is now known rather than guessed: onboarding's save was wired to a
+  button almost nobody pressed, so 98 of 103 accounts finished onboarding and
+  none of it was kept (#594). Fixed and verified with a real row on 30 Aug.
+  **Fired 30 Aug: 62 emails, all delivered, zero bounces.** One recipient clicked
+  through within five minutes and stopped at the platform picker. Those 62 went
+  out *before* the reply-to fix, so any reply lands in the Resend **Receiving**
+  tab rather than an inbox — check it daily this week. Resend is under
+  `renewalmate.updates@gmail.com`.
   The funnel has recorded since 28 Aug; `/admin/funnel` will show whether those 82
   click connect and fail or never click at all. Everything else here is smaller
   than this.
@@ -1142,6 +1217,23 @@ call sites build keys dynamically.
 
 ## Confirmed Done (stop asking about these)
 
+- ✅ **Onboarding actually saves now (Aug 30, PRs #592, #594, #595)** — `handleFinish`
+  runs on arrival at step 5 instead of on one button; the starter post is a single
+  post with a real date/time picker and saves as a draft when nothing is connected;
+  the 50 bonus lands in `earned_credits`. Verified end to end with a real scheduled
+  row in production. Never wire a write to a single non-primary button again.
+- ✅ **Reply-to on every sender (Aug 30, PRs #591, #593)** — `lib/mail.ts` is the one
+  sender, `REPLY_TO` defaults to a mailbox that is read, 62 sites migrated. Never
+  call `resend.emails.send` directly. `socialmate.studio` has **no mailbox**.
+- ✅ **Internal accounts excluded from metrics (Aug 30, PR #588)** — four of them,
+  in `lib/internal-accounts.ts`. `nichole_bostic@yahoo.com` is a real external
+  signup (Joshua's mother), deliberately not on the list. Never add her back.
+- ✅ **Reactivation email sent (Aug 30)** — 62 recipients, all delivered. One-shot,
+  idempotent via `usage_events`. Do not re-fire for that cohort.
+- ✅ **Onboarding bonus backfill (Aug 30)** — 94 accounts granted the 50 they were
+  owed, guarded by an `onboarding_bonus_backfill` marker. Re-running is a no-op.
+- ✅ **TikTok account names (Aug 30, PR #585)** — only `user.info.basic` fields are
+  requested now. Existing rows keep the old placeholder until reconnected.
 - ✅ **Aug 2026 repricing (Aug 12, PRs #555–#557)** — Pro $8, Agency $29, annual two months free, free cap 250 posts. New Stripe prices live, legacy IDs kept in the webhook. Compare-flip cards shipped. Public copy, all `/vs` and `/for` pages, and 32 Supabase blog rows migrated. Never quote $5 or $20 for a plan again.
 - ✅ **Schema drift sweep (Aug 12–13, PRs #560–#565)** — 44 findings triaged to 23 real, all fixed. `scripts/audit-schema-drift.py` is clean. Never re-run this from scratch; run the script instead.
 - ✅ **"Unlimited" claims corrected (Aug 13)** — Free is 250 posts/mo, Agency is 15 seats and 5 client workspaces. Four blog posts said "unlimited team members" / "unlimited scheduled posts" / "10 client workspaces"; all corrected in file and DB. The old "unlimited profiles on /vs" open question is closed: the real numbers are 1 / 5 / 10 connected accounts per platform, they are on the pricing page, and nothing is unlimited except Enterprise seats.
