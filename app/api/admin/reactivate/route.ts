@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
-import { Resend } from 'resend'
 import { requireAdmin } from '@/lib/admin-auth'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { lifecycleEmail } from '@/lib/lifecycle-emails'
+import { sendMail, REPLY_TO } from '@/lib/mail'
 import { isInternalEmail } from '@/lib/internal-accounts'
 
 // One-shot reactivation for accounts that signed up and never connected a
@@ -139,21 +139,18 @@ export async function GET() {
 export async function POST(req: Request) {
   if (!await requireAdmin()) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  const resendClient = new Resend(process.env.RESEND_API_KEY)
-
   // ── Dry run ───────────────────────────────────────────────────────────────
   // ?to=you@example.com sends one copy and records nothing. Use this before the
   // real send; there is no second attempt at the real one.
   const testTo = new URL(req.url).searchParams.get('to')
   if (testTo) {
     try {
-      await resendClient.emails.send({
-        from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
+      await sendMail({
         to: testTo,
         subject: '[TEST] That was our fault, and it is fixed',
         html: reactivationHtml(testTo.split('@')[0]),
       })
-      return NextResponse.json({ test: true, sentTo: testTo, recorded: false })
+      return NextResponse.json({ test: true, sentTo: testTo, recorded: false, replyTo: REPLY_TO })
     } catch (e: any) {
       return NextResponse.json({ test: true, error: e?.message ?? 'send failed' }, { status: 500 })
     }
@@ -162,8 +159,7 @@ export async function POST(req: Request) {
   const { targets } = await audience()
   if (targets.length === 0) return NextResponse.json({ sent: 0, note: 'nobody eligible' })
 
-  const admin  = getSupabaseAdmin()
-  const resend = resendClient
+  const admin = getSupabaseAdmin()
   let sent = 0
   const failed: string[] = []
 
@@ -175,8 +171,7 @@ export async function POST(req: Request) {
     const html = reactivationHtml(t.name)
 
     try {
-      await resend.emails.send({
-        from: 'Joshua @ SocialMate <joshua@socialmate.studio>',
+      await sendMail({
         to: t.email,
         subject: 'That was our fault, and it is fixed',
         html,
