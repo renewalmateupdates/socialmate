@@ -387,8 +387,31 @@ function OnboardingInner() {
     }
 
     setSaving(false)
-    window.location.href = '/dashboard?welcome=1'
   }
+
+  // Run the save when they reach the last step, not when they press a
+  // particular button on it.
+  //
+  // handleFinish is the only thing that writes anything at all: the profile
+  // name, the user_settings upsert carrying onboarding_completed / goal /
+  // IRIS opt-in, the +50 completion credits, the starter post, and the
+  // onboarding_completed funnel event. It was wired exclusively to the
+  // secondary "Go to Dashboard" button. The primary CTA above it is a plain
+  // <Link>, so anyone who pressed the big obvious purple button navigated away
+  // having saved nothing.
+  //
+  // Measured in production: onboarding_completed is true for 5 accounts out of
+  // 103, and onboarding_goal — captured on step 1, written only here — is set
+  // on 2. Ninety-eight people finished onboarding and none of it was kept.
+  //
+  // hasFinished makes this idempotent, so re-rendering step 5 cannot double
+  // write, and the redirect is gone because the buttons now do the navigating.
+  useEffect(() => {
+    if (step !== 5 || !user || hasFinished) return
+    void handleFinish()
+    // handleFinish is stable enough for this guard; hasFinished is the latch.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, user, hasFinished])
 
   const progress = ((step - 1) / (STEPS.length - 1)) * 100
   const platformData = LIVE_PLATFORMS.find(p => p.id === selectedPlatform)
@@ -949,15 +972,30 @@ function OnboardingInner() {
                 </Link>
               </div>
 
-              <Link href={didSchedule ? '/calendar' : didDraft ? '/drafts' : '/compose'}
-                className="flex items-center justify-center gap-2 w-full py-4 mb-3 bg-violet-600 hover:bg-violet-700 text-white text-sm font-extrabold rounded-2xl transition-all">
-                {didSchedule ? '📅 View Your Scheduled Post →' : didDraft ? '📄 Open Your Draft →' : '✏️ Write Your First Post →'}
-              </Link>
+              {/* Both of these are now pure navigation. The save runs on
+                  arrival at this step, so neither button can be the thing that
+                  decides whether the account was written. They are held until
+                  it settles, because leaving mid-write is exactly how the
+                  starter post used to disappear. */}
+              {saving ? (
+                <div className="flex items-center justify-center gap-3 w-full py-4 mb-3 bg-violet-600/40 text-white text-sm font-extrabold rounded-2xl">
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Setting up your account…
+                </div>
+              ) : (
+                <Link href={didSchedule ? '/calendar' : didDraft ? '/drafts' : '/compose'}
+                  className="flex items-center justify-center gap-2 w-full py-4 mb-3 bg-violet-600 hover:bg-violet-700 text-white text-sm font-extrabold rounded-2xl transition-all">
+                  {didSchedule ? '📅 View Your Scheduled Post →' : didDraft ? '📄 Open Your Draft →' : '✏️ Write Your First Post →'}
+                </Link>
+              )}
 
-              <button onClick={handleFinish} disabled={saving}
-                className="w-full py-3.5 bg-black text-white text-sm font-bold rounded-2xl hover:opacity-80 transition-all disabled:opacity-50">
-                {saving ? 'Setting up your account…' : 'Go to Dashboard →'}
-              </button>
+              <Link href="/dashboard?welcome=1"
+                aria-disabled={saving}
+                className={`block text-center w-full py-3.5 bg-black text-white text-sm font-bold rounded-2xl transition-all ${
+                  saving ? 'opacity-50 pointer-events-none' : 'hover:opacity-80'
+                }`}>
+                Go to Dashboard →
+              </Link>
 
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-4">
                 Everything can be changed anytime in <Link href="/settings" className="underline">Settings</Link>
