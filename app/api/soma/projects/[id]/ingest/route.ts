@@ -12,6 +12,52 @@ import { SOMA_COSTS } from '@/lib/soma-costs'
 const INGEST_COST = SOMA_COSTS.ingest_weekly // 25
 const MAX_CHARS = 500_000
 
+// Ceiling on what actually reaches Gemini in one prompt.
+//
+// The diff prompt used to embed BOTH full master docs. At CLAUDE.md's current
+// size that is ~375,000 characters (~95k tokens), and generating against a
+// prompt that large takes longer than Vercel Hobby's hard 60s function ceiling.
+// The function was killed mid-flight and the browser reported it as
+// "Network error. Please try again", which is the least useful description of a
+// timeout available.
+const MAX_PROMPT_CHARS = 60_000
+
+/**
+ * What changed, computed here rather than by asking Gemini to read two books.
+ *
+ * Master docs are append-and-annotate: a session adds sections and occasionally
+ * edits an older paragraph. So a line is "new" when its trimmed text does not
+ * appear anywhere in the previous version. Short lines (blank, `---`, fence
+ * markers) match too easily to judge on their own, so they are kept only when
+ * they fall inside a run of genuinely new lines, which preserves code blocks
+ * and tables intact.
+ *
+ * This is not a minimal diff and does not try to be. It answers "what should
+ * SOMA read this week", and for that, over-including a little context is a
+ * feature.
+ */
+function extractNewContent(oldText: string, newText: string, cap: number): string {
+  const SHORT = 12
+  const NL = '\n'
+  const seen = new Set(
+    oldText.split(NL).map(l => l.trim()).filter(l => l.length > SHORT)
+  )
+
+  const runs: string[] = []
+  let run: string[] = []
+  const flush = () => { if (run.length) { runs.push(run.join(NL)); run = [] } }
+
+  for (const line of newText.split(NL)) {
+    const t = line.trim()
+    const isNew = t.length > SHORT ? !seen.has(t) : run.length > 0
+    if (isNew) run.push(line)
+    else flush()
+  }
+  flush()
+
+  return runs.join(NL + NL + '[...]' + NL + NL).slice(0, cap)
+}
+
 function parseGeminiJson(text: string): any {
   return JSON.parse(text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim())
 }
@@ -120,6 +166,23 @@ Do NOT repeat or re-extract themes, wins, or angles that are already in SOMA's m
     const nextVersion   = latestVersion + 1
     const prevDoc       = (recentDocs ?? []).find(d => (d.content ?? '').trim() !== trimmedContent) ?? null
 
+    // Compute the delta before building the prompt, so an unchanged upload is
+    // rejected for 0 credits instead of costing 25 to be told nothing happened.
+    const newOnly = prevDoc
+      ? extractNewContent(prevDoc.content ?? '', trimmedContent, MAX_PROMPT_CHARS)
+      : ''
+    if (prevDoc && newOnly.trim().length < 200) {
+      return NextResponse.json({
+        error: `No meaningful changes found against v${prevDoc.version}. Add this week's update to the doc before submitting.`,
+      }, { status: 400 })
+    }
+    console.log(
+      '[soma/ingest] project:', projectId,
+      '| newDoc:', trimmedContent.length,
+      '| prevDoc:', prevDoc?.content?.length ?? 0,
+      '| sentToGemini:', prevDoc ? newOnly.length : Math.min(trimmedContent.length, MAX_PROMPT_CHARS)
+    )
+
     const genAI = new GoogleGenerativeAI(apiKey)
     // responseMimeType JSON forces raw parseable JSON (no fences, no preamble),
     // which is what parseGeminiJson expects. The gemini-2.5-era temperature and
@@ -155,13 +218,10 @@ Return ONLY valid JSON (no markdown):
   "memory_update": "2-3 sentences summarizing what new ground this ingestion covers. Written as notes a social media manager would keep to remember what they've already posted about."
 }
 
-PREVIOUS MASTER DOC (v${prevDoc.version}):
-${prevDoc.content}
+NEW AND CHANGED CONTENT (v${nextVersion}, already diffed against v${prevDoc.version} — everything below is new or edited since last week):
+${newOnly}
 
-CURRENT MASTER DOC (v${nextVersion}):
-${content}
-
-Rules: emotional_tone must be: high, reflective, grinding, or celebratory. Be specific and concrete. The memory_update field is mandatory.`
+Rules: emotional_tone must be: high, reflective, grinding, or celebratory. Be specific and concrete. The memory_update field is mandatory. Everything above is already known to be new, so do not hedge about whether it changed.`
       : `You are SOMA, a Self-Optimizing Media Agent acting as a professional social media manager.
 
 ${memoryBlock}
@@ -183,7 +243,7 @@ Return ONLY valid JSON (no markdown):
 }
 
 MASTER DOC:
-${content}
+${content.slice(0, MAX_PROMPT_CHARS)}
 
 Rules: Be specific. emotional_tone must be: high, reflective, grinding, or celebratory. The memory_update field is mandatory.`
 
