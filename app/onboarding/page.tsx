@@ -298,7 +298,7 @@ function OnboardingInner() {
 
     const { data: currentSettings } = await supabase
       .from('user_settings')
-      .select('onboarding_completed, ai_credits_remaining')
+      .select('onboarding_completed, ai_credits_remaining, earned_credits')
       .eq('user_id', user.id)
       .single()
 
@@ -327,6 +327,24 @@ function OnboardingInner() {
     }
 
     if (!currentSettings?.onboarding_completed) {
+      // Grant the completion bonus into `earned_credits`.
+      //
+      // This used to add 50 to `ai_credits_remaining` alone. That column is a
+      // legacy fallback: the deduction RPC computes the monthly pool as
+      // COALESCE(monthly_credits_remaining, ai_credits_remaining, 0), so it
+      // only counts for old accounts where monthly_credits_remaining is NULL.
+      // Every new signup has it set to 50, which means the bonus we promise on
+      // step 1 and again on step 5 landed somewhere that is neither displayed
+      // in the sidebar nor spendable by any AI tool.
+      //
+      // `earned_credits` is the pool built for exactly this — referrals,
+      // milestones, bonuses — and it is both counted and spent. The legacy
+      // column is still incremented so accounts on the fallback path are not
+      // regressed.
+      //
+      // This was harmless while handleFinish never ran (PR #594). It is live
+      // for every new user as of that fix, which is why it is worth catching now.
+      upsertPayload.earned_credits = (currentSettings?.earned_credits ?? 0) + 50
       upsertPayload.ai_credits_remaining = (currentSettings?.ai_credits_remaining ?? 50) + 50
     }
 
