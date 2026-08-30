@@ -46,7 +46,9 @@ ${!isEmail ? `- body must be under ${charLimit} characters.` : ''}
 `
 
   try {
-    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY!)
+    const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY
+      || process.env.GEMINI_API_KEY
+      || process.env.GOOGLE_AI_API_KEY!)
     const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
     const result = await model.generateContent(prompt)
     const raw = result.response.text().trim()
@@ -219,7 +221,9 @@ export const hermesAutoDiscoverCron = inngest.createFunction(
         const existingEmails = new Set((existingProspects ?? []).map((r: { email: string }) => r.email?.toLowerCase()).filter(Boolean))
         const newPeople = found.filter(p => !existingEmails.has(p.email))
 
-        const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY!)
+        const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY
+      || process.env.GEMINI_API_KEY
+      || process.env.GOOGLE_AI_API_KEY!)
         const model = genAI.getGenerativeModel({ model: 'gemini-3.6-flash' })
 
         for (const person of newPeople) {
