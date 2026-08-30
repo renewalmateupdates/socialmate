@@ -9,6 +9,7 @@ import { inngest } from '@/lib/inngest'
 import {
   scheduleWeeksFor, scheduleWindowLabel, postLimitFor, postsUsedThisMonth, postLimitReachedBody,
 } from '@/lib/post-limits'
+import { resolveWorkspacePlan } from '@/lib/plan'
 
 
 export async function POST(request: NextRequest) {
@@ -69,6 +70,11 @@ export async function POST(request: NextRequest) {
             owner_id:    user.id,
             name:        'Personal',
             is_personal: true,
+            // Inherit the owner's plan. The webhook's syncWorkspacePlan runs an
+            // UPDATE, so a user who subscribes BEFORE they ever compose has no
+            // workspace row to update — and this one would otherwise be born
+            // NULL, putting a paying subscriber back on free limits. See PR #579.
+            plan:        await resolveWorkspacePlan(adminSupabase, user.id, null),
           })
           .select('id')
           .single()

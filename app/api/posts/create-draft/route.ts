@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
+import { resolveWorkspacePlan } from '@/lib/plan'
 
 // CORS headers — allow the Chrome extension origin (chrome-extension://*) and
 // any direct browser call from socialmate.studio.
@@ -96,6 +97,9 @@ export async function POST(request: NextRequest) {
           owner_id:    user.id,
           name:        'Personal',
           is_personal: true,
+          // See app/api/posts/create/route.ts — subscribe-before-first-post
+          // would otherwise create this row on plan NULL.
+          plan:        await resolveWorkspacePlan(adminSupabase, user.id, null),
         })
         .select('id')
         .single()

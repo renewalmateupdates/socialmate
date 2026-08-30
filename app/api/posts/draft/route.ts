@@ -5,6 +5,7 @@ import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
 import { getSupabaseAdmin } from '@/lib/supabase-admin'
 import { postLimitFor, postsUsedThisMonth, postLimitReachedBody, countsAgainstQuota } from '@/lib/post-limits'
+import { resolveWorkspacePlan } from '@/lib/plan'
 
 
 export async function POST(request: NextRequest) {
@@ -120,6 +121,8 @@ export async function POST(request: NextRequest) {
             owner_id: user.id,
             name: 'Personal',
             is_personal: true,
+            // See app/api/posts/create/route.ts.
+            plan: await resolveWorkspacePlan(adminSupabase, user.id, null),
           })
           .select('id')
           .single()
