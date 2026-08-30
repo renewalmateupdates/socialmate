@@ -55,31 +55,35 @@ export async function GET(request: NextRequest) {
     ? new Date(Date.now() + expires_in * 1000).toISOString()
     : null
 
-  // Fetch TikTok user info
+  // Fetch TikTok user info.
+  //
+  // Only ask for fields `user.info.basic` actually grants. `username` belongs to
+  // `user.info.profile`, which this app has never held, and TikTok rejects the
+  // *entire* request with 400 when any single requested field is out of scope.
+  // That is why every TikTok row in production is named the literal placeholder
+  // "TikTok Account": the call has failed for every user since launch, and the
+  // failure looked exactly like a user with no display name.
+  const BASIC_FIELDS = 'open_id,union_id,avatar_url,display_name'
   const userRes = await fetch(
-    'https://open.tiktokapis.com/v2/user/info/?fields=open_id,union_id,avatar_url,display_name,username',
+    `https://open.tiktokapis.com/v2/user/info/?fields=${BASIC_FIELDS}`,
     { headers: { Authorization: `Bearer ${access_token}` } }
   )
 
   let displayName    = 'TikTok Account'
   let avatarUrl: string | null = null
-  let username: string | null  = null
 
   if (userRes.ok) {
     const userData = await userRes.json()
     displayName = userData?.data?.user?.display_name || 'TikTok Account'
     avatarUrl   = userData?.data?.user?.avatar_url   || null
-    username    = userData?.data?.user?.username      || null
   } else {
-    // Swallowed silently before this. Every TikTok row in production is named
-    // the literal placeholder "TikTok Account", which means this call has been
-    // failing for everyone and nobody could see why — two accounts on the same
-    // workspace are indistinguishable in the UI. Log the reason.
+    // Keep the reason visible. If TikTok ever changes what basic grants, this
+    // silently reverts to unnamed accounts and nothing else would say so.
     const detail = await userRes.text().catch(() => '')
     console.warn(`[TikTok OAuth] user/info failed (${userRes.status}):`, detail.slice(0, 300))
   }
 
-  const account_name = username ? `@${username}` : displayName
+  const account_name = displayName
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
