@@ -36,20 +36,42 @@ export async function GET(_request: NextRequest) {
     .eq('is_personal', true)
     .maybeSingle()
 
-  // Also look up workspaces where the user is a member (agency editors, etc.)
-  const { data: memberRows } = await admin
-    .from('workspace_members')
-    .select('workspace_id')
-    .eq('user_id', user.id)
+  // Also look up workspaces where the user is a member (agency editors, etc.).
+  //
+  // This read `workspace_members`, which NOTHING writes. Every membership path —
+  // team/invite, team/accept, team/remove, team/[id], user/delete — reads and
+  // writes `team_members`. So this lookup has always returned nothing and an
+  // invited editor has only ever seen their own personal workspace's activity.
+  // Both tables are empty today because nobody has invited a teammate yet, which
+  // is the only reason it has not been noticed; it would have surfaced as soon as
+  // the first Agency customer added a seat.
+  //
+  // team_members is scoped by OWNER, not by workspace — it has no workspace_id.
+  // The model is that a member belongs to an owner and therefore to all of that
+  // owner's workspaces, so resolve owners first and then their workspaces.
+  const { data: memberships, error: memberErr } = await admin
+    .from('team_members')
+    .select('owner_id')
+    .eq('member_id', user.id)
+    .eq('status', 'active')
+  if (memberErr) console.warn('[workspace/activity] membership lookup failed:', memberErr.message)
+
+  const ownerIds = Array.from(new Set((memberships ?? []).map(m => m.owner_id).filter(Boolean)))
+
+  let memberWorkspaceIds: string[] = []
+  if (ownerIds.length > 0) {
+    const { data: ownerWs, error: wsErr } = await admin
+      .from('workspaces')
+      .select('id')
+      .in('owner_id', ownerIds)
+    if (wsErr) console.warn('[workspace/activity] owner workspace lookup failed:', wsErr.message)
+    memberWorkspaceIds = (ownerWs ?? []).map(w => w.id)
+  }
 
   const workspaceIds: string[] = []
   if (personalWs?.id) workspaceIds.push(personalWs.id)
-  if (memberRows) {
-    for (const row of memberRows) {
-      if (!workspaceIds.includes(row.workspace_id)) {
-        workspaceIds.push(row.workspace_id)
-      }
-    }
+  for (const id of memberWorkspaceIds) {
+    if (!workspaceIds.includes(id)) workspaceIds.push(id)
   }
 
   if (workspaceIds.length === 0) {
