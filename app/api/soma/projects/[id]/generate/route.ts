@@ -268,6 +268,20 @@ Emotional tone: ${insights.emotional_tone ?? 'motivated'}${campaignBlock}`
     // Track used Unsplash photo URLs across ALL platforms in this run to prevent duplicates
     const usedImageUrls = new Set<string>()
 
+    // Build every Gemini call up front, then fire them all at once.
+    //
+    // This used to be a sequential loop over platforms, each awaiting its own
+    // chunk calls. #598 made a platform's chunks parallel but left the platforms
+    // themselves serialised, so a 3-platform project still cost three full call
+    // durations back to back -- roughly 75s against Vercel Hobby's hard 60s
+    // ceiling. The function was killed and the browser called it a network error.
+    //
+    // Nothing here actually depends on anything else: every slot is precomputed
+    // and every prompt carries its own slot list. So the whole run collapses to
+    // roughly the duration of the single slowest call.
+    type Job = { platform: string; ppd: number; instruction: string; chunk: { dayOffset: number; dayIdx: number; slotIdx: number }[] }
+    const jobs: Job[] = []
+
     for (const platform of platforms) {
       // TikTok requires video content — skip if no video URL is set on the project
       if (platform === 'tiktok' && !includeVideoUrl) {
@@ -278,33 +292,27 @@ Emotional tone: ${insights.emotional_tone ?? 'motivated'}${campaignBlock}`
       const ppd        = Math.min(Math.max(cfg.posts_per_day ?? 1, 1), maxPpd)
       const activeDows = Array.isArray(cfg.days) && cfg.days.length > 0 ? cfg.days : [0,1,2,3,4,5,6]
       const dayOffsets = getActiveDayOffsets(windowDays, activeDows, start_date)
-
       if (dayOffsets.length === 0 || ppd === 0) continue
 
       const instruction = PLATFORM_INSTRUCTIONS[platform] ?? `${platform}: Keep it natural and platform-appropriate.`
 
-      // Build the full list of (dayOffset, slotIndex) slots we need to fill
       type Slot = { dayOffset: number; dayIdx: number; slotIdx: number }
       const allSlots: Slot[] = []
       dayOffsets.forEach((dayOffset, dayIdx) => {
-        for (let slotIdx = 0; slotIdx < ppd; slotIdx++) {
-          allSlots.push({ dayOffset, dayIdx, slotIdx })
-        }
+        for (let slotIdx = 0; slotIdx < ppd; slotIdx++) allSlots.push({ dayOffset, dayIdx, slotIdx })
       })
 
-      // Split into chunks so each Gemini call is manageable
-      const chunks: Slot[][] = []
       for (let i = 0; i < allSlots.length; i += CHUNK_SIZE) {
-        chunks.push(allSlots.slice(i, i + CHUNK_SIZE))
+        jobs.push({ platform, ppd, instruction, chunk: allSlots.slice(i, i + CHUNK_SIZE) })
       }
+    }
 
-      // Fire every chunk for this platform at once rather than one after another.
-      // Each call is independent -- the slots are precomputed and each prompt
-      // carries its own -- so the only thing serialising them was the loop.
-      // Turns 3 sequential calls into roughly the duration of the slowest one.
-      const chunkResults = await Promise.all(chunks.map(async (chunk) => {
-        const chunkDays  = chunk.length
-        const prompt = `${identityContext}
+    console.log('[SOMA Generate] project:', projectId, '| platforms:', platforms.join(','), '| parallel gemini calls:', jobs.length)
+
+    const jobResults = await Promise.all(jobs.map(async (job) => {
+      const { platform, instruction, chunk } = job
+      const chunkDays = chunk.length
+      const prompt = `${identityContext}
 
 ${insightBlock}${videoBlock}
 
@@ -335,67 +343,62 @@ Rules:
 - Sound human, not AI-generated
 - Respect the character limit for ${platform}`
 
-        try {
-          const result  = await model.generateContent(prompt)
-          const parsed  = parseGeminiJson(result.response.text())
-          const posts   = parsed.posts ?? []
-          if (!posts.length) {
-            const msg = `Empty response for chunk of ${chunkDays} slots`
-            console.error(`[SOMA Generate] ${platform}: ${msg}`)
-            return { chunk, posts: [] as any[], error: msg }
-          }
-          return { chunk, posts, error: null as string | null }
-        } catch (aiErr: any) {
-          const msg = aiErr?.message ?? 'Unknown Gemini error'
-          console.error(`[SOMA Generate] ${platform} chunk error:`, msg)
-          return { chunk, posts: [] as any[], error: msg }
+      try {
+        const result = await model.generateContent(prompt)
+        const posts  = parseGeminiJson(result.response.text()).posts ?? []
+        if (!posts.length) {
+          const msg = `Empty response for chunk of ${chunkDays} slots`
+          console.error(`[SOMA Generate] ${platform}: ${msg}`)
+          return { job, posts: [] as any[], error: msg }
         }
-      }))
+        return { job, posts, error: null as string | null }
+      } catch (aiErr: any) {
+        const msg = aiErr?.message ?? 'Unknown Gemini error'
+        console.error(`[SOMA Generate] ${platform} chunk error:`, msg)
+        return { job, posts: [] as any[], error: msg }
+      }
+    }))
 
-      // Insert sequentially. These share usedImageUrls for photo dedup and the
-      // ordering matters for scheduling, so only the Gemini calls were parallel.
-      for (const { chunk, posts: chunkPosts, error: chunkError } of chunkResults) {
-        if (chunkError) platformErrors[platform] = chunkError
-        if (!chunkPosts.length) continue
+    // Inserts stay sequential: they share usedImageUrls for Unsplash dedup and
+    // their order drives scheduling. Only the model calls were parallelised.
+    for (const { job, posts: chunkPosts, error: chunkError } of jobResults) {
+      const { platform, ppd, chunk } = job
+      if (chunkError) platformErrors[platform] = chunkError
+      if (!chunkPosts.length) continue
 
-        // Map each returned post back to its slot for accurate scheduling
-        for (let i = 0; i < chunkPosts.length; i++) {
-          const post = chunkPosts[i]
-          const slot = chunk[i] ?? chunk[chunk.length - 1]
+      for (let i = 0; i < chunkPosts.length; i++) {
+        const post = chunkPosts[i]
+        const slot = chunk[i] ?? chunk[chunk.length - 1]
 
-          // Fetch a relevant image from Unsplash if media is enabled (non-fatal).
-          // media_urls[0] = image URL, media_urls[1] = "Photo by X on Unsplash | profile_url"
-          let mediaUrls: string[] | undefined
-          if (project.include_media) {
-            const keyword = extractKeyword(post.content ?? '')
-            const result  = await fetchUnsplashImage(keyword, usedImageUrls)
-            if (result) mediaUrls = [result.url, result.attribution]
-          }
+        let mediaUrls: string[] | undefined
+        if (project.include_media) {
+          const keyword = extractKeyword(post.content ?? '')
+          const result  = await fetchUnsplashImage(keyword, usedImageUrls)
+          if (result) mediaUrls = [result.url, result.attribution]
+        }
 
-          const { data: inserted, error: postErr } = await admin
-            .from('posts')
-            .insert({
-              user_id:      user.id,
-              workspace_id: project.workspace_id,
-              content:      post.content,
-              platforms:    [platform],
-              status:       project.mode === 'safe' ? 'draft' : 'scheduled',
-              scheduled_at: scheduledAt(slot.dayOffset, slot.slotIdx, ppd, start_date),
-              destinations: {},
-              ...(mediaUrls ? { media_urls: mediaUrls } : {}),
-            })
-            .select('id')
-            .single()
+        const { data: inserted, error: postErr } = await admin
+          .from('posts')
+          .insert({
+            user_id:      user.id,
+            workspace_id: project.workspace_id,
+            content:      post.content,
+            platforms:    [platform],
+            status:       project.mode === 'safe' ? 'draft' : 'scheduled',
+            scheduled_at: scheduledAt(slot.dayOffset, slot.slotIdx, ppd, start_date),
+            destinations: {},
+            ...(mediaUrls ? { media_urls: mediaUrls } : {}),
+          })
+          .select('id')
+          .single()
 
-          if (postErr) console.error(`[SOMA Generate] insert error (${platform}):`, postErr.message)
-          else if (inserted) {
-            allPostIds.push(inserted.id)
-            platformCounts[platform] = (platformCounts[platform] ?? 0) + 1
-            // Fire Inngest event so post publishes at exact scheduled time
-            if (project.mode !== 'safe') {
-              const scheduledAtIso = scheduledAt(slot.dayOffset, slot.slotIdx, ppd, start_date)
-              inngest.send({ name: 'post/scheduled', data: { postId: inserted.id, scheduledAt: scheduledAtIso } }).catch(() => {})
-            }
+        if (postErr) console.error(`[SOMA Generate] insert error (${platform}):`, postErr.message)
+        else if (inserted) {
+          allPostIds.push(inserted.id)
+          platformCounts[platform] = (platformCounts[platform] ?? 0) + 1
+          if (project.mode !== 'safe') {
+            const scheduledAtIso = scheduledAt(slot.dayOffset, slot.slotIdx, ppd, start_date)
+            inngest.send({ name: 'post/scheduled', data: { postId: inserted.id, scheduledAt: scheduledAtIso } }).catch(() => {})
           }
         }
       }
