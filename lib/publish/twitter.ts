@@ -175,12 +175,37 @@ export async function publishToTwitter(
     account.refresh_token &&
     (expiresAt === null || expiresAt < fiveMinFromNow)
 
+  // Tracks whether the proactive refresh actually produced a usable token, so
+  // the 401 retry below can still fire when it did not.
+  let refreshSucceeded = false
+
   if (shouldRefresh) {
     try {
       accessToken = await refreshTwitterToken(account.refresh_token!, account.id)
+      refreshSucceeded = true
     } catch (e) {
-      // Refresh failed — try with the existing access token; will surface a 401 below if truly expired
-      console.warn('[Twitter] Proactive token refresh failed, attempting with stored token:', e)
+      // X refresh tokens are single-use and rotate on every exchange, and
+      // Inngest publishes up to 5 posts concurrently. When two posts fire at
+      // the same second they both read the same refresh_token; the first
+      // rotates it and the second's exchange is rejected. Retrying with our
+      // now-stale access token just produces a 401 and the user is told to
+      // reconnect an account that is working perfectly.
+      //
+      // The row was already updated by whichever call won, so re-read it and
+      // use that token. Same fix as PR #382 for Bluesky, which had the identical
+      // race and the identical symptom.
+      console.warn('[Twitter] Proactive token refresh failed, re-reading row for a fresher token:', e)
+      const { data: fresh } = await getSupabaseAdmin()
+        .from('connected_accounts')
+        .select('access_token, expires_at')
+        .eq('id', account.id)
+        .maybeSingle()
+
+      if (fresh?.access_token && fresh.access_token !== account.access_token) {
+        console.log('[Twitter] Using token refreshed by a concurrent publish')
+        accessToken = fresh.access_token
+        refreshSucceeded = true
+      }
     }
   }
 
@@ -235,7 +260,9 @@ export async function publishToTwitter(
     body: JSON.stringify(tweetBody),
   })
 
-  if (!res.ok && res.status === 401 && account.refresh_token && !shouldRefresh) {
+  // Was `!shouldRefresh`, which skipped the retry precisely when a proactive
+  // refresh had been attempted and failed -- the case most in need of it.
+  if (!res.ok && res.status === 401 && account.refresh_token && !refreshSucceeded) {
     // Token was not refreshed above (had a valid-looking expiry) but got 401 anyway.
     // Attempt one token refresh and retry the post.
     try {
