@@ -67,7 +67,10 @@ export async function POST(request: NextRequest) {
       .from('platform_account_registry')
       .update({
         status: 'cooling',
-        connected_to_user: null,
+        // Deliberately NOT nulled. The cooldown exists to stop an account being
+        // passed between different SocialMate users, not to lock someone out of
+        // their own. Keeping the owner is what lets the callback tell those two
+        // cases apart.
         disconnected_at: now.toISOString(),
         cooling_until: coolingUntil.toISOString(),
         updated_at: now.toISOString(),
