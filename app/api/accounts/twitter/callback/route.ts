@@ -103,8 +103,18 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${appUrl}/accounts?error=twitter_already_connected`)
     }
 
-    // Account is in the 45-day cooling period
-    if (registryRecord.status === 'cooling' && registryRecord.cooling_until) {
+    // Account is in the 45-day cooling period.
+    //
+    // The cooldown is an anti-abuse measure against an X account being cycled
+    // between different SocialMate users. It was also blocking the person who
+    // owned it from coming back -- which matters because an expired token
+    // surfaces as "Please reconnect your X account", so following our own
+    // instructions could cost someone six weeks of X.
+    //
+    // Reconnecting your own account is not the abuse case, so let it through.
+    const isOwnAccountReturning =
+      registryRecord.connected_to_user === user.id
+    if (registryRecord.status === 'cooling' && registryRecord.cooling_until && !isOwnAccountReturning) {
       const coolingUntil = new Date(registryRecord.cooling_until)
       if (coolingUntil > new Date()) {
         cookieStore.delete('twitter_oauth_state')
