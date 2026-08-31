@@ -39,6 +39,42 @@ function extractKeyword(content: string): string {
   return meaningful.slice(0, 3).join(' ') || 'creator social media'
 }
 
+/**
+ * Run async work with a ceiling on how many are in flight.
+ *
+ * Generation used to call Gemini once per chunk, sequentially. That was slow
+ * enough to blow the request timeout, but it was also — by accident — never
+ * anywhere near Gemini's rate limit, because seven calls spread over two
+ * minutes is about 3 requests/minute.
+ *
+ * Firing all seven at once fixed the timeout and immediately broke the other
+ * end: free-tier Gemini allows roughly 15 requests/minute, and seven parallel
+ * calls plus up to three retries each is 21 in a few seconds. Every 429 came
+ * back as a short or empty chunk and was silently dropped, which is why a run
+ * that reported success wrote 26 of ~75 posts.
+ *
+ * Neither extreme works. This runs a few at a time: quick enough to finish
+ * inside the function budget, paced enough to stay under the quota, and it
+ * does not require anyone to shrink their posting schedule to compensate.
+ */
+async function mapWithConcurrency<T, R>(
+  items: T[],
+  limit: number,
+  fn: (item: T) => Promise<R>,
+): Promise<R[]> {
+  const results = new Array<R>(items.length)
+  let next = 0
+  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (true) {
+      const i = next++
+      if (i >= items.length) return
+      results[i] = await fn(items[i])
+    }
+  })
+  await Promise.all(workers)
+  return results
+}
+
 interface UnsplashResult { url: string; attribution: string }
 
 // Fetch a unique Unsplash image. usedUrls tracks already-used photos within
@@ -309,7 +345,10 @@ Emotional tone: ${insights.emotional_tone ?? 'motivated'}${campaignBlock}`
 
     console.log('[SOMA Generate] project:', projectId, '| platforms:', platforms.join(','), '| parallel gemini calls:', jobs.length)
 
-    const jobResults = await Promise.all(jobs.map(async (job) => {
+    // 3 at a time keeps peak load around 3 req/s worst case, well under the
+    // free-tier ceiling, while still finishing 7 chunks in 3 waves rather than 7.
+    const GEMINI_CONCURRENCY = 3
+    const jobResults = await mapWithConcurrency(jobs, GEMINI_CONCURRENCY, async (job) => {
       const { platform, instruction, chunk } = job
       const chunkDays = chunk.length
       const prompt = `${identityContext}
@@ -351,7 +390,12 @@ Rules:
       let lastError = 'Unknown Gemini error'
       let best: any[] = []
       for (let attempt = 0; attempt < 3; attempt++) {
-        if (attempt > 0) await new Promise(r => setTimeout(r, 1500 * attempt))
+        // Longer waits on a rate limit than on a malformed response: 429s are
+        // per-minute and clear on their own, so backing off is the whole fix.
+        if (attempt > 0) {
+          const isRateLimit = /429|quota|rate/i.test(lastError)
+          await new Promise(r => setTimeout(r, (isRateLimit ? 6000 : 1500) * attempt))
+        }
         try {
           const result = await model.generateContent(prompt)
           const posts  = parseGeminiJson(result.response.text()).posts ?? []
@@ -368,7 +412,7 @@ Rules:
       }
       console.error(`[SOMA Generate] ${platform}: gave up after 3 attempts -- ${lastError}`)
       return { job, posts: best, error: lastError }
-    }))
+    })
 
     // Inserts stay sequential: they share usedImageUrls for Unsplash dedup and
     // their order drives scheduling. Only the model calls were parallelised.
