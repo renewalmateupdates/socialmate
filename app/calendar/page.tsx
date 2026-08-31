@@ -250,7 +250,13 @@ function CalendarDayCell({
           <DraggablePostPill key={post.id} post={post}>
             <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${STATUS_DOT[post.status] ?? STATUS_DOT.draft}`} />
             <span className="text-[10px] text-gray-500 dark:text-gray-400 truncate leading-tight">
-              {post.platforms?.[0] ? (PLATFORM_ICONS[post.platforms[0]] ?? '') + ' ' : ''}
+              {/* Every platform, not just the first. A SOMA post carries
+                  ['telegram','twitter','bluesky'], so showing platforms[0] made
+                  an entire month of multi-platform posts look like Telegram
+                  only -- and disagree with the day panel below, which has
+                  always mapped the full array. */}
+              {(post.platforms ?? []).map(p => PLATFORM_ICONS[p] ?? '').join('')}
+              {(post.platforms ?? []).length > 0 ? ' ' : ''}
               {post.content.slice(0, 16)}{post.content.length > 16 ? '…' : ''}
             </span>
           </DraggablePostPill>
@@ -634,7 +640,8 @@ export default function CalendarPage() {
           <DragOverlay>
             {activeDragPost && (
               <div className="bg-white dark:bg-gray-900 border border-indigo-300 dark:border-indigo-700 rounded-lg px-2 py-1 shadow-lg text-[11px] font-semibold text-gray-700 dark:text-gray-200 max-w-[120px] truncate pointer-events-none">
-                {activeDragPost.platforms?.[0] ? (PLATFORM_ICONS[activeDragPost.platforms[0]] ?? '') + ' ' : ''}
+                {(activeDragPost.platforms ?? []).map(p => PLATFORM_ICONS[p] ?? '').join('')}
+                {(activeDragPost.platforms ?? []).length > 0 ? ' ' : ''}
                 {activeDragPost.content.slice(0, 24)}{activeDragPost.content.length > 24 ? '…' : ''}
               </div>
             )}
